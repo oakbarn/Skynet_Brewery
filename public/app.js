@@ -101,8 +101,9 @@ function renderWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing);
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe')) ws.append(buildGfx(g));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe' && g.kind !== 'ip')) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip')) ws.append(buildIp(g));
   renderPipes(); fitZoom();
 }
 
@@ -114,6 +115,15 @@ function buildGfx(g) {
   if (g.kind === 'image') n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : '';
   else { n.textContent = g.text || ''; n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.color = g.color || ''; n.style.fontWeight = g.bold ? '700' : ''; }
   if (editing) { n.append(h('div', { class: 'rs' })); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  return n;
+}
+
+// IP (Initial Point): a small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
+function buildIp(g) {
+  const n = h('div', { class: 'gfx ip' + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, title: g.label || 'IP' }, h('span', {}, g.text ?? 'IP'));
+  place(n, g);
+  n.style.setProperty('--ipc', g.color || '#e8a33a');
+  if (editing) { n.append(h('div', { class: 'rs' })); if (g.label) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
 
@@ -270,15 +280,33 @@ function isOn(name) {
   if ('running' in v) return !!v.running;
   return !!v.value && v.value !== '0' && v.value !== 'false';
 }
-let drawPts = null, drawCursor = null;
+let drawPts = null, drawCursor = null, drawFrom = null;
+const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
+const ipById = (id, ws) => id && L().graphics.find(g => g.kind === 'ip' && g.id === id && (!ws || g.workspace === ws));
+const pipeFlowing = p => (p.flowWhen || []).length > 0 && p.flowWhen.every(isOn);
+// Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square.
+function snapEnd(pts, i, j, c) {
+  const old = pts[i], nb = pts[j];
+  if (nb && j !== undefined) { if (nb[1] === old[1]) nb[1] = c[1]; else if (nb[0] === old[0]) nb[0] = c[0]; }
+  pts[i] = [c[0], c[1]];
+}
+function syncPipeEnds(p) {
+  const pts = p.points; if (!pts || pts.length < 2) return;
+  const a = ipById(p.from, p.workspace), b = ipById(p.to, p.workspace), n = pts.length;
+  if (a) snapEnd(pts, 0, n > 2 ? 1 : undefined, ipCenter(a));
+  if (b) snapEnd(pts, n - 1, n > 2 ? n - 2 : undefined, ipCenter(b));
+}
 function renderPipes() {
   const svg = $('#pipes'); const w = curWs(); if (!w) return;
   const NS = 'http://www.w3.org/2000/svg';
   svg.innerHTML = '';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+  const liveIps = new Set();
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name)) {
+    syncPipeEnds(p);
     const pts = (p.points || []).map(q => q.join(',')).join(' ');
-    const flowing = (p.flowWhen || []).length > 0 && p.flowWhen.every(isOn);
+    const flowing = pipeFlowing(p);
+    if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = +p.width || 8;
     const g = mk('g', { 'data-gid': p.id });
     if (p.baseVisible !== false || editing) g.append(mk('polyline', { class: 'pipe', points: pts, stroke: p.color || '#8a8f96', 'stroke-width': width, opacity: p.baseVisible === false ? 0.35 : 1 }));
@@ -294,6 +322,8 @@ function renderPipes() {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
     svg.append(mk('polyline', { class: 'drawing', points: all.map(q => q.join(',')).join(' ') }));
   }
+  // an IP glows while a pipe that starts or ends on it is flowing
+  $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.gid)));
 }
 
 // ---------------------------------------------------------------- edit mode
@@ -311,13 +341,20 @@ function setEditing(on) {
   renderTabs(); renderWs();
 }
 
-let drag = null;
+let drag = null, lastPipeTap = null;
 $('#ws').addEventListener('pointerdown', ev => {
   if (!editing) return;
   const p = canvasPt(ev);
   if (drawPts) {                                   // drawing a pipe
-    let q = [snap(p[0]), snap(p[1])];
+    const ipNode = ev.target.closest('.gfx.ip'), ip = ipNode && findItem('gfx', ipNode.dataset.gid);
     const last = drawPts[drawPts.length - 1];
+    if (ip) {                                      // a pipe starts on the first IP clicked and ends on the next one
+      const c = ipCenter(ip);
+      if (!last) { drawFrom = ip.id; drawPts.push(c); renderPipes(); ev.preventDefault(); return; }
+      if (last[0] !== c[0] && last[1] !== c[1]) drawPts.push(Math.abs(c[0] - last[0]) > Math.abs(c[1] - last[1]) ? [c[0], last[1]] : [last[0], c[1]]);
+      drawPts.push(c); finishPipe(ip.id); ev.preventDefault(); return;
+    }
+    let q = [snap(p[0]), snap(p[1])];
     if (last && !ev.shiftKey) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
     if (ev.detail >= 2) { finishPipe(); return; }  // double-click finishes the pipe
     drawPts.push(q); renderPipes(); return;
@@ -326,7 +363,13 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
   const node = ev.target.closest('.el,.gfx');
-  if (hit && !node) { startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid }; drag = { mode: 'pipe', item: findItem('gfx', sel.id), start: p, orig: clone(findItem('gfx', sel.id).points) }; renderWs(); return; }
+  if (hit && !node) {
+    // the pipe is redrawn on press, so the browser never sends a double-click for it: count two quick presses instead
+    const now = Date.now(), again = lastPipeTap && lastPipeTap.id === hit.dataset.gid && now - lastPipeTap.t < 450;
+    lastPipeTap = again ? null : { id: hit.dataset.gid, t: now };
+    if (again) { sel = { kind: 'gfx', id: hit.dataset.gid }; renderWs(); editItem('gfx', sel.id); return; }
+    startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid }; drag = { mode: 'pipe', item: findItem('gfx', sel.id), start: p, orig: clone(findItem('gfx', sel.id).points) }; renderWs(); return;
+  }
   if (!node) { sel = null; renderWs(); return; }
   sel = node.dataset.name ? { kind: 'el', id: node.dataset.name } : { kind: 'gfx', id: node.dataset.gid };
   const item = findItem(sel.kind, sel.id);
@@ -345,8 +388,8 @@ $('#ws').addEventListener('pointermove', ev => {
   }
   if (!drag) return;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
-  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); }
-  else if (drag.mode === 'resize') { drag.item.w = Math.max(20, snap(drag.orig.w + dx)); drag.item.h = Math.max(16, snap(drag.orig.h + dy)); place(drag.node, drag.item); }
+  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); if (drag.item.kind === 'ip') renderPipes(); }
+  else if (drag.mode === 'resize') { drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy)); place(drag.node, drag.item); if (drag.item.kind === 'ip') renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { drag.item.points = drag.orig.map(q => [snap(q[0] + dx), snap(q[1] + dy)]); renderPipes(); }
 });
@@ -362,7 +405,7 @@ $('#ws').addEventListener('dblclick', ev => {
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
   if (ev.key === 'Enter') finishPipe();
-  if (ev.key === 'Escape') { drawPts = null; drawCursor = null; renderPipes(); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); }
+  if (ev.key === 'Escape') { drawPts = null; drawCursor = null; drawFrom = null; renderPipes(); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); }
 });
 // Touch screens have no double-click: hold a finger on an item for 0.6 s to open its properties
 let lp = null;
@@ -372,11 +415,13 @@ function startLongPress(ev, kind, id) {
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 
-function finishPipe() {
+function finishPipe(to) {
   $('#finishPipe').classList.add('hidden');
-  const pts = drawPts; drawPts = null; drawCursor = null;
+  const pts = drawPts, from = drawFrom; drawPts = null; drawCursor = null; drawFrom = null;
   if (!pts || pts.length < 2) { renderPipes(); return; }
   const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, width: 10, color: '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true };
+  if (from) g.from = from;
+  if (typeof to === 'string') g.to = to;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
   $('#editHint').textContent = '';
 }
@@ -398,7 +443,12 @@ $('#addEl').onclick = () => {
 $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#addText').onclick = () => { const g = { id: newId(), kind: 'text', workspace: wsName, x: 40, y: 40, w: 220, h: 40, text: 'Text', fontSize: 18 }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#finishPipe').onclick = () => finishPipe();
-$('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; $('#editHint').textContent = 'Click points (Shift = any angle). Double-click or Enter to finish, Esc to cancel.'; };
+$('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
+$('#addIp').onclick = () => {
+  let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === 'IP ' + i)) i++;
+  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: 'IP ' + i, color: '#e8a33a' };
+  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+};
 $('#addWs').onclick = () => {
   const n = prompt('New workspace name'); if (!n) return;
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
@@ -431,7 +481,8 @@ const F = {
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  pipe: [['label', 'Label', 'text'], ['flowWhen', 'Flow when ALL of these are on (Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
+  ip: [['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
+  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Flow when ALL of these are on (Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 
@@ -443,6 +494,7 @@ function field([key, label, kind, opts], obj) {
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - free end)'), ...draft.graphics.filter(g => g.kind === 'ip' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
   else if (kind === 'multi') {
     const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'global', 'shared'].includes(e.type)).map(e => e.name).sort();
@@ -487,10 +539,22 @@ async function editItem(kind, id) {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
+      if (type === 'ip') for (const g of draft.graphics) { if (g.from === item.id) delete g.from; if (g.to === item.id) delete g.to; }
       sel = null; renderWs(); return;
     }
     if (r !== 'ok') return;
     readFields(work);
+    if (type === 'pipe') {
+      if (work.from && work.from === work.to) throw new Error('A pipe needs two different IPs');
+      // an IP picked in the dialog: if it sits at the far end of the drawn line, turn the line around so flow runs from -> to
+      const pts = work.points || [], d = (q, c) => Math.hypot(q[0] - c[0], q[1] - c[1]);
+      const a = ipById(work.from, work.workspace), b = ipById(work.to, work.workspace);
+      if (pts.length > 1 && (work.from !== item.from || work.to !== item.to)) {
+        const first = pts[0], last = pts[pts.length - 1];
+        const keep = (a ? d(first, ipCenter(a)) : 0) + (b ? d(last, ipCenter(b)) : 0), flip = (a ? d(last, ipCenter(a)) : 0) + (b ? d(first, ipCenter(b)) : 0);
+        if (flip < keep) pts.reverse();
+      }
+    }
     if (kind === 'el') {
       work.name = (work.name || '').trim();
       if (!work.name) throw new Error('Name is required');

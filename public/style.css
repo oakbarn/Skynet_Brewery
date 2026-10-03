@@ -147,3 +147,10 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .el .nm { flex: none; }
 .el.text.look-dark .vl, .el.text.look-button .vl { justify-content: center; align-items: center; text-align: center; }
 .el.alarm.img-alarm:not(.active) { background-color: transparent; border-color: transparent; }
+/* IP (Initial Point): where a flow starts or ends */
+#ws .gfx.ip { display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--ipc); background: rgba(0,0,0,.55); color: var(--ipc); font: 700 10px/1 system-ui, sans-serif; z-index: 2; overflow: visible; }
+#ws .gfx.ip.live { background: var(--ipc); color: #000; box-shadow: 0 0 10px var(--ipc); }
+#ws:not(.editing) .gfx.ip.hide-run { display: none; }
+#ws.editing .gfx.ip { outline: none; }
+#ws.editing .gfx.ip.sel { outline: 2px solid var(--accent); outline-offset: 2px; }
+#ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fff; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
