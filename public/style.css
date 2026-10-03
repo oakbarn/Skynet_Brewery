@@ -157,3 +157,14 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 #ws .gfx.ip.devip { font-size: 8px; z-index: 3; }
 #ws.editing .gfx.ip.devip { cursor: crosshair; }
 #pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
+/* IP widget fittings: tee, elbows, cross, manual valve */
+#ws .gfx.ip.fit { border: none; background: none; border-radius: 0; box-shadow: none; }
+#ws .gfx.ip.fit svg { width: 100%; height: 100%; overflow: visible; }
+#ws .gfx.ip.fit path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+#ws .gfx.ip.fit .edge path { stroke: #000; stroke-width: 9; }
+#ws .gfx.ip.fit .core path { stroke: var(--ipc); stroke-width: 6; }
+#ws .gfx.ip.fit.live .core path { stroke: var(--flow); }
+#ws .gfx.ip.fit .edge path.body { fill: #000; stroke-width: 4; }
+#ws .gfx.ip.fit .core path.body { stroke-width: 1.5; stroke: #000; fill: var(--bad); }
+#ws .gfx.ip.fit.open .core path.body { fill: var(--ok); }
+#ws:not(.editing) .gfx.ip[data-fit="manualValve"] { cursor: pointer; }
