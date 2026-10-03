@@ -4,7 +4,8 @@ A browser-based brewery control panel with BruControl-style workspaces and scrip
 
 ```
  Browser(s) ──WiFi/LAN──>  Brew Panel server (Node.js)  ──USB──>  Arduino Mega(s)
-                           scripts, Globals API, SQLite ──WiFi──> ESP32 ──> Mega
+                           scripts, Globals API, SQLite ──Ethernet──> Mega + Ethernet shield, or ESP32 (Ethernet) ──> Mega
+                                                        ──WiFi──> ESP32 ──> Mega
 ```
 
 The server runs the scripts and talks to the hardware. Scripts keep running when every browser is closed.
@@ -129,7 +130,7 @@ scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
                      put all your BruControl pictures in media/oakbarn - a few are already there)
 data/                state.json (Global values kept over restarts) and brewlog.db (the database)
-firmware/            Mega_BrewPanel.ino (Mega), ESP32_Bridge.ino (WiFi bridge)
+firmware/            Mega_BrewPanel.ino (Mega: USB or Ethernet shield), ESP32_Bridge.ino (WiFi or Ethernet bridge)
 docs/                DEVICE_PROTOCOL.md, brewpanel.service
 ```
 

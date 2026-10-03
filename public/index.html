@@ -101,10 +101,10 @@
     <h3>Add device</h3>
     <div class="form row">
       <label>Name <input id="devName" placeholder="MEGA1"></label>
-      <label>Type <select id="devType"><option value="serial">Arduino Mega (USB)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
+      <label>Type <select id="devType"><option value="serial">Arduino / ESP32 board (USB)</option><option value="ethernet">Board on Ethernet (wired)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
       <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
       <button id="scanPorts">Scan ports</button>
-      <label>ESP32 address <input id="devHost" placeholder="192.168.1.60"></label>
+      <label>Network address (Ethernet / WiFi) <input id="devHost" placeholder="192.168.1.60"></label>
       <button id="addDev" class="primary">Add</button>
     </div>
     <h3>OneWire probes seen</h3>

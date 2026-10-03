@@ -1,9 +1,12 @@
-# Device protocol (Arduino Mega over USB, ESP32 over WiFi)
+# Device protocol (boards over USB, Ethernet or WiFi)
 
 Both use the same plain-text protocol: one command per line, ending with a newline (`\n`), fields separated by spaces.
 
 - **Mega over USB:** 115200 baud.
+- **Ethernet:** TCP port 4100. A Mega with a W5500 / W5100 Ethernet shield (`USE_ETHERNET 1` in the Mega sketch), or an ESP32 board with an Ethernet jack running the bridge sketch with `USE_ETHERNET 1`. Add it on the Devices page as **Board on Ethernet** with its IP address.
 - **ESP32 over WiFi:** TCP port 4100. The ESP32 can bridge to a Mega on its second serial port. The included sketch does this.
+
+USB and Ethernet are preferred over WiFi for anything that heats or pumps. On every link, the board turns all outputs off if it hears nothing for 10 seconds.
 
 ## Server → device
 
@@ -43,7 +46,7 @@ Every DS18B20 probe has a unique 64-bit ROM id. Elements are matched to that id,
 
 ## Boards
 
-The "PLCs" are hobby boards: an **Arduino Mega** (USB), an **ESP32** WiFi bridge to a Mega, and hobby modules wired to them (relay boards, SSRs, MOSFET modules, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115 analog board, PWM-to-0-10 V modules). Uno and Nano can run the same sketch with smaller pin lists. The Raspberry Pi runs the panel; using the Pi's own GPIO pins as Devices is not built yet.
+The "PLCs" are hobby boards: an **Arduino Mega** (USB, or Ethernet with a W5500 / W5100 shield), an **ESP32** bridge to a Mega (Ethernet or WiFi), and hobby modules wired to them (relay boards, SSRs, MOSFET modules, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115 analog board, PWM-to-0-10 V modules). Uno and Nano can run the same sketch with smaller pin lists. The Raspberry Pi runs the panel; using the Pi's own GPIO pins as Devices is not built yet.
 
 ## Devices
 
