@@ -1,13 +1,25 @@
 // Mega_BrewPanel - Arduino Mega 2560 firmware for Brew Panel (docs/DEVICE_PROTOCOL.md)
 // MIT License Granted - Copyright (c) OakBarn Brewery 2026
 // Libraries (Arduino Library Manager): OneWire, DallasTemperature
-// Starter sketch: set the pin lists below for this Mega.
+//   + Adafruit MAX31865 when USE_RTD is 1, Adafruit MAX31856 when USE_TC is 1
+// Starter sketch: set the pin lists below for this Mega. Only pins in these lists can be used.
+// Sensor settings that live on the chip (thermocouple type, RTD wires, input pull-up) are sent by the
+// server with CFG lines, so you set them in the panel, not here.
+
+#define USE_RTD 0                                        // 1 = PT100 / PT1000 probes on MAX31865 boards
+#define USE_TC  0                                        // 1 = thermocouples on MAX31856 boards
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#if USE_RTD
+#include <Adafruit_MAX31865.h>
+#endif
+#if USE_TC
+#include <Adafruit_MAX31856.h>
+#endif
 
 const char* DEVICE_NAME = "MEGA1";
-const char* FIRMWARE = "0.1";
+const char* FIRMWARE = "0.2";
 
 // Link to the server: Serial = USB cable. Use Serial1 (pins 18/19) when an ESP32 bridge is wired in.
 #define LINK Serial
@@ -15,28 +27,87 @@ const char* FIRMWARE = "0.1";
 // ---- your pins ----
 const uint8_t OUTPUT_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 22, 23, 24, 25};
 const uint8_t INPUT_PINS[]  = {30, 31, 32, 33};          // switches / float sensors (to GND, internal pull-up)
-const uint8_t ANALOG_PINS[] = {A0};                      // analog inputs to report, e.g. {A0, A1}
+const uint8_t ANALOG_PINS[] = {A0};                      // analog inputs (sensors 0-5V, 4-20mA via 250 ohm, NTC, pH), e.g. {A0, A1}; reported as 0 = A0
+const uint8_t PWM_PINS[]    = {44, 45, 46};              // PWM outputs 0-100 % (pump speed, SSR power), not also in OUTPUT_PINS
+const uint8_t AO_PINS[]     = {};                        // analog outputs: a PWM pin into a PWM-to-0-10V or 4-20mA module, e.g. {13}
+const uint8_t FLOW_PINS[]   = {};                        // pulse flow meters, interrupt pins only: 2, 3, 18, 19, 20, 21 (max 6)
+const uint8_t RTD_CS_PINS[] = {};                        // MAX31865 chip-select pins (PT100 / PT1000), SPI on 50/51/52, e.g. {48}
+const uint8_t TC_CS_PINS[]  = {};                        // MAX31856 chip-select pins (thermocouples), SPI on 50/51/52, e.g. {49}
 const uint8_t ONEWIRE_PIN = 40;                          // all DS18B20 probes on one bus, 4.7k pull-up to 5V
 const bool RELAY_ACTIVE_LOW = true;                      // most relay boards switch ON with LOW
 const unsigned long WATCHDOG_MS = 10000;                 // no message for 10 s -> all outputs OFF
 
-const uint8_t N_OUT = sizeof(OUTPUT_PINS), N_IN = sizeof(INPUT_PINS), N_AN = sizeof(ANALOG_PINS);
+const uint8_t N_OUT = sizeof(OUTPUT_PINS), N_IN = sizeof(INPUT_PINS), N_AN = sizeof(ANALOG_PINS), N_PWM = sizeof(PWM_PINS), N_AO = sizeof(AO_PINS);
+const uint8_t N_FLOW = sizeof(FLOW_PINS) > 6 ? 6 : sizeof(FLOW_PINS), N_RTD = sizeof(RTD_CS_PINS), N_TC = sizeof(TC_CS_PINS);
 OneWire oneWire(ONEWIRE_PIN);
 DallasTemperature probes(&oneWire);
+#if USE_RTD
+Adafruit_MAX31865* rtd[N_RTD > 0 ? N_RTD : 1];
+#endif
+#if USE_TC
+Adafruit_MAX31856* tc[N_TC > 0 ? N_TC : 1];
+#endif
 int lastIn[N_IN > 0 ? N_IN : 1];
-unsigned long lastRx = 0, lastReport = 0, lastTemp = 0;
+volatile unsigned long pulses[6];
+void f0() { pulses[0]++; } void f1() { pulses[1]++; } void f2() { pulses[2]++; } void f3() { pulses[3]++; } void f4() { pulses[4]++; } void f5() { pulses[5]++; }
+void (*const FLOW_ISR[6])() = {f0, f1, f2, f3, f4, f5};
+unsigned long lastRx = 0, lastReport = 0, lastTemp = 0, lastFast = 0;
 bool tempRequested = false, watchdogTripped = false;
 String line;
 
-bool isOutput(int pin) { for (uint8_t i = 0; i < N_OUT; i++) if (OUTPUT_PINS[i] == pin) return true; return false; }
+int indexOf(const uint8_t* pins, uint8_t n, int pin) { for (uint8_t i = 0; i < n; i++) if (pins[i] == pin) return i; return -1; }
+bool isOutput(int pin) { return indexOf(OUTPUT_PINS, N_OUT, pin) >= 0; }
 
 void writeOut(int pin, bool on) { digitalWrite(pin, (on ^ RELAY_ACTIVE_LOW) ? HIGH : LOW); }
 
-void allOff() { for (uint8_t i = 0; i < N_OUT; i++) writeOut(OUTPUT_PINS[i], false); }
+void allOff() {
+  for (uint8_t i = 0; i < N_OUT; i++) writeOut(OUTPUT_PINS[i], false);
+  for (uint8_t i = 0; i < N_PWM; i++) analogWrite(PWM_PINS[i], 0);
+  for (uint8_t i = 0; i < N_AO; i++) analogWrite(AO_PINS[i], 0);
+}
+
+void say(const char* cmd, int pin, long v) { LINK.print(cmd); LINK.print(' '); LINK.print(pin); LINK.print(' '); LINK.println(v); }
 
 void reportInputs() {
-  for (uint8_t i = 0; i < N_IN; i++) { int v = digitalRead(INPUT_PINS[i]) == LOW ? 1 : 0; lastIn[i] = v; LINK.print("DI "); LINK.print(INPUT_PINS[i]); LINK.print(' '); LINK.println(v); }
-  for (uint8_t i = 0; i < N_AN; i++) { LINK.print("A "); LINK.print(ANALOG_PINS[i]); LINK.print(' '); LINK.println(analogRead(ANALOG_PINS[i])); }
+  for (uint8_t i = 0; i < N_IN; i++) { int v = digitalRead(INPUT_PINS[i]) == LOW ? 1 : 0; lastIn[i] = v; say("DI", INPUT_PINS[i], v); }
+}
+
+// Every second: analog inputs, flow meter pulse counts, RTD and thermocouple readings
+void reportFast() {
+  for (uint8_t i = 0; i < N_AN; i++) say("A", ANALOG_PINS[i] - A0, analogRead(ANALOG_PINS[i]));
+  for (uint8_t i = 0; i < N_FLOW; i++) { noInterrupts(); unsigned long c = pulses[i]; interrupts(); say("P", FLOW_PINS[i], c); }
+#if USE_RTD
+  for (uint8_t i = 0; i < N_RTD; i++) {
+    uint16_t raw = rtd[i]->readRTD();
+    if (rtd[i]->readFault()) { rtd[i]->clearFault(); LINK.print("RTD "); LINK.print(RTD_CS_PINS[i]); LINK.println(" NAN"); }
+    else say("RTD", RTD_CS_PINS[i], raw);
+  }
+#endif
+#if USE_TC
+  for (uint8_t i = 0; i < N_TC; i++) {
+    float c = tc[i]->readThermocoupleTemperature();
+    LINK.print("TC "); LINK.print(TC_CS_PINS[i]); LINK.print(' ');
+    if (tc[i]->readFault()) LINK.println("NAN"); else LINK.println(c, 2);
+  }
+#endif
+}
+
+// CFG <kind> <pin> <setting>: sensor settings sent by the server after HELLO
+void configure(String kind, int pin, String v) {
+  int i;
+  if (kind == "DI" && (i = indexOf(INPUT_PINS, N_IN, pin)) >= 0) { pinMode(pin, v == "NOPULL" ? INPUT : INPUT_PULLUP); return; }
+#if USE_RTD
+  if (kind == "RTD" && (i = indexOf(RTD_CS_PINS, N_RTD, pin)) >= 0) { rtd[i]->begin(v == "4" ? MAX31865_4WIRE : v == "2" ? MAX31865_2WIRE : MAX31865_3WIRE); return; }
+#endif
+#if USE_TC
+  if (kind == "TC" && (i = indexOf(TC_CS_PINS, N_TC, pin)) >= 0) {
+    const char* names = "KJTNERSB";
+    const max31856_thermocoupletype_t types[] = {MAX31856_TCTYPE_K, MAX31856_TCTYPE_J, MAX31856_TCTYPE_T, MAX31856_TCTYPE_N, MAX31856_TCTYPE_E, MAX31856_TCTYPE_R, MAX31856_TCTYPE_S, MAX31856_TCTYPE_B};
+    const char* at = strchr(names, v.charAt(0));
+    if (at && v.length() == 1) { tc[i]->setThermocoupleType(types[at - names]); return; }
+  }
+#endif
+  LINK.print("ERR CFG "); LINK.print(kind); LINK.print(' '); LINK.print(pin); LINK.println(": pin not in this sketch's lists (or USE_RTD / USE_TC is 0)");
 }
 
 void handle(String cmd) {
@@ -45,13 +116,29 @@ void handle(String cmd) {
   lastRx = millis();
   if (watchdogTripped) { watchdogTripped = false; LINK.println("ERR watchdog cleared"); }
   if (cmd == "PING") return;
-  if (cmd == "HELLO") { LINK.print("HELLO "); LINK.print(DEVICE_NAME); LINK.print(' '); LINK.println(FIRMWARE); reportInputs(); return; }
+  if (cmd == "HELLO") { LINK.print("HELLO "); LINK.print(DEVICE_NAME); LINK.print(' '); LINK.println(FIRMWARE); reportInputs(); reportFast(); return; }
   if (cmd.startsWith("DO ")) {
     int sp = cmd.indexOf(' ', 3);
     int pin = cmd.substring(3, sp).toInt(); int v = cmd.substring(sp + 1).toInt();
     if (!isOutput(pin)) { LINK.print("ERR pin "); LINK.print(pin); LINK.println(" is not in OUTPUT_PINS"); return; }
     writeOut(pin, v == 1);
     LINK.print("DO "); LINK.print(pin); LINK.print(' '); LINK.println(v == 1 ? 1 : 0);
+    return;
+  }
+  int s1 = cmd.indexOf(' '), s2 = cmd.indexOf(' ', s1 + 1);
+  String op = cmd.substring(0, s1);
+  if (op == "PWM" || op == "AO") {                        // PWM <pin> <0-255>,  AO <pin> <0-1000>
+    int pin = cmd.substring(s1 + 1, s2).toInt(); long v = cmd.substring(s2 + 1).toInt();
+    bool pwm = op == "PWM";
+    if (indexOf(pwm ? PWM_PINS : AO_PINS, pwm ? N_PWM : N_AO, pin) < 0) { LINK.print("ERR pin "); LINK.print(pin); LINK.println(pwm ? " is not in PWM_PINS" : " is not in AO_PINS"); return; }
+    v = constrain(v, 0, pwm ? 255 : 1000);
+    analogWrite(pin, pwm ? v : v * 255 / 1000);
+    say(pwm ? "PWM" : "AO", pin, v);
+    return;
+  }
+  if (op == "CFG") {                                     // CFG <DI|RTD|TC> <pin> <setting>
+    int s3 = cmd.indexOf(' ', s2 + 1);
+    configure(cmd.substring(s1 + 1, s2), cmd.substring(s2 + 1, s3).toInt(), cmd.substring(s3 + 1));
     return;
   }
   LINK.print("ERR unknown command: "); LINK.println(cmd);
@@ -73,6 +160,15 @@ void sendTemps() {
 void setup() {
   for (uint8_t i = 0; i < N_OUT; i++) { pinMode(OUTPUT_PINS[i], OUTPUT); writeOut(OUTPUT_PINS[i], false); }
   for (uint8_t i = 0; i < N_IN; i++) { pinMode(INPUT_PINS[i], INPUT_PULLUP); lastIn[i] = -1; }
+  for (uint8_t i = 0; i < N_PWM; i++) { pinMode(PWM_PINS[i], OUTPUT); analogWrite(PWM_PINS[i], 0); }
+  for (uint8_t i = 0; i < N_AO; i++) { pinMode(AO_PINS[i], OUTPUT); analogWrite(AO_PINS[i], 0); }
+  for (uint8_t i = 0; i < N_FLOW; i++) { pinMode(FLOW_PINS[i], INPUT_PULLUP); attachInterrupt(digitalPinToInterrupt(FLOW_PINS[i]), FLOW_ISR[i], FALLING); }
+#if USE_RTD
+  for (uint8_t i = 0; i < N_RTD; i++) { rtd[i] = new Adafruit_MAX31865(RTD_CS_PINS[i]); rtd[i]->begin(MAX31865_3WIRE); }
+#endif
+#if USE_TC
+  for (uint8_t i = 0; i < N_TC; i++) { tc[i] = new Adafruit_MAX31856(TC_CS_PINS[i]); tc[i]->begin(); tc[i]->setThermocoupleType(MAX31856_TCTYPE_K); tc[i]->setConversionMode(MAX31856_CONTINUOUS); }
+#endif
   LINK.begin(115200);
   probes.begin();
   probes.setWaitForConversion(false);                     // do not block while probes convert
@@ -92,6 +188,7 @@ void loop() {
     if (v != lastIn[i]) { lastIn[i] = v; LINK.print("DI "); LINK.print(INPUT_PINS[i]); LINK.print(' '); LINK.println(v); }
   }
   if (now - lastReport > 5000) { lastReport = now; reportInputs(); }
+  if (now - lastFast > 1000) { lastFast = now; reportFast(); }
   if (!tempRequested && now - lastTemp > 2000) { probes.requestTemperatures(); tempRequested = true; lastTemp = now; }
   if (tempRequested && now - lastTemp > 800) { sendTemps(); tempRequested = false; }
 }
