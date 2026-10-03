@@ -118,7 +118,7 @@ function buildGfx(g) {
   return n;
 }
 
-// IP (Initial Point): a small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
+// IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
 function buildIp(g) {
   const n = h('div', { class: 'gfx ip' + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, title: g.label || 'IP' }, h('span', {}, g.text ?? 'IP'));
   place(n, g);
@@ -534,7 +534,7 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...F.common.slice(3)] : F[type];
   const work = clone(item);
-  const r = await dialog(kind === 'el' ? `${type} element` : type, fields, work, true);
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type, fields, work, true);
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
