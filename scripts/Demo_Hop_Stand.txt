@@ -1,0 +1,35 @@
+//Demo_Hop_Stand
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//Whirlpool with cooling until the kettle reaches the hop stand
+//temperature, cooling off, hop alarm, 20 minute stand, then chill.
+//In Testing mode the stand is 20 seconds.
+new value vV_Stand_Temp
+new time vT_Stand
+new string vSMsg
+vV_Stand_Temp = 154
+vT_Stand = 00:20:00
+if "sw_Status_Testing" state == true
+	vT_Stand = 00:00:20
+endif
+"BK_Burner" state = false
+"V_MLT_Out" state = false
+"V_BK_In" state = true
+"MB_36_do_RedPump_B1" state = true
+"Cooling_Water" state = true
+vSMsg = "Cooling to " + vV_Stand_Temp
+vSMsg = vSMsg + " °F for the hop stand"
+"gblS_Inter_Script" value = vSMsg
+wait "BK_Temp" value <= vV_Stand_Temp
+"Cooling_Water" state = false
+start "alm_Hops"
+"gblS_Inter_Script" value = "Add the whirlpool hops, then click the Hop alarm"
+wait "alm_Hops" active == false
+"tm_Whirlpool" type = countdown
+"tm_Whirlpool" value = vT_Stand
+start "tm_Whirlpool"
+"gblS_Inter_Script" value = "Hop stand"
+wait "tm_Whirlpool" value <= 00:00:00
+"Cooling_Water" state = true
+"gblS_Inter_Script" value = "Hop stand done - chilling"
+print "Hop stand finished at " + "BK_Temp" value

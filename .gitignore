@@ -1,0 +1,12 @@
+# Runtime files the panel creates while running
+data/
+*.db
+*.db-journal
+state.json
+
+# Installed packages
+node_modules/
+
+# OS clutter
+.DS_Store
+Thumbs.db

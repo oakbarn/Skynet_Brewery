@@ -1,0 +1,19 @@
+//Demo_Transfer_HLT_to_MLT
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//Opens the HLT out and MLT in valves, runs the pump 15 seconds.
+//Watch the orange flow on the Brewery workspace.
+"gblS_Inter_Script" value = "Transfer HLT to MLT"
+"V_HLT_Out" state = true
+"V_MLT_In" state = true
+sleep 1000
+"MB_36_do_RedPump_B1" state = true
+"tm_Whirlpool" type = countdown
+"tm_Whirlpool" value = 00:00:15
+start "tm_Whirlpool"
+wait "tm_Whirlpool" value <= 00:00:00
+"MB_36_do_RedPump_B1" state = false
+sleep 1000
+"V_HLT_Out" state = false
+"V_MLT_In" state = false
+"gblS_Inter_Script" value = "Transfer done"
