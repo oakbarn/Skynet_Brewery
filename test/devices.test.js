@@ -25,6 +25,7 @@ near(analogFrom({ signal: '4-20mA', rangeLow: 0, rangeHigh: 100 }, 1023 * 12 / 2
 assert.equal(analogFrom({ signal: '4-20mA' }, 10).fault, true, 'broken 4-20 mA wire');
 near(analogFrom({ signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30 }, 1023 * 2.5 / 5).value, 15, 0.01, 'pressure 2.5 V');
 near(analogFrom({ signal: '0-10V', rangeLow: 0, rangeHigh: 200 }, 1023 / 2).value, 100, 0.01, '5 V of 10 V through a 2:1 divider');
+near(analogFrom({ adc: 'ads1115', signal: '0-5V', rangeLow: 0, rangeHigh: 100 }, 32767 * 2.5 / 6.144).value, 50, 0.01, 'ADS1115 2.5 V');
 near(analogFrom({ signal: 'twoPoint', cal1Raw: 400, cal1Value: 7, cal2Raw: 600, cal2Value: 4 }, 500).value, 5.5, 1e-9, 'pH two-point');
 
 // Outputs
@@ -43,6 +44,7 @@ fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
     { name: 'NTC', type: 'temperature', sensor: 'ntc', device: 'M', channel: 2, units: '°C' },
     { name: 'RTD', type: 'temperature', sensor: 'pt100', device: 'M', channel: 49, units: '°C', wires: 4 },
     { name: 'TC', type: 'temperature', sensor: 'thermocouple', tcType: 'J', device: 'M', channel: 48, units: '°F' },
+    { name: 'AdsPH', type: 'analogIn', adc: 'ads1115', device: 'M', channel: 1, signal: '0-5V', rangeLow: 0, rangeHigh: 14 },
     { name: 'Flow', type: 'flowMeter', device: 'M', channel: 18, pulsesPerUnit: 100 },
   ],
 }));
@@ -63,6 +65,7 @@ assert.deepEqual(sent, ['PWM 44 0'], 'disabled PWM output goes to 0');
 hw._onLine(dev, 'DI 30 1'); assert.equal(store.getProp('Float', 'state'), false, 'inverted input');
 hw._onLine(dev, `A 1 ${1023 * 12 / 20}`); near(store.getProp('Press', 'value'), 15, 0.01, 'pressure'); assert.equal(store.getProp('Press', 'fault'), false);
 hw._onLine(dev, 'A 1 3'); assert.equal(store.getProp('Press', 'fault'), true, 'pressure fault');
+{ const before = store.getProp('Press', 'value'); hw._onLine(dev, `ADS 1 ${32767 * 2.5 / 6.144}`); near(store.getProp('AdsPH', 'value'), 7, 0.01, 'ADS1115 element'); assert.equal(store.getProp('Press', 'value'), before, 'ADS line leaves board pin 1 alone'); }
 hw._onLine(dev, 'A 2 511.5'); near(store.getProp('NTC', 'value'), 25, 0.01, 'NTC element');
 hw._onLine(dev, `RTD 49 ${Math.round(138.51 / 430 * 32768)}`); near(store.getProp('RTD', 'value'), 100, 0.1, 'RTD element');
 hw._onLine(dev, 'TC 48 100'); near(store.getProp('TC', 'value'), 212, 1e-9, 'TC element');
