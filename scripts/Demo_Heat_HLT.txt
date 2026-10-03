@@ -1,0 +1,13 @@
+//Demo_Heat_HLT
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//Heats the HLT (simulated) to 90 °F then sounds the alarm.
+new value vV_Target
+vV_Target = 90
+"gblS_Inter_Script" value = "Heating HLT"
+"HLT_Element" state = true
+wait "HLT_Temp" value >= vV_Target
+"HLT_Element" state = false
+"gblS_Inter_Script" value = "HLT at target"
+start "alm_Hops"
+log "gblV_Kettle_Temp"

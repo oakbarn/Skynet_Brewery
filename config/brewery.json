@@ -1,0 +1,1152 @@
+{
+  "title": "OakBarn Brew Panel",
+  "port": 8080,
+  "mediaRoots": [
+    "./media"
+  ],
+  "apiKey": "",
+  "devices": [
+    {
+      "name": "SIM",
+      "type": "simulator",
+      "ambient": 68
+    }
+  ],
+  "workspaces": [
+    {
+      "name": "Brewery",
+      "background": "brewery_main.png",
+      "color": "#9ad8e8",
+      "width": 2520,
+      "height": 1302,
+      "bgX": 520,
+      "bgY": 0,
+      "bgW": 2000,
+      "bgH": 1302
+    },
+    {
+      "name": "Batch Hops",
+      "color": "",
+      "width": 1100,
+      "height": 700
+    }
+  ],
+  "elements": [
+    {
+      "name": "gblS_Style_R1",
+      "type": "global",
+      "dataType": "string"
+    },
+    {
+      "name": "gblV_BatchSize_Gal",
+      "type": "global",
+      "dataType": "value",
+      "precision": 2
+    },
+    {
+      "name": "gblV_BoilSize_Gal",
+      "type": "global",
+      "dataType": "value",
+      "precision": 2
+    },
+    {
+      "name": "gblV_OG_R1",
+      "type": "global",
+      "dataType": "value",
+      "precision": 3
+    },
+    {
+      "name": "gblV_FG_R1",
+      "type": "global",
+      "dataType": "value",
+      "precision": 3
+    },
+    {
+      "name": "gblV_IBU_Recipe_R1",
+      "type": "global",
+      "dataType": "value",
+      "precision": 1
+    },
+    {
+      "name": "gblVHop_Max",
+      "type": "global",
+      "dataType": "value",
+      "displayName": "Hop groups"
+    },
+    {
+      "name": "gblV_Kettle_Temp",
+      "type": "global",
+      "dataType": "value",
+      "precision": 1,
+      "units": "°F",
+      "log": {
+        "mode": "seconds",
+        "every": 10
+      },
+      "displayName": "Kettle temp (logged)"
+    },
+    {
+      "name": "gblS_Hop1_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 60,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 1"
+    },
+    {
+      "name": "gblV_Hop1_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 60,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 1",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop1_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 60,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 1",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop1_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 60,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 1"
+    },
+    {
+      "name": "gblV_Hop1_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 60,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 1"
+    },
+    {
+      "name": "gblS_Hop2_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 132,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 2"
+    },
+    {
+      "name": "gblV_Hop2_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 132,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 2",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop2_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 132,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 2",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop2_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 132,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 2"
+    },
+    {
+      "name": "gblV_Hop2_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 132,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 2"
+    },
+    {
+      "name": "gblS_Hop3_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 204,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 3"
+    },
+    {
+      "name": "gblV_Hop3_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 204,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 3",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop3_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 204,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 3",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop3_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 204,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 3"
+    },
+    {
+      "name": "gblV_Hop3_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 204,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 3"
+    },
+    {
+      "name": "gblS_Hop4_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 276,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 4"
+    },
+    {
+      "name": "gblV_Hop4_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 276,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 4",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop4_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 276,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 4",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop4_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 276,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 4"
+    },
+    {
+      "name": "gblV_Hop4_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 276,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 4"
+    },
+    {
+      "name": "gblS_Hop5_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 348,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 5"
+    },
+    {
+      "name": "gblV_Hop5_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 348,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 5",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop5_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 348,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 5",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop5_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 348,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 5"
+    },
+    {
+      "name": "gblV_Hop5_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 348,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 5"
+    },
+    {
+      "name": "gblS_Hop6_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 420,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 6"
+    },
+    {
+      "name": "gblV_Hop6_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 420,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 6",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop6_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 420,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 6",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop6_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 420,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 6"
+    },
+    {
+      "name": "gblV_Hop6_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 420,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 6"
+    },
+    {
+      "name": "gblS_Hop7_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 492,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 7"
+    },
+    {
+      "name": "gblV_Hop7_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 492,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 7",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop7_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 492,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 7",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop7_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 492,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 7"
+    },
+    {
+      "name": "gblV_Hop7_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 492,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 7"
+    },
+    {
+      "name": "gblS_Hop8_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 564,
+      "w": 260,
+      "h": 62,
+      "displayName": "Hop 8"
+    },
+    {
+      "name": "gblV_Hop8_Oz_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 310,
+      "y": 564,
+      "w": 110,
+      "h": 62,
+      "displayName": "Oz 8",
+      "precision": 2
+    },
+    {
+      "name": "gblV_Hop8_Recipe_AAU_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 430,
+      "y": 564,
+      "w": 110,
+      "h": 62,
+      "displayName": "Alpha % 8",
+      "precision": 1
+    },
+    {
+      "name": "gblV_TimeHop8_Min_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 550,
+      "y": 564,
+      "w": 110,
+      "h": 62,
+      "displayName": "Minutes 8"
+    },
+    {
+      "name": "gblV_Hop8_Group_R1",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Batch Hops",
+      "x": 670,
+      "y": 564,
+      "w": 110,
+      "h": 62,
+      "displayName": "Group 8"
+    },
+    {
+      "name": "shr_Hop_Slot",
+      "type": "shared",
+      "dataType": "value",
+      "displayName": "Hop slot (scripts only)"
+    },
+    {
+      "name": "gblS_Top_Text",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Brewery",
+      "x": 0,
+      "y": 0,
+      "w": 510,
+      "h": 460,
+      "hideName": true,
+      "look": "dark",
+      "fontSize": 28,
+      "readOnly": true,
+      "initial": "You can either go through Door #1 or Door #2.  Door #1 Closes all Valves, Door #2 just starts the Brew Process with the valves in the position they are.  Make a choice!"
+    },
+    {
+      "name": "sw_Make_Choice",
+      "type": "switch",
+      "workspace": "Brewery",
+      "x": 0,
+      "y": 465,
+      "w": 510,
+      "h": 120,
+      "hideName": true,
+      "look": "button",
+      "background": "4",
+      "fontSize": 30,
+      "onText": "Choice made",
+      "offText": "Make A Choice"
+    },
+    {
+      "name": "btn_New_Brew",
+      "type": "label",
+      "workspace": "Brewery",
+      "x": 0,
+      "y": 590,
+      "w": 510,
+      "h": 85,
+      "displayName": "New Brew",
+      "look": "dark",
+      "fontSize": 30,
+      "tap": "script",
+      "tapTarget": "Demo_Heat_HLT",
+      "confirm": true
+    },
+    {
+      "name": "btn_Close_Valves",
+      "type": "label",
+      "workspace": "Brewery",
+      "x": 0,
+      "y": 680,
+      "w": 510,
+      "h": 85,
+      "displayName": "Close All Valves?",
+      "look": "dark",
+      "fontSize": 30,
+      "tap": "script",
+      "tapTarget": "Close_All_Valves",
+      "confirm": true
+    },
+    {
+      "name": "gblV_Delay_Seconds",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Brewery",
+      "x": 0,
+      "y": 770,
+      "w": 510,
+      "h": 160,
+      "hideName": true,
+      "look": "dark",
+      "fontSize": 80,
+      "initial": 0,
+      "step": 5,
+      "min": 0,
+      "max": 600
+    },
+    {
+      "name": "HLT_Temp",
+      "type": "temperature",
+      "workspace": "Brewery",
+      "x": 1150,
+      "y": 110,
+      "w": 170,
+      "h": 80,
+      "device": "SIM",
+      "units": "°F",
+      "precision": 1,
+      "look": "lcd",
+      "sim": {
+        "start": 68,
+        "heater": "HLT_Element",
+        "heatRate": 1.5
+      }
+    },
+    {
+      "name": "MLT_Temp",
+      "type": "temperature",
+      "workspace": "Brewery",
+      "x": 1425,
+      "y": 110,
+      "w": 170,
+      "h": 80,
+      "device": "SIM",
+      "units": "°F",
+      "precision": 1,
+      "look": "lcd",
+      "sim": {
+        "start": 68
+      }
+    },
+    {
+      "name": "BK_Temp",
+      "type": "temperature",
+      "workspace": "Brewery",
+      "x": 1785,
+      "y": 110,
+      "w": 170,
+      "h": 80,
+      "device": "SIM",
+      "units": "°F",
+      "precision": 1,
+      "look": "lcd",
+      "sim": {
+        "start": 68,
+        "heater": "BK_Burner",
+        "heatRate": 2,
+        "cooler": "Cooling_Water",
+        "coolRate": 6,
+        "coolTo": 58
+      }
+    },
+    {
+      "name": "MLT_Out_Temp",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Brewery",
+      "x": 1750,
+      "y": 300,
+      "w": 170,
+      "h": 80,
+      "displayName": "Mash Tun Out",
+      "look": "led",
+      "precision": 1,
+      "readOnly": true
+    },
+    {
+      "name": "V_HLT_Out",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1073,
+      "y": 655,
+      "w": 64,
+      "h": 55,
+      "device": "SIM",
+      "channel": 2,
+      "displayName": "HLT out",
+      "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
+      "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
+      "hideName": true,
+      "hideValue": true
+    },
+    {
+      "name": "V_MLT_In",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1348,
+      "y": 655,
+      "w": 64,
+      "h": 55,
+      "device": "SIM",
+      "channel": 3,
+      "displayName": "MLT in",
+      "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
+      "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
+      "hideName": true,
+      "hideValue": true
+    },
+    {
+      "name": "VGC_23_do_BackManifold_Left_On_B1",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1124,
+      "y": 745,
+      "w": 64,
+      "h": 55,
+      "device": "SIM",
+      "channel": 23,
+      "displayName": "Back manifold left",
+      "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
+      "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
+      "hideName": true,
+      "hideValue": true
+    },
+    {
+      "name": "V_MLT_Out",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1398,
+      "y": 745,
+      "w": 64,
+      "h": 55,
+      "device": "SIM",
+      "channel": 4,
+      "displayName": "MLT out",
+      "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
+      "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
+      "hideName": true,
+      "hideValue": true
+    },
+    {
+      "name": "V_BK_In",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1716,
+      "y": 655,
+      "w": 64,
+      "h": 55,
+      "device": "SIM",
+      "channel": 5,
+      "displayName": "BK in",
+      "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
+      "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
+      "hideName": true,
+      "hideValue": true
+    },
+    {
+      "name": "MB_35_do_YellowPump_B1",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1170,
+      "y": 870,
+      "w": 140,
+      "h": 48,
+      "device": "SIM",
+      "channel": 33,
+      "displayName": "Yellow Pump",
+      "look": "dark"
+    },
+    {
+      "name": "insp_Pix_Yellow_Pump_B1",
+      "type": "picture",
+      "workspace": "Brewery",
+      "x": 1170,
+      "y": 920,
+      "w": 140,
+      "h": 95,
+      "follow": "MB_35_do_YellowPump_B1",
+      "imageOn": "oakbarn/Pump_Yellow_Rip_On.png",
+      "imageOff": "oakbarn/Pump_Yellow_Rip_Off.png",
+      "hideName": true,
+      "confirm": true
+    },
+    {
+      "name": "MB_36_do_RedPump_B1",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1430,
+      "y": 870,
+      "w": 140,
+      "h": 48,
+      "device": "SIM",
+      "channel": 35,
+      "displayName": "Red Pump",
+      "look": "dark"
+    },
+    {
+      "name": "insp_Pix_Red_Pump_B1",
+      "type": "picture",
+      "workspace": "Brewery",
+      "x": 1430,
+      "y": 920,
+      "w": 140,
+      "h": 95,
+      "follow": "MB_36_do_RedPump_B1",
+      "imageOn": "oakbarn/Pump_Red_Rip_On.png",
+      "imageOff": "oakbarn/Pump_Red_Rip_Off.png",
+      "hideName": true,
+      "confirm": true
+    },
+    {
+      "name": "MB_37_do_BluePump_B1",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1695,
+      "y": 870,
+      "w": 140,
+      "h": 48,
+      "device": "SIM",
+      "channel": 37,
+      "displayName": "Blue Pump",
+      "look": "dark"
+    },
+    {
+      "name": "insp_Pix_Blue_Pump_B1",
+      "type": "picture",
+      "workspace": "Brewery",
+      "x": 1695,
+      "y": 920,
+      "w": 140,
+      "h": 95,
+      "follow": "MB_37_do_BluePump_B1",
+      "imageOn": "oakbarn/Pump_Blue_Rip_On.png",
+      "imageOff": "oakbarn/Pump_Blue_Rip_Off.png",
+      "hideName": true,
+      "confirm": true
+    },
+    {
+      "name": "MB_38_do_GreenPump_B1",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 2000,
+      "y": 870,
+      "w": 140,
+      "h": 48,
+      "device": "SIM",
+      "channel": 39,
+      "displayName": "Green Pump",
+      "look": "dark"
+    },
+    {
+      "name": "insp_Pix_Green_Pump_B1",
+      "type": "picture",
+      "workspace": "Brewery",
+      "x": 2000,
+      "y": 920,
+      "w": 140,
+      "h": 95,
+      "follow": "MB_38_do_GreenPump_B1",
+      "imageOn": "oakbarn/Pump_Green_Rip_On.png",
+      "imageOff": "oakbarn/Pump_Green_Rip_Off.png",
+      "hideName": true,
+      "confirm": true
+    },
+    {
+      "name": "MB_39_do_WhitePump_B1",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 2210,
+      "y": 870,
+      "w": 140,
+      "h": 48,
+      "device": "SIM",
+      "channel": 41,
+      "displayName": "White Pump",
+      "look": "dark"
+    },
+    {
+      "name": "insp_Pix_White_Pump_B1",
+      "type": "picture",
+      "workspace": "Brewery",
+      "x": 2210,
+      "y": 920,
+      "w": 140,
+      "h": 95,
+      "follow": "MB_39_do_WhitePump_B1",
+      "imageOn": "oakbarn/Pump_Whute_Rip_On.png",
+      "imageOff": "oakbarn/Pump_White_Rip_Off.png",
+      "hideName": true,
+      "confirm": true
+    },
+    {
+      "name": "HLT_Element",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1175,
+      "y": 580,
+      "w": 120,
+      "h": 56,
+      "device": "SIM",
+      "channel": 40,
+      "displayName": "HLT element",
+      "imageOn": "oakbarn/BigMacRElementOn.png",
+      "imageOff": "oakbarn/BigMacRElementOff.png",
+      "hideValue": true
+    },
+    {
+      "name": "BK_Burner",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1795,
+      "y": 560,
+      "w": 130,
+      "h": 100,
+      "device": "SIM",
+      "channel": 41,
+      "displayName": "Brew Kettle Burner",
+      "imageOn": "oakbarn/BurnerFlame.png",
+      "imageOff": "oakbarn/Burner No Flame.png",
+      "hideValue": true,
+      "confirm": true
+    },
+    {
+      "name": "Cooling_Water",
+      "type": "digitalOut",
+      "workspace": "Brewery",
+      "x": 1520,
+      "y": 1040,
+      "w": 150,
+      "h": 50,
+      "device": "SIM",
+      "channel": 42,
+      "displayName": "Cooling water",
+      "look": "dark"
+    },
+    {
+      "name": "tm_Whirlpool",
+      "type": "timer",
+      "workspace": "Brewery",
+      "x": 1770,
+      "y": 1080,
+      "w": 190,
+      "h": 95,
+      "timerType": "countdown",
+      "displayName": "Whirlpool timer",
+      "look": "led"
+    },
+    {
+      "name": "alm_Hops",
+      "type": "alarm",
+      "workspace": "Brewery",
+      "x": 1980,
+      "y": 1060,
+      "w": 120,
+      "h": 120,
+      "sound": "sounds/alarm_beep.wav",
+      "loop": true,
+      "displayName": "Hop alarm",
+      "activeText": "",
+      "imageOn": "oakbarn/AlarmBitter.png",
+      "hideName": true
+    },
+    {
+      "name": "sw_Status_Testing",
+      "type": "switch",
+      "workspace": "Brewery",
+      "x": 2120,
+      "y": 1080,
+      "w": 170,
+      "h": 50,
+      "displayName": "Testing",
+      "onText": "ON",
+      "offText": "OFF"
+    },
+    {
+      "name": "gblS_BeerName_R1",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Brewery",
+      "x": 550,
+      "y": 40,
+      "w": 470,
+      "h": 60,
+      "displayName": "Beer",
+      "initial": "OakBarn Pale Ale",
+      "fontSize": 22
+    },
+    {
+      "name": "gblVBoilTime_Minutes",
+      "type": "global",
+      "dataType": "value",
+      "workspace": "Brewery",
+      "x": 550,
+      "y": 110,
+      "w": 170,
+      "h": 60,
+      "displayName": "Boil minutes",
+      "initial": 60,
+      "step": 5,
+      "min": 0,
+      "max": 180
+    },
+    {
+      "name": "gblS_Inter_Script",
+      "type": "global",
+      "dataType": "string",
+      "workspace": "Brewery",
+      "x": 550,
+      "y": 1215,
+      "w": 760,
+      "h": 60,
+      "displayName": "Script status",
+      "readOnly": true
+    }
+  ],
+  "graphics": [
+    {
+      "id": "p_hlt_mlt",
+      "kind": "pipe",
+      "workspace": "Brewery",
+      "label": "HLT to MLT",
+      "points": [
+        [
+          1105,
+          565
+        ],
+        [
+          1105,
+          716
+        ],
+        [
+          1380,
+          716
+        ],
+        [
+          1380,
+          565
+        ]
+      ],
+      "width": 10,
+      "color": "#8a8f96",
+      "flowColor": "#ffb347",
+      "flowWhen": [
+        "V_HLT_Out",
+        "V_MLT_In",
+        "MB_36_do_RedPump_B1"
+      ],
+      "baseVisible": false
+    },
+    {
+      "id": "p_mlt_bk",
+      "kind": "pipe",
+      "workspace": "Brewery",
+      "label": "MLT to BK",
+      "points": [
+        [
+          1430,
+          725
+        ],
+        [
+          1430,
+          808
+        ],
+        [
+          1748,
+          808
+        ],
+        [
+          1748,
+          716
+        ],
+        [
+          1748,
+          560
+        ]
+      ],
+      "width": 10,
+      "color": "#8a8f96",
+      "flowColor": "#4fb3ff",
+      "flowWhen": [
+        "V_MLT_Out",
+        "V_BK_In",
+        "MB_36_do_RedPump_B1"
+      ],
+      "baseVisible": false
+    },
+    {
+      "id": "t_title",
+      "kind": "text",
+      "workspace": "Batch Hops",
+      "x": 40,
+      "y": 10,
+      "w": 700,
+      "h": 40,
+      "text": "Batch hops (filled by BeerXML import)",
+      "fontSize": 22,
+      "bold": true
+    }
+  ],
+  "autostart": [
+    "looper_LogTemps"
+  ],
+  "beerxml": {
+    "recipe": {
+      "name": "gblS_BeerName_R1",
+      "style": "gblS_Style_R1",
+      "boilTime": "gblVBoilTime_Minutes",
+      "batchSize": "gblV_BatchSize_Gal",
+      "boilSize": "gblV_BoilSize_Gal",
+      "og": "gblV_OG_R1",
+      "fg": "gblV_FG_R1",
+      "ibu": "gblV_IBU_Recipe_R1"
+    },
+    "hops": {
+      "count": 8,
+      "name": "gblS_Hop{n}_R1",
+      "oz": "gblV_Hop{n}_Oz_R1",
+      "alpha": "gblV_Hop{n}_Recipe_AAU_R1",
+      "time": "gblV_TimeHop{n}_Min_R1",
+      "group": "gblV_Hop{n}_Group_R1"
+    },
+    "groupCodes": {
+      "mash": -333,
+      "first wort": -444,
+      "start of boil": -888,
+      "boil": 919,
+      "aroma": -999,
+      "whirlpool": -999,
+      "dry hop": -111,
+      "unused": 0
+    }
+  }
+}

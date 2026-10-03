@@ -1,0 +1,11 @@
+{
+  "name": "oakbarn-brewpanel",
+  "version": "0.1.0",
+  "description": "Browser-based brewery control panel with BruControl-style scripts",
+  "type": "module",
+  "main": "server.js",
+  "scripts": { "start": "node --no-warnings server.js" },
+  "engines": { "node": ">=22.13" },
+  "optionalDependencies": { "serialport": "^12.0.0" },
+  "license": "MIT"
+}

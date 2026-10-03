@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brew Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="top">
+  <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Brew Panel</span></div>
+  <nav id="views">
+    <button data-view="workspace" class="active">Workspaces</button>
+    <button data-view="scripts">Scripts</button>
+    <button data-view="globals">Globals</button>
+    <button data-view="log">Log</button>
+    <button data-view="devices">Devices</button>
+    <button data-view="import">Import</button>
+    <button data-view="settings">Settings</button>
+  </nav>
+  <div class="right">
+    <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
+  </div>
+</header>
+
+<main>
+  <!-- ===== Workspaces ===== -->
+  <section id="view-workspace" class="view active">
+    <div class="bar">
+      <div id="wsTabs" class="tabs"></div>
+      <div class="spacer"></div>
+      <label>Zoom <select id="zoom"><option value="fit">Fit</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option></select></label>
+      <label class="toggle"><input type="checkbox" id="editMode"> Edit layout</label>
+    </div>
+    <div id="editBar" class="bar edit hidden">
+      <select id="addType"></select>
+      <button id="addEl">Add element</button>
+      <button id="addImg">Add graphic</button>
+      <button id="addText">Add text</button>
+      <button id="drawPipe" title="Click points on the workspace. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
+      <button id="finishPipe" class="primary hidden">Finish pipe</button>
+      <button id="wsProps">Workspace…</button>
+      <button id="addWs">New workspace</button>
+      <span class="spacer"></span>
+      <span id="editHint" class="muted"></span>
+      <button id="saveLayout" class="primary">Save layout</button>
+      <button id="cancelLayout">Cancel</button>
+    </div>
+    <div id="wsScroll"><div id="wsSizer"><div id="ws"><svg id="pipes"></svg></div></div></div>
+  </section>
+
+  <!-- ===== Scripts ===== -->
+  <section id="view-scripts" class="view">
+    <div class="split">
+      <aside class="scriptList">
+        <div class="bar"><button id="newScript">New</button><button id="renScript">Rename</button><button id="delScript">Delete</button><span class="spacer"></span><button id="stopAll" class="danger" title="Stop every running script">Stop all</button></div>
+        <ul id="scriptList"></ul>
+      </aside>
+      <div class="editorPane">
+        <div class="bar">
+          <strong id="scriptName">-</strong>
+          <span id="scriptState" class="muted"></span>
+          <span class="spacer"></span>
+          <button id="saveScript" class="primary">Save</button>
+          <button id="checkScript">Check</button>
+          <button id="startScript">Start</button>
+          <button id="stopScript">Stop</button>
+        </div>
+        <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
+        <ul id="problems"></ul>
+        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all scripts</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
+        <pre id="console"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Globals ===== -->
+  <section id="view-globals" class="view">
+    <p class="muted">Globals are available to every script, to the API (<code>/api/globals</code>) and can be written to the database. Shared variables are for scripts only: no API, no database.</p>
+    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="globalsBody"></tbody></table>
+    <h3>Shared variables (scripts only)</h3>
+    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody id="sharedBody"></tbody></table>
+  </section>
+
+  <!-- ===== Log ===== -->
+  <section id="view-log" class="view">
+    <div class="bar">
+      <select id="logName"></select>
+      <label>From <input type="datetime-local" id="logFrom"></label>
+      <label>To <input type="datetime-local" id="logTo"></label>
+      <label>Max <input type="number" id="logLimit" value="500" min="1" style="width:6em"></label>
+      <button id="logLoad" class="primary">Show</button>
+      <a id="logCsv" href="#" download="brewlog.csv">Download CSV</a>
+    </div>
+    <table class="grid"><thead><tr><th>Time</th><th>Name</th><th>Value</th><th>Trigger</th></tr></thead><tbody id="logBody"></tbody></table>
+  </section>
+
+  <!-- ===== Devices ===== -->
+  <section id="view-devices" class="view">
+    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
+    <h3>Add device</h3>
+    <div class="form row">
+      <label>Name <input id="devName" placeholder="MEGA1"></label>
+      <label>Type <select id="devType"><option value="serial">Arduino Mega (USB)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
+      <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
+      <button id="scanPorts">Scan ports</button>
+      <label>ESP32 address <input id="devHost" placeholder="192.168.1.60"></label>
+      <button id="addDev" class="primary">Add</button>
+    </div>
+    <h3>OneWire probes seen</h3>
+    <p class="muted">Probes are matched by their ROM id, not their position on the bus. Replace or move a probe and just pick it for the element here.</p>
+    <table class="grid"><thead><tr><th>Device</th><th>Probe ROM id</th><th>Reading</th><th>Assigned to</th></tr></thead><tbody id="probeBody"></tbody></table>
+  </section>
+
+  <!-- ===== Import ===== -->
+  <section id="view-import" class="view">
+    <h3>BeerSmith recipe</h3>
+    <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the Globals named in Settings &gt; BeerXML mapping.</p>
+    <input type="file" id="xmlFile" accept=".xml,text/xml">
+    <button id="importBtn" class="primary">Import</button>
+    <pre id="importResult"></pre>
+    <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
+  </section>
+
+  <!-- ===== Settings ===== -->
+  <section id="view-settings" class="view">
+    <div class="form">
+      <label>Title <input id="setTitle"></label>
+      <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
+      <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change Globals through the API.<input id="setKey"></label>
+      <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
+      <div>Start these scripts when the server starts:</div>
+      <div id="setAuto" class="checks"></div>
+      <button id="saveSettings" class="primary">Save settings</button>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
+<dialog id="valDlg"></dialog>
+<div id="toast"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
