@@ -147,3 +147,18 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .el .nm { flex: none; }
 .el.text.look-dark .vl, .el.text.look-button .vl { justify-content: center; align-items: center; text-align: center; }
 .el.alarm.img-alarm:not(.active) { background-color: transparent; border-color: transparent; }
+
+/* ===== vKonstant controls ===== */
+table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6px 8px; color: var(--muted); }
+.el.longtext .vl { font-size: 13px; font-weight: 400; justify-content: flex-start; align-items: flex-start; text-align: left; overflow: auto; }
+.el.k-graphic { border-color: transparent; background-color: transparent; }
+#ws.editing .el.k-graphic:not(.has-img) { background-color: rgba(128,128,128,.25); }
+.el .slider { flex: none; align-self: center; width: 54px; height: 28px; margin: 2px 0 6px; border-radius: 14px; background: #555d66; position: relative; transition: background .15s; }
+.el .slider .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.5); transition: left .15s; }
+.el.on .slider { background: var(--ok); }
+.el.on .slider .knob { left: 29px; }
+.el.k-switch .vl, .el.k-pushbutton .vl, .el.k-momentary .vl { font-size: 13px; flex: none; }
+.el .ledbtn { flex: 1; align-self: center; aspect-ratio: 1; max-height: 70%; min-height: 24px; margin: 2px 0 6px; border-radius: 50%; border: 3px solid #444; background: radial-gradient(circle at 35% 30%, #6a2b2b, #2a0d0d 70%); box-shadow: 0 3px 0 #111; }
+.el.on .ledbtn { background: radial-gradient(circle at 35% 30%, #ffb3a8, #ff3b2a 45%, #a3150b 80%); box-shadow: 0 0 14px 4px rgba(255, 59, 42, .7); }
+.el.pressed .ledbtn { transform: translateY(2px); box-shadow: 0 1px 0 #111, 0 0 14px 4px rgba(255, 59, 42, .7); }
+.el.k-pushbutton { touch-action: none; }

@@ -39,6 +39,7 @@ async function load() {
   $('#title').textContent = S.config.title || 'Brew Panel';
   document.title = S.config.title || 'Brew Panel';
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
+  fillAddType();
   renderAll();
 }
 function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderConsole(); }
@@ -117,8 +118,17 @@ function buildGfx(g) {
   return n;
 }
 
+// variable classes: global, shared, vKonstant, vAPI
+const isVarEl = e => ['global', 'shared', 'vKonstant', 'vAPI'].includes(e?.type);
+const isApiEl = e => e?.type === 'global' || e?.type === 'vAPI';
+const vkKind = e => e?.type === 'vKonstant' ? (e.kind || 'value') : null;
+const kindsOf = type => type === 'vKonstant' ? S.vkKinds : type === 'vAPI' ? S.vapiKinds : null;
+const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
+
 function buildEl(e) {
-  const n = h('div', { class: 'el ' + e.type, 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
+  const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : ''), 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
+  if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
+  if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
   place(n, e);
   if (e.hideName) n.querySelector('.nm').classList.add('hidden');
   if (e.type === 'timer') n.append(h('div', { class: 'btns' },
@@ -143,7 +153,16 @@ function fillEl(n, e) {
   nm.textContent = v.displayname ?? e.name;
   let on = false, img = v.image || '', text = '';
   switch (e.type) {
-    case 'global': case 'shared': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'global': case 'shared': case 'vAPI': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'vKonstant':
+      switch (vkKind(e)) {
+        case 'graphic': img = v.value || img; text = ''; break;            // the value IS the picture path
+        case 'switch': case 'pushbutton': case 'momentary': case 'bool':
+          on = !!v.value; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF'); break;
+        default: text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
+      }
+      n.classList.toggle('longtext', vkKind(e) === 'longstring');
+      break;
     case 'digitalOut': case 'switch': case 'digitalIn':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       img = (on ? v.imageon : v.imageoff) || v.image || ''; break;
@@ -187,19 +206,23 @@ function tapAction(e) {
     case 'digitalOut': case 'switch': return 'toggle';
     case 'digitalIn': return simDev(e.device) ? 'toggle' : 'none';
     case 'alarm': return 'acknowledge';
-    case 'global': case 'shared': return e.readOnly ? 'none' : 'dialog';
+    case 'global': case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
+    case 'vKonstant':
+      if (e.readOnly) return 'none';
+      return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
     default: return 'none';
   }
 }
 const elByName = n => S.config.elements.find(x => x.name === n);
-const boolProp = t => t.type === 'alarm' ? 'active' : (t.type === 'global' || t.type === 'shared') ? 'value' : 'state';
-const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.type) || ((t.type === 'global' || t.type === 'shared') && t.dataType === 'bool');
+const boolProp = t => t.type === 'alarm' ? 'active' : isVarEl(t) ? 'value' : 'state';
+const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
 async function doTap(e) {
   const act = tapAction(e);
   const targetName = e.tapTarget || (e.type === 'picture' ? e.follow : e.name);
-  if (act === 'none') return;
+  if (act === 'none' || act === 'hold') return;          // push and hold buttons work on press / release (below)
+  if (act === 'pulse') { const t = elByName(targetName); if (t && isBoolEl(t)) setProp(t.name, boolProp(t), true); return; }
   if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
   if (act === 'workspace') { if (S.config.workspaces.some(w => w.name === targetName)) { wsName = targetName; renderTabs(); renderWs(); } return; }
   if (act === 'script') {
@@ -215,6 +238,29 @@ async function doTap(e) {
   }
   return valueDialog(t);
 }
+
+// Push Button (vKonstant): ON while pressed, OFF when released. "down" repeats every 0.5 s so the server
+// lets go by itself if this screen disappears while the button is held.
+let held = null;
+function release() {
+  if (!held) return;
+  clearInterval(held.t); held.n.classList.remove('pressed');
+  api('POST', '/ui/hold', { name: held.name, down: false }).catch(x => toast(x.message, true));
+  held = null;
+}
+$('#ws').addEventListener('pointerdown', ev => {
+  if (editing) return;
+  const n = ev.target.closest('.el'); const e = n && elByName(n.dataset.name);
+  if (!e || tapAction(e) !== 'hold') return;
+  ev.preventDefault(); release();
+  const name = e.tapTarget || e.name;
+  const send = () => api('POST', '/ui/hold', { name, down: true }).catch(x => { toast(x.message, true); release(); });
+  held = { name, n, t: setInterval(send, 500) }; n.classList.add('pressed'); send();
+  n.setPointerCapture?.(ev.pointerId);
+});
+for (const t of ['pointerup', 'pointercancel', 'blur']) window.addEventListener(t, release);
+document.addEventListener('visibilitychange', () => { if (document.hidden) release(); });
+$('#ws').addEventListener('contextmenu', ev => { if (!editing && ev.target.closest('.el.k-pushbutton')) ev.preventDefault(); });
 
 $('#ws').addEventListener('click', ev => {
   if (editing) return;
@@ -239,12 +285,12 @@ function valueDialog(t) {
   const v = S.values[t.name] || {};
   const title = v.displayname ?? t.name;
   if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
-  if (!(t.type === 'global' || t.type === 'shared') || t.readOnly) return;
+  if (!isVarEl(t) || t.readOnly) return;
   const d = $('#valDlg'); d.innerHTML = '';
-  const num = t.dataType === 'value';
-  const inp = t.dataType === 'string'
-    ? h('textarea', { class: 'vdInput', rows: 3 }, v.value ?? '')
-    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: t.dataType === 'time' ? 'hh:mm:ss' : '' });
+  const num = t.dataType === 'value', k = vkKind(t);
+  const inp = t.dataType === 'string' && k !== 'graphic'
+    ? h('textarea', { class: 'vdInput', rows: k === 'longstring' ? 12 : 3 }, v.value ?? '')
+    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: { time: 'hh:mm:ss', datetime: 'mm/dd/yyyy hh:mm:ss' }[t.dataType] ?? (k === 'graphic' ? 'image path, e.g. oakbarn/BurnerFlame.png' : '') });
   const step = +t.step || 1;
   const bump = k => { const x = (parseFloat(inp.value) || 0) + k * step; inp.value = t.precision !== undefined && t.precision !== '' ? x.toFixed(+t.precision) : String(+x.toFixed(6)); };
   const done = ok => {
@@ -256,9 +302,10 @@ function valueDialog(t) {
     d.close();
   };
   d.append(h('div', { class: 'vdTitle' }, title + (t.units ? ` (${t.units})` : '')),
+    k === 'longstring' && v.file ? h('div', { class: 'muted' }, 'Saved to ' + v.file) : '',
     num ? h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+')) : inp,
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
-  inp.addEventListener('keydown', k => { if (k.key === 'Enter' && t.dataType !== 'string') { k.preventDefault(); done(true); } });
+  inp.addEventListener('keydown', ke => { if (ke.key === 'Enter' && inp.tagName === 'INPUT') { ke.preventDefault(); done(true); } });
   d.showModal(); setTimeout(() => { inp.focus(); inp.select?.(); }, 50);
 }
 
@@ -385,12 +432,23 @@ $('#editMode').addEventListener('change', e => {
   if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
   setEditing(e.target.checked);
 });
-$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, t)));
+function fillAddType() {
+  const kinds = (type, ks) => h('optgroup', { label: type }, ...Object.entries(ks).map(([k, d]) => h('option', { value: type + ':' + k }, `${type}: ${d.label}  (${d.prefix})`)));
+  $('#addType').innerHTML = '';
+  $('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, t)),
+    kinds('vKonstant', S.vkKinds), kinds('vAPI', S.vapiKinds));
+}
 $('#addEl').onclick = () => {
-  const type = $('#addType').value; let i = 1, base = type + '_';
+  const [type, kind] = $('#addType').value.split(':');
+  const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : type + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
   const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60 };
   if (type === 'global' || type === 'shared') e.dataType = 'value';
+  if (kind) e.kind = kind;
+  if (kind === 'switch') { e.w = 110; e.h = 70; }
+  if (kind === 'pushbutton' || kind === 'momentary') { e.w = 100; e.h = 100; }
+  if (kind === 'longstring') { e.w = 360; e.h = 200; }
+  if (kind === 'graphic') { e.hideName = true; e.w = 140; e.h = 120; }
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
@@ -434,18 +492,34 @@ const F = {
   pipe: [['label', 'Label', 'text'], ['flowWhen', 'Flow when ALL of these are on (Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
+// field [key, label, kind, opts, onlyForKinds]
+const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
+F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vkKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+  ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
+  ['file', 'Text file path (inside a media folder, a network drive works if it is added there)', 'path', null, ['longstring']],
+  ['initial', 'Initial value', 'text', null, PLAINK], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'text', null, [...NUMK, 'string']],
+  ['step', '+ / - step', 'num', null, NUMK], ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK],
+  ['onText', 'Text when on', 'text', null, BOOLK], ['offText', 'Text when off', 'text', null, BOOLK],
+  ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
+  ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', ...PLAINK]]];
+F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+  ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'text'], ['step', '+ / - step', 'num', null, NUMK],
+  ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true],
+  ['_logNote', 'Database trigger: set it on the Globals page', 'note']];
+const fieldsFor = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f() : f || []).filter(x => !x[4] || x[4].includes(obj.kind || 'value')); };
 
 function field([key, label, kind, opts], obj) {
   const v = obj[key];
   let input;
   if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
-  else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind }, ...opts.map(o => h('option', { value: o, ...(String(v ?? opts[0]) === o ? { selected: true } : {}) }, o)));
+  else if (kind === 'sel') { const os = opts.map(o => Array.isArray(o) ? o : [o, o]); input = h('select', { 'data-k': key, 'data-kind': kind }, ...os.map(([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l))); }
+  else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
-  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
   else if (kind === 'multi') {
-    const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'global', 'shared'].includes(e.type)).map(e => e.name).sort();
+    const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(e.type) || isVarEl(e)).map(e => e.name).sort();
     input = h('select', { 'data-k': key, 'data-kind': kind, multiple: true, size: 8 }, ...names.map(n => h('option', { value: n, ...((v || []).includes(n) ? { selected: true } : {}) }, n)));
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}) });
   const full = kind === 'multi' || kind === 'area';
@@ -480,7 +554,8 @@ function dialog(title, fields, obj, canDelete) {
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const type = kind === 'el' ? item.type : item.kind;
-  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...F.common.slice(3)] : F[type];
+  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...fieldsFor(type, item), ...F.common.slice(3)] : F[type];
+  if (kind === 'el' && prefixOf(item)) fields.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(item)}  (a hint, not required)`, 'note']);
   const work = clone(item);
   const r = await dialog(kind === 'el' ? `${type} element` : type, fields, work, true);
   try {
@@ -497,9 +572,11 @@ async function editItem(kind, id) {
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
     }
+    const kindChanged = kind === 'el' && work.kind !== item.kind;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
     if (kind === 'el') sel = { kind, id: item.name };
     renderTabs(); renderWs();
+    if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
   } catch (e) { toast(e.message, true); }
 }
 
@@ -638,26 +715,75 @@ function renderConsole() {
 $('#consoleAll').onchange = renderConsole;
 $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 
-// ---------------------------------------------------------------- globals
-function renderGlobals() {
-  const tb = $('#globalsBody'); tb.innerHTML = '';
-  for (const e of S.config.elements.filter(e => e.type === 'global').sort((a, b) => a.name.localeCompare(b.name))) {
-    const v = S.values[e.name] || {}; const lg = e.log || { mode: 'none' };
-    const val = h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, v.value), onchange: ev => setProp(e.name, 'value', ev.target.value) });
-    const mode = h('select', { onchange: ev => saveLog(e.name, { ...(e.log || {}), mode: ev.target.value }) }, ...S.logModes.map(m => h('option', { value: m, ...(m === lg.mode ? { selected: true } : {}) }, { none: 'Off', ondemand: 'On demand', once: 'Once', seconds: 'Every N seconds', hours: 'Every N hours', days: 'Every N days' }[m])));
-    const every = h('input', { type: 'number', min: 1, style: 'width:5em', value: lg.every ?? 1, title: 'N', onchange: ev => saveLog(e.name, { ...(e.log || { mode: 'seconds' }), every: +ev.target.value }) });
-    tb.append(h('tr', {}, h('td', {}, e.name), h('td', {}, e.dataType), h('td', {}, val),
-      h('td', {}, mode, ' ', ['seconds', 'hours', 'days'].includes(lg.mode) ? every : ''),
+// ---------------------------------------------------------------- globals, vAPI, vKonstant, shared
+const LOG_LABEL = { none: 'Off', ondemand: 'Manual (log line / Log now)', script: 'On demand only (when a script starts)', once: 'Once',
+  ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours', days: 'Every N days', hms: 'Every 00:00:00' };
+const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
+function logSummary(lg) {
+  lg = lg || { mode: 'none' };
+  if (lg.mode === 'script') return lg.script ? `When "${lg.script}" starts` : 'On demand only (no script picked)';
+  if (!TIME_MODES.includes(lg.mode)) return LOG_LABEL[lg.mode] || lg.mode;
+  const every = lg.mode === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[lg.mode]}`;
+  return every + (lg.at ? ` at ${lg.at}` : '');
+}
+function varRow(e, withLog) {
+  const v = S.values[e.name] || {}, k = vkKind(e);
+  let val;
+  if (k === 'pushbutton' || k === 'momentary') val = h('span', { 'data-g': e.name, class: 'muted' }, v.value ? 'ON' : 'OFF');
+  else if (k === 'longstring') val = h('span', {}, h('button', { onclick: () => valueDialog(e) }, 'Edit text…'), ' ', h('span', { class: 'muted' }, v.file || '(no file: kept in memory)'));
+  else val = h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, v.value), onchange: ev => setProp(e.name, 'value', ev.target.value) });
+  const kindText = e.type === 'vKonstant' || e.type === 'vAPI' ? kindsOf(e.type)[e.kind || 'value']?.label : e.dataType;
+  const cells = [h('td', {}, e.name), h('td', {}, kindText), h('td', {}, val)];
+  if (withLog) {
+    const lg = e.log || { mode: 'none' };
+    cells.push(h('td', {}, logSummary(lg), ' ', h('button', { onclick: () => editLog(e) }, 'Change…')),
       h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Logged'); }) }, 'Log now'),
-        lg.mode === 'once' ? h('button', { title: 'Write one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : '')));
+        lg.mode === 'once' ? h('button', { title: 'Write one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
   }
-  const sb = $('#sharedBody'); sb.innerHTML = '';
-  for (const e of S.config.elements.filter(e => e.type === 'shared').sort((a, b) => a.name.localeCompare(b.name))) {
-    sb.append(h('tr', {}, h('td', {}, e.name), h('td', {}, e.dataType), h('td', {}, h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, S.values[e.name]?.value), onchange: ev => setProp(e.name, 'value', ev.target.value) }))));
+  return h('tr', {}, ...cells);
+}
+function renderGlobals() {
+  const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
+  for (const [id, type, withLog] of [['#vapiBody', 'vAPI', true], ['#globalsBody', 'global', true], ['#vkBody', 'vKonstant', false], ['#sharedBody', 'shared', false]]) {
+    const tb = $(id); tb.innerHTML = '';
+    tb.append(...of(type).map(e => varRow(e, withLog)));
+    tb.closest('table').classList.toggle('empty', !of(type).length);
   }
 }
 function refreshGlobalValues(ch) {
-  for (const n of Object.keys(ch)) { const inp = $(`input[data-g="${CSS.escape(n)}"]`); if (inp && document.activeElement !== inp) inp.value = fmtVal(S.config.elements.find(e => e.name === n) || {}, S.values[n].value); }
+  for (const n of Object.keys(ch)) {
+    const inp = $(`#view-globals [data-g="${CSS.escape(n)}"]`); if (!inp || document.activeElement === inp) continue;
+    const e = S.config.elements.find(e => e.name === n) || {};
+    if (inp.tagName === 'INPUT') inp.value = fmtVal(e, S.values[n].value); else inp.textContent = S.values[n].value ? 'ON' : 'OFF';
+  }
+}
+async function editLog(e) {
+  const work = clone(e.log || { mode: 'none' });
+  const r = await dialog(`Database trigger: ${e.name}`, [
+    ['mode', 'Write to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m])],
+    ['script', 'Script (for "On demand only")', 'sel', [['', '(pick a script)'], ...S.scripts.map(x => [x.name, x.name])]],
+    ['every', 'N (whole number, for "Every N …")', 'num'],
+    ['interval', 'Interval 00:00:00 (for "Every 00:00:00")', 'text'],
+    ['at', 'At clock time (optional, for the "Every" choices), e.g. 12 AM, 6:30 PM or 18:30', 'text'],
+    ['_n', '"Every 1 days at 12 AM" writes at midnight every day. "Every 6 hours at 1 AM" writes at 1 AM, 7 AM, 1 PM and 7 PM. Without a clock time it counts from when the server starts. Fastest is 100 ms.', 'note'],
+  ], work, false);
+  if (r !== 'ok') return;
+  try { readFields(work); } catch (x) { return toast(x.message, true); }
+  if (work.mode === 'script' && !work.script) return toast('Pick the script that writes this value', true);
+  if (work.mode === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(work.interval || '')) return toast('Interval must look like 00:05:00', true);
+  if (TIME_MODES.includes(work.mode) && work.every !== undefined && !(Number.isInteger(work.every) && work.every >= 1)) return toast('N must be a whole number, 1 or more', true);
+  if (work.at && !validClock(work.at)) return toast('Clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30', true);
+  for (const k of ['script', 'every', 'interval', 'at']) {
+    const keep = { script: work.mode === 'script', every: TIME_MODES.includes(work.mode) && work.mode !== 'hms', interval: work.mode === 'hms', at: TIME_MODES.includes(work.mode) }[k];
+    if (!keep) delete work[k];
+  }
+  saveLog(e.name, work);
+}
+// same rules as the server's parseClock
+function validClock(t) {
+  const m = /^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*([ap])?\.?\s*m?\.?$/i.exec(String(t).trim()); if (!m) return false;
+  const hh = +m[1]; if (m[4]) return hh >= 1 && hh <= 12 && +(m[2] ?? 0) < 60 && +(m[3] ?? 0) < 60;
+  return m[2] !== undefined && hh < 24 && +m[2] < 60 && +(m[3] ?? 0) < 60;
 }
 const saveLog = guard(async (name, log) => {
   const els = clone(S.config.elements); els.find(e => e.name === name).log = log;

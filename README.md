@@ -58,6 +58,34 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 | **OneWire probes** | Matched by ROM id, not bus position. New probes appear on **Devices > OneWire probes seen**, where you assign them to an element. |
 | **Media paths** | Images and sounds are paths to files inside the **media folders** listed in Settings, for example `valves/open.png` or `D:\Brewing\Pics\kettle.png`. Nothing is stored inside the program. For safety, only files inside those folders are served. |
 
+## 2a. Variables: vKonstant and vAPI
+
+Add them in **Workspaces > Edit layout > Add element** (they are listed by kind with their suggested name prefix). The **Variables** page lists all of them. The prefixes are hints only; any name works. The **Variables Demo** workspace and the `Demo_Variables` script show every kind.
+
+**vKonstant**: every script can read and change it, and you can change it on screen. It is never in the API or the database.
+
+| Kind | Prefix | Notes |
+|---|---|---|
+| Graphic | `vK_` | The value is an image path inside a media folder. Shows the picture; a script can swap it: `"vK_Burner_Pic" value = "oakbarn/BurnerFlame.png"` |
+| String | `vKS_` | |
+| Long String | `vKL_` | Linked to a text file inside a media folder (a network drive works once it is added under Settings > Media folders). Editing the file updates the panel within a second; setting the value from the panel or a script saves the file. `"vKL_Notes" file = "notes/other.txt"` links another file. |
+| Value | `vKV_` | |
+| Time | `vKT_` | `00:00:00` |
+| Date Time | `vKDT_` | |
+| Boolean | `vKB_` | |
+| Switch | `vKSW_` | Boolean shown as a slider; tap to flip it. |
+| Push Button | `vKPB_` | LED button that is ON only while held. If the screen holding it closes or loses WiFi, it lets go by itself within 1.5 seconds. |
+| Momentary Button | `vKMB_` | Tap (or a script sets it true): true for 100 ms, then off. `wait "vKMB_Go" value == true` always catches it. |
+
+**vAPI**: like a Global: scripts, the API (`/api/vapi`, same calls as `/api/globals`) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
+
+**Database trigger** (Variables page > Change…, for vAPI and Globals):
+
+- **On demand only**: pick a script; the value is written when that script starts, and at no other time.
+- **Every N** milliseconds, seconds, minutes, hours or days (whole numbers), or **every 00:00:00**. Fastest is 100 ms.
+- **At clock time** (optional): lines the writes up with the clock, e.g. every 1 day at `12 AM`, or every 6 hours at `1 AM` (1 AM, 7 AM, 1 PM, 7 PM). Accepts `12 AM`, `6:30 PM` or `18:30`.
+- Off, Manual (`log` line or Log now), and Once still work as before.
+
 ## 3. Scripts
 
 Scripts are text files in the `scripts` folder. You can edit them on the **Scripts** page or in any text editor.
@@ -100,10 +128,11 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 | `Demo_Heat_HLT` | Heats the simulated HLT, then sounds the alarm. |
 | `Hops_Order_Boil` | Orders the imported boil hops into groups. |
 | `looper_LogTemps` | Copies the kettle temperature into a logged Global. |
+| `Demo_Variables` | Uses each vKonstant and vAPI kind; waits for the Ping button. |
 
 ## 4. API (for Node-RED or other programs)
 
-Only **Globals** are in the API. If an API key is set in Settings, every change must send the header `X-API-Key: <key>`.
+Only **Globals** and **vAPI** variables are in the API (`/api/vapi/...` works the same as `/api/globals/...`). If an API key is set in Settings, every change must send the header `X-API-Key: <key>`.
 
 | Request | Does |
 |---|---|
