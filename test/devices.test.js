@@ -1,0 +1,75 @@
+// Devices: sensor conversions and the hardware protocol, without hardware.  Run: node test/devices.test.js
+import assert from 'node:assert/strict';
+import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
+import { analogFrom, analogOutLevel, ntcCelsius, pwmDuty, rtdCelsius, temperatureFrom } from '../lib/sensors.js';
+import { Store } from '../lib/store.js';
+import { Hardware } from '../lib/hardware.js';
+
+const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg}: ${a} is not ${b} ±${tol}`);
+
+// PT100 at 0 °C = 100 ohm, at 100 °C = 138.51 ohm (MAX31865 raw = R / Rref * 32768)
+near(rtdCelsius(100 / 430 * 32768, 100, 430), 0, 0.05, 'PT100 0C');
+near(rtdCelsius(138.51 / 430 * 32768, 100, 430), 100, 0.05, 'PT100 100C');
+near(rtdCelsius(1385.1 / 4300 * 32768, 1000, 4300), 100, 0.05, 'PT1000 100C');
+near(temperatureFrom({ sensor: 'pt100', units: '°F' }, 'RTD', 138.51 / 430 * 32768), 212, 0.1, 'PT100 in F');
+// NTC 10k beta 3950 with 10k series resistor reads half scale at 25 °C
+near(ntcCelsius(511.5), 25, 0.01, 'NTC 25C');
+assert.ok(Number.isNaN(ntcCelsius(0)), 'NTC shorted');
+near(temperatureFrom({ sensor: 'thermocouple', units: '°C', offset: -0.5 }, 'TC', 66.5), 66, 1e-9, 'TC offset');
+assert.ok(Number.isNaN(temperatureFrom({ sensor: 'thermocouple' }, 'TC', 'NAN')), 'TC open');
+near(temperatureFrom({ offset: 1 }, 'T', 150), 151, 1e-9, 'DS18B20');
+
+// Analog inputs
+assert.equal(analogFrom({ scale: 0.1, offset: 2 }, 100).value, 12, 'raw scale/offset unchanged');
+near(analogFrom({ signal: '4-20mA', rangeLow: 0, rangeHigh: 100 }, 1023 * 12 / 20).value, 50, 0.01, '12 mA = 50 %');
+assert.equal(analogFrom({ signal: '4-20mA' }, 10).fault, true, 'broken 4-20 mA wire');
+near(analogFrom({ signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30 }, 1023 * 2.5 / 5).value, 15, 0.01, 'pressure 2.5 V');
+near(analogFrom({ signal: '0-10V', rangeLow: 0, rangeHigh: 200 }, 1023 / 2).value, 100, 0.01, '5 V of 10 V through a 2:1 divider');
+near(analogFrom({ signal: 'twoPoint', cal1Raw: 400, cal1Value: 7, cal2Raw: 600, cal2Value: 4 }, 500).value, 5.5, 1e-9, 'pH two-point');
+
+// Outputs
+assert.equal(pwmDuty(50), 128); assert.equal(pwmDuty(150), 255);
+assert.equal(analogOutLevel({ rangeLow: 0, rangeHigh: 60 }, 30), 500, 'VFD 30 of 60 Hz');
+
+// Protocol: lines out to the device and readings in
+const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpdev'));
+fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
+  devices: [], elements: [
+    { name: 'Relay', type: 'digitalOut', device: 'M', channel: 5, activeLow: true },
+    { name: 'Pump_Speed', type: 'pwmOut', device: 'M', channel: 44 },
+    { name: 'VFD', type: 'analogOut', device: 'M', channel: 45, rangeLow: 0, rangeHigh: 60 },
+    { name: 'Float', type: 'digitalIn', device: 'M', channel: 30, activeLow: true },
+    { name: 'Press', type: 'analogIn', device: 'M', channel: 1, signal: '4-20mA', rangeLow: 0, rangeHigh: 30, units: 'psi' },
+    { name: 'NTC', type: 'temperature', sensor: 'ntc', device: 'M', channel: 2, units: '°C' },
+    { name: 'RTD', type: 'temperature', sensor: 'pt100', device: 'M', channel: 49, units: '°C', wires: 4 },
+    { name: 'TC', type: 'temperature', sensor: 'thermocouple', tcType: 'J', device: 'M', channel: 48, units: '°F' },
+    { name: 'Flow', type: 'flowMeter', device: 'M', channel: 18, pulsesPerUnit: 100 },
+  ],
+}));
+const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.load();
+const hw = new Hardware(store);
+const sent = [], dev = { name: 'M', send: l => sent.push(l), status: 'connected' };
+hw.devices.set('M', dev); hw.probesSeen.set('M', {});
+
+hw._resendOutputs(dev);
+assert.deepEqual(sent, ['DO 5 1', 'PWM 44 0', 'AO 45 0', 'CFG DI 30 PULLUP', 'CFG RTD 49 4', 'CFG TC 48 J']);
+sent.length = 0;
+store.setProp('Relay', 'state', true); store.setProp('Pump_Speed', 'value', 50); store.setProp('VFD', 'value', 45);
+assert.deepEqual(sent, ['DO 5 0', 'PWM 44 128', 'AO 45 750']);
+sent.length = 0;
+store.setProp('Pump_Speed', 'enabled', false);
+assert.deepEqual(sent, ['PWM 44 0'], 'disabled PWM output goes to 0');
+
+hw._onLine(dev, 'DI 30 1'); assert.equal(store.getProp('Float', 'state'), false, 'inverted input');
+hw._onLine(dev, `A 1 ${1023 * 12 / 20}`); near(store.getProp('Press', 'value'), 15, 0.01, 'pressure'); assert.equal(store.getProp('Press', 'fault'), false);
+hw._onLine(dev, 'A 1 3'); assert.equal(store.getProp('Press', 'fault'), true, 'pressure fault');
+hw._onLine(dev, 'A 2 511.5'); near(store.getProp('NTC', 'value'), 25, 0.01, 'NTC element');
+hw._onLine(dev, `RTD 49 ${Math.round(138.51 / 430 * 32768)}`); near(store.getProp('RTD', 'value'), 100, 0.1, 'RTD element');
+hw._onLine(dev, 'TC 48 100'); near(store.getProp('TC', 'value'), 212, 1e-9, 'TC element');
+hw._onLine(dev, 'TC 48 NAN'); assert.equal(store.getProp('TC', 'fault'), true, 'TC open'); near(store.getProp('TC', 'value'), 212, 1e-9, 'keeps last good value');
+hw._flow(store.get('Flow'), 1000, 0); hw._flow(store.get('Flow'), 1200, 60000);
+near(store.getProp('Flow', 'rate'), 2, 1e-9, 'flow rate per minute'); near(store.getProp('Flow', 'total'), 2, 1e-9, 'flow total');
+assert.throws(() => store.setProp('Press', 'value', 1), /cannot be set by a script/);
+store.setProp('Flow', 'total', 0); assert.equal(store.getProp('Flow', 'total'), 0, 'scripts can reset the flow total');
+
+console.log('devices test: all passed');

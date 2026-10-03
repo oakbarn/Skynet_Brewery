@@ -147,7 +147,10 @@ function fillEl(n, e) {
     case 'digitalOut': case 'switch': case 'digitalIn':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       img = (on ? v.imageon : v.imageoff) || v.image || ''; break;
-    case 'temperature': case 'analogIn': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'pwmOut': text = fmtVal(e, v.value) + ' %'; on = v.enabled !== false && v.value > 0; break;
+    case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
+    case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || v.image || ''; n.classList.toggle('img-alarm', !!(v.imageon || v.image)); break;
@@ -162,6 +165,7 @@ function fillEl(n, e) {
   vl.textContent = e.hideValue ? '' : text;
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden');
+  n.classList.toggle('fault', !!v.fault);
   n.style.backgroundColor = img ? '' : bg(v.background);
   n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
@@ -186,6 +190,8 @@ function tapAction(e) {
   switch (e.type) {
     case 'digitalOut': case 'switch': return 'toggle';
     case 'digitalIn': return simDev(e.device) ? 'toggle' : 'none';
+    case 'pwmOut': case 'analogOut': return 'dialog';
+    case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'global': case 'shared': return e.readOnly ? 'none' : 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
@@ -239,7 +245,10 @@ function valueDialog(t) {
   const v = S.values[t.name] || {};
   const title = v.displayname ?? t.name;
   if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
-  if (!(t.type === 'global' || t.type === 'shared') || t.readOnly) return;
+  const numDev = ['pwmOut', 'analogOut', 'analogIn', 'temperature'].includes(t.type);
+  if (!(t.type === 'global' || t.type === 'shared' || numDev) || t.readOnly) return;
+  if (numDev) t = { ...t, dataType: 'value', units: t.type === 'pwmOut' ? '%' : t.units,
+    min: t.type === 'pwmOut' ? 0 : t.type === 'analogOut' ? (t.rangeLow ?? 0) : t.min, max: t.type === 'pwmOut' ? 100 : t.type === 'analogOut' ? (t.rangeHigh ?? 100) : t.max };
   const d = $('#valDlg'); d.innerHTML = '';
   const num = t.dataType === 'value';
   const inp = t.dataType === 'string'
@@ -385,11 +394,51 @@ $('#editMode').addEventListener('change', e => {
   if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
   setEditing(e.target.checked);
 });
-$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, t)));
+// What can be added. Devices sit on a port of a PLC; Widgets live only in the app.
+const ADD_MENU = [
+  ['Devices: outputs', [
+    ['Digital output (relay, SSR, contactor)', 'digitalOut', 'DO'],
+    ['PWM output (pump speed, element power %)', 'pwmOut', 'PWM'],
+    ['Analog output 0-10 V (VFD speed, valve position)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }],
+    ['Analog output 4-20 mA', 'analogOut', 'AO', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: '%' }],
+  ]],
+  ['Devices: digital inputs', [
+    ['Digital input (switch, push button)', 'digitalIn', 'DI'],
+    ['Float / level switch', 'digitalIn', 'Float', { onText: 'FULL', offText: 'LOW' }],
+    ['Flow switch', 'digitalIn', 'FlowSw', { onText: 'FLOW', offText: 'NO FLOW' }],
+    ['Door / lid / safety interlock', 'digitalIn', 'Interlock', { onText: 'CLOSED', offText: 'OPEN' }],
+  ]],
+  ['Devices: temperature probes', [
+    ['DS18B20 (OneWire)', 'temperature', 'Temp', { sensor: 'ds18b20' }],
+    ['PT100 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt100', wires: 3 }],
+    ['PT1000 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt1000', wires: 3 }],
+    ['Thermocouple type K', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'K' }],
+    ['Thermocouple type J', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'J' }],
+    ['Thermocouple type T', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'T' }],
+    ['NTC thermistor (10k)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
+  ]],
+  ['Devices: analog inputs and sensors', [
+    ['Analog input 0-5 V', 'analogIn', 'AI', { signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input 0-10 V', 'analogIn', 'AI', { signal: '0-10V', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input 4-20 mA', 'analogIn', 'AI', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input, raw reading (scale / offset)', 'analogIn', 'AI', { signal: 'raw' }],
+    ['Pressure transducer 0.5-4.5 V', 'analogIn', 'Pressure', { signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30, units: 'psi', precision: 1 }],
+    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 30, units: 'gal', precision: 1 }],
+    ['pH probe (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
+    ['Flow meter (pulse / hall sensor)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
+  ]],
+  ['Widgets (app only, no PLC port)', [
+    ['Picture', 'picture'], ['Global', 'global'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
+    ['Timer', 'timer'], ['Alarm', 'alarm'], ['Label', 'label'],
+  ]],
+];
+$('#addType').append(...ADD_MENU.map(([group, items], gi) => h('optgroup', { label: group }, ...items.map((it, ii) => h('option', { value: gi + ':' + ii }, it[0])))));
 $('#addEl').onclick = () => {
-  const type = $('#addType').value; let i = 1, base = type + '_';
+  const [gi, ii] = $('#addType').value.split(':').map(Number);
+  const [, type, prefix, preset] = ADD_MENU[gi][1][ii];
+  let i = 1, base = (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
-  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60 };
+  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : type === 'flowMeter' ? 190 : 130, h: type === 'timer' ? 80 : 60, ...clone(preset || {}) };
   if (type === 'global' || type === 'shared') e.dataType = 'value';
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
@@ -420,11 +469,13 @@ const F = {
     ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', 'workspace']], ['tapTarget', 'Tap target (element, script or workspace; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
-  digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  temperature: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text'], ['offset', 'Calibration offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['sim', 'Simulator settings (JSON)', 'json']],
-  analogIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['scale', 'Scale', 'num'], ['offset', 'Offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text']],
+  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Invert (normally-closed contact)', 'bool'], ['pullup', 'Use the PLC\'s pull-up (switch wired to GND)', 'bool', true], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin', 'num'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
+  analogOut: [['device', 'Device', 'dev'], ['channel', 'Output pin (to the 0-10 V / 4-20 mA module)', 'num'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
+    ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'text'], ['precision', 'Decimals', 'num']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'num'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']]],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
@@ -435,11 +486,45 @@ const F = {
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 
-function field([key, label, kind, opts], obj) {
+// Temperature and analog inputs: the settings depend on the sensor / signal picked
+const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
+const SENSOR_FIELDS = {
+  ds18b20: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text']],
+  pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'num'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
+  pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'num'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
+  thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31856 board chip-select (CS) pin', 'num'], ['tcType', 'Thermocouple type', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
+  ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (0 = A0)', 'num'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
+};
+const SIGNAL_FIELDS = {
+  raw: [['scale', 'Scale (multiplies the raw 0-1023 reading)', 'num'], ['offset', 'Offset', 'num']],
+  twoPoint: [['cal1Raw', 'Point 1: raw reading', 'num'], ['cal1Value', 'Point 1: real value (e.g. pH 7)', 'num'], ['cal2Raw', 'Point 2: raw reading', 'num'], ['cal2Value', 'Point 2: real value (e.g. pH 4)', 'num'], ['offset', 'Extra offset', 'num']],
+  range: [['rangeLow', 'Value at lowest signal', 'num'], ['rangeHigh', 'Value at highest signal', 'num'], ['offset', 'Calibration offset', 'num']],
+};
+function fieldsFor(item) {
+  if (item.type === 'temperature') {
+    const s = item.sensor || 'ds18b20';
+    return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
+  }
+  if (item.type === 'analogIn') {
+    const sig = item.signal || 'raw';
+    return [['device', 'Device', 'dev'], ['channel', 'Analog pin (0 = A0)', 'num'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
+      ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
+      ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
+      ['units', 'Units', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
+  }
+  return F[item.type] || [];
+}
+
+function field([key, label, kind, opts, rerender], obj) {
   const v = obj[key];
   let input;
+  if (kind === 'info') {     // live reading, to help with calibration
+    const r = S.values[obj.name] || {};
+    const txt = obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
+    return [h('label', {}, label), h('span', { class: 'info' }, txt)];
+  }
   if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
-  else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind }, ...opts.map(o => h('option', { value: o, ...(String(v ?? opts[0]) === o ? { selected: true } : {}) }, o)));
+  else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => h('option', { value: o, ...(String(v ?? opts[0]) === o ? { selected: true } : {}) }, o)));
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
@@ -465,11 +550,14 @@ function readFields(obj) {
   }
 }
 
+// fields: a list, or a function of the item (the list changes when a [.., true] select changes, e.g. probe type)
 function dialog(title, fields, obj, canDelete) {
   return new Promise(res => {
     $('#dlgTitle').textContent = title;
-    const body = $('#dlgBody'); body.innerHTML = '';
-    for (const f of fields) body.append(...field(f, obj));
+    const body = $('#dlgBody');
+    const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); };
+    build();
+    body.onchange = ev => { if (ev.target.dataset?.rerender) { try { readFields(obj); } catch { } build(); } };
     $('#dlgDelete').classList.toggle('hidden', !canDelete);
     const d = $('#dlg');
     d.onclose = () => res(d.returnValue);
@@ -480,7 +568,7 @@ function dialog(title, fields, obj, canDelete) {
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const type = kind === 'el' ? item.type : item.kind;
-  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...F.common.slice(3)] : F[type];
+  const fields = kind === 'el' ? it => [...F.common.slice(0, 3), ...fieldsFor(it), ...F.common.slice(3)] : F[type];
   const work = clone(item);
   const r = await dialog(kind === 'el' ? `${type} element` : type, fields, work, true);
   try {
@@ -693,7 +781,7 @@ function renderDevices() {
       h('td', {}, h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   const pb = $('#probeBody'); pb.innerHTML = '';
-  const temps = S.config.elements.filter(e => e.type === 'temperature');
+  const temps = S.config.elements.filter(e => e.type === 'temperature' && (e.sensor || 'ds18b20') === 'ds18b20');
   for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) {
     const owner = temps.find(e => String(e.probe || '').toUpperCase() === rom);
     pb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
