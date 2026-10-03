@@ -147,3 +147,12 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .el .nm { flex: none; }
 .el.text.look-dark .vl, .el.text.look-button .vl { justify-content: center; align-items: center; text-align: center; }
 .el.alarm.img-alarm:not(.active) { background-color: transparent; border-color: transparent; }
+
+/* BruControl-style elements */
+.el.stretch { background-size: 100% 100%; }
+.el.no-border { border-color: transparent !important; box-shadow: none !important; }
+.el.show-border { border: 1px solid #000; }
+.el.look-indicator .vl::before { content: ''; flex: none; width: .9em; height: .9em; border-radius: 50%; background: var(--ind, transparent); border: 1px solid rgba(0,0,0,.45); margin-right: .45em; }
+.el.pwmOut .vl, .el.dutyCycle .vl, .el.hysteresis .vl, .el.pid .vl { font-size: 16px; }
+.import-opts { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 8px 0; }
+#bruResult { white-space: pre-wrap; max-height: 60vh; overflow: auto; }

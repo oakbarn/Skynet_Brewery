@@ -9,6 +9,8 @@ import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
+import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
+import { Control } from './lib/control.js';
 import { plain, toStr } from './lib/values.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -23,6 +25,8 @@ const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 const hw = new Hardware(store);
 hw.start();
+const control = new Control(store);
+control.start();
 setInterval(() => store.tickTimers(0.1), 100);
 store.on('warn', m => engine.print('system', m));
 
@@ -90,6 +94,22 @@ function resolveMedia(p) {
   const norm = s => process.platform === 'win32' ? s.toLowerCase() : s;
   if (!roots.some(r => norm(full).startsWith(norm(r + path.sep)) || norm(full) === norm(r))) return null;
   return full;
+}
+
+// BruControl ran on Windows, where file names ignore upper/lower case. Find "Wave/X.WAV" as "wave/x.wav" too.
+function findMedia(p) {
+  const full = resolveMedia(p);
+  if (!full || fs.existsSync(full)) return full;
+  const root = mediaRoots().find(r => full.startsWith(r + path.sep));
+  if (!root) return full;
+  let cur = root;
+  for (const part of path.relative(root, full).split(path.sep)) {
+    let names; try { names = fs.readdirSync(cur); } catch { return full; }
+    const hit = names.find(n => n === part) ?? names.find(n => n.toLowerCase() === part.toLowerCase());
+    if (!hit) return full;
+    cur = path.join(cur, hit);
+  }
+  return cur;
 }
 
 function apiAllowed(req, url) {
@@ -181,6 +201,16 @@ async function route(req, res) {
     return ok(res);
   }
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
+  if (p === '/ui/import/brucontrol' && m === 'POST') {
+    const q = url.searchParams;
+    const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'oakbarn', simulate: q.get('simulate') !== '0' });
+    const missingMedia = conv.media.filter(f => { const full = findMedia(f); return !full || !fs.existsSync(full); });
+    const out = { summary: conv.summary, warnings: conv.warnings, missingMedia, mediaCount: conv.media.length, autostart: conv.autostart };
+    if (q.get('preview') === '1') return ok(res, { ok: true, preview: true, ...out });
+    const applied = applyBruControl(conv, { store, engine, mode: q.get('mode') === 'merge' ? 'merge' : 'replace', overwriteScripts: q.get('overwrite') !== '0' });
+    hw.restart();
+    return ok(res, { ok: true, ...out, ...applied });
+  }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
   let s = /^\/ui\/log\/(once|now)\/(.+)$/.exec(p);
@@ -203,7 +233,7 @@ async function route(req, res) {
 
   // media files by path
   if (p === '/media' && m === 'GET') {
-    const f = resolveMedia(url.searchParams.get('path') ?? '');
+    const f = findMedia(url.searchParams.get('path') ?? '');
     if (!f) return fail(res, 403, 'That path is not inside a media folder (see Settings > Media folders)');
     return sendFile(req, res, f);
   }
@@ -227,5 +257,5 @@ server.listen(PORT, () => {
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
 });
 
-function shutdown() { console.log('Stopping...'); engine.stopAll(); store.persistNow(); hw.stop(); logger.close(); process.exit(0); }
+function shutdown() { console.log('Stopping...'); engine.stopAll(); control.stop(); store.persistNow(); hw.stop(); logger.close(); process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);

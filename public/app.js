@@ -121,6 +121,7 @@ function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type, 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
   place(n, e);
   if (e.hideName) n.querySelector('.nm').classList.add('hidden');
+  styleEl(n, e);
   if (e.type === 'timer') n.append(h('div', { class: 'btns' },
     h('button', { title: 'Start', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', true); } }, '▶'),
     h('button', { title: 'Stop', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', false); } }, '■'),
@@ -128,6 +129,30 @@ function buildEl(e) {
   if (editing) { n.append(h('div', { class: 'rs' })); if (sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
   fillEl(n, e);
   return n;
+}
+
+// Colors, fonts, alignment and border (imported from BruControl or set in the properties dialog)
+const ALIGN = { Top: 'flex-start', Middle: 'center', Bottom: 'flex-end', Left: 'flex-start', Center: 'center', Right: 'flex-end' };
+function fontCss(node, f) {
+  if (!f) return;
+  if (f.size) node.style.fontSize = (f.size * 4 / 3).toFixed(1) + 'px';
+  if (f.bold) node.style.fontWeight = '700';
+  if (f.italic) node.style.fontStyle = 'italic';
+  if (f.family) node.style.fontFamily = `"${f.family}", var(--font)`;
+}
+function styleEl(n, e) {
+  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
+  if (e.nameColor) nm.style.color = e.nameColor;
+  if (e.nameBg) nm.style.backgroundColor = e.nameBg;
+  if (e.valueColor) { vl.style.color = e.valueColor; vl.style.textShadow = 'none'; }
+  if (e.valueBg) vl.style.backgroundColor = e.valueBg;
+  fontCss(nm, e.nameFont); fontCss(vl, e.valueFont);
+  if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
+  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/;
+  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase();
+  m = a.exec(e.valueAlign ?? ''); if (m) { vl.style.alignItems = ALIGN[m[1]]; vl.style.justifyContent = ALIGN[m[2]]; vl.style.textAlign = m[2].toLowerCase(); }
+  if (e.border === 'hidden') n.classList.add('no-border');
+  if (e.border === 'visible') n.classList.add('show-border');
 }
 
 function fmtVal(e, v) {
@@ -147,7 +172,11 @@ function fillEl(n, e) {
     case 'digitalOut': case 'switch': case 'digitalIn':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       img = (on ? v.imageon : v.imageoff) || v.image || ''; break;
-    case 'temperature': case 'analogIn': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'temperature': case 'analogIn': text = (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) : (e.offText ?? 'OFF'); break;
+    case 'dutyCycle': on = !!v.state; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
+    case 'hysteresis': on = !!v.state; text = v.enabled ? `${on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
+    case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || v.image || ''; n.classList.toggle('img-alarm', !!(v.imageon || v.image)); break;
@@ -157,15 +186,19 @@ function fillEl(n, e) {
       if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || v.image || ''; }
       text = e.text ?? ''; break;
   }
+  // BruControl-style background images: "background" = 1, 2 or 3 picks one of the element's images
+  if (!img && e.images?.length && /^\d+$/.test(String(v.background ?? ''))) img = e.images[Math.max(1, +v.background) - 1] || '';
   if (e.type === 'label') n.classList.add('text');
-  for (const k of ['led', 'lcd', 'dark', 'button']) n.classList.toggle('look-' + k, e.look === k);
+  for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
+  if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
   vl.textContent = e.hideValue ? '' : text;
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden');
-  n.style.backgroundColor = img ? '' : bg(v.background);
+  n.style.backgroundColor = img ? '' : (e.images ? '' : bg(v.background));
   n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
+  n.classList.toggle('stretch', !!e.images);
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
 }
 const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator';
@@ -189,6 +222,7 @@ function tapAction(e) {
     case 'alarm': return 'acknowledge';
     case 'global': case 'shared': return e.readOnly ? 'none' : 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
+    case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': return 'dialog';
     default: return 'none';
   }
 }
@@ -235,7 +269,33 @@ function choose(title, buttons, current) {
   });
 }
 
+// main setting of each control element, shown with an Enabled switch in its dialog
+const CONTROL_MAIN = { pwmOut: ['value', 'Output (0-255)'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'] };
+function controlDialog(t) {
+  const v = S.values[t.name] || {};
+  const [prop, label] = CONTROL_MAIN[t.type];
+  const d = $('#valDlg'); d.innerHTML = '';
+  const inp = h('input', { class: 'vdInput', value: fmtVal({}, v[prop]), inputmode: 'decimal' });
+  const bump = k => { inp.value = String(+((parseFloat(inp.value) || 0) + k).toFixed(4)); };
+  const done = async en => {
+    const x = parseFloat(inp.value);
+    if (!Number.isFinite(x)) return toast('Enter a number', true);
+    d.close();
+    await setProp(t.name, prop, x);
+    if (en !== undefined) await setProp(t.name, 'enabled', en);
+  };
+  d.append(h('div', { class: 'vdTitle' }, `${v.displayname ?? t.name} - ${label}` + (t.type === 'pid' ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
+    h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+')),
+    h('div', { class: 'vdBtns' },
+      h('button', { type: 'button', class: 'big onb' + (v.enabled ? ' cur' : ''), onclick: () => done(true) }, 'Set + ON'),
+      h('button', { type: 'button', class: 'big offb' + (!v.enabled ? ' cur' : ''), onclick: () => done(false) }, 'OFF'),
+      h('button', { type: 'button', class: 'big primary', onclick: () => done() }, 'Set')),
+    h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => d.close() }, 'Cancel')));
+  d.showModal(); setTimeout(() => { inp.focus(); inp.select(); }, 50);
+}
+
 function valueDialog(t) {
+  if (CONTROL_MAIN[t.type]) return controlDialog(t);
   const v = S.values[t.name] || {};
   const title = v.displayname ?? t.name;
   if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
@@ -385,7 +445,7 @@ $('#editMode').addEventListener('change', e => {
   if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
   setEditing(e.target.checked);
 });
-$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, t)));
+$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label', 'pwmOut', 'dutyCycle', 'hysteresis', 'pid'].map(t => h('option', { value: t }, t)));
 $('#addEl').onclick = () => {
   const type = $('#addType').value; let i = 1, base = type + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
@@ -418,15 +478,21 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'],
     ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
-    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', 'workspace']], ['tapTarget', 'Tap target (element, script or workspace; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']],
+    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', 'workspace']], ['tapTarget', 'Tap target (element, script or workspace; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
+    ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'text'], ['nameBg', 'Name background color', 'text'], ['valueColor', 'Value color', 'text'], ['valueBg', 'Value background color', 'text'],
+    ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment (e.g. TopCenter)', 'text'], ['valueAlign', 'Value alignment (e.g. MiddleCenter)', 'text'], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
-  digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Active low (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (unticked = pulses ON)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Active low', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   temperature: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text'], ['offset', 'Calibration offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['sim', 'Simulator settings (JSON)', 'json']],
-  analogIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['scale', 'Scale', 'num'], ['offset', 'Offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text']],
-  timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']]],
-  alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
+  analogIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['scale', 'Scale', 'num'], ['offset', 'Offset', 'num'], ['calibrations', 'Calibrations (JSON list, used instead of scale/offset)', 'json'], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['precision', 'Decimals', 'num'], ['prefix', 'Prefix', 'text'], ['units', 'Units', 'text']],
+  timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
+  alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
+  pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin', 'num'], ['enabled', 'Enabled at start', 'bool'], ['initial', 'Start value (0-255)', 'num'], ['precision', 'Decimals', 'num']],
+  dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
+  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
+  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (unticked = time-proportioned on/off)', 'bool']],
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
@@ -529,7 +595,11 @@ $('#soundBtn').onclick = () => {
   updateAlarms();
 };
 function getAudio(e) {
-  const v = S.values[e.name] || {}; const src = v.sound || e.sound; if (!src) return null;
+  const v = S.values[e.name] || {};
+  const mode = v.soundmode || (e.sounds ? 'custom' : 'default');
+  if (mode === 'none') return null;
+  const src = mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound);
+  if (!src) return null;
   let a = audios.get(e.name);
   if (!a || a._src !== src) { a = new Audio(media(src)); a._src = src; audios.set(e.name, a); }
   return a;
@@ -688,9 +758,14 @@ $('#logLoad').onclick = guard(async () => {
 function renderDevices() {
   const tb = $('#devBody'); tb.innerHTML = '';
   for (const d of S.devices) {
-    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, { serial: 'Mega (USB)', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' }[d.type] || d.type), h('td', {}, d.port || d.host || ''),
+    const TYPES = { serial: 'Mega (USB)', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' };
+    const real = d.type === 'simulator' && d.realType ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
+      if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
+      await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
+    }) }, 'Use real hardware') : '';
+    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.port || d.host || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
-      h('td', {}, h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, real, ' ', h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   const pb = $('#probeBody'); pb.innerHTML = '';
   const temps = S.config.elements.filter(e => e.type === 'temperature');
@@ -729,6 +804,35 @@ $('#importBtn').onclick = guard(async () => {
   $('#importResult').textContent = `Recipe: ${r.recipe}\nHops in recipe: ${r.hops}\nGlobals set: ${r.set}` +
     (r.missing.length ? `\n\nThese Globals do not exist (create them or change the mapping in Settings):\n  ${r.missing.join('\n  ')}` : '') +
     (r.warnings.length ? `\n\n${r.warnings.join('\n')}` : '');
+});
+
+// BruControl configuration (.brucfg)
+function bruReport(r) {
+  const t = r.summary.byType;
+  const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} elements, ${r.summary.scripts} scripts`,
+    '  ' + Object.entries(t).map(([k, n]) => `${k} ${n}`).join(', ')];
+  if (r.autostart.length) lines.push(`Scripts started with the server: ${r.autostart.join(', ')}`);
+  lines.push(r.missingMedia.length ? `\n${r.missingMedia.length} of ${r.mediaCount} pictures and sounds are not in your media folder yet. Copy them from C:\\BruControl\\Media:\n  ${r.missingMedia.join('\n  ')}` : `All ${r.mediaCount} pictures and sounds were found.`);
+  if (r.warnings.length) lines.push('\nNotes:\n  ' + r.warnings.join('\n  '));
+  if (r.scripts) {
+    lines.push(`\nScripts written: ${r.scripts.written.length}` + (r.scripts.backedUp.length ? `, ${r.scripts.backedUp.length} older copies kept as .bak` : '') + (r.scripts.skipped.length ? `\nScripts not replaced: ${r.scripts.skipped.join(', ')}` : ''));
+    lines.push(r.problems.length ? `${r.problems.length} scripts have problems (they will not start until fixed):\n` + r.problems.map(p => `  ${p.script}: ` + p.errors.map(e => `line ${e.line}: ${e.msg}`).join('; ') + (p.more ? ` (+${p.more} more)` : '')).join('\n') : 'Every script checks OK.');
+  }
+  return lines.join('\n');
+}
+async function bruSend(preview) {
+  const f = $('#bruFile').files[0]; if (!f) throw new Error('Choose a BruControl .brucfg file first');
+  const q = new URLSearchParams({ mode: $('#bruMode').value, simulate: $('#bruSim').checked ? '1' : '0', overwrite: $('#bruOverwrite').checked ? '1' : '0', media: $('#bruMedia').value.trim(), preview: preview ? '1' : '0' });
+  $('#bruResult').textContent = preview ? 'Reading…' : 'Importing…';
+  try { return await api('POST', '/ui/import/brucontrol?' + q, await f.text(), true); } catch (e) { $('#bruResult').textContent = ''; throw e; }
+}
+$('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
+$('#bruImport').onclick = guard(async () => {
+  const msg = $('#bruMode').value === 'replace' ? 'Replace your workspaces, elements and devices with the ones in this BruControl file? Running scripts are stopped. (config/brewery.json.bak keeps the old setup.)' : 'Add this BruControl file to your setup? Running scripts are stopped.';
+  if (!confirm(msg)) return;
+  const r = await bruSend(false);
+  $('#bruResult').textContent = bruReport(r);
+  await load(); toast('BruControl configuration imported');
 });
 
 // ---------------------------------------------------------------- settings
