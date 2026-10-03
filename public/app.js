@@ -120,8 +120,21 @@ function buildGfx(g) {
 }
 
 // IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
+// IP widget types. "point" is a plain start / end point; the others are pipe fittings that join pipes and pass flow through.
+const FITTINGS = { point: 'IP point', tee: 'Tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Cross tee', manualValve: 'Manual valve' };
+const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point';
+const FIT_SVG = {
+  tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
+  elbow90: '<path d="M0 15H15V30"/>', elbow45: '<path d="M0 15H15L27 27"/>',
+  manualValve: '<path d="M15 15V3M9 3H21"/><path class="body" d="M2 7L15 15L2 23ZM28 7L15 15L28 23Z"/>',
+};
 function buildIp(g) {
-  const n = h('div', { class: 'gfx ip' + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, title: g.label || 'IP' }, h('span', {}, g.text ?? 'IP'));
+  const fit = isFitting(g) ? g.fitting : null;
+  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.label || FITTINGS[fit] || 'IP') + (fit === 'manualValve' ? (g.open ? ' (open)' : ' (closed)') : '') });
+  if (fit) {
+    n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
+    if (fit === 'manualValve') n.classList.add(g.open ? 'open' : 'closed');
+  } else n.append(h('span', {}, g.text ?? 'IP'));
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
   if (editing) { n.append(h('div', { class: 'rs' })); if (g.label) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
@@ -252,8 +265,20 @@ async function doTap(e) {
 
 $('#ws').addEventListener('click', ev => {
   if (editing) return;
+  const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
+  if (mv) return toggleManualValve(mv.dataset.gid);
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const e = elByName(n.dataset.name); if (e) doTap(e);
+});
+
+// A manual valve is app-only (no PLC): tapping it asks Open / Closed and saves that in the layout so every screen sees it
+const toggleManualValve = guard(async id => {
+  const g = S.config.graphics.find(x => x.id === id); if (!g) return;
+  const r = await choose(g.label || 'Manual valve', [['Open', true], ['Closed', false]], !!g.open);
+  if (r === undefined || r === !!g.open) return;
+  const graphics = clone(S.config.graphics); graphics.find(x => x.id === id).open = r;
+  await api('PUT', '/ui/layout', { graphics });
+  g.open = r; renderWs();
 });
 
 // Big touch-friendly dialogs
@@ -322,7 +347,19 @@ function allIps(ws) {
 // Flow only happens on a pipe joined IP to IP. A pump or valve at either end must be on (running / open), plus everything in "Flow when".
 function flowNeeds(p) { return [...new Set([...(p.flowWhen || []), ...[p.from, p.to].map(devOfIp).filter(n => n !== null)])]; }
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
-const pipeFlowing = p => { const need = flowNeeds(p); return pipeJoined(p) && need.length > 0 && need.every(isOn); };
+// Fittings pass flow on: a pipe that starts on a fitting flows only while a pipe ending on that fitting is flowing.
+// A closed manual valve at either end stops the pipe.
+const fittingOf = (id, ws) => { const g = id && L().graphics.find(g => g.id === id && g.workspace === ws); return isFitting(g) ? g : null; };
+function pipeFlowing(p, seen = new Set()) {
+  if (!pipeJoined(p) || seen.has(p.id)) return false;
+  seen.add(p.id);
+  const need = flowNeeds(p);
+  if (!need.every(isOn)) return false;
+  const a = fittingOf(p.from, p.workspace), b = fittingOf(p.to, p.workspace);
+  if ((a?.fitting === 'manualValve' && !a.open) || (b?.fitting === 'manualValve' && !b.open)) return false;
+  if (!a) return need.length > 0;
+  return L().graphics.some(q => q.kind === 'pipe' && q !== p && q.workspace === p.workspace && q.to === a.id && pipeFlowing(q, new Set(seen)));
+}
 // Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square.
 function snapEnd(pts, i, j, c) {
   const old = pts[i], nb = pts[j];
@@ -490,9 +527,12 @@ $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace
 $('#addText').onclick = () => { const g = { id: newId(), kind: 'text', workspace: wsName, x: 40, y: 40, w: 220, h: 40, text: 'Text', fontSize: 18 }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#finishPipe').onclick = () => finishPipe();
 $('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
+$('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
 $('#addIp').onclick = () => {
-  let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === 'IP ' + i)) i++;
-  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: 'IP ' + i, color: '#e8a33a' };
+  const fit = $('#addIpType').value, base = fit === 'point' ? 'IP' : FITTINGS[fit];
+  let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
+  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#c0c6cc' };
+  if (fit !== 'point') g.fitting = fit;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
 $('#addWs').onclick = () => {
@@ -527,7 +567,7 @@ const F = {
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  ip: [['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
+  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Flow when ALL of these are on (a pump or valve at either end counts by itself; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
@@ -540,6 +580,7 @@ function field([key, label, kind, opts], obj) {
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
   else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
   else if (kind === 'multi') {
