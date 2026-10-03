@@ -10,7 +10,7 @@
 <header id="top">
   <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Brew Panel</span></div>
   <nav id="views">
-    <button data-view="workspace" class="active">Workspaces</button>
+    <button data-view="workspace" class="active">Tabs</button>
     <button data-view="scripts">Scripts</button>
     <button data-view="globals">Globals</button>
     <button data-view="log">Log</button>
@@ -24,7 +24,7 @@
 </header>
 
 <main>
-  <!-- ===== Workspaces ===== -->
+  <!-- ===== Tabs (stored as "workspaces" in the config) ===== -->
   <section id="view-workspace" class="view active">
     <div class="bar">
       <div id="wsTabs" class="tabs"></div>
@@ -37,10 +37,11 @@
       <button id="addEl">Add element</button>
       <button id="addImg">Add graphic</button>
       <button id="addText">Add text</button>
-      <button id="drawPipe" title="Click points on the workspace. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
+      <button id="drawPipe" title="Click points on the tab. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
       <button id="finishPipe" class="primary hidden">Finish pipe</button>
-      <button id="wsProps">Workspace…</button>
-      <button id="addWs">New workspace</button>
+      <button id="lockItem" title="Lock or unlock the selected item so it cannot be dragged or resized" disabled>🔒 Lock</button>
+      <button id="wsProps">Tab…</button>
+      <button id="addWs">New tab</button>
       <span class="spacer"></span>
       <span id="editHint" class="muted"></span>
       <button id="saveLayout" class="primary">Save layout</button>

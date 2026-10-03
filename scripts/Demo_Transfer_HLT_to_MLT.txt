@@ -2,7 +2,7 @@
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //Opens the HLT out and MLT in valves, runs the pump 15 seconds.
-//Watch the orange flow on the Brewery workspace.
+//Watch the orange flow on the Brewery tab.
 "gblS_Inter_Script" value = "Transfer HLT to MLT"
 "V_HLT_Out" state = true
 "V_MLT_In" state = true

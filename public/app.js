@@ -103,17 +103,23 @@ function renderWs() {
   ws.classList.toggle('editing', editing);
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe')) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
-  renderPipes(); fitZoom();
+  renderPipes(); fitZoom(); updLockBtn();
 }
 
 function place(node, o) { node.style.left = (o.x || 0) + 'px'; node.style.top = (o.y || 0) + 'px'; node.style.width = (o.w || 120) + 'px'; node.style.height = (o.h || 60) + 'px'; }
+
+// Edit layout: a resize corner, or a padlock when the item is locked in place
+function editDeco(n, o) {
+  if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
+  else n.append(h('div', { class: 'rs' }));
+}
 
 function buildGfx(g) {
   const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id });
   place(n, g);
   if (g.kind === 'image') n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : '';
   else { n.textContent = g.text || ''; n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.color = g.color || ''; n.style.fontWeight = g.bold ? '700' : ''; }
-  if (editing) { n.append(h('div', { class: 'rs' })); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
 
@@ -125,7 +131,7 @@ function buildEl(e) {
     h('button', { title: 'Start', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', true); } }, '▶'),
     h('button', { title: 'Stop', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', false); } }, '■'),
     h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺')));
-  if (editing) { n.append(h('div', { class: 'rs' })); if (sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
+  if (editing) { editDeco(n, e); if (sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
   fillEl(n, e);
   return n;
 }
@@ -180,7 +186,7 @@ function updateEl(name) {
 async function setProp(name, prop, value) { try { await api('POST', '/ui/set', { name, prop, value }); } catch (e) { toast(e.message, true); } }
 
 // ---- tap / click actions (mouse or touch screen) ----
-// tap: default | none | toggle | dialog | script | workspace,   tapTarget: element / script / workspace (default = itself)
+// tap: default | none | toggle | dialog | script | workspace (shown as "tab"),   tapTarget: element / script / tab (default = itself)
 function tapAction(e) {
   if (e.tap && e.tap !== 'default') return e.tap;
   switch (e.type) {
@@ -286,7 +292,7 @@ function renderPipes() {
     const hit = mk('polyline', { class: 'hit', points: pts }); g.append(hit);
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(mk('polyline', { points: pts, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
-      (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
+      if (!p.locked) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
     svg.append(g);
   }
@@ -307,7 +313,7 @@ function setEditing(on) {
   draft = on ? clone(S.config) : null;
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
-  $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties.' : '';
+  $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties. 🔒 items are locked in place.' : '';
   renderTabs(); renderWs();
 }
 
@@ -326,13 +332,19 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
   const node = ev.target.closest('.el,.gfx');
-  if (hit && !node) { startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid }; drag = { mode: 'pipe', item: findItem('gfx', sel.id), start: p, orig: clone(findItem('gfx', sel.id).points) }; renderWs(); return; }
+  if (hit && !node) {
+    startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid };
+    const pipe = findItem('gfx', sel.id);
+    drag = pipe.locked ? null : { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points) };
+    renderWs(); return;
+  }
   if (!node) { sel = null; renderWs(); return; }
   sel = node.dataset.name ? { kind: 'el', id: node.dataset.name } : { kind: 'gfx', id: node.dataset.gid };
   const item = findItem(sel.kind, sel.id);
   startLongPress(ev, sel.kind, sel.id);
+  $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel'); updLockBtn();
+  if (item.locked) { drag = null; ev.preventDefault(); return; }   // locked: select only, no move or resize
   drag = { mode: ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
-  $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel');
   node.setPointerCapture?.(ev.pointerId);
   ev.preventDefault();
 });
@@ -398,9 +410,20 @@ $('#addEl').onclick = () => {
 $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#addText').onclick = () => { const g = { id: newId(), kind: 'text', workspace: wsName, x: 40, y: 40, w: 220, h: 40, text: 'Text', fontSize: 18 }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#finishPipe').onclick = () => finishPipe();
+// Lock / Unlock the selected item so it cannot be dragged or resized by accident
+function updLockBtn() {
+  const b = $('#lockItem'); if (!b) return;
+  const item = editing && sel ? findItem(sel.kind, sel.id) : null;
+  b.disabled = !item; b.textContent = item?.locked ? '🔓 Unlock' : '🔒 Lock';
+}
+$('#lockItem').onclick = () => {
+  const item = sel && findItem(sel.kind, sel.id); if (!item) return toast('Select an item first', true);
+  if (item.locked) delete item.locked; else item.locked = true;
+  toast(item.locked ? 'Locked in place' : 'Unlocked'); renderWs();
+};
 $('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; $('#editHint').textContent = 'Click points (Shift = any angle). Double-click or Enter to finish, Esc to cancel.'; };
 $('#addWs').onclick = () => {
-  const n = prompt('New workspace name'); if (!n) return;
+  const n = prompt('New tab name'); if (!n) return;
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
   draft.workspaces.push({ name: n, width: 1600, height: 900 }); wsName = n; renderTabs(); renderWs();
 };
@@ -416,9 +439,9 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 // ---------------------------------------------------------------- properties dialog
 // field: [key, label, kind, options]
 const F = {
-  common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'],
+  common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool'],
     ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
-    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', 'workspace']], ['tapTarget', 'Tap target (element, script or workspace; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']],
+    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, script or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
@@ -429,9 +452,9 @@ const F = {
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
-  image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  pipe: [['label', 'Label', 'text'], ['flowWhen', 'Flow when ALL of these are on (Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
+  image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
+  text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
+  pipe: [['label', 'Label', 'text'], ['flowWhen', 'Flow when ALL of these are on (Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'bool']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 
@@ -439,7 +462,7 @@ function field([key, label, kind, opts], obj) {
   const v = obj[key];
   let input;
   if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
-  else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind }, ...opts.map(o => h('option', { value: o, ...(String(v ?? opts[0]) === o ? { selected: true } : {}) }, o)));
+  else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind }, ...opts.map(o => [].concat(o)).map(([o, text = o]) => h('option', { value: o, ...(String(v ?? [].concat(opts[0])[0]) === o ? { selected: true } : {}) }, text)));
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
@@ -505,10 +528,10 @@ async function editItem(kind, id) {
 
 async function editWorkspace() {
   const w = curWs(); const work = clone(w);
-  const r = await dialog('Workspace', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'text'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
+  const r = await dialog('Tab', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'text'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
     ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
   if (r === 'delete') {
-    if (!confirm(`Delete workspace "${w.name}" and everything on it?`)) return;
+    if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
     draft.elements = draft.elements.filter(e => e.workspace !== w.name);
     draft.graphics = draft.graphics.filter(g => g.workspace !== w.name);
