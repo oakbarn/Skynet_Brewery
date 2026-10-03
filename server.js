@@ -4,7 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Store, cleanName, ELEMENT_TYPES } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar } from './lib/store.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
@@ -24,7 +24,9 @@ const engine = new Engine(store, SCRIPTS, logger);
 const hw = new Hardware(store);
 hw.start();
 setInterval(() => store.tickTimers(0.1), 100);
+setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants follow their text files
 store.on('warn', m => engine.print('system', m));
+engine.on('started', n => logger.scriptStarted(n));
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Set();
@@ -33,8 +35,22 @@ function broadcast(type, data) {
   const msg = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
   for (const res of clients) res.write(msg);
 }
-store.on('change', (name, prop, v) => { (pending[name] ??= {})[prop] = plain(v); });
-setInterval(() => { if (Object.keys(pending).length) { broadcast('values', pending); pending = {}; } }, 150);
+function flush() { if (Object.keys(pending).length) { broadcast('values', pending); pending = {}; } }
+store.on('change', (name, prop, v) => {
+  // a Momentary button's short "true" is sent at once so every screen sees the flash
+  if (v === false && pending[name]?.[prop] === true) flush();
+  (pending[name] ??= {})[prop] = plain(v);
+});
+setInterval(flush, 150);
+
+// Push Buttons (vKonstant) are on only while a finger or mouse holds them. The browser repeats "down"
+// every 0.5 s while held; if it goes quiet (closed tab, lost WiFi) the button lets go by itself.
+const holds = new Map();
+function hold(name, down) {
+  clearTimeout(holds.get(name)); holds.delete(name);
+  if (down) holds.set(name, setTimeout(() => { holds.delete(name); store.setProp(name, 'value', false, 'ui'); }, 1500));
+  store.setProp(name, 'value', !!down, 'ui');
+}
 engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout(() => broadcast('scripts', engine.list()), 100); });
 engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
@@ -82,15 +98,8 @@ function sendFile(req, res, file) {
   });
 }
 
-// Images and sounds are given by PATH. Only files inside the folders listed in config "mediaRoots" are served.
-function mediaRoots() { return (store.config.mediaRoots ?? ['./media']).map(r => path.resolve(path.dirname(CONFIG), '..', r)); }
-function resolveMedia(p) {
-  const roots = mediaRoots();
-  const full = path.isAbsolute(p) ? path.resolve(p) : path.resolve(roots[0], p);
-  const norm = s => process.platform === 'win32' ? s.toLowerCase() : s;
-  if (!roots.some(r => norm(full).startsWith(norm(r + path.sep)) || norm(full) === norm(r))) return null;
-  return full;
-}
+// Images, sounds and text files are given by PATH. Only files inside the folders listed in config "mediaRoots" are served.
+const resolveMedia = p => store.resolveMedia(p);
 
 function apiAllowed(req, url) {
   const key = store.config.apiKey;
@@ -98,7 +107,8 @@ function apiAllowed(req, url) {
   return req.headers['x-api-key'] === key || url.searchParams.get('key') === key;
 }
 
-const globalsOnly = () => store.list('global').map(e => ({ name: e.name, type: e.dataType, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
+// The API has Globals and vAPI variables only (never Shared or vKonstant)
+const apiVars = () => store.list().filter(isApiVar).map(e => ({ name: e.name, type: e.dataType, class: e.type, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
 
 function csv(rows) {
   const q = s => `"${String(s ?? '').replaceAll('"', '""')}"`;
@@ -112,24 +122,24 @@ async function route(req, res) {
   const m = req.method;
   if (m === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE', 'Access-Control-Allow-Headers': 'Content-Type,X-API-Key' }); return res.end(); }
 
-  // ===== Public API: Globals only (Shared variables are never exposed) =====
+  // ===== Public API: Globals and vAPI only (Shared and vKonstant variables are never exposed) =====
   if (p.startsWith('/api/')) {
     if (!apiAllowed(req, url)) return fail(res, 401, 'Missing or wrong X-API-Key');
-    if (p === '/api/globals' && m === 'GET') return ok(res, globalsOnly());
-    if (p === '/api/globals' && (m === 'POST' || m === 'PUT')) {
+    if ((p === '/api/globals' || p === '/api/vapi') && m === 'GET') return ok(res, apiVars());
+    if ((p === '/api/globals' || p === '/api/vapi') && (m === 'POST' || m === 'PUT')) {
       const body = await jsonBody(req); const done = [], errors = [];
       for (const [n, v] of Object.entries(body)) {
         const el = store.get(n);
-        if (!el || el.type !== 'global') { errors.push(`${n}: not a Global`); continue; }
+        if (!isApiVar(el)) { errors.push(`${n}: not a Global or vAPI`); continue; }
         try { store.setProp(n, 'value', v, 'api'); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); }
       }
       return ok(res, { ok: !errors.length, set: done, errors });
     }
-    let g = /^\/api\/globals\/(.+)$/.exec(p);
+    let g = /^\/api\/(?:globals|vapi)\/(.+)$/.exec(p);
     if (g) {
       const n = cleanName(g[1]), el = store.get(n);
-      if (!el || el.type !== 'global') return fail(res, 404, `No Global named "${n}"`);
-      if (m === 'GET') return ok(res, { name: n, type: el.dataType, value: plain(store.getProp(n, 'value')) });
+      if (!isApiVar(el)) return fail(res, 404, `No Global or vAPI named "${n}"`);
+      if (m === 'GET') return ok(res, { name: n, type: el.dataType, class: el.type, value: plain(store.getProp(n, 'value')) });
       if (m === 'PUT' || m === 'POST') {
         const t = await readBody(req); let v = t;
         try { const j = JSON.parse(t); v = (j && typeof j === 'object' && 'value' in j) ? j.value : j; } catch { }
@@ -158,7 +168,7 @@ async function route(req, res) {
     return;
   }
   if (p === '/ui/state' && m === 'GET') {
-    return ok(res, { config: store.config, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    return ok(res, { config: store.config, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -166,6 +176,13 @@ async function route(req, res) {
     if (!el) return fail(res, 404, `No element "${name}"`);
     if (['digitalIn', 'temperature', 'analogIn'].includes(el.type) && el.device && hw.devices.get(el.device)?.type !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
     store.setProp(name, prop, value, 'ui');
+    return ok(res);
+  }
+  if (p === '/ui/hold' && m === 'POST') {
+    const { name, down } = await jsonBody(req);
+    const el = store.get(name);
+    if (!el || el.type !== 'vKonstant' || el.kind !== 'pushbutton') return fail(res, 400, `"${name}" is not a Push Button`);
+    hold(el.name, down);
     return ok(res);
   }
   if (p === '/ui/layout' && m === 'PUT') {
