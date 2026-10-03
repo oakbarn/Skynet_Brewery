@@ -1,21 +1,29 @@
 // Mega_BrewPanel - Arduino Mega 2560 firmware for Brew Panel (docs/DEVICE_PROTOCOL.md)
 // MIT License Granted - Copyright (c) OakBarn Brewery 2026
 // Libraries (Arduino Library Manager): OneWire, DallasTemperature
-//   + Adafruit MAX31865 when USE_RTD is 1, Adafruit MAX31856 when USE_TC is 1
+//   + Adafruit MAX31865 when USE_RTD is 1, Adafruit MAX31856 when USE_TC is 1, Adafruit MAX31855 when USE_TC is 2,
+//     Adafruit ADS1X15 when USE_ADS1115 is 1
+// Written for an Arduino Mega 2560. Uno / Nano work with smaller pin lists (flow meters on pins 2 and 3 only).
 // Starter sketch: set the pin lists below for this Mega. Only pins in these lists can be used.
 // Sensor settings that live on the chip (thermocouple type, RTD wires, input pull-up) are sent by the
 // server with CFG lines, so you set them in the panel, not here.
 
 #define USE_RTD 0                                        // 1 = PT100 / PT1000 probes on MAX31865 boards
-#define USE_TC  0                                        // 1 = thermocouples on MAX31856 boards
+#define USE_TC  0                                        // 1 = thermocouples on MAX31856 boards (K, J, T ...), 2 = MAX31855 boards (K only)
+#define USE_ADS1115 0                                    // 1 = ADS1115 16-bit analog board on I2C (SDA 20, SCL 21), address 0x48
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #if USE_RTD
 #include <Adafruit_MAX31865.h>
 #endif
-#if USE_TC
+#if USE_TC == 1
 #include <Adafruit_MAX31856.h>
+#elif USE_TC == 2
+#include <Adafruit_MAX31855.h>
+#endif
+#if USE_ADS1115
+#include <Adafruit_ADS1X15.h>
 #endif
 
 const char* DEVICE_NAME = "MEGA1";
@@ -32,7 +40,8 @@ const uint8_t PWM_PINS[]    = {44, 45, 46};              // PWM outputs 0-100 % 
 const uint8_t AO_PINS[]     = {};                        // analog outputs: a PWM pin into a PWM-to-0-10V or 4-20mA module, e.g. {13}
 const uint8_t FLOW_PINS[]   = {};                        // pulse flow meters, interrupt pins only: 2, 3, 18, 19, 20, 21 (max 6)
 const uint8_t RTD_CS_PINS[] = {};                        // MAX31865 chip-select pins (PT100 / PT1000), SPI on 50/51/52, e.g. {48}
-const uint8_t TC_CS_PINS[]  = {};                        // MAX31856 chip-select pins (thermocouples), SPI on 50/51/52, e.g. {49}
+const uint8_t TC_CS_PINS[]  = {};                        // MAX31856 / MAX31855 chip-select pins (thermocouples), SPI on 50/51/52, e.g. {49}
+const uint8_t ADS_CHANNELS[] = {0, 1, 2, 3};             // ADS1115 channels to report (only when USE_ADS1115 is 1)
 const uint8_t ONEWIRE_PIN = 40;                          // all DS18B20 probes on one bus, 4.7k pull-up to 5V
 const bool RELAY_ACTIVE_LOW = true;                      // most relay boards switch ON with LOW
 const unsigned long WATCHDOG_MS = 10000;                 // no message for 10 s -> all outputs OFF
@@ -44,8 +53,13 @@ DallasTemperature probes(&oneWire);
 #if USE_RTD
 Adafruit_MAX31865* rtd[N_RTD > 0 ? N_RTD : 1];
 #endif
-#if USE_TC
+#if USE_TC == 1
 Adafruit_MAX31856* tc[N_TC > 0 ? N_TC : 1];
+#elif USE_TC == 2
+Adafruit_MAX31855* tc[N_TC > 0 ? N_TC : 1];
+#endif
+#if USE_ADS1115
+Adafruit_ADS1115 ads;
 #endif
 int lastIn[N_IN > 0 ? N_IN : 1];
 volatile unsigned long pulses[6];
@@ -83,12 +97,21 @@ void reportFast() {
     else say("RTD", RTD_CS_PINS[i], raw);
   }
 #endif
-#if USE_TC
+#if USE_TC == 1
   for (uint8_t i = 0; i < N_TC; i++) {
     float c = tc[i]->readThermocoupleTemperature();
     LINK.print("TC "); LINK.print(TC_CS_PINS[i]); LINK.print(' ');
     if (tc[i]->readFault()) LINK.println("NAN"); else LINK.println(c, 2);
   }
+#elif USE_TC == 2
+  for (uint8_t i = 0; i < N_TC; i++) {
+    double c = tc[i]->readCelsius();                     // NAN when the probe is open or shorted
+    LINK.print("TC "); LINK.print(TC_CS_PINS[i]); LINK.print(' ');
+    if (isnan(c)) LINK.println("NAN"); else LINK.println(c, 2);
+  }
+#endif
+#if USE_ADS1115
+  for (uint8_t i = 0; i < sizeof(ADS_CHANNELS); i++) say("ADS", ADS_CHANNELS[i], ads.readADC_SingleEnded(ADS_CHANNELS[i]));
 #endif
 }
 
@@ -99,7 +122,10 @@ void configure(String kind, int pin, String v) {
 #if USE_RTD
   if (kind == "RTD" && (i = indexOf(RTD_CS_PINS, N_RTD, pin)) >= 0) { rtd[i]->begin(v == "4" ? MAX31865_4WIRE : v == "2" ? MAX31865_2WIRE : MAX31865_3WIRE); return; }
 #endif
-#if USE_TC
+#if USE_TC == 2
+  if (kind == "TC" && (i = indexOf(TC_CS_PINS, N_TC, pin)) >= 0) { if (!(v == "K")) LINK.println("ERR MAX31855 boards are type K only"); return; }
+#endif
+#if USE_TC == 1
   if (kind == "TC" && (i = indexOf(TC_CS_PINS, N_TC, pin)) >= 0) {
     const char* names = "KJTNERSB";
     const max31856_thermocoupletype_t types[] = {MAX31856_TCTYPE_K, MAX31856_TCTYPE_J, MAX31856_TCTYPE_T, MAX31856_TCTYPE_N, MAX31856_TCTYPE_E, MAX31856_TCTYPE_R, MAX31856_TCTYPE_S, MAX31856_TCTYPE_B};
@@ -107,7 +133,7 @@ void configure(String kind, int pin, String v) {
     if (at && v.length() == 1) { tc[i]->setThermocoupleType(types[at - names]); return; }
   }
 #endif
-  LINK.print("ERR CFG "); LINK.print(kind); LINK.print(' '); LINK.print(pin); LINK.println(": pin not in this sketch's lists (or USE_RTD / USE_TC is 0)");
+  LINK.print("ERR CFG "); LINK.print(kind); LINK.print(' '); LINK.print(pin); LINK.println(": pin not in this sketch's lists (or USE_RTD / USE_TC is off)");
 }
 
 void handle(String cmd) {
@@ -166,7 +192,14 @@ void setup() {
 #if USE_RTD
   for (uint8_t i = 0; i < N_RTD; i++) { rtd[i] = new Adafruit_MAX31865(RTD_CS_PINS[i]); rtd[i]->begin(MAX31865_3WIRE); }
 #endif
-#if USE_TC
+#if USE_TC == 2
+  for (uint8_t i = 0; i < N_TC; i++) { tc[i] = new Adafruit_MAX31855(TC_CS_PINS[i]); tc[i]->begin(); }
+#endif
+#if USE_ADS1115
+  ads.setGain(GAIN_TWOTHIRDS);                           // 0-6.144 V range, so 5 V sensors fit
+  if (!ads.begin()) LINK.println("ERR ADS1115 not found on I2C");
+#endif
+#if USE_TC == 1
   for (uint8_t i = 0; i < N_TC; i++) { tc[i] = new Adafruit_MAX31856(TC_CS_PINS[i]); tc[i]->begin(); tc[i]->setThermocoupleType(MAX31856_TCTYPE_K); tc[i]->setConversionMode(MAX31856_CONTINUOUS); }
 #endif
   LINK.begin(115200);

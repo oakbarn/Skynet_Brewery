@@ -394,40 +394,40 @@ $('#editMode').addEventListener('change', e => {
   if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
   setEditing(e.target.checked);
 });
-// What can be added. Devices sit on a port of a PLC; Widgets live only in the app.
+// What can be added. Devices sit on a pin of a hobby board (Arduino, ESP32, Raspberry Pi); Widgets live only in the app.
 const ADD_MENU = [
-  ['Devices: outputs', [
-    ['Digital output (relay, SSR, contactor)', 'digitalOut', 'DO'],
-    ['PWM output (pump speed, element power %)', 'pwmOut', 'PWM'],
-    ['Analog output 0-10 V (VFD speed, valve position)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }],
-    ['Analog output 4-20 mA', 'analogOut', 'AO', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: '%' }],
+  ['Devices: outputs (board pin)', [
+    ['Relay module / SSR / contactor (on-off)', 'digitalOut', 'DO'],
+    ['PWM output: MOSFET module, pump speed, element %', 'pwmOut', 'PWM'],
+    ['Analog output 0-10 V (PWM-to-0-10V module, VFD speed)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }],
+    ['Analog output 4-20 mA (PWM-to-4-20mA module)', 'analogOut', 'AO', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: '%' }],
   ]],
-  ['Devices: digital inputs', [
-    ['Digital input (switch, push button)', 'digitalIn', 'DI'],
+  ['Devices: digital inputs (board pin)', [
+    ['Switch / push button', 'digitalIn', 'DI'],
     ['Float / level switch', 'digitalIn', 'Float', { onText: 'FULL', offText: 'LOW' }],
     ['Flow switch', 'digitalIn', 'FlowSw', { onText: 'FLOW', offText: 'NO FLOW' }],
     ['Door / lid / safety interlock', 'digitalIn', 'Interlock', { onText: 'CLOSED', offText: 'OPEN' }],
   ]],
   ['Devices: temperature probes', [
-    ['DS18B20 (OneWire)', 'temperature', 'Temp', { sensor: 'ds18b20' }],
+    ['DS18B20 (OneWire, waterproof probe)', 'temperature', 'Temp', { sensor: 'ds18b20' }],
     ['PT100 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt100', wires: 3 }],
     ['PT1000 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt1000', wires: 3 }],
-    ['Thermocouple type K', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'K' }],
-    ['Thermocouple type J', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'J' }],
-    ['Thermocouple type T', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'T' }],
-    ['NTC thermistor (10k)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
+    ['Thermocouple type K (MAX31855 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'K' }],
+    ['Thermocouple K / J / T and others (MAX31856 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'J' }],
+    ['NTC thermistor 10k (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
   ]],
-  ['Devices: analog inputs and sensors', [
+  ['Devices: analog sensors (board analog pin or ADS1115)', [
     ['Analog input 0-5 V', 'analogIn', 'AI', { signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
-    ['Analog input 0-10 V', 'analogIn', 'AI', { signal: '0-10V', rangeLow: 0, rangeHigh: 100 }],
-    ['Analog input 4-20 mA', 'analogIn', 'AI', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input 0-10 V (with voltage divider)', 'analogIn', 'AI', { signal: '0-10V', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input 4-20 mA (250 ohm resistor or current-to-voltage module)', 'analogIn', 'AI', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input on an ADS1115 board (16-bit)', 'analogIn', 'AI', { adc: 'ads1115', signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
     ['Analog input, raw reading (scale / offset)', 'analogIn', 'AI', { signal: 'raw' }],
-    ['Pressure transducer 0.5-4.5 V', 'analogIn', 'Pressure', { signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30, units: 'psi', precision: 1 }],
+    ['Pressure transducer 0.5-4.5 V (5 V hobby type)', 'analogIn', 'Pressure', { signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30, units: 'psi', precision: 1 }],
     ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 30, units: 'gal', precision: 1 }],
-    ['pH probe (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
-    ['Flow meter (pulse / hall sensor)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
+    ['pH probe board (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
+    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
   ]],
-  ['Widgets (app only, no PLC port)', [
+  ['Widgets (app only, no board pin)', [
     ['Picture', 'picture'], ['Global', 'global'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
     ['Timer', 'timer'], ['Alarm', 'alarm'], ['Label', 'label'],
   ]],
@@ -492,7 +492,7 @@ const SENSOR_FIELDS = {
   ds18b20: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text']],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'num'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
   pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'num'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
-  thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31856 board chip-select (CS) pin', 'num'], ['tcType', 'Thermocouple type', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
+  thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'num'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
   ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (0 = A0)', 'num'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
 };
 const SIGNAL_FIELDS = {
@@ -507,7 +507,7 @@ function fieldsFor(item) {
   }
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
-    return [['device', 'Device', 'dev'], ['channel', 'Analog pin (0 = A0)', 'num'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
+    return [['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], ['channel', item.adc === 'ads1115' ? 'ADS1115 channel (0-3)' : 'Analog pin (0 = A0)', 'num'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['units', 'Units', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
