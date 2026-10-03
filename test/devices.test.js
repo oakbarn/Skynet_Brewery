@@ -75,4 +75,21 @@ near(store.getProp('Flow', 'rate'), 2, 1e-9, 'flow rate per minute'); near(store
 assert.throws(() => store.setProp('Press', 'value', 1), /cannot be set by a script/);
 store.setProp('Flow', 'total', 0); assert.equal(store.getProp('Flow', 'total'), 0, 'scripts can reset the flow total');
 
+// A board on Ethernet: the panel connects over TCP, says HELLO, sends settings, and reads its inputs
+{
+  const net = await import('node:net');
+  const got = [];
+  const board = net.createServer(sock => {
+    sock.on('data', d => { got.push(...d.toString().trim().split('\n')); if (got.includes('HELLO')) sock.write('HELLO ETH1 0.2\nDI 30 0\n'); });
+  });
+  await new Promise(r => board.listen(0, '127.0.0.1', r));
+  const hw2 = new Hardware(store);
+  hw2.add({ name: 'M', type: 'ethernet', host: '127.0.0.1', port: board.address().port });
+  hw.devices.delete('M');
+  await new Promise(r => setTimeout(r, 400));
+  assert.ok(got.includes('HELLO') && got.includes('CFG RTD 49 4'), 'ethernet board got HELLO and settings: ' + got.join(','));
+  assert.equal(hw2.devices.get('M').status, 'connected'); assert.equal(hw2.devices.get('M').info, 'ETH1 0.2');
+  assert.equal(store.getProp('Float', 'state'), true, 'input read over ethernet (inverted)');
+  hw2.stop(); board.close();
+}
 console.log('devices test: all passed');

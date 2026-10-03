@@ -776,7 +776,7 @@ $('#logLoad').onclick = guard(async () => {
 function renderDevices() {
   const tb = $('#devBody'); tb.innerHTML = '';
   for (const d of S.devices) {
-    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, { serial: 'Mega (USB)', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' }[d.type] || d.type), h('td', {}, d.port || d.host || ''),
+    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, { serial: 'USB', ethernet: 'Ethernet', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' }[d.type] || d.type), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
       h('td', {}, h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
@@ -806,7 +806,7 @@ $('#addDev').onclick = guard(async () => {
   if (S.config.devices.some(d => d.name === name)) throw new Error('That device name is used');
   const d = { name, type };
   if (type === 'serial') { d.port = $('#devPort').value.trim(); d.baud = 115200; if (!d.port) throw new Error('USB port is required'); }
-  if (type === 'esp32') { d.host = $('#devHost').value.trim(); d.port = 4100; if (!d.host) throw new Error('ESP32 address is required'); }
+  if (type === 'esp32' || type === 'ethernet') { d.host = $('#devHost').value.trim(); d.port = 4100; if (!d.host) throw new Error('Network address is required'); }
   await api('PUT', '/ui/layout', { devices: [...S.config.devices, d] }); await load(); toast('Device added');
 });
 
