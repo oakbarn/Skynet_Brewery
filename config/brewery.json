@@ -707,7 +707,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_MLT_In",
@@ -723,7 +726,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "VGC_23_do_BackManifold_Left_On_B1",
@@ -739,7 +745,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_MLT_Out",
@@ -755,7 +764,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_BK_In",
@@ -771,7 +783,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "MB_35_do_YellowPump_B1",

@@ -104,7 +104,7 @@ function renderWs() {
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe' && g.kind !== 'ip')) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip')) ws.append(buildIp(g));
-  for (const e of L().elements.filter(e => e.workspace === w.name && isPump(e))) for (const q of pumpIps(e)) ws.append(buildPumpIp(e, q));
+  for (const e of L().elements.filter(e => e.workspace === w.name && hasIps(e))) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   renderPipes(); fitZoom();
 }
 
@@ -128,24 +128,27 @@ function buildIp(g) {
   return n;
 }
 
-// A pump is a Digital Output device of kind "pump". It comes with two built-in IPs, inlet and outlet, on the sides of its box.
-const isPump = e => e && e.type === 'digitalOut' && e.subtype === 'pump';
+// Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
+// a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
+const hasIps = e => e && e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve');
 const SIDES = ['left', 'right', 'top', 'bottom'];
 function sidePt(e, side) {
   const x = e.x || 0, y = e.y || 0, w = e.w || 120, hh = e.h || 60;
   return side === 'right' ? [x + w, y + hh / 2] : side === 'top' ? [x + w / 2, y] : side === 'bottom' ? [x + w / 2, y + hh] : [x, y + hh / 2];
 }
-const pumpIps = e => [
-  { id: `pump:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
-  { id: `pump:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: sidePt(e, e.ipOut || 'right') }];
-function buildPumpIp(e, q) {
-  const n = h('div', { class: 'gfx ip pumpip', 'data-ipid': q.id, 'data-pump': e.name, title: q.label }, h('span', {}, q.text));
+const devIps = e => {
+  const v = e.subtype === 'valve';
+  return [{ id: `dev:${e.name}:in`, label: `${e.name} ${v ? 'end A' : 'inlet'}`, text: v ? 'A' : 'IN', c: sidePt(e, e.ipIn || 'left') },
+    { id: `dev:${e.name}:out`, label: `${e.name} ${v ? 'end B' : 'outlet'}`, text: v ? 'B' : 'OUT', c: sidePt(e, e.ipOut || 'right') }];
+};
+function buildDevIp(e, q) {
+  const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
-  n.style.setProperty('--ipc', '#3fbf6a');
+  n.style.setProperty('--ipc', e.subtype === 'valve' ? '#4fb3ff' : '#3fbf6a');
   return n;
 }
-function placePumpIps(e) {
-  for (const q of pumpIps(e)) { const n = $(`#ws .pumpip[data-ipid="${CSS.escape(q.id)}"]`); if (n) place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 }); }
+function placeDevIps(e) {
+  for (const q of devIps(e)) { const n = $(`#ws .devip[data-ipid="${CSS.escape(q.id)}"]`); if (n) place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 }); }
 }
 
 function buildEl(e) {
@@ -303,21 +306,21 @@ function isOn(name) {
 }
 let drawPts = null, drawCursor = null, drawFrom = null;
 const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
-// An IP id is either an IP widget's id, or "pump:<name>:in" / "pump:<name>:out" for a pump's built-in IPs
-const pumpOfIp = id => (typeof id === 'string' && id.startsWith('pump:')) ? id.slice(5, id.lastIndexOf(':')) : null;
+// An IP id is either an IP widget's id, or "dev:<name>:in" / "dev:<name>:out" for the built-in IPs of a pump or valve
+const devOfIp = id => (typeof id === 'string' && id.startsWith('dev:')) ? id.slice(4, id.lastIndexOf(':')) : null;
 function ipPoint(id, ws) {
   if (!id) return null;
-  const pn = pumpOfIp(id);
-  if (pn !== null) { const e = L().elements.find(x => x.name === pn); if (!isPump(e) || (ws && e.workspace !== ws)) return null; return pumpIps(e).find(q => q.id === id)?.c || null; }
+  const pn = devOfIp(id);
+  if (pn !== null) { const e = L().elements.find(x => x.name === pn); if (!hasIps(e) || (ws && e.workspace !== ws)) return null; return devIps(e).find(q => q.id === id)?.c || null; }
   const g = L().graphics.find(g => g.kind === 'ip' && g.id === id && (!ws || g.workspace === ws));
   return g ? ipCenter(g) : null;
 }
 function allIps(ws) {
   return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws).map(g => ({ id: g.id, label: g.label || g.id })),
-    ...L().elements.filter(e => isPump(e) && e.workspace === ws).flatMap(e => pumpIps(e))];
+    ...L().elements.filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e))];
 }
-// Flow only happens on a pipe joined IP to IP. A pump at either end must be on, plus everything in "Flow when".
-function flowNeeds(p) { return [...new Set([...(p.flowWhen || []), ...[p.from, p.to].map(pumpOfIp).filter(n => n !== null)])]; }
+// Flow only happens on a pipe joined IP to IP. A pump or valve at either end must be on (running / open), plus everything in "Flow when".
+function flowNeeds(p) { return [...new Set([...(p.flowWhen || []), ...[p.from, p.to].map(devOfIp).filter(n => n !== null)])]; }
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
 const pipeFlowing = p => { const need = flowNeeds(p); return pipeJoined(p) && need.length > 0 && need.every(isOn); };
 // Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square.
@@ -402,8 +405,8 @@ $('#ws').addEventListener('pointerdown', ev => {
   const handle = ev.target.closest('circle.handle');
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
-  const pip = ev.target.closest('.pumpip');
-  const node = pip ? $(`#ws .el[data-name="${CSS.escape(pip.dataset.pump)}"]`) : ev.target.closest('.el,.gfx');
+  const pip = ev.target.closest('.devip');
+  const node = pip ? $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`) : ev.target.closest('.el,.gfx');
   if (hit && !node) {
     // the pipe is redrawn on press, so the browser never sends a double-click for it: count two quick presses instead
     const now = Date.now(), again = lastPipeTap && lastPipeTap.id === hit.dataset.gid && now - lastPipeTap.t < 450;
@@ -429,8 +432,8 @@ $('#ws').addEventListener('pointermove', ev => {
   }
   if (!drag) return;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
-  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); if (isPump(drag.item)) placePumpIps(drag.item); if (drag.item.kind === 'ip' || isPump(drag.item)) renderPipes(); }
-  else if (drag.mode === 'resize') { drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy)); place(drag.node, drag.item); if (isPump(drag.item)) placePumpIps(drag.item); if (drag.item.kind === 'ip' || isPump(drag.item)) renderPipes(); }
+  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
+  else if (drag.mode === 'resize') { drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy)); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { drag.item.points = drag.orig.map(q => [snap(q[0] + dx), snap(q[1] + dy)]); renderPipes(); }
 });
@@ -438,10 +441,10 @@ window.addEventListener('pointerup', () => { cancelLongPress(); if (drag?.mode =
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
   if (drawPts) return finishPipe();
-  const pip = ev.target.closest('.pumpip');
+  const pip = ev.target.closest('.devip');
   const node = ev.target.closest('.el,.gfx');
   const pipe = ev.target.closest('#pipes g');
-  if (pip) editItem('el', pip.dataset.pump);
+  if (pip) editItem('el', pip.dataset.dev);
   else if (node) editItem(node.dataset.name ? 'el' : 'gfx', node.dataset.name || node.dataset.gid);
   else if (pipe) editItem('gfx', pipe.dataset.gid);
 });
@@ -513,7 +516,7 @@ const F = {
     ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', 'workspace']], ['tapTarget', 'Tap target (element, script or workspace; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
-  digitalOut: [['subtype', 'Kind (a pump has inlet and outlet IPs for pipes)', 'sel', ['plain', 'pump']], ['ipIn', 'Pump inlet IP side', 'sel', SIDES], ['ipOut', 'Pump outlet IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['ipIn', 'Pump inlet / valve end A: IP side', 'sel', SIDES], ['ipOut', 'Pump outlet / valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   temperature: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text'], ['offset', 'Calibration offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['sim', 'Simulator settings (JSON)', 'json']],
@@ -525,7 +528,7 @@ const F = {
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   ip: [['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Flow when ALL of these are on (a pump at either end counts by itself; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
+  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Flow when ALL of these are on (a pump or valve at either end counts by itself; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 
@@ -582,7 +585,7 @@ async function editItem(kind, id) {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
-      const gone = type === 'ip' ? [item.id] : isPump(item) ? pumpIps(item).map(q => q.id) : [];
+      const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : [];
       for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
       sel = null; renderWs(); return;
     }
@@ -605,9 +608,9 @@ async function editItem(kind, id) {
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
-        for (const k of ['from', 'to']) if (pumpOfIp(g[k]) === item.name) g[k] = g[k].replace(`pump:${item.name}:`, `pump:${work.name}:`);
+        for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) g[k] = g[k].replace(`dev:${item.name}:`, `dev:${work.name}:`);
       }
-      if (isPump(item) && !isPump(work)) for (const g of draft.graphics) for (const k of ['from', 'to']) if (pumpOfIp(g[k]) === item.name) delete g[k];
+      if (hasIps(item) && !hasIps(work)) for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) delete g[k];
     }
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
     if (kind === 'el') sel = { kind, id: item.name };
