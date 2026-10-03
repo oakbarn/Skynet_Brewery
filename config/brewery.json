@@ -784,7 +784,8 @@
       "device": "SIM",
       "channel": 33,
       "displayName": "Yellow Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Yellow_Pump_B1",
@@ -811,7 +812,8 @@
       "device": "SIM",
       "channel": 35,
       "displayName": "Red Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Red_Pump_B1",
@@ -838,7 +840,8 @@
       "device": "SIM",
       "channel": 37,
       "displayName": "Blue Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Blue_Pump_B1",
@@ -865,7 +868,8 @@
       "device": "SIM",
       "channel": 39,
       "displayName": "Green Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Green_Pump_B1",
@@ -892,7 +896,8 @@
       "device": "SIM",
       "channel": 41,
       "displayName": "White Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_White_Pump_B1",

@@ -154,3 +154,6 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 #ws.editing .gfx.ip { outline: none; }
 #ws.editing .gfx.ip.sel { outline: 2px solid var(--accent); outline-offset: 2px; }
 #ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fff; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
+#ws .gfx.ip.pumpip { font-size: 8px; z-index: 3; }
+#ws.editing .gfx.ip.pumpip { cursor: crosshair; }
+#pipes .loose { fill: none; stroke: var(--bad); stroke-width: 3; pointer-events: none; }
