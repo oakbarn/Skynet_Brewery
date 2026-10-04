@@ -15,7 +15,7 @@ assert.equal(mediaPath('C:\\Brucontrol\\Media\\wave\\a b.wav'), 'oakbarn/wave/a 
 
 const conv = convertBruControl(xml, { simulate: true });
 const el = n => conv.elements.find(e => e.name === n);
-assert.deepEqual(conv.summary.byType, { digitalOut: 2, analogIn: 2, hysteresis: 1, pid: 1, pwmOut: 1, dutyCycle: 1, temperature: 1, global: 3, switch: 2, timer: 1, alarm: 1, picture: 1 });
+assert.deepEqual(conv.summary.byType, { digitalOut: 2, analogIn: 2, hysteresis: 1, pid: 1, pwmOut: 1, dutyCycle: 1, temperature: 1, vKonstant: 3, switch: 2, timer: 1, alarm: 1, picture: 1 });
 assert.equal(conv.devices[0].type, 'simulator'); assert.equal(conv.devices[0].realType, 'serial'); assert.equal(conv.devices[0].port, 'COM3');
 assert.equal(conv.devices[1].realType, 'esp32'); assert.equal(conv.devices[1].host, '192.168.1.60'); assert.equal(conv.devices[1].enabled, false);
 assert.deepEqual(conv.autostart, ['looper_Sample']);
@@ -29,11 +29,12 @@ assert.equal(valve.onText, 'Open'); assert.equal(valve.offText, 'Closed'); asser
 const kettle = el('MB_57_Kettle');
 assert.equal(kettle.look, 'led'); assert.equal(kettle.nameColor, '#ffffff'); assert.equal(kettle.nameBg, '#000000');
 assert.deepEqual(kettle.nameFont, { size: 14.25, family: 'Microsoft Sans Serif', bold: true }); assert.equal(kettle.tap, 'none'); assert.equal(kettle.units, '°F');
+assert.equal(valve.subtype, 'valve'); assert.equal(el('VGC_23_Pulse').subtype, 'valve'); assert.equal(el('MB_57_Kettle').subtype, undefined);
 assert.equal(el('VGC_23_Pulse').activeLow, true); assert.equal(el('VGC_23_Pulse').oneShot, 500);
 assert.equal(el('MB_05_Hys').input, 'MB_57_Kettle'); assert.equal(el('MB_05_Hys').look, 'indicator');
 assert.equal(el('MB_07_PID').kp, 30); assert.equal(el('MB_07_PID').pwm, true);
 assert.equal(el('gblS_Msg').initial, 'Hello & welcome'); assert.equal(el('gblS_Msg').visibility, 'hidden'); assert.equal(el('gblS_Msg').valueAlign, 'MiddleCenter');
-assert.equal(el('gblT_Delay').dataType, 'time'); assert.equal(el('gblT_Delay').initial, '00:01:30');
+assert.equal(el('gblT_Delay').type, 'vKonstant'); assert.equal(el('gblT_Delay').kind, 'time'); assert.equal(el('gblT_Delay').initial, '00:01:30');
 assert.equal(el('tm_Boil').timerType, 'countdown'); assert.equal(el('tm_Boil').resetValue, '01:00:00');
 assert.deepEqual(el('alm_Done').sounds, ['oakbarn/wave/Done.wav', 'oakbarn/Wave/Hops.wav', '']);
 assert.equal(el('insp_Start').tap, 'script'); assert.equal(el('insp_Start').tapTarget, 'looper_Sample');

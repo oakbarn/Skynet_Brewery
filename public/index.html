@@ -11,13 +11,14 @@
   <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Brew Panel</span></div>
   <nav id="views">
     <button data-view="workspace" class="active">Tabs</button>
-    <button data-view="scripts">Scripts</button>
+    <button data-view="scripts">Processes</button>
     <button data-view="globals">Variables</button>
     <button data-view="log">Log</button>
     <button data-view="devices">Devices</button>
     <button data-view="media">Media</button>
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
+    <button data-view="help">Help</button>
   </nav>
   <div class="right">
     <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
@@ -31,7 +32,8 @@
     <div class="bar">
       <div id="wsTabs" class="tabs"></div>
       <div class="spacer"></div>
-      <label>Zoom <select id="zoom"><option value="fit">Fit</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option></select></label>
+      <label>Zoom <select id="zoom"><option value="fit">Fit screen</option><option value="width">Fit width</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select></label>
+      <button id="fullScreen" title="Hide the browser bars so the tab gets the whole screen (Esc to leave)">Full screen</button>
       <label class="toggle admin-only"><input type="checkbox" id="editMode"> Edit layout</label>
     </div>
     <div id="editBar" class="bar edit hidden">
@@ -56,11 +58,11 @@
     <div id="wsScroll"><div id="wsSizer"><div id="ws"><svg id="pipes"></svg></div></div></div>
   </section>
 
-  <!-- ===== Scripts ===== -->
+  <!-- ===== Processes (internally "scripts") ===== -->
   <section id="view-scripts" class="view">
     <div class="split">
       <aside class="scriptList">
-        <div class="bar"><button id="newScript" class="admin-only">New</button><button id="renScript" class="admin-only">Rename</button><button id="delScript" class="admin-only">Delete</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running script">Stop all</button></div>
+        <div class="bar"><button id="newScript" class="admin-only">New</button><button id="renScript" class="admin-only">Rename</button><button id="delScript" class="admin-only">Delete</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running process">Stop all</button></div>
         <ul id="scriptList"></ul>
       </aside>
       <div class="editorPane">
@@ -75,22 +77,20 @@
         </div>
         <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
         <ul id="problems"></ul>
-        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all scripts</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
+        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all processes</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
         <pre id="console"></pre>
       </div>
     </div>
   </section>
 
-  <!-- ===== Globals ===== -->
+  <!-- ===== Variables ===== -->
   <section id="view-globals" class="view">
-    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every script.</p>
-    <h3>vAPI <span class="muted">(scripts, API <code>/api/vapi</code> and database)</span></h3>
+    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every process.</p>
+    <h3>vAPI <span class="muted">(processes, API <code>/api/vapi</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="vapiBody"></tbody></table>
-    <h3>Globals <span class="muted">(scripts, API <code>/api/globals</code> and database)</span></h3>
-    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="globalsBody"></tbody></table>
-    <h3>vKonstant <span class="muted">(scripts and screen only: no API, no database)</span></h3>
+    <h3>vKonstant <span class="muted">(processes and screen only: no API, no database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th></tr></thead><tbody id="vkBody"></tbody></table>
-    <h3>Shared variables <span class="muted">(scripts only)</span></h3>
+    <h3>Shared variables <span class="muted">(processes only)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody id="sharedBody"></tbody></table>
   </section>
 
@@ -131,7 +131,7 @@
   <!-- ===== Import ===== -->
   <section id="view-import" class="view">
     <h3>BeerSmith recipe</h3>
-    <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the Globals named in Settings &gt; BeerXML mapping.</p>
+    <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the variables named in Settings &gt; BeerXML mapping.</p>
     <input type="file" id="xmlFile" accept=".xml,text/xml" class="op-only">
     <button id="importBtn" class="primary op-only">Import</button>
     <pre id="importResult"></pre>
@@ -139,12 +139,12 @@
 
     <div class="admin-only">
     <h3>BruControl configuration</h3>
-    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and scripts are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
+    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
       <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
       <label class="toggle"><input type="checkbox" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
-      <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace scripts with the same name (old copy kept as .bak)</label>
+      <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace processes with the same name (old copy kept as .bak)</label>
       <label>Picture folder <input id="bruMedia" value="oakbarn" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
     </div>
     <button id="bruPreview">Check file</button>
@@ -174,11 +174,40 @@
     <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
   </section>
 
+  <!-- ===== Help: the manual, read from the help/ folder on the Brew Panel computer ===== -->
+  <section id="view-help" class="view">
+    <div class="hpLayout">
+      <aside class="hpSide" id="hpSide">
+        <input id="hpSearch" type="search" placeholder="🔍 Search the manual">
+        <select id="hpPick" aria-label="Help page"></select>
+        <nav id="hpList" aria-label="Help pages"></nav>
+        <button id="hpNew" class="admin-only">＋ New page</button>
+      </aside>
+      <article class="hpMain">
+        <div class="bar hpTools">
+          <button id="hpBack" title="Back">◀ Back</button>
+          <span class="spacer"></span>
+          <button id="hpPrint" title="Print this page">🖨 Print</button>
+          <button id="hpEdit" class="admin-only">✏ Edit page</button>
+        </div>
+        <div id="hpPage" class="hpPage"></div>
+        <div id="hpEditor" class="hpEditor" hidden>
+          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](oakbarn/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
+          <div class="hpEditPanes">
+            <textarea id="hpText" spellcheck="true"></textarea>
+            <div id="hpPreview" class="hpPage"></div>
+          </div>
+          <div class="bar"><button id="hpDelete" class="danger">Delete page</button><span class="spacer"></span><button id="hpCancel">Cancel</button><button id="hpSave" class="primary">Save page</button></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
     <div class="admin-only">
       <h3>Start from a sample</h3>
-      <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter scripts. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
+      <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter processes. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
       <div id="sampleList" class="samples"></div>
     </div>
     <h3>My account</h3>
@@ -188,9 +217,19 @@
       <label>New password again <input type="password" id="pwNew2" autocomplete="new-password"></label>
       <button id="pwSave">Change password</button>
     </div>
+    <h4>Sign-in codes by email or text</h4>
+    <p class="muted">Instead of a password you can tap <b>Email or text me a code</b> on the sign-in page. The code goes to the email address and/or mobile number here.</p>
+    <div class="form row">
+      <label class="admin-only">For user <select id="ctUser"></select></label>
+      <label>Email <input id="ctEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+      <label>Mobile number <input id="ctPhone" type="tel" autocomplete="tel" placeholder="555-123-4567"></label>
+      <label>Send texts through <select id="ctVia"></select></label>
+      <button id="ctSave">Save</button>
+    </div>
+    <p id="ctNote" class="muted"></p>
     <div class="admin-only">
       <h3>Users</h3>
-      <p class="muted"><b>Admin</b>: everything. <b>Operator</b>: brew day use (switch outputs, set values, start and stop scripts) but no layout, script, device or settings changes. <b>Viewer</b>: watch only.</p>
+      <p class="muted"><b>Admin</b>: everything. <b>Operator</b>: brew day use (switch outputs, set values, start and stop processes) but no layout, process, device or settings changes. <b>Viewer</b>: watch only.</p>
       <table class="grid"><thead><tr><th>User</th><th>Role</th><th></th></tr></thead><tbody id="userBody"></tbody></table>
       <div class="form row">
         <label>User name <input id="nuName" autocomplete="off" autocapitalize="none"></label>
@@ -198,16 +237,59 @@
         <label>Role <select id="nuRole"><option value="viewer">Viewer</option><option value="operator">Operator</option><option value="admin">Admin</option></select></label>
         <button id="nuAdd" class="primary">Add user</button>
       </div>
+      <h3>Recovery code</h3>
+      <p class="muted">For a forgotten password: on the sign-in page, <b>Forgot password?</b> takes a user name, this code and a new password. It only works from your home WiFi or Tailscale, and each code works once. Forgot a helper's password? Use <b>Set password</b> above instead.</p>
+      <div class="bar"><span id="recInfo"></span><button id="recNew">Make a new recovery code</button></div>
+      <div id="recShow" class="hidden"><div class="recoveryCode" id="recCode"></div><p>Write this down now and keep it away from the Pi. It is shown only this once. Any older code no longer works.</p></div>
+      <h3>Sending codes (email and text)</h3>
+      <p class="muted">The panel sends sign-in codes from your own email account. Texts are sent free through your phone carrier's email-to-text address, or through <a href="https://www.twilio.com" target="_blank" rel="noopener">Twilio</a> (a paid service, about a cent per text, works with every carrier). Passwords here are kept on the Pi only.</p>
+      <div class="form row">
+        <button id="msGmail" type="button">Fill in for Gmail</button>
+        <button id="msOutlook" type="button">Fill in for Outlook.com</button>
+      </div>
+      <div class="form row">
+        <label>Mail server <input id="msHost" placeholder="smtp.gmail.com"></label>
+        <label>Port <input id="msPort" type="number" style="width:6em" placeholder="465"></label>
+        <label>Security <select id="msSec"><option value="ssl">SSL (port 465)</option><option value="starttls">STARTTLS (port 587)</option><option value="none">None (local relay only)</option></select></label>
+      </div>
+      <div class="form row">
+        <label>Email account <input id="msUser" autocomplete="off" placeholder="you@gmail.com"></label>
+        <label>Password or app password <input id="msPass" type="password" autocomplete="new-password"></label>
+        <label>Send from <input id="msFrom" placeholder="you@gmail.com"></label>
+      </div>
+      <p class="muted">Gmail: turn on 2-Step Verification, then make an <b>app password</b> at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a> and paste it above (not your normal Gmail password).</p>
+      <div class="form row">
+        <label>Twilio Account SID <input id="msSid" autocomplete="off" placeholder="AC..."></label>
+        <label>Twilio Auth Token <input id="msToken" type="password" autocomplete="new-password"></label>
+        <label>Twilio phone number <input id="msTwFrom" placeholder="+15551234567"></label>
+      </div>
+      <div class="bar"><button id="msSave" class="primary">Save sending settings</button><button id="msTest">Send me a test</button><span id="msResult" class="muted"></span></div>
+      <h3>Testing mode</h3>
+      <label class="toggle"><input type="checkbox" id="setFresh"> Start fresh logins after each update</label>
+      <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>
       <h3>Panel settings</h3>
     </div>
     <div class="form admin-only">
       <label>Title <input id="setTitle"></label>
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
-      <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change Globals through the API.<input id="setKey"></label>
+      <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change vAPI variables through the API.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
-      <div>Start these scripts when the server starts:</div>
+      <div>Start these processes when the server starts:</div>
       <div id="setAuto" class="checks"></div>
       <button id="saveSettings" class="primary">Save settings</button>
+    </div>
+    <div class="form admin-only" id="donateSettings">
+      <h3>Beer money pop-up</h3>
+      <p class="muted">About once a month each phone or computer gets a small pop-up asking for a few dollars of beer money. It never shows while a Process is running (other than ones that start with the server), while a tab is being edited, or over another window.</p>
+      <label class="check"><input type="checkbox" id="donOn"> Show the pop-up</label>
+      <p>Donations go to Fritz's PayPal (fritz.range@gmail.com). This is built in and cannot be changed here.</p>
+      <label>Message (leave empty for the standard one)<textarea id="donMsg" rows="3"></textarea></label>
+      <label>Button text (leave empty for "Buy Fritz a beer")<input id="donBtn"></label>
+      <div class="form row">
+        <label>Show every (days)<input type="number" id="donEvery" min="1" max="3650"></label>
+        <label>After "Already donated", wait (days)<input type="number" id="donDone" min="1" max="3650"></label>
+      </div>
+      <div class="bar"><button id="donSave" class="primary">Save pop-up settings</button><button id="donPreview">Show it now</button></div>
     </div>
     <div class="form" id="pictures">
       <h3>Pictures (PNG / JPG to SVG)</h3>
@@ -217,15 +299,38 @@
       <div id="picSummary" class="muted"></div>
       <div id="picBox"></div>
     </div>
+
+    <h2 id="mqtt" class="admin-only">MQTT and voice</h2>
+    <div class="form admin-only">
+      <p class="muted">Shares vAPI variables and Devices with an MQTT broker (for example Mosquitto on the Raspberry Pi), so ESP32 boards, Node-RED or Home Assistant can read and change them. Through Home Assistant you can also ask Alexa, Google Home or Siri. Setup steps: <code>docs/MQTT_AND_VOICE.md</code>.</p>
+      <div id="mqttStatus" class="mqtt-status"></div>
+      <div class="checks"><label><input type="checkbox" id="mqEnabled"> Turn on MQTT</label><label><input type="checkbox" id="mqTls"> Encrypted (TLS)</label></div>
+      <div class="form row">
+        <label>Broker address<input id="mqHost" placeholder="localhost"></label>
+        <label>Port<input id="mqPort" type="number" placeholder="1883" style="width:7em"></label>
+        <label>User name<input id="mqUser" autocomplete="off"></label>
+        <label>Password<input id="mqPass" type="password" autocomplete="new-password"></label>
+        <label>Topic name<input id="mqBase" placeholder="brewpanel"></label>
+      </div>
+      <div class="checks"><label><input type="checkbox" id="mqHa"> Announce to Home Assistant (needed for Alexa, Google Home and Siri)</label></div>
+      <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop processes. They can change vAPI variables that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start processes that you tick below. Inputs from hardware are read only, and Shared variables are never shared.</p>
+      <table class="grid"><thead><tr><th>Element</th><th>Type</th><th>Voice can hear it</th><th>Can change it</th></tr></thead><tbody id="mqItems"></tbody></table>
+      <div>Voice and MQTT may <b>start</b> these processes:</div>
+      <div id="mqScripts" class="checks"></div>
+      <button id="saveMqtt" class="primary">Save MQTT and voice</button>
+    </div>
   </section>
 </main>
 
-<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
+<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
 <dialog id="sampleDlg"><h3>Welcome to the Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
+<dialog id="donateDlg"><h3>🍺 Beer money</h3><p id="donateText"></p>
+  <div class="bar"><button id="donateDone">Already donated</button><span class="spacer"></span><button id="donateLater">Maybe later</button><button id="donateGo" class="primary"></button></div></dialog>
 <div id="toast"></div>
 <script type="module" src="app.js"></script>
 <script type="module" src="pictures.js"></script>
 <script type="module" src="media.js"></script>
+<script type="module" src="help.js"></script>
 </body>
 </html>
