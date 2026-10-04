@@ -519,7 +519,7 @@ F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep valu
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
 const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
 const SENSOR_FIELDS = {
-  ds18b20: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text']],
+  ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
   pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
   thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'pin', 'digital'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
@@ -557,7 +557,9 @@ function field([key, label, kind, opts, rerender], obj) {
     input = h('input', { 'data-k': key, 'data-kind': kind, type: 'text', value: v ?? '', list: 'pins-' + opts, autocomplete: 'off', placeholder: opts === 'analog' ? 'A0' : '22' });
     return [h('label', {}, label), input];
   }
-  if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
+  if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
+    ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)));
+  else if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
   else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => h('option', { value: o, ...(String(v ?? opts[0]) === o ? { selected: true } : {}) }, o)));
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
@@ -815,20 +817,42 @@ function renderDevices() {
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
       h('td', {}, h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
+  renderProbes();
+}
+
+// ---- OneWire probe index: numbered slots; elements use the number, the slot holds the probe's ROM id
+const seenRoms = () => { const m = new Map(); for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) m.set(rom, { dev: d.name, t }); return m; };
+function renderProbes() {
+  const slots = S.config.probes || [], seen = seenRoms();
+  const usedBy = i => S.config.elements.filter(e => e.type === 'temperature' && Number(e.probeIndex) === i).map(e => e.name).join(', ');
+  const sb = $('#slotBody'); sb.innerHTML = '';
+  for (const p of slots) {
+    const roms = [...new Set([p.rom, ...seen.keys()].filter(Boolean))];
+    sb.append(h('tr', {}, h('td', {}, String(p.index)),
+      h('td', {}, h('input', { value: p.name || '', placeholder: 'e.g. HLT probe', onchange: ev => saveProbes(l => { l.find(x => x.index === p.index).name = ev.target.value; }) })),
+      h('td', {}, h('select', { onchange: ev => setSlotRom(p.index, ev.target.value) }, h('option', { value: '' }, '(no probe)'),
+        ...roms.map(r => h('option', { value: r, ...(r === p.rom ? { selected: true } : {}) }, r + (seen.has(r) ? '' : '  (not seen now)') + (slots.some(x => x.rom === r && x.index !== p.index) ? `  (in #${slots.find(x => x.rom === r).index})` : ''))))),
+      h('td', {}, seen.has(p.rom) ? String(seen.get(p.rom).t) : p.rom ? 'not seen' : ''),
+      h('td', {}, usedBy(p.index)),
+      h('td', {}, h('button', { class: 'danger', onclick: () => { if (usedBy(p.index) && !confirm(`Probe #${p.index} is used by ${usedBy(p.index)}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => x.index === p.index), 1)); } }, 'Remove'))));
+  }
   const pb = $('#probeBody'); pb.innerHTML = '';
-  const temps = S.config.elements.filter(e => e.type === 'temperature' && (e.sensor || 'ds18b20') === 'ds18b20');
-  for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) {
-    const owner = temps.find(e => String(e.probe || '').toUpperCase() === rom);
-    pb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
-      h('td', {}, h('select', { onchange: ev => assignProbe(rom, d.name, ev.target.value) }, h('option', { value: '' }, '(not assigned)'), ...temps.map(e => h('option', { value: e.name, ...(owner === e ? { selected: true } : {}) }, e.name))))));
+  for (const [rom, { dev, t }] of seen) {
+    const slot = slots.find(x => x.rom === rom);
+    pb.append(h('tr', {}, h('td', {}, dev), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
+      h('td', {}, h('select', { onchange: ev => ev.target.value === 'new' ? newSlot(rom) : setSlotRom(+ev.target.value, rom, !ev.target.value) },
+        h('option', { value: '' }, '(no number)'), h('option', { value: 'new' }, '+ new number'),
+        ...slots.map(x => h('option', { value: x.index, ...(slot === x ? { selected: true } : {}) }, `#${x.index} ${x.name || ''}`))))));
   }
 }
-const assignProbe = guard(async (rom, dev, elName) => {
-  const els = clone(S.config.elements);
-  for (const e of els) if (e.type === 'temperature' && String(e.probe || '').toUpperCase() === rom) delete e.probe;
-  if (elName) { const e = els.find(x => x.name === elName); e.probe = rom; e.device = dev; }
-  await api('PUT', '/ui/layout', { elements: els }); S.config.elements = els; toast('Probe assigned'); renderDevices();
+const saveProbes = guard(async change => {
+  const list = clone(S.config.probes || []); change(list);
+  await api('PUT', '/ui/layout', { probes: list }); S.config.probes = list; renderProbes(); toast('Probe index saved');
 });
+// put a ROM id on a slot (taking it off any other slot); clear = take this ROM off every slot
+const setSlotRom = (index, rom, clear) => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; if (!clear) { const s = l.find(x => x.index === index); if (s) s.rom = rom; } });
+const newSlot = rom => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; l.push({ index: Math.max(0, ...l.map(x => x.index)) + 1, name: '', rom: rom || '' }); });
+$('#addSlot').onclick = () => newSlot('');
 $('#scanPorts').onclick = guard(async () => {
   const r = await api('GET', '/ui/ports');
   if (!r.installed) throw new Error('USB support is not installed on the server. Run:  npm install serialport');
