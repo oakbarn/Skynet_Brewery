@@ -217,6 +217,7 @@ async function route(req, res) {
   if (p.startsWith('/ui/media/')) {
     const q = Object.fromEntries(url.searchParams), root = Number(q.root) || 0;
     if (p === '/ui/media/list' && m === 'GET') return ok(res, mediaFiles.list(root, q.dir ?? ''));
+    if (p === '/ui/media/tree' && m === 'GET') return ok(res, mediaFiles.tree(root));
     if (p === '/ui/media/upload' && m === 'PUT') {
       try {
         const r = await mediaFiles.upload(req, root, q.dir ?? '', q.name ?? '', q.overwrite === '1');

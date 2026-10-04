@@ -123,20 +123,25 @@
     <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
   </section>
 
-  <!-- ===== Media: add pictures and sounds from any browser ===== -->
+  <!-- ===== Media: add pictures and sounds from any browser (looks like Windows File Explorer) ===== -->
   <section id="view-media" class="view">
-    <div class="bar">
-      <label class="mdPickBtn primary">Add pictures / sounds<input id="mdPick" type="file" multiple accept="image/*,audio/*,.zip,.wav,.mp3,.ogg,.m4a,.svg" hidden></label>
-      <button id="mdNew">New folder</button>
-      <label><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
+    <div class="bar mdTools">
+      <label class="mdPickBtn">⬆ Add pictures / sounds<input id="mdPick" type="file" multiple accept="image/*,audio/*,.zip,.wav,.mp3,.ogg,.m4a,.svg" hidden></label>
+      <button id="mdNew">📁 New folder</button>
+      <button id="mdUp" title="Up one folder">⬆ Up</button>
+      <select id="mdView" title="View"><option value="icons">Large icons</option><option value="details">Details</option></select>
+      <label class="mdReplace"><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
     </div>
-    <p class="muted">Pick files or drag them onto this page: pictures (png, jpg, gif, svg, webp, bmp), sounds (wav, mp3, ogg, m4a), or a .zip of them, which is unpacked keeping its folders. PNG and JPG pictures get their SVG copy automatically; those copies are not listed here, see Settings &gt; Pictures.</p>
-    <div class="bar"><select id="mdRoot" title="Media folder"></select><span id="mdCrumbs" class="mdCrumbs"></span></div>
-    <div id="mdProgress" class="muted"></div>
-    <div id="mdFolders" class="mdFolders"></div>
-    <div class="bar"><input id="mdFilter" placeholder="Filter by name"><span id="mdCount" class="muted"></span></div>
-    <p id="mdEmpty" class="muted" hidden>This folder is empty. Add files above.</p>
-    <div id="mdFiles" class="mdFiles"></div>
+    <div class="mdAddress"><span id="mdCrumbs" class="mdCrumbs"></span><input id="mdFilter" placeholder="🔍 Search this folder"></div>
+    <div class="mdExplorer">
+      <nav id="mdTree" class="mdTree" aria-label="Folders"></nav>
+      <div class="mdPane">
+        <div id="mdFiles" class="mdFiles"></div>
+        <p id="mdEmpty" class="muted" hidden>This folder is empty. Use <b>Add pictures / sounds</b> or drag files here.</p>
+      </div>
+    </div>
+    <div class="mdStatus"><span id="mdCount"></span><span id="mdProgress"></span></div>
+    <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
   </section>
 
   <!-- ===== Settings ===== -->
