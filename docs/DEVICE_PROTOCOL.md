@@ -35,6 +35,7 @@ After every reconnect the server sends the `CFG` lines and then the state of eve
 | `TC <cs> <°C\|NAN>` | Thermocouple temperature in °C from a MAX31856 or MAX31855 board. `NAN` = open or shorted probe. Every second. |
 | `ADS <ch> <raw>` | ADS1115 16-bit analog board, channel 0-3 (0-32767 = 0-6.144 V). Every second. |
 | `P <pin> <count>` | Flow meter: pulses counted since the device started. Every second. |
+| `W <dt> <raw>` | HX711 load-cell board, by its DT pin: average raw count since the last report. Every second. |
 | `T <romid> <°F>` | OneWire temperature, by the probe's 16-hex-digit ROM id. |
 | `ERR <text>` | Any problem. Shown on the Devices page. |
 
@@ -60,6 +61,7 @@ Devices are elements tied to a pin on a board. Every Device has `device` (which 
 | digitalIn | switches, buttons, float / level switches, flow switches, interlocks | `activeLow` (normally-closed contact), `pullup` |
 | temperature | `sensor`: `ds18b20`, `pt100`, `pt1000`, `thermocouple`, `ntc` | DS18B20: `probe` (ROM id), `device` optional. PT100/PT1000: `channel` = CS pin, `wires`, `rref`. Thermocouple: `channel` = CS pin, `tcType`. NTC: `channel` = analog pin, `r0`, `beta`, `series`, `wiring`. All: `offset` (calibration), `units` (°F or °C). Property `fault` is true when the probe is open or shorted. |
 | analogIn | pressure, level, pH, any 0-5 V / 0-10 V / 4-20 mA sensor | `adc`: `board` (analog pin) or `ads1115` (`channel` = 0-3). `signal`: `raw` (`scale`, `offset`), `0-5V`, `0.5-4.5V`, `1-5V`, `0-10V` (`divider`), `4-20mA` / `0-20mA` (`shunt`, ohm), `twoPoint` (`cal1Raw`, `cal1Value`, `cal2Raw`, `cal2Value`). Ranges: `rangeLow`, `rangeHigh`, `offset`. Properties `raw` and `fault` (4-20 mA below 3.6 mA = broken wire). |
+| scale | vessel weight and volume from load cells on HX711 boards | `channel` = DT pin(s), comma between several boards on one vessel (their counts are added). `countsPerUnit` (calibration), `weightUnits` lb / kg, `volumeUnits` gal / L, `specificGravity` (1.000 = water) or `sgFrom` (an element holding the gravity, e.g. the OG Global), `offset`, `autoTare`, `autoTareBand`, `autoTareSeconds`. Properties: `value` (weight), `volume`, `raw`. A script or the screen tares it with `"Scale" tare = true` or `"Scale" volume = 0`, and calibrates it with `"Scale" calibrate = 10` (10 = the known weight on it). |
 | flowMeter | hall-effect pulse flow meters | `pulsesPerUnit`, `units`. Properties `rate` (per minute) and `total` (a script can reset it: `"Flow_1" total = 0`). |
 
 ### Wiring notes (Arduino Mega)
@@ -70,4 +72,11 @@ Devices are elements tied to a pin on a board. Every Device has `device` (which 
 - **ADS1115** (16-bit, 4 channels) on I2C pins 20 / 21 gives finer readings than the Mega's own analog pins, useful for pH and pressure. Turn on `USE_ADS1115`.
 - **NTC thermistors**: a series resistor (usually 10k) from 5 V to the analog pin, thermistor from the pin to GND.
 - **Flow meters** must be on an interrupt pin: 2, 3, 18, 19, 20 or 21.
+- **Load cells**: each HX711 board takes one full bridge (4 half-bridge "bathroom scale" cells through a combinator board, or one bar / S-type cell) on any two pins (DT and SCK). Turn on `USE_HX711` and list the pins.
+
+### Weight to volume, and auto tare
+
+Volume = net weight ÷ (water density × specific gravity). Water is 8.345 lb per US gallon or 0.998 kg per liter. Set the gravity of what is in the vessel (wort at 1.050 weighs 5 % more than water), or point `sgFrom` at the element that holds it.
+
+**Tare** zeroes the scale at its present reading and saves it, so it survives a restart. **Auto tare** (on by default) zeroes the scale by itself when the vessel reads empty (under 0.05 gal or 0.2 L) and steady for 10 seconds. This removes slow drift from temperature and settling, but never moves the zero while there is liquid in the vessel. Calibrate once: tare the empty scale, put a known weight on it, tap it, choose **Calibrate** and enter the weight.
 - **Analog outputs**: the Mega has no true analog output. Use a PWM-to-0-10 V (or 4-20 mA) converter module on a PWM pin listed in `AO_PINS`.

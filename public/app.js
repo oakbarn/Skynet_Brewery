@@ -150,6 +150,7 @@ function fillEl(n, e) {
     case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'pwmOut': text = fmtVal(e, v.value) + ' %'; on = v.enabled !== false && v.value > 0; break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
+    case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
     case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
@@ -190,7 +191,7 @@ function tapAction(e) {
   switch (e.type) {
     case 'digitalOut': case 'switch': return 'toggle';
     case 'digitalIn': return simDev(e.device) ? 'toggle' : 'none';
-    case 'pwmOut': case 'analogOut': return 'dialog';
+    case 'pwmOut': case 'analogOut': case 'scale': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'global': case 'shared': return e.readOnly ? 'none' : 'dialog';
@@ -245,6 +246,7 @@ function valueDialog(t) {
   const v = S.values[t.name] || {};
   const title = v.displayname ?? t.name;
   if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
+  if (t.type === 'scale') return scaleDialog(t, title);
   const numDev = ['pwmOut', 'analogOut', 'analogIn', 'temperature'].includes(t.type);
   if (!(t.type === 'global' || t.type === 'shared' || numDev) || t.readOnly) return;
   if (numDev) t = { ...t, dataType: 'value', units: t.type === 'pwmOut' ? '%' : t.units,
@@ -269,6 +271,16 @@ function valueDialog(t) {
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
   inp.addEventListener('keydown', k => { if (k.key === 'Enter' && t.dataType !== 'string') { k.preventDefault(); done(true); } });
   d.showModal(); setTimeout(() => { inp.focus(); inp.select?.(); }, 50);
+}
+
+// Scale: Tare (zero it now) or calibrate with a known weight
+async function scaleDialog(t, title) {
+  const r = await choose(title, [['Tare (zero)', 'tare'], ['Calibrate…', 'cal']]);
+  if (r === 'tare') return setProp(t.name, 'tare', true);
+  if (r === 'cal') {
+    const w = parseFloat(prompt(`1. Tare the empty scale first.\n2. Put a known weight on it.\n3. Enter that weight in ${t.weightUnits || 'lb'}:`) || '');
+    if (w > 0) { await setProp(t.name, 'calibrate', w); toast('Scale calibrated'); }
+  }
 }
 
 // ---- pipes: drawn lines that show flow when all of their "flow when" elements are on
@@ -427,6 +439,9 @@ const ADD_MENU = [
     ['pH probe board (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
     ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
   ]],
+  ['Devices: weight', [
+    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
+  ]],
   ['Widgets (app only, no board pin)', [
     ['Picture', 'picture'], ['Global', 'global'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
     ['Timer', 'timer'], ['Alarm', 'alarm'], ['Label', 'label'],
@@ -475,6 +490,13 @@ const F = {
   pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin', 'num'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
   analogOut: [['device', 'Device', 'dev'], ['channel', 'Output pin (to the 0-10 V / 4-20 mA module)', 'num'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'text'], ['precision', 'Decimals', 'num']],
+  scale: [['device', 'Device', 'dev'], ['channel', 'HX711 DT pin(s), comma between several boards on one vessel', 'text'],
+    ['countsPerUnit', 'Calibration: counts per lb / kg (tap the scale > Calibrate to measure it)', 'num'],
+    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']],
+    ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a Global with the OG)', 'elem'],
+    ['offset', 'Weight offset (added after tare)', 'num'],
+    ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
+    ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'num'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']]],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
@@ -520,14 +542,14 @@ function field([key, label, kind, opts, rerender], obj) {
   let input;
   if (kind === 'info') {     // live reading, to help with calibration
     const r = S.values[obj.name] || {};
-    const txt = obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
+    const txt = obj.type === 'scale' ? `${r.raw ?? '-'}  (tare ${obj.tareRaw ?? 'not set'})` : obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
     return [h('label', {}, label), h('span', { class: 'info' }, txt)];
   }
   if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
   else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => h('option', { value: o, ...(String(v ?? opts[0]) === o ? { selected: true } : {}) }, o)));
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
-  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
   else if (kind === 'multi') {
     const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'global', 'shared'].includes(e.type)).map(e => e.name).sort();

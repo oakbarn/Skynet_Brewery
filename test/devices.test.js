@@ -1,7 +1,7 @@
 // Devices: sensor conversions and the hardware protocol, without hardware.  Run: node test/devices.test.js
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
-import { analogFrom, analogOutLevel, ntcCelsius, pwmDuty, rtdCelsius, temperatureFrom } from '../lib/sensors.js';
+import { analogFrom, analogOutLevel, ntcCelsius, pwmDuty, rtdCelsius, scaleFrom, temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
 import { Hardware } from '../lib/hardware.js';
 
@@ -28,6 +28,12 @@ near(analogFrom({ signal: '0-10V', rangeLow: 0, rangeHigh: 200 }, 1023 / 2).valu
 near(analogFrom({ adc: 'ads1115', signal: '0-5V', rangeLow: 0, rangeHigh: 100 }, 32767 * 2.5 / 6.144).value, 50, 0.01, 'ADS1115 2.5 V');
 near(analogFrom({ signal: 'twoPoint', cal1Raw: 400, cal1Value: 7, cal2Raw: 600, cal2Value: 4 }, 500).value, 5.5, 1e-9, 'pH two-point');
 
+// Scales: weight to volume
+near(scaleFrom({ countsPerUnit: 1000 }, 83454).volume, 10, 1e-3, '83.454 lb of water = 10 gal');
+near(scaleFrom({ countsPerUnit: 1000 }, 83454, 1.05).volume, 10 / 1.05, 1e-3, 'wort at 1.050');
+near(scaleFrom({ countsPerUnit: 100, weightUnits: 'kg', volumeUnits: 'L', tareRaw: 500 }, 1498.2).volume, 10, 1e-3, '9.982 kg = 10 L');
+near(scaleFrom({ countsPerUnit: 1000 }, 83454, 0).volume, 10, 1e-3, 'unset gravity falls back to water');
+
 // Outputs
 assert.equal(pwmDuty(50), 128); assert.equal(pwmDuty(150), 255);
 assert.equal(analogOutLevel({ rangeLow: 0, rangeHigh: 60 }, 30), 500, 'VFD 30 of 60 Hz');
@@ -45,6 +51,7 @@ fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
     { name: 'RTD', type: 'temperature', sensor: 'pt100', device: 'M', channel: 49, units: '°C', wires: 4 },
     { name: 'TC', type: 'temperature', sensor: 'thermocouple', tcType: 'J', device: 'M', channel: 48, units: '°F' },
     { name: 'AdsPH', type: 'analogIn', adc: 'ads1115', device: 'M', channel: 1, signal: '0-5V', rangeLow: 0, rangeHigh: 14 },
+    { name: 'Kettle', type: 'scale', device: 'M', channel: '26, 28', countsPerUnit: 1000, tareRaw: 0, autoTareSeconds: 10 },
     { name: 'Flow', type: 'flowMeter', device: 'M', channel: 18, pulsesPerUnit: 100 },
   ],
 }));
@@ -74,6 +81,20 @@ hw._flow(store.get('Flow'), 1000, 0); hw._flow(store.get('Flow'), 1200, 60000);
 near(store.getProp('Flow', 'rate'), 2, 1e-9, 'flow rate per minute'); near(store.getProp('Flow', 'total'), 2, 1e-9, 'flow total');
 assert.throws(() => store.setProp('Press', 'value', 1), /cannot be set by a script/);
 store.setProp('Flow', 'total', 0); assert.equal(store.getProp('Flow', 'total'), 0, 'scripts can reset the flow total');
+
+// Scale with two HX711 boards: summed, tared, calibrated, auto tared
+hw._onLine(dev, 'W 26 40000'); assert.equal(store.getProp('Kettle', 'volume'), 0, 'waits for both boards');
+hw._onLine(dev, 'W 28 43454'); near(store.getProp('Kettle', 'volume'), 10, 1e-3, 'kettle volume'); near(store.getProp('Kettle', 'value'), 83.454, 1e-9, 'kettle weight');
+store.setProp('Kettle', 'tare', true);
+assert.equal(store.get('Kettle').tareRaw, 83454, 'tare kept in config'); assert.equal(store.getProp('Kettle', 'volume'), 0); assert.equal(store.getProp('Kettle', 'tare'), false, 'tare button resets');
+hw._onLine(dev, 'W 26 50000'); near(store.getProp('Kettle', 'value'), 10, 1e-9, '10 lb added');
+store.setProp('Kettle', 'calibrate', 5); assert.equal(store.get('Kettle').countsPerUnit, 2000, 'calibrated with a 5 lb weight');
+store.setProp('Kettle', 'volume', 0); assert.equal(store.get('Kettle').tareRaw, 93454, 'setting volume to 0 tares');
+const k = store.get('Kettle');
+hw._scale(k, 93454 + 100, 0); hw._scale(k, 93454 + 100, 5000); assert.equal(k.tareRaw, 93454, 'no auto tare before 10 s');
+hw._scale(k, 93454 + 100, 10500); assert.equal(k.tareRaw, 93554, 'auto tare when empty and steady');
+hw._scale(k, 93554 + 20000, 11000); hw._scale(k, 93554 + 20000, 30000); assert.equal(k.tareRaw, 93554, 'no auto tare with liquid in it');
+assert.throws(() => store.setProp('Kettle', 'value', 1), /cannot be set by a script/);
 
 // A board on Ethernet: the panel connects over TCP, says HELLO, sends settings, and reads its inputs
 {
