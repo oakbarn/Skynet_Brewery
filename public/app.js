@@ -1591,10 +1591,16 @@ async function renderUsers() {
 }
 async function renderRecovery() {
   if (!can('admin')) return;
+  $('#setFresh').checked = S.config.resetLoginsOnUpdate !== false;
   const r = await api('GET', '/auth/recovery');
   $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
   $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
 }
+$('#setFresh').onchange = guard(async ev => {
+  await api('PUT', '/ui/settings', { resetLoginsOnUpdate: ev.target.checked });
+  S.config.resetLoginsOnUpdate = ev.target.checked;
+  toast(ev.target.checked ? 'Logins will start fresh after each update' : 'Logins are kept after updates');
+});
 $('#recNew').onclick = guard(async () => {
   if ($('#recInfo').textContent.startsWith('Made') && !confirm('Make a new recovery code? The old one stops working.')) return;
   const r = await api('POST', '/auth/recovery');

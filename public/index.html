@@ -202,6 +202,9 @@
       <p class="muted">For a forgotten password: on the sign-in page, <b>Forgot password?</b> takes a user name, this code and a new password. It only works from your home WiFi or Tailscale, and each code works once. Forgot a helper's password? Use <b>Set password</b> above instead.</p>
       <div class="bar"><span id="recInfo"></span><button id="recNew">Make a new recovery code</button></div>
       <div id="recShow" class="hidden"><div class="recoveryCode" id="recCode"></div><p>Write this down now and keep it away from the Pi. It is shown only this once. Any older code no longer works.</p></div>
+      <h3>Testing mode</h3>
+      <label class="toggle"><input type="checkbox" id="setFresh"> Start fresh logins after each update</label>
+      <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>
       <h3>Panel settings</h3>
     </div>
     <div class="form admin-only">
