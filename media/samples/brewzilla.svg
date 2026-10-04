@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 340">
+  <defs><linearGradient id="s" x1="0" x2="1"><stop offset="0" stop-color="#7d858d"/><stop offset=".35" stop-color="#e4e8ec"/><stop offset=".6" stop-color="#b9c0c7"/><stop offset="1" stop-color="#6b737b"/></linearGradient></defs>
+  <path d="M120 10 V40 H190 V60" fill="none" stroke="#8a929a" stroke-width="8" stroke-linecap="round"/>
+  <rect x="30" y="50" width="180" height="230" rx="14" fill="url(#s)" stroke="#3b4148" stroke-width="3"/>
+  <rect x="44" y="70" width="152" height="170" rx="10" fill="none" stroke="#5c646c" stroke-width="3" stroke-dasharray="5 4"/>
+  <rect x="30" y="280" width="180" height="50" rx="8" fill="#1d2126" stroke="#3b4148" stroke-width="3"/>
+  <rect x="80" y="292" width="80" height="26" rx="4" fill="#0b1a33"/><text x="120" y="311" text-anchor="middle" font-family="monospace" font-size="16" fill="#8fd0ff">--.-</text>
+  <circle cx="190" cy="305" r="8" fill="#3fbf6a"/><circle cx="52" cy="305" r="8" fill="#e8833a"/>
+  <text x="120" y="160" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#22272c">BrewZilla</text>
+</svg>

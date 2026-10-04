@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 300">
+  <defs><linearGradient id="s" x1="0" x2="1"><stop offset="0" stop-color="#7d858d"/><stop offset=".35" stop-color="#e4e8ec"/><stop offset=".6" stop-color="#b9c0c7"/><stop offset="1" stop-color="#6b737b"/></linearGradient></defs>
+  <rect x="24" y="30" width="172" height="210" rx="12" fill="url(#s)" stroke="#3b4148" stroke-width="3"/>
+  <rect x="16" y="22" width="188" height="14" rx="5" fill="#9aa2aa" stroke="#3b4148" stroke-width="2"/>
+  <rect x="24" y="240" width="172" height="46" rx="8" fill="#1d2126" stroke="#3b4148" stroke-width="3"/>
+  <rect x="70" y="251" width="80" height="24" rx="4" fill="#0b1a33"/><text x="110" y="269" text-anchor="middle" font-family="monospace" font-size="15" fill="#8fd0ff">--.-</text>
+  <text x="110" y="140" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#22272c">DigiBoil</text>
+</svg>
