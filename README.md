@@ -1,6 +1,6 @@
 # OakBarn Brew Panel (prototype)
 
-A browser-based brewery control panel with BruControl-style workspaces and scripts. It runs on Windows, Mac, Linux or a Raspberry Pi, and you use it from any browser on your network: Chrome, Edge, Safari, Firefox or DuckDuckGo, on a PC, tablet or phone.
+A browser-based brewery control panel with BruControl-style screens (called **Tabs**; BruControl calls them workspaces) and scripts. It runs on Windows, Mac, Linux or a Raspberry Pi, and you use it from any browser on your network: Chrome, Edge, Safari, Firefox or DuckDuckGo, on a PC, tablet or phone.
 
 ```
  Browser(s) ──WiFi/LAN──>  Brew Panel server (Node.js)  ──USB──>  Arduino Mega(s)
@@ -45,9 +45,9 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 
 | Area | What it does |
 |---|---|
-| **Workspaces** | Tabs with a background image (a path) that fills the workspace or sits at a set place and size (room for a message panel on the left), placed elements, graphics, text and **pipes**. Use **Edit layout** to drag, resize, double-click for properties, add elements, and draw pipes. |
+| **Tabs** | Screens with a background image (a path) that fills the tab or sits at a set place and size (room for a message panel on the left), placed elements, graphics, text and **pipes**. Use **Edit layout** to drag, resize, double-click for properties, add elements, and draw pipes. Any element, graphic, text or pipe can be **locked** in place: select it and press **🔒 Lock** (or tick **Lock position** in its properties). A locked item shows a padlock and cannot be dragged or resized until you unlock it; you can still open its properties and tap it as normal. |
 | **Picture elements** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** another element (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a script (`"insp_Pix_Red_Pump_B1" image = "oakbarn/Pump_Red_Rip_On.png"`). Tapping a picture that follows an output turns that output on/off. |
-| **Touch screens** | Tap an output to turn it on/off, tap a Global to get a large dialog with − / + buttons and a number pad. Every element has **When tapped** (default, none, toggle, dialog, script, workspace), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
+| **Touch screens** | Tap an output to turn it on/off, tap a Global to get a large dialog with − / + buttons and a number pad. Every element has **When tapped** (default, none, toggle, dialog, script, tab), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
 | **Looks** | `led` (red digits), `lcd` (blue digits), `dark` (white on black, like the BruControl message panels) and `button`. |
 | **Pipes** | Click points to draw a line along a manifold path (or start and end it on an **IP**, below). Pick the valves and pump it needs in **Flow when**. When all of them are on, the pipe shows animated flow. If your background already shows the piping, turn off **Show pipe when not flowing**: then only the moving flow appears. |
 | **IP (Initial Point) widget** | A small round marker where a flow starts or ends: a pump outlet, a vessel port, a drain. It is a widget, used only by the app and not tied to any PLC or device port. In **Edit layout** press **Add IP**, drag it onto the spot, and give it a name like *Red pump out* or *MLT in*. With **Draw pipe**, click the start IP, click the bends, then click the end IP: the pipe is joined to both, and its flow always runs from the start IP to the end IP. Move an IP and the pipe ends (and the corner next to them) follow. An IP lights up while a pipe on it is flowing; tick **Show only while editing** if you only want it as a drawing aid. A pipe's **Starts at IP / Ends at IP** can also be picked in its properties. **Flow only happens on a pipe joined IP to IP**; in Edit layout a red ring marks a pipe end that is not on an IP yet. |
@@ -112,7 +112,7 @@ endif
 [Label]                    goto "Label"
 sleep 1000                 wait "BK_Temp" value <= 154
 start "Other_Script"       stop "Other_Script"     start "tm_Whirlpool"   reset "tm_Whirlpool"   start "alm_Hops"
-print "text"               show workspace "Brewery"     log "gblV_Kettle_Temp"   (writes that Global to the database now)
+print "text"               show tab "Brewery"   (or show workspace)     log "gblV_Kettle_Temp"   (writes that Global to the database now)
 vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:00
 BF precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
@@ -158,7 +158,7 @@ Only **Globals** and **vAPI** variables are in the API (`/api/vapi/...` works th
 server.js            the server
 lib/                 engine (scripts), store (elements), logger (SQLite), hardware, beerxml
 public/              the browser app
-config/brewery.json  workspaces, elements, graphics, devices, settings (edited by the app; a .bak is kept)
+config/brewery.json  workspaces (the tabs), elements, graphics, devices, settings (edited by the app; a .bak is kept)
 scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
                      put all your BruControl pictures in media/oakbarn - a few are already there)

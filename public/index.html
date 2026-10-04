@@ -10,7 +10,7 @@
 <header id="top">
   <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Brew Panel</span></div>
   <nav id="views">
-    <button data-view="workspace" class="active">Workspaces</button>
+    <button data-view="workspace" class="active">Tabs</button>
     <button data-view="scripts">Scripts</button>
     <button data-view="globals">Variables</button>
     <button data-view="log">Log</button>
@@ -24,7 +24,7 @@
 </header>
 
 <main>
-  <!-- ===== Workspaces ===== -->
+  <!-- ===== Tabs (stored as "workspaces" in the config) ===== -->
   <section id="view-workspace" class="view active">
     <div class="bar">
       <div id="wsTabs" class="tabs"></div>
@@ -39,10 +39,11 @@
       <button id="addText">Add text</button>
       <select id="addIpType" title="IP widget type: a plain point, or a pipe fitting"></select>
       <button id="addIp" title="IP (Initial Point) widget: marks where a flow starts or ends: a pump outlet, vessel port or drain. Pipes can start and end on IPs.">Add IP</button>
-      <button id="drawPipe" title="Click points on the workspace. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
+      <button id="drawPipe" title="Click points on the tab. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
       <button id="finishPipe" class="primary hidden">Finish pipe</button>
-      <button id="wsProps">Workspace…</button>
-      <button id="addWs">New workspace</button>
+      <button id="lockItem" title="Lock or unlock the selected item so it cannot be dragged or resized" disabled>🔒 Lock</button>
+      <button id="wsProps">Tab…</button>
+      <button id="addWs">New tab</button>
       <span class="spacer"></span>
       <span id="editHint" class="muted"></span>
       <button id="saveLayout" class="primary">Save layout</button>
@@ -78,7 +79,7 @@
 
   <!-- ===== Globals ===== -->
   <section id="view-globals" class="view">
-    <p class="muted">Add new variables in <em>Workspaces &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every script.</p>
+    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every script.</p>
     <h3>vAPI <span class="muted">(scripts, API <code>/api/vapi</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="vapiBody"></tbody></table>
     <h3>Globals <span class="muted">(scripts, API <code>/api/globals</code> and database)</span></h3>
@@ -133,10 +134,10 @@
     <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
 
     <h3>BruControl configuration</h3>
-    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, workspaces, elements and scripts are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
+    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and scripts are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
-      <label>What to do <select id="bruMode"><option value="replace">Replace my workspaces, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
+      <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
       <label class="toggle"><input type="checkbox" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
       <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace scripts with the same name (old copy kept as .bak)</label>
       <label>Picture folder <input id="bruMedia" value="oakbarn" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
