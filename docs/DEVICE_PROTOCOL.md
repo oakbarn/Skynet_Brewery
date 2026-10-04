@@ -39,9 +39,15 @@ After every reconnect the server sends the `CFG` lines and then the state of eve
 | `T <romid> <°F>` | OneWire temperature, by the probe's 16-hex-digit ROM id. |
 | `ERR <text>` | Any problem. Shown on the Devices page. |
 
-### Why temperatures use the ROM id
+### OneWire probe index
 
-Every DS18B20 probe has a unique 64-bit ROM id. Elements are matched to that id, not to the probe's position on the bus. You can therefore add, remove, replace or move a probe to another vessel without renumbering the others. A new probe shows up on the Devices page under **OneWire probes seen**, where you pick the element it belongs to.
+Every DS18B20 probe has a unique 64-bit ROM id, and the board reports each probe by that id, not by its position on the bus. The panel keeps its own **OneWire probe index** (Devices page, saved as `probes` in the config): numbered slots, each with a name and the ROM id of the probe in it. Temperature elements point to a slot number (`probeIndex`), never to the ROM id.
+
+- **Add a probe:** plug it in. It appears under **OneWire probes seen**; pick **+ new number** (or an empty number) for it.
+- **Replace a probe:** plug in the new one and pick its ROM id in that number's row. Every element using the number follows; nothing else changes.
+- **Move a probe** to another vessel: give it the other number.
+
+Older configs that put the ROM id on the element (`probe`) are moved into the index automatically.
 
 ## Element settings that use the protocol
 
@@ -59,7 +65,7 @@ Devices are elements tied to a pin on a board. Every Device has `device` (which 
 | pwmOut | pump speed, element power | value is 0-100 % |
 | analogOut | VFD speed, proportional valve (0-10 V, 4-20 mA) | `signal`, `rangeLow`, `rangeHigh`, `units` |
 | digitalIn | switches, buttons, float / level switches, flow switches, interlocks | `activeLow` (normally-closed contact), `pullup` |
-| temperature | `sensor`: `ds18b20`, `pt100`, `pt1000`, `thermocouple`, `ntc` | DS18B20: `probe` (ROM id), `device` optional. PT100/PT1000: `channel` = CS pin, `wires`, `rref`. Thermocouple: `channel` = CS pin, `tcType`. NTC: `channel` = analog pin, `r0`, `beta`, `series`, `wiring`. All: `offset` (calibration), `units` (°F or °C). Property `fault` is true when the probe is open or shorted. |
+| temperature | `sensor`: `ds18b20`, `pt100`, `pt1000`, `thermocouple`, `ntc` | DS18B20: `probeIndex` (number in the OneWire probe index), `device` optional. PT100/PT1000: `channel` = CS pin, `wires`, `rref`. Thermocouple: `channel` = CS pin, `tcType`. NTC: `channel` = analog pin, `r0`, `beta`, `series`, `wiring`. All: `offset` (calibration), `units` (°F or °C). Property `fault` is true when the probe is open or shorted. |
 | analogIn | pressure, level, pH, any 0-5 V / 0-10 V / 4-20 mA sensor | `adc`: `board` (analog pin) or `ads1115` (`channel` = 0-3). `signal`: `raw` (`scale`, `offset`), `0-5V`, `0.5-4.5V`, `1-5V`, `0-10V` (`divider`), `4-20mA` / `0-20mA` (`shunt`, ohm), `twoPoint` (`cal1Raw`, `cal1Value`, `cal2Raw`, `cal2Value`). Ranges: `rangeLow`, `rangeHigh`, `offset`. Properties `raw` and `fault` (4-20 mA below 3.6 mA = broken wire). |
 | scale | vessel weight and volume from load cells on HX711 boards | `channel` = DT pin(s), comma between several boards on one vessel (their counts are added). `countsPerUnit` (calibration), `weightUnits` lb / kg, `volumeUnits` gal / L, `specificGravity` (1.000 = water) or `sgFrom` (an element holding the gravity, e.g. the OG Global), `offset`, `autoTare`, `autoTareBand`, `autoTareSeconds`. Properties: `value` (weight), `volume`, `raw`. A script or the screen tares it with `"Scale" tare = true` or `"Scale" volume = 0`, and calibrates it with `"Scale" calibrate = 10` (10 = the known weight on it). |
 | flowMeter | hall-effect pulse flow meters | `pulsesPerUnit`, `units`. Properties `rate` (per minute) and `total` (a script can reset it: `"Flow_1" total = 0`). |

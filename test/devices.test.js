@@ -45,7 +45,9 @@ assert.equal(analogOutLevel({ rangeLow: 0, rangeHigh: 60 }, 30), 500, 'VFD 30 of
 // Protocol: lines out to the device and readings in
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpdev'));
 fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
-  devices: [], elements: [
+  devices: [], probes: [{ index: 1, name: 'HLT probe', rom: '28AA000000000001' }], elements: [
+    { name: 'HLT_T', type: 'temperature', probeIndex: 1 },
+    { name: 'Old_T', type: 'temperature', probe: '28bb000000000009' },
     { name: 'Relay', type: 'digitalOut', device: 'M', channel: 5, activeLow: true },
     { name: 'Pump_Speed', type: 'pwmOut', device: 'M', channel: 44 },
     { name: 'VFD', type: 'analogOut', device: 'M', channel: 45, rangeLow: 0, rangeHigh: 60 },
@@ -91,6 +93,16 @@ assert.match(hw._outLine({ name: 'Relay', type: 'digitalOut', channel: 'A5' }), 
 { const before = store.getProp('Press', 'value'); hw._onLine(dev, `A 1 ${1023 * 12 / 20}`);
   store.get('Press').channel = 55; hw._onLine(dev, `A 1 ${1023 * 16 / 20}`); near(store.getProp('Press', 'value'), 22.5, 0.01, 'BruControl 55 = A1');
   store.get('Press').channel = 'A1'; hw._onLine(dev, `A 1 ${1023 * 12 / 20}`); near(store.getProp('Press', 'value'), 15, 0.01, 'A1'); void before; }
+
+// OneWire probe index: elements use the number; replacing a probe = new ROM id on the slot
+assert.equal(store.get('Old_T').probeIndex, 2, 'old ROM-on-element config gets a probe number'); assert.equal(store.config.probes[1].rom, '28BB000000000009');
+hw._onLine(dev, 'T 28AA000000000001 150.5'); assert.equal(store.getProp('HLT_T', 'value'), 150.5);
+hw._onLine(dev, 'T 28BB000000000009 66'); assert.equal(store.getProp('Old_T', 'value'), 66);
+store.saveLayout({ probes: [{ index: 1, name: 'HLT probe', rom: '28aa0000000000ff' }, store.config.probes[1]] });
+hw._onLine(dev, 'T 28AA000000000001 99'); assert.equal(store.getProp('HLT_T', 'value'), 150.5, 'old probe no longer feeds slot 1');
+hw._onLine(dev, 'T 28AA0000000000FF 152'); assert.equal(store.getProp('HLT_T', 'value'), 152, 'new probe feeds slot 1');
+assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: '28AA0000000000FF' }, { index: 2, rom: '28AA0000000000FF' }] }), /two OneWire slots/);
+assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: 'xyz' }] }), /16 hex digits/);
 
 // Scale with two HX711 boards: summed, tared, calibrated, auto tared
 hw._onLine(dev, 'W 26 40000'); assert.equal(store.getProp('Kettle', 'volume'), 0, 'waits for both boards');
