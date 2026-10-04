@@ -315,3 +315,25 @@ button.small { padding: 2px 7px; font-size: 12px; }
 .right { display: flex; align-items: center; gap: 8px; }
 body:not(.role-admin) .admin-only { display: none !important; }
 body.role-viewer .op-only { display: none !important; }
+.lgLink { align-self: center; color: var(--muted); font-size: 14px; }
+.recoveryCode { font: 600 22px/1.3 var(--mono); letter-spacing: 1px; text-align: center; padding: 12px; border: 2px dashed var(--accent); border-radius: 8px; user-select: all; word-break: break-all; }
+.codeBox { max-width: 480px; border: 2px solid var(--accent); }
+.codeBox .step { margin: 0; color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; }
+.recoveryCode.big { font-size: clamp(17px, 5.4vw, 30px); padding: 18px 4px; white-space: nowrap; word-break: normal; letter-spacing: 0; }
+.codeBtns { display: flex; gap: 8px; }
+.codeBtns button { flex: 1; }
+.howTo { background: var(--panel2); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+.howTo ol { margin: 6px 0; padding-left: 20px; }
+.codeBox .saved { flex-direction: row; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; }
+.codeBox .saved input { flex: none; }
+.codeBox .saved input { width: 22px; height: 22px; }
+.codeBox button:disabled { opacity: .45; cursor: not-allowed; }
+@media print {
+  body.loginPage { background: #fff; color: #000; }
+  .codeBox { border: 1px solid #000; }
+  .codeBtns, .codeBox .saved, #codeDone { display: none !important; }
+}
+.pwWrap { position: relative; display: flex; }
+.pwWrap input { flex: 1; min-width: 0; padding-right: 40px !important; }
+.pwWrap .eye { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); border: none; background: none; padding: 4px 6px; color: var(--muted); line-height: 0; }
+.pwWrap .eye:hover { color: var(--accent); }

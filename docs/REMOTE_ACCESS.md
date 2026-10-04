@@ -33,9 +33,33 @@ You can change someone's role, set a new password, or remove them at any time. T
 
 **Settings > My account**. Every other phone or computer signed in as you is signed out.
 
+### Your recovery code
+
+When you create the admin account, the panel shows a **recovery code** like `K7QM-3XPD-9RTA-WF2H`. Write it down and keep it somewhere safe, away from the Pi (your wallet, a password manager). It is shown only once.
+
+Lost it, or want a new one? An admin can make a new code in **Settings > Recovery code**. The old one stops working.
+
+### Sign in with a code by email or text
+
+Instead of typing a password, you can tap **Email or text me a code** on the sign-in page. The panel sends a 6-digit code that works once, for 10 minutes.
+
+To set it up (once, as admin):
+1. **Settings > Sending codes**: tap **Fill in for Gmail** (or Outlook.com), type your email address and an **app password**. For Gmail, turn on 2-Step Verification first, then make the app password at <https://myaccount.google.com/apppasswords>. Use the app password, not your normal Gmail password.
+2. **Settings > My account > Sign-in codes**: type your email and/or mobile number and pick your carrier under **Send texts through**. The code is emailed to your carrier's text address and arrives as a text, so nothing extra to pay.
+   - Some carriers have stopped email-to-text (AT&T did in 2025). For those, sign up at <https://www.twilio.com>, buy a number (about $1 a month plus about a cent per text) and fill in the Twilio boxes in **Sending codes**, then pick **Twilio** under **Send texts through**.
+3. Tap **Send me a test**. You should get an email and/or a text within a minute.
+
+Each user can set their own email and number in **My account**; an admin can set them for anyone. Codes are limited to one a minute and five an hour per user, and five wrong tries lock the code.
+
 ### Forgot the password?
 
-On the Pi, in the panel folder:
+**Easiest: use the recovery code.** On the sign-in page tap **Forgot password?**, enter your user name, the recovery code and a new password. You are signed in straight away, and the panel shows you a **new** recovery code (each code works once), so write that one down.
+- This only works from your home WiFi or through Tailscale, never from the open internet.
+- Five wrong tries and the panel makes you wait before trying again.
+
+**A helper forgot theirs?** An admin sets a new one in **Settings > Users > Set password**.
+
+**No recovery code and no admin can sign in?** On the Pi, in the panel folder:
 
 ```
 node tools/reset-password.js            (lists the users)
