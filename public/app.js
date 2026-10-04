@@ -1609,7 +1609,8 @@ $('#saveSettings').onclick = guard(async () => {
 // so new users are not asked straight away. Admins can preview it under Settings.
 const DONATE_KEY = 'brewpanel.donateNext', DAY = 86400000;
 const DONATE_MSG = 'Enjoying the Brew Panel? It is free and built in spare time between brew days. If it has made brewing a bit easier for you, a few dollars of beer money for Fritz is always appreciated. Cheers!';
-const donation = () => ({ enabled: true, link: '', message: '', button: '', everyDays: 30, donatedDays: 180, ...(S.config.donation || {}) });
+const DONATE_LINK = 'https://www.paypal.com/donate/?business=fritz.range%40gmail.com&no_recurring=1&currency_code=USD';   // same default as the server
+const donation = () => ({ enabled: true, link: DONATE_LINK, message: '', button: '', everyDays: 30, donatedDays: 180, ...(S.config.donation || {}) });
 const donateGet = () => { try { return Number(localStorage.getItem(DONATE_KEY)) || 0; } catch { return -1; } };
 const donateSnooze = days => { try { localStorage.setItem(DONATE_KEY, String(Date.now() + days * DAY)); } catch { } };
 // a brew is under way if any Process is running other than the ones that start with the server (loggers and the like)

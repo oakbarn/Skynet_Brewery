@@ -138,13 +138,16 @@ function apiKeyOk(req, url) {
 
 // ---------------- login ----------------
 // Who may do what. viewer < operator < admin. New routes default to viewer for GET and admin for changes.
+const paypalDonateLink = email => 'https://www.paypal.com/donate/?business=' + encodeURIComponent(email) + '&no_recurring=1&currency_code=USD';
+const DEFAULT_DONATE_LINK = paypalDonateLink('fritz.range@gmail.com');
 // Beer money pop-up settings (Settings > Beer money). The link must be a plain https address.
 function cleanDonation(d = {}) {
   const days = (v, def) => { const n = Math.round(Number(v)); return n >= 1 && n <= 3650 ? n : def; };
-  const link = String(d.link ?? '').trim();
-  if (link && !/^https:\/\/[^\s"'<>]+$/i.test(link)) throw new Error('The PayPal link must start with https://');
+  let link = String(d.link ?? '').trim();
+  if (/^[^\s@"'<>]+@[^\s@"'<>]+\.[a-z]{2,}$/i.test(link)) link = paypalDonateLink(link);   // a PayPal email becomes a donate link
+  if (link && !/^https:\/\/[^\s"'<>]+$/i.test(link)) throw new Error('Enter a PayPal email, or a link that starts with https://');
   return {
-    enabled: d.enabled !== false, link,
+    enabled: d.enabled !== false, link: link || DEFAULT_DONATE_LINK,
     message: String(d.message ?? '').slice(0, 1000), button: String(d.button ?? '').slice(0, 60),
     everyDays: days(d.everyDays, 30), donatedDays: days(d.donatedDays, 180),
   };
