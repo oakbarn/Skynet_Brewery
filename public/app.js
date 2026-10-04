@@ -1609,8 +1609,7 @@ $('#saveSettings').onclick = guard(async () => {
 // so new users are not asked straight away. Admins can preview it under Settings.
 const DONATE_KEY = 'brewpanel.donateNext', DAY = 86400000;
 const DONATE_MSG = 'Enjoying the Brew Panel? It is free and built in spare time between brew days. If it has made brewing a bit easier for you, a few dollars of beer money for Fritz is always appreciated. Cheers!';
-const DONATE_LINK = 'https://www.paypal.com/donate/?business=fritz.range%40gmail.com&no_recurring=1&currency_code=USD';   // same default as the server
-const donation = () => ({ enabled: true, link: DONATE_LINK, message: '', button: '', everyDays: 30, donatedDays: 180, ...(S.config.donation || {}) });
+const donation = () => ({ enabled: true, message: '', button: '', everyDays: 30, donatedDays: 180, ...(S.config.donation || {}), link: S.donateLink });   // the link is fixed on the server (lib/donation.js)
 const donateGet = () => { try { return Number(localStorage.getItem(DONATE_KEY)) || 0; } catch { return -1; } };
 const donateSnooze = days => { try { localStorage.setItem(DONATE_KEY, String(Date.now() + days * DAY)); } catch { } };
 // a brew is under way if any Process is running other than the ones that start with the server (loggers and the like)
@@ -1619,8 +1618,6 @@ function showDonate(preview) {
   const d = donation(), dlg = $('#donateDlg');
   $('#donateText').textContent = d.message.trim() || DONATE_MSG;
   $('#donateGo').textContent = d.button.trim() || 'Buy Fritz a beer';
-  $('#donateNoLink').textContent = d.link ? '' : 'The PayPal link is coming soon.' + (can('admin') ? ' (Admin: set it in Settings > Beer money pop-up.)' : '');
-  $('#donateGo').disabled = !d.link;
   const close = days => { if (!preview) donateSnooze(days); dlg.close(); };
   $('#donateGo').onclick = () => { window.open(d.link, '_blank', 'noopener'); close(d.everyDays); };
   $('#donateLater').onclick = () => close(d.everyDays);
@@ -1640,12 +1637,12 @@ setTimeout(() => { if (S) { maybeDonate(); setInterval(maybeDonate, 5 * 60000); 
 
 function renderDonate() {
   const d = donation();
-  $('#donOn').checked = d.enabled; $('#donLink').value = d.link; $('#donMsg').value = d.message;
+  $('#donOn').checked = d.enabled; $('#donMsg').value = d.message;
   $('#donBtn').value = d.button; $('#donEvery').value = d.everyDays; $('#donDone').value = d.donatedDays;
   $('#donMsg').placeholder = DONATE_MSG;
 }
 $('#donSave').onclick = guard(async () => {
-  await api('PUT', '/ui/settings', { donation: { enabled: $('#donOn').checked, link: $('#donLink').value.trim(), message: $('#donMsg').value,
+  await api('PUT', '/ui/settings', { donation: { enabled: $('#donOn').checked, message: $('#donMsg').value,
     button: $('#donBtn').value, everyDays: $('#donEvery').value, donatedDays: $('#donDone').value } });
   await load(); toast('Pop-up settings saved');
 });
