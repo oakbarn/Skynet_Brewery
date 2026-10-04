@@ -125,6 +125,16 @@ assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: 'xyz' }] }), /1
   store.get('DinSwitch').offDelay = 0.2;
   hw._onLine(dev, 'DI 31 0'); hw._onLine(dev, 'DI 31 1');
   await new Promise(r => setTimeout(r, 300)); assert.equal(st('DinSwitch'), true, 'off blip shorter than the off delay is ignored');
+  // momentary push button: one short ON per press, held = one press, bumps inside the lockout ignored
+  store.config.elements.push({ name: 'PB', type: 'digitalIn', device: 'M', channel: 32, mode: 'momentary', pulse: 100, lockout: 300 });
+  store.saveLayout({ elements: store.config.elements });
+  hw._onLine(dev, 'DI 32 0');
+  hw._onLine(dev, 'DI 32 1'); assert.equal(st('PB'), true, 'press = ON'); assert.equal(store.getProp('PB', 'count'), 1);
+  await new Promise(r => setTimeout(r, 150)); assert.equal(st('PB'), false, 'ON only for the pulse, though still held');
+  hw._onLine(dev, 'DI 32 0'); hw._onLine(dev, 'DI 32 1'); assert.equal(store.getProp('PB', 'count'), 1, 'bump inside the lockout is not a press'); assert.equal(st('PB'), false);
+  await new Promise(r => setTimeout(r, 200)); hw._onLine(dev, 'DI 32 0'); hw._onLine(dev, 'DI 32 1');
+  assert.equal(store.getProp('PB', 'count'), 2, 'next press after the lockout counts'); assert.equal(st('PB'), true);
+  await new Promise(r => setTimeout(r, 150));
   for (const t of hw.dinTimers.values()) clearTimeout(t);
 }
 
