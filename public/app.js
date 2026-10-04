@@ -344,21 +344,53 @@ function allIps(ws) {
   return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws).map(g => ({ id: g.id, label: g.label || g.id })),
     ...L().elements.filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e))];
 }
-// Flow only happens on a pipe joined IP to IP. A pump or valve at either end must be on (running / open), plus everything in "Flow when".
-function flowNeeds(p) { return [...new Set([...(p.flowWhen || []), ...[p.from, p.to].map(devOfIp).filter(n => n !== null)])]; }
+// ---- flow through the pipe network
+// Pipes join IPs. Each IP belongs to a node:
+//  - a running pump: OUT pushes flow out, IN pulls flow in
+//  - a pump that is off, an open valve, a fitting or an open manual valve: flow passes straight through, either way
+//  - a closed valve or closed manual valve: blocks every pipe on it
+//  - a plain IP point: an end of the line (a vessel port, an outlet), where flow can come from or go to
+// Flow is traced from each running pump out to the IP points it reaches, and from each IP point into each running pump's IN.
+// The direction of each pipe comes from that trace, so a pipe can show flow backwards through a pump that is off.
+// A pipe between two plain IP points with a "Flow when" list keeps the old rule: it flows, as drawn, while all of those are on.
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
-// Fittings pass flow on: a pipe that starts on a fitting flows only while a pipe ending on that fitting is flowing.
-// A closed manual valve at either end stops the pipe.
-const fittingOf = (id, ws) => { const g = id && L().graphics.find(g => g.id === id && g.workspace === ws); return isFitting(g) ? g : null; };
-function pipeFlowing(p, seen = new Set()) {
-  if (!pipeJoined(p) || seen.has(p.id)) return false;
-  seen.add(p.id);
-  const need = flowNeeds(p);
-  if (!need.every(isOn)) return false;
-  const a = fittingOf(p.from, p.workspace), b = fittingOf(p.to, p.workspace);
-  if ((a?.fitting === 'manualValve' && !a.open) || (b?.fitting === 'manualValve' && !b.open)) return false;
-  if (!a) return need.length > 0;
-  return L().graphics.some(q => q.kind === 'pipe' && q !== p && q.workspace === p.workspace && q.to === a.id && pipeFlowing(q, new Set(seen)));
+function ipNode(id, ws) {
+  const dn = devOfIp(id);
+  if (dn !== null) {
+    const e = L().elements.find(x => x.name === dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
+    if (e.subtype === 'valve') return on ? { key: 'dev:' + dn, pass: true } : { closed: true };
+    return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
+  }
+  const g = L().graphics.find(g => g.id === id && g.workspace === ws);
+  if (g?.fitting === 'manualValve' && !g.open) return { closed: true };
+  return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
+}
+function computeFlow(ws) {
+  const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
+  const nodes = new Map(), adj = new Map();
+  const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
+  for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
+    if (!(p.flowWhen || []).every(isOn)) continue;
+    const a = node(p.from), b = node(p.to);
+    if (a.closed || b.closed || a.key === b.key) continue;
+    if (a.end && b.end) { if ((p.flowWhen || []).length) dir.set(p.id, 1); continue; }
+    for (const [u, v, d] of [[a.key, b.key, 1], [b.key, a.key, -1]]) { if (!adj.has(u)) adj.set(u, []); adj.get(u).push({ v, p, d }); }
+  }
+  // breadth-first trace from a pump to every plain IP point (or other running pump) it reaches; mark the pipes on each route
+  const trace = (start, outward) => {
+    const prev = new Map([[start, null]]), queue = [start];
+    while (queue.length) {
+      const u = queue.shift();
+      if (u !== start && !nodes.get(u).pass) {            // reached an end of the line: mark the route back to the start
+        const n = nodes.get(u);
+        if (n.end || (outward ? n.pull : n.push)) for (let k = u; prev.get(k); k = prev.get(k).from) { const st = prev.get(k); dir.set(st.p.id, outward ? st.d : -st.d); }
+        continue;
+      }
+      for (const { v, p, d } of adj.get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); queue.push(v); }
+    }
+  };
+  for (const [k, n] of nodes) { if (n.push) trace(k, true); if (n.pull) trace(k, false); }
+  return dir;
 }
 // Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square.
 function snapEnd(pts, i, j, c) {
@@ -378,15 +410,17 @@ function renderPipes() {
   svg.innerHTML = '';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
   const liveIps = new Set();
-  for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name)) {
-    syncPipeEnds(p);
+  const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
+  pipes.forEach(syncPipeEnds);
+  const flow = computeFlow(w.name);
+  for (const p of pipes) {
     const pts = (p.points || []).map(q => q.join(',')).join(' ');
-    const flowing = pipeFlowing(p);
+    const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = +p.width || 8;
     const g = mk('g', { 'data-gid': p.id });
     if (p.baseVisible !== false || editing) g.append(mk('polyline', { class: 'pipe', points: pts, stroke: p.color || '#8a8f96', 'stroke-width': width, opacity: p.baseVisible === false ? 0.35 : 1 }));
-    g.append(mk('polyline', { class: 'flow' + (flowing ? '' : ' off') + (p.reverse ? ' rev' : ''), points: pts, stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(mk('polyline', { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), points: pts, stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
     const hit = mk('polyline', { class: 'hit', points: pts }); g.append(hit);
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
@@ -573,7 +607,7 @@ const F = {
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Flow when ALL of these are on (a pump or valve at either end counts by itself; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
+  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 
