@@ -15,8 +15,8 @@ Add people and give each a role:
 | Role | Can do |
 |---|---|
 | **Viewer** | Watch only. |
-| **Operator** | Brew day: switch pumps and valves, set values, start and stop scripts, import a recipe. |
-| **Admin** | Everything, including layout, scripts, devices, settings, users and editing this manual. |
+| **Operator** | Brew day: switch pumps and valves, set values, start and stop processes, import a recipe. |
+| **Admin** | Everything, including layout, processes, devices, settings, users and editing this manual. |
 
 ## Panel settings (admins)
 
@@ -24,7 +24,7 @@ Add people and give each a role:
 - **Media folders**: where pictures and sounds are kept, one per line.
 - **API key**: the password other programs (Node-RED and the like) must send. See [API](11-api).
 - **BeerXML mapping**: which Globals a BeerSmith recipe fills.
-- **Start these scripts when the server starts**: tick scripts that should always run.
+- **Start these processes when the server starts**: tick processes that should always run.
 
 ## Pictures
 

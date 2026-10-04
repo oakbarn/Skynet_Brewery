@@ -8,7 +8,7 @@
 
 **BeerXML**: the recipe file BeerSmith exports. See [Import](08-import).
 
-**BruControl**: the Windows brewery program this panel is modelled on. Its configurations and scripts can be imported.
+**BruControl**: the Windows brewery program this panel is modelled on. Its configurations and processes can be imported.
 
 **Device**: an element tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices).
 
@@ -16,7 +16,7 @@
 
 **Fitting**: a pipe part (tee, elbow, cross, cap, manual valve) placed as an IP type.
 
-**Global**: a variable every script can use, that can be logged and sent through the API.
+**Global**: a variable every process can use, that can be logged and sent through the API.
 
 **IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs.
 
@@ -26,9 +26,9 @@
 
 **Raspberry Pi**: the small computer that runs the panel and keeps all its files: the brain of the brewery.
 
-**Script**: a text file of brew steps the panel runs by itself. See [Scripts](05-scripts).
+**Process**: a text file of brew steps the panel runs by itself. See [Processes](05-scripts).
 
-**Shared variable**: a variable for passing values between scripts. Not on screen, not in the API or the database.
+**Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 
 **Simulator**: a pretend board, so you can try everything without hardware.
 
@@ -38,8 +38,8 @@
 
 **Tailscale**: a free private network between your own devices, for using the panel away from home safely. See [Installing Tailscale on Windows](00-tailscale-windows).
 
-**vAPI**: a variable for scripts, the screen, the API and the database. Names start with `vA`.
+**vAPI**: a variable for processes, the screen, the API and the database. Names start with `vA`.
 
-**vKonstant**: a variable for scripts and the screen only. Names start with `vK`.
+**vKonstant**: a variable for processes and the screen only. Names start with `vK`.
 
 **Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
