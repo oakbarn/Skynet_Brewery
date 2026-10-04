@@ -25,17 +25,24 @@ async function api(method, url, body, raw) {
   const opt = { method, headers: {} };
   if (body !== undefined) { if (raw) { opt.body = body; opt.headers['Content-Type'] = 'text/plain'; } else { opt.body = JSON.stringify(body); opt.headers['Content-Type'] = 'application/json'; } }
   const r = await fetch(url, opt);
+  if (r.status === 401) { location.replace('/login.html'); throw new Error('Please sign in'); }
   const ct = r.headers.get('content-type') || '';
   const data = ct.includes('json') ? await r.json() : await r.text();
   if (!r.ok || (data && data.ok === false && data.error)) throw new Error(data.error || r.statusText);
   return data;
 }
 function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? 5000 : 2200); }
+const RANK = { viewer: 0, operator: 1, admin: 2 };
+const can = need => RANK[S?.me?.role] >= RANK[need];
 const guard = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
 
 // ---------------------------------------------------------------- load + live
 async function load() {
   S = await api('GET', '/ui/state');
+  document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
+  document.body.classList.add('role-' + S.me.role);
+  $('#whoName').textContent = `${S.me.name} (${S.me.role})`;
+  $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Brew Panel';
   document.title = S.config.title || 'Brew Panel';
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
@@ -47,7 +54,11 @@ function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(
 function connect() {
   const es = new EventSource('/ui/events');
   es.onopen = () => $('#conn').classList.add('on');
-  es.onerror = () => $('#conn').classList.remove('on');
+  es.onerror = () => {
+    $('#conn').classList.remove('on');
+    // signed out elsewhere, password changed or account removed: back to the sign-in page
+    fetch('/auth/status').then(r => r.json()).then(st => { if (!st.user) { es.close(); location.replace('/login.html'); } }).catch(() => { });
+  };
   es.addEventListener('values', e => {
     const ch = JSON.parse(e.data);
     for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; updateEl(n); }
@@ -66,6 +77,7 @@ function setView(v) {
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
+  if (v === 'settings') renderUsers().catch(e => toast(e.message, true));
 }
 
 // ---------------------------------------------------------------- workspaces
@@ -403,6 +415,7 @@ const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.
 
 async function doTap(e) {
   const act = tapAction(e);
+  if (!['none', 'workspace'].includes(act) && !can('operator')) return toast('Your account is view only', true);
   const targetName = e.tapTarget || (e.type === 'picture' ? e.follow : e.name);
   if (act === 'none' || act === 'hold') return;          // push and hold buttons work on press / release (below)
   if (act === 'pulse') { const t = elByName(targetName); if (t && isBoolEl(t)) setProp(t.name, boolProp(t), true); return; }
@@ -1354,6 +1367,9 @@ function renderGlobals() {
     tb.append(...of(type).map(e => varRow(e, withLog)));
     tb.closest('table').classList.toggle('empty', !of(type).length);
   }
+  // database triggers are part of the layout (admin); values and "Log now" need an operator
+  if (!can('admin')) tb.querySelectorAll('select, input[type=number]').forEach(i => i.disabled = true);
+  if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); tb.querySelectorAll('button').forEach(b => b.disabled = true); }
 }
 function refreshGlobalValues(ch) {
   for (const n of Object.keys(ch)) {
@@ -1426,7 +1442,7 @@ function renderDevices() {
     }) }, 'Use real hardware') : '';
     tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
-      h('td', {}, real, ' ', h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   renderProbes();
 }
@@ -1440,18 +1456,18 @@ function renderProbes() {
   for (const p of slots) {
     const roms = [...new Set([p.rom, ...seen.keys()].filter(Boolean))];
     sb.append(h('tr', {}, h('td', {}, String(p.index)),
-      h('td', {}, h('input', { value: p.name || '', placeholder: 'e.g. HLT probe', onchange: ev => saveProbes(l => { l.find(x => x.index === p.index).name = ev.target.value; }) })),
-      h('td', {}, h('select', { onchange: ev => setSlotRom(p.index, ev.target.value) }, h('option', { value: '' }, '(no probe)'),
+      h('td', {}, h('input', { disabled: !can('admin'), value: p.name || '', placeholder: 'e.g. HLT probe', onchange: ev => saveProbes(l => { l.find(x => x.index === p.index).name = ev.target.value; }) })),
+      h('td', {}, h('select', { disabled: !can('admin'), onchange: ev => setSlotRom(p.index, ev.target.value) }, h('option', { value: '' }, '(no probe)'),
         ...roms.map(r => h('option', { value: r, ...(r === p.rom ? { selected: true } : {}) }, r + (seen.has(r) ? '' : '  (not seen now)') + (slots.some(x => x.rom === r && x.index !== p.index) ? `  (in #${slots.find(x => x.rom === r).index})` : ''))))),
       h('td', {}, seen.has(p.rom) ? String(seen.get(p.rom).t) : p.rom ? 'not seen' : ''),
       h('td', {}, usedBy(p.index)),
-      h('td', {}, h('button', { class: 'danger', onclick: () => { if (usedBy(p.index) && !confirm(`Probe #${p.index} is used by ${usedBy(p.index)}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => x.index === p.index), 1)); } }, 'Remove'))));
+      h('td', {}, h('button', { class: 'danger admin-only', onclick: () => { if (usedBy(p.index) && !confirm(`Probe #${p.index} is used by ${usedBy(p.index)}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => x.index === p.index), 1)); } }, 'Remove'))));
   }
   const pb = $('#probeBody'); pb.innerHTML = '';
   for (const [rom, { dev, t }] of seen) {
     const slot = slots.find(x => x.rom === rom);
     pb.append(h('tr', {}, h('td', {}, dev), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
-      h('td', {}, h('select', { onchange: ev => ev.target.value === 'new' ? newSlot(rom) : setSlotRom(+ev.target.value, rom, !ev.target.value) },
+      h('td', {}, h('select', { disabled: !can('admin'), onchange: ev => ev.target.value === 'new' ? newSlot(rom) : setSlotRom(+ev.target.value, rom, !ev.target.value) },
         h('option', { value: '' }, '(no number)'), h('option', { value: 'new' }, '+ new number'),
         ...slots.map(x => h('option', { value: x.index, ...(slot === x ? { selected: true } : {}) }, `#${x.index} ${x.name || ''}`))))));
   }
@@ -1536,7 +1552,7 @@ async function sampleCards(box, after) {
     }) }, S.config.sample === sm.id ? 'Load again' : 'Load this one')));
 }
 async function firstRunSamples() {
-  if (!S.config.chooseSample) return;
+  if (!S.config.chooseSample || !can('admin')) return;
   const d = $('#sampleDlg');
   await sampleCards($('#sampleDlgList'), () => d.close());
   $('#sampleKeep').onclick = guard(async () => { d.close(); await api('PUT', '/ui/settings', { chooseSample: false }); S.config.chooseSample = false; });
@@ -1553,6 +1569,31 @@ function renderSettings() {
   const box = $('#setAuto'); box.innerHTML = '';
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
 }
+// ---- accounts
+$('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
+$('#pwSave').onclick = guard(async () => {
+  if ($('#pwNew').value !== $('#pwNew2').value) throw new Error('The two new passwords are not the same');
+  await api('POST', '/auth/password', { current: $('#pwCur').value, password: $('#pwNew').value });
+  for (const i of ['#pwCur', '#pwNew', '#pwNew2']) $(i).value = '';
+  toast('Password changed. Other phones and computers signed in as you are signed out.');
+});
+async function renderUsers() {
+  if (!can('admin')) return;
+  const users = await api('GET', '/auth/users');
+  const tb = $('#userBody'); tb.innerHTML = '';
+  for (const u of users) {
+    const role = h('select', { onchange: guard(async ev => { try { await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { role: ev.target.value }); toast(`${u.name} is now ${ev.target.value}`); } finally { if (u.name === S.me.name) location.reload(); else renderUsers(); } }) },
+      ...S.roles.map(r => h('option', { value: r, ...(r === u.role ? { selected: true } : {}) }, r[0].toUpperCase() + r.slice(1))));
+    tb.append(h('tr', {}, h('td', {}, u.name + (u.name === S.me.name ? ' (you)' : '')), h('td', {}, role), h('td', {},
+      h('button', { onclick: guard(async () => { const pw = prompt(`New password for ${u.name} (at least 8 characters)`); if (!pw) return; await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { password: pw }); toast('Password set'); }) }, 'Set password'), ' ',
+      h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove user ${u.name}?`)) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
+  }
+}
+$('#nuAdd').onclick = guard(async () => {
+  await api('POST', '/auth/users', { name: $('#nuName').value.trim(), password: $('#nuPass').value, role: $('#nuRole').value });
+  $('#nuName').value = ''; $('#nuPass').value = ''; toast('User added'); renderUsers();
+});
+
 $('#saveSettings').onclick = guard(async () => {
   let beer; try { beer = JSON.parse($('#setBeer').value || '{}'); } catch { throw new Error('BeerXML mapping is not valid JSON'); }
   await api('PUT', '/ui/settings', {
