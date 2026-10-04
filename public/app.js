@@ -344,6 +344,11 @@ function fillEl(n, e) {
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
     case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
     case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
+    case 'stepper': {     // where it is, where it is going, and a warning while it has a home switch but has not found it
+      const u = STEP_UNITS[e.units]?.[0] ?? e.units ?? '';
+      text = v.enabled === false ? (e.offText ?? 'OFF') : `${fmtVal(e, v.position)} ${u}${v.moving && v.run === 0 ? `  ▸ ${fmtVal(e, v.target)}` : v.run ? `  ${v.run > 0 ? '▶' : '◀'}` : ''}${e.homePin !== undefined && e.homePin !== '' && !v.homed ? '  (not homed)' : ''}`;
+      on = !!v.moving; break;
+    }
     case 'dutyCycle': on = !!v.state; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     case 'hysteresis': on = !!v.state; text = v.enabled ? `${on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
@@ -396,7 +401,7 @@ function tapAction(e) {
   switch (e.type) {
     case 'digitalOut': case 'switch': return 'toggle';
     case 'digitalIn': return ['latch', 'toggle', 'counter'].includes(e.mode) || (e.mode === 'momentary' && simDev(e.device)) ? 'dialog' : simDev(e.device) ? 'toggle' : 'none';
-    case 'pwmOut': case 'analogOut': case 'scale': return 'dialog';
+    case 'pwmOut': case 'analogOut': case 'scale': case 'stepper': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'global': case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
@@ -548,6 +553,7 @@ function valueDialog(t) {
   const v = S.values[t.name] || {};
   const title = v.displayname ?? t.name;
   if (t.type === 'scale') return scaleDialog(t, title);
+  if (t.type === 'stepper') return stepperDialog(t, title);
   if (t.type === 'digitalIn') {   // latch / toggle: reset to off; counter: count back to 0
     const sim = !simDev(t.device) ? [] : t.mode === 'momentary' ? [['Simulate: press', 'press']] : [['Simulate: input ON', 'on'], ['Simulate: input OFF', 'off']];
     return choose(title, [...sim, ['counter', 'momentary'].includes(t.mode) ? ['Reset count to 0', 'count'] : ['Reset (off)', 'reset']])
@@ -589,6 +595,22 @@ async function scaleDialog(t, title) {
     const w = parseFloat(prompt(`1. Tare the empty scale first.\n2. Put a known weight on it.\n3. Enter that weight in ${t.weightUnits || 'lb'}:`) || '');
     if (w > 0) { await setProp(t.name, 'calibrate', w); toast('Scale calibrated'); }
   }
+}
+
+// Stepper: move it from the screen (the same properties a Process sets)
+async function stepperDialog(t, title) {
+  const v = S.values[t.name] || {}, u = STEP_UNITS[t.units]?.[0] ?? t.units ?? '', lim = [t.minPos, t.maxPos].some(x => x !== undefined && x !== '') ? `  (allowed ${t.minPos ?? '…'} to ${t.maxPos ?? '…'})` : '';
+  const hasHome = t.homePin !== undefined && t.homePin !== '';
+  const r = await choose(`${title}: at ${fmtVal(t, v.position)} ${u}`, [
+    ['Move to …', 'target'], ['Move by …', 'move'], ['Turn at a speed …', 'run'], ['Stop', 'stop'],
+    ...(hasHome ? [['Home (find the switch)', 'home']] : []), ['Call this position home', 'reset'],
+    v.enabled === false ? ['Turn the motor on', 'on'] : ['Turn the motor off (free to turn by hand)', 'off']]);
+  if (!r) return;
+  if (['stop', 'home', 'reset'].includes(r)) return setProp(t.name, r, true);
+  if (r === 'on' || r === 'off') return setProp(t.name, 'enabled', r === 'on');
+  const ask = { target: `Go to which position (${u})?${lim}`, move: `Move by how much (${u}, minus = backward)?`, run: `Turn at how many ${u} per second (minus = backward, 0 = stop)?` }[r];
+  const x = parseFloat(prompt(ask, r === 'target' ? fmtVal(t, v.target) : '') ?? '');
+  if (Number.isFinite(x)) setProp(t.name, r, x);
 }
 
 // ---- pipes: drawn lines that show flow when all of their "flow when" elements are on
@@ -909,6 +931,10 @@ const ADD_MENU = [
     ['pH probe board (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
     ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
   ]],
+  ['Devices: motors (board pins)', [
+    ['Stepper motor on a STEP / DIR driver (A4988, DRV8825, TMC2209, TB6600, DM542)', 'stepper', 'Stepper', { driver: 'A4988', wiring: 'stepDir', stepsPerRev: 200, microsteps: 16, units: 'rev', maxSpeed: 2, accel: 4, precision: 2 }],
+    ['Stepper motor 28BYJ-48 on a ULN2003 board (4 pins)', 'stepper', 'Stepper', { driver: 'ULN2003 + 28BYJ-48', wiring: 'fourWire', stepsPerRev: 2048, microsteps: 2, units: 'deg', maxSpeed: 60, accel: 120, precision: 1 }],
+  ]],
   ['Devices: weight', [
     ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
   ]],
@@ -929,7 +955,7 @@ $('#addEl').onclick = () => {
   const [, pick, prefix, extra] = ADD_MENU[gi][1][ii], preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
-  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : type === 'flowMeter' ? 190 : 130, h: type === 'timer' ? 80 : 60, ...clone(preset || {}), ...clone(extra || {}) };
+  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : type === 'flowMeter' || type === 'stepper' ? 190 : 130, h: type === 'timer' ? 80 : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (type === 'global' || type === 'shared') e.dataType = 'value';
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
@@ -1064,7 +1090,52 @@ const SIGNAL_FIELDS = {
   twoPoint: [['cal1Raw', 'Point 1: raw reading', 'num'], ['cal1Value', 'Point 1: real value (e.g. pH 7)', 'num'], ['cal2Raw', 'Point 2: raw reading', 'num'], ['cal2Value', 'Point 2: real value (e.g. pH 4)', 'num'], ['offset', 'Extra offset', 'num']],
   range: [['rangeLow', 'Value at lowest signal', 'num'], ['rangeHigh', 'Value at highest signal', 'num'], ['offset', 'Calibration offset', 'num']],
 };
+// Stepper motors: the lists can be added to ("Add new ..."); a driver picked from the list fills in its usual settings
+// unit -> [shown on the tab, shown in the list]
+const STEP_UNITS = { rev: ['turns', 'rev (turns)'], deg: ['°', 'deg (degrees)'], mm: ['mm', 'mm'], in: ['in', 'in (inches)'], mL: ['mL', 'mL'], L: ['L', 'L'], gal: ['gal', 'gal'], '%': ['%', '% (how far open, e.g. a valve)'], steps: ['steps', 'steps (no conversion)'] };
+const STEP_LISTS = {
+  driver: ['A4988', 'DRV8825', 'TMC2208', 'TMC2209', 'TB6600', 'DM542', 'ULN2003 + 28BYJ-48', 'L298N'].map(x => [x, x]),
+  stepsPerRev: [[200, '200 (1.8° per step: most NEMA 17 / 23 motors)'], [400, '400 (0.9° per step)'], [2048, '2048 (28BYJ-48)'], [4096, '4096 (28BYJ-48, counted in half steps)']],
+  microsteps: [1, 2, 4, 8, 16, 32, 64, 128, 256].map(n => [n, n === 1 ? '1 (full steps)' : n === 2 ? '2 (half steps)' : `1/${n} steps`]),
+  units: Object.entries(STEP_UNITS).map(([k, [, l]]) => [k, l]),
+};
+const STEP_DRIVERS = {
+  'A4988': { wiring: 'stepDir', pulseUs: 1, enableLevel: 'low', microsteps: 16 }, 'DRV8825': { wiring: 'stepDir', pulseUs: 2, enableLevel: 'low', microsteps: 32 },
+  'TMC2208': { wiring: 'stepDir', pulseUs: 1, enableLevel: 'low', microsteps: 8 }, 'TMC2209': { wiring: 'stepDir', pulseUs: 1, enableLevel: 'low', microsteps: 8 },
+  'TB6600': { wiring: 'stepDir', pulseUs: 5, enableLevel: 'low', microsteps: 8 }, 'DM542': { wiring: 'stepDir', pulseUs: 3, enableLevel: 'low', microsteps: 8 },
+  'ULN2003 + 28BYJ-48': { wiring: 'fourWire', microsteps: 2, stepsPerRev: 2048 }, 'L298N': { wiring: 'fourWire', microsteps: 1, stepsPerRev: 200 },
+};
+function stepperFields(it) {
+  const four = it.wiring === 'fourWire';
+  return [['device', 'Device (board)', 'dev'],
+    ['driver', 'Driver board (picking one fills in its usual settings)', 'stpick', 'driver'],
+    ['wiring', 'Wired with', 'sel', [['stepDir', 'STEP and DIR pins (A4988, DRV8825, TMC, TB6600, DM542)'], ['fourWire', '4 coil pins (ULN2003 board, L298N)']], true],
+    ...(four ? [['channel', 'IN1 pin', 'pin', 'digital'], ['pin2', 'IN2 pin', 'pin', 'digital'], ['pin3', 'IN3 pin', 'pin', 'digital'], ['pin4', 'IN4 pin', 'pin', 'digital']]
+      : [['channel', 'STEP pin', 'pin', 'digital'], ['dirPin', 'DIR (direction) pin', 'pin', 'digital'],
+        ['enablePin', 'ENABLE pin (empty = not wired, driver always on)', 'pin', 'digital'],
+        ['enableLevel', 'The driver is ON when the ENABLE pin is', 'sel', [['low', 'LOW (A4988, DRV8825, TMC, and TB6600 / DM542 with ENA- to GND)'], ['high', 'HIGH']]],
+        ['pulseUs', 'Shortest STEP pulse in microseconds (empty = what the driver needs)', 'num']]),
+    ['invertDir', 'Reverse the direction', 'yn'],
+    ['stepsPerRev', 'Motor steps per turn (motor label or data sheet)', 'stpick', 'stepsPerRev'],
+    ['microsteps', four ? 'Stepping' : 'Microstepping (set on the driver with its MS pins or switches; must match)', 'stpick', 'microsteps'],
+    ['gearRatio', 'Gearbox: motor turns per output turn (empty = 1, no gearbox)', 'num'],
+    ['units', 'Position units', 'stpick', 'units'],
+    ['unitsPerRev', 'Units per output turn (empty = 1 turn, 360°, 100 %; lead screw = its pitch in mm; dosing pump = mL per turn)', 'num'],
+    ['maxSpeed', 'Top speed (units per second)', 'num'], ['accel', 'Speeds up and slows down by (units per second, each second; empty = 2 x top speed)', 'num'],
+    ['holdWhenIdle', 'Keep the motor powered when stopped (holds its place, runs warm)', 'yn', true],
+    ['minPos', 'Lowest position allowed (empty = no limit)', 'num'], ['maxPos', 'Highest position allowed (empty = no limit)', 'num'],
+    ['homePin', 'Home switch pin on the same board (empty = no switch)', 'pin', 'digital'],
+    ['homeSwitch', 'Home switch', 'sel', [['no', 'Normally open, closes to GND when hit'], ['nc', 'Normally closed to GND, opens when hit']]],
+    ['homeDir', 'Home switch is at the', 'sel', [['minus', 'low end (homing turns backward)'], ['plus', 'high end (homing turns forward)']]],
+    ['homeSpeed', 'Homing speed (units per second, empty = 1/4 of top speed)', 'num'], ['homePosition', 'Position at the home switch (empty = 0)', 'num'],
+    ['homeTravel', 'Stop homing if the switch is not found within (units, empty = 2 x the allowed range, or 10 turns)', 'num'],
+    ['homeOnConnect', 'Home by itself each time the board connects', 'yn'],
+    ['precision', 'Decimals', 'num'], ['offText', 'Text when turned off', 'text'],
+    ['sim', 'Simulator settings (JSON): where it starts and where its home switch is, in its units, e.g. {"start":40,"switchAt":-5}', 'json'], ['info', 'Position now', 'info']];
+}
+
 function fieldsFor(item) {
+  if (item.type === 'stepper') return stepperFields(item);
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
     return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
@@ -1085,6 +1156,8 @@ function field([key, label, kind, opts, rerender], obj) {
   let input;
   if (kind === 'info') {     // live reading, to help with calibration
     const r = S.values[obj.name] || {};
+    const spu = obj.type === 'stepper' ? (obj.units === 'steps' ? 1 : (+obj.stepsPerRev || 200) * (+obj.microsteps || 1) * (+obj.gearRatio || 1) / (+obj.unitsPerRev || (obj.units === 'deg' ? 360 : obj.units === '%' ? 100 : 1))) : 0;
+    if (spu) return [h('label', {}, label), h('span', { class: 'info' }, `${fmtVal(obj, r.position)} ${obj.units || ''} = ${r.steps ?? 0} steps${r.moving ? ', moving' : ''}${r.homed ? ', homed' : ''}.  ${+spu.toFixed(3)} steps per ${obj.units || 'unit'} (from the settings above, after Save)`)];
     const txt = obj.type === 'scale' ? `${r.raw ?? '-'}  (tare ${obj.tareRaw ?? 'not set'})` : obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
     return [h('label', {}, label), h('span', { class: 'info' }, txt)];
   }
@@ -1092,6 +1165,11 @@ function field([key, label, kind, opts, rerender], obj) {
     input = h('input', { 'data-k': key, 'data-kind': kind, type: 'text', value: v ?? '', list: 'pins-' + opts, autocomplete: 'off', placeholder: opts === 'analog' ? 'A0' : '22' });
     return [h('label', {}, label), input];
   }
+  if (kind === 'yn') {        // a true / false setting as a Yes / No dropdown
+    const on = !!(v ?? opts);
+    return [h('label', {}, label), h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: 'yes', ...(on ? { selected: true } : {}) }, 'Yes'), h('option', { value: 'no', ...(on ? {} : { selected: true }) }, 'No'))];
+  }
+  if (kind === 'stpick') return [h('label', {}, label), stepperPick(key, opts, v)];
   if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
     ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)));
   else if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
@@ -1112,6 +1190,32 @@ function field([key, label, kind, opts, rerender], obj) {
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
 }
 
+// Stepper dropdowns: the built-in list, anything already used on another stepper, and "Add new ..."
+function stepperPick(key, list, v) {
+  const num = list !== 'driver' && list !== 'units', items = [...STEP_LISTS[list]];
+  for (const e of (draft || S.config).elements) if (e.type === 'stepper' && e[key] !== undefined && e[key] !== '' && !items.some(([x]) => String(x) === String(e[key]))) items.push([e[key], String(e[key])]);
+  if (v !== undefined && v !== '' && !items.some(([x]) => String(x) === String(v))) items.push([v, String(v)]);
+  const s = h('select', { 'data-k': key, 'data-kind': 'stpick', ...(num ? { 'data-num': '1' } : {}) }, h('option', { value: '' }, '(pick one)'),
+    ...items.map(([x, l]) => h('option', { value: x, ...(String(x) === String(v ?? '') ? { selected: true } : {}) }, l)), h('option', { value: '__add__' }, 'Add new ...'));
+  let prev = s.value;
+  s.addEventListener('change', () => {
+    if (s.value === '__add__') {
+      const t = (prompt({ driver: 'Driver board name (for example TMC5160)', stepsPerRev: 'Motor steps per turn (a number, for example 100)', microsteps: 'Microsteps (a number, for example 10)', units: 'Unit name (for example oz)' }[list]) || '').trim();
+      if (!t || (num && !(+t > 0))) { s.value = prev; if (t) toast('Enter a number above 0', true); return; }
+      if (![...s.options].some(o => o.value === t)) s.insertBefore(h('option', { value: t }, t), s.lastChild);
+      s.value = t;
+    }
+    prev = s.value;
+    const d = list === 'driver' && STEP_DRIVERS[s.value];
+    if (d) for (const [k, x] of Object.entries(d)) {      // fill in that driver's usual settings
+      const f = $(`#dlgBody [data-k="${k}"]`); if (!f) continue;
+      if (f.tagName === 'SELECT' && ![...f.options].some(o => o.value === String(x))) f.insertBefore(h('option', { value: x }, String(x)), f.lastChild);
+      f.value = String(x); if (k === 'wiring') f.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  });
+  return s;
+}
+
 function readFields(obj) {
   for (const inp of $$('#dlgBody [data-k]')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
@@ -1119,6 +1223,8 @@ function readFields(obj) {
     if (kind === 'bool') v = inp.checked;
     else if (kind === 'num') v = inp.value === '' ? undefined : +inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
+    else if (kind === 'yn') v = inp.value === 'yes';
+    else if (kind === 'stpick') v = inp.value === '' || inp.value === '__add__' ? undefined : inp.dataset.num ? +inp.value : inp.value;
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
     else if (kind === 'json') { if (inp.value.trim() === '') v = undefined; else { try { v = JSON.parse(inp.value); } catch { throw new Error(`${k}: not valid JSON`); } } }
     else v = inp.value === '' ? undefined : inp.value;
