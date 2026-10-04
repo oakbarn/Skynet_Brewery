@@ -89,6 +89,7 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **Alarms** | Sound file by path, `.wav` or `.mp3`. Browsers only play sound after one click, so press **Enable sound** on each screen that should sound alarms. |
 | **BeerSmith** | BeerSmith **File > Export > BeerXML**, then the **Import** page (or POST to the API). Hop uses become your group codes: Mash -333, First Wort -444, boil hop at full boil time -888, other boil hops 919, Aroma/Whirlpool -999, Dry Hop -111, unused slot 0. Dry hop time is converted to days. The mapping is editable in **Settings**. |
 | **OneWire probes** | The panel's own **OneWire probe index** (Devices page): each probe gets a number and a name, and temperature elements use the number. Probes are recognised by ROM id, not bus position. To replace a probe, pick the new probe's ROM id for that number; nothing else changes. New probes appear under **OneWire probes seen**. |
+| **MQTT and voice** | **Settings > MQTT and voice** shares Globals and Devices with an MQTT broker such as Mosquitto on the Pi, for ESP32 boards, Node-RED or Home Assistant. Through Home Assistant you can ask **Alexa, Google Home or Siri** for temperatures, timers and status. Turning on heat, pumps or valves, and starting scripts, stays off until you allow it per item. Setup: `docs/MQTT_AND_VOICE.md`. |
 | **Media paths** | Images and sounds are paths to files inside the **media folders** listed in Settings, for example `valves/open.png` or `D:\Brewing\Pics\kettle.png`. Nothing is stored inside the program. For safety, only files inside those folders are served. |
 | **Media page** | Add pictures and sounds to the Brew Panel computer (the Raspberry Pi) from any browser, PC or phone: pick files or drag them onto the page, several at once, or a `.zip` of them (unpacked keeping its folders, handy for the BruControl Media folder). Looks like Windows File Explorer: folder tree on the left, files with thumbnails on the right (Large icons or Details), an address bar and search. Make folders, drag files onto a folder to move them (Move button on phones), preview pictures, play sounds, copy the path to type into an element, rename and delete. Only pictures and sounds are accepted, and only inside the media folders. |
 | **SVG pictures** | Every PNG or JPG in a media folder gets an SVG copy next to it (`Pump_On.png` makes `Pump_On.svg`) as soon as it is added, so pictures stay sharp at any size. The original is never changed, so BruControl can still use it, and you keep using the `.png` path everywhere. **Settings > Pictures** shows each original beside its SVG: by default the SVG is used for drawing-like pictures and the original for photo-like ones (tracing makes photos blotchy), and you can pick per picture or for all. A hand-made SVG with the same name is used instead and never overwritten. Pictures over 2 megapixels (photo backgrounds) are left as they are. Tracing runs in the background and needs no extra install. |
@@ -197,7 +198,7 @@ Only **vAPI** variables are in the API (the old `/api/globals/...` address works
 
 ```
 server.js            the server
-lib/                 engine (scripts), store (elements), logger (SQLite), hardware, beerxml
+lib/                 engine (scripts), store (elements), logger (SQLite), hardware, beerxml, mqtt
 public/              the browser app
 config/brewery.json  workspaces (the tabs), elements, graphics, devices, settings (edited by the app; a .bak is kept)
 scripts/*.txt        scripts
@@ -208,7 +209,7 @@ data/                state.json (variable values kept over restarts), brewlog.db
 tools/               reset-password.js (forgotten password)
 help/                the manual shown on the Help tab, one Markdown file per page
 firmware/            Mega_BrewPanel.ino (Mega: USB or Ethernet shield), ESP32_Bridge.ino (WiFi or Ethernet bridge)
-docs/                DEVICE_PROTOCOL.md, brewpanel.service, REMOTE_ACCESS.md (login and Tailscale)
+docs/                DEVICE_PROTOCOL.md, MQTT_AND_VOICE.md, brewpanel.service, REMOTE_ACCESS.md (login and Tailscale)
 ```
 
 ## 6. Prototype limits
