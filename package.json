@@ -4,8 +4,15 @@
   "description": "Browser-based brewery control panel with BruControl-style scripts",
   "type": "module",
   "main": "server.js",
-  "scripts": { "start": "node --no-warnings server.js" },
-  "engines": { "node": ">=22.13" },
-  "optionalDependencies": { "serialport": "^12.0.0" },
+  "scripts": {
+    "start": "node --no-warnings server.js",
+    "test": "node test/engine.test.js && node test/variables.test.js && node test/brucontrol.test.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "optionalDependencies": {
+    "serialport": "^12.0.0"
+  },
   "license": "MIT"
 }

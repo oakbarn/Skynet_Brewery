@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <ActiveWorkspaceIndex>0</ActiveWorkspaceIndex>
+  <Devices>
+    <Device>
+      <Address>192.168.1.2</Address>
+      <BaudRate>115200</BaudRate>
+      <Enabled>true</Enabled>
+      <ID>d0000000-0000-0000-0000-000000000001</ID>
+      <Interface>Serial</Interface>
+      <LoggingEnabled>true</LoggingEnabled>
+      <Name>Brewery (2560)</Name>
+      <Port>5000</Port>
+      <Ports>
+        <DevicePort xmlns="" i:type="DigitalOutPort">
+          <Enabled>true</Enabled><ID>p-do-22</ID><Number>22</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <ActiveLow>false</ActiveLow><DualThrowDelay>0</DualThrowDelay><DualThrowPortNum>-1</DualThrowPortNum><OneShot>0</OneShot><OneShotDirection>false</OneShotDirection><State>true</State>
+        </DevicePort>
+        <DevicePort xmlns="" i:type="DigitalOutPort">
+          <Enabled>true</Enabled><ID>p-do-23</ID><Number>23</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <ActiveLow>true</ActiveLow><DualThrowDelay>0</DualThrowDelay><DualThrowPortNum>-1</DualThrowPortNum><OneShot>500</OneShot><OneShotDirection>false</OneShotDirection><State>false</State>
+        </DevicePort>
+        <DevicePort xmlns="" i:type="AnalogInPort">
+          <Enabled>true</Enabled><ID>p-ai-57</ID><Number>57</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <AvgWeight>100</AvgWeight>
+          <CalValue>
+            <Calibrations>
+              <Calibration xmlns="" i:type="SteinhartHartCalibration"><Enabled>true</Enabled><A>0.001137155</A><B>0.00023259496</B><C>0.000000095400</C><Resistor>9960</Resistor></Calibration>
+              <Calibration xmlns="" i:type="KelvinToFahrenheitCalibration"><Enabled>true</Enabled></Calibration>
+            </Calibrations>
+            <Precision>1</Precision><Prefix></Prefix><RequestedValue>0</RequestedValue><Suffix>°F</Suffix>
+          </CalValue>
+          <PollRate>500</PollRate>
+        </DevicePort>
+        <DevicePort xmlns="" i:type="AnalogInPort">
+          <Enabled>true</Enabled><ID>p-ai-62</ID><Number>62</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <AvgWeight>25</AvgWeight>
+          <CalValue>
+            <Calibrations>
+              <Calibration xmlns="" i:type="MultiplierCalibration"><Enabled>true</Enabled><Multiplier>0.5</Multiplier></Calibration>
+              <Calibration xmlns="" i:type="OffsetCalibration"><Enabled>true</Enabled><Offset>-10</Offset></Calibration>
+              <Calibration xmlns="" i:type="LookupTableCalibration"><Enabled>true</Enabled><Rows><Row><X>0</X><Y>0</Y></Row><Row><X>100</X><Y>20</Y></Row></Rows></Calibration>
+            </Calibrations>
+            <Precision>2</Precision><Prefix></Prefix><RequestedValue>0</RequestedValue><Suffix> gal</Suffix>
+          </CalValue>
+          <PollRate>500</PollRate>
+        </DevicePort>
+        <DevicePort xmlns="" i:type="HysteresisPort">
+          <Enabled>false</Enabled><ID>p-hys-5</ID><Number>5</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <ActiveLow>false</ActiveLow><InputPortID>p-ai-57</InputPortID><OnDelay>0</OnDelay><OnOffset>2</OnOffset><PredictiveHysteresis>false</PredictiveHysteresis><Target>150</Target>
+        </DevicePort>
+        <DevicePort xmlns="" i:type="PIDPort">
+          <Enabled>false</Enabled><ID>p-pid-7</ID><Number>7</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <CalValue><Calibrations /><Precision>0</Precision><Prefix></Prefix><RequestedValue>0</RequestedValue><Suffix></Suffix></CalValue>
+          <CalcTime>1</CalcTime><InputPortID>p-ai-57</InputPortID><Kd>5</Kd><Ki>1</Ki><Kp>30</Kp><MaxIntegral>50</MaxIntegral><MaxOutput>100</MaxOutput><OutTime>1</OutTime><Pwm>true</Pwm><Reversed>false</Reversed><Target>152</Target>
+        </DevicePort>
+        <DevicePort xmlns="" i:type="PWMOutPort">
+          <Enabled>false</Enabled><ID>p-pwm-9</ID><Number>9</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <CalValue><Calibrations /><Precision>0</Precision><Prefix></Prefix><RequestedValue>255</RequestedValue><Suffix></Suffix></CalValue>
+        </DevicePort>
+        <DevicePort xmlns="" i:type="DutyCyclePort">
+          <Enabled>false</Enabled><ID>p-dc-8</ID><Number>8</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <DutyCycle>80</DutyCycle><Interval>1000</Interval>
+        </DevicePort>
+      </Ports>
+      <ReceiveTimeout>3000</ReceiveTimeout>
+      <RefreshInterval>1000</RefreshInterval>
+      <SerialPort>3</SerialPort>
+      <TypeName>Arduino MEGA</TypeName>
+      <WiringMap>FW_v46</WiringMap>
+    </Device>
+    <Device>
+      <Address>192.168.1.60</Address><BaudRate>115200</BaudRate><Enabled>false</Enabled><ID>d0000000-0000-0000-0000-000000000002</ID>
+      <Interface>Network TCP</Interface><LoggingEnabled>false</LoggingEnabled><Name>Interface 1</Name><Port>5000</Port>
+      <Ports>
+        <DevicePort xmlns="" i:type="OWTempPort">
+          <Enabled>true</Enabled><ID>p-ow-200</ID><Number>200</Number><PrimaryDisplayChannel>0</PrimaryDisplayChannel><RefreshMultiple>1</RefreshMultiple>
+          <SensorIndex>0</SensorIndex>
+          <Temperature><Calibrations /><Precision>1</Precision><Prefix></Prefix><RequestedValue>0</RequestedValue><Suffix></Suffix></Temperature>
+          <Unit>Fahrenheit</Unit>
+        </DevicePort>
+      </Ports>
+      <ReceiveTimeout>3000</ReceiveTimeout><RefreshInterval>1000</RefreshInterval><SerialPort>1</SerialPort><TypeName>ESP32</TypeName><WiringMap>Default</WiringMap>
+    </Device>
+  </Devices>
+  <Processes>
+    <Process>
+      <AutoStart>true</AutoStart><ID>proc-1</ID><Name>looper_Sample</Name>
+      <Script>// sample &amp; "quoted"&#xD;
+new value vV&#xD;
+vV = "MB_57_Kettle" value&#xD;
+"gblV_Kettle" value = vV&#xD;
+"alm_Done" fileindex = 2&#xD;
+"alm_Done" sound = Custom&#xD;
+"VGC_22_Valve" background = 2&#xD;
+"gblS_Msg" visibility = hiddenlocked&#xD;
+"MB_05_Hys" enabled = true&#xD;
+"MB_07_PID" target = 155&#xD;
+reset "tm_Boil"&#xD;
+</Script>
+      <UserControl>true</UserControl>
+    </Process>
+  </Processes>
+  <ShowProcesses>true</ShowProcesses>
+  <Workspaces>
+    <Workspace>
+      <BackgroundImageHeight>1000</BackgroundImageHeight>
+      <BackgroundImagePath>C:\BruControl\Media\System_Back_1 .png</BackgroundImagePath>
+      <BackgroundImageWidth>1900</BackgroundImageWidth>
+      <Elements>
+        <Element xmlns="" i:type="DeviceElement">
+          <Appearance>
+            <BackgroundImageIndex>1</BackgroundImageIndex>
+            <BackgroundImages xmlns:d7p1="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+              <d7p1:string>C:\BruControl\Media\Valve_Ball_OpenV-1x1.png</d7p1:string>
+              <d7p1:string>C:\Brucontrol\Media\Valve_Ball_ClosedV-1x1.png</d7p1:string>
+              <d7p1:string></d7p1:string>
+            </BackgroundImages>
+            <BorderVisibility>Hidden</BorderVisibility>
+            <DisplayKind>Text</DisplayKind>
+            <EnableButtonVisibility>Never</EnableButtonVisibility>
+            <NameAlignment>Default</NameAlignment>
+            <NameBackColor /><NameFont /><NameForeColor />
+            <NameVisibility>Hidden</NameVisibility>
+            <TextDisplayOptions><FalseText>Closed</FalseText><Precision>0</Precision><TrueText>Open</TrueText></TextDisplayOptions>
+            <ValueAlignment>Default</ValueAlignment><ValueBackColor /><ValueEnlargement /><ValueFont /><ValueForeColor />
+            <Visibility>Default</Visibility>
+          </Appearance>
+          <DisplayName></DisplayName><Enabled>false</Enabled><Height>50</Height><ID>e-1</ID><Name>VGC_22_Valve</Name><UserControl>true</UserControl><Width>50</Width><X>1110</X><Y>680</Y>
+          <PortID>p-do-22</PortID>
+        </Element>
+        <Element xmlns="" i:type="DeviceElement">
+          <Appearance>
+            <BackgroundImageIndex>0</BackgroundImageIndex>
+            <BackgroundImages xmlns:d7p1="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><d7p1:string></d7p1:string><d7p1:string></d7p1:string><d7p1:string></d7p1:string></BackgroundImages>
+            <BorderVisibility>Default</BorderVisibility>
+            <DigitalGaugeOptions><DigitCount>4</DigitCount><Mode>Default</Mode><Style>DeepFire</Style></DigitalGaugeOptions>
+            <DisplayKind>DigitalGauge</DisplayKind>
+            <NameAlignment>TopCenter</NameAlignment>
+            <NameBackColor>-16777216</NameBackColor>
+            <NameFont><FontFamily>Microsoft Sans Serif</FontFamily><Size>14.25</Size><Style>Bold</Style><Unit>Point</Unit></NameFont>
+            <NameForeColor>-1</NameForeColor>
+            <NameVisibility>Default</NameVisibility>
+            <Visibility>Visible</Visibility>
+          </Appearance>
+          <DisplayName>Kettle °F</DisplayName><Enabled>false</Enabled><Height>90</Height><ID>e-2</ID><Name>MB_57_Kettle</Name><UserControl>false</UserControl><Width>250</Width><X>1650</X><Y>0</Y>
+          <PortID>p-ai-57</PortID>
+        </Element>
+        <Element xmlns="" i:type="DeviceElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>MB_62_Volume</Name><Height>60</Height><Width>120</Width><X>0</X><Y>0</Y><PortID>p-ai-62</PortID></Element>
+        <Element xmlns="" i:type="DeviceElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>VGC_23_Pulse</Name><Height>60</Height><Width>120</Width><X>0</X><Y>70</Y><PortID>p-do-23</PortID></Element>
+        <Element xmlns="" i:type="DeviceElement"><Appearance><Visibility>Default</Visibility><DisplayKind>StateIndicator</DisplayKind><IndicatorOptions><OffColor>Red</OffColor><OnColor>Green</OnColor></IndicatorOptions></Appearance><Name>MB_05_Hys</Name><Height>60</Height><Width>120</Width><X>0</X><Y>140</Y><PortID>p-hys-5</PortID></Element>
+        <Element xmlns="" i:type="DeviceElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>MB_07_PID</Name><Height>60</Height><Width>120</Width><X>0</X><Y>210</Y><PortID>p-pid-7</PortID></Element>
+        <Element xmlns="" i:type="DeviceElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>MB_09_PWM</Name><Height>60</Height><Width>120</Width><X>0</X><Y>280</Y><PortID>p-pwm-9</PortID></Element>
+        <Element xmlns="" i:type="DeviceElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>MB_08_Duty</Name><Height>60</Height><Width>120</Width><X>0</X><Y>350</Y><PortID>p-dc-8</PortID></Element>
+        <Element xmlns="" i:type="DeviceElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>OneW_200_Radiator</Name><Height>60</Height><Width>120</Width><X>0</X><Y>420</Y><PortID>p-ow-200</PortID></Element>
+        <Element xmlns="" i:type="GlobalVariableElement">
+          <Appearance><Visibility>Hidden</Visibility><ValueForeColor>-16732080</ValueForeColor><ValueAlignment>MiddleCenter</ValueAlignment></Appearance>
+          <DisplayName>Message</DisplayName><Height>60</Height><ID>e-3</ID><Name>gblS_Msg</Name><UserControl>true</UserControl><Width>300</Width><X>200</X><Y>0</Y>
+          <Format /><Precision>0</Precision><Value>Hello &amp; welcome</Value><VariableName /><VariableType>String</VariableType>
+        </Element>
+        <Element xmlns="" i:type="GlobalVariableElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>gblV_Kettle</Name><Height>60</Height><Width>120</Width><X>200</X><Y>70</Y><Precision>1</Precision><Value>65.5</Value><VariableType>Value</VariableType></Element>
+        <Element xmlns="" i:type="GlobalVariableElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>gblT_Delay</Name><Height>60</Height><Width>120</Width><X>200</X><Y>140</Y><Precision>0</Precision><Value>PT1M30S</Value><VariableType>TimeSpan</VariableType></Element>
+        <Element xmlns="" i:type="ToggleSwitchElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>sw_Testing</Name><Height>60</Height><Width>120</Width><X>200</X><Y>210</Y><UserControl>true</UserControl></Element>
+        <Element xmlns="" i:type="TimerElement">
+          <Appearance><Visibility>Default</Visibility></Appearance><Name>tm_Boil</Name><Height>60</Height><Width>120</Width><X>200</X><Y>280</Y>
+          <Alarms><TimerAlarm><AlarmID>00000000-0000-0000-0000-000000000000</AlarmID><Enabled>false</Enabled><Threshold>PT0S</Threshold></TimerAlarm></Alarms>
+          <Format /><InitRunning>false</InitRunning><ResetValue>PT1H</ResetValue><Time>2026-10-03T16:44:04Z</Time><Type>CountDown</Type><Value>PT0S</Value>
+        </Element>
+        <Element xmlns="" i:type="AlarmElement">
+          <Appearance><Visibility>HiddenLocked</Visibility></Appearance><Name>alm_Done</Name><Height>60</Height><Width>120</Width><X>200</X><Y>350</Y>
+          <DigitalOutputID>00000000-0000-0000-0000-000000000000</DigitalOutputID><EmailNotification>false</EmailNotification><FileIndex>1</FileIndex><Loop>true</Loop>
+          <OffImagePath /><OnImagePath /><Sound>Custom</Sound>
+          <SoundFile>C:\BruControl\Media\wave\Done.wav</SoundFile><SoundFile2>C:\BruControl\Media\Wave\Hops.wav</SoundFile2><SoundFile3 />
+        </Element>
+        <Element xmlns="" i:type="ScriptElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>insp_Start</Name><Height>60</Height><Width>120</Width><X>200</X><Y>420</Y><UserControl>true</UserControl><ProcessID>proc-1</ProcessID><VariableName>vV</VariableName></Element>
+      </Elements>
+      <Hidden>false</Hidden>
+      <Name>B1 Brewery</Name>
+    </Workspace>
+    <Workspace>
+      <BackgroundImageHeight>600</BackgroundImageHeight><BackgroundImagePath /><BackgroundImageWidth>800</BackgroundImageWidth>
+      <Elements>
+        <Element xmlns="" i:type="ToggleSwitchElement"><Appearance><Visibility>Default</Visibility></Appearance><Name>sw_Testing</Name><Height>60</Height><Width>120</Width><X>10</X><Y>10</Y><UserControl>false</UserControl></Element>
+      </Elements>
+      <Hidden>false</Hidden><Name>Water</Name>
+    </Workspace>
+  </Workspaces>
+</Configuration>

@@ -14,13 +14,14 @@ const char* FIRMWARE = "0.1";
 
 // ---- your pins ----
 const uint8_t OUTPUT_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 22, 23, 24, 25};
+const uint8_t PWM_PINS[]    = {};                        // PWM outputs 0-255, e.g. {44, 45, 46} (not also in OUTPUT_PINS)
 const uint8_t INPUT_PINS[]  = {30, 31, 32, 33};          // switches / float sensors (to GND, internal pull-up)
 const uint8_t ANALOG_PINS[] = {A0};                      // analog inputs to report, e.g. {A0, A1}
 const uint8_t ONEWIRE_PIN = 40;                          // all DS18B20 probes on one bus, 4.7k pull-up to 5V
 const bool RELAY_ACTIVE_LOW = true;                      // most relay boards switch ON with LOW
 const unsigned long WATCHDOG_MS = 10000;                 // no message for 10 s -> all outputs OFF
 
-const uint8_t N_OUT = sizeof(OUTPUT_PINS), N_IN = sizeof(INPUT_PINS), N_AN = sizeof(ANALOG_PINS);
+const uint8_t N_OUT = sizeof(OUTPUT_PINS), N_PWM = sizeof(PWM_PINS), N_IN = sizeof(INPUT_PINS), N_AN = sizeof(ANALOG_PINS);
 OneWire oneWire(ONEWIRE_PIN);
 DallasTemperature probes(&oneWire);
 int lastIn[N_IN > 0 ? N_IN : 1];
@@ -32,7 +33,12 @@ bool isOutput(int pin) { for (uint8_t i = 0; i < N_OUT; i++) if (OUTPUT_PINS[i] 
 
 void writeOut(int pin, bool on) { digitalWrite(pin, (on ^ RELAY_ACTIVE_LOW) ? HIGH : LOW); }
 
-void allOff() { for (uint8_t i = 0; i < N_OUT; i++) writeOut(OUTPUT_PINS[i], false); }
+bool isPwm(int pin) { for (uint8_t i = 0; i < N_PWM; i++) if (PWM_PINS[i] == pin) return true; return false; }
+
+void allOff() {
+  for (uint8_t i = 0; i < N_OUT; i++) writeOut(OUTPUT_PINS[i], false);
+  for (uint8_t i = 0; i < N_PWM; i++) analogWrite(PWM_PINS[i], 0);
+}
 
 void reportInputs() {
   for (uint8_t i = 0; i < N_IN; i++) { int v = digitalRead(INPUT_PINS[i]) == LOW ? 1 : 0; lastIn[i] = v; LINK.print("DI "); LINK.print(INPUT_PINS[i]); LINK.print(' '); LINK.println(v); }
@@ -54,6 +60,14 @@ void handle(String cmd) {
     LINK.print("DO "); LINK.print(pin); LINK.print(' '); LINK.println(v == 1 ? 1 : 0);
     return;
   }
+  if (cmd.startsWith("PWM ")) {
+    int sp = cmd.indexOf(' ', 4);
+    int pin = cmd.substring(4, sp).toInt(); int v = constrain(cmd.substring(sp + 1).toInt(), 0, 255);
+    if (!isPwm(pin)) { LINK.print("ERR pin "); LINK.print(pin); LINK.println(" is not in PWM_PINS"); return; }
+    analogWrite(pin, v);
+    LINK.print("PWM "); LINK.print(pin); LINK.print(' '); LINK.println(v);
+    return;
+  }
   LINK.print("ERR unknown command: "); LINK.println(cmd);
 }
 
@@ -72,6 +86,7 @@ void sendTemps() {
 
 void setup() {
   for (uint8_t i = 0; i < N_OUT; i++) { pinMode(OUTPUT_PINS[i], OUTPUT); writeOut(OUTPUT_PINS[i], false); }
+  for (uint8_t i = 0; i < N_PWM; i++) { pinMode(PWM_PINS[i], OUTPUT); analogWrite(PWM_PINS[i], 0); }
   for (uint8_t i = 0; i < N_IN; i++) { pinMode(INPUT_PINS[i], INPUT_PULLUP); lastIn[i] = -1; }
   LINK.begin(115200);
   probes.begin();

@@ -125,6 +125,19 @@
     <button id="importBtn" class="primary">Import</button>
     <pre id="importResult"></pre>
     <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
+
+    <h3>BruControl configuration</h3>
+    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, workspaces, elements and scripts are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
+    <input type="file" id="bruFile" accept=".brucfg,.xml">
+    <div class="import-opts">
+      <label>What to do <select id="bruMode"><option value="replace">Replace my workspaces, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
+      <label class="toggle"><input type="checkbox" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
+      <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace scripts with the same name (old copy kept as .bak)</label>
+      <label>Picture folder <input id="bruMedia" value="oakbarn" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
+    </div>
+    <button id="bruPreview">Check file</button>
+    <button id="bruImport" class="primary">Import</button>
+    <pre id="bruResult"></pre>
   </section>
 
   <!-- ===== Settings ===== -->
