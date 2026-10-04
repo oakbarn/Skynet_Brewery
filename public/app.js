@@ -405,6 +405,12 @@ function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : ''), 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
   if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
+  if (vkKind(e) === 'list') {        // vKonstant List: pick the Text, the element gets that choice's Value
+    const s = h('select', { class: 'vksel', ...(editing || e.readOnly ? { disabled: true } : {}) }, ...(e.items || []).map(i => h('option', { value: String(i.value) }, i.text || String(i.value))));
+    s.addEventListener('click', ev => ev.stopPropagation());
+    s.onchange = () => { const it = (e.items || []).find(i => String(i.value) === s.value); if (it) setProp(e.name, 'value', it.value); };
+    n.append(s);
+  }
   if (e.type === 'manual') n.append(h('div', { class: 'mv' }, h('div', { class: 'mvPic' }), h('div', { class: 'mvRows' })));
   place(n, elGeom(e));
   if (e.hideName) n.querySelector('.nm').classList.add('hidden');
@@ -461,6 +467,11 @@ function fillEl(n, e) {
     case 'vKonstant':
       switch (vkKind(e)) {
         case 'graphic': img = v.value || img; text = ''; break;            // the value IS the picture path
+        case 'list': {
+          const s = n.querySelector('.vksel'), it = (e.items || []).find(i => String(i.value) === String(v.value));
+          if (s && document.activeElement !== s) s.value = it ? String(it.value) : '';
+          text = s ? '' : it ? it.text : fmtVal(e, v.value); break;
+        }
         case 'switch': case 'pushbutton': case 'momentary': case 'bool':
           on = !!v.value; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF'); break;
         default: text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : '');
@@ -1073,6 +1084,7 @@ $('#addEl').onclick = () => {
   if (kind === 'pushbutton' || kind === 'momentary') { e.w = 100; e.h = 100; }
   if (kind === 'longstring') { e.w = 360; e.h = 200; }
   if (kind === 'graphic') { e.hideName = true; e.w = 140; e.h = 120; }
+  if (kind === 'list') { e.w = 200; e.h = 70; e.items = [{ value: 1, text: '' }, { value: 2, text: '' }, { value: 3, text: '' }]; e.initial = '1'; }
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
@@ -1143,7 +1155,7 @@ const F = {
     ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
-  digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (No = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', ['switch', 'momentary', 'toggle', 'latch', 'counter']],
@@ -1169,7 +1181,7 @@ const F = {
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
-  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (No = time-proportioned on/off)', 'bool']],
+  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
@@ -1192,13 +1204,15 @@ F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep valu
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
 F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vkKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+  ['items', 'Choices: Value (what Processes see and trigger on) and Text (what the dropdown shows)', 'vkitems', null, ['list']],
+  ['initial', 'Starting choice (its Value)', 'text', null, ['list']],
   ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
   ['file', 'Text file path (inside a media folder, a network drive works if it is added there)', 'path', null, ['longstring']],
   ['initial', 'Initial value', 'text', null, PLAINK], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units', [...NUMK, 'string']],
   ['step', '+ / - step', 'num', null, NUMK], ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK],
   ['onText', 'Text when on', 'text', null, BOOLK], ['offText', 'Text when off', 'text', null, BOOLK],
   ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
-  ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', ...PLAINK]]];
+  ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', 'list', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', 'list', ...PLAINK]]];
 F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
   ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num', null, NUMK],
   ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true],
@@ -1250,9 +1264,20 @@ function field([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
     ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)));
-  else if (kind === 'bool' || kind === 'yn') {     // every true / false setting is a Yes / No dropdown (Fritz)
-    const on = !!(v ?? opts);
-    input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: 'yes', ...(on ? { selected: true } : {}) }, 'Yes'), h('option', { value: 'no', ...(on ? {} : { selected: true }) }, 'No'));
+  else if (kind === 'bool' || kind === 'yn') {     // a simple true / false is a switch (Fritz); choices with more options are dropdowns
+    input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'bool', ...(v ?? opts ? { checked: true } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) }), h('span', { class: 'swk' }));
+  }
+  else if (kind === 'vkitems') {   // two columns: Value | Text, with rows to add and remove
+    const tb = h('tbody');
+    const row = (it = {}) => {
+      const tr = h('tr', { class: 'vkrow' }, h('td', {}, h('input', { class: 'vkv', type: 'number', step: 'any', value: it.value ?? '' })), h('td', {}, h('input', { class: 'vkt', type: 'text', value: it.text ?? '', placeholder: 'e.g. Mash' })),
+        h('td', {}, h('button', { type: 'button', title: 'Remove this row', onclick: () => tr.remove() }, '✕')));
+      tb.append(tr);
+    };
+    (v || []).forEach(row);
+    const add = h('button', { type: 'button', onclick: () => { const vs = [...tb.querySelectorAll('.vkv')].map(i => +i.value).filter(Number.isFinite); row({ value: vs.length ? Math.max(...vs) + 1 : 1 }); tb.lastChild.querySelector('.vkt').focus(); } }, '+ Add row');
+    input = h('div', { class: 'vkitems', 'data-k': key, 'data-kind': kind }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Value'), h('th', {}, 'Text'), h('th'))), tb), add);
+    return [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)];
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, or Custom with a color picker
     const cols = [...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];
@@ -1306,7 +1331,12 @@ function readFields(obj) {
   for (const inp of $$('#dlgBody [data-k]')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
     let v;
-    if (kind === 'bool' || kind === 'yn') v = inp.value === 'yes';
+    if (kind === 'bool') v = inp.checked;
+    else if (kind === 'vkitems') {
+      v = [...inp.querySelectorAll('.vkrow')].map(tr => ({ value: tr.querySelector('.vkv').value.trim(), text: tr.querySelector('.vkt').value.trim() })).filter(r => r.value !== '' || r.text);
+      for (const r of v) { if (r.value === '' || !Number.isFinite(+r.value)) throw new Error(`Choice "${r.text}": its Value must be a number`); r.value = +r.value; }
+      if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
+    }
     else if (kind === 'num') v = inp.value === '' ? undefined : +inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
@@ -1552,7 +1582,7 @@ $('#delScript').onclick = guard(async () => {
   curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
 });
 function renderConsole() {
-  const all = $('#consoleAll').value === 'all';
+  const all = $('#consoleAll').checked;
   const rows = S.console.filter(c => all || !curScript || c.script === curScript).slice(-400);
   const pad = n => String(n).padStart(2, '0');
   $('#console').textContent = rows.map(c => { const d = new Date(c.ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${all ? '[' + c.script + '] ' : ''}${c.text}`; }).join('\n');
@@ -1749,7 +1779,7 @@ function bruReport(r) {
 }
 async function bruSend(preview) {
   const f = $('#bruFile').files[0]; if (!f) throw new Error('Choose a BruControl .brucfg file first');
-  const q = new URLSearchParams({ mode: $('#bruMode').value, simulate: $('#bruSim').value === 'yes' ? '1' : '0', overwrite: $('#bruOverwrite').value === 'yes' ? '1' : '0', media: $('#bruMedia').value.trim(), preview: preview ? '1' : '0' });
+  const q = new URLSearchParams({ mode: $('#bruMode').value, simulate: $('#bruSim').checked ? '1' : '0', overwrite: $('#bruOverwrite').checked ? '1' : '0', media: $('#bruMedia').value.trim(), preview: preview ? '1' : '0' });
   $('#bruResult').textContent = preview ? 'Reading…' : 'Importing…';
   try { return await api('POST', '/ui/import/brucontrol?' + q, await f.text(), true); } catch (e) { $('#bruResult').textContent = ''; throw e; }
 }
@@ -1795,10 +1825,8 @@ function renderSettings() {
   $('#setKey').value = c.apiKey || '';
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
   const box = $('#setAuto'); box.innerHTML = '';
-  for (const s of S.scripts) {      // one Yes / No dropdown per script
-    const on = (c.autostart || []).includes(s.name);
-    box.append(h('label', { class: 'yn-row' }, h('select', { 'data-script': s.name }, h('option', { value: 'yes', ...(on ? { selected: true } : {}) }, 'Yes'), h('option', { value: 'no', ...(on ? {} : { selected: true }) }, 'No')), s.name));
-  }
+  for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
+
 }
 // ---- accounts
 $('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
@@ -1829,7 +1857,7 @@ $('#saveSettings').onclick = guard(async () => {
   let beer; try { beer = JSON.parse($('#setBeer').value || '{}'); } catch { throw new Error('BeerXML mapping is not valid JSON'); }
   await api('PUT', '/ui/settings', {
     title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean),
-    apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto select').filter(i => i.value === 'yes').map(i => i.dataset.script),
+    apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
   });
   await load(); toast('Settings saved');
 });

@@ -75,7 +75,7 @@
         </div>
         <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
         <ul id="problems"></ul>
-        <div class="bar"><strong>Output</strong><label class="toggle">Show <select id="consoleAll"><option value="one">this script</option><option value="all">all scripts</option></select></label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
+        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all scripts</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
         <pre id="console"></pre>
       </div>
     </div>
@@ -143,8 +143,8 @@
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
       <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
-      <label class="toggle"><select id="bruSim"><option value="yes" selected>Yes</option><option value="no">No</option></select> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
-      <label class="toggle"><select id="bruOverwrite"><option value="yes" selected>Yes</option><option value="no">No</option></select> Replace scripts with the same name (old copy kept as .bak)</label>
+      <label class="toggle"><input type="checkbox" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
+      <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace scripts with the same name (old copy kept as .bak)</label>
       <label>Picture folder <input id="bruMedia" value="oakbarn" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
     </div>
     <button id="bruPreview">Check file</button>
@@ -160,7 +160,7 @@
       <button id="mdNew">📁 New folder</button>
       <button id="mdUp" title="Up one folder">⬆ Up</button>
       <select id="mdView" title="View"><option value="icons">Large icons</option><option value="details">Details</option></select>
-      <label class="mdReplace"><select id="mdReplace"><option value="yes">Yes</option><option value="no" selected>No</option></select> Replace files with the same name</label>
+      <label class="mdReplace"><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
     </div>
     <div class="mdAddress"><span id="mdCrumbs" class="mdCrumbs"></span><input id="mdFilter" placeholder="🔍 Search this folder"></div>
     <div class="mdExplorer">
