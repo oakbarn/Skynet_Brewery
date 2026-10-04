@@ -15,6 +15,7 @@
     <button data-view="globals">Globals</button>
     <button data-view="log">Log</button>
     <button data-view="devices">Devices</button>
+    <button data-view="media">Media</button>
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
   </nav>
@@ -122,6 +123,22 @@
     <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
   </section>
 
+  <!-- ===== Media: add pictures and sounds from any browser ===== -->
+  <section id="view-media" class="view">
+    <div class="bar">
+      <label class="mdPickBtn primary">Add pictures / sounds<input id="mdPick" type="file" multiple accept="image/*,audio/*,.zip,.wav,.mp3,.ogg,.m4a,.svg" hidden></label>
+      <button id="mdNew">New folder</button>
+      <label><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
+    </div>
+    <p class="muted">Pick files or drag them onto this page: pictures (png, jpg, gif, svg, webp, bmp), sounds (wav, mp3, ogg, m4a), or a .zip of them, which is unpacked keeping its folders. PNG and JPG pictures get their SVG copy automatically; those copies are not listed here, see Settings &gt; Pictures.</p>
+    <div class="bar"><select id="mdRoot" title="Media folder"></select><span id="mdCrumbs" class="mdCrumbs"></span></div>
+    <div id="mdProgress" class="muted"></div>
+    <div id="mdFolders" class="mdFolders"></div>
+    <div class="bar"><input id="mdFilter" placeholder="Filter by name"><span id="mdCount" class="muted"></span></div>
+    <p id="mdEmpty" class="muted" hidden>This folder is empty. Add files above.</p>
+    <div id="mdFiles" class="mdFiles"></div>
+  </section>
+
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
     <div class="form">
@@ -149,5 +166,6 @@
 <div id="toast"></div>
 <script type="module" src="app.js"></script>
 <script type="module" src="pictures.js"></script>
+<script type="module" src="media.js"></script>
 </body>
 </html>
