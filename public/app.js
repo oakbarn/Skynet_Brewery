@@ -17,6 +17,7 @@ const bg = v => (v === '' || v === null || v === undefined) ? '' : (PALETTE[Stri
 
 let S = null;                 // server state
 let view = 'workspace', wsName = null, zoom = 'fit';
+try { zoom = localStorage.getItem('bp.zoom') || 'fit'; } catch { /* private window: default */ }
 let editing = false, draft = null, sel = null;   // sel = {kind:'el'|'gfx', id}
 let soundOn = false;
 const audios = new Map();
@@ -89,13 +90,19 @@ function renderTabs() {
   for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName ? 'active' : '', onclick: () => { wsName = w.name; sel = null; renderTabs(); renderWs(); } }, w.name));
 }
 
-function fitZoom() {
+// Fit width: the tab fills the width of the window, bigger or smaller (a 1920 x 1080 screen at 100 % has no empty space on the right).
+// Whole tab: the whole tab fits in the window without scrolling.
+function fitZoom(again = true) {
   const w = curWs(); if (!w) return;
-  const z = zoom === 'fit' ? Math.min(1, ($('#wsScroll').clientWidth - 4) / (w.width || 1600)) : +zoom;
+  const box = $('#wsScroll'), tw = w.width || 1600, th = w.height || 900, before = box.clientWidth;
+  const byWidth = (box.clientWidth - 4) / tw;
+  const byHeight = (window.innerHeight - box.getBoundingClientRect().top - 14) / th;
+  const z = zoom === 'fit' ? Math.min(3, byWidth) : zoom === 'page' ? Math.min(3, byWidth, byHeight) : +zoom;
   const ws = $('#ws');
   ws.style.transform = `scale(${z})`; ws.dataset.z = z;
   $('#wsSizer').style.width = (w.width || 1600) * z + 'px';
   $('#wsSizer').style.height = (w.height || 900) * z + 'px';
+  if (again && (zoom === 'fit' || zoom === 'page') && box.clientWidth !== before) fitZoom(false);   // a scroll bar came or went: fit to the new width
 }
 const Z = () => +$('#ws').dataset.z || 1;
 
@@ -982,7 +989,15 @@ $('#saveLayout').onclick = guard(async () => {
   toast('Layout saved'); editing = false; await load(); setEditing(false);
 });
 $('#cancelLayout').onclick = () => setEditing(false);
-$('#zoom').onchange = e => { zoom = e.target.value; fitZoom(); };
+$('#zoom').value = zoom;
+$('#zoom').onchange = e => { zoom = e.target.value; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); };
+let fitTimer;
+const refit = () => { clearTimeout(fitTimer); fitTimer = setTimeout(() => { if (view === 'workspace') fitZoom(); }, 100); };
+window.addEventListener('resize', refit);
+document.addEventListener('fullscreenchange', () => { $('#fullScreen').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; refit(); });
+// Full screen hides the browser's own bars (phones without it, like iPhones, just do not show the button)
+if (!document.documentElement.requestFullscreen) $('#fullScreen').classList.add('hidden');
+$('#fullScreen').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => { });
 window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); });
 
 // ---------------------------------------------------------------- properties dialog
