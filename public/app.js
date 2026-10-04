@@ -247,9 +247,13 @@ function fillEl(n, e) {
       break;
     case 'digitalOut': case 'switch': case 'digitalIn':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
+      if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || v.image || ''; break;
-    case 'temperature': case 'analogIn': text = (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
-    case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) : (e.offText ?? 'OFF'); break;
+    case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' : (e.offText ?? 'OFF'); break;
+    case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
+    case 'scale': text = `${fmtVal(e, v.volume)} ${e.volumeUnits || 'gal'} · ${fmtVal(e, v.value)} ${e.weightUnits || 'lb'}`; break;
+    case 'flowMeter': text = `${fmtVal(e, v.rate)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total)} ${e.units || 'gal'}`; on = v.rate > 0; break;
     case 'dutyCycle': on = !!v.state; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     case 'hysteresis': on = !!v.state; text = v.enabled ? `${on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
@@ -275,6 +279,7 @@ function fillEl(n, e) {
   vl.textContent = e.hideValue ? '' : text;
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden');
+  n.classList.toggle('fault', !!v.fault);
   n.style.backgroundColor = img ? '' : (e.images ? '' : bg(v.background));
   n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
@@ -299,7 +304,9 @@ function tapAction(e) {
   if (e.tap && e.tap !== 'default') return e.tap;
   switch (e.type) {
     case 'digitalOut': case 'switch': return 'toggle';
-    case 'digitalIn': return simDev(e.device) ? 'toggle' : 'none';
+    case 'digitalIn': return ['latch', 'toggle', 'counter'].includes(e.mode) ? 'dialog' : simDev(e.device) ? 'toggle' : 'none';
+    case 'pwmOut': case 'analogOut': case 'scale': return 'dialog';
+    case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'global': case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
     case 'vKonstant':
@@ -311,7 +318,7 @@ function tapAction(e) {
   }
 }
 const elByName = n => S.config.elements.find(x => x.name === n);
-const boolProp = t => t.type === 'alarm' ? 'active' : isVarEl(t) ? 'value' : 'state';
+const boolProp = t => t.type === 'alarm' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
 const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
 async function doTap(e) {
@@ -328,7 +335,7 @@ async function doTap(e) {
   }
   const t = elByName(targetName); if (!t) return toast(`No element "${targetName}"`, true);
   if (act === 'toggle' && isBoolEl(t)) {
-    const cur = isOn(t.name);
+    const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.displayname ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
     return setProp(t.name, boolProp(t), !cur);
   }
@@ -418,8 +425,17 @@ function valueDialog(t) {
   if (CONTROL_MAIN[t.type]) return controlDialog(t);
   const v = S.values[t.name] || {};
   const title = v.displayname ?? t.name;
+  if (t.type === 'scale') return scaleDialog(t, title);
+  if (t.type === 'digitalIn') {   // latch / toggle: reset to off; counter: count back to 0
+    const sim = simDev(t.device) ? [['Simulate: input ON', 'on'], ['Simulate: input OFF', 'off']] : [];
+    return choose(title, [...sim, t.mode === 'counter' ? ['Reset count to 0', 'count'] : ['Reset (off)', 'reset']])
+      .then(r => r === 'count' ? setProp(t.name, 'count', 0) : r === 'reset' ? setProp(t.name, 'reset', true) : r ? setProp(t.name, 'raw', r === 'on') : undefined);
+  }
   if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
-  if (!isVarEl(t) || t.readOnly) return;
+  const numDev = ['pwmOut', 'analogOut', 'analogIn', 'temperature'].includes(t.type);
+  if (!(isVarEl(t) || numDev) || t.readOnly) return;
+  if (numDev) t = { ...t, dataType: 'value', units: t.type === 'pwmOut' ? '%' : t.units,
+    min: t.type === 'pwmOut' ? 0 : t.type === 'analogOut' ? (t.rangeLow ?? 0) : t.min, max: t.type === 'pwmOut' ? 100 : t.type === 'analogOut' ? (t.rangeHigh ?? 100) : t.max };
   const d = $('#valDlg'); d.innerHTML = '';
   const num = t.dataType === 'value', k = vkKind(t);
   const inp = t.dataType === 'string' && k !== 'graphic'
@@ -441,6 +457,16 @@ function valueDialog(t) {
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
   inp.addEventListener('keydown', ke => { if (ke.key === 'Enter' && inp.tagName === 'INPUT') { ke.preventDefault(); done(true); } });
   d.showModal(); setTimeout(() => { inp.focus(); inp.select?.(); }, 50);
+}
+
+// Scale: Tare (zero it now) or calibrate with a known weight
+async function scaleDialog(t, title) {
+  const r = await choose(title, [['Tare (zero)', 'tare'], ['Calibrate…', 'cal']]);
+  if (r === 'tare') return setProp(t.name, 'tare', true);
+  if (r === 'cal') {
+    const w = parseFloat(prompt(`1. Tare the empty scale first.\n2. Put a known weight on it.\n3. Enter that weight in ${t.weightUnits || 'lb'}:`) || '');
+    if (w > 0) { await setProp(t.name, 'calibrate', w); toast('Scale calibrated'); }
+  }
 }
 
 // ---- pipes: drawn lines that show flow when all of their "flow when" elements are on
@@ -681,17 +707,78 @@ const PRESETS = {
   },
   valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'oakbarn/Valve_Ball_OpenV-1x1.png', imageOff: 'oakbarn/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
+// Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
+(() => {
+  const an = [...Array(16).keys()].map(i => [`A${i}`, `A${i} = pin ${54 + i} (BruControl)`]);
+  const dig = [...Array(54).keys()].map(i => [String(i), `D${i}`]);
+  const lists = { analog: an, digital: [...dig, ...an], pwm: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 44, 45, 46].map(i => [String(i), `D${i} (PWM)`]), interrupt: [2, 3, 18, 19, 20, 21].map(i => [String(i), `D${i} (interrupt)`]) };
+  for (const [k, opts] of Object.entries(lists)) document.body.append(h('datalist', { id: 'pins-' + k }, ...opts.map(([v, t]) => h('option', { value: v, label: t }, t))));
+})();
+
+// What can be added. Devices sit on a pin of a hobby board (Arduino, ESP32, Raspberry Pi); Widgets live only in the app.
+const ADD_MENU = [
+  ['Devices: outputs (board pin)', [
+    ['Relay module / SSR / contactor (on-off)', 'digitalOut', 'DO'],
+    ['PWM output: MOSFET module, pump speed, element %', 'pwmOut', 'PWM'],
+    ['Analog output 0-10 V (PWM-to-0-10V module, VFD speed)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }],
+    ['Analog output 4-20 mA (PWM-to-4-20mA module)', 'analogOut', 'AO', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: '%' }],
+    ['Pump (relay output with inlet and outlet IPs for pipes)', 'pump', 'Pump'],
+    ['Valve (relay output with an IP at each end)', 'valve', 'Valve'],
+    ['Proportional valve 0-100 % (analog output)', 'propValve', 'PropValve'],
+  ]],
+  ['Devices: control outputs (switch a pin by themselves)', [
+    ['Duty cycle (on for a % of each cycle)', 'dutyCycle', 'Duty'],
+    ['Hysteresis (on / off around a target)', 'hysteresis', 'Hyst'],
+    ['PID (holds a target temperature)', 'pid', 'PID'],
+  ]],
+  ['Devices: digital inputs (board pin)', [
+    ['Switch (on while closed)', 'digitalIn', 'DI', { mode: 'switch' }],
+    ['Push button that toggles (press on, press off)', 'digitalIn', 'DI', { mode: 'toggle' }],
+    ['Latching input (stays on until reset: leak, E-stop, alarm)', 'digitalIn', 'DI', { mode: 'latch', onText: 'TRIPPED', offText: 'OK' }],
+    ['Pulse counter (counts presses or pulses)', 'digitalIn', 'Count', { mode: 'counter' }],
+    ['Float / level switch', 'digitalIn', 'Float', { mode: 'switch', onText: 'FULL', offText: 'LOW', onDelay: 2, offDelay: 2 }],
+    ['Flow switch', 'digitalIn', 'FlowSw', { mode: 'switch', onText: 'FLOW', offText: 'NO FLOW', offDelay: 3 }],
+    ['Door / lid / safety interlock', 'digitalIn', 'Interlock', { mode: 'switch', onText: 'CLOSED', offText: 'OPEN' }],
+  ]],
+  ['Devices: temperature probes', [
+    ['DS18B20 (OneWire, waterproof probe)', 'temperature', 'Temp', { sensor: 'ds18b20' }],
+    ['PT100 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt100', wires: 3 }],
+    ['PT1000 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt1000', wires: 3 }],
+    ['Thermocouple type K (MAX31855 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'K' }],
+    ['Thermocouple K / J / T and others (MAX31856 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'J' }],
+    ['NTC thermistor 10k (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
+  ]],
+  ['Devices: analog sensors (board analog pin or ADS1115)', [
+    ['Analog input 0-5 V', 'analogIn', 'AI', { signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input 0-10 V (with voltage divider)', 'analogIn', 'AI', { signal: '0-10V', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input 4-20 mA (250 ohm resistor or current-to-voltage module)', 'analogIn', 'AI', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input on an ADS1115 board (16-bit)', 'analogIn', 'AI', { adc: 'ads1115', signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
+    ['Analog input, raw reading (scale / offset)', 'analogIn', 'AI', { signal: 'raw' }],
+    ['Pressure transducer 0.5-4.5 V (5 V hobby type)', 'analogIn', 'Pressure', { signal: '0.5-4.5V', rangeLow: 0, rangeHigh: 30, units: 'psi', precision: 1 }],
+    ['Level transmitter 4-20 mA', 'analogIn', 'Level', { signal: '4-20mA', rangeLow: 0, rangeHigh: 30, units: 'gal', precision: 1 }],
+    ['pH probe board (two-point calibration)', 'analogIn', 'pH', { signal: 'twoPoint', cal1Raw: 410, cal1Value: 7, cal2Raw: 560, cal2Value: 4, units: 'pH', precision: 2 }],
+    ['Flow meter (hall sensor, e.g. YF-S201)', 'flowMeter', 'Flow', { pulsesPerUnit: 1703, units: 'gal', precision: 2 }],
+  ]],
+  ['Devices: weight', [
+    ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
+  ]],
+  ['Widgets (app only, no board pin)', [
+    ['Picture', 'picture'], ['Global', 'global'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
+    ['Timer', 'timer'], ['Alarm', 'alarm'], ['Label', 'label'],
+  ]],
+];
 function fillAddType() {
-  const kinds = (type, ks) => h('optgroup', { label: type }, ...Object.entries(ks).map(([k, d]) => h('option', { value: type + ':' + k }, `${type}: ${d.label}  (${d.prefix})`)));
+  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
+  if (!ADD_MENU.some(([g]) => g.startsWith('vKonstant'))) ADD_MENU.push(vars('vKonstant', S.vkKinds), vars('vAPI', S.vapiKinds));
   $('#addType').innerHTML = '';
-  $('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'pump', 'valve', 'propValve', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label', 'pwmOut', 'dutyCycle', 'hysteresis', 'pid'].map(t => h('option', { value: t }, { digitalOut: 'digitalOut (plain)', pump: 'Pump (Device Output)', valve: 'Valve (Device Output)', propValve: 'Proportional valve (0-100 %)' }[t] || t)),
-    kinds('vKonstant', S.vkKinds), kinds('vAPI', S.vapiKinds));
+  $('#addType').append(...ADD_MENU.map(([group, items], gi) => h('optgroup', { label: group }, ...items.map((it, ii) => h('option', { value: gi + ':' + ii }, it[0])))));
 }
 $('#addEl').onclick = () => {
-  const [pick, kind] = $('#addType').value.split(':'), preset = PRESETS[pick], type = preset ? preset.type : pick;
-  const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : ({ pump: 'Pump', valve: 'Valve', propValve: 'PropValve' }[pick] || type) + '_';
+  const [gi, ii] = $('#addType').value.split(':').map(Number);
+  const [, pick, prefix, extra] = ADD_MENU[gi][1][ii], preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
+  const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
-  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60, ...(preset ? clone(preset) : {}) };
+  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : type === 'flowMeter' ? 190 : 130, h: type === 'timer' ? 80 : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (type === 'global' || type === 'shared') e.dataType = 'value';
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
@@ -737,14 +824,26 @@ const F = {
     ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'text'], ['nameBg', 'Name background color', 'text'], ['valueColor', 'Value color', 'text'], ['valueBg', 'Value background color', 'text'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment (e.g. TopCenter)', 'text'], ['valueAlign', 'Value alignment (e.g. MiddleCenter)', 'text'], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
-  digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['ipIn', 'Pump inlet / valve end A: IP side', 'sel', SIDES], ['ipOut', 'Pump outlet / valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Active low (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (unticked = pulses ON)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['ipIn', 'Pump inlet / valve end A: IP side', 'sel', SIDES], ['ipOut', 'Pump outlet / valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (unticked = pulses ON)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Active low', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  temperature: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text'], ['offset', 'Calibration offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['sim', 'Simulator settings (JSON)', 'json']],
-  analogIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['scale', 'Scale', 'num'], ['offset', 'Offset', 'num'], ['calibrations', 'Calibrations (JSON list, used instead of scale/offset)', 'json'], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['precision', 'Decimals', 'num'], ['prefix', 'Prefix', 'text'], ['units', 'Units', 'text']],
+  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
+    ['mode', 'Input type', 'sel', ['switch', 'toggle', 'latch', 'counter']],
+    ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
+    ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
+    ['units', 'Counter units (e.g. presses, gal)', 'text'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
-  pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin', 'num'], ['enabled', 'Enabled at start', 'bool'], ['initial', 'Start value (0-255)', 'num'], ['precision', 'Decimals', 'num']],
+  pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
+  analogOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin feeding the 0-10 V / 4-20 mA module', 'pin', 'pwm'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
+    ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'text'], ['precision', 'Decimals', 'num']],
+  scale: [['device', 'Device', 'dev'], ['channel', 'HX711 DT pin(s), comma between several boards on one vessel (e.g. 26, 28)', 'text'],
+    ['countsPerUnit', 'Calibration: counts per lb / kg (tap the scale > Calibrate to measure it)', 'num'],
+    ['weightUnits', 'Weight units', 'sel', ['lb', 'kg']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']],
+    ['specificGravity', 'Liquid specific gravity (water = 1.000, wort e.g. 1.050)', 'num'], ['sgFrom', 'Or take the gravity from (e.g. a Global with the OG)', 'elem'],
+    ['offset', 'Weight offset (added after tare)', 'num'],
+    ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
+    ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (unticked = time-proportioned on/off)', 'bool']],
@@ -771,17 +870,58 @@ F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Obje
   ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'text'], ['step', '+ / - step', 'num', null, NUMK],
   ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true],
   ['_logNote', 'Database trigger: set it on the Globals page', 'note']];
-const fieldsFor = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f() : f || []).filter(x => !x[4] || x[4].includes(obj.kind || 'value')); };
+const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f() : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
-function field([key, label, kind, opts], obj) {
+// Temperature and analog inputs: the settings depend on the sensor / signal picked
+const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
+const SENSOR_FIELDS = {
+  ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
+  pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
+  pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
+  thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'pin', 'digital'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
+  ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
+};
+const SIGNAL_FIELDS = {
+  raw: [['scale', 'Scale (multiplies the raw 0-1023 reading)', 'num'], ['offset', 'Offset', 'num']],
+  twoPoint: [['cal1Raw', 'Point 1: raw reading', 'num'], ['cal1Value', 'Point 1: real value (e.g. pH 7)', 'num'], ['cal2Raw', 'Point 2: raw reading', 'num'], ['cal2Value', 'Point 2: real value (e.g. pH 4)', 'num'], ['offset', 'Extra offset', 'num']],
+  range: [['rangeLow', 'Value at lowest signal', 'num'], ['rangeHigh', 'Value at highest signal', 'num'], ['offset', 'Calibration offset', 'num']],
+};
+function fieldsFor(item) {
+  if (item.type === 'temperature') {
+    const s = item.sensor || 'ds18b20';
+    return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
+  }
+  if (item.type === 'analogIn') {
+    const sig = item.signal || 'raw';
+    return [['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
+      ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
+      ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
+      ['calibrations', 'BruControl calibrations (JSON list, used instead of the settings above)', 'json'], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['prefix', 'Prefix', 'text'],
+      ['units', 'Units', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
+  }
+  return kindFields(item.type, item);
+}
+
+function field([key, label, kind, opts, rerender], obj) {
   const v = obj[key];
   let input;
-  if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
-  else if (kind === 'sel') { const os = opts.map(o => Array.isArray(o) ? o : [o, o]); input = h('select', { 'data-k': key, 'data-kind': kind }, ...os.map(([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l))); }
+  if (kind === 'info') {     // live reading, to help with calibration
+    const r = S.values[obj.name] || {};
+    const txt = obj.type === 'scale' ? `${r.raw ?? '-'}  (tare ${obj.tareRaw ?? 'not set'})` : obj.type === 'analogIn' ? `${r.raw ?? '-'}${r.fault ? '  (signal out of range: check wiring)' : ''}` : r.fault ? 'FAULT: check the probe and its wiring' : `${fmtVal(obj, r.value)} ${obj.units || ''}`;
+    return [h('label', {}, label), h('span', { class: 'info' }, txt)];
+  }
+  if (kind === 'pin') {      // free text with a list of Mega 2560 pins: A0-A15 and their BruControl numbers 54-69 mean the same pin
+    input = h('input', { 'data-k': key, 'data-kind': kind, type: 'text', value: v ?? '', list: 'pins-' + opts, autocomplete: 'off', placeholder: opts === 'analog' ? 'A0' : '22' });
+    return [h('label', {}, label), input];
+  }
+  if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
+    ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)));
+  else if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}) });
+  else if (kind === 'sel') { const os = opts.map(o => Array.isArray(o) ? o : [o, o]); input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...os.map(([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l))); }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
-  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
   else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
@@ -799,6 +939,7 @@ function readFields(obj) {
     let v;
     if (kind === 'bool') v = inp.checked;
     else if (kind === 'num') v = inp.value === '' ? undefined : +inp.value;
+    else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
     else if (kind === 'json') { if (inp.value.trim() === '') v = undefined; else { try { v = JSON.parse(inp.value); } catch { throw new Error(`${k}: not valid JSON`); } } }
     else v = inp.value === '' ? undefined : inp.value;
@@ -806,11 +947,14 @@ function readFields(obj) {
   }
 }
 
+// fields: a list, or a function of the item (the list changes when a [.., true] select changes, e.g. probe type)
 function dialog(title, fields, obj, canDelete) {
   return new Promise(res => {
     $('#dlgTitle').textContent = title;
-    const body = $('#dlgBody'); body.innerHTML = '';
-    for (const f of fields) body.append(...field(f, obj));
+    const body = $('#dlgBody');
+    const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); };
+    build();
+    body.onchange = ev => { if (ev.target.dataset?.rerender) { try { readFields(obj); } catch { } build(); } };
     $('#dlgDelete').classList.toggle('hidden', !canDelete);
     const d = $('#dlg');
     d.onclose = () => res(d.returnValue);
@@ -821,8 +965,11 @@ function dialog(title, fields, obj, canDelete) {
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const type = kind === 'el' ? item.type : item.kind;
-  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...fieldsFor(type, item), ...(isPropValve(item) ? F.propValve : []), ...F.common.slice(3)] : F[type];
-  if (kind === 'el' && prefixOf(item)) fields.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(item)}  (a hint, not required)`, 'note']);
+  const fields = kind === 'el' ? it => {
+    const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...F.common.slice(3)];
+    if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
+    return f;
+  } : F[type];
   const work = clone(item);
   const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type, fields, work, true);
   try {
@@ -1102,29 +1249,51 @@ $('#logLoad').onclick = guard(async () => {
 function renderDevices() {
   const tb = $('#devBody'); tb.innerHTML = '';
   for (const d of S.devices) {
-    const TYPES = { serial: 'Mega (USB)', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' };
+    const TYPES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' };
     const real = d.type === 'simulator' && d.realType ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
       if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
-    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.port || d.host || ''),
+    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
       h('td', {}, real, ' ', h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
+  renderProbes();
+}
+
+// ---- OneWire probe index: numbered slots; elements use the number, the slot holds the probe's ROM id
+const seenRoms = () => { const m = new Map(); for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) m.set(rom, { dev: d.name, t }); return m; };
+function renderProbes() {
+  const slots = S.config.probes || [], seen = seenRoms();
+  const usedBy = i => S.config.elements.filter(e => e.type === 'temperature' && Number(e.probeIndex) === i).map(e => e.name).join(', ');
+  const sb = $('#slotBody'); sb.innerHTML = '';
+  for (const p of slots) {
+    const roms = [...new Set([p.rom, ...seen.keys()].filter(Boolean))];
+    sb.append(h('tr', {}, h('td', {}, String(p.index)),
+      h('td', {}, h('input', { value: p.name || '', placeholder: 'e.g. HLT probe', onchange: ev => saveProbes(l => { l.find(x => x.index === p.index).name = ev.target.value; }) })),
+      h('td', {}, h('select', { onchange: ev => setSlotRom(p.index, ev.target.value) }, h('option', { value: '' }, '(no probe)'),
+        ...roms.map(r => h('option', { value: r, ...(r === p.rom ? { selected: true } : {}) }, r + (seen.has(r) ? '' : '  (not seen now)') + (slots.some(x => x.rom === r && x.index !== p.index) ? `  (in #${slots.find(x => x.rom === r).index})` : ''))))),
+      h('td', {}, seen.has(p.rom) ? String(seen.get(p.rom).t) : p.rom ? 'not seen' : ''),
+      h('td', {}, usedBy(p.index)),
+      h('td', {}, h('button', { class: 'danger', onclick: () => { if (usedBy(p.index) && !confirm(`Probe #${p.index} is used by ${usedBy(p.index)}. Remove it anyway?`)) return; saveProbes(l => l.splice(l.findIndex(x => x.index === p.index), 1)); } }, 'Remove'))));
+  }
   const pb = $('#probeBody'); pb.innerHTML = '';
-  const temps = S.config.elements.filter(e => e.type === 'temperature');
-  for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) {
-    const owner = temps.find(e => String(e.probe || '').toUpperCase() === rom);
-    pb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
-      h('td', {}, h('select', { onchange: ev => assignProbe(rom, d.name, ev.target.value) }, h('option', { value: '' }, '(not assigned)'), ...temps.map(e => h('option', { value: e.name, ...(owner === e ? { selected: true } : {}) }, e.name))))));
+  for (const [rom, { dev, t }] of seen) {
+    const slot = slots.find(x => x.rom === rom);
+    pb.append(h('tr', {}, h('td', {}, dev), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
+      h('td', {}, h('select', { onchange: ev => ev.target.value === 'new' ? newSlot(rom) : setSlotRom(+ev.target.value, rom, !ev.target.value) },
+        h('option', { value: '' }, '(no number)'), h('option', { value: 'new' }, '+ new number'),
+        ...slots.map(x => h('option', { value: x.index, ...(slot === x ? { selected: true } : {}) }, `#${x.index} ${x.name || ''}`))))));
   }
 }
-const assignProbe = guard(async (rom, dev, elName) => {
-  const els = clone(S.config.elements);
-  for (const e of els) if (e.type === 'temperature' && String(e.probe || '').toUpperCase() === rom) delete e.probe;
-  if (elName) { const e = els.find(x => x.name === elName); e.probe = rom; e.device = dev; }
-  await api('PUT', '/ui/layout', { elements: els }); S.config.elements = els; toast('Probe assigned'); renderDevices();
+const saveProbes = guard(async change => {
+  const list = clone(S.config.probes || []); change(list);
+  await api('PUT', '/ui/layout', { probes: list }); S.config.probes = list; renderProbes(); toast('Probe index saved');
 });
+// put a ROM id on a slot (taking it off any other slot); clear = take this ROM off every slot
+const setSlotRom = (index, rom, clear) => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; if (!clear) { const s = l.find(x => x.index === index); if (s) s.rom = rom; } });
+const newSlot = rom => saveProbes(l => { for (const x of l) if (x.rom === rom) x.rom = ''; l.push({ index: Math.max(0, ...l.map(x => x.index)) + 1, name: '', rom: rom || '' }); });
+$('#addSlot').onclick = () => newSlot('');
 $('#scanPorts').onclick = guard(async () => {
   const r = await api('GET', '/ui/ports');
   if (!r.installed) throw new Error('USB support is not installed on the server. Run:  npm install serialport');
@@ -1137,7 +1306,7 @@ $('#addDev').onclick = guard(async () => {
   if (S.config.devices.some(d => d.name === name)) throw new Error('That device name is used');
   const d = { name, type };
   if (type === 'serial') { d.port = $('#devPort').value.trim(); d.baud = 115200; if (!d.port) throw new Error('USB port is required'); }
-  if (type === 'esp32') { d.host = $('#devHost').value.trim(); d.port = 4100; if (!d.host) throw new Error('ESP32 address is required'); }
+  if (type === 'esp32' || type === 'ethernet') { d.host = $('#devHost').value.trim(); d.port = 4100; if (!d.host) throw new Error('Network address is required'); }
   await api('PUT', '/ui/layout', { devices: [...S.config.devices, d] }); await load(); toast('Device added');
 });
 

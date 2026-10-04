@@ -4,7 +4,8 @@ A browser-based brewery control panel with BruControl-style workspaces and scrip
 
 ```
  Browser(s) ──WiFi/LAN──>  Brew Panel server (Node.js)  ──USB──>  Arduino Mega(s)
-                           scripts, Globals API, SQLite ──WiFi──> ESP32 ──> Mega
+                           scripts, Globals API, SQLite ──Ethernet──> Mega + Ethernet shield, or ESP32 (Ethernet) ──> Mega
+                                                        ──WiFi──> ESP32 ──> Mega
 ```
 
 The server runs the scripts and talks to the hardware. Scripts keep running when every browser is closed.
@@ -54,12 +55,14 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 | **How flow is worked out** | Flow starts at a running pump. From its OUT it goes through pipes, fittings, open valves and pumps that are off until it reaches an IP point (a vessel port or outlet), and into its IN from an IP point the same way. Each pipe on that route shows flow, in the direction the liquid is really moving, whichever way the pipe was drawn. Flow stops at a closed valve or closed manual valve, so a pump pushing into a closed valve shows no flow. A pipe's optional **Only when** list adds extra conditions. A pipe between two plain IP points with an **Only when** list works the old way: it flows, as drawn, while those are all on. |
 | **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has an IP at each end, **A** and **B**, and flow can go through it either way. Pick the side of its box for each IP in its properties. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has A on top and B on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has IPs A and B at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a Global holding the percent, which scripts can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
 | **Elements** | `global`, `shared`, `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
+| **Devices** | Elements tied to a pin on a hobby board (Arduino Mega, ESP32 bridge; hobby modules such as relay boards, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115). **Add element** groups them: outputs (digital, PWM %, analog 0-10 V / 4-20 mA), digital inputs (switch, float / level switch, flow switch, interlock), temperature probes (DS18B20, PT100, PT1000, thermocouple K / J / T and more, NTC thermistor), analog sensors (0-5 V, 0-10 V, 4-20 mA, pressure transducer, level transmitter, pH with two-point calibration), pulse flow meters, and vessel scales (HX711 load cells) that show weight and volume with tare, calibration and auto tare when empty. The properties dialog shows only the settings the chosen probe or signal needs, plus the live reading for calibration. Wiring and protocol: `docs/DEVICE_PROTOCOL.md`. |
+| **Widgets** | App-only items with no board pin: pictures, Globals, shared variables, on-screen switches, timers, alarms, labels. |
 | **Globals** | Readable and writable by every script, by the API, and can be logged to the database. |
 | **Shared variables** | Readable and writable by every script, but **never in the API or the database**. Use them to pass values between scripts. |
 | **Database** | SQLite file `data/brewlog.db`. Each Global has a trigger: **Off, On demand, Once, Every N seconds, Every N hours, Every N days**. The **Log** page shows the data and downloads CSV. |
 | **Alarms** | Sound file by path, `.wav` or `.mp3`. Browsers only play sound after one click, so press **Enable sound** on each screen that should sound alarms. |
 | **BeerSmith** | BeerSmith **File > Export > BeerXML**, then the **Import** page (or POST to the API). Hop uses become your group codes: Mash -333, First Wort -444, boil hop at full boil time -888, other boil hops 919, Aroma/Whirlpool -999, Dry Hop -111, unused slot 0. Dry hop time is converted to days. The mapping is editable in **Settings**. |
-| **OneWire probes** | Matched by ROM id, not bus position. New probes appear on **Devices > OneWire probes seen**, where you assign them to an element. |
+| **OneWire probes** | The panel's own **OneWire probe index** (Devices page): each probe gets a number and a name, and temperature elements use the number. Probes are recognised by ROM id, not bus position. To replace a probe, pick the new probe's ROM id for that number; nothing else changes. New probes appear under **OneWire probes seen**. |
 | **Media paths** | Images and sounds are paths to files inside the **media folders** listed in Settings, for example `valves/open.png` or `D:\Brewing\Pics\kettle.png`. Nothing is stored inside the program. For safety, only files inside those folders are served. |
 
 ## 2a. Variables: vKonstant and vAPI
@@ -160,7 +163,7 @@ scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
                      put all your BruControl pictures in media/oakbarn - a few are already there)
 data/                state.json (Global values kept over restarts) and brewlog.db (the database)
-firmware/            Mega_BrewPanel.ino (Mega), ESP32_Bridge.ino (WiFi bridge)
+firmware/            Mega_BrewPanel.ino (Mega: USB or Ethernet shield), ESP32_Bridge.ino (WiFi or Ethernet bridge)
 docs/                DEVICE_PROTOCOL.md, brewpanel.service
 ```
 

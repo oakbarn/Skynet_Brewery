@@ -108,15 +108,19 @@
     <h3>Add device</h3>
     <div class="form row">
       <label>Name <input id="devName" placeholder="MEGA1"></label>
-      <label>Type <select id="devType"><option value="serial">Arduino Mega (USB)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
+      <label>Type <select id="devType"><option value="serial">Arduino / ESP32 board (USB)</option><option value="ethernet">Board on Ethernet (wired)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
       <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
       <button id="scanPorts">Scan ports</button>
-      <label>ESP32 address <input id="devHost" placeholder="192.168.1.60"></label>
+      <label>Network address (Ethernet / WiFi) <input id="devHost" placeholder="192.168.1.60"></label>
       <button id="addDev" class="primary">Add</button>
     </div>
+    <h3>OneWire probe index</h3>
+    <p class="muted">Each DS18B20 probe gets a number here, and temperature elements use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every element that uses that number follows it, nothing else changes.</p>
+    <table class="grid"><thead><tr><th>#</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
+    <div class="form row"><button id="addSlot">Add probe number</button></div>
     <h3>OneWire probes seen</h3>
-    <p class="muted">Probes are matched by their ROM id, not their position on the bus. Replace or move a probe and just pick it for the element here.</p>
-    <table class="grid"><thead><tr><th>Device</th><th>Probe ROM id</th><th>Reading</th><th>Assigned to</th></tr></thead><tbody id="probeBody"></tbody></table>
+    <p class="muted">Every probe the boards report, by its ROM id (not its position on the bus). Give a new probe a number here.</p>
+    <table class="grid"><thead><tr><th>Device</th><th>Probe ROM id</th><th>Reading</th><th>Probe number</th></tr></thead><tbody id="probeBody"></tbody></table>
   </section>
 
   <!-- ===== Import ===== -->

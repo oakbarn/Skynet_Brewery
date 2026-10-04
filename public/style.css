@@ -191,3 +191,6 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws .gfx.ip.fit .core path.body { stroke-width: 1.5; stroke: #000; fill: var(--bad); }
 #ws .gfx.ip.fit.open .core path.body { fill: var(--ok); }
 #ws:not(.editing) .gfx.ip[data-fit="manualValve"] { cursor: pointer; }
+.el.fault { border-color: var(--bad); }
+.el.fault .vl { color: var(--bad); }
+#dlgBody .info { font-family: var(--mono); align-self: center; }
