@@ -1234,8 +1234,7 @@ function field([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
     ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)));
-  else if (kind === 'bool') input = h('input', { type: 'checkbox', 'data-k': key, 'data-kind': kind, ...(v ?? opts ? { checked: true } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
-  else if (kind === 'yn') {        // a Yes / No choice as a dropdown (flow widgets)
+  else if (kind === 'bool' || kind === 'yn') {     // every true / false setting is a Yes / No dropdown (Fritz)
     const on = !!(v ?? opts);
     input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: 'yes', ...(on ? { selected: true } : {}) }, 'Yes'), h('option', { value: 'no', ...(on ? {} : { selected: true }) }, 'No'));
   }
@@ -1276,8 +1275,7 @@ function readFields(obj) {
   for (const inp of $$('#dlgBody [data-k]')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
     let v;
-    if (kind === 'bool') v = inp.checked;
-    else if (kind === 'yn') v = inp.value === 'yes';
+    if (kind === 'bool' || kind === 'yn') v = inp.value === 'yes';
     else if (kind === 'num') v = inp.value === '' ? undefined : +inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
@@ -1523,7 +1521,7 @@ $('#delScript').onclick = guard(async () => {
   curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
 });
 function renderConsole() {
-  const all = $('#consoleAll').checked;
+  const all = $('#consoleAll').value === 'all';
   const rows = S.console.filter(c => all || !curScript || c.script === curScript).slice(-400);
   const pad = n => String(n).padStart(2, '0');
   $('#console').textContent = rows.map(c => { const d = new Date(c.ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${all ? '[' + c.script + '] ' : ''}${c.text}`; }).join('\n');
@@ -1720,7 +1718,7 @@ function bruReport(r) {
 }
 async function bruSend(preview) {
   const f = $('#bruFile').files[0]; if (!f) throw new Error('Choose a BruControl .brucfg file first');
-  const q = new URLSearchParams({ mode: $('#bruMode').value, simulate: $('#bruSim').checked ? '1' : '0', overwrite: $('#bruOverwrite').checked ? '1' : '0', media: $('#bruMedia').value.trim(), preview: preview ? '1' : '0' });
+  const q = new URLSearchParams({ mode: $('#bruMode').value, simulate: $('#bruSim').value === 'yes' ? '1' : '0', overwrite: $('#bruOverwrite').value === 'yes' ? '1' : '0', media: $('#bruMedia').value.trim(), preview: preview ? '1' : '0' });
   $('#bruResult').textContent = preview ? 'Reading…' : 'Importing…';
   try { return await api('POST', '/ui/import/brucontrol?' + q, await f.text(), true); } catch (e) { $('#bruResult').textContent = ''; throw e; }
 }
@@ -1766,7 +1764,10 @@ function renderSettings() {
   $('#setKey').value = c.apiKey || '';
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
   const box = $('#setAuto'); box.innerHTML = '';
-  for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
+  for (const s of S.scripts) {      // one Yes / No dropdown per script
+    const on = (c.autostart || []).includes(s.name);
+    box.append(h('label', { class: 'yn-row' }, h('select', { 'data-script': s.name }, h('option', { value: 'yes', ...(on ? { selected: true } : {}) }, 'Yes'), h('option', { value: 'no', ...(on ? {} : { selected: true }) }, 'No')), s.name));
+  }
 }
 // ---- accounts
 $('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
@@ -1797,7 +1798,7 @@ $('#saveSettings').onclick = guard(async () => {
   let beer; try { beer = JSON.parse($('#setBeer').value || '{}'); } catch { throw new Error('BeerXML mapping is not valid JSON'); }
   await api('PUT', '/ui/settings', {
     title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean),
-    apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
+    apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto select').filter(i => i.value === 'yes').map(i => i.dataset.script),
   });
   await load(); toast('Settings saved');
 });

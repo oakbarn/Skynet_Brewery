@@ -328,3 +328,4 @@ body.role-viewer .op-only { display: none !important; }
 .cpick .cswatch.none { background: repeating-linear-gradient(45deg, #ccc 0 4px, #fff 4px 8px) !important; }
 .cpick input[type=color] { width: 40px; height: 28px; padding: 0; border: none; background: none; }
 .cpick .hidden { display: none; }
+.yn-row { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
