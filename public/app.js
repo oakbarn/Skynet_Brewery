@@ -25,17 +25,24 @@ async function api(method, url, body, raw) {
   const opt = { method, headers: {} };
   if (body !== undefined) { if (raw) { opt.body = body; opt.headers['Content-Type'] = 'text/plain'; } else { opt.body = JSON.stringify(body); opt.headers['Content-Type'] = 'application/json'; } }
   const r = await fetch(url, opt);
+  if (r.status === 401) { location.replace('/login.html'); throw new Error('Please sign in'); }
   const ct = r.headers.get('content-type') || '';
   const data = ct.includes('json') ? await r.json() : await r.text();
   if (!r.ok || (data && data.ok === false && data.error)) throw new Error(data.error || r.statusText);
   return data;
 }
 function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? 5000 : 2200); }
+const RANK = { viewer: 0, operator: 1, admin: 2 };
+const can = need => RANK[S?.me?.role] >= RANK[need];
 const guard = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
 
 // ---------------------------------------------------------------- load + live
 async function load() {
   S = await api('GET', '/ui/state');
+  document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
+  document.body.classList.add('role-' + S.me.role);
+  $('#whoName').textContent = `${S.me.name} (${S.me.role})`;
+  $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Brew Panel';
   document.title = S.config.title || 'Brew Panel';
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
@@ -46,7 +53,11 @@ function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(
 function connect() {
   const es = new EventSource('/ui/events');
   es.onopen = () => $('#conn').classList.add('on');
-  es.onerror = () => $('#conn').classList.remove('on');
+  es.onerror = () => {
+    $('#conn').classList.remove('on');
+    // signed out elsewhere, password changed or account removed: back to the sign-in page
+    fetch('/auth/status').then(r => r.json()).then(st => { if (!st.user) { es.close(); location.replace('/login.html'); } }).catch(() => { });
+  };
   es.addEventListener('values', e => {
     const ch = JSON.parse(e.data);
     for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; updateEl(n); }
@@ -65,6 +76,7 @@ function setView(v) {
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
+  if (v === 'settings') renderUsers().catch(e => toast(e.message, true));
 }
 
 // ---------------------------------------------------------------- workspaces
@@ -198,6 +210,7 @@ const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.
 
 async function doTap(e) {
   const act = tapAction(e);
+  if (!['none', 'workspace'].includes(act) && !can('operator')) return toast('Your account is view only', true);
   const targetName = e.tapTarget || (e.type === 'picture' ? e.follow : e.name);
   if (act === 'none') return;
   if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
@@ -655,6 +668,9 @@ function renderGlobals() {
   for (const e of S.config.elements.filter(e => e.type === 'shared').sort((a, b) => a.name.localeCompare(b.name))) {
     sb.append(h('tr', {}, h('td', {}, e.name), h('td', {}, e.dataType), h('td', {}, h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, S.values[e.name]?.value), onchange: ev => setProp(e.name, 'value', ev.target.value) }))));
   }
+  // database triggers are part of the layout (admin); values and "Log now" need an operator
+  if (!can('admin')) tb.querySelectorAll('select, input[type=number]').forEach(i => i.disabled = true);
+  if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); tb.querySelectorAll('button').forEach(b => b.disabled = true); }
 }
 function refreshGlobalValues(ch) {
   for (const n of Object.keys(ch)) { const inp = $(`input[data-g="${CSS.escape(n)}"]`); if (inp && document.activeElement !== inp) inp.value = fmtVal(S.config.elements.find(e => e.name === n) || {}, S.values[n].value); }
@@ -690,14 +706,14 @@ function renderDevices() {
   for (const d of S.devices) {
     tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, { serial: 'Mega (USB)', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' }[d.type] || d.type), h('td', {}, d.port || d.host || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
-      h('td', {}, h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   const pb = $('#probeBody'); pb.innerHTML = '';
   const temps = S.config.elements.filter(e => e.type === 'temperature');
   for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) {
     const owner = temps.find(e => String(e.probe || '').toUpperCase() === rom);
     pb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, h('code', {}, rom)), h('td', {}, String(t)),
-      h('td', {}, h('select', { onchange: ev => assignProbe(rom, d.name, ev.target.value) }, h('option', { value: '' }, '(not assigned)'), ...temps.map(e => h('option', { value: e.name, ...(owner === e ? { selected: true } : {}) }, e.name))))));
+      h('td', {}, h('select', { disabled: !can('admin'), onchange: ev => assignProbe(rom, d.name, ev.target.value) }, h('option', { value: '' }, '(not assigned)'), ...temps.map(e => h('option', { value: e.name, ...(owner === e ? { selected: true } : {}) }, e.name))))));
   }
 }
 const assignProbe = guard(async (rom, dev, elName) => {
@@ -741,6 +757,31 @@ function renderSettings() {
   const box = $('#setAuto'); box.innerHTML = '';
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
 }
+// ---- accounts
+$('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
+$('#pwSave').onclick = guard(async () => {
+  if ($('#pwNew').value !== $('#pwNew2').value) throw new Error('The two new passwords are not the same');
+  await api('POST', '/auth/password', { current: $('#pwCur').value, password: $('#pwNew').value });
+  for (const i of ['#pwCur', '#pwNew', '#pwNew2']) $(i).value = '';
+  toast('Password changed. Other phones and computers signed in as you are signed out.');
+});
+async function renderUsers() {
+  if (!can('admin')) return;
+  const users = await api('GET', '/auth/users');
+  const tb = $('#userBody'); tb.innerHTML = '';
+  for (const u of users) {
+    const role = h('select', { onchange: guard(async ev => { try { await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { role: ev.target.value }); toast(`${u.name} is now ${ev.target.value}`); } finally { if (u.name === S.me.name) location.reload(); else renderUsers(); } }) },
+      ...S.roles.map(r => h('option', { value: r, ...(r === u.role ? { selected: true } : {}) }, r[0].toUpperCase() + r.slice(1))));
+    tb.append(h('tr', {}, h('td', {}, u.name + (u.name === S.me.name ? ' (you)' : '')), h('td', {}, role), h('td', {},
+      h('button', { onclick: guard(async () => { const pw = prompt(`New password for ${u.name} (at least 8 characters)`); if (!pw) return; await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { password: pw }); toast('Password set'); }) }, 'Set password'), ' ',
+      h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove user ${u.name}?`)) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
+  }
+}
+$('#nuAdd').onclick = guard(async () => {
+  await api('POST', '/auth/users', { name: $('#nuName').value.trim(), password: $('#nuPass').value, role: $('#nuRole').value });
+  $('#nuName').value = ''; $('#nuPass').value = ''; toast('User added'); renderUsers();
+});
+
 $('#saveSettings').onclick = guard(async () => {
   let beer; try { beer = JSON.parse($('#setBeer').value || '{}'); } catch { throw new Error('BeerXML mapping is not valid JSON'); }
   await api('PUT', '/ui/settings', {
