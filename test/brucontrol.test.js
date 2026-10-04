@@ -29,6 +29,7 @@ assert.equal(valve.onText, 'Open'); assert.equal(valve.offText, 'Closed'); asser
 const kettle = el('MB_57_Kettle');
 assert.equal(kettle.look, 'led'); assert.equal(kettle.nameColor, '#ffffff'); assert.equal(kettle.nameBg, '#000000');
 assert.deepEqual(kettle.nameFont, { size: 14.25, family: 'Microsoft Sans Serif', bold: true }); assert.equal(kettle.tap, 'none'); assert.equal(kettle.units, '°F');
+assert.equal(valve.subtype, 'valve'); assert.equal(el('VGC_23_Pulse').subtype, 'valve'); assert.equal(el('MB_57_Kettle').subtype, undefined);
 assert.equal(el('VGC_23_Pulse').activeLow, true); assert.equal(el('VGC_23_Pulse').oneShot, 500);
 assert.equal(el('MB_05_Hys').input, 'MB_57_Kettle'); assert.equal(el('MB_05_Hys').look, 'indicator');
 assert.equal(el('MB_07_PID').kp, 30); assert.equal(el('MB_07_PID').pwm, true);
