@@ -15,6 +15,7 @@ import { listSamples, loadSample } from './lib/samples.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { plain, toStr } from './lib/values.js';
+import { Messaging, CARRIERS } from './lib/messaging.js';
 import { Auth, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -30,6 +31,7 @@ const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 const hw = new Hardware(store);
 const auth = new Auth(DATA);
+const messaging = new Messaging(DATA);
 // Testing mode (Settings > "Start fresh logins after each update", on unless turned off)
 const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
 hw.start();
@@ -145,7 +147,7 @@ function needRole(p, m) {
   if (p === '/ui/ports') return 'admin';
   return m === 'GET' ? 'viewer' : 'admin';
 }
-const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/style.css', '/favicon.ico']);
+const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico']);
 const clientIp = req => req.socket.remoteAddress ?? '';
 // HTTPS through a proxy on this computer (for example "tailscale serve")
 const viaHttps = req => req.headers['x-forwarded-proto'] === 'https' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(clientIp(req));
@@ -179,7 +181,7 @@ async function route(req, res) {
   if (p.startsWith('/auth/')) {
     if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
     const login = (tok, extra = {}) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, 200, { ok: true, ...extra }); };
-    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel' });
+    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady() });
     if (p === '/auth/setup' && m === 'POST') {
       if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
       if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');
@@ -193,6 +195,24 @@ async function route(req, res) {
       const r = auth.recover(name, code, password, ip); dropEndedSessions();
       return login(auth.newSession(r.name), { recoveryCode: r.code });
     }
+    // sign in with a code sent by email or text. The answer is the same whether or not the user exists.
+    if (p === '/auth/code/send' && m === 'POST') {
+      const wait = auth.blockedFor(ip);
+      if (wait) return fail(res, 429, `Too many wrong tries. Wait ${wait} seconds and try again.`);
+      const { name } = await jsonBody(req);
+      const said = { ok: true, message: 'If that user has an email or mobile number set up, a code is on its way. It works for 10 minutes.' };
+      const made = auth.makeSignInCode(name);
+      if (made) {
+        const contact = auth.getContact(made.name);
+        if (messaging.targets(contact).length) {
+          const title = store.config.title || 'Brew Panel';
+          messaging.deliver(contact, `${title} sign-in code`, `${made.code} is your ${title} sign-in code. It works once, for 10 minutes. If you did not ask for it, change your password.`)
+            .catch(e => console.error(`Sign-in code for ${made.name} not sent: ${e.message}`));
+        }
+      }
+      return ok(res, said);
+    }
+    if (p === '/auth/code/login' && m === 'POST') { const { name, code } = await jsonBody(req); return login(auth.loginWithCode(name, code, ip)); }
     if (p === '/auth/login' && m === 'POST') { const { name, password } = await jsonBody(req); return login(auth.login(name, password, ip)); }
     if (p === '/auth/logout' && m === 'POST') { auth.logout(token); dropEndedSessions(); res.setHeader('Set-Cookie', auth.clearCookie()); return ok(res); }
     if (!me) return fail(res, 401, 'Please sign in');
@@ -202,7 +222,20 @@ async function route(req, res) {
       auth.setPassword(me.name, password); auth.endSessionsFor(me.name); dropEndedSessions();
       return login(auth.newSession(me.name));
     }
+    // contact details for sign-in codes: your own, or anyone's for an admin
+    if (p === '/auth/contact') {
+      const who = url.searchParams.get('user') || me.name;
+      if (who.toLowerCase() !== me.name.toLowerCase() && me.role !== 'admin') return fail(res, 403, 'Only an admin can change other users');
+      if (m === 'GET') return ok(res, { ...auth.getContact(who), carriers: Object.fromEntries(Object.entries(CARRIERS).map(([k, v]) => [k, v.name])), twilio: messaging.twilioReady(), email: messaging.emailReady() });
+      if (m === 'PUT') { auth.setContact(who, await jsonBody(req), CARRIERS); return ok(res); }
+    }
     if (me.role !== 'admin') return fail(res, 403, 'Only an admin can manage users');
+    if (p === '/auth/messaging' && m === 'GET') return ok(res, messaging.publicSettings());
+    if (p === '/auth/messaging' && m === 'PUT') { messaging.save(await jsonBody(req)); return ok(res); }
+    if (p === '/auth/messaging/test' && m === 'POST') {
+      const sent = await messaging.deliver(auth.getContact(me.name), 'Brew Panel test message', 'This is a test from your Brew Panel. Sign-in codes will arrive like this.');
+      return ok(res, { ok: true, sent: sent.map(t => `${t.kind} to ${t.to}`) });
+    }
     if (p === '/auth/users' && m === 'GET') return ok(res, auth.listUsers());
     if (p === '/auth/recovery' && m === 'GET') return ok(res, auth.recoveryInfo());
     if (p === '/auth/recovery' && m === 'POST') return ok(res, { ok: true, code: auth.makeRecoveryCode() });
