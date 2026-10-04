@@ -18,6 +18,7 @@ The server runs the scripts and talks to the hardware. Scripts keep running when
    npm start
    ```
 4. **Open the panel.** On the same computer go to `http://localhost:8080`. From a tablet or phone, use `http://<computer's IP address>:8080`.
+5. **Create the admin account.** The first time, the panel asks for a user name and password. After that everyone signs in. To use the panel away from home, follow [docs/REMOTE_ACCESS.md](docs/REMOTE_ACCESS.md) (login, user roles and Tailscale).
 
 Nothing else needs to be installed for the simulator, scripts, API and database.
 
@@ -103,7 +104,7 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 
 ## 4. API (for Node-RED or other programs)
 
-Only **Globals** are in the API. If an API key is set in Settings, every change must send the header `X-API-Key: <key>`.
+Only **Globals** are in the API. Programs must send the API key from Settings in the header `X-API-Key: <key>` (or `?key=<key>`). Without a key, reading works only from your own network (home or Tailscale), and changes are refused. A signed-in browser can use the API too: viewers read, operators and admins also change.
 
 | Request | Does |
 |---|---|
@@ -126,15 +127,17 @@ config/brewery.json  workspaces, elements, graphics, devices, settings (edited b
 scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
                      put all your BruControl pictures in media/oakbarn - a few are already there)
-data/                state.json (Global values kept over restarts) and brewlog.db (the database)
+data/                state.json (Global values kept over restarts), brewlog.db (the database),
+                     users.json (accounts, passwords are hashed) and sessions.json (who is signed in)
+tools/               reset-password.js (forgotten password)
 firmware/            Mega_BrewPanel.ino (Mega), ESP32_Bridge.ino (WiFi bridge)
-docs/                DEVICE_PROTOCOL.md, brewpanel.service
+docs/                DEVICE_PROTOCOL.md, brewpanel.service, REMOTE_ACCESS.md (login and Tailscale)
 ```
 
 ## 6. Prototype limits
 
-- **No login.** Anyone on your network who can open the page can control the rig. Keep it on your home network, not the internet.
+- **Remote use:** only through Tailscale (see docs/REMOTE_ACCESS.md). Never port-forward the panel on your router.
 - **Browser testing:** tested in Chromium (Chrome/Edge engine), not yet in Safari or Firefox.
 - **Hardware testing:** the hardware layer is tested with the simulator and a simulated ESP32. It is not yet tested with a real Mega. The firmware sketches have not been compiled yet.
-- **Not built yet:** graphs on the Log page, user accounts, and PWM/analog outputs.
+- **Not built yet:** graphs on the Log page and PWM/analog outputs.
 - **Hardware safety still comes first.** Keep hard-wired safety devices: burner flame safety, float switches and emergency stop.
