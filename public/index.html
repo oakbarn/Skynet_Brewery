@@ -220,7 +220,7 @@
   </section>
 </main>
 
-<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
+<dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
 <dialog id="sampleDlg"><h3>Welcome to the Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
 <div id="toast"></div>
