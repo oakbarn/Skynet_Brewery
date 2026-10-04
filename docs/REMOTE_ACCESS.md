@@ -33,9 +33,21 @@ You can change someone's role, set a new password, or remove them at any time. T
 
 **Settings > My account**. Every other phone or computer signed in as you is signed out.
 
+### Your recovery code
+
+When you create the admin account, the panel shows a **recovery code** like `K7QM-3XPD-9RTA-WF2H`. Write it down and keep it somewhere safe, away from the Pi (your wallet, a password manager). It is shown only once.
+
+Lost it, or want a new one? An admin can make a new code in **Settings > Recovery code**. The old one stops working.
+
 ### Forgot the password?
 
-On the Pi, in the panel folder:
+**Easiest: use the recovery code.** On the sign-in page tap **Forgot password?**, enter your user name, the recovery code and a new password. You are signed in straight away, and the panel shows you a **new** recovery code (each code works once), so write that one down.
+- This only works from your home WiFi or through Tailscale, never from the open internet.
+- Five wrong tries and the panel makes you wait before trying again.
+
+**A helper forgot theirs?** An admin sets a new one in **Settings > Users > Set password**.
+
+**No recovery code and no admin can sign in?** On the Pi, in the panel folder:
 
 ```
 node tools/reset-password.js            (lists the users)

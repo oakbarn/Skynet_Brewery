@@ -198,6 +198,10 @@
         <label>Role <select id="nuRole"><option value="viewer">Viewer</option><option value="operator">Operator</option><option value="admin">Admin</option></select></label>
         <button id="nuAdd" class="primary">Add user</button>
       </div>
+      <h3>Recovery code</h3>
+      <p class="muted">For a forgotten password: on the sign-in page, <b>Forgot password?</b> takes a user name, this code and a new password. It only works from your home WiFi or Tailscale, and each code works once. Forgot a helper's password? Use <b>Set password</b> above instead.</p>
+      <div class="bar"><span id="recInfo"></span><button id="recNew">Make a new recovery code</button></div>
+      <div id="recShow" class="hidden"><div class="recoveryCode" id="recCode"></div><p>Write this down now and keep it away from the Pi. It is shown only this once. Any older code no longer works.</p></div>
       <h3>Panel settings</h3>
     </div>
     <div class="form admin-only">

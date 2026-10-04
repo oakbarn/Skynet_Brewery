@@ -77,7 +77,7 @@ function setView(v) {
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
-  if (v === 'settings') renderUsers().catch(e => toast(e.message, true));
+  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).catch(e => toast(e.message, true)); }
 }
 
 // ---------------------------------------------------------------- workspaces
@@ -1589,6 +1589,18 @@ async function renderUsers() {
       h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove user ${u.name}?`)) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
   }
 }
+async function renderRecovery() {
+  if (!can('admin')) return;
+  const r = await api('GET', '/auth/recovery');
+  $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
+  $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
+}
+$('#recNew').onclick = guard(async () => {
+  if ($('#recInfo').textContent.startsWith('Made') && !confirm('Make a new recovery code? The old one stops working.')) return;
+  const r = await api('POST', '/auth/recovery');
+  $('#recCode').textContent = r.code; $('#recShow').classList.remove('hidden');
+  renderRecovery();
+});
 $('#nuAdd').onclick = guard(async () => {
   await api('POST', '/auth/users', { name: $('#nuName').value.trim(), password: $('#nuPass').value, role: $('#nuRole').value });
   $('#nuName').value = ''; $('#nuPass').value = ''; toast('User added'); renderUsers();
