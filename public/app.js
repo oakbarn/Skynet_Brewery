@@ -1,3 +1,4 @@
+import { addEyes } from './eye.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -77,7 +78,7 @@ function setView(v) {
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
-  if (v === 'settings') renderUsers().catch(e => toast(e.message, true));
+  if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
 }
 
 // ---------------------------------------------------------------- workspaces
@@ -1570,6 +1571,7 @@ function renderSettings() {
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
 }
 // ---- accounts
+addEyes();
 $('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
 $('#pwSave').onclick = guard(async () => {
   if ($('#pwNew').value !== $('#pwNew2').value) throw new Error('The two new passwords are not the same');
@@ -1589,6 +1591,67 @@ async function renderUsers() {
       h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove user ${u.name}?`)) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
   }
 }
+async function renderRecovery() {
+  if (!can('admin')) return;
+  $('#setFresh').checked = S.config.resetLoginsOnUpdate !== false;
+  const r = await api('GET', '/auth/recovery');
+  $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
+  $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
+}
+// ---- sign-in codes: where they go (each user) and how they are sent (admin)
+async function renderContact(who) {
+  who = who || $('#ctUser').value || S.me.name;
+  if (can('admin')) {
+    const users = await api('GET', '/auth/users');
+    $('#ctUser').innerHTML = ''; for (const u of users) $('#ctUser').append(h('option', { value: u.name, ...(u.name === who ? { selected: true } : {}) }, u.name));
+  }
+  const c = await api('GET', '/auth/contact?user=' + encodeURIComponent(who));
+  $('#ctEmail').value = c.email; $('#ctPhone').value = c.phone;
+  $('#ctVia').innerHTML = '';
+  $('#ctVia').append(h('option', { value: '' }, '(no texts)'), ...Object.entries(c.carriers).map(([k, n]) => h('option', { value: k }, n)), h('option', { value: 'twilio' }, 'Twilio'));
+  $('#ctVia').value = c.textVia;
+  $('#ctNote').textContent = !c.email && !c.twilio ? 'Codes cannot be sent yet: an admin has to fill in "Sending codes" in Settings first.' : '';
+}
+$('#ctUser').onchange = guard(() => renderContact($('#ctUser').value));
+$('#ctSave').onclick = guard(async () => {
+  const who = can('admin') ? $('#ctUser').value : S.me.name;
+  await api('PUT', '/auth/contact?user=' + encodeURIComponent(who), { email: $('#ctEmail').value, phone: $('#ctPhone').value, textVia: $('#ctVia').value });
+  toast('Saved');
+});
+async function renderMessaging() {
+  if (!can('admin')) return;
+  const c = await api('GET', '/auth/messaging');
+  $('#msHost').value = c.smtpHost || ''; $('#msPort').value = c.smtpPort || ''; $('#msSec').value = c.smtpSecurity || 'ssl';
+  $('#msUser').value = c.smtpUser || ''; $('#msPass').value = c.smtpPass || ''; $('#msFrom').value = c.smtpFrom || '';
+  $('#msSid').value = c.twilioSid || ''; $('#msToken').value = c.twilioToken || ''; $('#msTwFrom').value = c.twilioFrom || '';
+}
+const preset = (host, port, sec) => () => { $('#msHost').value = host; $('#msPort').value = port; $('#msSec').value = sec; if (!$('#msFrom').value) $('#msFrom').value = $('#msUser').value; };
+$('#msGmail').onclick = preset('smtp.gmail.com', 465, 'ssl');
+$('#msOutlook').onclick = preset('smtp-mail.outlook.com', 587, 'starttls');
+$('#msUser').onchange = () => { if (!$('#msFrom').value) $('#msFrom').value = $('#msUser').value; };
+const saveMessaging = () => api('PUT', '/auth/messaging', {
+  smtpHost: $('#msHost').value, smtpPort: +$('#msPort').value || '', smtpSecurity: $('#msSec').value, smtpUser: $('#msUser').value, smtpPass: $('#msPass').value,
+  smtpFrom: $('#msFrom').value, twilioSid: $('#msSid').value, twilioToken: $('#msToken').value, twilioFrom: $('#msTwFrom').value,
+});
+$('#msSave').onclick = guard(async () => { await saveMessaging(); await renderMessaging(); renderContact(); toast('Sending settings saved'); });
+$('#msTest').onclick = guard(async () => {
+  await saveMessaging();
+  $('#msResult').textContent = 'Sending...';
+  try { const r = await api('POST', '/auth/messaging/test'); $('#msResult').textContent = 'Sent: ' + r.sent.join(', '); }
+  catch (e) { $('#msResult').textContent = e.message.includes('No email or text') ? 'Put your own email or mobile number under "Sign-in codes" in My account first.' : e.message; throw e; }
+});
+
+$('#setFresh').onchange = guard(async ev => {
+  await api('PUT', '/ui/settings', { resetLoginsOnUpdate: ev.target.checked });
+  S.config.resetLoginsOnUpdate = ev.target.checked;
+  toast(ev.target.checked ? 'Logins will start fresh after each update' : 'Logins are kept after updates');
+});
+$('#recNew').onclick = guard(async () => {
+  if ($('#recInfo').textContent.startsWith('Made') && !confirm('Make a new recovery code? The old one stops working.')) return;
+  const r = await api('POST', '/auth/recovery');
+  $('#recCode').textContent = r.code; $('#recShow').classList.remove('hidden');
+  renderRecovery();
+});
 $('#nuAdd').onclick = guard(async () => {
   await api('POST', '/auth/users', { name: $('#nuName').value.trim(), password: $('#nuPass').value, role: $('#nuRole').value });
   $('#nuName').value = ''; $('#nuPass').value = ''; toast('User added'); renderUsers();
