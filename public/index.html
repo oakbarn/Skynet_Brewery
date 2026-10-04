@@ -278,6 +278,19 @@
       <div id="setAuto" class="checks"></div>
       <button id="saveSettings" class="primary">Save settings</button>
     </div>
+    <div class="form admin-only" id="donateSettings">
+      <h3>Beer money pop-up</h3>
+      <p class="muted">About once a month each phone or computer gets a small pop-up asking for a few dollars of beer money. It never shows while a Process is running (other than ones that start with the server), while a tab is being edited, or over another window.</p>
+      <label class="check"><input type="checkbox" id="donOn"> Show the pop-up</label>
+      <p>Donations go to Fritz's PayPal (fritz.range@gmail.com). This is built in and cannot be changed here.</p>
+      <label>Message (leave empty for the standard one)<textarea id="donMsg" rows="3"></textarea></label>
+      <label>Button text (leave empty for "Buy Fritz a beer")<input id="donBtn"></label>
+      <div class="form row">
+        <label>Show every (days)<input type="number" id="donEvery" min="1" max="3650"></label>
+        <label>After "Already donated", wait (days)<input type="number" id="donDone" min="1" max="3650"></label>
+      </div>
+      <div class="bar"><button id="donSave" class="primary">Save pop-up settings</button><button id="donPreview">Show it now</button></div>
+    </div>
     <div class="form" id="pictures">
       <h3>Pictures (PNG / JPG to SVG)</h3>
       <p class="muted">Every PNG or JPG put in a media folder gets an SVG copy next to it, so it stays sharp at any size. The original file is never changed, so BruControl can still use it. Tracing works best on drawings and icons; photo-like pictures come out blotchy, so check them here.</p>
@@ -292,6 +305,8 @@
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
 <dialog id="sampleDlg"><h3>Welcome to the Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
+<dialog id="donateDlg"><h3>🍺 Beer money</h3><p id="donateText"></p>
+  <div class="bar"><button id="donateDone">Already donated</button><span class="spacer"></span><button id="donateLater">Maybe later</button><button id="donateGo" class="primary"></button></div></dialog>
 <div id="toast"></div>
 <script type="module" src="app.js"></script>
 <script type="module" src="pictures.js"></script>
