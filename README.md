@@ -120,7 +120,7 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 - `x…` is **deleted**. Scripts or items still using one are listed with line numbers.
 - `glb…` was a typo for `gbl…`: renamed `glb` → `gbl` (setup and scripts), then a vKonstant like the rest.
 - `DX_gblV_…` becomes a **vAPI**, renamed `DX_gblV_` → `vA_` in the setup and every script.
-- `insp_…` was meant to be an inspector: it becomes a **picture** element, keeping its pictures and background.
+- `insp_…` is **deleted** like `x…` (scripts still using one are listed).
 - Any other name becomes a vAPI with the same name (it works exactly like the Global did) and is listed so it can be sorted later.
 
 On start-up the old setup is copied to `config/backups/brewery-before-globals-<date>.json`, each changed script keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Scripts page console). A vKonstant is never written to the database, so a `gbl` that had a database trigger is listed too.
