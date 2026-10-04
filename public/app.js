@@ -78,6 +78,8 @@ function setView(v) {
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
   if (v === 'settings') renderUsers().catch(e => toast(e.message, true));
+  if (v === 'scripts' || v === 'config') placeFind();
+  if (v === 'config') openConfig();
 }
 
 // ---------------------------------------------------------------- workspaces
@@ -1292,7 +1294,7 @@ $('#code').addEventListener('keydown', ev => {
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }
 });
 // ---------------------------------------------------------------- find and replace
-// In the open script: Ctrl+F (find), Ctrl+H (replace), or the Find button (phones). Matches are painted on a layer behind the editor.
+// In the open script or the Config Editor (the bar moves to whichever page is open): Ctrl+F (find), Ctrl+H (replace), or the Find button (phones). Matches are painted on a layer behind the editor.
 // Across every script: the All scripts button lists each match first; only the ticked ones are replaced.
 const escHtml = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 function findRe(text, matchCase, word) {
@@ -1302,10 +1304,19 @@ function findRe(text, matchCase, word) {
 }
 const findMatches = (str, re) => re ? [...str.matchAll(re)].map(m => [m.index, m.index + m[0].length]) : [];
 let fMatches = [], fIdx = -1;
+const fTa = () => view === 'config' ? $('#cfgCode') : $('#code');
+const fHl = () => view === 'config' ? $('#cfgCodeHl') : $('#codeHl');
+const fGutter = () => view === 'config' ? $('#cfgGutter') : $('#gutter');
+// put the find bar above the editor of the page being shown
+function placeFind() {
+  const ed = fTa().closest('.editor');
+  if (ed.previousElementSibling !== $('#findBar')) { $('#codeHl').innerHTML = $('#cfgCodeHl').innerHTML = ''; ed.before($('#findBar')); }
+  refreshFind(false);
+}
 const findOpen = () => !$('#findBar').classList.contains('hidden');
 const curRe = () => findRe($('#findText').value, $('#findCase').checked, $('#findWord').checked);
 function showFind(replace) {
-  const ta = $('#code'), selText = ta.value.slice(ta.selectionStart, ta.selectionEnd);
+  const ta = fTa(), selText = ta.value.slice(ta.selectionStart, ta.selectionEnd);
   if (selText && !selText.includes('\n')) $('#findText').value = selText;
   $('#findBar').classList.remove('hidden');
   const box = replace && can('admin') ? $('#replText') : $('#findText');
@@ -1314,13 +1325,13 @@ function showFind(replace) {
 }
 function hideFind() {
   $('#findBar').classList.add('hidden'); paintFind();
-  const ta = $('#code'), m = fMatches[fIdx];
+  const ta = fTa(), m = fMatches[fIdx];
   ta.focus(); if (m) ta.setSelectionRange(m[0], m[1]);
 }
 // recount the matches; `jump` moves to the first match at or after the cursor
 function refreshFind(jump) {
   if (!findOpen()) { fMatches = []; fIdx = -1; paintFind(); return; }
-  const ta = $('#code'), at = fMatches[fIdx]?.[0] ?? ta.selectionStart;
+  const ta = fTa(), at = fMatches[fIdx]?.[0] ?? ta.selectionStart;
   fMatches = findMatches(ta.value, curRe());
   fIdx = fMatches.length ? Math.max(0, fMatches.findIndex(m => m[0] >= at)) : -1;
   if (fIdx === -1 && fMatches.length) fIdx = 0;
@@ -1331,29 +1342,29 @@ function paintFind() {
   $('#findCount').textContent = !findOpen() || !t ? '' : n ? `${fIdx + 1} of ${n}` : 'No matches';
   $('#findCount').style.color = findOpen() && t && !n ? 'var(--bad)' : '';
   for (const b of ['#findPrev', '#findNext', '#replOne', '#replAll']) $(b).disabled = !n;
-  const v = $('#code').value;
-  if (!findOpen() || !n) { $('#codeHl').innerHTML = ''; return; }
+  const v = fTa().value;
+  if (!findOpen() || !n) { fHl().innerHTML = ''; return; }
   let out = '', last = 0;
   fMatches.forEach(([s, e], i) => { out += escHtml(v.slice(last, s)) + `<mark${i === fIdx ? ' class="cur"' : ''}>${escHtml(v.slice(s, e))}</mark>`; last = e; });
-  $('#codeHl').innerHTML = out + escHtml(v.slice(last)) + '\n ';
+  fHl().innerHTML = out + escHtml(v.slice(last)) + '\n ';
   syncHl();
 }
-const syncHl = () => { const ta = $('#code'); $('#codeHl').style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`; };
+const syncHl = () => { const ta = fTa(); fHl().style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`; };
 let charW = 0;
 function showMatch() {
-  const ta = $('#code'), m = fMatches[fIdx]; if (!m) return;
+  const ta = fTa(), m = fMatches[fIdx]; if (!m) return;
   ta.setSelectionRange(m[0], m[1]);
   const before = ta.value.slice(0, m[0]), line = before.split('\n').length - 1, col = m[0] - before.lastIndexOf('\n') - 1;
   if (!charW) { const c = document.createElement('canvas').getContext('2d'); c.font = getComputedStyle(ta).font; charW = c.measureText('MMMMMMMMMM').width / 10 || 7.8; }
   const lh = parseFloat(getComputedStyle(ta).lineHeight) || 19.5, y = 8 + line * lh, x = 8 + col * charW;
   if (y < ta.scrollTop || y + lh > ta.scrollTop + ta.clientHeight) ta.scrollTop = y - ta.clientHeight / 3;
   if (x < ta.scrollLeft || x + (m[1] - m[0]) * charW > ta.scrollLeft + ta.clientWidth) ta.scrollLeft = Math.max(0, x - ta.clientWidth / 3);
-  syncHl(); $('#gutter').scrollTop = ta.scrollTop;
+  syncHl(); fGutter().scrollTop = ta.scrollTop;
 }
 function stepFind(d) { if (!fMatches.length) return; fIdx = (fIdx + d + fMatches.length) % fMatches.length; paintFind(); showMatch(); }
 // type into the editor through the browser so Ctrl+Z can undo it, then give the focus back
 function editCode(start, end, text, back) {
-  const ta = $('#code');
+  const ta = fTa();
   ta.focus(); ta.setSelectionRange(start, end);
   if (!document.execCommand('insertText', false, text)) { ta.setRangeText(text, start, end, 'end'); ta.dispatchEvent(new Event('input')); }
   back?.focus();
@@ -1372,21 +1383,21 @@ $('#replOne').onclick = () => {
   const m = fMatches[fIdx]; if (!m || !can('admin')) return;
   const at = m[0] + $('#replText').value.length;
   editCode(m[0], m[1], $('#replText').value, $('#replText'));
-  fIdx = -1; $('#code').setSelectionRange(at, at); refreshFind(true);
+  fIdx = -1; fTa().setSelectionRange(at, at); refreshFind(true);
 };
 $('#replAll').onclick = () => {
   if (!fMatches.length || !can('admin')) return;
-  const n = fMatches.length, ta = $('#code');
+  const n = fMatches.length, ta = fTa();
   editCode(0, ta.value.length, ta.value.replace(curRe(), () => $('#replText').value), $('#replText'));
   refreshFind(false); toast(`Replaced ${n} match${n === 1 ? '' : 'es'} - press Save to keep the change`);
 };
 document.addEventListener('keydown', ev => {
-  if (view !== 'scripts' || document.querySelector('dialog[open]')) return;
+  if (!['scripts', 'config'].includes(view) || document.querySelector('dialog[open]')) return;
   const k = ev.key.toLowerCase(), mod = ev.ctrlKey || ev.metaKey;
   if (mod && k === 'f') { ev.preventDefault(); showFind(false); }
   else if (ev.ctrlKey && k === 'h') { ev.preventDefault(); showFind(true); }
   else if (findOpen() && (k === 'f3' || (mod && k === 'g'))) { ev.preventDefault(); stepFind(ev.shiftKey ? -1 : 1); }
-  else if (k === 'escape' && findOpen() && ev.target === $('#code')) hideFind();
+  else if (k === 'escape' && findOpen() && ev.target === fTa()) hideFind();
 });
 
 // ---- across all scripts
@@ -1776,4 +1787,77 @@ $('#saveSettings').onclick = guard(async () => {
 // ---------------------------------------------------------------- start
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
 window.addEventListener('beforeunload', e => { if (dirty || (editing && JSON.stringify(draft) !== JSON.stringify(S.config))) { e.preventDefault(); e.returnValue = ''; } });
+// ---------------------------------------------------------------- Config Editor (admin only)
+// Opening it makes a backup copy of the config file first (config/backups). Save checks the JSON before anything is written.
+let cfgDirty = false, cfgProblem = null;
+const openConfig = guard(async () => {
+  if (cfgDirty) return;                       // keep unsaved work when coming back to the page
+  const r = await api('POST', '/ui/config/open');
+  setCfgText(r.text);
+  $('#cfgFile').textContent = r.file;
+  $('#cfgBackupNote').textContent = (r.made ? 'Backup copy made: ' : 'Backup copy already up to date: ') + 'config/backups/' + r.backup;
+});
+function setCfgText(t) { $('#cfgCode').value = t; cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(); fIdx = -1; refreshFind(false); }
+function updateCfgGutter() {
+  const n = $('#cfgCode').value.split('\n').length, bad = cfgProblem?.line;
+  $('#cfgGutter').innerHTML = Array.from({ length: n }, (_, i) => i + 1 === bad ? `<span class="err">${i + 1}</span>` : i + 1).join('\n');
+  $('#cfgGutter').scrollTop = $('#cfgCode').scrollTop;
+}
+function renderCfgProblems(checked) {
+  const ul = $('#cfgProblems'); ul.innerHTML = '';
+  if (cfgProblem) ul.append(h('li', { onclick: () => cfgGoto(cfgProblem) }, `Line ${cfgProblem.line}: ${cfgProblem.msg}`));
+  else if (checked) ul.append(h('li', { class: 'ok' }, 'No problems found'));
+  updateCfgGutter();
+}
+function cfgGoto({ line, col }) {
+  const ta = $('#cfgCode'), lines = ta.value.split('\n');
+  const at = lines.slice(0, line - 1).reduce((a, s) => a + s.length + 1, 0) + Math.max(0, (col || 1) - 1);
+  ta.focus(); ta.setSelectionRange(at, Math.min(at + 1, ta.value.length));
+  ta.scrollTop = Math.max(0, (line - 5) * 19.5); ta.scrollLeft = 0;
+}
+$('#cfgCode').addEventListener('input', () => { cfgDirty = true; $('#cfgState').textContent = '(not saved)'; updateCfgGutter(); refreshFind(false); });
+$('#cfgCode').addEventListener('scroll', () => { $('#cfgGutter').scrollTop = $('#cfgCode').scrollTop; syncHl(); });
+$('#cfgCode').addEventListener('keydown', ev => {
+  if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '  '); }
+  if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); $('#cfgSave').click(); }
+});
+$('#cfgFind').onclick = () => findOpen() ? hideFind() : showFind();
+$('#cfgCheck').onclick = guard(async () => {
+  cfgProblem = (await api('POST', '/ui/config/check', $('#cfgCode').value, true)).problem; renderCfgProblems(true);
+  if (cfgProblem) cfgGoto(cfgProblem);
+});
+$('#cfgSave').onclick = guard(async () => {
+  const c = await api('POST', '/ui/config/check', $('#cfgCode').value, true);
+  if (c.problem) { cfgProblem = c.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + c.problem.line + ': ' + c.problem.msg); }
+  if (!confirm('Save the config file?\n\nRunning scripts are stopped and the boards reconnect. The old file is kept in config/backups.')) return;
+  const r = await api('PUT', '/ui/config', $('#cfgCode').value, true);
+  if (!r.ok) { cfgProblem = r.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + r.problem.line + ': ' + r.problem.msg); }
+  cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(true);
+  $('#cfgBackupNote').textContent = 'Saved. The old file was copied to config/backups/' + r.backup;
+  toast('Config saved');
+});
+$('#cfgReload').onclick = () => { if (cfgDirty && !confirm('Throw away your unsaved changes?')) return; cfgDirty = false; openConfig(); };
+$('#cfgBackups').onclick = guard(async () => {
+  const list = await api('GET', '/ui/config/backups'), box = $('#cfgBackupList'); box.innerHTML = '';
+  if (!list.length) box.append(h('div', { class: 'faRow muted' }, 'No backups yet.'));
+  for (const b of list) box.append(h('div', { class: 'faRow cfgBk' },
+    h('div', { class: 'faText' }, h('div', {}, new Date(b.time).toLocaleString()), h('div', { class: 'muted faLine' }, `${b.name}  (${Math.round(b.size / 1024)} KB)`)),
+    h('button', { title: 'Show this backup in the editor; nothing changes until you press Save', onclick: guard(async ev => {
+      ev.preventDefault();
+      if (cfgDirty && !confirm('Throw away your unsaved changes?')) return;
+      setCfgText(await api('GET', '/ui/config/backups/' + encodeURIComponent(b.name)));
+      cfgDirty = true; $('#cfgState').textContent = `(showing backup ${b.name}, not saved)`; $('#cfgBackupDlg').close();
+    }) }, 'Open'),
+    h('button', { class: 'primary', onclick: guard(async ev => {
+      ev.preventDefault();
+      if (!confirm(`Put back the config from ${new Date(b.time).toLocaleString()}?\n\nRunning scripts are stopped and the boards reconnect. The current file is copied to config/backups first.`)) return;
+      const r = await api('POST', `/ui/config/backups/${encodeURIComponent(b.name)}/restore`);
+      setCfgText(r.text); $('#cfgBackupDlg').close();
+      $('#cfgBackupNote').textContent = `Restored ${b.name}. The file it replaced was copied to config/backups/${r.backup}`;
+      toast('Config restored');
+    }) }, 'Restore')));
+  $('#cfgBackupDlg').showModal();
+});
+window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
+
 load().then(() => { connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

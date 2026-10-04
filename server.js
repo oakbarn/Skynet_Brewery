@@ -12,6 +12,7 @@ import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
+import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { plain, toStr } from './lib/values.js';
@@ -141,6 +142,7 @@ function apiKeyOk(req, url) {
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
+  if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   return m === 'GET' ? 'viewer' : 'admin';
 }
 const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/style.css', '/favicon.ico']);
@@ -313,6 +315,20 @@ async function route(req, res) {
     const applied = applyBruControl(conv, { store, engine, mode: q.get('mode') === 'merge' ? 'merge' : 'replace', overwriteScripts: q.get('overwrite') !== '0' });
     hw.restart();
     return ok(res, { ok: true, ...out, ...applied });
+  }
+  // Config Editor (admin only, see needRole)
+  if (p === '/ui/config/open' && m === 'POST') { const b = backupConfigFile(store); return ok(res, { ok: true, text: fs.readFileSync(CONFIG, 'utf8'), backup: b.name, made: b.made, file: path.relative(ROOT, CONFIG) }); }
+  if (p === '/ui/config/check' && m === 'POST') return ok(res, { ok: true, problem: checkConfigText(await readBody(req, 16 * 1024 * 1024), DATA) });
+  if (p === '/ui/config' && m === 'PUT') {
+    try { return ok(res, { ok: true, ...applyConfigText(await readBody(req, 16 * 1024 * 1024), { store, engine, hw, pictures, dataDir: DATA }) }); }
+    catch (e) { if (e.problem) return ok(res, { ok: false, problem: e.problem }); throw e; }
+  }
+  if (p === '/ui/config/backups' && m === 'GET') return ok(res, listBackups(store));
+  const cb = /^\/ui\/config\/backups\/([^/]+?)(\/restore)?$/.exec(p);
+  if (cb && m === 'GET' && !cb[2]) return ok(res, readBackup(store, cb[1]));
+  if (cb && m === 'POST' && cb[2]) {
+    const r = applyConfigText(readBackup(store, cb[1]), { store, engine, hw, pictures, dataDir: DATA });
+    return ok(res, { ok: true, ...r, text: fs.readFileSync(CONFIG, 'utf8') });
   }
   if (p === '/ui/samples' && m === 'GET') return ok(res, listSamples(SAMPLES));
   const smp = /^\/ui\/samples\/([\w-]+)\/load$/.exec(p);
