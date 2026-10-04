@@ -1568,6 +1568,7 @@ function renderSettings() {
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
   const box = $('#setAuto'); box.innerHTML = '';
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
+  renderDonate();
 }
 // ---- accounts
 $('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
@@ -1602,6 +1603,52 @@ $('#saveSettings').onclick = guard(async () => {
   });
   await load(); toast('Settings saved');
 });
+
+// ---------------------------------------------------------------- beer money pop-up
+// Each browser remembers when to ask next (localStorage). A first visit waits one full interval,
+// so new users are not asked straight away. Admins can preview it under Settings.
+const DONATE_KEY = 'brewpanel.donateNext', DAY = 86400000;
+const DONATE_MSG = 'Enjoying the Brew Panel? It is free and built in spare time between brew days. If it has made brewing a bit easier for you, a few dollars of beer money for Fritz is always appreciated. Cheers!';
+const donation = () => ({ enabled: true, link: '', message: '', button: '', everyDays: 30, donatedDays: 180, ...(S.config.donation || {}) });
+const donateGet = () => { try { return Number(localStorage.getItem(DONATE_KEY)) || 0; } catch { return -1; } };
+const donateSnooze = days => { try { localStorage.setItem(DONATE_KEY, String(Date.now() + days * DAY)); } catch { } };
+// a brew is under way if any Process is running other than the ones that start with the server (loggers and the like)
+const brewing = () => (S.scripts || []).some(s => s.state === 'running' && !(S.config.autostart || []).includes(s.name));
+function showDonate(preview) {
+  const d = donation(), dlg = $('#donateDlg');
+  $('#donateText').textContent = d.message.trim() || DONATE_MSG;
+  $('#donateGo').textContent = d.button.trim() || 'Buy Fritz a beer';
+  $('#donateNoLink').textContent = d.link ? '' : 'The PayPal link is coming soon.' + (can('admin') ? ' (Admin: set it in Settings > Beer money pop-up.)' : '');
+  $('#donateGo').disabled = !d.link;
+  const close = days => { if (!preview) donateSnooze(days); dlg.close(); };
+  $('#donateGo').onclick = () => { window.open(d.link, '_blank', 'noopener'); close(d.everyDays); };
+  $('#donateLater').onclick = () => close(d.everyDays);
+  $('#donateDone').onclick = () => { close(d.donatedDays); toast('Thank you, cheers! 🍺'); };
+  dlg.oncancel = e => { e.preventDefault(); close(d.everyDays); };   // Esc counts as "Maybe later"
+  dlg.showModal();
+}
+function maybeDonate() {
+  const d = donation(), next = donateGet();
+  if (!d.enabled || next < 0) return;                                    // turned off, or this browser cannot remember
+  if (!next) return donateSnooze(d.everyDays);                           // first visit: start the clock
+  if (Date.now() < next) return;
+  if (brewing() || editing || document.hidden || $('dialog[open]')) return;   // try again at the next check
+  showDonate(false);
+}
+setTimeout(() => { if (S) { maybeDonate(); setInterval(maybeDonate, 5 * 60000); } }, 30000);
+
+function renderDonate() {
+  const d = donation();
+  $('#donOn').checked = d.enabled; $('#donLink').value = d.link; $('#donMsg').value = d.message;
+  $('#donBtn').value = d.button; $('#donEvery').value = d.everyDays; $('#donDone').value = d.donatedDays;
+  $('#donMsg').placeholder = DONATE_MSG;
+}
+$('#donSave').onclick = guard(async () => {
+  await api('PUT', '/ui/settings', { donation: { enabled: $('#donOn').checked, link: $('#donLink').value.trim(), message: $('#donMsg').value,
+    button: $('#donBtn').value, everyDays: $('#donEvery').value, donatedDays: $('#donDone').value } });
+  await load(); toast('Pop-up settings saved');
+});
+$('#donPreview').onclick = () => showDonate(true);
 
 // ---------------------------------------------------------------- start
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));

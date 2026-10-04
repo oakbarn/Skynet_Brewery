@@ -138,6 +138,18 @@ function apiKeyOk(req, url) {
 
 // ---------------- login ----------------
 // Who may do what. viewer < operator < admin. New routes default to viewer for GET and admin for changes.
+// Beer money pop-up settings (Settings > Beer money). The link must be a plain https address.
+function cleanDonation(d = {}) {
+  const days = (v, def) => { const n = Math.round(Number(v)); return n >= 1 && n <= 3650 ? n : def; };
+  const link = String(d.link ?? '').trim();
+  if (link && !/^https:\/\/[^\s"'<>]+$/i.test(link)) throw new Error('The PayPal link must start with https://');
+  return {
+    enabled: d.enabled !== false, link,
+    message: String(d.message ?? '').slice(0, 1000), button: String(d.button ?? '').slice(0, 60),
+    everyDays: days(d.everyDays, 30), donatedDays: days(d.donatedDays, 180),
+  };
+}
+
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
@@ -298,7 +310,9 @@ async function route(req, res) {
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
+    const donation = 'donation' in body ? cleanDonation(body.donation) : undefined;   // checked first so a bad link changes nothing
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample']) if (k in body) store.config[k] = body[k];
+    if (donation) store.config.donation = donation;
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
