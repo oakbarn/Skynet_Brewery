@@ -2,7 +2,7 @@
 // MIT License Granted - Copyright (c) OakBarn Brewery 2026
 // Libraries (Arduino Library Manager): OneWire, DallasTemperature
 //   + Adafruit MAX31865 when USE_RTD is 1, Adafruit MAX31856 when USE_TC is 1, Adafruit MAX31855 when USE_TC is 2,
-//     Adafruit ADS1X15 when USE_ADS1115 is 1
+//     Adafruit ADS1X15 when USE_ADS1115 is 1, HX711 (by Bogdan Necula) when USE_HX711 is 1
 // Written for an Arduino Mega 2560. Uno / Nano work with smaller pin lists (flow meters on pins 2 and 3 only).
 // Starter sketch: set the pin lists below for this Mega. Only pins in these lists can be used.
 // Sensor settings that live on the chip (thermocouple type, RTD wires, input pull-up) are sent by the
@@ -11,6 +11,7 @@
 #define USE_RTD 0                                        // 1 = PT100 / PT1000 probes on MAX31865 boards
 #define USE_TC  0                                        // 1 = thermocouples on MAX31856 boards (K, J, T ...), 2 = MAX31855 boards (K only)
 #define USE_ADS1115 0                                    // 1 = ADS1115 16-bit analog board on I2C (SDA 20, SCL 21), address 0x48
+#define USE_HX711 0                                      // 1 = load cells (vessel scales) on HX711 boards
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -24,6 +25,9 @@
 #endif
 #if USE_ADS1115
 #include <Adafruit_ADS1X15.h>
+#endif
+#if USE_HX711
+#include <HX711.h>
 #endif
 
 const char* DEVICE_NAME = "MEGA1";
@@ -57,6 +61,8 @@ const uint8_t FLOW_PINS[]   = {};                        // pulse flow meters, i
 const uint8_t RTD_CS_PINS[] = {};                        // MAX31865 chip-select pins (PT100 / PT1000), SPI on 50/51/52, e.g. {48}
 const uint8_t TC_CS_PINS[]  = {};                        // MAX31856 / MAX31855 chip-select pins (thermocouples), SPI on 50/51/52, e.g. {49}
 const uint8_t ADS_CHANNELS[] = {0, 1, 2, 3};             // ADS1115 channels to report (only when USE_ADS1115 is 1)
+const uint8_t HX711_DT_PINS[]  = {};                     // HX711 boards: data (DT) pins, e.g. {26, 28}; the panel names a scale by these
+const uint8_t HX711_SCK_PINS[] = {};                     // and their clock (SCK) pins, same order, e.g. {27, 29}
 const uint8_t ONEWIRE_PIN = 40;                          // all DS18B20 probes on one bus, 4.7k pull-up to 5V
 const bool RELAY_ACTIVE_LOW = true;                      // most relay boards switch ON with LOW
 const unsigned long WATCHDOG_MS = 10000;                 // no message for 10 s -> all outputs OFF
@@ -75,6 +81,11 @@ Adafruit_MAX31855* tc[N_TC > 0 ? N_TC : 1];
 #endif
 #if USE_ADS1115
 Adafruit_ADS1115 ads;
+#endif
+const uint8_t N_HX = sizeof(HX711_DT_PINS);
+#if USE_HX711
+HX711 hx[N_HX > 0 ? N_HX : 1];
+long hxSum[N_HX > 0 ? N_HX : 1]; uint8_t hxN[N_HX > 0 ? N_HX : 1];
 #endif
 int lastIn[N_IN > 0 ? N_IN : 1];
 volatile unsigned long pulses[6];
@@ -129,6 +140,9 @@ void reportFast() {
     LINK.print("TC "); LINK.print(TC_CS_PINS[i]); LINK.print(' ');
     if (isnan(c)) LINK.println("NAN"); else LINK.println(c, 2);
   }
+#endif
+#if USE_HX711
+  for (uint8_t i = 0; i < N_HX; i++) if (hxN[i]) { say("W", HX711_DT_PINS[i], hxSum[i] / hxN[i]); hxSum[i] = 0; hxN[i] = 0; }   // average since last report
 #endif
 #if USE_ADS1115
   for (uint8_t i = 0; i < sizeof(ADS_CHANNELS); i++) say("ADS", ADS_CHANNELS[i], ads.readADC_SingleEnded(ADS_CHANNELS[i]));
@@ -215,6 +229,9 @@ void setup() {
 #if USE_TC == 2
   for (uint8_t i = 0; i < N_TC; i++) { tc[i] = new Adafruit_MAX31855(TC_CS_PINS[i]); tc[i]->begin(); }
 #endif
+#if USE_HX711
+  for (uint8_t i = 0; i < N_HX; i++) hx[i].begin(HX711_DT_PINS[i], HX711_SCK_PINS[i]);
+#endif
 #if USE_ADS1115
   ads.setGain(GAIN_TWOTHIRDS);                           // 0-6.144 V range, so 5 V sensors fit
   if (!ads.begin()) LINK.println("ERR ADS1115 not found on I2C");
@@ -253,6 +270,9 @@ void loop() {
     if (v != lastIn[i]) { lastIn[i] = v; LINK.print("DI "); LINK.print(INPUT_PINS[i]); LINK.print(' '); LINK.println(v); }
   }
   if (now - lastReport > 5000) { lastReport = now; reportInputs(); }
+#if USE_HX711
+  for (uint8_t i = 0; i < N_HX; i++) if (hx[i].is_ready()) { hxSum[i] += hx[i].read(); hxN[i]++; }   // about 10 readings a second, never waits
+#endif
   if (now - lastFast > 1000) { lastFast = now; reportFast(); }
   if (!tempRequested && now - lastTemp > 2000) { probes.requestTemperatures(); tempRequested = true; lastTemp = now; }
   if (tempRequested && now - lastTemp > 800) { sendTemps(); tempRequested = false; }
