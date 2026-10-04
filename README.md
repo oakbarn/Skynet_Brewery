@@ -158,6 +158,15 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 | `looper_LogTemps` | Copies the kettle temperature into a logged Global. |
 | `Demo_Variables` | Uses each vKonstant and vAPI kind; waits for the Ping button. |
 
+## 3a. Config Editor (admins only)
+
+The **Config** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
+
+- **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
+- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
+- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
+- **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
+
 ## 4. API (for Node-RED or other programs)
 
 Only **Globals** and **vAPI** variables are in the API (`/api/vapi/...` works the same as `/api/globals/...`). Programs must send the API key from Settings in the header `X-API-Key: <key>` (or `?key=<key>`). Without a key, reading works only from your own network (home or Tailscale), and changes are refused. A signed-in browser can use the API too: viewers read, operators and admins also change.

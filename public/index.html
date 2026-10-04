@@ -18,6 +18,7 @@
     <button data-view="media">Media</button>
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
+    <button data-view="config" class="admin-only" title="Edit the config file (admin only)">Config</button>
   </nav>
   <div class="right">
     <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
@@ -97,6 +98,25 @@
         <pre id="console"></pre>
       </div>
     </div>
+  </section>
+
+  <!-- ===== Config Editor (admin only) ===== -->
+  <section id="view-config" class="view admin-only">
+    <div class="bar">
+      <strong>Config Editor</strong>
+      <code id="cfgFile" class="muted"></code>
+      <span id="cfgState" class="muted"></span>
+      <span class="spacer"></span>
+      <button id="cfgSave" class="primary">Save</button>
+      <button id="cfgCheck">Check</button>
+      <button id="cfgFind" title="Find (Ctrl+F) and Replace (Ctrl+H)">Find</button>
+      <button id="cfgReload" title="Throw away unsaved changes and read the file again">Reload</button>
+      <button id="cfgBackups">Backups</button>
+    </div>
+    <p id="cfgBackupNote" class="cfgNote"></p>
+    <div class="editor"><pre id="cfgGutter"></pre><div class="codeWrap"><pre id="cfgCodeHl" aria-hidden="true"></pre><textarea id="cfgCode" spellcheck="false" wrap="off"></textarea></div></div>
+    <ul id="cfgProblems" class="problems"></ul>
+    <p class="muted">This is the whole setup as one JSON file: tabs, elements, pipes, devices and settings. Save checks it first and will not save a file the panel cannot load. Saving stops running scripts and reconnects the boards.</p>
   </section>
 
   <!-- ===== Globals ===== -->
@@ -253,6 +273,12 @@
   <div id="faSummary" class="muted"></div>
   <div id="faList" class="faList"></div>
   <div class="bar"><label class="toggle admin-only"><input type="checkbox" id="faTickAll" checked> Tick all</label><span class="spacer"></span><button value="cancel">Close</button><button type="button" id="faReplace" class="primary admin-only" disabled>Replace ticked</button></div>
+</form></dialog>
+<dialog id="cfgBackupDlg" class="findAllDlg"><form method="dialog">
+  <h3>Config backups</h3>
+  <p class="muted">A copy is made each time the Config Editor opens (unless nothing changed since the last copy), and before every save or restore. They are kept in <code>config/backups</code>.</p>
+  <div id="cfgBackupList" class="faList"></div>
+  <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
 </form></dialog>
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
