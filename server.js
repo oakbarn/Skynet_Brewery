@@ -15,6 +15,7 @@ import { listSamples, loadSample } from './lib/samples.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { plain, toStr } from './lib/values.js';
+import { Help } from './lib/help.js';
 import { Auth, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -23,6 +24,7 @@ const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'))
 const SCRIPTS = path.resolve(process.env.BREWPANEL_SCRIPTS ?? path.join(ROOT, 'scripts'));
 const PUBLIC = path.join(ROOT, 'public');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
+const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'));
 
 const store = new Store(CONFIG, DATA);
 store.load();
@@ -38,6 +40,7 @@ setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants
 store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media page: add / rename / delete pictures and sounds
+const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
@@ -361,6 +364,18 @@ async function route(req, res) {
     if (p === '/ui/media/delete' && m === 'POST') { const f = mediaFiles.resolve(b.root, b.path); mediaFiles.remove(b.root, b.path); pictures.forget(f); return ok(res); }
     return fail(res, 404, 'Unknown media route');
   }
+  // Help tab: everyone reads, admins edit
+  if (p === '/ui/help' && m === 'GET') return ok(res, help.list());
+  if (p === '/ui/help' && m === 'POST') { const { title } = await jsonBody(req); return ok(res, { ok: true, name: help.create(title) }); }
+  const hp = /^\/ui\/help\/([^/]+)$/.exec(p);
+  if (hp) {
+    try {
+      if (m === 'GET') return send(res, 200, help.read(hp[1]), 'text/plain; charset=utf-8');
+      if (m === 'PUT') { help.write(hp[1], await readBody(req, 1024 * 1024 + 1)); return ok(res); }
+      if (m === 'DELETE') { help.remove(hp[1]); return ok(res); }
+    } catch (e) { return fail(res, e.code === 404 ? 404 : 400, e.message); }
+  }
+
   // PNG/JPG -> SVG pictures
   if (p === '/ui/pictures' && m === 'GET') return ok(res, pictures.status());
   if (p === '/ui/pictures/convert' && m === 'POST') { const { force } = await jsonBody(req); return ok(res, { ok: true, queued: pictures.convertAll(!!force) }); }

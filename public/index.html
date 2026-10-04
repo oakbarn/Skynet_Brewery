@@ -18,6 +18,7 @@
     <button data-view="media">Media</button>
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
+    <button data-view="help">Help</button>
   </nav>
   <div class="right">
     <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
@@ -174,6 +175,35 @@
     <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
   </section>
 
+  <!-- ===== Help: the manual, read from the help/ folder on the Brew Panel computer ===== -->
+  <section id="view-help" class="view">
+    <div class="hpLayout">
+      <aside class="hpSide" id="hpSide">
+        <input id="hpSearch" type="search" placeholder="🔍 Search the manual">
+        <select id="hpPick" aria-label="Help page"></select>
+        <nav id="hpList" aria-label="Help pages"></nav>
+        <button id="hpNew" class="admin-only">＋ New page</button>
+      </aside>
+      <article class="hpMain">
+        <div class="bar hpTools">
+          <button id="hpBack" title="Back">◀ Back</button>
+          <span class="spacer"></span>
+          <button id="hpPrint" title="Print this page">🖨 Print</button>
+          <button id="hpEdit" class="admin-only">✏ Edit page</button>
+        </div>
+        <div id="hpPage" class="hpPage"></div>
+        <div id="hpEditor" class="hpEditor" hidden>
+          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](oakbarn/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
+          <div class="hpEditPanes">
+            <textarea id="hpText" spellcheck="true"></textarea>
+            <div id="hpPreview" class="hpPage"></div>
+          </div>
+          <div class="bar"><button id="hpDelete" class="danger">Delete page</button><span class="spacer"></span><button id="hpCancel">Cancel</button><button id="hpSave" class="primary">Save page</button></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
     <div class="admin-only">
@@ -227,5 +257,6 @@
 <script type="module" src="app.js"></script>
 <script type="module" src="pictures.js"></script>
 <script type="module" src="media.js"></script>
+<script type="module" src="help.js"></script>
 </body>
 </html>
