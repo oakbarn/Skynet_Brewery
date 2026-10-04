@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 170">
+  <defs><linearGradient id="s" x1="0" x2="1"><stop offset="0" stop-color="#7d858d"/><stop offset=".4" stop-color="#e4e8ec"/><stop offset="1" stop-color="#6b737b"/></linearGradient></defs>
+  <path d="M50 0 V20 M50 150 V170" stroke="#3b4148" stroke-width="14"/><path d="M50 0 V20 M50 150 V170" stroke="#c9ced3" stroke-width="8"/>
+  <rect x="18" y="18" width="64" height="134" rx="12" fill="url(#s)" stroke="#3b4148" stroke-width="3"/>
+  <g stroke="#59616a" stroke-width="2" stroke-dasharray="3 4"><path d="M32 34 V136"/><path d="M44 34 V136"/><path d="M56 34 V136"/><path d="M68 34 V136"/></g>
+  <text x="50" y="94" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#22272c">TRUB</text>
+</svg>
