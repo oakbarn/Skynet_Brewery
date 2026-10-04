@@ -1,7 +1,7 @@
 // Devices: sensor conversions and the hardware protocol, without hardware.  Run: node test/devices.test.js
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
-import { analogFrom, analogOutLevel, ntcCelsius, pwmDuty, rtdCelsius, scaleFrom, temperatureFrom } from '../lib/sensors.js';
+import { analogFrom, analogOutLevel, ntcCelsius, pwmDuty, rtdCelsius, scaleFrom, temperatureFrom, pinNumber, analogIndex } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
 import { Hardware } from '../lib/hardware.js';
 
@@ -33,6 +33,10 @@ near(scaleFrom({ countsPerUnit: 1000 }, 83454).volume, 10, 1e-3, '83.454 lb of w
 near(scaleFrom({ countsPerUnit: 1000 }, 83454, 1.05).volume, 10 / 1.05, 1e-3, 'wort at 1.050');
 near(scaleFrom({ countsPerUnit: 100, weightUnits: 'kg', volumeUnits: 'L', tareRaw: 500 }, 1498.2).volume, 10, 1e-3, '9.982 kg = 10 L');
 near(scaleFrom({ countsPerUnit: 1000 }, 83454, 0).volume, 10, 1e-3, 'unset gravity falls back to water');
+
+// Mega pin names: A0-A15 and BruControl's 54-69 are the same pins
+assert.equal(pinNumber('A5'), 59); assert.equal(pinNumber('a15'), 69); assert.equal(pinNumber('D22'), 22); assert.equal(pinNumber(22), 22); assert.ok(Number.isNaN(pinNumber('GPIO5')));
+assert.equal(analogIndex('A3'), 3); assert.equal(analogIndex(57), 3); assert.equal(analogIndex('3'), 3);
 
 // Outputs
 assert.equal(pwmDuty(50), 128); assert.equal(pwmDuty(150), 255);
@@ -81,6 +85,12 @@ hw._flow(store.get('Flow'), 1000, 0); hw._flow(store.get('Flow'), 1200, 60000);
 near(store.getProp('Flow', 'rate'), 2, 1e-9, 'flow rate per minute'); near(store.getProp('Flow', 'total'), 2, 1e-9, 'flow total');
 assert.throws(() => store.setProp('Press', 'value', 1), /cannot be set by a script/);
 store.setProp('Flow', 'total', 0); assert.equal(store.getProp('Flow', 'total'), 0, 'scripts can reset the flow total');
+
+// The same pin by either name
+assert.match(hw._outLine({ name: 'Relay', type: 'digitalOut', channel: 'A5' }), /^DO 59 [01]$/, 'A5 is sent as pin 59');
+{ const before = store.getProp('Press', 'value'); hw._onLine(dev, `A 1 ${1023 * 12 / 20}`);
+  store.get('Press').channel = 55; hw._onLine(dev, `A 1 ${1023 * 16 / 20}`); near(store.getProp('Press', 'value'), 22.5, 0.01, 'BruControl 55 = A1');
+  store.get('Press').channel = 'A1'; hw._onLine(dev, `A 1 ${1023 * 12 / 20}`); near(store.getProp('Press', 'value'), 15, 0.01, 'A1'); void before; }
 
 // Scale with two HX711 boards: summed, tared, calibrated, auto tared
 hw._onLine(dev, 'W 26 40000'); assert.equal(store.getProp('Kettle', 'volume'), 0, 'waits for both boards');
