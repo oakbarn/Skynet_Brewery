@@ -1,20 +1,20 @@
-# Scripts
+# Processes
 
-Scripts are the automatic steps of a brew: open valves, run a pump, wait for a temperature, start a timer, sound an alarm. They are text files in the `scripts` folder on the Pi and work like BruControl scripts.
+Processes are the automatic steps of a brew: open valves, run a pump, wait for a temperature, start a timer, sound an alarm. They are text files in the `scripts` folder on the Pi and work like BruControl processes.
 
-## The Scripts screen
+## The Processes screen
 
-- The list on the left shows every script; a running one is marked.
+- The list on the left shows every process; a running one is marked.
 - **New**, **Rename**, **Delete** (admins).
-- **Save** and **Check** (admins). Check finds mistakes without starting the script.
-- **Start** and **Stop** (operators and admins). **Stop all** stops every script.
-- **Output** shows what scripts print. Tick **all scripts** to see every script's output.
+- **Save** and **Check** (admins). Check finds mistakes without starting the process.
+- **Start** and **Stop** (operators and admins). **Stop all** stops every process.
+- **Output** shows what processes print. Tick **all processes** to see every process's output.
 
-**A script with a mistake does not start.** The mistakes are listed with their line numbers; click one to jump to it.
+**A process with a mistake does not start.** The mistakes are listed with their line numbers; click one to jump to it.
 
-The saved file is read every time a script starts, so it never runs an old copy. If you edit a running script, it is marked "edited since start": stop and start it to use the new version.
+The saved file is read every time a process starts, so it never runs an old copy. If you edit a running process, it is marked "edited since start": stop and start it to use the new version.
 
-## Script lines you will use most
+## Process lines you will use most
 
 ```
 new value vVCount              make a number variable
@@ -40,9 +40,9 @@ log "gblV_Kettle_Temp"         write a value to the database now
 ## Differences from BruControl
 
 - Labels and gotos can be anywhere, even inside if/endif.
-- Starting a script that is already running does nothing (it prints a note).
-- Readings from hardware (inputs, probes) cannot be set by scripts.
+- Starting a process that is already running does nothing (it prints a note).
+- Readings from hardware (inputs, probes) cannot be set by processes.
 
-## Sample scripts
+## Sample processes
 
 `Demo_Transfer_HLT_to_MLT`, `Demo_Hop_Stand`, `Demo_Heat_HLT`, `Hops_Order_Boil`, `looper_LogTemps` and `Demo_Variables` show how things are done. Open one and press Start to watch it work on the simulator.

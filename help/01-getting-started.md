@@ -2,7 +2,7 @@
 
 Welcome to the **Brew Panel**, the brewery control program for the Skynet Brewery. It runs on the Raspberry Pi (the "brain") and you use it from any browser: a PC, Mac, tablet, Android phone or iPhone, in Chrome, Edge, Safari, Firefox or DuckDuckGo.
 
-The Pi keeps everything: the layout of your screens, your scripts, pictures, sounds, the brew log and this manual. Every screen you open shows the same live brewery, and scripts keep running when every browser is closed.
+The Pi keeps everything: the layout of your screens, your processes, pictures, sounds, the brew log and this manual. Every screen you open shows the same live brewery, and processes keep running when every browser is closed.
 
 ## Opening the panel
 
@@ -19,7 +19,7 @@ The buttons along the top are the main screens:
 | Button | What it is for |
 |---|---|
 | **Tabs** | Your brewery screens: pumps, valves, temperatures, timers, pipes. Where you brew. |
-| **Scripts** | Write, check, start and stop scripts (automatic brew steps). |
+| **Processes** | Write, check, start and stop processes (automatic brew steps). |
 | **Variables** | Every vKonstant, vAPI, Global and Shared variable and its value. |
 | **Log** | Values written to the brew database, with a CSV download. |
 | **Devices** | The boards (PLCs) connected to the Pi, and the temperature probe list. |

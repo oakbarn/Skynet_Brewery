@@ -1,6 +1,6 @@
 # Tabs (your brewery screens)
 
-A **Tab** is one screen of your brewery: a background picture with pumps, valves, temperatures, timers and pipes placed on it. The tab buttons sit at the top of the **Tabs** screen. Scripts can switch every screen to a tab with `show tab "Brew Day"`.
+A **Tab** is one screen of your brewery: a background picture with pumps, valves, temperatures, timers and pipes placed on it. The tab buttons sit at the top of the **Tabs** screen. Processes can switch every screen to a tab with `show tab "Brew Day"`.
 
 **Zoom** sets the size: **Fit** fills the width of your screen; 50 % to 125 % are fixed sizes.
 

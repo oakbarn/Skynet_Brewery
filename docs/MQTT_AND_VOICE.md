@@ -1,6 +1,6 @@
 # MQTT and voice control
 
-The Brew Panel can share its Globals and Devices over **MQTT**. MQTT is a small "message board" program (a *broker*) that many brewing and home gadgets understand: ESP32 boards, Tasmota smart plugs, Node-RED and Home Assistant.
+The Brew Panel can share its vAPI variables and Devices over **MQTT**. MQTT is a small "message board" program (a *broker*) that many brewing and home gadgets understand: ESP32 boards, Tasmota smart plugs, Node-RED and Home Assistant.
 
 Through **Home Assistant** you can then use your voice with **Alexa, Google Home and Siri** (Apple Home).
 
@@ -78,12 +78,12 @@ Everything uses the **Topic name** from Settings (default `brewpanel`).
 | Topic | What it is |
 |---|---|
 | `brewpanel/status` | `online` or `offline` (the broker sets offline if the panel stops) |
-| `brewpanel/state/<name>` | The value of a Global or Device. On/off things are `ON` / `OFF`. Timers are `hh:mm:ss`. |
+| `brewpanel/state/<name>` | The value of a vAPI variable or Device. On/off things are `ON` / `OFF`. Timers are `hh:mm:ss`. |
 | `brewpanel/state/<timer>/running` | `ON` while a timer runs |
-| `brewpanel/scripts/running` | Names of the running scripts, or `none` |
-| `brewpanel/set/<name>` | Send a value here to change a Global or Device (see the safety rules) |
-| `brewpanel/cmd/stopall` | Stops all scripts |
-| `brewpanel/cmd/script/<script>/start` or `/stop` | Start or stop one script |
+| `brewpanel/scripts/running` | Names of the running processes, or `none` |
+| `brewpanel/set/<name>` | Send a value here to change a vAPI variable or Device (see the safety rules) |
+| `brewpanel/cmd/stopall` | Stops all processes |
+| `brewpanel/cmd/script/<script>/start` or `/stop` | Start or stop one process |
 | `brewpanel/cmd/timer/<timer>/start`, `/stop`, `/reset` | Control a timer |
 
 Values are kept on the broker ("retained"), so a gadget that connects later gets the latest value straight away. **Shared variables are never shared**, the same as the web API.
@@ -106,9 +106,9 @@ Out of the box:
 
 | Always allowed | Allowed until you untick it | Not allowed until you tick it |
 |---|---|---|
-| Reading every shared value | Changing Globals that are not read-only (same as the web API) | Turning outputs and switches on or off (heaters, burners, pumps, valves) |
+| Reading every shared value | Changing vAPI variables that are not read-only (same as the web API) | Turning outputs and switches on or off (heaters, burners, pumps, valves) |
 | Silencing an alarm | | Starting, stopping or resetting a timer |
-| Stopping scripts | | Starting a script (list under the table) |
+| Stopping processes | | Starting a process (list under the table) |
 
 Temperatures and other hardware inputs can never be changed from outside. A refused change is written to the panel's console with the reason.
 
@@ -125,8 +125,8 @@ Alexa, Google Home and Siri do not talk MQTT themselves. **Home Assistant** sits
    * outputs as on/off status, or as switches if **Can change it** is ticked,
    * timers as sensors (plus Start / Stop / Reset buttons if allowed),
    * alarms as problem sensors plus a **Silence** button,
-   * **Running scripts**, **Stop all scripts**, and a **Start** button for each script you allowed,
-   * read-only Globals such as your message panel or *Script status*, and any Global you tick.
+   * **Running processes**, **Stop all processes**, and a **Start** button for each process you allowed,
+   * read-only vAPI variables such as your message panel or *Process status*, and any vAPI variable you tick.
 
 Name things the way you will say them: the **Display name** of each element becomes its name in Home Assistant and on your speakers.
 
@@ -149,10 +149,10 @@ Name things the way you will say them: the **Display name** of each element beco
 | Temperature | Temperature sensor | "Alexa, what is the **HLT Temp** temperature?" |
 | Output or switch you ticked **Can change** | Switch | "Alexa, turn on **Red Pump**" / "turn off ..." |
 | Output not ticked | Shown in the app (on/off) | Check it in the Alexa app, or use it in a Routine |
-| **Stop all scripts**, **Silence** alarm, **Start** script | Scene | "Alexa, turn on **Stop all scripts**" |
+| **Stop all processes**, **Silence** alarm, **Start** process | Scene | "Alexa, turn on **Stop all processes**" |
 | Alarm | Can start a Routine | Alexa app **Routines**: *When* Hop alarm turns on, *Alexa says* "Add the hops" |
 
-Alexa does not read out text or timer values (for example the *Script status* message or the *Whirlpool timer*). For those, an Alexa **Routine** can speak when something changes, or ask Home Assistant's own **Assist** app on your phone.
+Alexa does not read out text or timer values (for example the *Process status* message or the *Whirlpool timer*). For those, an Alexa **Routine** can speak when something changes, or ask Home Assistant's own **Assist** app on your phone.
 
 ### Google Home
 
@@ -162,14 +162,14 @@ The same as Alexa: in **Home Assistant Cloud** turn on **Google Assistant**, the
 
 In Home Assistant add the **HomeKit Bridge** integration, choose the Brew Panel items, and scan the code it shows with the Home app on your iPhone. Then "Hey Siri, what is the HLT temperature?" works, on the iPhone, iPad, Apple Watch and HomePod.
 
-Siri Shortcuts can also call the panel's web API directly without Home Assistant: a Shortcut with **Get Contents of URL** `http://<pi address>:8080/api/globals/<name>` reads a Global, and **Speak Text** reads it out.
+Siri Shortcuts can also call the panel's web API directly without Home Assistant: a Shortcut with **Get Contents of URL** `http://<pi address>:8080/api/globals/<name>` reads a vAPI variable, and **Speak Text** reads it out.
 
 ### What you can say
 
 Exact words depend on the assistant, but for example:
 
 * "Alexa, what is the Kettle temperature?"
-* "Alexa, turn on Stop all scripts."
+* "Alexa, turn on Stop all processes."
 * "Hey Google, what is the Kettle temperature?"
 * "Hey Siri, what is the Whirlpool timer?"
 * "Alexa, turn on Silence Hop alarm."
