@@ -315,3 +315,9 @@ button.small { padding: 2px 7px; font-size: 12px; }
 .right { display: flex; align-items: center; gap: 8px; }
 body:not(.role-admin) .admin-only { display: none !important; }
 body.role-viewer .op-only { display: none !important; }
+/* Vessel widget: thermowell mark (not an IP) and the pop-up shown after its ports are placed */
+#ws .gfx.vessel .twell { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 4px; background: #c0392b; color: #fff; font: 700 11px/18px system-ui, sans-serif; text-align: center; box-shadow: 0 0 0 2px rgba(0,0,0,.5); pointer-events: auto; }
+.vpop { position: fixed; top: 90px; right: 24px; z-index: 50; width: 340px; max-width: calc(100vw - 32px); background: #1d2329; color: #e8ecef; border: 1px solid #4a5058; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.5); padding: 0 14px 12px; font-size: 14px; }
+.vpop .vpop-head { margin: 0 -14px 8px; padding: 10px 14px; background: #2a3239; border-radius: 10px 10px 0 0; font-weight: 700; cursor: move; user-select: none; touch-action: none; }
+.vpop ul { margin: 0 0 8px; padding-left: 18px; }
+.vpop p { margin: 6px 0; }
