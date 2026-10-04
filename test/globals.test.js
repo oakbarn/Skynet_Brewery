@@ -1,7 +1,7 @@
 // Retiring the Global class: node test/globals.test.js
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import assert from 'node:assert/strict';
-import { retireGlobals, retireGlobalsOnDisk, reportLines } from '../lib/globals.js';
+import { retireGlobals, retireGlobalsOnDisk, reportLines, hasGlobals } from '../lib/globals.js';
 import { Store } from '../lib/store.js';
 
 const cfg = {
@@ -32,7 +32,7 @@ assert.equal(el('RP_v_Pitch_Temp'), undefined);
 assert.equal(el('vA_v_Pitch_Temp').type, 'vAPI'); assert.deepEqual(el('vA_v_Pitch_Temp').log, { mode: 'minutes', every: 5 });
 assert.equal(el('vA_dt_BrewDate').kind, 'datetime');
 assert.equal(el('xgblT_Old'), undefined);
-assert.equal(el('glbV_Typo').type, 'vAPI');
+assert.equal(el('glbV_Typo').type, 'global'); assert.equal(el('glbV_Typo').dataType, 'value');
 assert.equal(el('Pitch_Show').follow, 'vA_v_Pitch_Temp'); assert.equal(el('Pitch_Show').note, 'RP_v_Pitch_Temp is shown');
 assert.deepEqual(r.cfg.graphics[0].flowWhen, ['vA_dt_BrewDate']);
 assert.deepEqual(r.cfg.beerxml, { recipe: { og: 'vA_v_Pitch_Temp' }, hops: { oz: 'vA_v_Hop{n}_Oz' } });
@@ -46,6 +46,8 @@ assert.ok(reportLines(r.report)[0].startsWith('Globals retired: 2 gbl → vKonst
 // a vA_ name that already exists is not overwritten
 const clash = retireGlobals({ elements: [{ name: 'RP_a', type: 'global' }, { name: 'vA_a', type: 'vAPI' }] });
 assert.deepEqual(clash.report.notRenamed, [{ name: 'RP_a', to: 'vA_a' }]); assert.equal(clash.cfg.elements[0].type, 'vAPI');
+// Globals that fit no rule do not make the start-up conversion run again
+assert.equal(retireGlobals({ elements: [{ name: 'Odd', type: 'global' }] }).cfg.elements[0].type, 'global');
 
 // start-up: a saved setup is converted once, with backups, and saved values follow the renames
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpg'));
@@ -62,9 +64,8 @@ assert.ok(!fs.existsSync(path.join(d, 'scripts', 'Plain.txt.before-globals.bak')
 assert.match(fs.readFileSync(path.join(d, 'scripts', 'Brew.txt'), 'utf8'), /^"vA_v_Pitch_Temp" value = 68/);
 assert.ok(fs.existsSync(path.join(d, 'data', 'globals-retired.txt')));
 assert.equal(retireGlobalsOnDisk({ configPath, scriptsDir: path.join(d, 'scripts'), dataDir: path.join(d, 'data') }), null, 'only once');
+assert.equal(hasGlobals([{ name: 'glbV_Typo', type: 'global' }]), false);
 const store = new Store(configPath, path.join(d, 'data')); store.load();
 assert.equal(store.getProp('vA_v_Pitch_Temp', 'value'), 66); assert.equal(store.getProp('gblS_Msg', 'value'), 'hi');
-// the Global class itself is gone
-fs.writeFileSync(configPath, JSON.stringify({ elements: [{ name: 'g', type: 'global' }] }));
-assert.throws(() => new Store(configPath, path.join(d, 'data')).load(), /unknown type "global"/);
+assert.equal(store.get('glbV_Typo').type, 'global', 'names that fit no rule stay Globals');
 console.log('globals OK');

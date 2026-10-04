@@ -192,9 +192,9 @@ function buildGfx(g) {
   return n;
 }
 
-// variable classes: shared, vKonstant, vAPI (the old Global class is retired: lib/globals.js)
-const isVarEl = e => ['shared', 'vKonstant', 'vAPI'].includes(e?.type);
-const isApiEl = e => e?.type === 'vAPI';
+// variable classes: shared, vKonstant, vAPI, and global (being retired: only names that fit no rule are left, see lib/globals.js)
+const isVarEl = e => ['global', 'shared', 'vKonstant', 'vAPI'].includes(e?.type);
+const isApiEl = e => e?.type === 'global' || e?.type === 'vAPI';
 const vkKind = e => e?.type === 'vKonstant' ? (e.kind || 'value') : null;
 const kindsOf = type => type === 'vKonstant' ? S.vkKinds : type === 'vAPI' ? S.vapiKinds : null;
 const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
@@ -248,7 +248,7 @@ function elGeom(e) {
 }
 // A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
 // it can also be a vKonstant value holding the percent. It passes flow whenever it is above 0 % open.
-const PROP_TYPES = ['analogOut', 'pwmOut', 'vKonstant', 'vAPI', 'shared'];
+const PROP_TYPES = ['analogOut', 'pwmOut', 'vKonstant', 'vAPI', 'global', 'shared'];
 const isPropValve = e => e && e.subtype === 'propValve' && PROP_TYPES.includes(e.type);
 function propPct(e) {
   const v = Number(S.values[e.name]?.value) || 0;
@@ -330,7 +330,7 @@ function fillEl(n, e) {
   nm.textContent = v.displayname ?? e.name;
   let on = false, img = v.image || '', text = '';
   switch (e.type) {
-    case 'shared': case 'vAPI':
+    case 'global': case 'shared': case 'vAPI':
       if (e.dataType === 'bool' || e.kind === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
       text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'vKonstant':
@@ -406,7 +406,7 @@ function tapAction(e) {
     case 'pwmOut': case 'analogOut': case 'scale': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
-    case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
+    case 'global': case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
     case 'vKonstant':
       if (e.readOnly) return 'none';
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
@@ -1048,6 +1048,7 @@ const F = {
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'bool']]],
   pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Tab', 'ws', ['locked', 'Lock position (no drag or resize)', 'bool']]],
 };
+F.global = F.shared;     // the Globals still left (no new ones can be added)
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
 F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vkKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
@@ -1376,7 +1377,7 @@ function varRow(e, withLog) {
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
-  for (const [id, type, withLog] of [['#vapiBody', 'vAPI', true], ['#vkBody', 'vKonstant', false], ['#sharedBody', 'shared', false]]) {
+  for (const [id, type, withLog] of [['#vapiBody', 'vAPI', true], ['#globalsBody', 'global', true], ['#vkBody', 'vKonstant', false], ['#sharedBody', 'shared', false]]) {
     const tb = $(id); tb.innerHTML = '';
     tb.append(...of(type).map(e => varRow(e, withLog)));
     tb.closest('table').classList.toggle('empty', !of(type).length);
