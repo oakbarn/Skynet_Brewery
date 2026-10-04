@@ -24,7 +24,7 @@ Go to **Settings > Users** and add a user with one of three roles:
 | Role | Can do |
 |---|---|
 | **Viewer** | Watch everything (temperatures, timers, pumps). Cannot change anything. Good for a friend who wants to follow the brew. |
-| **Operator** | Brew-day use: switch pumps and valves, set values, start and stop scripts, import a recipe. Cannot change the layout, scripts, devices, settings or users. |
+| **Operator** | Brew-day use: switch pumps and valves, set values, start and stop processes, import a recipe. Cannot change the layout, processes, devices, settings or users. |
 | **Admin** | Everything. |
 
 You can change someone's role, set a new password, or remove them at any time. They are signed out on every device straight away.
