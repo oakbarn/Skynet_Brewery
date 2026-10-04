@@ -184,12 +184,22 @@ const ONOFF_GRAPHICS = [['LED green', 'samples/led_green.svg'], ['LED red', 'sam
   ['Lightning bolt on', 'samples/bolt_on.svg'], ['Lightning bolt off', 'samples/bolt_off.svg'],
   ['Ball valve open (horizontal)', 'oakbarn/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'oakbarn/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'oakbarn/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'oakbarn/Valve_Ball_ClosedV-1x1.png']];
+// lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
+const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
+const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
+// pictures and sounds already used anywhere in the layout
+function usedPaths(re) {
+  const c = draft || S.config;
+  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.image, o.background, o.sound, ...(o.images || []), ...(o.sounds || [])])
+    .filter(p => typeof p === 'string' && re.test(p)))].sort();
+}
 const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
 const eqClass = g => g?.kind === 'vessel' ? EQ[g.vesselType] : null;
 // list keys: "standard" (shared), "<class>.types", "<class>.<port>"
 function vList(key) {
   const [c, p] = key.split('.');
-  const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
+  const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'units' ? UNITS : key === 'colors' ? [] :
+    key === 'pictures' ? [...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE)] : key === 'sounds' ? usedPaths(SND_RE) : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
   return [...new Set([...(base || []), ...(S.config.vesselLists?.[key] || [])])];
 }
 const portDefPos = d => d.def || d.pos[0][0];
@@ -1130,9 +1140,9 @@ const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool'],
     ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, script or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
-    ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'text'], ['nameBg', 'Name background color', 'text'], ['valueColor', 'Value color', 'text'], ['valueBg', 'Value background color', 'text'],
-    ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment (e.g. TopCenter)', 'text'], ['valueAlign', 'Value alignment (e.g. MiddleCenter)', 'text'], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
-  global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
+    ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
+    ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
+  global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (No = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
@@ -1140,7 +1150,7 @@ const F = {
     ['pulse', 'Momentary: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Momentary: lockout before the next press counts (ms, 3000 = 3 seconds; empty = 3000)', 'num'],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
-    ['units', 'Counter units (e.g. presses, gal)', 'text'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
@@ -1148,7 +1158,7 @@ const F = {
     ['_mnote', 'Scripts set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
   pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
   analogOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin feeding the 0-10 V / 4-20 mA module', 'pin', 'pwm'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
-    ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'text'], ['precision', 'Decimals', 'num']],
+    ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num']],
   scale: [['device', 'Device', 'dev'], ['channel', 'HX711 DT pin(s), comma between several boards on one vessel (e.g. 26, 28)', 'text'],
     ['countsPerUnit', 'Calibration: counts per lb / kg (tap the scale > Calibrate to measure it)', 'num'],
     ['weightUnits', 'Weight units', 'sel', ['lb', 'kg']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']],
@@ -1156,14 +1166,14 @@ const F = {
     ['offset', 'Weight offset (added after tare)', 'num'],
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
     ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
-  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
+  flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (No = time-proportioned on/off)', 'bool']],
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
-  text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
+  text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'color'], ['bold', 'Bold', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
@@ -1184,19 +1194,19 @@ const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], P
 F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vkKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
   ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
   ['file', 'Text file path (inside a media folder, a network drive works if it is added there)', 'path', null, ['longstring']],
-  ['initial', 'Initial value', 'text', null, PLAINK], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'text', null, [...NUMK, 'string']],
+  ['initial', 'Initial value', 'text', null, PLAINK], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units', [...NUMK, 'string']],
   ['step', '+ / - step', 'num', null, NUMK], ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK],
   ['onText', 'Text when on', 'text', null, BOOLK], ['offText', 'Text when off', 'text', null, BOOLK],
   ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
   ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', ...PLAINK]]];
 F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
-  ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'text'], ['step', '+ / - step', 'num', null, NUMK],
+  ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num', null, NUMK],
   ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true],
   ['_logNote', 'Database trigger: set it on the Globals page', 'note']];
 const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f() : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
-const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
+const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
 const SENSOR_FIELDS = {
   ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
@@ -1220,12 +1230,13 @@ function fieldsFor(item) {
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['calibrations', 'BruControl calibrations (JSON list, used instead of the settings above)', 'json'], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['prefix', 'Prefix', 'text'],
-      ['units', 'Units', 'text'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
+      ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"value":12,"noise":0.2}', 'json'], ['info', 'Raw reading now', 'info']];
   }
   return kindFields(item.type, item);
 }
 
 function field([key, label, kind, opts, rerender], obj) {
+  if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const v = obj[key];
   let input;
   if (kind === 'info') {     // live reading, to help with calibration
@@ -1244,23 +1255,30 @@ function field([key, label, kind, opts, rerender], obj) {
     input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: 'yes', ...(on ? { selected: true } : {}) }, 'Yes'), h('option', { value: 'no', ...(on ? {} : { selected: true }) }, 'No'));
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, or Custom with a color picker
-    const cur = String(v || '').toLowerCase(), known = COLORS.find(c => c[1] === cur);
+    const cols = [...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];
+    const cur = String(v || '').toLowerCase(), known = cols.find(c => c[1] === cur);
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
     const sw = h('span', { class: 'cswatch' + (cur ? '' : ' none') }); sw.style.background = cur;
     const pick = h('input', { type: 'color', class: known ? 'hidden' : '', value: /^#[0-9a-f]{6}$/.test(cur) ? cur : '#888888' });
     const set = c => { val.value = c; sw.style.background = c; sw.classList.toggle('none', !c); };
-    const s = h('select', {}, ...COLORS.map(([n, c]) => h('option', { value: c, ...(known && known[1] === c ? { selected: true } : {}), ...(c ? { style: `background:${c};color:${['#ffffff', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n)),
-      h('option', { value: 'custom', ...(known ? {} : { selected: true }) }, cur ? `Custom (${cur})` : 'Custom ...'));
+    const s = h('select', {}, ...cols.map(([n, c]) => h('option', { value: c, ...(known && known[1] === c ? { selected: true } : {}), ...(c ? { style: `background:${c};color:${['#ffffff', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n)),
+      h('option', { value: 'custom', ...(known ? {} : { selected: true }) }, 'Custom (add new) ...'));
     s.onchange = () => { pick.classList.toggle('hidden', s.value !== 'custom'); set(s.value === 'custom' ? pick.value : s.value); };
     pick.oninput = () => set(pick.value);
+    pick.onchange = () => {      // a custom color joins the list for next time
+      const c = pick.value.toLowerCase(); if (vList('colors').includes(c) || COLORS.some(k => k[1] === c)) return;
+      const lists = S.config.vesselLists = { ...(S.config.vesselLists || {}) }; lists.colors = [...(lists.colors || []), c];
+      api('PUT', '/ui/settings', { vesselLists: lists }).catch(e => toast(e.message, true));
+    };
     input = h('div', { class: 'cpick' }, sw, s, pick, val);
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
-    const named = new Map(ONOFF_GRAPHICS.map(([n, p]) => [p, n])), os = vList('onoff'); if (v && !os.includes(v)) os.push(v);
-    const pv = h('img', { class: 'gprev' + (v ? '' : ' hidden'), ...(v ? { src: media(v) } : {}), alt: '' });
-    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': 'onoff' }, h('option', { value: '' }, '(none)'),
+    const list = opts || 'onoff', pic = list === 'onoff' || list === 'pictures';
+    const named = new Map(ONOFF_GRAPHICS.map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
+    const pv = h('img', { class: 'gprev' + (v && pic ? '' : ' hidden'), ...(v && pic ? { src: media(v) } : {}), alt: '' });
+    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list }, h('option', { value: '' }, '(none)'),
       ...os.map(p => h('option', { value: p, ...(p === v ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
-    s.addEventListener('change', () => { if (s.value !== '__add__') { pv.classList.toggle('hidden', !s.value); if (s.value) pv.src = media(s.value); } });
+    s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value); if (s.value) pv.src = media(s.value); } });
     input = h('div', { class: 'gpick' }, s, pv);
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
@@ -1308,7 +1326,7 @@ function dialog(title, fields, obj, canDelete) {
     body.onchange = ev => {
       const t = ev.target;
       if ((t.dataset?.kind === 'vlist' || t.dataset?.kind === 'gpick') && t.value === '__add__') {
-        const k = t.dataset.k, prev = obj[k], text = (prompt(t.dataset.kind === 'gpick' ? 'Picture path in your media folders (for example oakbarn/MyValve_On.png)' : 'Add to this list') || '').trim();
+        const k = t.dataset.k, prev = obj[k], text = (prompt({ units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture path in your media folders (for example oakbarn/MyValve_On.png)' : 'Add to this list')) || '').trim();
         try { readFields(obj); } catch { }
         obj[k] = text || prev;
         if (text && !vList(t.dataset.list).includes(text)) {
@@ -1406,7 +1424,7 @@ async function editItem(kind, id) {
 
 async function editWorkspace() {
   const w = curWs(); const work = clone(w);
-  const r = await dialog('Tab', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'text'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
+  const r = await dialog('Tab', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'color'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
     ['pipeSize', 'Pipe size: thickness of every pipe and fitting on this tab (default 10)', 'num'], ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
