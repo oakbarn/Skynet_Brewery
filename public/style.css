@@ -147,3 +147,15 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .el .nm { flex: none; }
 .el.text.look-dark .vl, .el.text.look-button .vl { justify-content: center; align-items: center; text-align: center; }
 .el.alarm.img-alarm:not(.active) { background-color: transparent; border-color: transparent; }
+
+/* Settings > Pictures (PNG / JPG to SVG) */
+#picBox { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+.pic { border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--panel); }
+.pic.svg { border-color: var(--accent); }
+.picName { font-size: 12px; word-break: break-all; margin-bottom: 4px; }
+.picPair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.picPair figure { margin: 0; text-align: center; }
+.picPair img, .picNone { width: 100%; height: 110px; object-fit: contain; background: repeating-conic-gradient(#8883 0 25%, transparent 0 50%) 0 0 / 14px 14px; border-radius: 4px; }
+.picNone { display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted); }
+.picPair figcaption { font-size: 11px; color: var(--muted); }
+.picBar { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 12px; }

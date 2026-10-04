@@ -9,6 +9,7 @@ import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
+import { Pictures } from './lib/vectorize.js';
 import { plain, toStr } from './lib/values.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,7 @@ const hw = new Hardware(store);
 hw.start();
 setInterval(() => store.tickTimers(0.1), 100);
 store.on('warn', m => engine.print('system', m));
+const pictures = new Pictures(store, mediaRoots);     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Set();
@@ -40,6 +42,7 @@ engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
+pictures.on('changed', () => broadcast('config', {}));
 setInterval(() => { for (const res of clients) res.write(': ping\n\n'); }, 20000);
 
 // ---------------- helpers ----------------
@@ -178,6 +181,7 @@ async function route(req, res) {
     const body = await jsonBody(req);
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title']) if (k in body) store.config[k] = body[k];
     store.writeConfig(); broadcast('config', {});
+    if ('mediaRoots' in body) pictures.start();
     return ok(res);
   }
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
@@ -205,8 +209,13 @@ async function route(req, res) {
   if (p === '/media' && m === 'GET') {
     const f = resolveMedia(url.searchParams.get('path') ?? '');
     if (!f) return fail(res, 403, 'That path is not inside a media folder (see Settings > Media folders)');
-    return sendFile(req, res, f);
+    return sendFile(req, res, pictures.pick(f, url.searchParams.get('as')));   // as=original / as=svg for side-by-side previews
   }
+  // PNG/JPG -> SVG pictures
+  if (p === '/ui/pictures' && m === 'GET') return ok(res, pictures.status());
+  if (p === '/ui/pictures/convert' && m === 'POST') { const { force } = await jsonBody(req); return ok(res, { ok: true, queued: pictures.convertAll(!!force) }); }
+  if (p === '/ui/pictures/mode' && m === 'PUT') { pictures.setMode((await jsonBody(req)).mode); if (pictures.mode !== 'off') pictures.convertAll(false); broadcast('config', {}); return ok(res); }
+  if (p === '/ui/pictures/choice' && m === 'PUT') { const { path: rel, use } = await jsonBody(req); pictures.setChoice(String(rel), use); broadcast('config', {}); return ok(res); }
 
   // static UI
   if (m === 'GET') {
@@ -224,8 +233,9 @@ const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
 server.listen(PORT, () => {
   console.log(`Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nScripts: ${SCRIPTS}\nData:    ${DATA}`);
+  pictures.start();
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
 });
 
-function shutdown() { console.log('Stopping...'); engine.stopAll(); store.persistNow(); hw.stop(); logger.close(); process.exit(0); }
+function shutdown() { console.log('Stopping...'); engine.stopAll(); store.persistNow(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
