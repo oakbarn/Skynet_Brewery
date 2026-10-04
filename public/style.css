@@ -321,3 +321,10 @@ body.role-viewer .op-only { display: none !important; }
 .vpop .vpop-head { margin: 0 -14px 8px; padding: 10px 14px; background: #2a3239; border-radius: 10px 10px 0 0; font-weight: 700; cursor: move; user-select: none; touch-action: none; }
 .vpop ul { margin: 0 0 8px; padding-left: 18px; }
 .vpop p { margin: 6px 0; }
+/* color dropdown in the flow widget settings: swatch, named colors, Custom picker */
+.cpick { display: flex; align-items: center; gap: 6px; }
+.cpick select { flex: 1; min-width: 0; }
+.cpick .cswatch { width: 22px; height: 22px; flex: none; border-radius: 4px; border: 1px solid #888; }
+.cpick .cswatch.none { background: repeating-linear-gradient(45deg, #ccc 0 4px, #fff 4px 8px) !important; }
+.cpick input[type=color] { width: 40px; height: 28px; padding: 0; border: none; background: none; }
+.cpick .hidden { display: none; }
