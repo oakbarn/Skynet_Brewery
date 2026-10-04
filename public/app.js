@@ -191,7 +191,7 @@ function tapAction(e) {
   if (e.tap && e.tap !== 'default') return e.tap;
   switch (e.type) {
     case 'digitalOut': case 'switch': return 'toggle';
-    case 'digitalIn': return ['latch', 'toggle', 'counter'].includes(e.mode) ? 'dialog' : simDev(e.device) ? 'toggle' : 'none';
+    case 'digitalIn': return ['latch', 'toggle', 'counter'].includes(e.mode) || (e.mode === 'momentary' && simDev(e.device)) ? 'dialog' : simDev(e.device) ? 'toggle' : 'none';
     case 'pwmOut': case 'analogOut': case 'scale': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
@@ -248,9 +248,9 @@ function valueDialog(t) {
   const title = v.displayname ?? t.name;
   if (t.type === 'scale') return scaleDialog(t, title);
   if (t.type === 'digitalIn') {   // latch / toggle: reset to off; counter: count back to 0
-    const sim = simDev(t.device) ? [['Simulate: input ON', 'on'], ['Simulate: input OFF', 'off']] : [];
-    return choose(title, [...sim, t.mode === 'counter' ? ['Reset count to 0', 'count'] : ['Reset (off)', 'reset']])
-      .then(r => r === 'count' ? setProp(t.name, 'count', 0) : r === 'reset' ? setProp(t.name, 'reset', true) : r ? setProp(t.name, 'raw', r === 'on') : undefined);
+    const sim = !simDev(t.device) ? [] : t.mode === 'momentary' ? [['Simulate: press', 'press']] : [['Simulate: input ON', 'on'], ['Simulate: input OFF', 'off']];
+    return choose(title, [...sim, ['counter', 'momentary'].includes(t.mode) ? ['Reset count to 0', 'count'] : ['Reset (off)', 'reset']])
+      .then(async r => r === 'press' ? (await setProp(t.name, 'raw', true), setProp(t.name, 'raw', false)) : r === 'count' ? setProp(t.name, 'count', 0) : r === 'reset' ? setProp(t.name, 'reset', true) : r ? setProp(t.name, 'raw', r === 'on') : undefined);
   }
   if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
   const numDev = ['pwmOut', 'analogOut', 'analogIn', 'temperature'].includes(t.type);
@@ -430,6 +430,7 @@ const ADD_MENU = [
   ]],
   ['Devices: digital inputs (board pin)', [
     ['Switch (on while closed)', 'digitalIn', 'DI', { mode: 'switch' }],
+    ['Momentary push button (one short ON per press)', 'digitalIn', 'PB', { mode: 'momentary', pulse: 100, lockout: 500 }],
     ['Push button that toggles (press on, press off)', 'digitalIn', 'DI', { mode: 'toggle' }],
     ['Latching input (stays on until reset: leak, E-stop, alarm)', 'digitalIn', 'DI', { mode: 'latch', onText: 'TRIPPED', offText: 'OK' }],
     ['Pulse counter (counts presses or pulses)', 'digitalIn', 'Count', { mode: 'counter' }],
@@ -504,7 +505,8 @@ const F = {
   digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
-    ['mode', 'Input type', 'sel', ['switch', 'toggle', 'latch', 'counter']],
+    ['mode', 'Input type', 'sel', ['switch', 'momentary', 'toggle', 'latch', 'counter']],
+    ['pulse', 'Momentary: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Momentary: lockout before the next press counts (ms, empty = 500)', 'num'],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'text'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
