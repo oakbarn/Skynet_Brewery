@@ -513,11 +513,16 @@ $('#editMode').addEventListener('change', e => {
   if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
   setEditing(e.target.checked);
 });
-$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, t)));
+// Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
+const PRESETS = {
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'oakbarn/Pump_Red_Rip_On.png', imageOff: 'oakbarn/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'oakbarn/Valve_Ball_OpenV-1x1.png', imageOff: 'oakbarn/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+};
+$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'pump', 'valve', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, { digitalOut: 'digitalOut (plain)', pump: 'Pump (Device Output)', valve: 'Valve (Device Output)' }[t] || t)));
 $('#addEl').onclick = () => {
-  const type = $('#addType').value; let i = 1, base = type + '_';
+  const pick = $('#addType').value, preset = PRESETS[pick], type = preset ? preset.type : pick; let i = 1, base = (preset ? pick[0].toUpperCase() + pick.slice(1) : type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
-  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60 };
+  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60, ...(preset ? clone(preset) : {}) };
   if (type === 'global' || type === 'shared') e.dataType = 'value';
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
