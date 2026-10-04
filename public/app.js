@@ -101,7 +101,8 @@ function renderWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing);
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe' && g.kind !== 'ip')) ws.append(buildGfx(g));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel')) ws.append(buildVessel(g));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel'].includes(g.kind))) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip')) ws.append(buildIp(g));
   for (const e of L().elements.filter(e => e.workspace === w.name && hasIps(e))) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
@@ -109,6 +110,31 @@ function renderWs() {
 }
 
 function place(node, o) { node.style.left = (o.x || 0) + 'px'; node.style.top = (o.y || 0) + 'px'; node.style.width = (o.w || 120) + 'px'; node.style.height = (o.h || 60) + 'px'; }
+
+// Vessel widgets (app-only): electrically heated, gas heated, or an unheated mash tun. A background picture by path,
+// a label (alignment, color, size, show / hide), and IPs placed on them become its ports and move with it.
+const VESSELS = { electric: 'Electric heated vessel', gas: 'Gas heated vessel', mashTun: 'Unheated mash tun' };
+const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
+function buildVessel(g) {
+  const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
+  const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: g.label || VESSELS[t] });
+  place(n, g);
+  if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
+  if (t !== 'mashTun') n.append(h('div', { class: 'heat' }));
+  if (g.labelVisible !== false && g.label) {
+    const lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : 'top') }, g.label);
+    lb.style.color = g.labelColor || ''; lb.style.fontSize = (g.labelSize || 16) + 'px';
+    n.append(lb);
+  }
+  if (editing) { n.append(h('div', { class: 'rs' })); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  return n;
+}
+// an IP dropped on a vessel becomes one of its ports
+function attachIp(ip) {
+  const [cx, cy] = ipCenter(ip);
+  const v = [...draft.graphics].reverse().find(g => g.kind === 'vessel' && g.workspace === ip.workspace && cx >= g.x && cx <= g.x + g.w && cy >= g.y && cy <= g.y + g.h);
+  if (v) ip.attachTo = v.id; else delete ip.attachTo;
+}
 
 function buildGfx(g) {
   const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id });
@@ -454,6 +480,7 @@ function renderPipes() {
   }
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
+  $$('#ws .gfx.vessel').forEach(n => n.classList.toggle('heating', !!n.dataset.heater && isOn(n.dataset.heater)));
 }
 
 // ---------------------------------------------------------------- edit mode
@@ -506,6 +533,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   const item = findItem(sel.kind, sel.id);
   startLongPress(ev, sel.kind, sel.id);
   drag = { mode: !pip && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
+  if (item.kind === 'vessel') drag.ports = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel');
   node.setPointerCapture?.(ev.pointerId);
   ev.preventDefault();
@@ -519,12 +547,22 @@ $('#ws').addEventListener('pointermove', ev => {
   }
   if (!drag) return;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
+  if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
+    const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
+    for (const q of drag.ports) { q.g.x = q.x + mx; q.g.y = q.y + my; const pn = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (pn) place(pn, q.g); }
+    if (drag.ports.length) renderPipes();
+  }
   if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
   else if (drag.mode === 'resize') { drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy)); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { drag.item.points = drag.orig.map(q => [snap(q[0] + dx), snap(q[1] + dy)]); renderPipes(); }
 });
-window.addEventListener('pointerup', () => { cancelLongPress(); if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs(); drag = null; });
+window.addEventListener('pointerup', () => {
+  cancelLongPress();
+  if (drag?.mode === 'move' && drag.item.kind === 'ip' && !isFitting(drag.item)) attachIp(drag.item);
+  if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
+  drag = null;
+});
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
   if (drawPts) return finishPipe();
@@ -589,6 +627,13 @@ $('#addText').onclick = () => { const g = { id: newId(), kind: 'text', workspace
 $('#finishPipe').onclick = () => finishPipe();
 $('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
+$('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
+$('#addVessel').onclick = () => {
+  const t = $('#addVesselType').value, base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun' }[t];
+  let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.label === base + ' ' + i)) i++;
+  const g = { id: newId(), kind: 'vessel', vesselType: t, workspace: wsName, x: 60, y: 60, w: 200, h: 260, image: '', label: base + ' ' + i, labelAlign: 'top', labelColor: '#ffffff', labelSize: 16, labelVisible: true };
+  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+};
 $('#addIp').onclick = () => {
   const fit = $('#addIpType').value, base = fit === 'point' ? 'IP' : FITTINGS[fit];
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
@@ -629,7 +674,9 @@ const F = {
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   propValve: [['ipIn', 'Valve end A: IP side', 'sel', SIDES], ['ipOut', 'Valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
-  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
+  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS)], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'bool', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
+    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
+  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
@@ -641,7 +688,8 @@ function field([key, label, kind, opts], obj) {
   else if (kind === 'sel') input = h('select', { 'data-k': key, 'data-kind': kind }, ...opts.map(o => h('option', { value: o, ...(String(v ?? opts[0]) === o ? { selected: true } : {}) }, o)));
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
-  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...draft.elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
   else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
@@ -683,11 +731,12 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...(isPropValve(item) ? F.propValve : []), ...F.common.slice(3)] : F[type];
   const work = clone(item);
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type, fields, work, true);
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type === 'vessel' ? 'Vessel widget' : type, fields, work, true);
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
+      if (type === 'vessel') for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
       const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : [];
       for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
       sel = null; renderWs(); return;
@@ -711,11 +760,14 @@ async function editItem(kind, id) {
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
+        if (g.heater === item.name) g.heater = work.name;
         for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) g[k] = g[k].replace(`dev:${item.name}:`, `dev:${work.name}:`);
       }
       if (hasIps(item) && !hasIps(work)) for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) delete g[k];
     }
+    const pickedPort = work.attachTo !== item.attachTo;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
+    if (type === 'ip' && !isFitting(item) && !pickedPort) attachIp(item);   // typed a new X / Y: re-check which vessel it sits on
     if (kind === 'el') sel = { kind, id: item.name };
     renderTabs(); renderWs();
   } catch (e) { toast(e.message, true); }
