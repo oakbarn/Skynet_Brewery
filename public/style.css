@@ -339,3 +339,36 @@ body.role-viewer .op-only { display: none !important; }
 .pwWrap input { flex: 1; min-width: 0; padding-right: 40px !important; }
 .pwWrap .eye { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); border: none; background: none; padding: 4px 6px; color: var(--muted); line-height: 0; }
 .pwWrap .eye:hover { color: var(--accent); }
+/* Vessel widget: thermowell mark (not an IP) and the pop-up shown after its ports are placed */
+#ws .gfx.vessel .twell { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 4px; background: #c0392b; color: #fff; font: 700 11px/18px system-ui, sans-serif; text-align: center; box-shadow: 0 0 0 2px rgba(0,0,0,.5); pointer-events: auto; }
+.vpop { position: fixed; top: 90px; right: 24px; z-index: 50; width: 340px; max-width: calc(100vw - 32px); background: #1d2329; color: #e8ecef; border: 1px solid #4a5058; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.5); padding: 0 14px 12px; font-size: 14px; }
+.vpop .vpop-head { margin: 0 -14px 8px; padding: 10px 14px; background: #2a3239; border-radius: 10px 10px 0 0; font-weight: 700; cursor: move; user-select: none; touch-action: none; }
+.vpop ul { margin: 0 0 8px; padding-left: 18px; }
+.vpop p { margin: 6px 0; }
+/* color dropdown in the flow widget settings: swatch, named colors, Custom picker */
+.cpick { display: flex; align-items: center; gap: 6px; }
+.cpick select { flex: 1; min-width: 0; }
+.cpick .cswatch { width: 22px; height: 22px; flex: none; border-radius: 4px; border: 1px solid #888; }
+.cpick .cswatch.none { background: repeating-linear-gradient(45deg, #ccc 0 4px, #fff 4px 8px) !important; }
+.cpick input[type=color] { width: 40px; height: 28px; padding: 0; border: none; background: none; }
+.cpick .hidden { display: none; }
+/* on / off graphic dropdown with a small preview */
+.gpick { display: flex; align-items: center; gap: 8px; }
+.gpick select { flex: 1; min-width: 0; }
+.gpick .gprev { width: 32px; height: 32px; object-fit: contain; flex: none; }
+.gpick .hidden { display: none; }
+/* true / false settings are switches */
+.sw { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; cursor: pointer; }
+.sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+.sw .swk { position: absolute; inset: 0; border-radius: 13px; background: #9aa2aa; transition: background .15s; }
+.sw .swk::after { content: ''; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
+.sw input:checked + .swk { background: #3fbf6a; }
+.sw input:checked + .swk::after { transform: translateX(20px); }
+.sw input:focus-visible + .swk { outline: 2px solid #4fb3ff; outline-offset: 2px; }
+/* vKonstant List: the Value / Text table in its settings, and the dropdown on screen */
+.vkitems table { border-collapse: collapse; width: 100%; margin-bottom: 6px; }
+.vkitems th { text-align: left; font-weight: 600; padding: 2px 4px; }
+.vkitems td { padding: 2px 4px; }
+.vkitems .vkv { width: 6em; }
+.vkitems .vkt { width: 100%; }
+#ws .el .vksel { position: absolute; left: 6px; right: 6px; bottom: 6px; font-size: 16px; padding: 4px; }
