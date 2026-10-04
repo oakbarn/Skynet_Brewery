@@ -176,8 +176,16 @@ const FIT_SVG = {
   elbow90: '<path d="M0 15H15V30"/>', elbow45: '<path d="M0 15H15L27 27"/>',
   manualValve: '<path d="M15 15V3M9 3H21"/><path class="body" d="M2 7L15 15L2 23ZM28 7L15 15L28 23Z"/>',
 };
+// One pipe size per tab: every pipe and every fitting (tee, elbows, cross, straight pipe, cap, manual valve) is drawn from it,
+// so fittings always match the pipes. A fitting is 5 x the pipe size, which makes its drawn arms exactly as thick as a pipe.
+const pipeSize = wsn => +(L().workspaces.find(w => w.name === wsn)?.pipeSize) || 10;
+function sizeFitting(g) {
+  const S = 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
+  g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
+}
 function buildIp(g) {
   const fit = isFitting(g) ? g.fitting : null;
+  if (fit) sizeFitting(g);
   const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.label || FITTINGS[fit] || 'IP') + (fit === 'manualValve' ? (g.open ? ' (open)' : ' (closed)') : '') });
   if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(g.image)}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
   else if (fit) {
@@ -187,7 +195,7 @@ function buildIp(g) {
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
   if (g.labelVisible && g.label) n.append(widgetLabel(g, 'below'));
-  if (editing) { n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  if (editing) { if (!fit) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
 
@@ -490,7 +498,7 @@ function renderPipes() {
     const pts = (p.points || []).map(q => q.join(',')).join(' ');
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
-    const width = +p.width || 8;
+    const width = pipeSize(w.name);
     const g = mk('g', { 'data-gid': p.id });
     if (p.baseVisible !== false || editing) g.append(mk('polyline', { class: 'pipe', points: pts, stroke: p.color || '#8a8f96', 'stroke-width': width, opacity: p.baseVisible === false ? 0.35 : 1 }));
     g.append(mk('polyline', { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), points: pts, stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
@@ -622,7 +630,7 @@ function finishPipe(to) {
   $('#finishPipe').classList.add('hidden');
   const pts = drawPts, from = drawFrom; drawPts = null; drawCursor = null; drawFrom = null;
   if (!pts || pts.length < 2) { renderPipes(); return; }
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, width: 10, color: '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true };
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true };
   if (from) g.from = from;
   if (typeof to === 'string') g.to = to;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
@@ -670,7 +678,7 @@ $('#addVessel').onclick = () => {
 $('#addIp').onclick = () => {
   const fit = $('#addIpType').value, base = { point: 'IP', pipe: 'Pipe', cap: 'Cap' }[fit] || FITTINGS[fit];
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
-  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#c0c6cc' };
+  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
@@ -711,7 +719,7 @@ const F = {
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'bool'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
+  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 
@@ -810,7 +818,7 @@ async function editItem(kind, id) {
 async function editWorkspace() {
   const w = curWs(); const work = clone(w);
   const r = await dialog('Workspace', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'text'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
-    ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
+    ['pipeSize', 'Pipe size: thickness of every pipe and fitting on this tab (default 10)', 'num'], ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
   if (r === 'delete') {
     if (!confirm(`Delete workspace "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);

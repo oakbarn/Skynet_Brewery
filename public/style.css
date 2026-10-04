@@ -161,7 +161,7 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 #ws .gfx.ip.fit { border: none; background: none; border-radius: 0; box-shadow: none; }
 #ws .gfx.ip.fit svg { width: 100%; height: 100%; overflow: visible; }
 #ws .gfx.ip.fit path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-#ws .gfx.ip.fit .edge path { stroke: #000; stroke-width: 9; }
+#ws .gfx.ip.fit .edge path { stroke: rgba(0,0,0,.45); stroke-width: 6.8; }
 #ws .gfx.ip.fit .core path { stroke: var(--ipc); stroke-width: 6; }
 #ws .gfx.ip.fit.live .core path { stroke: var(--flow); }
 #ws .gfx.ip.fit .edge path.body { fill: #000; stroke-width: 4; }
