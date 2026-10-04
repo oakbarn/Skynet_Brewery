@@ -315,3 +315,5 @@ button.small { padding: 2px 7px; font-size: 12px; }
 .right { display: flex; align-items: center; gap: 8px; }
 body:not(.role-admin) .admin-only { display: none !important; }
 body.role-viewer .op-only { display: none !important; }
+.form label.check { flex-direction: row; align-items: center; gap: 6px; }
+#donateDlg p { line-height: 1.45; }
