@@ -44,4 +44,11 @@ assert.throws(() => mf.remove(0, 'bru/Pics'), /Empty the folder/);
 mf.remove(0, 'bru/Pics/Pump.png'); mf.remove(0, 'bru/Pics');
 assert.deepEqual(mf.list(0, 'bru'), { ...mf.list(0, 'bru'), folders: [] });
 assert.throws(() => mf.remove(0, ''));
+// folder tree (Explorer left pane) and moving
+mf.mkdir(0, 'A/B'); mf.mkdir(0, 'C');
+assert.deepEqual(mf.tree(0).folders.map(f => f.name), ['A', 'bru', 'C']);
+assert.deepEqual(mf.tree(0).folders[0].folders.map(f => f.name), ['B']);
+assert.throws(() => mf.rename(0, 'A', 'A/B/A'), /inside itself/);
+mf.rename(0, 'bru/alarm.wav', 'C/alarm.wav'); assert.ok(fs.existsSync(path.join(d, 'C/alarm.wav')));
+assert.equal(mf.tree(0).name, path.basename(d));
 console.log('mediafiles tests passed');
