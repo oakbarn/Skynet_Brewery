@@ -2,7 +2,7 @@ import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'
 import { Store } from '../lib/store.js'; import { Engine, compile } from '../lib/engine.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bp'));
 fs.writeFileSync(path.join(d,'c.json'), JSON.stringify({elements:[
- {name:'gblS_Msg',type:'global',dataType:'string'},{name:'gblV_N',type:'global',dataType:'value'},
+ {name:'gblS_Msg',type:'vKonstant',kind:'string'},{name:'gblV_N',type:'vKonstant',kind:'value'},
  {name:'tm_T',type:'timer',timerType:'countdown'},{name:'sw_X',type:'switch'},{name:'shr',type:'shared',dataType:'value'}]}));
 const store = new Store(path.join(d,'c.json'), path.join(d,'data')); store.load();
 const eng = new Engine(store, path.join(d,'scripts'), {logNow(){}});

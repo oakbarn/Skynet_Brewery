@@ -2,7 +2,8 @@
 // MIT License Granted - Copyright (c) OakBarn Brewery 2026
 // Libraries (Arduino Library Manager): OneWire, DallasTemperature
 //   + Adafruit MAX31865 when USE_RTD is 1, Adafruit MAX31856 when USE_TC is 1, Adafruit MAX31855 when USE_TC is 2,
-//     Adafruit ADS1X15 when USE_ADS1115 is 1, HX711 (by Bogdan Necula) when USE_HX711 is 1
+//     Adafruit ADS1X15 when USE_ADS1115 is 1, HX711 (by Bogdan Necula) when USE_HX711 is 1,
+//     AccelStepper (by Mike McCauley) when USE_STEPPER is 1
 // Written for an Arduino Mega 2560. Uno / Nano work with smaller pin lists (flow meters on pins 2 and 3 only).
 // Starter sketch: set the pin lists below for this Mega. Only pins in these lists can be used.
 // Sensor settings that live on the chip (thermocouple type, RTD wires, input pull-up) are sent by the
@@ -12,6 +13,7 @@
 #define USE_TC  0                                        // 1 = thermocouples on MAX31856 boards (K, J, T ...), 2 = MAX31855 boards (K only)
 #define USE_ADS1115 0                                    // 1 = ADS1115 16-bit analog board on I2C (SDA 20, SCL 21), address 0x48
 #define USE_HX711 0                                      // 1 = load cells (vessel scales) on HX711 boards
+#define USE_STEPPER 0                                    // 1 = stepper motors (A4988 / DRV8825 / TMC / TB6600 driver, or ULN2003 board); set up in the panel
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -29,9 +31,12 @@
 #if USE_HX711
 #include <HX711.h>
 #endif
+#if USE_STEPPER
+#include <AccelStepper.h>
+#endif
 
 const char* DEVICE_NAME = "MEGA1";
-const char* FIRMWARE = "0.2";
+const char* FIRMWARE = "0.3";
 
 // Link to the server:
 //   USB cable:      USE_ETHERNET 0 and LINK Serial (the default)
@@ -63,6 +68,7 @@ const uint8_t TC_CS_PINS[]  = {};                        // MAX31856 / MAX31855 
 const uint8_t ADS_CHANNELS[] = {0, 1, 2, 3};             // ADS1115 channels to report (only when USE_ADS1115 is 1)
 const uint8_t HX711_DT_PINS[]  = {};                     // HX711 boards: data (DT) pins, e.g. {26, 28}; the panel names a scale by these
 const uint8_t HX711_SCK_PINS[] = {};                     // and their clock (SCK) pins, same order, e.g. {27, 29}
+const uint8_t STEPPER_PINS[]  = {};                     // every pin a stepper uses (STEP, DIR, ENABLE or IN1-IN4, home switch), e.g. {40, 41, 42, 43}; not also in other lists
 const uint8_t ONEWIRE_PIN = 40;                          // all DS18B20 probes on one bus, 4.7k pull-up to 5V
 const bool RELAY_ACTIVE_LOW = true;                      // most relay boards switch ON with LOW
 const unsigned long WATCHDOG_MS = 10000;                 // no message for 10 s -> all outputs OFF
@@ -87,6 +93,15 @@ const uint8_t N_HX = sizeof(HX711_DT_PINS);
 HX711 hx[N_HX > 0 ? N_HX : 1];
 long hxSum[N_HX > 0 ? N_HX : 1]; uint8_t hxN[N_HX > 0 ? N_HX : 1];
 #endif
+const uint8_t N_STP = sizeof(STEPPER_PINS);
+#if USE_STEPPER
+// A stepper is set up by the panel (CFG STEP / STEP4 / HOME) and named by its STEP pin (IN1 for 4-pin boards).
+// The board makes the steps, speeds up and slows down, and stops on the home switch; it reports
+// SP <step pin> <position in steps> <moving 0|1> <homed 0|1>  every 0.2 s while moving and every second when still.
+const uint8_t MAX_STEPPERS = 4;
+struct Motor { AccelStepper* m; int id, homePin, homeDir; bool homeHigh, hold, on, homed, wasMoving; uint8_t mode; long maxTravel, homePos; unsigned long lastReport; };   // mode 0 = go / idle, 1 = run, 2 = homing
+Motor motor[MAX_STEPPERS]; uint8_t nMotor = 0;
+#endif
 int lastIn[N_IN > 0 ? N_IN : 1], candIn[N_IN > 0 ? N_IN : 1];
 unsigned long candSince[N_IN > 0 ? N_IN : 1]; unsigned int debounceMs[N_IN > 0 ? N_IN : 1];   // an input must hold a new level this long (ms) before it is reported
 volatile unsigned long pulses[6];
@@ -106,7 +121,14 @@ bool isOutput(int pin) {
 
 void writeOut(int pin, bool on) { digitalWrite(pin, (on ^ RELAY_ACTIVE_LOW) ? HIGH : LOW); }
 
+#if USE_STEPPER
+void halt(Motor& m) { m.m->setCurrentPosition(m.m->currentPosition()); m.mode = 0; }   // stop this instant (no slowing down)
+#endif
+
 void allOff() {
+#if USE_STEPPER
+  for (uint8_t i = 0; i < nMotor; i++) halt(motor[i]);
+#endif
   for (uint8_t i = 0; i < N_OUT; i++) if (isOutput(OUTPUT_PINS[i])) writeOut(OUTPUT_PINS[i], false);
   for (uint8_t i = 0; i < N_PWM; i++) analogWrite(PWM_PINS[i], 0);
   for (uint8_t i = 0; i < N_AO; i++) analogWrite(AO_PINS[i], 0);
@@ -150,9 +172,104 @@ void reportFast() {
 #endif
 }
 
+// n-th number (from 0) in a line of numbers separated by spaces
+long argN(const String& s, uint8_t n) { int at = 0; for (uint8_t i = 0; i < n; i++) { at = s.indexOf(' ', at); if (at < 0) return 0; at++; } return s.substring(at).toInt(); }
+
+#if USE_STEPPER
+bool stepperPin(long p) { return p < 0 || indexOf(STEPPER_PINS, N_STP, p) >= 0; }
+int findMotor(int id) { for (uint8_t i = 0; i < nMotor; i++) if (motor[i].id == id) return i; return -1; }
+void reportMotor(Motor& m) {
+  LINK.print("SP "); LINK.print(m.id); LINK.print(' '); LINK.print(m.m->currentPosition()); LINK.print(' ');
+  LINK.print(m.wasMoving ? 1 : 0); LINK.print(' '); LINK.println(m.homed ? 1 : 0);
+  m.lastReport = millis();
+}
+bool homeHit(Motor& m) { return m.homePin >= 0 && (digitalRead(m.homePin) == HIGH) == m.homeHigh; }
+
+// CFG STEP <step> <dir> <enable|-1> <flags> <max steps/s> <accel> <pulse us>,  CFG STEP4 <in1> <in2> <in3> <in4> <flags> <max> <accel>
+// flags: 1 reverse, 2 enable pin HIGH = on, 4 keep powered when stopped, 8 half steps, 16 28BYJ-48 coil order (IN1 IN3 IN2 IN4)
+void setupMotor(bool four, int pin, const String& v) {
+  long p2 = argN(v, 0), p3 = argN(v, 1), p4 = four ? argN(v, 2) : -1, flags = argN(v, four ? 3 : 2);
+  if (!stepperPin(pin) || !stepperPin(p2) || !stepperPin(p3) || !stepperPin(p4)) { LINK.print("ERR stepper "); LINK.print(pin); LINK.println(": a pin is not in STEPPER_PINS"); return; }
+  int i = findMotor(pin); long pos = 0;
+  if (i < 0) {
+    if (nMotor >= MAX_STEPPERS) { LINK.println("ERR too many steppers (MAX_STEPPERS)"); return; }
+    i = nMotor++; motor[i].id = pin; motor[i].homePin = -1; motor[i].homeDir = -1; motor[i].homed = false; motor[i].on = true; motor[i].wasMoving = false;
+  } else { pos = motor[i].m->currentPosition(); delete motor[i].m; }       // new settings: rebuild, keep the position
+  Motor& m = motor[i];
+  if (four) {
+    long a1 = pin, a2 = (flags & 16) ? p3 : p2, b1 = (flags & 16) ? p2 : p3, b2 = p4;
+    if (flags & 1) { long t = a1; a1 = a2; a2 = t; }                       // reverse: swap the ends of one coil
+    m.m = new AccelStepper((flags & 8) ? AccelStepper::HALF4WIRE : AccelStepper::FULL4WIRE, a1, a2, b1, b2);
+  } else {
+    m.m = new AccelStepper(AccelStepper::DRIVER, pin, p2);
+    m.m->setPinsInverted(flags & 1, false, !(flags & 2));                   // most drivers: ENABLE LOW = on
+    if (p3 >= 0) m.m->setEnablePin(p3);
+    m.m->setMinPulseWidth(max(1L, argN(v, 5)));
+  }
+  m.m->setMaxSpeed(max(1L, argN(v, four ? 4 : 3))); m.m->setAcceleration(max(1L, argN(v, four ? 5 : 4)));
+  m.m->setCurrentPosition(pos);
+  m.hold = flags & 4; m.mode = 0;
+  if (!m.on || !m.hold) m.m->disableOutputs(); else m.m->enableOutputs();
+  reportMotor(m);
+}
+
+// GO <id> <position> <speed>, RUN <id> <speed, - = backward, 0 = stop>, STOP <id>, ZERO <id> <position>, HOME <id> <speed> <max travel> <position at switch>, EN <id> <0|1>
+void motorCommand(const String& op, const String& a) {
+  int i = findMotor(a.toInt());
+  if (i < 0) { LINK.print("ERR stepper "); LINK.print(a.toInt()); LINK.println(" not set up (no CFG STEP)"); return; }
+  Motor& m = motor[i];
+  if (op == "STOP") { m.mode = 0; m.m->stop(); return; }                      // slows down to a stop
+  if (op == "ZERO") { m.m->setCurrentPosition(argN(a, 1)); m.mode = 0; m.homed = true; reportMotor(m); return; }
+  if (op == "EN") {
+    m.on = argN(a, 1) == 1;
+    if (!m.on) { halt(m); m.m->disableOutputs(); } else if (m.hold) m.m->enableOutputs();
+    reportMotor(m); return;
+  }
+  if (!m.on) { LINK.print("ERR stepper "); LINK.print(m.id); LINK.println(" is turned off"); return; }
+  long v = argN(a, op == "GO" ? 2 : 1);
+  if (op == "RUN" && v == 0) { m.m->stop(); return; }
+  if (op == "HOME" && m.homePin < 0) { LINK.print("ERR stepper "); LINK.print(m.id); LINK.println(": no home switch set"); LINK.print("SH "); LINK.print(m.id); LINK.println(" 0"); return; }
+  m.m->enableOutputs();
+  m.m->setMaxSpeed(max(1L, labs(v)));
+  if (op == "GO") { m.mode = 0; m.m->moveTo(argN(a, 1)); }
+  else if (op == "RUN") { m.mode = 1; m.m->moveTo(m.m->currentPosition() + (v > 0 ? 100000000L : -100000000L)); }
+  else if (op == "HOME") { m.mode = 2; m.homed = false; m.maxTravel = argN(a, 2); m.homePos = argN(a, 3); m.m->moveTo(m.m->currentPosition() + (v > 0 ? m.maxTravel : -m.maxTravel)); }
+}
+
+// Every pass of loop(): step the motors, stop on the home switch, report
+void runMotors() {
+  unsigned long now = millis();
+  for (uint8_t i = 0; i < nMotor; i++) {
+    Motor& m = motor[i];
+    bool moving = m.m->distanceToGo() != 0;
+    if (moving && homeHit(m)) {
+      if (m.mode == 2) { halt(m); m.m->setCurrentPosition(m.homePos); m.homed = true; LINK.print("SH "); LINK.print(m.id); LINK.println(" 1"); moving = false; }
+      else if ((m.m->distanceToGo() > 0 ? 1 : -1) == m.homeDir) { halt(m); LINK.print("ERR stepper "); LINK.print(m.id); LINK.println(" stopped at its home switch"); moving = false; }
+    }
+    if (moving) m.m->run();
+    else if (m.wasMoving) {                                // just stopped
+      if (m.mode == 2) { LINK.print("ERR stepper "); LINK.print(m.id); LINK.println(": home switch not found"); LINK.print("SH "); LINK.print(m.id); LINK.println(" 0"); }
+      m.mode = 0;
+      if (!m.hold) m.m->disableOutputs();
+    }
+    if (moving != m.wasMoving || now - m.lastReport >= (moving ? 200UL : 1000UL)) { m.wasMoving = moving; reportMotor(m); }
+  }
+}
+#endif
+
 // CFG <kind> <pin> <setting>: sensor settings sent by the server after HELLO
 void configure(String kind, int pin, String v) {
   int i;
+#if USE_STEPPER
+  if (kind == "STEP" || kind == "STEP4") { setupMotor(kind == "STEP4", pin, v); return; }
+  if (kind == "HOME" && (i = findMotor(pin)) >= 0) {        // CFG HOME <step pin> <switch pin> <flags: 1 = switch reads HIGH when hit, 2 = switch at the + end>
+    long hp = argN(v, 0), f = argN(v, 1);
+    if (!stepperPin(hp) || hp < 0) { LINK.print("ERR home switch pin "); LINK.print(hp); LINK.println(" is not in STEPPER_PINS"); return; }
+    motor[i].homePin = hp; motor[i].homeHigh = f & 1; motor[i].homeDir = (f & 2) ? 1 : -1;
+    pinMode(hp, INPUT_PULLUP);
+    return;
+  }
+#endif
   if (kind == "DI" && (i = indexOf(INPUT_PINS, N_IN, pin)) >= 0) {   // CFG DI <pin> <PULLUP|NOPULL> [debounce ms]
     int sp = v.indexOf(' ');
     pinMode(pin, v.substring(0, sp < 0 ? v.length() : sp) == "NOPULL" ? INPUT : INPUT_PULLUP);
@@ -202,6 +319,9 @@ void handle(String cmd) {
     say(pwm ? "PWM" : "AO", pin, v);
     return;
   }
+#if USE_STEPPER
+  if (op == "GO" || op == "RUN" || op == "STOP" || op == "ZERO" || op == "HOME" || op == "EN") { motorCommand(op, cmd.substring(s1 + 1)); return; }
+#endif
   if (op == "CFG") {                                     // CFG <DI|RTD|TC> <pin> <setting>
     int s3 = cmd.indexOf(' ', s2 + 1);
     configure(cmd.substring(s1 + 1, s2), cmd.substring(s2 + 1, s3).toInt(), cmd.substring(s3 + 1));
@@ -277,6 +397,9 @@ void loop() {
     else if (v != lastIn[i] && now - candSince[i] >= debounceMs[i]) { lastIn[i] = v; say("DI", INPUT_PINS[i], v); }
   }
   if (now - lastReport > 5000) { lastReport = now; reportInputs(); }
+#if USE_STEPPER
+  runMotors();
+#endif
 #if USE_HX711
   for (uint8_t i = 0; i < N_HX; i++) if (hx[i].is_ready()) { hxSum[i] += hx[i].read(); hxN[i]++; }   // about 10 readings a second, never waits
 #endif

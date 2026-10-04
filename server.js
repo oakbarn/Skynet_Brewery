@@ -4,6 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DONATE_LINK } from './lib/donation.js';
 import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS } from './lib/store.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
@@ -12,10 +13,14 @@ import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
+import { retireGlobalsOnDisk } from './lib/globals.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
+import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain, toStr } from './lib/values.js';
-import { Auth, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
+import { Help } from './lib/help.js';
+import { Messaging, CARRIERS } from './lib/messaging.js';
+import { Auth, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'config', 'brewery.json'));
@@ -23,13 +28,19 @@ const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'))
 const SCRIPTS = path.resolve(process.env.BREWPANEL_SCRIPTS ?? path.join(ROOT, 'scripts'));
 const PUBLIC = path.join(ROOT, 'public');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
+const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'));
 
+// A configuration saved before the Global class was retired is converted once (backups in config/backups and *.before-globals.bak)
+const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 const hw = new Hardware(store);
 const auth = new Auth(DATA);
+const messaging = new Messaging(DATA);
+// Testing mode (Settings > "Start fresh logins after each update", on unless turned off)
+const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
 hw.start();
 const control = new Control(store);
 control.start();
@@ -38,7 +49,11 @@ setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants
 store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media page: add / rename / delete pictures and sounds
+const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
+if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
+const mqtt = new MqttBridge(store, engine);
+mqtt.start();
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
@@ -69,6 +84,7 @@ engine.on('show', ws => broadcast('show', ws));
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
+mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
 setInterval(() => { dropEndedSessions(); for (const res of clients.keys()) res.write(': ping\n\n'); }, 20000);
 
@@ -138,12 +154,23 @@ function apiKeyOk(req, url) {
 
 // ---------------- login ----------------
 // Who may do what. viewer < operator < admin. New routes default to viewer for GET and admin for changes.
+// Beer money pop-up settings (Settings > Beer money pop-up). The PayPal address is fixed in lib/donation.js.
+function cleanDonation(d = {}) {
+  const days = (v, def) => { const n = Math.round(Number(v)); return n >= 1 && n <= 3650 ? n : def; };
+  return {
+    enabled: d.enabled !== false,
+    message: String(d.message ?? '').slice(0, 1000), button: String(d.button ?? '').slice(0, 60),
+    everyDays: days(d.everyDays, 30), donatedDays: days(d.donatedDays, 180),
+  };
+}
+
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
+  if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   return m === 'GET' ? 'viewer' : 'admin';
 }
-const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/style.css', '/favicon.ico']);
+const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico']);
 const clientIp = req => req.socket.remoteAddress ?? '';
 // HTTPS through a proxy on this computer (for example "tailscale serve")
 const viaHttps = req => req.headers['x-forwarded-proto'] === 'https' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(clientIp(req));
@@ -154,7 +181,18 @@ function sameOrigin(req) {
   try { const h = new URL(o).host; return h === req.headers.host || h === req.headers['x-forwarded-host']; } catch { return false; }
 }
 
-// The API has Globals and vAPI variables only (never Shared or vKonstant)
+// The MQTT password never goes to the browser; Settings shows whether one is saved.
+function browserConfig() {
+  const c = store.config;
+  if (!c.mqtt) return c;
+  const { password, ...m } = c.mqtt;
+  return { ...c, mqtt: { ...m, hasPassword: !!password } };
+}
+function mqttView() {
+  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, displayName: e.displayName ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
+}
+
+// The API has vAPI variables only (never Shared or vKonstant)
 const apiVars = () => store.list().filter(isApiVar).map(e => ({ name: e.name, type: e.dataType, class: e.type, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
 
 function csv(rows) {
@@ -176,15 +214,39 @@ async function route(req, res) {
   // ===== Sign in / out, first-time setup, users =====
   if (p.startsWith('/auth/')) {
     if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
-    const login = (tok, code = 200) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, code, { ok: true }); };
-    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel' });
+    const login = (tok, extra = {}) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, 200, { ok: true, ...extra }); };
+    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady() });
     if (p === '/auth/setup' && m === 'POST') {
       if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
       if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');
       const { name, password } = await jsonBody(req);
       auth.addUser(name, password, 'admin');
-      return login(auth.newSession(auth.findUser(name).name));
+      return login(auth.newSession(auth.findUser(name).name), { recoveryCode: auth.makeRecoveryCode() });
     }
+    if (p === '/auth/recover' && m === 'POST') {
+      if (!isPrivateAddress(ip)) return fail(res, 403, 'Password recovery only works from your own network (home WiFi or Tailscale)');
+      const { name, code, password } = await jsonBody(req);
+      const r = auth.recover(name, code, password, ip); dropEndedSessions();
+      return login(auth.newSession(r.name), { recoveryCode: r.code });
+    }
+    // sign in with a code sent by email or text. The answer is the same whether or not the user exists.
+    if (p === '/auth/code/send' && m === 'POST') {
+      const wait = auth.blockedFor(ip);
+      if (wait) return fail(res, 429, `Too many wrong tries. Wait ${wait} seconds and try again.`);
+      const { name } = await jsonBody(req);
+      const said = { ok: true, message: 'If that user has an email or mobile number set up, a code is on its way. It works for 10 minutes.' };
+      const made = auth.makeSignInCode(name);
+      if (made) {
+        const contact = auth.getContact(made.name);
+        if (messaging.targets(contact).length) {
+          const title = store.config.title || 'Brew Panel';
+          messaging.deliver(contact, `${title} sign-in code`, `${made.code} is your ${title} sign-in code. It works once, for 10 minutes. If you did not ask for it, change your password.`)
+            .catch(e => console.error(`Sign-in code for ${made.name} not sent: ${e.message}`));
+        }
+      }
+      return ok(res, said);
+    }
+    if (p === '/auth/code/login' && m === 'POST') { const { name, code } = await jsonBody(req); return login(auth.loginWithCode(name, code, ip)); }
     if (p === '/auth/login' && m === 'POST') { const { name, password } = await jsonBody(req); return login(auth.login(name, password, ip)); }
     if (p === '/auth/logout' && m === 'POST') { auth.logout(token); dropEndedSessions(); res.setHeader('Set-Cookie', auth.clearCookie()); return ok(res); }
     if (!me) return fail(res, 401, 'Please sign in');
@@ -194,8 +256,23 @@ async function route(req, res) {
       auth.setPassword(me.name, password); auth.endSessionsFor(me.name); dropEndedSessions();
       return login(auth.newSession(me.name));
     }
+    // contact details for sign-in codes: your own, or anyone's for an admin
+    if (p === '/auth/contact') {
+      const who = url.searchParams.get('user') || me.name;
+      if (who.toLowerCase() !== me.name.toLowerCase() && me.role !== 'admin') return fail(res, 403, 'Only an admin can change other users');
+      if (m === 'GET') return ok(res, { ...auth.getContact(who), carriers: Object.fromEntries(Object.entries(CARRIERS).map(([k, v]) => [k, v.name])), twilio: messaging.twilioReady(), email: messaging.emailReady() });
+      if (m === 'PUT') { auth.setContact(who, await jsonBody(req), CARRIERS); return ok(res); }
+    }
     if (me.role !== 'admin') return fail(res, 403, 'Only an admin can manage users');
+    if (p === '/auth/messaging' && m === 'GET') return ok(res, messaging.publicSettings());
+    if (p === '/auth/messaging' && m === 'PUT') { messaging.save(await jsonBody(req)); return ok(res); }
+    if (p === '/auth/messaging/test' && m === 'POST') {
+      const sent = await messaging.deliver(auth.getContact(me.name), 'Brew Panel test message', 'This is a test from your Brew Panel. Sign-in codes will arrive like this.');
+      return ok(res, { ok: true, sent: sent.map(t => `${t.kind} to ${t.to}`) });
+    }
     if (p === '/auth/users' && m === 'GET') return ok(res, auth.listUsers());
+    if (p === '/auth/recovery' && m === 'GET') return ok(res, auth.recoveryInfo());
+    if (p === '/auth/recovery' && m === 'POST') return ok(res, { ok: true, code: auth.makeRecoveryCode() });
     if (p === '/auth/users' && m === 'POST') { const { name, password, role } = await jsonBody(req); auth.addUser(name, password, role); return ok(res); }
     const u = /^\/auth\/users\/(.+)$/.exec(p);
     if (u && m === 'PUT') {
@@ -210,7 +287,7 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown route');
   }
 
-  // ===== Public API: Globals and vAPI only (Shared and vKonstant variables are never exposed) =====
+  // ===== Public API: vAPI only (Shared and vKonstant variables are never exposed). /api/globals is the old address of /api/vapi =====
   // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
     if (!apiKeyOk(req, url)) {
@@ -224,7 +301,7 @@ async function route(req, res) {
       const body = await jsonBody(req); const done = [], errors = [];
       for (const [n, v] of Object.entries(body)) {
         const el = store.get(n);
-        if (!isApiVar(el)) { errors.push(`${n}: not a Global or vAPI`); continue; }
+        if (!isApiVar(el)) { errors.push(`${n}: not a vAPI`); continue; }
         try { store.setProp(n, 'value', v, 'api'); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); }
       }
       return ok(res, { ok: !errors.length, set: done, errors });
@@ -232,7 +309,7 @@ async function route(req, res) {
     let g = /^\/api\/(?:globals|vapi)\/(.+)$/.exec(p);
     if (g) {
       const n = cleanName(g[1]), el = store.get(n);
-      if (!isApiVar(el)) return fail(res, 404, `No Global or vAPI named "${n}"`);
+      if (!isApiVar(el)) return fail(res, 404, `No vAPI named "${n}"`);
       if (m === 'GET') return ok(res, { name: n, type: el.dataType, class: el.type, value: plain(store.getProp(n, 'value')) });
       if (m === 'PUT' || m === 'POST') {
         const t = await readBody(req); let v = t;
@@ -272,8 +349,8 @@ async function route(req, res) {
     return;
   }
   if (p === '/ui/state' && m === 'GET') {
-    const config = me.role === 'admin' ? store.config : { ...store.config, apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -298,10 +375,25 @@ async function route(req, res) {
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
-    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample']) if (k in body) store.config[k] = body[k];
+    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists']) if (k in body) store.config[k] = body[k];
+    if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
+  }
+  if (p === '/ui/mqtt' && m === 'GET') return ok(res, mqttView());
+  if (p === '/ui/mqtt' && m === 'PUT') {
+    const body = await jsonBody(req), old = store.config.mqtt ?? {};
+    const c = {
+      enabled: !!body.enabled, host: String(body.host ?? '').trim(), port: Number(body.port) || (body.tls ? 8883 : 1883), tls: !!body.tls,
+      username: String(body.username ?? '').trim(), password: body.password === undefined ? (old.password ?? '') : String(body.password),
+      baseTopic: String(body.baseTopic ?? 'brewpanel').trim() || 'brewpanel',
+      homeAssistant: { enabled: body.homeAssistant?.enabled !== false, prefix: String(body.homeAssistant?.prefix ?? 'homeassistant').trim() || 'homeassistant' },
+      scripts: Array.isArray(body.scripts) ? body.scripts.map(String) : (old.scripts ?? []),
+      items: cleanItems(store, body.items && typeof body.items === 'object' ? body.items : (old.items ?? {})),
+    };
+    store.config.mqtt = c; store.writeConfig(); mqtt.restart(); broadcast('config', {});
+    return ok(res, mqttView());
   }
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
   if (p === '/ui/import/brucontrol' && m === 'POST') {
@@ -331,7 +423,7 @@ async function route(req, res) {
     if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
     if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
-    if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No script ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
+    if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
     if (!act && m === 'PUT') { const text = await readBody(req); engine.write(name, text); return ok(res, engine.check(text)); }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
   }
@@ -361,6 +453,18 @@ async function route(req, res) {
     if (p === '/ui/media/delete' && m === 'POST') { const f = mediaFiles.resolve(b.root, b.path); mediaFiles.remove(b.root, b.path); pictures.forget(f); return ok(res); }
     return fail(res, 404, 'Unknown media route');
   }
+  // Help tab: everyone reads, admins edit
+  if (p === '/ui/help' && m === 'GET') return ok(res, help.list());
+  if (p === '/ui/help' && m === 'POST') { const { title } = await jsonBody(req); return ok(res, { ok: true, name: help.create(title) }); }
+  const hp = /^\/ui\/help\/([^/]+)$/.exec(p);
+  if (hp) {
+    try {
+      if (m === 'GET') return send(res, 200, help.read(hp[1]), 'text/plain; charset=utf-8');
+      if (m === 'PUT') { help.write(hp[1], await readBody(req, 1024 * 1024 + 1)); return ok(res); }
+      if (m === 'DELETE') { help.remove(hp[1]); return ok(res); }
+    } catch (e) { return fail(res, e.code === 404 ? 404 : 400, e.message); }
+  }
+
   // PNG/JPG -> SVG pictures
   if (p === '/ui/pictures' && m === 'GET') return ok(res, pictures.status());
   if (p === '/ui/pictures/convert' && m === 'POST') { const { force } = await jsonBody(req); return ok(res, { ok: true, queued: pictures.convertAll(!!force) }); }
@@ -385,11 +489,12 @@ const server = http.createServer((req, res) => {
 const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
 server.listen(PORT, () => {
   console.log(`Brew Panel running:  http://localhost:${PORT}`);
-  console.log(`Config:  ${CONFIG}\nScripts: ${SCRIPTS}\nData:    ${DATA}`);
+  console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();
+  if (loginsCleared) console.log('New version installed: all logins were cleared (testing mode). Create the admin account again.');
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
 });
 
-function shutdown() { console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
+function shutdown() { console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);

@@ -11,11 +11,38 @@
   <h2 id="lgTitle">Brew Panel</h2>
   <p id="lgIntro" class="muted">Sign in to use the panel.</p>
   <label>User name <input id="lgName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-  <label>Password <input id="lgPass" name="password" type="password" autocomplete="current-password" required></label>
+  <label id="lgCodeRow" class="hidden">Recovery code <input id="lgCode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX"></label>
+  <label id="lgOtpRow" class="hidden">Code from your email or text <input id="lgOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="6 digits"></label>
+  <label id="lgPassRow"><span id="lgPassLabel">Password</span> <input id="lgPass" name="password" type="password" autocomplete="current-password" required></label>
   <label id="lgPass2Row" class="hidden">Type the password again <input id="lgPass2" type="password" autocomplete="new-password"></label>
   <p id="lgError" class="bad"></p>
   <button id="lgBtn" class="primary" type="submit">Sign in</button>
+  <a href="#" id="lgCodeLink" class="lgLink hidden">Email or text me a code instead</a>
+  <a href="#" id="lgForgot" class="lgLink">Forgot password?</a>
+  <a href="#" id="lgBack" class="lgLink hidden">Back to sign in</a>
 </form>
+<div id="codeBox" class="loginBox codeBox hidden">
+  <p id="codeStep" class="step">Step 2 of 2</p>
+  <h2 id="codeTitle">Save your recovery code</h2>
+  <p><b>This code is the only way back in if you forget your password.</b> It is shown only now.</p>
+  <div id="codeShow" class="recoveryCode big"></div>
+  <div class="codeBtns">
+    <button type="button" id="codeCopy">Copy</button>
+    <button type="button" id="codeSave">Download</button>
+    <button type="button" id="codePrint">Print</button>
+  </div>
+  <div class="howTo">
+    <b>If you forget your password:</b>
+    <ol>
+      <li>On the sign-in page, tap <b>Forgot password?</b></li>
+      <li>Type your user name, this code and a new password.</li>
+      <li>You get a new code. Save that one too (each code works once).</li>
+    </ol>
+    This works from your home WiFi or Tailscale. An admin can make a new code any time in <b>Settings &gt; Recovery code</b>.
+  </div>
+  <label class="toggle saved"><input type="checkbox" id="codeSaved"> I saved my recovery code somewhere safe</label>
+  <button id="codeDone" class="primary" disabled>Continue to the panel</button>
+</div>
 <script type="module" src="login.js"></script>
 </body>
 </html>
