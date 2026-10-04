@@ -17,7 +17,7 @@ USB and Ethernet are preferred over WiFi for anything that heats or pumps. On ev
 | `DO <pin> <0\|1>` | Set a digital output. The device answers with the same line to confirm. |
 | `PWM <pin> <0-255>` | Set a PWM output (the panel shows 0-100 %). The device answers with the same line. |
 | `AO <pin> <0-1000>` | Set an analog output, in tenths of a percent of full scale (0 = 0 V / 4 mA, 1000 = 10 V / 20 mA). The Mega drives a PWM-to-0-10 V or 4-20 mA module from a PWM pin. |
-| `CFG DI <pin> <PULLUP\|NOPULL>` | Input pull-up on or off. |
+| `CFG DI <pin> <PULLUP\|NOPULL> <ms>` | Input pull-up on or off, and debounce: a new level must hold this many ms before the board reports it (default 20). |
 | `CFG RTD <cs> <2\|3\|4>` | PT100 / PT1000 probe wires on the MAX31865 board at chip-select pin `cs`. |
 | `CFG TC <cs> <K\|J\|T\|N\|E\|R\|S\|B>` | Thermocouple type on the MAX31856 board at chip-select pin `cs` (MAX31855 boards are K only). |
 
@@ -64,7 +64,7 @@ Devices are elements tied to a pin on a board. Every Device has `device` (which 
 | digitalOut | relays, SSRs, contactors, pumps, valves | `activeLow` (invert) |
 | pwmOut | pump speed, element power | value is 0-100 % |
 | analogOut | VFD speed, proportional valve (0-10 V, 4-20 mA) | `signal`, `rangeLow`, `rangeHigh`, `units` |
-| digitalIn | switches, buttons, float / level switches, flow switches, interlocks | `activeLow` (normally-closed contact), `pullup` |
+| digitalIn | switches, buttons, float / level switches, flow switches, interlocks (BruControl DIN) | `mode`: `switch` (on while the input is on), `toggle` (each press flips it), `latch` (on until reset: leak, E-stop), `counter` (counts presses / pulses). `activeLow` (invert, normally-closed contact; same as BruControl's Active Low), `pullup`, `debounce` (ms, on the board), `onDelay` / `offDelay` (seconds the input must hold before it counts), `units` (counter). Properties: `state`, `raw` (the input itself), `count` (rising edges, a script can set it to 0), `reset` (`"Leak" reset = true` clears a latch or toggle). |
 | temperature | `sensor`: `ds18b20`, `pt100`, `pt1000`, `thermocouple`, `ntc` | DS18B20: `probeIndex` (number in the OneWire probe index), `device` optional. PT100/PT1000: `channel` = CS pin, `wires`, `rref`. Thermocouple: `channel` = CS pin, `tcType`. NTC: `channel` = analog pin, `r0`, `beta`, `series`, `wiring`. All: `offset` (calibration), `units` (°F or °C). Property `fault` is true when the probe is open or shorted. |
 | analogIn | pressure, level, pH, any 0-5 V / 0-10 V / 4-20 mA sensor | `adc`: `board` (analog pin) or `ads1115` (`channel` = 0-3). `signal`: `raw` (`scale`, `offset`), `0-5V`, `0.5-4.5V`, `1-5V`, `0-10V` (`divider`), `4-20mA` / `0-20mA` (`shunt`, ohm), `twoPoint` (`cal1Raw`, `cal1Value`, `cal2Raw`, `cal2Value`). Ranges: `rangeLow`, `rangeHigh`, `offset`. Properties `raw` and `fault` (4-20 mA below 3.6 mA = broken wire). |
 | scale | vessel weight and volume from load cells on HX711 boards | `channel` = DT pin(s), comma between several boards on one vessel (their counts are added). `countsPerUnit` (calibration), `weightUnits` lb / kg, `volumeUnits` gal / L, `specificGravity` (1.000 = water) or `sgFrom` (an element holding the gravity, e.g. the OG Global), `offset`, `autoTare`, `autoTareBand`, `autoTareSeconds`. Properties: `value` (weight), `volume`, `raw`. A script or the screen tares it with `"Scale" tare = true` or `"Scale" volume = 0`, and calibrates it with `"Scale" calibrate = 10` (10 = the known weight on it). |
