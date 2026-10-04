@@ -201,7 +201,18 @@ function buildIp(g) {
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e));
+const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e));
+// Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
+// "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
+const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)));
+// Devices with IPs (pumps, valves, proportional valves, inline sensors) are drawn in proportion to the tab's pipe size.
+// Their width / height are the size at pipe size 10; at any other pipe size they grow or shrink about their centre.
+function elGeom(e) {
+  const k = hasIps(e) ? pipeSize(e.workspace) / 10 : 1, w = e.w || 120, hh = e.h || 60;
+  if (k === 1) return e;
+  const cx = (e.x || 0) + w / 2, cy = (e.y || 0) + hh / 2;
+  return { x: cx - w * k / 2, y: cy - hh * k / 2, w: w * k, h: hh * k };
+}
 // A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
 // it can also be a Global holding the percent. It passes flow whenever it is above 0 % open.
 const PROP_TYPES = ['analogOut', 'pwmOut', 'global', 'shared'];
@@ -214,18 +225,18 @@ function propPct(e) {
 }
 const SIDES = ['left', 'right', 'top', 'bottom'];
 function sidePt(e, side) {
-  const x = e.x || 0, y = e.y || 0, w = e.w || 120, hh = e.h || 60;
+  const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60;
   return side === 'right' ? [x + w, y + hh / 2] : side === 'top' ? [x + w / 2, y] : side === 'bottom' ? [x + w / 2, y + hh] : [x, y + hh / 2];
 }
 const devIps = e => {
-  const v = e.subtype === 'valve' || e.subtype === 'propValve';
+  const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   return [{ id: `dev:${e.name}:in`, label: `${e.name} ${v ? 'end A' : 'inlet'}`, text: v ? 'A' : 'IN', c: sidePt(e, e.ipIn || 'left') },
     { id: `dev:${e.name}:out`, label: `${e.name} ${v ? 'end B' : 'outlet'}`, text: v ? 'B' : 'OUT', c: sidePt(e, e.ipOut || 'right') }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
-  n.style.setProperty('--ipc', e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
+  n.style.setProperty('--ipc', isInline(e) ? '#a87ee8' : e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
   return n;
 }
 function placeDevIps(e) {
@@ -234,7 +245,7 @@ function placeDevIps(e) {
 
 function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type, 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
-  place(n, e);
+  place(n, elGeom(e));
   if (e.hideName) n.querySelector('.nm').classList.add('hidden');
   if (e.type === 'timer') n.append(h('div', { class: 'btns' },
     h('button', { title: 'Start', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', true); } }, '▶'),
@@ -439,6 +450,7 @@ function ipNode(id, ws) {
   if (dn !== null) {
     const e = L().elements.find(x => x.name === dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
     if (e.subtype === 'valve') return on ? { key: 'dev:' + dn, pass: true } : { closed: true };
+    if (isInline(e)) return { key: 'dev:' + dn, pass: true };
     if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
     return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
   }
@@ -592,8 +604,10 @@ $('#ws').addEventListener('pointermove', ev => {
     placeEqIps(drag.item);
     renderPipes();
   }
-  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
-  else if (drag.mode === 'resize') { drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy)); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length) renderPipes(); }
+  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
+  else if (drag.mode === 'resize') {
+    const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
+    drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx / k)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy / k)); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length) renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { drag.item.points = drag.orig.map(q => [snap(q[0] + dx), snap(q[1] + dy)]); renderPipes(); }
 });
@@ -705,15 +719,16 @@ const F = {
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['ipIn', 'Pump inlet / valve end A: IP side', 'sel', SIDES], ['ipOut', 'Pump outlet / valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   temperature: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text'], ['offset', 'Calibration offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['sim', 'Simulator settings (JSON)', 'json']],
-  analogIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['scale', 'Scale', 'num'], ['offset', 'Offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text']],
+  analogIn: [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['scale', 'Scale', 'num'], ['offset', 'Offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']]],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
+  inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['ipIn', 'Valve end A: IP side', 'sel', SIDES], ['ipOut', 'Valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS)], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'bool', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
@@ -771,7 +786,7 @@ function dialog(title, fields, obj, canDelete) {
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const type = kind === 'el' ? item.type : item.kind;
-  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...(isPropValve(item) ? F.propValve : []), ...F.common.slice(3)] : F[type];
+  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...(isPropValve(item) ? F.propValve : []), ...(isInline(item) ? F.inlineSides : []), ...F.common.slice(3)] : F[type];
   const work = clone(item);
   const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type === 'vessel' ? 'Vessel / equipment widget' : type, fields, work, true);
   try {
