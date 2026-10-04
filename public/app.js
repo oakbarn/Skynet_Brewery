@@ -18,6 +18,8 @@ const bg = v => (v === '' || v === null || v === undefined) ? '' : (PALETTE[Stri
 let S = null;                 // server state
 let view = 'workspace', wsName = null, zoom = 'fit';
 try { zoom = localStorage.getItem('bp.zoom') || 'fit'; } catch { /* private window: default */ }
+if (zoom === 'page') zoom = 'fit';         // "Whole tab" is now "Fit screen"
+
 let editing = false, draft = null, sel = null;   // sel = {kind:'el'|'gfx', id}
 let soundOn = false;
 const audios = new Map();
@@ -90,19 +92,22 @@ function renderTabs() {
   for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName ? 'active' : '', onclick: () => { wsName = w.name; sel = null; renderTabs(); renderWs(); } }, w.name));
 }
 
-// Fit width: the tab fills the width of the window, bigger or smaller (a 1920 x 1080 screen at 100 % has no empty space on the right).
-// Whole tab: the whole tab fits in the window without scrolling.
+// Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
+// Fit width: the tab fills the width of the window and scrolls up / down when it is taller than the space left.
+// The tab area always ends at the bottom of the window, so the page itself never scrolls.
 function fitZoom(again = true) {
   const w = curWs(); if (!w) return;
   const box = $('#wsScroll'), tw = w.width || 1600, th = w.height || 900, before = box.clientWidth;
-  const byWidth = (box.clientWidth - 4) / tw;
-  const byHeight = (window.innerHeight - box.getBoundingClientRect().top - 14) / th;
-  const z = zoom === 'fit' ? Math.min(3, byWidth) : zoom === 'page' ? Math.min(3, byWidth, byHeight) : +zoom;
+  const top = box.getBoundingClientRect().top + window.scrollY;
+  const pad = parseFloat(getComputedStyle($('main')).paddingBottom) || 0;
+  box.style.height = box.style.maxHeight = Math.max(200, Math.floor(window.innerHeight - top - pad)) + 'px';
+  const byWidth = (box.clientWidth - 2) / tw, byHeight = (box.clientHeight - 2) / th;
+  const z = zoom === 'fit' ? Math.min(3, byWidth, byHeight) : zoom === 'width' ? Math.min(3, byWidth) : +zoom;
   const ws = $('#ws');
   ws.style.transform = `scale(${z})`; ws.dataset.z = z;
-  $('#wsSizer').style.width = (w.width || 1600) * z + 'px';
-  $('#wsSizer').style.height = (w.height || 900) * z + 'px';
-  if (again && (zoom === 'fit' || zoom === 'page') && box.clientWidth !== before) fitZoom(false);   // a scroll bar came or went: fit to the new width
+  $('#wsSizer').style.width = tw * z + 'px';
+  $('#wsSizer').style.height = th * z + 'px';
+  if (again && (zoom === 'fit' || zoom === 'width') && box.clientWidth !== before) fitZoom(false);   // a scroll bar came or went: fit to the new width
 }
 const Z = () => +$('#ws').dataset.z || 1;
 
@@ -993,8 +998,15 @@ $('#zoom').value = zoom;
 $('#zoom').onchange = e => { zoom = e.target.value; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); };
 let fitTimer;
 const refit = () => { clearTimeout(fitTimer); fitTimer = setTimeout(() => { if (view === 'workspace') fitZoom(); }, 100); };
+{ const ro = new ResizeObserver(refit); for (const s of ['#top', '#view-workspace > .bar', '#editBar']) ro.observe($(s)); }   // a menu or the tab buttons wrapped onto another line
 window.addEventListener('resize', refit);
-document.addEventListener('fullscreenchange', () => { $('#fullScreen').textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen'; refit(); });
+// in full screen the top menu is hidden too, so the tab gets every pixel (Esc or Exit full screen brings it back)
+document.addEventListener('fullscreenchange', () => {
+  const on = !!document.fullscreenElement;
+  $('#fullScreen').textContent = on ? 'Exit full screen' : 'Full screen';
+  document.body.classList.toggle('fullscreen', on);
+  refit();
+});
 // Full screen hides the browser's own bars (phones without it, like iPhones, just do not show the button)
 if (!document.documentElement.requestFullscreen) $('#fullScreen').classList.add('hidden');
 $('#fullScreen').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => { });

@@ -38,7 +38,7 @@ main { padding: 10px 14px; }
 .toggle { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 
 /* ===== workspace canvas ===== */
-#wsScroll { overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); max-height: calc(100vh - 150px); max-height: calc(100dvh - 150px); }
+#wsScroll { overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); max-height: calc(100vh - 150px); }   /* exact height set by fitZoom */
 #ws { position: relative; background-size: cover; background-position: center; touch-action: manipulation; }
 #ws.editing { touch-action: none; }
 #ws.editing { background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 20px 20px; }
@@ -118,7 +118,9 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 50; max-width: 90vw; }
 #toast.show { opacity: 1; }
 #toast.bad { border-color: var(--bad); color: var(--bad); }
-#wsSizer { position: relative; }
+#wsSizer { position: relative; margin: 0 auto; }
+body.fullscreen header#top { display: none; }
+body.fullscreen main { padding-top: 6px; }
 #ws { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
 
 /* ===== touch ===== */
