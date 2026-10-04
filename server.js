@@ -176,14 +176,20 @@ async function route(req, res) {
   // ===== Sign in / out, first-time setup, users =====
   if (p.startsWith('/auth/')) {
     if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
-    const login = (tok, code = 200) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, code, { ok: true }); };
+    const login = (tok, extra = {}) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, 200, { ok: true, ...extra }); };
     if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel' });
     if (p === '/auth/setup' && m === 'POST') {
       if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
       if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');
       const { name, password } = await jsonBody(req);
       auth.addUser(name, password, 'admin');
-      return login(auth.newSession(auth.findUser(name).name));
+      return login(auth.newSession(auth.findUser(name).name), { recoveryCode: auth.makeRecoveryCode() });
+    }
+    if (p === '/auth/recover' && m === 'POST') {
+      if (!isPrivateAddress(ip)) return fail(res, 403, 'Password recovery only works from your own network (home WiFi or Tailscale)');
+      const { name, code, password } = await jsonBody(req);
+      const r = auth.recover(name, code, password, ip); dropEndedSessions();
+      return login(auth.newSession(r.name), { recoveryCode: r.code });
     }
     if (p === '/auth/login' && m === 'POST') { const { name, password } = await jsonBody(req); return login(auth.login(name, password, ip)); }
     if (p === '/auth/logout' && m === 'POST') { auth.logout(token); dropEndedSessions(); res.setHeader('Set-Cookie', auth.clearCookie()); return ok(res); }
@@ -196,6 +202,8 @@ async function route(req, res) {
     }
     if (me.role !== 'admin') return fail(res, 403, 'Only an admin can manage users');
     if (p === '/auth/users' && m === 'GET') return ok(res, auth.listUsers());
+    if (p === '/auth/recovery' && m === 'GET') return ok(res, auth.recoveryInfo());
+    if (p === '/auth/recovery' && m === 'POST') return ok(res, { ok: true, code: auth.makeRecoveryCode() });
     if (p === '/auth/users' && m === 'POST') { const { name, password, role } = await jsonBody(req); auth.addUser(name, password, role); return ok(res); }
     const u = /^\/auth\/users\/(.+)$/.exec(p);
     if (u && m === 'PUT') {
