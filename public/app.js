@@ -192,6 +192,7 @@ function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : ''), 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
   if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
+  if (e.type === 'manual') n.append(h('div', { class: 'mv' }, h('div', { class: 'mvPic' }), h('div', { class: 'mvRows' })));
   place(n, e);
   if (e.hideName) n.querySelector('.nm').classList.add('hidden');
   styleEl(n, e);
@@ -241,7 +242,9 @@ function fillEl(n, e) {
   nm.textContent = v.displayname ?? e.name;
   let on = false, img = v.image || '', text = '';
   switch (e.type) {
-    case 'global': case 'shared': case 'vAPI': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
+    case 'global': case 'shared': case 'vAPI':
+      if (e.dataType === 'bool' || e.kind === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
+      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'vKonstant':
       switch (vkKind(e)) {
         case 'graphic': img = v.value || img; text = ''; break;            // the value IS the picture path
@@ -267,6 +270,7 @@ function fillEl(n, e) {
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || v.image || ''; n.classList.toggle('img-alarm', !!(v.imageon || v.image)); break;
     case 'label': text = v.displayname ?? e.name; nm.classList.add('hidden'); break;
+    case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
       if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || v.image || ''; }
@@ -319,6 +323,7 @@ function tapAction(e) {
       if (e.readOnly) return 'none';
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
+    case 'manual': return 'manual';
     case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': return 'dialog';
     default: return 'none';
   }
@@ -333,6 +338,7 @@ async function doTap(e) {
   if (act === 'none' || act === 'hold') return;          // push and hold buttons work on press / release (below)
   if (act === 'pulse') { const t = elByName(targetName); if (t && isBoolEl(t)) setProp(t.name, boolProp(t), true); return; }
   if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
+  if (act === 'manual') return manualDialog(elByName(targetName) || e);
   if (act === 'workspace') { if (S.config.workspaces.some(w => w.name === targetName)) { wsName = targetName; renderTabs(); renderWs(); } return; }
   if (act === 'script') {
     if (e.confirm && !(await choose(`Start script ${targetName}?`, [['Start', true]]))) return;
@@ -403,7 +409,7 @@ function choose(title, buttons, current) {
 }
 
 // main setting of each control element, shown with an Enabled switch in its dialog
-const CONTROL_MAIN = { pwmOut: ['value', 'Output (0-255)'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'] };
+const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'] };
 function controlDialog(t) {
   const v = S.values[t.name] || {};
   const [prop, label] = CONTROL_MAIN[t.type];
@@ -425,6 +431,34 @@ function controlDialog(t) {
       h('button', { type: 'button', class: 'big primary', onclick: () => done() }, 'Set')),
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => d.close() }, 'Cancel')));
   d.showModal(); setTimeout(() => { inp.focus(); inp.select(); }, 50);
+}
+
+// Manual vessel widget (BrewZilla, DigiBoil and other appliances with their own controller): no board pin.
+// A script says what to set by hand (setpoint, heat, pump, timer, message) and waits for the brewer to confirm here.
+function fillManual(n, e, v) {
+  const u = e.units || '°F', rows = n.querySelector('.mvRows'), pic = n.querySelector('.mvPic');
+  const img = (v.heat ? (e.imageOn || e.image) : (e.imageOff || e.image)) || '';
+  pic.style.backgroundImage = img ? `url("${media(img)}")` : '';
+  pic.classList.toggle('hidden', !img);
+  const row = (k, val, cls = '') => h('div', { class: 'mvRow ' + cls }, h('span', {}, k), h('b', {}, val));
+  rows.innerHTML = '';
+  rows.append(row('Set to', `${fmtVal({ precision: e.precision ?? 0 }, v.setpoint)} ${u}`),
+    row('Heat', v.heat ? 'ON' : 'OFF', v.heat ? 'hot' : ''),
+    ...(e.noPump ? [] : [row('Pump', v.pump ? 'ON' : 'OFF', v.pump ? 'run' : '')]),
+    ...(v.timer && v.timer !== '00:00:00' ? [row('Timer', v.timer)] : []),
+    ...(v.reading ? [row('Reads', `${fmtVal({ precision: 1 }, v.reading)} ${u}`)] : []),
+    ...(v.volume ? [row('Volume', `${fmtVal({ precision: 2 }, v.volume)} ${e.volumeUnits || 'gal'}`)] : []));
+  n.classList.toggle('waiting', !!v.waiting);
+}
+async function manualDialog(t) {
+  const v = S.values[t.name] || {}, title = v.displayname ?? t.name;
+  const r = await choose(v.waiting ? `${title}: ${v.message || 'confirm when done'}` : title,
+    [...(v.waiting ? [['Done ✓', 'ok']] : []), ['Enter the temperature it shows', 'reading'], ['Enter the volume in it', 'volume']]);
+  if (r === 'ok') { await setProp(t.name, 'confirmed', true); return setProp(t.name, 'waiting', false); }
+  if (r === 'reading' || r === 'volume') {
+    const x = parseFloat(prompt(r === 'reading' ? `Temperature on the ${title} display (${t.units || '°F'}):` : `Volume in the ${title} (${t.volumeUnits || 'gal'}):`, '') || '');
+    if (Number.isFinite(x)) setProp(t.name, r, x);
+  }
 }
 
 function valueDialog(t) {
@@ -775,6 +809,7 @@ const ADD_MENU = [
   ['Widgets (app only, no board pin)', [
     ['Picture', 'picture'], ['Global', 'global'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
     ['Timer', 'timer'], ['Alarm', 'alarm'], ['Label', 'label'],
+    ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
 ];
 function fillAddType() {
@@ -854,6 +889,9 @@ const F = {
     ['units', 'Counter units (e.g. presses, gal)', 'text'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
+  manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
+    ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
+    ['_mnote', 'Scripts set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
   pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
   analogOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin feeding the 0-10 V / 4-20 mA module', 'pin', 'pwm'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'text'], ['precision', 'Decimals', 'num']],
@@ -1370,8 +1408,33 @@ $('#bruImport').onclick = guard(async () => {
 });
 
 // ---------------------------------------------------------------- settings
+// ---- sample setups: on first start, and under Settings
+let samples = null;
+async function sampleCards(box, after) {
+  samples ??= await api('GET', '/ui/samples');
+  box.innerHTML = '';
+  for (const sm of samples) box.append(h('div', { class: 'sampleCard' + (S.config.sample === sm.id ? ' cur' : '') },
+    h('div', { class: 'sampleName' }, sm.name), h('div', { class: 'muted' }, sm.description || ''),
+    sm.needs ? h('div', { class: 'sampleNeeds' }, sm.needs) : '',
+    h('button', { class: 'primary', onclick: guard(async () => {
+      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your tabs, elements, pipes and devices and stops running scripts. Your current setup is saved in config/backups first.`)) return;
+      const r = await api('POST', `/ui/samples/${sm.id}/load`);
+      after?.(); wsName = null; await load(); setView('workspace');
+      const bad = (r.problems || []).length;
+      toast(`Loaded "${r.sample}"` + (bad ? `. ${bad} script(s) need a look on the Scripts page` : ''), bad > 0);
+    }) }, S.config.sample === sm.id ? 'Load again' : 'Load this one')));
+}
+async function firstRunSamples() {
+  if (!S.config.chooseSample) return;
+  const d = $('#sampleDlg');
+  await sampleCards($('#sampleDlgList'), () => d.close());
+  $('#sampleKeep').onclick = guard(async () => { d.close(); await api('PUT', '/ui/settings', { chooseSample: false }); S.config.chooseSample = false; });
+  d.showModal();
+}
+
 function renderSettings() {
   const c = S.config;
+  sampleCards($('#sampleList')).catch(e => toast(e.message, true));
   $('#setTitle').value = c.title || '';
   $('#setMedia').value = (c.mediaRoots || []).join('\n');
   $('#setKey').value = c.apiKey || '';
@@ -1391,4 +1454,4 @@ $('#saveSettings').onclick = guard(async () => {
 // ---------------------------------------------------------------- start
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
 window.addEventListener('beforeunload', e => { if (dirty || (editing && JSON.stringify(draft) !== JSON.stringify(S.config))) { e.preventDefault(); e.returnValue = ''; } });
-load().then(() => { connect(); setView('workspace'); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

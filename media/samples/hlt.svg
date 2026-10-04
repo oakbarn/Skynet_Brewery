@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 320">
+  <defs>
+    <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#7d858d"/><stop offset=".35" stop-color="#e4e8ec"/><stop offset=".6" stop-color="#b9c0c7"/><stop offset="1" stop-color="#6b737b"/></linearGradient>
+    <linearGradient id="liq" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9fd3ea"/><stop offset="1" stop-color="#4b8db0"/></linearGradient>
+  </defs>
+  <rect x="20" y="22" width="220" height="276" rx="18" fill="url(#steel)" stroke="#3b4148" stroke-width="3"/>
+  <rect x="12" y="14" width="236" height="16" rx="6" fill="#9aa2aa" stroke="#3b4148" stroke-width="2"/>
+  <rect x="26" y="120" width="208" height="172" rx="12" fill="url(#liq)" opacity=".85"/>
+  <path d="M40 270 H220" stroke="#c0392b" stroke-width="6" stroke-linecap="round"/>
+  <text x="130" y="80" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="700" fill="#22272c">HLT</text>
+</svg>

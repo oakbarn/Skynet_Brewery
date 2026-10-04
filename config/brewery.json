@@ -1439,5 +1439,6 @@
       "dry hop": -111,
       "unused": 0
     }
-  }
+  },
+  "chooseSample": true
 }

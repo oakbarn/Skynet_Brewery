@@ -1,0 +1,24 @@
+//BrewDay_Stop
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//Stops the brew day and turns everything off.
+stop "BrewDay_Flow"
+stop "looper_Advance_Switch"
+stop "tm_Step"
+stop "tm_BrewDay"
+"alm_Hops" active = false
+"alm_Step" active = false
+"sw_Advance_BrewStatus" visibility = hidden
+"Pump_1" state = false
+"V_Kettle_Out" state = false
+"V_MLT_Out" state = false
+"V_To_MLT" state = false
+"V_To_Kettle" state = false
+"V_To_Ferm" state = false
+"Kettle_Heat" enabled = false
+"Chiller_Water" state = false
+"gblV_Brew_Status" value = 0
+"gblS_Advance_Label" value = "Stopped"
+"gblS_Advance_Label" background = 8
+"gblS_Step_Text" background = 8
+"gblS_Step_Text" value = "Stopped. Everything is off."
