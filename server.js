@@ -158,7 +158,7 @@ function sameOrigin(req) {
   try { const h = new URL(o).host; return h === req.headers.host || h === req.headers['x-forwarded-host']; } catch { return false; }
 }
 
-// The API has vAPI variables and the Globals still left (never Shared or vKonstant)
+// The API has vAPI variables only (never Shared or vKonstant)
 const apiVars = () => store.list().filter(isApiVar).map(e => ({ name: e.name, type: e.dataType, class: e.type, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
 
 function csv(rows) {
@@ -228,7 +228,7 @@ async function route(req, res) {
       const body = await jsonBody(req); const done = [], errors = [];
       for (const [n, v] of Object.entries(body)) {
         const el = store.get(n);
-        if (!isApiVar(el)) { errors.push(`${n}: not a vAPI or Global`); continue; }
+        if (!isApiVar(el)) { errors.push(`${n}: not a vAPI`); continue; }
         try { store.setProp(n, 'value', v, 'api'); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); }
       }
       return ok(res, { ok: !errors.length, set: done, errors });
@@ -236,7 +236,7 @@ async function route(req, res) {
     let g = /^\/api\/(?:globals|vapi)\/(.+)$/.exec(p);
     if (g) {
       const n = cleanName(g[1]), el = store.get(n);
-      if (!isApiVar(el)) return fail(res, 404, `No vAPI or Global named "${n}"`);
+      if (!isApiVar(el)) return fail(res, 404, `No vAPI named "${n}"`);
       if (m === 'GET') return ok(res, { name: n, type: el.dataType, class: el.type, value: plain(store.getProp(n, 'value')) });
       if (m === 'PUT' || m === 'POST') {
         const t = await readBody(req); let v = t;

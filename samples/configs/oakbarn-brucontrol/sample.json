@@ -2,7 +2,7 @@
   "order": 1,
   "name": "OakBarn (my BruControl setup)",
   "title": "OakBarn Brew Panel",
-  "description": "Your own BruControl configuration (26-26-46 VGC UNI and MB Relay): 17 tabs, 898 elements, 175 scripts and the BrewZilla / DigiBoil manual steps, with all three boards on the simulator. Globals are moved by your rules: gbl to vKonstant, RP_ to vAPI as vA_, x deleted; 9 other names stay Globals for now.",
+  "description": "Your own BruControl configuration (26-26-46 VGC UNI and MB Relay): 17 tabs, 898 elements, 175 scripts and the BrewZilla / DigiBoil manual steps, with all three boards on the simulator. Globals are moved by your rules: gbl to vKonstant, RP_ to vAPI as vA_, x deleted.",
   "needs": "Some pictures from C:\\BruControl\\Media still need copying into media/oakbarn",
   "brucontrol": "OakBarn_BruControl.brucfg",
   "mediaFolder": "oakbarn"
