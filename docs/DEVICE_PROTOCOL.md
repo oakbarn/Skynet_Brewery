@@ -64,6 +64,17 @@ Devices are elements tied to a pin on a board. Every Device has `device` (which 
 | scale | vessel weight and volume from load cells on HX711 boards | `channel` = DT pin(s), comma between several boards on one vessel (their counts are added). `countsPerUnit` (calibration), `weightUnits` lb / kg, `volumeUnits` gal / L, `specificGravity` (1.000 = water) or `sgFrom` (an element holding the gravity, e.g. the OG Global), `offset`, `autoTare`, `autoTareBand`, `autoTareSeconds`. Properties: `value` (weight), `volume`, `raw`. A script or the screen tares it with `"Scale" tare = true` or `"Scale" volume = 0`, and calibrates it with `"Scale" calibrate = 10` (10 = the known weight on it). |
 | flowMeter | hall-effect pulse flow meters | `pulsesPerUnit`, `units`. Properties `rate` (per minute) and `total` (a script can reset it: `"Flow_1" total = 0`). |
 
+### Pin names (Arduino Mega 2560)
+
+A pin can be typed the Arduino way or the BruControl way, and both mean the same pin:
+
+| Pin | Arduino name | BruControl number |
+|---|---|---|
+| Digital pins | 0-53 (or D0-D53) | 0-53 |
+| Analog pins | A0-A15 | 54-69 |
+
+The pin picker lists analog pins as `A0 = pin 54 (BruControl)` and so on. Analog pins also work as digital inputs or outputs (A5 = pin 59). On the wire the panel always sends the pin number (`DO 59 1`), and analog readings arrive as `A 5 <raw>` for A5. So a BruControl configuration that uses 54-69 works unchanged.
+
 ### Wiring notes (Arduino Mega)
 
 - **0-10 V sensors** need a 2:1 voltage divider (for example two 10k resistors) so 10 V becomes 5 V at the pin. Set `divider` if you use another ratio.

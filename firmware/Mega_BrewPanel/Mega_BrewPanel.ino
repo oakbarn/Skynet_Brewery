@@ -51,7 +51,7 @@ EthernetClient netClient;
 #define LINK Serial
 #endif
 
-// ---- your pins ----
+// ---- your pins ----   (analog pins can be listed as A0-A15; in the panel they are A0-A15 or BruControl's 54-69)
 const uint8_t OUTPUT_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 22, 23, 24, 25};
 const uint8_t INPUT_PINS[]  = {30, 31, 32, 33};          // switches / float sensors (to GND, internal pull-up)
 const uint8_t ANALOG_PINS[] = {A0};                      // analog inputs (sensors 0-5V, 4-20mA via 250 ohm, NTC, pH), e.g. {A0, A1}; reported as 0 = A0
