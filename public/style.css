@@ -373,3 +373,53 @@ body.role-viewer .op-only { display: none !important; }
 .vkitems .vkv { width: 6em; }
 .vkitems .vkt { width: 100%; }
 #ws .el .vksel { position: absolute; left: 6px; right: 6px; bottom: 6px; font-size: 16px; padding: 4px; }
+
+/* ===== Help tab (the manual) ===== */
+.hpLayout { display: grid; grid-template-columns: 240px 1fr; gap: 14px; align-items: start; }
+.hpSide { position: sticky; top: 60px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 80px); overflow: auto; }
+.hpSide input, .hpSide select { width: 100%; }
+#hpPick { display: none; }
+#hpList { display: flex; flex-direction: column; gap: 2px; }
+#hpList a { display: flex; flex-direction: column; gap: 2px; padding: 6px 9px; border-radius: 6px; color: var(--text); text-decoration: none; border: 1px solid transparent; }
+#hpList a:hover { border-color: var(--line); }
+#hpList a.here { background: var(--panel2); border-color: var(--line); color: var(--accent); }
+#hpList small { font-size: 12px; }
+.hpMain { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 18px 18px; }
+.hpPage { max-width: 860px; line-height: 1.55; font-size: 15px; overflow-wrap: anywhere; }
+.hpPage h1 { font-size: 24px; margin: 6px 0 12px; }
+.hpPage h2 { font-size: 19px; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+.hpPage h3 { font-size: 16px; margin: 18px 0 6px; }
+.hpPage a { color: var(--flow); }
+.hpPage img { max-width: 100%; height: auto; vertical-align: middle; }
+.hpPage pre { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; overflow-x: auto; }
+.hpPage code { background: var(--panel2); border-radius: 4px; padding: 0 3px; }
+.hpPage pre code { background: none; padding: 0; }
+.hpPage blockquote { margin: 10px 0; padding: 4px 12px; border-left: 4px solid var(--accent); background: var(--panel2); border-radius: 0 6px 6px 0; }
+.hpPage blockquote p { margin: 6px 0; }
+.hpPage mark { background: var(--warn); color: #1b1305; border-radius: 2px; }
+.hpTable { overflow-x: auto; margin: 8px 0; }
+.hpTable table { border-collapse: collapse; }
+.hpTable th, .hpTable td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
+.hpTable th { background: var(--panel2); }
+.hpEditPanes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+#hpText { width: 100%; min-height: 60vh; font-family: var(--mono); font-size: 13px; line-height: 1.45; resize: vertical; }
+#hpPreview { border: 1px dashed var(--line); border-radius: 6px; padding: 4px 12px; max-height: 70vh; overflow: auto; }
+@media (max-width: 760px) {
+  .hpLayout { grid-template-columns: 1fr; }
+  .hpSide { position: static; max-height: none; }
+  #hpPick { display: block; min-height: 40px; }
+  #hpList, #hpNew { display: none; }
+  .hpSide.searching #hpList { display: flex; }
+  .hpSide.searching #hpPick { display: none; }
+  body.role-admin #hpNew { display: block; }
+  .hpMain { padding: 8px 12px 14px; }
+  .hpEditPanes { grid-template-columns: 1fr; }
+  #hpText { min-height: 40vh; }
+}
+@media print {
+  header#top, .hpSide, .hpTools, .hpEditor, #toast { display: none !important; }
+  html, body, .hpMain { background: #fff; color: #000; border: 0; }
+  .hpLayout { display: block; }
+  .hpPage { max-width: none; }
+  .hpPage a { color: #000; }
+}
