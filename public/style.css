@@ -423,3 +423,5 @@ body.role-viewer .op-only { display: none !important; }
   .hpPage { max-width: none; }
   .hpPage a { color: #000; }
 }
+.form label.check { flex-direction: row; align-items: center; gap: 6px; }
+#donateDlg p { line-height: 1.45; }

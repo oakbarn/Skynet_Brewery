@@ -4,6 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DONATE_LINK } from './lib/donation.js';
 import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS } from './lib/store.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
@@ -149,6 +150,16 @@ function apiKeyOk(req, url) {
 
 // ---------------- login ----------------
 // Who may do what. viewer < operator < admin. New routes default to viewer for GET and admin for changes.
+// Beer money pop-up settings (Settings > Beer money pop-up). The PayPal address is fixed in lib/donation.js.
+function cleanDonation(d = {}) {
+  const days = (v, def) => { const n = Math.round(Number(v)); return n >= 1 && n <= 3650 ? n : def; };
+  return {
+    enabled: d.enabled !== false,
+    message: String(d.message ?? '').slice(0, 1000), button: String(d.button ?? '').slice(0, 60),
+    everyDays: days(d.everyDays, 30), donatedDays: days(d.donatedDays, 180),
+  };
+}
+
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
@@ -323,7 +334,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? store.config : { ...store.config, apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -349,6 +360,7 @@ async function route(req, res) {
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists']) if (k in body) store.config[k] = body[k];
+    if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);

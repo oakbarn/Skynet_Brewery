@@ -1,0 +1,4 @@
+# Changes to these files need a review from @oakbarn before they can be merged
+# (when branch protection "Require review from Code Owners" is turned on).
+/lib/donation.js     @oakbarn
+/.github/CODEOWNERS  @oakbarn
