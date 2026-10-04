@@ -579,7 +579,7 @@ async function doTap(e) {
   if (act === 'manual') return manualDialog(elByName(targetName) || e);
   if (act === 'workspace') { if (S.config.workspaces.some(w => w.name === targetName)) { wsName = targetName; renderTabs(); renderWs(); } return; }
   if (act === 'script') {
-    if (e.confirm && !(await choose(`Start script ${targetName}?`, [['Start', true]]))) return;
+    if (e.confirm && !(await choose(`Start process ${targetName}?`, [['Start', true]]))) return;
     try { const r = await api('POST', `/ui/scripts/${encodeURIComponent(targetName)}/start`); if (!r.ok) toast(r.msg, true); else toast(`Started ${targetName}`); } catch (x) { toast(x.message, true); }
     return;
   }
@@ -1179,7 +1179,7 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool'],
     ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
-    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', 'script', ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, script or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
+    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
@@ -1195,7 +1195,7 @@ const F = {
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
-    ['_mnote', 'Scripts set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
+    ['_mnote', 'Processes set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
   pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
   analogOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin feeding the 0-10 V / 4-20 mA module', 'pin', 'pwm'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'gpick', 'units'], ['precision', 'Decimals', 'num']],
@@ -1596,7 +1596,7 @@ $('#startScript').onclick = guard(async () => {
 $('#stopScript').onclick = guard(() => api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/stop`));
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
-  const n = prompt('New script name'); if (!n) return;
+  const n = prompt('New process name'); if (!n) return;
   if (S.scripts.some(s => s.name === n.trim())) throw new Error('That name is used');
   await api('PUT', '/ui/scripts/' + encodeURIComponent(n.trim()), '//' + n.trim() + '\n', true);
   S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n.trim());
@@ -1607,7 +1607,7 @@ $('#renScript').onclick = guard(async () => {
   curScript = n.trim(); S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
 $('#delScript').onclick = guard(async () => {
-  if (!curScript || !confirm(`Delete script "${curScript}"?`)) return;
+  if (!curScript || !confirm(`Delete process "${curScript}"?`)) return;
   await api('DELETE', '/ui/scripts/' + encodeURIComponent(curScript));
   curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
 });
@@ -1622,12 +1622,12 @@ $('#consoleAll').onchange = renderConsole;
 $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 
 // ---------------------------------------------------------------- variables page: vAPI, vKonstant, shared
-const LOG_LABEL = { none: 'Off', ondemand: 'Manual (log line / Log now)', script: 'On demand only (when a script starts)', once: 'Once',
+const LOG_LABEL = { none: 'Off', ondemand: 'Manual (log line / Log now)', script: 'On demand only (when a process starts)', once: 'Once',
   ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours', days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 function logSummary(lg) {
   lg = lg || { mode: 'none' };
-  if (lg.mode === 'script') return lg.script ? `When "${lg.script}" starts` : 'On demand only (no script picked)';
+  if (lg.mode === 'script') return lg.script ? `When "${lg.script}" starts` : 'On demand only (no process picked)';
   if (!TIME_MODES.includes(lg.mode)) return LOG_LABEL[lg.mode] || lg.mode;
   const every = lg.mode === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[lg.mode]}`;
   return every + (lg.at ? ` at ${lg.at}` : '');
@@ -1670,7 +1670,7 @@ async function editLog(e) {
   const work = clone(e.log || { mode: 'none' });
   const r = await dialog(`Database trigger: ${e.name}`, [
     ['mode', 'Write to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m])],
-    ['script', 'Script (for "On demand only")', 'sel', [['', '(pick a script)'], ...S.scripts.map(x => [x.name, x.name])]],
+    ['script', 'Process (for "On demand only")', 'sel', [['', '(pick a process)'], ...S.scripts.map(x => [x.name, x.name])]],
     ['every', 'N (whole number, for "Every N …")', 'num'],
     ['interval', 'Interval 00:00:00 (for "Every 00:00:00")', 'text'],
     ['at', 'At clock time (optional, for the "Every" choices), e.g. 12 AM, 6:30 PM or 18:30', 'text'],
@@ -1678,7 +1678,7 @@ async function editLog(e) {
   ], work, false);
   if (r !== 'ok') return;
   try { readFields(work); } catch (x) { return toast(x.message, true); }
-  if (work.mode === 'script' && !work.script) return toast('Pick the script that writes this value', true);
+  if (work.mode === 'script' && !work.script) return toast('Pick the process that writes this value', true);
   if (work.mode === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(work.interval || '')) return toast('Interval must look like 00:05:00', true);
   if (TIME_MODES.includes(work.mode) && work.every !== undefined && !(Number.isInteger(work.every) && work.every >= 1)) return toast('N must be a whole number, 1 or more', true);
   if (work.at && !validClock(work.at)) return toast('Clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30', true);
@@ -1796,14 +1796,14 @@ $('#importBtn').onclick = guard(async () => {
 // BruControl configuration (.brucfg)
 function bruReport(r) {
   const t = r.summary.byType;
-  const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} elements, ${r.summary.scripts} scripts`,
+  const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} elements, ${r.summary.scripts} processes`,
     '  ' + Object.entries(t).map(([k, n]) => `${k} ${n}`).join(', ')];
-  if (r.autostart.length) lines.push(`Scripts started with the server: ${r.autostart.join(', ')}`);
+  if (r.autostart.length) lines.push(`Processes started with the server: ${r.autostart.join(', ')}`);
   lines.push(r.missingMedia.length ? `\n${r.missingMedia.length} of ${r.mediaCount} pictures and sounds are not in your media folder yet. Copy them from C:\\BruControl\\Media:\n  ${r.missingMedia.join('\n  ')}` : `All ${r.mediaCount} pictures and sounds were found.`);
   if (r.warnings.length) lines.push('\nNotes:\n  ' + r.warnings.join('\n  '));
   if (r.scripts) {
-    lines.push(`\nScripts written: ${r.scripts.written.length}` + (r.scripts.backedUp.length ? `, ${r.scripts.backedUp.length} older copies kept as .bak` : '') + (r.scripts.skipped.length ? `\nScripts not replaced: ${r.scripts.skipped.join(', ')}` : ''));
-    lines.push(r.problems.length ? `${r.problems.length} scripts have problems (they will not start until fixed):\n` + r.problems.map(p => `  ${p.script}: ` + p.errors.map(e => `line ${e.line}: ${e.msg}`).join('; ') + (p.more ? ` (+${p.more} more)` : '')).join('\n') : 'Every script checks OK.');
+    lines.push(`\nProcesses written: ${r.scripts.written.length}` + (r.scripts.backedUp.length ? `, ${r.scripts.backedUp.length} older copies kept as .bak` : '') + (r.scripts.skipped.length ? `\nProcesses not replaced: ${r.scripts.skipped.join(', ')}` : ''));
+    lines.push(r.problems.length ? `${r.problems.length} processes have problems (they will not start until fixed):\n` + r.problems.map(p => `  ${p.script}: ` + p.errors.map(e => `line ${e.line}: ${e.msg}`).join('; ') + (p.more ? ` (+${p.more} more)` : '')).join('\n') : 'Every process checks OK.');
   }
   return lines.join('\n');
 }
@@ -1815,7 +1815,7 @@ async function bruSend(preview) {
 }
 $('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
 $('#bruImport').onclick = guard(async () => {
-  const msg = $('#bruMode').value === 'replace' ? 'Replace your tabs, elements and devices with the ones in this BruControl file? Running scripts are stopped. (config/brewery.json.bak keeps the old setup.)' : 'Add this BruControl file to your setup? Running scripts are stopped.';
+  const msg = $('#bruMode').value === 'replace' ? 'Replace your tabs, elements and devices with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old setup.)' : 'Add this BruControl file to your setup? Running processes are stopped.';
   if (!confirm(msg)) return;
   const r = await bruSend(false);
   $('#bruResult').textContent = bruReport(r);
@@ -1832,11 +1832,11 @@ async function sampleCards(box, after) {
     h('div', { class: 'sampleName' }, sm.name), h('div', { class: 'muted' }, sm.description || ''),
     sm.needs ? h('div', { class: 'sampleNeeds' }, sm.needs) : '',
     h('button', { class: 'primary', onclick: guard(async () => {
-      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your tabs, elements, pipes and devices and stops running scripts. Your current setup is saved in config/backups first.`)) return;
+      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your tabs, elements, pipes and devices and stops running processes. Your current setup is saved in config/backups first.`)) return;
       const r = await api('POST', `/ui/samples/${sm.id}/load`);
       after?.(); wsName = null; await load(); setView('workspace');
       const bad = (r.problems || []).length;
-      toast(`Loaded "${r.sample}"` + (bad ? `. ${bad} script(s) need a look on the Scripts page` : ''), bad > 0);
+      toast(`Loaded "${r.sample}"` + (bad ? `. ${bad} process(es) need a look on the Processes page` : ''), bad > 0);
     }) }, S.config.sample === sm.id ? 'Load again' : 'Load this one')));
 }
 async function firstRunSamples() {

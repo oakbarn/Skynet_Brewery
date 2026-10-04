@@ -85,7 +85,7 @@ hw._onLine(dev, 'TC 48 100'); near(store.getProp('TC', 'value'), 212, 1e-9, 'TC 
 hw._onLine(dev, 'TC 48 NAN'); assert.equal(store.getProp('TC', 'fault'), true, 'TC open'); near(store.getProp('TC', 'value'), 212, 1e-9, 'keeps last good value');
 hw._flow(store.get('Flow'), 1000, 0); hw._flow(store.get('Flow'), 1200, 60000);
 near(store.getProp('Flow', 'rate'), 2, 1e-9, 'flow rate per minute'); near(store.getProp('Flow', 'total'), 2, 1e-9, 'flow total');
-assert.throws(() => store.setProp('Press', 'value', 1), /cannot be set by a script/);
+assert.throws(() => store.setProp('Press', 'value', 1), /cannot be set by a process/);
 store.setProp('Flow', 'total', 0); assert.equal(store.getProp('Flow', 'total'), 0, 'scripts can reset the flow total');
 
 // The same pin by either name
@@ -118,7 +118,7 @@ assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: 'xyz' }] }), /1
   assert.equal(st('DinSwitch'), false); assert.equal(st('DinLatch'), true, 'latch stays on');
   store.setProp('DinLatch', 'reset', true); assert.equal(st('DinLatch'), false, 'latch reset'); assert.equal(store.getProp('DinLatch', 'reset'), false);
   store.setProp('DinCount', 'count', 0); assert.equal(store.getProp('DinCount', 'count'), 0, 'count reset by script');
-  assert.throws(() => store.setProp('DinSwitch', 'state', true), /cannot be set by a script/);
+  assert.throws(() => store.setProp('DinSwitch', 'state', true), /cannot be set by a process/);
   store.get('DinSwitch').onDelay = 0.2;
   hw._onLine(dev, 'DI 31 1'); assert.equal(st('DinSwitch'), false, 'on delay: not yet');
   await new Promise(r => setTimeout(r, 300)); assert.equal(st('DinSwitch'), true, 'on delay: after 0.2 s');
@@ -150,7 +150,7 @@ const k = store.get('Kettle');
 hw._scale(k, 93454 + 100, 0); hw._scale(k, 93454 + 100, 5000); assert.equal(k.tareRaw, 93454, 'no auto tare before 10 s');
 hw._scale(k, 93454 + 100, 10500); assert.equal(k.tareRaw, 93554, 'auto tare when empty and steady');
 hw._scale(k, 93554 + 20000, 11000); hw._scale(k, 93554 + 20000, 30000); assert.equal(k.tareRaw, 93554, 'no auto tare with liquid in it');
-assert.throws(() => store.setProp('Kettle', 'value', 1), /cannot be set by a script/);
+assert.throws(() => store.setProp('Kettle', 'value', 1), /cannot be set by a process/);
 
 // A board on Ethernet: the panel connects over TCP, says HELLO, sends settings, and reads its inputs
 {

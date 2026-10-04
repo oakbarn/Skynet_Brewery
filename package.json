@@ -1,7 +1,7 @@
 {
   "name": "oakbarn-brewpanel",
   "version": "0.1.0",
-  "description": "Browser-based brewery control panel with BruControl-style scripts",
+  "description": "Browser-based brewery control panel with BruControl-style processes",
   "type": "module",
   "main": "server.js",
   "scripts": {
