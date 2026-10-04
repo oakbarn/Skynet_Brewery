@@ -1,0 +1,28 @@
+//looper_Advance_Switch
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//Clicking the advance switch (or Done on a Manual vessel that is waiting) adds 1 to gblV_Brew_Status.
+new value vVBrew
+[LoopAuto]
+sleep 100
+if "sw_Advance_BrewStatus" state == true
+	vVBrew = "gblV_Brew_Status" value
+	vVBrew += 1
+	"gblV_Brew_Status" value = vVBrew
+	"sw_Advance_BrewStatus" state = false
+endif
+if "BrewZilla" confirmed == true
+	"BrewZilla" confirmed = false
+	"BrewZilla" waiting = false
+	vVBrew = "gblV_Brew_Status" value
+	vVBrew += 1
+	"gblV_Brew_Status" value = vVBrew
+endif
+if "DigiBoil" confirmed == true
+	"DigiBoil" confirmed = false
+	"DigiBoil" waiting = false
+	vVBrew = "gblV_Brew_Status" value
+	vVBrew += 1
+	"gblV_Brew_Status" value = vVBrew
+endif
+goto "LoopAuto"

@@ -11,6 +11,7 @@ import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
+import { listSamples, loadSample } from './lib/samples.js';
 import { plain, toStr } from './lib/values.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,7 @@ const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'con
 const DATA = path.resolve(process.env.BREWPANEL_DATA ?? path.join(ROOT, 'data'));
 const SCRIPTS = path.resolve(process.env.BREWPANEL_SCRIPTS ?? path.join(ROOT, 'scripts'));
 const PUBLIC = path.join(ROOT, 'public');
+const SAMPLES = path.join(ROOT, 'samples', 'configs');
 
 const store = new Store(CONFIG, DATA);
 store.load();
@@ -109,7 +111,7 @@ const resolveMedia = p => store.resolveMedia(p);
 function findMedia(p) {
   const full = resolveMedia(p);
   if (!full || fs.existsSync(full)) return full;
-  const root = mediaRoots().find(r => full.startsWith(r + path.sep));
+  const root = store.mediaRoots().find(r => full.startsWith(r + path.sep));
   if (!root) return full;
   let cur = root;
   for (const part of path.relative(root, full).split(path.sep)) {
@@ -213,7 +215,7 @@ async function route(req, res) {
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
-    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title']) if (k in body) store.config[k] = body[k];
+    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample']) if (k in body) store.config[k] = body[k];
     store.writeConfig(); broadcast('config', {});
     return ok(res);
   }
@@ -228,6 +230,9 @@ async function route(req, res) {
     hw.restart();
     return ok(res, { ok: true, ...out, ...applied });
   }
+  if (p === '/ui/samples' && m === 'GET') return ok(res, listSamples(SAMPLES));
+  const smp = /^\/ui\/samples\/([\w-]+)\/load$/.exec(p);
+  if (smp && m === 'POST') return ok(res, loadSample(SAMPLES, smp[1], { store, engine, hw }));
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
   let s = /^\/ui\/log\/(once|now)\/(.+)$/.exec(p);

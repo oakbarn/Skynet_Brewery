@@ -149,6 +149,10 @@
 
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
+    <h3>Start from a sample</h3>
+    <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter scripts. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
+    <div id="sampleList" class="samples"></div>
+    <h3>Settings</h3>
     <div class="form">
       <label>Title <input id="setTitle"></label>
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
@@ -163,6 +167,7 @@
 
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
+<dialog id="sampleDlg"><h3>Welcome to the Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
 <div id="toast"></div>
 <script type="module" src="app.js"></script>
 </body>

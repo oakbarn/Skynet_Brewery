@@ -198,3 +198,22 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el.fault { border-color: var(--bad); }
 .el.fault .vl { color: var(--bad); }
 #dlgBody .info { font-family: var(--mono); align-self: center; }
+/* Manual vessel widget (BrewZilla, DigiBoil) */
+.el.manual .vl { flex: none; font-size: 13px; font-weight: 500; padding: 2px 6px 4px; }
+.el.manual .mv { flex: 1; display: flex; gap: 6px; padding: 0 6px; min-height: 0; }
+.el.manual .mvPic { flex: 0 0 38%; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.el.manual .mvRows { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1px; font-size: 13px; }
+.el.manual .mvRow { display: flex; justify-content: space-between; gap: 6px; }
+.el.manual .mvRow span { color: var(--muted); }
+.el.manual .mvRow.hot b { color: #ff6a3a; }
+.el.manual .mvRow.run b { color: var(--ok); }
+.el.manual.waiting { animation: mvBlink 1s steps(2) infinite; border-width: 3px; }
+@keyframes mvBlink { from { border-color: var(--bad); } to { border-color: transparent; } }
+/* Sample setups */
+.samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin: 8px 0 18px; }
+.sampleCard { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: var(--panel2); }
+.sampleCard.cur { border-color: var(--accent); }
+.sampleCard button { margin-top: auto; align-self: flex-start; }
+.sampleName { font-weight: 600; font-size: 16px; }
+.sampleNeeds { font-size: 12px; color: var(--warn, #e8c33a); }
+#sampleDlg { max-width: min(900px, 94vw); }

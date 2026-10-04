@@ -1,0 +1,7 @@
+{
+  "order": 3,
+  "name": "Three vessels, one pump",
+  "title": "Three Vessel Brewery",
+  "description": "HLT, mash tun and boil kettle, one pump, six valves, three temperature probes, two elements, chiller water. Guided brew day with batch sparge and hop alarms.",
+  "needs": "Arduino Mega (simulated until you switch it to real hardware on the Devices page)"
+}

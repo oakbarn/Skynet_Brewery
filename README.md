@@ -41,6 +41,21 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 - **Raspberry Pi / Linux:** see `docs/brewpanel.service` (systemd).
 - **Windows:** a Task Scheduler task "At log on" that runs `node --no-warnings server.js` in this folder.
 
+## 1a. Start from a sample
+
+The first time the panel opens it offers four ready-made setups. You can load one later from **Settings > Start from a sample**. Loading one replaces your Tabs, elements, pipes and devices; your old setup is saved first in `config/backups/`. Scripts with the same name are backed up before they are replaced.
+
+| Sample | What you get |
+|---|---|
+| **OakBarn BruControl** | Fritz's BruControl configuration, imported with every board on the simulator. |
+| **Two vessel, one pump** | Kettle and mash tun, one pump, five valves, pipes, two probes, a kettle heater and a chiller. |
+| **Three vessel, one pump** | HLT, mash tun and boil kettle, one pump, six valves, pipes, three probes and two heaters. |
+| **BrewZilla brew day** | No hardware. A brew day flow for a BrewZilla and DigiBoil with step timers, hop drop warnings and readings you type in. |
+
+Every sample has a **Recipe** tab (filled by a BeerXML import, including mash steps) and a **Brew Day** panel that works like BruControl: `gblV_Brew_Status` holds the step, the red/blue advance switch moves to the next step, timers count down, and the hop alarm sounds for each hop addition. Readings such as pH, gravity and volumes are vAPI fields, so they are logged and sent through the API. Run `BrewDay_Flow` to start; tick **Testing** to run it fast.
+
+**Manual vessel widget.** For kettles with no connection (BrewZilla, DigiBoil and similar), add **Widgets > Manual vessel**. A script sets what it shows (`setpoint`, `heat`, `pump`, `timer`, `message`) and sets `waiting` to make it blink. The brewer taps it to press **Done**, or to type a reading or a volume; the script waits on `confirmed`.
+
 ## 2. What is in it
 
 | Area | What it does |
