@@ -12,6 +12,7 @@ Both use the same plain-text protocol: one command per line, ending with a newli
 | `HELLO` | Sent after connecting. The device answers `HELLO <name> <firmware>` and reports all its inputs. |
 | `PING` | Sent every 2 seconds. **If the device hears nothing for 10 seconds it must turn every output OFF** (safety if the PC, cable or WiFi fails). |
 | `DO <pin> <0\|1>` | Set a digital output. The device answers with the same line to confirm. |
+| `PWM <pin> <0-255>` | Set a PWM output (pwmOut elements, and PID elements with "PWM output" on). The device answers with the same line. |
 
 After every reconnect the server resends the state of every output, so the hardware matches the screen.
 
@@ -34,7 +35,9 @@ Every DS18B20 probe has a unique 64-bit ROM id. Elements are matched to that id,
 
 | Element | Settings |
 |---|---|
-| digitalOut | `device`, `channel` (= pin) |
+| digitalOut | `device`, `channel` (= pin), optional `activeLow`, `oneShot` (ms) |
+| pwmOut | `device`, `channel` (sends `PWM`) |
+| dutyCycle, hysteresis, pid | `device`, `channel`; the server switches the pin with `DO` (PID with `pwm` on sends `PWM`) |
 | digitalIn | `device`, `channel` |
-| analogIn | `device`, `channel`, `scale`, `offset` |
+| analogIn | `device`, `channel`, `scale`, `offset`, or `calibrations` imported from BruControl (thermistor, multiplier, offset, lookup table …) and `avgWeight` (smoothing %) |
 | temperature | `probe` (ROM id), optional `device` (empty = any device), `offset` (calibration) |

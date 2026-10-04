@@ -162,3 +162,11 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el.on .ledbtn { background: radial-gradient(circle at 35% 30%, #ffb3a8, #ff3b2a 45%, #a3150b 80%); box-shadow: 0 0 14px 4px rgba(255, 59, 42, .7); }
 .el.pressed .ledbtn { transform: translateY(2px); box-shadow: 0 1px 0 #111, 0 0 14px 4px rgba(255, 59, 42, .7); }
 .el.k-pushbutton { touch-action: none; }
+/* BruControl-style elements */
+.el.stretch { background-size: 100% 100%; }
+.el.no-border { border-color: transparent !important; box-shadow: none !important; }
+.el.show-border { border: 1px solid #000; }
+.el.look-indicator .vl::before { content: ''; flex: none; width: .9em; height: .9em; border-radius: 50%; background: var(--ind, transparent); border: 1px solid rgba(0,0,0,.45); margin-right: .45em; }
+.el.pwmOut .vl, .el.dutyCycle .vl, .el.hysteresis .vl, .el.pid .vl { font-size: 16px; }
+.import-opts { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 8px 0; }
+#bruResult { white-space: pre-wrap; max-height: 60vh; overflow: auto; }
