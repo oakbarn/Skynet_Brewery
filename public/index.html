@@ -136,7 +136,7 @@
 
     <h2 id="mqtt">MQTT and voice</h2>
     <div class="form">
-      <p class="muted">Shares Globals and Devices with an MQTT broker (for example Mosquitto on the Raspberry Pi), so ESP32 boards, Node-RED or Home Assistant can read and change them. Through Home Assistant you can also ask Google Home, Alexa or Siri. Setup steps: <code>docs/MQTT_AND_VOICE.md</code>.</p>
+      <p class="muted">Shares Globals and Devices with an MQTT broker (for example Mosquitto on the Raspberry Pi), so ESP32 boards, Node-RED or Home Assistant can read and change them. Through Home Assistant you can also ask Alexa, Google Home or Siri. Setup steps: <code>docs/MQTT_AND_VOICE.md</code>.</p>
       <div id="mqttStatus" class="mqtt-status"></div>
       <div class="checks"><label><input type="checkbox" id="mqEnabled"> Turn on MQTT</label><label><input type="checkbox" id="mqTls"> Encrypted (TLS)</label></div>
       <div class="form row">
@@ -146,7 +146,7 @@
         <label>Password<input id="mqPass" type="password" autocomplete="new-password"></label>
         <label>Topic name<input id="mqBase" placeholder="brewpanel"></label>
       </div>
-      <div class="checks"><label><input type="checkbox" id="mqHa"> Announce to Home Assistant (needed for Google Home, Alexa and Siri)</label></div>
+      <div class="checks"><label><input type="checkbox" id="mqHa"> Announce to Home Assistant (needed for Alexa, Google Home and Siri)</label></div>
       <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop scripts. They can change Globals that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start scripts that you tick below. Inputs from hardware are read only, and Shared variables are never shared.</p>
       <table class="grid"><thead><tr><th>Element</th><th>Type</th><th>Voice can hear it</th><th>Can change it</th></tr></thead><tbody id="mqItems"></tbody></table>
       <div>Voice and MQTT may <b>start</b> these scripts:</div>
