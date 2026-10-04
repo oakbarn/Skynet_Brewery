@@ -712,7 +712,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_MLT_In",
@@ -728,7 +731,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "VGC_23_do_BackManifold_Left_On_B1",
@@ -744,7 +750,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_MLT_Out",
@@ -760,7 +769,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_BK_In",
@@ -776,7 +788,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "MB_35_do_YellowPump_B1",
@@ -789,7 +804,8 @@
       "device": "SIM",
       "channel": 33,
       "displayName": "Yellow Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Yellow_Pump_B1",
@@ -816,7 +832,8 @@
       "device": "SIM",
       "channel": 35,
       "displayName": "Red Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Red_Pump_B1",
@@ -843,7 +860,8 @@
       "device": "SIM",
       "channel": 37,
       "displayName": "Blue Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Blue_Pump_B1",
@@ -870,7 +888,8 @@
       "device": "SIM",
       "channel": 39,
       "displayName": "Green Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Green_Pump_B1",
@@ -897,7 +916,8 @@
       "device": "SIM",
       "channel": 41,
       "displayName": "White Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_White_Pump_B1",
@@ -1235,6 +1255,50 @@
   ],
   "graphics": [
     {
+      "id": "ip_hlt_out",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "HLT out",
+      "x": 1090,
+      "y": 550,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
+    {
+      "id": "ip_mlt_in",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "MLT in",
+      "x": 1365,
+      "y": 550,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
+    {
+      "id": "ip_mlt_out",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "MLT out",
+      "x": 1415,
+      "y": 710,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
+    {
+      "id": "ip_bk_in",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "BK in",
+      "x": 1733,
+      "y": 545,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
+    {
       "id": "p_hlt_mlt",
       "kind": "pipe",
       "workspace": "Brewery",
@@ -1265,7 +1329,9 @@
         "V_MLT_In",
         "MB_36_do_RedPump_B1"
       ],
-      "baseVisible": false
+      "baseVisible": false,
+      "from": "ip_hlt_out",
+      "to": "ip_mlt_in"
     },
     {
       "id": "p_mlt_bk",
@@ -1302,7 +1368,9 @@
         "V_BK_In",
         "MB_36_do_RedPump_B1"
       ],
-      "baseVisible": false
+      "baseVisible": false,
+      "from": "ip_mlt_out",
+      "to": "ip_bk_in"
     },
     {
       "id": "t_title",

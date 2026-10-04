@@ -102,8 +102,10 @@ function renderWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing);
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe')) ws.append(buildGfx(g));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe' && g.kind !== 'ip')) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip')) ws.append(buildIp(g));
+  for (const e of L().elements.filter(e => e.workspace === w.name && hasIps(e))) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   renderPipes(); fitZoom();
 }
 
@@ -124,6 +126,61 @@ const isApiEl = e => e?.type === 'global' || e?.type === 'vAPI';
 const vkKind = e => e?.type === 'vKonstant' ? (e.kind || 'value') : null;
 const kindsOf = type => type === 'vKonstant' ? S.vkKinds : type === 'vAPI' ? S.vapiKinds : null;
 const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
+
+// IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
+// IP widget types. "point" is a plain start / end point; the others are pipe fittings that join pipes and pass flow through.
+const FITTINGS = { point: 'IP point', tee: 'Tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Cross tee', manualValve: 'Manual valve' };
+const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point';
+const FIT_SVG = {
+  tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
+  elbow90: '<path d="M0 15H15V30"/>', elbow45: '<path d="M0 15H15L27 27"/>',
+  manualValve: '<path d="M15 15V3M9 3H21"/><path class="body" d="M2 7L15 15L2 23ZM28 7L15 15L28 23Z"/>',
+};
+function buildIp(g) {
+  const fit = isFitting(g) ? g.fitting : null;
+  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.label || FITTINGS[fit] || 'IP') + (fit === 'manualValve' ? (g.open ? ' (open)' : ' (closed)') : '') });
+  if (fit) {
+    n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
+    if (fit === 'manualValve') n.classList.add(g.open ? 'open' : 'closed');
+  } else n.append(h('span', {}, g.text ?? 'IP'));
+  place(n, g);
+  n.style.setProperty('--ipc', g.color || '#e8a33a');
+  if (editing) { n.append(h('div', { class: 'rs' })); if (g.label) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  return n;
+}
+
+// Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
+// a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
+const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e));
+// A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
+// it can also be a Global holding the percent. It passes flow whenever it is above 0 % open.
+const PROP_TYPES = ['analogOut', 'pwmOut', 'global', 'shared'];
+const isPropValve = e => e && e.subtype === 'propValve' && PROP_TYPES.includes(e.type);
+function propPct(e) {
+  const v = Number(S.values[e.name]?.value) || 0;
+  if (e.type !== 'analogOut') return v;
+  const lo = Number(e.rangeLow ?? 0), hi = Number(e.rangeHigh ?? 100);
+  return hi === lo ? 0 : (v - lo) / (hi - lo) * 100;
+}
+const SIDES = ['left', 'right', 'top', 'bottom'];
+function sidePt(e, side) {
+  const x = e.x || 0, y = e.y || 0, w = e.w || 120, hh = e.h || 60;
+  return side === 'right' ? [x + w, y + hh / 2] : side === 'top' ? [x + w / 2, y] : side === 'bottom' ? [x + w / 2, y + hh] : [x, y + hh / 2];
+}
+const devIps = e => {
+  const v = e.subtype === 'valve' || e.subtype === 'propValve';
+  return [{ id: `dev:${e.name}:in`, label: `${e.name} ${v ? 'end A' : 'inlet'}`, text: v ? 'A' : 'IN', c: sidePt(e, e.ipIn || 'left') },
+    { id: `dev:${e.name}:out`, label: `${e.name} ${v ? 'end B' : 'outlet'}`, text: v ? 'B' : 'OUT', c: sidePt(e, e.ipOut || 'right') }];
+};
+function buildDevIp(e, q) {
+  const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
+  place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
+  n.style.setProperty('--ipc', e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
+  return n;
+}
+function placeDevIps(e) {
+  for (const q of devIps(e)) { const n = $(`#ws .devip[data-ipid="${CSS.escape(q.id)}"]`); if (n) place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 }); }
+}
 
 function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : ''), 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
@@ -207,6 +264,11 @@ function fillEl(n, e) {
   }
   // BruControl-style background images: "background" = 1, 2 or 3 picks one of the element's images
   if (!img && e.images?.length && /^\d+$/.test(String(v.background ?? ''))) img = e.images[Math.max(1, +v.background) - 1] || '';
+  if (isPropValve(e)) {                              // show percent open, and the open / closed picture
+    const pct = propPct(e); on = pct > 0;
+    text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
+    img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || v.image || '';
+  }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
@@ -298,8 +360,20 @@ $('#ws').addEventListener('contextmenu', ev => { if (!editing && ev.target.close
 
 $('#ws').addEventListener('click', ev => {
   if (editing) return;
+  const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
+  if (mv) return toggleManualValve(mv.dataset.gid);
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const e = elByName(n.dataset.name); if (e) doTap(e);
+});
+
+// A manual valve is app-only (no PLC): tapping it asks Open / Closed and saves that in the layout so every screen sees it
+const toggleManualValve = guard(async id => {
+  const g = S.config.graphics.find(x => x.id === id); if (!g) return;
+  const r = await choose(g.label || 'Manual valve', [['Open', true], ['Closed', false]], !!g.open);
+  if (r === undefined || r === !!g.open) return;
+  const graphics = clone(S.config.graphics); graphics.find(x => x.id === id).open = r;
+  await api('PUT', '/ui/layout', { graphics });
+  g.open = r; renderWs();
 });
 
 // Big touch-friendly dialogs
@@ -377,20 +451,104 @@ function isOn(name) {
   if ('running' in v) return !!v.running;
   return !!v.value && v.value !== '0' && v.value !== 'false';
 }
-let drawPts = null, drawCursor = null;
+let drawPts = null, drawCursor = null, drawFrom = null;
+const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
+// An IP id is either an IP widget's id, or "dev:<name>:in" / "dev:<name>:out" for the built-in IPs of a pump or valve
+const devOfIp = id => (typeof id === 'string' && id.startsWith('dev:')) ? id.slice(4, id.lastIndexOf(':')) : null;
+function ipPoint(id, ws) {
+  if (!id) return null;
+  const pn = devOfIp(id);
+  if (pn !== null) { const e = L().elements.find(x => x.name === pn); if (!hasIps(e) || (ws && e.workspace !== ws)) return null; return devIps(e).find(q => q.id === id)?.c || null; }
+  const g = L().graphics.find(g => g.kind === 'ip' && g.id === id && (!ws || g.workspace === ws));
+  return g ? ipCenter(g) : null;
+}
+function allIps(ws) {
+  return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws).map(g => ({ id: g.id, label: g.label || g.id })),
+    ...L().elements.filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e))];
+}
+// ---- flow through the pipe network
+// Pipes join IPs. Each IP belongs to a node:
+//  - a running pump: OUT pushes flow out, IN pulls flow in
+//  - a pump that is off, an open valve, a fitting or an open manual valve: flow passes straight through, either way
+//  - a closed valve or closed manual valve: blocks every pipe on it
+//  - a plain IP point: an end of the line (a vessel port, an outlet), where flow can come from or go to
+// Flow is traced from each running pump out to the IP points it reaches, and from each IP point into each running pump's IN.
+// The direction of each pipe comes from that trace, so a pipe can show flow backwards through a pump that is off.
+// A pipe between two plain IP points with a "Flow when" list keeps the old rule: it flows, as drawn, while all of those are on.
+const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
+function ipNode(id, ws) {
+  const dn = devOfIp(id);
+  if (dn !== null) {
+    const e = L().elements.find(x => x.name === dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
+    if (e.subtype === 'valve') return on ? { key: 'dev:' + dn, pass: true } : { closed: true };
+    if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
+    return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
+  }
+  const g = L().graphics.find(g => g.id === id && g.workspace === ws);
+  if (g?.fitting === 'manualValve' && !g.open) return { closed: true };
+  return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
+}
+function computeFlow(ws) {
+  const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
+  const nodes = new Map(), adj = new Map();
+  const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
+  for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
+    if (!(p.flowWhen || []).every(isOn)) continue;
+    const a = node(p.from), b = node(p.to);
+    if (a.closed || b.closed || a.key === b.key) continue;
+    if (a.end && b.end) { if ((p.flowWhen || []).length) dir.set(p.id, 1); continue; }
+    for (const [u, v, d] of [[a.key, b.key, 1], [b.key, a.key, -1]]) { if (!adj.has(u)) adj.set(u, []); adj.get(u).push({ v, p, d }); }
+  }
+  // breadth-first trace from a pump to every plain IP point (or other running pump) it reaches; mark the pipes on each route
+  const trace = (start, outward) => {
+    const prev = new Map([[start, null]]), queue = [start];
+    while (queue.length) {
+      const u = queue.shift();
+      if (u !== start && !nodes.get(u).pass) {            // reached an end of the line: mark the route back to the start
+        const n = nodes.get(u);
+        if (n.end || (outward ? n.pull : n.push)) for (let k = u; prev.get(k); k = prev.get(k).from) { const st = prev.get(k); dir.set(st.p.id, outward ? st.d : -st.d); }
+        continue;
+      }
+      for (const { v, p, d } of adj.get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); queue.push(v); }
+    }
+  };
+  for (const [k, n] of nodes) { if (n.push) trace(k, true); if (n.pull) trace(k, false); }
+  return dir;
+}
+// Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square.
+function snapEnd(pts, i, j, c) {
+  const old = pts[i], nb = pts[j];
+  if (nb && j !== undefined) { if (nb[1] === old[1]) nb[1] = c[1]; else if (nb[0] === old[0]) nb[0] = c[0]; }
+  pts[i] = [c[0], c[1]];
+}
+function syncPipeEnds(p) {
+  const pts = p.points; if (!pts || pts.length < 2) return;
+  const a = ipPoint(p.from, p.workspace), b = ipPoint(p.to, p.workspace), n = pts.length;
+  if (a) snapEnd(pts, 0, n > 2 ? 1 : undefined, a);
+  if (b) snapEnd(pts, n - 1, n > 2 ? n - 2 : undefined, b);
+}
 function renderPipes() {
   const svg = $('#pipes'); const w = curWs(); if (!w) return;
   const NS = 'http://www.w3.org/2000/svg';
   svg.innerHTML = '';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
-  for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name)) {
+  const liveIps = new Set();
+  const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
+  pipes.forEach(syncPipeEnds);
+  const flow = computeFlow(w.name);
+  for (const p of pipes) {
     const pts = (p.points || []).map(q => q.join(',')).join(' ');
-    const flowing = (p.flowWhen || []).length > 0 && p.flowWhen.every(isOn);
+    const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
+    if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = +p.width || 8;
     const g = mk('g', { 'data-gid': p.id });
     if (p.baseVisible !== false || editing) g.append(mk('polyline', { class: 'pipe', points: pts, stroke: p.color || '#8a8f96', 'stroke-width': width, opacity: p.baseVisible === false ? 0.35 : 1 }));
-    g.append(mk('polyline', { class: 'flow' + (flowing ? '' : ' off') + (p.reverse ? ' rev' : ''), points: pts, stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(mk('polyline', { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), points: pts, stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
     const hit = mk('polyline', { class: 'hit', points: pts }); g.append(hit);
+    if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
+      if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
+      if (!ipPoint(p.to, p.workspace)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
+    }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(mk('polyline', { points: pts, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
       (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
@@ -401,6 +559,8 @@ function renderPipes() {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
     svg.append(mk('polyline', { class: 'drawing', points: all.map(q => q.join(',')).join(' ') }));
   }
+  // an IP glows while a pipe that starts or ends on it is flowing
+  $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
 }
 
 // ---------------------------------------------------------------- edit mode
@@ -418,13 +578,20 @@ function setEditing(on) {
   renderTabs(); renderWs();
 }
 
-let drag = null;
+let drag = null, lastPipeTap = null;
 $('#ws').addEventListener('pointerdown', ev => {
   if (!editing) return;
   const p = canvasPt(ev);
   if (drawPts) {                                   // drawing a pipe
-    let q = [snap(p[0]), snap(p[1])];
+    const ipNode = ev.target.closest('.gfx.ip'), ipId = ipNode && (ipNode.dataset.ipid || ipNode.dataset.gid), c = ipId && ipPoint(ipId, wsName);
     const last = drawPts[drawPts.length - 1];
+    if (c) {                                       // a pipe starts on the first IP clicked and ends on the next one
+      if (!last) { drawFrom = ipId; drawPts.push(c); renderPipes(); ev.preventDefault(); return; }
+      if (ipId === drawFrom) { ev.preventDefault(); return; }
+      if (last[0] !== c[0] && last[1] !== c[1]) drawPts.push(Math.abs(c[0] - last[0]) > Math.abs(c[1] - last[1]) ? [c[0], last[1]] : [last[0], c[1]]);
+      drawPts.push(c); finishPipe(ipId); ev.preventDefault(); return;
+    }
+    let q = [snap(p[0]), snap(p[1])];
     if (last && !ev.shiftKey) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
     if (ev.detail >= 2) { finishPipe(); return; }  // double-click finishes the pipe
     drawPts.push(q); renderPipes(); return;
@@ -432,13 +599,20 @@ $('#ws').addEventListener('pointerdown', ev => {
   const handle = ev.target.closest('circle.handle');
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
-  const node = ev.target.closest('.el,.gfx');
-  if (hit && !node) { startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid }; drag = { mode: 'pipe', item: findItem('gfx', sel.id), start: p, orig: clone(findItem('gfx', sel.id).points) }; renderWs(); return; }
+  const pip = ev.target.closest('.devip');
+  const node = pip ? $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`) : ev.target.closest('.el,.gfx');
+  if (hit && !node) {
+    // the pipe is redrawn on press, so the browser never sends a double-click for it: count two quick presses instead
+    const now = Date.now(), again = lastPipeTap && lastPipeTap.id === hit.dataset.gid && now - lastPipeTap.t < 450;
+    lastPipeTap = again ? null : { id: hit.dataset.gid, t: now };
+    if (again) { sel = { kind: 'gfx', id: hit.dataset.gid }; renderWs(); editItem('gfx', sel.id); return; }
+    startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid }; drag = { mode: 'pipe', item: findItem('gfx', sel.id), start: p, orig: clone(findItem('gfx', sel.id).points) }; renderWs(); return;
+  }
   if (!node) { sel = null; renderWs(); return; }
   sel = node.dataset.name ? { kind: 'el', id: node.dataset.name } : { kind: 'gfx', id: node.dataset.gid };
   const item = findItem(sel.kind, sel.id);
   startLongPress(ev, sel.kind, sel.id);
-  drag = { mode: ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
+  drag = { mode: !pip && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel');
   node.setPointerCapture?.(ev.pointerId);
   ev.preventDefault();
@@ -452,8 +626,8 @@ $('#ws').addEventListener('pointermove', ev => {
   }
   if (!drag) return;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
-  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); }
-  else if (drag.mode === 'resize') { drag.item.w = Math.max(20, snap(drag.orig.w + dx)); drag.item.h = Math.max(16, snap(drag.orig.h + dy)); place(drag.node, drag.item); }
+  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
+  else if (drag.mode === 'resize') { drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy)); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { drag.item.points = drag.orig.map(q => [snap(q[0] + dx), snap(q[1] + dy)]); renderPipes(); }
 });
@@ -461,15 +635,17 @@ window.addEventListener('pointerup', () => { cancelLongPress(); if (drag?.mode =
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
   if (drawPts) return finishPipe();
+  const pip = ev.target.closest('.devip');
   const node = ev.target.closest('.el,.gfx');
   const pipe = ev.target.closest('#pipes g');
-  if (node) editItem(node.dataset.name ? 'el' : 'gfx', node.dataset.name || node.dataset.gid);
+  if (pip) editItem('el', pip.dataset.dev);
+  else if (node) editItem(node.dataset.name ? 'el' : 'gfx', node.dataset.name || node.dataset.gid);
   else if (pipe) editItem('gfx', pipe.dataset.gid);
 });
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
-  if (ev.key === 'Enter') finishPipe();
-  if (ev.key === 'Escape') { drawPts = null; drawCursor = null; renderPipes(); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); }
+  if (ev.key === 'Enter') { ev.preventDefault(); finishPipe(); }   // without preventDefault the same Enter press hits the properties dialog and presses Delete
+  if (ev.key === 'Escape') { drawPts = null; drawCursor = null; drawFrom = null; renderPipes(); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); }
 });
 // Touch screens have no double-click: hold a finger on an item for 0.6 s to open its properties
 let lp = null;
@@ -479,11 +655,13 @@ function startLongPress(ev, kind, id) {
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 
-function finishPipe() {
+function finishPipe(to) {
   $('#finishPipe').classList.add('hidden');
-  const pts = drawPts; drawPts = null; drawCursor = null;
+  const pts = drawPts, from = drawFrom; drawPts = null; drawCursor = null; drawFrom = null;
   if (!pts || pts.length < 2) { renderPipes(); return; }
   const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, width: 10, color: '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true };
+  if (from) g.from = from;
+  if (typeof to === 'string') g.to = to;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
   $('#editHint').textContent = '';
 }
@@ -492,17 +670,28 @@ $('#editMode').addEventListener('change', e => {
   if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
   setEditing(e.target.checked);
 });
+// Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
+const PRESETS = {
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'oakbarn/Pump_Red_Rip_On.png', imageOff: 'oakbarn/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
+  // analogOut when that output type is installed (its fields exist), otherwise a Global holding 0-100 %
+  get propValve() {
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'oakbarn/Valve_Ball_OpenH_1.png', imageOff: 'oakbarn/Valve_Ball_ClosedH_1.png' };
+    return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
+      : { type: 'global', dataType: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
+  },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'oakbarn/Valve_Ball_OpenV-1x1.png', imageOff: 'oakbarn/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+};
 function fillAddType() {
   const kinds = (type, ks) => h('optgroup', { label: type }, ...Object.entries(ks).map(([k, d]) => h('option', { value: type + ':' + k }, `${type}: ${d.label}  (${d.prefix})`)));
   $('#addType').innerHTML = '';
-  $('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label', 'pwmOut', 'dutyCycle', 'hysteresis', 'pid'].map(t => h('option', { value: t }, t)),
+  $('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'pump', 'valve', 'propValve', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label', 'pwmOut', 'dutyCycle', 'hysteresis', 'pid'].map(t => h('option', { value: t }, { digitalOut: 'digitalOut (plain)', pump: 'Pump (Device Output)', valve: 'Valve (Device Output)', propValve: 'Proportional valve (0-100 %)' }[t] || t)),
     kinds('vKonstant', S.vkKinds), kinds('vAPI', S.vapiKinds));
 }
 $('#addEl').onclick = () => {
-  const [type, kind] = $('#addType').value.split(':');
-  const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : type + '_';
+  const [pick, kind] = $('#addType').value.split(':'), preset = PRESETS[pick], type = preset ? preset.type : pick;
+  const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : ({ pump: 'Pump', valve: 'Valve', propValve: 'PropValve' }[pick] || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
-  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60 };
+  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60, ...(preset ? clone(preset) : {}) };
   if (type === 'global' || type === 'shared') e.dataType = 'value';
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
@@ -516,7 +705,15 @@ $('#addEl').onclick = () => {
 $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#addText').onclick = () => { const g = { id: newId(), kind: 'text', workspace: wsName, x: 40, y: 40, w: 220, h: 40, text: 'Text', fontSize: 18 }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#finishPipe').onclick = () => finishPipe();
-$('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; $('#editHint').textContent = 'Click points (Shift = any angle). Double-click or Enter to finish, Esc to cancel.'; };
+$('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
+$('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
+$('#addIp').onclick = () => {
+  const fit = $('#addIpType').value, base = fit === 'point' ? 'IP' : FITTINGS[fit];
+  let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
+  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#c0c6cc' };
+  if (fit !== 'point') g.fitting = fit;
+  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+};
 $('#addWs').onclick = () => {
   const n = prompt('New workspace name'); if (!n) return;
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
@@ -540,7 +737,7 @@ const F = {
     ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'text'], ['nameBg', 'Name background color', 'text'], ['valueColor', 'Value color', 'text'], ['valueBg', 'Value background color', 'text'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment (e.g. TopCenter)', 'text'], ['valueAlign', 'Value alignment (e.g. MiddleCenter)', 'text'], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
-  digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Active low (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (unticked = pulses ON)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['ipIn', 'Pump inlet / valve end A: IP side', 'sel', SIDES], ['ipOut', 'Pump outlet / valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Active low (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (unticked = pulses ON)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin / channel', 'num'], ['activeLow', 'Active low', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   temperature: [['device', 'Device (empty = any)', 'dev'], ['probe', 'OneWire ROM id', 'text'], ['offset', 'Calibration offset', 'num'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['sim', 'Simulator settings (JSON)', 'json']],
@@ -555,7 +752,9 @@ const F = {
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
-  pipe: [['label', 'Label', 'text'], ['flowWhen', 'Flow when ALL of these are on (Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
+  propValve: [['ipIn', 'Valve end A: IP side', 'sel', SIDES], ['ipOut', 'Valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
+  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
+  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 // field [key, label, kind, opts, onlyForKinds]
@@ -583,6 +782,8 @@ function field([key, label, kind, opts], obj) {
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - static picture)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
+  else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
   else if (kind === 'multi') {
     const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(e.type) || isVarEl(e)).map(e => e.name).sort();
@@ -620,23 +821,40 @@ function dialog(title, fields, obj, canDelete) {
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const type = kind === 'el' ? item.type : item.kind;
-  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...fieldsFor(type, item), ...F.common.slice(3)] : F[type];
+  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...fieldsFor(type, item), ...(isPropValve(item) ? F.propValve : []), ...F.common.slice(3)] : F[type];
   if (kind === 'el' && prefixOf(item)) fields.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(item)}  (a hint, not required)`, 'note']);
   const work = clone(item);
-  const r = await dialog(kind === 'el' ? `${type} element` : type, fields, work, true);
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type, fields, work, true);
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
+      const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : [];
+      for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
       sel = null; renderWs(); return;
     }
     if (r !== 'ok') return;
     readFields(work);
+    if (type === 'pipe') {
+      if (work.from && work.from === work.to) throw new Error('A pipe needs two different IPs');
+      // an IP picked in the dialog: if it sits at the far end of the drawn line, turn the line around so flow runs from -> to
+      const pts = work.points || [], d = (q, c) => Math.hypot(q[0] - c[0], q[1] - c[1]);
+      const a = ipPoint(work.from, work.workspace), b = ipPoint(work.to, work.workspace);
+      if (pts.length > 1 && (work.from !== item.from || work.to !== item.to)) {
+        const first = pts[0], last = pts[pts.length - 1];
+        const keep = (a ? d(first, a) : 0) + (b ? d(last, b) : 0), flip = (a ? d(last, a) : 0) + (b ? d(first, b) : 0);
+        if (flip < keep) pts.reverse();
+      }
+    }
     if (kind === 'el') {
       work.name = (work.name || '').trim();
       if (!work.name) throw new Error('Name is required');
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
-      if (work.name !== item.name) for (const g of draft.graphics) if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
+      if (work.name !== item.name) for (const g of draft.graphics) {
+        if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
+        for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) g[k] = g[k].replace(`dev:${item.name}:`, `dev:${work.name}:`);
+      }
+      if (hasIps(item) && !hasIps(work)) for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) delete g[k];
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
