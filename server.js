@@ -12,6 +12,7 @@ import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
+import { retireGlobalsOnDisk } from './lib/globals.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { plain, toStr } from './lib/values.js';
@@ -25,6 +26,8 @@ const SCRIPTS = path.resolve(process.env.BREWPANEL_SCRIPTS ?? path.join(ROOT, 's
 const PUBLIC = path.join(ROOT, 'public');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
 
+// A configuration saved before the Global class was retired is converted once (backups in config/backups and *.before-globals.bak)
+const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
@@ -43,6 +46,7 @@ store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media page: add / rename / delete pictures and sounds
 engine.on('started', n => logger.scriptStarted(n));
+if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
@@ -158,7 +162,7 @@ function sameOrigin(req) {
   try { const h = new URL(o).host; return h === req.headers.host || h === req.headers['x-forwarded-host']; } catch { return false; }
 }
 
-// The API has Globals and vAPI variables only (never Shared or vKonstant)
+// The API has vAPI variables only (never Shared or vKonstant)
 const apiVars = () => store.list().filter(isApiVar).map(e => ({ name: e.name, type: e.dataType, class: e.type, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
 
 function csv(rows) {
@@ -253,7 +257,7 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown route');
   }
 
-  // ===== Public API: Globals and vAPI only (Shared and vKonstant variables are never exposed) =====
+  // ===== Public API: vAPI only (Shared and vKonstant variables are never exposed). /api/globals is the old address of /api/vapi =====
   // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
     if (!apiKeyOk(req, url)) {
@@ -267,7 +271,7 @@ async function route(req, res) {
       const body = await jsonBody(req); const done = [], errors = [];
       for (const [n, v] of Object.entries(body)) {
         const el = store.get(n);
-        if (!isApiVar(el)) { errors.push(`${n}: not a Global or vAPI`); continue; }
+        if (!isApiVar(el)) { errors.push(`${n}: not a vAPI`); continue; }
         try { store.setProp(n, 'value', v, 'api'); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); }
       }
       return ok(res, { ok: !errors.length, set: done, errors });
@@ -275,7 +279,7 @@ async function route(req, res) {
     let g = /^\/api\/(?:globals|vapi)\/(.+)$/.exec(p);
     if (g) {
       const n = cleanName(g[1]), el = store.get(n);
-      if (!isApiVar(el)) return fail(res, 404, `No Global or vAPI named "${n}"`);
+      if (!isApiVar(el)) return fail(res, 404, `No vAPI named "${n}"`);
       if (m === 'GET') return ok(res, { name: n, type: el.dataType, class: el.type, value: plain(store.getProp(n, 'value')) });
       if (m === 'PUT' || m === 'POST') {
         const t = await readBody(req); let v = t;

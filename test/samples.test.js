@@ -15,7 +15,7 @@ assert.deepEqual(list.map(s => s.id), ['oakbarn-brucontrol', 'two-vessel-one-pum
 function scratch() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bps'));
   fs.mkdirSync(path.join(d, 'config')); fs.mkdirSync(path.join(d, 'scripts'));
-  fs.writeFileSync(path.join(d, 'config', 'brewery.json'), JSON.stringify({ title: 'x', mediaRoots: [path.join(ROOT, 'media')], chooseSample: true, elements: [{ name: 'Old', type: 'global' }] }));
+  fs.writeFileSync(path.join(d, 'config', 'brewery.json'), JSON.stringify({ title: 'x', mediaRoots: [path.join(ROOT, 'media')], chooseSample: true, elements: [{ name: 'Old', type: 'shared' }] }));
   const store = new Store(path.join(d, 'config', 'brewery.json'), path.join(d, 'data')); store.load();
   const engine = new Engine(store, path.join(d, 'scripts'), { logNow() { }, scriptStarted() { } });
   const hw = new Hardware(store);
@@ -30,7 +30,7 @@ for (const sm of list) {
   assert.equal(c.sample, sm.id); assert.equal(c.chooseSample, false);
   assert.ok(fs.existsSync(path.join(d, r.backup)), 'old config backed up');
   assert.ok(!store.has('Old'));
-  if (sm.brucontrol) { assert.equal(c.elements.length, 911); assert.ok(c.devices.every(x => x.type === 'simulator')); continue; }
+  if (sm.brucontrol) { assert.equal(c.elements.length, 897); assert.ok(!c.elements.some(e => e.type === 'global')); assert.ok(c.devices.every(x => x.type === 'simulator')); continue; }
   assert.deepEqual(r.problems, [], `${sm.id}: script errors ${JSON.stringify(r.problems)}`);
   // every pipe joins two IPs, every picture exists
   const ips = new Set(c.graphics.filter(g => g.kind === 'ip').map(g => g.id));

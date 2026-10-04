@@ -25,8 +25,7 @@
   {
    "workspace": "Brewhouse",
    "name": "gblS_Step_Text",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "x": 0,
    "y": 0,
    "w": 520,
@@ -37,13 +36,13 @@
    "valueColor": "#ffffff",
    "background": "8",
    "readOnly": true,
-   "retain": false
+   "retain": false,
+   "kind": "string"
   },
   {
    "workspace": "Brewhouse",
    "name": "gblS_Advance_Label",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "x": 0,
    "y": 310,
    "w": 380,
@@ -54,7 +53,8 @@
    "valueColor": "#ffffff",
    "background": "8",
    "readOnly": true,
-   "retain": false
+   "retain": false,
+   "kind": "string"
   },
   {
    "workspace": "Brewhouse",
@@ -74,8 +74,7 @@
   {
    "workspace": "Brewhouse",
    "name": "gblV_Brew_Status",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "x": 400,
    "y": 700,
    "w": 120,
@@ -83,7 +82,8 @@
    "displayName": "Brew status",
    "initial": 0,
    "precision": 0,
-   "retain": false
+   "retain": false,
+   "kind": "value"
   },
   {
    "workspace": "Brewhouse",
@@ -112,8 +112,7 @@
   {
    "workspace": "Brewhouse",
    "name": "gblS_Hop_Warning",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "x": 0,
    "y": 520,
    "w": 380,
@@ -122,7 +121,8 @@
    "initial": "",
    "fontSize": 17,
    "readOnly": true,
-   "retain": false
+   "retain": false,
+   "kind": "string"
   },
   {
    "workspace": "Brewhouse",
@@ -323,8 +323,7 @@
   },
   {
    "name": "gblS_BeerName_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 20,
    "y": 60,
@@ -332,24 +331,24 @@
    "h": 64,
    "displayName": "Beer",
    "initial": "Sample Pale Ale",
-   "fontSize": 22
+   "fontSize": 22,
+   "kind": "string"
   },
   {
    "name": "gblS_Style_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 390,
    "y": 60,
    "w": 260,
    "h": 64,
    "displayName": "Style",
-   "initial": "American Pale Ale"
+   "initial": "American Pale Ale",
+   "kind": "string"
   },
   {
    "name": "gblV_OG_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 60,
@@ -358,12 +357,12 @@
    "displayName": "OG",
    "initial": 1.052,
    "precision": 3,
-   "step": 0.001
+   "step": 0.001,
+   "kind": "value"
   },
   {
    "name": "gblV_FG_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 780,
    "y": 60,
@@ -372,12 +371,12 @@
    "displayName": "FG",
    "initial": 1.011,
    "precision": 3,
-   "step": 0.001
+   "step": 0.001,
+   "kind": "value"
   },
   {
    "name": "gblV_IBU_Recipe_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 900,
    "y": 60,
@@ -385,12 +384,12 @@
    "h": 64,
    "displayName": "IBU",
    "initial": 38,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblV_BatchSize_Gal",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1020,
    "y": 60,
@@ -399,12 +398,12 @@
    "displayName": "Batch",
    "initial": 5.5,
    "precision": 2,
-   "units": "gal"
+   "units": "gal",
+   "kind": "value"
   },
   {
    "name": "gblV_BoilSize_Gal",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1160,
    "y": 60,
@@ -413,12 +412,12 @@
    "displayName": "Pre-boil",
    "initial": 6.75,
    "precision": 2,
-   "units": "gal"
+   "units": "gal",
+   "kind": "value"
   },
   {
    "name": "gblV_Desired_Strike",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 20,
    "y": 175,
@@ -428,12 +427,12 @@
    "initial": 163.6,
    "precision": 1,
    "units": "°F",
-   "step": 0.5
+   "step": 0.5,
+   "kind": "value"
   },
   {
    "name": "gblV_Sparge_Temp",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 175,
    "y": 175,
@@ -442,12 +441,12 @@
    "displayName": "Sparge water",
    "initial": 168,
    "precision": 0,
-   "units": "°F"
+   "units": "°F",
+   "kind": "value"
   },
   {
    "name": "gblV_Pitch_Temp",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 330,
    "y": 175,
@@ -456,12 +455,12 @@
    "displayName": "Pitch at",
    "initial": 66,
    "precision": 0,
-   "units": "°F"
+   "units": "°F",
+   "kind": "value"
   },
   {
    "name": "gblV_Whirlpool_Min",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 485,
    "y": 175,
@@ -470,24 +469,24 @@
    "displayName": "Whirlpool",
    "initial": 20,
    "precision": 0,
-   "units": "min"
+   "units": "min",
+   "kind": "value"
   },
   {
    "name": "gblS_Mash_1_Name",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 20,
    "y": 250,
    "w": 260,
    "h": 62,
    "displayName": "Step 1",
-   "initial": "Saccharification"
+   "initial": "Saccharification",
+   "kind": "string"
   },
   {
    "name": "gblV_Mash_1_Temp",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 290,
    "y": 250,
@@ -497,36 +496,36 @@
    "initial": 152,
    "precision": 1,
    "units": "°F",
-   "step": 0.5
+   "step": 0.5,
+   "kind": "value"
   },
   {
    "name": "gblT_1_Mash_Time_R1",
-   "type": "global",
-   "dataType": "time",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 450,
    "y": 250,
    "w": 150,
    "h": 62,
    "displayName": "Time",
-   "initial": "01:00:00"
+   "initial": "01:00:00",
+   "kind": "time"
   },
   {
    "name": "gblS_Mash_2_Name",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 20,
    "y": 320,
    "w": 260,
    "h": 62,
    "displayName": "Step 2",
-   "initial": ""
+   "initial": "",
+   "kind": "string"
   },
   {
    "name": "gblV_Mash_2_Temp",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 290,
    "y": 320,
@@ -536,36 +535,36 @@
    "initial": 0,
    "precision": 1,
    "units": "°F",
-   "step": 0.5
+   "step": 0.5,
+   "kind": "value"
   },
   {
    "name": "gblT_2_Mash_Time_R1",
-   "type": "global",
-   "dataType": "time",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 450,
    "y": 320,
    "w": 150,
    "h": 62,
    "displayName": "Time",
-   "initial": "00:00:00"
+   "initial": "00:00:00",
+   "kind": "time"
   },
   {
    "name": "gblS_Mash_3_Name",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 20,
    "y": 390,
    "w": 260,
    "h": 62,
    "displayName": "Step 3",
-   "initial": ""
+   "initial": "",
+   "kind": "string"
   },
   {
    "name": "gblV_Mash_3_Temp",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 290,
    "y": 390,
@@ -575,24 +574,24 @@
    "initial": 0,
    "precision": 1,
    "units": "°F",
-   "step": 0.5
+   "step": 0.5,
+   "kind": "value"
   },
   {
    "name": "gblT_3_Mash_Time_R1",
-   "type": "global",
-   "dataType": "time",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 450,
    "y": 390,
    "w": 150,
    "h": 62,
    "displayName": "Time",
-   "initial": "00:00:00"
+   "initial": "00:00:00",
+   "kind": "time"
   },
   {
    "name": "gblV_MashOut_Temp",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 290,
    "y": 460,
@@ -601,24 +600,24 @@
    "displayName": "Mash out",
    "initial": 168,
    "precision": 1,
-   "units": "°F"
+   "units": "°F",
+   "kind": "value"
   },
   {
    "name": "gblT_MashOut_Time",
-   "type": "global",
-   "dataType": "time",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 450,
    "y": 460,
    "w": 150,
    "h": 62,
    "displayName": "Mash out time",
-   "initial": "00:10:00"
+   "initial": "00:10:00",
+   "kind": "time"
   },
   {
    "name": "gblVBoilTime_Minutes",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 760,
    "y": 140,
@@ -627,24 +626,24 @@
    "displayName": "Boil time",
    "initial": 60,
    "precision": 0,
-   "units": "min"
+   "units": "min",
+   "kind": "value"
   },
   {
    "name": "gblS_Hop1_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 250,
    "w": 210,
    "h": 56,
    "displayName": "Hop 1",
-   "initial": "Magnum"
+   "initial": "Magnum",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop1_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 250,
@@ -652,12 +651,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 1,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop1_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 250,
@@ -665,12 +664,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 12,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop1_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 250,
@@ -678,12 +677,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 60,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop1_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 250,
@@ -691,12 +690,12 @@
    "h": 56,
    "displayName": "use",
    "initial": -888,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop1_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 250,
@@ -706,24 +705,24 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "gblS_Hop2_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 312,
    "w": 210,
    "h": 56,
    "displayName": "Hop 2",
-   "initial": "Cascade"
+   "initial": "Cascade",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop2_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 312,
@@ -731,12 +730,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 1,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop2_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 312,
@@ -744,12 +743,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 5.5,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop2_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 312,
@@ -757,12 +756,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 15,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop2_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 312,
@@ -770,12 +769,12 @@
    "h": 56,
    "displayName": "use",
    "initial": 919,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop2_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 312,
@@ -785,24 +784,24 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "gblS_Hop3_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 374,
    "w": 210,
    "h": 56,
    "displayName": "Hop 3",
-   "initial": "Centennial"
+   "initial": "Centennial",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop3_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 374,
@@ -810,12 +809,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 1,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop3_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 374,
@@ -823,12 +822,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 10,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop3_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 374,
@@ -836,12 +835,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 5,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop3_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 374,
@@ -849,12 +848,12 @@
    "h": 56,
    "displayName": "use",
    "initial": 919,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop3_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 374,
@@ -864,24 +863,24 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "gblS_Hop4_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 436,
    "w": 210,
    "h": 56,
    "displayName": "Hop 4",
-   "initial": "Citra"
+   "initial": "Citra",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop4_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 436,
@@ -889,12 +888,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 2,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop4_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 436,
@@ -902,12 +901,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 12,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop4_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 436,
@@ -915,12 +914,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 20,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop4_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 436,
@@ -928,12 +927,12 @@
    "h": 56,
    "displayName": "use",
    "initial": -999,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop4_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 436,
@@ -943,24 +942,24 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "gblS_Hop5_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 498,
    "w": 210,
    "h": 56,
    "displayName": "Hop 5",
-   "initial": "Mosaic"
+   "initial": "Mosaic",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop5_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 498,
@@ -968,12 +967,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 2,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop5_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 498,
@@ -981,12 +980,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 12.5,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop5_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 498,
@@ -994,12 +993,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 4,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop5_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 498,
@@ -1007,12 +1006,12 @@
    "h": 56,
    "displayName": "use",
    "initial": -111,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop5_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 498,
@@ -1022,24 +1021,24 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "gblS_Hop6_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 560,
    "w": 210,
    "h": 56,
    "displayName": "Hop 6",
-   "initial": ""
+   "initial": "",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop6_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 560,
@@ -1047,12 +1046,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 0,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop6_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 560,
@@ -1060,12 +1059,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 0,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop6_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 560,
@@ -1073,12 +1072,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 0,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop6_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 560,
@@ -1086,12 +1085,12 @@
    "h": 56,
    "displayName": "use",
    "initial": 0,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop6_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 560,
@@ -1101,24 +1100,24 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "gblS_Hop7_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 622,
    "w": 210,
    "h": 56,
    "displayName": "Hop 7",
-   "initial": ""
+   "initial": "",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop7_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 622,
@@ -1126,12 +1125,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 0,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop7_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 622,
@@ -1139,12 +1138,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 0,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop7_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 622,
@@ -1152,12 +1151,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 0,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop7_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 622,
@@ -1165,12 +1164,12 @@
    "h": 56,
    "displayName": "use",
    "initial": 0,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop7_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 622,
@@ -1180,24 +1179,24 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "gblS_Hop8_R1",
-   "type": "global",
-   "dataType": "string",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 660,
    "y": 684,
    "w": 210,
    "h": 56,
    "displayName": "Hop 8",
-   "initial": ""
+   "initial": "",
+   "kind": "string"
   },
   {
    "name": "gblV_Hop8_Oz_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 875,
    "y": 684,
@@ -1205,12 +1204,12 @@
    "h": 56,
    "displayName": "oz",
    "initial": 0,
-   "precision": 2
+   "precision": 2,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop8_Recipe_AAU_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 980,
    "y": 684,
@@ -1218,12 +1217,12 @@
    "h": 56,
    "displayName": "AA %",
    "initial": 0,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_TimeHop8_Min_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1075,
    "y": 684,
@@ -1231,12 +1230,12 @@
    "h": 56,
    "displayName": "min (days)",
    "initial": 0,
-   "precision": 1
+   "precision": 1,
+   "kind": "value"
   },
   {
    "name": "gblV_Hop8_Group_R1",
-   "type": "global",
-   "dataType": "value",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1180,
    "y": 684,
@@ -1244,12 +1243,12 @@
    "h": 56,
    "displayName": "use",
    "initial": 0,
-   "precision": 0
+   "precision": 0,
+   "kind": "value"
   },
   {
    "name": "gblB_Hop8_Added",
-   "type": "global",
-   "dataType": "bool",
+   "type": "vKonstant",
    "workspace": "Recipe",
    "x": 1285,
    "y": 684,
@@ -1259,7 +1258,8 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false
+   "retain": false,
+   "kind": "bool"
   },
   {
    "name": "HLT_Temp",
