@@ -686,7 +686,8 @@
     },
     {
       "name": "MLT_Out_Temp",
-      "type": "vAPI",
+      "type": "global",
+      "dataType": "value",
       "workspace": "Brewery",
       "x": 1750,
       "y": 300,
@@ -695,8 +696,7 @@
       "displayName": "Mash Tun Out",
       "look": "led",
       "precision": 1,
-      "readOnly": true,
-      "kind": "value"
+      "readOnly": true
     },
     {
       "name": "V_HLT_Out",
