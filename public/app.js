@@ -102,10 +102,12 @@ function renderWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing);
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind !== 'pipe' && g.kind !== 'ip')) ws.append(buildGfx(g));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel')) ws.append(buildVessel(g));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel'].includes(g.kind))) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip')) ws.append(buildIp(g));
   for (const e of L().elements.filter(e => e.workspace === w.name && hasIps(e))) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
   renderPipes(); fitZoom(); updLockBtn();
 }
 
@@ -115,6 +117,51 @@ function place(node, o) { node.style.left = (o.x || 0) + 'px'; node.style.top = 
 function editDeco(n, o) {
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
   else n.append(h('div', { class: 'rs' }));
+}
+
+// Vessel widgets (app-only): electrically heated, gas heated, or an unheated mash tun. A background picture by path,
+// a label (alignment, color, size, show / hide), and IPs placed on them become its ports and move with it.
+const VESSELS = { electric: 'Electric heated vessel', gas: 'Gas heated vessel', mashTun: 'Unheated mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' };
+// Cooling coils and plate chillers have IPs built in. Flow passes through each circuit: the coil has one (in -> out),
+// the plate chiller has two that never mix (wort in -> wort out, water in -> water out).
+function eqPorts(g) {
+  if (g.kind !== 'vessel') return [];
+  const x = g.x || 0, y = g.y || 0, w = g.w || 200, hh = g.h || 260, L_ = g.label || VESSELS[g.vesselType];
+  const port = (k, text, circuit, cx, cy) => ({ id: `eq:${g.id}:${k}`, label: `${L_} ${text.toLowerCase()}`, text, circuit, c: [Math.round(cx), Math.round(cy)] });
+  if (g.vesselType === 'coil') return [port('in', 'IN', 'a', x, y + hh * 0.25), port('out', 'OUT', 'a', x, y + hh * 0.75)];
+  if (g.vesselType === 'plateChiller') return [port('wortIn', 'WORT IN', 'wort', x, y + hh * 0.2), port('wortOut', 'WORT OUT', 'wort', x + w, y + hh * 0.8),
+    port('waterIn', 'WATER IN', 'water', x + w, y + hh * 0.2), port('waterOut', 'WATER OUT', 'water', x, y + hh * 0.8)];
+  return [];
+}
+function buildEqIp(g, q) {
+  const n = h('div', { class: 'gfx ip devip eqip', 'data-ipid': q.id, 'data-eq': g.id, title: q.label }, h('span', {}, q.text.replace('WORT ', 'W').replace('WATER ', 'C')));
+  place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
+  n.style.setProperty('--ipc', q.circuit === 'water' ? '#4fb3ff' : '#e8a33a');
+  return n;
+}
+function placeEqIps(g) { for (const q of eqPorts(g)) { const n = $(`#ws .devip[data-ipid="${CSS.escape(q.id)}"]`); if (n) place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 }); } }
+// label shared by vessels, equipment and IP widgets: position, color, size, show / hide
+function widgetLabel(g, defPos) {
+  const lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) }, g.label);
+  lb.style.color = g.labelColor || ''; lb.style.fontSize = (g.labelSize || 16) + 'px';
+  return lb;
+}
+const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
+function buildVessel(g) {
+  const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
+  const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: g.label || VESSELS[t] });
+  place(n, g);
+  if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
+  if (t === 'electric' || t === 'gas') n.append(h('div', { class: 'heat' }));
+  if (g.labelVisible !== false && g.label) n.append(widgetLabel(g, 'top'));
+  if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  return n;
+}
+// an IP dropped on a vessel becomes one of its ports
+function attachIp(ip) {
+  const [cx, cy] = ipCenter(ip);
+  const v = [...draft.graphics].reverse().find(g => g.kind === 'vessel' && g.workspace === ip.workspace && cx >= g.x && cx <= g.x + g.w && cy >= g.y && cy <= g.y + g.h);
+  if (v) ip.attachTo = v.id; else delete ip.attachTo;
 }
 
 function buildGfx(g) {
@@ -135,29 +182,51 @@ const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
 
 // IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
 // IP widget types. "point" is a plain start / end point; the others are pipe fittings that join pipes and pass flow through.
-const FITTINGS = { point: 'IP point', tee: 'Tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Cross tee', manualValve: 'Manual valve' };
+const FITTINGS = { point: 'IP point', pipe: 'Pipe (straight)', tee: 'Pipe tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Pipe cross', manualValve: 'Manual valve', cap: 'Pipe cap (no IP: dead end)' };
 const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point';
 const FIT_SVG = {
+  pipe: '<path d="M0 15H30"/>', cap: '<path d="M0 15H17M20 5V25"/>',
   tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
   elbow90: '<path d="M0 15H15V30"/>', elbow45: '<path d="M0 15H15L27 27"/>',
   manualValve: '<path d="M15 15V3M9 3H21"/><path class="body" d="M2 7L15 15L2 23ZM28 7L15 15L28 23Z"/>',
 };
+// One pipe size per tab: every pipe and every fitting (tee, elbows, cross, straight pipe, cap, manual valve) is drawn from it,
+// so fittings always match the pipes. A fitting is 5 x the pipe size, which makes its drawn arms exactly as thick as a pipe.
+const pipeSize = wsn => +(L().workspaces.find(w => w.name === wsn)?.pipeSize) || 10;
+function sizeFitting(g) {
+  const S = 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
+  g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
+}
 function buildIp(g) {
   const fit = isFitting(g) ? g.fitting : null;
+  if (fit) sizeFitting(g);
   const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.label || FITTINGS[fit] || 'IP') + (fit === 'manualValve' ? (g.open ? ' (open)' : ' (closed)') : '') });
-  if (fit) {
+  if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(g.image)}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
+  else if (fit) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
     if (fit === 'manualValve') n.classList.add(g.open ? 'open' : 'closed');
   } else n.append(h('span', {}, g.text ?? 'IP'));
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
-  if (editing) { n.append(h('div', { class: 'rs' })); if (g.label) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  if (g.labelVisible && g.label) n.append(widgetLabel(g, 'below'));
+  if (editing) { if (!fit) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e));
+const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e));
+// Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
+// "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
+const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)));
+// Devices with IPs (pumps, valves, proportional valves, inline sensors) are drawn in proportion to the tab's pipe size.
+// Their width / height are the size at pipe size 10; at any other pipe size they grow or shrink about their centre.
+function elGeom(e) {
+  const k = hasIps(e) ? pipeSize(e.workspace) / 10 : 1, w = e.w || 120, hh = e.h || 60;
+  if (k === 1) return e;
+  const cx = (e.x || 0) + w / 2, cy = (e.y || 0) + hh / 2;
+  return { x: cx - w * k / 2, y: cy - hh * k / 2, w: w * k, h: hh * k };
+}
 // A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
 // it can also be a Global holding the percent. It passes flow whenever it is above 0 % open.
 const PROP_TYPES = ['analogOut', 'pwmOut', 'global', 'shared'];
@@ -170,18 +239,18 @@ function propPct(e) {
 }
 const SIDES = ['left', 'right', 'top', 'bottom'];
 function sidePt(e, side) {
-  const x = e.x || 0, y = e.y || 0, w = e.w || 120, hh = e.h || 60;
+  const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60;
   return side === 'right' ? [x + w, y + hh / 2] : side === 'top' ? [x + w / 2, y] : side === 'bottom' ? [x + w / 2, y + hh] : [x, y + hh / 2];
 }
 const devIps = e => {
-  const v = e.subtype === 'valve' || e.subtype === 'propValve';
+  const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   return [{ id: `dev:${e.name}:in`, label: `${e.name} ${v ? 'end A' : 'inlet'}`, text: v ? 'A' : 'IN', c: sidePt(e, e.ipIn || 'left') },
     { id: `dev:${e.name}:out`, label: `${e.name} ${v ? 'end B' : 'outlet'}`, text: v ? 'B' : 'OUT', c: sidePt(e, e.ipOut || 'right') }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
-  n.style.setProperty('--ipc', e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
+  n.style.setProperty('--ipc', isInline(e) ? '#a87ee8' : e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
   return n;
 }
 function placeDevIps(e) {
@@ -193,7 +262,7 @@ function buildEl(e) {
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
   if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
   if (e.type === 'manual') n.append(h('div', { class: 'mv' }, h('div', { class: 'mvPic' }), h('div', { class: 'mvRows' })));
-  place(n, e);
+  place(n, elGeom(e));
   if (e.hideName) n.querySelector('.nm').classList.add('hidden');
   styleEl(n, e);
   if (e.type === 'timer') n.append(h('div', { class: 'btns' },
@@ -521,8 +590,11 @@ let drawPts = null, drawCursor = null, drawFrom = null;
 const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
 // An IP id is either an IP widget's id, or "dev:<name>:in" / "dev:<name>:out" for the built-in IPs of a pump or valve
 const devOfIp = id => (typeof id === 'string' && id.startsWith('dev:')) ? id.slice(4, id.lastIndexOf(':')) : null;
+const eqOfIp = id => (typeof id === 'string' && id.startsWith('eq:')) ? id.slice(3, id.lastIndexOf(':')) : null;
+const eqPort = (id, ws) => { const gid = eqOfIp(id); const g = gid && L().graphics.find(x => x.id === gid && (!ws || x.workspace === ws)); return g ? eqPorts(g).find(q => q.id === id) : null; };
 function ipPoint(id, ws) {
   if (!id) return null;
+  if (eqOfIp(id) !== null) return eqPort(id, ws)?.c || null;
   const pn = devOfIp(id);
   if (pn !== null) { const e = L().elements.find(x => x.name === pn); if (!hasIps(e) || (ws && e.workspace !== ws)) return null; return devIps(e).find(q => q.id === id)?.c || null; }
   const g = L().graphics.find(g => g.kind === 'ip' && g.id === id && (!ws || g.workspace === ws));
@@ -530,28 +602,33 @@ function ipPoint(id, ws) {
 }
 function allIps(ws) {
   return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws).map(g => ({ id: g.id, label: g.label || g.id })),
-    ...L().elements.filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e))];
+    ...L().elements.filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e)),
+    ...L().graphics.filter(g => g.workspace === ws).flatMap(eqPorts)];
 }
 // ---- flow through the pipe network
 // Pipes join IPs. Each IP belongs to a node:
 //  - a running pump: OUT pushes flow out, IN pulls flow in
 //  - a pump that is off, an open valve, a fitting or an open manual valve: flow passes straight through, either way
-//  - a closed valve or closed manual valve: blocks every pipe on it
+//  - a cooling coil or plate chiller circuit: passes flow through (the chiller's wort and water circuits stay separate)
+//  - a closed valve, closed manual valve or pipe cap: blocks every pipe on it
 //  - a plain IP point: an end of the line (a vessel port, an outlet), where flow can come from or go to
 // Flow is traced from each running pump out to the IP points it reaches, and from each IP point into each running pump's IN.
 // The direction of each pipe comes from that trace, so a pipe can show flow backwards through a pump that is off.
 // A pipe between two plain IP points with a "Flow when" list keeps the old rule: it flows, as drawn, while all of those are on.
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
 function ipNode(id, ws) {
+  const q = eqOfIp(id) !== null && eqPort(id, ws);
+  if (q) return { key: `eq:${eqOfIp(id)}:${q.circuit}`, pass: true };
   const dn = devOfIp(id);
   if (dn !== null) {
     const e = L().elements.find(x => x.name === dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
     if (e.subtype === 'valve') return on ? { key: 'dev:' + dn, pass: true } : { closed: true };
+    if (isInline(e)) return { key: 'dev:' + dn, pass: true };
     if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
     return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
   }
   const g = L().graphics.find(g => g.id === id && g.workspace === ws);
-  if (g?.fitting === 'manualValve' && !g.open) return { closed: true };
+  if ((g?.fitting === 'manualValve' && !g.open) || g?.fitting === 'cap') return { closed: true };
   return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
 }
 function computeFlow(ws) {
@@ -606,7 +683,7 @@ function renderPipes() {
     const pts = (p.points || []).map(q => q.join(',')).join(' ');
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
-    const width = +p.width || 8;
+    const width = pipeSize(w.name);
     const g = mk('g', { 'data-gid': p.id });
     if (p.baseVisible !== false || editing) g.append(mk('polyline', { class: 'pipe', points: pts, stroke: p.color || '#8a8f96', 'stroke-width': width, opacity: p.baseVisible === false ? 0.35 : 1 }));
     g.append(mk('polyline', { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), points: pts, stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
@@ -627,6 +704,7 @@ function renderPipes() {
   }
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
+  $$('#ws .gfx.vessel').forEach(n => n.classList.toggle('heating', !!n.dataset.heater && isOn(n.dataset.heater)));
 }
 
 // ---------------------------------------------------------------- edit mode
@@ -666,7 +744,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
   const pip = ev.target.closest('.devip');
-  const node = pip ? $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`) : ev.target.closest('.el,.gfx');
+  const node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
   if (hit && !node) {
     // the pipe is redrawn on press, so the browser never sends a double-click for it: count two quick presses instead
     const now = Date.now(), again = lastPipeTap && lastPipeTap.id === hit.dataset.gid && now - lastPipeTap.t < 450;
@@ -684,6 +762,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel'); updLockBtn();
   if (item.locked) { drag = null; ev.preventDefault(); return; }   // locked: select only, no move or resize
   drag = { mode: !pip && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
+  if (item.kind === 'vessel') drag.ports = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   node.setPointerCapture?.(ev.pointerId);
   ev.preventDefault();
 });
@@ -696,19 +775,32 @@ $('#ws').addEventListener('pointermove', ev => {
   }
   if (!drag) return;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
-  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
-  else if (drag.mode === 'resize') { drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy)); place(drag.node, drag.item); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
+  if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
+    const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
+    for (const q of drag.ports) { q.g.x = q.x + mx; q.g.y = q.y + my; const pn = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (pn) place(pn, q.g); }
+    placeEqIps(drag.item);
+    renderPipes();
+  }
+  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
+  else if (drag.mode === 'resize') {
+    const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
+    drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx / k)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy / k)); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length) renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { drag.item.points = drag.orig.map(q => [snap(q[0] + dx), snap(q[1] + dy)]); renderPipes(); }
 });
-window.addEventListener('pointerup', () => { cancelLongPress(); if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs(); drag = null; });
+window.addEventListener('pointerup', () => {
+  cancelLongPress();
+  if (drag?.mode === 'move' && drag.item.kind === 'ip' && !isFitting(drag.item)) attachIp(drag.item);
+  if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
+  drag = null;
+});
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
   if (drawPts) return finishPipe();
   const pip = ev.target.closest('.devip');
   const node = ev.target.closest('.el,.gfx');
   const pipe = ev.target.closest('#pipes g');
-  if (pip) editItem('el', pip.dataset.dev);
+  if (pip) pip.dataset.eq ? editItem('gfx', pip.dataset.eq) : editItem('el', pip.dataset.dev);
   else if (node) editItem(node.dataset.name ? 'el' : 'gfx', node.dataset.name || node.dataset.gid);
   else if (pipe) editItem('gfx', pipe.dataset.gid);
 });
@@ -729,7 +821,7 @@ function finishPipe(to) {
   $('#finishPipe').classList.add('hidden');
   const pts = drawPts, from = drawFrom; drawPts = null; drawCursor = null; drawFrom = null;
   if (!pts || pts.length < 2) { renderPipes(); return; }
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, width: 10, color: '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true };
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true };
   if (from) g.from = from;
   if (typeof to === 'string') g.to = to;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
@@ -850,10 +942,18 @@ $('#lockItem').onclick = () => {
 };
 $('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
+$('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
+$('#addVessel').onclick = () => {
+  const t = $('#addVesselType').value, base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' }[t];
+  let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.label === base + ' ' + i)) i++;
+  const size = { coil: [160, 160], plateChiller: [90, 160] }[t] || [200, 260];
+  const g = { id: newId(), kind: 'vessel', vesselType: t, workspace: wsName, x: 60, y: 60, w: size[0], h: size[1], image: '', label: base + ' ' + i, labelAlign: 'top', labelColor: '#ffffff', labelSize: 16, labelVisible: true };
+  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+};
 $('#addIp').onclick = () => {
-  const fit = $('#addIpType').value, base = fit === 'point' ? 'IP' : FITTINGS[fit];
+  const fit = $('#addIpType').value, base = { point: 'IP', pipe: 'Pipe', cap: 'Cap' }[fit] || FITTINGS[fit];
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
-  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#c0c6cc' };
+  const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
@@ -882,7 +982,7 @@ const F = {
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['ipIn', 'Pump inlet / valve end A: IP side', 'sel', SIDES], ['ipOut', 'Pump outlet / valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (unticked = pulses ON)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
+  digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', ['switch', 'toggle', 'latch', 'counter']],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
@@ -910,9 +1010,13 @@ const F = {
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
+  inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['ipIn', 'Valve end A: IP side', 'sel', SIDES], ['ipOut', 'Valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
-  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
-  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'bool']],
+  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS)], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'bool', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
+    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'bool']]],
+  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'bool'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
+    ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'bool']]],
+  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Tab', 'ws', ['locked', 'Lock position (no drag or resize)', 'bool']]],
 };
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
 // field [key, label, kind, opts, onlyForKinds]
@@ -952,7 +1056,7 @@ function fieldsFor(item) {
   }
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
-    return [['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
+    return [['inline', 'Inline in a pipe, e.g. a flow sensor (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['adc', 'Read by', 'sel', ['board', 'ads1115'], true], item.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num'] : ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['signal', 'Sensor signal', 'sel', ['raw', '0-5V', '0.5-4.5V', '1-5V', '0-10V', '4-20mA', '0-20mA', 'twoPoint'], true],
       ...SIGNAL_FIELDS[sig] ?? SIGNAL_FIELDS.range,
       ...(sig === '0-10V' ? [['divider', 'Input divider (10 V -> 5 V = 2)', 'num']] : []), ...(sig.endsWith('mA') ? [['shunt', 'Resistor across the input (ohm, usually 250)', 'num']] : []),
       ['calibrations', 'BruControl calibrations (JSON list, used instead of the settings above)', 'json'], ['avgWeight', 'Smoothing weight % (100 = none)', 'num'], ['prefix', 'Prefix', 'text'],
@@ -981,6 +1085,7 @@ function field([key, label, kind, opts, rerender], obj) {
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
   else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
@@ -1025,17 +1130,18 @@ async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
-    const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...F.common.slice(3)];
+    const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     return f;
   } : F[type];
   const work = clone(item);
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type, fields, work, true);
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type === 'vessel' ? 'Vessel / equipment widget' : type, fields, work, true);
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
-      const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : [];
+      if (type === 'vessel') for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
+      const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : eqPorts(item).map(q => q.id);
       for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
       sel = null; renderWs(); return;
     }
@@ -1058,12 +1164,15 @@ async function editItem(kind, id) {
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
+        if (g.heater === item.name) g.heater = work.name;
         for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) g[k] = g[k].replace(`dev:${item.name}:`, `dev:${work.name}:`);
       }
       if (hasIps(item) && !hasIps(work)) for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) delete g[k];
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
+    const pickedPort = work.attachTo !== item.attachTo;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
+    if (type === 'ip' && !isFitting(item) && !pickedPort) attachIp(item);   // typed a new X / Y: re-check which vessel it sits on
     if (kind === 'el') sel = { kind, id: item.name };
     renderTabs(); renderWs();
     if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
@@ -1073,7 +1182,7 @@ async function editItem(kind, id) {
 async function editWorkspace() {
   const w = curWs(); const work = clone(w);
   const r = await dialog('Tab', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'text'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
-    ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
+    ['pipeSize', 'Pipe size: thickness of every pipe and fitting on this tab (default 10)', 'num'], ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
