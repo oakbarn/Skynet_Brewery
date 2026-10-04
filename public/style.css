@@ -177,7 +177,7 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 #ws .gfx.vessel.v-gas .heat { bottom: -12%; height: 10%; background: radial-gradient(circle at 50% 100%, #3a7be8 0 30%, transparent 31%) 0 0 / 14px 100%; }
 #ws .gfx.vessel.heating .heat { opacity: 1; box-shadow: 0 0 14px #ff7a1a; }
 #ws .gfx.vessel.v-gas.heating .heat { background: radial-gradient(ellipse at 50% 100%, #ffd23a 0 25%, #ff7a1a 26% 45%, transparent 46%) 0 0 / 14px 100%; box-shadow: none; }
-#ws .gfx.vessel .vlabel { position: absolute; padding: 2px 6px; font-weight: 700; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 3px #000; }
+#ws .vlabel { position: absolute; padding: 2px 6px; font-weight: 700; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 3px #000; }
 .vlabel.at-top { top: 6px; left: 50%; transform: translateX(-50%); }
 .vlabel.at-top-left { top: 6px; left: 6px; }
 .vlabel.at-top-right { top: 6px; right: 6px; }
@@ -188,3 +188,8 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .vlabel.at-above { bottom: 100%; left: 50%; transform: translateX(-50%); }
 .vlabel.at-below { top: 100%; left: 50%; transform: translateX(-50%); }
 #ws .gfx.vessel.v-gas .vlabel.at-below { top: calc(112% + 4px); }
+#ws .gfx.vessel.v-coil:not(.has-img) { border: none; border-radius: 40%; background: repeating-linear-gradient(0deg, #8a4a1f 0 3px, #d98a4a 3px 9px, #8a4a1f 9px 11px, transparent 11px 18px); }
+#ws .gfx.vessel.v-plateChiller:not(.has-img) { border: 2px solid #4a5058; border-radius: 6px; background: repeating-linear-gradient(0deg, #8d969e 0 3px, #dfe3e7 3px 8px); }
+#ws .gfx.ip.eqip { font-size: 7px; }
+#ws .gfx.ip.has-img { border: none; border-radius: 0; background-color: transparent; background-size: 100% 100%; background-repeat: no-repeat; }
+#ws .gfx.ip .vlabel { font-size: 12px; }
