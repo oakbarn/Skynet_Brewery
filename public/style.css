@@ -168,3 +168,23 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 #ws .gfx.ip.fit .core path.body { stroke-width: 1.5; stroke: #000; fill: var(--bad); }
 #ws .gfx.ip.fit.open .core path.body { fill: var(--ok); }
 #ws:not(.editing) .gfx.ip[data-fit="manualValve"] { cursor: pointer; }
+/* Vessel widgets */
+#ws .gfx.vessel { border-radius: 14px 14px 22px 22px; background-size: 100% 100%; background-repeat: no-repeat; overflow: visible; }
+#ws .gfx.vessel:not(.has-img) { background: linear-gradient(90deg, #6f7780, #d9dee3 35%, #f4f6f8 50%, #b9c0c7 70%, #6f7780); border: 2px solid #4a5058; }
+#ws .gfx.vessel.v-mashTun:not(.has-img) { background: linear-gradient(90deg, #3b5f8a, #8fb5de 35%, #c9def3 50%, #7aa1cb 70%, #3b5f8a); }
+#ws .gfx.vessel .heat { position: absolute; left: 12%; right: 12%; bottom: 6%; height: 7%; border-radius: 4px; opacity: .45; pointer-events: none; }
+#ws .gfx.vessel.v-electric .heat { background: repeating-linear-gradient(90deg, #8a1f1f 0 8px, #d04a2a 8px 12px); }
+#ws .gfx.vessel.v-gas .heat { bottom: -12%; height: 10%; background: radial-gradient(circle at 50% 100%, #3a7be8 0 30%, transparent 31%) 0 0 / 14px 100%; }
+#ws .gfx.vessel.heating .heat { opacity: 1; box-shadow: 0 0 14px #ff7a1a; }
+#ws .gfx.vessel.v-gas.heating .heat { background: radial-gradient(ellipse at 50% 100%, #ffd23a 0 25%, #ff7a1a 26% 45%, transparent 46%) 0 0 / 14px 100%; box-shadow: none; }
+#ws .gfx.vessel .vlabel { position: absolute; padding: 2px 6px; font-weight: 700; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 3px #000; }
+.vlabel.at-top { top: 6px; left: 50%; transform: translateX(-50%); }
+.vlabel.at-top-left { top: 6px; left: 6px; }
+.vlabel.at-top-right { top: 6px; right: 6px; }
+.vlabel.at-center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.vlabel.at-bottom { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.vlabel.at-bottom-left { bottom: 6px; left: 6px; }
+.vlabel.at-bottom-right { bottom: 6px; right: 6px; }
+.vlabel.at-above { bottom: 100%; left: 50%; transform: translateX(-50%); }
+.vlabel.at-below { top: 100%; left: 50%; transform: translateX(-50%); }
+#ws .gfx.vessel.v-gas .vlabel.at-below { top: calc(112% + 4px); }
