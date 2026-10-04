@@ -72,10 +72,10 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **Pipe size** | Each tab has one **Pipe size** (Tab… > Pipe size, default 10). Every pipe and every fitting on that tab (straight pipe, tee, elbows, cross, cap, manual valve) is drawn from it, so they always match: change it and they all grow or shrink together. Fittings stay centred on their IP when the size changes. Devices with IPs scale with it too: pumps, valves, proportional valves and inline sensors (a **flow meter**, or a digital / analog input with **Inline in a pipe** ticked, such as a flow switch). Their Width / Height are their size at pipe size 10; at pipe size 20 they are drawn twice as big, about their centre. Inline sensors have IN and OUT IPs and always let flow through. |
 | **Vessel widgets** | Pick the kind next to **Add equipment**: **Electric heated vessel**, **Gas heated vessel**, **Unheated mash tun**, **Cooling coil** or **Plate chiller**. The coil has IN and OUT IPs built in; the plate chiller has WORT IN / WORT OUT and WATER IN / WATER OUT, two circuits that never mix. Flow passes through them. Each has a **Background picture path** (empty = a plain drawn vessel), a **Label** with **position** (top, corners, center, bottom, above or below), **color**, **size** and **Show label**, and an optional **Heater** (the element or burner output): its heating strip or flames light up while that output is on. Drop an IP point on a vessel and it becomes one of its ports: it moves with the vessel, and pipes on it follow. |
 | **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has an IP at each end, **A** and **B**, and flow can go through it either way. Pick the side of its box for each IP in its properties. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has A on top and B on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has IPs A and B at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a vKonstant value holding the percent, which scripts can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
-| **Elements** | `vKonstant`, `vAPI`, `shared`, `global` (being retired), `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
+| **Elements** | `vKonstant`, `vAPI`, `shared`, `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
 | **Devices** | Elements tied to a pin on a hobby board (Arduino Mega, ESP32 bridge; hobby modules such as relay boards, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115). **Add element** groups them: outputs (digital, PWM %, analog 0-10 V / 4-20 mA), digital inputs (switch, float / level switch, flow switch, interlock), temperature probes (DS18B20, PT100, PT1000, thermocouple K / J / T and more, NTC thermistor), analog sensors (0-5 V, 0-10 V, 4-20 mA, pressure transducer, level transmitter, pH with two-point calibration), pulse flow meters, and vessel scales (HX711 load cells) that show weight and volume with tare, calibration and auto tare when empty. The properties dialog shows only the settings the chosen probe or signal needs, plus the live reading for calibration. Wiring and protocol: `docs/DEVICE_PROTOCOL.md`. |
 | **Widgets** | App-only items with no board pin: pictures, vKonstant / vAPI / shared variables, on-screen switches, timers, alarms, labels. |
-| **Variables** | vKonstant (scripts and screen), vAPI (also the API and the database), shared (scripts). The old **Global** class is being retired, see below. |
+| **Variables** | vKonstant (scripts and screen), vAPI (also the API and the database), shared (scripts). The old **Global** class is retired, see below. |
 | **Shared variables** | Readable and writable by every script, but **never in the API or the database**. Use them to pass values between scripts. |
 | **Database** | SQLite file `data/brewlog.db`. Each vAPI has a trigger: **Off, On demand, Once, Every N seconds, Every N hours, Every N days**. The **Log** page shows the data and downloads CSV. |
 | **Alarms** | Sound file by path, `.wav` or `.mp3`. Browsers only play sound after one click, so press **Enable sound** on each screen that should sound alarms. |
@@ -106,19 +106,22 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 
 **vAPI**: scripts, the API (`/api/vapi`; the old `/api/globals` address still works) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
 
-**Database trigger** (Variables page > Change…, for vAPI and the Globals still left):
+**Database trigger** (Variables page > Change…, for vAPI):
 
 - **On demand only**: pick a script; the value is written when that script starts, and at no other time.
 - **Every N** milliseconds, seconds, minutes, hours or days (whole numbers), or **every 00:00:00**. Fastest is 100 ms.
 - **At clock time** (optional): lines the writes up with the clock, e.g. every 1 day at `12 AM`, or every 6 hours at `1 AM` (1 AM, 7 AM, 1 PM, 7 PM). Accepts `12 AM`, `6:30 PM` or `18:30`.
 - Off, Manual (`log` line or Log now), and Once still work as before.
 
-**The old Global class is being retired.** Globals move by their name, on start-up for a saved setup and in the BruControl import:
+**The old Global class is retired.** Globals move by their name, on start-up for a saved setup and in the BruControl import:
 
 - `gbl…` becomes a **vKonstant** of the same kind with the **same name**, so the names still match BruControl for now.
 - `RP_…` becomes a **vAPI** of the same kind, renamed `RP_` → `vA_` in the setup and in every script (`RP_v_Pitch_Temp` → `vA_v_Pitch_Temp`).
 - `x…` is **deleted**. Scripts or items still using one are listed with line numbers.
-- Any other name **stays a Global**, unchanged, and is listed until you decide what it becomes. New Globals can no longer be added.
+- `glb…` was a typo for `gbl…`: renamed `glb` → `gbl` (setup and scripts), then a vKonstant like the rest.
+- `DX_gblV_…` becomes a **vAPI**, renamed `DX_gblV_` → `vA_` in the setup and every script.
+- `insp_…` was meant to be an inspector: it becomes a **picture** element, keeping its pictures and background.
+- Any other name becomes a vAPI with the same name (it works exactly like the Global did) and is listed so it can be sorted later.
 
 On start-up the old setup is copied to `config/backups/brewery-before-globals-<date>.json`, each changed script keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Scripts page console). A vKonstant is never written to the database, so a `gbl` that had a database trigger is listed too.
 
