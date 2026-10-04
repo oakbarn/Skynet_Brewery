@@ -92,7 +92,30 @@ main { padding: 10px 14px; }
 .editor { display: flex; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); height: 52vh; overflow: hidden; }
 #gutter { margin: 0; padding: 8px 6px; text-align: right; color: var(--muted); font: 13px/1.5 var(--mono); background: var(--panel2); overflow: hidden; min-width: 3.4em; user-select: none; }
 #gutter .cur { color: var(--ok); font-weight: 700; } #gutter .err { color: var(--bad); font-weight: 700; }
-#code { flex: 1; border: 0; border-radius: 0; resize: none; padding: 8px; font: 13px/1.5 var(--mono); background: var(--panel); tab-size: 4; outline: none; }
+.codeWrap { flex: 1; position: relative; overflow: hidden; min-width: 0; }
+#code { position: relative; display: block; width: 100%; height: 100%; border: 0; border-radius: 0; resize: none; padding: 8px; font: 13px/1.5 var(--mono); background: transparent; tab-size: 4; outline: none; }
+#codeHl { position: absolute; top: 0; left: 0; margin: 0; padding: 8px; font: 13px/1.5 var(--mono); tab-size: 4; white-space: pre; color: transparent; pointer-events: none; }
+#codeHl mark { color: transparent; background: rgba(232, 195, 58, 0.35); border-radius: 2px; }
+#codeHl mark.cur { background: rgba(232, 131, 58, 0.75); outline: 1px solid var(--accent); }
+/* find and replace */
+.findBar { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; margin-bottom: 8px; }
+.findRow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.findRow input[type=search], .findRow input:not([type]) { flex: 1 1 180px; min-width: 0; font-family: var(--mono); }
+#findCount { min-width: 5.5em; font-size: 12px; }
+.findAllDlg { width: min(860px, calc(100vw - 16px)); max-height: calc(100vh - 32px); }
+.findAllDlg form { display: flex; flex-direction: column; gap: 8px; }
+.findAllDlg h3 { margin: 0; }
+.faList { overflow: auto; max-height: 55vh; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); }
+.faList:empty { display: none; }
+.faScript { position: sticky; top: 0; background: var(--panel); padding: 5px 8px; font-weight: 600; border-bottom: 1px solid var(--line); }
+.faRow { display: flex; align-items: flex-start; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+.faRow input { margin-top: 3px; }
+.faNo { min-width: 2.5em; text-align: right; font: 12px/1.6 var(--mono); }
+.faText { flex: 1; min-width: 0; cursor: pointer; }
+.faLine { font: 12px/1.6 var(--mono); white-space: pre; overflow: hidden; text-overflow: ellipsis; }
+.faLine mark { background: rgba(232, 195, 58, 0.45); color: inherit; border-radius: 2px; }
+.faNew { color: var(--ok); } .faNew::before { content: '\2192  '; }
+.faNew mark { background: rgba(63, 191, 106, 0.3); }
 #problems { list-style: none; padding: 0; margin: 6px 0; }
 #problems li { color: var(--bad); cursor: pointer; padding: 2px 0; }
 #problems li.ok { color: var(--ok); cursor: default; }
@@ -315,3 +338,4 @@ button.small { padding: 2px 7px; font-size: 12px; }
 .right { display: flex; align-items: center; gap: 8px; }
 body:not(.role-admin) .admin-only { display: none !important; }
 body.role-viewer .op-only { display: none !important; }
+@media (pointer: coarse) { .findRow input[type=search], .findRow input:not([type]) { font-size: 16px; } }   /* 16px stops iPhones zooming in */
