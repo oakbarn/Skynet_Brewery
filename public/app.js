@@ -114,9 +114,11 @@ function renderWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing);
-  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel')) ws.append(buildVessel(g));
+  const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
+  for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
   for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel'].includes(g.kind))) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip')) ws.append(buildIp(g));
   for (const e of L().elements.filter(e => e.workspace === w.name && hasIps(e))) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
@@ -133,32 +135,70 @@ function editDeco(n, o) {
 
 // Vessel widgets (app-only): electrically heated, gas heated, or an unheated mash tun. A background picture by path,
 // a label (alignment, color, size, show / hide), and IPs placed on them become its ports and move with it.
-const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', electric: 'Electric heated vessel', gas: 'Gas heated vessel', mashTun: 'Unheated mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' };
-// The Vessel widget (Fritz's spec): a picture with a Type, a Name, a Label and optional ports. Every port except the
-// thermowell is an IP: it is created on screen near its Position when installed, and stays attached to the vessel.
-// Each list (types, positions, standards) can be added to; the additions are kept in the settings (vesselLists).
-const V_HIGH = ['Center High', 'Left High', 'Right High', 'Back High'];
-const VPORTS = {
-  outlet: { name: 'Outlet', ip: true, pos: ['Center Bottom', 'Bottom Drain'] },
-  tangential: { name: 'Tangential', ip: true, pos: ['Bottom Left', 'Bottom Right', 'Center', 'Back'] },
-  thermowell: { name: 'Thermowell', ip: false, pos: ['Center Low', 'Left Low', 'Right Low', 'Back Low'] },
-  steamSlayer: { name: 'Steam Slayer', ip: true, pos: V_HIGH },
-  sparge: { name: 'Sparge', ip: true, pos: V_HIGH },
-  cip: { name: 'CIP', ip: true, pos: ['Lid', ...V_HIGH] },
+const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter',
+  eqTee: 'Pipe tee', eqElbow90: 'Pipe 90° elbow', eqElbow45: 'Pipe 45° elbow', eqCross: 'Pipe cross',
+  electric: 'Electric heated vessel (older)', gas: 'Gas heated vessel (older)', mashTun: 'Unheated mash tun (older)', coil: 'Cooling coil (older)', plateChiller: 'Plate chiller (older)' };
+// Equipment widgets (Fritz's spec): a picture with a Name, a Type, a Label and ports. Every port except a thermowell is an IP:
+// it is created on screen near its Position when installed, and stays attached to the widget. Each list (types, positions,
+// standards) can be added to; the additions are kept in the settings (vesselLists). Fritz will refine the choices later.
+// A port's positions are [name, x, y]: where it sits on the picture as a fraction of its width and height (added ones start in
+// the middle). Ports with the same `circuit` pass flow between them (a chiller's wort side, a fitting); a vessel's ports are
+// ends, where flow starts or stops.
+const V_HIGH = [['Center High', 0.5, 0.1], ['Left High', 0, 0.15], ['Right High', 1, 0.15], ['Back High', 0.7, 0.12]];
+const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 0.5, 1]];
+const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
+const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
+const EQ = {
+  vessel: { title: 'Vessel', types: ['Brew Kettle', 'HLT', 'MLT', 'Mash Tun', 'Whirlpool'], image: 'samples/kettle.svg', size: [220, 270], tab: 'Equipment',
+    ports: {
+      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92]], { on: true }),
+      tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75]]),
+      thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7]], { ip: false }),
+      steamSlayer: pt('Steam Slayer', V_HIGH), sparge: pt('Sparge', V_HIGH), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH]),
+    } },
+  pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'samples/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
+    ports: {
+      wortIn: pt('Wort In', CORNERS, { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS, { on: true, def: 'Bottom Right', circuit: 'wort' }),
+      waterIn: pt('Water In', CORNERS, { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS, { on: true, def: 'Top Right', circuit: 'water' }),
+      thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
+    } },
+  ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'samples/chill_coil.svg', size: [180, 180], tab: 'Equipment',
+    ports: { in: pt('In', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }) } },
+  herms: { title: 'HERMS coil', types: ['Stainless 25 ft', 'Stainless 50 ft', 'Copper'], image: 'samples/herms_coil.svg', size: [180, 180], tab: 'Equipment',
+    ports: { wortIn: pt('Wort In', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), wortOut: pt('Wort Out', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }) } },
+  trub: { title: 'Trub filter', types: ['Inline filter', 'Hop rocket', 'Hop spider'], image: 'samples/trub_filter.svg', size: [100, 170], tab: 'Equipment',
+    ports: { inlet: pt('Inlet', SIDE4.concat(CORNERS), { on: true, def: 'Top', circuit: 'a' }), outlet: pt('Outlet', SIDE4.concat(CORNERS), { on: true, def: 'Bottom', circuit: 'a' }) } },
+  eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'samples/pipe_tee.svg', size: [90, 90],
+    ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
+  eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'samples/pipe_elbow90.svg', size: [90, 90],
+    ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
+  eqElbow45: { title: 'Pipe 45° elbow', types: ['Short radius', 'Long radius'], image: 'samples/pipe_elbow45.svg', size: [90, 90],
+    ports: { a: pt('End A', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Left', circuit: 'a' }),
+      b: pt('End B', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Bottom Right', circuit: 'a' }) } },
+  eqCross: { title: 'Pipe cross', types: ['Equal cross', 'Reducing cross'], image: 'samples/pipe_cross.svg', size: [90, 90],
+    ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Right', circuit: 'a' }),
+      c: pt('End C', SIDE4, { on: true, def: 'Top', circuit: 'a' }), d: pt('End D', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
 };
-const V_LISTS = { types: ['Brew Kettle', 'HLT', 'MLT', 'Mash Tun', 'Whirlpool'], standard: ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'],
-  ...Object.fromEntries(Object.entries(VPORTS).map(([k, p]) => [k, p.pos])) };
-const vList = key => [...new Set([...(V_LISTS[key] || []), ...(S.config.vesselLists?.[key] || [])])];
-// where each position sits on the picture, as a fraction of its width and height (added positions start in the middle)
-const V_XY = { 'Center Bottom': [0.5, 1], 'Bottom Drain': [0.9, 0.92], 'Bottom Left': [0, 0.8], 'Bottom Right': [1, 0.8], Center: [0.5, 0.8], Back: [0.65, 0.75],
-  'Center Low': [0.5, 0.75], 'Left Low': [0, 0.75], 'Right Low': [1, 0.75], 'Back Low': [0.7, 0.7],
-  'Center High': [0.5, 0.1], 'Left High': [0, 0.15], 'Right High': [1, 0.15], 'Back High': [0.7, 0.12], Lid: [0.5, 0] };
-const vPortXY = (g, pos) => { const [rx, ry] = V_XY[pos] || [0.5, 0.5]; return [(g.x || 0) + rx * (g.w || 220), (g.y || 0) + ry * (g.h || 270)]; };
-const vPortLabel = (k, p) => `${VPORTS[k].name}${p.standard ? ` (${p.standard})` : ''}`;
-// Create, move or remove a vessel's port IPs to match its settings. Returns the ports that were placed or moved.
+const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
+const eqClass = g => g?.kind === 'vessel' ? EQ[g.vesselType] : null;
+// list keys: "standard" (shared), "<class>.types", "<class>.<port>"
+function vList(key) {
+  const [c, p] = key.split('.');
+  const base = key === 'standard' ? EQ_STANDARDS : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
+  return [...new Set([...(base || []), ...(S.config.vesselLists?.[key] || [])])];
+}
+const portDefPos = d => d.def || d.pos[0][0];
+function vPortXY(g, k, pos) {
+  const q = eqClass(g).ports[k].pos.find(q => q[0] === pos) || [pos, 0.5, 0.5];
+  return [(g.x || 0) + q[1] * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
+}
+const vPortLabel = (g, k, p) => `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
+// the starting port settings of a new widget
+const eqDefaultPorts = c => Object.fromEntries(Object.entries(EQ[c].ports).filter(([, d]) => d.on).map(([k, d]) => [k, { installed: true, position: portDefPos(d), standard: EQ_STANDARDS[0] }]));
+// Create, move or remove a widget's port IPs to match its settings. Returns the ports that were placed or moved.
 function syncVesselPorts(g, old) {
   const moved = [];
-  for (const [k, def] of Object.entries(VPORTS)) {
+  for (const [k, def] of Object.entries(eqClass(g).ports)) {
     if (!def.ip) continue;
     const p = g.ports?.[k] || {}, was = old?.ports?.[k] || {};
     let ip = draft.graphics.find(x => x.kind === 'ip' && x.attachTo === g.id && x.port === k);
@@ -169,9 +209,9 @@ function syncVesselPorts(g, old) {
     if (!ip) {
       ip = { id: newId(), kind: 'ip', workspace: g.workspace, w: 30, h: 30, color: '#e8a33a', attachTo: g.id, port: k, labelVisible: true, labelAlign: 'below', labelSize: 12 };
       draft.graphics.push(ip);
-    } else if (was.position === p.position && ip.workspace === g.workspace) { ip.label = vPortLabel(k, p); continue; }
-    const [cx, cy] = vPortXY(g, p.position);
-    Object.assign(ip, { workspace: g.workspace, x: Math.round(cx - 15), y: Math.round(cy - 15), label: vPortLabel(k, p) });
+    } else if (was.position === p.position && ip.workspace === g.workspace) { ip.label = vPortLabel(g, k, p); continue; }
+    const [cx, cy] = vPortXY(g, k, p.position);
+    Object.assign(ip, { workspace: g.workspace, x: Math.round(cx - 15), y: Math.round(cy - 15), label: vPortLabel(g, k, p) });
     moved.push(k);
   }
   return moved;
@@ -179,12 +219,12 @@ function syncVesselPorts(g, old) {
 // a small pop-up after ports are placed: where they went and how to move them. It can be dragged out of the way.
 function vesselPopup(g, placed) {
   $('#vpop')?.remove();
-  const rows = Object.entries(VPORTS).filter(([k]) => g.ports?.[k]?.installed).map(([k, d]) => h('li', {}, `${vPortLabel(k, g.ports[k])}: ${g.ports[k].position || 'middle'}${d.ip ? (placed.includes(k) ? '' : ' (not moved)') : ' (not an IP, shown as a mark on the picture)'}`));
+  const rows = Object.entries(eqClass(g).ports).filter(([k]) => g.ports?.[k]?.installed).map(([k, d]) => h('li', {}, `${vPortLabel(g, k, g.ports[k])}: ${g.ports[k].position || 'middle'}${d.ip ? (placed.includes(k) ? '' : ' (not moved)') : ' (not an IP, shown as a mark on the picture)'}`));
   const head = h('div', { class: 'vpop-head' }, `${g.label || g.name}: ports placed`);
   const close = h('button', { class: 'primary' }, 'OK, close');
   const box = h('div', { id: 'vpop', class: 'vpop' }, head,
     h('ul', {}, ...(rows.length ? rows : [h('li', {}, 'No ports installed.')])),
-    h('p', {}, 'Check each IP sits on the right opening of the picture. To move one, drag it: it stays a port of this vessel and moves with it. To add, remove or change ports, double-click the vessel.'),
+    h('p', {}, 'Check each IP sits on the right opening of the picture. To move one, drag it: it stays a port of this widget and moves with it. To add, remove or change ports, double-click the widget.'),
     h('p', { class: 'muted' }, 'Drag this box by its title to move it out of the way.'), close);
   close.onclick = () => box.remove();
   head.onpointerdown = ev => {
@@ -222,14 +262,14 @@ function widgetLabel(g, defPos) {
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
 function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
-  const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (t === 'vessel' && g.name ? g.name + ': ' : '') + (g.label || VESSELS[t]) });
+  const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (EQ[t] && g.name ? g.name + ': ' : '') + (g.label || VESSELS[t]) });
   place(n, g);
   if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
   if (t === 'electric' || t === 'gas') n.append(h('div', { class: 'heat' }));
-  const tw = t === 'vessel' && g.ports?.thermowell;
-  if (tw?.installed) {
-    const [rx, ry] = V_XY[tw.position] || [0.5, 0.5];
-    n.append(h('div', { class: 'twell', title: vPortLabel('thermowell', tw), style: `left:${rx * 100}%;top:${ry * 100}%` }, 'T'));
+  for (const [k, d] of Object.entries(eqClass(g)?.ports || {})) {    // ports that are not IPs (thermowells) show as a mark
+    const p = g.ports?.[k]; if (d.ip || !p?.installed) continue;
+    const q = d.pos.find(q => q[0] === p.position) || [0, 0.5, 0.5];
+    n.append(h('div', { class: 'twell', title: vPortLabel(g, k, p), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, 'T'));
   }
   if (g.labelVisible !== false && g.label) n.append(widgetLabel(g, 'top'));
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
@@ -716,6 +756,10 @@ function ipNode(id, ws) {
     return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
   }
   const g = L().graphics.find(g => g.id === id && g.workspace === ws);
+  if (g?.port) {      // a port of an equipment widget: ports on the same circuit pass flow (chiller side, coil, filter, fitting)
+    const v = L().graphics.find(x => x.id === g.attachTo), c = eqClass(v)?.ports[g.port]?.circuit;
+    if (c) return { key: `eq:${v.id}:${c}`, pass: true };
+  }
   if ((g?.fitting === 'manualValve' && !g.open) || g?.fitting === 'cap') return { closed: true };
   return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
 }
@@ -1032,19 +1076,19 @@ $('#lockItem').onclick = () => {
 $('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
 $('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
-// a new Vessel goes on the Equipment tab (made if it is missing)
-function addVesselWidget() {
-  if (!draft.workspaces.some(w => w.name === 'Equipment')) draft.workspaces.push({ name: 'Equipment', width: 1600, height: 900 });
-  wsName = 'Equipment';
-  let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.name === 'Vessel ' + i)) i++;
-  const n = draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === 'Equipment').length;
-  const g = { id: newId(), kind: 'vessel', vesselType: 'vessel', workspace: 'Equipment', x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: 220, h: 270,
-    name: 'Vessel ' + i, vtype: 'Brew Kettle', label: 'Brew Kettle', image: 'samples/kettle.svg', labelAlign: 'above', labelSize: 16, labelVisible: true,
-    ports: { outlet: { installed: true, position: 'Center Bottom', standard: 'TC 1.5' } }, isNew: true };
+// a new equipment widget: vessels, chillers, coils and filters go on the Equipment tab (made if it is missing), fittings on this tab
+function addVesselWidget(c) {
+  const C = EQ[c], tab = C.tab || wsName;
+  if (!draft.workspaces.some(w => w.name === tab)) draft.workspaces.push({ name: tab, width: 1600, height: 900 });
+  wsName = tab;
+  let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.name === C.title + ' ' + i)) i++;
+  const n = draft.graphics.filter(g => eqClass(g) && g.workspace === tab).length;
+  const g = { id: newId(), kind: 'vessel', vesselType: c, workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1],
+    name: C.title + ' ' + i, vtype: C.types[0], label: C.types[0], image: C.image, labelAlign: 'above', labelSize: 16, labelVisible: true, ports: eqDefaultPorts(c), isNew: true };
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderTabs(); renderWs(); editItem('gfx', g.id);
 }
 $('#addVessel').onclick = () => {
-  if ($('#addVesselType').value === 'vessel') return addVesselWidget();
+  if (EQ[$('#addVesselType').value]) return addVesselWidget($('#addVesselType').value);
   const t = $('#addVesselType').value, base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' }[t];
   let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.label === base + ' ' + i)) i++;
   const size = { coil: [160, 160], plateChiller: [90, 160] }[t] || [200, 260];
@@ -1114,16 +1158,16 @@ const F = {
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
-  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => k !== 'vessel')], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'bool', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
+  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'bool', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'bool']]],
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'bool'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'bool']]],
   pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Tab', 'ws', ['locked', 'Lock position (no drag or resize)', 'bool']]],
 };
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
-F.vesselNew = it => [['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', 'types'], ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
-  ...Object.entries(VPORTS).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'bool', false, true],
-    ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', k], [k + '_std', d.name + ' standard', 'vlist', 'standard']] : [])]),
+F.vesselNew = it => [['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+  ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'bool', false, true],
+    ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' standard', 'vlist', 'standard']] : [])]),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'bool', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'text'], ['labelSize', 'Label size', 'num'],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']];
 F.shared = F.global.filter(f => f[0] !== 'retain').concat([['retain', 'Keep value on restart', 'bool', true]]);
@@ -1259,11 +1303,11 @@ async function editItem(kind, id) {
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     return f;
-  } : type === 'vessel' && item.vesselType === 'vessel' ? F.vesselNew : F[type];
+  } : eqClass(item) ? F.vesselNew : F[type];
   const work = clone(item);
-  const isV = type === 'vessel' && item.vesselType === 'vessel';
-  if (isV) for (const k of Object.keys(VPORTS)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? 'Vessel' : type === 'vessel' ? 'Vessel / equipment widget' : type, fields, work, true);
+  const isV = !!eqClass(item);
+  if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type, fields, work, true);
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
@@ -1284,8 +1328,8 @@ async function editItem(kind, id) {
     readFields(work);
     if (isV) {
       work.ports = {};
-      for (const k of Object.keys(VPORTS)) {
-        work.ports[k] = { installed: !!work[k + '_on'], position: work[k + '_pos'] || VPORTS[k].pos[0], standard: work[k + '_std'] || V_LISTS.standard[0] };
+      for (const [k, d] of Object.entries(eqClass(item).ports)) {
+        work.ports[k] = { installed: !!work[k + '_on'], position: work[k + '_pos'] || portDefPos(d), standard: work[k + '_std'] || EQ_STANDARDS[0] };
         delete work[k + '_on']; delete work[k + '_pos']; delete work[k + '_std'];
       }
       work.name = (work.name || '').trim() || item.name;
