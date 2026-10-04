@@ -84,6 +84,7 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **Media paths** | Images and sounds are paths to files inside the **media folders** listed in Settings, for example `valves/open.png` or `D:\Brewing\Pics\kettle.png`. Nothing is stored inside the program. For safety, only files inside those folders are served. |
 | **Media page** | Add pictures and sounds to the Brew Panel computer (the Raspberry Pi) from any browser, PC or phone: pick files or drag them onto the page, several at once, or a `.zip` of them (unpacked keeping its folders, handy for the BruControl Media folder). Looks like Windows File Explorer: folder tree on the left, files with thumbnails on the right (Large icons or Details), an address bar and search. Make folders, drag files onto a folder to move them (Move button on phones), preview pictures, play sounds, copy the path to type into an element, rename and delete. Only pictures and sounds are accepted, and only inside the media folders. |
 | **SVG pictures** | Every PNG or JPG in a media folder gets an SVG copy next to it (`Pump_On.png` makes `Pump_On.svg`) as soon as it is added, so pictures stay sharp at any size. The original is never changed, so BruControl can still use it, and you keep using the `.png` path everywhere. **Settings > Pictures** shows each original beside its SVG: by default the SVG is used for drawing-like pictures and the original for photo-like ones (tracing makes photos blotchy), and you can pick per picture or for all. A hand-made SVG with the same name is used instead and never overwritten. Pictures over 2 megapixels (photo backgrounds) are left as they are. Tracing runs in the background and needs no extra install. |
+| **Help tab** | The manual, inside the panel. Everyone can read it; it opens on the page for the screen you came from, and **Search the manual** looks through every page. Admins can **Edit page** (with a live preview), add a **New page** or delete one. Pages are Markdown text files in the `help` folder (the number in front of the name sets the order), so they can also be edited with any text editor. An old copy goes to `help/backups/` on every save. |
 
 ## 2a. Variables: vKonstant and vAPI
 
@@ -185,6 +186,7 @@ media/               images and sounds (your background is media/brewery_main.pn
 data/                state.json (Global values kept over restarts), brewlog.db (the database),
                      users.json (accounts, passwords are hashed) and sessions.json (who is signed in)
 tools/               reset-password.js (forgotten password)
+help/                the manual shown on the Help tab, one Markdown file per page
 firmware/            Mega_BrewPanel.ino (Mega: USB or Ethernet shield), ESP32_Bridge.ino (WiFi or Ethernet bridge)
 docs/                DEVICE_PROTOCOL.md, brewpanel.service, REMOTE_ACCESS.md (login and Tailscale)
 ```
