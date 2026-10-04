@@ -147,3 +147,12 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .el .nm { flex: none; }
 .el.text.look-dark .vl, .el.text.look-button .vl { justify-content: center; align-items: center; text-align: center; }
 .el.alarm.img-alarm:not(.active) { background-color: transparent; border-color: transparent; }
+
+/* ===== MQTT ===== */
+.mqtt-status { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); }
+.mqtt-status.on { border-color: #3fa34d; }
+.mqtt-status.error { border-color: #c94040; }
+.mqtt-status::before { content: '●  '; color: var(--muted); }
+.mqtt-status.on::before { color: #3fa34d; }
+.mqtt-status.error::before { color: #c94040; }
+#mqItems td:nth-child(3), #mqItems td:nth-child(4) { text-align: center; }

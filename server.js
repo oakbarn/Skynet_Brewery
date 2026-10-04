@@ -9,6 +9,7 @@ import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
+import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain, toStr } from './lib/values.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -25,6 +26,8 @@ const hw = new Hardware(store);
 hw.start();
 setInterval(() => store.tickTimers(0.1), 100);
 store.on('warn', m => engine.print('system', m));
+const mqtt = new MqttBridge(store, engine);
+mqtt.start();
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Set();
@@ -40,6 +43,7 @@ engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
+mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 setInterval(() => { for (const res of clients) res.write(': ping\n\n'); }, 20000);
 
 // ---------------- helpers ----------------
@@ -96,6 +100,17 @@ function apiAllowed(req, url) {
   const key = store.config.apiKey;
   if (!key || req.method === 'GET') return true;
   return req.headers['x-api-key'] === key || url.searchParams.get('key') === key;
+}
+
+// The MQTT password never goes to the browser; Settings shows whether one is saved.
+function browserConfig() {
+  const c = store.config;
+  if (!c.mqtt) return c;
+  const { password, ...m } = c.mqtt;
+  return { ...c, mqtt: { ...m, hasPassword: !!password } };
+}
+function mqttView() {
+  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, displayName: e.displayName ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
 }
 
 const globalsOnly = () => store.list('global').map(e => ({ name: e.name, type: e.dataType, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
@@ -158,7 +173,7 @@ async function route(req, res) {
     return;
   }
   if (p === '/ui/state' && m === 'GET') {
-    return ok(res, { config: store.config, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    return ok(res, { config: browserConfig(), mqtt: mqttView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, logModes: LOG_MODES, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -179,6 +194,20 @@ async function route(req, res) {
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title']) if (k in body) store.config[k] = body[k];
     store.writeConfig(); broadcast('config', {});
     return ok(res);
+  }
+  if (p === '/ui/mqtt' && m === 'GET') return ok(res, mqttView());
+  if (p === '/ui/mqtt' && m === 'PUT') {
+    const body = await jsonBody(req), old = store.config.mqtt ?? {};
+    const c = {
+      enabled: !!body.enabled, host: String(body.host ?? '').trim(), port: Number(body.port) || (body.tls ? 8883 : 1883), tls: !!body.tls,
+      username: String(body.username ?? '').trim(), password: body.password === undefined ? (old.password ?? '') : String(body.password),
+      baseTopic: String(body.baseTopic ?? 'brewpanel').trim() || 'brewpanel',
+      homeAssistant: { enabled: body.homeAssistant?.enabled !== false, prefix: String(body.homeAssistant?.prefix ?? 'homeassistant').trim() || 'homeassistant' },
+      scripts: Array.isArray(body.scripts) ? body.scripts.map(String) : (old.scripts ?? []),
+      items: cleanItems(store, body.items && typeof body.items === 'object' ? body.items : (old.items ?? {})),
+    };
+    store.config.mqtt = c; store.writeConfig(); mqtt.restart(); broadcast('config', {});
+    return ok(res, mqttView());
   }
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
@@ -227,5 +256,5 @@ server.listen(PORT, () => {
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
 });
 
-function shutdown() { console.log('Stopping...'); engine.stopAll(); store.persistNow(); hw.stop(); logger.close(); process.exit(0); }
+function shutdown() { console.log('Stopping...'); engine.stopAll(); store.persistNow(); mqtt.stop(); hw.stop(); logger.close(); process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
