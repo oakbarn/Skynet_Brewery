@@ -126,4 +126,4 @@ It prints an address like `https://brewpi.tail1234.ts.net`. That address works o
 - Keep the hard-wired safety devices (flame safety, float switches, emergency stop). Remote control is a convenience, not a safety system.
 - Give helpers the **Viewer** or **Operator** role, not Admin.
 - If a phone is lost, remove it from your Tailscale account (admin page > the phone > **Remove**) and change your panel password.
-- **API key:** other programs (Node-RED and similar) that change Globals through `/api` need the API key from **Settings**. Reading Globals without a key only works from your own network (home or Tailscale).
+- **API key:** other programs (Node-RED and similar) that change vAPI variables through `/api` need the API key from **Settings**. Reading them without a key only works from your own network (home or Tailscale).

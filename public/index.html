@@ -31,7 +31,8 @@
     <div class="bar">
       <div id="wsTabs" class="tabs"></div>
       <div class="spacer"></div>
-      <label>Zoom <select id="zoom"><option value="fit">Fit</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option></select></label>
+      <label>Zoom <select id="zoom"><option value="fit">Fit screen</option><option value="width">Fit width</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select></label>
+      <button id="fullScreen" title="Hide the browser bars so the tab gets the whole screen (Esc to leave)">Full screen</button>
       <label class="toggle admin-only"><input type="checkbox" id="editMode"> Edit layout</label>
     </div>
     <div id="editBar" class="bar edit hidden">
@@ -81,13 +82,11 @@
     </div>
   </section>
 
-  <!-- ===== Globals ===== -->
+  <!-- ===== Variables ===== -->
   <section id="view-globals" class="view">
     <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every script.</p>
     <h3>vAPI <span class="muted">(scripts, API <code>/api/vapi</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="vapiBody"></tbody></table>
-    <h3>Globals <span class="muted">(scripts, API <code>/api/globals</code> and database)</span></h3>
-    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="globalsBody"></tbody></table>
     <h3>vKonstant <span class="muted">(scripts and screen only: no API, no database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th></tr></thead><tbody id="vkBody"></tbody></table>
     <h3>Shared variables <span class="muted">(scripts only)</span></h3>
@@ -131,7 +130,7 @@
   <!-- ===== Import ===== -->
   <section id="view-import" class="view">
     <h3>BeerSmith recipe</h3>
-    <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the Globals named in Settings &gt; BeerXML mapping.</p>
+    <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the variables named in Settings &gt; BeerXML mapping.</p>
     <input type="file" id="xmlFile" accept=".xml,text/xml" class="op-only">
     <button id="importBtn" class="primary op-only">Import</button>
     <pre id="importResult"></pre>
@@ -243,7 +242,7 @@
     <div class="form admin-only">
       <label>Title <input id="setTitle"></label>
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
-      <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change Globals through the API.<input id="setKey"></label>
+      <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change vAPI variables through the API.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
       <div>Start these scripts when the server starts:</div>
       <div id="setAuto" class="checks"></div>
