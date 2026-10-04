@@ -11,7 +11,7 @@
   <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Brew Panel</span></div>
   <nav id="views">
     <button data-view="workspace" class="active">Tabs</button>
-    <button data-view="scripts">Scripts</button>
+    <button data-view="scripts">Processes</button>
     <button data-view="globals">Variables</button>
     <button data-view="log">Log</button>
     <button data-view="devices">Devices</button>
@@ -56,11 +56,11 @@
     <div id="wsScroll"><div id="wsSizer"><div id="ws"><svg id="pipes"></svg></div></div></div>
   </section>
 
-  <!-- ===== Scripts ===== -->
+  <!-- ===== Processes (internally "scripts") ===== -->
   <section id="view-scripts" class="view">
     <div class="split">
       <aside class="scriptList">
-        <div class="bar"><button id="newScript" class="admin-only">New</button><button id="renScript" class="admin-only">Rename</button><button id="delScript" class="admin-only">Delete</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running script">Stop all</button></div>
+        <div class="bar"><button id="newScript" class="admin-only">New</button><button id="renScript" class="admin-only">Rename</button><button id="delScript" class="admin-only">Delete</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running process">Stop all</button></div>
         <ul id="scriptList"></ul>
       </aside>
       <div class="editorPane">
@@ -75,7 +75,7 @@
         </div>
         <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
         <ul id="problems"></ul>
-        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all scripts</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
+        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all processes</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
         <pre id="console"></pre>
       </div>
     </div>
@@ -83,14 +83,14 @@
 
   <!-- ===== Globals ===== -->
   <section id="view-globals" class="view">
-    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every script.</p>
-    <h3>vAPI <span class="muted">(scripts, API <code>/api/vapi</code> and database)</span></h3>
+    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every process.</p>
+    <h3>vAPI <span class="muted">(processes, API <code>/api/vapi</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="vapiBody"></tbody></table>
-    <h3>Globals <span class="muted">(scripts, API <code>/api/globals</code> and database)</span></h3>
+    <h3>Globals <span class="muted">(processes, API <code>/api/globals</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="globalsBody"></tbody></table>
-    <h3>vKonstant <span class="muted">(scripts and screen only: no API, no database)</span></h3>
+    <h3>vKonstant <span class="muted">(processes and screen only: no API, no database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th></tr></thead><tbody id="vkBody"></tbody></table>
-    <h3>Shared variables <span class="muted">(scripts only)</span></h3>
+    <h3>Shared variables <span class="muted">(processes only)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody id="sharedBody"></tbody></table>
   </section>
 
@@ -139,12 +139,12 @@
 
     <div class="admin-only">
     <h3>BruControl configuration</h3>
-    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and scripts are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
+    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
       <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
       <label class="toggle"><input type="checkbox" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
-      <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace scripts with the same name (old copy kept as .bak)</label>
+      <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace processes with the same name (old copy kept as .bak)</label>
       <label>Picture folder <input id="bruMedia" value="oakbarn" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
     </div>
     <button id="bruPreview">Check file</button>
@@ -178,7 +178,7 @@
   <section id="view-settings" class="view">
     <div class="admin-only">
       <h3>Start from a sample</h3>
-      <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter scripts. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
+      <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter processes. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
       <div id="sampleList" class="samples"></div>
     </div>
     <h3>My account</h3>
@@ -190,7 +190,7 @@
     </div>
     <div class="admin-only">
       <h3>Users</h3>
-      <p class="muted"><b>Admin</b>: everything. <b>Operator</b>: brew day use (switch outputs, set values, start and stop scripts) but no layout, script, device or settings changes. <b>Viewer</b>: watch only.</p>
+      <p class="muted"><b>Admin</b>: everything. <b>Operator</b>: brew day use (switch outputs, set values, start and stop processes) but no layout, process, device or settings changes. <b>Viewer</b>: watch only.</p>
       <table class="grid"><thead><tr><th>User</th><th>Role</th><th></th></tr></thead><tbody id="userBody"></tbody></table>
       <div class="form row">
         <label>User name <input id="nuName" autocomplete="off" autocapitalize="none"></label>
@@ -205,7 +205,7 @@
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
       <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change Globals through the API.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
-      <div>Start these scripts when the server starts:</div>
+      <div>Start these processes when the server starts:</div>
       <div id="setAuto" class="checks"></div>
       <button id="saveSettings" class="primary">Save settings</button>
     </div>
