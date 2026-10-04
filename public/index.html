@@ -188,6 +188,16 @@
       <label>New password again <input type="password" id="pwNew2" autocomplete="new-password"></label>
       <button id="pwSave">Change password</button>
     </div>
+    <h4>Sign-in codes by email or text</h4>
+    <p class="muted">Instead of a password you can tap <b>Email or text me a code</b> on the sign-in page. The code goes to the email address and/or mobile number here.</p>
+    <div class="form row">
+      <label class="admin-only">For user <select id="ctUser"></select></label>
+      <label>Email <input id="ctEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+      <label>Mobile number <input id="ctPhone" type="tel" autocomplete="tel" placeholder="555-123-4567"></label>
+      <label>Send texts through <select id="ctVia"></select></label>
+      <button id="ctSave">Save</button>
+    </div>
+    <p id="ctNote" class="muted"></p>
     <div class="admin-only">
       <h3>Users</h3>
       <p class="muted"><b>Admin</b>: everything. <b>Operator</b>: brew day use (switch outputs, set values, start and stop scripts) but no layout, script, device or settings changes. <b>Viewer</b>: watch only.</p>
@@ -202,6 +212,29 @@
       <p class="muted">For a forgotten password: on the sign-in page, <b>Forgot password?</b> takes a user name, this code and a new password. It only works from your home WiFi or Tailscale, and each code works once. Forgot a helper's password? Use <b>Set password</b> above instead.</p>
       <div class="bar"><span id="recInfo"></span><button id="recNew">Make a new recovery code</button></div>
       <div id="recShow" class="hidden"><div class="recoveryCode" id="recCode"></div><p>Write this down now and keep it away from the Pi. It is shown only this once. Any older code no longer works.</p></div>
+      <h3>Sending codes (email and text)</h3>
+      <p class="muted">The panel sends sign-in codes from your own email account. Texts are sent free through your phone carrier's email-to-text address, or through <a href="https://www.twilio.com" target="_blank" rel="noopener">Twilio</a> (a paid service, about a cent per text, works with every carrier). Passwords here are kept on the Pi only.</p>
+      <div class="form row">
+        <button id="msGmail" type="button">Fill in for Gmail</button>
+        <button id="msOutlook" type="button">Fill in for Outlook.com</button>
+      </div>
+      <div class="form row">
+        <label>Mail server <input id="msHost" placeholder="smtp.gmail.com"></label>
+        <label>Port <input id="msPort" type="number" style="width:6em" placeholder="465"></label>
+        <label>Security <select id="msSec"><option value="ssl">SSL (port 465)</option><option value="starttls">STARTTLS (port 587)</option><option value="none">None (local relay only)</option></select></label>
+      </div>
+      <div class="form row">
+        <label>Email account <input id="msUser" autocomplete="off" placeholder="you@gmail.com"></label>
+        <label>Password or app password <input id="msPass" type="password" autocomplete="new-password"></label>
+        <label>Send from <input id="msFrom" placeholder="you@gmail.com"></label>
+      </div>
+      <p class="muted">Gmail: turn on 2-Step Verification, then make an <b>app password</b> at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a> and paste it above (not your normal Gmail password).</p>
+      <div class="form row">
+        <label>Twilio Account SID <input id="msSid" autocomplete="off" placeholder="AC..."></label>
+        <label>Twilio Auth Token <input id="msToken" type="password" autocomplete="new-password"></label>
+        <label>Twilio phone number <input id="msTwFrom" placeholder="+15551234567"></label>
+      </div>
+      <div class="bar"><button id="msSave" class="primary">Save sending settings</button><button id="msTest">Send me a test</button><span id="msResult" class="muted"></span></div>
       <h3>Testing mode</h3>
       <label class="toggle"><input type="checkbox" id="setFresh"> Start fresh logins after each update</label>
       <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>

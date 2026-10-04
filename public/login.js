@@ -1,6 +1,8 @@
 // Sign-in page, first-time setup of the admin account, and "Forgot password?" with the recovery code
+import { addEyes } from './eye.js';
 const $ = s => document.querySelector(s);
-let mode = 'login';            // login | setup | forgot
+let mode = 'login';            // login | setup | forgot | code (sign in with a code sent by email or text)
+let codeSent = false;
 let st = {};
 
 async function post(url, body) {
@@ -11,16 +13,20 @@ async function post(url, body) {
 }
 
 function setMode(m) {
-  mode = m;
+  mode = m; codeSent = false;
   $('#lgError').textContent = '';
-  const newPw = m !== 'login';
+  const newPw = m === 'setup' || m === 'forgot';
+  $('#lgPassRow').classList.toggle('hidden', m === 'code');
+  $('#lgPass').required = m !== 'code';
+  $('#lgOtpRow').classList.add('hidden');
+  $('#lgCodeLink').classList.toggle('hidden', m !== 'login' || !st.codeSignIn);
   $('#lgCodeRow').classList.toggle('hidden', m !== 'forgot');
   $('#lgPass2Row').classList.toggle('hidden', !newPw);
   $('#lgPassLabel').textContent = m === 'forgot' ? 'New password' : 'Password';
   $('#lgPass').autocomplete = newPw ? 'new-password' : 'current-password';
   $('#lgForgot').classList.toggle('hidden', m !== 'login');
-  $('#lgBack').classList.toggle('hidden', m !== 'forgot');
-  $('#lgBtn').textContent = { login: 'Sign in', setup: 'Create admin account', forgot: 'Set new password' }[m];
+  $('#lgBack').classList.toggle('hidden', m !== 'forgot' && m !== 'code');
+  $('#lgBtn').textContent = { login: 'Sign in', setup: 'Create admin account', forgot: 'Set new password', code: 'Send me a code' }[m];
   $('#lgIntro').textContent = {
     login: 'Sign in to use the panel.',
     setup: st.setupAllowed
@@ -29,6 +35,7 @@ function setMode(m) {
     forgot: st.setupAllowed
       ? 'Enter your user name, the recovery code you wrote down, and a new password. Not the admin? Your admin can also set a new password for you in Settings > Users.'
       : 'Password recovery only works from your home WiFi or through Tailscale. Connect to one of those and try again, or ask your admin to set a new password for you.',
+    code: 'Type your user name. We send a 6-digit code to the email or mobile number saved for you in Settings > My account.',
   }[m];
   const locked = (m === 'setup' || m === 'forgot') && !st.setupAllowed;
   $('#loginForm').querySelectorAll('input,button').forEach(e => e.disabled = locked);
@@ -75,6 +82,7 @@ async function init() {
 }
 
 $('#lgForgot').onclick = ev => { ev.preventDefault(); setMode('forgot'); };
+$('#lgCodeLink').onclick = ev => { ev.preventDefault(); setMode('code'); };
 $('#lgBack').onclick = ev => { ev.preventDefault(); setMode('login'); };
 
 $('#loginForm').addEventListener('submit', async ev => {
@@ -83,6 +91,15 @@ $('#loginForm').addEventListener('submit', async ev => {
   const name = $('#lgName').value.trim(), password = $('#lgPass').value;
   try {
     if (mode !== 'login' && password !== $('#lgPass2').value) throw new Error('The two passwords are not the same');
+    if (mode === 'code' && !codeSent) {
+      const r = await post('/auth/code/send', { name });
+      codeSent = true;
+      $('#lgIntro').textContent = r.message;
+      $('#lgOtpRow').classList.remove('hidden'); $('#lgOtp').focus();
+      $('#lgBtn').textContent = 'Sign in';
+      return;
+    }
+    if (mode === 'code') { await post('/auth/code/login', { name, code: $('#lgOtp').value }); return location.replace('/'); }
     if (mode === 'setup') return showCode((await post('/auth/setup', { name, password })).recoveryCode, name);
     if (mode === 'forgot') return showCode((await post('/auth/recover', { name, code: $('#lgCode').value, password })).recoveryCode, name, true);
     await post('/auth/login', { name, password });
@@ -90,4 +107,5 @@ $('#loginForm').addEventListener('submit', async ev => {
   } catch (e) { $('#lgError').textContent = e.message; }
 });
 
+addEyes();
 init().catch(e => { $('#lgError').textContent = 'Cannot reach the panel: ' + e.message; });
