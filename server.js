@@ -4,7 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS } from './lib/store.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
@@ -194,7 +194,7 @@ async function route(req, res) {
     const { name, prop, value } = await jsonBody(req);
     const el = store.get(name);
     if (!el) return fail(res, 404, `No element "${name}"`);
-    if (['digitalIn', 'temperature', 'analogIn'].includes(el.type) && el.device && hw.devices.get(el.device)?.type !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
+    if (INPUT_PROPS[el.type]?.includes(String(prop).toLowerCase()) && el.device && hw.devices.get(el.device)?.type !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
     store.setProp(name, prop, value, 'ui');
     return ok(res);
   }
