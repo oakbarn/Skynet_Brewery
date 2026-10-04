@@ -16,7 +16,7 @@
 
 **Fitting**: a pipe part (tee, elbow, cross, cap, manual valve) placed as an IP type.
 
-**Global**: a variable every process can use, that can be logged and sent through the API.
+**Global**: BruControl's variable class. The panel turns Globals into vKonstant or vAPI variables when they are imported.
 
 **IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs.
 

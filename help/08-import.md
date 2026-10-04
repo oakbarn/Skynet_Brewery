@@ -5,7 +5,7 @@
 1. In BeerSmith: **File > Export > BeerXML**.
 2. On the **Import** screen, choose the `.xml` file and press **Import**.
 
-The recipe values go into the Globals named in **Settings > BeerXML mapping**, including mash steps and hops. Hop uses become group codes:
+The recipe values go into the variables named in **Settings > BeerXML mapping**, including mash steps and hops. Hop uses become group codes:
 
 | Hop use | Code |
 |---|---|
