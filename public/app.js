@@ -143,21 +143,31 @@ function buildIp(g) {
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve');
+const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e));
+// A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
+// it can also be a Global holding the percent. It passes flow whenever it is above 0 % open.
+const PROP_TYPES = ['analogOut', 'pwmOut', 'global', 'shared'];
+const isPropValve = e => e && e.subtype === 'propValve' && PROP_TYPES.includes(e.type);
+function propPct(e) {
+  const v = Number(S.values[e.name]?.value) || 0;
+  if (e.type !== 'analogOut') return v;
+  const lo = Number(e.rangeLow ?? 0), hi = Number(e.rangeHigh ?? 100);
+  return hi === lo ? 0 : (v - lo) / (hi - lo) * 100;
+}
 const SIDES = ['left', 'right', 'top', 'bottom'];
 function sidePt(e, side) {
   const x = e.x || 0, y = e.y || 0, w = e.w || 120, hh = e.h || 60;
   return side === 'right' ? [x + w, y + hh / 2] : side === 'top' ? [x + w / 2, y] : side === 'bottom' ? [x + w / 2, y + hh] : [x, y + hh / 2];
 }
 const devIps = e => {
-  const v = e.subtype === 'valve';
+  const v = e.subtype === 'valve' || e.subtype === 'propValve';
   return [{ id: `dev:${e.name}:in`, label: `${e.name} ${v ? 'end A' : 'inlet'}`, text: v ? 'A' : 'IN', c: sidePt(e, e.ipIn || 'left') },
     { id: `dev:${e.name}:out`, label: `${e.name} ${v ? 'end B' : 'outlet'}`, text: v ? 'B' : 'OUT', c: sidePt(e, e.ipOut || 'right') }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
-  n.style.setProperty('--ipc', e.subtype === 'valve' ? '#4fb3ff' : '#3fbf6a');
+  n.style.setProperty('--ipc', e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
   return n;
 }
 function placeDevIps(e) {
@@ -203,6 +213,11 @@ function fillEl(n, e) {
       // A screen picture: static image, or it follows another element (on image / off image)
       if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || v.image || ''; }
       text = e.text ?? ''; break;
+  }
+  if (isPropValve(e)) {                              // show percent open, and the open / closed picture
+    const pct = propPct(e); on = pct > 0;
+    text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
+    img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || v.image || '';
   }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button']) n.classList.toggle('look-' + k, e.look === k);
@@ -359,6 +374,7 @@ function ipNode(id, ws) {
   if (dn !== null) {
     const e = L().elements.find(x => x.name === dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
     if (e.subtype === 'valve') return on ? { key: 'dev:' + dn, pass: true } : { closed: true };
+    if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
     return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
   }
   const g = L().graphics.find(g => g.id === id && g.workspace === ws);
@@ -550,11 +566,17 @@ $('#editMode').addEventListener('change', e => {
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
   pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'oakbarn/Pump_Red_Rip_On.png', imageOff: 'oakbarn/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
+  // analogOut when that output type is installed (its fields exist), otherwise a Global holding 0-100 %
+  get propValve() {
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'oakbarn/Valve_Ball_OpenH_1.png', imageOff: 'oakbarn/Valve_Ball_ClosedH_1.png' };
+    return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
+      : { type: 'global', dataType: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
+  },
   valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'oakbarn/Valve_Ball_OpenV-1x1.png', imageOff: 'oakbarn/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
-$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'pump', 'valve', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, { digitalOut: 'digitalOut (plain)', pump: 'Pump (Device Output)', valve: 'Valve (Device Output)' }[t] || t)));
+$('#addType').append(...['picture', 'global', 'shared', 'digitalOut', 'pump', 'valve', 'propValve', 'switch', 'digitalIn', 'temperature', 'analogIn', 'timer', 'alarm', 'label'].map(t => h('option', { value: t }, { digitalOut: 'digitalOut (plain)', pump: 'Pump (Device Output)', valve: 'Valve (Device Output)', propValve: 'Proportional valve (0-100 %)' }[t] || t)));
 $('#addEl').onclick = () => {
-  const pick = $('#addType').value, preset = PRESETS[pick], type = preset ? preset.type : pick; let i = 1, base = (preset ? pick[0].toUpperCase() + pick.slice(1) : type) + '_';
+  const pick = $('#addType').value, preset = PRESETS[pick], type = preset ? preset.type : pick; let i = 1, base = ({ pump: 'Pump', valve: 'Valve', propValve: 'PropValve' }[pick] || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
   const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : 130, h: type === 'timer' ? 80 : 60, ...(preset ? clone(preset) : {}) };
   if (type === 'global' || type === 'shared') e.dataType = 'value';
@@ -606,6 +628,7 @@ const F = {
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'text'], ['bold', 'Bold', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
+  propValve: [['ipIn', 'Valve end A: IP side', 'sel', SIDES], ['ipOut', 'Valve end B: IP side', 'sel', ['right', 'left', 'top', 'bottom']], ['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'bool'], ['label', 'Name (e.g. Red pump out, MLT in, Drain)', 'text'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'text'], ['hideRun', 'Show only while editing the layout', 'bool'], ['workspace', 'Workspace', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']],
   pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'], ['width', 'Width', 'num'], ['color', 'Pipe color', 'text'], ['flowColor', 'Flow color', 'text'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'bool', true], ['workspace', 'Workspace', 'ws']],
 };
@@ -658,7 +681,7 @@ function dialog(title, fields, obj, canDelete) {
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const type = kind === 'el' ? item.type : item.kind;
-  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...F.common.slice(3)] : F[type];
+  const fields = kind === 'el' ? [...F.common.slice(0, 3), ...(F[type] || []), ...(isPropValve(item) ? F.propValve : []), ...F.common.slice(3)] : F[type];
   const work = clone(item);
   const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : type, fields, work, true);
   try {
