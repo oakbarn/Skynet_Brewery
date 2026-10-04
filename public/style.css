@@ -328,9 +328,23 @@ body.role-viewer .op-only { display: none !important; }
 .cpick .cswatch.none { background: repeating-linear-gradient(45deg, #ccc 0 4px, #fff 4px 8px) !important; }
 .cpick input[type=color] { width: 40px; height: 28px; padding: 0; border: none; background: none; }
 .cpick .hidden { display: none; }
-.yn-row { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
 /* on / off graphic dropdown with a small preview */
 .gpick { display: flex; align-items: center; gap: 8px; }
 .gpick select { flex: 1; min-width: 0; }
 .gpick .gprev { width: 32px; height: 32px; object-fit: contain; flex: none; }
 .gpick .hidden { display: none; }
+/* true / false settings are switches */
+.sw { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; cursor: pointer; }
+.sw input { position: absolute; opacity: 0; width: 0; height: 0; }
+.sw .swk { position: absolute; inset: 0; border-radius: 13px; background: #9aa2aa; transition: background .15s; }
+.sw .swk::after { content: ''; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: transform .15s; }
+.sw input:checked + .swk { background: #3fbf6a; }
+.sw input:checked + .swk::after { transform: translateX(20px); }
+.sw input:focus-visible + .swk { outline: 2px solid #4fb3ff; outline-offset: 2px; }
+/* vKonstant List: the Value / Text table in its settings, and the dropdown on screen */
+.vkitems table { border-collapse: collapse; width: 100%; margin-bottom: 6px; }
+.vkitems th { text-align: left; font-weight: 600; padding: 2px 4px; }
+.vkitems td { padding: 2px 4px; }
+.vkitems .vkv { width: 6em; }
+.vkitems .vkt { width: 100%; }
+#ws .el .vksel { position: absolute; left: 6px; right: 6px; bottom: 6px; font-size: 16px; padding: 4px; }

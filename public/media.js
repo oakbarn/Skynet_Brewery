@@ -131,7 +131,7 @@ async function send(file, overwrite) {
 }
 async function upload(files) {
   files = [...files]; if (!files.length || busy) return;
-  busy = true; const replace = $('#mdReplace').value === 'yes', saved = [], skipped = [], exists = [], errors = [];
+  busy = true; const replace = $('#mdReplace').checked, saved = [], skipped = [], exists = [], errors = [];
   try {
     for (const [i, f] of files.entries()) {
       $('#mdProgress').textContent = `Adding ${i + 1} of ${files.length}: ${f.name}` + (/\.zip$/i.test(f.name) ? ' (unpacking)' : '');
