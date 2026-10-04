@@ -15,6 +15,7 @@ import { listSamples, loadSample } from './lib/samples.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { plain, toStr } from './lib/values.js';
+import { Auth, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG = path.resolve(process.env.BREWPANEL_CONFIG ?? path.join(ROOT, 'config', 'brewery.json'));
@@ -28,6 +29,7 @@ store.load();
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 const hw = new Hardware(store);
+const auth = new Auth(DATA);
 hw.start();
 const control = new Control(store);
 control.start();
@@ -39,11 +41,11 @@ const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media pag
 engine.on('started', n => logger.scriptStarted(n));
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
-const clients = new Set();
+const clients = new Map();       // response -> session token (closed when the session ends)
 let pending = {};
 function broadcast(type, data) {
   const msg = `event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;
-  for (const res of clients) res.write(msg);
+  for (const res of clients.keys()) res.write(msg);
 }
 function flush() { if (Object.keys(pending).length) { broadcast('values', pending); pending = {}; } }
 store.on('change', (name, prop, v) => {
@@ -67,7 +69,8 @@ engine.on('show', ws => broadcast('show', ws));
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
-setInterval(() => { for (const res of clients) res.write(': ping\n\n'); }, 20000);
+function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
+setInterval(() => { dropEndedSessions(); for (const res of clients.keys()) res.write(': ping\n\n'); }, 20000);
 
 // ---------------- helpers ----------------
 const MIME = {
@@ -128,10 +131,27 @@ function findMedia(p) {
   return cur;
 }
 
-function apiAllowed(req, url) {
+function apiKeyOk(req, url) {
   const key = store.config.apiKey;
-  if (!key || req.method === 'GET') return true;
-  return req.headers['x-api-key'] === key || url.searchParams.get('key') === key;
+  return !!key && (req.headers['x-api-key'] === key || url.searchParams.get('key') === key);
+}
+
+// ---------------- login ----------------
+// Who may do what. viewer < operator < admin. New routes default to viewer for GET and admin for changes.
+function needRole(p, m) {
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop)$/.test(p)) return 'operator';
+  if (p === '/ui/ports') return 'admin';
+  return m === 'GET' ? 'viewer' : 'admin';
+}
+const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/style.css', '/favicon.ico']);
+const clientIp = req => req.socket.remoteAddress ?? '';
+// HTTPS through a proxy on this computer (for example "tailscale serve")
+const viaHttps = req => req.headers['x-forwarded-proto'] === 'https' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(clientIp(req));
+// Changes must come from a page served by this panel, not from another web site (stops cross-site tricks)
+function sameOrigin(req) {
+  const o = req.headers.origin;
+  if (!o || o === 'null') return !o;
+  try { const h = new URL(o).host; return h === req.headers.host || h === req.headers['x-forwarded-host']; } catch { return false; }
 }
 
 // The API has Globals and vAPI variables only (never Shared or vKonstant)
@@ -149,9 +169,56 @@ async function route(req, res) {
   const m = req.method;
   if (m === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE', 'Access-Control-Allow-Headers': 'Content-Type,X-API-Key' }); return res.end(); }
 
+  const token = parseCookies(req.headers.cookie)[COOKIE];
+  const me = auth.check(token);
+  const ip = clientIp(req);
+
+  // ===== Sign in / out, first-time setup, users =====
+  if (p.startsWith('/auth/')) {
+    if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
+    const login = (tok, code = 200) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, code, { ok: true }); };
+    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel' });
+    if (p === '/auth/setup' && m === 'POST') {
+      if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
+      if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');
+      const { name, password } = await jsonBody(req);
+      auth.addUser(name, password, 'admin');
+      return login(auth.newSession(auth.findUser(name).name));
+    }
+    if (p === '/auth/login' && m === 'POST') { const { name, password } = await jsonBody(req); return login(auth.login(name, password, ip)); }
+    if (p === '/auth/logout' && m === 'POST') { auth.logout(token); dropEndedSessions(); res.setHeader('Set-Cookie', auth.clearCookie()); return ok(res); }
+    if (!me) return fail(res, 401, 'Please sign in');
+    if (p === '/auth/password' && m === 'POST') {
+      const { current, password } = await jsonBody(req);
+      try { auth.login(me.name, current, ip); } catch { return fail(res, 400, 'Your current password is wrong'); }
+      auth.setPassword(me.name, password); auth.endSessionsFor(me.name); dropEndedSessions();
+      return login(auth.newSession(me.name));
+    }
+    if (me.role !== 'admin') return fail(res, 403, 'Only an admin can manage users');
+    if (p === '/auth/users' && m === 'GET') return ok(res, auth.listUsers());
+    if (p === '/auth/users' && m === 'POST') { const { name, password, role } = await jsonBody(req); auth.addUser(name, password, role); return ok(res); }
+    const u = /^\/auth\/users\/(.+)$/.exec(p);
+    if (u && m === 'PUT') {
+      const { role, password } = await jsonBody(req);
+      if (role) auth.setRole(u[1], role);
+      if (password) auth.setPassword(u[1], password);
+      auth.endSessionsFor(u[1]); dropEndedSessions();      // they sign in again with the new role / password
+      if (u[1].toLowerCase() === me.name.toLowerCase()) return login(auth.newSession(me.name));
+      return ok(res);
+    }
+    if (u && m === 'DELETE') { auth.removeUser(u[1]); dropEndedSessions(); return ok(res); }
+    return fail(res, 404, 'Unknown route');
+  }
+
   // ===== Public API: Globals and vAPI only (Shared and vKonstant variables are never exposed) =====
+  // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
-    if (!apiAllowed(req, url)) return fail(res, 401, 'Missing or wrong X-API-Key');
+    if (!apiKeyOk(req, url)) {
+      if (me) {
+        if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
+        if (!roleAtLeast(me.role, m === 'GET' ? 'viewer' : 'operator')) return fail(res, 403, 'Your account is view only');
+      } else if (!(m === 'GET' && isPrivateAddress(ip))) return fail(res, 401, 'Missing or wrong X-API-Key');
+    }
     if ((p === '/api/globals' || p === '/api/vapi') && m === 'GET') return ok(res, apiVars());
     if ((p === '/api/globals' || p === '/api/vapi') && (m === 'POST' || m === 'PUT')) {
       const body = await jsonBody(req); const done = [], errors = [];
@@ -187,15 +254,26 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown API route');
   }
 
+  // ===== Everything below needs a signed-in user =====
+  if (m === 'GET' && PUBLIC_FILES.has(p)) return sendFile(req, res, path.join(PUBLIC, p));
+  if (!me) {
+    if (m === 'GET' && (p === '/' || p === '/index.html')) { res.writeHead(302, { Location: '/login.html' }); return res.end(); }
+    return fail(res, 401, 'Please sign in');
+  }
+  const need = needRole(p, m);
+  if (!roleAtLeast(me.role, need)) return fail(res, 403, need === 'admin' ? 'Only an admin can do that' : 'Your account is view only');
+  if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
+
   // ===== Browser UI =====
   if (p === '/ui/events') {
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
     res.write('retry: 2000\n\n');
-    clients.add(res); req.on('close', () => clients.delete(res));
+    clients.set(res, token); req.on('close', () => clients.delete(res));
     return;
   }
   if (p === '/ui/state' && m === 'GET') {
-    return ok(res, { config: store.config, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    const config = me.role === 'admin' ? store.config : { ...store.config, apiKey: undefined };
+    return ok(res, { me, roles: ROLES, config, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -299,6 +377,9 @@ async function route(req, res) {
 }
 
 const server = http.createServer((req, res) => {
+  res.setHeader('X-Frame-Options', 'DENY');               // the panel cannot be hidden inside another site's page
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'same-origin');
   route(req, res).catch(e => { if (!res.headersSent) fail(res, 400, e.message); });
 });
 const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
@@ -306,8 +387,9 @@ server.listen(PORT, () => {
   console.log(`Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nScripts: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();
+  if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
 });
 
-function shutdown() { console.log('Stopping...'); engine.stopAll(); control.stop(); store.persistNow(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
+function shutdown() { console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);

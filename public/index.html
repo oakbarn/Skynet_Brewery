@@ -21,6 +21,7 @@
   </nav>
   <div class="right">
     <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
+    <span id="who"><span id="whoName" class="muted"></span><button id="signOut">Sign out</button></span>
   </div>
 </header>
 
@@ -31,7 +32,7 @@
       <div id="wsTabs" class="tabs"></div>
       <div class="spacer"></div>
       <label>Zoom <select id="zoom"><option value="fit">Fit</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option></select></label>
-      <label class="toggle"><input type="checkbox" id="editMode"> Edit layout</label>
+      <label class="toggle admin-only"><input type="checkbox" id="editMode"> Edit layout</label>
     </div>
     <div id="editBar" class="bar edit hidden">
       <select id="addType"></select>
@@ -59,7 +60,7 @@
   <section id="view-scripts" class="view">
     <div class="split">
       <aside class="scriptList">
-        <div class="bar"><button id="newScript">New</button><button id="renScript">Rename</button><button id="delScript">Delete</button><span class="spacer"></span><button id="stopAll" class="danger" title="Stop every running script">Stop all</button></div>
+        <div class="bar"><button id="newScript" class="admin-only">New</button><button id="renScript" class="admin-only">Rename</button><button id="delScript" class="admin-only">Delete</button><span class="spacer"></span><button id="stopAll" class="danger op-only" title="Stop every running script">Stop all</button></div>
         <ul id="scriptList"></ul>
       </aside>
       <div class="editorPane">
@@ -67,10 +68,10 @@
           <strong id="scriptName">-</strong>
           <span id="scriptState" class="muted"></span>
           <span class="spacer"></span>
-          <button id="saveScript" class="primary">Save</button>
-          <button id="checkScript">Check</button>
-          <button id="startScript">Start</button>
-          <button id="stopScript">Stop</button>
+          <button id="saveScript" class="primary admin-only">Save</button>
+          <button id="checkScript" class="admin-only">Check</button>
+          <button id="startScript" class="op-only">Start</button>
+          <button id="stopScript" class="op-only">Stop</button>
         </div>
         <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
         <ul id="problems"></ul>
@@ -109,8 +110,8 @@
   <!-- ===== Devices ===== -->
   <section id="view-devices" class="view">
     <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
-    <h3>Add device</h3>
-    <div class="form row">
+    <h3 class="admin-only">Add device</h3>
+    <div class="form row admin-only">
       <label>Name <input id="devName" placeholder="MEGA1"></label>
       <label>Type <select id="devType"><option value="serial">Arduino / ESP32 board (USB)</option><option value="ethernet">Board on Ethernet (wired)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
       <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
@@ -121,7 +122,7 @@
     <h3>OneWire probe index</h3>
     <p class="muted">Each DS18B20 probe gets a number here, and temperature elements use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every element that uses that number follows it, nothing else changes.</p>
     <table class="grid"><thead><tr><th>#</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
-    <div class="form row"><button id="addSlot">Add probe number</button></div>
+    <div class="form row admin-only"><button id="addSlot">Add probe number</button></div>
     <h3>OneWire probes seen</h3>
     <p class="muted">Every probe the boards report, by its ROM id (not its position on the bus). Give a new probe a number here.</p>
     <table class="grid"><thead><tr><th>Device</th><th>Probe ROM id</th><th>Reading</th><th>Probe number</th></tr></thead><tbody id="probeBody"></tbody></table>
@@ -131,11 +132,12 @@
   <section id="view-import" class="view">
     <h3>BeerSmith recipe</h3>
     <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the Globals named in Settings &gt; BeerXML mapping.</p>
-    <input type="file" id="xmlFile" accept=".xml,text/xml">
-    <button id="importBtn" class="primary">Import</button>
+    <input type="file" id="xmlFile" accept=".xml,text/xml" class="op-only">
+    <button id="importBtn" class="primary op-only">Import</button>
     <pre id="importResult"></pre>
     <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
 
+    <div class="admin-only">
     <h3>BruControl configuration</h3>
     <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and scripts are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
     <input type="file" id="bruFile" accept=".brucfg,.xml">
@@ -148,11 +150,12 @@
     <button id="bruPreview">Check file</button>
     <button id="bruImport" class="primary">Import</button>
     <pre id="bruResult"></pre>
+    </div>
   </section>
 
   <!-- ===== Media: add pictures and sounds from any browser (looks like Windows File Explorer) ===== -->
   <section id="view-media" class="view">
-    <div class="bar mdTools">
+    <div class="bar mdTools admin-only">
       <label class="mdPickBtn">⬆ Add pictures / sounds<input id="mdPick" type="file" multiple accept="image/*,audio/*,.zip,.wav,.mp3,.ogg,.m4a,.svg" hidden></label>
       <button id="mdNew">📁 New folder</button>
       <button id="mdUp" title="Up one folder">⬆ Up</button>
@@ -173,11 +176,31 @@
 
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
-    <h3>Start from a sample</h3>
-    <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter scripts. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
-    <div id="sampleList" class="samples"></div>
-    <h3>Settings</h3>
-    <div class="form">
+    <div class="admin-only">
+      <h3>Start from a sample</h3>
+      <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter scripts. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
+      <div id="sampleList" class="samples"></div>
+    </div>
+    <h3>My account</h3>
+    <div class="form row">
+      <label>Current password <input type="password" id="pwCur" autocomplete="current-password"></label>
+      <label>New password <input type="password" id="pwNew" autocomplete="new-password"></label>
+      <label>New password again <input type="password" id="pwNew2" autocomplete="new-password"></label>
+      <button id="pwSave">Change password</button>
+    </div>
+    <div class="admin-only">
+      <h3>Users</h3>
+      <p class="muted"><b>Admin</b>: everything. <b>Operator</b>: brew day use (switch outputs, set values, start and stop scripts) but no layout, script, device or settings changes. <b>Viewer</b>: watch only.</p>
+      <table class="grid"><thead><tr><th>User</th><th>Role</th><th></th></tr></thead><tbody id="userBody"></tbody></table>
+      <div class="form row">
+        <label>User name <input id="nuName" autocomplete="off" autocapitalize="none"></label>
+        <label>Password <input type="password" id="nuPass" autocomplete="new-password"></label>
+        <label>Role <select id="nuRole"><option value="viewer">Viewer</option><option value="operator">Operator</option><option value="admin">Admin</option></select></label>
+        <button id="nuAdd" class="primary">Add user</button>
+      </div>
+      <h3>Panel settings</h3>
+    </div>
+    <div class="form admin-only">
       <label>Title <input id="setTitle"></label>
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
       <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change Globals through the API.<input id="setKey"></label>
@@ -189,8 +212,8 @@
     <div class="form" id="pictures">
       <h3>Pictures (PNG / JPG to SVG)</h3>
       <p class="muted">Every PNG or JPG put in a media folder gets an SVG copy next to it, so it stays sharp at any size. The original file is never changed, so BruControl can still use it. Tracing works best on drawings and icons; photo-like pictures come out blotchy, so check them here.</p>
-      <label>Use SVG pictures <select id="picMode"></select></label>
-      <div class="bar"><button id="picConvert" class="primary">Convert all now</button><button id="picRedo">Re-make all</button><input id="picFilter" placeholder="Filter by name"></div>
+      <label class="admin-only">Use SVG pictures <select id="picMode"></select></label>
+      <div class="bar admin-only"><button id="picConvert" class="primary">Convert all now</button><button id="picRedo">Re-make all</button><input id="picFilter" placeholder="Filter by name"></div>
       <div id="picSummary" class="muted"></div>
       <div id="picBox"></div>
     </div>
