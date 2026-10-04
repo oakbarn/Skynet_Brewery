@@ -20,6 +20,7 @@ USB and Ethernet are preferred over WiFi for anything that heats or pumps. On ev
 | `CFG DI <pin> <PULLUP\|NOPULL> <ms>` | Input pull-up on or off, and debounce: a new level must hold this many ms before the board reports it (default 20). |
 | `CFG RTD <cs> <2\|3\|4>` | PT100 / PT1000 probe wires on the MAX31865 board at chip-select pin `cs`. |
 | `CFG TC <cs> <K\|J\|T\|N\|E\|R\|S\|B>` | Thermocouple type on the MAX31856 board at chip-select pin `cs` (MAX31855 boards are K only). |
+| `CFG STEP …`, `GO`, `RUN`, `STOP`, `ZERO`, `HOME`, `EN` | Stepper motors: see **Stepper motors** below. |
 
 After every reconnect the server sends the `CFG` lines and then the state of every output, so the hardware matches the screen and the panel's settings.
 
@@ -37,6 +38,8 @@ After every reconnect the server sends the `CFG` lines and then the state of eve
 | `P <pin> <count>` | Flow meter: pulses counted since the device started. Every second. |
 | `W <dt> <raw>` | HX711 load-cell board, by its DT pin: average raw count since the last report. Every second. |
 | `T <romid> <°F>` | OneWire temperature, by the probe's 16-hex-digit ROM id. |
+| `SP <step pin> <steps> <0\|1> <0\|1>` | Stepper position in steps, moving, homed. Every 0.2 s while moving, every second when still. |
+| `SH <step pin> <1\|0>` | Stepper homing finished: 1 = found the switch, 0 = gave up. |
 | `ERR <text>` | Any problem. Shown on the Devices page. |
 
 ### OneWire probe index
@@ -70,6 +73,7 @@ Devices are elements tied to a pin on a board. Every Device has `device` (which 
 | scale | vessel weight and volume from load cells on HX711 boards | `channel` = DT pin(s), comma between several boards on one vessel (their counts are added). `countsPerUnit` (calibration), `weightUnits` lb / kg, `volumeUnits` gal / L, `specificGravity` (1.000 = water) or `sgFrom` (an element holding the gravity, e.g. the OG variable), `offset`, `autoTare`, `autoTareBand`, `autoTareSeconds`. Properties: `value` (weight), `volume`, `raw`. A process or the screen tares it with `"Scale" tare = true` or `"Scale" volume = 0`, and calibrates it with `"Scale" calibrate = 10` (10 = the known weight on it). |
 | dutyCycle, hysteresis, pid | relay or SSR switched by the server (BruControl-style control elements) | `input` (sensor element), `target`; the server switches the pin with `DO` (PID with `pwm` on sends `PWM`) |
 | flowMeter | hall-effect pulse flow meters | `pulsesPerUnit`, `units`. Properties `rate` (per minute) and `total` (a process can reset it: `"Flow_1" total = 0`). |
+| stepper | stepper motors (see **Stepper motors** below) | `channel` = STEP pin (IN1 on a 4-pin board), `dirPin`, `enablePin`, or `pin2`-`pin4`. Properties: `position`, `target`, `move`, `speed`, `run`, `stop`, `home`, `reset`, `moving`, `homed`, `steps`. |
 
 ### Pin names (Arduino Mega 2560)
 
@@ -98,3 +102,74 @@ Volume = net weight ÷ (water density × specific gravity). Water is 8.345 lb pe
 
 **Tare** zeroes the scale at its present reading and saves it, so it survives a restart. **Auto tare** (on by default) zeroes the scale by itself when the vessel reads empty (under 0.05 gal or 0.2 L) and steady for 10 seconds. This removes slow drift from temperature and settling, but never moves the zero while there is liquid in the vessel. Calibrate once: tare the empty scale, put a known weight on it, tap it, choose **Calibrate** and enter the weight.
 - **Analog outputs**: the Mega has no true analog output. Use a PWM-to-0-10 V (or 4-20 mA) converter module on a PWM pin listed in `AO_PINS`.
+
+## Stepper motors
+
+A stepper is a Device like any other: it sits on pins of one board. The board makes the steps itself (exact timing, speeding up and slowing down, stopping on the home switch); the panel only says where to go. This keeps the motor smooth even though the panel talks to the board over USB, Ethernet or WiFi.
+
+**BruControl has no stepper element** (its devices are digital / PWM / analog outputs, inputs, counters and probes), so a BruControl import never brings one in; add them on the Tabs page with **Add element > Devices: motors**.
+
+### Drivers and wiring
+
+| Driver board | Wired with | Microsteps (set on the board) | Shortest STEP pulse | ENABLE |
+|---|---|---|---|---|
+| A4988 | STEP, DIR, ENABLE pins | MS1-MS3 jumpers: 1, 2, 4, 8, 16 | 1 µs | LOW = on (leave unwired or tie to GND for always on) |
+| DRV8825 | STEP, DIR, ENABLE | M0-M2: up to 32 | 2 µs | LOW = on |
+| TMC2208 / TMC2209 (stand-alone, quiet) | STEP, DIR, EN | MS1 / MS2: 8, 16, 32, 64 | 1 µs | LOW = on |
+| TB6600 / DM542 (big NEMA 23 motors, 24-48 V) | PUL, DIR, ENA (wire PUL-, DIR-, ENA- to GND and the + inputs to the pins) | DIP switches | 5 µs / 3 µs | ENA energized = OFF, so with ENA- to GND pick "LOW" |
+| ULN2003 + 28BYJ-48 (small 5 V geared motor, slow) | IN1-IN4 | half steps: 4096 per turn | – | – |
+| L298N (bipolar motor, H-bridge) | IN1-IN4 | full or half steps | – | – |
+
+Every pin the stepper uses (STEP, DIR, ENABLE or IN1-IN4, and the home switch) goes in `STEPPER_PINS` in the Mega sketch, and `USE_STEPPER` is set to 1 (install the **AccelStepper** library by Mike McCauley). The ESP32 bridge needs no change: it passes the lines on to the Mega. Power the motor from its own supply, never from the Mega's 5 V pin (except a single 28BYJ-48), and set the driver's current limit to the motor's rating.
+
+### Settings (properties dialog)
+
+- **Device**, **Driver board** (picking one fills in the usual wiring, pulse and microsteps; **Add new ...** for another driver), **Wired with** (STEP / DIR, or 4 coil pins).
+- **Pins**: STEP, DIR, ENABLE (empty = not wired), or IN1-IN4. **The driver is ON when the ENABLE pin is** LOW / HIGH. **Shortest STEP pulse** (µs).
+- **Reverse the direction** (Yes / No).
+- **Motor steps per turn**: 200 for a 1.8° motor (most NEMA 17 / 23), 400 for 0.9°, 2048 for a 28BYJ-48. **Microstepping** must match the jumpers or DIP switches on the driver. **Gearbox**: motor turns per output turn.
+- **Position units** (turns, degrees, mm, in, mL, L, gal, %, steps; **Add new ...**) and **Units per output turn**: 360 for degrees, 100 for % (or 400 % per turn for a quarter-turn ball valve, so 0-100 % = 90°), the lead screw pitch for mm, the mL per turn of a dosing pump.
+  Steps per unit = steps per turn × microsteps × gearbox ÷ units per turn. The dialog shows the result under **Position now**.
+- **Top speed** and **Speeds up and slows down by** (units per second).
+- **Keep the motor powered when stopped**: Yes holds the position (the motor runs warm); No lets it cool and turn freely.
+- **Lowest / Highest position allowed**: moves are kept inside these, and **run** stops at them.
+- **Home switch pin** (on the same board), **Home switch** normally open or normally closed, **Home switch is at the** low or high end, **Homing speed**, **Position at the home switch**, **Stop homing if the switch is not found within**, **Home by itself each time the board connects**.
+
+### Processes (scripts) and the screen
+
+| Process line | Does |
+|---|---|
+| `"Valve_M" target = 50` (or `value = 50`) | Go to position 50. |
+| `"Valve_M" move = -10` | Go 10 units back from where it is heading. |
+| `"Valve_M" speed = 5` | Top speed for the next moves (units per second). |
+| `"Valve_M" run = 2` | Keep turning at 2 units per second (minus = backward, `run = 0` slows to a stop). Stops at the allowed limits. |
+| `stop "Valve_M"` or `"Valve_M" stop = true` | Slow down and stop now. |
+| `"Valve_M" home = true` | Turn toward the home switch until it is hit; that spot becomes the home position. |
+| `reset "Valve_M"` or `"Valve_M" reset = true` | Call the present spot the home position (no switch needed). |
+| `"Valve_M" enabled = false` | Turn the motor off (free to turn by hand); `true` turns it back on. |
+| `wait "Valve_M" moving == false` | Wait until the move is done. |
+| `wait "Valve_M" homed == true` | Wait for homing. |
+
+`position`, `steps`, `moving` and `homed` come from the board and cannot be set by a Process. On a tab, a stepper shows its position, the target while moving, and "(not homed)" when it has a home switch that it has not found since the board started. Tapping it gives Move to, Move by, Turn at a speed, Stop, Home, Call this position home, and Turn the motor off / on.
+
+On the simulator a stepper moves at its set speed; `sim` sets where it starts and where its home switch is, e.g. `{"start": 40, "switchAt": -5}`.
+
+### Lines
+
+| Server → board | Meaning |
+|---|---|
+| `CFG STEP <step> <dir> <enable\|-1> <flags> <top steps/s> <accel steps/s²> <pulse µs>` | Set up a STEP / DIR stepper. The STEP pin names the motor in every later line. |
+| `CFG STEP4 <in1> <in2> <in3> <in4> <flags> <top> <accel>` | Set up a 4-pin stepper (IN1 names it). |
+| `CFG HOME <step> <switch pin> <flags>` | Its home switch: flags 1 = the switch reads HIGH when hit (normally closed), 2 = the switch is at the + end. |
+| `GO <step> <position> <steps/s>` | Go to a position (in steps). |
+| `RUN <step> <steps/s>` | Keep turning (minus = backward); `RUN <step> 0` slows to a stop. |
+| `STOP <step>` | Slow down and stop. |
+| `ZERO <step> <position>` | Call the present spot this position (and homed). |
+| `HOME <step> <steps/s> <max steps> <position>` | Turn at this speed (sign = direction) until the switch is hit, then call that spot `position`. Gives up after `max steps`. |
+| `EN <step> <0\|1>` | Driver off (motor free) or on. |
+
+Flags in `CFG STEP`: 1 reverse direction, 2 ENABLE HIGH = on, 4 keep powered when stopped, 8 half steps (4-pin boards), 16 28BYJ-48 coil order (IN1, IN3, IN2, IN4).
+
+The board also stops a move that runs into the home switch, and the 10-second watchdog stops every motor at once. After a USB reconnect the Mega restarts, so the motor reports `homed` 0 until it is homed again.
+
+The Mega makes steps between its other jobs, so keep each motor under about 1,000-2,000 steps per second (fewer microsteps for fast moves). The Mega firmware for steppers has been compiled with the real AccelStepper library but not yet run on a real motor. Steppers on a Raspberry Pi's own pins are not built (the Pi is not exact enough for step timing; a Pi would use a Mega or ESP32 for the motor).
