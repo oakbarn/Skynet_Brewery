@@ -430,7 +430,7 @@ const ADD_MENU = [
   ]],
   ['Devices: digital inputs (board pin)', [
     ['Switch (on while closed)', 'digitalIn', 'DI', { mode: 'switch' }],
-    ['Momentary push button (one short ON per press)', 'digitalIn', 'PB', { mode: 'momentary', pulse: 100, lockout: 500 }],
+    ['Momentary push button (one short ON per press)', 'digitalIn', 'PB', { mode: 'momentary', pulse: 100, lockout: 3000 }],
     ['Push button that toggles (press on, press off)', 'digitalIn', 'DI', { mode: 'toggle' }],
     ['Latching input (stays on until reset: leak, E-stop, alarm)', 'digitalIn', 'DI', { mode: 'latch', onText: 'TRIPPED', offText: 'OK' }],
     ['Pulse counter (counts presses or pulses)', 'digitalIn', 'Count', { mode: 'counter' }],
@@ -506,7 +506,7 @@ const F = {
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', ['switch', 'momentary', 'toggle', 'latch', 'counter']],
-    ['pulse', 'Momentary: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Momentary: lockout before the next press counts (ms, empty = 500)', 'num'],
+    ['pulse', 'Momentary: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Momentary: lockout before the next press counts (ms, 3000 = 3 seconds; empty = 3000)', 'num'],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'text'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
