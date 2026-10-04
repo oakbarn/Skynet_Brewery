@@ -1,0 +1,7 @@
+{
+  "order": 4,
+  "name": "BrewZilla brew day (no board)",
+  "title": "BrewZilla Brew Day",
+  "description": "All-in-one BrewZilla plus a DigiBoil for sparge water, as Manual vessel widgets: no board or wiring. A step-by-step brew day like your BruControl one: advance switch, mash steps, boil timer, 10-minute hop warnings and hop alarms, readings logged to the database.",
+  "needs": "Nothing to wire"
+}

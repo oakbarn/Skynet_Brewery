@@ -29,6 +29,11 @@
       "color": "",
       "width": 1100,
       "height": 700
+    },
+    {
+      "name": "Variables Demo",
+      "width": 1300,
+      "height": 760
     }
   ],
   "elements": [
@@ -707,7 +712,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_MLT_In",
@@ -723,7 +731,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "VGC_23_do_BackManifold_Left_On_B1",
@@ -739,7 +750,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_MLT_Out",
@@ -755,7 +769,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "V_BK_In",
@@ -771,7 +788,10 @@
       "imageOn": "oakbarn/Valve_Ball_OpenH_1.png",
       "imageOff": "oakbarn/Valve_Ball_ClosedH_1.png",
       "hideName": true,
-      "hideValue": true
+      "hideValue": true,
+      "subtype": "valve",
+      "ipIn": "top",
+      "ipOut": "bottom"
     },
     {
       "name": "MB_35_do_YellowPump_B1",
@@ -784,7 +804,8 @@
       "device": "SIM",
       "channel": 33,
       "displayName": "Yellow Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Yellow_Pump_B1",
@@ -811,7 +832,8 @@
       "device": "SIM",
       "channel": 35,
       "displayName": "Red Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Red_Pump_B1",
@@ -838,7 +860,8 @@
       "device": "SIM",
       "channel": 37,
       "displayName": "Blue Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Blue_Pump_B1",
@@ -865,7 +888,8 @@
       "device": "SIM",
       "channel": 39,
       "displayName": "Green Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_Green_Pump_B1",
@@ -892,7 +916,8 @@
       "device": "SIM",
       "channel": 41,
       "displayName": "White Pump",
-      "look": "dark"
+      "look": "dark",
+      "subtype": "pump"
     },
     {
       "name": "insp_Pix_White_Pump_B1",
@@ -1030,9 +1055,249 @@
       "h": 60,
       "displayName": "Script status",
       "readOnly": true
+    },
+    {
+      "name": "vKSW_Testing",
+      "type": "vKonstant",
+      "kind": "switch",
+      "displayName": "Testing mode",
+      "x": 40,
+      "y": 60,
+      "w": 130,
+      "h": 90,
+      "onText": "TESTING",
+      "offText": "LIVE",
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKPB_Jog_Pump",
+      "type": "vKonstant",
+      "kind": "pushbutton",
+      "displayName": "Jog pump (hold)",
+      "x": 200,
+      "y": 60,
+      "w": 130,
+      "h": 140,
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKMB_Ping",
+      "type": "vKonstant",
+      "kind": "momentary",
+      "displayName": "Ping",
+      "x": 360,
+      "y": 60,
+      "w": 130,
+      "h": 140,
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKB_Ready",
+      "type": "vKonstant",
+      "kind": "bool",
+      "displayName": "Ready",
+      "x": 520,
+      "y": 60,
+      "w": 130,
+      "h": 70,
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKV_Strike_Target",
+      "type": "vKonstant",
+      "kind": "value",
+      "displayName": "Strike target",
+      "x": 680,
+      "y": 60,
+      "w": 170,
+      "h": 70,
+      "initial": 165,
+      "precision": 1,
+      "units": "°F",
+      "step": 0.5,
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKT_Mash_Rest",
+      "type": "vKonstant",
+      "kind": "time",
+      "displayName": "Mash rest",
+      "x": 880,
+      "y": 60,
+      "w": 150,
+      "h": 70,
+      "initial": "01:00:00",
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKDT_Brew_Day",
+      "type": "vKonstant",
+      "kind": "datetime",
+      "displayName": "Brew day",
+      "x": 1060,
+      "y": 60,
+      "w": 200,
+      "h": 70,
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKS_Brewer",
+      "type": "vKonstant",
+      "kind": "string",
+      "displayName": "Brewer",
+      "x": 520,
+      "y": 150,
+      "w": 330,
+      "h": 60,
+      "initial": "Fritz",
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vK_Burner_Pic",
+      "type": "vKonstant",
+      "kind": "graphic",
+      "x": 40,
+      "y": 230,
+      "w": 140,
+      "h": 160,
+      "hideName": true,
+      "initial": "oakbarn/Burner No Flame.png",
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vKL_Brew_Notes",
+      "type": "vKonstant",
+      "kind": "longstring",
+      "displayName": "Brew notes (media/notes/brew_notes.txt)",
+      "x": 200,
+      "y": 230,
+      "w": 480,
+      "h": 160,
+      "file": "notes/brew_notes.txt",
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vAV_HLT_Target",
+      "type": "vAPI",
+      "kind": "value",
+      "displayName": "HLT target",
+      "x": 40,
+      "y": 420,
+      "w": 170,
+      "h": 70,
+      "initial": 168,
+      "precision": 1,
+      "units": "°F",
+      "log": {
+        "mode": "days",
+        "every": 1,
+        "at": "12 AM"
+      },
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vAS_Batch_Status",
+      "type": "vAPI",
+      "kind": "string",
+      "displayName": "Batch status",
+      "x": 230,
+      "y": 420,
+      "w": 330,
+      "h": 70,
+      "initial": "Idle",
+      "log": {
+        "mode": "script",
+        "script": "Demo_Variables"
+      },
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vAB_Pump_Lock",
+      "type": "vAPI",
+      "kind": "bool",
+      "displayName": "Pump lock",
+      "x": 580,
+      "y": 420,
+      "w": 130,
+      "h": 70,
+      "log": {
+        "mode": "minutes",
+        "every": 5
+      },
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vAT_Boil_Left",
+      "type": "vAPI",
+      "kind": "time",
+      "displayName": "Boil left",
+      "x": 730,
+      "y": 420,
+      "w": 150,
+      "h": 70,
+      "log": {
+        "mode": "hms",
+        "interval": "00:00:30"
+      },
+      "workspace": "Variables Demo"
+    },
+    {
+      "name": "vADT_Last_Brew",
+      "type": "vAPI",
+      "kind": "datetime",
+      "displayName": "Last brew",
+      "x": 900,
+      "y": 420,
+      "w": 220,
+      "h": 70,
+      "workspace": "Variables Demo"
     }
   ],
   "graphics": [
+    {
+      "id": "ip_hlt_out",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "HLT out",
+      "x": 1090,
+      "y": 550,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
+    {
+      "id": "ip_mlt_in",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "MLT in",
+      "x": 1365,
+      "y": 550,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
+    {
+      "id": "ip_mlt_out",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "MLT out",
+      "x": 1415,
+      "y": 710,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
+    {
+      "id": "ip_bk_in",
+      "kind": "ip",
+      "workspace": "Brewery",
+      "label": "BK in",
+      "x": 1733,
+      "y": 545,
+      "w": 30,
+      "h": 30,
+      "color": "#e8a33a"
+    },
     {
       "id": "p_hlt_mlt",
       "kind": "pipe",
@@ -1064,7 +1329,9 @@
         "V_MLT_In",
         "MB_36_do_RedPump_B1"
       ],
-      "baseVisible": false
+      "baseVisible": false,
+      "from": "ip_hlt_out",
+      "to": "ip_mlt_in"
     },
     {
       "id": "p_mlt_bk",
@@ -1101,7 +1368,9 @@
         "V_BK_In",
         "MB_36_do_RedPump_B1"
       ],
-      "baseVisible": false
+      "baseVisible": false,
+      "from": "ip_mlt_out",
+      "to": "ip_bk_in"
     },
     {
       "id": "t_title",
@@ -1114,6 +1383,28 @@
       "text": "Batch hops (filled by BeerXML import)",
       "fontSize": 22,
       "bold": true
+    },
+    {
+      "id": "gvdemo1",
+      "kind": "text",
+      "workspace": "Variables Demo",
+      "x": 40,
+      "y": 10,
+      "w": 1200,
+      "h": 40,
+      "text": "vKonstant: scripts and screen only.   vAPI: scripts, API and database.   Start the script Demo_Variables, then press Ping.",
+      "fontSize": 16
+    },
+    {
+      "id": "gvdemo2",
+      "kind": "text",
+      "workspace": "Variables Demo",
+      "x": 40,
+      "y": 520,
+      "w": 1200,
+      "h": 120,
+      "text": "HLT target is written to the database every day at 12 AM.  Batch status is written only when Demo_Variables starts.\nPump lock every 5 minutes.  Boil left every 00:00:30.  See the Variables page to change these.",
+      "fontSize": 15
     }
   ],
   "autostart": [
@@ -1148,5 +1439,6 @@
       "dry hop": -111,
       "unused": 0
     }
-  }
+  },
+  "chooseSample": true
 }

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in - Brew Panel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="loginPage">
+<form id="loginForm" class="loginBox" autocomplete="on">
+  <h2 id="lgTitle">Brew Panel</h2>
+  <p id="lgIntro" class="muted">Sign in to use the panel.</p>
+  <label>User name <input id="lgName" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+  <label>Password <input id="lgPass" name="password" type="password" autocomplete="current-password" required></label>
+  <label id="lgPass2Row" class="hidden">Type the password again <input id="lgPass2" type="password" autocomplete="new-password"></label>
+  <p id="lgError" class="bad"></p>
+  <button id="lgBtn" class="primary" type="submit">Sign in</button>
+</form>
+<script type="module" src="login.js"></script>
+</body>
+</html>

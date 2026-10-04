@@ -1,0 +1,7 @@
+{
+  "order": 2,
+  "name": "Two vessels, one pump",
+  "title": "Two Vessel Brewery",
+  "description": "Electric kettle (strike and sparge water, then the boil) and a mash tun, one pump, five valves, two temperature probes, chiller water. Guided brew day with hop alarms.",
+  "needs": "Arduino Mega (simulated until you switch it to real hardware on the Devices page)"
+}

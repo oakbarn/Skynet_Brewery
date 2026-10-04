@@ -1,0 +1,5 @@
+Brew day notes
+
+- Mill grain the night before.
+- Check the HLT float switch.
+- Edit this file in any text editor (or on the panel) and the panel follows it.
