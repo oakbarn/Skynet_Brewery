@@ -142,6 +142,7 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 - A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
 - A `//` comment can contain quote marks.
 - **A script with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing script. The Scripts page lists the errors with line numbers; click one to jump to it.
+- **Find and Replace.** On the Scripts page press **Find** (or Ctrl+F; Ctrl+H to replace). Tick **Aa** to match upper and lower case and **Whole word** to skip longer names. **Replace** changes one match, **Replace all** every match in the open script; press Save to keep it, Ctrl+Z undoes it. **All scripts** searches every script and lists each match with how the line will look; untick the ones to leave alone, then **Replace ticked** saves those scripts. A running script keeps the old text until it is stopped and started.
 - `start` on a script that is already running does nothing and prints a note. Stop it first to restart it.
 - Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by scripts.
 - `fileindex` and other BruControl-only properties are stored but ignored. Alarms use `sound` (a path).

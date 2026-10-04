@@ -1253,7 +1253,7 @@ async function openScript(name) {
   curScript = name; dirty = false; problems = [];
   $('#code').value = await api('GET', '/ui/scripts/' + encodeURIComponent(name));
   $('#scriptName').textContent = name;
-  renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole();
+  renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole(); fIdx = -1; refreshFind(false);
 }
 function updateScriptState() {
   const s = S.scripts.find(x => x.name === curScript);
@@ -1285,12 +1285,182 @@ function gotoLine(l) {
   ta.focus(); ta.setSelectionRange(start, start + (lines[l - 1] || '').length);
   ta.scrollTop = Math.max(0, (l - 5) * 19.5);
 }
-$('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; });
-$('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; });
+$('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; refreshFind(false); });
+$('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; syncHl(); });
 $('#code').addEventListener('keydown', ev => {
   if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '\t'); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }
 });
+// ---------------------------------------------------------------- find and replace
+// In the open script: Ctrl+F (find), Ctrl+H (replace), or the Find button (phones). Matches are painted on a layer behind the editor.
+// Across every script: the All scripts button lists each match first; only the ticked ones are replaced.
+const escHtml = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+function findRe(text, matchCase, word) {
+  if (!text) return null;
+  const esc = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(word ? `(?<![A-Za-z0-9_])${esc}(?![A-Za-z0-9_])` : esc, 'g' + (matchCase ? '' : 'i'));
+}
+const findMatches = (str, re) => re ? [...str.matchAll(re)].map(m => [m.index, m.index + m[0].length]) : [];
+let fMatches = [], fIdx = -1;
+const findOpen = () => !$('#findBar').classList.contains('hidden');
+const curRe = () => findRe($('#findText').value, $('#findCase').checked, $('#findWord').checked);
+function showFind(replace) {
+  const ta = $('#code'), selText = ta.value.slice(ta.selectionStart, ta.selectionEnd);
+  if (selText && !selText.includes('\n')) $('#findText').value = selText;
+  $('#findBar').classList.remove('hidden');
+  const box = replace && can('admin') ? $('#replText') : $('#findText');
+  box.focus(); box.select();
+  refreshFind(true);
+}
+function hideFind() {
+  $('#findBar').classList.add('hidden'); paintFind();
+  const ta = $('#code'), m = fMatches[fIdx];
+  ta.focus(); if (m) ta.setSelectionRange(m[0], m[1]);
+}
+// recount the matches; `jump` moves to the first match at or after the cursor
+function refreshFind(jump) {
+  if (!findOpen()) { fMatches = []; fIdx = -1; paintFind(); return; }
+  const ta = $('#code'), at = fMatches[fIdx]?.[0] ?? ta.selectionStart;
+  fMatches = findMatches(ta.value, curRe());
+  fIdx = fMatches.length ? Math.max(0, fMatches.findIndex(m => m[0] >= at)) : -1;
+  if (fIdx === -1 && fMatches.length) fIdx = 0;
+  paintFind(); if (jump) showMatch();
+}
+function paintFind() {
+  const t = $('#findText').value, n = fMatches.length;
+  $('#findCount').textContent = !findOpen() || !t ? '' : n ? `${fIdx + 1} of ${n}` : 'No matches';
+  $('#findCount').style.color = findOpen() && t && !n ? 'var(--bad)' : '';
+  for (const b of ['#findPrev', '#findNext', '#replOne', '#replAll']) $(b).disabled = !n;
+  const v = $('#code').value;
+  if (!findOpen() || !n) { $('#codeHl').innerHTML = ''; return; }
+  let out = '', last = 0;
+  fMatches.forEach(([s, e], i) => { out += escHtml(v.slice(last, s)) + `<mark${i === fIdx ? ' class="cur"' : ''}>${escHtml(v.slice(s, e))}</mark>`; last = e; });
+  $('#codeHl').innerHTML = out + escHtml(v.slice(last)) + '\n ';
+  syncHl();
+}
+const syncHl = () => { const ta = $('#code'); $('#codeHl').style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`; };
+let charW = 0;
+function showMatch() {
+  const ta = $('#code'), m = fMatches[fIdx]; if (!m) return;
+  ta.setSelectionRange(m[0], m[1]);
+  const before = ta.value.slice(0, m[0]), line = before.split('\n').length - 1, col = m[0] - before.lastIndexOf('\n') - 1;
+  if (!charW) { const c = document.createElement('canvas').getContext('2d'); c.font = getComputedStyle(ta).font; charW = c.measureText('MMMMMMMMMM').width / 10 || 7.8; }
+  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 19.5, y = 8 + line * lh, x = 8 + col * charW;
+  if (y < ta.scrollTop || y + lh > ta.scrollTop + ta.clientHeight) ta.scrollTop = y - ta.clientHeight / 3;
+  if (x < ta.scrollLeft || x + (m[1] - m[0]) * charW > ta.scrollLeft + ta.clientWidth) ta.scrollLeft = Math.max(0, x - ta.clientWidth / 3);
+  syncHl(); $('#gutter').scrollTop = ta.scrollTop;
+}
+function stepFind(d) { if (!fMatches.length) return; fIdx = (fIdx + d + fMatches.length) % fMatches.length; paintFind(); showMatch(); }
+// type into the editor through the browser so Ctrl+Z can undo it, then give the focus back
+function editCode(start, end, text, back) {
+  const ta = $('#code');
+  ta.focus(); ta.setSelectionRange(start, end);
+  if (!document.execCommand('insertText', false, text)) { ta.setRangeText(text, start, end, 'end'); ta.dispatchEvent(new Event('input')); }
+  back?.focus();
+}
+$('#findBtn').onclick = () => findOpen() ? hideFind() : showFind();
+$('#findClose').onclick = hideFind;
+$('#findPrev').onclick = () => stepFind(-1);
+$('#findNext').onclick = () => stepFind(1);
+$('#findText').addEventListener('input', () => { fIdx = -1; refreshFind(true); });
+for (const id of ['#findCase', '#findWord']) $(id).addEventListener('change', () => refreshFind(true));
+for (const id of ['#findText', '#replText']) $(id).addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') { ev.preventDefault(); if (id === '#replText' && !ev.shiftKey) $('#replOne').click(); else stepFind(ev.shiftKey ? -1 : 1); }
+  if (ev.key === 'Escape') { ev.preventDefault(); hideFind(); }
+});
+$('#replOne').onclick = () => {
+  const m = fMatches[fIdx]; if (!m || !can('admin')) return;
+  const at = m[0] + $('#replText').value.length;
+  editCode(m[0], m[1], $('#replText').value, $('#replText'));
+  fIdx = -1; $('#code').setSelectionRange(at, at); refreshFind(true);
+};
+$('#replAll').onclick = () => {
+  if (!fMatches.length || !can('admin')) return;
+  const n = fMatches.length, ta = $('#code');
+  editCode(0, ta.value.length, ta.value.replace(curRe(), () => $('#replText').value), $('#replText'));
+  refreshFind(false); toast(`Replaced ${n} match${n === 1 ? '' : 'es'} - press Save to keep the change`);
+};
+document.addEventListener('keydown', ev => {
+  if (view !== 'scripts' || document.querySelector('dialog[open]')) return;
+  const k = ev.key.toLowerCase(), mod = ev.ctrlKey || ev.metaKey;
+  if (mod && k === 'f') { ev.preventDefault(); showFind(false); }
+  else if (ev.ctrlKey && k === 'h') { ev.preventDefault(); showFind(true); }
+  else if (findOpen() && (k === 'f3' || (mod && k === 'g'))) { ev.preventDefault(); stepFind(ev.shiftKey ? -1 : 1); }
+  else if (k === 'escape' && findOpen() && ev.target === $('#code')) hideFind();
+});
+
+// ---- across all scripts
+let faRes = [];
+const faRe = () => findRe($('#faText').value, $('#faCase').checked, $('#faWord').checked);
+$('#findAllBtn').onclick = () => {
+  if (findOpen()) { $('#faText').value = $('#findText').value; $('#faCase').checked = $('#findCase').checked; $('#faWord').checked = $('#findWord').checked; $('#faRepl').value = $('#replText').value; }
+  faRes = []; renderFindAll(); $('#findAllDlg').showModal(); $('#faText').focus(); if ($('#faText').value) $('#faSearch').click();
+};
+$('#faSearch').onclick = guard(async () => {
+  const re = faRe(); if (!re) return toast('Type something to find', true);
+  $('#faSummary').textContent = 'Searching...';
+  const texts = await Promise.all(S.scripts.map(s => api('GET', '/ui/scripts/' + encodeURIComponent(s.name))));
+  faRes = S.scripts.map((s, i) => {
+    const text = texts[i], lines = text.split('\n'), starts = [];
+    lines.reduce((a, l) => (starts.push(a), a + l.length + 1), 0);
+    const matches = findMatches(text, re).map(([a, b]) => { let ln = 0; while (ln + 1 < starts.length && starts[ln + 1] <= a) ln++; return { a, b, line: ln + 1, ls: starts[ln], lt: lines[ln], on: true }; });
+    return { name: s.name, text, matches };
+  }).filter(r => r.matches.length);
+  $('#faTickAll').checked = true; renderFindAll();
+});
+for (const id of ['#faText', '#faRepl']) $(id).addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); $('#faSearch').click(); } });
+for (const id of ['#faCase', '#faWord']) $(id).addEventListener('change', () => { if (faRes.length || $('#faText').value) $('#faSearch').click(); });
+$('#faRepl').addEventListener('input', () => renderFindAll());
+$('#faTickAll').addEventListener('change', ev => { for (const r of faRes) for (const m of r.matches) m.on = ev.target.checked; renderFindAll(); });
+function renderFindAll() {
+  const list = $('#faList'); list.innerHTML = '';
+  const total = faRes.reduce((a, r) => a + r.matches.length, 0), ticked = faRes.reduce((a, r) => a + r.matches.filter(m => m.on).length, 0);
+  const admin = can('admin'), repl = $('#faRepl').value;
+  $('#faSummary').textContent = !$('#faText').value ? 'Type what to find, then press Search.' : !total ? 'No matches in any script.' : `${total} match${total === 1 ? '' : 'es'} in ${faRes.length} script${faRes.length === 1 ? '' : 's'}` + (admin ? `, ${ticked} ticked` : '') + '. Tap a line to open it.';
+  $('#faReplace').disabled = !ticked;
+  for (const r of faRes) {
+    const run = S.scripts.find(s => s.name === r.name)?.state === 'running';
+    list.append(h('div', { class: 'faScript' }, r.name, run ? h('span', { class: 'muted' }, '  (running: restart it to use the change)') : null));
+    for (const m of r.matches) {
+      const s = m.a - m.ls, e = m.b - m.ls;
+      const old = h('div', { class: 'faLine' }, m.lt.slice(0, s).trimStart(), h('mark', {}, m.lt.slice(s, e)), m.lt.slice(e));
+      const neu = admin && m.on ? h('div', { class: 'faLine faNew' }, m.lt.slice(0, s).trimStart(), h('mark', {}, repl), m.lt.slice(e)) : null;
+      list.append(h('div', { class: 'faRow' },
+        admin ? h('input', { type: 'checkbox', checked: m.on, onchange: ev => { m.on = ev.target.checked; renderFindAll(); } }) : null,
+        h('span', { class: 'faNo muted' }, m.line),
+        h('div', { class: 'faText', onclick: () => openFindHit(r.name, m.a) }, old, neu)));
+    }
+  }
+}
+const openFindHit = guard(async (name, at) => {
+  if (curScript !== name) { await openScript(name); if (curScript !== name) return; }
+  $('#findAllDlg').close();
+  $('#findText').value = $('#faText').value; $('#findCase').checked = $('#faCase').checked; $('#findWord').checked = $('#faWord').checked; $('#replText').value = $('#faRepl').value;
+  $('#findBar').classList.remove('hidden');
+  fMatches = findMatches($('#code').value, curRe()); fIdx = Math.max(0, fMatches.findIndex(m => m[0] === at));
+  paintFind(); showMatch();
+});
+$('#faReplace').onclick = guard(async () => {
+  const todo = faRes.map(r => ({ ...r, hits: r.matches.filter(m => m.on) })).filter(r => r.hits.length);
+  const n = todo.reduce((a, r) => a + r.hits.length, 0), repl = $('#faRepl').value;
+  if (!n) return;
+  if (dirty && todo.some(r => r.name === curScript)) throw new Error(`"${curScript}" has unsaved changes. Save it first, then search again.`);
+  if (!confirm(`Replace ${n} match${n === 1 ? '' : 'es'} in ${todo.length} script${todo.length === 1 ? '' : 's'} with "${repl}"?\n\nEach script is saved straight away.`)) return;
+  const done = [], changed = [], bad = [];
+  for (const r of todo) {
+    if (await api('GET', '/ui/scripts/' + encodeURIComponent(r.name)) !== r.text) { changed.push(r.name); continue; }   // edited since the search: leave it alone
+    let t = r.text;
+    for (const m of [...r.hits].sort((x, y) => y.a - x.a)) t = t.slice(0, m.a) + repl + t.slice(m.b);
+    const res = await api('PUT', '/ui/scripts/' + encodeURIComponent(r.name), t, true);
+    done.push(r.name); if (res.errors?.length) bad.push(`${r.name} (${res.errors.length})`);
+  }
+  S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
+  if (done.includes(curScript)) { dirty = false; await openScript(curScript); }
+  const msg = `Replaced in ${done.length} script${done.length === 1 ? '' : 's'}.` + (changed.length ? ` Skipped (changed since the search): ${changed.join(', ')}.` : '') + (bad.length ? ` Now has problems: ${bad.join(', ')}.` : '');
+  toast(msg, !!(changed.length || bad.length));
+  $('#faSearch').click();
+});
+
 const saveScript = guard(async () => {
   if (!curScript) return;
   const r = await api('PUT', '/ui/scripts/' + encodeURIComponent(curScript), $('#code').value, true);
