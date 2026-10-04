@@ -426,3 +426,12 @@ body.role-viewer .op-only { display: none !important; }
 }
 .form label.check { flex-direction: row; align-items: center; gap: 6px; }
 #donateDlg p { line-height: 1.45; }
+
+/* ===== MQTT ===== */
+.mqtt-status { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); }
+.mqtt-status.on { border-color: #3fa34d; }
+.mqtt-status.error { border-color: #c94040; }
+.mqtt-status::before { content: '●  '; color: var(--muted); }
+.mqtt-status.on::before { color: #3fa34d; }
+.mqtt-status.error::before { color: #c94040; }
+#mqItems td:nth-child(3), #mqItems td:nth-child(4) { text-align: center; }

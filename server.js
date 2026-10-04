@@ -16,6 +16,7 @@ import { listSamples, loadSample } from './lib/samples.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
+import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain, toStr } from './lib/values.js';
 import { Help } from './lib/help.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
@@ -51,6 +52,8 @@ const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media pag
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
+const mqtt = new MqttBridge(store, engine);
+mqtt.start();
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
@@ -81,6 +84,7 @@ engine.on('show', ws => broadcast('show', ws));
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
+mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
 function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
 setInterval(() => { dropEndedSessions(); for (const res of clients.keys()) res.write(': ping\n\n'); }, 20000);
 
@@ -163,6 +167,7 @@ function cleanDonation(d = {}) {
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
+  if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   return m === 'GET' ? 'viewer' : 'admin';
 }
 const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico']);
@@ -174,6 +179,17 @@ function sameOrigin(req) {
   const o = req.headers.origin;
   if (!o || o === 'null') return !o;
   try { const h = new URL(o).host; return h === req.headers.host || h === req.headers['x-forwarded-host']; } catch { return false; }
+}
+
+// The MQTT password never goes to the browser; Settings shows whether one is saved.
+function browserConfig() {
+  const c = store.config;
+  if (!c.mqtt) return c;
+  const { password, ...m } = c.mqtt;
+  return { ...c, mqtt: { ...m, hasPassword: !!password } };
+}
+function mqttView() {
+  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, displayName: e.displayName ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
 }
 
 // The API has vAPI variables only (never Shared or vKonstant)
@@ -333,8 +349,8 @@ async function route(req, res) {
     return;
   }
   if (p === '/ui/state' && m === 'GET') {
-    const config = me.role === 'admin' ? store.config : { ...store.config, apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -364,6 +380,20 @@ async function route(req, res) {
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
+  }
+  if (p === '/ui/mqtt' && m === 'GET') return ok(res, mqttView());
+  if (p === '/ui/mqtt' && m === 'PUT') {
+    const body = await jsonBody(req), old = store.config.mqtt ?? {};
+    const c = {
+      enabled: !!body.enabled, host: String(body.host ?? '').trim(), port: Number(body.port) || (body.tls ? 8883 : 1883), tls: !!body.tls,
+      username: String(body.username ?? '').trim(), password: body.password === undefined ? (old.password ?? '') : String(body.password),
+      baseTopic: String(body.baseTopic ?? 'brewpanel').trim() || 'brewpanel',
+      homeAssistant: { enabled: body.homeAssistant?.enabled !== false, prefix: String(body.homeAssistant?.prefix ?? 'homeassistant').trim() || 'homeassistant' },
+      scripts: Array.isArray(body.scripts) ? body.scripts.map(String) : (old.scripts ?? []),
+      items: cleanItems(store, body.items && typeof body.items === 'object' ? body.items : (old.items ?? {})),
+    };
+    store.config.mqtt = c; store.writeConfig(); mqtt.restart(); broadcast('config', {});
+    return ok(res, mqttView());
   }
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
   if (p === '/ui/import/brucontrol' && m === 'POST') {
@@ -466,5 +496,5 @@ server.listen(PORT, () => {
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
 });
 
-function shutdown() { console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
+function shutdown() { console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
