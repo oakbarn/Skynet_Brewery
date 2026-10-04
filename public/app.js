@@ -1368,8 +1368,8 @@ function renderGlobals() {
     tb.closest('table').classList.toggle('empty', !of(type).length);
   }
   // database triggers are part of the layout (admin); values and "Log now" need an operator
-  if (!can('admin')) tb.querySelectorAll('select, input[type=number]').forEach(i => i.disabled = true);
-  if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); tb.querySelectorAll('button').forEach(b => b.disabled = true); }
+  if (!can('admin')) $$('#view-globals select, #view-globals input[type=number]:not(.val)').forEach(i => i.disabled = true);
+  if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); $$('#view-globals button').forEach(b => b.disabled = true); }
 }
 function refreshGlobalValues(ch) {
   for (const n of Object.keys(ch)) {
