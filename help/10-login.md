@@ -22,6 +22,6 @@ sudo systemctl restart brewpanel
 
 ## Using the panel away from home
 
-Use **Tailscale**, a free private network between your own devices. Install it on the Pi and on your phone, signed in to the same account, and open `http://brewpi:8080` from anywhere. The full steps are in `docs/REMOTE_ACCESS.md` in the panel folder.
+Use **Tailscale**, a free private network between your own devices. Install it on the Pi and on your phone, signed in to the same account, and open `http://brewpi:8080` from anywhere. For a Windows computer, follow [Installing Tailscale on Windows](00-tailscale-windows). The steps for the Pi and phones are in `docs/REMOTE_ACCESS.md` in the panel folder.
 
 > **Never** add a port forward for the panel on your router, and never put it on a public web address. The panel switches heaters, burners and pumps.

@@ -8,7 +8,7 @@ The Pi keeps everything: the layout of your screens, your scripts, pictures, sou
 
 - On the Pi itself: `http://localhost:8080`
 - From another computer or phone at home: `http://<Pi's address>:8080`, for example `http://192.168.1.50:8080`
-- Away from home: through Tailscale only. See [Login, users and passwords](10-login).
+- Away from home: through Tailscale only. See [Installing Tailscale on Windows](00-tailscale-windows) and [Login, users and passwords](10-login).
 
 The very first time, the panel asks you to **create the admin account**. That only works from a phone or computer on your home network.
 

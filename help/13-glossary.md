@@ -36,7 +36,7 @@
 
 **Tab**: one brewery screen (BruControl calls it a workspace).
 
-**Tailscale**: a free private network between your own devices, for using the panel away from home safely.
+**Tailscale**: a free private network between your own devices, for using the panel away from home safely. See [Installing Tailscale on Windows](00-tailscale-windows).
 
 **vAPI**: a variable for scripts, the screen, the API and the database. Names start with `vA`.
 
