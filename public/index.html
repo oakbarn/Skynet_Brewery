@@ -18,6 +18,7 @@
     <button data-view="media">Media</button>
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
+    <button data-view="config" class="admin-only" title="Edit the config file (admin only)">Config</button>
   </nav>
   <div class="right">
     <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
@@ -72,13 +73,50 @@
           <button id="checkScript" class="admin-only">Check</button>
           <button id="startScript" class="op-only">Start</button>
           <button id="stopScript" class="op-only">Stop</button>
+          <button id="findBtn" title="Find (Ctrl+F) and Replace (Ctrl+H)">Find</button>
+          <button id="findAllBtn" title="Find, and replace, in every script">All scripts</button>
         </div>
-        <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
+        <div id="findBar" class="findBar hidden">
+          <div class="findRow">
+            <input id="findText" type="search" placeholder="Find" autocomplete="off" spellcheck="false" enterkeyhint="search">
+            <span id="findCount" class="muted"></span>
+            <button id="findPrev" title="Previous match (Shift+Enter)">&#9650;</button>
+            <button id="findNext" title="Next match (Enter)">&#9660;</button>
+            <label class="toggle" title="Match upper and lower case exactly"><input type="checkbox" id="findCase"> Aa</label>
+            <label class="toggle" title="Whole words only"><input type="checkbox" id="findWord"> Whole word</label>
+            <button id="findClose" title="Close (Esc)">&#10005;</button>
+          </div>
+          <div class="findRow admin-only">
+            <input id="replText" placeholder="Replace with" autocomplete="off" spellcheck="false">
+            <button id="replOne" title="Replace this match and go to the next">Replace</button>
+            <button id="replAll">Replace all</button>
+          </div>
+        </div>
+        <div class="editor"><pre id="gutter"></pre><div class="codeWrap"><pre id="codeHl" aria-hidden="true"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div></div>
         <ul id="problems"></ul>
         <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all scripts</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
         <pre id="console"></pre>
       </div>
     </div>
+  </section>
+
+  <!-- ===== Config Editor (admin only) ===== -->
+  <section id="view-config" class="view admin-only">
+    <div class="bar">
+      <strong>Config Editor</strong>
+      <code id="cfgFile" class="muted"></code>
+      <span id="cfgState" class="muted"></span>
+      <span class="spacer"></span>
+      <button id="cfgSave" class="primary">Save</button>
+      <button id="cfgCheck">Check</button>
+      <button id="cfgFind" title="Find (Ctrl+F) and Replace (Ctrl+H)">Find</button>
+      <button id="cfgReload" title="Throw away unsaved changes and read the file again">Reload</button>
+      <button id="cfgBackups">Backups</button>
+    </div>
+    <p id="cfgBackupNote" class="cfgNote"></p>
+    <div class="editor"><pre id="cfgGutter"></pre><div class="codeWrap"><pre id="cfgCodeHl" aria-hidden="true"></pre><textarea id="cfgCode" spellcheck="false" wrap="off"></textarea></div></div>
+    <ul id="cfgProblems" class="problems"></ul>
+    <p class="muted">This is the whole setup as one JSON file: tabs, elements, pipes, devices and settings. Save checks it first and will not save a file the panel cannot load. Saving stops running scripts and reconnects the boards.</p>
   </section>
 
   <!-- ===== Globals ===== -->
@@ -220,6 +258,28 @@
   </section>
 </main>
 
+<dialog id="findAllDlg" class="findAllDlg"><form method="dialog">
+  <h3>Find in all scripts</h3>
+  <div class="findRow">
+    <input id="faText" type="search" placeholder="Find" autocomplete="off" spellcheck="false" enterkeyhint="search">
+    <label class="toggle"><input type="checkbox" id="faCase"> Aa</label>
+    <label class="toggle"><input type="checkbox" id="faWord"> Whole word</label>
+    <button type="button" id="faSearch" class="primary">Search</button>
+  </div>
+  <div class="findRow admin-only">
+    <input id="faRepl" placeholder="Replace with" autocomplete="off" spellcheck="false">
+    <span class="muted">Untick any line you want left alone.</span>
+  </div>
+  <div id="faSummary" class="muted"></div>
+  <div id="faList" class="faList"></div>
+  <div class="bar"><label class="toggle admin-only"><input type="checkbox" id="faTickAll" checked> Tick all</label><span class="spacer"></span><button value="cancel">Close</button><button type="button" id="faReplace" class="primary admin-only" disabled>Replace ticked</button></div>
+</form></dialog>
+<dialog id="cfgBackupDlg" class="findAllDlg"><form method="dialog">
+  <h3>Config backups</h3>
+  <p class="muted">A copy is made each time the Config Editor opens (unless nothing changed since the last copy), and before every save or restore. They are kept in <code>config/backups</code>.</p>
+  <div id="cfgBackupList" class="faList"></div>
+  <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
+</form></dialog>
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
 <dialog id="sampleDlg"><h3>Welcome to the Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>

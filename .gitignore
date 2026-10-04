@@ -10,3 +10,6 @@ node_modules/
 # OS clutter
 .DS_Store
 Thumbs.db
+
+# Config Editor backups (made on the Pi while it runs)
+config/backups/

@@ -142,6 +142,7 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 - A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
 - A `//` comment can contain quote marks.
 - **A script with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing script. The Scripts page lists the errors with line numbers; click one to jump to it.
+- **Find and Replace.** On the Scripts page press **Find** (or Ctrl+F; Ctrl+H to replace). Tick **Aa** to match upper and lower case and **Whole word** to skip longer names. **Replace** changes one match, **Replace all** every match in the open script; press Save to keep it, Ctrl+Z undoes it. **All scripts** searches every script and lists each match with how the line will look; untick the ones to leave alone, then **Replace ticked** saves those scripts. A running script keeps the old text until it is stopped and started.
 - `start` on a script that is already running does nothing and prints a note. Stop it first to restart it.
 - Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by scripts.
 - `fileindex` and other BruControl-only properties are stored but ignored. Alarms use `sound` (a path).
@@ -156,6 +157,15 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 | `Hops_Order_Boil` | Orders the imported boil hops into groups. |
 | `looper_LogTemps` | Copies the kettle temperature into a logged Global. |
 | `Demo_Variables` | Uses each vKonstant and vAPI kind; waits for the Ping button. |
+
+## 3a. Config Editor (admins only)
+
+The **Config** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
+
+- **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
+- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
+- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
+- **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
 
 ## 4. API (for Node-RED or other programs)
 
