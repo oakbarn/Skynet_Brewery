@@ -15,6 +15,7 @@
     <button data-view="globals">Variables</button>
     <button data-view="log">Log</button>
     <button data-view="devices">Devices</button>
+    <button data-view="media">Media</button>
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
   </nav>
@@ -149,6 +150,27 @@
     <pre id="bruResult"></pre>
   </section>
 
+  <!-- ===== Media: add pictures and sounds from any browser (looks like Windows File Explorer) ===== -->
+  <section id="view-media" class="view">
+    <div class="bar mdTools">
+      <label class="mdPickBtn">⬆ Add pictures / sounds<input id="mdPick" type="file" multiple accept="image/*,audio/*,.zip,.wav,.mp3,.ogg,.m4a,.svg" hidden></label>
+      <button id="mdNew">📁 New folder</button>
+      <button id="mdUp" title="Up one folder">⬆ Up</button>
+      <select id="mdView" title="View"><option value="icons">Large icons</option><option value="details">Details</option></select>
+      <label class="mdReplace"><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
+    </div>
+    <div class="mdAddress"><span id="mdCrumbs" class="mdCrumbs"></span><input id="mdFilter" placeholder="🔍 Search this folder"></div>
+    <div class="mdExplorer">
+      <nav id="mdTree" class="mdTree" aria-label="Folders"></nav>
+      <div class="mdPane">
+        <div id="mdFiles" class="mdFiles"></div>
+        <p id="mdEmpty" class="muted" hidden>This folder is empty. Use <b>Add pictures / sounds</b> or drag files here.</p>
+      </div>
+    </div>
+    <div class="mdStatus"><span id="mdCount"></span><span id="mdProgress"></span></div>
+    <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
+  </section>
+
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
     <h3>Start from a sample</h3>
@@ -164,6 +186,14 @@
       <div id="setAuto" class="checks"></div>
       <button id="saveSettings" class="primary">Save settings</button>
     </div>
+    <div class="form" id="pictures">
+      <h3>Pictures (PNG / JPG to SVG)</h3>
+      <p class="muted">Every PNG or JPG put in a media folder gets an SVG copy next to it, so it stays sharp at any size. The original file is never changed, so BruControl can still use it. Tracing works best on drawings and icons; photo-like pictures come out blotchy, so check them here.</p>
+      <label>Use SVG pictures <select id="picMode"></select></label>
+      <div class="bar"><button id="picConvert" class="primary">Convert all now</button><button id="picRedo">Re-make all</button><input id="picFilter" placeholder="Filter by name"></div>
+      <div id="picSummary" class="muted"></div>
+      <div id="picBox"></div>
+    </div>
   </section>
 </main>
 
@@ -172,5 +202,7 @@
 <dialog id="sampleDlg"><h3>Welcome to the Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
 <div id="toast"></div>
 <script type="module" src="app.js"></script>
+<script type="module" src="pictures.js"></script>
+<script type="module" src="media.js"></script>
 </body>
 </html>

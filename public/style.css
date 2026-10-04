@@ -242,3 +242,63 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws .gfx.ip.eqip { font-size: 7px; }
 #ws .gfx.ip.has-img { border: none; border-radius: 0; background-color: transparent; background-size: 100% 100%; background-repeat: no-repeat; }
 #ws .gfx.ip .vlabel { font-size: 12px; }
+
+/* Settings > Pictures (PNG / JPG to SVG) */
+#picBox { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+.pic { border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--panel); }
+.pic.svg { border-color: var(--accent); }
+.picName { font-size: 12px; word-break: break-all; margin-bottom: 4px; }
+.picPair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.picPair figure { margin: 0; text-align: center; }
+.picPair img, .picNone { width: 100%; height: 110px; object-fit: contain; background: repeating-conic-gradient(#8883 0 25%, transparent 0 50%) 0 0 / 14px 14px; border-radius: 4px; }
+.picNone { display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted); }
+.picPair figcaption { font-size: 11px; color: var(--muted); }
+.picBar { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 12px; }
+
+/* Media page (Explorer style) */
+.mdPickBtn { background: var(--accent); color: #1b1305; border: 1px solid var(--accent); border-radius: 6px; padding: 5px 11px; cursor: pointer; font-weight: 600; }
+.mdReplace { font-size: 13px; }
+.mdAddress { display: flex; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 4px 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.mdCrumbs { display: flex; flex-wrap: wrap; gap: 2px; flex: 1; min-width: 0; }
+.mdCrumbs button { border-color: transparent; background: none; padding: 3px 6px; }
+.mdCrumbs button + button::before { content: '› '; color: var(--muted); }
+.mdCrumbs button.drop, .mdTree .drop, .mdItem.drop { outline: 2px solid var(--accent); }
+#mdFilter { width: 200px; max-width: 100%; }
+.mdExplorer { display: grid; grid-template-columns: 240px 1fr; gap: 8px; min-height: 360px; }
+.mdTree { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 6px 4px; overflow: auto; max-height: calc(100vh - 260px); font-size: 14px; }
+.mdTree ul { list-style: none; margin: 0; padding-left: 14px; }
+.mdTree > ul { padding-left: 0; }
+.mdNode { display: flex; align-items: center; gap: 2px; border-radius: 4px; cursor: pointer; padding: 2px 4px; white-space: nowrap; }
+.mdNode:hover { background: var(--panel2); }
+.mdNode.here { background: var(--panel2); color: var(--accent); font-weight: 600; }
+.mdTwisty { width: 16px; text-align: center; color: var(--muted); flex: none; }
+.mdPane { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 8px; min-width: 0; }
+#view-media.dropping .mdPane { outline: 3px dashed var(--accent); outline-offset: -4px; }
+.mdFiles.icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.mdItem { border: 1px solid transparent; border-radius: 6px; padding: 6px; display: flex; flex-direction: column; gap: 3px; min-width: 0; cursor: default; }
+.mdItem:hover { background: var(--panel2); border-color: var(--line); }
+.mdItem.sel { background: var(--panel2); border-color: var(--accent); }
+.mdThumb { width: 100%; height: 96px; object-fit: contain; background: repeating-conic-gradient(#8883 0 25%, transparent 0 50%) 0 0 / 14px 14px; border-radius: 4px; }
+.mdIcon { height: 96px; display: flex; align-items: center; justify-content: center; font-size: 56px; }
+.mdItem audio { width: 100%; height: 34px; }
+.mdName { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+.mdMeta { font-size: 11px; text-align: center; }
+.mdBtns { display: none; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.mdItem.sel .mdBtns { display: flex; }
+.mdUse { font-size: 11px; word-break: break-all; text-align: center; }
+.mdItem:not(.sel) .mdUse { display: none; }
+/* details view: one row per item like Explorer */
+.mdFiles.details .mdItem { flex-direction: row; align-items: center; flex-wrap: wrap; padding: 3px 6px; gap: 10px; }
+.mdFiles.details .mdThumb, .mdFiles.details .mdIcon { width: 28px; height: 28px; font-size: 20px; flex: none; }
+.mdFiles.details audio { width: 180px; }
+.mdFiles.details .mdName { text-align: left; flex: 1; min-width: 140px; }
+.mdFiles.details .mdMeta { width: 150px; text-align: right; }
+.mdFiles.details .mdUse { flex-basis: 100%; text-align: left; }
+.mdFiles.details .mdBtns { justify-content: flex-start; }
+.mdStatus { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--muted); padding: 4px 2px; flex-wrap: wrap; }
+.mdHelp { font-size: 12px; }
+button.small { padding: 2px 7px; font-size: 12px; }
+@media (max-width: 700px) {
+  .mdExplorer { grid-template-columns: 1fr; }
+  .mdTree { max-height: 180px; }
+}

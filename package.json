@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node --no-warnings server.js",
-    "test": "node test/engine.test.js && node test/variables.test.js && node test/brucontrol.test.js && node test/devices.test.js && node --no-warnings test/samples.test.js"
+    "test": "node test/engine.test.js && node test/variables.test.js && node test/brucontrol.test.js && node test/devices.test.js && node --no-warnings test/samples.test.js && node test/vectorize.test.js && node test/mediafiles.test.js"
   },
   "engines": {
     "node": ">=22.13"
