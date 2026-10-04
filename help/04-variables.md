@@ -8,12 +8,13 @@ Variables hold values that processes and screens use. The **Variables** screen l
 |---|---|---|---|---|
 | **vKonstant** | ✓ | ✓ | – | – |
 | **vAPI** | ✓ | ✓ | ✓ | ✓ |
-| **Global** | ✓ | ✓ | ✓ | ✓ |
 | **Shared** | ✓ | – | – | – |
 
 - Use a **vKonstant** for settings and screen items that stay inside the panel.
 - Use a **vAPI** for readings you want logged or sent to other programs (pH, gravity, volumes).
 - Use a **Shared** variable to pass a value from one process to another.
+
+The old **Global** class (from BruControl) is retired. When a BruControl file or an older setup is loaded, each Global becomes a vKonstant or a vAPI by its name, and the list of what moved shows on the Processes page.
 
 ## vKonstant kinds
 
@@ -36,7 +37,7 @@ String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
 
 ## Database trigger
 
-For vAPI and Globals, press **Change…** on the Variables screen to choose when the value is written to the database:
+For vAPI variables, press **Change…** on the Variables screen to choose when the value is written to the database:
 
 - **Off**, **Manual** (a `log` line in a process, or Log now), or **Once**.
 - **On demand**: when a chosen process starts.

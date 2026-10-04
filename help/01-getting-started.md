@@ -20,7 +20,7 @@ The buttons along the top are the main screens:
 |---|---|
 | **Tabs** | Your brewery screens: pumps, valves, temperatures, timers, pipes. Where you brew. |
 | **Processes** | Write, check, start and stop processes (automatic brew steps). |
-| **Variables** | Every vKonstant, vAPI, Global and Shared variable and its value. |
+| **Variables** | Every vKonstant, vAPI and Shared variable and its value. |
 | **Log** | Values written to the brew database, with a CSV download. |
 | **Devices** | The boards (PLCs) connected to the Pi, and the temperature probe list. |
 | **Media** | Add pictures and sounds to the Pi from any browser. |

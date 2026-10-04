@@ -23,7 +23,7 @@ Add people and give each a role:
 - **Title**: the name at the top of the screen.
 - **Media folders**: where pictures and sounds are kept, one per line.
 - **API key**: the password other programs (Node-RED and the like) must send. See [API](11-api).
-- **BeerXML mapping**: which Globals a BeerSmith recipe fills.
+- **BeerXML mapping**: which variables a BeerSmith recipe fills.
 - **Start these processes when the server starts**: tick processes that should always run.
 
 ## Pictures
