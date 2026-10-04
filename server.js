@@ -10,6 +10,7 @@ import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { Pictures } from './lib/vectorize.js';
+import { MediaFiles } from './lib/mediafiles.js';
 import { plain, toStr } from './lib/values.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +28,7 @@ hw.start();
 setInterval(() => store.tickTimers(0.1), 100);
 store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, mediaRoots);     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
+const mediaFiles = new MediaFiles(mediaRoots);        // Media page: add / rename / delete pictures and sounds
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Set();
@@ -210,6 +212,23 @@ async function route(req, res) {
     const f = resolveMedia(url.searchParams.get('path') ?? '');
     if (!f) return fail(res, 403, 'That path is not inside a media folder (see Settings > Media folders)');
     return sendFile(req, res, pictures.pick(f, url.searchParams.get('as')));   // as=original / as=svg for side-by-side previews
+  }
+  // Media page
+  if (p.startsWith('/ui/media/')) {
+    const q = Object.fromEntries(url.searchParams), root = Number(q.root) || 0;
+    if (p === '/ui/media/list' && m === 'GET') return ok(res, mediaFiles.list(root, q.dir ?? ''));
+    if (p === '/ui/media/upload' && m === 'PUT') {
+      try {
+        const r = await mediaFiles.upload(req, root, q.dir ?? '', q.name ?? '', q.overwrite === '1');
+        for (const u of r.saved) { const f = resolveMedia(u); if (f) { pictures.forget(f); pictures.add(f); } }
+        return ok(res, { ok: true, ...r });
+      } catch (e) { return fail(res, e.code === 409 ? 409 : 400, e.message); }
+    }
+    const b = m === 'GET' ? {} : await jsonBody(req);
+    if (p === '/ui/media/folder' && m === 'POST') { mediaFiles.mkdir(b.root, b.path); return ok(res); }
+    if (p === '/ui/media/rename' && m === 'POST') { const from = mediaFiles.resolve(b.root, b.from); mediaFiles.rename(b.root, b.from, b.to); pictures.forget(from); pictures.add(mediaFiles.resolve(b.root, b.to)); return ok(res); }
+    if (p === '/ui/media/delete' && m === 'POST') { const f = mediaFiles.resolve(b.root, b.path); mediaFiles.remove(b.root, b.path); pictures.forget(f); return ok(res); }
+    return fail(res, 404, 'Unknown media route');
   }
   // PNG/JPG -> SVG pictures
   if (p === '/ui/pictures' && m === 'GET') return ok(res, pictures.status());
