@@ -41,7 +41,7 @@ async function load() {
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   renderAll();
 }
-function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderConsole(); }
+function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); }
 
 function connect() {
   const es = new EventSource('/ui/events');
@@ -57,6 +57,7 @@ function connect() {
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
+  es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
 function setView(v) {
@@ -748,6 +749,42 @@ $('#saveSettings').onclick = guard(async () => {
     apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
   });
   await load(); toast('Settings saved');
+});
+
+// ---------------------------------------------------------------- MQTT and voice
+const TYPE_WORD = { global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm' };
+function renderMqttStatus() {
+  const st = S.mqtt?.status ?? { state: 'off', text: 'MQTT is off' };
+  const box = $('#mqttStatus'); box.className = 'mqtt-status ' + st.state; box.textContent = st.text;
+}
+function renderMqtt() {
+  const c = S.config.mqtt || {};
+  $('#mqEnabled').checked = !!c.enabled; $('#mqTls').checked = !!c.tls;
+  $('#mqHost').value = c.host || ''; $('#mqPort').value = c.port || ''; $('#mqUser').value = c.username || '';
+  $('#mqPass').value = ''; $('#mqPass').placeholder = c.hasPassword ? 'saved (type to change)' : '';
+  $('#mqBase').value = c.baseTopic || 'brewpanel';
+  $('#mqHa').checked = c.homeAssistant?.enabled !== false;
+  const body = $('#mqItems'); body.innerHTML = '';
+  for (const it of S.mqtt?.items || []) {
+    const box = (k, dis) => h('input', { type: 'checkbox', 'data-name': it.name, 'data-k': k, ...(it[k] ? { checked: true } : {}), ...(dis ? { disabled: true, title: 'Inputs from hardware are read only' } : {}) });
+    body.append(h('tr', {}, h('td', {}, it.displayName ? `${it.displayName} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
+  }
+  const sb = $('#mqScripts'); sb.innerHTML = '';
+  for (const s of S.scripts) sb.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.scripts || []).includes(s.name) ? { checked: true } : {}) }), s.name));
+  renderMqttStatus();
+}
+$('#saveMqtt').onclick = guard(async () => {
+  const items = {};
+  for (const i of $$('#mqItems input')) (items[i.dataset.name] ??= {})[i.dataset.k] = i.checked;
+  const body = {
+    enabled: $('#mqEnabled').checked, tls: $('#mqTls').checked, host: $('#mqHost').value.trim(), port: +$('#mqPort').value || 0,
+    username: $('#mqUser').value.trim(), baseTopic: $('#mqBase').value.trim(), homeAssistant: { enabled: $('#mqHa').checked },
+    scripts: $$('#mqScripts input:checked').map(i => i.value), items,
+  };
+  if ($('#mqPass').value) body.password = $('#mqPass').value;
+  if (body.enabled && !body.host) throw new Error('Enter the broker address (localhost when Mosquitto runs on this Pi)');
+  await api('PUT', '/ui/mqtt', body);
+  await load(); toast('MQTT and voice saved');
 });
 
 // ---------------------------------------------------------------- start
