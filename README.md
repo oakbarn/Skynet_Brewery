@@ -4,7 +4,7 @@ A browser-based brewery control panel with BruControl-style screens (called **Ta
 
 ```
  Browser(s) ──WiFi/LAN──>  Brew Panel server (Node.js)  ──USB──>  Arduino Mega(s)
-                           scripts, Globals API, SQLite ──Ethernet──> Mega + Ethernet shield, or ESP32 (Ethernet) ──> Mega
+                           scripts, vAPI API,  SQLite ──Ethernet──> Mega + Ethernet shield, or ESP32 (Ethernet) ──> Mega
                                                         ──WiFi──> ESP32 ──> Mega
 ```
 
@@ -63,7 +63,7 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 |---|---|
 | **Tabs** | Screens with a background image (a path) that fills the tab or sits at a set place and size (room for a message panel on the left), placed elements, graphics, text and **pipes**. Use **Edit layout** to drag, resize, double-click for properties, add elements, and draw pipes. Any element, graphic, text or pipe can be **locked** in place: select it and press **🔒 Lock** (or tick **Lock position** in its properties). A locked item shows a padlock and cannot be dragged or resized until you unlock it; you can still open its properties and tap it as normal. |
 | **Picture elements** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** another element (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a script (`"insp_Pix_Red_Pump_B1" image = "oakbarn/Pump_Red_Rip_On.png"`). Tapping a picture that follows an output turns that output on/off. |
-| **Touch screens** | Tap an output to turn it on/off, tap a Global to get a large dialog with − / + buttons and a number pad. Every element has **When tapped** (default, none, toggle, dialog, script, tab), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
+| **Touch screens** | Tap an output to turn it on/off, tap a variable to get a large dialog with − / + buttons and a number pad. Every element has **When tapped** (default, none, toggle, dialog, script, tab), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
 | **Looks** | `led` (red digits), `lcd` (blue digits), `dark` (white on black, like the BruControl message panels) and `button`. |
 | **Pipes** | Click points to draw a line along a manifold path (or start and end it on an **IP**, below). Pick the valves and pump it needs in **Flow when**. When all of them are on, the pipe shows animated flow. If your background already shows the piping, turn off **Show pipe when not flowing**: then only the moving flow appears. |
 | **IP (Initial Point) widget** | A small round marker where a flow starts or ends: a pump outlet, a vessel port, a drain. It is a widget, used only by the app and not tied to any PLC or device port. In **Edit layout** press **Add IP**, drag it onto the spot, and give it a name like *Red pump out* or *MLT in*. With **Draw pipe**, click the start IP, click the bends, then click the end IP: the pipe is joined to both, and its flow always runs from the start IP to the end IP. Move an IP and the pipe ends (and the corner next to them) follow. An IP lights up while a pipe on it is flowing; tick **Show only while editing** if you only want it as a drawing aid. A pipe's **Starts at IP / Ends at IP** can also be picked in its properties. **Flow only happens on a pipe joined IP to IP**; in Edit layout a red ring marks a pipe end that is not on an IP yet. |
@@ -71,13 +71,13 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **How flow is worked out** | Flow starts at a running pump. From its OUT it goes through pipes, fittings, open valves and pumps that are off until it reaches an IP point (a vessel port or outlet), and into its IN from an IP point the same way. Each pipe on that route shows flow, in the direction the liquid is really moving, whichever way the pipe was drawn. Flow stops at a closed valve or closed manual valve, so a pump pushing into a closed valve shows no flow. A pipe's optional **Only when** list adds extra conditions. A pipe between two plain IP points with an **Only when** list works the old way: it flows, as drawn, while those are all on. |
 | **Pipe size** | Each tab has one **Pipe size** (Tab… > Pipe size, default 10). Every pipe and every fitting on that tab (straight pipe, tee, elbows, cross, cap, manual valve) is drawn from it, so they always match: change it and they all grow or shrink together. Fittings stay centred on their IP when the size changes. Devices with IPs scale with it too: pumps, valves, proportional valves and inline sensors (a **flow meter**, or a digital / analog input with **Inline in a pipe** ticked, such as a flow switch). Their Width / Height are their size at pipe size 10; at pipe size 20 they are drawn twice as big, about their centre. Inline sensors have IN and OUT IPs and always let flow through. |
 | **Vessel widgets** | Pick the kind next to **Add equipment**: **Electric heated vessel**, **Gas heated vessel**, **Unheated mash tun**, **Cooling coil** or **Plate chiller**. The coil has IN and OUT IPs built in; the plate chiller has WORT IN / WORT OUT and WATER IN / WATER OUT, two circuits that never mix. Flow passes through them. Each has a **Background picture path** (empty = a plain drawn vessel), a **Label** with **position** (top, corners, center, bottom, above or below), **color**, **size** and **Show label**, and an optional **Heater** (the element or burner output): its heating strip or flames light up while that output is on. Drop an IP point on a vessel and it becomes one of its ports: it moves with the vessel, and pipes on it follow. |
-| **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has an IP at each end, **A** and **B**, and flow can go through it either way. Pick the side of its box for each IP in its properties. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has A on top and B on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has IPs A and B at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a Global holding the percent, which scripts can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
-| **Elements** | `global`, `shared`, `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
+| **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has an IP at each end, **A** and **B**, and flow can go through it either way. Pick the side of its box for each IP in its properties. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has A on top and B on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has IPs A and B at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a vKonstant value holding the percent, which scripts can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
+| **Elements** | `vKonstant`, `vAPI`, `shared`, `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
 | **Devices** | Elements tied to a pin on a hobby board (Arduino Mega, ESP32 bridge; hobby modules such as relay boards, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115). **Add element** groups them: outputs (digital, PWM %, analog 0-10 V / 4-20 mA), digital inputs (switch, float / level switch, flow switch, interlock), temperature probes (DS18B20, PT100, PT1000, thermocouple K / J / T and more, NTC thermistor), analog sensors (0-5 V, 0-10 V, 4-20 mA, pressure transducer, level transmitter, pH with two-point calibration), pulse flow meters, and vessel scales (HX711 load cells) that show weight and volume with tare, calibration and auto tare when empty. The properties dialog shows only the settings the chosen probe or signal needs, plus the live reading for calibration. Wiring and protocol: `docs/DEVICE_PROTOCOL.md`. |
-| **Widgets** | App-only items with no board pin: pictures, Globals, shared variables, on-screen switches, timers, alarms, labels. |
-| **Globals** | Readable and writable by every script, by the API, and can be logged to the database. |
+| **Widgets** | App-only items with no board pin: pictures, vKonstant / vAPI / shared variables, on-screen switches, timers, alarms, labels. |
+| **Variables** | vKonstant (scripts and screen), vAPI (also the API and the database), shared (scripts). The old **Global** class is retired, see below. |
 | **Shared variables** | Readable and writable by every script, but **never in the API or the database**. Use them to pass values between scripts. |
-| **Database** | SQLite file `data/brewlog.db`. Each Global has a trigger: **Off, On demand, Once, Every N seconds, Every N hours, Every N days**. The **Log** page shows the data and downloads CSV. |
+| **Database** | SQLite file `data/brewlog.db`. Each vAPI has a trigger: **Off, On demand, Once, Every N seconds, Every N hours, Every N days**. The **Log** page shows the data and downloads CSV. |
 | **Alarms** | Sound file by path, `.wav` or `.mp3`. Browsers only play sound after one click, so press **Enable sound** on each screen that should sound alarms. |
 | **BeerSmith** | BeerSmith **File > Export > BeerXML**, then the **Import** page (or POST to the API). Hop uses become your group codes: Mash -333, First Wort -444, boil hop at full boil time -888, other boil hops 919, Aroma/Whirlpool -999, Dry Hop -111, unused slot 0. Dry hop time is converted to days. The mapping is editable in **Settings**. |
 | **OneWire probes** | The panel's own **OneWire probe index** (Devices page): each probe gets a number and a name, and temperature elements use the number. Probes are recognised by ROM id, not bus position. To replace a probe, pick the new probe's ROM id for that number; nothing else changes. New probes appear under **OneWire probes seen**. |
@@ -104,14 +104,23 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 | Push Button | `vKPB_` | LED button that is ON only while held. If the screen holding it closes or loses WiFi, it lets go by itself within 1.5 seconds. |
 | Momentary Button | `vKMB_` | Tap (or a script sets it true): true for 100 ms, then off. `wait "vKMB_Go" value == true` always catches it. |
 
-**vAPI**: like a Global: scripts, the API (`/api/vapi`, same calls as `/api/globals`) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
+**vAPI**: scripts, the API (`/api/vapi`; the old `/api/globals` address still works) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
 
-**Database trigger** (Variables page > Change…, for vAPI and Globals):
+**Database trigger** (Variables page > Change…, for vAPI):
 
 - **On demand only**: pick a script; the value is written when that script starts, and at no other time.
 - **Every N** milliseconds, seconds, minutes, hours or days (whole numbers), or **every 00:00:00**. Fastest is 100 ms.
 - **At clock time** (optional): lines the writes up with the clock, e.g. every 1 day at `12 AM`, or every 6 hours at `1 AM` (1 AM, 7 AM, 1 PM, 7 PM). Accepts `12 AM`, `6:30 PM` or `18:30`.
 - Off, Manual (`log` line or Log now), and Once still work as before.
+
+**The old Global class is retired.** Globals move by their name, on start-up for a saved setup and in the BruControl import:
+
+- `gbl…` becomes a **vKonstant** of the same kind with the **same name**, so the names still match BruControl for now.
+- `RP_…` becomes a **vAPI** of the same kind, renamed `RP_` → `vA_` in the setup and in every script (`RP_v_Pitch_Temp` → `vA_v_Pitch_Temp`).
+- `x…` is **deleted**. Scripts or items still using one are listed with line numbers.
+- Any other name becomes a vAPI with the same name (it works exactly like the Global did) and is listed so it can be sorted later.
+
+On start-up the old setup is copied to `config/backups/brewery-before-globals-<date>.json`, each changed script keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Scripts page console). A vKonstant is never written to the database, so a `gbl` that had a database trigger is listed too.
 
 ## 3. Scripts
 
@@ -132,7 +141,7 @@ endif
 [Label]                    goto "Label"
 sleep 1000                 wait "BK_Temp" value <= 154
 start "Other_Script"       stop "Other_Script"     start "tm_Whirlpool"   reset "tm_Whirlpool"   start "alm_Hops"
-print "text"               show tab "Brewery"   (or show workspace)     log "gblV_Kettle_Temp"   (writes that Global to the database now)
+print "text"               show tab "Brewery"   (or show workspace)     log "vAV_Kettle_Temp"   (writes that vAPI to the database now)
 vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:00
 BF precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
@@ -154,21 +163,21 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 | `Demo_Hop_Stand` | 154 °F, 20-minute stand; 20 seconds when Testing is on. |
 | `Demo_Heat_HLT` | Heats the simulated HLT, then sounds the alarm. |
 | `Hops_Order_Boil` | Orders the imported boil hops into groups. |
-| `looper_LogTemps` | Copies the kettle temperature into a logged Global. |
+| `looper_LogTemps` | Copies the kettle temperature into a logged vAPI. |
 | `Demo_Variables` | Uses each vKonstant and vAPI kind; waits for the Ping button. |
 
 ## 4. API (for Node-RED or other programs)
 
-Only **Globals** and **vAPI** variables are in the API (`/api/vapi/...` works the same as `/api/globals/...`). Programs must send the API key from Settings in the header `X-API-Key: <key>` (or `?key=<key>`). Without a key, reading works only from your own network (home or Tailscale), and changes are refused. A signed-in browser can use the API too: viewers read, operators and admins also change.
+Only **vAPI** variables are in the API (the old `/api/globals/...` address works the same as `/api/vapi/...`). Programs must send the API key from Settings in the header `X-API-Key: <key>` (or `?key=<key>`). Without a key, reading works only from your own network (home or Tailscale), and changes are refused. A signed-in browser can use the API too: viewers read, operators and admins also change.
 
 | Request | Does |
 |---|---|
-| `GET /api/globals` | All Globals with values |
-| `GET /api/globals/<name>` | One Global |
-| `PUT /api/globals/<name>` with body `{"value": 152}` or just `152` | Set one |
-| `POST /api/globals` with body `{"name1": v1, "name2": v2}` | Set several |
+| `GET /api/vapi` | All vAPI variables with values |
+| `GET /api/vapi/<name>` | One vAPI |
+| `PUT /api/vapi/<name>` with body `{"value": 152}` or just `152` | Set one |
+| `POST /api/vapi` with body `{"name1": v1, "name2": v2}` | Set several |
 | `POST /api/import/beerxml` with the XML file as the body | Import a recipe |
-| `POST /api/log/<name>` | Write a Global to the database now |
+| `POST /api/log/<name>` | Write a vAPI to the database now |
 | `GET /api/log?name=&from=&to=&limit=` | Logged values (from/to in epoch ms) |
 | `GET /api/log.csv?...` | Same as CSV |
 
@@ -182,7 +191,7 @@ config/brewery.json  workspaces (the tabs), elements, graphics, devices, setting
 scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
                      put all your BruControl pictures in media/oakbarn - a few are already there)
-data/                state.json (Global values kept over restarts), brewlog.db (the database),
+data/                state.json (variable values kept over restarts), brewlog.db (the database),
                      users.json (accounts, passwords are hashed) and sessions.json (who is signed in)
 tools/               reset-password.js (forgotten password)
 firmware/            Mega_BrewPanel.ino (Mega: USB or Ethernet shield), ESP32_Bridge.ino (WiFi or Ethernet bridge)

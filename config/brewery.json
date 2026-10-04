@@ -39,512 +39,512 @@
   "elements": [
     {
       "name": "gblS_Style_R1",
-      "type": "global",
-      "dataType": "string"
+      "type": "vKonstant",
+      "kind": "string"
     },
     {
       "name": "gblV_BatchSize_Gal",
-      "type": "global",
-      "dataType": "value",
-      "precision": 2
+      "type": "vKonstant",
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_BoilSize_Gal",
-      "type": "global",
-      "dataType": "value",
-      "precision": 2
+      "type": "vKonstant",
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_OG_R1",
-      "type": "global",
-      "dataType": "value",
-      "precision": 3
+      "type": "vKonstant",
+      "precision": 3,
+      "kind": "value"
     },
     {
       "name": "gblV_FG_R1",
-      "type": "global",
-      "dataType": "value",
-      "precision": 3
+      "type": "vKonstant",
+      "precision": 3,
+      "kind": "value"
     },
     {
       "name": "gblV_IBU_Recipe_R1",
-      "type": "global",
-      "dataType": "value",
-      "precision": 1
+      "type": "vKonstant",
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblVHop_Max",
-      "type": "global",
-      "dataType": "value",
-      "displayName": "Hop groups"
+      "type": "vKonstant",
+      "displayName": "Hop groups",
+      "kind": "value"
     },
     {
-      "name": "gblV_Kettle_Temp",
-      "type": "global",
-      "dataType": "value",
+      "name": "vAV_Kettle_Temp",
+      "type": "vAPI",
       "precision": 1,
       "units": "°F",
       "log": {
         "mode": "seconds",
         "every": 10
       },
-      "displayName": "Kettle temp (logged)"
+      "displayName": "Kettle temp (logged)",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop1_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 60,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 1"
+      "displayName": "Hop 1",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop1_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 60,
       "w": 110,
       "h": 62,
       "displayName": "Oz 1",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop1_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 60,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 1",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop1_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 60,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 1"
+      "displayName": "Minutes 1",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop1_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 60,
       "w": 110,
       "h": 62,
-      "displayName": "Group 1"
+      "displayName": "Group 1",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop2_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 132,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 2"
+      "displayName": "Hop 2",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop2_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 132,
       "w": 110,
       "h": 62,
       "displayName": "Oz 2",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop2_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 132,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 2",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop2_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 132,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 2"
+      "displayName": "Minutes 2",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop2_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 132,
       "w": 110,
       "h": 62,
-      "displayName": "Group 2"
+      "displayName": "Group 2",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop3_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 204,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 3"
+      "displayName": "Hop 3",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop3_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 204,
       "w": 110,
       "h": 62,
       "displayName": "Oz 3",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop3_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 204,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 3",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop3_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 204,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 3"
+      "displayName": "Minutes 3",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop3_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 204,
       "w": 110,
       "h": 62,
-      "displayName": "Group 3"
+      "displayName": "Group 3",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop4_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 276,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 4"
+      "displayName": "Hop 4",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop4_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 276,
       "w": 110,
       "h": 62,
       "displayName": "Oz 4",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop4_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 276,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 4",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop4_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 276,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 4"
+      "displayName": "Minutes 4",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop4_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 276,
       "w": 110,
       "h": 62,
-      "displayName": "Group 4"
+      "displayName": "Group 4",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop5_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 348,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 5"
+      "displayName": "Hop 5",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop5_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 348,
       "w": 110,
       "h": 62,
       "displayName": "Oz 5",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop5_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 348,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 5",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop5_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 348,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 5"
+      "displayName": "Minutes 5",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop5_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 348,
       "w": 110,
       "h": 62,
-      "displayName": "Group 5"
+      "displayName": "Group 5",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop6_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 420,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 6"
+      "displayName": "Hop 6",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop6_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 420,
       "w": 110,
       "h": 62,
       "displayName": "Oz 6",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop6_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 420,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 6",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop6_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 420,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 6"
+      "displayName": "Minutes 6",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop6_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 420,
       "w": 110,
       "h": 62,
-      "displayName": "Group 6"
+      "displayName": "Group 6",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop7_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 492,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 7"
+      "displayName": "Hop 7",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop7_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 492,
       "w": 110,
       "h": 62,
       "displayName": "Oz 7",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop7_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 492,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 7",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop7_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 492,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 7"
+      "displayName": "Minutes 7",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop7_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 492,
       "w": 110,
       "h": 62,
-      "displayName": "Group 7"
+      "displayName": "Group 7",
+      "kind": "value"
     },
     {
       "name": "gblS_Hop8_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 564,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 8"
+      "displayName": "Hop 8",
+      "kind": "string"
     },
     {
       "name": "gblV_Hop8_Oz_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 564,
       "w": 110,
       "h": 62,
       "displayName": "Oz 8",
-      "precision": 2
+      "precision": 2,
+      "kind": "value"
     },
     {
       "name": "gblV_Hop8_Recipe_AAU_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 564,
       "w": 110,
       "h": 62,
       "displayName": "Alpha % 8",
-      "precision": 1
+      "precision": 1,
+      "kind": "value"
     },
     {
       "name": "gblV_TimeHop8_Min_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 564,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 8"
+      "displayName": "Minutes 8",
+      "kind": "value"
     },
     {
       "name": "gblV_Hop8_Group_R1",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 564,
       "w": 110,
       "h": 62,
-      "displayName": "Group 8"
+      "displayName": "Group 8",
+      "kind": "value"
     },
     {
       "name": "shr_Hop_Slot",
@@ -554,8 +554,7 @@
     },
     {
       "name": "gblS_Top_Text",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Brewery",
       "x": 0,
       "y": 0,
@@ -565,7 +564,8 @@
       "look": "dark",
       "fontSize": 28,
       "readOnly": true,
-      "initial": "You can either go through Door #1 or Door #2.  Door #1 Closes all Valves, Door #2 just starts the Brew Process with the valves in the position they are.  Make a choice!"
+      "initial": "You can either go through Door #1 or Door #2.  Door #1 Closes all Valves, Door #2 just starts the Brew Process with the valves in the position they are.  Make a choice!",
+      "kind": "string"
     },
     {
       "name": "sw_Make_Choice",
@@ -614,8 +614,7 @@
     },
     {
       "name": "gblV_Delay_Seconds",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Brewery",
       "x": 0,
       "y": 770,
@@ -627,7 +626,8 @@
       "initial": 0,
       "step": 5,
       "min": 0,
-      "max": 600
+      "max": 600,
+      "kind": "value"
     },
     {
       "name": "HLT_Temp",
@@ -686,8 +686,7 @@
     },
     {
       "name": "MLT_Out_Temp",
-      "type": "global",
-      "dataType": "value",
+      "type": "vAPI",
       "workspace": "Brewery",
       "x": 1750,
       "y": 300,
@@ -696,7 +695,8 @@
       "displayName": "Mash Tun Out",
       "look": "led",
       "precision": 1,
-      "readOnly": true
+      "readOnly": true,
+      "kind": "value"
     },
     {
       "name": "V_HLT_Out",
@@ -1018,8 +1018,7 @@
     },
     {
       "name": "gblS_BeerName_R1",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Brewery",
       "x": 550,
       "y": 40,
@@ -1027,12 +1026,12 @@
       "h": 60,
       "displayName": "Beer",
       "initial": "OakBarn Pale Ale",
-      "fontSize": 22
+      "fontSize": 22,
+      "kind": "string"
     },
     {
       "name": "gblVBoilTime_Minutes",
-      "type": "global",
-      "dataType": "value",
+      "type": "vKonstant",
       "workspace": "Brewery",
       "x": 550,
       "y": 110,
@@ -1042,19 +1041,20 @@
       "initial": 60,
       "step": 5,
       "min": 0,
-      "max": 180
+      "max": 180,
+      "kind": "value"
     },
     {
       "name": "gblS_Inter_Script",
-      "type": "global",
-      "dataType": "string",
+      "type": "vKonstant",
       "workspace": "Brewery",
       "x": 550,
       "y": 1215,
       "w": 760,
       "h": 60,
       "displayName": "Script status",
-      "readOnly": true
+      "readOnly": true,
+      "kind": "string"
     },
     {
       "name": "vKSW_Testing",
