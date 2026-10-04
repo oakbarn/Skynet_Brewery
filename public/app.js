@@ -1134,8 +1134,10 @@ function dialog(title, fields, obj, canDelete) {
     const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); };
     build();
     body.onchange = ev => { if (ev.target.dataset?.rerender) { try { readFields(obj); } catch { } build(); } };
-    $('#dlgDelete').classList.toggle('hidden', !canDelete);
+    for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
     const d = $('#dlg');
+    // Delete and Cancel are plain buttons so Enter in a field always means Save
+    for (const b of $$('#dlg [data-close]')) b.onclick = () => d.close(b.dataset.close);
     d.onclose = () => res(d.returnValue);
     d.returnValue = 'cancel'; d.showModal();
   });
