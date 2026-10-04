@@ -67,7 +67,7 @@ const sent = [], dev = { name: 'M', send: l => sent.push(l), status: 'connected'
 hw.devices.set('M', dev); hw.probesSeen.set('M', {});
 
 hw._resendOutputs(dev);
-assert.deepEqual(sent, ['DO 5 1', 'PWM 44 0', 'AO 45 0', 'CFG DI 30 PULLUP', 'CFG RTD 49 4', 'CFG TC 48 J']);
+assert.deepEqual(sent, ['DO 5 1', 'PWM 44 0', 'AO 45 0', 'CFG DI 30 PULLUP 20', 'CFG RTD 49 4', 'CFG TC 48 J']);
 sent.length = 0;
 store.setProp('Relay', 'state', true); store.setProp('Pump_Speed', 'value', 50); store.setProp('VFD', 'value', 45);
 assert.deepEqual(sent, ['DO 5 0', 'PWM 44 128', 'AO 45 750']);
@@ -103,6 +103,30 @@ hw._onLine(dev, 'T 28AA000000000001 99'); assert.equal(store.getProp('HLT_T', 'v
 hw._onLine(dev, 'T 28AA0000000000FF 152'); assert.equal(store.getProp('HLT_T', 'value'), 152, 'new probe feeds slot 1');
 assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: '28AA0000000000FF' }, { index: 2, rom: '28AA0000000000FF' }] }), /two OneWire slots/);
 assert.throws(() => store.saveLayout({ probes: [{ index: 1, rom: 'xyz' }] }), /16 hex digits/);
+
+// Digital input modes (as BruControl DINs): switch, toggle, latch, counter, with on delay and reset
+{
+  const mk = (name, extra) => { store.config.elements.push({ name, type: 'digitalIn', device: 'M', channel: 31, ...extra }); };
+  mk('DinSwitch'); mk('DinToggle', { mode: 'toggle' }); mk('DinLatch', { mode: 'latch' }); mk('DinCount', { mode: 'counter' });
+  store.saveLayout({ elements: store.config.elements });
+  const st = n => store.getProp(n, 'state');
+  hw._onLine(dev, 'DI 31 0');                                        // first report: no press counted
+  for (const v of [1, 0, 1, 0, 1]) hw._onLine(dev, `DI 31 ${v}`);    // three presses, still held
+  assert.equal(st('DinSwitch'), true); assert.equal(st('DinToggle'), true, 'toggle: three presses = on');
+  assert.equal(st('DinLatch'), true); assert.equal(store.getProp('DinCount', 'count'), 3, 'counter counted 3');
+  hw._onLine(dev, 'DI 31 0');
+  assert.equal(st('DinSwitch'), false); assert.equal(st('DinLatch'), true, 'latch stays on');
+  store.setProp('DinLatch', 'reset', true); assert.equal(st('DinLatch'), false, 'latch reset'); assert.equal(store.getProp('DinLatch', 'reset'), false);
+  store.setProp('DinCount', 'count', 0); assert.equal(store.getProp('DinCount', 'count'), 0, 'count reset by script');
+  assert.throws(() => store.setProp('DinSwitch', 'state', true), /cannot be set by a script/);
+  store.get('DinSwitch').onDelay = 0.2;
+  hw._onLine(dev, 'DI 31 1'); assert.equal(st('DinSwitch'), false, 'on delay: not yet');
+  await new Promise(r => setTimeout(r, 300)); assert.equal(st('DinSwitch'), true, 'on delay: after 0.2 s');
+  store.get('DinSwitch').offDelay = 0.2;
+  hw._onLine(dev, 'DI 31 0'); hw._onLine(dev, 'DI 31 1');
+  await new Promise(r => setTimeout(r, 300)); assert.equal(st('DinSwitch'), true, 'off blip shorter than the off delay is ignored');
+  for (const t of hw.dinTimers.values()) clearTimeout(t);
+}
 
 // Scale with two HX711 boards: summed, tared, calibrated, auto tared
 hw._onLine(dev, 'W 26 40000'); assert.equal(store.getProp('Kettle', 'volume'), 0, 'waits for both boards');

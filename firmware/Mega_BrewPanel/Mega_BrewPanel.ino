@@ -87,7 +87,8 @@ const uint8_t N_HX = sizeof(HX711_DT_PINS);
 HX711 hx[N_HX > 0 ? N_HX : 1];
 long hxSum[N_HX > 0 ? N_HX : 1]; uint8_t hxN[N_HX > 0 ? N_HX : 1];
 #endif
-int lastIn[N_IN > 0 ? N_IN : 1];
+int lastIn[N_IN > 0 ? N_IN : 1], candIn[N_IN > 0 ? N_IN : 1];
+unsigned long candSince[N_IN > 0 ? N_IN : 1]; unsigned int debounceMs[N_IN > 0 ? N_IN : 1];   // an input must hold a new level this long (ms) before it is reported
 volatile unsigned long pulses[6];
 void f0() { pulses[0]++; } void f1() { pulses[1]++; } void f2() { pulses[2]++; } void f3() { pulses[3]++; } void f4() { pulses[4]++; } void f5() { pulses[5]++; }
 void (*const FLOW_ISR[6])() = {f0, f1, f2, f3, f4, f5};
@@ -152,7 +153,12 @@ void reportFast() {
 // CFG <kind> <pin> <setting>: sensor settings sent by the server after HELLO
 void configure(String kind, int pin, String v) {
   int i;
-  if (kind == "DI" && (i = indexOf(INPUT_PINS, N_IN, pin)) >= 0) { pinMode(pin, v == "NOPULL" ? INPUT : INPUT_PULLUP); return; }
+  if (kind == "DI" && (i = indexOf(INPUT_PINS, N_IN, pin)) >= 0) {   // CFG DI <pin> <PULLUP|NOPULL> [debounce ms]
+    int sp = v.indexOf(' ');
+    pinMode(pin, v.substring(0, sp < 0 ? v.length() : sp) == "NOPULL" ? INPUT : INPUT_PULLUP);
+    if (sp > 0) debounceMs[i] = constrain(v.substring(sp + 1).toInt(), 0, 5000);
+    return;
+  }
 #if USE_RTD
   if (kind == "RTD" && (i = indexOf(RTD_CS_PINS, N_RTD, pin)) >= 0) { rtd[i]->begin(v == "4" ? MAX31865_4WIRE : v == "2" ? MAX31865_2WIRE : MAX31865_3WIRE); return; }
 #endif
@@ -219,7 +225,7 @@ void sendTemps() {
 
 void setup() {
   for (uint8_t i = 0; i < N_OUT; i++) if (isOutput(OUTPUT_PINS[i])) { pinMode(OUTPUT_PINS[i], OUTPUT); writeOut(OUTPUT_PINS[i], false); }
-  for (uint8_t i = 0; i < N_IN; i++) { pinMode(INPUT_PINS[i], INPUT_PULLUP); lastIn[i] = -1; }
+  for (uint8_t i = 0; i < N_IN; i++) { pinMode(INPUT_PINS[i], INPUT_PULLUP); lastIn[i] = -1; candIn[i] = -1; debounceMs[i] = 20; }
   for (uint8_t i = 0; i < N_PWM; i++) { pinMode(PWM_PINS[i], OUTPUT); analogWrite(PWM_PINS[i], 0); }
   for (uint8_t i = 0; i < N_AO; i++) { pinMode(AO_PINS[i], OUTPUT); analogWrite(AO_PINS[i], 0); }
   for (uint8_t i = 0; i < N_FLOW; i++) { pinMode(FLOW_PINS[i], INPUT_PULLUP); attachInterrupt(digitalPinToInterrupt(FLOW_PINS[i]), FLOW_ISR[i], FALLING); }
@@ -267,7 +273,8 @@ void loop() {
   if (!watchdogTripped && now - lastRx > WATCHDOG_MS) { allOff(); watchdogTripped = true; LINK.println("ERR watchdog: no messages, all outputs OFF"); }
   for (uint8_t i = 0; i < N_IN; i++) {
     int v = digitalRead(INPUT_PINS[i]) == LOW ? 1 : 0;
-    if (v != lastIn[i]) { lastIn[i] = v; LINK.print("DI "); LINK.print(INPUT_PINS[i]); LINK.print(' '); LINK.println(v); }
+    if (v != candIn[i]) { candIn[i] = v; candSince[i] = now; }                     // debounce: wait until the level holds
+    else if (v != lastIn[i] && now - candSince[i] >= debounceMs[i]) { lastIn[i] = v; say("DI", INPUT_PINS[i], v); }
   }
   if (now - lastReport > 5000) { lastReport = now; reportInputs(); }
 #if USE_HX711

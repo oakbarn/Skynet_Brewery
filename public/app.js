@@ -146,6 +146,7 @@ function fillEl(n, e) {
     case 'global': case 'shared': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'digitalOut': case 'switch': case 'digitalIn':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
+      if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || v.image || ''; break;
     case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'pwmOut': text = fmtVal(e, v.value) + ' %'; on = v.enabled !== false && v.value > 0; break;
@@ -190,7 +191,7 @@ function tapAction(e) {
   if (e.tap && e.tap !== 'default') return e.tap;
   switch (e.type) {
     case 'digitalOut': case 'switch': return 'toggle';
-    case 'digitalIn': return simDev(e.device) ? 'toggle' : 'none';
+    case 'digitalIn': return ['latch', 'toggle', 'counter'].includes(e.mode) ? 'dialog' : simDev(e.device) ? 'toggle' : 'none';
     case 'pwmOut': case 'analogOut': case 'scale': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
@@ -200,7 +201,7 @@ function tapAction(e) {
   }
 }
 const elByName = n => S.config.elements.find(x => x.name === n);
-const boolProp = t => t.type === 'alarm' ? 'active' : (t.type === 'global' || t.type === 'shared') ? 'value' : 'state';
+const boolProp = t => t.type === 'alarm' ? 'active' : t.type === 'digitalIn' ? 'raw' : (t.type === 'global' || t.type === 'shared') ? 'value' : 'state';
 const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.type) || ((t.type === 'global' || t.type === 'shared') && t.dataType === 'bool');
 
 async function doTap(e) {
@@ -216,7 +217,7 @@ async function doTap(e) {
   }
   const t = elByName(targetName); if (!t) return toast(`No element "${targetName}"`, true);
   if (act === 'toggle' && isBoolEl(t)) {
-    const cur = isOn(t.name);
+    const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.displayname ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
     return setProp(t.name, boolProp(t), !cur);
   }
@@ -245,8 +246,13 @@ function choose(title, buttons, current) {
 function valueDialog(t) {
   const v = S.values[t.name] || {};
   const title = v.displayname ?? t.name;
-  if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
   if (t.type === 'scale') return scaleDialog(t, title);
+  if (t.type === 'digitalIn') {   // latch / toggle: reset to off; counter: count back to 0
+    const sim = simDev(t.device) ? [['Simulate: input ON', 'on'], ['Simulate: input OFF', 'off']] : [];
+    return choose(title, [...sim, t.mode === 'counter' ? ['Reset count to 0', 'count'] : ['Reset (off)', 'reset']])
+      .then(r => r === 'count' ? setProp(t.name, 'count', 0) : r === 'reset' ? setProp(t.name, 'reset', true) : r ? setProp(t.name, 'raw', r === 'on') : undefined);
+  }
+  if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
   const numDev = ['pwmOut', 'analogOut', 'analogIn', 'temperature'].includes(t.type);
   if (!(t.type === 'global' || t.type === 'shared' || numDev) || t.readOnly) return;
   if (numDev) t = { ...t, dataType: 'value', units: t.type === 'pwmOut' ? '%' : t.units,
@@ -423,10 +429,13 @@ const ADD_MENU = [
     ['Analog output 4-20 mA (PWM-to-4-20mA module)', 'analogOut', 'AO', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: '%' }],
   ]],
   ['Devices: digital inputs (board pin)', [
-    ['Switch / push button', 'digitalIn', 'DI'],
-    ['Float / level switch', 'digitalIn', 'Float', { onText: 'FULL', offText: 'LOW' }],
-    ['Flow switch', 'digitalIn', 'FlowSw', { onText: 'FLOW', offText: 'NO FLOW' }],
-    ['Door / lid / safety interlock', 'digitalIn', 'Interlock', { onText: 'CLOSED', offText: 'OPEN' }],
+    ['Switch (on while closed)', 'digitalIn', 'DI', { mode: 'switch' }],
+    ['Push button that toggles (press on, press off)', 'digitalIn', 'DI', { mode: 'toggle' }],
+    ['Latching input (stays on until reset: leak, E-stop, alarm)', 'digitalIn', 'DI', { mode: 'latch', onText: 'TRIPPED', offText: 'OK' }],
+    ['Pulse counter (counts presses or pulses)', 'digitalIn', 'Count', { mode: 'counter' }],
+    ['Float / level switch', 'digitalIn', 'Float', { mode: 'switch', onText: 'FULL', offText: 'LOW', onDelay: 2, offDelay: 2 }],
+    ['Flow switch', 'digitalIn', 'FlowSw', { mode: 'switch', onText: 'FLOW', offText: 'NO FLOW', offDelay: 3 }],
+    ['Door / lid / safety interlock', 'digitalIn', 'Interlock', { mode: 'switch', onText: 'CLOSED', offText: 'OPEN' }],
   ]],
   ['Devices: temperature probes', [
     ['DS18B20 (OneWire, waterproof probe)', 'temperature', 'Temp', { sensor: 'ds18b20' }],
@@ -494,7 +503,11 @@ const F = {
   global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'text'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'], ['activeLow', 'Invert (normally-closed contact)', 'bool'], ['pullup', 'Use the PLC\'s pull-up (switch wired to GND)', 'bool', true], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalIn: [['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
+    ['mode', 'Input type', 'sel', ['switch', 'toggle', 'latch', 'counter']],
+    ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
+    ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
+    ['units', 'Counter units (e.g. presses, gal)', 'text'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   pwmOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin (Mega: 2-13, 44-46)', 'pin', 'pwm'], ['initial', 'Start value (%)', 'num'], ['precision', 'Decimals', 'num']],
   analogOut: [['device', 'Device', 'dev'], ['channel', 'PWM pin feeding the 0-10 V / 4-20 mA module', 'pin', 'pwm'], ['signal', 'Signal', 'sel', ['0-10V', '4-20mA', '0-5V']],
     ['rangeLow', 'Value at lowest signal (0 V / 4 mA)', 'num'], ['rangeHigh', 'Value at highest signal (10 V / 20 mA)', 'num'], ['units', 'Units', 'text'], ['precision', 'Decimals', 'num']],
