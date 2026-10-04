@@ -1,6 +1,6 @@
 # OakBarn Brew Panel (prototype)
 
-A browser-based brewery control panel with BruControl-style screens (called **Tabs**; BruControl calls them workspaces) and scripts. It runs on Windows, Mac, Linux or a Raspberry Pi, and you use it from any browser on your network: Chrome, Edge, Safari, Firefox or DuckDuckGo, on a PC, tablet or phone.
+A browser-based brewery control panel with BruControl-style screens (called **Tabs**; BruControl calls them workspaces) and processes. It runs on Windows, Mac, Linux or a Raspberry Pi, and you use it from any browser on your network: Chrome, Edge, Safari, Firefox or DuckDuckGo, on a PC, tablet or phone.
 
 ```
  Browser(s) ──WiFi/LAN──>  Brew Panel server (Node.js)  ──USB──>  Arduino Mega(s)
@@ -8,7 +8,7 @@ A browser-based brewery control panel with BruControl-style screens (called **Ta
                                                         ──WiFi──> ESP32 ──> Mega
 ```
 
-The server runs the scripts and talks to the hardware. Scripts keep running when every browser is closed.
+The server runs the processes and talks to the hardware. Processes keep running when every browser is closed.
 
 ## 1. Install and run
 
@@ -21,7 +21,7 @@ The server runs the scripts and talks to the hardware. Scripts keep running when
 4. **Open the panel.** On the same computer go to `http://localhost:8080`. From a tablet or phone, use `http://<computer's IP address>:8080`.
 5. **Create the admin account.** The first time, the panel asks for a user name and password. After that everyone signs in. To use the panel away from home, follow [docs/REMOTE_ACCESS.md](docs/REMOTE_ACCESS.md) (login, user roles and Tailscale).
 
-Nothing else needs to be installed for the simulator, scripts, API and database.
+Nothing else needs to be installed for the simulator, processes, API and database.
 
 **For Megas on USB**, run this once in the folder:
 ```
@@ -44,7 +44,7 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 
 ## 1a. Start from a sample
 
-The first time the panel opens it offers four ready-made setups. You can load one later from **Settings > Start from a sample**. Loading one replaces your Tabs, elements, pipes and devices; your old setup is saved first in `config/backups/`. Scripts with the same name are backed up before they are replaced.
+The first time the panel opens it offers four ready-made setups. You can load one later from **Settings > Start from a sample**. Loading one replaces your Tabs, elements, pipes and devices; your old setup is saved first in `config/backups/`. Processes with the same name are backed up before they are replaced.
 
 | Sample | What you get |
 |---|---|
@@ -55,15 +55,15 @@ The first time the panel opens it offers four ready-made setups. You can load on
 
 Every sample has a **Recipe** tab (filled by a BeerXML import, including mash steps) and a **Brew Day** panel that works like BruControl: `gblV_Brew_Status` holds the step, the red/blue advance switch moves to the next step, timers count down, and the hop alarm sounds for each hop addition. Readings such as pH, gravity and volumes are vAPI fields, so they are logged and sent through the API. Run `BrewDay_Flow` to start; tick **Testing** to run it fast.
 
-**Manual vessel widget.** For kettles with no connection (BrewZilla, DigiBoil and similar), add **Widgets > Manual vessel**. A script sets what it shows (`setpoint`, `heat`, `pump`, `timer`, `message`) and sets `waiting` to make it blink. The brewer taps it to press **Done**, or to type a reading or a volume; the script waits on `confirmed`.
+**Manual vessel widget.** For kettles with no connection (BrewZilla, DigiBoil and similar), add **Widgets > Manual vessel**. A process sets what it shows (`setpoint`, `heat`, `pump`, `timer`, `message`) and sets `waiting` to make it blink. The brewer taps it to press **Done**, or to type a reading or a volume; the process waits on `confirmed`.
 
 ## 2. What is in it
 
 | Area | What it does |
 |---|---|
 | **Tabs** | Screens with a background image (a path) that fills the tab or sits at a set place and size (room for a message panel on the left), placed elements, graphics, text and **pipes**. Use **Edit layout** to drag, resize, double-click for properties, add elements, and draw pipes. Any element, graphic, text or pipe can be **locked** in place: select it and press **🔒 Lock** (or tick **Lock position** in its properties). A locked item shows a padlock and cannot be dragged or resized until you unlock it; you can still open its properties and tap it as normal. |
-| **Picture elements** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** another element (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a script (`"insp_Pix_Red_Pump_B1" image = "oakbarn/Pump_Red_Rip_On.png"`). Tapping a picture that follows an output turns that output on/off. |
-| **Touch screens** | Tap an output to turn it on/off, tap a Global to get a large dialog with − / + buttons and a number pad. Every element has **When tapped** (default, none, toggle, dialog, script, tab), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
+| **Picture elements** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** another element (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a process (`"insp_Pix_Red_Pump_B1" image = "oakbarn/Pump_Red_Rip_On.png"`). Tapping a picture that follows an output turns that output on/off. |
+| **Touch screens** | Tap an output to turn it on/off, tap a Global to get a large dialog with − / + buttons and a number pad. Every element has **When tapped** (default, none, toggle, dialog, process, tab), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
 | **Looks** | `led` (red digits), `lcd` (blue digits), `dark` (white on black, like the BruControl message panels) and `button`. |
 | **Pipes** | Click points to draw a line along a manifold path (or start and end it on an **IP**, below). Pick the valves and pump it needs in **Flow when**. When all of them are on, the pipe shows animated flow. If your background already shows the piping, turn off **Show pipe when not flowing**: then only the moving flow appears. |
 | **IP (Initial Point) widget** | A small round marker where a flow starts or ends: a pump outlet, a vessel port, a drain. It is a widget, used only by the app and not tied to any PLC or device port. In **Edit layout** press **Add IP**, drag it onto the spot, and give it a name like *Red pump out* or *MLT in*. With **Draw pipe**, click the start IP, click the bends, then click the end IP: the pipe is joined to both, and its flow always runs from the start IP to the end IP. Move an IP and the pipe ends (and the corner next to them) follow. An IP lights up while a pipe on it is flowing; tick **Show only while editing** if you only want it as a drawing aid. A pipe's **Starts at IP / Ends at IP** can also be picked in its properties. **Flow only happens on a pipe joined IP to IP**; in Edit layout a red ring marks a pipe end that is not on an IP yet. |
@@ -71,12 +71,12 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **How flow is worked out** | Flow starts at a running pump. From its OUT it goes through pipes, fittings, open valves and pumps that are off until it reaches an IP point (a vessel port or outlet), and into its IN from an IP point the same way. Each pipe on that route shows flow, in the direction the liquid is really moving, whichever way the pipe was drawn. Flow stops at a closed valve or closed manual valve, so a pump pushing into a closed valve shows no flow. A pipe's optional **Only when** list adds extra conditions. A pipe between two plain IP points with an **Only when** list works the old way: it flows, as drawn, while those are all on. |
 | **Pipe size** | Each tab has one **Pipe size** (Tab… > Pipe size, default 10). Every pipe and every fitting on that tab (straight pipe, tee, elbows, cross, cap, manual valve) is drawn from it, so they always match: change it and they all grow or shrink together. Fittings stay centred on their IP when the size changes. Devices with IPs scale with it too: pumps, valves, proportional valves and inline sensors (a **flow meter**, or a digital / analog input with **Inline in a pipe** ticked, such as a flow switch). Their Width / Height are their size at pipe size 10; at pipe size 20 they are drawn twice as big, about their centre. Inline sensors have IN and OUT IPs and always let flow through. |
 | **Vessel widgets** | Pick the kind next to **Add equipment**: **Electric heated vessel**, **Gas heated vessel**, **Unheated mash tun**, **Cooling coil** or **Plate chiller**. The coil has IN and OUT IPs built in; the plate chiller has WORT IN / WORT OUT and WATER IN / WATER OUT, two circuits that never mix. Flow passes through them. Each has a **Background picture path** (empty = a plain drawn vessel), a **Label** with **position** (top, corners, center, bottom, above or below), **color**, **size** and **Show label**, and an optional **Heater** (the element or burner output): its heating strip or flames light up while that output is on. Drop an IP point on a vessel and it becomes one of its ports: it moves with the vessel, and pipes on it follow. |
-| **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has an IP at each end, **A** and **B**, and flow can go through it either way. Pick the side of its box for each IP in its properties. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has A on top and B on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has IPs A and B at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a Global holding the percent, which scripts can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
+| **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has an IP at each end, **A** and **B**, and flow can go through it either way. Pick the side of its box for each IP in its properties. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has A on top and B on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has IPs A and B at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a Global holding the percent, which processes can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
 | **Elements** | `global`, `shared`, `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
 | **Devices** | Elements tied to a pin on a hobby board (Arduino Mega, ESP32 bridge; hobby modules such as relay boards, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115). **Add element** groups them: outputs (digital, PWM %, analog 0-10 V / 4-20 mA), digital inputs (switch, float / level switch, flow switch, interlock), temperature probes (DS18B20, PT100, PT1000, thermocouple K / J / T and more, NTC thermistor), analog sensors (0-5 V, 0-10 V, 4-20 mA, pressure transducer, level transmitter, pH with two-point calibration), pulse flow meters, and vessel scales (HX711 load cells) that show weight and volume with tare, calibration and auto tare when empty. The properties dialog shows only the settings the chosen probe or signal needs, plus the live reading for calibration. Wiring and protocol: `docs/DEVICE_PROTOCOL.md`. |
 | **Widgets** | App-only items with no board pin: pictures, Globals, shared variables, on-screen switches, timers, alarms, labels. |
-| **Globals** | Readable and writable by every script, by the API, and can be logged to the database. |
-| **Shared variables** | Readable and writable by every script, but **never in the API or the database**. Use them to pass values between scripts. |
+| **Globals** | Readable and writable by every process, by the API, and can be logged to the database. |
+| **Shared variables** | Readable and writable by every process, but **never in the API or the database**. Use them to pass values between processes. |
 | **Database** | SQLite file `data/brewlog.db`. Each Global has a trigger: **Off, On demand, Once, Every N seconds, Every N hours, Every N days**. The **Log** page shows the data and downloads CSV. |
 | **Alarms** | Sound file by path, `.wav` or `.mp3`. Browsers only play sound after one click, so press **Enable sound** on each screen that should sound alarms. |
 | **BeerSmith** | BeerSmith **File > Export > BeerXML**, then the **Import** page (or POST to the API). Hop uses become your group codes: Mash -333, First Wort -444, boil hop at full boil time -888, other boil hops 919, Aroma/Whirlpool -999, Dry Hop -111, unused slot 0. Dry hop time is converted to days. The mapping is editable in **Settings**. |
@@ -87,37 +87,37 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 
 ## 2a. Variables: vKonstant and vAPI
 
-Add them in **Workspaces > Edit layout > Add element** (they are listed by kind with their suggested name prefix). The **Variables** page lists all of them. The prefixes are hints only; any name works. The **Variables Demo** workspace and the `Demo_Variables` script show every kind.
+Add them in **Workspaces > Edit layout > Add element** (they are listed by kind with their suggested name prefix). The **Variables** page lists all of them. The prefixes are hints only; any name works. The **Variables Demo** workspace and the `Demo_Variables` process show every kind.
 
-**vKonstant**: every script can read and change it, and you can change it on screen. It is never in the API or the database.
+**vKonstant**: every process can read and change it, and you can change it on screen. It is never in the API or the database.
 
 | Kind | Prefix | Notes |
 |---|---|---|
-| Graphic | `vK_` | The value is an image path inside a media folder. Shows the picture; a script can swap it: `"vK_Burner_Pic" value = "oakbarn/BurnerFlame.png"` |
+| Graphic | `vK_` | The value is an image path inside a media folder. Shows the picture; a process can swap it: `"vK_Burner_Pic" value = "oakbarn/BurnerFlame.png"` |
 | String | `vKS_` | |
-| Long String | `vKL_` | Linked to a text file inside a media folder (a network drive works once it is added under Settings > Media folders). Editing the file updates the panel within a second; setting the value from the panel or a script saves the file. `"vKL_Notes" file = "notes/other.txt"` links another file. |
+| Long String | `vKL_` | Linked to a text file inside a media folder (a network drive works once it is added under Settings > Media folders). Editing the file updates the panel within a second; setting the value from the panel or a process saves the file. `"vKL_Notes" file = "notes/other.txt"` links another file. |
 | Value | `vKV_` | |
 | Time | `vKT_` | `00:00:00` |
 | Date Time | `vKDT_` | |
 | Boolean | `vKB_` | |
 | Switch | `vKSW_` | Boolean shown as a slider; tap to flip it. |
 | Push Button | `vKPB_` | LED button that is ON only while held. If the screen holding it closes or loses WiFi, it lets go by itself within 1.5 seconds. |
-| Momentary Button | `vKMB_` | Tap (or a script sets it true): true for 100 ms, then off. `wait "vKMB_Go" value == true` always catches it. |
+| Momentary Button | `vKMB_` | Tap (or a process sets it true): true for 100 ms, then off. `wait "vKMB_Go" value == true` always catches it. |
 
-**vAPI**: like a Global: scripts, the API (`/api/vapi`, same calls as `/api/globals`) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
+**vAPI**: like a Global: processes, the API (`/api/vapi`, same calls as `/api/globals`) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
 
 **Database trigger** (Variables page > Change…, for vAPI and Globals):
 
-- **On demand only**: pick a script; the value is written when that script starts, and at no other time.
+- **On demand only**: pick a process; the value is written when that process starts, and at no other time.
 - **Every N** milliseconds, seconds, minutes, hours or days (whole numbers), or **every 00:00:00**. Fastest is 100 ms.
 - **At clock time** (optional): lines the writes up with the clock, e.g. every 1 day at `12 AM`, or every 6 hours at `1 AM` (1 AM, 7 AM, 1 PM, 7 PM). Accepts `12 AM`, `6:30 PM` or `18:30`.
 - Off, Manual (`log` line or Log now), and Once still work as before.
 
-## 3. Scripts
+## 3. Processes
 
-Scripts are text files in the `scripts` folder. You can edit them on the **Scripts** page or in any text editor.
+Processes (BruControl and older versions of this panel call them scripts) are text files in the `scripts` folder. You can edit them on the **Processes** page or in any text editor. Only the name on screen changed: the folder, the file format, the process commands and the config settings are the same as before, so existing scripts and BruControl files work unchanged.
 
-**The saved file is read every time a script starts**, so a script can never run an old copy from memory. A script that is running while you edit it is marked "edited since start - stop and start to apply".
+**The saved file is read every time a process starts**, so a process can never run an old copy from memory. A process that is running while you edit it is marked "edited since start - stop and start to apply".
 
 Most BruControl script lines work unchanged:
 
@@ -141,14 +141,14 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 
 - A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
 - A `//` comment can contain quote marks.
-- **A script with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing script. The Scripts page lists the errors with line numbers; click one to jump to it.
-- `start` on a script that is already running does nothing and prints a note. Stop it first to restart it.
-- Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by scripts.
+- **A process with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing process. The Processes page lists the errors with line numbers; click one to jump to it.
+- `start` on a process that is already running does nothing and prints a note. Stop it first to restart it.
+- Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by processes.
 - `fileindex` and other BruControl-only properties are stored but ignored. Alarms use `sound` (a path).
 
 **Included samples**
 
-| Script | What it does |
+| Process | What it does |
 |---|---|
 | `Demo_Transfer_HLT_to_MLT` | Opens valves and runs the pump; watch the flow. |
 | `Demo_Hop_Stand` | 154 °F, 20-minute stand; 20 seconds when Testing is on. |
