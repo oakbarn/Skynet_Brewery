@@ -1851,7 +1851,7 @@ async function editWorkspace() {
   } else if (r === 'ok') {
     try { readFields(work); } catch (e) { return toast(e.message, true); }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
-    Object.assign(w, work);
+    Object.keys(w).forEach(k => delete w[k]); Object.assign(w, work);     // a cleared box (picture "(none)", color Default) must remove the old value
   }
   renderTabs(); renderWs();
 }
