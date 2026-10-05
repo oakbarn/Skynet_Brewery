@@ -1,6 +1,8 @@
 # Media (pictures and sounds)
 
-Pictures and sounds live in **media folders** on the Pi. Everywhere in the panel, a picture or sound is given by its **path** inside a media folder, for example `oakbarn/Pump_Red_Rip_On.png`. The media folders are listed in **Settings > Panel settings**.
+Pictures and sounds live in **media folders** on the Pi. Everywhere in the panel, a picture or sound is given by its **path** inside a media folder, for example `Images/Pump_Red_Rip_On.png`. The media folders are listed in **Settings > Panel settings**.
+
+The ready-made pictures are in the `Images` folder (it used to be called `oakbarn`). Old paths that start with `oakbarn/` still work.
 
 ## The Media screen
 
