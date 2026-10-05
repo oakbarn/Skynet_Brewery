@@ -15,8 +15,17 @@ const h = (tag, attrs = {}, ...kids) => {
 const media = p => '/media?path=' + encodeURIComponent(p);
 const noSpaces = n => String(n ?? '').trim().replace(/_*\s+_*/g, '_');
 const clone = o => JSON.parse(JSON.stringify(o));
-const PALETTE = { '0': '', '1': '#e8833a', '2': '#3fa34d', '3': '#a8c64a', '4': '#c94040', '5': '#3a7be8', '6': '#8a5cd6', '7': '#e8c33a', '8': '#777f88' };
-const bg = v => (v === '' || v === null || v === undefined) ? '' : (PALETTE[String(v)] ?? String(v));
+// a background that is not a number is a color ("red", "#3fa34d"); a number only ever picks a picture
+const bg = v => (v === '' || v === null || v === undefined || /^\s*-?\d+\s*$/.test(String(v))) ? '' : String(v);
+// Picture paths (as in BruControl): "background" = 1, 2 or 3 shows imagePath_1, _2 or _3, any other whole number shows
+// no picture. Empty (or a color) shows imagePath_1. name.image = "path" in a Process sets imagePath_1 and background = 1.
+const IMG_SLOT = /^imagePath_(\d+)$/;
+const slotsOf = e => Object.keys(e).filter(k => IMG_SLOT.test(k) && e[k]).map(k => +IMG_SLOT.exec(k)[1]).sort((a, b) => a - b);
+function slotImage(e, v) {
+  const b = String(v.background ?? '').trim(), n = /^-?\d+$/.test(b) ? +b : 1;
+  return n >= 1 ? (v['imagepath_' + n] ?? e['imagePath_' + n] ?? '') : '';
+}
+const hasPictures = (e, v) => !!(slotsOf(e).length || v.imagepath_1 || v.imagepath_2 || v.imagepath_3);
 
 let S = null;                 // server state
 let view = 'workspace', wsName = null, zoom = 'fit';
@@ -215,7 +224,7 @@ const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)
 // pictures and sounds already used anywhere in the layout
 function usedPaths(re) {
   const c = draft || S.config;
-  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.image, o.background, o.sound, ...(o.images || []), ...(o.sounds || [])])
+  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.image, o.background, o.sound, ...slotsOf(o).map(n => o['imagePath_' + n]), ...(o.sounds || [])])
     .filter(p => typeof p === 'string' && re.test(p)))].sort();
 }
 const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
@@ -352,19 +361,35 @@ const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
 
 // IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
 // IP widget types. "point" is a plain start / end point; the others are pipe fittings that join pipes and pass flow through.
-const FITTINGS = { point: 'IP point', pipe: 'Pipe (straight)', tee: 'Pipe tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Pipe cross', manualValve: 'Manual valve', cap: 'Pipe cap (no IP: dead end)' };
+const FITTINGS = { point: 'IP point', pipe: 'Pipe (straight)', tee: 'Pipe tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Pipe cross', manualValve: 'Manual valve', coupling: 'Coupling / hose end', cap: 'Pipe cap (no IP: dead end)' };
 const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point';
 const FIT_SVG = {
   pipe: '<path d="M0 15H30"/>', cap: '<path d="M0 15H17M20 5V25"/>',
   tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
   elbow90: '<path d="M0 15H15V30"/>', elbow45: '<path d="M0 15H15L27 27"/>',
   manualValve: '<path d="M15 15V3M9 3H21"/><path class="body" d="M2 7L15 15L2 23ZM28 7L15 15L28 23Z"/>',
+  coupling: '<path class="collar" d="M15 9.5V20.5"/>',
 };
-// One pipe size per tab: every pipe and every fitting (tee, elbows, cross, straight pipe, cap, manual valve) is drawn from it,
-// so fittings always match the pipes. A fitting is 5 x the pipe size, which makes its drawn arms exactly as thick as a pipe.
+// Each tab has a Pipe size: how thick a 1/2" pipe is drawn on that tab (default 10). Every pipe and hose has its own size
+// (1/2" when not set), drawn in proportion: a 1" pipe is twice as thick as a 1/2" one. Sizes are kept in inches; the metric
+// choices are the common mm sizes that match them (pipe: DN sizes, hose: inside diameter).
 const pipeSize = wsn => +(L().workspaces.find(w => w.name === wsn)?.pipeSize) || 10;
+const PIPE_SIZES = [['0.5', '1/2"  (most common)', '15 mm (DN15)'], ['1', '1"', '25 mm (DN25)'], ['0.75', '3/4"', '20 mm (DN20)'], ['0.25', '1/4"', '8 mm (DN8)'],
+  ['2', '2"', '50 mm (DN50)'], ['3', '3"', '80 mm (DN80)'], ['4', '4"', '100 mm (DN100)'], ['5', '5"', '125 mm (DN125)'], ['6', '6"', '150 mm (DN150)']];
+const HOSE_SIZES = [['0.5', '1/2"  (most common)', '13 mm'], ['1', '1"', '25 mm'], ['0.75', '3/4"', '19 mm'], ['0.25', '1/4"', '6 mm'], ['2', '2"', '50 mm']];
+const sizeChoices = p => [...(p.hose ? HOSE_SIZES : PIPE_SIZES).map(([v, inch, mm]) => [v, p.sizeUnits === 'mm' ? mm : inch]), ['custom', 'Custom']];
+function sizeInches(p) {
+  if (p.size === 'custom') { const c = +p.sizeCustom; return c > 0 ? (p.sizeUnits === 'mm' ? c / 25.4 : c) : 0.5; }
+  return +p.size > 0 ? +p.size : 0.5;
+}
+const pipeWidth = p => pipeSize(p.workspace) * sizeInches(p) / 0.5;
+const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
+  : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
+const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
+// A fitting takes the size of the largest pipe or hose joined to it (the tab's 1/2" size when nothing is joined yet).
+// It is 5 x that pipe thickness, which makes its drawn arms exactly as thick as the pipe.
 function sizeFitting(g) {
-  const S = 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
+  const S = 5 * Math.max(0, ...pipesOn(g.id, g.workspace).map(pipeWidth)) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
   g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
 }
 function buildIp(g) {
@@ -493,7 +518,8 @@ function fillEl(n, e) {
   const v = S.values[e.name] || {};
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   nm.textContent = v.displayname ?? e.name;
-  let on = false, img = v.image || '', text = '';
+  const pic = slotImage(e, v);
+  let on = false, img = pic, text = '';
   switch (e.type) {
     case 'shared': case 'vAPI':
       if (e.dataType === 'bool' || e.kind === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
@@ -515,7 +541,7 @@ function fillEl(n, e) {
     case 'digitalOut': case 'switch': case 'digitalIn':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
-      img = (on ? v.imageon : v.imageoff) || v.image || ''; break;
+      img = (on ? v.imageon : v.imageoff) || pic; break;
     case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
@@ -531,21 +557,19 @@ function fillEl(n, e) {
     case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
-      img = (v.active ? v.imageon : v.imageoff) || v.image || ''; n.classList.toggle('img-alarm', !!(v.imageon || v.image)); break;
+      img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic)); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = v.displayname ?? e.name; nm.classList.add('hidden'); break;
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
-      if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || v.image || ''; }
+      if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
       text = e.text ?? ''; break;
   }
-  // BruControl-style background images: "background" = 1, 2 or 3 picks one of the element's images
-  if (!img && e.images?.length && /^\d+$/.test(String(v.background ?? ''))) img = e.images[Math.max(1, +v.background) - 1] || '';
   if (isPropValve(e)) {                              // show percent open, and the open / closed picture
     const pct = propPct(e); on = pct > 0;
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
-    img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || v.image || '';
+    img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
   }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
@@ -560,11 +584,12 @@ function fillEl(n, e) {
   const missing = img && isButton && imgMissing(media(img), n);
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
-  n.style.backgroundColor = img || missing ? '' : (e.images ? '' : bg(v.background));
+  const stretch = !!e.imagePathsLocked && hasPictures(e, v);
+  n.style.backgroundColor = img || missing ? '' : bg(v.background);
   n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
-  n.classList.toggle('stretch', !!e.images);
+  n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
 }
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
@@ -851,7 +876,7 @@ function isOn(name) {
   if ('running' in v) return !!v.running;
   return !!v.value && v.value !== '0' && v.value !== 'false';
 }
-let drawPts = null, drawCursor = null, drawFrom = null;
+let drawPts = null, drawCursor = null, drawFrom = null, drawHose = false;
 const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
 // An IP id is either an IP widget's id, or "dev:<name>:in" / "dev:<name>:out" for the built-in IPs of a pump or valve
 const devOfIp = id => (typeof id === 'string' && id.startsWith('dev:')) ? id.slice(4, id.lastIndexOf(':')) : null;
@@ -899,6 +924,8 @@ function ipNode(id, ws) {
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
   if ((g?.fitting === 'manualValve' && !g.open) || g?.fitting === 'cap') return { closed: true };
+  // a coupling joining two or more pipes / hoses passes flow; a hose end with nothing else on it is an open end (flow pours out)
+  if (g?.fitting === 'coupling' && pipesOn(id, ws).length < 2) return { key: id, end: true };
   return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
 }
 function computeFlow(ws) {
@@ -928,7 +955,7 @@ function computeFlow(ws) {
   for (const [k, n] of nodes) { if (n.push) trace(k, true); if (n.pull) trace(k, false); }
   return dir;
 }
-// Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square.
+// Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square (a hose just bends).
 function snapEnd(pts, i, j, c) {
   const old = pts[i], nb = pts[j];
   if (nb && j !== undefined) { if (nb[1] === old[1]) nb[1] = c[1]; else if (nb[0] === old[0]) nb[0] = c[0]; }
@@ -937,40 +964,81 @@ function snapEnd(pts, i, j, c) {
 function syncPipeEnds(p) {
   const pts = p.points; if (!pts || pts.length < 2) return;
   const a = ipPoint(p.from, p.workspace), b = ipPoint(p.to, p.workspace), n = pts.length;
-  if (a) snapEnd(pts, 0, n > 2 ? 1 : undefined, a);
-  if (b) snapEnd(pts, n - 1, n > 2 ? n - 2 : undefined, b);
+  if (a) snapEnd(pts, 0, n > 2 && !p.hose ? 1 : undefined, a);
+  if (b) snapEnd(pts, n - 1, n > 2 && !p.hose ? n - 2 : undefined, b);
+}
+// A hose is a pipe that bends: a smooth curve through its points (Catmull-Rom spline drawn as Bezier curves)
+function hoseD(pts) {
+  if (!pts.length) return '';
+  let d = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    d += ` C${p1[0] + (p2[0] - p0[0]) / 6} ${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6} ${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]} ${p2[1]}`;
+  }
+  return d;
+}
+// Where pipes or hoses of different sizes meet on one IP, a reducer joins them: a cone from the bigger size down to the
+// smaller one, drawn on the smaller pipe just outside the fitting (or from the IP itself when there is no fitting).
+function reducers(pipes, ws) {
+  const ends = new Map();
+  for (const p of pipes) {
+    const pts = p.points || []; if (pts.length < 2) continue;
+    for (const [id, a, b] of [[p.from, pts[0], pts[1]], [p.to, pts[pts.length - 1], pts[pts.length - 2]]]) {
+      if (!id || !ipPoint(id, ws)) continue;
+      if (!ends.has(id)) ends.set(id, []);
+      ends.get(id).push({ p, a, b, w: pipeWidth(p) });
+    }
+  }
+  const out = [];
+  for (const [id, list] of ends) {
+    const big = Math.max(...list.map(e => e.w)); if (list.length < 2) continue;
+    const g = L().graphics.find(x => x.id === id && x.kind === 'ip');
+    const start = !isFitting(g) || g.fitting === 'cap' ? 0 : g.fitting === 'coupling' ? big / 2 : 2.5 * big;
+    for (const e of list) {
+      if (e.w >= big - 0.5) continue;
+      const len = Math.hypot(e.b[0] - e.a[0], e.b[1] - e.a[1]); if (!len) continue;
+      const ux = (e.b[0] - e.a[0]) / len, uy = (e.b[1] - e.a[1]) / len, nx = -uy, ny = ux;
+      const c0 = [e.a[0] + ux * start, e.a[1] + uy * start], c1 = [c0[0] + ux * 1.5 * big, c0[1] + uy * 1.5 * big];
+      out.push({ p: e.p, pts: [[c0[0] + nx * big / 2, c0[1] + ny * big / 2], [c1[0] + nx * e.w / 2, c1[1] + ny * e.w / 2], [c1[0] - nx * e.w / 2, c1[1] - ny * e.w / 2], [c0[0] - nx * big / 2, c0[1] - ny * big / 2]] });
+    }
+  }
+  return out;
 }
 function renderPipes() {
   const svg = $('#pipes'); const w = curWs(); if (!w) return;
   const NS = 'http://www.w3.org/2000/svg';
   svg.innerHTML = '';
   const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e; };
+  const line = (p, attrs) => p.hose ? mk('path', { d: hoseD(p.points || []), ...attrs }) : mk('polyline', { points: (p.points || []).map(q => q.join(',')).join(' '), ...attrs });
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
-  const flow = computeFlow(w.name);
+  const flow = computeFlow(w.name), cones = reducers(pipes, w.name);
   for (const p of pipes) {
-    const pts = (p.points || []).map(q => q.join(',')).join(' ');
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
-    const width = pipeSize(w.name);
+    const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
     const g = mk('g', { 'data-gid': p.id });
-    if (p.baseVisible !== false || editing) g.append(mk('polyline', { class: 'pipe', points: pts, stroke: p.color || '#8a8f96', 'stroke-width': width, opacity: p.baseVisible === false ? 0.35 : 1 }));
-    g.append(mk('polyline', { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), points: pts, stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
-    const hit = mk('polyline', { class: 'hit', points: pts }); g.append(hit);
+    if (p.baseVisible !== false || editing) {
+      const op = p.baseVisible === false ? 0.35 : 1;
+      for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color, opacity: op }));
+      g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width, opacity: op }));
+    }
+    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'hit' }));
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
       if (!ipPoint(p.to, p.workspace)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
     }
     if (editing) {
-      if (sel?.kind === 'gfx' && sel.id === p.id) g.append(mk('polyline', { points: pts, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
+      if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
       if (!p.locked) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
     svg.append(g);
   }
   if (drawPts) {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
-    svg.append(mk('polyline', { class: 'drawing', points: all.map(q => q.join(',')).join(' ') }));
+    svg.append(line({ hose: drawHose, points: all }, { class: 'drawing' }));
   }
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
@@ -1002,11 +1070,11 @@ $('#ws').addEventListener('pointerdown', ev => {
     if (c) {                                       // a pipe starts on the first IP clicked and ends on the next one
       if (!last) { drawFrom = ipId; drawPts.push(c); renderPipes(); ev.preventDefault(); return; }
       if (ipId === drawFrom) { ev.preventDefault(); return; }
-      if (last[0] !== c[0] && last[1] !== c[1]) drawPts.push(Math.abs(c[0] - last[0]) > Math.abs(c[1] - last[1]) ? [c[0], last[1]] : [last[0], c[1]]);
+      if (!drawHose && last[0] !== c[0] && last[1] !== c[1]) drawPts.push(Math.abs(c[0] - last[0]) > Math.abs(c[1] - last[1]) ? [c[0], last[1]] : [last[0], c[1]]);
       drawPts.push(c); finishPipe(ipId); ev.preventDefault(); return;
     }
     let q = [snap(p[0]), snap(p[1])];
-    if (last && !ev.shiftKey) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
+    if (last && !ev.shiftKey && !drawHose) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
     if (ev.detail >= 2) { finishPipe(); return; }  // double-click finishes the pipe
     drawPts.push(q); renderPipes(); return;
   }
@@ -1040,7 +1108,7 @@ $('#ws').addEventListener('pointermove', ev => {
   if (lp && Math.hypot(ev.clientX - lp.x, ev.clientY - lp.y) > 8) cancelLongPress();
   if (drawPts) {
     let q = canvasPt(ev).map(snap); const last = drawPts[drawPts.length - 1];
-    if (last && !ev.shiftKey) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
+    if (last && !ev.shiftKey && !drawHose) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
     drawCursor = q; renderPipes(); return;
   }
   if (!drag) return;
@@ -1078,7 +1146,7 @@ $('#ws').addEventListener('dblclick', ev => {
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
   if (ev.key === 'Enter') { ev.preventDefault(); finishPipe(); }   // without preventDefault the same Enter press hits the properties dialog and presses Delete
-  if (ev.key === 'Escape') { drawPts = null; drawCursor = null; drawFrom = null; renderPipes(); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); }
+  if (ev.key === 'Escape') { drawPts = null; drawCursor = null; drawFrom = null; drawHose = false; renderPipes(); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); }
 });
 // Touch screens have no double-click: hold a finger on an item for 0.6 s to open its properties
 let lp = null;
@@ -1090,11 +1158,23 @@ function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 
 function finishPipe(to) {
   $('#finishPipe').classList.add('hidden');
-  const pts = drawPts, from = drawFrom; drawPts = null; drawCursor = null; drawFrom = null;
-  if (!pts || pts.length < 2) { renderPipes(); return; }
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true };
+  const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose;   // a double-click adds its point twice
+  drawPts = null; drawCursor = null; drawFrom = null; drawHose = false;
+  if (pts.length < 2) { renderPipes(); return; }
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true, size: '0.5' };
+  if (hose) g.hose = true;
   if (from) g.from = from;
   if (typeof to === 'string') g.to = to;
+  if (hose) {     // a hose has an IP on both ends: a loose end gets a coupling, where another pipe or hose can join it later
+    const end = (i, j) => {
+      const c = pts[i], n = pts[j], ang = Math.round(Math.atan2(n[1] - c[1], n[0] - c[0]) * 180 / Math.PI / 45) * 45;
+      let k = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === 'Hose end ' + k)) k++;
+      const ip = { id: newId(), kind: 'ip', fitting: 'coupling', workspace: wsName, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: 'Hose end ' + k, color: '#9aa0a6', rotate: String((ang + 360) % 180) };
+      draft.graphics.push(ip); return ip.id;
+    };
+    if (!g.from) g.from = end(0, 1);
+    if (!g.to) g.to = end(pts.length - 1, pts.length - 2);
+  }
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
   $('#editHint').textContent = '';
 }
@@ -1241,7 +1321,8 @@ $('#lockItem').onclick = () => {
   if (item.locked) delete item.locked; else item.locked = true;
   toast(item.locked ? 'Locked in place' : 'Unlocked'); renderWs();
 };
-$('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
+$('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; drawHose = false; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
+$('#drawHose').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; drawHose = true; $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
 $('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
 // a new equipment widget: vessels, chillers, coils and filters go on the Equipment tab (made if it is missing), fittings on this tab
@@ -1264,7 +1345,7 @@ $('#addVessel').onclick = () => {
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
 $('#addIp').onclick = () => {
-  const fit = $('#addIpType').value, base = { point: 'IP', pipe: 'Pipe', cap: 'Cap' }[fit] || FITTINGS[fit];
+  const fit = $('#addIpType').value, base = { point: 'IP', pipe: 'Pipe', cap: 'Cap', coupling: 'Coupling' }[fit] || FITTINGS[fit];
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
   const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
@@ -1304,9 +1385,10 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 // field: [key, label, kind, options]
 const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool'],
-    ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
+    ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
+    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
-    ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
+    ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
@@ -1347,8 +1429,15 @@ const F = {
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'yn']]],
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'yn'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Show only while editing the layout', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'yn']]],
-  pipe: [['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'], ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'yn'], ['color', 'Pipe color', 'color'], ['flowColor', 'Flow color', 'color'], ['baseVisible', 'Show pipe when not flowing (off = background already shows pipes)', 'yn', true], ['workspace', 'Tab', 'ws', ['locked', 'Lock position (no drag or resize)', 'yn']]],
+    ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'yn']]],
+  pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
+    ['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
+    ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
+    ...(it.size === 'custom' ? [['sizeCustom', `Custom size (${it.sizeUnits === 'mm' ? 'mm' : 'inches, e.g. 1.5'})`, 'num']] : []),
+    ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'],
+    ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'], ['flowColor', 'Flow color', 'color'],
+    ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
+    ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'bool']],
 };
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
 F.vesselNew = it => [['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
@@ -1466,6 +1555,19 @@ function field([key, label, kind, opts, rerender], obj) {
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const v = obj[key];
   let input;
+  if (kind === 'imgpath') {    // imagePath_1, _2, _3: after a BruControl import only imagePath_1 can be changed (the Skynet way)
+    if (opts === 1 || !obj.imagePathsLocked) return field([key, label, 'gpick', 'pictures'], obj);
+    input = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', readonly: true, class: 'lockedPath', placeholder: '(empty)', title: 'Locked after the BruControl import. Click to see why.', onclick: lockedPathHelp });
+    return [h('label', {}, label + ' 🔒'), input];
+  }
+  if (kind === 'bgsel') {      // which picture shows: 1-3 (and more on folded items), or none
+    const n = [1, 2, 3, ...slotsOf(obj).filter(x => x > 3)];
+    const os = [['', '(default) imagePath_1'], ...n.map(x => [String(x), `${x} = imagePath_${x}`]), ['0', 'None (0 or any number other than ' + n.join(', ') + ')']];
+    const cur = v === undefined || v === null ? '' : String(v);
+    if (!os.some(o => o[0] === cur)) os.push([cur, /^-?\d+$/.test(cur) ? `${cur} = None (no picture)` : `${cur} (color, shown when there is no picture)`]);
+    input = h('select', { 'data-k': key, 'data-kind': kind }, ...os.map(([o, l]) => h('option', { value: o, ...(o === cur ? { selected: true } : {}) }, l)));
+    return [h('label', {}, label), input];
+  }
   if (kind === 'info') {     // live reading, to help with calibration
     const r = S.values[obj.name] || {};
     const spu = obj.type === 'stepper' ? (obj.units === 'steps' ? 1 : (+obj.stepsPerRev || 200) * (+obj.microsteps || 1) * (+obj.gearRatio || 1) / (+obj.unitsPerRev || (obj.units === 'deg' ? 360 : obj.units === '%' ? 100 : 1))) : 0;
@@ -1574,6 +1676,27 @@ function stepperPick(key, list, v) {
   return s;
 }
 
+// A locked imagePath_2 / _3 was clicked: explain how pictures change in Skynet
+let lockedShown = 0;
+function lockedPathHelp(ev) {
+  ev?.target?.blur?.();
+  if (Date.now() - lockedShown < 800) return;       // click and focus fire together
+  lockedShown = Date.now();
+  let d = $('#lockedPathDlg');
+  if (!d) {
+    d = h('dialog', { id: 'lockedPathDlg' }, h('h3', {}, '🔒 imagePath_2 and imagePath_3 are locked'),
+      h('p', {}, 'This item came from a BruControl import. BruControl kept 3 background pictures and a Process picked one with background = 1, 2 or 3. Those pictures were kept, so your imported Processes still work, but imagePath_2 and imagePath_3 can no longer be changed here.'),
+      h('p', {}, h('b', {}, 'The Skynet way:'), ' use one picture, imagePath_1, and let a Process change it:'),
+      h('pre', { class: 'mono' }, 'my_widget.image = "Images/RedPump.png"'),
+      h('p', {}, 'That puts the new path in imagePath_1 and sets background = 1 by itself, so the picture shows at once. You can also change imagePath_1 right here in this dialog.'),
+      h('p', {}, 'Still works as in BruControl: my_widget.background = 1, 2 or 3 shows that picture; any other number (for example 4) shows no picture.'),
+      h('p', { class: 'muted' }, 'More in Help > Pictures on items.'),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: () => d.close() }, 'OK')));
+    document.body.append(d);
+  }
+  d.showModal();
+}
+
 function readFields(obj) {
   for (const inp of $$('#dlgBody [data-k]')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
@@ -1585,6 +1708,7 @@ function readFields(obj) {
       if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
     }
     else if (kind === 'num') v = inp.value === '' ? undefined : +inp.value;
+    else if (kind === 'bgsel') v = inp.value === '' ? undefined : /^-?\d+$/.test(inp.value) ? +inp.value : inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'yn') v = inp.value === 'yes';
     else if (kind === 'stpick') v = inp.value === '' || inp.value === '__add__' ? undefined : inp.dataset.num ? +inp.value : inp.value;
@@ -1631,13 +1755,15 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
+    const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
+    if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     return f;
   } : eqClass(item) ? F.vesselNew : F[type];
   const work = clone(item);
   const isV = !!eqClass(item);
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type, fields, work, true);
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true);
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
@@ -1715,7 +1841,7 @@ async function editWorkspace() {
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
     ['_sizeHead', 'Size', 'head'],
     ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
-    ['pipeSize', 'Pipe size (every pipe and fitting on this tab, default 10)', 'num']], work, draft.workspaces.length > 1);
+    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num']], work, draft.workspaces.length > 1);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);

@@ -50,7 +50,7 @@ main { padding: 10px 14px; }
 #pipes .hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; pointer-events: none; }
 #ws.editing #pipes .hit { pointer-events: stroke; }
 #pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
-#pipes .pipe, #pipes .flow, #pipes .drawing { pointer-events: none; }
+#pipes .pipe, #pipes .flow, #pipes .drawing, #pipes .reducer { pointer-events: none; }
 #pipes .drawing { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 6 4; }
 @keyframes flow { to { stroke-dashoffset: -24; } }
 
@@ -195,6 +195,10 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws .gfx.ip { display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid var(--ipc); background: rgba(0,0,0,.55); color: var(--ipc); font: 700 10px/1 system-ui, sans-serif; z-index: 2; overflow: visible; }
 #ws .gfx.ip.live { background: var(--ipc); color: #000; box-shadow: 0 0 10px var(--ipc); }
 #ws:not(.editing) .gfx.ip.hide-run { display: none; }
+/* IP markers (plain IPs and the built-in IPs of pumps, valves and equipment) only show in Edit layout. Fittings, and IPs
+   given a picture, are part of the drawing and stay. A label set to show stays too. */
+#ws:not(.editing) .gfx.ip:not(.fit):not(.has-img) { border-color: transparent; background: none; box-shadow: none; pointer-events: none; }
+#ws:not(.editing) .gfx.ip:not(.fit):not(.has-img) > span { display: none; }
 #ws.editing .gfx.ip { outline: none; }
 #ws.editing .gfx.ip.sel { outline: 2px solid var(--accent); outline-offset: 2px; }
 #ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fff; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
@@ -210,6 +214,8 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 #ws .gfx.ip.fit.live .core path { stroke: var(--flow); }
 #ws .gfx.ip.fit .edge path.body { fill: #000; stroke-width: 4; }
 #ws .gfx.ip.fit .core path.body { stroke-width: 1.5; stroke: #000; fill: var(--bad); }
+#ws .gfx.ip.fit .edge path.collar { stroke-width: 3.8; stroke-linecap: butt; }
+#ws .gfx.ip.fit .core path.collar { stroke-width: 3; stroke-linecap: butt; }
 #ws .gfx.ip.fit.open .core path.body { fill: var(--ok); }
 #ws:not(.editing) .gfx.ip[data-fit="manualValve"] { cursor: pointer; }
 .el.fault { border-color: var(--bad); }
@@ -472,3 +478,4 @@ body.role-viewer .op-only { display: none !important; }
 .alertBar + .alertBar { top: auto; bottom: 10px; }
 .alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
+#dlgBody .lockedPath { opacity: 0.65; cursor: help; background-image: none; }
