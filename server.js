@@ -5,7 +5,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
-import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf } from './lib/store.js';
+import { modernize, removeSpacesOnDisk } from './lib/modernize.js';
+import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
@@ -35,6 +37,8 @@ const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'))
 
 // A configuration saved before the Global class was retired is converted once (backups in config/backups and *.before-globals.bak)
 const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
+// Names have no spaces any more: an older configuration is changed once (backups in config/backups and *.before-no-spaces.bak)
+const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
@@ -59,6 +63,7 @@ const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media pag
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
+if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
 
@@ -157,6 +162,14 @@ function cleanDonation(d = {}) {
     enabled: d.enabled !== false,
     message: String(d.message ?? '').slice(0, 1000), button: String(d.button ?? '').slice(0, 60),
     everyDays: days(d.everyDays, 30), donatedDays: days(d.donatedDays, 180),
+  };
+}
+
+// Autofill in the Process editor: every Device, Widget and Process name, each with its attributes
+function processWords() {
+  return {
+    elements: store.list().map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el) })),
+    processes: engine.names(),
   };
 }
 
@@ -346,7 +359,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -423,14 +436,24 @@ async function route(req, res) {
   // scripts
   if (p === '/ui/scripts' && m === 'GET') return ok(res, engine.list());
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
-  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|rename))?$/.exec(p);
+  if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
+  if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
+  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|rename|class))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];
+    if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
     if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
     if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
-    if (!act && m === 'PUT') { const text = await readBody(req); engine.write(name, text); return ok(res, engine.check(text)); }
+    if (!act && m === 'PUT') {
+      // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
+      const mod = modernize(await readBody(req), n => store.get(n));
+      engine.write(name, mod.text);
+      engine.renumber();
+      const text = engine.read(name);
+      return ok(res, { ...engine.check(text), text, modernized: mod.changed });
+    }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
   }
   if (p === '/ui/stopall' && m === 'POST') { engine.stopAll(); return ok(res); }

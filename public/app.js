@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { attachAutofill } from './autofill.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -12,6 +13,7 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 const media = p => '/media?path=' + encodeURIComponent(p);
+const noSpaces = n => String(n ?? '').trim().replace(/_*\s+_*/g, '_');
 const clone = o => JSON.parse(JSON.stringify(o));
 const PALETTE = { '0': '', '1': '#e8833a', '2': '#3fa34d', '3': '#a8c64a', '4': '#c94040', '5': '#3a7be8', '6': '#8a5cd6', '7': '#e8c33a', '8': '#777f88' };
 const bg = v => (v === '' || v === null || v === undefined) ? '' : (PALETTE[String(v)] ?? String(v));
@@ -1330,6 +1332,7 @@ F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel',
   ['step', '+ / - step', 'num', null, NUMK], ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK],
   ['onText', 'Text when on', 'text', null, BOOLK], ['offText', 'Text when off', 'text', null, BOOLK],
   ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
+  ['stepClass', 'Shows the steps of', 'sel', [['flow', 'Flow Processes'], ['sub', 'Sub Processes'], ['repeat', 'Repeat Processes'], ['looper', 'Looper Processes'], ['any', 'Any Process']], ['step']],
   ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', 'list', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', 'list', ...PLAINK]]];
 F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
   ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num', null, NUMK],
@@ -1637,7 +1640,7 @@ async function editItem(kind, id) {
       }
     }
     if (kind === 'el') {
-      work.name = (work.name || '').trim();
+      work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       if (!work.name) throw new Error('Name is required');
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
@@ -1724,11 +1727,25 @@ function updateAlarms() {
 // ---------------------------------------------------------------- scripts
 let curScript = null, dirty = false, problems = [];
 function renderScripts() { renderScriptList(); }
+// grouped by class: Flow, Sub, Repeat, Looper (lib/scaffold.js); a group can be folded
+let foldedClasses = new Set();
+try { foldedClasses = new Set(JSON.parse(localStorage.getItem('bp.foldedClasses') || '[]')); } catch { /* private window */ }
 function renderScriptList() {
   const ul = $('#scriptList'); ul.innerHTML = '';
-  for (const s of S.scripts) {
-    const cls = s.state === 'running' ? (s.waiting ? 'waiting' : 'running') : s.state === 'error' ? 'error' : '';
-    ul.append(h('li', { class: s.name === curScript ? 'active' : '', title: s.error || s.state, onclick: () => openScript(s.name) }, h('span', { class: 'st ' + cls }), s.name, s.modified ? ' *' : ''));
+  for (const [c, d] of Object.entries(S.processClasses || { sub: { label: 'Processes' } })) {
+    const list = S.scripts.filter(s => (s.cls || 'sub') === c);
+    if (!list.length) continue;
+    const folded = foldedClasses.has(c);
+    ul.append(h('li', { class: 'clsHead', title: d.about || '', onclick: () => {
+      folded ? foldedClasses.delete(c) : foldedClasses.add(c);
+      try { localStorage.setItem('bp.foldedClasses', JSON.stringify([...foldedClasses])); } catch { /* ignore */ }
+      renderScriptList();
+    } }, (folded ? '▸ ' : '▾ ') + d.label, h('span', { class: 'muted' }, ` (${list.length})`)));
+    if (folded) continue;
+    for (const s of list) {
+      const st = s.state === 'running' ? (s.waiting ? 'waiting' : 'running') : s.state === 'error' ? 'error' : '';
+      ul.append(h('li', { class: s.name === curScript ? 'active' : '', title: s.error || s.state, onclick: () => openScript(s.name) }, h('span', { class: 'st ' + st }), s.name, s.modified ? ' *' : ''));
+    }
   }
 }
 async function openScript(name) {
@@ -1739,13 +1756,17 @@ async function openScript(name) {
   knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
   if (can('admin')) api('POST', '/ui/scripts/check', $('#code').value, true).then(r => { for (const x of r.offBrain ?? []) knownPaths.add(x.path); }).catch(() => { });
   renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole();
+  api('GET', '/ui/scripts/words').then(w => { S.words = w; }).catch(() => { });
 }
 function updateScriptState() {
   const s = S.scripts.find(x => x.name === curScript);
   const st = $('#scriptState');
+  const sel = $('#scriptClass');
+  sel.disabled = !s || !can('admin');
+  if (s && document.activeElement !== sel) sel.value = s.cls || 'sub';
   if (!s) { st.textContent = ''; updateGutter(); return; }
   let t = s.state;
-  if (s.state === 'running') t = (s.waiting ? 'waiting' : 'running') + ` (line ${s.line})` + (s.modified ? ' - edited since start, stop and start to apply' : '');
+  if (s.state === 'running') t = (s.waiting ? 'waiting' : 'running') + ` (line ${s.line}${s.step ? `, step ${[s.step.num, s.step.name].filter(Boolean).join(' ')}` : ''})` + (s.modified ? ' - edited since start, stop and start to apply' : '');
   if (s.state === 'error') t = s.error;
   st.textContent = t; st.style.color = s.state === 'error' ? 'var(--bad)' : s.state === 'running' ? 'var(--ok)' : '';
   updateGutter();
@@ -1772,6 +1793,7 @@ function gotoLine(l) {
 }
 $('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; });
 $('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; });
+attachAutofill($('#code'), $('#autofill'), () => S?.words);
 $('#code').addEventListener('keydown', ev => {
   if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '\t'); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }
@@ -1779,8 +1801,17 @@ $('#code').addEventListener('keydown', ev => {
 const saveScript = guard(async () => {
   if (!curScript) return;
   const r = await api('PUT', '/ui/scripts/' + encodeURIComponent(curScript), $('#code').value, true);
+  // the server writes it in the new style and renumbers the steps: show what was saved, keeping the place
+  const ta = $('#code');
+  if (typeof r.text === 'string' && r.text !== ta.value) {
+    const line = ta.value.slice(0, ta.selectionStart).split('\n').length, top = ta.scrollTop;
+    ta.value = r.text;
+    const pos = r.text.split('\n').slice(0, line - 1).reduce((a, l) => a + l.length + 1, 0);
+    ta.setSelectionRange(pos, pos); ta.scrollTop = top;
+  }
   dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter();
-  toast(problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved', !!problems.length);
+  const note = r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '';
+  toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length);
   const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
   for (const x of added) knownPaths.add(x.path);
   if (added.length && S.config.warnOffBrainPaths !== false) offBrainDialog(added);
@@ -1803,6 +1834,14 @@ function offBrainDialog(list) {
   d.showModal();
 }
 $('#saveScript').onclick = saveScript;
+$('#scriptClass').onchange = guard(async ev => { if (curScript) await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/class`, { cls: ev.target.value }); });
+$('#addSteps').onclick = guard(async () => {
+  if (!curScript) return;
+  const ta = $('#code'), t = await api('POST', '/ui/scripts/addsteps', ta.value, true);
+  if (t.text === ta.value) { toast('Every [label] already has a step'); return; }
+  ta.value = t.text; dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)';
+  toast('Steps added: Save to number them');
+});
 $('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; renderProblems(); updateGutter(); });
 $('#startScript').onclick = guard(async () => {
   if (!curScript) return;
@@ -1813,15 +1852,17 @@ $('#startScript').onclick = guard(async () => {
 $('#stopScript').onclick = guard(() => api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/stop`));
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
-  const n = prompt('New process name'); if (!n) return;
-  if (S.scripts.some(s => s.name === n.trim())) throw new Error('That name is used');
-  await api('PUT', '/ui/scripts/' + encodeURIComponent(n.trim()), '//' + n.trim() + '\n', true);
-  S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n.trim());
+  let n = prompt('New process name'); if (!n) return;
+  n = noSpaces(n);
+  if (S.scripts.some(s => s.name === n)) throw new Error('That name is used');
+  await api('PUT', '/ui/scripts/' + encodeURIComponent(n), '//' + n + '\n', true);
+  S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n);
 });
 $('#renScript').onclick = guard(async () => {
-  if (!curScript) return; const n = prompt('Rename to', curScript); if (!n || n === curScript) return;
-  await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n.trim() });
-  curScript = n.trim(); S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
+  if (!curScript) return; let n = prompt('Rename to', curScript); if (!n) return;
+  n = noSpaces(n); if (n === curScript) return;
+  await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n });
+  curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
 $('#delScript').onclick = guard(async () => {
   if (!curScript || !confirm(`Delete process "${curScript}"?`)) return;
