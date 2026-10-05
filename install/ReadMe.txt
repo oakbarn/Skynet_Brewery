@@ -11,7 +11,8 @@ The installers get it for you, or tell you how.
 The files in this release:
 
   Skynet_Brewer_Setup_<date>.exe    Windows installer (has the whole panel inside)
-  Skynet_BrewPanel_<date>.zip       The panel itself, for a manual install or for Mac/Linux/Pi
+  Skynet_BrewPanel_Full_<date>.zip    The whole panel: first install by hand, or for Mac/Linux/Pi
+  Skynet_BrewPanel_Update_<date>.zip  Update by hand (has no config, media or scripts)
   Install Skynet Brewer.command     Mac installer
   install-skynet-brewer.sh          Linux and Raspberry Pi installer
   Skynet_Brewer.bat                 Sample Windows start file (for a manual install)
@@ -20,9 +21,21 @@ The files in this release:
 The panel goes in C:\Brewing\BrewPanel on Windows, and in Brewing/BrewPanel in your
 home folder on a Mac, Linux or a Pi.
 
-Updating? Your brew data (the "data" folder) and your layout (config\brewery.json)
-are kept. Stop the panel first. In the panel, Help > "Updating to a new version"
-has the details.
+FULL INSTALL OR UPDATE
+A full install is the first time. An update is a newer version over a panel you use.
+On an update these folders are NEVER overwritten:
+  config    your layout, tabs, devices and settings
+  data      brew log, saved values, users, passwords, sign-ins, recovery code
+  media     your pictures and sounds
+  scripts   your processes
+The installers see an existing panel and update it by themselves (they only add new
+sample files you don't have). Updating by hand? Use the Update zip, never the Full
+zip. Stop the panel first either way. The Help pages are replaced by the new manual;
+the old ones go to help\backups.
+While Settings > Testing mode is on, a new version clears every sign-in, so you
+create the admin account again. That is on purpose while testing. Turn it off when
+you use the panel for real. In the panel, Help > "Updating to a new version" has
+the details.
 
 
 WINDOWS, THE EASY WAY (INSTALLER)
@@ -43,10 +56,10 @@ your brew data.
 WINDOWS, BY HAND
 ----------------
 1. Install Node.js (the LTS version) from https://nodejs.org
-2. Make the folder C:\Brewing and copy Skynet_BrewPanel_<date>.zip into it.
+2. Make the folder C:\Brewing and copy Skynet_BrewPanel_Full_<date>.zip into it.
 3. Right-click the zip, choose "Extract All...", and extract into C:\Brewing.
    It makes the sub folder C:\Brewing\BrewPanel by itself.
-   (If Windows suggests C:\Brewing\Skynet_BrewPanel_<date>, change it to C:\Brewing.)
+   (If Windows suggests C:\Brewing\Skynet_BrewPanel_Full_<date>, change it to C:\Brewing.)
 4. Create a .bat file to start the panel. Use the sample Skynet_Brewer.bat that came
    with this ReadMe, or make your own:
      a. Open any simple text editor (Notepad, Notepad++). Word works only if you
@@ -76,7 +89,7 @@ may show "can't reach this page" until you refresh.
 
 MAC
 ---
-1. Double-click Skynet_BrewPanel_<date>.zip (Safari may already have unzipped it into
+1. Double-click Skynet_BrewPanel_Full_<date>.zip (Safari may already have unzipped it into
    a BrewPanel folder; that is fine).
 2. Put "Install Skynet Brewer.command" in the same folder as the zip (or the BrewPanel
    folder), or open the one inside BrewPanel/install/mac.
@@ -90,7 +103,7 @@ MAC
 
 LINUX
 -----
-1. Put install-skynet-brewer.sh and Skynet_BrewPanel_<date>.zip in the same folder.
+1. Put install-skynet-brewer.sh and Skynet_BrewPanel_Full_<date>.zip in the same folder.
 2. Open a terminal in that folder and run:
        bash install-skynet-brewer.sh
    Do not put sudo in front; it asks for your password when it needs it.
@@ -102,7 +115,7 @@ LINUX
 RASPBERRY PI (THE BRAIN)
 ------------------------
 Raspberry Pi OS (64-bit recommended), Pi 4 or newer.
-1. Copy install-skynet-brewer.sh and Skynet_BrewPanel_<date>.zip to the Pi
+1. Copy install-skynet-brewer.sh and Skynet_BrewPanel_Full_<date>.zip to the Pi
    (a USB stick, or download them on the Pi).
 2. Open a terminal in that folder and run:
        bash install-skynet-brewer.sh
