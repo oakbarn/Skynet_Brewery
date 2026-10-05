@@ -9,27 +9,27 @@ new time vT_Stand
 new string vSMsg
 vV_Stand_Temp = 154
 vT_Stand = 00:20:00
-if "sw_Status_Testing" state == true
+if sw_Status_Testing == true
 	vT_Stand = 00:00:20
 endif
-"BK_Burner" state = false
-"V_MLT_Out" state = false
-"V_BK_In" state = true
-"MB_36_do_RedPump_B1" state = true
-"Cooling_Water" state = true
+BK_Burner = false
+V_MLT_Out = false
+V_BK_In = true
+MB_36_do_RedPump_B1 = true
+Cooling_Water = true
 vSMsg = "Cooling to " + vV_Stand_Temp
 vSMsg = vSMsg + " °F for the hop stand"
-"gblS_Inter_Script" value = vSMsg
-wait "BK_Temp" value <= vV_Stand_Temp
-"Cooling_Water" state = false
+gblS_Inter_Script = vSMsg
+wait BK_Temp <= vV_Stand_Temp
+Cooling_Water = false
 start "alm_Hops"
-"gblS_Inter_Script" value = "Add the whirlpool hops, then click the Hop alarm"
-wait "alm_Hops" active == false
-"tm_Whirlpool" type = countdown
-"tm_Whirlpool" value = vT_Stand
+gblS_Inter_Script = "Add the whirlpool hops, then click the Hop alarm"
+wait alm_Hops == false
+tm_Whirlpool.countdown = true
+tm_Whirlpool = vT_Stand
 start "tm_Whirlpool"
-"gblS_Inter_Script" value = "Hop stand"
-wait "tm_Whirlpool" value <= 00:00:00
-"Cooling_Water" state = true
-"gblS_Inter_Script" value = "Hop stand done - chilling"
-print "Hop stand finished at " + "BK_Temp" value
+gblS_Inter_Script = "Hop stand"
+wait tm_Whirlpool <= 00:00:00
+Cooling_Water = true
+gblS_Inter_Script = "Hop stand done - chilling"
+print "Hop stand finished at " + BK_Temp

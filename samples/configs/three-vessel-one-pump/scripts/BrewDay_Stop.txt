@@ -6,21 +6,21 @@ stop "BrewDay_Flow"
 stop "looper_Advance_Switch"
 stop "tm_Step"
 stop "tm_BrewDay"
-"alm_Hops" active = false
-"alm_Step" active = false
-"sw_Advance_BrewStatus" visibility = hidden
-"Pump_1" state = false
-"V_HLT_Out" state = false
-"V_MLT_Out" state = false
-"V_BK_Out" state = false
-"V_To_MLT" state = false
-"V_To_BK" state = false
-"V_To_Ferm" state = false
-"HLT_Heat" enabled = false
-"BK_Heat" enabled = false
-"Chiller_Water" state = false
-"gblV_Brew_Status" value = 0
-"gblS_Advance_Label" value = "Stopped"
-"gblS_Advance_Label" background = 8
-"gblS_Step_Text" background = 8
-"gblS_Step_Text" value = "Stopped. Everything is off."
+alm_Hops = false
+alm_Step = false
+sw_Advance_BrewStatus.visible = false
+Pump_1 = false
+V_HLT_Out = false
+V_MLT_Out = false
+V_BK_Out = false
+V_To_MLT = false
+V_To_BK = false
+V_To_Ferm = false
+HLT_Heat.enabled = false
+BK_Heat.enabled = false
+Chiller_Water = false
+gblV_Brew_Status = 0
+gblS_Advance_Label = "Stopped"
+gblS_Advance_Label.background = 8
+gblS_Step_Text.background = 8
+gblS_Step_Text = "Stopped. Everything is off."
