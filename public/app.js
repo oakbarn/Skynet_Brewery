@@ -15,8 +15,17 @@ const h = (tag, attrs = {}, ...kids) => {
 const media = p => '/media?path=' + encodeURIComponent(p);
 const noSpaces = n => String(n ?? '').trim().replace(/_*\s+_*/g, '_');
 const clone = o => JSON.parse(JSON.stringify(o));
-const PALETTE = { '0': '', '1': '#e8833a', '2': '#3fa34d', '3': '#a8c64a', '4': '#c94040', '5': '#3a7be8', '6': '#8a5cd6', '7': '#e8c33a', '8': '#777f88' };
-const bg = v => (v === '' || v === null || v === undefined) ? '' : (PALETTE[String(v)] ?? String(v));
+// a background that is not a number is a color ("red", "#3fa34d"); a number only ever picks a picture
+const bg = v => (v === '' || v === null || v === undefined || /^\s*-?\d+\s*$/.test(String(v))) ? '' : String(v);
+// Picture paths (as in BruControl): "background" = 1, 2 or 3 shows imagePath_1, _2 or _3, any other whole number shows
+// no picture. Empty (or a color) shows imagePath_1. name.image = "path" in a Process sets imagePath_1 and background = 1.
+const IMG_SLOT = /^imagePath_(\d+)$/;
+const slotsOf = e => Object.keys(e).filter(k => IMG_SLOT.test(k) && e[k]).map(k => +IMG_SLOT.exec(k)[1]).sort((a, b) => a - b);
+function slotImage(e, v) {
+  const b = String(v.background ?? '').trim(), n = /^-?\d+$/.test(b) ? +b : 1;
+  return n >= 1 ? (v['imagepath_' + n] ?? e['imagePath_' + n] ?? '') : '';
+}
+const hasPictures = (e, v) => !!(slotsOf(e).length || v.imagepath_1 || v.imagepath_2 || v.imagepath_3);
 
 let S = null;                 // server state
 let view = 'workspace', wsName = null, zoom = 'fit';
@@ -215,7 +224,7 @@ const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)
 // pictures and sounds already used anywhere in the layout
 function usedPaths(re) {
   const c = draft || S.config;
-  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.image, o.background, o.sound, ...(o.images || []), ...(o.sounds || [])])
+  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.image, o.background, o.sound, ...slotsOf(o).map(n => o['imagePath_' + n]), ...(o.sounds || [])])
     .filter(p => typeof p === 'string' && re.test(p)))].sort();
 }
 const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
@@ -509,7 +518,8 @@ function fillEl(n, e) {
   const v = S.values[e.name] || {};
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   nm.textContent = v.displayname ?? e.name;
-  let on = false, img = v.image || '', text = '';
+  const pic = slotImage(e, v);
+  let on = false, img = pic, text = '';
   switch (e.type) {
     case 'shared': case 'vAPI':
       if (e.dataType === 'bool' || e.kind === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
@@ -531,7 +541,7 @@ function fillEl(n, e) {
     case 'digitalOut': case 'switch': case 'digitalIn':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
-      img = (on ? v.imageon : v.imageoff) || v.image || ''; break;
+      img = (on ? v.imageon : v.imageoff) || pic; break;
     case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'pwmOut': on = !!v.enabled && v.value > 0; text = v.enabled ? fmtVal(e, v.value) + ' %' : (e.offText ?? 'OFF'); break;
     case 'analogOut': text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); on = v.enabled !== false && v.value > (e.rangeLow ?? 0); break;
@@ -547,21 +557,19 @@ function fillEl(n, e) {
     case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
-      img = (v.active ? v.imageon : v.imageoff) || v.image || ''; n.classList.toggle('img-alarm', !!(v.imageon || v.image)); break;
+      img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic)); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = v.displayname ?? e.name; nm.classList.add('hidden'); break;
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
-      if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || v.image || ''; }
+      if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
       text = e.text ?? ''; break;
   }
-  // BruControl-style background images: "background" = 1, 2 or 3 picks one of the element's images
-  if (!img && e.images?.length && /^\d+$/.test(String(v.background ?? ''))) img = e.images[Math.max(1, +v.background) - 1] || '';
   if (isPropValve(e)) {                              // show percent open, and the open / closed picture
     const pct = propPct(e); on = pct > 0;
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
-    img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || v.image || '';
+    img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
   }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
@@ -576,11 +584,12 @@ function fillEl(n, e) {
   const missing = img && isButton && imgMissing(media(img), n);
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
-  n.style.backgroundColor = img || missing ? '' : (e.images ? '' : bg(v.background));
+  const stretch = !!e.imagePathsLocked && hasPictures(e, v);
+  n.style.backgroundColor = img || missing ? '' : bg(v.background);
   n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
-  n.classList.toggle('stretch', !!e.images);
+  n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
 }
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
@@ -1376,9 +1385,10 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 // field: [key, label, kind, options]
 const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool'],
-    ['background', 'Background (1-8 or color)', 'text'], ['image', 'Image path', 'path'], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
+    ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
+    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
-    ['images', 'Background images 1-3 (JSON list; "background" = 1, 2 or 3 picks one)', 'json'], ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
+    ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
@@ -1545,6 +1555,19 @@ function field([key, label, kind, opts, rerender], obj) {
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const v = obj[key];
   let input;
+  if (kind === 'imgpath') {    // imagePath_1, _2, _3: after a BruControl import only imagePath_1 can be changed (the Skynet way)
+    if (opts === 1 || !obj.imagePathsLocked) return field([key, label, 'gpick', 'pictures'], obj);
+    input = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', readonly: true, class: 'lockedPath', placeholder: '(empty)', title: 'Locked after the BruControl import. Click to see why.', onclick: lockedPathHelp });
+    return [h('label', {}, label + ' 🔒'), input];
+  }
+  if (kind === 'bgsel') {      // which picture shows: 1-3 (and more on folded items), or none
+    const n = [1, 2, 3, ...slotsOf(obj).filter(x => x > 3)];
+    const os = [['', '(default) imagePath_1'], ...n.map(x => [String(x), `${x} = imagePath_${x}`]), ['0', 'None (0 or any number other than ' + n.join(', ') + ')']];
+    const cur = v === undefined || v === null ? '' : String(v);
+    if (!os.some(o => o[0] === cur)) os.push([cur, /^-?\d+$/.test(cur) ? `${cur} = None (no picture)` : `${cur} (color, shown when there is no picture)`]);
+    input = h('select', { 'data-k': key, 'data-kind': kind }, ...os.map(([o, l]) => h('option', { value: o, ...(o === cur ? { selected: true } : {}) }, l)));
+    return [h('label', {}, label), input];
+  }
   if (kind === 'info') {     // live reading, to help with calibration
     const r = S.values[obj.name] || {};
     const spu = obj.type === 'stepper' ? (obj.units === 'steps' ? 1 : (+obj.stepsPerRev || 200) * (+obj.microsteps || 1) * (+obj.gearRatio || 1) / (+obj.unitsPerRev || (obj.units === 'deg' ? 360 : obj.units === '%' ? 100 : 1))) : 0;
@@ -1653,6 +1676,27 @@ function stepperPick(key, list, v) {
   return s;
 }
 
+// A locked imagePath_2 / _3 was clicked: explain how pictures change in Skynet
+let lockedShown = 0;
+function lockedPathHelp(ev) {
+  ev?.target?.blur?.();
+  if (Date.now() - lockedShown < 800) return;       // click and focus fire together
+  lockedShown = Date.now();
+  let d = $('#lockedPathDlg');
+  if (!d) {
+    d = h('dialog', { id: 'lockedPathDlg' }, h('h3', {}, '🔒 imagePath_2 and imagePath_3 are locked'),
+      h('p', {}, 'This item came from a BruControl import. BruControl kept 3 background pictures and a Process picked one with background = 1, 2 or 3. Those pictures were kept, so your imported Processes still work, but imagePath_2 and imagePath_3 can no longer be changed here.'),
+      h('p', {}, h('b', {}, 'The Skynet way:'), ' use one picture, imagePath_1, and let a Process change it:'),
+      h('pre', { class: 'mono' }, 'my_widget.image = "Images/RedPump.png"'),
+      h('p', {}, 'That puts the new path in imagePath_1 and sets background = 1 by itself, so the picture shows at once. You can also change imagePath_1 right here in this dialog.'),
+      h('p', {}, 'Still works as in BruControl: my_widget.background = 1, 2 or 3 shows that picture; any other number (for example 4) shows no picture.'),
+      h('p', { class: 'muted' }, 'More in Help > Pictures on items.'),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: () => d.close() }, 'OK')));
+    document.body.append(d);
+  }
+  d.showModal();
+}
+
 function readFields(obj) {
   for (const inp of $$('#dlgBody [data-k]')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
@@ -1664,6 +1708,7 @@ function readFields(obj) {
       if (new Set(v.map(r => r.value)).size !== v.length) throw new Error('Two choices have the same Value');
     }
     else if (kind === 'num') v = inp.value === '' ? undefined : +inp.value;
+    else if (kind === 'bgsel') v = inp.value === '' ? undefined : /^-?\d+$/.test(inp.value) ? +inp.value : inp.value;
     else if (kind === 'pin') { const t = inp.value.trim().toUpperCase(); v = t === '' ? undefined : /^\d+$/.test(t) ? +t : t; }
     else if (kind === 'yn') v = inp.value === 'yes';
     else if (kind === 'stpick') v = inp.value === '' || inp.value === '__add__' ? undefined : inp.dataset.num ? +inp.value : inp.value;
@@ -1710,6 +1755,8 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
+    const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
+    if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     return f;
   } : eqClass(item) ? F.vesselNew : F[type];
