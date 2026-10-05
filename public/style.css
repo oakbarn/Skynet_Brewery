@@ -461,3 +461,9 @@ body.role-viewer .op-only { display: none !important; }
 .form label.simSwitch { flex-direction: row; align-items: center; gap: 8px; }
 .tblScroll { overflow-x: auto; max-width: 100%; }
 .tblScroll table { min-width: 640px; }
+
+/* a Process that kept failing: stays on screen until closed */
+.alertBar { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1000; max-width: min(640px, calc(100vw - 32px)); display: flex; gap: 10px; align-items: flex-start;
+  background: #b3261e; color: #fff; padding: 10px 12px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); font-weight: 600; }
+.alertBar + .alertBar { top: auto; bottom: 10px; }
+.alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
