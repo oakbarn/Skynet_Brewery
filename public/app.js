@@ -101,7 +101,8 @@ const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspace
 
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
-  for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName ? 'active' : '', onclick: () => { wsName = w.name; sel = null; renderTabs(); renderWs(); } }, w.name));
+  for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName ? 'active' : '', onclick: () => { wsName = w.name; sel = null; renderTabs(); renderWs(); },
+    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: 'Double-click for Tab settings' } : {}) }, w.name));
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -223,8 +224,15 @@ const eqClass = g => g?.kind === 'vessel' ? EQ[g.vesselType] : null;
 function vList(key) {
   const [c, p] = key.split('.');
   const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'units' ? UNITS : key === 'colors' ? [] :
-    key === 'pictures' ? [...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE)] : key === 'sounds' ? usedPaths(SND_RE) : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
+    key === 'pictures' ? [...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE), ...mediaPics] :
+    key === 'backgrounds' ? [...mediaPics, ...(draft || S.config).workspaces.map(w => w.background).filter(Boolean)].sort() : key === 'sounds' ? usedPaths(SND_RE) : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
   return [...new Set([...(base || []), ...(S.config.vesselLists?.[key] || [])])];
+}
+// pictures sitting in the media folder and its Images folder (fetched when a dialog needs them)
+let mediaPics = [];
+async function loadMediaPictures() {
+  const got = await Promise.all(['', 'Images'].map(dir => api('GET', `/ui/media/list?root=0&dir=${dir}`).catch(() => null)));
+  mediaPics = got.flatMap(r => r?.files || []).filter(f => f.kind === 'picture').map(f => f.use).sort();
 }
 const portDefPos = d => d.def || d.pos[0][0];
 function vPortXY(g, k, pos) {
@@ -960,7 +968,7 @@ function setEditing(on) {
   draft = on ? clone(S.config) : null;
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
-  $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties. 🔒 items are locked in place.' : '';
+  $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties. Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.' : '';
   renderTabs(); renderWs();
 }
 
@@ -997,7 +1005,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     drag = pipe.locked ? null : { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points) };
     renderWs(); return;
   }
-  if (!node) { sel = null; renderWs(); return; }
+  if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
   sel = node.dataset.name ? { kind: 'el', id: node.dataset.name } : { kind: 'gfx', id: node.dataset.gid };
   const item = findItem(sel.kind, sel.id);
   startLongPress(ev, sel.kind, sel.id);
@@ -1045,6 +1053,7 @@ $('#ws').addEventListener('dblclick', ev => {
   if (pip) pip.dataset.eq ? editItem('gfx', pip.dataset.eq) : editItem('el', pip.dataset.dev);
   else if (node) editItem(node.dataset.name ? 'el' : 'gfx', node.dataset.name || node.dataset.gid);
   else if (pipe) editItem('gfx', pipe.dataset.gid);
+  else editWorkspace();      // an empty spot on the tab: Tab settings (name, background color and picture, size)
 });
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
@@ -1055,7 +1064,7 @@ document.addEventListener('keydown', ev => {
 let lp = null;
 function startLongPress(ev, kind, id) {
   cancelLongPress();
-  lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } editItem(kind, id); }, 600) };
+  lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } kind === 'tab' ? editWorkspace() : editItem(kind, id); }, 600) };
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 
@@ -1489,7 +1498,7 @@ function field([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'cpick' }, sw, s, pick, val);
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
-    const list = opts || 'onoff', pic = list === 'onoff' || list === 'pictures';
+    const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds'].includes(list);
     const named = new Map(ONOFF_GRAPHICS.map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
     const pv = h('img', { class: 'gprev' + (v && pic ? '' : ' hidden'), ...(v && pic ? { src: media(v) } : {}), alt: '' });
     const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list }, h('option', { value: '' }, '(none)'),
@@ -1503,6 +1512,7 @@ function field([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'sel') { const os = opts.map(o => Array.isArray(o) ? o : [o, o]); input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...os.map(([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l))); }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
+  else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
@@ -1674,9 +1684,18 @@ async function editItem(kind, id) {
 }
 
 async function editWorkspace() {
+  if (!editing) return;
   const w = curWs(); const work = clone(w);
-  const r = await dialog('Tab', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'color'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
-    ['pipeSize', 'Pipe size: thickness of every pipe and fitting on this tab (default 10)', 'num'], ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
+  await loadMediaPictures();
+  const r = await dialog('Tab settings', [['name', 'Name', 'text'],
+    ['_bgHead', 'Background', 'head'],
+    ['color', 'Background color', 'color'],
+    ['background', 'Background picture', 'gpick', 'backgrounds'],
+    ['_bgPlace', 'The list shows the pictures in your media folder and its Images folder (Add new ... takes any other path). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
+    ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
+    ['_sizeHead', 'Size', 'head'],
+    ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
+    ['pipeSize', 'Pipe size (every pipe and fitting on this tab, default 10)', 'num']], work, draft.workspaces.length > 1);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
