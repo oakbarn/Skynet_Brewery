@@ -6,7 +6,7 @@
 #   bash install-skynet-brewer.sh
 #
 # It looks for the panel in this order: the BrewPanel folder this script sits in (BrewPanel/install/linux),
-# a Skynet*.zip next to this script, or a BrewPanel folder next to this script.
+# a Skynet*.zip next to this script (the Full zip first), or a BrewPanel folder next to this script.
 # It installs to ~/Brewing/BrewPanel, gets Node.js if needed, and adds a "Skynet Brewer" launcher.
 # On a Raspberry Pi it also makes the panel start by itself when the Pi starts (a systemd service).
 #
@@ -66,7 +66,8 @@ SRC=""
 if [ -f "$HERE/../../server.js" ]; then
   SRC="$(cd "$HERE/../.." && pwd)"
 else
-  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
+  ZIP="$(ls -t "$HERE"/Skynet*Full*.zip 2>/dev/null | head -n 1 || true)"
+  [ -n "$ZIP" ] || ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
   if [ -n "$ZIP" ]; then
     echo "Unpacking $(basename "$ZIP")"
     unzip_to "$ZIP" "$TMP/zip"
@@ -110,21 +111,33 @@ done
 
 # ---------------------------------------------------------------- Copy the files
 STAMP="$(date +%Y-%m-%d_%H%M%S)"
+UPDATE=no
+[ -f "$DEST/server.js" ] && UPDATE=yes
+[ "$UPDATE" = yes ] || [ -f "$SRC/config/brewery.json" ] || fail "This is an update-only zip, and there is no panel in $DEST yet. Use the Skynet_BrewPanel_Full zip for a first install."
 mkdir -p "$DEST"
 DEST="$(cd "$DEST" && pwd)"
-KEEP=""
-if [ -f "$DEST/server.js" ] && [ -f "$DEST/config/brewery.json" ]; then
-  mkdir -p "$DEST/config/backups"
-  KEEP="$DEST/config/backups/brewery_before_update_$STAMP.json"
-  cp -p "$DEST/config/brewery.json" "$KEEP"
-  echo "Updating. Your layout was copied to config/backups/$(basename "$KEEP")"
-fi
+# Your folders (config, data, media, scripts): an update only adds files that are new. It never replaces or deletes yours.
 if [ "$SRC" != "$DEST" ]; then
-  echo "Copying the panel to $DEST"
-  # Never copy a data folder over the brew data (a release zip has none anyway)
-  ( cd "$SRC" && tar --exclude=./data --exclude=./node_modules -cf - . ) | ( cd "$DEST" && tar -xf - )
+  if [ "$UPDATE" = yes ]; then
+    echo "Updating the panel in $DEST"
+    echo "Kept as they are: your layout and settings (config), brew data, log, users and passwords (data),"
+    echo "pictures and sounds (media) and processes (scripts). Only new sample files are added to them."
+    if ls "$DEST"/help/*.md >/dev/null 2>&1; then
+      mkdir -p "$DEST/help/backups/before_update_$STAMP"
+      cp -p "$DEST"/help/*.md "$DEST/help/backups/before_update_$STAMP/"
+      echo "Help pages are replaced by the new manual. The old ones are in help/backups/before_update_$STAMP"
+    fi
+  else
+    echo "Full install to $DEST"
+  fi
+  ( cd "$SRC" && find . -type f ! -path './data/*' ! -path './node_modules/*' ) | while IFS= read -r f; do
+    case "$f" in
+      ./config/*|./media/*|./scripts/*) if [ -e "$DEST/$f" ]; then continue; fi ;;
+    esac
+    mkdir -p "$DEST/$(dirname "$f")"
+    cp -p "$SRC/$f" "$DEST/$f"
+  done
 fi
-[ -n "$KEEP" ] && cp -p "$KEEP" "$DEST/config/brewery.json"
 chmod +x "$DEST"/install/linux/*.sh "$DEST"/install/mac/*.command 2>/dev/null || true
 
 echo "Getting the USB support package (needs internet)"

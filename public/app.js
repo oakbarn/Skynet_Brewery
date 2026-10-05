@@ -38,6 +38,11 @@ async function api(method, url, body, raw) {
   if (!r.ok || (data && data.ok === false && data.error)) throw new Error(data.error || r.statusText);
   return data;
 }
+// A message that stays until it is closed: a Process that kept failing and was not restarted again
+function alertBar(text) {
+  const bar = h('div', { class: 'alertBar', role: 'alert' }, h('span', {}, '⚠ ' + text), h('button', { title: 'Close', onclick: () => bar.remove() }, '✕'));
+  document.body.append(bar);
+}
 function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? 5000 : 2200); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 const can = need => RANK[S?.me?.role] >= RANK[need];
@@ -73,6 +78,7 @@ function connect() {
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
+  es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
@@ -95,7 +101,8 @@ const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspace
 
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
-  for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName ? 'active' : '', onclick: () => { wsName = w.name; sel = null; renderTabs(); renderWs(); } }, w.name));
+  for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName ? 'active' : '', onclick: () => { wsName = w.name; sel = null; renderTabs(); renderWs(); },
+    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: 'Double-click for Tab settings' } : {}) }, w.name));
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -217,8 +224,15 @@ const eqClass = g => g?.kind === 'vessel' ? EQ[g.vesselType] : null;
 function vList(key) {
   const [c, p] = key.split('.');
   const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'units' ? UNITS : key === 'colors' ? [] :
-    key === 'pictures' ? [...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE)] : key === 'sounds' ? usedPaths(SND_RE) : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
+    key === 'pictures' ? [...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE), ...mediaPics] :
+    key === 'backgrounds' ? [...mediaPics, ...(draft || S.config).workspaces.map(w => w.background).filter(Boolean)].sort() : key === 'sounds' ? usedPaths(SND_RE) : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
   return [...new Set([...(base || []), ...(S.config.vesselLists?.[key] || [])])];
+}
+// pictures sitting in the media folder and its Images folder (fetched when a dialog needs them)
+let mediaPics = [];
+async function loadMediaPictures() {
+  const got = await Promise.all(['', 'Images'].map(dir => api('GET', `/ui/media/list?root=0&dir=${dir}`).catch(() => null)));
+  mediaPics = got.flatMap(r => r?.files || []).filter(f => f.kind === 'picture').map(f => f.use).sort();
 }
 const portDefPos = d => d.def || d.pos[0][0];
 function vPortXY(g, k, pos) {
@@ -293,7 +307,8 @@ function widgetLabel(g, defPos) {
   return lb;
 }
 // standard colors for the flow widgets' color dropdowns ('' = the default color)
-const COLORS = [['Default', ''], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
+// Default = the item's normal color, None = no color at all (see-through)
+const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
   ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White', '#ffffff'], ['Black', '#000000']];
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
 function buildVessel(g) {
@@ -539,12 +554,31 @@ function fillEl(n, e) {
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden');
   n.classList.toggle('fault', !!v.fault);
-  n.style.backgroundColor = img ? '' : (e.images ? '' : bg(v.background));
+  // a picture that is not in the media folders (BruControl pictures not copied yet) would leave a see-through
+  // button with white text: show the plain gray button with black text instead
+  const isButton = e.type === 'switch' || ['switch', 'pushbutton', 'momentary'].includes(vkKind(e)) || e.look === 'button';
+  const missing = img && isButton && imgMissing(media(img), n);
+  if (missing) img = '';
+  n.classList.toggle('img-missing', !!missing);
+  n.style.backgroundColor = img || missing ? '' : (e.images ? '' : bg(v.background));
   n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
   n.classList.toggle('stretch', !!e.images);
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
+}
+// pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
+const imgState = new Map();
+function imgMissing(url, node) {
+  const st = imgState.get(url);
+  if (st === true || st === false) return st;
+  if (st) { st.add(node); return false; }
+  const wait = new Set([node]); imgState.set(url, wait);
+  const im = new Image();
+  const done = bad => { imgState.set(url, bad); if (bad) for (const n of wait) { const e = n.isConnected && L().elements.find(x => x.name === n.dataset.name); if (e) fillEl(n, e); } };
+  im.onload = () => done(false); im.onerror = () => done(true);
+  im.src = url;
+  return false;
 }
 const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator';
 
@@ -954,7 +988,7 @@ function setEditing(on) {
   draft = on ? clone(S.config) : null;
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
-  $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties. 🔒 items are locked in place.' : '';
+  $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties. Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.' : '';
   renderTabs(); renderWs();
 }
 
@@ -991,7 +1025,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     drag = pipe.locked ? null : { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points) };
     renderWs(); return;
   }
-  if (!node) { sel = null; renderWs(); return; }
+  if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
   sel = node.dataset.name ? { kind: 'el', id: node.dataset.name } : { kind: 'gfx', id: node.dataset.gid };
   const item = findItem(sel.kind, sel.id);
   startLongPress(ev, sel.kind, sel.id);
@@ -1039,6 +1073,7 @@ $('#ws').addEventListener('dblclick', ev => {
   if (pip) pip.dataset.eq ? editItem('gfx', pip.dataset.eq) : editItem('el', pip.dataset.dev);
   else if (node) editItem(node.dataset.name ? 'el' : 'gfx', node.dataset.name || node.dataset.gid);
   else if (pipe) editItem('gfx', pipe.dataset.gid);
+  else editWorkspace();      // an empty spot on the tab: Tab settings (name, background color and picture, size)
 });
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
@@ -1049,7 +1084,7 @@ document.addEventListener('keydown', ev => {
 let lp = null;
 function startLongPress(ev, kind, id) {
   cancelLongPress();
-  lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } editItem(kind, id); }, 600) };
+  lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } kind === 'tab' ? editWorkspace() : editItem(kind, id); }, 600) };
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 
@@ -1468,10 +1503,10 @@ function field([key, label, kind, opts, rerender], obj) {
     const cols = [...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];
     const cur = String(v || '').toLowerCase(), known = cols.find(c => c[1] === cur);
     const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': kind, value: cur });
-    const sw = h('span', { class: 'cswatch' + (cur ? '' : ' none') }); sw.style.background = cur;
+    const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') + (cur === 'transparent' ? ' none' : '') }); sw.style.background = cur;
     const pick = h('input', { type: 'color', class: known ? 'hidden' : '', value: /^#[0-9a-f]{6}$/.test(cur) ? cur : '#888888' });
-    const set = c => { val.value = c; sw.style.background = c; sw.classList.toggle('none', !c); };
-    const s = h('select', {}, ...cols.map(([n, c]) => h('option', { value: c, ...(known && known[1] === c ? { selected: true } : {}), ...(c ? { style: `background:${c};color:${['#ffffff', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n)),
+    const set = c => { val.value = c; sw.style.background = c; sw.classList.toggle('dflt', !c); sw.classList.toggle('none', c === 'transparent'); };
+    const s = h('select', {}, ...cols.map(([n, c]) => h('option', { value: c, ...(known && known[1] === c ? { selected: true } : {}), ...(c && c !== 'transparent' ? { style: `background:${c};color:${['#ffffff', '#f1c40f', '#c9ced3'].includes(c) ? '#000' : '#fff'}` } : {}) }, n)),
       h('option', { value: 'custom', ...(known ? {} : { selected: true }) }, 'Custom (add new) ...'));
     s.onchange = () => { pick.classList.toggle('hidden', s.value !== 'custom'); set(s.value === 'custom' ? pick.value : s.value); };
     pick.oninput = () => set(pick.value);
@@ -1483,7 +1518,7 @@ function field([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'cpick' }, sw, s, pick, val);
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
-    const list = opts || 'onoff', pic = list === 'onoff' || list === 'pictures';
+    const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds'].includes(list);
     const named = new Map(ONOFF_GRAPHICS.map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
     const pv = h('img', { class: 'gprev' + (v && pic ? '' : ' hidden'), ...(v && pic ? { src: media(v) } : {}), alt: '' });
     const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list }, h('option', { value: '' }, '(none)'),
@@ -1497,6 +1532,7 @@ function field([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'sel') { const os = opts.map(o => Array.isArray(o) ? o : [o, o]); input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...os.map(([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l))); }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
+  else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
@@ -1668,9 +1704,18 @@ async function editItem(kind, id) {
 }
 
 async function editWorkspace() {
+  if (!editing) return;
   const w = curWs(); const work = clone(w);
-  const r = await dialog('Tab', [['name', 'Name', 'text'], ['background', 'Background image path', 'path'], ['color', 'Background color', 'color'], ['width', 'Width', 'num'], ['height', 'Height', 'num'],
-    ['pipeSize', 'Pipe size: thickness of every pipe and fitting on this tab (default 10)', 'num'], ['bgX', 'Image left (empty = fill)', 'num'], ['bgY', 'Image top', 'num'], ['bgW', 'Image width', 'num'], ['bgH', 'Image height', 'num']], work, draft.workspaces.length > 1);
+  await loadMediaPictures();
+  const r = await dialog('Tab settings', [['name', 'Name', 'text'],
+    ['_bgHead', 'Background', 'head'],
+    ['color', 'Background color', 'color'],
+    ['background', 'Background picture', 'gpick', 'backgrounds'],
+    ['_bgPlace', 'The list shows the pictures in your media folder and its Images folder (Add new ... takes any other path). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
+    ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
+    ['_sizeHead', 'Size', 'head'],
+    ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
+    ['pipeSize', 'Pipe size (every pipe and fitting on this tab, default 10)', 'num']], work, draft.workspaces.length > 1);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
@@ -1765,6 +1810,8 @@ function updateScriptState() {
   const sel = $('#scriptClass');
   sel.disabled = !s || !can('admin');
   if (s && document.activeElement !== sel) sel.value = s.cls || 'sub';
+  const ar = $('#scriptAutoRestart');
+  ar.disabled = !s || !can('admin'); ar.checked = !!s?.autorestart;
   if (!s) { st.textContent = ''; updateGutter(); return; }
   let t = s.state;
   if (s.state === 'running') t = (s.waiting ? 'waiting' : 'running') + ` (line ${s.line}${s.step ? `, step ${[s.step.num, s.step.name].filter(Boolean).join(' ')}` : ''})` + (s.modified ? ' - edited since start, stop and start to apply' : '');
@@ -1851,6 +1898,18 @@ $('#startScript').onclick = guard(async () => {
   if (!r.ok) toast(r.line ? `Not started - line ${r.line}: ${r.msg}` : r.msg, true);
 });
 $('#stopScript').onclick = guard(() => api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/stop`));
+$('#restartScript').onclick = guard(async () => {
+  if (!curScript) return;
+  if (dirty) await saveScript();
+  const r = await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/restart`);
+  if (!r.ok) toast(r.line ? `Not started - line ${r.line}: ${r.msg}` : r.msg, true);
+  else toast('Restarted');
+});
+$('#scriptAutoRestart').onchange = guard(async ev => {
+  if (!curScript) return;
+  await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/autorestart`, { on: ev.target.checked });
+  toast(ev.target.checked ? `${curScript} will restart by itself if it stops on an error` : `${curScript} will not restart by itself`);
+});
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
@@ -2116,6 +2175,10 @@ function renderSettings() {
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
   const box = $('#setAuto'); box.innerHTML = '';
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
+  $('#setRestartLimit').value = c.restartLimit || 5;
+  const alarms = (c.elements || []).filter(e => e.type === 'alarm');
+  $('#setRestartAlarm').replaceChildren(h('option', { value: '' }, 'None'), ...alarms.map(e => h('option', { value: e.name }, e.name)));
+  $('#setRestartAlarm').value = alarms.some(e => e.name === c.restartAlarm) ? c.restartAlarm : '';
   renderDonate();
   renderSimSettings();
 }
@@ -2216,6 +2279,7 @@ $('#saveSettings').onclick = guard(async () => {
   await api('PUT', '/ui/settings', {
     title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean),
     apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
+    restartLimit: Math.min(60, Math.max(1, Math.round(Number($('#setRestartLimit').value)) || 5)), restartAlarm: $('#setRestartAlarm').value,
   });
   await load(); toast('Settings saved');
 });

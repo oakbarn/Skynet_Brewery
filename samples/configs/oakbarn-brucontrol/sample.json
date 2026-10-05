@@ -5,5 +5,23 @@
   "description": "Your own BruControl configuration (26-26-46 VGC UNI and MB Relay): 17 tabs, 897 elements, 175 scripts and the BrewZilla / DigiBoil manual steps, with all three boards on the simulator. Globals are moved by your rules: gbl to vKonstant, RP_ to vAPI as vA_, x deleted.",
   "needs": "Some pictures from C:\\BruControl\\Media still need copying into media/Images",
   "brucontrol": "OakBarn_BruControl.brucfg",
-  "mediaFolder": "Images"
+  "mediaFolder": "Images",
+  "addElements": [
+    {
+      "workspace": "B1 Brewery",
+      "name": "btn_Start_Brew_Day",
+      "type": "label",
+      "x": 20,
+      "y": 900,
+      "w": 240,
+      "h": 70,
+      "displayName": "Start Brew Day",
+      "look": "button",
+      "background": "2",
+      "fontSize": 20,
+      "tap": "script",
+      "tapTarget": "scrStart0_0",
+      "confirm": true
+    }
+  ]
 }

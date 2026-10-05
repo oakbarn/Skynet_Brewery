@@ -93,6 +93,7 @@ function hold(name, down) {
 engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout(() => broadcast('scripts', engine.list()), 100); });
 engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
+engine.on('alert', a => broadcast('alert', a));            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
@@ -174,7 +175,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   return m === 'GET' ? 'viewer' : 'admin';
@@ -384,7 +385,7 @@ async function route(req, res) {
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
-    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths']) if (k in body) store.config[k] = body[k];
+    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm']) if (k in body) store.config[k] = body[k];
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
@@ -438,12 +439,14 @@ async function route(req, res) {
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
   if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
-  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|rename|class))?$/.exec(p);
+  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];
     if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
     if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
+    if (act === 'restart' && m === 'POST') return ok(res, await engine.restart(name, 'user'));
+    if (act === 'autorestart' && m === 'POST') { const { on } = await jsonBody(req); engine.setAutoRestart(name, !!on); return ok(res); }
     if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
     if (!act && m === 'PUT') {

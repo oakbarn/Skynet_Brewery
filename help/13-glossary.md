@@ -12,6 +12,8 @@
 
 **BruControl**: the Windows brewery program this panel is modelled on. Its configurations and processes can be imported.
 
+**Color selector**: every color setting is the same dropdown. **Default** (first) keeps the item's normal color, **None** (second) means no color at all (see-through), then colors by name with a swatch, and **Custom (add new) ...** for any other color, which is kept in the list for next time.
+
 **Device**: an element tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices).
 
 **Element**: anything placed on a tab: an output, a reading, a variable, a timer, a picture.
