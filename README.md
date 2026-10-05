@@ -160,6 +160,7 @@ endif
 step "Mash in"             (a numbered section: 1.00000, 1.00001 ... renumbered on every save)
 sleep 1000                 wait BK_Temp <= 154
 start "Other_Script"       stop "Other_Script"     start "tm_Whirlpool"   reset "tm_Whirlpool"   start "alm_Hops"
+restart Other_Script       restart                 (stop, clear its memory, start again; on its own = this Process. See Help > Restarting Processes)
 print "text"               show tab "Brewery"   (or show workspace)     log "vAV_Kettle_Temp"   (writes that vAPI to the database now)
 vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:00
 BF.precision = 4           "Euler's number" = 2.718   (quoted variable names work)
