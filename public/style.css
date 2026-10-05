@@ -63,6 +63,9 @@ main { padding: 10px 14px; }
 .el.on .vl { color: var(--ok); }
 .el.has-img { background-color: transparent; border-color: transparent; }
 .el.has-img .vl { text-shadow: 0 1px 3px #000; color: #fff; }
+.el.img-missing { background-color: #c8c8c8; border-color: #888; }
+.el.img-missing .vl { color: #000 !important; text-shadow: none; }
+.el.img-missing.on .vl { color: #1b6e2a !important; }
 .el.alarm.active { animation: blink 0.8s steps(2) infinite; border-color: var(--bad); }
 @keyframes blink { 50% { background-color: var(--bad); color: #fff; } }
 .el.timer .btns { display: flex; justify-content: center; gap: 4px; padding-bottom: 3px; }
