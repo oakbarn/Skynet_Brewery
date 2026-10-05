@@ -116,6 +116,8 @@ function renderList() {
   }
   const words = q.split(/\s+/);
   const hits = pages.filter(p => words.every(w => (p.title + '\n' + p.text).toLowerCase().includes(w)));
+  const inTitle = p => words.every(w => p.title.toLowerCase().includes(w));
+  hits.sort((a, b) => inTitle(b) - inTitle(a));     // pages with the words in their title come first
   nav.replaceChildren(...hits.map(p => {
     const plainText = p.text.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[#*`|>]|^-{3,}$/gm, ' ').replace(/\s+/g, ' ');
     const at = plainText.toLowerCase().indexOf(words[0]);
