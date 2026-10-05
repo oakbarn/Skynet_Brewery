@@ -2,7 +2,7 @@
 
 **Admin, Operator, Viewer**: the three user roles. See [Login](10-login).
 
-**Alarm**: an element that plays a sound file: Hop, Brew Flow, Pre-Hop, General or Sound only. Only one sound plays at a time, by priority. In a Process: `alm_Name = true`. See [Alarms and sound](20-alarms-and-sound).
+**Alarm**: an element that plays a sound file: Hop, Brew Flow, Pre-Hop, General or Sound only. Only one sound plays at a time, by priority. In a Process: `alm_Name = true`. See [Alarms and sound](21-alarms-and-sound).
 
 **Sound Player**: a Widget that plays one sound file (`play SoundPlayer`, `stop SoundPlayer`). It pauses while any alarm sounds.
 
@@ -30,13 +30,13 @@
 
 **Process**: a text file of brew steps the panel runs by itself. See [Processes](05-scripts).
 
-**Process class**: Flow, Sub, Repeat or Looper: what a Process is for. See [Process language and steps](21-process-language).
+**Process class**: Flow, Sub, Repeat or Looper: what a Process is for. See [Process language and steps](22-process-language).
 
-**Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](21-process-language).
+**Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](22-process-language).
 
 **Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 
-**Simulation mode**: every board is replaced by the simulator and time can run faster or skip ahead, to try a brew day without touching hardware. See [Simulation mode](19-simulation).
+**Simulation mode**: every board is replaced by the simulator and time can run faster or skip ahead, to try a brew day without touching hardware. See [Simulation mode](20-simulation).
 
 **Simulator**: a pretend board, so you can try everything without hardware.
 

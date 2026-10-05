@@ -165,7 +165,7 @@ vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:0
 BF.precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
 
-Names have no spaces (a space typed in a name becomes `_`). Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/21-process-language.md`).
+Names have no spaces (a space typed in a name becomes `_`). Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
 
 **Differences from BruControl**
 

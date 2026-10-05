@@ -40,7 +40,7 @@ log "vAV_Kettle_Temp"          write a value to the database now
 // a comment
 ```
 
-The name alone means its main value, and other attributes use a dot. See [Process language and steps](21-process-language) for the full list, autofill, Process classes and step numbers.
+The name alone means its main value, and other attributes use a dot. See [Process language and steps](22-process-language) for the full list, autofill, Process classes and step numbers.
 
 ## Display names
 
