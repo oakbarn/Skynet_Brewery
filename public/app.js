@@ -554,12 +554,31 @@ function fillEl(n, e) {
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden');
   n.classList.toggle('fault', !!v.fault);
-  n.style.backgroundColor = img ? '' : (e.images ? '' : bg(v.background));
+  // a picture that is not in the media folders (BruControl pictures not copied yet) would leave a see-through
+  // button with white text: show the plain gray button with black text instead
+  const isButton = e.type === 'switch' || ['switch', 'pushbutton', 'momentary'].includes(vkKind(e)) || e.look === 'button';
+  const missing = img && isButton && imgMissing(media(img), n);
+  if (missing) img = '';
+  n.classList.toggle('img-missing', !!missing);
+  n.style.backgroundColor = img || missing ? '' : (e.images ? '' : bg(v.background));
   n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
   n.classList.toggle('stretch', !!e.images);
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
+}
+// pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
+const imgState = new Map();
+function imgMissing(url, node) {
+  const st = imgState.get(url);
+  if (st === true || st === false) return st;
+  if (st) { st.add(node); return false; }
+  const wait = new Set([node]); imgState.set(url, wait);
+  const im = new Image();
+  const done = bad => { imgState.set(url, bad); if (bad) for (const n of wait) { const e = n.isConnected && L().elements.find(x => x.name === n.dataset.name); if (e) fillEl(n, e); } };
+  im.onload = () => done(false); im.onerror = () => done(true);
+  im.src = url;
+  return false;
 }
 const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator';
 
