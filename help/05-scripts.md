@@ -7,12 +7,13 @@ Processes are the automatic steps of a brew: open valves, run a pump, wait for a
 - The list on the left shows every process; a running one is marked.
 - **New**, **Rename**, **Delete** (admins).
 - **Save** and **Check** (admins). Check finds mistakes without starting the process.
-- **Start** and **Stop** (operators and admins). **Stop all** stops every process.
+- **Start**, **Stop** and **Restart** (operators and admins). **Stop all** stops every process. Restart stops the process, clears its memory and starts it again from the top.
+- **Restart if it fails** (admins): start the process again by itself if it stops on an error. See *Restarting Processes*.
 - **Output** shows what processes print. Tick **all processes** to see every process's output.
 
 **A process with a mistake does not start.** The mistakes are listed with their line numbers; click one to jump to it.
 
-The saved file is read every time a process starts, so it never runs an old copy. If you edit a running process, it is marked "edited since start": stop and start it to use the new version.
+The saved file is read every time a process starts, so it never runs an old copy. If you edit a running process, it is marked "edited since start": stop and start it (or press Restart) to use the new version.
 
 ## Process lines you will use most
 
@@ -34,6 +35,8 @@ endif
 [Label]  and  goto "Label"     jump
 step "Mash in"                 mark a step (numbered when you save)
 start "Other_Process"          start another process
+restart Other_Process          stop it, clear its memory, start it again
+restart                        start this process over from the top
 print "text"                   write to Output
 show tab "Brewery"             switch every screen to a tab
 log "vAV_Kettle_Temp"          write a value to the database now

@@ -40,7 +40,7 @@ The [Glossary](13-glossary) explains every special word. The three you will meet
 
 ## Updating to a new version
 
-Stop the panel before you unzip a new version over it, and keep the `data` folder. See [Updating to a new version](18-updating).
+Stop the panel first, then run the installer again or unzip the **Update** zip. Your layout, settings, brew data, users, pictures, sounds and processes are never overwritten. See [Updating to a new version](18-updating).
 
 ## About this manual
 

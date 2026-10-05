@@ -25,11 +25,25 @@ Tick **Edit layout**. A dashed bar appears with these buttons:
 | **Add IP** | A flow point or pipe fitting (see below). |
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. Press again to unlock. |
-| **Tab…** | Name, size, background picture and **Pipe size** of this tab. |
+| **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
 | **New tab** | Adds a tab. |
 | **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Unticking **Edit layout** asks the same. Nothing is changed until you save. |
 
 Drag items to move them, drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.
+
+## Background color and picture
+
+Each tab has its own background color and picture.
+
+1. Tick **Edit layout**.
+2. Open **⚙ Tab settings**: press the button in the dashed bar, **double-click an empty spot** on the tab, or double-click the tab's name. On a phone, **hold a finger on an empty spot**.
+3. Under **Background**:
+   - **Background color**: **Default** (the panel's normal color), **None** (no color), a color by name (the swatch shows it), or **Custom (add new) ...** for any color.
+   - **Background picture**: one picture path per tab. Pick a picture from your media folders (the panel's `media` folder and its `Images` folder are listed). A preview shows under the list. **Add new ...** takes any picture path, for example one in another media folder. Put new pictures in with the **Media** page first.
+4. Leave **Picture left / top / width / height** empty to stretch the picture over the whole tab. Fill them in to place the picture at a spot and size; the background color shows around it.
+5. Press **Save**, then **Save layout**.
+
+To remove the picture pick **(none)**. The color shows wherever the picture does not cover (or everywhere when there is no picture).
 
 ## Timers
 
@@ -47,7 +61,7 @@ The panel works out the flow itself: it starts at a running pump and follows pip
 
 **Fittings** are IP types: straight pipe, tee, 90° and 45° elbow, cross, **manual valve** (tap it to open or close) and **pipe cap**. Set **Turn (degrees)** to point them the right way.
 
-**Pipe size** (in **Tab…**) sets the size of every pipe and fitting on that tab together, so they always match.
+**Pipe size** (in **⚙ Tab settings**) sets the size of every pipe and fitting on that tab together, so they always match.
 
 ## Vessels
 

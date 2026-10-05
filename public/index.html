@@ -60,7 +60,7 @@
       <button id="drawPipe" title="Click points on the tab. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
       <button id="finishPipe" class="primary hidden">Finish pipe</button>
       <button id="lockItem" title="Lock or unlock the selected item so it cannot be dragged or resized" disabled>🔒 Lock</button>
-      <button id="wsProps">Tab…</button>
+      <button id="wsProps" title="Name, background color, background picture, size and pipe size of this tab. You can also double-click an empty spot on the tab.">⚙ Tab settings</button>
       <button id="addWs">New tab</button>
       <span class="spacer"></span>
       <span id="editHint" class="muted"></span>
@@ -88,6 +88,8 @@
           <button id="checkScript" class="admin-only">Check</button>
           <button id="startScript" class="op-only">Start</button>
           <button id="stopScript" class="op-only">Stop</button>
+          <button id="restartScript" class="op-only" title="Stop this Process, clear its memory and start it again from the saved file">Restart</button>
+          <label class="toggle admin-only" title="If this Process stops on an error, start it again by itself (at most the number of times a minute set in Settings)"><span class="sw"><input type="checkbox" id="scriptAutoRestart"><span class="swk"></span></span> Restart if it fails</label>
         </div>
         <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off" autocomplete="off" autocapitalize="off"></textarea><ul id="autofill" class="hidden"></ul></div>
         <ul id="problems"></ul>
@@ -312,6 +314,8 @@
       <label class="check"><input type="checkbox" id="setWarnPaths"> Warn me when a process uses a file that is not on the Brain (saved right away)</label>
       <div>Start these processes when the server starts:</div>
       <div id="setAuto" class="checks"></div>
+      <label>Most restarts a minute for one Process. Restarts by the <code>restart</code> command or by "Restart if it fails" past this number leave the Process stopped, so a broken Process cannot restart forever.<input id="setRestartLimit" type="number" min="1" max="60" step="1"></label>
+      <label>Alarm to sound when a Process is stopped for restarting too often <select id="setRestartAlarm"></select></label>
       <button id="saveSettings" class="primary">Save settings</button>
     </div>
     <div class="form admin-only" id="donateSettings">
