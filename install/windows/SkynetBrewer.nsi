@@ -2,10 +2,10 @@
 ;
 ; Puts the Skynet Brew Panel in C:\Brewing\BrewPanel (changeable), writes Skynet_Brewer.bat there,
 ; and adds a "Skynet Brewer" shortcut to the Desktop and the Start menu.
-; On an update it never overwrites your config, data, media or scripts folders; it only adds new files there.
+; On an update it keeps your config, data, media and scripts folders, unless you choose to replace one.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
-;   -DSRC=<folder with program\ (always replaced) and user\ (config, media, scripts: never overwritten)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
+;   -DSRC=<the BrewPanel folder of the release (config, media and scripts samples are in its defaults\ folder)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
 
 Unicode true
 !include "MUI2.nsh"
@@ -121,6 +121,37 @@ Function WaitForPanelStopped
     ${EndIf}
 FunctionEnd
 
+; ---------------------------------------------------------------- Your folders on an update
+; Moves one of your folders to backups\ so the panel starts it again from the samples. $R0 = folder, $R1 = what is in it.
+Function MoveToBackups
+  ${If} ${FileExists} "$INSTDIR\$R0\*.*"
+    CreateDirectory "$INSTDIR\backups"
+    Rename "$INSTDIR\$R0" "$INSTDIR\backups\$R0_$Stamp"
+    DetailPrint "Your $R0 folder ($R1) was moved to backups\$R0_$Stamp. The panel starts it again from the samples."
+  ${EndIf}
+FunctionEnd
+
+Function AskReplaceFolders
+  MessageBox MB_YESNO|MB_ICONQUESTION "Keep all your own folders as they are?$\r$\n$\r$\n   config:   your layout, tabs, devices and settings$\r$\n   data:      brew log, users, passwords and logins$\r$\n   media:    your pictures and sounds$\r$\n   scripts:  your Processes$\r$\n$\r$\nYes (recommended): keep them all.$\r$\nNo: ask me about each one." /SD IDYES IDYES done
+  StrCpy $R0 "config"
+  StrCpy $R1 "layout, tabs, devices and settings"
+  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your config folder ($R1) with the sample layout?$\r$\n$\r$\nYes moves yours to backups\config_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
+    Call MoveToBackups
+  StrCpy $R0 "media"
+  StrCpy $R1 "pictures and sounds"
+  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your media folder ($R1) with the sample pictures and sounds?$\r$\n$\r$\nYes moves yours to backups\media_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
+    Call MoveToBackups
+  StrCpy $R0 "scripts"
+  StrCpy $R1 "Processes"
+  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Replace your scripts folder ($R1) with the sample Processes?$\r$\n$\r$\nYes moves yours to backups\scripts_$Stamp first.$\r$\nNo keeps yours." /SD IDNO IDNO +2
+    Call MoveToBackups
+  StrCpy $R0 "data"
+  StrCpy $R1 "brew log, users, passwords and logins"
+  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Start the data folder ($R1) fresh?$\r$\n$\r$\nYes moves yours to backups\data_$Stamp first, and you create the admin account again.$\r$\nNo keeps yours." /SD IDNO IDNO +2
+    Call MoveToBackups
+  done:
+FunctionEnd
+
 ; ---------------------------------------------------------------- Install
 Section "Skynet Brew Panel" SecMain
   SectionIn RO
@@ -130,8 +161,8 @@ Section "Skynet Brew Panel" SecMain
   Call NeedNode
   Call WaitForPanelStopped
 
-  ; An update over an existing panel. Your folders (config, data, media, scripts) only get files that are new:
-  ; nothing of yours is replaced or deleted. A copy of the layout goes to config\backups just in case.
+  ; An update over an existing panel. The release has no config, data, media or scripts folders (their samples are in
+  ; defaults\), so yours are kept unless you ask to replace one. A copy of the layout goes to config\backups just in case.
   StrCpy $Upgrade 0
   ${If} ${FileExists} "$INSTDIR\server.js"
     StrCpy $Upgrade 1
@@ -146,6 +177,7 @@ Section "Skynet Brew Panel" SecMain
       CopyFiles /SILENT "$INSTDIR\help\*.md" "$INSTDIR\help\backups\before_update_$Stamp"
       DetailPrint "Old help pages copied to help\backups\before_update_$Stamp"
     ${EndIf}
+    Call AskReplaceFolders
   ${Else}
     DetailPrint "Full install to $INSTDIR"
   ${EndIf}
@@ -160,15 +192,14 @@ Section "Skynet Brew Panel" SecMain
       StrCpy $OldPanel "$0"
   ${EndIf}
 
-  ; Program files are always replaced. Your folders: existing files are never overwritten.
+  ; Program files are always replaced. The panel copies the samples in defaults\ into any folder you don't have on its first start.
   SetOutPath "$INSTDIR"
-  SetOverwrite on
-  File /r "${SRC}\program\*.*"
-  SetOverwrite off
-  File /r "${SRC}\user\*.*"
-  SetOverwrite on
+  File /r "${SRC}\*.*"
   ${If} $OldPanel != ""
     DetailPrint "Copying data from $OldPanel"
+    CreateDirectory "$INSTDIR\config"
+    CreateDirectory "$INSTDIR\scripts"
+    CreateDirectory "$INSTDIR\media"
     CopyFiles /SILENT "$OldPanel\config\brewery.json" "$INSTDIR\config\brewery.json"
     ${If} ${FileExists} "$OldPanel\data\*.*"
       CopyFiles /SILENT "$OldPanel\data" "$INSTDIR"
@@ -245,6 +276,7 @@ Section "Uninstall"
     RMDir /r "$INSTDIR\test"
     RMDir /r "$INSTDIR\tools"
     RMDir /r "$INSTDIR\install"
+    RMDir /r "$INSTDIR\defaults"
     Delete "$INSTDIR\server.js"
     Delete "$INSTDIR\package.json"
     Delete "$INSTDIR\package-lock.json"
