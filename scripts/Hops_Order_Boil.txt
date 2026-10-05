@@ -23,29 +23,29 @@ vVT5 = -99
 vVT6 = -99
 vVT7 = -99
 vVT8 = -99
-	if "gblV_Hop1_Group_R1" value == 919
-		vVT1 = "gblV_TimeHop1_Min_R1" value
+	if gblV_Hop1_Group_R1 == 919
+		vVT1 = gblV_TimeHop1_Min_R1
 	endif
-	if "gblV_Hop2_Group_R1" value == 919
-		vVT2 = "gblV_TimeHop2_Min_R1" value
+	if gblV_Hop2_Group_R1 == 919
+		vVT2 = gblV_TimeHop2_Min_R1
 	endif
-	if "gblV_Hop3_Group_R1" value == 919
-		vVT3 = "gblV_TimeHop3_Min_R1" value
+	if gblV_Hop3_Group_R1 == 919
+		vVT3 = gblV_TimeHop3_Min_R1
 	endif
-	if "gblV_Hop4_Group_R1" value == 919
-		vVT4 = "gblV_TimeHop4_Min_R1" value
+	if gblV_Hop4_Group_R1 == 919
+		vVT4 = gblV_TimeHop4_Min_R1
 	endif
-	if "gblV_Hop5_Group_R1" value == 919
-		vVT5 = "gblV_TimeHop5_Min_R1" value
+	if gblV_Hop5_Group_R1 == 919
+		vVT5 = gblV_TimeHop5_Min_R1
 	endif
-	if "gblV_Hop6_Group_R1" value == 919
-		vVT6 = "gblV_TimeHop6_Min_R1" value
+	if gblV_Hop6_Group_R1 == 919
+		vVT6 = gblV_TimeHop6_Min_R1
 	endif
-	if "gblV_Hop7_Group_R1" value == 919
-		vVT7 = "gblV_TimeHop7_Min_R1" value
+	if gblV_Hop7_Group_R1 == 919
+		vVT7 = gblV_TimeHop7_Min_R1
 	endif
-	if "gblV_Hop8_Group_R1" value == 919
-		vVT8 = "gblV_TimeHop8_Min_R1" value
+	if gblV_Hop8_Group_R1 == 919
+		vVT8 = gblV_TimeHop8_Min_R1
 	endif
 vVSlot = 0
 [Next_Slot]
@@ -76,39 +76,39 @@ vVHopMax = vVT1
 	endif
 vVSlot += 1
 	if vVT1 == vVHopMax
-		"gblV_Hop1_Group_R1" value = vVSlot
+		gblV_Hop1_Group_R1 = vVSlot
 		vVT1 = -99
 	endif
 	if vVT2 == vVHopMax
-		"gblV_Hop2_Group_R1" value = vVSlot
+		gblV_Hop2_Group_R1 = vVSlot
 		vVT2 = -99
 	endif
 	if vVT3 == vVHopMax
-		"gblV_Hop3_Group_R1" value = vVSlot
+		gblV_Hop3_Group_R1 = vVSlot
 		vVT3 = -99
 	endif
 	if vVT4 == vVHopMax
-		"gblV_Hop4_Group_R1" value = vVSlot
+		gblV_Hop4_Group_R1 = vVSlot
 		vVT4 = -99
 	endif
 	if vVT5 == vVHopMax
-		"gblV_Hop5_Group_R1" value = vVSlot
+		gblV_Hop5_Group_R1 = vVSlot
 		vVT5 = -99
 	endif
 	if vVT6 == vVHopMax
-		"gblV_Hop6_Group_R1" value = vVSlot
+		gblV_Hop6_Group_R1 = vVSlot
 		vVT6 = -99
 	endif
 	if vVT7 == vVHopMax
-		"gblV_Hop7_Group_R1" value = vVSlot
+		gblV_Hop7_Group_R1 = vVSlot
 		vVT7 = -99
 	endif
 	if vVT8 == vVHopMax
-		"gblV_Hop8_Group_R1" value = vVSlot
+		gblV_Hop8_Group_R1 = vVSlot
 		vVT8 = -99
 	endif
 goto "Next_Slot"
 [Slots_Done]
-"gblVHop_Max" value = vVSlot
-"shr_Hop_Slot" value = vVSlot
+gblVHop_Max = vVSlot
+shr_Hop_Slot = vVSlot
 print "Boil hop groups: " + vVSlot

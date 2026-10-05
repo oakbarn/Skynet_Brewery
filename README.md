@@ -1,4 +1,4 @@
-# OakBarn Brew Panel (prototype)
+# Skynet Brew Panel (prototype)
 
 A browser-based brewery control panel with BruControl-style screens (called **Tabs**; BruControl calls them workspaces) and processes. It runs on Windows, Mac, Linux or a Raspberry Pi, and you use it from any browser on your network: Chrome, Edge, Safari, Firefox or DuckDuckGo, on a PC, tablet or phone.
 
@@ -11,6 +11,10 @@ A browser-based brewery control panel with BruControl-style screens (called **Ta
 The server runs the processes and talks to the hardware. Processes keep running when every browser is closed.
 
 ## 1. Install and run
+
+**The easy way:** each release has installers. On Windows run `Skynet_Brewer_Setup_<date>.exe`; on a Mac open `Install Skynet Brewer.command`; on Linux or a Raspberry Pi run `bash install-skynet-brewer.sh`. They put the panel in `C:\Brewing\BrewPanel` (Windows) or `~/Brewing/BrewPanel`, get Node.js if needed, and add a **Skynet Brewer** shortcut to the Desktop. On a Pi the panel also starts by itself at boot (service `skynet-brewer`). Full steps: `install/ReadMe.txt` and Help > Installing the panel. To build a release: `bash tools/build-release.sh` (needs NSIS for the Windows installer).
+
+**By hand:**
 
 1. **Install Node.js 22 LTS or newer** from <https://nodejs.org>. On a Raspberry Pi use the NodeSource packages for Node 22.
 2. **Copy this folder** anywhere, for example `C:\BrewPanel` or `/home/pi/brewpanel`.
@@ -41,7 +45,7 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 
 **Start automatically**
 
-- **Raspberry Pi / Linux:** see `docs/brewpanel.service` (systemd).
+- **Raspberry Pi / Linux:** `install/linux/install-skynet-brewer.sh --service` sets it up, or see `docs/brewpanel.service` (systemd).
 - **Windows:** a Task Scheduler task "At log on" that runs `node --no-warnings server.js` in this folder.
 
 ## 1a. Start from a sample
@@ -64,7 +68,7 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | Area | What it does |
 |---|---|
 | **Tabs** | Screens with a background image (a path) that fills the tab or sits at a set place and size (room for a message panel on the left), placed elements, graphics, text and **pipes**. Use **Edit layout** to drag, resize, double-click for properties, add elements, and draw pipes. Any element, graphic, text or pipe can be **locked** in place: select it and press **🔒 Lock** (or switch on **Lock position** in its properties). A locked item shows a padlock and cannot be dragged or resized until you unlock it; you can still open its properties and tap it as normal. |
-| **Picture elements** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** another element (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a process (`"insp_Pix_Red_Pump_B1" image = "oakbarn/Pump_Red_Rip_On.png"`). Tapping a picture that follows an output turns that output on/off. |
+| **Picture elements** | A screen picture you place anywhere, for example `insp_Pix_Red_Pump_B1`. It can stay **static**, **follow** another element (shows its *on* image when `MB_36_do_RedPump_B1` is on and its *off* image when it is off), or be changed by a process (`"insp_Pix_Red_Pump_B1" image = "Images/Pump_Red_Rip_On.png"`). Tapping a picture that follows an output turns that output on/off. |
 | **Touch screens** | Tap an output to turn it on/off, tap a variable to get a large dialog with − / + buttons and a number pad. Every element has **When tapped** (default, none, toggle, dialog, process, tab), a **Tap target**, and **Ask before changing**, which shows large ON / OFF buttons so a bump does not start a pump. In Edit layout, hold a finger on an item for a moment to open its properties, and use **Finish pipe** when drawing pipes. |
 | **Looks** | `led` (red digits), `lcd` (blue digits), `dark` (white on black, like the BruControl message panels) and `button`. |
 | **Pipes** | Click points to draw a line along a manifold path (or start and end it on an **IP**, below). Pick the valves and pump it needs in **Flow when**. When all of them are on, the pipe shows animated flow. If your background already shows the piping, turn off **Show pipe when not flowing**: then only the moving flow appears. |
@@ -74,10 +78,10 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **Pipe size** | Each tab has one **Pipe size** (Tab… > Pipe size, default 10). Every pipe and every fitting on that tab (straight pipe, tee, elbows, cross, cap, manual valve) is drawn from it, so they always match: change it and they all grow or shrink together. Fittings stay centred on their IP when the size changes. Devices with IPs scale with it too: pumps, valves, proportional valves and inline sensors (a **flow meter**, or a digital / analog input with **Inline in a pipe** switched on, such as a flow switch). Their Width / Height are their size at pipe size 10; at pipe size 20 they are drawn twice as big, about their centre. Inline sensors have IN and OUT IPs and always let flow through. |
 | **Vessel** | Pick **Vessel** next to **Add equipment**. It goes on the **Equipment** tab (always there). Set its **Name**, **Type** (Brew Kettle, HLT, MLT, Mash Tun, Whirlpool), **Label** (starts as the Type) and **Graphic** (starts as `samples/kettle.svg`). Then switch on **Installed** for each port it has: **Outlet**, **Tangential**, **Thermowell**, **Steam Slayer**, **Sparge** and **CIP**, each with a **Position** (for example Center Bottom, Bottom Left, Right Low, Center High, Lid) and a **Standard** (TC 1.5, NPT 1/2 FPT, BSP 1/2, MM, TC 2, NPT 3/4 FPT, NPT 1/2 MPT). Every list has **Add new ...** at the bottom to add your own; added entries are kept for all vessels. Each port except the thermowell becomes an IP placed near its position, labelled like *Outlet (TC 1.5)*; the thermowell shows as a red **T** mark. A box then lists where the ports went and how to move them: drag an IP to fit the picture, and it stays a port of the vessel and moves with it. Drag the box by its title to get it out of the way, and close it with its button. Apart from its IPs the vessel is display only. Pipes only join IPs on the same tab. |
 | **Other equipment** | The same **Add equipment** list has **Plate chiller**, **Chilling coil**, **HERMS coil**, **Trub filter**, **Pipe tee**, **Pipe 90° elbow**, **Pipe 45° elbow** and **Pipe cross**. They work just like the Vessel: Name, Type, Label, Graphic (a sample picture in `samples/`), and ports with Installed, Position and Standard, all lists extendable. All of their openings start installed as IPs. Flow passes through them between ports of the same circuit: a chiller's wort side and water side stay separate, and coils, the filter and the fittings pass flow end to end. Chillers, coils and the filter go on the Equipment tab; fittings go on the tab you are on, above the other elements. The Type and Position choices are placeholders for now. |
-| **On / off graphics** | A Digital Output's **Graphic when on** and **Graphic when off** are dropdowns with a small preview: green, red and grey LEDs, a lightning bolt (on and off) and the ball valve pictures. **Add new ...** takes any picture path in your media folders (for example `oakbarn/MyValve_On.png`) and keeps it in the list for every output. |
+| **On / off graphics** | A Digital Output's **Graphic when on** and **Graphic when off** are dropdowns with a small preview: green, red and grey LEDs, a lightning bolt (on and off) and the ball valve pictures. **Add new ...** takes any picture path in your media folders (for example `Images/MyValve_On.png`) and keeps it in the list for every output. |
 | **Pick lists with Add new** | Wherever you pick from choices you get a dropdown, and lists that can grow end with **Add new ...**: every picture path (element images, on / off graphics, widget and vessel graphics, tab backgrounds; the list offers the sample pictures and every picture already used, with a preview), sound paths, **Units** (°F, °C, %, psi, gal, L, SG, pH ... ), vessel and equipment types, positions and standards, and colors (a **Custom** color is added to the color list). Fixed choices such as text alignment are plain dropdowns. Additions are kept in the settings and offered everywhere. |
 | **Switches and dropdowns** | A simple true / false setting is a switch (slide it on or off). A choice between more options is a dropdown. Every color is a dropdown of standard colors (Red, Green, Blue, Yellow, Orange, Purple, Copper, Brown, greys, White, Black) with a swatch; pick **Custom ...** for any other color. |
-| **vKonstant List** | A dropdown for a tab. Add element > vKonstant > **List (dropdown: Value + Text)**; its settings open with a two-column table: **Value** (a number) and **Text**. Example: `vKList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil, Chill; picking Boil sets the vKonstant to 2, and that number is what Processes read and trigger on (`if "vKList_BrewStatus" value == 2`). A Process that sets it to 3 makes the dropdown show Chill. **+ Add row** adds a choice, ✕ removes one. |
+| **vKonstant List** | A dropdown for a tab. Add element > vKonstant > **List (dropdown: Value + Text)**; its settings open with a two-column table: **Value** (a number) and **Text**. Example: `vKList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil, Chill; picking Boil sets the vKonstant to 2, and that number is what Processes read and trigger on (`if vKList_BrewStatus == 2`). A Process that sets it to 3 makes the dropdown show Chill. **+ Add row** adds a choice, ✕ removes one. |
 | **Older vessel widgets** | Pick the kind next to **Add equipment**: **Electric heated vessel**, **Gas heated vessel**, **Unheated mash tun**, **Cooling coil** or **Plate chiller**. The coil has IN and OUT IPs built in; the plate chiller has WORT IN / WORT OUT and WATER IN / WATER OUT, two circuits that never mix. Flow passes through them. Each has a **Background picture path** (empty = a plain drawn vessel), a **Label** with **position** (top, corners, center, bottom, above or below), **color**, **size** and **Show label**, and an optional **Heater** (the element or burner output): its heating strip or flames light up while that output is on. Drop an IP point on a vessel and it becomes one of its ports: it moves with the vessel, and pipes on it follow. |
 | **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has a plain IP at each end, with no inlet or outlet side, and flow goes through it either way while it is open. The IPs sit on the long sides of its picture. Importing a BruControl file makes every output whose name starts with **VGC** a valve. A pump's head orientation is fixed, so there is no setting for it: use a picture that shows it. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has one IP on top and one on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has an IP at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a vKonstant value holding the percent, which processes can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
 | **Elements** | `vKonstant`, `vAPI`, `shared`, `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
@@ -86,7 +90,7 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **Variables** | vKonstant (processes and screen), vAPI (also the API and the database), shared (processes). The old **Global** class is retired, see below. |
 | **Shared variables** | Readable and writable by every process, but **never in the API or the database**. Use them to pass values between processes. |
 | **Database** | SQLite file `data/brewlog.db`. Each vAPI has a trigger: **Off, On demand, Once, Every N seconds, Every N hours, Every N days**. The **Log** page shows the data and downloads CSV. |
-| **Alarms** | Sound file by path, `.wav` or `.mp3`. Browsers only play sound after one click, so press **Enable sound** on each screen that should sound alarms. |
+| **Alarms** | Sound file by path, `.wav` or `.mp3`. Kinds Hop (1), Brew Flow (2), Pre-Hop (3), General (4), Sound only (5): only one sound plays at a time, the lowest number wins, the rest wait. A Hop Alarm can sound by itself at a time on a timer, a Pre-Hop Alarm a set time before it. In a Process: `alm_Hops = true`, `wait alm_Hops == false`. The built-in **SoundPlayer** plays music (`play SoundPlayer`, `stop SoundPlayer`) and pauses for alarms. Browsers only play sound after one click, so press **Enable sound** on each screen that should sound alarms. |
 | **BeerSmith** | BeerSmith **File > Export > BeerXML**, then the **Import** page (or POST to the API). Hop uses become your group codes: Mash -333, First Wort -444, boil hop at full boil time -888, other boil hops 919, Aroma/Whirlpool -999, Dry Hop -111, unused slot 0. Dry hop time is converted to days. The mapping is editable in **Settings**. |
 | **OneWire probes** | The panel's own **OneWire probe index** (Devices page): each probe gets a number and a name, and temperature elements use the number. Probes are recognised by ROM id, not bus position. To replace a probe, pick the new probe's ROM id for that number; nothing else changes. New probes appear under **OneWire probes seen**. |
 | **MQTT and voice** | **Settings > MQTT and voice** shares vAPI variables and Devices with an MQTT broker such as Mosquitto on the Pi, for ESP32 boards, Node-RED or Home Assistant. Through Home Assistant you can ask **Alexa, Google Home or Siri** for temperatures, timers and status. Turning on heat, pumps or valves, and starting processes, stays off until you allow it per item. Setup: `docs/MQTT_AND_VOICE.md`. |
@@ -103,7 +107,7 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 
 | Kind | Prefix | Notes |
 |---|---|---|
-| Graphic | `vK_` | The value is an image path inside a media folder. Shows the picture; a process can swap it: `"vK_Burner_Pic" value = "oakbarn/BurnerFlame.png"` |
+| Graphic | `vK_` | The value is an image path inside a media folder. Shows the picture; a process can swap it: `vK_Burner_Pic = "Images/BurnerFlame.png"` |
 | String | `vKS_` | |
 | Long String | `vKL_` | Linked to a text file inside a media folder (a network drive works once it is added under Settings > Media folders). Editing the file updates the panel within a second; setting the value from the panel or a process saves the file. `"vKL_Notes" file = "notes/other.txt"` links another file. |
 | Value | `vKV_` | |
@@ -112,7 +116,7 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 | Boolean | `vKB_` | |
 | Switch | `vKSW_` | Boolean shown as a slider; tap to flip it. |
 | Push Button | `vKPB_` | LED button that is ON only while held. If the screen holding it closes or loses WiFi, it lets go by itself within 1.5 seconds. |
-| Momentary Button | `vKMB_` | Tap (or a process sets it true): true for 100 ms, then off. `wait "vKMB_Go" value == true` always catches it. |
+| Momentary Button | `vKMB_` | Tap (or a process sets it true): true for 100 ms, then off. `wait vKMB_Go == true` always catches it. |
 
 **vAPI**: processes, the API (`/api/vapi`; the old `/api/globals` address still works) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
 
@@ -141,23 +145,27 @@ Processes (BruControl and older versions of this panel call them scripts) are te
 
 **The saved file is read every time a process starts**, so a process can never run an old copy from memory. A process that is running while you edit it is marked "edited since start - stop and start to apply".
 
-Most BruControl script lines work unchanged:
+Process lines (the name alone is the main value, other attributes use a dot; BruControl lines like `"V_BK_In" state = true` still run and are rewritten in this style when a Process is saved or imported):
 
 ```
 new value vVCount          new string vSMsg     new bool vB_Testing     new time vT     new datetime vDT
-vVCount = 3                vVCount += 1         vSMsg = "Temp " + "BK_Temp" value
-"V_BK_In" state = true     "gblS_Msg" value = vSMsg     "tm_Whirlpool" value = 00:20:00
-if vVCount > 2 && "Pump_Red" state == true
+vVCount = 3                vVCount += 1         vSMsg = "Temp " + BK_Temp
+V_BK_In = true             gblS_Msg = vSMsg     tm_Whirlpool = 00:20:00     alm_Hops = true
+my_Widget.visible = false  tm_Mash.countdown = true     tm_Mash.displayname = "Mash"
+if vVCount > 2 && Pump_Red == true
 elseif ...
 else
 endif
 [Label]                    goto "Label"
-sleep 1000                 wait "BK_Temp" value <= 154
+step "Mash in"             (a numbered section: 1.00000, 1.00001 ... renumbered on every save)
+sleep 1000                 wait BK_Temp <= 154
 start "Other_Script"       stop "Other_Script"     start "tm_Whirlpool"   reset "tm_Whirlpool"   start "alm_Hops"
 print "text"               show tab "Brewery"   (or show workspace)     log "vAV_Kettle_Temp"   (writes that vAPI to the database now)
 vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:00
-BF precision = 4           "Euler's number" = 2.718   (quoted variable names work)
+BF.precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
+
+Names have no spaces (a space typed in a name becomes `_`). Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/22-process-language.md`).
 
 **Differences from BruControl**
 
@@ -178,6 +186,9 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 | `Hops_Order_Boil` | Orders the imported boil hops into groups. |
 | `looper_LogTemps` | Copies the kettle temperature into a logged vAPI. |
 | `Demo_Variables` | Uses each vKonstant and vAPI kind; waits for the Ping button. |
+| `Demo_Mash_Steps` | A 60-minute mash with a pH check at 10 and a stir at 30; made for trying simulation mode. |
+
+**Simulation mode** (Settings > Simulation, admins): every board is replaced by the simulator so no real hardware is switched, a yellow bar shows on every screen, and time can run up to 120× faster, skip ahead by hand, skip to the next event, or skip by itself from a Time jumps table. The Process timeline works out when each step of a Process happens. See the Help page *Simulation mode*.
 
 ## 4. API (for Node-RED or other programs)
 
@@ -203,7 +214,7 @@ public/              the browser app
 config/brewery.json  workspaces (the tabs), elements, graphics, devices, settings (edited by the app; a .bak is kept)
 scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
-                     put all your BruControl pictures in media/oakbarn - a few are already there)
+                     put all your BruControl pictures in media/Images - a few are already there)
 data/                state.json (variable values kept over restarts), brewlog.db (the database),
                      users.json (accounts, passwords are hashed) and sessions.json (who is signed in)
 tools/               reset-password.js (forgotten password)

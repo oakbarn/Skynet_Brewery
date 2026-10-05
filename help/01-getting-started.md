@@ -38,6 +38,10 @@ The [Glossary](13-glossary) explains every special word. The three you will meet
 - **Device**: anything tied to a port or pin on a board (a pump relay, a probe, a valve).
 - **Widget**: something that lives only in the app and is not tied to any board (a pipe fitting, a note, a timer).
 
+## Updating to a new version
+
+Stop the panel before you unzip a new version over it, and keep the `data` folder. See [Updating to a new version](18-updating).
+
 ## About this manual
 
 Click a page on the left (on a phone, the page buttons are at the top). Type in **Search the manual** to find a word on every page. When you open Help from another screen, it opens the page about that screen.

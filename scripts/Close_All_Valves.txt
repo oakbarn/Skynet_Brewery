@@ -2,15 +2,15 @@
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //Pumps off first, then every valve closed.
-"MB_35_do_YellowPump_B1" state = false
-"MB_36_do_RedPump_B1" state = false
-"MB_37_do_BluePump_B1" state = false
-"MB_38_do_GreenPump_B1" state = false
-"MB_39_do_WhitePump_B1" state = false
+MB_35_do_YellowPump_B1 = false
+MB_36_do_RedPump_B1 = false
+MB_37_do_BluePump_B1 = false
+MB_38_do_GreenPump_B1 = false
+MB_39_do_WhitePump_B1 = false
 sleep 1000
-"V_HLT_Out" state = false
-"V_MLT_In" state = false
-"V_MLT_Out" state = false
-"V_BK_In" state = false
-"VGC_23_do_BackManifold_Left_On_B1" state = false
-"gblS_Top_Text" value = "All pumps off and all valves closed."
+V_HLT_Out = false
+V_MLT_In = false
+V_MLT_Out = false
+V_BK_In = false
+VGC_23_do_BackManifold_Left_On_B1 = false
+gblS_Top_Text = "All pumps off and all valves closed."
