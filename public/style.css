@@ -461,3 +461,4 @@ body.role-viewer .op-only { display: none !important; }
 .form label.simSwitch { flex-direction: row; align-items: center; gap: 8px; }
 .tblScroll { overflow-x: auto; max-width: 100%; }
 .tblScroll table { min-width: 640px; }
+.dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
