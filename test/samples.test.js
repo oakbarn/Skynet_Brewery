@@ -30,8 +30,14 @@ for (const sm of list) {
   assert.equal(c.sample, sm.id); assert.equal(c.chooseSample, false);
   assert.ok(fs.existsSync(path.join(d, r.backup)), 'old config backed up');
   assert.ok(!store.has('Old'));
-  // 897 imported, 2 x 3 stacked look-alikes folded into 2, plus the built-in SoundPlayer
-  if (sm.brucontrol) { assert.equal(c.elements.length, 894); assert.ok(!c.elements.some(e => e.type === 'global')); assert.ok(c.devices.every(x => x.type === 'simulator')); continue; }
+  // 897 imported, 2 x 3 stacked look-alikes folded into 2, plus the built-in SoundPlayer and the Start Brew Day button
+  if (sm.brucontrol) {
+    // the brew day starts from a button; scrStart0_0's call to a Process BruControl never had is now a comment
+    assert.equal(store.get('btn_Start_Brew_Day')?.tapTarget, 'scrStart0_0');
+    assert.deepEqual(engine.check(engine.read('scrStart0_0')).errors, []);
+    assert.match(engine.read('scrStart0_0'), /\/\/ skipped, no such Process in BruControl either: start "strt_scrEndAllscripts"/);
+  }
+  if (sm.brucontrol) { assert.equal(c.elements.length, 895); assert.ok(!c.elements.some(e => e.type === 'global')); assert.ok(c.devices.every(x => x.type === 'simulator')); continue; }
   assert.deepEqual(r.problems, [], `${sm.id}: script errors ${JSON.stringify(r.problems)}`);
   // every pipe joins two IPs, every picture exists
   const ips = new Set(c.graphics.filter(g => g.kind === 'ip').map(g => g.id));
