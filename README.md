@@ -12,6 +12,10 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 ## 1. Install and run
 
+**The easy way:** each release has installers. On Windows run `Skynet_Brewer_Setup_<date>.exe`; on a Mac open `Install Skynet Brewer.command`; on Linux or a Raspberry Pi run `bash install-skynet-brewer.sh`. They put the panel in `C:\Brewing\BrewPanel` (Windows) or `~/Brewing/BrewPanel`, get Node.js if needed, and add a **Skynet Brewer** shortcut to the Desktop. On a Pi the panel also starts by itself at boot (service `skynet-brewer`). Full steps: `install/ReadMe.txt` and Help > Installing the panel. To build a release: `bash tools/build-release.sh` (needs NSIS for the Windows installer).
+
+**By hand:**
+
 1. **Install Node.js 22 LTS or newer** from <https://nodejs.org>. On a Raspberry Pi use the NodeSource packages for Node 22.
 2. **Copy this folder** anywhere, for example `C:\BrewPanel` or `/home/pi/brewpanel`.
 3. **Start it.** In that folder run:
@@ -41,7 +45,7 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 
 **Start automatically**
 
-- **Raspberry Pi / Linux:** see `docs/brewpanel.service` (systemd).
+- **Raspberry Pi / Linux:** `install/linux/install-skynet-brewer.sh --service` sets it up, or see `docs/brewpanel.service` (systemd).
 - **Windows:** a Task Scheduler task "At log on" that runs `node --no-warnings server.js` in this folder.
 
 ## 1a. Start from a sample
