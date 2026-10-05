@@ -153,6 +153,7 @@ function renderWs() {
   for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel'].includes(g.kind))) ws.append(buildGfx(g));
   for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
+  if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip')) ws.append(buildIp(g));
   for (const e of L().elements.filter(e => e.workspace === w.name && hasIps(e))) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
@@ -397,10 +398,24 @@ function sizeFitting(g) {
   const S = 5 * Math.max(0, ...pipesOn(g.id, g.workspace).map(pipeWidth)) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
   g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
 }
+// Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
+// its settings and in the IP lists but cannot be typed over; the Label stays free text. Vessels keep the names users give them.
+const NAME_PREFIX = { point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', cap: 'Cap' };
+const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : null;
+function giveName(g, all) {
+  const p = autoPrefix(g); if (!p || (g.name && g.name.startsWith(p + '_'))) return;
+  const used = new Set(all.map(x => x.name)); let n = 1; while (used.has(p + '_' + n)) n++;
+  g.name = p + '_' + n;
+}
+const nameAll = gs => { for (const g of gs || []) giveName(g, gs); };
+const ipName = g => g.name ? (g.label && g.label !== g.name ? `${g.name} (${g.label})` : g.name) : (g.label || g.id);
+
 function buildIp(g) {
   const fit = isFitting(g) ? g.fitting : null;
   if (fit) sizeFitting(g);
-  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.label || FITTINGS[fit] || 'IP') + (fit === 'manualValve' ? (g.open ? ' (open)' : ' (closed)') : '') });
+  // a coupling on just one pipe end is an open end: it shows in Edit layout only; joining two pipes it shows as a collar
+  const lonely = fit === 'coupling' && pipesOn(g.id, g.workspace).length < 2;
+  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? ipName(g) : g.label || FITTINGS[fit] || 'IP') + (fit === 'manualValve' ? (g.open ? ' (open)' : ' (closed)') : '') });
   if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(g.image)}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
   else if (fit) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
@@ -881,7 +896,7 @@ function isOn(name) {
   if ('running' in v) return !!v.running;
   return !!v.value && v.value !== '0' && v.value !== 'false';
 }
-let drawPts = null, drawCursor = null, drawFrom = null, drawHose = false;
+let drawPts = null, drawCursor = null, drawFrom = null, drawHose = false, drawOnIp = null;
 const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
 // An IP id is either an IP widget's id, or "dev:<name>:in" / "dev:<name>:out" for the built-in IPs of a pump or valve
 const devOfIp = id => (typeof id === 'string' && id.startsWith('dev:')) ? id.slice(4, id.lastIndexOf(':')) : null;
@@ -897,7 +912,7 @@ function ipPoint(id, ws) {
 }
 function allIps(ws) {
   const vn = id => { const v = L().graphics.find(x => x.id === id); return v ? (v.name || v.label || '') + ' ' : ''; };
-  return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws).map(g => ({ id: g.id, label: (g.port ? vn(g.attachTo) : '') + (g.label || g.id) })),
+  return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws).map(g => ({ id: g.id, label: (g.port ? vn(g.attachTo) + (g.label || g.id) : ipName(g)) })),
     ...L().elements.filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e)),
     ...L().graphics.filter(g => g.workspace === ws).flatMap(eqPorts)];
 }
@@ -1037,13 +1052,21 @@ function renderPipes() {
     }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
-      if (!p.locked) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
+      if (!p.locked && !p.straight) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
     svg.append(g);
   }
   if (drawPts) {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
-    svg.append(line({ hose: drawHose, points: all }, { class: 'drawing' }));
+    if (all.length > 1) svg.append(line({ hose: drawHose, points: all }, { class: 'drawing' }));
+    for (const q of drawPts) svg.append(mk('circle', { class: 'drawmark set', cx: q[0], cy: q[1], r: 9 }));
+    // a big marker under the pointer, green when it is on an IP the pipe will join
+    if (drawCursor) {
+      const [x, y] = drawCursor, on = !!drawOnIp, g = mk('g', { class: 'drawmark' + (on ? ' on' : '') });
+      const d = `M${x - 24} ${y}H${x - 7}M${x + 7} ${y}H${x + 24}M${x} ${y - 24}V${y - 7}M${x} ${y + 7}V${y + 24}`, r = on ? 16 : 12;
+      for (const cls of ['bk', 'wh']) g.append(mk('circle', { class: cls, cx: x, cy: y, r }), mk('path', { class: cls, d }));
+      svg.append(g);
+    }
   }
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
@@ -1057,8 +1080,10 @@ function findItem(kind, id) { return kind === 'el' ? draft.elements.find(e => e.
 const newId = () => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 function setEditing(on) {
-  editing = on; sel = null; drawPts = null;
+  editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
+  if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
+  $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
   $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties. Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.' : '';
@@ -1069,19 +1094,16 @@ let drag = null, lastPipeTap = null;
 $('#ws').addEventListener('pointerdown', ev => {
   if (!editing) return;
   const p = canvasPt(ev);
-  if (drawPts) {                                   // drawing a pipe
-    const ipNode = ev.target.closest('.gfx.ip'), ipId = ipNode && (ipNode.dataset.ipid || ipNode.dataset.gid), c = ipId && ipPoint(ipId, wsName);
-    const last = drawPts[drawPts.length - 1];
-    if (c) {                                       // a pipe starts on the first IP clicked and ends on the next one
-      if (!last) { drawFrom = ipId; drawPts.push(c); renderPipes(); ev.preventDefault(); return; }
-      if (ipId === drawFrom) { ev.preventDefault(); return; }
-      if (!drawHose && last[0] !== c[0] && last[1] !== c[1]) drawPts.push(Math.abs(c[0] - last[0]) > Math.abs(c[1] - last[1]) ? [c[0], last[1]] : [last[0], c[1]]);
-      drawPts.push(c); finishPipe(ipId); ev.preventDefault(); return;
+  if (drawPts) {                                   // drawing a pipe or hose
+    ev.preventDefault();
+    if (!drawHose) { if (ev.pointerType !== 'mouse') drawStraight(ev); return; }   // a mouse sets pipe ends by double-click (see dblclick); a finger by tapping
+    const { c, id: ipId } = drawSnap(ev), last = drawPts[drawPts.length - 1];
+    if (ipId) {                                    // a hose starts on the first IP clicked and ends on the next one
+      if (!last) { drawFrom = ipId; drawPts.push(c); renderPipes(); return; }
+      if (ipId === drawFrom) return;
+      drawPts.push(c); finishPipe(ipId); return;
     }
-    let q = [snap(p[0]), snap(p[1])];
-    if (last && !ev.shiftKey && !drawHose) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
-    if (ev.detail >= 2) { finishPipe(); return; }  // double-click finishes the pipe
-    drawPts.push(q); renderPipes(); return;
+    drawPts.push(c); renderPipes(); return;
   }
   const handle = ev.target.closest('circle.handle');
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
@@ -1095,7 +1117,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     if (again) { sel = { kind: 'gfx', id: hit.dataset.gid }; renderWs(); editItem('gfx', sel.id); return; }
     startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid };
     const pipe = findItem('gfx', sel.id);
-    drag = pipe.locked ? null : { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points) };
+    drag = pipe.locked ? null : startPipeMove(pipe, p);
     renderWs(); return;
   }
   if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
@@ -1106,19 +1128,26 @@ $('#ws').addEventListener('pointerdown', ev => {
   startLongPress(ev, sel.kind, sel.id);
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel'); updLockBtn();
   if (item.locked) { drag = null; ev.preventDefault(); return; }   // locked: select only, no move or resize
+  if (item.fitting === 'coupling') {     // the open end of one straight pipe: dragging it moves that whole pipe
+    const ps = pipesOn(item.id, item.workspace);
+    if (ps.length === 1 && ps[0].straight && !ps[0].locked) { drag = startPipeMove(ps[0], p); ev.preventDefault(); return; }
+  }
   drag = { mode: !pip && !bundle && !item.bundled && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
+  // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
+  if (item.kind === 'ip') drag.stubs = pipesOn(item.id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === item.id ? pp.to : pp.from, pp) })).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
   node.setPointerCapture?.(ev.pointerId);
   ev.preventDefault();
 });
 $('#ws').addEventListener('pointermove', ev => {
   if (lp && Math.hypot(ev.clientX - lp.x, ev.clientY - lp.y) > 8) cancelLongPress();
   if (drawPts) {
-    let q = canvasPt(ev).map(snap); const last = drawPts[drawPts.length - 1];
-    if (last && !ev.shiftKey && !drawHose) { if (Math.abs(q[0] - last[0]) > Math.abs(q[1] - last[1])) q[1] = last[1]; else q[0] = last[0]; }
-    drawCursor = q; renderPipes(); return;
+    const { c, id } = drawSnap(ev), last = drawPts[drawPts.length - 1];
+    drawCursor = !drawHose && last ? straightEnd(last, c, id).c : c; drawOnIp = id && (!last || drawHose || straightEnd(last, c, id).id) ? id : null;
+    renderPipes(); return;
   }
   if (!drag) return;
+  drag.moved = true;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
   if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
     const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
@@ -1126,22 +1155,27 @@ $('#ws').addEventListener('pointermove', ev => {
     placeEqIps(drag.item);
     renderPipes();
   }
+  if (drag.mode === 'move' && drag.stubs?.length) {
+    const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
+    for (const q of drag.stubs) { q.p.points = q.pts.map(c => [c[0] + mx, c[1] + my]); q.end.x = q.ex + mx; q.end.y = q.ey + my; const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.end.id)}"]`); if (n) place(n, q.end); }
+  }
   if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
   else if (drag.mode === 'resize') {
     const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
     drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx / k)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy / k)); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length) renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
-  else if (drag.mode === 'pipe') { drag.item.points = drag.orig.map(q => [snap(q[0] + dx), snap(q[1] + dy)]); renderPipes(); }
+  else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
 window.addEventListener('pointerup', () => {
   cancelLongPress();
   if (drag?.mode === 'move' && drag.item.kind === 'ip' && !isFitting(drag.item)) attachIp(drag.item);
+  if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
-  if (drawPts) return finishPipe();
+  if (drawPts) { if (drawHose) finishPipe(); else drawStraight(ev); return; }
   const pip = ev.target.closest('.devip');
   const node = ev.target.closest('.el,.gfx');
   const pipe = ev.target.closest('#pipes g');
@@ -1152,8 +1186,8 @@ $('#ws').addEventListener('dblclick', ev => {
 });
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
-  if (ev.key === 'Enter') { ev.preventDefault(); finishPipe(); }   // without preventDefault the same Enter press hits the properties dialog and presses Delete
-  if (ev.key === 'Escape') { drawPts = null; drawCursor = null; drawFrom = null; drawHose = false; renderPipes(); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); }
+  if (ev.key === 'Enter' && drawHose) { ev.preventDefault(); finishPipe(); }   // without preventDefault the same Enter press hits the properties dialog and presses Delete
+  if (ev.key === 'Escape') stopDrawing();
 });
 // Touch screens have no double-click: hold a finger on an item for 0.6 s to open its properties
 let lp = null;
@@ -1163,27 +1197,107 @@ function startLongPress(ev, kind, id) {
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 
-function finishPipe(to) {
-  $('#finishPipe').classList.add('hidden');
-  const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose;   // a double-click adds its point twice
-  drawPts = null; drawCursor = null; drawFrom = null; drawHose = false;
-  if (pts.length < 2) { renderPipes(); return; }
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true, size: '0.5' };
-  if (hose) g.hose = true;
-  if (from) g.from = from;
-  if (typeof to === 'string') g.to = to;
-  if (hose) {     // a hose has an IP on both ends: a loose end gets a coupling, where another pipe or hose can join it later
-    const end = (i, j) => {
-      const c = pts[i], n = pts[j], ang = Math.round(Math.atan2(n[1] - c[1], n[0] - c[0]) * 180 / Math.PI / 45) * 45;
-      let k = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === 'Hose end ' + k)) k++;
-      const ip = { id: newId(), kind: 'ip', fitting: 'coupling', workspace: wsName, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: 'Hose end ' + k, color: '#9aa0a6', rotate: String((ang + 360) % 180) };
-      draft.graphics.push(ip); return ip.id;
-    };
-    if (!g.from) g.from = end(0, 1);
-    if (!g.to) g.to = end(pts.length - 1, pts.length - 2);
+// The joint Skynet put at a pipe end turns into the fitting the pipes on it need: one or two in line = coupling,
+// a corner = 90° elbow, three = tee, four = cross, each turned the right way. A joint with a hose on it stays a coupling.
+const ARMS = { coupling: null, elbow90: { W: 1, S: 1 }, tee: { W: 1, E: 1, S: 1 }, cross: { W: 1, E: 1, N: 1, S: 1 } };
+const turnArm = (d, k) => { const o = 'NESW'; return o[(o.indexOf(d) + k) % 4]; };
+function autoFit(g) {
+  const ps = pipesOn(g.id, g.workspace), c = ipCenter(g);
+  let fit = 'coupling', rot = g.rotate || '0';
+  if (ps.length >= 2 && ps.every(p => p.straight)) {
+    const dirs = new Set(ps.map(p => {
+      const pts = p.points, far = p.from === g.id ? pts[1] : pts[pts.length - 2], dx = far[0] - c[0], dy = far[1] - c[1];
+      return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'E' : 'W') : (dy > 0 ? 'S' : 'N');
+    }));
+    const want = [...dirs].sort().join('');
+    fit = dirs.size === 2 && (want === 'EW' || want === 'NS') ? 'coupling' : dirs.size === 2 ? 'elbow90' : dirs.size === 3 ? 'tee' : dirs.size === 4 ? 'cross' : 'coupling';
+    if (fit === 'coupling') rot = want === 'NS' ? '90' : '0';
+    else for (const k of [0, 1, 2, 3]) if (Object.keys(ARMS[fit]).map(d => turnArm(d, k)).sort().join('') === want) { rot = String(k * 90); break; }
   }
+  if (g.fitting !== fit || String(g.rotate) !== rot) { g.fitting = fit; g.rotate = rot; giveName(g, draft.graphics); }
+}
+// Drawing: the pointer snaps onto an IP when it is close to one, else to the 5 px grid
+function drawSnap(ev) {
+  const p = canvasPt(ev), r = 16 / Z();
+  let best = null;
+  for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (c) { const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= r && (!best || d < best.d)) best = { d, c, id: q.id }; } }
+  return best ? { c: [...best.c], id: best.id } : { c: [snap(p[0]), snap(p[1])], id: null };
+}
+// A straight pipe runs only across or up-and-down from its start. It ends on the IP picked only when that IP is in line with
+// the start; anywhere else the end goes on the line, level with the pointer.
+function straightEnd(a, c, id) {
+  const across = Math.abs(c[0] - a[0]) >= Math.abs(c[1] - a[1]), off = across ? Math.abs(c[1] - a[1]) : Math.abs(c[0] - a[0]);
+  if (id && off <= 2) return { c: across ? [c[0], a[1]] : [a[0], c[1]], id };
+  return { c: across ? [c[0], a[1]] : [a[0], c[1]], id: null };
+}
+// Fritz: double-click the start, move to the length wanted, double-click the end. The pipe is then one straight piece of fixed
+// length; turns are made with elbows and tees.
+function drawStraight(ev) {
+  const { c, id } = drawSnap(ev);
+  if (!drawPts.length) { drawPts.push(c); drawFrom = id; $('#editHint').textContent = 'Start set. Move to the length you want and double-click (or tap) the end. Esc cancels.'; renderPipes(); return; }
+  const a = drawPts[0], e = straightEnd(a, c, id);
+  if (e.c[0] === a[0] && e.c[1] === a[1]) return;
+  if (e.id && e.id === drawFrom) return;
+  drawPts.push(e.c); finishPipe(e.id || undefined);
+}
+function stopDrawing() {
+  drawPts = null; drawCursor = null; drawFrom = null; drawHose = false; drawOnIp = null;
+  $('#ws').classList.remove('drawing'); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); renderPipes();
+}
+// a loose pipe or hose end gets a coupling, so every pipe has an IP at both ends; another pipe can join it there later
+function endCoupling(pts, i, j) {
+  const c = pts[i], n = pts[j], ang = Math.round(Math.atan2(n[1] - c[1], n[0] - c[0]) * 180 / Math.PI / 45) * 45;
+  const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: wsName, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: String((ang + 360) % 180) };
+  draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
+}
+function finishPipe(to) {
+  const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose;   // a double-click adds its point twice
+  stopDrawing();
+  if (pts.length < 2) return;
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true, size: '0.5' };
+  if (hose) g.hose = true; else g.straight = true;
+  g.from = from || endCoupling(pts, 0, 1);
+  g.to = typeof to === 'string' ? to : endCoupling(pts, pts.length - 1, pts.length - 2);
+  giveName(g, draft.graphics);
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
-  $('#editHint').textContent = '';
+}
+// Moving a straight pipe: it keeps its length and moves as one piece. Its own open-end couplings go with it; an end that was on
+// a shared IP (a fitting, pump, valve or vessel port) lets go. Dropped with an end on another IP, it joins that IP.
+const ownCoupling = (id, pipe) => { const g = draft.graphics.find(x => x.id === id && x.fitting === 'coupling'); return g && pipesOn(id, pipe.workspace).every(p => p === pipe) ? g : null; };
+function startPipeMove(pipe, p) {
+  const d = { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points), carry: [] };
+  if (!pipe.straight) return d;
+  for (const k of ['from', 'to']) {
+    const own = ownCoupling(pipe[k], pipe);
+    if (own) d.carry.push({ g: own, x: own.x, y: own.y });
+    else if (pipe[k]) d.loose = [...(d.loose || []), k];
+  }
+  return d;
+}
+function movePipe(d, dx, dy) {
+  const mx = snap(dx), my = snap(dy);
+  d.item.points = d.orig.map(q => [q[0] + mx, q[1] + my]);
+  if (d.loose) { for (const k of d.loose) delete d.item[k]; d.loose = null; }     // let go of shared IPs on the first move
+  for (const q of d.carry) { q.g.x = q.x + mx; q.g.y = q.y + my; }
+}
+function dropPipe(d) {
+  const pipe = d.item; if (!pipe.straight) return;
+  const pts = pipe.points, ends = [['from', 0, 1], ['to', pts.length - 1, pts.length - 2]];
+  for (const [k, i, j] of ends) {
+    const mine = pipe[k] && ownCoupling(pipe[k], pipe);
+    if (pipe[k] && !mine) continue;
+    const near = allIps(pipe.workspace).filter(q => q.id !== pipe.from && q.id !== pipe.to).map(q => ({ id: q.id, c: ipPoint(q.id, pipe.workspace) }))
+      .filter(q => q.c && Math.hypot(q.c[0] - pts[i][0], q.c[1] - pts[i][1]) <= 14).sort((a, b) => Math.hypot(a.c[0] - pts[i][0], a.c[1] - pts[i][1]) - Math.hypot(b.c[0] - pts[i][0], b.c[1] - pts[i][1]))[0];
+    if (near) {
+      const mx = near.c[0] - pts[i][0], my = near.c[1] - pts[i][1];
+      pipe.points = pts.map(q => [q[0] + mx, q[1] + my]);
+      for (const q of d.carry) if (q.g !== mine) { q.g.x += mx; q.g.y += my; }
+      if (mine) draft.graphics = draft.graphics.filter(g => g !== mine);
+      pipe[k] = near.id;
+      return dropPipe({ ...d, carry: d.carry.filter(q => q.g !== mine) });   // the other end may now sit on an IP too
+    }
+    if (!pipe[k]) pipe[k] = endCoupling(pipe.points, i, j);
+  }
 }
 
 // Leaving Edit layout with changes: Save, or Exit without Saving (Fritz: OK / Cancel was confusing). Esc or "Keep editing" stays in Edit layout.
@@ -1312,6 +1426,8 @@ $('#addEl').onclick = () => {
   if (kind === 'list') { e.w = 200; e.h = 70; e.items = [{ value: 1, text: '' }, { value: 2, text: '' }, { value: 3, text: '' }]; e.initial = '1'; }
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
+  // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
+  if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'samples/led_green.svg'; e.imageOff = 'samples/led_red.svg'; }
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 };
 $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
@@ -1328,8 +1444,8 @@ $('#lockItem').onclick = () => {
   if (item.locked) delete item.locked; else item.locked = true;
   toast(item.locked ? 'Locked in place' : 'Unlocked'); renderWs();
 };
-$('#drawPipe').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; drawHose = false; $('#editHint').textContent = 'Click the start IP (or any point), click the bends, then click the end IP. Shift = any angle. Double-click or Enter to finish, Esc to cancel.'; };
-$('#drawHose').onclick = () => { $('#finishPipe').classList.remove('hidden'); drawPts = []; drawFrom = null; drawHose = true; $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; };
+$('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run straight across or up and down. Esc cancels.'; renderPipes(); };
+$('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
 $('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
 // a new equipment widget: vessels, chillers, coils and filters go on the Equipment tab (made if it is missing), fittings on this tab
@@ -1788,8 +1904,8 @@ async function editItem(kind, id) {
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     return f;
-  } : eqClass(item) ? F.vesselNew : F[type];
-  const work = clone(item);
+  } : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)`, 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item);
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
   const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true);
@@ -1863,6 +1979,8 @@ async function editItem(kind, id) {
       item.bundled = true; $('#vpop')?.remove(); toast('Bundled');
     }
     if (type === 'ip' && !isFitting(item) && !pickedPort) attachIp(item);   // typed a new X / Y: re-check which vessel it sits on
+    if (type === 'ip' && before0 !== item.fitting) delete item.autoFit;   // a type picked by hand is kept
+    giveName(item, draft.graphics);         // a new fitting type gets a matching name (IP_2 turned into a tee becomes Tee_1)
     if (kind === 'el') sel = { kind, id: item.name };
     renderTabs(); renderWs();
     if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
