@@ -5,7 +5,7 @@
 # Double-click it. The first time, macOS may say it "cannot be opened": right-click it, choose Open, then Open again.
 #
 # It looks for the panel in this order: the BrewPanel folder this file sits in (BrewPanel/install/mac),
-# a Skynet*.zip next to this file (the Full zip first), or a BrewPanel folder next to this file (Safari unzips downloads by itself).
+# a Skynet*.zip next to this file, or a BrewPanel folder next to this file (Safari unzips downloads by itself).
 # It installs to ~/Brewing/BrewPanel and puts "Skynet Brewer" on the Desktop.
 set -eu
 
@@ -14,6 +14,12 @@ NODE_MIN=22.13.0
 DEST="$HOME/Brewing/BrewPanel"
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 
+# ask "Question" Y|N : returns 0 for yes
+ask() {
+  local def="$2" a
+  if [ "$def" = Y ]; then read -r -p "$1 [Y/n] " a; a="${a:-y}"; else read -r -p "$1 [y/N] " a; a="${a:-n}"; fi
+  case "$a" in [Yy]*) return 0 ;; *) return 1 ;; esac
+}
 say()  { printf '\n\033[1m%s\033[0m\n' "$*"; }
 fail() { printf '\n\033[31m%s\033[0m\n' "$*"; read -r -p "Press Enter to close. " _; exit 1; }
 
@@ -28,8 +34,7 @@ SRC=""
 if [ -f "$HERE/../../server.js" ]; then
   SRC="$(cd "$HERE/../.." && pwd)"
 else
-  ZIP="$(ls -t "$HERE"/Skynet*Full*.zip 2>/dev/null | head -n 1 || true)"
-  [ -n "$ZIP" ] || ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
+  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
   if [ -n "$ZIP" ]; then
     echo "Unpacking $(basename "$ZIP")"
     unzip -q "$ZIP" -d "$TMP/zip"
@@ -66,15 +71,25 @@ done
 STAMP="$(date +%Y-%m-%d_%H%M%S)"
 UPDATE=no
 [ -f "$DEST/server.js" ] && UPDATE=yes
-[ "$UPDATE" = yes ] || [ -f "$SRC/config/brewery.json" ] || fail "This is an update-only zip, and there is no panel in $DEST yet. Use the Skynet_BrewPanel_Full zip for a first install."
 mkdir -p "$DEST"
 DEST="$(cd "$DEST" && pwd)"
-# Your folders (config, data, media, scripts): an update only adds files that are new. It never replaces or deletes yours.
+# Your folders (config, data, media, scripts) are not in the release (samples are in defaults/, copied by the panel on
+# its first start). They are kept unless you choose to replace one. Older releases that still carry them only add new files.
 if [ "$SRC" != "$DEST" ]; then
   if [ "$UPDATE" = yes ]; then
     echo "Updating the panel in $DEST"
-    echo "Kept as they are: your layout and settings (config), brew data, log, users and passwords (data),"
-    echo "pictures and sounds (media) and processes (scripts). Only new sample files are added to them."
+    echo "Your own folders: config (layout, tabs, devices, settings), data (brew log, users, passwords, logins),"
+    echo "media (pictures and sounds) and scripts (Processes)."
+    if ! ask "Keep all of them as they are? (No asks about each one)" Y; then
+      for d in "config:the sample layout" "media:the sample pictures and sounds" "scripts:the sample Processes" "data:a fresh start (you create the admin account again)"; do
+        name="${d%%:*}"
+        [ -d "$DEST/$name" ] || continue
+        if ask "Replace your $name folder with ${d#*:}? Yours is moved to backups/${name}_$STAMP first." N; then
+          mkdir -p "$DEST/backups" && mv "$DEST/$name" "$DEST/backups/${name}_$STAMP"
+          echo "Moved $name to backups/${name}_$STAMP. The panel starts it again from the samples."
+        fi
+      done
+    fi
     if ls "$DEST"/help/*.md >/dev/null 2>&1; then
       mkdir -p "$DEST/help/backups/before_update_$STAMP"
       cp -p "$DEST"/help/*.md "$DEST/help/backups/before_update_$STAMP/"
