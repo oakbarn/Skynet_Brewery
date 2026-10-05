@@ -53,7 +53,7 @@ async function load() {
   fillAddType();
   renderAll();
 }
-function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); }
+function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
 function connect() {
   const es = new EventSource('/ui/events');
@@ -73,6 +73,7 @@ function connect() {
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
+  es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -1831,11 +1832,11 @@ function renderDevices() {
   const tb = $('#devBody'); tb.innerHTML = '';
   for (const d of S.devices) {
     const TYPES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' };
-    const real = d.type === 'simulator' && d.realType ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
+    const real = d.type === 'simulator' && d.realType && !d.simMode ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
       if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
-    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
+    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
       h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
@@ -1964,6 +1965,7 @@ function renderSettings() {
   const box = $('#setAuto'); box.innerHTML = '';
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
   renderDonate();
+  renderSimSettings();
 }
 // ---- accounts
 addEyes();
@@ -2140,6 +2142,111 @@ $('#saveMqtt').onclick = guard(async () => {
   await api('PUT', '/ui/mqtt', body);
   await load(); toast('MQTT and voice saved');
 });
+
+// ---------------------------------------------------------------- simulation mode
+// The striped bar under the menu (everyone sees it; admins get the speed and skip buttons),
+// and Settings > Simulation (switch, speed, Time jumps table, Process timeline).
+const fmtT = s => { s = Math.max(0, Math.round(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; };
+const speedOpts = sel => { const cur = S.sim?.speed ?? 1; sel.innerHTML = ''; for (const x of S.simSpeeds || [1]) sel.append(h('option', { value: x, ...(x === cur ? { selected: true } : {}) }, x === 1 ? 'Normal (1×)' : x + '× faster')); if (!(S.simSpeeds || []).includes(cur)) sel.append(h('option', { value: cur, selected: true }, cur + '× faster')); };
+let simPoll = null;
+function renderSimBar() {
+  const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden');
+  bar.classList.toggle('hidden', !on);
+  if (on !== was && view === 'workspace') fitZoom();
+  if (!on) { clearInterval(simPoll); simPoll = null; $('#simNextInfo').textContent = ''; return; }
+  $('#simInfo').textContent = `Clock ${S.sim.speed === 1 ? 'at normal speed' : S.sim.speed + '× faster'}` + (S.sim.skipped ? `, ${fmtT(S.sim.skipped / 1000)} skipped` : '');
+  if (document.activeElement !== $('#simSpeed')) speedOpts($('#simSpeed'));
+  $('#simAutoBar').checked = !!S.sim.autoSkip;
+  if (!simPoll) { simPoll = setInterval(simNextInfo, 2000); simNextInfo(); }
+}
+async function simNextInfo() {
+  try {
+    const r = await api('GET', '/ui/sim');
+    const n = r.upcoming?.[0];
+    $('#simNextInfo').textContent = n ? `Next: ${n.what} in ${fmtT(n.in)}` : 'Nothing counting down';
+  } catch { /* offline: the connection dot shows it */ }
+}
+$('#simAutoBar').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { autoSkip: ev.target.checked }); renderSimBar(); if ($('#simAuto')) $('#simAuto').checked = ev.target.checked; toast(ev.target.checked ? 'Auto skip on: each step runs a few seconds, then time skips to just before the next one' : 'Auto skip off'); });
+$('#simSpeed').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { speed: +ev.target.value }); renderSimBar(); if ($('#simSpeedSet')) $('#simSpeedSet').value = ev.target.value; });
+for (const b of $$('#simBar [data-skip]')) b.onclick = guard(async () => { await api('POST', '/ui/sim/skip', { seconds: +b.dataset.skip }); toast(`Skipped ahead ${fmtT(+b.dataset.skip)}`); simNextInfo(); });
+$('#simNext').onclick = guard(async () => { const r = await api('POST', '/ui/sim/skip', { next: true }); toast(`Skipped ${fmtT(r.skipped / 1000)}, to just before ${r.next}`); simNextInfo(); });
+
+let simDraft = null, simDirty = false, tlRows = null;
+const simCfg = () => ({ on: false, speed: 1, lead: 5, autoSkip: false, watch: 5, jumps: [], ...(S.config.simulation || {}) });
+function renderSimSettings() {
+  if (!can('admin')) return;
+  const c = simCfg();
+  $('#simOn').checked = !!c.on;
+  speedOpts($('#simSpeedSet')); $('#simSpeedSet').value = c.speed;
+  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; $('#simAuto').checked = !!c.autoSkip; $('#simWatch').value = c.watch; renderSimJumps(); }
+  const pick = $('#tlPick'), cur = pick.value; pick.innerHTML = '';
+  for (const sc of S.scripts) pick.append(h('option', { value: sc.name, ...(sc.name === cur ? { selected: true } : {}) }, sc.name));
+}
+function renderSimJumps() {
+  const tb = $('#simJumps'); tb.innerHTML = '';
+  const names = when => when === 'timer' ? S.config.elements.filter(e => e.type === 'timer').map(e => e.name).sort() : S.scripts.map(x => x.name);
+  const dirty = () => { simDirty = true; };
+  simDraft.forEach((j, i) => {
+    const nameSel = h('select', { onchange: ev => { j.name = ev.target.value; dirty(); } }, ...[...new Set([...names(j.when), j.name].filter(Boolean))].map(n => h('option', { value: n, ...(n === j.name ? { selected: true } : {}) }, n)));
+    if (!j.name) j.name = nameSel.value;
+    tb.append(h('tr', {},
+      h('td', {}, h('label', { class: 'sw' }, h('input', { type: 'checkbox', ...(j.on !== false ? { checked: true } : {}), onchange: ev => { j.on = ev.target.checked; dirty(); } }), h('span', { class: 'swk' }))),
+      h('td', {}, h('select', { onchange: ev => { j.when = ev.target.value; j.name = ''; dirty(); renderSimJumps(); } }, ...Object.entries(S.jumpWhen || {}).map(([k, t]) => h('option', { value: k, ...(k === j.when ? { selected: true } : {}) }, t)))),
+      h('td', {}, nameSel),
+      h('td', {}, h('input', { class: 'num', type: 'number', min: 0, max: 3600, value: j.after ?? 5, onchange: ev => { j.after = +ev.target.value; dirty(); } })),
+      h('td', {}, h('input', { class: 'tm', value: j.jump || '00:00:00', placeholder: '00:50:00', onchange: ev => { j.jump = ev.target.value.trim(); dirty(); } })),
+      h('td', {}, h('input', { value: j.note || '', onchange: ev => { j.note = ev.target.value; dirty(); } })),
+      h('td', {}, h('button', { class: 'danger', onclick: () => { simDraft.splice(i, 1); dirty(); renderSimJumps(); } }, 'Delete'))));
+  });
+  if (!simDraft.length) tb.append(h('tr', {}, h('td', { colspan: 7, class: 'muted' }, 'No time jumps yet.')));
+}
+for (const id of ['#simAuto', '#simWatch', '#simLead']) $(id).addEventListener('change', () => { simDirty = true; });
+$('#simAddJump').onclick = () => { simDraft.push({ on: true, when: 'timer', name: '', after: 5, jump: '00:50:00', note: '' }); simDirty = true; renderSimJumps(); };
+$('#simSave').onclick = guard(async () => {
+  for (const j of simDraft) if (!/^\d+:\d{1,2}(:\d{1,2})?$/.test(j.jump || '')) throw new Error(`"${j.jump}" is not a time. Write it as hh:mm:ss, for example 00:50:00`);
+  S.sim = await api('PUT', '/ui/sim', { speed: +$('#simSpeedSet').value, lead: +$('#simLead').value, autoSkip: $('#simAuto').checked, watch: +$('#simWatch').value, jumps: simDraft });
+  simDirty = false; await load(); toast('Simulation settings saved');
+});
+$('#simOn').onchange = guard(async ev => {
+  const on = ev.target.checked;
+  if (!confirm(on ? 'Turn on simulation mode?\n\nEvery process stops and every output turns off. Then the real boards are let go and the simulator takes their place, so nothing real is switched until you turn it off again.'
+    : 'Turn off simulation mode?\n\nEvery process stops and every output turns off, then the real boards are used again.')) { ev.target.checked = !on; return; }
+  S.sim = await api('PUT', '/ui/sim', { on });
+  await load(); toast(on ? 'Simulation mode is on: no real hardware is switched' : 'Simulation mode is off: real hardware is used');
+});
+
+$('#tlShow').onclick = guard(async () => {
+  const name = $('#tlPick').value; if (!name) throw new Error('There are no Processes yet');
+  const r = await api('GET', '/ui/sim/timeline/' + encodeURIComponent(name));
+  tlRows = { name, rows: r.rows };
+  const tb = $('#tlBody'); tb.innerHTML = '';
+  for (const x of r.rows) {
+    const when = (x.after ? `${fmtT(x.at)} after line ${x.after}` : fmtT(x.at)) + (x.maybe ? ' (if)' : '');
+    const what = x.what === 'wait' ? (x.unknown ? 'waits (how long is not known ahead)' : `waits ${fmtT(x.secs)}`) : x.what === 'sleep' ? `sleeps ${fmtT(x.secs)}` : '';
+    tb.append(h('tr', { class: x.what === 'wait' || x.what === 'sleep' ? 'wait' : '' }, h('td', { class: x.maybe ? 'maybe' : '' }, when), h('td', {}, String(x.line)), h('td', {}, h('code', {}, x.text), what ? ' ' : '', what ? h('span', { class: 'muted' }, what) : '')));
+  }
+  $('.tlTable').classList.toggle('hidden', !r.rows.length);
+  $('#tlNote').textContent = (r.rows.length ? `About ${fmtT(r.end.at)}${r.end.after ? ` after line ${r.end.after}` : ''} from start to finish. Steps marked (if) only happen when that "if" is true. ` : 'Nothing to show. ') + (r.note || '');
+  $('#tlMake').disabled = !r.rows.some(x => !x.after && x.at > 0);
+});
+// Time jumps that, after the Process starts, skip to a few seconds before each timed step (chained one after the other)
+$('#tlMake').onclick = () => {
+  if (!tlRows) return;
+  const lead = +$('#simLead').value || 5, speed = +$('#simSpeedSet').value || 1;
+  const times = [...new Set(tlRows.rows.filter(x => !x.after && x.at > 0 && x.what !== 'sleep' && x.what !== 'wait').map(x => x.at))].sort((a, b) => a - b);
+  simDraft = simDraft.filter(j => !(j.when === 'process' && j.name === tlRows.name));
+  let real = 5, jumped = 0, made = 0;
+  for (const at of times) {
+    const jump = Math.round(at - lead - real * speed - jumped);
+    if (jump < 10) continue;                         // so close it is not worth a jump
+    const step = tlRows.rows.find(x => x.at === at && !x.after);
+    simDraft.push({ on: true, when: 'process', name: tlRows.name, after: real, jump: fmtT(jump), note: `to ${fmtT(at - lead)}: line ${step.line}` });
+    jumped += jump; made++;
+    real += Math.ceil(lead / speed) + 5;             // time to watch that step happen
+  }
+  simDirty = true; renderSimJumps();
+  toast(made ? `${made} time jump${made > 1 ? 's' : ''} added. Check them, then Save simulation settings.` : 'Every step is only seconds apart: no jumps needed');
+};
 
 // ---------------------------------------------------------------- start
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
