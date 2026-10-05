@@ -38,8 +38,8 @@ Each tab has its own background color and picture.
 1. Tick **Edit layout**.
 2. Open **⚙ Tab settings**: press the button in the dashed bar, **double-click an empty spot** on the tab, or double-click the tab's name. On a phone, **hold a finger on an empty spot**.
 3. Under **Background**:
-   - **Background color**: pick a color by name (the swatch shows it), or **Custom (add new) ...** for any color.
-   - **Background picture**: pick a picture from your media folders (the panel's `media` folder and its `Images` folder are listed). A preview shows under the list. **Add new ...** takes any picture path, for example one in another media folder. Put new pictures in with the **Media** page first.
+   - **Background color**: **Default** (the panel's normal color), **None** (no color), a color by name (the swatch shows it), or **Custom (add new) ...** for any color.
+   - **Background picture**: one picture path per tab. Pick a picture from your media folders (the panel's `media` folder and its `Images` folder are listed). A preview shows under the list. **Add new ...** takes any picture path, for example one in another media folder. Put new pictures in with the **Media** page first.
 4. Leave **Picture left / top / width / height** empty to stretch the picture over the whole tab. Fill them in to place the picture at a spot and size; the background color shows around it.
 5. Press **Save**, then **Save layout**.
 
