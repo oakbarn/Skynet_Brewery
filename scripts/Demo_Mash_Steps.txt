@@ -1,0 +1,21 @@
+//Demo_Mash_Steps
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+//A 60 minute mash with a pH check at 10 minutes and a stir at 30.
+//Try it in simulation mode (Settings > Simulation): Process timeline
+//shows when each step happens, and "Make time jumps from this"
+//skips ahead so the whole mash takes well under a minute to watch.
+"tm_Whirlpool" type = countup
+"tm_Whirlpool" value = 00:00:00
+start "tm_Whirlpool"
+"gblS_Inter_Script" value = "Mash started"
+wait "tm_Whirlpool" value >= 00:10:00
+"gblS_Inter_Script" value = "10 minutes: check the mash pH"
+print "Check the mash pH now"
+wait "tm_Whirlpool" value >= 00:30:00
+"gblS_Inter_Script" value = "30 minutes: stir the mash"
+print "Stir the mash"
+wait "tm_Whirlpool" value >= 01:00:00
+stop "tm_Whirlpool"
+"gblS_Inter_Script" value = "Mash done"
+print "Mash done after " + "tm_Whirlpool" value

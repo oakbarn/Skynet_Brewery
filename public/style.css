@@ -435,3 +435,19 @@ body.role-viewer .op-only { display: none !important; }
 .mqtt-status.on::before { color: #3fa34d; }
 .mqtt-status.error::before { color: #c94040; }
 #mqItems td:nth-child(3), #mqItems td:nth-child(4) { text-align: center; }
+
+/* ===== Simulation mode: a striped bar under the menu while it is on ===== */
+.simBar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 14px; color: #1b1305;
+  background: repeating-linear-gradient(135deg, #e8c33a 0 18px, #f0d25c 18px 36px); border-bottom: 1px solid #b8962a; }
+.simBar .muted { color: #4a3d10; }
+.simBar button, .simBar select { background: #fff6d6; color: #1b1305; border-color: #b8962a; }
+.simBar button.primary { background: #1b1305; color: #f0d25c; }
+.simBar .simCtl { display: inline-flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.simJumps input.tm { width: 7em; }
+.simJumps input.num { width: 5em; }
+.tlTable td.maybe { font-style: italic; }
+.tlTable tr.wait td { color: var(--accent); }
+@media (max-width: 700px) { .simBar { padding: 6px 10px; gap: 6px; } .simBar .simCtl button { padding: 4px 7px; } }
+.form label.simSwitch { flex-direction: row; align-items: center; gap: 8px; }
+.tblScroll { overflow-x: auto; max-width: 100%; }
+.tblScroll table { min-width: 640px; }
