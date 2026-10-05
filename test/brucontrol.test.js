@@ -51,7 +51,7 @@ const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.loa
 const engine = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 const res = applyBruControl(conv, { store, engine, mode: 'replace' });
 assert.deepEqual(res.problems, []);
-assert.equal(store.has('old'), false); assert.equal(store.list().length, 17);
+assert.equal(store.has('old'), false); assert.equal(store.list().length, 18);        // 17 imported + the built-in SoundPlayer
 assert.equal(String(store.getProp('tm_Boil', 'resetvalue')), '01:00:00');
 assert.equal(store.getProp('MB_05_Hys', 'enabled'), false);
 assert.equal(store.getProp('VGC_22_Valve', 'enabled'), true);

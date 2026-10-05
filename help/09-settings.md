@@ -20,7 +20,7 @@ Add people and give each a role:
 
 ## Simulation (admins)
 
-Try a brew day without touching any hardware, with time running faster or skipping ahead. See [Simulation mode](18-simulation).
+Try a brew day without touching any hardware, with time running faster or skipping ahead. See [Simulation mode](19-simulation).
 
 ## Panel settings (admins)
 
