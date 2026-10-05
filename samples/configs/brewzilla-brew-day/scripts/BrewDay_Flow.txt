@@ -4,6 +4,7 @@
 //Brew day, step by step, like BruControl: the message box says what to do, the red label is the question,
 //click the green switch to advance (gblV_Brew_Status + 1). Blue = the panel is working, it moves on by itself.
 //Testing switch on: every minute runs as one second.
+step 1.00000 "Start"
 new string vSMsg
 new string vSHops
 new value vVScale
@@ -28,526 +29,546 @@ new value vVT7
 new value vVH8
 new value vVT8
 vVScale = 60
-if "sw_Status_Testing" state == true
+if sw_Status_Testing == true
 	vVScale = 1
 endif
 stop "BrewDay_Stop"
 start "looper_Advance_Switch"
-"tm_BrewDay" value = 00:00:00
+tm_BrewDay = 00:00:00
 start "tm_BrewDay"
-"gblS_Hop_Warning" value = ""
-"gblB_Hop1_Added" value = false
-"gblB_Hop2_Added" value = false
-"gblB_Hop3_Added" value = false
-"gblB_Hop4_Added" value = false
-"gblB_Hop5_Added" value = false
-"gblB_Hop6_Added" value = false
-"gblB_Hop7_Added" value = false
-"gblB_Hop8_Added" value = false
-"BrewZilla" heat = false
-"BrewZilla" pump = false
-"DigiBoil" heat = false
+gblS_Hop_Warning = ""
+gblB_Hop1_Added = false
+gblB_Hop2_Added = false
+gblB_Hop3_Added = false
+gblB_Hop4_Added = false
+gblB_Hop5_Added = false
+gblB_Hop6_Added = false
+gblB_Hop7_Added = false
+gblB_Hop8_Added = false
+BrewZilla.heat = false
+BrewZilla.pump = false
+DigiBoil.heat = false
 [SectionBrew100]
-"gblV_Brew_Status" value = 100
-vSMsg = "Brewing " + "gblS_BeerName_R1" value + ". Import the BeerSmith recipe (Import > BeerXML) or check the Recipe tab. Strike " + "gblV_Desired_Strike" value + " °F, mash " + "gblV_Mash_1_Temp" value + " °F, boil " + "gblVBoilTime_Minutes" value + " min."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Recipe Ready?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 101
-"sw_Advance_BrewStatus" visibility = hidden
+step 1.00001 "SectionBrew100"
+gblV_Brew_Status = 100
+vSMsg = "Brewing " + gblS_BeerName_R1 + ". Import the BeerSmith recipe (Import > BeerXML) or check the Recipe tab. Strike " + gblV_Desired_Strike + " °F, mash " + gblV_Mash_1_Temp + " °F, boil " + gblVBoilTime_Minutes + " min."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Recipe Ready?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 101
+sw_Advance_BrewStatus.visible = false
 [SectionBrew102]
-"gblV_Brew_Status" value = 102
+step 1.00002 "SectionBrew102"
+gblV_Brew_Status = 102
 vSMsg = "Insure that the Wall Safety Switch for the BrewZilla is on and the BrewZilla Control Panel is lit."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "BrewZilla Control Panel Live?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 103
-"sw_Advance_BrewStatus" visibility = hidden
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "BrewZilla Control Panel Live?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 103
+sw_Advance_BrewStatus.visible = false
 [SectionBrew104]
-"gblV_Brew_Status" value = 104
+step 1.00003 "SectionBrew104"
+gblV_Brew_Status = 104
 vSMsg = "Fill the BrewZilla with the strike water (malt pipe in). Enter the strike volume under Readings."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Water In?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 105
-"sw_Advance_BrewStatus" visibility = hidden
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Water In?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 105
+sw_Advance_BrewStatus.visible = false
 log "vAV_Strike_Volume"
-"BrewZilla" setpoint = "gblV_Desired_Strike" value
-"BrewZilla" heat = true
-"BrewZilla" pump = true
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "BrewZilla Set?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = gblV_Desired_Strike
+BrewZilla.heat = true
+BrewZilla.pump = true
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "BrewZilla Set?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew106]
-"gblV_Brew_Status" value = 106
-vSMsg = "Set the BrewZilla to " + "gblV_Desired_Strike" value + " °F, heat ON, pump ON (recirculating)."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "BrewZilla Set?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 107
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"DigiBoil" setpoint = "gblV_Sparge_Temp" value
-"DigiBoil" heat = true
-"DigiBoil" message = "Heat sparge water"
-"DigiBoil" confirmed = false
-"DigiBoil" waiting = true
+step 1.00004 "SectionBrew106"
+gblV_Brew_Status = 106
+vSMsg = "Set the BrewZilla to " + gblV_Desired_Strike + " °F, heat ON, pump ON (recirculating)."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "BrewZilla Set?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 107
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+DigiBoil.setpoint = gblV_Sparge_Temp
+DigiBoil.heat = true
+DigiBoil.message = "Heat sparge water"
+DigiBoil.confirmed = false
+DigiBoil.waiting = true
 [SectionBrew108]
-"gblV_Brew_Status" value = 108
-vSMsg = "Plug in the DigiBoil, fill it with the sparge water and set it to " + "gblV_Sparge_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "DigiBoil Ready?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 109
-"sw_Advance_BrewStatus" visibility = hidden
-"DigiBoil" waiting = false
+step 1.00005 "SectionBrew108"
+gblV_Brew_Status = 108
+vSMsg = "Plug in the DigiBoil, fill it with the sparge water and set it to " + gblV_Sparge_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "DigiBoil Ready?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 109
+sw_Advance_BrewStatus.visible = false
+DigiBoil.waiting = false
 [SectionBrew110]
-"gblV_Brew_Status" value = 110
-vSMsg = "Wait until the BrewZilla shows " + "gblV_Desired_Strike" value + " °F (tap it to enter what it shows)."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "At Strike Temp?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 111
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" message = "At strike"
+step 1.00006 "SectionBrew110"
+gblV_Brew_Status = 110
+vSMsg = "Wait until the BrewZilla shows " + gblV_Desired_Strike + " °F (tap it to enter what it shows)."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "At Strike Temp?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 111
+sw_Advance_BrewStatus.visible = false
+BrewZilla.message = "At strike"
 vSHops = ""
-if "gblV_Hop1_Group_R1" value == -333
-	if "gblS_Hop1_R1" value != ""
-		vSHops = vSHops + "gblV_Hop1_Oz_R1" value + " oz " + "gblS_Hop1_R1" value
+if gblV_Hop1_Group_R1 == -333
+	if gblS_Hop1_R1 != ""
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop1_Added" value = true
+		gblB_Hop1_Added = true
 	endif
 endif
-if "gblV_Hop2_Group_R1" value == -333
-	if "gblS_Hop2_R1" value != ""
-		vSHops = vSHops + "gblV_Hop2_Oz_R1" value + " oz " + "gblS_Hop2_R1" value
+if gblV_Hop2_Group_R1 == -333
+	if gblS_Hop2_R1 != ""
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop2_Added" value = true
+		gblB_Hop2_Added = true
 	endif
 endif
-if "gblV_Hop3_Group_R1" value == -333
-	if "gblS_Hop3_R1" value != ""
-		vSHops = vSHops + "gblV_Hop3_Oz_R1" value + " oz " + "gblS_Hop3_R1" value
+if gblV_Hop3_Group_R1 == -333
+	if gblS_Hop3_R1 != ""
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop3_Added" value = true
+		gblB_Hop3_Added = true
 	endif
 endif
-if "gblV_Hop4_Group_R1" value == -333
-	if "gblS_Hop4_R1" value != ""
-		vSHops = vSHops + "gblV_Hop4_Oz_R1" value + " oz " + "gblS_Hop4_R1" value
+if gblV_Hop4_Group_R1 == -333
+	if gblS_Hop4_R1 != ""
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop4_Added" value = true
+		gblB_Hop4_Added = true
 	endif
 endif
-if "gblV_Hop5_Group_R1" value == -333
-	if "gblS_Hop5_R1" value != ""
-		vSHops = vSHops + "gblV_Hop5_Oz_R1" value + " oz " + "gblS_Hop5_R1" value
+if gblV_Hop5_Group_R1 == -333
+	if gblS_Hop5_R1 != ""
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop5_Added" value = true
+		gblB_Hop5_Added = true
 	endif
 endif
-if "gblV_Hop6_Group_R1" value == -333
-	if "gblS_Hop6_R1" value != ""
-		vSHops = vSHops + "gblV_Hop6_Oz_R1" value + " oz " + "gblS_Hop6_R1" value
+if gblV_Hop6_Group_R1 == -333
+	if gblS_Hop6_R1 != ""
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop6_Added" value = true
+		gblB_Hop6_Added = true
 	endif
 endif
-if "gblV_Hop7_Group_R1" value == -333
-	if "gblS_Hop7_R1" value != ""
-		vSHops = vSHops + "gblV_Hop7_Oz_R1" value + " oz " + "gblS_Hop7_R1" value
+if gblV_Hop7_Group_R1 == -333
+	if gblS_Hop7_R1 != ""
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop7_Added" value = true
+		gblB_Hop7_Added = true
 	endif
 endif
-if "gblV_Hop8_Group_R1" value == -333
-	if "gblS_Hop8_R1" value != ""
-		vSHops = vSHops + "gblV_Hop8_Oz_R1" value + " oz " + "gblS_Hop8_R1" value
+if gblV_Hop8_Group_R1 == -333
+	if gblS_Hop8_R1 != ""
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop8_Added" value = true
+		gblB_Hop8_Added = true
 	endif
 endif
-"BrewZilla" setpoint = "gblV_Mash_1_Temp" value
-"BrewZilla" heat = true
-"BrewZilla" pump = false
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Grain Added?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = gblV_Mash_1_Temp
+BrewZilla.heat = true
+BrewZilla.pump = false
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Grain Added?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew150]
-"gblV_Brew_Status" value = 150
-vSMsg = "Pump OFF. Add the grain slowly and stir out the dough balls. Mash hops: " + vSHops + " Set the BrewZilla to " + "gblV_Mash_1_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Grain Added?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 151
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"BrewZilla" setpoint = "gblV_Mash_1_Temp" value
-"BrewZilla" heat = true
-"BrewZilla" pump = true
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Recirculating?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+step 1.00007 "SectionBrew150"
+gblV_Brew_Status = 150
+vSMsg = "Pump OFF. Add the grain slowly and stir out the dough balls. Mash hops: " + vSHops + " Set the BrewZilla to " + gblV_Mash_1_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Grain Added?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 151
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+BrewZilla.setpoint = gblV_Mash_1_Temp
+BrewZilla.heat = true
+BrewZilla.pump = true
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Recirculating?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew152]
-"gblV_Brew_Status" value = 152
+step 1.00008 "SectionBrew152"
+gblV_Brew_Status = 152
 vSMsg = "Put the top screen and the recirculation arm on, pump ON (half open). Measure the mash pH after 10 minutes and enter it under Readings."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Recirculating?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 153
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Recirculating?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 153
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
 [Mash_Step_1]
-if "gblT_1_Mash_Time_R1" value == 00:00:00
+step 1.00009 "Mash Step 1"
+if gblT_1_Mash_Time_R1 == 00:00:00
 	goto "Mash_Steps_Done"
 endif
-vVStep = "gblT_1_Mash_Time_R1" value
+vVStep = gblT_1_Mash_Time_R1
 vVStep = vVStep / 60 * vVScale
 vT_Step = vVStep
-"tm_Step" type = countdown
-"tm_Step" value = vT_Step
+tm_Step.countdown = true
+tm_Step = vT_Step
 start "tm_Step"
-vSMsg = "Mash step 1: holding " + "gblV_Mash_1_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Mashing: step 1"
-"gblS_Advance_Label" background = 5
-"gblS_Step_Text" background = 5
-"sw_Advance_BrewStatus" visibility = hidden
-wait "tm_Step" value <= 00:00:00
+vSMsg = "Mash step 1: holding " + gblV_Mash_1_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Mashing: step 1"
+gblS_Advance_Label.background = 5
+gblS_Step_Text.background = 5
+sw_Advance_BrewStatus.visible = false
+wait tm_Step <= 00:00:00
 stop "tm_Step"
 [Mash_Step_2]
-if "gblT_2_Mash_Time_R1" value == 00:00:00
+step 1.00010 "Mash Step 2"
+if gblT_2_Mash_Time_R1 == 00:00:00
 	goto "Mash_Steps_Done"
 endif
-"BrewZilla" setpoint = "gblV_Mash_2_Temp" value
-"BrewZilla" heat = true
-"BrewZilla" pump = true
-"BrewZilla" timer = "gblT_2_Mash_Time_R1" value
-"BrewZilla" message = "Step 2 Set?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = gblV_Mash_2_Temp
+BrewZilla.heat = true
+BrewZilla.pump = true
+BrewZilla.timer = gblT_2_Mash_Time_R1
+BrewZilla.message = "Step 2 Set?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew220]
-"gblV_Brew_Status" value = 220
-vSMsg = "Mash step 2: set the BrewZilla to " + "gblV_Mash_2_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Step 2 Set?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 221
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-vVStep = "gblT_2_Mash_Time_R1" value
+step 1.00011 "SectionBrew220"
+gblV_Brew_Status = 220
+vSMsg = "Mash step 2: set the BrewZilla to " + gblV_Mash_2_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Step 2 Set?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 221
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+vVStep = gblT_2_Mash_Time_R1
 vVStep = vVStep / 60 * vVScale
 vT_Step = vVStep
-"tm_Step" type = countdown
-"tm_Step" value = vT_Step
+tm_Step.countdown = true
+tm_Step = vT_Step
 start "tm_Step"
-vSMsg = "Mash step 2: holding " + "gblV_Mash_2_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Mashing: step 2"
-"gblS_Advance_Label" background = 5
-"gblS_Step_Text" background = 5
-"sw_Advance_BrewStatus" visibility = hidden
-wait "tm_Step" value <= 00:00:00
+vSMsg = "Mash step 2: holding " + gblV_Mash_2_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Mashing: step 2"
+gblS_Advance_Label.background = 5
+gblS_Step_Text.background = 5
+sw_Advance_BrewStatus.visible = false
+wait tm_Step <= 00:00:00
 stop "tm_Step"
 [Mash_Step_3]
-if "gblT_3_Mash_Time_R1" value == 00:00:00
+step 1.00012 "Mash Step 3"
+if gblT_3_Mash_Time_R1 == 00:00:00
 	goto "Mash_Steps_Done"
 endif
-"BrewZilla" setpoint = "gblV_Mash_3_Temp" value
-"BrewZilla" heat = true
-"BrewZilla" pump = true
-"BrewZilla" timer = "gblT_3_Mash_Time_R1" value
-"BrewZilla" message = "Step 3 Set?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = gblV_Mash_3_Temp
+BrewZilla.heat = true
+BrewZilla.pump = true
+BrewZilla.timer = gblT_3_Mash_Time_R1
+BrewZilla.message = "Step 3 Set?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew230]
-"gblV_Brew_Status" value = 230
-vSMsg = "Mash step 3: set the BrewZilla to " + "gblV_Mash_3_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Step 3 Set?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 231
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-vVStep = "gblT_3_Mash_Time_R1" value
+step 1.00013 "SectionBrew230"
+gblV_Brew_Status = 230
+vSMsg = "Mash step 3: set the BrewZilla to " + gblV_Mash_3_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Step 3 Set?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 231
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+vVStep = gblT_3_Mash_Time_R1
 vVStep = vVStep / 60 * vVScale
 vT_Step = vVStep
-"tm_Step" type = countdown
-"tm_Step" value = vT_Step
+tm_Step.countdown = true
+tm_Step = vT_Step
 start "tm_Step"
-vSMsg = "Mash step 3: holding " + "gblV_Mash_3_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Mashing: step 3"
-"gblS_Advance_Label" background = 5
-"gblS_Step_Text" background = 5
-"sw_Advance_BrewStatus" visibility = hidden
-wait "tm_Step" value <= 00:00:00
+vSMsg = "Mash step 3: holding " + gblV_Mash_3_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Mashing: step 3"
+gblS_Advance_Label.background = 5
+gblS_Step_Text.background = 5
+sw_Advance_BrewStatus.visible = false
+wait tm_Step <= 00:00:00
 stop "tm_Step"
 [Mash_Steps_Done]
+step 1.00014 "Mash Steps Done"
 log "vAV_Mash_pH"
-if "gblT_MashOut_Time" value > 00:00:00
-"BrewZilla" setpoint = "gblV_MashOut_Temp" value
-"BrewZilla" heat = true
-"BrewZilla" pump = true
-"BrewZilla" timer = "gblT_MashOut_Time" value
-"BrewZilla" message = "Mash Out Set?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+if gblT_MashOut_Time > 00:00:00
+BrewZilla.setpoint = gblV_MashOut_Temp
+BrewZilla.heat = true
+BrewZilla.pump = true
+BrewZilla.timer = gblT_MashOut_Time
+BrewZilla.message = "Mash Out Set?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew250]
-"gblV_Brew_Status" value = 250
-vSMsg = "Mash out: set the BrewZilla to " + "gblV_MashOut_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Mash Out Set?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 251
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-	vVStep = "gblT_MashOut_Time" value
+step 1.00015 "SectionBrew250"
+gblV_Brew_Status = 250
+vSMsg = "Mash out: set the BrewZilla to " + gblV_MashOut_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Mash Out Set?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 251
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+	vVStep = gblT_MashOut_Time
 	vVStep = vVStep / 60 * vVScale
 vT_Step = vVStep
-"tm_Step" type = countdown
-"tm_Step" value = vT_Step
+tm_Step.countdown = true
+tm_Step = vT_Step
 start "tm_Step"
-vSMsg = "Mash out at " + "gblV_MashOut_Temp" value + " °F."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Mash Out"
-"gblS_Advance_Label" background = 5
-"gblS_Step_Text" background = 5
-"sw_Advance_BrewStatus" visibility = hidden
-wait "tm_Step" value <= 00:00:00
+vSMsg = "Mash out at " + gblV_MashOut_Temp + " °F."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Mash Out"
+gblS_Advance_Label.background = 5
+gblS_Step_Text.background = 5
+sw_Advance_BrewStatus.visible = false
+wait tm_Step <= 00:00:00
 stop "tm_Step"
 endif
 start "alm_Step"
 vSHops = ""
-if "gblV_Hop1_Group_R1" value == -444
-	if "gblS_Hop1_R1" value != ""
-		vSHops = vSHops + "gblV_Hop1_Oz_R1" value + " oz " + "gblS_Hop1_R1" value
+if gblV_Hop1_Group_R1 == -444
+	if gblS_Hop1_R1 != ""
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop1_Added" value = true
+		gblB_Hop1_Added = true
 	endif
 endif
-if "gblV_Hop2_Group_R1" value == -444
-	if "gblS_Hop2_R1" value != ""
-		vSHops = vSHops + "gblV_Hop2_Oz_R1" value + " oz " + "gblS_Hop2_R1" value
+if gblV_Hop2_Group_R1 == -444
+	if gblS_Hop2_R1 != ""
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop2_Added" value = true
+		gblB_Hop2_Added = true
 	endif
 endif
-if "gblV_Hop3_Group_R1" value == -444
-	if "gblS_Hop3_R1" value != ""
-		vSHops = vSHops + "gblV_Hop3_Oz_R1" value + " oz " + "gblS_Hop3_R1" value
+if gblV_Hop3_Group_R1 == -444
+	if gblS_Hop3_R1 != ""
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop3_Added" value = true
+		gblB_Hop3_Added = true
 	endif
 endif
-if "gblV_Hop4_Group_R1" value == -444
-	if "gblS_Hop4_R1" value != ""
-		vSHops = vSHops + "gblV_Hop4_Oz_R1" value + " oz " + "gblS_Hop4_R1" value
+if gblV_Hop4_Group_R1 == -444
+	if gblS_Hop4_R1 != ""
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop4_Added" value = true
+		gblB_Hop4_Added = true
 	endif
 endif
-if "gblV_Hop5_Group_R1" value == -444
-	if "gblS_Hop5_R1" value != ""
-		vSHops = vSHops + "gblV_Hop5_Oz_R1" value + " oz " + "gblS_Hop5_R1" value
+if gblV_Hop5_Group_R1 == -444
+	if gblS_Hop5_R1 != ""
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop5_Added" value = true
+		gblB_Hop5_Added = true
 	endif
 endif
-if "gblV_Hop6_Group_R1" value == -444
-	if "gblS_Hop6_R1" value != ""
-		vSHops = vSHops + "gblV_Hop6_Oz_R1" value + " oz " + "gblS_Hop6_R1" value
+if gblV_Hop6_Group_R1 == -444
+	if gblS_Hop6_R1 != ""
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop6_Added" value = true
+		gblB_Hop6_Added = true
 	endif
 endif
-if "gblV_Hop7_Group_R1" value == -444
-	if "gblS_Hop7_R1" value != ""
-		vSHops = vSHops + "gblV_Hop7_Oz_R1" value + " oz " + "gblS_Hop7_R1" value
+if gblV_Hop7_Group_R1 == -444
+	if gblS_Hop7_R1 != ""
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop7_Added" value = true
+		gblB_Hop7_Added = true
 	endif
 endif
-if "gblV_Hop8_Group_R1" value == -444
-	if "gblS_Hop8_R1" value != ""
-		vSHops = vSHops + "gblV_Hop8_Oz_R1" value + " oz " + "gblS_Hop8_R1" value
+if gblV_Hop8_Group_R1 == -444
+	if gblS_Hop8_R1 != ""
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop8_Added" value = true
+		gblB_Hop8_Added = true
 	endif
 endif
-"BrewZilla" setpoint = "gblV_MashOut_Temp" value
-"BrewZilla" heat = false
-"BrewZilla" pump = false
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Malt Pipe Lifted?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = gblV_MashOut_Temp
+BrewZilla.heat = false
+BrewZilla.pump = false
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Malt Pipe Lifted?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew300]
-"gblV_Brew_Status" value = 300
+step 1.00016 "SectionBrew300"
+gblV_Brew_Status = 300
 vSMsg = "Mash done. Heat OFF, pump OFF. Lift the malt pipe and rest it on the top to drain. First wort hops: " + vSHops
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Malt Pipe Lifted?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 301
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"alm_Step" active = false
-"DigiBoil" message = "Sparge"
-"DigiBoil" confirmed = false
-"DigiBoil" waiting = true
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Malt Pipe Lifted?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 301
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+alm_Step = false
+DigiBoil.message = "Sparge"
+DigiBoil.confirmed = false
+DigiBoil.waiting = true
 [SectionBrew302]
-"gblV_Brew_Status" value = 302
-vSMsg = "Sparge slowly with the DigiBoil water (" + "gblV_Sparge_Temp" value + " °F) over the grain."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Sparge Done?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 303
-"sw_Advance_BrewStatus" visibility = hidden
-"DigiBoil" waiting = false
-"DigiBoil" heat = false
-"DigiBoil" message = "Done"
+step 1.00017 "SectionBrew302"
+gblV_Brew_Status = 302
+vSMsg = "Sparge slowly with the DigiBoil water (" + gblV_Sparge_Temp + " °F) over the grain."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Sparge Done?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 303
+sw_Advance_BrewStatus.visible = false
+DigiBoil.waiting = false
+DigiBoil.heat = false
+DigiBoil.message = "Done"
 [SectionBrew304]
-"gblV_Brew_Status" value = 304
+step 1.00018 "SectionBrew304"
+gblV_Brew_Status = 304
 vSMsg = "Remove the malt pipe. Take a sample: enter the pre-boil volume and gravity under Readings."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Pre Boil Volume Good?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 305
-"sw_Advance_BrewStatus" visibility = hidden
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Pre Boil Volume Good?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 305
+sw_Advance_BrewStatus.visible = false
 log "vAV_PreBoil_Volume"
 log "vAV_PreBoil_Gravity"
-"BrewZilla" setpoint = 212
-"BrewZilla" heat = true
-"BrewZilla" pump = false
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Hot Break?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = 212
+BrewZilla.heat = true
+BrewZilla.pump = false
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Hot Break?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew400]
-"gblV_Brew_Status" value = 400
+step 1.00019 "SectionBrew400"
+gblV_Brew_Status = 400
 vSMsg = "Set the BrewZilla to boil (212 °F, both elements). Watch for the hot break and skim. Click when the hot break is over: the boil timer starts."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Hot Break?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 401
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"BrewZilla" message = "Boiling"
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Hot Break?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 401
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+BrewZilla.message = "Boiling"
 vVH1 = 9
-if "gblV_Hop1_Group_R1" value == 919 || "gblV_Hop1_Group_R1" value == -888
-	if "gblS_Hop1_R1" value != ""
+if gblV_Hop1_Group_R1 == 919 || gblV_Hop1_Group_R1 == -888
+	if gblS_Hop1_R1 != ""
 		vVH1 = 0
 	endif
 endif
-vVT1 = "gblV_TimeHop1_Min_R1" value * vVScale
+vVT1 = gblV_TimeHop1_Min_R1 * vVScale
 vVH2 = 9
-if "gblV_Hop2_Group_R1" value == 919 || "gblV_Hop2_Group_R1" value == -888
-	if "gblS_Hop2_R1" value != ""
+if gblV_Hop2_Group_R1 == 919 || gblV_Hop2_Group_R1 == -888
+	if gblS_Hop2_R1 != ""
 		vVH2 = 0
 	endif
 endif
-vVT2 = "gblV_TimeHop2_Min_R1" value * vVScale
+vVT2 = gblV_TimeHop2_Min_R1 * vVScale
 vVH3 = 9
-if "gblV_Hop3_Group_R1" value == 919 || "gblV_Hop3_Group_R1" value == -888
-	if "gblS_Hop3_R1" value != ""
+if gblV_Hop3_Group_R1 == 919 || gblV_Hop3_Group_R1 == -888
+	if gblS_Hop3_R1 != ""
 		vVH3 = 0
 	endif
 endif
-vVT3 = "gblV_TimeHop3_Min_R1" value * vVScale
+vVT3 = gblV_TimeHop3_Min_R1 * vVScale
 vVH4 = 9
-if "gblV_Hop4_Group_R1" value == 919 || "gblV_Hop4_Group_R1" value == -888
-	if "gblS_Hop4_R1" value != ""
+if gblV_Hop4_Group_R1 == 919 || gblV_Hop4_Group_R1 == -888
+	if gblS_Hop4_R1 != ""
 		vVH4 = 0
 	endif
 endif
-vVT4 = "gblV_TimeHop4_Min_R1" value * vVScale
+vVT4 = gblV_TimeHop4_Min_R1 * vVScale
 vVH5 = 9
-if "gblV_Hop5_Group_R1" value == 919 || "gblV_Hop5_Group_R1" value == -888
-	if "gblS_Hop5_R1" value != ""
+if gblV_Hop5_Group_R1 == 919 || gblV_Hop5_Group_R1 == -888
+	if gblS_Hop5_R1 != ""
 		vVH5 = 0
 	endif
 endif
-vVT5 = "gblV_TimeHop5_Min_R1" value * vVScale
+vVT5 = gblV_TimeHop5_Min_R1 * vVScale
 vVH6 = 9
-if "gblV_Hop6_Group_R1" value == 919 || "gblV_Hop6_Group_R1" value == -888
-	if "gblS_Hop6_R1" value != ""
+if gblV_Hop6_Group_R1 == 919 || gblV_Hop6_Group_R1 == -888
+	if gblS_Hop6_R1 != ""
 		vVH6 = 0
 	endif
 endif
-vVT6 = "gblV_TimeHop6_Min_R1" value * vVScale
+vVT6 = gblV_TimeHop6_Min_R1 * vVScale
 vVH7 = 9
-if "gblV_Hop7_Group_R1" value == 919 || "gblV_Hop7_Group_R1" value == -888
-	if "gblS_Hop7_R1" value != ""
+if gblV_Hop7_Group_R1 == 919 || gblV_Hop7_Group_R1 == -888
+	if gblS_Hop7_R1 != ""
 		vVH7 = 0
 	endif
 endif
-vVT7 = "gblV_TimeHop7_Min_R1" value * vVScale
+vVT7 = gblV_TimeHop7_Min_R1 * vVScale
 vVH8 = 9
-if "gblV_Hop8_Group_R1" value == 919 || "gblV_Hop8_Group_R1" value == -888
-	if "gblS_Hop8_R1" value != ""
+if gblV_Hop8_Group_R1 == 919 || gblV_Hop8_Group_R1 == -888
+	if gblS_Hop8_R1 != ""
 		vVH8 = 0
 	endif
 endif
-vVT8 = "gblV_TimeHop8_Min_R1" value * vVScale
+vVT8 = gblV_TimeHop8_Min_R1 * vVScale
 vVWarn = 10 * vVScale
-vVStep = "gblVBoilTime_Minutes" value * vVScale
-"tm_Step" type = countdown
-"tm_Step" value = vVStep
+vVStep = gblVBoilTime_Minutes * vVScale
+tm_Step.countdown = true
+tm_Step = vVStep
 start "tm_Step"
-vSMsg = "Boiling. " + "gblVBoilTime_Minutes" value + " minutes. The hop alarm rings at each addition; tap it when the hops are in."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Boiling"
-"gblS_Advance_Label" background = 5
-"gblS_Step_Text" background = 5
-"sw_Advance_BrewStatus" visibility = hidden
+vSMsg = "Boiling. " + gblVBoilTime_Minutes + " minutes. The hop alarm rings at each addition; tap it when the hops are in."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Boiling"
+gblS_Advance_Label.background = 5
+gblS_Step_Text.background = 5
+sw_Advance_BrewStatus.visible = false
 [Boil_Loop]
-vVLeft = "tm_Step" value
+step 1.00020 "Boil Loop"
+vVLeft = tm_Step
 if vVH1 == 0
 	if vVLeft <= vVT1 + vVWarn
 		if vVLeft > vVT1
-			vSMsg = "In 10 minutes: " + "gblV_Hop1_Oz_R1" value + " oz " + "gblS_Hop1_R1" value + " at " + "gblV_TimeHop1_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1 + " at " + gblV_TimeHop1_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH1 = 1
 		endif
@@ -555,24 +576,24 @@ if vVH1 == 0
 endif
 if vVH1 < 2
 	if vVLeft <= vVT1
-		vSMsg = "ADD NOW: " + "gblV_Hop1_Oz_R1" value + " oz " + "gblS_Hop1_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop1_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop1_Added = true
 		vVH1 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVH2 == 0
 	if vVLeft <= vVT2 + vVWarn
 		if vVLeft > vVT2
-			vSMsg = "In 10 minutes: " + "gblV_Hop2_Oz_R1" value + " oz " + "gblS_Hop2_R1" value + " at " + "gblV_TimeHop2_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1 + " at " + gblV_TimeHop2_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH2 = 1
 		endif
@@ -580,24 +601,24 @@ if vVH2 == 0
 endif
 if vVH2 < 2
 	if vVLeft <= vVT2
-		vSMsg = "ADD NOW: " + "gblV_Hop2_Oz_R1" value + " oz " + "gblS_Hop2_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop2_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop2_Added = true
 		vVH2 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVH3 == 0
 	if vVLeft <= vVT3 + vVWarn
 		if vVLeft > vVT3
-			vSMsg = "In 10 minutes: " + "gblV_Hop3_Oz_R1" value + " oz " + "gblS_Hop3_R1" value + " at " + "gblV_TimeHop3_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1 + " at " + gblV_TimeHop3_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH3 = 1
 		endif
@@ -605,24 +626,24 @@ if vVH3 == 0
 endif
 if vVH3 < 2
 	if vVLeft <= vVT3
-		vSMsg = "ADD NOW: " + "gblV_Hop3_Oz_R1" value + " oz " + "gblS_Hop3_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop3_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop3_Added = true
 		vVH3 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVH4 == 0
 	if vVLeft <= vVT4 + vVWarn
 		if vVLeft > vVT4
-			vSMsg = "In 10 minutes: " + "gblV_Hop4_Oz_R1" value + " oz " + "gblS_Hop4_R1" value + " at " + "gblV_TimeHop4_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1 + " at " + gblV_TimeHop4_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH4 = 1
 		endif
@@ -630,24 +651,24 @@ if vVH4 == 0
 endif
 if vVH4 < 2
 	if vVLeft <= vVT4
-		vSMsg = "ADD NOW: " + "gblV_Hop4_Oz_R1" value + " oz " + "gblS_Hop4_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop4_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop4_Added = true
 		vVH4 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVH5 == 0
 	if vVLeft <= vVT5 + vVWarn
 		if vVLeft > vVT5
-			vSMsg = "In 10 minutes: " + "gblV_Hop5_Oz_R1" value + " oz " + "gblS_Hop5_R1" value + " at " + "gblV_TimeHop5_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1 + " at " + gblV_TimeHop5_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH5 = 1
 		endif
@@ -655,24 +676,24 @@ if vVH5 == 0
 endif
 if vVH5 < 2
 	if vVLeft <= vVT5
-		vSMsg = "ADD NOW: " + "gblV_Hop5_Oz_R1" value + " oz " + "gblS_Hop5_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop5_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop5_Added = true
 		vVH5 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVH6 == 0
 	if vVLeft <= vVT6 + vVWarn
 		if vVLeft > vVT6
-			vSMsg = "In 10 minutes: " + "gblV_Hop6_Oz_R1" value + " oz " + "gblS_Hop6_R1" value + " at " + "gblV_TimeHop6_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1 + " at " + gblV_TimeHop6_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH6 = 1
 		endif
@@ -680,24 +701,24 @@ if vVH6 == 0
 endif
 if vVH6 < 2
 	if vVLeft <= vVT6
-		vSMsg = "ADD NOW: " + "gblV_Hop6_Oz_R1" value + " oz " + "gblS_Hop6_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop6_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop6_Added = true
 		vVH6 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVH7 == 0
 	if vVLeft <= vVT7 + vVWarn
 		if vVLeft > vVT7
-			vSMsg = "In 10 minutes: " + "gblV_Hop7_Oz_R1" value + " oz " + "gblS_Hop7_R1" value + " at " + "gblV_TimeHop7_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1 + " at " + gblV_TimeHop7_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH7 = 1
 		endif
@@ -705,24 +726,24 @@ if vVH7 == 0
 endif
 if vVH7 < 2
 	if vVLeft <= vVT7
-		vSMsg = "ADD NOW: " + "gblV_Hop7_Oz_R1" value + " oz " + "gblS_Hop7_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop7_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop7_Added = true
 		vVH7 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVH8 == 0
 	if vVLeft <= vVT8 + vVWarn
 		if vVLeft > vVT8
-			vSMsg = "In 10 minutes: " + "gblV_Hop8_Oz_R1" value + " oz " + "gblS_Hop8_R1" value + " at " + "gblV_TimeHop8_Min_R1" value + " min"
-			"gblS_Hop_Warning" value = vSMsg
+			vSMsg = "In 10 minutes: " + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1 + " at " + gblV_TimeHop8_Min_R1 + " min"
+			gblS_Hop_Warning = vSMsg
 			start "alm_Warning"
 			vVH8 = 1
 		endif
@@ -730,22 +751,22 @@ if vVH8 == 0
 endif
 if vVH8 < 2
 	if vVLeft <= vVT8
-		vSMsg = "ADD NOW: " + "gblV_Hop8_Oz_R1" value + " oz " + "gblS_Hop8_R1" value
-		"gblS_Hop_Warning" value = vSMsg
-		"gblS_Advance_Label" value = "Hops Added?  Tap the hop alarm"
-		"gblS_Advance_Label" background = 4
+		vSMsg = "ADD NOW: " + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
+		gblS_Hop_Warning = vSMsg
+		gblS_Advance_Label = "Hops Added?  Tap the hop alarm"
+		gblS_Advance_Label.background = 4
 		start "alm_Hops"
-		wait "alm_Hops" active == false
-		"gblB_Hop8_Added" value = true
+		wait alm_Hops == false
+		gblB_Hop8_Added = true
 		vVH8 = 2
-		"gblS_Hop_Warning" value = ""
-		"gblS_Advance_Label" value = "Boiling"
-		"gblS_Advance_Label" background = 5
+		gblS_Hop_Warning = ""
+		gblS_Advance_Label = "Boiling"
+		gblS_Advance_Label.background = 5
 	endif
 endif
 if vVLeft <= 15 * vVScale
 	if vVStep != -1
-		"gblS_Hop_Warning" value = "Put the immersion chiller in to sanitize it, and add Whirlfloc."
+		gblS_Hop_Warning = "Put the immersion chiller in to sanitize it, and add Whirlfloc."
 		start "alm_Warning"
 		vVStep = -1
 	endif
@@ -756,278 +777,287 @@ endif
 sleep 500
 goto "Boil_Loop"
 [Boil_Done]
+step 1.00021 "Boil Done"
 stop "tm_Step"
-"gblS_Hop_Warning" value = ""
+gblS_Hop_Warning = ""
 start "alm_Step"
-"BrewZilla" setpoint = 0
-"BrewZilla" heat = false
-"BrewZilla" pump = false
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Heat Off?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = 0
+BrewZilla.heat = false
+BrewZilla.pump = false
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Heat Off?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew480]
-"gblV_Brew_Status" value = 480
+step 1.00022 "SectionBrew480"
+gblV_Brew_Status = 480
 vSMsg = "Boil is Done! Turn the BrewZilla heat OFF."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Heat Off?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 481
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"alm_Step" active = false
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Heat Off?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 481
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+alm_Step = false
 vSHops = ""
-if "gblV_Hop1_Group_R1" value == -999
-	if "gblS_Hop1_R1" value != ""
-		vSHops = vSHops + "gblV_Hop1_Oz_R1" value + " oz " + "gblS_Hop1_R1" value
+if gblV_Hop1_Group_R1 == -999
+	if gblS_Hop1_R1 != ""
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop1_Added" value = true
+		gblB_Hop1_Added = true
 	endif
 endif
-if "gblV_Hop2_Group_R1" value == -999
-	if "gblS_Hop2_R1" value != ""
-		vSHops = vSHops + "gblV_Hop2_Oz_R1" value + " oz " + "gblS_Hop2_R1" value
+if gblV_Hop2_Group_R1 == -999
+	if gblS_Hop2_R1 != ""
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop2_Added" value = true
+		gblB_Hop2_Added = true
 	endif
 endif
-if "gblV_Hop3_Group_R1" value == -999
-	if "gblS_Hop3_R1" value != ""
-		vSHops = vSHops + "gblV_Hop3_Oz_R1" value + " oz " + "gblS_Hop3_R1" value
+if gblV_Hop3_Group_R1 == -999
+	if gblS_Hop3_R1 != ""
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop3_Added" value = true
+		gblB_Hop3_Added = true
 	endif
 endif
-if "gblV_Hop4_Group_R1" value == -999
-	if "gblS_Hop4_R1" value != ""
-		vSHops = vSHops + "gblV_Hop4_Oz_R1" value + " oz " + "gblS_Hop4_R1" value
+if gblV_Hop4_Group_R1 == -999
+	if gblS_Hop4_R1 != ""
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop4_Added" value = true
+		gblB_Hop4_Added = true
 	endif
 endif
-if "gblV_Hop5_Group_R1" value == -999
-	if "gblS_Hop5_R1" value != ""
-		vSHops = vSHops + "gblV_Hop5_Oz_R1" value + " oz " + "gblS_Hop5_R1" value
+if gblV_Hop5_Group_R1 == -999
+	if gblS_Hop5_R1 != ""
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop5_Added" value = true
+		gblB_Hop5_Added = true
 	endif
 endif
-if "gblV_Hop6_Group_R1" value == -999
-	if "gblS_Hop6_R1" value != ""
-		vSHops = vSHops + "gblV_Hop6_Oz_R1" value + " oz " + "gblS_Hop6_R1" value
+if gblV_Hop6_Group_R1 == -999
+	if gblS_Hop6_R1 != ""
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop6_Added" value = true
+		gblB_Hop6_Added = true
 	endif
 endif
-if "gblV_Hop7_Group_R1" value == -999
-	if "gblS_Hop7_R1" value != ""
-		vSHops = vSHops + "gblV_Hop7_Oz_R1" value + " oz " + "gblS_Hop7_R1" value
+if gblV_Hop7_Group_R1 == -999
+	if gblS_Hop7_R1 != ""
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop7_Added" value = true
+		gblB_Hop7_Added = true
 	endif
 endif
-if "gblV_Hop8_Group_R1" value == -999
-	if "gblS_Hop8_R1" value != ""
-		vSHops = vSHops + "gblV_Hop8_Oz_R1" value + " oz " + "gblS_Hop8_R1" value
+if gblV_Hop8_Group_R1 == -999
+	if gblS_Hop8_R1 != ""
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1
 		vSHops = vSHops + ".  "
-		"gblB_Hop8_Added" value = true
+		gblB_Hop8_Added = true
 	endif
 endif
-"BrewZilla" setpoint = 0
-"BrewZilla" heat = false
-"BrewZilla" pump = true
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Whirlpool Hops Added?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = 0
+BrewZilla.heat = false
+BrewZilla.pump = true
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Whirlpool Hops Added?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew500]
-"gblV_Brew_Status" value = 500
+step 1.00023 "SectionBrew500"
+gblV_Brew_Status = 500
 vSMsg = "Whirlpool hops: " + vSHops + " Add them, pump ON through the whirlpool arm."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Whirlpool Hops Added?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 501
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-vVStep = "gblV_Whirlpool_Min" value * vVScale
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Whirlpool Hops Added?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 501
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+vVStep = gblV_Whirlpool_Min * vVScale
 vT_Step = vVStep
-"tm_Step" type = countdown
-"tm_Step" value = vT_Step
+tm_Step.countdown = true
+tm_Step = vT_Step
 start "tm_Step"
-vSMsg = "Whirlpool, " + "gblV_Whirlpool_Min" value + " minutes."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Whirlpooling"
-"gblS_Advance_Label" background = 5
-"gblS_Step_Text" background = 5
-"sw_Advance_BrewStatus" visibility = hidden
-wait "tm_Step" value <= 00:00:00
+vSMsg = "Whirlpool, " + gblV_Whirlpool_Min + " minutes."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Whirlpooling"
+gblS_Advance_Label.background = 5
+gblS_Step_Text.background = 5
+sw_Advance_BrewStatus.visible = false
+wait tm_Step <= 00:00:00
 stop "tm_Step"
 start "alm_Step"
-"BrewZilla" setpoint = "gblV_Pitch_Temp" value
-"BrewZilla" heat = false
-"BrewZilla" pump = true
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Chilled?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = gblV_Pitch_Temp
+BrewZilla.heat = false
+BrewZilla.pump = true
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Chilled?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew520]
-"gblV_Brew_Status" value = 520
-vSMsg = "Run the chiller water. Chill to " + "gblV_Pitch_Temp" value + " °F (tap the BrewZilla to enter what it shows)."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Chilled?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 521
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"alm_Step" active = false
+step 1.00024 "SectionBrew520"
+gblV_Brew_Status = 520
+vSMsg = "Run the chiller water. Chill to " + gblV_Pitch_Temp + " °F (tap the BrewZilla to enter what it shows)."
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Chilled?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 521
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+alm_Step = false
 [SectionBrew600]
-"gblV_Brew_Status" value = 600
+step 1.00025 "SectionBrew600"
+gblV_Brew_Status = 600
 vSMsg = "Enter the post-boil volume. Hoses and fermenter ready?"
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Transfer WORT?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 601
-"sw_Advance_BrewStatus" visibility = hidden
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Transfer WORT?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 601
+sw_Advance_BrewStatus.visible = false
 log "vAV_PostBoil_Volume"
-"BrewZilla" setpoint = 0
-"BrewZilla" heat = false
-"BrewZilla" pump = true
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "Fermenter Full?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = 0
+BrewZilla.heat = false
+BrewZilla.pump = true
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "Fermenter Full?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew602]
-"gblV_Brew_Status" value = 602
+step 1.00026 "SectionBrew602"
+gblV_Brew_Status = 602
 vSMsg = "Pump ON to the fermenter. Click when the BrewZilla is empty."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Fermenter Full?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 603
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"BrewZilla" pump = false
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Fermenter Full?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 603
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+BrewZilla.pump = false
 [SectionBrew604]
-"gblV_Brew_Status" value = 604
+step 1.00027 "SectionBrew604"
+gblV_Brew_Status = 604
 vSMsg = "Measure and enter the Original Gravity and the volume in the fermenter under Readings."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "OG Entered?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 605
-"sw_Advance_BrewStatus" visibility = hidden
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "OG Entered?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 605
+sw_Advance_BrewStatus.visible = false
 log "vAV_OG"
 log "vAV_Fermenter_Volume"
-"BrewZilla" setpoint = 140
-"BrewZilla" heat = true
-"BrewZilla" pump = true
-"BrewZilla" timer = 00:00:00
-"BrewZilla" message = "PBW Added?"
-"BrewZilla" confirmed = false
-"BrewZilla" waiting = true
+BrewZilla.setpoint = 140
+BrewZilla.heat = true
+BrewZilla.pump = true
+BrewZilla.timer = 00:00:00
+BrewZilla.message = "PBW Added?"
+BrewZilla.confirmed = false
+BrewZilla.waiting = true
 [SectionBrew700]
-"gblV_Brew_Status" value = 700
+step 1.00028 "SectionBrew700"
+gblV_Brew_Status = 700
 vSMsg = "Clean up: fill the BrewZilla with water, add PBW, heat to 140 °F and recirculate."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "PBW Added?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 701
-"sw_Advance_BrewStatus" visibility = hidden
-"BrewZilla" waiting = false
-"BrewZilla" message = ""
-"BrewZilla" heat = false
-"BrewZilla" pump = false
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "PBW Added?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 701
+sw_Advance_BrewStatus.visible = false
+BrewZilla.waiting = false
+BrewZilla.message = ""
+BrewZilla.heat = false
+BrewZilla.pump = false
 [SectionBrew702]
-"gblV_Brew_Status" value = 702
+step 1.00029 "SectionBrew702"
+gblV_Brew_Status = 702
 vSMsg = "Drain and rinse with clean water."
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Rinse Drained?"
-"gblS_Advance_Label" background = 4
-"gblS_Step_Text" background = 4
-"sw_Advance_BrewStatus" visibility = visible
-wait "gblV_Brew_Status" value == 703
-"sw_Advance_BrewStatus" visibility = hidden
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Rinse Drained?"
+gblS_Advance_Label.background = 4
+gblS_Step_Text.background = 4
+sw_Advance_BrewStatus.visible = true
+wait gblV_Brew_Status == 703
+sw_Advance_BrewStatus.visible = false
 vSHops = ""
-if "gblV_Hop1_Group_R1" value == -111
-	if "gblS_Hop1_R1" value != ""
-		vSHops = vSHops + "gblV_Hop1_Oz_R1" value + " oz " + "gblS_Hop1_R1" value + " (" + "gblV_TimeHop1_Min_R1" value + " days" + ")"
+if gblV_Hop1_Group_R1 == -111
+	if gblS_Hop1_R1 != ""
+		vSHops = vSHops + gblV_Hop1_Oz_R1 + " oz " + gblS_Hop1_R1 + " (" + gblV_TimeHop1_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop1_Added" value = true
+		gblB_Hop1_Added = true
 	endif
 endif
-if "gblV_Hop2_Group_R1" value == -111
-	if "gblS_Hop2_R1" value != ""
-		vSHops = vSHops + "gblV_Hop2_Oz_R1" value + " oz " + "gblS_Hop2_R1" value + " (" + "gblV_TimeHop2_Min_R1" value + " days" + ")"
+if gblV_Hop2_Group_R1 == -111
+	if gblS_Hop2_R1 != ""
+		vSHops = vSHops + gblV_Hop2_Oz_R1 + " oz " + gblS_Hop2_R1 + " (" + gblV_TimeHop2_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop2_Added" value = true
+		gblB_Hop2_Added = true
 	endif
 endif
-if "gblV_Hop3_Group_R1" value == -111
-	if "gblS_Hop3_R1" value != ""
-		vSHops = vSHops + "gblV_Hop3_Oz_R1" value + " oz " + "gblS_Hop3_R1" value + " (" + "gblV_TimeHop3_Min_R1" value + " days" + ")"
+if gblV_Hop3_Group_R1 == -111
+	if gblS_Hop3_R1 != ""
+		vSHops = vSHops + gblV_Hop3_Oz_R1 + " oz " + gblS_Hop3_R1 + " (" + gblV_TimeHop3_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop3_Added" value = true
+		gblB_Hop3_Added = true
 	endif
 endif
-if "gblV_Hop4_Group_R1" value == -111
-	if "gblS_Hop4_R1" value != ""
-		vSHops = vSHops + "gblV_Hop4_Oz_R1" value + " oz " + "gblS_Hop4_R1" value + " (" + "gblV_TimeHop4_Min_R1" value + " days" + ")"
+if gblV_Hop4_Group_R1 == -111
+	if gblS_Hop4_R1 != ""
+		vSHops = vSHops + gblV_Hop4_Oz_R1 + " oz " + gblS_Hop4_R1 + " (" + gblV_TimeHop4_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop4_Added" value = true
+		gblB_Hop4_Added = true
 	endif
 endif
-if "gblV_Hop5_Group_R1" value == -111
-	if "gblS_Hop5_R1" value != ""
-		vSHops = vSHops + "gblV_Hop5_Oz_R1" value + " oz " + "gblS_Hop5_R1" value + " (" + "gblV_TimeHop5_Min_R1" value + " days" + ")"
+if gblV_Hop5_Group_R1 == -111
+	if gblS_Hop5_R1 != ""
+		vSHops = vSHops + gblV_Hop5_Oz_R1 + " oz " + gblS_Hop5_R1 + " (" + gblV_TimeHop5_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop5_Added" value = true
+		gblB_Hop5_Added = true
 	endif
 endif
-if "gblV_Hop6_Group_R1" value == -111
-	if "gblS_Hop6_R1" value != ""
-		vSHops = vSHops + "gblV_Hop6_Oz_R1" value + " oz " + "gblS_Hop6_R1" value + " (" + "gblV_TimeHop6_Min_R1" value + " days" + ")"
+if gblV_Hop6_Group_R1 == -111
+	if gblS_Hop6_R1 != ""
+		vSHops = vSHops + gblV_Hop6_Oz_R1 + " oz " + gblS_Hop6_R1 + " (" + gblV_TimeHop6_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop6_Added" value = true
+		gblB_Hop6_Added = true
 	endif
 endif
-if "gblV_Hop7_Group_R1" value == -111
-	if "gblS_Hop7_R1" value != ""
-		vSHops = vSHops + "gblV_Hop7_Oz_R1" value + " oz " + "gblS_Hop7_R1" value + " (" + "gblV_TimeHop7_Min_R1" value + " days" + ")"
+if gblV_Hop7_Group_R1 == -111
+	if gblS_Hop7_R1 != ""
+		vSHops = vSHops + gblV_Hop7_Oz_R1 + " oz " + gblS_Hop7_R1 + " (" + gblV_TimeHop7_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop7_Added" value = true
+		gblB_Hop7_Added = true
 	endif
 endif
-if "gblV_Hop8_Group_R1" value == -111
-	if "gblS_Hop8_R1" value != ""
-		vSHops = vSHops + "gblV_Hop8_Oz_R1" value + " oz " + "gblS_Hop8_R1" value + " (" + "gblV_TimeHop8_Min_R1" value + " days" + ")"
+if gblV_Hop8_Group_R1 == -111
+	if gblS_Hop8_R1 != ""
+		vSHops = vSHops + gblV_Hop8_Oz_R1 + " oz " + gblS_Hop8_R1 + " (" + gblV_TimeHop8_Min_R1 + " days" + ")"
 		vSHops = vSHops + ".  "
-		"gblB_Hop8_Added" value = true
+		gblB_Hop8_Added = true
 	endif
 endif
-vSMsg = "Brew day finished. Dry hops: " + vSHops + " Total time " + "tm_BrewDay" value
-"gblS_Step_Text" value = vSMsg
-"gblS_Advance_Label" value = "Done!"
-"gblS_Advance_Label" background = 5
-"gblS_Step_Text" background = 5
-"sw_Advance_BrewStatus" visibility = hidden
-"gblS_Advance_Label" background = 2
-"gblS_Step_Text" background = 2
+vSMsg = "Brew day finished. Dry hops: " + vSHops + " Total time " + tm_BrewDay
+gblS_Step_Text = vSMsg
+gblS_Advance_Label = "Done!"
+gblS_Advance_Label.background = 5
+gblS_Step_Text.background = 5
+sw_Advance_BrewStatus.visible = false
+gblS_Advance_Label.background = 2
+gblS_Step_Text.background = 2
 stop "tm_BrewDay"
-"gblV_Brew_Status" value = 999
+gblV_Brew_Status = 999
 stop "looper_Advance_Switch"

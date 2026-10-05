@@ -93,6 +93,13 @@ main { padding: 10px 14px; }
 #gutter { margin: 0; padding: 8px 6px; text-align: right; color: var(--muted); font: 13px/1.5 var(--mono); background: var(--panel2); overflow: hidden; min-width: 3.4em; user-select: none; }
 #gutter .cur { color: var(--ok); font-weight: 700; } #gutter .err { color: var(--bad); font-weight: 700; }
 #code { flex: 1; border: 0; border-radius: 0; resize: none; padding: 8px; font: 13px/1.5 var(--mono); background: var(--panel); tab-size: 4; outline: none; }
+.editor { position: relative; }
+#autofill { position: absolute; z-index: 30; list-style: none; margin: 0; padding: 3px 0; min-width: 200px; max-width: 420px; max-height: 240px; overflow: auto;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.35); font: 13px/1.5 var(--mono); }
+#autofill li { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
+#autofill li.sel { background: var(--accent); color: #fff; }
+#autofill li.sel .muted { color: #eee; }
+.scriptList li.clsHead { cursor: pointer; font-weight: 600; background: var(--panel2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 #problems { list-style: none; padding: 0; margin: 6px 0; }
 #problems li { color: var(--bad); cursor: pointer; padding: 2px 0; }
 #problems li.ok { color: var(--ok); cursor: default; }

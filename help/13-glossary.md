@@ -30,6 +30,10 @@
 
 **Process**: a text file of brew steps the panel runs by itself. See [Processes](05-scripts).
 
+**Process class**: Flow, Sub, Repeat or Looper: what a Process is for. See [Process language and steps](21-process-language).
+
+**Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](21-process-language).
+
 **Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 
 **Simulation mode**: every board is replaced by the simulator and time can run faster or skip ahead, to try a brew day without touching hardware. See [Simulation mode](19-simulation).

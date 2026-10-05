@@ -57,8 +57,8 @@ assert.equal(engine.running.has('w'), false); assert.equal(store.getProp('vB_Fla
 
 // errors are caught before a Process starts
 const errs = t => { engine.write('x', t); return engine.check(t).errors.map(e => e.msg); };
-assert.match(errs('alm_Nope = true')[0], /Unknown variable alm_Nope/);
-assert.match(errs('vB_Flag = true')[0], /Unknown variable vB_Flag/, 'only alarms and sound players work by name alone (variables: "name" value = ...)');
+assert.match(errs('alm_Nope = true')[0], /Unknown name alm_Nope/);
+assert.deepEqual(errs('vB_Flag = true'), [], 'every element works by name alone since the Process language change (PR #25)');
 assert.match(errs('play tm_Boil')[0], /no alarm or sound player named "tm_Boil"/);
 assert.match(compile('pause SoundPlayer').errors[0].msg, /pause is automatic/);
 assert.throws(() => store.setProp('alm_Note', 'playing', true), /set by the panel/);

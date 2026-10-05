@@ -82,12 +82,14 @@
           <strong id="scriptName">-</strong>
           <span id="scriptState" class="muted"></span>
           <span class="spacer"></span>
+          <select id="scriptClass" class="admin-only" title="Process class: decides how its steps are numbered"><option value="flow">Flow</option><option value="sub">Sub</option><option value="repeat">Repeat</option><option value="looper">Looper</option></select>
+          <button id="addSteps" class="admin-only" title="Put a step line at the start and after every [label]">Add steps</button>
           <button id="saveScript" class="primary admin-only">Save</button>
           <button id="checkScript" class="admin-only">Check</button>
           <button id="startScript" class="op-only">Start</button>
           <button id="stopScript" class="op-only">Stop</button>
         </div>
-        <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
+        <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off" autocomplete="off" autocapitalize="off"></textarea><ul id="autofill" class="hidden"></ul></div>
         <ul id="problems"></ul>
         <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all processes</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
         <pre id="console"></pre>

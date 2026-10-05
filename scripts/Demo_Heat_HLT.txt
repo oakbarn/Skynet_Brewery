@@ -4,10 +4,10 @@
 //Heats the HLT (simulated) to 90 °F then sounds the alarm.
 new value vV_Target
 vV_Target = 90
-"gblS_Inter_Script" value = "Heating HLT"
-"HLT_Element" state = true
-wait "HLT_Temp" value >= vV_Target
-"HLT_Element" state = false
-"gblS_Inter_Script" value = "HLT at target"
+gblS_Inter_Script = "Heating HLT"
+HLT_Element = true
+wait HLT_Temp >= vV_Target
+HLT_Element = false
+gblS_Inter_Script = "HLT at target"
 start "alm_Hops"
 log "vAV_Kettle_Temp"

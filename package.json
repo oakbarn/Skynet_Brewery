@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node --no-warnings server.js",
-    "test": "node test/engine.test.js && node test/globals.test.js && node test/variables.test.js && node test/brucontrol.test.js && node test/devices.test.js && node --no-warnings test/samples.test.js && node test/vectorize.test.js && node test/mediafiles.test.js && node test/auth.test.js && node test/messaging.test.js && node test/help.test.js && node test/steppers.test.js && node test/mqtt.test.js && node --no-warnings test/simulation.test.js && node --no-warnings test/displayname.test.js && node test/alarms.test.js"
+    "test": "node test/engine.test.js && node test/globals.test.js && node test/variables.test.js && node test/brucontrol.test.js && node test/devices.test.js && node --no-warnings test/samples.test.js && node test/vectorize.test.js && node test/mediafiles.test.js && node test/auth.test.js && node test/messaging.test.js && node test/help.test.js && node test/steppers.test.js && node test/mqtt.test.js && node --no-warnings test/simulation.test.js && node --no-warnings test/displayname.test.js && node test/alarms.test.js && node test/language.test.js"
   },
   "engines": {
     "node": ">=22.13"

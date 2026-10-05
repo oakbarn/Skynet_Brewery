@@ -3,17 +3,17 @@
 //Copyright © OakBarn Brewery 2026
 //Opens the HLT out and MLT in valves, runs the pump 15 seconds.
 //Watch the orange flow on the Brewery tab.
-"gblS_Inter_Script" value = "Transfer HLT to MLT"
-"V_HLT_Out" state = true
-"V_MLT_In" state = true
+gblS_Inter_Script = "Transfer HLT to MLT"
+V_HLT_Out = true
+V_MLT_In = true
 sleep 1000
-"MB_36_do_RedPump_B1" state = true
-"tm_Whirlpool" type = countdown
-"tm_Whirlpool" value = 00:00:15
+MB_36_do_RedPump_B1 = true
+tm_Whirlpool.countdown = true
+tm_Whirlpool = 00:00:15
 start "tm_Whirlpool"
-wait "tm_Whirlpool" value <= 00:00:00
-"MB_36_do_RedPump_B1" state = false
+wait tm_Whirlpool <= 00:00:00
+MB_36_do_RedPump_B1 = false
 sleep 1000
-"V_HLT_Out" state = false
-"V_MLT_In" state = false
-"gblS_Inter_Script" value = "Transfer done"
+V_HLT_Out = false
+V_MLT_In = false
+gblS_Inter_Script = "Transfer done"
