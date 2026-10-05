@@ -5,7 +5,7 @@
 //    attribute it is filled in by itself: my_Widget.b -> my_Widget.background =
 //    (" = " only at the start of a line; in an if or wait just the attribute name).
 //    Letters typed afterwards that spell the rest of the attribute are skipped, so typing it in full also works.
-const WORDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show tab', 'log', 'step',
+const WORDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'restart', 'reset', 'print', 'clear', 'show tab', 'log', 'step',
   'new value', 'new string', 'new bool', 'new time', 'new datetime', 'true', 'false', 'now', 'and', 'or', 'not'];
 const IDENT = /[A-Za-z_][A-Za-z0-9_]*$/;
 

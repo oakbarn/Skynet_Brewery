@@ -38,6 +38,11 @@ async function api(method, url, body, raw) {
   if (!r.ok || (data && data.ok === false && data.error)) throw new Error(data.error || r.statusText);
   return data;
 }
+// A message that stays until it is closed: a Process that kept failing and was not restarted again
+function alertBar(text) {
+  const bar = h('div', { class: 'alertBar', role: 'alert' }, h('span', {}, '⚠ ' + text), h('button', { title: 'Close', onclick: () => bar.remove() }, '✕'));
+  document.body.append(bar);
+}
 function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? 5000 : 2200); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 const can = need => RANK[S?.me?.role] >= RANK[need];
@@ -73,6 +78,7 @@ function connect() {
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
+  es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
@@ -1764,6 +1770,8 @@ function updateScriptState() {
   const sel = $('#scriptClass');
   sel.disabled = !s || !can('admin');
   if (s && document.activeElement !== sel) sel.value = s.cls || 'sub';
+  const ar = $('#scriptAutoRestart');
+  ar.disabled = !s || !can('admin'); ar.checked = !!s?.autorestart;
   if (!s) { st.textContent = ''; updateGutter(); return; }
   let t = s.state;
   if (s.state === 'running') t = (s.waiting ? 'waiting' : 'running') + ` (line ${s.line}${s.step ? `, step ${[s.step.num, s.step.name].filter(Boolean).join(' ')}` : ''})` + (s.modified ? ' - edited since start, stop and start to apply' : '');
@@ -1850,6 +1858,18 @@ $('#startScript').onclick = guard(async () => {
   if (!r.ok) toast(r.line ? `Not started - line ${r.line}: ${r.msg}` : r.msg, true);
 });
 $('#stopScript').onclick = guard(() => api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/stop`));
+$('#restartScript').onclick = guard(async () => {
+  if (!curScript) return;
+  if (dirty) await saveScript();
+  const r = await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/restart`);
+  if (!r.ok) toast(r.line ? `Not started - line ${r.line}: ${r.msg}` : r.msg, true);
+  else toast('Restarted');
+});
+$('#scriptAutoRestart').onchange = guard(async ev => {
+  if (!curScript) return;
+  await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/autorestart`, { on: ev.target.checked });
+  toast(ev.target.checked ? `${curScript} will restart by itself if it stops on an error` : `${curScript} will not restart by itself`);
+});
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
@@ -2115,6 +2135,10 @@ function renderSettings() {
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
   const box = $('#setAuto'); box.innerHTML = '';
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
+  $('#setRestartLimit').value = c.restartLimit || 5;
+  const alarms = (c.elements || []).filter(e => e.type === 'alarm');
+  $('#setRestartAlarm').replaceChildren(h('option', { value: '' }, 'None'), ...alarms.map(e => h('option', { value: e.name }, e.name)));
+  $('#setRestartAlarm').value = alarms.some(e => e.name === c.restartAlarm) ? c.restartAlarm : '';
   renderDonate();
   renderSimSettings();
 }
@@ -2215,6 +2239,7 @@ $('#saveSettings').onclick = guard(async () => {
   await api('PUT', '/ui/settings', {
     title: $('#setTitle').value, mediaRoots: $('#setMedia').value.split('\n').map(s => s.trim()).filter(Boolean),
     apiKey: $('#setKey').value.trim(), beerxml: beer, autostart: $$('#setAuto input:checked').map(i => i.value),
+    restartLimit: Math.min(60, Math.max(1, Math.round(Number($('#setRestartLimit').value)) || 5)), restartAlarm: $('#setRestartAlarm').value,
   });
   await load(); toast('Settings saved');
 });
