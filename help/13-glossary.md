@@ -30,6 +30,8 @@
 
 **Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 
+**Simulation mode**: every board is replaced by the simulator and time can run faster or skip ahead, to try a brew day without touching hardware. See [Simulation mode](18-simulation).
+
 **Simulator**: a pretend board, so you can try everything without hardware.
 
 **SVG**: a picture format that stays sharp at any size. The panel makes SVG copies of your PNG and JPG pictures.

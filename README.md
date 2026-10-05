@@ -178,6 +178,9 @@ BF precision = 4           "Euler's number" = 2.718   (quoted variable names wor
 | `Hops_Order_Boil` | Orders the imported boil hops into groups. |
 | `looper_LogTemps` | Copies the kettle temperature into a logged vAPI. |
 | `Demo_Variables` | Uses each vKonstant and vAPI kind; waits for the Ping button. |
+| `Demo_Mash_Steps` | A 60-minute mash with a pH check at 10 and a stir at 30; made for trying simulation mode. |
+
+**Simulation mode** (Settings > Simulation, admins): every board is replaced by the simulator so no real hardware is switched, a yellow bar shows on every screen, and time can run up to 120× faster, skip ahead by hand, skip to the next event, or skip by itself from a Time jumps table. The Process timeline works out when each step of a Process happens. See the Help page *Simulation mode*.
 
 ## 4. API (for Node-RED or other programs)
 

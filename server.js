@@ -19,6 +19,9 @@ import { MediaFiles } from './lib/mediafiles.js';
 import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain, toStr } from './lib/values.js';
 import { Help } from './lib/help.js';
+import { clock } from './lib/simclock.js';
+import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
+import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { Auth, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
@@ -41,10 +44,14 @@ const auth = new Auth(DATA);
 const messaging = new Messaging(DATA);
 // Testing mode (Settings > "Start fresh logins after each update", on unless turned off)
 const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
+const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
+sim.apply();
 hw.start();
 const control = new Control(store);
 control.start();
-setInterval(() => store.tickTimers(0.1), 100);
+hw.onSimStep = t => control.tick(t);                         // a skip ahead runs the controls between simulator steps
+const timerDt = clock.stepper();
+setInterval(() => store.tickTimers(timerDt() / 1000), 100);   // timers follow the clock (faster in simulation mode)
 setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants follow their text files
 store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
@@ -85,6 +92,7 @@ store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
+sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
 function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
 setInterval(() => { dropEndedSessions(); for (const res of clients.keys()) res.write(': ping\n\n'); }, 20000);
 
@@ -350,7 +358,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -380,6 +388,16 @@ async function route(req, res) {
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
+  }
+  // Simulation mode: everyone sees it, admins change it
+  if (p === '/ui/sim' && m === 'GET') return ok(res, { ...sim.status(), upcoming: sim.upcoming() });
+  if (p === '/ui/sim' && m === 'PUT') { sim.save(await jsonBody(req)); broadcast('config', {}); return ok(res, sim.status()); }
+  const tl = /^\/ui\/sim\/timeline\/([^/]+)$/.exec(p);
+  if (tl && m === 'GET') { if (!engine.exists(tl[1])) return fail(res, 404, 'No process ' + tl[1]); return ok(res, timeline(engine, tl[1])); }
+  if (p === '/ui/sim/skip' && m === 'POST') {
+    const b = await jsonBody(req);
+    if (b.next) return ok(res, { ok: true, ...sim.skipToNext() });
+    return ok(res, { ok: true, skipped: sim.skip(Number(b.seconds) * 1000) });
   }
   if (p === '/ui/mqtt' && m === 'GET') return ok(res, mqttView());
   if (p === '/ui/mqtt' && m === 'PUT') {
