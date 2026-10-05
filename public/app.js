@@ -1815,8 +1815,15 @@ async function editItem(kind, id) {
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
-    const before = isV ? clone(item) : null;
+    const before = isV ? clone(item) : null, oldTab = item.workspace;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
+    if (item.workspace && item.workspace !== oldTab) {   // moved to another tab: go there with it, so it does not seem to vanish
+      for (const g of draft.graphics) if (g.attachTo === (item.id ?? item.name) && !g.port && g.kind === 'ip') g.workspace = item.workspace;   // IPs dropped on it go along
+      wsName = item.workspace;
+      const ips = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : eqPorts(item).map(q => q.id);
+      const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === oldTab && (ips.includes(p.from) || ips.includes(p.to)));
+      toast(`Moved to the ${item.workspace} tab.` + (piped ? ` Its pipes stayed on ${oldTab}; draw new ones here.` : ''));
+    }
     if (isV) {
       const placed = syncVesselPorts(item, before.isNew ? null : before);
       if (placed.length || before.isNew) vesselPopup(item, placed);
