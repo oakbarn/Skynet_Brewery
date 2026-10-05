@@ -51,7 +51,7 @@ main { padding: 10px 14px; }
 #ws.editing #pipes .hit { pointer-events: stroke; }
 #pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
 #pipes .pipe, #pipes .flow, #pipes .drawing, #pipes .reducer { pointer-events: none; }
-#pipes .drawing { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 6 4; }
+#pipes .drawing { fill: none; stroke: var(--accent); stroke-width: 5; stroke-dasharray: 10 5; filter: drop-shadow(0 0 1.5px #000); }
 @keyframes flow { to { stroke-dashoffset: -24; } }
 
 .el { position: absolute; border-radius: 7px; border: 1px solid var(--line); background: var(--panel2); display: flex; flex-direction: column; overflow: hidden; user-select: none; background-size: contain; background-repeat: no-repeat; background-position: center; }
@@ -73,7 +73,9 @@ main { padding: 10px 14px; }
 .el.vhidden { display: none; }
 .gfx { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; }
 .gfx.txt { background: none; white-space: pre-wrap; }
-#ws.editing .el, #ws.editing .gfx { cursor: move; outline: 1px dashed var(--muted); display: flex; }
+/* Edit layout: every item gets a black-and-white dashed edge that shows on any background (Fritz: hard to see what is where) */
+#ws.editing .el, #ws.editing .gfx { cursor: move; outline: 2px dashed #fff; box-shadow: 0 0 0 2px #000; display: flex; }
+#ws.editing .gfx:not(.ip):not(.vessel):not(.has-img) { background-color: rgba(128,128,128,.3); }
 #ws.editing .gfx { display: block; }
 #ws.editing .el.vhidden { opacity: 0.35; }
 #ws.editing .sel { outline: 2px solid var(--accent); }
@@ -81,7 +83,7 @@ main { padding: 10px 14px; }
 #ws.editing .rs { display: block; }
 .lock { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: rgba(255,255,255,.85); pointer-events: none; display: none; }
 #ws.editing .lock { display: block; }
-#ws.editing .locked { cursor: default; outline: 1px dashed rgba(128,128,128,.7); }
+#ws.editing .locked { cursor: default; outline: 2px dotted #fff; box-shadow: 0 0 0 2px #000; }
 #ws.editing .locked.sel { outline: 2px solid var(--accent); }
 
 /* ===== scripts ===== */
@@ -199,7 +201,19 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
    given a picture, are part of the drawing and stay. A label set to show stays too. */
 #ws:not(.editing) .gfx.ip:not(.fit):not(.has-img) { border-color: transparent; background: none; box-shadow: none; pointer-events: none; }
 #ws:not(.editing) .gfx.ip:not(.fit):not(.has-img) > span { display: none; }
-#ws.editing .gfx.ip { outline: none; }
+#ws.editing .gfx.ip { outline: none; box-shadow: none; }
+#ws.editing .gfx.ip:not(.fit) { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000; }
+#ws.editing .gfx.ip.fit { outline: 1px dashed #fff; box-shadow: 0 0 0 1px #000; }
+#ws:not(.editing) .gfx.ip.fit.lonely { visibility: hidden; }
+/* drawing a pipe or hose: a big cross-hair pointer and a marker that turns green on an IP */
+#ws.drawing, #ws.drawing * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23fff' stroke-width='5'/%3E%3Cpath d='M24 2V18M24 30V46M2 24H18M30 24H46' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23fff' stroke-width='4'/%3E%3Ccircle cx='24' cy='24' r='6' stroke='%23e8a33a' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E") 24 24, crosshair !important; }
+#pipes .drawmark { pointer-events: none; fill: none; }
+#pipes .drawmark .bk { stroke: #000; stroke-width: 6; }
+#pipes .drawmark .wh { stroke: #fff; stroke-width: 2.5; }
+#pipes .drawmark circle.bk { fill: rgba(232,163,58,.3); }
+#pipes .drawmark.on .wh { stroke: #3fbf6a; }
+#pipes .drawmark.on circle.bk { fill: rgba(63,191,106,.45); }
+#pipes circle.drawmark.set { fill: var(--accent); stroke: #000; stroke-width: 3; }
 #ws.editing .gfx.ip.sel { outline: 2px solid var(--accent); outline-offset: 2px; }
 #ws .gfx.ip .iplbl { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; white-space: nowrap; font-size: 11px; color: #fff; background: rgba(0,0,0,.6); padding: 0 4px; border-radius: 3px; pointer-events: none; }
 #ws .gfx.ip.devip { font-size: 8px; z-index: 3; }
