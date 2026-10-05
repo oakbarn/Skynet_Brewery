@@ -2,7 +2,9 @@
 
 **Admin, Operator, Viewer**: the three user roles. See [Login](10-login).
 
-**Alarm**: an element that plays a sound file. Press **Enable sound** once on each screen that should play it.
+**Alarm**: an element that plays a sound file: Hop, Brew Flow, Pre-Hop, General or Sound only. Only one sound plays at a time, by priority. In a Process: `alm_Name = true`. See [Alarms and sound](20-alarms-and-sound).
+
+**Sound Player**: a Widget that plays one sound file (`play SoundPlayer`, `stop SoundPlayer`). It pauses while any alarm sounds.
 
 **API**: the way other programs (Node-RED, Home Assistant) read and set values. See [API](11-api).
 
@@ -30,7 +32,7 @@
 
 **Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 
-**Simulation mode**: every board is replaced by the simulator and time can run faster or skip ahead, to try a brew day without touching hardware. See [Simulation mode](18-simulation).
+**Simulation mode**: every board is replaced by the simulator and time can run faster or skip ahead, to try a brew day without touching hardware. See [Simulation mode](19-simulation).
 
 **Simulator**: a pretend board, so you can try everything without hardware.
 
