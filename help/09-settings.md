@@ -18,6 +18,10 @@ Add people and give each a role:
 | **Operator** | Brew day: switch pumps and valves, set values, start and stop processes, import a recipe. |
 | **Admin** | Everything, including layout, processes, devices, settings, users and editing this manual. |
 
+## Simulation (admins)
+
+Try a brew day without touching any hardware, with time running faster or skipping ahead. See [Simulation mode](20-simulation).
+
 ## Panel settings (admins)
 
 - **Title**: the name at the top of the screen.

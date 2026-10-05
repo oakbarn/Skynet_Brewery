@@ -93,6 +93,13 @@ main { padding: 10px 14px; }
 #gutter { margin: 0; padding: 8px 6px; text-align: right; color: var(--muted); font: 13px/1.5 var(--mono); background: var(--panel2); overflow: hidden; min-width: 3.4em; user-select: none; }
 #gutter .cur { color: var(--ok); font-weight: 700; } #gutter .err { color: var(--bad); font-weight: 700; }
 #code { flex: 1; border: 0; border-radius: 0; resize: none; padding: 8px; font: 13px/1.5 var(--mono); background: var(--panel); tab-size: 4; outline: none; }
+.editor { position: relative; }
+#autofill { position: absolute; z-index: 30; list-style: none; margin: 0; padding: 3px 0; min-width: 200px; max-width: 420px; max-height: 240px; overflow: auto;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.35); font: 13px/1.5 var(--mono); }
+#autofill li { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
+#autofill li.sel { background: var(--accent); color: #fff; }
+#autofill li.sel .muted { color: #eee; }
+.scriptList li.clsHead { cursor: pointer; font-weight: 600; background: var(--panel2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 #problems { list-style: none; padding: 0; margin: 6px 0; }
 #problems li { color: var(--bad); cursor: pointer; padding: 2px 0; }
 #problems li.ok { color: var(--ok); cursor: default; }
@@ -139,6 +146,9 @@ button.big.cur { outline: 3px solid var(--accent); }
 .vdRow { display: flex; gap: 10px; align-items: center; }
 .vdRow .big { min-width: 64px; }
 .vdInput { width: 100%; font-size: 26px; padding: 10px; text-align: center; }
+.tmRow { justify-content: center; }
+.tmBox { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tmBox .vdInput { width: 3.4em; }
 textarea.vdInput { font-size: 18px; text-align: left; }
 @media (pointer: coarse) { button { min-height: 40px; } nav#views button { padding: 8px 12px; } }
 
@@ -435,3 +445,19 @@ body.role-viewer .op-only { display: none !important; }
 .mqtt-status.on::before { color: #3fa34d; }
 .mqtt-status.error::before { color: #c94040; }
 #mqItems td:nth-child(3), #mqItems td:nth-child(4) { text-align: center; }
+
+/* ===== Simulation mode: a striped bar under the menu while it is on ===== */
+.simBar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 14px; color: #1b1305;
+  background: repeating-linear-gradient(135deg, #e8c33a 0 18px, #f0d25c 18px 36px); border-bottom: 1px solid #b8962a; }
+.simBar .muted { color: #4a3d10; }
+.simBar button, .simBar select { background: #fff6d6; color: #1b1305; border-color: #b8962a; }
+.simBar button.primary { background: #1b1305; color: #f0d25c; }
+.simBar .simCtl { display: inline-flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.simJumps input.tm { width: 7em; }
+.simJumps input.num { width: 5em; }
+.tlTable td.maybe { font-style: italic; }
+.tlTable tr.wait td { color: var(--accent); }
+@media (max-width: 700px) { .simBar { padding: 6px 10px; gap: 6px; } .simBar .simCtl button { padding: 4px 7px; } }
+.form label.simSwitch { flex-direction: row; align-items: center; gap: 8px; }
+.tblScroll { overflow-x: auto; max-width: 100%; }
+.tblScroll table { min-width: 640px; }

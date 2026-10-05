@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Brew Panel</title>
+<title>Skynet Brew Panel</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header id="top">
-  <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Brew Panel</span></div>
+  <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span></div>
   <nav id="views">
     <button data-view="workspace" class="active">Tabs</button>
     <button data-view="scripts">Processes</button>
@@ -25,6 +25,18 @@
     <span id="who"><span id="whoName" class="muted"></span><button id="signOut">Sign out</button></span>
   </div>
 </header>
+<div id="simBar" class="simBar hidden" role="status">
+  <strong>🧪 SIMULATION</strong><span class="muted">no real hardware is switched</span>
+  <span id="simInfo"></span>
+  <span class="spacer"></span>
+  <span class="simCtl admin-only">
+    <label>Speed <select id="simSpeed"></select></label>
+    <button data-skip="60">+1 min</button><button data-skip="300">+5 min</button><button data-skip="600">+10 min</button>
+    <label class="toggle"><span class="sw"><input type="checkbox" id="simAutoBar"><span class="swk"></span></span> Auto skip</label>
+    <button id="simNext" class="primary" title="Jump to a few seconds before the next sleep end, timer wait or countdown">Skip to next event</button>
+  </span>
+  <span id="simNextInfo" class="muted"></span>
+</div>
 
 <main>
   <!-- ===== Tabs (stored as "workspaces" in the config) ===== -->
@@ -53,7 +65,7 @@
       <span class="spacer"></span>
       <span id="editHint" class="muted"></span>
       <button id="saveLayout" class="primary">Save layout</button>
-      <button id="cancelLayout">Cancel</button>
+      <button id="cancelLayout" title="Leave Edit layout. If anything changed you can still pick Save or Exit without Saving.">Exit</button>
     </div>
     <div id="wsScroll"><div id="wsSizer"><div id="ws"><svg id="pipes"></svg></div></div></div>
   </section>
@@ -70,12 +82,14 @@
           <strong id="scriptName">-</strong>
           <span id="scriptState" class="muted"></span>
           <span class="spacer"></span>
+          <select id="scriptClass" class="admin-only" title="Process class: decides how its steps are numbered"><option value="flow">Flow</option><option value="sub">Sub</option><option value="repeat">Repeat</option><option value="looper">Looper</option></select>
+          <button id="addSteps" class="admin-only" title="Put a step line at the start and after every [label]">Add steps</button>
           <button id="saveScript" class="primary admin-only">Save</button>
           <button id="checkScript" class="admin-only">Check</button>
           <button id="startScript" class="op-only">Start</button>
           <button id="stopScript" class="op-only">Stop</button>
         </div>
-        <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off"></textarea></div>
+        <div class="editor"><pre id="gutter"></pre><textarea id="code" spellcheck="false" wrap="off" autocomplete="off" autocapitalize="off"></textarea><ul id="autofill" class="hidden"></ul></div>
         <ul id="problems"></ul>
         <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all processes</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
         <pre id="console"></pre>
@@ -145,7 +159,7 @@
       <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
       <label class="toggle"><input type="checkbox" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
       <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace processes with the same name (old copy kept as .bak)</label>
-      <label>Picture folder <input id="bruMedia" value="oakbarn" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
+      <label>Picture folder <input id="bruMedia" value="Images" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
     </div>
     <button id="bruPreview">Check file</button>
     <button id="bruImport" class="primary">Import</button>
@@ -192,7 +206,7 @@
         </div>
         <div id="hpPage" class="hpPage"></div>
         <div id="hpEditor" class="hpEditor" hidden>
-          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](oakbarn/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
+          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](Images/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
           <div class="hpEditPanes">
             <textarea id="hpText" spellcheck="true"></textarea>
             <div id="hpPreview" class="hpPage"></div>
@@ -267,6 +281,27 @@
       <h3>Testing mode</h3>
       <label class="toggle"><input type="checkbox" id="setFresh"> Start fresh logins after each update</label>
       <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>
+      <h3 id="simulation">Simulation (test mode)</h3>
+      <p class="muted">Try out a brew without touching any hardware. While it is on, every board is replaced by the simulator: processes, timers, alarms and the screen work as on brew day, but heaters, pumps and valves are only pretend. Time can run faster, and can skip ahead so you do not wait out a 60 minute mash. Turning it on or off stops every process and turns every output off.</p>
+      <div class="form row">
+        <label class="toggle simSwitch"><span class="sw"><input type="checkbox" id="simOn"><span class="swk"></span></span> Simulation mode</label>
+        <label>Speed <select id="simSpeedSet"></select></label>
+        <label>"Skip to next event" stops this many seconds before it <input id="simLead" type="number" min="0" max="600" style="width:6em"></label>
+      </div>
+      <div class="form row">
+        <label class="toggle simSwitch"><span class="sw"><input type="checkbox" id="simAuto"><span class="swk"></span></span> Auto skip</label>
+        <label>Watch each step for (seconds) <input id="simWatch" type="number" min="1" max="600" style="width:6em"></label>
+      </div>
+      <p class="muted"><b>Auto skip</b> needs no table: each step runs for the seconds above, then the clock skips to a few seconds before the next sleep end, timer wait or countdown, in every running Process (called ones and loopers too). A wait on a button or a temperature is never skipped: press the screen buttons as usual. Only time is skipped.</p>
+      <h4>Time jumps</h4>
+      <p class="muted">Skips ahead by itself in simulation mode. Example: when timer <b>tm_Mash</b> starts, wait <b>5</b> seconds, then jump ahead <b>00:50:00</b>; the mash timer goes from 00:00:05 to 00:50:05, so a 60 minute mash takes about 15 seconds of watching.</p>
+      <div class="tblScroll"><table class="grid simJumps"><thead><tr><th>On</th><th>When</th><th>Name</th><th>Then wait (seconds)</th><th>Jump ahead (hh:mm:ss)</th><th>Note</th><th></th></tr></thead><tbody id="simJumps"></tbody></table></div>
+      <div class="bar"><button id="simAddJump">Add time jump</button><span class="spacer"></span><button id="simSave" class="primary">Save simulation settings</button></div>
+      <h4>Process timeline</h4>
+      <p class="muted">Works out when each step of a Process happens, for example "00:10:00 into the mash: check the pH". It reads the Process without running it, using today's values. A wait on something other than a timer (a temperature, a button) cannot be known ahead, so the steps after it are timed from the end of that wait.</p>
+      <div class="bar"><select id="tlPick"></select><button id="tlShow">Work out timeline</button><button id="tlMake" disabled title="Add time jumps that skip to a few seconds before each timed step">Make time jumps from this</button></div>
+      <p id="tlNote" class="muted"></p>
+      <div class="tblScroll"><table class="grid tlTable hidden"><thead><tr><th>When</th><th>Line</th><th>What happens</th></tr></thead><tbody id="tlBody"></tbody></table></div>
       <h3>Panel settings</h3>
     </div>
     <div class="form admin-only">
@@ -274,6 +309,7 @@
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
       <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change vAPI variables through the API.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
+      <label class="check"><input type="checkbox" id="setWarnPaths"> Warn me when a process uses a file that is not on the Brain (saved right away)</label>
       <div>Start these processes when the server starts:</div>
       <div id="setAuto" class="checks"></div>
       <button id="saveSettings" class="primary">Save settings</button>
@@ -324,7 +360,7 @@
 
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
-<dialog id="sampleDlg"><h3>Welcome to the Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
+<dialog id="sampleDlg"><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
 <dialog id="donateDlg"><h3>🍺 Beer money</h3><p id="donateText"></p>
   <div class="bar"><button id="donateDone">Already donated</button><span class="spacer"></span><button id="donateLater">Maybe later</button><button id="donateGo" class="primary"></button></div></dialog>
 <div id="toast"></div>

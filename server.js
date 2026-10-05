@@ -1,11 +1,13 @@
-// OakBarn Brew Panel - server
+// Skynet Brew Panel - server
 // Run:  node --no-warnings server.js   then open http://<this computer>:8080 in any browser
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
-import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf } from './lib/store.js';
+import { modernize, removeSpacesOnDisk } from './lib/modernize.js';
+import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { Hardware } from './lib/hardware.js';
@@ -19,6 +21,9 @@ import { MediaFiles } from './lib/mediafiles.js';
 import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain, toStr } from './lib/values.js';
 import { Help } from './lib/help.js';
+import { clock } from './lib/simclock.js';
+import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
+import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { Auth, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
@@ -32,6 +37,8 @@ const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'))
 
 // A configuration saved before the Global class was retired is converted once (backups in config/backups and *.before-globals.bak)
 const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
+// Names have no spaces any more: an older configuration is changed once (backups in config/backups and *.before-no-spaces.bak)
+const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
@@ -41,10 +48,14 @@ const auth = new Auth(DATA);
 const messaging = new Messaging(DATA);
 // Testing mode (Settings > "Start fresh logins after each update", on unless turned off)
 const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
+const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
+sim.apply();
 hw.start();
 const control = new Control(store);
 control.start();
-setInterval(() => store.tickTimers(0.1), 100);
+hw.onSimStep = t => control.tick(t);                         // a skip ahead runs the controls between simulator steps
+const timerDt = clock.stepper();
+setInterval(() => store.tickTimers(timerDt() / 1000), 100);   // timers follow the clock (faster in simulation mode)
 setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants follow their text files
 store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
@@ -52,6 +63,7 @@ const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media pag
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
+if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
 
@@ -85,6 +97,7 @@ store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
+sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
 function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
 setInterval(() => { dropEndedSessions(); for (const res of clients.keys()) res.write(': ping\n\n'); }, 20000);
 
@@ -131,21 +144,9 @@ function sendFile(req, res, file) {
 // Images, sounds and text files are given by PATH. Only files inside the folders listed in config "mediaRoots" are served.
 const resolveMedia = p => store.resolveMedia(p);
 
-// BruControl ran on Windows, where file names ignore upper/lower case. Find "Wave/X.WAV" as "wave/x.wav" too.
-function findMedia(p) {
-  const full = resolveMedia(p);
-  if (!full || fs.existsSync(full)) return full;
-  const root = store.mediaRoots().find(r => full.startsWith(r + path.sep));
-  if (!root) return full;
-  let cur = root;
-  for (const part of path.relative(root, full).split(path.sep)) {
-    let names; try { names = fs.readdirSync(cur); } catch { return full; }
-    const hit = names.find(n => n === part) ?? names.find(n => n.toLowerCase() === part.toLowerCase());
-    if (!hit) return full;
-    cur = path.join(cur, hit);
-  }
-  return cur;
-}
+// BruControl ran on Windows, where file names ignore upper/lower case. Find "Wave/X.WAV" as "wave/x.wav" too
+// (and the old picture folder name oakbarn/ as Images/), see Store.findMedia
+const findMedia = p => store.findMedia(p);
 
 function apiKeyOk(req, url) {
   const key = store.config.apiKey;
@@ -161,6 +162,14 @@ function cleanDonation(d = {}) {
     enabled: d.enabled !== false,
     message: String(d.message ?? '').slice(0, 1000), button: String(d.button ?? '').slice(0, 60),
     everyDays: days(d.everyDays, 30), donatedDays: days(d.donatedDays, 180),
+  };
+}
+
+// Autofill in the Process editor: every Device, Widget and Process name, each with its attributes
+function processWords() {
+  return {
+    elements: store.list().map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el) })),
+    processes: engine.names(),
   };
 }
 
@@ -215,7 +224,7 @@ async function route(req, res) {
   if (p.startsWith('/auth/')) {
     if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
     const login = (tok, extra = {}) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, 200, { ok: true, ...extra }); };
-    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady() });
+    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Skynet Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady() });
     if (p === '/auth/setup' && m === 'POST') {
       if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
       if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');
@@ -239,7 +248,7 @@ async function route(req, res) {
       if (made) {
         const contact = auth.getContact(made.name);
         if (messaging.targets(contact).length) {
-          const title = store.config.title || 'Brew Panel';
+          const title = store.config.title || 'Skynet Brew Panel';
           messaging.deliver(contact, `${title} sign-in code`, `${made.code} is your ${title} sign-in code. It works once, for 10 minutes. If you did not ask for it, change your password.`)
             .catch(e => console.error(`Sign-in code for ${made.name} not sent: ${e.message}`));
         }
@@ -350,7 +359,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, logModes: LOG_MODES, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -375,11 +384,21 @@ async function route(req, res) {
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
-    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists']) if (k in body) store.config[k] = body[k];
+    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths']) if (k in body) store.config[k] = body[k];
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
+  }
+  // Simulation mode: everyone sees it, admins change it
+  if (p === '/ui/sim' && m === 'GET') return ok(res, { ...sim.status(), upcoming: sim.upcoming() });
+  if (p === '/ui/sim' && m === 'PUT') { sim.save(await jsonBody(req)); broadcast('config', {}); return ok(res, sim.status()); }
+  const tl = /^\/ui\/sim\/timeline\/([^/]+)$/.exec(p);
+  if (tl && m === 'GET') { if (!engine.exists(tl[1])) return fail(res, 404, 'No process ' + tl[1]); return ok(res, timeline(engine, tl[1])); }
+  if (p === '/ui/sim/skip' && m === 'POST') {
+    const b = await jsonBody(req);
+    if (b.next) return ok(res, { ok: true, ...sim.skipToNext() });
+    return ok(res, { ok: true, skipped: sim.skip(Number(b.seconds) * 1000) });
   }
   if (p === '/ui/mqtt' && m === 'GET') return ok(res, mqttView());
   if (p === '/ui/mqtt' && m === 'PUT') {
@@ -398,7 +417,7 @@ async function route(req, res) {
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
   if (p === '/ui/import/brucontrol' && m === 'POST') {
     const q = url.searchParams;
-    const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'oakbarn', simulate: q.get('simulate') !== '0' });
+    const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'Images', simulate: q.get('simulate') !== '0' });
     const missingMedia = conv.media.filter(f => { const full = findMedia(f); return !full || !fs.existsSync(full); });
     const out = { summary: conv.summary, warnings: conv.warnings, missingMedia, mediaCount: conv.media.length, autostart: conv.autostart };
     if (q.get('preview') === '1') return ok(res, { ok: true, preview: true, ...out });
@@ -417,14 +436,24 @@ async function route(req, res) {
   // scripts
   if (p === '/ui/scripts' && m === 'GET') return ok(res, engine.list());
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
-  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|rename))?$/.exec(p);
+  if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
+  if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
+  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|rename|class))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];
+    if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
     if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
     if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
-    if (!act && m === 'PUT') { const text = await readBody(req); engine.write(name, text); return ok(res, engine.check(text)); }
+    if (!act && m === 'PUT') {
+      // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
+      const mod = modernize(await readBody(req), n => store.get(n));
+      engine.write(name, mod.text);
+      engine.renumber();
+      const text = engine.read(name);
+      return ok(res, { ...engine.check(text), text, modernized: mod.changed });
+    }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
   }
   if (p === '/ui/stopall' && m === 'POST') { engine.stopAll(); return ok(res); }
@@ -488,7 +517,7 @@ const server = http.createServer((req, res) => {
 });
 const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
 server.listen(PORT, () => {
-  console.log(`Brew Panel running:  http://localhost:${PORT}`);
+  console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();
   if (loginsCleared) console.log('New version installed: all logins were cleared (testing mode). Create the admin account again.');

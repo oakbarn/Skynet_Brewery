@@ -11,7 +11,7 @@ const xml = fs.readFileSync(path.join(here, '..', 'samples', 'sample_brucontrol.
 
 assert.equal(isoSeconds('PT1M30S'), 90); assert.equal(isoSeconds('-PT0.5S'), -0.5); assert.equal(isoSeconds('P1DT1H'), 90000);
 assert.equal(argb(-16777216), '#000000'); assert.equal(argb(-1), '#ffffff'); assert.equal(argb(''), undefined);
-assert.equal(mediaPath('C:\\Brucontrol\\Media\\wave\\a b.wav'), 'oakbarn/wave/a b.wav');
+assert.equal(mediaPath('C:\\Brucontrol\\Media\\wave\\a b.wav'), 'Images/wave/a b.wav');
 
 const conv = convertBruControl(xml, { simulate: true });
 const el = n => conv.elements.find(e => e.name === n);
@@ -23,7 +23,7 @@ assert.match(conv.scripts[0].text, /^\/\/ sample & "quoted"\nnew value vV\n/);
 assert.ok(conv.warnings.some(w => w.includes('sw_Testing_2')));
 
 const valve = el('VGC_22_Valve');
-assert.deepEqual(valve.images, ['oakbarn/Valve_Ball_OpenV-1x1.png', 'oakbarn/Valve_Ball_ClosedV-1x1.png', '']);
+assert.deepEqual(valve.images, ['Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_ClosedV-1x1.png', '']);
 assert.equal(valve.background, 1); assert.equal(valve.hideName, true); assert.equal(valve.border, 'hidden');
 assert.equal(valve.onText, 'Open'); assert.equal(valve.offText, 'Closed'); assert.equal(valve.channel, 22);
 const kettle = el('MB_57_Kettle');
@@ -36,7 +36,7 @@ assert.equal(el('MB_07_PID').kp, 30); assert.equal(el('MB_07_PID').pwm, true);
 assert.equal(el('gblS_Msg').initial, 'Hello & welcome'); assert.equal(el('gblS_Msg').visibility, 'hidden'); assert.equal(el('gblS_Msg').valueAlign, 'MiddleCenter');
 assert.equal(el('gblT_Delay').type, 'vKonstant'); assert.equal(el('gblT_Delay').kind, 'time'); assert.equal(el('gblT_Delay').initial, '00:01:30');
 assert.equal(el('tm_Boil').timerType, 'countdown'); assert.equal(el('tm_Boil').resetValue, '01:00:00');
-assert.deepEqual(el('alm_Done').sounds, ['oakbarn/wave/Done.wav', 'oakbarn/Wave/Hops.wav', '']);
+assert.deepEqual(el('alm_Done').sounds, ['Images/wave/Done.wav', 'Images/Wave/Hops.wav', '']);
 assert.equal(el('insp_Start').tap, 'script'); assert.equal(el('insp_Start').tapTarget, 'looper_Sample');
 assert.equal(conv.workspaces[0].bgW, 1900); assert.equal(conv.workspaces[0].width, 1920);
 
@@ -51,7 +51,7 @@ const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.loa
 const engine = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 const res = applyBruControl(conv, { store, engine, mode: 'replace' });
 assert.deepEqual(res.problems, []);
-assert.equal(store.has('old'), false); assert.equal(store.list().length, 17);
+assert.equal(store.has('old'), false); assert.equal(store.list().length, 18);        // 17 imported + the built-in SoundPlayer
 assert.equal(String(store.getProp('tm_Boil', 'resetvalue')), '01:00:00');
 assert.equal(store.getProp('MB_05_Hys', 'enabled'), false);
 assert.equal(store.getProp('VGC_22_Valve', 'enabled'), true);

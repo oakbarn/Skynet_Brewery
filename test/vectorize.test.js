@@ -3,8 +3,8 @@ import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'
 import { traceFile, Pictures, DRAWING_SCORE } from '../lib/vectorize.js';
 const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpv'));
-fs.copyFileSync(path.join(ROOT, 'media/oakbarn/AlarmBitter.png'), path.join(d, 'Bell.png'));
-fs.copyFileSync(path.join(ROOT, 'media/oakbarn/Burner No Flame.png'), path.join(d, 'Burner.png'));
+fs.copyFileSync(path.join(ROOT, 'media/Images/AlarmBitter.png'), path.join(d, 'Bell.png'));
+fs.copyFileSync(path.join(ROOT, 'media/Images/Burner No Flame.png'), path.join(d, 'Burner.png'));
 fs.writeFileSync(path.join(d, 'Mine.png'), fs.readFileSync(path.join(d, 'Bell.png')));
 fs.writeFileSync(path.join(d, 'Mine.svg'), '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"/>');   // hand-made
 

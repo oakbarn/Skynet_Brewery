@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { attachAutofill } from './autofill.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -12,6 +13,7 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 const media = p => '/media?path=' + encodeURIComponent(p);
+const noSpaces = n => String(n ?? '').trim().replace(/_*\s+_*/g, '_');
 const clone = o => JSON.parse(JSON.stringify(o));
 const PALETTE = { '0': '', '1': '#e8833a', '2': '#3fa34d', '3': '#a8c64a', '4': '#c94040', '5': '#3a7be8', '6': '#8a5cd6', '7': '#e8c33a', '8': '#777f88' };
 const bg = v => (v === '' || v === null || v === undefined) ? '' : (PALETTE[String(v)] ?? String(v));
@@ -21,6 +23,7 @@ let view = 'workspace', wsName = null, zoom = 'fit';
 try { zoom = localStorage.getItem('bp.zoom') || 'fit'; } catch { /* private window: default */ }
 if (zoom === 'page') zoom = 'fit';         // "Whole tab" is now "Fit screen"
 
+let knownPaths = new Set();   // file paths in the open process that were already warned about (not on the Brain)
 let editing = false, draft = null, sel = null;   // sel = {kind:'el'|'gfx', id}
 let soundOn = false;
 const audios = new Map();
@@ -47,13 +50,13 @@ async function load() {
   document.body.classList.add('role-' + S.me.role);
   $('#whoName').textContent = `${S.me.name} (${S.me.role})`;
   $('#code').readOnly = !can('admin');
-  $('#title').textContent = S.config.title || 'Brew Panel';
-  document.title = S.config.title || 'Brew Panel';
+  $('#title').textContent = S.config.title || 'Skynet Brew Panel';
+  document.title = S.config.title || 'Skynet Brew Panel';
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   fillAddType();
   renderAll();
 }
-function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); }
+function renderAll() { renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
 function connect() {
   const es = new EventSource('/ui/events');
@@ -73,6 +76,7 @@ function connect() {
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
+  es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -196,8 +200,8 @@ const EQ = {
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'samples/led_green.svg'], ['LED red', 'samples/led_red.svg'], ['LED off (grey)', 'samples/led_off.svg'],
   ['Lightning bolt on', 'samples/bolt_on.svg'], ['Lightning bolt off', 'samples/bolt_off.svg'],
-  ['Ball valve open (horizontal)', 'oakbarn/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'oakbarn/Valve_Ball_ClosedH_1.png'],
-  ['Ball valve open (vertical)', 'oakbarn/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'oakbarn/Valve_Ball_ClosedV-1x1.png']];
+  ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
+  ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -432,7 +436,8 @@ function buildEl(e) {
   if (e.type === 'timer') n.append(h('div', { class: 'btns' },
     h('button', { title: 'Start', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', true); } }, '▶'),
     h('button', { title: 'Stop', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', false); } }, '■'),
-    h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺')));
+    h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺'),
+    h('button', { class: 'tmSet', title: 'Set the time (hh:mm:ss)', onclick: ev => { ev.stopPropagation(); timerSetDialog(e); } }, 'Set')));
   if (editing) { editDeco(n, e); if (sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
   fillEl(n, e);
   return n;
@@ -510,8 +515,9 @@ function fillEl(n, e) {
     case 'hysteresis': on = !!v.state; text = v.enabled ? `${on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
-    case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
+    case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || v.image || ''; n.classList.toggle('img-alarm', !!(v.imageon || v.image)); break;
+    case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = v.displayname ?? e.name; nm.classList.add('hidden'); break;
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
@@ -561,6 +567,7 @@ function tapAction(e) {
     case 'pwmOut': case 'analogOut': case 'scale': case 'stepper': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
+    case 'soundPlayer': return 'toggle';
     case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
     case 'vKonstant':
       if (e.readOnly) return 'none';
@@ -572,8 +579,8 @@ function tapAction(e) {
   }
 }
 const elByName = n => S.config.elements.find(x => x.name === n);
-const boolProp = t => t.type === 'alarm' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
-const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
+const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
+const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
 async function doTap(e) {
   const act = tapAction(e);
@@ -725,7 +732,7 @@ function valueDialog(t) {
   const num = t.dataType === 'value', k = vkKind(t);
   const inp = t.dataType === 'string' && k !== 'graphic'
     ? h('textarea', { class: 'vdInput', rows: k === 'longstring' ? 12 : 3 }, v.value ?? '')
-    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: { time: 'hh:mm:ss', datetime: 'mm/dd/yyyy hh:mm:ss' }[t.dataType] ?? (k === 'graphic' ? 'image path, e.g. oakbarn/BurnerFlame.png' : '') });
+    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: { time: 'hh:mm:ss', datetime: 'mm/dd/yyyy hh:mm:ss' }[t.dataType] ?? (k === 'graphic' ? 'image path, e.g. Images/BurnerFlame.png' : '') });
   const step = +t.step || 1;
   const bump = k => { const x = (parseFloat(inp.value) || 0) + k * step; inp.value = t.precision !== undefined && t.precision !== '' ? x.toFixed(+t.precision) : String(+x.toFixed(6)); };
   const done = ok => {
@@ -742,6 +749,38 @@ function valueDialog(t) {
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
   inp.addEventListener('keydown', ke => { if (ke.key === 'Enter' && inp.tagName === 'INPUT') { ke.preventDefault(); done(true); } });
   d.showModal(); setTimeout(() => { inp.focus(); inp.select?.(); }, 50);
+}
+
+// Timer: Set button. Hours : minutes : seconds in three boxes (00:00:00), keeps running or stopped as it was
+function timerSetDialog(t) {
+  const v = S.values[t.name] || {};
+  const cur = String(v.value ?? '00:00:00').split(':').map(x => parseInt(x, 10) || 0);
+  while (cur.length < 3) cur.unshift(0);
+  const d = $('#valDlg'); d.innerHTML = '';
+  const box = (val, label) => h('label', { class: 'tmBox' }, h('input', { class: 'vdInput', value: String(val).padStart(2, '0'), inputmode: 'numeric', 'aria-label': label,
+    onfocus: ev => ev.target.select() }), h('span', { class: 'muted' }, label));
+  const hh = box(cur[0], 'hours'), mm = box(cur[1], 'minutes'), ss = box(cur[2], 'seconds');
+  const ins = [hh, mm, ss].map(b => b.querySelector('input'));
+  const done = ok => {
+    if (ok) {
+      const [H, M, Sx] = ins.map(i => i.value.trim() === '' ? 0 : Number(i.value.trim()));
+      if (![H, M, Sx].every(x => Number.isInteger(x) && x >= 0)) return toast('Use whole numbers, for example 01:30:00', true);
+      if (M > 59 || Sx > 59) return toast('Minutes and seconds go up to 59', true);
+      setProp(t.name, 'value', [H, M, Sx].map(x => String(x).padStart(2, '0')).join(':'));
+    }
+    d.close();
+  };
+  // typing or pasting a whole time like 1:30:00 into any box fills all three
+  for (const i of ins) i.addEventListener('input', () => {
+    const m = /^(\d+):(\d{1,2})(?::(\d{1,2}))?$/.exec(i.value.trim());
+    if (m) { const parts = m[3] === undefined ? [0, m[1], m[2]] : [m[1], m[2], m[3]]; ins.forEach((x, k) => { x.value = String(parts[k]).padStart(2, '0'); }); }
+  });
+  for (const i of ins) i.addEventListener('keydown', ke => { if (ke.key === 'Enter') { ke.preventDefault(); done(true); } });
+  d.append(h('div', { class: 'vdTitle' }, `${v.displayname ?? t.name} - set time`),
+    h('div', { class: 'vdRow tmRow' }, hh, h('b', {}, ':'), mm, h('b', {}, ':'), ss),
+    h('div', { class: 'muted' }, v.running ? 'It keeps running from the new time.' : ((v.type ?? t.timerType) === 'countdown' ? 'Counts down from this time when started.' : 'Counts up from this time when started.')),
+    h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
+  d.showModal(); setTimeout(() => { ins[0].focus(); ins[0].select(); }, 50);
 }
 
 // Scale: Tare (zero it now) or calibrate with a known weight
@@ -1025,20 +1064,43 @@ function finishPipe(to) {
   $('#editHint').textContent = '';
 }
 
+// Leaving Edit layout with changes: Save, or Exit without Saving (Fritz: OK / Cancel was confusing). Esc or "Keep editing" stays in Edit layout.
+const layoutChanged = () => editing && JSON.stringify(draft) !== JSON.stringify(S.config);
+function leaveLayoutDialog() {
+  return new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    const close = v => { d.oncancel = null; d.close(); res(v); };
+    d.append(h('div', { class: 'vdTitle' }, 'Leave Edit layout?'),
+      h('p', {}, 'You have changes to this layout that are not saved yet.'),
+      h('div', { class: 'vdBtns' },
+        h('button', { type: 'button', class: 'big primary', onclick: () => close('save') }, 'Save'),
+        h('button', { type: 'button', class: 'big danger', onclick: () => close('discard') }, 'Exit without Saving')),
+      h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => close(undefined) }, 'Keep editing')));
+    d.oncancel = () => res(undefined);
+    d.showModal();
+  });
+}
+async function leaveLayout() {
+  if (!layoutChanged()) return setEditing(false);
+  const r = await leaveLayoutDialog();
+  if (r === 'save') return saveLayout();
+  if (r === 'discard') return setEditing(false);
+  $('#editMode').checked = true;
+}
 $('#editMode').addEventListener('change', e => {
-  if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
+  if (!e.target.checked && editing) { e.target.checked = true; return leaveLayout(); }
   setEditing(e.target.checked);
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'oakbarn/Pump_Red_Rip_On.png', imageOff: 'oakbarn/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Pump_Red_Rip_On.png', imageOff: 'Images/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a vKonstant value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'oakbarn/Valve_Ball_OpenH_1.png', imageOff: 'oakbarn/Valve_Ball_ClosedH_1.png' };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Valve_Ball_OpenH_1.png', imageOff: 'Images/Valve_Ball_ClosedH_1.png' };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'vKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
   },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'oakbarn/Valve_Ball_OpenV-1x1.png', imageOff: 'oakbarn/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Valve_Ball_OpenV-1x1.png', imageOff: 'Images/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
@@ -1102,7 +1164,7 @@ const ADD_MENU = [
   ]],
   ['Widgets (app only, no board pin)', [
     ['Picture', 'picture'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
-    ['Timer', 'timer'], ['Alarm', 'alarm'], ['Label', 'label'],
+    ['Timer', 'timer'], ['Alarm', 'alarm', '', { kind: 'general' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
 ];
@@ -1178,11 +1240,12 @@ $('#addWs').onclick = () => {
   draft.workspaces.push({ name: n, width: 1600, height: 900 }); wsName = n; renderTabs(); renderWs();
 };
 $('#wsProps').onclick = () => editWorkspace();
-$('#saveLayout').onclick = guard(async () => {
+const saveLayout = guard(async () => {
   await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics });
   toast('Layout saved'); editing = false; await load(); setEditing(false);
 });
-$('#cancelLayout').onclick = () => setEditing(false);
+$('#saveLayout').onclick = saveLayout;
+$('#cancelLayout').onclick = () => leaveLayout();
 $('#zoom').value = zoom;
 $('#zoom').onchange = e => { zoom = e.target.value; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); };
 let fitTimer;
@@ -1219,6 +1282,8 @@ const F = {
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
+  soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
+    ['_snote', 'Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
@@ -1267,6 +1332,7 @@ F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel',
   ['step', '+ / - step', 'num', null, NUMK], ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK],
   ['onText', 'Text when on', 'text', null, BOOLK], ['offText', 'Text when off', 'text', null, BOOLK],
   ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
+  ['stepClass', 'Shows the steps of', 'sel', [['flow', 'Flow Processes'], ['sub', 'Sub Processes'], ['repeat', 'Repeat Processes'], ['looper', 'Looper Processes'], ['any', 'Any Process']], ['step']],
   ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', 'list', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', 'list', ...PLAINK]]];
 F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
   ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num', null, NUMK],
@@ -1332,8 +1398,19 @@ function stepperFields(it) {
     ['sim', 'Simulator settings (JSON): where it starts and where its home switch is, in its units, e.g. {"start":40,"switchAt":-5}', 'json'], ['info', 'Position now', 'info']];
 }
 
+// Alarm kind first: a Hop Alarm can sound by itself on a timer, a Pre-Hop Alarm a set time before its Hop Alarm
+const ALARM_KIND_LIST = [['hop', 'Hop Alarm (priority 1: beats every other sound)'], ['brewflow', 'Brew Flow Alarm (2: end of mash, start of boil)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
+function alarmFields(item) {
+  const k = item.kind ??= 'general';
+  return [['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true],
+    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
+    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
+    ...kindFields('alarm', item)];
+}
+
 function fieldsFor(item) {
   if (item.type === 'stepper') return stepperFields(item);
+  if (item.type === 'alarm') return alarmFields(item);
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
     return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
@@ -1491,7 +1568,7 @@ function dialog(title, fields, obj, canDelete) {
     body.onchange = ev => {
       const t = ev.target;
       if ((t.dataset?.kind === 'vlist' || t.dataset?.kind === 'gpick') && t.value === '__add__') {
-        const k = t.dataset.k, prev = obj[k], text = (prompt({ units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture path in your media folders (for example oakbarn/MyValve_On.png)' : 'Add to this list')) || '').trim();
+        const k = t.dataset.k, prev = obj[k], text = (prompt({ units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture path in your media folders (for example Images/MyValve_On.png)' : 'Add to this list')) || '').trim();
         try { readFields(obj); } catch { }
         obj[k] = text || prev;
         if (text && !vList(t.dataset.list).includes(text)) {
@@ -1563,7 +1640,7 @@ async function editItem(kind, id) {
       }
     }
     if (kind === 'el') {
-      work.name = (work.name || '').trim();
+      work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       if (!work.name) throw new Error('Name is required');
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
@@ -1611,36 +1688,64 @@ async function editWorkspace() {
 $('#soundBtn').onclick = () => {
   soundOn = !soundOn;
   $('#soundBtn').textContent = soundOn ? 'Sound on' : 'Enable sound';
-  if (soundOn) for (const e of S.config.elements.filter(e => e.type === 'alarm')) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
+  if (soundOn) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
   updateAlarms();
 };
-function getAudio(e) {
-  const v = S.values[e.name] || {};
+const isSoundEl = e => e.type === 'alarm' || e.type === 'soundPlayer';
+// the sound file an alarm / sound player plays now (Default = the panel's beep)
+function soundSrc(e, v) {
+  if (e.type === 'soundPlayer') return v.path || '';
   const mode = v.soundmode || (e.sounds ? 'custom' : 'default');
-  if (mode === 'none') return null;
-  const src = mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound);
+  if (mode === 'none') return '';
+  return mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound || (mode === 'default' ? 'sounds/alarm_beep.wav' : ''));
+}
+const hasSoundNow = (e, v) => !!soundSrc(e, v);
+function getAudio(e) {
+  const src = soundSrc(e, S.values[e.name] || {});
   if (!src) return null;
   let a = audios.get(e.name);
   if (!a || a._src !== src) { a = new Audio(media(src)); a._src = src; audios.set(e.name, a); }
   return a;
 }
+// Only one sound at a time: the panel marks the one that plays ("playing"); the others are quiet.
+// Music (Sound Player, Sound only alarms) pauses and goes on where it was; an alarm that had to wait starts from the beginning.
 function updateAlarms() {
-  for (const e of S.config.elements.filter(e => e.type === 'alarm')) {
+  for (const e of S.config.elements.filter(isSoundEl)) {
     const v = S.values[e.name] || {}; const a = getAudio(e); if (!a) continue;
     a.loop = !!v.loop;
-    if (v.active && soundOn) { if (a.paused && !a._playing) { a._playing = true; a.currentTime = 0; a.play().catch(() => { }); } }
-    else { a._playing = false; if (!a.paused) a.pause(); }
+    const music = e.type === 'soundPlayer' || e.kind === 'sound';
+    if (v.playing && soundOn) {
+      if (a.paused && !a._playing) { a._playing = true; if (!(music && a._held && !a.ended)) a.currentTime = 0; a._held = false; a.play().catch(() => { }); }
+    } else {
+      if (a._playing && v.active) a._held = true;            // paused for a higher sound: goes on later
+      if (!v.active) a._held = false;
+      a._playing = false; if (!a.paused) a.pause();
+    }
   }
 }
 
 // ---------------------------------------------------------------- scripts
 let curScript = null, dirty = false, problems = [];
 function renderScripts() { renderScriptList(); }
+// grouped by class: Flow, Sub, Repeat, Looper (lib/scaffold.js); a group can be folded
+let foldedClasses = new Set();
+try { foldedClasses = new Set(JSON.parse(localStorage.getItem('bp.foldedClasses') || '[]')); } catch { /* private window */ }
 function renderScriptList() {
   const ul = $('#scriptList'); ul.innerHTML = '';
-  for (const s of S.scripts) {
-    const cls = s.state === 'running' ? (s.waiting ? 'waiting' : 'running') : s.state === 'error' ? 'error' : '';
-    ul.append(h('li', { class: s.name === curScript ? 'active' : '', title: s.error || s.state, onclick: () => openScript(s.name) }, h('span', { class: 'st ' + cls }), s.name, s.modified ? ' *' : ''));
+  for (const [c, d] of Object.entries(S.processClasses || { sub: { label: 'Processes' } })) {
+    const list = S.scripts.filter(s => (s.cls || 'sub') === c);
+    if (!list.length) continue;
+    const folded = foldedClasses.has(c);
+    ul.append(h('li', { class: 'clsHead', title: d.about || '', onclick: () => {
+      folded ? foldedClasses.delete(c) : foldedClasses.add(c);
+      try { localStorage.setItem('bp.foldedClasses', JSON.stringify([...foldedClasses])); } catch { /* ignore */ }
+      renderScriptList();
+    } }, (folded ? '▸ ' : '▾ ') + d.label, h('span', { class: 'muted' }, ` (${list.length})`)));
+    if (folded) continue;
+    for (const s of list) {
+      const st = s.state === 'running' ? (s.waiting ? 'waiting' : 'running') : s.state === 'error' ? 'error' : '';
+      ul.append(h('li', { class: s.name === curScript ? 'active' : '', title: s.error || s.state, onclick: () => openScript(s.name) }, h('span', { class: 'st ' + st }), s.name, s.modified ? ' *' : ''));
+    }
   }
 }
 async function openScript(name) {
@@ -1648,14 +1753,20 @@ async function openScript(name) {
   curScript = name; dirty = false; problems = [];
   $('#code').value = await api('GET', '/ui/scripts/' + encodeURIComponent(name));
   $('#scriptName').textContent = name;
+  knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
+  if (can('admin')) api('POST', '/ui/scripts/check', $('#code').value, true).then(r => { for (const x of r.offBrain ?? []) knownPaths.add(x.path); }).catch(() => { });
   renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole();
+  api('GET', '/ui/scripts/words').then(w => { S.words = w; }).catch(() => { });
 }
 function updateScriptState() {
   const s = S.scripts.find(x => x.name === curScript);
   const st = $('#scriptState');
+  const sel = $('#scriptClass');
+  sel.disabled = !s || !can('admin');
+  if (s && document.activeElement !== sel) sel.value = s.cls || 'sub';
   if (!s) { st.textContent = ''; updateGutter(); return; }
   let t = s.state;
-  if (s.state === 'running') t = (s.waiting ? 'waiting' : 'running') + ` (line ${s.line})` + (s.modified ? ' - edited since start, stop and start to apply' : '');
+  if (s.state === 'running') t = (s.waiting ? 'waiting' : 'running') + ` (line ${s.line}${s.step ? `, step ${[s.step.num, s.step.name].filter(Boolean).join(' ')}` : ''})` + (s.modified ? ' - edited since start, stop and start to apply' : '');
   if (s.state === 'error') t = s.error;
   st.textContent = t; st.style.color = s.state === 'error' ? 'var(--bad)' : s.state === 'running' ? 'var(--ok)' : '';
   updateGutter();
@@ -1682,6 +1793,7 @@ function gotoLine(l) {
 }
 $('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; });
 $('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; });
+attachAutofill($('#code'), $('#autofill'), () => S?.words);
 $('#code').addEventListener('keydown', ev => {
   if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '\t'); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }
@@ -1689,10 +1801,47 @@ $('#code').addEventListener('keydown', ev => {
 const saveScript = guard(async () => {
   if (!curScript) return;
   const r = await api('PUT', '/ui/scripts/' + encodeURIComponent(curScript), $('#code').value, true);
+  // the server writes it in the new style and renumbers the steps: show what was saved, keeping the place
+  const ta = $('#code');
+  if (typeof r.text === 'string' && r.text !== ta.value) {
+    const line = ta.value.slice(0, ta.selectionStart).split('\n').length, top = ta.scrollTop;
+    ta.value = r.text;
+    const pos = r.text.split('\n').slice(0, line - 1).reduce((a, l) => a + l.length + 1, 0);
+    ta.setSelectionRange(pos, pos); ta.scrollTop = top;
+  }
   dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter();
-  toast(problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved', !!problems.length);
+  const note = r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '';
+  toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length);
+  const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
+  for (const x of added) knownPaths.add(x.path);
+  if (added.length && S.config.warnOffBrainPaths !== false) offBrainDialog(added);
 });
+// A path in a process that is not on the Brain (the Pi): files there cannot be reached from a phone or another computer
+function offBrainDialog(list) {
+  const d = $('#valDlg'); d.innerHTML = '';
+  const off = h('input', { type: 'checkbox' });
+  const close = guard(async () => {
+    d.close();
+    if (off.checked) { await api('PUT', '/ui/settings', { warnOffBrainPaths: false }); S.config.warnOffBrainPaths = false; toast('Path warnings are off. Turn them back on in Settings > Panel settings.'); }
+  });
+  d.append(h('div', { class: 'vdTitle' }, '⚠ File not on the Brain'),
+    h('p', {}, list.length === 1 ? 'This process uses a file that is not on the Brain (the Raspberry Pi):' : 'This process uses files that are not on the Brain (the Raspberry Pi):'),
+    h('ul', {}, ...list.map(x => h('li', {}, h('code', {}, x.path), ` (line ${x.line}) ${x.why}.`))),
+    h('p', {}, 'Files that are not on the Brain cannot be reached remotely, from your phone or another computer. Put the file in a media folder with the Media screen and use its path there, for example ', h('code', {}, 'sounds/bell.wav'), '.'),
+    h('label', { class: 'check' }, off, ' Do not show this warning again'),
+    h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big primary', onclick: close }, 'OK')));
+  d.oncancel = () => { d.oncancel = null; close(); };
+  d.showModal();
+}
 $('#saveScript').onclick = saveScript;
+$('#scriptClass').onchange = guard(async ev => { if (curScript) await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/class`, { cls: ev.target.value }); });
+$('#addSteps').onclick = guard(async () => {
+  if (!curScript) return;
+  const ta = $('#code'), t = await api('POST', '/ui/scripts/addsteps', ta.value, true);
+  if (t.text === ta.value) { toast('Every [label] already has a step'); return; }
+  ta.value = t.text; dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)';
+  toast('Steps added: Save to number them');
+});
 $('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; renderProblems(); updateGutter(); });
 $('#startScript').onclick = guard(async () => {
   if (!curScript) return;
@@ -1703,15 +1852,17 @@ $('#startScript').onclick = guard(async () => {
 $('#stopScript').onclick = guard(() => api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/stop`));
 $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
-  const n = prompt('New process name'); if (!n) return;
-  if (S.scripts.some(s => s.name === n.trim())) throw new Error('That name is used');
-  await api('PUT', '/ui/scripts/' + encodeURIComponent(n.trim()), '//' + n.trim() + '\n', true);
-  S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n.trim());
+  let n = prompt('New process name'); if (!n) return;
+  n = noSpaces(n);
+  if (S.scripts.some(s => s.name === n)) throw new Error('That name is used');
+  await api('PUT', '/ui/scripts/' + encodeURIComponent(n), '//' + n + '\n', true);
+  S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n);
 });
 $('#renScript').onclick = guard(async () => {
-  if (!curScript) return; const n = prompt('Rename to', curScript); if (!n || n === curScript) return;
-  await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n.trim() });
-  curScript = n.trim(); S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
+  if (!curScript) return; let n = prompt('Rename to', curScript); if (!n) return;
+  n = noSpaces(n); if (n === curScript) return;
+  await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n });
+  curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
 $('#delScript').onclick = guard(async () => {
   if (!curScript || !confirm(`Delete process "${curScript}"?`)) return;
@@ -1831,11 +1982,11 @@ function renderDevices() {
   const tb = $('#devBody'); tb.innerHTML = '';
   for (const d of S.devices) {
     const TYPES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' };
-    const real = d.type === 'simulator' && d.realType ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
+    const real = d.type === 'simulator' && d.realType && !d.simMode ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
       if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
-    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
+    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
       h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
@@ -1958,12 +2109,14 @@ function renderSettings() {
   const c = S.config;
   sampleCards($('#sampleList')).catch(e => toast(e.message, true));
   $('#setTitle').value = c.title || '';
+  $('#setWarnPaths').checked = c.warnOffBrainPaths !== false;
   $('#setMedia').value = (c.mediaRoots || []).join('\n');
   $('#setKey').value = c.apiKey || '';
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
   const box = $('#setAuto'); box.innerHTML = '';
   for (const s of S.scripts) box.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.autostart || []).includes(s.name) ? { checked: true } : {}) }), s.name));
   renderDonate();
+  renderSimSettings();
 }
 // ---- accounts
 addEyes();
@@ -2036,6 +2189,11 @@ $('#msTest').onclick = guard(async () => {
   catch (e) { $('#msResult').textContent = e.message.includes('No email or text') ? 'Put your own email or mobile number under "Sign-in codes" in My account first.' : e.message; throw e; }
 });
 
+$('#setWarnPaths').onchange = guard(async ev => {
+  await api('PUT', '/ui/settings', { warnOffBrainPaths: ev.target.checked });
+  S.config.warnOffBrainPaths = ev.target.checked;
+  toast(ev.target.checked ? 'You will be warned about files that are not on the Brain' : 'Path warnings are off');
+});
 $('#setFresh').onchange = guard(async ev => {
   await api('PUT', '/ui/settings', { resetLoginsOnUpdate: ev.target.checked });
   S.config.resetLoginsOnUpdate = ev.target.checked;
@@ -2106,7 +2264,7 @@ $('#donSave').onclick = guard(async () => {
 $('#donPreview').onclick = () => showDonate(true);
 
 // ---------------------------------------------------------------- MQTT and voice
-const TYPE_WORD = { vAPI: 'vAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm' };
+const TYPE_WORD = { vAPI: 'vAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
 function renderMqttStatus() {
   const st = S.mqtt?.status ?? { state: 'off', text: 'MQTT is off' };
   const box = $('#mqttStatus'); box.className = 'mqtt-status ' + st.state; box.textContent = st.text;
@@ -2140,6 +2298,111 @@ $('#saveMqtt').onclick = guard(async () => {
   await api('PUT', '/ui/mqtt', body);
   await load(); toast('MQTT and voice saved');
 });
+
+// ---------------------------------------------------------------- simulation mode
+// The striped bar under the menu (everyone sees it; admins get the speed and skip buttons),
+// and Settings > Simulation (switch, speed, Time jumps table, Process timeline).
+const fmtT = s => { s = Math.max(0, Math.round(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; };
+const speedOpts = sel => { const cur = S.sim?.speed ?? 1; sel.innerHTML = ''; for (const x of S.simSpeeds || [1]) sel.append(h('option', { value: x, ...(x === cur ? { selected: true } : {}) }, x === 1 ? 'Normal (1×)' : x + '× faster')); if (!(S.simSpeeds || []).includes(cur)) sel.append(h('option', { value: cur, selected: true }, cur + '× faster')); };
+let simPoll = null;
+function renderSimBar() {
+  const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden');
+  bar.classList.toggle('hidden', !on);
+  if (on !== was && view === 'workspace') fitZoom();
+  if (!on) { clearInterval(simPoll); simPoll = null; $('#simNextInfo').textContent = ''; return; }
+  $('#simInfo').textContent = `Clock ${S.sim.speed === 1 ? 'at normal speed' : S.sim.speed + '× faster'}` + (S.sim.skipped ? `, ${fmtT(S.sim.skipped / 1000)} skipped` : '');
+  if (document.activeElement !== $('#simSpeed')) speedOpts($('#simSpeed'));
+  $('#simAutoBar').checked = !!S.sim.autoSkip;
+  if (!simPoll) { simPoll = setInterval(simNextInfo, 2000); simNextInfo(); }
+}
+async function simNextInfo() {
+  try {
+    const r = await api('GET', '/ui/sim');
+    const n = r.upcoming?.[0];
+    $('#simNextInfo').textContent = n ? `Next: ${n.what} in ${fmtT(n.in)}` : 'Nothing counting down';
+  } catch { /* offline: the connection dot shows it */ }
+}
+$('#simAutoBar').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { autoSkip: ev.target.checked }); renderSimBar(); if ($('#simAuto')) $('#simAuto').checked = ev.target.checked; toast(ev.target.checked ? 'Auto skip on: each step runs a few seconds, then time skips to just before the next one' : 'Auto skip off'); });
+$('#simSpeed').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { speed: +ev.target.value }); renderSimBar(); if ($('#simSpeedSet')) $('#simSpeedSet').value = ev.target.value; });
+for (const b of $$('#simBar [data-skip]')) b.onclick = guard(async () => { await api('POST', '/ui/sim/skip', { seconds: +b.dataset.skip }); toast(`Skipped ahead ${fmtT(+b.dataset.skip)}`); simNextInfo(); });
+$('#simNext').onclick = guard(async () => { const r = await api('POST', '/ui/sim/skip', { next: true }); toast(`Skipped ${fmtT(r.skipped / 1000)}, to just before ${r.next}`); simNextInfo(); });
+
+let simDraft = null, simDirty = false, tlRows = null;
+const simCfg = () => ({ on: false, speed: 1, lead: 5, autoSkip: false, watch: 5, jumps: [], ...(S.config.simulation || {}) });
+function renderSimSettings() {
+  if (!can('admin')) return;
+  const c = simCfg();
+  $('#simOn').checked = !!c.on;
+  speedOpts($('#simSpeedSet')); $('#simSpeedSet').value = c.speed;
+  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; $('#simAuto').checked = !!c.autoSkip; $('#simWatch').value = c.watch; renderSimJumps(); }
+  const pick = $('#tlPick'), cur = pick.value; pick.innerHTML = '';
+  for (const sc of S.scripts) pick.append(h('option', { value: sc.name, ...(sc.name === cur ? { selected: true } : {}) }, sc.name));
+}
+function renderSimJumps() {
+  const tb = $('#simJumps'); tb.innerHTML = '';
+  const names = when => when === 'timer' ? S.config.elements.filter(e => e.type === 'timer').map(e => e.name).sort() : S.scripts.map(x => x.name);
+  const dirty = () => { simDirty = true; };
+  simDraft.forEach((j, i) => {
+    const nameSel = h('select', { onchange: ev => { j.name = ev.target.value; dirty(); } }, ...[...new Set([...names(j.when), j.name].filter(Boolean))].map(n => h('option', { value: n, ...(n === j.name ? { selected: true } : {}) }, n)));
+    if (!j.name) j.name = nameSel.value;
+    tb.append(h('tr', {},
+      h('td', {}, h('label', { class: 'sw' }, h('input', { type: 'checkbox', ...(j.on !== false ? { checked: true } : {}), onchange: ev => { j.on = ev.target.checked; dirty(); } }), h('span', { class: 'swk' }))),
+      h('td', {}, h('select', { onchange: ev => { j.when = ev.target.value; j.name = ''; dirty(); renderSimJumps(); } }, ...Object.entries(S.jumpWhen || {}).map(([k, t]) => h('option', { value: k, ...(k === j.when ? { selected: true } : {}) }, t)))),
+      h('td', {}, nameSel),
+      h('td', {}, h('input', { class: 'num', type: 'number', min: 0, max: 3600, value: j.after ?? 5, onchange: ev => { j.after = +ev.target.value; dirty(); } })),
+      h('td', {}, h('input', { class: 'tm', value: j.jump || '00:00:00', placeholder: '00:50:00', onchange: ev => { j.jump = ev.target.value.trim(); dirty(); } })),
+      h('td', {}, h('input', { value: j.note || '', onchange: ev => { j.note = ev.target.value; dirty(); } })),
+      h('td', {}, h('button', { class: 'danger', onclick: () => { simDraft.splice(i, 1); dirty(); renderSimJumps(); } }, 'Delete'))));
+  });
+  if (!simDraft.length) tb.append(h('tr', {}, h('td', { colspan: 7, class: 'muted' }, 'No time jumps yet.')));
+}
+for (const id of ['#simAuto', '#simWatch', '#simLead']) $(id).addEventListener('change', () => { simDirty = true; });
+$('#simAddJump').onclick = () => { simDraft.push({ on: true, when: 'timer', name: '', after: 5, jump: '00:50:00', note: '' }); simDirty = true; renderSimJumps(); };
+$('#simSave').onclick = guard(async () => {
+  for (const j of simDraft) if (!/^\d+:\d{1,2}(:\d{1,2})?$/.test(j.jump || '')) throw new Error(`"${j.jump}" is not a time. Write it as hh:mm:ss, for example 00:50:00`);
+  S.sim = await api('PUT', '/ui/sim', { speed: +$('#simSpeedSet').value, lead: +$('#simLead').value, autoSkip: $('#simAuto').checked, watch: +$('#simWatch').value, jumps: simDraft });
+  simDirty = false; await load(); toast('Simulation settings saved');
+});
+$('#simOn').onchange = guard(async ev => {
+  const on = ev.target.checked;
+  if (!confirm(on ? 'Turn on simulation mode?\n\nEvery process stops and every output turns off. Then the real boards are let go and the simulator takes their place, so nothing real is switched until you turn it off again.'
+    : 'Turn off simulation mode?\n\nEvery process stops and every output turns off, then the real boards are used again.')) { ev.target.checked = !on; return; }
+  S.sim = await api('PUT', '/ui/sim', { on });
+  await load(); toast(on ? 'Simulation mode is on: no real hardware is switched' : 'Simulation mode is off: real hardware is used');
+});
+
+$('#tlShow').onclick = guard(async () => {
+  const name = $('#tlPick').value; if (!name) throw new Error('There are no Processes yet');
+  const r = await api('GET', '/ui/sim/timeline/' + encodeURIComponent(name));
+  tlRows = { name, rows: r.rows };
+  const tb = $('#tlBody'); tb.innerHTML = '';
+  for (const x of r.rows) {
+    const when = (x.after ? `${fmtT(x.at)} after line ${x.after}` : fmtT(x.at)) + (x.maybe ? ' (if)' : '');
+    const what = x.what === 'wait' ? (x.unknown ? 'waits (how long is not known ahead)' : `waits ${fmtT(x.secs)}`) : x.what === 'sleep' ? `sleeps ${fmtT(x.secs)}` : '';
+    tb.append(h('tr', { class: x.what === 'wait' || x.what === 'sleep' ? 'wait' : '' }, h('td', { class: x.maybe ? 'maybe' : '' }, when), h('td', {}, String(x.line)), h('td', {}, h('code', {}, x.text), what ? ' ' : '', what ? h('span', { class: 'muted' }, what) : '')));
+  }
+  $('.tlTable').classList.toggle('hidden', !r.rows.length);
+  $('#tlNote').textContent = (r.rows.length ? `About ${fmtT(r.end.at)}${r.end.after ? ` after line ${r.end.after}` : ''} from start to finish. Steps marked (if) only happen when that "if" is true. ` : 'Nothing to show. ') + (r.note || '');
+  $('#tlMake').disabled = !r.rows.some(x => !x.after && x.at > 0);
+});
+// Time jumps that, after the Process starts, skip to a few seconds before each timed step (chained one after the other)
+$('#tlMake').onclick = () => {
+  if (!tlRows) return;
+  const lead = +$('#simLead').value || 5, speed = +$('#simSpeedSet').value || 1;
+  const times = [...new Set(tlRows.rows.filter(x => !x.after && x.at > 0 && x.what !== 'sleep' && x.what !== 'wait').map(x => x.at))].sort((a, b) => a - b);
+  simDraft = simDraft.filter(j => !(j.when === 'process' && j.name === tlRows.name));
+  let real = 5, jumped = 0, made = 0;
+  for (const at of times) {
+    const jump = Math.round(at - lead - real * speed - jumped);
+    if (jump < 10) continue;                         // so close it is not worth a jump
+    const step = tlRows.rows.find(x => x.at === at && !x.after);
+    simDraft.push({ on: true, when: 'process', name: tlRows.name, after: real, jump: fmtT(jump), note: `to ${fmtT(at - lead)}: line ${step.line}` });
+    jumped += jump; made++;
+    real += Math.ceil(lead / speed) + 5;             // time to watch that step happen
+  }
+  simDirty = true; renderSimJumps();
+  toast(made ? `${made} time jump${made > 1 ? 's' : ''} added. Check them, then Save simulation settings.` : 'Every step is only seconds apart: no jumps needed');
+};
 
 // ---------------------------------------------------------------- start
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
