@@ -35,7 +35,7 @@ Drag items to move them, drag a corner to resize, and **double-click** (or hold 
 
 A timer shows hh:mm:ss with four buttons: **▶** start, **■** stop, **↺** reset to 00:00:00, and **Set**. **Set** opens a box for hours : minutes : seconds (for example 01:30:00). You can also type the whole time, like `1:30:00`, into the first box. A running timer keeps running from the new time; a countdown timer counts down from it.
 
-> Every element can have a background picture. On/off items have a separate picture for on and for off.
+> Every element can have a picture: **imagePath_1** to **imagePath_3**, and **Background picture** picks which one shows. A Process changes it with `my_widget.image = "Images/RedPump.png"`. See [Pictures on items](23-picture-paths). On/off items have a separate picture for on and for off.
 
 ## Pipes and flow
 
