@@ -120,7 +120,7 @@ Alexa, Google Home and Siri do not talk MQTT themselves. **Home Assistant** sits
 
 1. Install Home Assistant: <https://www.home-assistant.io/installation/>.
 2. In Home Assistant: **Settings > Devices & services > Add integration > MQTT**. Enter the Brew Panel Pi's address, port 1883, and the broker user name and password.
-3. In the Brew Panel, keep **Announce to Home Assistant** ticked and save. A device named after your panel title (for example *OakBarn Brew Panel*) appears in Home Assistant by itself, with:
+3. In the Brew Panel, keep **Announce to Home Assistant** ticked and save. A device named after your panel title (for example *Skynet Brew Panel*) appears in Home Assistant by itself, with:
    * temperatures as sensors,
    * outputs as on/off status, or as switches if **Can change it** is ticked,
    * timers as sensors (plus Start / Stop / Reset buttons if allowed),

@@ -21,7 +21,7 @@ Pages are written in **Markdown**, plain text with a few marks:
 | `> Note` | A highlighted note |
 | `[Tailscale](https://tailscale.com)` | A link to a web site |
 | `[Scripts](05-scripts)` | A link to another help page |
-| `![Red pump](oakbarn/Pump_Red_Rip_On.png)` | A picture from a media folder |
+| `![Red pump](Images/Pump_Red_Rip_On.png)` | A picture from a media folder |
 | `---` | A line across the page |
 
 Tables are rows of `|` with a `|---|---|` line under the first row, like the one above. For a picture, first add it on the [Media](07-media) screen, then use **Copy path**.

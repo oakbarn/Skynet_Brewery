@@ -139,6 +139,9 @@ button.big.cur { outline: 3px solid var(--accent); }
 .vdRow { display: flex; gap: 10px; align-items: center; }
 .vdRow .big { min-width: 64px; }
 .vdInput { width: 100%; font-size: 26px; padding: 10px; text-align: center; }
+.tmRow { justify-content: center; }
+.tmBox { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tmBox .vdInput { width: 3.4em; }
 textarea.vdInput { font-size: 18px; text-align: left; }
 @media (pointer: coarse) { button { min-height: 40px; } nav#views button { padding: 8px 12px; } }
 
