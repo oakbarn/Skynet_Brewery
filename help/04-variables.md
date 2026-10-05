@@ -27,9 +27,9 @@ The old **Global** class (from BruControl) is retired. When a BruControl file or
 | Time | `vKT_` | `00:00:00` |
 | Date Time | `vKDT_` | |
 | Boolean | `vKB_` | True or false. |
-| Switch | `vKSW_` | A slider; tap to flip it. |
-| Push Button | `vKPB_` | ON only while held. Lets go by itself if the screen loses WiFi. |
-| Momentary Button | `vKMB_` | A tap makes it true for a tenth of a second. |
+| Switch | `vKSW_` | A slider. It is a toggle: tap it ON and it stays ON, tap it again and it stays OFF. |
+| Push Button | `vKPB_` | ON only while held, OFF as soon as you let go. Lets go by itself if the screen loses WiFi. |
+| Pulse Button | `vKMB_` | A tap makes it true for a tenth of a second, however long you hold it. |
 
 ## vAPI kinds
 
