@@ -32,6 +32,7 @@
   <span class="simCtl admin-only">
     <label>Speed <select id="simSpeed"></select></label>
     <button data-skip="60">+1 min</button><button data-skip="300">+5 min</button><button data-skip="600">+10 min</button>
+    <label class="toggle"><span class="sw"><input type="checkbox" id="simAutoBar"><span class="swk"></span></span> Auto skip</label>
     <button id="simNext" class="primary" title="Jump to a few seconds before the next sleep end, timer wait or countdown">Skip to next event</button>
   </span>
   <span id="simNextInfo" class="muted"></span>
@@ -278,13 +279,18 @@
       <h3>Testing mode</h3>
       <label class="toggle"><input type="checkbox" id="setFresh"> Start fresh logins after each update</label>
       <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>
-      <h3 id="simulation">Simulation</h3>
+      <h3 id="simulation">Simulation (test mode)</h3>
       <p class="muted">Try out a brew without touching any hardware. While it is on, every board is replaced by the simulator: processes, timers, alarms and the screen work as on brew day, but heaters, pumps and valves are only pretend. Time can run faster, and can skip ahead so you do not wait out a 60 minute mash. Turning it on or off stops every process and turns every output off.</p>
       <div class="form row">
         <label class="toggle simSwitch"><span class="sw"><input type="checkbox" id="simOn"><span class="swk"></span></span> Simulation mode</label>
         <label>Speed <select id="simSpeedSet"></select></label>
         <label>"Skip to next event" stops this many seconds before it <input id="simLead" type="number" min="0" max="600" style="width:6em"></label>
       </div>
+      <div class="form row">
+        <label class="toggle simSwitch"><span class="sw"><input type="checkbox" id="simAuto"><span class="swk"></span></span> Auto skip</label>
+        <label>Watch each step for (seconds) <input id="simWatch" type="number" min="1" max="600" style="width:6em"></label>
+      </div>
+      <p class="muted"><b>Auto skip</b> needs no table: each step runs for the seconds above, then the clock skips to a few seconds before the next sleep end, timer wait or countdown, in every running Process (called ones and loopers too). A wait on a button or a temperature is never skipped: press the screen buttons as usual. Only time is skipped.</p>
       <h4>Time jumps</h4>
       <p class="muted">Skips ahead by itself in simulation mode. Example: when timer <b>tm_Mash</b> starts, wait <b>5</b> seconds, then jump ahead <b>00:50:00</b>; the mash timer goes from 00:00:05 to 00:50:05, so a 60 minute mash takes about 15 seconds of watching.</p>
       <div class="tblScroll"><table class="grid simJumps"><thead><tr><th>On</th><th>When</th><th>Name</th><th>Then wait (seconds)</th><th>Jump ahead (hh:mm:ss)</th><th>Note</th><th></th></tr></thead><tbody id="simJumps"></tbody></table></div>
