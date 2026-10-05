@@ -25,7 +25,7 @@ The table at the top shows each board and whether it is connected.
 In **Tabs > Edit layout > Add element**, the list groups devices by kind:
 
 - **Outputs**: on/off (relays), PWM %, analog 0-10 V or 4-20 mA. A **Pump** and a **Valve** are ready-made outputs with their pictures and flow points already set.
-- **Digital inputs**: switches, float and level switches, flow switches, interlocks.
+- **Digital inputs**: switches, float and level switches, flow switches, interlocks, and buttons. A **push button** is ON only while it is held and OFF when released. A **toggle button** stays ON after one press and OFF after the next. A **pulse button** gives one short ON per press.
 - **Temperature probes**: DS18B20, PT100, PT1000, thermocouples (K, J, T and more), NTC thermistors.
 - **Analog sensors**: 0-5 V, 0-10 V, 4-20 mA, pressure, level, pH (with two-point calibration).
 - **Flow meters** (pulse) and **vessel scales** (HX711 load cells, with tare and calibration).
