@@ -18,11 +18,15 @@
 
 **Element**: anything placed on a tab: an output, a reading, a variable, a timer, a picture.
 
-**Fitting**: a pipe part (tee, elbow, cross, cap, manual valve) placed as an IP type.
+**Fitting**: a pipe part (tee, elbow, cross, coupling, cap, manual valve) placed as an IP type.
+
+**Hose**: a flexible pipe that bends in curves, with an IP (a coupling) at both ends. See [Pipes, hoses and reducers](24-pipes-and-hoses).
 
 **Global**: BruControl's variable class. The panel turns Globals into vKonstant or vAPI variables when they are imported.
 
-**IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs.
+**imagePath_1, _2, _3**: the three picture paths of an item. `background = 1, 2 or 3` picks one; `name.image = "path"` changes imagePath_1. See [Pictures on items](25-picture-paths).
+
+**IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs. IPs only show in Edit layout.
 
 **Media folder**: a folder on the Pi that holds pictures and sounds. See [Media](07-media).
 
