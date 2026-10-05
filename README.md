@@ -77,7 +77,7 @@ Every sample has a **Recipe** tab (filled by a BeerXML import, including mash st
 | **On / off graphics** | A Digital Output's **Graphic when on** and **Graphic when off** are dropdowns with a small preview: green, red and grey LEDs, a lightning bolt (on and off) and the ball valve pictures. **Add new ...** takes any picture path in your media folders (for example `oakbarn/MyValve_On.png`) and keeps it in the list for every output. |
 | **Pick lists with Add new** | Wherever you pick from choices you get a dropdown, and lists that can grow end with **Add new ...**: every picture path (element images, on / off graphics, widget and vessel graphics, tab backgrounds; the list offers the sample pictures and every picture already used, with a preview), sound paths, **Units** (°F, °C, %, psi, gal, L, SG, pH ... ), vessel and equipment types, positions and standards, and colors (a **Custom** color is added to the color list). Fixed choices such as text alignment are plain dropdowns. Additions are kept in the settings and offered everywhere. |
 | **Switches and dropdowns** | A simple true / false setting is a switch (slide it on or off). A choice between more options is a dropdown. Every color is a dropdown of standard colors (Red, Green, Blue, Yellow, Orange, Purple, Copper, Brown, greys, White, Black) with a swatch; pick **Custom ...** for any other color. |
-| **vKonstant List** | A dropdown for a tab. Add element > vKonstant > **List (dropdown: Value + Text)**; its settings open with a two-column table: **Value** (a number) and **Text**. Example: `vKList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil, Chill; picking Boil sets the vKonstant to 2, and that number is what Processes read and trigger on (`if "vKList_BrewStatus" value == 2`). A Process that sets it to 3 makes the dropdown show Chill. **+ Add row** adds a choice, ✕ removes one. |
+| **vKonstant List** | A dropdown for a tab. Add element > vKonstant > **List (dropdown: Value + Text)**; its settings open with a two-column table: **Value** (a number) and **Text**. Example: `vKList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil, Chill; picking Boil sets the vKonstant to 2, and that number is what Processes read and trigger on (`if vKList_BrewStatus == 2`). A Process that sets it to 3 makes the dropdown show Chill. **+ Add row** adds a choice, ✕ removes one. |
 | **Older vessel widgets** | Pick the kind next to **Add equipment**: **Electric heated vessel**, **Gas heated vessel**, **Unheated mash tun**, **Cooling coil** or **Plate chiller**. The coil has IN and OUT IPs built in; the plate chiller has WORT IN / WORT OUT and WATER IN / WATER OUT, two circuits that never mix. Flow passes through them. Each has a **Background picture path** (empty = a plain drawn vessel), a **Label** with **position** (top, corners, center, bottom, above or below), **color**, **size** and **Show label**, and an optional **Heater** (the element or burner output): its heating strip or flames light up while that output is on. Drop an IP point on a vessel and it becomes one of its ports: it moves with the vessel, and pipes on it follow. |
 | **Pumps and valves** | A pump is a **Digital Output** device with **Kind = pump**: it comes with two built-in IPs, **IN** and **OUT**. A valve is a Digital Output with **Kind = valve**: it has a plain IP at each end, with no inlet or outlet side, and flow goes through it either way while it is open. The IPs sit on the long sides of its picture. Importing a BruControl file makes every output whose name starts with **VGC** a valve. A pump's head orientation is fixed, so there is no setting for it: use a picture that shows it. The **Add element** list has ready-made **Pump** and **Valve** Device Outputs with this already set: a Pump has IN on the left and OUT on the right, the red pump on/off pictures, tap = toggle and **Ask before changing** on; a Valve has one IP on top and one on the bottom, the ball-valve open/closed pictures, tap = toggle (no question), and its name and text hidden. Pick the **Device** and **Pin / channel** and you're done; anything else can be changed. A **Proportional valve** (also in the list) opens 0-100 %: it has an IP at each end like a valve, shows its percent open, passes flow whenever it is above 0 %, and tapping it lets you type the percent. It is meant to be an analog output (0-10 V or 4-20 mA, or PWM); until those output types are installed it is a vKonstant value holding the percent, which processes can set too. Start or end a pipe on them like any other IP. A closed valve blocks flow. A pump that is off does not: flow can pass through it either way, even backwards, when another pump drives it. |
 | **Elements** | `vKonstant`, `vAPI`, `shared`, `digitalOut`, `switch`, `digitalIn`, `temperature`, `analogIn`, `timer`, `alarm`, `label`. **Every element can have a background image path**, and on/off elements have separate on and off image paths. |
@@ -103,7 +103,7 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 
 | Kind | Prefix | Notes |
 |---|---|---|
-| Graphic | `vK_` | The value is an image path inside a media folder. Shows the picture; a process can swap it: `"vK_Burner_Pic" value = "oakbarn/BurnerFlame.png"` |
+| Graphic | `vK_` | The value is an image path inside a media folder. Shows the picture; a process can swap it: `vK_Burner_Pic = "oakbarn/BurnerFlame.png"` |
 | String | `vKS_` | |
 | Long String | `vKL_` | Linked to a text file inside a media folder (a network drive works once it is added under Settings > Media folders). Editing the file updates the panel within a second; setting the value from the panel or a process saves the file. `"vKL_Notes" file = "notes/other.txt"` links another file. |
 | Value | `vKV_` | |
@@ -112,7 +112,7 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 | Boolean | `vKB_` | |
 | Switch | `vKSW_` | Boolean shown as a slider; tap to flip it. |
 | Push Button | `vKPB_` | LED button that is ON only while held. If the screen holding it closes or loses WiFi, it lets go by itself within 1.5 seconds. |
-| Momentary Button | `vKMB_` | Tap (or a process sets it true): true for 100 ms, then off. `wait "vKMB_Go" value == true` always catches it. |
+| Momentary Button | `vKMB_` | Tap (or a process sets it true): true for 100 ms, then off. `wait vKMB_Go == true` always catches it. |
 
 **vAPI**: processes, the API (`/api/vapi`; the old `/api/globals` address still works) and the database. Kinds: String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
 
@@ -141,23 +141,27 @@ Processes (BruControl and older versions of this panel call them scripts) are te
 
 **The saved file is read every time a process starts**, so a process can never run an old copy from memory. A process that is running while you edit it is marked "edited since start - stop and start to apply".
 
-Most BruControl script lines work unchanged:
+Process lines (the name alone is the main value, other attributes use a dot; BruControl lines like `"V_BK_In" state = true` still run and are rewritten in this style when a Process is saved or imported):
 
 ```
 new value vVCount          new string vSMsg     new bool vB_Testing     new time vT     new datetime vDT
-vVCount = 3                vVCount += 1         vSMsg = "Temp " + "BK_Temp" value
-"V_BK_In" state = true     "gblS_Msg" value = vSMsg     "tm_Whirlpool" value = 00:20:00
-if vVCount > 2 && "Pump_Red" state == true
+vVCount = 3                vVCount += 1         vSMsg = "Temp " + BK_Temp
+V_BK_In = true             gblS_Msg = vSMsg     tm_Whirlpool = 00:20:00     alm_Hops = true
+my_Widget.visible = false  tm_Mash.countdown = true     tm_Mash.displayname = "Mash"
+if vVCount > 2 && Pump_Red == true
 elseif ...
 else
 endif
 [Label]                    goto "Label"
-sleep 1000                 wait "BK_Temp" value <= 154
+step "Mash in"             (a numbered section: 1.00000, 1.00001 ... renumbered on every save)
+sleep 1000                 wait BK_Temp <= 154
 start "Other_Script"       stop "Other_Script"     start "tm_Whirlpool"   reset "tm_Whirlpool"   start "alm_Hops"
 print "text"               show tab "Brewery"   (or show workspace)     log "vAV_Kettle_Temp"   (writes that vAPI to the database now)
 vDT = now                  vT = vDT2 - vDT  (time between)   vDT = vDT + 00:10:00
-BF precision = 4           "Euler's number" = 2.718   (quoted variable names work)
+BF.precision = 4           "Euler's number" = 2.718   (quoted variable names work)
 ```
+
+Names have no spaces (a space typed in a name becomes `_`). Processes have a class (Flow, Sub, Repeat, Looper) that decides how their steps are numbered, and the editor fills in names and attributes as you type. Details: Help > Process language and steps (`help/19-process-language.md`).
 
 **Differences from BruControl**
 

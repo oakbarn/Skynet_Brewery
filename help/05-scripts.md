@@ -19,23 +19,28 @@ The saved file is read every time a process starts, so it never runs an old copy
 ```
 new value vVCount              make a number variable
 vVCount = 3                    set it
-"V_BK_In" state = true         open a valve (turn an output on)
-"gblS_Msg" value = "Mash in"   set a variable
-"tm_Whirlpool" value = 00:20:00
+V_BK_In = true                 open a valve (turn an output on)
+gblS_Msg = "Mash in"           set a variable
+tm_Whirlpool = 00:20:00        set a timer
 start "tm_Whirlpool"           start a timer
-wait "BK_Temp" value <= 154    wait for a temperature
+alm_Hops = true                sound an alarm
+wait BK_Temp <= 154            wait for a temperature
 sleep 1000                     wait 1 second (1000 ms)
-if vVCount > 2 && "Pump_Red" state == true
+my_Widget.visible = false      hide something on the screen
+if vVCount > 2 && Pump_Red == true
 elseif ...
 else
 endif
 [Label]  and  goto "Label"     jump
-start "Other_Script"           start another script
+step "Mash in"                 mark a step (numbered when you save)
+start "Other_Process"          start another process
 print "text"                   write to Output
 show tab "Brewery"             switch every screen to a tab
-log "gblV_Kettle_Temp"         write a value to the database now
+log "vAV_Kettle_Temp"          write a value to the database now
 // a comment
 ```
+
+The name alone means its main value, and other attributes use a dot. See [Process language and steps](19-process-language) for the full list, autofill, Process classes and step numbers.
 
 ## Differences from BruControl
 

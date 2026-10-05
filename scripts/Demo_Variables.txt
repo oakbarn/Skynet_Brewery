@@ -1,18 +1,18 @@
 // Demo of the vKonstant and vAPI variables (Variables Demo workspace)
 // Starting this script writes vAS_Batch_Status to the database ("On demand only").
-"vAS_Batch_Status" value = "Demo running"
-"vKDT_Brew_Day" value = now
-"vADT_Last_Brew" value = now
-"vK_Burner_Pic" value = "oakbarn/Burner No Flame.png"
-print "Brewer: " + "vKS_Brewer" value
-print "Strike target: " + "vKV_Strike_Target" value
-if "vKSW_Testing" value == true
+vAS_Batch_Status = "Demo running"
+vKDT_Brew_Day = now
+vADT_Last_Brew = now
+vK_Burner_Pic = "oakbarn/Burner No Flame.png"
+print "Brewer: " + vKS_Brewer
+print "Strike target: " + vKV_Strike_Target
+if vKSW_Testing == true
   print "Testing mode is on"
 endif
 print "Press Ping (the momentary button) on the Variables Demo workspace"
-wait "vKMB_Ping" value == true
+wait vKMB_Ping == true
 print "Ping seen - lighting the burner picture"
-"vK_Burner_Pic" value = "oakbarn/BurnerFlame.png"
-"vKL_Brew_Notes" value = "vKL_Brew_Notes" value + "\n- Ping pressed " + now
-"vAS_Batch_Status" value = "Ping pressed"
+vK_Burner_Pic = "oakbarn/BurnerFlame.png"
+vKL_Brew_Notes = vKL_Brew_Notes + "\n- Ping pressed " + now
+vAS_Batch_Status = "Ping pressed"
 log "vAS_Batch_Status"

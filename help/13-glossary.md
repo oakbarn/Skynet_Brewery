@@ -28,6 +28,10 @@
 
 **Process**: a text file of brew steps the panel runs by itself. See [Processes](05-scripts).
 
+**Process class**: Flow, Sub, Repeat or Looper: what a Process is for. See [Process language and steps](19-process-language).
+
+**Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](19-process-language).
+
 **Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 
 **Simulator**: a pretend board, so you can try everything without hardware.
