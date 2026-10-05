@@ -7,8 +7,7 @@ Every way needs **Node.js** (free, from <https://nodejs.org>). The installers ge
 | File in the release | What it is for |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Windows installer. The whole panel is inside it. |
-| `Skynet_BrewPanel_Full_<date>.zip` | The whole panel: for a first install by hand, and for Mac, Linux and the Pi |
-| `Skynet_BrewPanel_Update_<date>.zip` | Updating by hand. It has no `config`, `data`, `media` or `scripts`, so it can't overwrite yours. |
+| `Skynet_BrewPanel_<date>.zip` | The panel itself: a first install or an update by hand, and for Mac, Linux and the Pi. It has no `config`, `data`, `media` or `scripts` folders, so unzipping it over your panel can't replace yours. |
 | `Install Skynet Brewer.command` | Mac installer |
 | `install-skynet-brewer.sh` | Linux and Raspberry Pi installer |
 | `Skynet_Brewer.bat` | Sample Windows start file |
@@ -16,7 +15,7 @@ Every way needs **Node.js** (free, from <https://nodejs.org>). The installers ge
 
 The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewPanel`** in your home folder on a Mac, Linux or a Pi. Every installer puts a **Skynet Brewer** shortcut on the Desktop.
 
-> **Updating?** Stop the panel first, then run the same installer again. It never overwrites your layout and settings (`config`), brew data, users and passwords (`data`), pictures and sounds (`media`) or processes (`scripts`). See [Updating to a new version](18-updating).
+> **Updating?** Stop the panel first, then run the same installer again, or unzip the zip over the panel. Neither one replaces your layout and settings (`config`), brew data, users and passwords (`data`), pictures and sounds (`media`) or processes (`scripts`). See [Updating to a new version](18-updating).
 
 ## Windows: the installer
 
@@ -32,8 +31,8 @@ To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. It asks before de
 ## Windows: by hand, with a .bat file
 
 1. Install Node.js (the **LTS** version) from <https://nodejs.org>.
-2. Make the folder `C:\Brewing` and copy `Skynet_BrewPanel_Full_<date>.zip` into it.
-3. Right-click the zip, choose **Extract All…**, and extract into `C:\Brewing`. It makes the sub folder `C:\Brewing\BrewPanel` by itself. (If Windows suggests `C:\Brewing\Skynet_BrewPanel_Full_<date>`, change it to `C:\Brewing`.)
+2. Make the folder `C:\Brewing` and copy `Skynet_BrewPanel_<date>.zip` into it.
+3. Right-click the zip, choose **Extract All…**, and extract into `C:\Brewing`. It makes the sub folder `C:\Brewing\BrewPanel` by itself. (If Windows suggests `C:\Brewing\Skynet_BrewPanel_<date>`, change it to `C:\Brewing`.)
 4. Create a `.bat` file that starts the panel. Use the sample `Skynet_Brewer.bat` from the release, or make your own:
    1. Open a simple text editor such as **Notepad** or **Notepad++**. (Word works only if you save as Plain Text, so Notepad is easier.)
    2. Paste these lines:
@@ -57,7 +56,7 @@ The `start … timeout` line opens the browser 4 seconds later, so the panel has
 
 ## Mac
 
-1. Double-click `Skynet_BrewPanel_Full_<date>.zip`. Safari may already have unzipped it into a **BrewPanel** folder; that's fine.
+1. Double-click `Skynet_BrewPanel_<date>.zip`. Safari may already have unzipped it into a **BrewPanel** folder; that's fine.
 2. Put `Install Skynet Brewer.command` next to the zip (or the BrewPanel folder), or use the one inside `BrewPanel/install/mac`.
 3. Double-click **Install Skynet Brewer.command**. If macOS says it can't be opened, right-click it, choose **Open**, then **Open** again.
    - If Node.js is missing, the Node.js page opens. Install the **macOS Installer (.pkg)** for the LTS version, then run the installer again.
@@ -65,7 +64,7 @@ The `start … timeout` line opens the browser 4 seconds later, so the panel has
 
 ## Linux
 
-1. Put `install-skynet-brewer.sh` and the Full zip in the same folder.
+1. Put `install-skynet-brewer.sh` and the zip in the same folder.
 2. Open a terminal there and run `bash install-skynet-brewer.sh`. Don't put `sudo` in front; it asks for your password when it needs it. On Debian, Ubuntu, Mint and similar it installs Node.js if needed.
 3. It asks whether the panel should start by itself when the computer starts. Start it with **Skynet Brewer** on the Desktop or in the applications menu.
 
@@ -73,7 +72,7 @@ The `start … timeout` line opens the browser 4 seconds later, so the panel has
 
 Use Raspberry Pi OS (64-bit recommended) on a Pi 4 or newer.
 
-1. Copy `install-skynet-brewer.sh` and the Full zip to the Pi (a USB stick, or download them on the Pi).
+1. Copy `install-skynet-brewer.sh` and the zip to the Pi (a USB stick, or download them on the Pi).
 2. Open a terminal in that folder and run `bash install-skynet-brewer.sh`.
 3. It installs Node.js, lets the panel use USB boards, and sets the panel to **start by itself every time the Pi starts**. Say **Yes** when it asks.
 4. At the end it prints the Pi's address, for example `http://192.168.1.50:8080`. Open that on any phone or computer at home. **Skynet Brewer** on the Pi's own desktop just opens the panel in the Pi's browser.
