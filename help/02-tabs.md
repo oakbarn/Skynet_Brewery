@@ -24,6 +24,7 @@ Tick **Edit layout**. A dashed bar appears with these buttons:
 | **Add equipment** | A vessel: electric or gas heated kettle, mash tun, cooling coil, plate chiller. |
 | **Add IP** | A flow point or pipe fitting (see below). |
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
+| **Draw hose** | Like a pipe, but it bends in smooth curves. Loose ends get a coupling. See [Pipes, hoses and reducers](23-pipes-and-hoses). |
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. Press again to unlock. |
 | **Tab…** | Name, size, background picture and **Pipe size** of this tab. |
 | **New tab** | Adds a tab. |
@@ -41,13 +42,15 @@ A timer shows hh:mm:ss with four buttons: **▶** start, **■** stop, **↺** r
 
 1. Put an **IP** (Initial Point) where a flow starts or ends: a pump outlet, a vessel port, a drain.
 2. Press **Draw pipe**, click the start IP, click the bends, then click the end IP.
-3. Pumps come with **IN** and **OUT** IPs; valves have **A** and **B**.
+3. Pumps come with **IN** and **OUT** IPs; a valve has one IP at each end.
+
+IPs only show while **Edit layout** is ticked.
 
 The panel works out the flow itself: it starts at a running pump and follows pipes, fittings and open valves. A closed valve stops it. A pipe only shows flow when it is joined IP to IP; in Edit layout a **red ring** marks a pipe end that is not on an IP yet.
 
-**Fittings** are IP types: straight pipe, tee, 90° and 45° elbow, cross, **manual valve** (tap it to open or close) and **pipe cap**. Set **Turn (degrees)** to point them the right way.
+**Fittings** are IP types: straight pipe, tee, 90° and 45° elbow, cross, **manual valve** (tap it to open or close), **coupling** and **pipe cap**. Set **Turn (degrees)** to point them the right way.
 
-**Pipe size** (in **Tab…**) sets the size of every pipe and fitting on that tab together, so they always match.
+Each pipe and hose has its own **Size** (1/2", 3/4", 1" ... or mm). **Pipe size** (in **Tab…**) sets how thick a 1/2" pipe is drawn on that tab; other sizes and fittings scale from it, and a **reducer** appears where two sizes meet. See [Pipes, hoses and reducers](23-pipes-and-hoses).
 
 ## Vessels
 
