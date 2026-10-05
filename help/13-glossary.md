@@ -20,6 +20,8 @@
 
 **Global**: BruControl's variable class. The panel turns Globals into vKonstant or vAPI variables when they are imported.
 
+**imagePath_1, _2, _3**: the three picture paths of an item. `background = 1, 2 or 3` picks one; `name.image = "path"` changes imagePath_1. See [Pictures on items](23-picture-paths).
+
 **IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs.
 
 **Media folder**: a folder on the Pi that holds pictures and sounds. See [Media](07-media).

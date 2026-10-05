@@ -30,8 +30,11 @@ my_Widget.visible = false
 tm_Mash.countdown = true
 tm_Mash.displayname = "Mash rest"
 Kettle_Temp.background = 2
+Pump_Red.image = "Images/RedPump.png"
 if Hop_Text.visible == true
 ```
+
+`.image` changes the item's picture: the path goes into imagePath_1 and background becomes 1. `.background = 1`, `2` or `3` shows imagePath_1, 2 or 3, and any other number shows no picture. See [Pictures on items](23-picture-paths).
 
 Any attribute with only two choices is `true` or `false`:
 
