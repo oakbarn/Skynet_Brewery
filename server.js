@@ -1,4 +1,4 @@
-// OakBarn Brew Panel - server
+// Skynet Brew Panel - server
 // Run:  node --no-warnings server.js   then open http://<this computer>:8080 in any browser
 import http from 'node:http';
 import fs from 'node:fs';
@@ -131,21 +131,9 @@ function sendFile(req, res, file) {
 // Images, sounds and text files are given by PATH. Only files inside the folders listed in config "mediaRoots" are served.
 const resolveMedia = p => store.resolveMedia(p);
 
-// BruControl ran on Windows, where file names ignore upper/lower case. Find "Wave/X.WAV" as "wave/x.wav" too.
-function findMedia(p) {
-  const full = resolveMedia(p);
-  if (!full || fs.existsSync(full)) return full;
-  const root = store.mediaRoots().find(r => full.startsWith(r + path.sep));
-  if (!root) return full;
-  let cur = root;
-  for (const part of path.relative(root, full).split(path.sep)) {
-    let names; try { names = fs.readdirSync(cur); } catch { return full; }
-    const hit = names.find(n => n === part) ?? names.find(n => n.toLowerCase() === part.toLowerCase());
-    if (!hit) return full;
-    cur = path.join(cur, hit);
-  }
-  return cur;
-}
+// BruControl ran on Windows, where file names ignore upper/lower case. Find "Wave/X.WAV" as "wave/x.wav" too
+// (and the old picture folder name oakbarn/ as Images/), see Store.findMedia
+const findMedia = p => store.findMedia(p);
 
 function apiKeyOk(req, url) {
   const key = store.config.apiKey;
@@ -215,7 +203,7 @@ async function route(req, res) {
   if (p.startsWith('/auth/')) {
     if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
     const login = (tok, extra = {}) => { res.setHeader('Set-Cookie', auth.cookie(tok, viaHttps(req))); return send(res, 200, { ok: true, ...extra }); };
-    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady() });
+    if (p === '/auth/status' && m === 'GET') return ok(res, { ok: true, user: me, setup: auth.needsSetup(), setupAllowed: isPrivateAddress(ip), roles: ROLE_INFO, title: store.config.title || 'Skynet Brew Panel', codeSignIn: messaging.emailReady() || messaging.twilioReady() });
     if (p === '/auth/setup' && m === 'POST') {
       if (!auth.needsSetup()) return fail(res, 400, 'Setup is already done. Sign in instead.');
       if (!isPrivateAddress(ip)) return fail(res, 403, 'First-time setup only works from your own network');
@@ -239,7 +227,7 @@ async function route(req, res) {
       if (made) {
         const contact = auth.getContact(made.name);
         if (messaging.targets(contact).length) {
-          const title = store.config.title || 'Brew Panel';
+          const title = store.config.title || 'Skynet Brew Panel';
           messaging.deliver(contact, `${title} sign-in code`, `${made.code} is your ${title} sign-in code. It works once, for 10 minutes. If you did not ask for it, change your password.`)
             .catch(e => console.error(`Sign-in code for ${made.name} not sent: ${e.message}`));
         }
@@ -375,7 +363,7 @@ async function route(req, res) {
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
-    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists']) if (k in body) store.config[k] = body[k];
+    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths']) if (k in body) store.config[k] = body[k];
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
@@ -398,7 +386,7 @@ async function route(req, res) {
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
   if (p === '/ui/import/brucontrol' && m === 'POST') {
     const q = url.searchParams;
-    const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'oakbarn', simulate: q.get('simulate') !== '0' });
+    const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'Images', simulate: q.get('simulate') !== '0' });
     const missingMedia = conv.media.filter(f => { const full = findMedia(f); return !full || !fs.existsSync(full); });
     const out = { summary: conv.summary, warnings: conv.warnings, missingMedia, mediaCount: conv.media.length, autostart: conv.autostart };
     if (q.get('preview') === '1') return ok(res, { ok: true, preview: true, ...out });
@@ -488,7 +476,7 @@ const server = http.createServer((req, res) => {
 });
 const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
 server.listen(PORT, () => {
-  console.log(`Brew Panel running:  http://localhost:${PORT}`);
+  console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();
   if (loginsCleared) console.log('New version installed: all logins were cleared (testing mode). Create the admin account again.');

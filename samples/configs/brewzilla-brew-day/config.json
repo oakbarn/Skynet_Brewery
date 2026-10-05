@@ -126,7 +126,7 @@
    "displayName": "Hop alarm (tap = added)",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
-   "imageOn": "oakbarn/AlarmBitter.png",
+   "imageOn": "Images/AlarmBitter.png",
    "hideName": true,
    "activeText": ""
   },

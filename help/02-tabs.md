@@ -27,9 +27,13 @@ Tick **Edit layout**. A dashed bar appears with these buttons:
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. Press again to unlock. |
 | **Tab…** | Name, size, background picture and **Pipe size** of this tab. |
 | **New tab** | Adds a tab. |
-| **Save layout** / **Cancel** | Keep or throw away your changes. Nothing is changed until you save. |
+| **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Unticking **Edit layout** asks the same. Nothing is changed until you save. |
 
 Drag items to move them, drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.
+
+## Timers
+
+A timer shows hh:mm:ss with four buttons: **▶** start, **■** stop, **↺** reset to 00:00:00, and **Set**. **Set** opens a box for hours : minutes : seconds (for example 01:30:00). You can also type the whole time, like `1:30:00`, into the first box. A running timer keeps running from the new time; a countdown timer counts down from it.
 
 > Every element can have a background picture. On/off items have a separate picture for on and for off.
 

@@ -2,7 +2,7 @@
 # Copy to /etc/systemd/system/brewpanel.service, change User and WorkingDirectory, then:
 #   sudo systemctl daemon-reload && sudo systemctl enable --now brewpanel
 [Unit]
-Description=OakBarn Brew Panel
+Description=Skynet Brew Panel
 After=network-online.target
 
 [Service]

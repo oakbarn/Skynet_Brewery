@@ -37,6 +37,23 @@ log "gblV_Kettle_Temp"         write a value to the database now
 // a comment
 ```
 
+## Display names
+
+Every element has a **displayname**: the name shown on the tab. A process can change it on any kind of element, including String, Value and Graphic vKonstants, timers, alarms and outputs:
+
+```
+"tm_Delay_W1" displayname = "1 Minute Delay"
+"vKS_Brewery_Top" displayname = "Mash"
+```
+
+(In BruControl this failed on a Global String; here it works the same on every type.)
+
+## Files that are not on the Brain
+
+When you save a process with a new file path that is not on the Brain (the Raspberry Pi), a warning pops up. That happens for a Windows path such as `C:\BruControl\Media\Hops.wav`, a path outside the media folders, or a file that is not in a media folder yet. Phones and other computers cannot reach those files. Put the file in a media folder with the [Media](07-media) screen and use its path there, for example `sounds/Hops.wav`.
+
+Tick **Do not show this warning again** to stop the warnings. Turn them back on in **Settings > Panel settings**.
+
 ## Differences from BruControl
 
 - Labels and gotos can be anywhere, even inside if/endif.

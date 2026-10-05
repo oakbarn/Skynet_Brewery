@@ -21,6 +21,7 @@ let view = 'workspace', wsName = null, zoom = 'fit';
 try { zoom = localStorage.getItem('bp.zoom') || 'fit'; } catch { /* private window: default */ }
 if (zoom === 'page') zoom = 'fit';         // "Whole tab" is now "Fit screen"
 
+let knownPaths = new Set();   // file paths in the open process that were already warned about (not on the Brain)
 let editing = false, draft = null, sel = null;   // sel = {kind:'el'|'gfx', id}
 let soundOn = false;
 const audios = new Map();
@@ -47,8 +48,8 @@ async function load() {
   document.body.classList.add('role-' + S.me.role);
   $('#whoName').textContent = `${S.me.name} (${S.me.role})`;
   $('#code').readOnly = !can('admin');
-  $('#title').textContent = S.config.title || 'Brew Panel';
-  document.title = S.config.title || 'Brew Panel';
+  $('#title').textContent = S.config.title || 'Skynet Brew Panel';
+  document.title = S.config.title || 'Skynet Brew Panel';
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   fillAddType();
   renderAll();
@@ -196,8 +197,8 @@ const EQ = {
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'samples/led_green.svg'], ['LED red', 'samples/led_red.svg'], ['LED off (grey)', 'samples/led_off.svg'],
   ['Lightning bolt on', 'samples/bolt_on.svg'], ['Lightning bolt off', 'samples/bolt_off.svg'],
-  ['Ball valve open (horizontal)', 'oakbarn/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'oakbarn/Valve_Ball_ClosedH_1.png'],
-  ['Ball valve open (vertical)', 'oakbarn/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'oakbarn/Valve_Ball_ClosedV-1x1.png']];
+  ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
+  ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -432,7 +433,8 @@ function buildEl(e) {
   if (e.type === 'timer') n.append(h('div', { class: 'btns' },
     h('button', { title: 'Start', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', true); } }, '▶'),
     h('button', { title: 'Stop', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', false); } }, '■'),
-    h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺')));
+    h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺'),
+    h('button', { class: 'tmSet', title: 'Set the time (hh:mm:ss)', onclick: ev => { ev.stopPropagation(); timerSetDialog(e); } }, 'Set')));
   if (editing) { editDeco(n, e); if (sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
   fillEl(n, e);
   return n;
@@ -725,7 +727,7 @@ function valueDialog(t) {
   const num = t.dataType === 'value', k = vkKind(t);
   const inp = t.dataType === 'string' && k !== 'graphic'
     ? h('textarea', { class: 'vdInput', rows: k === 'longstring' ? 12 : 3 }, v.value ?? '')
-    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: { time: 'hh:mm:ss', datetime: 'mm/dd/yyyy hh:mm:ss' }[t.dataType] ?? (k === 'graphic' ? 'image path, e.g. oakbarn/BurnerFlame.png' : '') });
+    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: { time: 'hh:mm:ss', datetime: 'mm/dd/yyyy hh:mm:ss' }[t.dataType] ?? (k === 'graphic' ? 'image path, e.g. Images/BurnerFlame.png' : '') });
   const step = +t.step || 1;
   const bump = k => { const x = (parseFloat(inp.value) || 0) + k * step; inp.value = t.precision !== undefined && t.precision !== '' ? x.toFixed(+t.precision) : String(+x.toFixed(6)); };
   const done = ok => {
@@ -742,6 +744,38 @@ function valueDialog(t) {
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
   inp.addEventListener('keydown', ke => { if (ke.key === 'Enter' && inp.tagName === 'INPUT') { ke.preventDefault(); done(true); } });
   d.showModal(); setTimeout(() => { inp.focus(); inp.select?.(); }, 50);
+}
+
+// Timer: Set button. Hours : minutes : seconds in three boxes (00:00:00), keeps running or stopped as it was
+function timerSetDialog(t) {
+  const v = S.values[t.name] || {};
+  const cur = String(v.value ?? '00:00:00').split(':').map(x => parseInt(x, 10) || 0);
+  while (cur.length < 3) cur.unshift(0);
+  const d = $('#valDlg'); d.innerHTML = '';
+  const box = (val, label) => h('label', { class: 'tmBox' }, h('input', { class: 'vdInput', value: String(val).padStart(2, '0'), inputmode: 'numeric', 'aria-label': label,
+    onfocus: ev => ev.target.select() }), h('span', { class: 'muted' }, label));
+  const hh = box(cur[0], 'hours'), mm = box(cur[1], 'minutes'), ss = box(cur[2], 'seconds');
+  const ins = [hh, mm, ss].map(b => b.querySelector('input'));
+  const done = ok => {
+    if (ok) {
+      const [H, M, Sx] = ins.map(i => i.value.trim() === '' ? 0 : Number(i.value.trim()));
+      if (![H, M, Sx].every(x => Number.isInteger(x) && x >= 0)) return toast('Use whole numbers, for example 01:30:00', true);
+      if (M > 59 || Sx > 59) return toast('Minutes and seconds go up to 59', true);
+      setProp(t.name, 'value', [H, M, Sx].map(x => String(x).padStart(2, '0')).join(':'));
+    }
+    d.close();
+  };
+  // typing or pasting a whole time like 1:30:00 into any box fills all three
+  for (const i of ins) i.addEventListener('input', () => {
+    const m = /^(\d+):(\d{1,2})(?::(\d{1,2}))?$/.exec(i.value.trim());
+    if (m) { const parts = m[3] === undefined ? [0, m[1], m[2]] : [m[1], m[2], m[3]]; ins.forEach((x, k) => { x.value = String(parts[k]).padStart(2, '0'); }); }
+  });
+  for (const i of ins) i.addEventListener('keydown', ke => { if (ke.key === 'Enter') { ke.preventDefault(); done(true); } });
+  d.append(h('div', { class: 'vdTitle' }, `${v.displayname ?? t.name} - set time`),
+    h('div', { class: 'vdRow tmRow' }, hh, h('b', {}, ':'), mm, h('b', {}, ':'), ss),
+    h('div', { class: 'muted' }, v.running ? 'It keeps running from the new time.' : ((v.type ?? t.timerType) === 'countdown' ? 'Counts down from this time when started.' : 'Counts up from this time when started.')),
+    h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
+  d.showModal(); setTimeout(() => { ins[0].focus(); ins[0].select(); }, 50);
 }
 
 // Scale: Tare (zero it now) or calibrate with a known weight
@@ -1025,20 +1059,43 @@ function finishPipe(to) {
   $('#editHint').textContent = '';
 }
 
+// Leaving Edit layout with changes: Save, or Exit without Saving (Fritz: OK / Cancel was confusing). Esc or "Keep editing" stays in Edit layout.
+const layoutChanged = () => editing && JSON.stringify(draft) !== JSON.stringify(S.config);
+function leaveLayoutDialog() {
+  return new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    const close = v => { d.oncancel = null; d.close(); res(v); };
+    d.append(h('div', { class: 'vdTitle' }, 'Leave Edit layout?'),
+      h('p', {}, 'You have changes to this layout that are not saved yet.'),
+      h('div', { class: 'vdBtns' },
+        h('button', { type: 'button', class: 'big primary', onclick: () => close('save') }, 'Save'),
+        h('button', { type: 'button', class: 'big danger', onclick: () => close('discard') }, 'Exit without Saving')),
+      h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => close(undefined) }, 'Keep editing')));
+    d.oncancel = () => res(undefined);
+    d.showModal();
+  });
+}
+async function leaveLayout() {
+  if (!layoutChanged()) return setEditing(false);
+  const r = await leaveLayoutDialog();
+  if (r === 'save') return saveLayout();
+  if (r === 'discard') return setEditing(false);
+  $('#editMode').checked = true;
+}
 $('#editMode').addEventListener('change', e => {
-  if (!e.target.checked && editing && JSON.stringify(draft) !== JSON.stringify(S.config) && !confirm('Discard layout changes?')) { e.target.checked = true; return; }
+  if (!e.target.checked && editing) { e.target.checked = true; return leaveLayout(); }
   setEditing(e.target.checked);
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'oakbarn/Pump_Red_Rip_On.png', imageOff: 'oakbarn/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Pump_Red_Rip_On.png', imageOff: 'Images/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a vKonstant value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'oakbarn/Valve_Ball_OpenH_1.png', imageOff: 'oakbarn/Valve_Ball_ClosedH_1.png' };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Valve_Ball_OpenH_1.png', imageOff: 'Images/Valve_Ball_ClosedH_1.png' };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'vKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
   },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'oakbarn/Valve_Ball_OpenV-1x1.png', imageOff: 'oakbarn/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Valve_Ball_OpenV-1x1.png', imageOff: 'Images/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
@@ -1178,11 +1235,12 @@ $('#addWs').onclick = () => {
   draft.workspaces.push({ name: n, width: 1600, height: 900 }); wsName = n; renderTabs(); renderWs();
 };
 $('#wsProps').onclick = () => editWorkspace();
-$('#saveLayout').onclick = guard(async () => {
+const saveLayout = guard(async () => {
   await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics });
   toast('Layout saved'); editing = false; await load(); setEditing(false);
 });
-$('#cancelLayout').onclick = () => setEditing(false);
+$('#saveLayout').onclick = saveLayout;
+$('#cancelLayout').onclick = () => leaveLayout();
 $('#zoom').value = zoom;
 $('#zoom').onchange = e => { zoom = e.target.value; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); };
 let fitTimer;
@@ -1491,7 +1549,7 @@ function dialog(title, fields, obj, canDelete) {
     body.onchange = ev => {
       const t = ev.target;
       if ((t.dataset?.kind === 'vlist' || t.dataset?.kind === 'gpick') && t.value === '__add__') {
-        const k = t.dataset.k, prev = obj[k], text = (prompt({ units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture path in your media folders (for example oakbarn/MyValve_On.png)' : 'Add to this list')) || '').trim();
+        const k = t.dataset.k, prev = obj[k], text = (prompt({ units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture path in your media folders (for example Images/MyValve_On.png)' : 'Add to this list')) || '').trim();
         try { readFields(obj); } catch { }
         obj[k] = text || prev;
         if (text && !vList(t.dataset.list).includes(text)) {
@@ -1648,6 +1706,8 @@ async function openScript(name) {
   curScript = name; dirty = false; problems = [];
   $('#code').value = await api('GET', '/ui/scripts/' + encodeURIComponent(name));
   $('#scriptName').textContent = name;
+  knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
+  if (can('admin')) api('POST', '/ui/scripts/check', $('#code').value, true).then(r => { for (const x of r.offBrain ?? []) knownPaths.add(x.path); }).catch(() => { });
   renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole();
 }
 function updateScriptState() {
@@ -1691,7 +1751,27 @@ const saveScript = guard(async () => {
   const r = await api('PUT', '/ui/scripts/' + encodeURIComponent(curScript), $('#code').value, true);
   dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter();
   toast(problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved', !!problems.length);
+  const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
+  for (const x of added) knownPaths.add(x.path);
+  if (added.length && S.config.warnOffBrainPaths !== false) offBrainDialog(added);
 });
+// A path in a process that is not on the Brain (the Pi): files there cannot be reached from a phone or another computer
+function offBrainDialog(list) {
+  const d = $('#valDlg'); d.innerHTML = '';
+  const off = h('input', { type: 'checkbox' });
+  const close = guard(async () => {
+    d.close();
+    if (off.checked) { await api('PUT', '/ui/settings', { warnOffBrainPaths: false }); S.config.warnOffBrainPaths = false; toast('Path warnings are off. Turn them back on in Settings > Panel settings.'); }
+  });
+  d.append(h('div', { class: 'vdTitle' }, '⚠ File not on the Brain'),
+    h('p', {}, list.length === 1 ? 'This process uses a file that is not on the Brain (the Raspberry Pi):' : 'This process uses files that are not on the Brain (the Raspberry Pi):'),
+    h('ul', {}, ...list.map(x => h('li', {}, h('code', {}, x.path), ` (line ${x.line}) ${x.why}.`))),
+    h('p', {}, 'Files that are not on the Brain cannot be reached remotely, from your phone or another computer. Put the file in a media folder with the Media screen and use its path there, for example ', h('code', {}, 'sounds/bell.wav'), '.'),
+    h('label', { class: 'check' }, off, ' Do not show this warning again'),
+    h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big primary', onclick: close }, 'OK')));
+  d.oncancel = () => { d.oncancel = null; close(); };
+  d.showModal();
+}
 $('#saveScript').onclick = saveScript;
 $('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; renderProblems(); updateGutter(); });
 $('#startScript').onclick = guard(async () => {
@@ -1958,6 +2038,7 @@ function renderSettings() {
   const c = S.config;
   sampleCards($('#sampleList')).catch(e => toast(e.message, true));
   $('#setTitle').value = c.title || '';
+  $('#setWarnPaths').checked = c.warnOffBrainPaths !== false;
   $('#setMedia').value = (c.mediaRoots || []).join('\n');
   $('#setKey').value = c.apiKey || '';
   $('#setBeer').value = JSON.stringify(c.beerxml || {}, null, 2);
@@ -2036,6 +2117,11 @@ $('#msTest').onclick = guard(async () => {
   catch (e) { $('#msResult').textContent = e.message.includes('No email or text') ? 'Put your own email or mobile number under "Sign-in codes" in My account first.' : e.message; throw e; }
 });
 
+$('#setWarnPaths').onchange = guard(async ev => {
+  await api('PUT', '/ui/settings', { warnOffBrainPaths: ev.target.checked });
+  S.config.warnOffBrainPaths = ev.target.checked;
+  toast(ev.target.checked ? 'You will be warned about files that are not on the Brain' : 'Path warnings are off');
+});
 $('#setFresh').onchange = guard(async ev => {
   await api('PUT', '/ui/settings', { resetLoginsOnUpdate: ev.target.checked });
   S.config.resetLoginsOnUpdate = ev.target.checked;
