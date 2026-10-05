@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Builds a Skynet Brewer release in release/ (MIT License, Copyright (c) OakBarn Brewery 2026):
-#   Skynet_BrewPanel_Full_<version>.zip    the whole panel in a BrewPanel folder (no data/, no node_modules), for a first install
-#   Skynet_BrewPanel_Update_<version>.zip  the same without config/, media/ and scripts/, so unzipping it over a panel keeps yours
+#   Skynet_BrewPanel_<version>.zip         the panel in a BrewPanel folder, for a first install AND for updates: it has no
+#                                          data/, config/, media/ or scripts/ (their samples are in defaults/), so it never replaces yours
 #   Skynet_Brewer_Setup_<version>.exe     Windows installer (needs NSIS: sudo apt install nsis)
 #   Install Skynet Brewer.command, install-skynet-brewer.sh, Skynet_Brewer.bat, ReadMe.txt
 # Usage: bash tools/build-release.sh [version]     (version defaults to today's date, e.g. 2026-10-05)
@@ -21,29 +21,22 @@ git ls-files -z --cached --others --exclude-standard | grep -zEv '^(release/|\.g
 done
 chmod +x "$STAGE/install/linux/install-skynet-brewer.sh" "$STAGE/install/mac/Install Skynet Brewer.command"
 
-# Your folders: an update never overwrites them (data/ is never in a release at all)
-USER_DIRS="config media scripts"
+# Your folders (config, media, scripts) are NOT in the zip. Their samples go in defaults/, and the panel copies them
+# into place on its first start (lib/seed.js). So unzipping a new version over a panel can never replace yours.
+# data/ is never in a release at all.
+mkdir -p "$STAGE/defaults"
+for d in config media scripts; do [ -d "$STAGE/$d" ] && mv "$STAGE/$d" "$STAGE/defaults/$d"; done
 
-FULL="Skynet_BrewPanel_Full_$VERSION.zip"
-UPDATE="Skynet_BrewPanel_Update_$VERSION.zip"
+ZIP="Skynet_BrewPanel_$VERSION.zip"
 rm -f "$OUT"/Skynet_BrewPanel_*.zip
-( cd "$OUT/stage" && zip -qr -X "../$FULL" BrewPanel )
-echo "Built $OUT/$FULL"
-EXCL=(); for d in $USER_DIRS; do EXCL+=(-x "BrewPanel/$d/*"); done
-( cd "$OUT/stage" && zip -qr -X "../$UPDATE" BrewPanel "${EXCL[@]}" )
-echo "Built $OUT/$UPDATE"
-
-# The Windows installer gets the same files split in two: program/ (always replaced) and user/ (never overwritten)
-NSIS_SRC="$OUT/stage/nsis"
-mkdir -p "$NSIS_SRC/program" "$NSIS_SRC/user"
-cp -a "$STAGE/." "$NSIS_SRC/program/"
-for d in $USER_DIRS; do [ -d "$NSIS_SRC/program/$d" ] && mv "$NSIS_SRC/program/$d" "$NSIS_SRC/user/$d"; done
+( cd "$OUT/stage" && zip -qr -X "../$ZIP" BrewPanel )
+echo "Built $OUT/$ZIP"
 
 cp -p install/ReadMe.txt install/windows/Skynet_Brewer.bat install/linux/install-skynet-brewer.sh "install/mac/Install Skynet Brewer.command" "$OUT/"
 
 if command -v makensis >/dev/null; then
   EXE="Skynet_Brewer_Setup_$VERSION.exe"
-  makensis -V2 -DSRC="$(pwd)/$NSIS_SRC" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$EXE" install/windows/SkynetBrewer.nsi
+  makensis -V2 -DSRC="$(pwd)/$STAGE" -DVERSION="$VERSION" -DOUTFILE="$(pwd)/$OUT/$EXE" install/windows/SkynetBrewer.nsi
   echo "Built $OUT/$EXE"
 else
   echo "NSIS (makensis) is not installed, so no Windows installer was built. On Linux: sudo apt install nsis"

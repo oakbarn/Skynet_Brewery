@@ -30,6 +30,11 @@ The buttons along the top are the main screens:
 
 What you can see depends on your role. An **Admin** sees everything; an **Operator** can run a brew day; a **Viewer** can only watch. See [Login, users and passwords](10-login).
 
+## Common jobs
+
+- Change a tab's background picture or color: [Tab background picture and color](26-tab-background).
+- Put your own pictures and sounds on the Pi: [Media](07-media).
+
 ## Words used in this manual
 
 The [Glossary](13-glossary) explains every special word. The three you will meet most:
@@ -40,7 +45,7 @@ The [Glossary](13-glossary) explains every special word. The three you will meet
 
 ## Updating to a new version
 
-Stop the panel first, then run the installer again or unzip the **Update** zip. Your layout, settings, brew data, users, pictures, sounds and processes are never overwritten. See [Updating to a new version](18-updating).
+Stop the panel first, then run the installer again or unzip the new zip over the panel. The zip has no `config`, `data`, `media` or `scripts` folders, so your layout, settings, brew data, users, pictures, sounds and processes are never replaced. See [Updating to a new version](18-updating).
 
 ## About this manual
 
