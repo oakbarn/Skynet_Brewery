@@ -1,58 +1,66 @@
-# Updating to a new version (Windows)
+# Updating to a new version
 
-A new version of the Brew Panel comes as a `.zip` file. You unzip it over your panel folder (for example `C:\Brewing`). This page shows how to do that without errors and without losing your brew data.
+There are two kinds of install:
 
-> **The panel must be stopped first.** While it runs, Windows keeps some of its files open (the **data** folder: the brew log database, users and saved values). Unzipping over open files fails with errors like "The action can't be completed because the file is open in Node.js" or "Access denied".
+- **Full install**: the first time, on a computer or Pi that has no panel yet. You get everything, including the sample layout, pictures and processes.
+- **Update**: a newer version over a panel you already use. **Your own things are never overwritten.**
 
-## Step 1: Stop the panel
+| Folder | What is in it | On an update |
+|---|---|---|
+| `config` | Your tabs, elements, devices and settings (`brewery.json`) | **Kept.** Never replaced. |
+| `data` | Brew log, saved values, users, passwords, sign-ins, the recovery code | **Kept.** Never replaced. |
+| `media` | Your pictures and sounds | **Kept.** Never replaced. |
+| `scripts` | Your processes | **Kept.** Never replaced. |
+| `help` | This manual | Replaced by the new manual. The old pages are copied to `help/backups/before_update_<date>` first. |
+| Everything else (`lib`, `public`, `server.js`, `samples` …) | The program itself | Replaced. |
 
-The panel runs in a black **command window** (opened by your `.bat` file or by `npm start`).
+The installers add a new sample picture or process to `media` or `scripts` only if you don't have a file with that name. They never change or delete one of yours. If you deleted a sample process, the installer brings it back. The update-only zip never does.
 
-1. Click that command window.
-2. Press **Ctrl + C**. If it asks `Terminate batch job (Y/N)?`, type **Y** and press Enter.
-3. Close the window with the **X** in its corner.
+> **Testing mode and sign-ins.** Your users and passwords stay on disk. But while **Settings > Testing mode** is on, a new version clears every sign-in when it starts, so you create the admin account again and get a new **recovery code**. That is on purpose while testing. Turn Testing mode off when you use the panel for real, and updates keep your logins too. See [Login, users and passwords](10-login).
 
-Closing the window with the **X** on its own also stops the panel.
+## Every update: stop the panel first
 
-## Step 2: If files are still locked
+While the panel runs, its files are open (the brew log database, users and saved values). Copying over open files fails with errors like "The action can't be completed because the file is open in Node.js" or "Access denied".
 
-Sometimes Node.js keeps running in the background after the window is gone, and the data folder stays locked. To end it:
+- **Windows:** click the panel's black command window, press **Ctrl + C** (type **Y** if it asks `Terminate batch job (Y/N)?`), then close the window.
+- **Mac / Linux:** press **Ctrl + C** in the panel's Terminal window.
+- **Raspberry Pi:** the installer stops and restarts the panel service by itself.
+
+### Windows: if files are still locked
+
+Sometimes Node.js keeps running in the background after the window is gone. To end it:
 
 1. Press **Ctrl + Shift + Esc** to open **Task Manager**. If it looks small, click **More details**.
 2. On the **Processes** tab (Windows 11: the first icon on the left), find **Node.js JavaScript Runtime** (or `node.exe`).
 3. Click it, then click **End task**. Do this for each Node.js line.
-4. Close Task Manager.
-
-> If you're not sure which Node.js is the panel, it's fine to end them all, as long as you don't have another Node program open that you care about.
 
 Still locked? Restart the computer, and don't start the panel until the update is done.
 
-## Step 3: Make a copy first
+## Update with the installer (easiest)
 
-Right-click your panel folder (for example `C:\Brewing`), choose **Copy**, then **Paste** it in the same place. Windows makes `C:\Brewing - Copy`. If anything goes wrong, you still have everything.
+Run the same installer you used the first time, from the new release. It sees the panel is already there and **updates** it:
 
-## Step 4: Unzip the new version
+- **Windows:** `Skynet_Brewer_Setup_<date>.exe`. Keep the same folder (`C:\Brewing\BrewPanel`).
+- **Mac:** `Install Skynet Brewer.command` next to the new zip.
+- **Linux / Pi:** `bash install-skynet-brewer.sh` next to the new zip.
 
-1. Right-click the new `.zip` and choose **Extract All…**, or open it and drag its contents out.
-2. Put the files into your panel folder (`C:\Brewing`).
-3. When Windows asks about files with the same name, choose **Replace the files in the destination**.
+It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case.
 
-## What to keep
+## Update by hand: use the Update zip
 
-| Folder or file | What it is | On an update |
-|---|---|---|
-| `data` | Brew log database, saved values, users and sign-ins | **Keep it.** The zip doesn't have a data folder, so unzipping never touches it. Never delete it. |
-| `config\brewery.json` | Your tabs, elements, devices and settings | The zip has one too. If you changed your layout, copy yours back from the copy you made in step 3. |
-| `scripts` | Your processes | Copy back any you made or changed. |
-| `media` | Your pictures and sounds | Copy back any you added. |
-| `help` | This manual | Copy back pages you wrote yourself. |
+Each release has two zips:
 
-## Step 5: Start the panel again
+| Zip | Use it for |
+|---|---|
+| `Skynet_BrewPanel_Full_<date>.zip` | A first install only |
+| `Skynet_BrewPanel_Update_<date>.zip` | Updating. It has **no** `config`, `data`, `media` or `scripts` folders, so unzipping it can't overwrite yours. |
 
-Double-click your `.bat` file (or run `npm start` in the folder) and open the panel in your browser as usual.
+1. Stop the panel (above).
+2. For extra safety, copy your panel folder: right-click `C:\Brewing\BrewPanel`, **Copy**, then **Paste**.
+3. Right-click `Skynet_BrewPanel_Update_<date>.zip`, choose **Extract All…**, and extract into **`C:\Brewing`** (the folder *above* BrewPanel).
+4. When Windows asks about files with the same name, choose **Replace the files in the destination**. That only replaces program files and help pages.
+5. Start the panel again with **Skynet Brewer** on the Desktop.
 
-While **Testing mode** is on, a new version clears every sign-in, so the panel asks you to create the admin account again. Write down the new **recovery code**. See [Login, users and passwords](10-login).
+> **Never unzip the Full zip over a panel you use.** It has a sample `config`, `media` and `scripts`, and Windows would replace yours if you choose Replace.
 
-## On the Raspberry Pi
-
-It's the same idea: stop the panel with `sudo systemctl stop brewpanel`, copy the new files over the panel folder (keep `data`), then run `sudo systemctl start brewpanel`.
+On the Raspberry Pi by hand: `sudo systemctl stop skynet-brewer`, unzip the Update zip over the panel folder (`unzip -o Skynet_BrewPanel_Update_<date>.zip -d ~/Brewing`), then `sudo systemctl start skynet-brewer`.

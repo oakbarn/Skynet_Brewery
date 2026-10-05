@@ -5,7 +5,7 @@
 # Double-click it. The first time, macOS may say it "cannot be opened": right-click it, choose Open, then Open again.
 #
 # It looks for the panel in this order: the BrewPanel folder this file sits in (BrewPanel/install/mac),
-# a Skynet*.zip next to this file, or a BrewPanel folder next to this file (Safari unzips downloads by itself).
+# a Skynet*.zip next to this file (the Full zip first), or a BrewPanel folder next to this file (Safari unzips downloads by itself).
 # It installs to ~/Brewing/BrewPanel and puts "Skynet Brewer" on the Desktop.
 set -eu
 
@@ -28,7 +28,8 @@ SRC=""
 if [ -f "$HERE/../../server.js" ]; then
   SRC="$(cd "$HERE/../.." && pwd)"
 else
-  ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
+  ZIP="$(ls -t "$HERE"/Skynet*Full*.zip 2>/dev/null | head -n 1 || true)"
+  [ -n "$ZIP" ] || ZIP="$(ls -t "$HERE"/Skynet*.zip 2>/dev/null | head -n 1 || true)"
   if [ -n "$ZIP" ]; then
     echo "Unpacking $(basename "$ZIP")"
     unzip -q "$ZIP" -d "$TMP/zip"
@@ -63,20 +64,33 @@ done
 
 # ---------------------------------------------------------------- Copy the files
 STAMP="$(date +%Y-%m-%d_%H%M%S)"
+UPDATE=no
+[ -f "$DEST/server.js" ] && UPDATE=yes
+[ "$UPDATE" = yes ] || [ -f "$SRC/config/brewery.json" ] || fail "This is an update-only zip, and there is no panel in $DEST yet. Use the Skynet_BrewPanel_Full zip for a first install."
 mkdir -p "$DEST"
 DEST="$(cd "$DEST" && pwd)"
-KEEP=""
-if [ -f "$DEST/server.js" ] && [ -f "$DEST/config/brewery.json" ]; then
-  mkdir -p "$DEST/config/backups"
-  KEEP="$DEST/config/backups/brewery_before_update_$STAMP.json"
-  cp -p "$DEST/config/brewery.json" "$KEEP"
-  echo "Updating. Your layout was copied to config/backups/$(basename "$KEEP")"
-fi
+# Your folders (config, data, media, scripts): an update only adds files that are new. It never replaces or deletes yours.
 if [ "$SRC" != "$DEST" ]; then
-  echo "Copying the panel to $DEST"
-  ( cd "$SRC" && tar --exclude=./data --exclude=./node_modules -cf - . ) | ( cd "$DEST" && tar -xf - )
+  if [ "$UPDATE" = yes ]; then
+    echo "Updating the panel in $DEST"
+    echo "Kept as they are: your layout and settings (config), brew data, log, users and passwords (data),"
+    echo "pictures and sounds (media) and processes (scripts). Only new sample files are added to them."
+    if ls "$DEST"/help/*.md >/dev/null 2>&1; then
+      mkdir -p "$DEST/help/backups/before_update_$STAMP"
+      cp -p "$DEST"/help/*.md "$DEST/help/backups/before_update_$STAMP/"
+      echo "Help pages are replaced by the new manual. The old ones are in help/backups/before_update_$STAMP"
+    fi
+  else
+    echo "Full install to $DEST"
+  fi
+  ( cd "$SRC" && find . -type f ! -path './data/*' ! -path './node_modules/*' ) | while IFS= read -r f; do
+    case "$f" in
+      ./config/*|./media/*|./scripts/*) if [ -e "$DEST/$f" ]; then continue; fi ;;
+    esac
+    mkdir -p "$DEST/$(dirname "$f")"
+    cp -p "$SRC/$f" "$DEST/$f"
+  done
 fi
-if [ -n "$KEEP" ]; then cp -p "$KEEP" "$DEST/config/brewery.json"; fi
 # Files copied from a download are marked "from the internet"; clear that so they open without warnings
 xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true
 

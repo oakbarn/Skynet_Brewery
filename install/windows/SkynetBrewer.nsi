@@ -2,10 +2,10 @@
 ;
 ; Puts the Skynet Brew Panel in C:\Brewing\BrewPanel (changeable), writes Skynet_Brewer.bat there,
 ; and adds a "Skynet Brewer" shortcut to the Desktop and the Start menu.
-; On an update it keeps the data folder and your layout (config\brewery.json).
+; On an update it never overwrites your config, data, media or scripts folders; it only adds new files there.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
-;   -DSRC=<folder holding the panel files>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
+;   -DSRC=<folder with program\ (always replaced) and user\ (config, media, scripts: never overwritten)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
 
 Unicode true
 !include "MUI2.nsh"
@@ -44,7 +44,7 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !define MUI_ICON "skynet.ico"
 !define MUI_UNICON "skynet.ico"
 !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
-!define MUI_WELCOMEPAGE_TEXT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop.$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? Your brew data and your layout are kept."
+!define MUI_WELCOMEPAGE_TEXT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop.$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? Your layout, settings, brew data, users and passwords, pictures, sounds and processes are kept."
 !define MUI_DIRECTORYPAGE_TEXT_TOP "The panel goes in this folder. C:\Brewing\BrewPanel is recommended."
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_TEXT "Start Skynet Brewer now"
@@ -130,14 +130,24 @@ Section "Skynet Brew Panel" SecMain
   Call NeedNode
   Call WaitForPanelStopped
 
-  ; An update over an existing panel: keep a copy of the layout and put it back after the new files are in
+  ; An update over an existing panel. Your folders (config, data, media, scripts) only get files that are new:
+  ; nothing of yours is replaced or deleted. A copy of the layout goes to config\backups just in case.
   StrCpy $Upgrade 0
   ${If} ${FileExists} "$INSTDIR\server.js"
-  ${AndIf} ${FileExists} "$INSTDIR\config\brewery.json"
     StrCpy $Upgrade 1
-    CreateDirectory "$INSTDIR\config\backups"
-    CopyFiles /SILENT "$INSTDIR\config\brewery.json" "$INSTDIR\config\backups\brewery_before_update_$Stamp.json"
-    DetailPrint "Updating. Your layout was copied to config\backups\brewery_before_update_$Stamp.json"
+    DetailPrint "Updating. Kept as they are: layout and settings (config), brew data, log, users and passwords (data), pictures and sounds (media), processes (scripts)."
+    ${If} ${FileExists} "$INSTDIR\config\brewery.json"
+      CreateDirectory "$INSTDIR\config\backups"
+      CopyFiles /SILENT "$INSTDIR\config\brewery.json" "$INSTDIR\config\backups\brewery_before_update_$Stamp.json"
+    ${EndIf}
+    ; The manual is replaced by the new one; the old pages are kept
+    ${If} ${FileExists} "$INSTDIR\help\*.md"
+      CreateDirectory "$INSTDIR\help\backups\before_update_$Stamp"
+      CopyFiles /SILENT "$INSTDIR\help\*.md" "$INSTDIR\help\backups\before_update_$Stamp"
+      DetailPrint "Old help pages copied to help\backups\before_update_$Stamp"
+    ${EndIf}
+  ${Else}
+    DetailPrint "Full install to $INSTDIR"
   ${EndIf}
 
   ; The older layout put the panel straight in C:\Brewing. Offer to bring its data along.
@@ -150,12 +160,13 @@ Section "Skynet Brew Panel" SecMain
       StrCpy $OldPanel "$0"
   ${EndIf}
 
+  ; Program files are always replaced. Your folders: existing files are never overwritten.
   SetOutPath "$INSTDIR"
-  File /r "${SRC}\*.*"
-
-  ${If} $Upgrade == 1
-    CopyFiles /SILENT "$INSTDIR\config\backups\brewery_before_update_$Stamp.json" "$INSTDIR\config\brewery.json"
-  ${EndIf}
+  SetOverwrite on
+  File /r "${SRC}\program\*.*"
+  SetOverwrite off
+  File /r "${SRC}\user\*.*"
+  SetOverwrite on
   ${If} $OldPanel != ""
     DetailPrint "Copying data from $OldPanel"
     CopyFiles /SILENT "$OldPanel\config\brewery.json" "$INSTDIR\config\brewery.json"
