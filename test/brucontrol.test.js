@@ -23,7 +23,9 @@ assert.match(conv.scripts[0].text, /^\/\/ sample & "quoted"\nnew value vV\n/);
 assert.ok(conv.warnings.some(w => w.includes('sw_Testing_2')));
 
 const valve = el('VGC_22_Valve');
-assert.deepEqual(valve.images, ['Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_ClosedV-1x1.png', '']);
+assert.equal(valve.images, undefined, 'BruControl pictures become imagePath_1 to 3');
+assert.equal(valve.imagePath_1, 'Images/Valve_Ball_OpenV-1x1.png'); assert.equal(valve.imagePath_2, 'Images/Valve_Ball_ClosedV-1x1.png');
+assert.equal(valve.imagePath_3, undefined); assert.equal(valve.imagePathsLocked, true, 'imagePath_2 and _3 are locked after an import');
 assert.equal(valve.background, 1); assert.equal(valve.hideName, true); assert.equal(valve.border, 'hidden');
 assert.equal(valve.onText, 'Open'); assert.equal(valve.offText, 'Closed'); assert.equal(valve.channel, 22);
 const kettle = el('MB_57_Kettle');
