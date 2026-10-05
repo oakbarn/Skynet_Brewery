@@ -510,8 +510,9 @@ function fillEl(n, e) {
     case 'hysteresis': on = !!v.state; text = v.enabled ? `${on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
-    case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
+    case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || v.image || ''; n.classList.toggle('img-alarm', !!(v.imageon || v.image)); break;
+    case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = v.displayname ?? e.name; nm.classList.add('hidden'); break;
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
@@ -561,6 +562,7 @@ function tapAction(e) {
     case 'pwmOut': case 'analogOut': case 'scale': case 'stepper': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
+    case 'soundPlayer': return 'toggle';
     case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
     case 'vKonstant':
       if (e.readOnly) return 'none';
@@ -572,8 +574,8 @@ function tapAction(e) {
   }
 }
 const elByName = n => S.config.elements.find(x => x.name === n);
-const boolProp = t => t.type === 'alarm' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
-const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
+const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
+const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
 async function doTap(e) {
   const act = tapAction(e);
@@ -1102,7 +1104,7 @@ const ADD_MENU = [
   ]],
   ['Widgets (app only, no board pin)', [
     ['Picture', 'picture'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
-    ['Timer', 'timer'], ['Alarm', 'alarm'], ['Label', 'label'],
+    ['Timer', 'timer'], ['Alarm', 'alarm', '', { kind: 'general' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
 ];
@@ -1219,6 +1221,8 @@ const F = {
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
     ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
+  soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
+    ['_snote', 'Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
   alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
@@ -1332,8 +1336,19 @@ function stepperFields(it) {
     ['sim', 'Simulator settings (JSON): where it starts and where its home switch is, in its units, e.g. {"start":40,"switchAt":-5}', 'json'], ['info', 'Position now', 'info']];
 }
 
+// Alarm kind first: a Hop Alarm can sound by itself on a timer, a Pre-Hop Alarm a set time before its Hop Alarm
+const ALARM_KIND_LIST = [['hop', 'Hop Alarm (priority 1: beats every other sound)'], ['brewflow', 'Brew Flow Alarm (2: end of mash, start of boil)'], ['prehop', 'Pre-Hop Alarm (3: a set time before its Hop Alarm)'], ['general', 'General Alarm (4)'], ['sound', 'Sound only (5: music, beeps; pauses for any alarm)']];
+function alarmFields(item) {
+  const k = item.kind ??= 'general';
+  return [['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true],
+    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
+    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
+    ...kindFields('alarm', item)];
+}
+
 function fieldsFor(item) {
   if (item.type === 'stepper') return stepperFields(item);
+  if (item.type === 'alarm') return alarmFields(item);
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
     return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
@@ -1611,25 +1626,39 @@ async function editWorkspace() {
 $('#soundBtn').onclick = () => {
   soundOn = !soundOn;
   $('#soundBtn').textContent = soundOn ? 'Sound on' : 'Enable sound';
-  if (soundOn) for (const e of S.config.elements.filter(e => e.type === 'alarm')) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
+  if (soundOn) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
   updateAlarms();
 };
-function getAudio(e) {
-  const v = S.values[e.name] || {};
+const isSoundEl = e => e.type === 'alarm' || e.type === 'soundPlayer';
+// the sound file an alarm / sound player plays now (Default = the panel's beep)
+function soundSrc(e, v) {
+  if (e.type === 'soundPlayer') return v.path || '';
   const mode = v.soundmode || (e.sounds ? 'custom' : 'default');
-  if (mode === 'none') return null;
-  const src = mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound);
+  if (mode === 'none') return '';
+  return mode === 'default' && e.sounds ? 'sounds/alarm_beep.wav' : (e.sounds?.[(v.fileindex || 1) - 1] || v.sound || e.sound || (mode === 'default' ? 'sounds/alarm_beep.wav' : ''));
+}
+const hasSoundNow = (e, v) => !!soundSrc(e, v);
+function getAudio(e) {
+  const src = soundSrc(e, S.values[e.name] || {});
   if (!src) return null;
   let a = audios.get(e.name);
   if (!a || a._src !== src) { a = new Audio(media(src)); a._src = src; audios.set(e.name, a); }
   return a;
 }
+// Only one sound at a time: the panel marks the one that plays ("playing"); the others are quiet.
+// Music (Sound Player, Sound only alarms) pauses and goes on where it was; an alarm that had to wait starts from the beginning.
 function updateAlarms() {
-  for (const e of S.config.elements.filter(e => e.type === 'alarm')) {
+  for (const e of S.config.elements.filter(isSoundEl)) {
     const v = S.values[e.name] || {}; const a = getAudio(e); if (!a) continue;
     a.loop = !!v.loop;
-    if (v.active && soundOn) { if (a.paused && !a._playing) { a._playing = true; a.currentTime = 0; a.play().catch(() => { }); } }
-    else { a._playing = false; if (!a.paused) a.pause(); }
+    const music = e.type === 'soundPlayer' || e.kind === 'sound';
+    if (v.playing && soundOn) {
+      if (a.paused && !a._playing) { a._playing = true; if (!(music && a._held && !a.ended)) a.currentTime = 0; a._held = false; a.play().catch(() => { }); }
+    } else {
+      if (a._playing && v.active) a._held = true;            // paused for a higher sound: goes on later
+      if (!v.active) a._held = false;
+      a._playing = false; if (!a.paused) a.pause();
+    }
   }
 }
 
@@ -2106,7 +2135,7 @@ $('#donSave').onclick = guard(async () => {
 $('#donPreview').onclick = () => showDonate(true);
 
 // ---------------------------------------------------------------- MQTT and voice
-const TYPE_WORD = { vAPI: 'vAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm' };
+const TYPE_WORD = { vAPI: 'vAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
 function renderMqttStatus() {
   const st = S.mqtt?.status ?? { state: 'off', text: 'MQTT is off' };
   const box = $('#mqttStatus'); box.className = 'mqtt-status ' + st.state; box.textContent = st.text;
