@@ -20,23 +20,36 @@ The same list has **Plate chiller**, **Chilling coil**, **HERMS coil**, **Trub f
 
 ## Bundle a vessel with its IPs
 
-When the IPs sit where you want them, bundle the vessel so nothing gets bumped out of place.
+Bundling locks a vessel and its IPs together as one unit, so nothing gets bumped out of place. Bundle it once the IPs sit where you want them.
 
-- Each time you **Save** a vessel that has IPs, the panel asks **Bundle ... with its IPs?** Press **OK** to bundle, or **Cancel** if you still need to drag IPs into place. You can also switch on **Bundled** at the bottom of its properties.
-- A bundled vessel shows a 📦 in Edit layout. Drag the vessel, or any of its IPs, and the whole bundle moves as one.
-- While bundled, the vessel and its IPs can't be resized, edited or deleted. Opening it only shows **Bundled** and **Tab**.
-- To change anything, open the vessel, switch **Bundled** off and press **Save**.
+**To bundle (PC or iPhone):**
+
+1. Go to the vessel's tab and switch on **Edit layout**.
+2. Open the vessel's properties. On a PC, **double-click** it. On an iPhone, **hold a finger on it**.
+3. Press **Save**. The panel asks **Bundle ... with its IPs?** Press **OK** to bundle, or **Cancel** if you still need to drag IPs into place.
+4. Or switch on **Bundled** at the bottom of its properties and press **Save**.
+5. Press **Save layout**.
+
+**While it's bundled:**
+
+- It shows a 📦 in Edit layout.
+- Drag the vessel, or any of its IPs, and the whole bundle moves as one (on an iPhone, drag with one finger).
+- The vessel and its IPs can't be resized, edited or deleted. Opening it only shows **Bundled** and **Tab**.
+
+**To un-bundle:** open the vessel (double-click, or hold a finger on it), switch **Bundled** off, press **Save**, then **Save layout**. Now you can edit, move or delete its IPs again.
 
 ## Move equipment to another tab
 
-New vessels, chillers, coils and filters start on the **Equipment** tab. To move one:
+New vessels, chillers, coils and filters start on the **Equipment** tab. To move one to another tab:
 
-1. Go to the tab it is on and press **Edit layout**.
-2. Open its properties: on a PC **double-click** it, on a phone **hold a finger on it**.
-3. Near the bottom, pick the new tab in the **Tab** list.
+1. Go to the tab it is on and switch on **Edit layout**.
+2. Open its properties. On a PC, **double-click** it. On an iPhone, **hold a finger on it**.
+3. Pick the new tab in the **Tab** list near the bottom.
 4. Press **Save**, then **Save layout**.
 
-A bundled vessel moves to the new tab with all its IPs, just as they are. The panel jumps to the new tab with the item. Its ports (IPs) go with it. Pipes do not move, because pipes only join IPs on the same tab: draw new ones on the new tab. Every other item (devices, pictures, text, IPs, pipes) has the same **Tab** list.
+The panel jumps to the new tab with the item, and its IPs go with it. A bundled vessel moves with all its IPs exactly where they were. Pipes do not move, because a pipe only joins IPs on the same tab, so draw new ones on the new tab.
+
+Every other item (devices, pictures, text, IPs and pipes) has the same **Tab** list.
 
 ## Pick lists and switches
 
