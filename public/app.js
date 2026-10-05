@@ -161,9 +161,14 @@ function renderWs() {
 
 function place(node, o) { node.style.left = (o.x || 0) + 'px'; node.style.top = (o.y || 0) + 'px'; node.style.width = (o.w || 120) + 'px'; node.style.height = (o.h || 60) + 'px'; }
 
+// Bundle (Fritz): a vessel and the IPs attached to it move as one unit and can't be edited until it is un-bundled
+const bundleOf = g => g?.kind === 'ip' && g.attachTo ? draft.graphics.find(v => v.id === g.attachTo && v.kind === 'vessel' && v.bundled) : null;
+const bundledIps = v => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id);
+
 // Edit layout: a resize corner, or a padlock when the item is locked in place
 function editDeco(n, o) {
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
+  else if (o.bundled) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
   else n.append(h('div', { class: 'rs' }));
 }
 
@@ -1082,7 +1087,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
   const pip = ev.target.closest('.devip');
-  const node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
+  let node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
   if (hit && !node) {
     // the pipe is redrawn on press, so the browser never sends a double-click for it: count two quick presses instead
     const now = Date.now(), again = lastPipeTap && lastPipeTap.id === hit.dataset.gid && now - lastPipeTap.t < 450;
@@ -1095,11 +1100,13 @@ $('#ws').addEventListener('pointerdown', ev => {
   }
   if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
   sel = node.dataset.name ? { kind: 'el', id: node.dataset.name } : { kind: 'gfx', id: node.dataset.gid };
-  const item = findItem(sel.kind, sel.id);
+  let item = findItem(sel.kind, sel.id);
+  const bundle = bundleOf(item);
+  if (bundle) { item = bundle; sel = { kind: 'gfx', id: bundle.id }; node = $(`#ws .gfx[data-gid="${CSS.escape(bundle.id)}"]`) || node; }
   startLongPress(ev, sel.kind, sel.id);
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel'); updLockBtn();
   if (item.locked) { drag = null; ev.preventDefault(); return; }   // locked: select only, no move or resize
-  drag = { mode: !pip && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
+  drag = { mode: !pip && !bundle && !item.bundled && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   node.setPointerCapture?.(ev.pointerId);
   ev.preventDefault();
@@ -1444,7 +1451,8 @@ F.vesselNew = it => [['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.ves
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' standard', 'vlist', 'standard']] : [])]),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
-  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']];
+  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn'],
+  ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
@@ -1750,8 +1758,29 @@ function dialog(title, fields, obj, canDelete) {
   });
 }
 
+// a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
+async function editBundle(v) {
+  const work = { bundled: true, workspace: v.workspace };
+  const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', 'This vessel and its IPs are bundled: they move as one and can\'t be edited. Switch off Bundled to edit, move or delete them.', 'note'],
+    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws']], work, false);
+  if (r !== 'ok') return;
+  readFields(work);
+  if (work.workspace && work.workspace !== v.workspace) {
+    const old = v.workspace;
+    for (const g of [v, ...bundledIps(v)]) g.workspace = work.workspace;
+    const ids = [...bundledIps(v).map(g => g.id), ...eqPorts(v).map(q => q.id)];
+    const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === old && (ids.includes(p.from) || ids.includes(p.to)));
+    wsName = v.workspace;
+    toast(`Moved the bundle to the ${v.workspace} tab.` + (piped ? ` Its pipes stayed on ${old}; draw new ones here.` : ''));
+  }
+  if (!work.bundled) { delete v.bundled; toast('Un-bundled: the vessel and its IPs can be edited again'); }
+  sel = { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
+}
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
+  const bundle = bundleOf(item);
+  if (bundle) return toast(`This IP is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to edit, move or delete it.`, true);
+  if (item.kind === 'vessel' && item.bundled) return editBundle(item);
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
@@ -1828,6 +1857,10 @@ async function editItem(kind, id) {
       const placed = syncVesselPorts(item, before.isNew ? null : before);
       if (placed.length || before.isNew) vesselPopup(item, placed);
       delete item.isNew;
+    }
+    if (type === 'vessel' && !item.bundled && bundledIps(item).length &&
+      confirm(`Bundle ${item.label || item.name} with its ${bundledIps(item).length === 1 ? 'IP' : bundledIps(item).length + ' IPs'}?\n\nThey will move as one unit, and the vessel and its IPs can't be edited until you switch Bundled off.\n\nPress Cancel if you still need to drag its IPs into place.`)) {
+      item.bundled = true; $('#vpop')?.remove(); toast('Bundled');
     }
     if (type === 'ip' && !isFitting(item) && !pickedPort) attachIp(item);   // typed a new X / Y: re-check which vessel it sits on
     if (kind === 'el') sel = { kind, id: item.name };
