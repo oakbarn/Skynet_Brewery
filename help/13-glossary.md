@@ -8,7 +8,11 @@
 
 **API**: the way other programs (Node-RED, Home Assistant) read and set values. See [API](11-api).
 
+**Background (of a tab)**: the picture and color behind everything on a tab. Set in **⚙ Tab settings** with Edit layout on. See [Tab background picture and color](26-tab-background).
+
 **BeerXML**: the recipe file BeerSmith exports. See [Import](08-import).
+
+**Bundle**: a vessel locked together with its IPs so they move as one and can't be edited until you switch **Bundled** off. See [Equipment](14-equipment).
 
 **BruControl**: the Windows brewery program this panel is modelled on. Its configurations and processes can be imported.
 

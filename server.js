@@ -16,6 +16,7 @@ import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
+import { seedDefaults } from './lib/seed.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
@@ -35,6 +36,9 @@ const PUBLIC = path.join(ROOT, 'public');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
 const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'));
 
+// A release has its samples in defaults/: a folder you don't have yet (first start) gets a copy; yours are never touched
+const seeded = seedDefaults(ROOT);
+if (seeded.length) console.log(`First start: copied the samples into ${seeded.join(', ')}`);
 // A configuration saved before the Global class was retired is converted once (backups in config/backups and *.before-globals.bak)
 const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 // Names have no spaces any more: an older configuration is changed once (backups in config/backups and *.before-no-spaces.bak)
