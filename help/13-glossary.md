@@ -12,6 +12,8 @@
 
 **BeerXML**: the recipe file BeerSmith exports. See [Import](08-import).
 
+**Bundle**: a vessel locked together with its IPs so they move as one and can't be edited until you switch **Bundled** off. See [Equipment](14-equipment).
+
 **BruControl**: the Windows brewery program this panel is modelled on. Its configurations and processes can be imported.
 
 **Color selector**: every color setting is the same dropdown. **Default** (first) keeps the item's normal color, **None** (second) means no color at all (see-through), then colors by name with a swatch, and **Custom (add new) ...** for any other color, which is kept in the list for next time.
