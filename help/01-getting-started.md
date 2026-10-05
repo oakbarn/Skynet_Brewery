@@ -30,6 +30,11 @@ The buttons along the top are the main screens:
 
 What you can see depends on your role. An **Admin** sees everything; an **Operator** can run a brew day; a **Viewer** can only watch. See [Login, users and passwords](10-login).
 
+## Common jobs
+
+- Change a tab's background picture or color: [Tab background picture and color](26-tab-background).
+- Put your own pictures and sounds on the Pi: [Media](07-media).
+
 ## Words used in this manual
 
 The [Glossary](13-glossary) explains every special word. The three you will meet most:
