@@ -18,6 +18,15 @@ The same list has **Plate chiller**, **Chilling coil**, **HERMS coil**, **Trub f
 
 > Pipes only join IPs on the same tab.
 
+## Bundle a vessel with its IPs
+
+When the IPs sit where you want them, bundle the vessel so nothing gets bumped out of place.
+
+- Each time you **Save** a vessel that has IPs, the panel asks **Bundle ... with its IPs?** Press **OK** to bundle, or **Cancel** if you still need to drag IPs into place. You can also switch on **Bundled** at the bottom of its properties.
+- A bundled vessel shows a 📦 in Edit layout. Drag the vessel, or any of its IPs, and the whole bundle moves as one.
+- While bundled, the vessel and its IPs can't be resized, edited or deleted. Opening it only shows **Bundled** and **Tab**.
+- To change anything, open the vessel, switch **Bundled** off and press **Save**.
+
 ## Move equipment to another tab
 
 New vessels, chillers, coils and filters start on the **Equipment** tab. To move one:
@@ -27,7 +36,7 @@ New vessels, chillers, coils and filters start on the **Equipment** tab. To move
 3. Near the bottom, pick the new tab in the **Tab** list.
 4. Press **Save**, then **Save layout**.
 
-The panel jumps to the new tab with the item. Its ports (IPs) go with it. Pipes do not move, because pipes only join IPs on the same tab: draw new ones on the new tab. Every other item (devices, pictures, text, IPs, pipes) has the same **Tab** list.
+A bundled vessel moves to the new tab with all its IPs, just as they are. The panel jumps to the new tab with the item. Its ports (IPs) go with it. Pipes do not move, because pipes only join IPs on the same tab: draw new ones on the new tab. Every other item (devices, pictures, text, IPs, pipes) has the same **Tab** list.
 
 ## Pick lists and switches
 
