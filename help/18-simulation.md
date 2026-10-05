@@ -1,6 +1,6 @@
 # Simulation mode
 
-Simulation mode lets you try a whole brew day without touching any hardware. Processes, timers, alarms and the screen work exactly as on brew day, but no real heater, pump or valve is switched. Time can also run faster, or skip ahead, so you do not have to sit through a 60 minute mash to see what happens at minute 50.
+Simulation mode (the test mode) lets you try a whole brew day without touching any hardware. Processes, timers, alarms and the screen work exactly as on brew day, but no real heater, pump or valve is switched. Time can also run faster, or skip ahead, so you do not have to sit through a 60 minute mash to see what happens at minute 50.
 
 An admin turns it on in **Settings > Simulation**.
 
@@ -28,6 +28,12 @@ The yellow bar has buttons for admins:
 - **Skip to next event** finds the next thing that happens by itself (a `sleep` ending, a Process waiting on a timer, a countdown timer running out) and jumps to a few seconds before it, so you see it happen. The few seconds are set by **"Skip to next event" stops this many seconds before it** (5 seconds unless you change it).
 
 The bar also shows what the next event is and how long until it.
+
+## Auto skip
+
+Turn on **Auto skip** (in Settings or the yellow bar) and the panel skips by itself, with no table to fill in. Each step runs for a few seconds (**Watch each step for**, 5 seconds unless you change it), then the clock skips to a few seconds before the next thing that happens by itself: a `sleep` ending, a timer reaching its time, or a countdown running out. It looks at every running Process, including ones another Process started and loopers.
+
+Only time is skipped. A wait on a screen button, a switch or a temperature is never skipped: press the button as on brew day, and auto skip carries on from there.
 
 ## Time jumps table
 

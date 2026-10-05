@@ -2156,6 +2156,7 @@ function renderSimBar() {
   if (!on) { clearInterval(simPoll); simPoll = null; $('#simNextInfo').textContent = ''; return; }
   $('#simInfo').textContent = `Clock ${S.sim.speed === 1 ? 'at normal speed' : S.sim.speed + '× faster'}` + (S.sim.skipped ? `, ${fmtT(S.sim.skipped / 1000)} skipped` : '');
   if (document.activeElement !== $('#simSpeed')) speedOpts($('#simSpeed'));
+  $('#simAutoBar').checked = !!S.sim.autoSkip;
   if (!simPoll) { simPoll = setInterval(simNextInfo, 2000); simNextInfo(); }
 }
 async function simNextInfo() {
@@ -2165,18 +2166,19 @@ async function simNextInfo() {
     $('#simNextInfo').textContent = n ? `Next: ${n.what} in ${fmtT(n.in)}` : 'Nothing counting down';
   } catch { /* offline: the connection dot shows it */ }
 }
+$('#simAutoBar').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { autoSkip: ev.target.checked }); renderSimBar(); if ($('#simAuto')) $('#simAuto').checked = ev.target.checked; toast(ev.target.checked ? 'Auto skip on: each step runs a few seconds, then time skips to just before the next one' : 'Auto skip off'); });
 $('#simSpeed').onchange = guard(async ev => { S.sim = await api('PUT', '/ui/sim', { speed: +ev.target.value }); renderSimBar(); if ($('#simSpeedSet')) $('#simSpeedSet').value = ev.target.value; });
 for (const b of $$('#simBar [data-skip]')) b.onclick = guard(async () => { await api('POST', '/ui/sim/skip', { seconds: +b.dataset.skip }); toast(`Skipped ahead ${fmtT(+b.dataset.skip)}`); simNextInfo(); });
 $('#simNext').onclick = guard(async () => { const r = await api('POST', '/ui/sim/skip', { next: true }); toast(`Skipped ${fmtT(r.skipped / 1000)}, to just before ${r.next}`); simNextInfo(); });
 
 let simDraft = null, simDirty = false, tlRows = null;
-const simCfg = () => ({ on: false, speed: 1, lead: 5, jumps: [], ...(S.config.simulation || {}) });
+const simCfg = () => ({ on: false, speed: 1, lead: 5, autoSkip: false, watch: 5, jumps: [], ...(S.config.simulation || {}) });
 function renderSimSettings() {
   if (!can('admin')) return;
   const c = simCfg();
   $('#simOn').checked = !!c.on;
   speedOpts($('#simSpeedSet')); $('#simSpeedSet').value = c.speed;
-  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; renderSimJumps(); }
+  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; $('#simAuto').checked = !!c.autoSkip; $('#simWatch').value = c.watch; renderSimJumps(); }
   const pick = $('#tlPick'), cur = pick.value; pick.innerHTML = '';
   for (const sc of S.scripts) pick.append(h('option', { value: sc.name, ...(sc.name === cur ? { selected: true } : {}) }, sc.name));
 }
@@ -2198,10 +2200,11 @@ function renderSimJumps() {
   });
   if (!simDraft.length) tb.append(h('tr', {}, h('td', { colspan: 7, class: 'muted' }, 'No time jumps yet.')));
 }
+for (const id of ['#simAuto', '#simWatch', '#simLead']) $(id).addEventListener('change', () => { simDirty = true; });
 $('#simAddJump').onclick = () => { simDraft.push({ on: true, when: 'timer', name: '', after: 5, jump: '00:50:00', note: '' }); simDirty = true; renderSimJumps(); };
 $('#simSave').onclick = guard(async () => {
   for (const j of simDraft) if (!/^\d+:\d{1,2}(:\d{1,2})?$/.test(j.jump || '')) throw new Error(`"${j.jump}" is not a time. Write it as hh:mm:ss, for example 00:50:00`);
-  S.sim = await api('PUT', '/ui/sim', { speed: +$('#simSpeedSet').value, lead: +$('#simLead').value, jumps: simDraft });
+  S.sim = await api('PUT', '/ui/sim', { speed: +$('#simSpeedSet').value, lead: +$('#simLead').value, autoSkip: $('#simAuto').checked, watch: +$('#simWatch').value, jumps: simDraft });
   simDirty = false; await load(); toast('Simulation settings saved');
 });
 $('#simOn').onchange = guard(async ev => {

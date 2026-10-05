@@ -29,6 +29,7 @@ print "hot"
 sleep 5000
 print "done"
 `);
+fs.writeFileSync(path.join(scripts, 'Auto.txt'), 'print "a"\nsleep 1200000\nprint "b"\nwait "Mash_Temp" value > 500\nsleep 1200000\nprint "c"\n');
 const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.load();
 const engine = new Engine(store, scripts, { logNow() { } });
 const hw = new Hardware(store);
@@ -84,6 +85,18 @@ assert.ok(prints.includes('hot'));
 assert.ok(sim.upcoming()[0]?.what.includes('sleep'), 'the 5 s sleep is the next event');
 assert.throws(() => sim.skipToNext(), /only/, 'too close to skip to');
 
+// Auto skip: each step runs "watch" seconds, then skips to just before the next; a wait on a reading is not skipped
+sim.save({ autoSkip: true, watch: 1 });
+const ap = []; engine.on('print', p => { if (p.script === 'Auto') ap.push(p.text); }); engine.start('Auto', 'test');
+await wait(4000);
+assert.deepEqual(ap, ['a', 'b'], 'auto skip passed the 20 minute sleep: ' + ap.join(' | '));
+await wait(1500);
+assert.deepEqual(ap, ['a', 'b'], 'nothing skips a wait on a reading');
+store.setProp('Mash_Temp', 'value', 600, 'ui');
+await wait(4000);
+assert.deepEqual(ap, ['a', 'b', 'c'], 'after the reading, auto skip carries on: ' + ap.join(' | '));
+sim.save({ autoSkip: false });
+
 // turning it off stops processes, turns outputs off and brings the real board back
 sim.save({ on: false });
 await wait(50);
@@ -94,6 +107,6 @@ assert.notEqual(hw.list()[0].type, 'simulator', 'real board type again');
 t0 = clock.now(); const real0 = Date.now(); await wait(100);
 assert.ok(Math.abs((clock.now() - t0) - (Date.now() - real0)) < 30, 'clock back to real time');
 
-clearInterval(timers); hw.stop(); for (const t of sim.pending) clearTimeout(t);
+clearInterval(timers); clearInterval(sim.autoTimer); hw.stop(); for (const t of sim.pending) clearTimeout(t);
 console.log('simulation tests passed');
 process.exit(0);
