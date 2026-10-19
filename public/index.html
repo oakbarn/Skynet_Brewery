@@ -155,8 +155,8 @@
     <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
 
     <div class="admin-only">
-    <h3>BruControl configuration</h3>
-    <p>Choose a BruControl configuration file (<code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
+    <h3>BruControl Schema</h3>
+    <p>Choose a BruControl Schema file (BruControl calls it a configuration file, <code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
       <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
@@ -223,8 +223,8 @@
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
     <div class="admin-only">
-      <h3>Start from a sample</h3>
-      <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter processes. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved in <code>config/backups</code> first.</p>
+      <h3>Start from a sample Schema</h3>
+      <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter processes. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current Schema is saved in <code>config/backups</code> first.</p>
       <div id="sampleList" class="samples"></div>
     </div>
     <h3>My account</h3>
@@ -365,7 +365,7 @@
 
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
-<dialog id="sampleDlg"><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
+<dialog id="sampleDlg"><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery Schema to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample Schema</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
 <dialog id="donateDlg"><h3>🍺 Beer money</h3><p id="donateText"></p>
   <div class="bar"><button id="donateDone">Already donated</button><span class="spacer"></span><button id="donateLater">Maybe later</button><button id="donateGo" class="primary"></button></div></dialog>
 <div id="toast"></div>

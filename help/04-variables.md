@@ -14,7 +14,7 @@ Variables hold values that processes and screens use. The **Variables** screen l
 - Use a **vAPI** for readings you want logged or sent to other programs (pH, gravity, volumes).
 - Use a **Shared** variable to pass a value from one process to another.
 
-The old **Global** class (from BruControl) is retired. When a BruControl file or an older setup is loaded, each Global becomes a vKonstant or a vAPI by its name, and the list of what moved shows on the Processes page.
+The old **Global** class (from BruControl) is retired. When a BruControl file or an older Schema is loaded, each Global becomes a vKonstant or a vAPI by its name, and the list of what moved shows on the Processes page.
 
 ## vKonstant kinds
 

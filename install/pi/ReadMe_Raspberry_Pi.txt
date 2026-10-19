@@ -34,6 +34,9 @@ How USB is different on the Pi:
 
 WHAT YOU NEED
 -------------
+(For the boards to buy, how many ports each has, and what the panel cannot do yet,
+see Minimum_Equipment_and_Limitations.txt, or Help > Minimum equipment in the panel.)
+
 HARDWARE
   [ ] A Raspberry Pi 4 (2 GB memory or more) or a Raspberry Pi 5 (4 GB recommended).
   [ ] The official power supply for that Pi. Pi 5: 27 W USB-C. Pi 4: 15 W USB-C.
@@ -245,7 +248,8 @@ STEP 9. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
       will remember.
   [ ] It then shows a RECOVERY CODE. Write it down on paper or save it somewhere safe.
       It is the only way back in if you forget the password.
-  [ ] Pick a sample setup to start from (you can change it later in Settings).
+  [ ] Pick a sample Schema to start from (a Schema is a whole brewery: Tabs, Devices,
+      pipes and settings; you can load another later in Settings).
 
   While Settings > Testing mode is on, every new version clears the sign-ins and you
   do this step again. That is on purpose while the panel is being tested.

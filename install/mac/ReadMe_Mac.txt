@@ -38,6 +38,9 @@ Use only ONE Brain at a time. Two panels driving the same boards fight each othe
 
 WHAT YOU NEED
 -------------
+(For the boards to buy, how many ports each has, and what the panel cannot do yet,
+see Minimum_Equipment_and_Limitations.txt, or Help > Minimum equipment in the panel.)
+
   [ ] A Mac with macOS 12 Monterey or newer (Apple chip M1/M2/M3/M4 or Intel both work),
       with an internet connection for the install.
   [ ] Your Mac password (the one you use to install programs).
@@ -197,7 +200,8 @@ STEP 7. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
       you will remember.
   [ ] It then shows a RECOVERY CODE. Write it down on paper or save it somewhere
       safe. It is the only way back in if you forget the password.
-  [ ] Pick a sample setup to start from (you can change it later in Settings).
+  [ ] Pick a sample Schema to start from (a Schema is a whole brewery: Tabs, Devices,
+      pipes and settings; you can load another later in Settings).
 
   While Settings > Testing mode is on, every new version clears the sign-ins and you
   do this step again. That is on purpose while the panel is being tested.
