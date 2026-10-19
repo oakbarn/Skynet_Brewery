@@ -12,6 +12,26 @@ to 8 for you. This ReadMe is the step-by-step way, so you know exactly what is o
 your Pi. Use one or the other, not both.)
 
 
+THE PI IS THE BRAIN
+-------------------
+The Pi runs the panel and holds all the settings, pictures, sounds and Processes.
+Your boards (Arduino Mega and so on) plug into the PI's USB sockets, not into your
+PC. Your PC, Mac, phone and tablet then only open the panel in a web browser: do not
+install the panel or Node.js on them too. Use only ONE Brain at a time; two panels
+driving the same boards fight each other.
+
+How USB is different on the Pi:
+  - No driver to install. Raspberry Pi OS already knows genuine Arduino boards and
+    CH340 clone boards. (On Windows you may need a driver; on the Pi you never do.)
+  - The board shows up as /dev/ttyACM0 (genuine Arduino) or /dev/ttyUSB0 (clone),
+    not as a COM number like on Windows.
+  - Linux only lets members of the "dialout" group use USB boards. The first install
+    file (step 8) adds you to it and lets the panel's service use it. A restart
+    afterwards makes it take effect everywhere.
+  - The Pi's own GPIO pins (the row of pins on the board) are NOT used by the panel
+    yet. All inputs and outputs go through a board on USB, such as the Arduino Mega.
+
+
 WHAT YOU NEED
 -------------
 HARDWARE
@@ -255,10 +275,17 @@ Never open a port on your router for the panel. Use Tailscale (free for home use
 
 STEP 13. CONNECT YOUR BOARDS
 ----------------------------
-  [ ] Plug the Arduino Mega (or other board) into one of the Pi's USB sockets.
+  [ ] Plug the Arduino Mega (or other board) into one of the Pi's USB sockets, with
+      its normal USB cable (USB-A on the Pi end, USB-B on the Mega end). No driver
+      is needed.
   [ ] In a terminal type   ls /dev/ttyACM* /dev/ttyUSB*
-      You should see something like /dev/ttyACM0 . That is the port to pick for the
-      board in the panel (Devices page).
+      You should see something like /dev/ttyACM0 (genuine Arduino) or /dev/ttyUSB0
+      (clone). That is the port to pick for the board in the panel (Devices page).
+      With several boards, plug them in one at a time and note which name each gets.
+  [ ] Nothing shows? Try another cable (some cables only charge and carry no data),
+      and make sure you restarted the Pi once after step 8.
+  [ ] Several boards, or boards that draw a lot of power: use a powered USB hub, so
+      the Pi's power supply is not overloaded.
   [ ] Help > Devices in the panel explains the rest.
 
 
