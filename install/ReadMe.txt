@@ -24,6 +24,8 @@ hand, written for beginners, with every download and click spelled out:
   First_Install_linux/ReadMe_Linux.txt           with skynet-first-install.sh
   First_Install_pi/ReadMe_Raspberry_Pi.txt       with skynet-first-install-pi.sh
 (They are also inside the zip, in BrewPanel/install/<platform>.)
+Minimum_Equipment_and_Limitations.txt lists what to buy for 1 Pi + 1 Mega up to
+3 Megas and 2 ESP32s, the ports on each board, and what the panel cannot do yet.
 
 The panel goes in C:\Brewing\BrewPanel on Windows, and in Brewing/BrewPanel in your
 home folder on a Mac, Linux or a Pi.

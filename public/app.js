@@ -2395,7 +2395,7 @@ $('#importBtn').onclick = guard(async () => {
     (r.warnings.length ? `\n\n${r.warnings.join('\n')}` : '');
 });
 
-// BruControl configuration (.brucfg)
+// BruControl Schema (.brucfg configuration file)
 function bruReport(r) {
   const t = r.summary.byType;
   const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} elements, ${r.summary.scripts} processes`,
@@ -2417,15 +2417,15 @@ async function bruSend(preview) {
 }
 $('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
 $('#bruImport').onclick = guard(async () => {
-  const msg = $('#bruMode').value === 'replace' ? 'Replace your tabs, elements and devices with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old setup.)' : 'Add this BruControl file to your setup? Running processes are stopped.';
+  const msg = $('#bruMode').value === 'replace' ? 'Replace your tabs, elements and devices with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old Schema.)' : 'Add this BruControl file to your Schema? Running processes are stopped.';
   if (!confirm(msg)) return;
   const r = await bruSend(false);
   $('#bruResult').textContent = bruReport(r);
-  await load(); toast('BruControl configuration imported');
+  await load(); toast('BruControl Schema imported');
 });
 
 // ---------------------------------------------------------------- settings
-// ---- sample setups: on first start, and under Settings
+// ---- sample Schemas: on first start, and under Settings
 let samples = null;
 async function sampleCards(box, after) {
   samples ??= await api('GET', '/ui/samples');
@@ -2434,7 +2434,7 @@ async function sampleCards(box, after) {
     h('div', { class: 'sampleName' }, sm.name), h('div', { class: 'muted' }, sm.description || ''),
     sm.needs ? h('div', { class: 'sampleNeeds' }, sm.needs) : '',
     h('button', { class: 'primary', onclick: guard(async () => {
-      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your tabs, elements, pipes and devices and stops running processes. Your current setup is saved in config/backups first.`)) return;
+      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your tabs, elements, pipes and devices and stops running processes. Your current Schema is saved in config/backups first.`)) return;
       const r = await api('POST', `/ui/samples/${sm.id}/load`);
       after?.(); wsName = null; await load(); setView('workspace');
       const bad = (r.problems || []).length;

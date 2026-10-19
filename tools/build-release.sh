@@ -40,6 +40,7 @@ cp -p install/windows/ReadMe_Windows.txt install/windows/Skynet_First_Install.ba
 cp -p install/mac/ReadMe_Mac.txt "install/mac/Skynet First Install.command" "$OUT/First_Install_mac/"
 cp -p install/linux/ReadMe_Linux.txt install/linux/skynet-first-install.sh "$OUT/First_Install_linux/"
 cp -p install/pi/ReadMe_Raspberry_Pi.txt install/pi/skynet-first-install-pi.sh "$OUT/First_Install_pi/"
+cp -p help/27-minimum-equipment.md "$OUT/Minimum_Equipment_and_Limitations.txt"
 
 if command -v makensis >/dev/null; then
   EXE="Skynet_Brewer_Setup_$VERSION.exe"

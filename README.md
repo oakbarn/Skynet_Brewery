@@ -48,13 +48,13 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 - **Raspberry Pi / Linux:** `install/linux/install-skynet-brewer.sh --service` sets it up, or see `docs/brewpanel.service` (systemd).
 - **Windows:** a Task Scheduler task "At log on" that runs `node --no-warnings server.js` in this folder.
 
-## 1a. Start from a sample
+## 1a. Start from a sample Schema
 
-The first time the panel opens it offers four ready-made setups. You can load one later from **Settings > Start from a sample**. Loading one replaces your Tabs, elements, pipes and devices; your old setup is saved first in `config/backups/`. Processes with the same name are backed up before they are replaced.
+The first time the panel opens it offers four ready-made Schemas (a Schema is a whole brewery setup: Tabs, elements, pipes, devices and settings). You can load one later from **Settings > Start from a sample Schema**. Loading one replaces your Tabs, elements, pipes and devices; your old Schema is saved first in `config/backups/`. Processes with the same name are backed up before they are replaced.
 
 | Sample | What you get |
 |---|---|
-| **OakBarn BruControl** | Fritz's BruControl configuration, imported with every board on the simulator. |
+| **OakBarn BruControl** | Fritz's BruControl Schema, imported with every board on the simulator. |
 | **Two vessel, one pump** | Kettle and mash tun, one pump, five valves, pipes, two probes, a kettle heater and a chiller. |
 | **Three vessel, one pump** | HLT, mash tun and boil kettle, one pump, six valves, pipes, three probes and two heaters. |
 | **BrewZilla brew day** | No hardware. A brew day flow for a BrewZilla and DigiBoil with step timers, hop drop warnings and readings you type in. |
@@ -129,17 +129,17 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 - **At clock time** (optional): lines the writes up with the clock, e.g. every 1 day at `12 AM`, or every 6 hours at `1 AM` (1 AM, 7 AM, 1 PM, 7 PM). Accepts `12 AM`, `6:30 PM` or `18:30`.
 - Off, Manual (`log` line or Log now), and Once still work as before.
 
-**The old Global class is retired.** Globals move by their name, on start-up for a saved setup and in the BruControl import:
+**The old Global class is retired.** Globals move by their name, on start-up for a saved Schema and in the BruControl import:
 
 - `gbl…` becomes a **vKonstant** of the same kind with the **same name**, so the names still match BruControl for now.
-- `RP_…` becomes a **vAPI** of the same kind, renamed `RP_` → `vA_` in the setup and in every process (`RP_v_Pitch_Temp` → `vA_v_Pitch_Temp`).
+- `RP_…` becomes a **vAPI** of the same kind, renamed `RP_` → `vA_` in the Schema and in every process (`RP_v_Pitch_Temp` → `vA_v_Pitch_Temp`).
 - `x…` is **deleted**. Processes or items still using one are listed with line numbers.
-- `glb…` was a typo for `gbl…`: renamed `glb` → `gbl` (setup and processes), then a vKonstant like the rest.
-- `DX_gblV_…` becomes a **vAPI**, renamed `DX_gblV_` → `vA_` in the setup and every process.
+- `glb…` was a typo for `gbl…`: renamed `glb` → `gbl` (Schema and processes), then a vKonstant like the rest.
+- `DX_gblV_…` becomes a **vAPI**, renamed `DX_gblV_` → `vA_` in the Schema and every process.
 - `insp_…` is **deleted** like `x…` (processes still using one are listed).
 - Any other name becomes a vAPI with the same name (it works exactly like the Global did) and is listed so it can be sorted later.
 
-On start-up the old setup is copied to `config/backups/brewery-before-globals-<date>.json`, each changed process keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Processes page console). A vKonstant is never written to the database, so a `gbl` that had a database trigger is listed too.
+On start-up the old Schema is copied to `config/backups/brewery-before-globals-<date>.json`, each changed process keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Processes page console). A vKonstant is never written to the database, so a `gbl` that had a database trigger is listed too.
 
 ## 3. Processes
 
