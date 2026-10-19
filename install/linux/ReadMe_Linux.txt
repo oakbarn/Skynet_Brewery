@@ -14,6 +14,30 @@ these steps for you. This ReadMe is the step-by-step way, so you know exactly wh
 is on your computer. Use one or the other, not both.)
 
 
+WHICH COMPUTER IS THE BRAIN? READ THIS FIRST
+--------------------------------------------
+The "Brain" is the one computer that runs the panel. It holds all the settings,
+pictures, sounds and Processes, and your boards (Arduino Mega and so on) plug into
+ITS USB sockets. Every other phone, tablet or computer only opens the panel in a
+web browser and needs NOTHING installed.
+
+The Brain can be a Raspberry Pi or this computer. A Raspberry Pi is the plan for the
+finished brewery (small, cheap, always on), but it is not required today: the
+panel runs the same on Windows, Mac, Linux or a Pi.
+
+  Your Brain is a Raspberry Pi?
+      Then do NOT follow this ReadMe on this computer. Follow ReadMe_Raspberry_Pi.txt on
+      the Pi instead, and plug the boards into the Pi. On this computer you only open the
+      browser and go to  http://skynet.local:8080  (or the Pi's number).
+      No Node.js, no drivers and no files are needed on this computer.
+
+  Your Brain is this computer?
+      Then follow this ReadMe. The boards plug into this computer (Linux needs no USB driver; the first install file sets the USB permission), and phones
+      and other computers open  http://<this computer's number>:8080 (step 10).
+
+Use only ONE Brain at a time. Two panels driving the same boards fight each other.
+
+
 WHAT YOU NEED
 -------------
   [ ] A 64-bit PC with Ubuntu 22.04 or newer, Linux Mint 21 or newer, Debian 12 or
