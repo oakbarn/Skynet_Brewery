@@ -29,8 +29,9 @@ panel runs the same on Windows, Mac, Linux or a Pi.
       No Node.js, no drivers and no files are needed on this Mac.
 
   Your Brain is this Mac?
-      Then follow this ReadMe. The boards plug into this Mac (step 4 covers the USB setup), and phones
-      and other computers open  http://<this Mac's number>:8080 (step 9).
+      Then follow this ReadMe. The boards plug into this Mac (step 4 covers the USB
+      setup), and phones and other computers open  http://<this Mac's number>:8080
+      (step 9).
 
 Use only ONE Brain at a time. Two panels driving the same boards fight each other.
 
@@ -169,6 +170,25 @@ IF "Skynet First Install.command" WILL NOT OPEN AT ALL ("permission" message)
   [ ] Open Terminal and type exactly this, then press Return:
           chmod +x ~/Brewing/"Skynet First Install.command"
   [ ] Then do step 6 again.
+
+
+IF THIS COMPUTER ALREADY HAD THE PANEL (STARTING OVER)
+------------------------------------------------------
+If the panel was installed here before, the first install file finds your old
+work and stops with a red WARNING before it changes anything:
+    "THIS COMPUTER ALREADY HAS A SKYNET PANEL WITH YOUR WORK IN IT"
+Starting over gives you a brand-new panel, as if it had never been installed,
+and ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN: your Tabs, layout, Devices,
+pipes, settings, Processes, pictures, sounds, brew log, users and passwords.
+  [ ] Type  YES  (capital letters) and press Return to start over.
+      As a safety net the old work is moved to Brewing/Old_Panel_<date>, not deleted.
+      Nothing from it is used by the new panel. Delete that folder later if you
+      do not need it.
+  [ ] Type  KEEP  and press Return to keep all your work and only finish the
+      install (for example when you open it again to get the USB support).
+  [ ] Just press Return to stop without changing anything.
+  If it says the panel is still running, stop it first (Control + C in its Terminal
+  window, or close it), then run the first install file again.
 
 
 STEP 7. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)

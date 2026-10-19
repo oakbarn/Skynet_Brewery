@@ -25,6 +25,42 @@ folder, with server.js inside it. See step 5 of ReadMe_Mac.txt"
 cd "$PANEL" || exit 1
 echo "[1/5] Found the panel in $PANEL"
 
+# Already had the panel here? Its work is in config, data, media and scripts (a new zip has none of them).
+OLD=""
+for d in config data media scripts; do [ -e "$PANEL/$d" ] && OLD="$OLD $d"; done
+if [ -n "$OLD" ]; then
+  printf '\n\033[41;97m %s \033[0m\n' "WARNING: THIS COMPUTER ALREADY HAS A SKYNET PANEL WITH YOUR WORK IN IT"
+  echo
+  echo "Starting over gives you a brand-new panel, as if it had never been installed."
+  echo "ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN:"
+  echo "  - your Tabs, layout, Devices, pipes and settings   (config)"
+  echo "  - your Processes                                   (scripts)"
+  echo "  - your pictures and sounds                         (media)"
+  echo "  - your brew log, users, passwords and recovery code (data)"
+  echo "(As a safety net the old folders are moved to $HOME/Brewing/Old_Panel_<date>,"
+  echo " not deleted. Nothing from them is used by the new panel.)"
+  echo
+  echo "  Type  YES   to start over and overwrite all of it."
+  echo "  Type  KEEP  to keep all your work and only finish the install."
+  echo "  Press Enter to stop without changing anything."
+  read -r -p "Your answer: " ANSWER
+  case "$ANSWER" in
+    YES)
+      :
+      if (echo > /dev/tcp/127.0.0.1/8080) 2>/dev/null; then
+        stop "The panel is still running. Stop it first (Ctrl+C in its window, or close the window),
+then run this file again. Nothing was changed."
+      fi
+      KEEP_DIR="$HOME/Brewing/Old_Panel_$(date +%Y-%m-%d_%H%M%S)"
+      mkdir -p "$KEEP_DIR" || stop "Could not make $KEEP_DIR. Nothing was changed."
+      for d in $OLD; do mv "$PANEL/$d" "$KEEP_DIR/" || stop "Could not move $d. Close any window that uses the panel's files and try again."; done
+      echo "Started over. The old work was moved to $KEEP_DIR"
+      ;;
+    KEEP|keep|Keep) echo "Keeping all your work." ;;
+    *) stop "Stopped. Nothing was changed." ;;
+  esac
+fi
+
 # 2. Is Node.js installed, and new enough?
 if ! command -v node >/dev/null; then
   open "https://nodejs.org/en/download"

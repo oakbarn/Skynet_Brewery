@@ -29,8 +29,9 @@ panel runs the same on Windows, Mac, Linux or a Pi.
       No Node.js, no drivers and no files are needed on this PC.
 
   Your Brain is this PC?
-      Then follow this ReadMe. The boards plug into this PC (step 4 covers the USB driver), and phones
-      and other computers open  http://<this PC's number>:8080 (step 11).
+      Then follow this ReadMe. The boards plug into this PC (step 4 covers the USB
+      driver), and phones and other computers open  http://<this PC's number>:8080
+      (step 11).
 
 Use only ONE Brain at a time. Two panels driving the same boards fight each other.
 
@@ -179,6 +180,25 @@ If you ever need to make Skynet_First_Install.bat yourself, it is a plain text f
 Copy it from C:\Brewing\BrewPanel\install\windows, or open Notepad, paste the text
 from that file, and save it as C:\Brewing\Skynet_First_Install.bat with
 "Save as type" set to "All files" (otherwise Notepad names it .bat.txt).
+
+
+IF THIS COMPUTER ALREADY HAD THE PANEL (STARTING OVER)
+------------------------------------------------------
+If the panel was installed here before, the first install file finds your old
+work and stops with a red WARNING before it changes anything:
+    "THIS COMPUTER ALREADY HAS A SKYNET PANEL WITH YOUR WORK IN IT"
+Starting over gives you a brand-new panel, as if it had never been installed,
+and ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN: your Tabs, layout, Devices,
+pipes, settings, Processes, pictures, sounds, brew log, users and passwords.
+  [ ] Type  YES  (capital letters) and press Enter to start over.
+      As a safety net the old work is moved to C:\Brewing\Old_Panel_<date>, not deleted.
+      Nothing from it is used by the new panel. Delete that folder later if you
+      do not need it.
+  [ ] Type  KEEP  and press Enter to keep all your work and only finish the
+      install (for example when you run it again to get the USB support).
+  [ ] Just press Enter to stop without changing anything.
+  If it says the panel is still running, stop it first (close its black window),
+  then run the first install file again.
 
 
 STEP 8. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)

@@ -217,6 +217,26 @@ STEP 8. RUN THE FIRST TIME INSTALL FILE
   to go back to.
 
 
+IF THIS COMPUTER ALREADY HAD THE PANEL (STARTING OVER)
+------------------------------------------------------
+If the panel was installed here before, the first install file finds your old
+work and stops with a red WARNING before it changes anything:
+    "THIS COMPUTER ALREADY HAS A SKYNET PANEL WITH YOUR WORK IN IT"
+Starting over gives you a brand-new panel, as if it had never been installed,
+and ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN: your Tabs, layout, Devices,
+pipes, settings, Processes, pictures, sounds, brew log, users and passwords.
+  [ ] Type  YES  (capital letters) and press Enter to start over.
+      As a safety net the old work is moved to ~/Brewing/Old_Panel_<date>, not deleted.
+      Nothing from it is used by the new panel. Delete that folder later if you
+      do not need it.
+  [ ] Type  KEEP  and press Enter to keep all your work and only finish the
+      install (for example when you run it again to get the USB support).
+  [ ] Just press Enter to stop without changing anything.
+  The file stops the running panel by itself before it moves anything. If it still
+  says the panel is running, type  sudo systemctl stop skynet-brewer  and run the
+  first install file again.
+
+
 STEP 9. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
 --------------------------------------------------
   [ ] On the Pi, double-click "Skynet Brewer" on the desktop (or open the browser and

@@ -26,14 +26,16 @@ finished brewery (small, cheap, always on), but it is not required today: the
 panel runs the same on Windows, Mac, Linux or a Pi.
 
   Your Brain is a Raspberry Pi?
-      Then do NOT follow this ReadMe on this computer. Follow ReadMe_Raspberry_Pi.txt on
-      the Pi instead, and plug the boards into the Pi. On this computer you only open the
-      browser and go to  http://skynet.local:8080  (or the Pi's number).
+      Then do NOT follow this ReadMe on this computer. Follow
+      ReadMe_Raspberry_Pi.txt on the Pi instead, and plug the boards into the Pi. On
+      this computer you only open the browser and go to  http://skynet.local:8080
+      (or the Pi's number).
       No Node.js, no drivers and no files are needed on this computer.
 
   Your Brain is this computer?
-      Then follow this ReadMe. The boards plug into this computer (Linux needs no USB driver; the first install file sets the USB permission), and phones
-      and other computers open  http://<this computer's number>:8080 (step 10).
+      Then follow this ReadMe. The boards plug into this computer (Linux needs no
+      USB driver; the first install file sets the USB permission), and phones and
+      other computers open  http://<this computer's number>:8080 (step 10).
 
 Use only ONE Brain at a time. Two panels driving the same boards fight each other.
 
@@ -163,6 +165,25 @@ STEP 6. RUN THE FIRST TIME INSTALL FILE
   to go back to.
 
   If it said "log out and back in": do that once (or restart), so USB boards work.
+
+
+IF THIS COMPUTER ALREADY HAD THE PANEL (STARTING OVER)
+------------------------------------------------------
+If the panel was installed here before, the first install file finds your old
+work and stops with a red WARNING before it changes anything:
+    "THIS COMPUTER ALREADY HAS A SKYNET PANEL WITH YOUR WORK IN IT"
+Starting over gives you a brand-new panel, as if it had never been installed,
+and ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN: your Tabs, layout, Devices,
+pipes, settings, Processes, pictures, sounds, brew log, users and passwords.
+  [ ] Type  YES  (capital letters) and press Enter to start over.
+      As a safety net the old work is moved to ~/Brewing/Old_Panel_<date>, not deleted.
+      Nothing from it is used by the new panel. Delete that folder later if you
+      do not need it.
+  [ ] Type  KEEP  and press Enter to keep all your work and only finish the
+      install (for example when you run it again to get the USB support).
+  [ ] Just press Enter to stop without changing anything.
+  If it says the panel is still running, stop it first (Ctrl + C in its window, or
+  close it), then run the first install file again.
 
 
 STEP 7. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
