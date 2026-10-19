@@ -302,6 +302,13 @@ STEP 13. CONNECT YOUR BOARDS
       You should see something like /dev/ttyACM0 (genuine Arduino) or /dev/ttyUSB0
       (clone). That is the port to pick for the board in the panel (Devices page).
       With several boards, plug them in one at a time and note which name each gets.
+  [ ] Several boards of the same kind? The names ttyACM0, ttyACM1 ... can swap places
+      after a restart. Use the board's permanent name instead. Type
+          ls /dev/serial/by-id/
+      Each board has its own long name there, for example
+          usb-Arduino__www.arduino.cc__0042_95530343834351A0C1E1-if00
+      In the panel, type the full path as the board's port:
+          /dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_95530343834351A0C1E1-if00
   [ ] Nothing shows? Try another cable (some cables only charge and carry no data),
       and make sure you restarted the Pi once after step 8.
   [ ] Several boards, or boards that draw a lot of power: use a powered USB hub, so
