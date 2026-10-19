@@ -175,6 +175,8 @@ Names have no spaces (a space typed in a name becomes `_`). Processes have a cla
 - A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
 - A `//` comment can contain quote marks.
 - **A process with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing process. The Processes page lists the errors with line numbers; click one to jump to it.
+- **Find and Replace.** On the Processes page press **Find** (or Ctrl+F; Ctrl+H to replace). Tick **Aa** to match upper and lower case and **Whole word** to skip longer names. **Replace** changes one match, **Replace all** every match in the open Process; press Save to keep it, Ctrl+Z undoes it. **All Processes** searches every Process and lists each match with how the line will look; untick the ones to leave alone, then **Replace ticked** saves those Processes. A running Process keeps the old text until it is stopped and started.
+- **Editor tools** (Help > The Process editor): line numbers and **Go to line** (Ctrl+G); colors by what each word does (Commands blue, Devices magenta, Widgets teal, vKonstants purple, vAPI red, variables black on white, operators orange, comments green), with a **Colors** switch and **Color key**; **Save to file** for the whole Process or the highlighted lines as text or as XML in color, plus a **Notepad++ colors file** (a general one is `docs/Skynet_Process_Notepad++.xml`). Comments can be `//`, `#`, `'` or `/* ... */`. **Delete** moves a Process to the **Recycle Bin** (`scripts/Recycle_Bin`), where admins can restore it or delete it for good; both ask first.
 - `start` on a process that is already running does nothing and prints a note. Stop it first to restart it.
 - Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by processes.
 - `fileindex` and other BruControl-only properties are stored but ignored. Alarms use `sound` (a path).
@@ -192,6 +194,15 @@ Names have no spaces (a space typed in a name becomes `_`). Processes have a cla
 | `Demo_Mash_Steps` | A 60-minute mash with a pH check at 10 and a stir at 30; made for trying simulation mode. |
 
 **Simulation mode** (Settings > Simulation, admins): every board is replaced by the simulator so no real hardware is switched, a yellow bar shows on every screen, and time can run up to 120× faster, skip ahead by hand, skip to the next event, or skip by itself from a Time jumps table. The Process timeline works out when each step of a Process happens. See the Help page *Simulation mode*.
+
+## 3a. Config Editor (admins only)
+
+The **Config** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
+
+- **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
+- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
+- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
+- **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
 
 ## 4. API (for Node-RED or other programs)
 

@@ -14,3 +14,5 @@ Thumbs.db
 # Old copies of help pages (made on every save in the Help tab)
 help/backups/
 release/
+# Config Editor backups (made on the Pi while it runs)
+config/backups/

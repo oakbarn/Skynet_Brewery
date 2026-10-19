@@ -1,5 +1,6 @@
 import { addEyes } from './eye.js';
 import { attachAutofill } from './autofill.js';
+import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -102,6 +103,8 @@ function setView(v) {
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
   if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
+  if (v === 'scripts' || v === 'config') placeFind();
+  if (v === 'config') openConfig();
 }
 
 // ---------------------------------------------------------------- workspaces
@@ -2086,7 +2089,8 @@ async function openScript(name) {
   knownPaths = new Set();       // paths already in the process are not warned about again, only ones added now
   if (can('admin')) api('POST', '/ui/scripts/check', $('#code').value, true).then(r => { for (const x of r.offBrain ?? []) knownPaths.add(x.path); }).catch(() => { });
   renderScriptList(); updateGutter(); updateScriptState(); renderProblems(); renderConsole();
-  api('GET', '/ui/scripts/words').then(w => { S.words = w; }).catch(() => { });
+  api('GET', '/ui/scripts/words').then(w => { S.words = w; paintFind(); }).catch(() => { });
+  fIdx = -1; refreshFind(false);
 }
 function updateScriptState() {
   const s = S.scripts.find(x => x.name === curScript);
@@ -2117,19 +2121,298 @@ function renderProblems() {
   if (!problems.length) { if (curScript) ul.append(h('li', { class: 'ok' }, 'No problems found')); return; }
   for (const p of problems) ul.append(h('li', { onclick: () => gotoLine(p.line) }, `Line ${p.line}: ${p.msg}`));
 }
-function gotoLine(l) {
-  const ta = $('#code'), lines = ta.value.split('\n');
+function gotoLine(l, ta = $('#code')) {
+  const lines = ta.value.split('\n');
+  l = Math.min(Math.max(1, l), lines.length);
   const start = lines.slice(0, l - 1).reduce((a, s) => a + s.length + 1, 0);
   ta.focus(); ta.setSelectionRange(start, start + (lines[l - 1] || '').length);
-  ta.scrollTop = Math.max(0, (l - 5) * 19.5);
+  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 19.5;
+  ta.scrollTop = Math.max(0, 8 + (l - 1) * lh - ta.clientHeight / 3); ta.scrollLeft = 0;
+  syncHl(); fGutter().scrollTop = ta.scrollTop;
 }
-$('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; });
-$('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; });
+// Go to line (Ctrl+G or the button), in the Process editor or the Config Editor
+function askLine() {
+  const ta = fTa(), n = ta.value.split('\n').length, here = ta.value.slice(0, ta.selectionStart).split('\n').length;
+  const a = prompt(`Go to line (1 to ${n})`, here); if (a === null) return;
+  const l = parseInt(a, 10);
+  if (!Number.isFinite(l) || l < 1 || l > n) return toast(`Pick a line from 1 to ${n}`, true);
+  gotoLine(l, ta);
+}
+$('#goLine').onclick = askLine;
+$('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; refreshFind(false); });
+$('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; syncHl(); });
 attachAutofill($('#code'), $('#autofill'), () => S?.words);
 $('#code').addEventListener('keydown', ev => {
   if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '\t'); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }
 });
+// ---------------------------------------------------------------- find and replace
+// In the open script or the Config Editor (the bar moves to whichever page is open): Ctrl+F (find), Ctrl+H (replace), or the Find button (phones). Matches are painted on a layer behind the editor.
+// Across every script: the All scripts button lists each match first; only the ticked ones are replaced.
+const escHtml = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+function findRe(text, matchCase, word) {
+  if (!text) return null;
+  const esc = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(word ? `(?<![A-Za-z0-9_])${esc}(?![A-Za-z0-9_])` : esc, 'g' + (matchCase ? '' : 'i'));
+}
+const findMatches = (str, re) => re ? [...str.matchAll(re)].map(m => [m.index, m.index + m[0].length]) : [];
+let fMatches = [], fIdx = -1;
+const fTa = () => view === 'config' ? $('#cfgCode') : $('#code');
+const fHl = () => view === 'config' ? $('#cfgCodeHl') : $('#codeHl');
+const fGutter = () => view === 'config' ? $('#cfgGutter') : $('#gutter');
+// put the find bar above the editor of the page being shown
+function placeFind() {
+  const ed = fTa().closest('.editor');
+  if (ed.previousElementSibling !== $('#findBar')) { $('#codeHl').innerHTML = $('#cfgCodeHl').innerHTML = ''; ed.before($('#findBar')); }
+  refreshFind(false);
+}
+const findOpen = () => !$('#findBar').classList.contains('hidden');
+const curRe = () => findRe($('#findText').value, $('#findCase').checked, $('#findWord').checked);
+function showFind(replace) {
+  const ta = fTa(), selText = ta.value.slice(ta.selectionStart, ta.selectionEnd);
+  if (selText && !selText.includes('\n')) $('#findText').value = selText;
+  $('#findBar').classList.remove('hidden');
+  const box = replace && can('admin') ? $('#replText') : $('#findText');
+  box.focus(); box.select();
+  refreshFind(true);
+}
+function hideFind() {
+  $('#findBar').classList.add('hidden'); paintFind();
+  const ta = fTa(), m = fMatches[fIdx];
+  ta.focus(); if (m) ta.setSelectionRange(m[0], m[1]);
+}
+// recount the matches; `jump` moves to the first match at or after the cursor
+function refreshFind(jump) {
+  if (!findOpen()) { fMatches = []; fIdx = -1; paintFind(); return; }
+  const ta = fTa(), at = fMatches[fIdx]?.[0] ?? ta.selectionStart;
+  fMatches = findMatches(ta.value, curRe());
+  fIdx = fMatches.length ? Math.max(0, fMatches.findIndex(m => m[0] >= at)) : -1;
+  if (fIdx === -1 && fMatches.length) fIdx = 0;
+  paintFind(); if (jump) showMatch();
+}
+function paintFind() {
+  const t = $('#findText').value, n = fMatches.length;
+  $('#findCount').textContent = !findOpen() || !t ? '' : n ? `${fIdx + 1} of ${n}` : 'No matches';
+  $('#findCount').style.color = findOpen() && t && !n ? 'var(--bad)' : '';
+  for (const b of ['#findPrev', '#findNext', '#replOne', '#replAll']) $(b).disabled = !n;
+  const v = fTa().value;
+  // the Process editor in color: every word painted by what it does, find matches on top (public/colorize.js)
+  if (fTa() === $('#code') && colorsOn()) { fHl().innerHTML = toHtml(v, classify(v, S?.words), 0, v.length, findOpen() ? fMatches : [], fIdx) + '\n '; syncHl(); return; }
+  if (!findOpen() || !n) { fHl().innerHTML = ''; return; }
+  let out = '', last = 0;
+  fMatches.forEach(([s, e], i) => { out += escHtml(v.slice(last, s)) + `<mark${i === fIdx ? ' class="cur"' : ''}>${escHtml(v.slice(s, e))}</mark>`; last = e; });
+  fHl().innerHTML = out + escHtml(v.slice(last)) + '\n ';
+  syncHl();
+}
+const syncHl = () => { const ta = fTa(); fHl().style.transform = `translate(${-ta.scrollLeft}px, ${-ta.scrollTop}px)`; };
+let charW = 0;
+function showMatch() {
+  const ta = fTa(), m = fMatches[fIdx]; if (!m) return;
+  ta.setSelectionRange(m[0], m[1]);
+  const before = ta.value.slice(0, m[0]), line = before.split('\n').length - 1, col = m[0] - before.lastIndexOf('\n') - 1;
+  if (!charW) { const c = document.createElement('canvas').getContext('2d'); c.font = getComputedStyle(ta).font; charW = c.measureText('MMMMMMMMMM').width / 10 || 7.8; }
+  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 19.5, y = 8 + line * lh, x = 8 + col * charW;
+  if (y < ta.scrollTop || y + lh > ta.scrollTop + ta.clientHeight) ta.scrollTop = y - ta.clientHeight / 3;
+  if (x < ta.scrollLeft || x + (m[1] - m[0]) * charW > ta.scrollLeft + ta.clientWidth) ta.scrollLeft = Math.max(0, x - ta.clientWidth / 3);
+  syncHl(); fGutter().scrollTop = ta.scrollTop;
+}
+function stepFind(d) { if (!fMatches.length) return; fIdx = (fIdx + d + fMatches.length) % fMatches.length; paintFind(); showMatch(); }
+// type into the editor through the browser so Ctrl+Z can undo it, then give the focus back
+function editCode(start, end, text, back) {
+  const ta = fTa();
+  ta.focus(); ta.setSelectionRange(start, end);
+  if (!document.execCommand('insertText', false, text)) { ta.setRangeText(text, start, end, 'end'); ta.dispatchEvent(new Event('input')); }
+  back?.focus();
+}
+$('#findBtn').onclick = () => findOpen() ? hideFind() : showFind();
+$('#findClose').onclick = hideFind;
+$('#findPrev').onclick = () => stepFind(-1);
+$('#findNext').onclick = () => stepFind(1);
+$('#findText').addEventListener('input', () => { fIdx = -1; refreshFind(true); });
+for (const id of ['#findCase', '#findWord']) $(id).addEventListener('change', () => refreshFind(true));
+for (const id of ['#findText', '#replText']) $(id).addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') { ev.preventDefault(); if (id === '#replText' && !ev.shiftKey) $('#replOne').click(); else stepFind(ev.shiftKey ? -1 : 1); }
+  if (ev.key === 'Escape') { ev.preventDefault(); hideFind(); }
+});
+$('#replOne').onclick = () => {
+  const m = fMatches[fIdx]; if (!m || !can('admin')) return;
+  const at = m[0] + $('#replText').value.length;
+  editCode(m[0], m[1], $('#replText').value, $('#replText'));
+  fIdx = -1; fTa().setSelectionRange(at, at); refreshFind(true);
+};
+$('#replAll').onclick = () => {
+  if (!fMatches.length || !can('admin')) return;
+  const n = fMatches.length, ta = fTa();
+  editCode(0, ta.value.length, ta.value.replace(curRe(), () => $('#replText').value), $('#replText'));
+  refreshFind(false); toast(`Replaced ${n} match${n === 1 ? '' : 'es'} - press Save to keep the change`);
+};
+document.addEventListener('keydown', ev => {
+  if (!['scripts', 'config'].includes(view) || document.querySelector('dialog[open]')) return;
+  const k = ev.key.toLowerCase(), mod = ev.ctrlKey || ev.metaKey;
+  if (mod && k === 'f') { ev.preventDefault(); showFind(false); }
+  else if (ev.ctrlKey && k === 'h') { ev.preventDefault(); showFind(true); }
+  else if (mod && k === 'g') { ev.preventDefault(); askLine(); }
+  else if (findOpen() && k === 'f3') { ev.preventDefault(); stepFind(ev.shiftKey ? -1 : 1); }
+  else if (k === 'escape' && findOpen() && ev.target === fTa()) hideFind();
+});
+
+// ---- across all scripts
+let faRes = [];
+const faRe = () => findRe($('#faText').value, $('#faCase').checked, $('#faWord').checked);
+$('#findAllBtn').onclick = () => {
+  if (findOpen()) { $('#faText').value = $('#findText').value; $('#faCase').checked = $('#findCase').checked; $('#faWord').checked = $('#findWord').checked; $('#faRepl').value = $('#replText').value; }
+  faRes = []; renderFindAll(); $('#findAllDlg').showModal(); $('#faText').focus(); if ($('#faText').value) $('#faSearch').click();
+};
+$('#faSearch').onclick = guard(async () => {
+  const re = faRe(); if (!re) return toast('Type something to find', true);
+  $('#faSummary').textContent = 'Searching...';
+  const texts = await Promise.all(S.scripts.map(s => api('GET', '/ui/scripts/' + encodeURIComponent(s.name))));
+  faRes = S.scripts.map((s, i) => {
+    const text = texts[i], lines = text.split('\n'), starts = [];
+    lines.reduce((a, l) => (starts.push(a), a + l.length + 1), 0);
+    const matches = findMatches(text, re).map(([a, b]) => { let ln = 0; while (ln + 1 < starts.length && starts[ln + 1] <= a) ln++; return { a, b, line: ln + 1, ls: starts[ln], lt: lines[ln], on: true }; });
+    return { name: s.name, text, matches };
+  }).filter(r => r.matches.length);
+  $('#faTickAll').checked = true; renderFindAll();
+});
+for (const id of ['#faText', '#faRepl']) $(id).addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); $('#faSearch').click(); } });
+for (const id of ['#faCase', '#faWord']) $(id).addEventListener('change', () => { if (faRes.length || $('#faText').value) $('#faSearch').click(); });
+$('#faRepl').addEventListener('input', () => renderFindAll());
+$('#faTickAll').addEventListener('change', ev => { for (const r of faRes) for (const m of r.matches) m.on = ev.target.checked; renderFindAll(); });
+function renderFindAll() {
+  const list = $('#faList'); list.innerHTML = '';
+  const total = faRes.reduce((a, r) => a + r.matches.length, 0), ticked = faRes.reduce((a, r) => a + r.matches.filter(m => m.on).length, 0);
+  const admin = can('admin'), repl = $('#faRepl').value;
+  $('#faSummary').textContent = !$('#faText').value ? 'Type what to find, then press Search.' : !total ? 'No matches in any Process.' : `${total} match${total === 1 ? '' : 'es'} in ${faRes.length} Process${faRes.length === 1 ? '' : 'es'}` + (admin ? `, ${ticked} ticked` : '') + '. Tap a line to open it.';
+  $('#faReplace').disabled = !ticked;
+  for (const r of faRes) {
+    const run = S.scripts.find(s => s.name === r.name)?.state === 'running';
+    list.append(h('div', { class: 'faScript' }, r.name, run ? h('span', { class: 'muted' }, '  (running: restart it to use the change)') : null));
+    for (const m of r.matches) {
+      const s = m.a - m.ls, e = m.b - m.ls;
+      const old = h('div', { class: 'faLine' }, m.lt.slice(0, s).trimStart(), h('mark', {}, m.lt.slice(s, e)), m.lt.slice(e));
+      const neu = admin && m.on ? h('div', { class: 'faLine faNew' }, m.lt.slice(0, s).trimStart(), h('mark', {}, repl), m.lt.slice(e)) : null;
+      list.append(h('div', { class: 'faRow' },
+        admin ? h('input', { type: 'checkbox', checked: m.on, onchange: ev => { m.on = ev.target.checked; renderFindAll(); } }) : null,
+        h('span', { class: 'faNo muted' }, m.line),
+        h('div', { class: 'faText', onclick: () => openFindHit(r.name, m.a) }, old, neu)));
+    }
+  }
+}
+const openFindHit = guard(async (name, at) => {
+  if (curScript !== name) { await openScript(name); if (curScript !== name) return; }
+  $('#findAllDlg').close();
+  $('#findText').value = $('#faText').value; $('#findCase').checked = $('#faCase').checked; $('#findWord').checked = $('#faWord').checked; $('#replText').value = $('#faRepl').value;
+  $('#findBar').classList.remove('hidden');
+  fMatches = findMatches($('#code').value, curRe()); fIdx = Math.max(0, fMatches.findIndex(m => m[0] === at));
+  paintFind(); showMatch();
+});
+$('#faReplace').onclick = guard(async () => {
+  const todo = faRes.map(r => ({ ...r, hits: r.matches.filter(m => m.on) })).filter(r => r.hits.length);
+  const n = todo.reduce((a, r) => a + r.hits.length, 0), repl = $('#faRepl').value;
+  if (!n) return;
+  if (dirty && todo.some(r => r.name === curScript)) throw new Error(`"${curScript}" has unsaved changes. Save it first, then search again.`);
+  if (!confirm(`Replace ${n} match${n === 1 ? '' : 'es'} in ${todo.length} Process${todo.length === 1 ? '' : 'es'} with "${repl}"?\n\nEach Process is saved straight away.`)) return;
+  const done = [], changed = [], bad = [];
+  for (const r of todo) {
+    if (await api('GET', '/ui/scripts/' + encodeURIComponent(r.name)) !== r.text) { changed.push(r.name); continue; }   // edited since the search: leave it alone
+    let t = r.text;
+    for (const m of [...r.hits].sort((x, y) => y.a - x.a)) t = t.slice(0, m.a) + repl + t.slice(m.b);
+    const res = await api('PUT', '/ui/scripts/' + encodeURIComponent(r.name), t, true);
+    done.push(r.name); if (res.errors?.length) bad.push(`${r.name} (${res.errors.length})`);
+  }
+  S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
+  if (done.includes(curScript)) { dirty = false; await openScript(curScript); }
+  const msg = `Replaced in ${done.length} Process${done.length === 1 ? '' : 'es'}.` + (changed.length ? ` Skipped (changed since the search): ${changed.join(', ')}.` : '') + (bad.length ? ` Now has problems: ${bad.join(', ')}.` : '');
+  toast(msg, !!(changed.length || bad.length));
+  $('#faSearch').click();
+});
+
+// ---------------------------------------------------------------- colors, files and the Recycle Bin (Fritz, 2026-10-19)
+// Colors: each viewer turns them on or off for themselves (kept in this browser only)
+const COLORS_KEY = 'skynet.processColors';
+function colorsOn() { return $('#colorsOn').checked; }
+try { $('#colorsOn').checked = localStorage.getItem(COLORS_KEY) !== 'off'; } catch { }
+function applyColors() { $('#code').closest('.codeWrap').classList.toggle('colored', colorsOn()); paintFind(); }
+$('#colorsOn').onchange = () => { try { localStorage.setItem(COLORS_KEY, colorsOn() ? 'on' : 'off'); } catch { } applyColors(); };
+applyColors();
+const KEY_SAMPLES = { cmd: 'if  wait  start  true', dev: 'Pump_Red  HLT_Temp', wid: 'tm_Mash  alm_Hops', vk: 'vKV_Strike', vapi: 'vAV_Mash_Temp', var: 'new value x', proc: 'start sub_Fill',
+  op: '=  +  -  <  and', str: '"Mash in"', num: '185.5  00:10:00', com: '// note  # note  /* note */', lab: '[Mash]  goto Mash', attr: 'tm_Mash.visible' };
+const KEY_WORDS = { elements: [{ name: 'Pump_Red', type: 'digitalOut' }, { name: 'HLT_Temp', type: 'temperature' }, { name: 'tm_Mash', type: 'timer' }, { name: 'alm_Hops', type: 'alarm' },
+  { name: 'vKV_Strike', type: 'vKonstant' }, { name: 'vAV_Mash_Temp', type: 'vAPI' }], processes: ['sub_Fill'] };
+$('#colorKey').onclick = () => {
+  const box = $('#keyList'); box.innerHTML = '';
+  for (const [c, label] of LEGEND) {
+    const t = KEY_SAMPLES[c], code = h('code', { class: 'keyCode' });
+    code.innerHTML = toHtml(t, classify(t, KEY_WORDS));
+    box.append(h('div', { class: 'keyRow' }, h('span', { class: 'keyName' }, label), code));
+  }
+  $('#keyDlg').showModal();
+};
+
+// Save to file: the whole Process or the highlighted part, as text or as XML in color; and the Notepad++ colors file
+let lastSel = [0, 0];
+for (const ev of ['select', 'keyup', 'mouseup', 'touchend']) $('#code').addEventListener(ev, () => { const ta = $('#code'); lastSel = [ta.selectionStart, ta.selectionEnd]; });
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = h('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+const fileName = n => String(n).replace(/[\\/:*?"<>|\s]+/g, '_');
+$('#saveAs').onchange = guard(async ev => {
+  const what = ev.target.value; ev.target.value = '';
+  if (!what) return;
+  if (what === 'npp') {
+    const words = await api('GET', '/ui/scripts/words');
+    const texts = await Promise.all(S.scripts.map(s => api('GET', '/ui/scripts/' + encodeURIComponent(s.name)).catch(() => '')));
+    download('Skynet_Process_Notepad++.xml', notepadPlusPlus(words, texts), 'application/xml');
+    toast('Saved. In Notepad++: Language > User Defined Language > Define your language > Import (see Help)');
+    return;
+  }
+  if (!curScript) throw new Error('Open a Process first');
+  const ta = $('#code'), text = ta.value;
+  let [a, b] = ta.selectionEnd > ta.selectionStart ? [ta.selectionStart, ta.selectionEnd] : lastSel;
+  if (what.startsWith('all')) [a, b] = [0, text.length];
+  else if (b <= a) throw new Error('Highlight some lines of the Process first, then pick this again');
+  const first = text.slice(0, a).split('\n').length, last = first + text.slice(a, b).split('\n').length - 1;
+  const base = fileName(curScript) + (what.startsWith('sel') ? `_lines_${first}-${last}` : '');
+  if (what.endsWith('txt')) download(base + '.txt', text.slice(a, b), 'text/plain;charset=utf-8');
+  else download(base + '.xml', processXml(curScript, text, S.words, a, b), 'application/xml');
+  if (dirty) toast('Saved what is in the editor now (the Process itself is not saved yet)');
+});
+
+// Recycle Bin: Delete moves a Process here; putting one back or erasing it for good always asks first
+$('#binBtn').onclick = guard(async () => { await renderBin(); $('#binView').classList.add('hidden'); $('#binDlg').showModal(); });
+async function renderBin() {
+  const list = await api('GET', '/ui/recycle'), box = $('#binList'); box.innerHTML = '';
+  if (!list.length) box.append(h('div', { class: 'faRow muted' }, 'The Recycle Bin is empty.'));
+  const admin = can('admin');
+  for (const b of list) box.append(h('div', { class: 'faRow binRow' },
+    h('div', { class: 'faText' }, h('div', {}, h('strong', {}, b.name)), h('div', { class: 'muted faLine' }, `Deleted ${new Date(b.deletedAt).toLocaleString()}, ${b.lines} line${b.lines === 1 ? '' : 's'}`)),
+    h('button', { type: 'button', title: 'Show what is in it', onclick: guard(async () => {
+      const t = await api('GET', '/ui/recycle/' + encodeURIComponent(b.id)), v = $('#binView');
+      v.innerHTML = toHtml(t, classify(t, S.words)); v.classList.remove('hidden');
+    }) }, 'Look'),
+    admin ? h('button', { type: 'button', class: 'primary', onclick: guard(() => restoreFromBin(b)) }, 'Restore') : null,
+    admin ? h('button', { type: 'button', class: 'danger', onclick: guard(async () => {
+      if (!confirm(`Delete "${b.name}" for good?\n\nIt cannot be brought back after this.`)) return;
+      await api('DELETE', '/ui/recycle/' + encodeURIComponent(b.id)); toast(`"${b.name}" deleted for good`); $('#binView').classList.add('hidden'); await renderBin();
+    }) }, 'Delete for good') : null));
+}
+async function restoreFromBin(b) {
+  if (!confirm(`Restore the Process "${b.name}"?\n\nIt goes back in the Process list (it was deleted ${new Date(b.deletedAt).toLocaleString()}).`)) return;
+  let as = b.name, r;
+  for (;;) {
+    r = await api('POST', `/ui/recycle/${encodeURIComponent(b.id)}/restore`, { as });
+    if (r.ok) break;
+    as = prompt(`${r.msg}\n\nRestore it as:`, as + '_restored'); if (!as) return;
+    as = noSpaces(as);
+  }
+  S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
+  $('#binDlg').close(); toast(`"${r.name}" is back`);
+  if (!dirty) openScript(r.name);
+}
+
 const saveScript = guard(async () => {
   if (!curScript) return;
   const r = await api('PUT', '/ui/scripts/' + encodeURIComponent(curScript), $('#code').value, true);
@@ -2141,7 +2424,7 @@ const saveScript = guard(async () => {
     const pos = r.text.split('\n').slice(0, line - 1).reduce((a, l) => a + l.length + 1, 0);
     ta.setSelectionRange(pos, pos); ta.scrollTop = top;
   }
-  dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter();
+  dirty = false; $('#scriptName').textContent = curScript; problems = r.errors; renderProblems(); updateGutter(); refreshFind(false);
   const note = r.modernized ? ` (${r.modernized} line(s) changed to the new style)` : '';
   toast((problems.length ? `Saved with ${problems.length} problem(s)` : 'Saved') + note, !!problems.length);
   const added = (r.offBrain ?? []).filter(x => !knownPaths.has(x.path));
@@ -2171,7 +2454,7 @@ $('#addSteps').onclick = guard(async () => {
   if (!curScript) return;
   const ta = $('#code'), t = await api('POST', '/ui/scripts/addsteps', ta.value, true);
   if (t.text === ta.value) { toast('Every [label] already has a step'); return; }
-  ta.value = t.text; dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)';
+  ta.value = t.text; dirty = true; updateGutter(); refreshFind(false); $('#scriptName').textContent = curScript + ' (not saved)';
   toast('Steps added: Save to number them');
 });
 $('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; renderProblems(); updateGutter(); });
@@ -2209,9 +2492,10 @@ $('#renScript').onclick = guard(async () => {
   curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
 $('#delScript').onclick = guard(async () => {
-  if (!curScript || !confirm(`Delete process "${curScript}"?`)) return;
+  if (!curScript || !confirm(`Delete the Process "${curScript}"?\n\nIt goes to the Recycle Bin, where you can restore it.` + (dirty ? '\n\nYour unsaved changes are lost.' : ''))) return;
   await api('DELETE', '/ui/scripts/' + encodeURIComponent(curScript));
-  curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
+  toast(`"${curScript}" moved to the Recycle Bin`);
+  curScript = null; dirty = false; $('#code').value = ''; $('#scriptName').textContent = '-'; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); updateGutter(); refreshFind(false);
 });
 function renderConsole() {
   const all = $('#consoleAll').checked;
@@ -2756,4 +3040,77 @@ $('#tlMake').onclick = () => {
 // ---------------------------------------------------------------- start
 $$('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
 window.addEventListener('beforeunload', e => { if (dirty || (editing && JSON.stringify(draft) !== JSON.stringify(S.config))) { e.preventDefault(); e.returnValue = ''; } });
+// ---------------------------------------------------------------- Config Editor (admin only)
+// Opening it makes a backup copy of the config file first (config/backups). Save checks the JSON before anything is written.
+let cfgDirty = false, cfgProblem = null;
+const openConfig = guard(async () => {
+  if (cfgDirty) return;                       // keep unsaved work when coming back to the page
+  const r = await api('POST', '/ui/config/open');
+  setCfgText(r.text);
+  $('#cfgFile').textContent = r.file;
+  $('#cfgBackupNote').textContent = (r.made ? 'Backup copy made: ' : 'Backup copy already up to date: ') + 'config/backups/' + r.backup;
+});
+function setCfgText(t) { $('#cfgCode').value = t; cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(); fIdx = -1; refreshFind(false); }
+function updateCfgGutter() {
+  const n = $('#cfgCode').value.split('\n').length, bad = cfgProblem?.line;
+  $('#cfgGutter').innerHTML = Array.from({ length: n }, (_, i) => i + 1 === bad ? `<span class="err">${i + 1}</span>` : i + 1).join('\n');
+  $('#cfgGutter').scrollTop = $('#cfgCode').scrollTop;
+}
+function renderCfgProblems(checked) {
+  const ul = $('#cfgProblems'); ul.innerHTML = '';
+  if (cfgProblem) ul.append(h('li', { onclick: () => cfgGoto(cfgProblem) }, `Line ${cfgProblem.line}: ${cfgProblem.msg}`));
+  else if (checked) ul.append(h('li', { class: 'ok' }, 'No problems found'));
+  updateCfgGutter();
+}
+function cfgGoto({ line, col }) {
+  const ta = $('#cfgCode'), lines = ta.value.split('\n');
+  const at = lines.slice(0, line - 1).reduce((a, s) => a + s.length + 1, 0) + Math.max(0, (col || 1) - 1);
+  ta.focus(); ta.setSelectionRange(at, Math.min(at + 1, ta.value.length));
+  ta.scrollTop = Math.max(0, (line - 5) * 19.5); ta.scrollLeft = 0;
+}
+$('#cfgCode').addEventListener('input', () => { cfgDirty = true; $('#cfgState').textContent = '(not saved)'; updateCfgGutter(); refreshFind(false); });
+$('#cfgCode').addEventListener('scroll', () => { $('#cfgGutter').scrollTop = $('#cfgCode').scrollTop; syncHl(); });
+$('#cfgCode').addEventListener('keydown', ev => {
+  if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '  '); }
+  if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); $('#cfgSave').click(); }
+});
+$('#cfgFind').onclick = () => findOpen() ? hideFind() : showFind();
+$('#cfgCheck').onclick = guard(async () => {
+  cfgProblem = (await api('POST', '/ui/config/check', $('#cfgCode').value, true)).problem; renderCfgProblems(true);
+  if (cfgProblem) cfgGoto(cfgProblem);
+});
+$('#cfgSave').onclick = guard(async () => {
+  const c = await api('POST', '/ui/config/check', $('#cfgCode').value, true);
+  if (c.problem) { cfgProblem = c.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + c.problem.line + ': ' + c.problem.msg); }
+  if (!confirm('Save the config file?\n\nRunning Processes are stopped and the boards reconnect. The old file is kept in config/backups.')) return;
+  const r = await api('PUT', '/ui/config', $('#cfgCode').value, true);
+  if (!r.ok) { cfgProblem = r.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + r.problem.line + ': ' + r.problem.msg); }
+  cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(true);
+  $('#cfgBackupNote').textContent = 'Saved. The old file was copied to config/backups/' + r.backup;
+  toast('Config saved');
+});
+$('#cfgReload').onclick = () => { if (cfgDirty && !confirm('Throw away your unsaved changes?')) return; cfgDirty = false; openConfig(); };
+$('#cfgBackups').onclick = guard(async () => {
+  const list = await api('GET', '/ui/config/backups'), box = $('#cfgBackupList'); box.innerHTML = '';
+  if (!list.length) box.append(h('div', { class: 'faRow muted' }, 'No backups yet.'));
+  for (const b of list) box.append(h('div', { class: 'faRow cfgBk' },
+    h('div', { class: 'faText' }, h('div', {}, new Date(b.time).toLocaleString()), h('div', { class: 'muted faLine' }, `${b.name}  (${Math.round(b.size / 1024)} KB)`)),
+    h('button', { title: 'Show this backup in the editor; nothing changes until you press Save', onclick: guard(async ev => {
+      ev.preventDefault();
+      if (cfgDirty && !confirm('Throw away your unsaved changes?')) return;
+      setCfgText(await api('GET', '/ui/config/backups/' + encodeURIComponent(b.name)));
+      cfgDirty = true; $('#cfgState').textContent = `(showing backup ${b.name}, not saved)`; $('#cfgBackupDlg').close();
+    }) }, 'Open'),
+    h('button', { class: 'primary', onclick: guard(async ev => {
+      ev.preventDefault();
+      if (!confirm(`Put back the config from ${new Date(b.time).toLocaleString()}?\n\nRunning Processes are stopped and the boards reconnect. The current file is copied to config/backups first.`)) return;
+      const r = await api('POST', `/ui/config/backups/${encodeURIComponent(b.name)}/restore`);
+      setCfgText(r.text); $('#cfgBackupDlg').close();
+      $('#cfgBackupNote').textContent = `Restored ${b.name}. The file it replaced was copied to config/backups/${r.backup}`;
+      toast('Config restored');
+    }) }, 'Restore')));
+  $('#cfgBackupDlg').showModal();
+});
+window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
+
 load().then(() => { connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
