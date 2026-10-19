@@ -19,6 +19,55 @@ if not exist "%PANEL%\server.js" goto nopanel
 cd /d "%PANEL%"
 echo [1/5] Found the panel in %PANEL%
 
+:: Already had the panel here? Its work is in config, data, media and scripts (a new zip has none of them).
+set "OLD="
+for %%d in (config data media scripts) do if exist "%PANEL%\%%d" set "OLD=1"
+if not defined OLD goto checknode
+echo.
+color 4F
+echo  ========================================================================
+echo   WARNING: THIS PC ALREADY HAS A SKYNET PANEL WITH YOUR WORK IN IT
+echo  ========================================================================
+echo.
+echo  Starting over gives you a brand-new panel, as if it had never been installed.
+echo  ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN:
+echo    - your Tabs, layout, Devices, pipes and settings    (config)
+echo    - your Processes                                    (scripts)
+echo    - your pictures and sounds                          (media)
+echo    - your brew log, users, passwords and recovery code (data)
+echo  As a safety net the old folders are moved to C:\Brewing\Old_Panel_(date),
+echo  not deleted. Nothing from them is used by the new panel.
+echo.
+echo    Type  YES   to start over and overwrite all of it.
+echo    Type  KEEP  to keep all your work and only finish the install.
+echo    Press Enter to stop without changing anything.
+echo.
+set "ANSWER="
+set /p "ANSWER=Your answer: "
+color 07
+if "%ANSWER%"=="YES" goto startover
+if /i "%ANSWER%"=="KEEP" goto keepwork
+echo.
+echo  Stopped. Nothing was changed.
+pause
+exit /b 1
+
+:startover
+netstat -ano | findstr /r /c:":8080 .*LISTENING" >nul
+if not errorlevel 1 goto stillrunning
+for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HHmmss"') do set "STAMP=%%t"
+set "KEEPDIR=C:\Brewing\Old_Panel_%STAMP%"
+mkdir "%KEEPDIR%"
+for %%d in (config data media scripts) do if exist "%PANEL%\%%d" move "%PANEL%\%%d" "%KEEPDIR%\" >nul
+for %%d in (config data media scripts) do if exist "%PANEL%\%%d" goto movefailed
+echo  Started over. The old work was moved to %KEEPDIR%
+goto checknode
+
+:keepwork
+echo  Keeping all your work.
+
+:checknode
+
 :: 2. Is Node.js installed, and new enough?
 if exist "%ProgramFiles%\nodejs\node.exe" set "PATH=%ProgramFiles%\nodejs;%PATH%"
 where node >nul 2>nul
@@ -59,6 +108,20 @@ echo.
 echo The panel has stopped.
 pause
 exit /b 0
+
+:stillrunning
+echo.
+echo  The panel is still running. Close its black window first, then run this file
+echo  again. Nothing was changed.
+pause
+exit /b 1
+
+:movefailed
+echo.
+echo  Could not move all the old folders (a file is in use). Close every window that
+echo  uses the panel's files, then run this file again. What did move is in %KEEPDIR%
+pause
+exit /b 1
 
 :nopanel
 echo  The panel is not in %PANEL%
