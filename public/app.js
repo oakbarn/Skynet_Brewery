@@ -132,7 +132,9 @@ const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspace
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
   for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName && !menuTab ? 'active' : '', onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: 'Double-click for Tab settings' } : {}) }, w.name));
+    ondblclick: () => { if (editing) editWorkspace(); },
+    oncontextmenu: ev => { if (!editing) return; ev.preventDefault(); if (w.name !== curWs().name) { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); } editWorkspace(); },
+    ...(editing ? { title: 'Double-click or right-click for Tab settings' } : {}) }, w.name));
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -1146,13 +1148,13 @@ function setEditing(on) {
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
   const lockedEq = S.profiles?.find(p => p.id === S.config.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" is locked: equipment, IPs and pipes can't be changed. ` : '') + 'Drag to move, corner to resize, double-click (or hold a finger) for properties. Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" is locked: equipment, IPs and pipes can't be changed. ` : '') + 'Drag to move, corner to resize, right-click or double-click (or hold a finger) for properties. Right-click or double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
   renderTabs(); renderWs();
 }
 
 let drag = null, lastPipeTap = null;
 $('#ws').addEventListener('pointerdown', ev => {
-  if (!editing) return;
+  if (!editing || ev.button === 2) return;           // the right mouse button opens properties (see contextmenu below)
   const p = canvasPt(ev);
   if (drawPts) {                                   // drawing a pipe or hose
     ev.preventDefault();
@@ -1244,6 +1246,23 @@ $('#ws').addEventListener('dblclick', ev => {
   else if (pipe) editItem('gfx', pipe.dataset.gid);
   else editWorkspace();      // an empty spot on the tab: Tab settings (name, background color and picture, size)
 });
+// Right-click opens the same Properties dialog as a double-click, but only in Edit layout and only on an unlocked item.
+// Outside Edit layout (or on a 🔒 item) right-click does nothing special. Phones open properties by holding a finger (below).
+$('#ws').addEventListener('contextmenu', ev => {
+  if (!editing) return;
+  ev.preventDefault();
+  if (lp?.touch) return;                             // a held finger: the long press below opens it
+  if (drawPts || $('dialog[open]')) return;
+  const pip = ev.target.closest('.devip'), node = ev.target.closest('.el,.gfx'), pipe = ev.target.closest('#pipes g');
+  const [kind, id] = pip ? (pip.dataset.eq ? ['gfx', pip.dataset.eq] : ['el', pip.dataset.dev])
+    : node ? (node.dataset.name ? ['el', node.dataset.name] : ['gfx', node.dataset.gid]) : pipe ? ['gfx', pipe.dataset.gid] : [];
+  if (!kind) return editWorkspace();                 // an empty spot: Tab settings
+  const item = findItem(kind, id); if (!item) return;
+  const top = bundleOf(item) || item;
+  sel = { kind: top === item ? kind : 'gfx', id: top === item ? id : top.id }; renderWs(); updLockBtn();
+  if (top.locked) return toast('🔒 Locked in place. Press 🔓 Unlock first, then right-click it again (double-click still opens it).', true);
+  top === item ? editItem(kind, id) : editItem('gfx', top.id);   // an IP bundled to a vessel opens the vessel's Bundled dialog
+});
 document.addEventListener('keydown', ev => {
   if (!drawPts) return;
   if (ev.key === 'Enter' && drawHose) { ev.preventDefault(); finishPipe(); }   // without preventDefault the same Enter press hits the properties dialog and presses Delete
@@ -1253,7 +1272,7 @@ document.addEventListener('keydown', ev => {
 let lp = null;
 function startLongPress(ev, kind, id) {
   cancelLongPress();
-  lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } kind === 'tab' ? editWorkspace() : editItem(kind, id); }, 600) };
+  lp = { x: ev.clientX, y: ev.clientY, touch: ev.pointerType !== 'mouse', t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } kind === 'tab' ? editWorkspace() : editItem(kind, id); }, 600) };
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 

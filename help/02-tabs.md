@@ -26,11 +26,11 @@ Press **☰ Menu** and pick **Edit layout**. A dashed bar appears with these but
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
 | **Draw hose** | Like a pipe, but it bends in smooth curves. Loose ends get a coupling. See [Pipes, hoses and reducers](24-pipes-and-hoses). |
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. Press again to unlock. |
-| **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
+| **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking or right-clicking an empty spot on the tab (or right-clicking its Tab button) opens it too. |
 | **New tab** | Adds a tab. |
 | **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Picking **☰ Menu > Exit Edit layout** asks the same. Nothing is changed until you save. |
 
-Drag items to move them, drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.
+Drag items to move them, drag a corner to resize, and **right-click** or **double-click** (or hold a finger on it) to open its properties. Right-click only works in Edit layout and not on a 🔒 locked item: see [Right-click for Properties](38-right-click-properties).
 
 ## Background color and picture
 
