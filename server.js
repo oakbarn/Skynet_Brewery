@@ -17,6 +17,7 @@ import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
+import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
@@ -182,6 +183,7 @@ function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
+  if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   return m === 'GET' ? 'viewer' : 'admin';
 }
 const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico']);
@@ -430,6 +432,20 @@ async function route(req, res) {
     hw.restart();
     return ok(res, { ok: true, ...out, ...applied });
   }
+  // Config Editor (admin only, see needRole)
+  if (p === '/ui/config/open' && m === 'POST') { const b = backupConfigFile(store); return ok(res, { ok: true, text: fs.readFileSync(CONFIG, 'utf8'), backup: b.name, made: b.made, file: path.relative(ROOT, CONFIG) }); }
+  if (p === '/ui/config/check' && m === 'POST') return ok(res, { ok: true, problem: checkConfigText(await readBody(req, 16 * 1024 * 1024), DATA) });
+  if (p === '/ui/config' && m === 'PUT') {
+    try { return ok(res, { ok: true, ...applyConfigText(await readBody(req, 16 * 1024 * 1024), { store, engine, hw, pictures, dataDir: DATA }) }); }
+    catch (e) { if (e.problem) return ok(res, { ok: false, problem: e.problem }); throw e; }
+  }
+  if (p === '/ui/config/backups' && m === 'GET') return ok(res, listBackups(store));
+  const cb = /^\/ui\/config\/backups\/([^/]+?)(\/restore)?$/.exec(p);
+  if (cb && m === 'GET' && !cb[2]) return ok(res, readBackup(store, cb[1]));
+  if (cb && m === 'POST' && cb[2]) {
+    const r = applyConfigText(readBackup(store, cb[1]), { store, engine, hw, pictures, dataDir: DATA });
+    return ok(res, { ok: true, ...r, text: fs.readFileSync(CONFIG, 'utf8') });
+  }
   if (p === '/ui/samples' && m === 'GET') return ok(res, listSamples(SAMPLES));
   const smp = /^\/ui\/samples\/([\w-]+)\/load$/.exec(p);
   if (smp && m === 'POST') return ok(res, loadSample(SAMPLES, smp[1], { store, engine, hw }));
@@ -462,6 +478,18 @@ async function route(req, res) {
       return ok(res, { ...engine.check(text), text, modernized: mod.changed });
     }
     if (!act && m === 'DELETE') { engine.remove(name); return ok(res); }
+  }
+  // Recycle Bin of deleted Processes: list and look for everyone, restore or erase for admins (needRole)
+  if (p === '/ui/recycle' && m === 'GET') return ok(res, engine.binList());
+  s = /^\/ui\/recycle\/([^/]+?)(\/restore)?$/.exec(p);
+  if (s) {
+    const id = s[1];
+    if (!s[2] && m === 'GET') return send(res, 200, engine.binRead(id), 'text/plain; charset=utf-8');
+    if (s[2] && m === 'POST') {
+      const { as } = await jsonBody(req);
+      try { return ok(res, { ok: true, ...engine.binRestore(id, as) }); } catch (e) { if (e.code === 409) return ok(res, { ok: false, taken: true, msg: e.message }); throw e; }
+    }
+    if (!s[2] && m === 'DELETE') { engine.binPurge(id); return ok(res); }
   }
   if (p === '/ui/stopall' && m === 'POST') { engine.stopAll(); return ok(res); }
 
