@@ -2,6 +2,15 @@
 
 The Skynet Brew Panel runs on **Windows, Mac, Linux or a Raspberry Pi**. Each release comes with a `ReadMe.txt` (outside the zip) that has these same steps, so you can follow them before the panel is running.
 
+**New to this?** Each platform has its own beginner ReadMe for a first install by hand, with every download, click and check spelled out, and a first-install file that checks Node.js, gets the USB board support, puts **Skynet Brewer** on the Desktop and starts the panel. They come with each release in `First_Install_<platform>` folders, and are in the panel's `install` folder:
+
+| Platform | ReadMe | First-install file |
+|---|---|---|
+| Windows | `install/windows/ReadMe_Windows.txt` | `Skynet_First_Install.bat` |
+| Mac | `install/mac/ReadMe_Mac.txt` | `Skynet First Install.command` |
+| Linux | `install/linux/ReadMe_Linux.txt` | `skynet-first-install.sh` |
+| Raspberry Pi | `install/pi/ReadMe_Raspberry_Pi.txt` | `skynet-first-install-pi.sh` (also makes the panel start by itself at boot) |
+
 Every way needs **Node.js** (free, from <https://nodejs.org>). The installers get it for you, or tell you how.
 
 | File in the release | What it is for |

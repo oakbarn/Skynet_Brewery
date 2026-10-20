@@ -14,7 +14,7 @@
 
 **Bundle**: a vessel locked together with its IPs so they move as one and can't be edited until you switch **Bundled** off. See [Equipment](14-equipment).
 
-**BruControl**: the Windows brewery program this panel is modelled on. Its configurations and processes can be imported.
+**BruControl**: the Windows brewery program this panel is modelled on. Its Schemas (BruControl calls them configuration files) and processes can be imported.
 
 **Color selector**: every color setting is the same dropdown. **Default** (first) keeps the item's normal color, **None** (second) means no color at all (see-through), then colors by name with a swatch, and **Custom (add new) ...** for any other color, which is kept in the list for next time.
 
@@ -43,6 +43,8 @@
 **Process class**: Flow, Sub, Repeat or Looper: what a Process is for. See [Process language and steps](22-process-language).
 
 **Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](22-process-language).
+
+**Schema**: the whole setup of your brewery in the panel: Tabs, elements, pipes, Devices and settings (other programs call it a setup or configuration). The samples are ready-made Schemas, and a BruControl configuration file is imported as a Schema. It is saved in the `config` folder.
 
 **Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 

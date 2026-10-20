@@ -17,7 +17,7 @@ The recipe values go into the variables named in **Settings > BeerXML mapping**,
 | Dry Hop | -111 |
 | Unused slot | 0 |
 
-## A BruControl configuration (admins)
+## A BruControl Schema (admins)
 
 1. Choose the `.brucfg` file (in *Documents\BruControl* on the BruControl computer).
 2. Pick **Replace** (start over) or **Add to what I have**.
