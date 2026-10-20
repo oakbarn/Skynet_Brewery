@@ -50,7 +50,7 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 
 ## 1a. Start from a sample
 
-The first time the panel opens it offers four ready-made setups. You can load one later from **Settings > Start from a sample**. Loading one replaces your Tabs, elements, pipes and devices; your old setup is saved first in `config/backups/`. Processes with the same name are backed up before they are replaced.
+The first time the panel opens it offers four ready-made setups. You can load one later from **Settings > Start from a sample**. A sample loaded later comes in as a new Schema, so the Schema you have is kept. Processes with the same name are backed up before they are replaced.
 
 | Sample | What you get |
 |---|---|
@@ -214,7 +214,9 @@ Only **vAPI** variables are in the API (the old `/api/globals/...` address works
 server.js            the server
 lib/                 engine (scripts), store (elements), logger (SQLite), hardware, beerxml, mqtt
 public/              the browser app
-config/brewery.json  workspaces (the tabs), elements, graphics, devices, settings (edited by the app; a .bak is kept)
+config/brewery.json  the loaded Schema (tabs, elements, graphics, devices) and the panel settings (edited by the app; a .bak is kept)
+config/schemas/      one file per Schema (picked in the Schema dropdown), its saved values, daily and by-hand backups
+config/equipment/    Equipment Profiles (Brewing page), used by any Schema
 scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
                      put all your BruControl pictures in media/Images - a few are already there)
