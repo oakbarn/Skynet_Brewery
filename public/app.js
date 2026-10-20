@@ -53,6 +53,20 @@ function alertBar(text) {
   const bar = h('div', { class: 'alertBar', role: 'alert' }, h('span', {}, '⚠ ' + text), h('button', { title: 'Close', onclick: () => bar.remove() }, '✕'));
   document.body.append(bar);
 }
+// Manual valves (Valve type Manual): a Process asked for one to be opened or closed by hand and waits for Done
+function renderValves(list = []) {
+  let d = $('#valveDlg');
+  if (!list.length) { if (d?.open) d.close(); return; }
+  if (!d) { d = h('dialog', { id: 'valveDlg', class: 'valveDlg' }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
+  d.innerHTML = '';
+  d.append(h('h3', {}, '✋ Manual valve'), ...list.map(a => h('div', { class: 'valveAsk' },
+    h('div', { class: 'valveDo' }, `${a.open ? 'OPEN' : 'CLOSE'} ${a.label} by hand`),
+    h('div', { class: 'muted' }, `The Process ${a.process} waits until you press Done.`),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), can('operator')
+      ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, `Done: it is ${a.open ? 'open' : 'closed'}`)
+      : h('span', { class: 'muted' }, 'An operator or admin must press Done.')))));
+  if (!d.open) d.showModal();
+}
 function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? 5000 : 2200); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 const can = need => RANK[S?.me?.role] >= RANK[need];
@@ -72,7 +86,7 @@ async function load() {
   fillAddType();
   renderAll();
 }
-function renderAll() { renderSchemaPick(); renderBrewing(); renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
+function renderAll() { renderValves(S.valves); renderSchemaPick(); renderBrewing(); renderTabs(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
 function connect() {
   const es = new EventSource('/ui/events');
@@ -90,6 +104,7 @@ function connect() {
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
+  es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); });
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
@@ -1519,7 +1534,7 @@ const F = {
     ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
-  digitalOut: [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve']], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', ['plain', 'pump', 'valve'], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]]] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
@@ -1592,7 +1607,7 @@ F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Obje
   ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num', null, NUMK],
   ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true],
   ['_logNote', 'Database trigger: set it on the Variables page', 'note']];
-const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f() : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
+const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f(obj) : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
 const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
