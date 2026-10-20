@@ -17,6 +17,7 @@ import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas } from './lib/schemas.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
+import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
@@ -76,6 +77,8 @@ mqtt.start();
 // Schemas (the Schema dropdown at the top) and Equipment Profiles (Brewing page)
 const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipment'));
 const schemas = new Schemas(store, { engine, hw, profiles });
+// Mash and Boil Profiles (Menu > Mash Profile / Boil Profile), shared by every Schema
+const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
 const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
@@ -404,7 +407,7 @@ async function route(req, res) {
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
-    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm']) if (k in body) store.config[k] = body[k];
+    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm', 'brewDefaults', 'menuOrder']) if (k in body) store.config[k] = body[k];
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
@@ -473,7 +476,8 @@ async function route(req, res) {
   const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
   if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
   if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
-  if (p === '/ui/schema/profile' && m === 'PUT') { const r = schemas.setProfile((await jsonBody(req)).id || null); return ok(res, { ...schemaView(), ...r }); }
+  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
+  if (p === '/ui/schema/layout' && m === 'POST') return ok(res, schemas.layoutAction((await jsonBody(req)).action));
   let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore))?$/.exec(p);
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
@@ -483,6 +487,16 @@ async function route(req, res) {
     if (sc[2] === 'load' && m === 'POST') { schemas.load(sc[1]); return ok(res, schemaView()); }
     if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
     if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
+  }
+  // Mash and Boil Profiles: everyone sees them, admins make and change them
+  sc = /^\/ui\/profiles\/(mash|boil)(?:\/([a-z0-9-]+))?$/.exec(p);
+  if (sc) {
+    const ps = brewProfiles[sc[1]];
+    if (!sc[2] && m === 'GET') return ok(res, ps.list());
+    if (!sc[2] && m === 'POST') { const b = await jsonBody(req); const made = ps.create(b.name, { from: b.from, units: b.units }); return ok(res, { made: made.id, list: ps.list() }); }
+    if (sc[2] && !ps.has(sc[2])) return fail(res, 404, 'No such profile');
+    if (sc[2] && m === 'PUT') { const q = ps.save(sc[2], await jsonBody(req)); return ok(res, { saved: q, list: ps.list() }); }
+    if (sc[2] && m === 'DELETE') { ps.remove(sc[2]); return ok(res, { list: ps.list() }); }
   }
   // Equipment Profiles: everyone sees them, admins make and change them
   const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id) }));
