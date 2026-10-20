@@ -85,3 +85,16 @@ If you add a step in the middle, the numbers after it move up by themselves. Nev
 **Add steps** (next to Save) puts a step at the start of the Process and after every `[label]` that doesn't have one yet. Save afterwards to number them.
 
 While a Process runs, the Processes screen shows the step it is on. To show it on a tab, add a **vKonstant** with the kind **Step**. In its properties, **Shows the steps of** picks the class to follow (Flow unless you change it). It then shows, for example, `2.00003  Mash in`.
+
+## Lock the Equipment Profile
+
+`lock_Equipment` locks the Equipment Profile of the loaded Schema, so its numbers, equipment and pipes can't be changed. `unlock_Equipment` unlocks it again. Put them on a line of their own, for example at the start and end of a brew day:
+
+```
+lock_Equipment
+step "Mash in"
+...
+unlock_Equipment
+```
+
+The Process output says which profile was locked. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.

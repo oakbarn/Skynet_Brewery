@@ -15,6 +15,8 @@ import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
+import { Schemas } from './lib/schemas.js';
+import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
@@ -71,6 +73,13 @@ if (retired) for (const l of retired.lines) { console.log(l); engine.print('syst
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
+// Schemas (the Schema dropdown at the top) and Equipment Profiles (Brewing page)
+const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipment'));
+const schemas = new Schemas(store, { engine, hw, profiles });
+engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
+if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
+const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
+dailyBackups(); setInterval(dailyBackups, 3600 * 1000);       // every Schema gets one backup a day (config/schemas/backups)
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
@@ -98,7 +107,8 @@ function hold(name, down) {
 engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout(() => broadcast('scripts', engine.list()), 100); });
 engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
-engine.on('alert', a => broadcast('alert', a));            // a Process that kept failing and was not restarted again
+engine.on('alert', a => broadcast('alert', a));
+engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
@@ -180,8 +190,9 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
+  if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   return m === 'GET' ? 'viewer' : 'admin';
@@ -366,7 +377,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -376,6 +387,7 @@ async function route(req, res) {
     store.setProp(name, prop, value, 'ui');
     return ok(res);
   }
+  if (p === '/ui/valve/confirm' && m === 'POST') { engine.confirmValve((await jsonBody(req)).name); return ok(res); }
   if (p === '/ui/hold' && m === 'POST') {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
@@ -385,6 +397,7 @@ async function route(req, res) {
   }
   if (p === '/ui/layout' && m === 'PUT') {
     const body = await jsonBody(req);
+    schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: its equipment and pipes can't change
     store.saveLayout(body);
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
     return ok(res);
@@ -424,6 +437,7 @@ async function route(req, res) {
   if (p === '/ui/import/beerxml' && m === 'POST') return ok(res, { ok: true, ...importBeerXml(await readBody(req), store, store.config.beerxml) });
   if (p === '/ui/import/brucontrol' && m === 'POST') {
     const q = url.searchParams;
+    if (q.get('preview') !== '1' && schemas.lockedProfile()) return fail(res, 409, lockedMsgFor(schemas.lockedProfile()));
     const conv = convertBruControl(await readBody(req, 64 * 1024 * 1024), { mediaFolder: q.get('media') ?? 'Images', simulate: q.get('simulate') !== '0' });
     const missingMedia = conv.media.filter(f => { const full = findMedia(f); return !full || !fs.existsSync(full); });
     const out = { summary: conv.summary, warnings: conv.warnings, missingMedia, mediaCount: conv.media.length, autostart: conv.autostart };
@@ -448,7 +462,52 @@ async function route(req, res) {
   }
   if (p === '/ui/samples' && m === 'GET') return ok(res, listSamples(SAMPLES));
   const smp = /^\/ui\/samples\/([\w-]+)\/load$/.exec(p);
-  if (smp && m === 'POST') return ok(res, loadSample(SAMPLES, smp[1], { store, engine, hw }));
+  if (smp && m === 'POST') {
+    const meta = listSamples(SAMPLES).find(x => x.id === smp[1]); if (!meta) return fail(res, 404, 'No such sample');
+    // a sample comes in as a new Schema; the pick on the very first start fills (and names) the one you have
+    if (!store.config.chooseSample) schemas.startNew(meta.name); else if (store.config.schema) store.config.schema.name = schemas.freeName(meta.name);
+    return ok(res, loadSample(SAMPLES, smp[1], { store, engine, hw }));
+  }
+
+  // Schemas: everyone sees the list, admins load, add, rename and delete
+  const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
+  if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
+  if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
+  if (p === '/ui/schema/profile' && m === 'PUT') { const r = schemas.setProfile((await jsonBody(req)).id || null); return ok(res, { ...schemaView(), ...r }); }
+  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore))?$/.exec(p);
+  if (sc) {
+    if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
+    if (sc[2] === 'backup' && m === 'POST') return ok(res, { ok: true, file: schemas.backupSchema(sc[1]) });
+    if (sc[2] === 'backups' && m === 'GET') return ok(res, schemas.listBackups(sc[1]));
+    if (sc[2] === 'restore' && m === 'POST') { schemas.restore(sc[1], (await jsonBody(req)).file); return ok(res, schemaView()); }
+    if (sc[2] === 'load' && m === 'POST') { schemas.load(sc[1]); return ok(res, schemaView()); }
+    if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
+    if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
+  }
+  // Equipment Profiles: everyone sees them, admins make and change them
+  const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id) }));
+  if (p === '/ui/equipment' && m === 'GET') return ok(res, profileView());
+  if (p === '/ui/equipment' && m === 'POST') {
+    const b = await jsonBody(req), made = profiles.create(b.name, b.from);
+    if (b.assign) schemas.setProfile(made.id);           // "Make it unique to this Schema": the copy goes on the loaded Schema
+    return ok(res, { made: made.id, list: profileView() });
+  }
+  sc = /^\/ui\/equipment\/([a-z0-9-]+)(\/lock)?$/.exec(p);
+  if (sc) {
+    if (!profiles.has(sc[1])) return fail(res, 404, 'No such Equipment Profile');
+    if (sc[2] && m === 'PUT') {
+      const on = !!(await jsonBody(req)).locked;
+      if (sc[1] === store.config.equipmentProfile) schemas.lock(on, me.name); else profiles.setLock(sc[1], on, me.name);
+      return ok(res, { list: profileView() });
+    }
+    if (sc[2]) return fail(res, 405, 'Use PUT');
+    if (m === 'GET') return ok(res, withVolumes(profiles.get(sc[1])));
+    if (m === 'PUT') { const q = profiles.save(sc[1], await jsonBody(req)); broadcast('config', {}); return ok(res, { saved: withVolumes(q), list: profileView() }); }
+    if (m === 'DELETE') {
+      const q = profiles.get(sc[1]); if (q.locked) return fail(res, 409, lockedMsgFor(q));
+      schemas.dropProfile(sc[1], q.graphics || []); profiles.remove(sc[1]); return ok(res, { list: profileView() });
+    }
+  }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
   let s = /^\/ui\/log\/(once|now)\/(.+)$/.exec(p);
