@@ -51,7 +51,8 @@ assert.throws(() => schemas.remove(first), /loaded/);
 
 // Equipment Profiles: shared and unique
 const p = profiles.create('10 gallon');
-assert.equal(p.batchSize, 5.5);
+assert.equal(p.trubChillerLoss, 0.5);
+assert.equal(p.batchSize, undefined, 'batch size belongs to the Recipe now');
 schemas.setProfile(p.id);
 const bz = schemas.list().find(s => s.name === 'BrewZilla').id;
 schemas.load(bz); schemas.setProfile(p.id);
