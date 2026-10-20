@@ -22,6 +22,7 @@ import { seedDefaults } from './lib/seed.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
+import { FileMove, KINDS as MOVE_KINDS, missingMedia } from './lib/filemove.js';
 import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain, toStr } from './lib/values.js';
 import { Help } from './lib/help.js';
@@ -67,6 +68,7 @@ setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants
 store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
 const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media page: add / rename / delete pictures and sounds
+const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], scripts: SCRIPTS, help: HELP }));   // File Move page
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
@@ -195,6 +197,7 @@ function needRole(p, m) {
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
+  if (p.startsWith('/ui/filemove/')) return 'admin';   // File Move: copies files onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
 const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico']);
@@ -558,11 +561,28 @@ async function route(req, res) {
     if (!f) return fail(res, 403, 'That path is not inside a media folder (see Settings > Media folders)');
     return sendFile(req, res, pictures.pick(f, url.searchParams.get('as')));   // as=original / as=svg for side-by-side previews
   }
+  // File Move page (admin only, see needRole): copy files and folders from your computer to the Brain
+  if (p.startsWith('/ui/filemove/')) {
+    const q = Object.fromEntries(url.searchParams);
+    if (p === '/ui/filemove/kinds' && m === 'GET') return ok(res, { kinds: Object.fromEntries(Object.entries(MOVE_KINDS).map(([k, v]) => [k, v.label])), brain: ROOT });
+    if (p === '/ui/filemove/missing' && m === 'GET') return ok(res, { missing: missingMedia(store.config, findMedia) });
+    if (p === '/ui/filemove/check' && m === 'POST') return ok(res, { items: fileMove.check((await jsonBody(req)).items) });
+    if (p === '/ui/filemove/upload' && m === 'PUT') {
+      try {
+        const r = await fileMove.save(req, q.kind, q.path, q.overwrite === '1');
+        if (q.kind === 'pictures') { pictures.forget(r.full); pictures.add(r.full); }
+        if (q.kind === 'processes') engine.emit('scripts');         // the Processes list shows the new one
+        return ok(res, { ok: true, saved: r.saved, use: r.use });
+      } catch (e) { return fail(res, e.code === 409 ? 409 : 400, e.message); }
+    }
+    return fail(res, 404, 'Unknown File Move route');
+  }
   // Media page
   if (p.startsWith('/ui/media/')) {
     const q = Object.fromEntries(url.searchParams), root = Number(q.root) || 0;
     if (p === '/ui/media/list' && m === 'GET') return ok(res, mediaFiles.list(root, q.dir ?? ''));
     if (p === '/ui/media/tree' && m === 'GET') return ok(res, mediaFiles.tree(root));
+    if (p === '/ui/media/all' && m === 'GET') return ok(res, { files: mediaFiles.all(root, q.dir ?? '') });
     if (p === '/ui/media/upload' && m === 'PUT') {
       try {
         const r = await mediaFiles.upload(req, root, q.dir ?? '', q.name ?? '', q.overwrite === '1');

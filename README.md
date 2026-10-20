@@ -229,8 +229,10 @@ config/brewery.json  the loaded Schema (tabs, elements, graphics, devices) and t
 config/schemas/      one file per Schema (picked in the Schema dropdown), its saved values, daily and by-hand backups
 config/equipment/    Equipment Profiles (Brewing page), used by any Schema
 scripts/*.txt        scripts
-media/               images and sounds (your background is media/brewery_main.png;
-                     put all your BruControl pictures in media/Images - a few are already there)
+media/Images/        every picture (backgrounds too, e.g. media/Images/brewery_main.png); put all your
+                     BruControl pictures here - the File Move page copies a whole folder from your computer
+media/sounds/        alarm and timer sounds (BruControl's Media\wave sounds go here)
+media/notes/         text files read by Long String vKonstants
 data/                state.json (variable values kept over restarts), brewlog.db (the database),
                      users.json (accounts, passwords are hashed) and sessions.json (who is signed in)
 tools/               reset-password.js (forgotten password)
