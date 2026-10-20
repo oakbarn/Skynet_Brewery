@@ -20,6 +20,12 @@ fs.rmSync(path.join(root, 'scripts/Demo.txt'));
 put('scripts/Mine.txt', 'mine');
 put('config/brewery.json', 'mine');
 assert.deepEqual(seedDefaults(root), [], 'existing folders are left alone');
+put('defaults/media/Images/Valve_Open.png', 'sample');
+put('defaults/media/sounds/beep.wav', 'sample');
+assert.deepEqual(seedDefaults(root), ['media (2 sample files)'], 'sample pictures and sounds a media folder is missing are added');
+assert.equal(fs.readFileSync(path.join(root, 'media/Images/Pump_On.png'), 'utf8'), 'mine', 'yours are never replaced');
+assert.equal(fs.readFileSync(path.join(root, 'media/sounds/beep.wav'), 'utf8'), 'sample');
+assert.deepEqual(seedDefaults(root), [], 'nothing more to add');
 assert.equal(fs.readFileSync(path.join(root, 'media/Images/Pump_On.png'), 'utf8'), 'mine');
 assert.equal(fs.existsSync(path.join(root, 'scripts/Demo.txt')), false, 'a deleted sample stays deleted');
 

@@ -11,7 +11,7 @@ const xml = fs.readFileSync(path.join(here, '..', 'samples', 'sample_brucontrol.
 
 assert.equal(isoSeconds('PT1M30S'), 90); assert.equal(isoSeconds('-PT0.5S'), -0.5); assert.equal(isoSeconds('P1DT1H'), 90000);
 assert.equal(argb(-16777216), '#000000'); assert.equal(argb(-1), '#ffffff'); assert.equal(argb(''), undefined);
-assert.equal(mediaPath('C:\\Brucontrol\\Media\\wave\\a b.wav'), 'Images/wave/a b.wav');
+assert.equal(mediaPath('C:\\Brucontrol\\Media\\wave\\a b.wav'), 'sounds/a b.wav');
 
 const conv = convertBruControl(xml, { simulate: true });
 const el = n => conv.elements.find(e => e.name === n);
@@ -38,7 +38,7 @@ assert.equal(el('MB_07_PID').kp, 30); assert.equal(el('MB_07_PID').pwm, true);
 assert.equal(el('gblS_Msg').initial, 'Hello & welcome'); assert.equal(el('gblS_Msg').visibility, 'hidden'); assert.equal(el('gblS_Msg').valueAlign, 'MiddleCenter');
 assert.equal(el('gblT_Delay').type, 'vKonstant'); assert.equal(el('gblT_Delay').kind, 'time'); assert.equal(el('gblT_Delay').initial, '00:01:30');
 assert.equal(el('tm_Boil').timerType, 'countdown'); assert.equal(el('tm_Boil').resetValue, '01:00:00');
-assert.deepEqual(el('alm_Done').sounds, ['Images/wave/Done.wav', 'Images/Wave/Hops.wav', '']);
+assert.deepEqual(el('alm_Done').sounds, ['sounds/Done.wav', 'sounds/Hops.wav', '']);
 assert.equal(el('insp_Start').tap, 'script'); assert.equal(el('insp_Start').tapTarget, 'looper_Sample');
 assert.equal(conv.workspaces[0].bgW, 1900); assert.equal(conv.workspaces[0].width, 1920);
 
