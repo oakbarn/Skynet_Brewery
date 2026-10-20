@@ -15,7 +15,7 @@
   "workspaces": [
     {
       "name": "Brewery",
-      "background": "brewery_main.png",
+      "background": "Images/brewery_main.png",
       "color": "#9ad8e8",
       "width": 2520,
       "height": 1302,

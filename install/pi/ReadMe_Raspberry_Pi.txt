@@ -55,6 +55,72 @@ FILES
         skynet-first-install-pi.sh    runs once, the first time
       (It is also inside the zip, in BrewPanel/install/pi.)
 
+REAL-WORLD EQUIPMENT: ONLY NEEDED FOR REAL-WORLD TESTING WITH WIRED DEVICES
+==========================================================================
+You do NOT need any boards to install or try the panel. It has a built-in simulator
+(Settings > Simulation) that runs every tab, Process and alarm with no hardware at
+all. Buy the parts below only when you want to switch real things on and off: valves,
+pumps, burners, heating elements, temperature probes.
+
+SUGGESTED REAL-WORLD TEST SETUP
+-------------------------------
+  [ ] One Raspberry Pi 4 (4 GB). This is the Brain (this ReadMe).
+  [ ] A dedicated power supply for the Pi: the official Raspberry Pi 15 W USB-C
+      supply (5.1 V, 3 A). Use it for the Pi only. Phone chargers and shared supplies
+      cause random restarts in the middle of a brew.
+        Additional items for a real Production Environment (not needed for testing):
+        [ ] A case with a fan or a heat-sink case (the Pi slows itself down when hot).
+        [ ] A USB SSD or a "High Endurance" microSD card (normal cards wear out),
+            and a spare card with a copy of your setup.
+        [ ] A small UPS (battery backup) so a power blink does not restart the Brain.
+        [ ] An Ethernet cable to your router (steadier than WiFi on brew day).
+        [ ] A dry spot away from steam and splashes, or a closed electrical box.
+        [ ] A surge protector, and a powered USB hub if you add more than 2 boards.
+  [ ] One Arduino Mega 2560 (genuine or clone) and a USB cable (USB-A to USB-B, the
+      square "printer" plug). The Mega plugs into the Pi's USB socket.
+        Clone boards work fine. What is different about a clone:
+        - The chip next to the USB plug is usually a CH340 instead of the genuine
+          board's chip. The Pi, Linux and Macs (macOS 12 and newer) need no driver.
+          Windows needs the free CH340 driver (see ReadMe_Windows.txt) only if you
+          plug the Mega into a Windows PC, for example to load the firmware.
+        - It shows up as "USB-SERIAL CH340" (Windows) or /dev/ttyUSB0 (Pi, Linux)
+          instead of "Arduino Mega 2560" or /dev/ttyACM0. Pick that port on the
+          Devices page.
+        - In the Arduino IDE pick Board "Arduino Mega or Mega 2560" and Processor
+          "ATmega2560 (Mega 2560)", the same as a genuine board.
+        - If loading the firmware fails ("not in sync"), try another USB cable (many
+          cheap cables only charge and carry no data), pick the right port, and
+          press the board's reset button just as the upload starts.
+  [ ] For the test devices: a relay board (5 V coil, 4 or 8 channels), a 12 V power
+      supply for the valves and lights, a DS18B20 temperature probe with a 4.7 k
+      resistor, and some jumper wires. A 12 V LED makes a safe stand-in for a burner
+      or an electric element. Never power valves or relays from the Mega's 5V pin.
+  [ ] OPTION: one ESP32, only if you want to test a hydrometer that needs it (below).
+
+HYDROMETERS AND THE ESP32 (OPTION)
+----------------------------------
+A hydrometer may be tested using only the Pi. Depending on the type and where the
+hydrometer sits, an ESP32 (or a WiFi extender) might be required in a real
+Production Environment, because metal blocks radio signals:
+  Tilt (Bluetooth)
+    - Pi only: works when the fermenter is within about 10-30 ft of the Pi in the
+      open, or in a plastic or glass fermenter.
+    - Needs an ESP32 near the fermenter (for example running TiltBridge) when it is
+      far from the Pi, inside a freezer or fridge (metal walls), or inside a
+      stainless conical (the steel blocks most of the signal; even then the ESP32
+      or a Tilt Repeater must sit right next to the conical).
+  RAPT Pill (Bluetooth or WiFi)
+    - On Bluetooth: the same as a Tilt above.
+    - On WiFi: no ESP32. It needs good WiFi at the fermenter; inside a freezer or a
+      stainless conical put a WiFi extender close by.
+  iSpindel (WiFi, it has its own ESP chip)
+    - No ESP32 needed. It sends over WiFi (the panel can take it in through MQTT).
+    - Inside a freezer or a stainless conical the WiFi signal may not get out: put
+      a WiFi extender next to it.
+Hydrometer readings in the panel are still being built. See Help > Minimum
+equipment for what works today.
+
+
 SOFTWARE YOU WILL INSTALL
   Program                   Where           Needed?                 Why
   ------------------------  --------------  ----------------------  -------------------------

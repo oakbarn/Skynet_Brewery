@@ -210,39 +210,39 @@ const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 
 const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
-  vessel: { title: 'Vessel', types: ['Brew Kettle', 'HLT', 'MLT', 'Mash Tun', 'Whirlpool'], image: 'samples/kettle.svg', size: [220, 270], tab: 'Equipment',
+  vessel: { title: 'Vessel', types: ['Brew Kettle', 'HLT', 'MLT', 'Mash Tun', 'Whirlpool'], image: 'Images/samples/kettle.svg', size: [220, 270], tab: 'Equipment',
     ports: {
       outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92]], { on: true }),
       tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75]]),
       thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7]], { ip: false }),
       steamSlayer: pt('Steam Slayer', V_HIGH), sparge: pt('Sparge', V_HIGH), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH]),
     } },
-  pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'samples/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
+  pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/samples/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
       wortIn: pt('Wort In', CORNERS, { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS, { on: true, def: 'Bottom Right', circuit: 'wort' }),
       waterIn: pt('Water In', CORNERS, { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS, { on: true, def: 'Top Right', circuit: 'water' }),
       thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
     } },
-  ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'samples/chill_coil.svg', size: [180, 180], tab: 'Equipment',
+  ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/samples/chill_coil.svg', size: [180, 180], tab: 'Equipment',
     ports: { in: pt('In', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }) } },
-  herms: { title: 'HERMS coil', types: ['Stainless 25 ft', 'Stainless 50 ft', 'Copper'], image: 'samples/herms_coil.svg', size: [180, 180], tab: 'Equipment',
+  herms: { title: 'HERMS coil', types: ['Stainless 25 ft', 'Stainless 50 ft', 'Copper'], image: 'Images/samples/herms_coil.svg', size: [180, 180], tab: 'Equipment',
     ports: { wortIn: pt('Wort In', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), wortOut: pt('Wort Out', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }) } },
-  trub: { title: 'Trub filter', types: ['Inline filter', 'Hop rocket', 'Hop spider'], image: 'samples/trub_filter.svg', size: [100, 170], tab: 'Equipment',
+  trub: { title: 'Trub filter', types: ['Inline filter', 'Hop rocket', 'Hop spider'], image: 'Images/samples/trub_filter.svg', size: [100, 170], tab: 'Equipment',
     ports: { inlet: pt('Inlet', SIDE4.concat(CORNERS), { on: true, def: 'Top', circuit: 'a' }), outlet: pt('Outlet', SIDE4.concat(CORNERS), { on: true, def: 'Bottom', circuit: 'a' }) } },
-  eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'samples/pipe_tee.svg', size: [90, 90],
+  eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/samples/pipe_tee.svg', size: [90, 90],
     ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
-  eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'samples/pipe_elbow90.svg', size: [90, 90],
+  eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/samples/pipe_elbow90.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
-  eqElbow45: { title: 'Pipe 45° elbow', types: ['Short radius', 'Long radius'], image: 'samples/pipe_elbow45.svg', size: [90, 90],
+  eqElbow45: { title: 'Pipe 45° elbow', types: ['Short radius', 'Long radius'], image: 'Images/samples/pipe_elbow45.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Left', circuit: 'a' }),
       b: pt('End B', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Bottom Right', circuit: 'a' }) } },
-  eqCross: { title: 'Pipe cross', types: ['Equal cross', 'Reducing cross'], image: 'samples/pipe_cross.svg', size: [90, 90],
+  eqCross: { title: 'Pipe cross', types: ['Equal cross', 'Reducing cross'], image: 'Images/samples/pipe_cross.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Right', circuit: 'a' }),
       c: pt('End C', SIDE4, { on: true, def: 'Top', circuit: 'a' }), d: pt('End D', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
 };
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
-const ONOFF_GRAPHICS = [['LED green', 'samples/led_green.svg'], ['LED red', 'samples/led_red.svg'], ['LED off (grey)', 'samples/led_off.svg'],
-  ['Lightning bolt on', 'samples/bolt_on.svg'], ['Lightning bolt off', 'samples/bolt_off.svg'],
+const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red', 'Images/samples/led_red.svg'], ['LED off (grey)', 'Images/samples/led_off.svg'],
+  ['Lightning bolt on', 'Images/samples/bolt_on.svg'], ['Lightning bolt off', 'Images/samples/bolt_off.svg'],
   ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
@@ -261,15 +261,20 @@ const eqClass = g => g?.kind === 'vessel' ? EQ[g.vesselType] : null;
 function vList(key) {
   const [c, p] = key.split('.');
   const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'units' ? UNITS : key === 'colors' ? [] :
-    key === 'pictures' ? [...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE), ...mediaPics] :
-    key === 'backgrounds' ? [...mediaPics, ...(draft || S.config).workspaces.map(w => w.background).filter(Boolean)].sort() : key === 'sounds' ? usedPaths(SND_RE) : key === 'heat' ? HEAT_SOURCES : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
+    key === 'pictures' ? inImages([...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE), ...mediaPics]) :
+    key === 'backgrounds' ? inImages([...mediaPics, ...(draft || S.config).workspaces.map(w => w.background).filter(Boolean)]).sort() : key === 'sounds' ? [...new Set([...mediaSounds, ...usedPaths(SND_RE)])].sort() : key === 'heat' ? HEAT_SOURCES : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
   return [...new Set([...(base || []), ...(S.config.vesselLists?.[key] || [])])];
 }
-// pictures sitting in the media folder and its Images folder (fetched when a dialog needs them)
-let mediaPics = [];
+// Picture lists only offer pictures in media/Images (and its folders); sound lists add what is in media/sounds.
+// Fetched when a dialog needs them.
+let mediaPics = [], mediaSounds = [];
+// a picture typed by hand always lands in media/Images: "pump.png", "/images/pump.png" and "media\Images\pump.png" -> "Images/pump.png"
+const imagesPath = p => 'Images/' + p.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^media\//i, '').replace(/^images\//i, '');
+const inImages = list => [...new Set(list)].filter(p => /^Images\//i.test(p));
 async function loadMediaPictures() {
-  const got = await Promise.all(['', 'Images'].map(dir => api('GET', `/ui/media/list?root=0&dir=${dir}`).catch(() => null)));
-  mediaPics = got.flatMap(r => r?.files || []).filter(f => f.kind === 'picture').map(f => f.use).sort();
+  const [pics, snds] = await Promise.all(['Images', 'sounds'].map(dir => api('GET', `/ui/media/all?root=0&dir=${dir}`).catch(() => null)));
+  mediaPics = (pics?.files || []).filter(f => f.kind === 'picture').map(f => f.use);
+  mediaSounds = (snds?.files || []).filter(f => f.kind === 'sound').map(f => f.use);
 }
 const portDefPos = d => d.def || d.pos[0][0];
 function vPortXY(g, k, pos) {
@@ -1454,7 +1459,7 @@ $('#addEl').onclick = () => {
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
-  if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'samples/led_green.svg'; e.imageOff = 'samples/led_red.svg'; }
+  if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/samples/led_green.svg'; e.imageOff = 'Images/samples/led_red.svg'; }
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 };
 $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
@@ -1876,7 +1881,9 @@ function dialog(title, fields, obj, canDelete) {
     body.onchange = ev => {
       const t = ev.target;
       if ((t.dataset?.kind === 'vlist' || t.dataset?.kind === 'gpick') && t.value === '__add__') {
-        const k = t.dataset.k, prev = obj[k], text = (prompt({ units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture path in your media folders (for example Images/MyValve_On.png)' : 'Add to this list')) || '').trim();
+        const k = t.dataset.k, prev = obj[k];
+        let text = (prompt({ units: 'New unit (for example psi)', sounds: 'Sound file path in your media folders (for example sounds/bell.wav)' }[t.dataset.list] || (t.dataset.kind === 'gpick' ? 'Picture in media/Images (for example MyValve_On.png or Valves/MyValve_On.png)' : 'Add to this list')) || '').trim();
+        if (text && ['onoff', 'pictures', 'backgrounds'].includes(t.dataset.list)) text = imagesPath(text);
         try { readFields(obj); } catch { }
         obj[k] = text || prev;
         if (text && !vList(t.dataset.list).includes(text)) {
@@ -1920,6 +1927,7 @@ async function editItem(kind, id) {
   const bundle = bundleOf(item);
   if (bundle) return toast(`This IP is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to edit, move or delete it.`, true);
   if (item.kind === 'vessel' && item.bundled) return editBundle(item);
+  await loadMediaPictures();
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
@@ -2018,7 +2026,7 @@ async function editWorkspace() {
     ['_bgHead', 'Background', 'head'],
     ['color', 'Background color', 'color'],
     ['background', 'Background picture', 'gpick', 'backgrounds'],
-    ['_bgPlace', 'The list shows the pictures in your media folder and its Images folder (Add new ... takes any other path). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
+    ['_bgPlace', 'The list shows the pictures in media/Images and its folders (Add new ... takes another picture name there; the File Move page copies pictures from your computer). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
     ['_sizeHead', 'Size', 'head'],
     ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
