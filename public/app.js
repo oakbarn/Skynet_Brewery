@@ -656,7 +656,11 @@ function fillEl(n, e0) {
   n.classList.toggle('img-missing', !!missing);
   const stretch = !!e.imagePathsLocked && hasPictures(e, v);
   n.style.backgroundColor = img || missing ? '' : bg(v.background);
-  n.style.backgroundImage = img ? `url("${media(img)}")` : '';
+  // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
+  const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] : 0;
+  n.classList.toggle('turned', !!turn);
+  if (turn) { n.style.backgroundImage = ''; n.style.setProperty('--pic', `url("${media(img)}")`); n.style.setProperty('--turn', turn + 'deg'); }
+  else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
@@ -1498,6 +1502,7 @@ async function useValveProfile(e) {
   if (p.imageClosed) e.imageOff = p.imageClosed;
   e.orientation = p.orientation; delete e.ipIn; delete e.ipOut;
   if (p.orientation === 'h') [e.w, e.h] = [e.h, e.w];
+  if (p.orientation === 'l45' || p.orientation === 'r45') e.w = e.h = Math.max(e.w, e.h);   // the vertical picture is turned 45 degrees in a square
   return true;
 }
 // Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Background Profile (only when it is made).
@@ -3693,7 +3698,7 @@ function profFields(kind) {
       ['notes', 'Notes', 'area']];
     if (kind === 'valve') return [['name', 'Name', 'text'], ['imageOpen', 'Graphic when open', 'gpick'], ['imageClosed', 'Graphic when closed', 'gpick'],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
-      ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. Pick graphics drawn the same way.', 'note'], ['notes', 'Notes', 'area']];
+      ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
     if (kind === 'boil') return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
       ['boilTime', 'Total boil time (minutes)', 'num'], ['boilOffRate', `Boil off (${u} per hour)`, 'num'], ['notes', 'Notes', 'area']];
     return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
