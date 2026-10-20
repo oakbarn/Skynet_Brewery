@@ -11,7 +11,7 @@ The Skynet Brew Panel runs on **Windows, Mac, Linux or a Raspberry Pi**. Each re
 | Linux | `install/linux/ReadMe_Linux.txt` | `skynet-first-install.sh` |
 | Raspberry Pi | `install/pi/ReadMe_Raspberry_Pi.txt` | `skynet-first-install-pi.sh` (also makes the panel start by itself at boot) |
 
-Every way needs **Node.js** (free, from <https://nodejs.org>). The installers get it for you, or tell you how.
+Every way needs **Node.js** (free, from <https://nodejs.org>). The installers get it for you, or tell you how. On Windows, `Skynet_Brewer.bat` and `Skynet_First_Install.bat` also install it by themselves when it is missing.
 
 | File in the release | What it is for |
 |---|---|
@@ -39,29 +39,15 @@ To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. It asks before de
 
 ## Windows: by hand, with a .bat file
 
-1. Install Node.js (the **LTS** version) from <https://nodejs.org>.
-2. Make the folder `C:\Brewing` and copy `Skynet_BrewPanel_<date>.zip` into it.
-3. Right-click the zip, choose **Extract All…**, and extract into `C:\Brewing`. It makes the sub folder `C:\Brewing\BrewPanel` by itself. (If Windows suggests `C:\Brewing\Skynet_BrewPanel_<date>`, change it to `C:\Brewing`.)
-4. Create a `.bat` file that starts the panel. Use the sample `Skynet_Brewer.bat` from the release, or make your own:
-   1. Open a simple text editor such as **Notepad** or **Notepad++**. (Word works only if you save as Plain Text, so Notepad is easier.)
-   2. Paste these lines:
+1. Make the folder `C:\Brewing` and copy `Skynet_BrewPanel_<date>.zip` into it.
+2. Right-click the zip, choose **Extract All…**, and extract into `C:\Brewing`. It makes the sub folder `C:\Brewing\BrewPanel` by itself. (If Windows suggests `C:\Brewing\Skynet_BrewPanel_<date>`, change it to `C:\Brewing`.)
+3. Copy `Skynet_Brewer.bat` from the release (it is also in `C:\Brewing\BrewPanel\install\windows`) into `C:\Brewing`.
+4. Right-click the `.bat`, choose **Show more options > Send to > Desktop (create shortcut)**, and rename the shortcut to **Skynet Brewer**.
+5. Double-click it. Keep the black window open while you brew. The browser opens the panel a few seconds later.
 
-```
-:: MIT License Granted
-:: Copyright (c) OakBarn Brewery 2026
-@echo off
-title Skynet Brewery Panel
-cd /d C:\Brewing\BrewPanel
-start "" /min cmd /c "timeout /t 4 /nobreak >nul & start "" http://localhost:8080"
-npm start
-pause
-```
+**You don't need to install Node.js first.** Every time `Skynet_Brewer.bat` starts, it checks for Node.js. If it is missing or older than 22.13, it downloads the LTS version from nodejs.org and installs it, then carries on. This needs the internet and takes a few minutes; when Windows asks *"Do you want to allow this app to make changes to your device?"*, click **Yes**. It also gets the USB board support the first time. If that ever fails, the black window says so and opens the Node.js download page so you can install it by hand.
 
-   3. Save it as `C:\Brewing\Skynet_Brewer.bat`. In Notepad, set **Save as type** to **All files**, or you get `Skynet_Brewer.bat.txt`.
-5. Right-click the `.bat`, choose **Show more options > Send to > Desktop (create shortcut)**, and rename the shortcut to **Skynet Brewer**.
-6. Double-click it. Keep the black window open while you brew.
-
-The `start … timeout` line opens the browser 4 seconds later, so the panel has time to start. A plain `start "" http://localhost:8080` works too, but the browser may say it can't reach the page until you refresh.
+If your panel is not in `C:\Brewing\BrewPanel`, open the `.bat` in Notepad and change the line `set "PANEL=C:\Brewing\BrewPanel"`.
 
 ## Mac
 

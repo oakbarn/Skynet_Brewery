@@ -16,7 +16,7 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 **By hand:**
 
-1. **Install Node.js 22 LTS or newer** from <https://nodejs.org>. On a Raspberry Pi use the NodeSource packages for Node 22.
+1. **Install Node.js 22 LTS or newer** from <https://nodejs.org>. On a Raspberry Pi use the NodeSource packages for Node 22. On Windows you can skip this: `install/windows/Skynet_Brewer.bat` installs Node.js by itself (winget, or the LTS .msi from nodejs.org, checked against its SHA-256) when it is missing or too old.
 2. **Copy this folder** anywhere, for example `C:\BrewPanel` or `/home/pi/brewpanel`.
 3. **Start it.** In that folder run:
    ```

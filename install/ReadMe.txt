@@ -5,7 +5,8 @@ MIT License Granted. Copyright (c) OakBarn Brewery 2026
 The Skynet Brew Panel runs on Windows, Mac, Linux or a Raspberry Pi.
 You then use it from any browser: PC, Mac, tablet, Android phone or iPhone.
 
-Every way below needs Node.js (free, from https://nodejs.org).
+Every way below needs Node.js (free, from https://nodejs.org). On Windows the
+installer and Skynet_Brewer.bat install it for you when it is missing.
 The installers get it for you, or tell you how.
 
 The files in this release:
@@ -67,36 +68,22 @@ your brew data.
 
 WINDOWS, BY HAND
 ----------------
-1. Install Node.js (the LTS version) from https://nodejs.org
-2. Make the folder C:\Brewing and copy Skynet_BrewPanel_<date>.zip into it.
-3. Right-click the zip, choose "Extract All...", and extract into C:\Brewing.
+1. Make the folder C:\Brewing and copy Skynet_BrewPanel_<date>.zip into it.
+2. Right-click the zip, choose "Extract All...", and extract into C:\Brewing.
    It makes the sub folder C:\Brewing\BrewPanel by itself.
    (If Windows suggests C:\Brewing\Skynet_BrewPanel_<date>, change it to C:\Brewing.)
-4. Create a .bat file to start the panel. Use the sample Skynet_Brewer.bat that came
-   with this ReadMe, or make your own:
-     a. Open any simple text editor (Notepad, Notepad++). Word works only if you
-        save as "Plain Text", so Notepad is easier.
-     b. Paste these lines:
-
-        :: MIT License Granted
-        :: Copyright (c) OakBarn Brewery 2026
-        @echo off
-        title Skynet Brewery Panel
-        cd /d C:\Brewing\BrewPanel
-        start "" /min cmd /c "timeout /t 4 /nobreak >nul & start "" http://localhost:8080"
-        npm start
-        pause
-
-     c. Save it as C:\Brewing\Skynet_Brewer.bat
-        In Notepad set "Save as type" to "All files", or it becomes Skynet_Brewer.bat.txt
-5. Put it on the Desktop: right-click the .bat, "Show more options", "Send to",
+3. Copy Skynet_Brewer.bat (it comes with this ReadMe, and is also in
+   C:\Brewing\BrewPanel\install\windows) into C:\Brewing.
+4. Put it on the Desktop: right-click the .bat, "Show more options", "Send to",
    "Desktop (create shortcut)". Rename the shortcut to "Skynet Brewer".
-6. Double-click it. The black window is the panel running; keep it open while you brew.
+5. Double-click it. The black window is the panel running; keep it open while you brew.
    The browser opens http://localhost:8080 after a few seconds.
 
-The "start ... timeout" line opens the browser 4 seconds later, so the panel has
-time to start. A plain  start "" http://localhost:8080  also works, but the browser
-may show "can't reach this page" until you refresh.
+You do not need to install Node.js first. Each time Skynet_Brewer.bat starts, it
+checks for Node.js and, if it is missing or too old, downloads the LTS version from
+nodejs.org and installs it (needs the internet; Windows asks for permission, click
+Yes). It also gets the USB board support the first time. If your panel is not in
+C:\Brewing\BrewPanel, open the .bat in Notepad and change the PANEL line.
 
 
 MAC
