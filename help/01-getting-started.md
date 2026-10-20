@@ -24,7 +24,7 @@ The buttons along the top are the main screens:
 | **Log** | Values written to the brew database, with a CSV download. |
 | **Devices** | The boards (PLCs) connected to the Pi, and the temperature probe list. |
 | **Media** | Add pictures and sounds to the Pi from any browser. |
-| **Import** | Bring in a BeerSmith recipe or a BruControl configuration. |
+| **Import** | Bring in a BeerSmith recipe or a BruControl Schema. |
 | **Settings** | Samples, your password, users and panel settings. |
 | **Help** | This manual. |
 
