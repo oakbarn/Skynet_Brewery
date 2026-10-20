@@ -515,3 +515,7 @@ body.role-viewer .op-only { display: none !important; }
   .schemaPick { margin-left: 0; }
   .schemaPick select { max-width: 160px; }
 }
+/* Manual valve pop-up: a Process waits until someone turns the valve by hand */
+.valveDlg { border: 2px solid var(--warn); border-radius: 10px; background: var(--panel); color: var(--text); max-width: 460px; }
+.valveAsk { border-top: 1px solid var(--line); padding: 8px 0; }
+.valveDo { font-size: 1.35em; font-weight: 700; color: var(--warn); margin-bottom: 4px; }

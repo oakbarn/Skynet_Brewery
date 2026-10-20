@@ -106,7 +106,8 @@ function hold(name, down) {
 engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout(() => broadcast('scripts', engine.list()), 100); });
 engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
-engine.on('alert', a => broadcast('alert', a));            // a Process that kept failing and was not restarted again
+engine.on('alert', a => broadcast('alert', a));
+engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
@@ -188,7 +189,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -374,7 +375,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
@@ -384,6 +385,7 @@ async function route(req, res) {
     store.setProp(name, prop, value, 'ui');
     return ok(res);
   }
+  if (p === '/ui/valve/confirm' && m === 'POST') { engine.confirmValve((await jsonBody(req)).name); return ok(res); }
   if (p === '/ui/hold' && m === 'POST') {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
