@@ -84,7 +84,7 @@ A pin can be typed the Arduino way or the BruControl way, and both mean the same
 | Digital pins | 0-53 (or D0-D53) | 0-53 |
 | Analog pins | A0-A15 | 54-69 |
 
-The pin picker lists analog pins as `A0 = pin 54 (BruControl)` and so on. Analog pins also work as digital inputs or outputs (A5 = pin 59). On the wire the panel always sends the pin number (`DO 59 1`), and analog readings arrive as `A 5 <raw>` for A5. So a BruControl configuration that uses 54-69 works unchanged.
+The pin picker lists analog pins as `A0 = pin 54 (BruControl)` and so on. Analog pins also work as digital inputs or outputs (A5 = pin 59). On the wire the panel always sends the pin number (`DO 59 1`), and analog readings arrive as `A 5 <raw>` for A5. So a BruControl Schema that uses 54-69 works unchanged.
 
 ### Wiring notes (Arduino Mega)
 
