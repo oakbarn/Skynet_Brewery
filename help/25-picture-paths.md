@@ -38,7 +38,7 @@ A number in **background** only ever picks a picture. A color name or code (`my_
 
 ## After a BruControl import: imagePath_2 and imagePath_3 are locked
 
-When a BruControl configuration is imported, each item keeps its three BruControl pictures so your imported Processes that say `background = 2` or `background = 3` still show the right picture. On those items **imagePath_2** and **imagePath_3** are locked (🔒) and can no longer be changed. Clicking one opens a short note that explains the Skynet way above.
+When a BruControl Schema is imported, each item keeps its three BruControl pictures so your imported Processes that say `background = 2` or `background = 3` still show the right picture. On those items **imagePath_2** and **imagePath_3** are locked (🔒) and can no longer be changed. Clicking one opens a short note that explains the Skynet way above.
 
 imagePath_1 stays open: change it in the properties dialog, or from a Process with `.image`.
 

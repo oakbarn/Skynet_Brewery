@@ -1,8 +1,8 @@
 # Settings
 
-## Start from a sample (admins)
+## Start from a sample Schema (admins)
 
-Ready-made breweries: **OakBarn BruControl**, **Two vessel, one pump**, **Three vessel, one pump** and **BrewZilla brew day**. Every board starts on the simulator. Loading one replaces your tabs, elements and devices; a copy of your current setup is saved first in `config/backups` on the Pi.
+Ready-made brewery Schemas: **OakBarn BruControl**, **Two vessel, one pump**, **Three vessel, one pump** and **BrewZilla brew day**. Every board starts on the simulator. Loading one replaces your tabs, elements and devices; a copy of your current Schema is saved first in `config/backups` on the Pi.
 
 ## My account
 

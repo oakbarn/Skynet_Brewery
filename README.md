@@ -16,7 +16,7 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 **By hand:**
 
-1. **Install Node.js 22 LTS or newer** from <https://nodejs.org>. On a Raspberry Pi use the NodeSource packages for Node 22.
+1. **Install Node.js 22 LTS or newer** from <https://nodejs.org>. On a Raspberry Pi use the NodeSource packages for Node 22. On Windows you can skip this: `install/windows/Skynet_Brewer.bat` installs Node.js by itself (winget, or the LTS .msi from nodejs.org, checked against its SHA-256) when it is missing or too old.
 2. **Copy this folder** anywhere, for example `C:\BrewPanel` or `/home/pi/brewpanel`.
 3. **Start it.** In that folder run:
    ```
@@ -48,13 +48,13 @@ On Linux or a Pi, also run `sudo usermod -aG dialout $USER` once, then log out a
 - **Raspberry Pi / Linux:** `install/linux/install-skynet-brewer.sh --service` sets it up, or see `docs/brewpanel.service` (systemd).
 - **Windows:** a Task Scheduler task "At log on" that runs `node --no-warnings server.js` in this folder.
 
-## 1a. Start from a sample
+## 1a. Start from a sample Schema
 
-The first time the panel opens it offers four ready-made setups. You can load one later from **Settings > Start from a sample**. Loading one replaces your Tabs, elements, pipes and devices; your old setup is saved first in `config/backups/`. Processes with the same name are backed up before they are replaced.
+The first time the panel opens it offers four ready-made Schemas (a Schema is a whole brewery setup: Tabs, elements, pipes, devices and settings). You can load one later from **Settings > Start from a sample Schema**. A sample loaded later comes in as a new Schema, so the Schema you have is kept. Processes with the same name are backed up before they are replaced.
 
 | Sample | What you get |
 |---|---|
-| **OakBarn BruControl** | Fritz's BruControl configuration, imported with every board on the simulator. |
+| **OakBarn BruControl** | Fritz's BruControl Schema, imported with every board on the simulator. |
 | **Two vessel, one pump** | Kettle and mash tun, one pump, five valves, pipes, two probes, a kettle heater and a chiller. |
 | **Three vessel, one pump** | HLT, mash tun and boil kettle, one pump, six valves, pipes, three probes and two heaters. |
 | **BrewZilla brew day** | No hardware. A brew day flow for a BrewZilla and DigiBoil with step timers, hop drop warnings and readings you type in. |
@@ -129,17 +129,17 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 - **At clock time** (optional): lines the writes up with the clock, e.g. every 1 day at `12 AM`, or every 6 hours at `1 AM` (1 AM, 7 AM, 1 PM, 7 PM). Accepts `12 AM`, `6:30 PM` or `18:30`.
 - Off, Manual (`log` line or Log now), and Once still work as before.
 
-**The old Global class is retired.** Globals move by their name, on start-up for a saved setup and in the BruControl import:
+**The old Global class is retired.** Globals move by their name, on start-up for a saved Schema and in the BruControl import:
 
 - `gbl…` becomes a **vKonstant** of the same kind with the **same name**, so the names still match BruControl for now.
-- `RP_…` becomes a **vAPI** of the same kind, renamed `RP_` → `vA_` in the setup and in every process (`RP_v_Pitch_Temp` → `vA_v_Pitch_Temp`).
+- `RP_…` becomes a **vAPI** of the same kind, renamed `RP_` → `vA_` in the Schema and in every process (`RP_v_Pitch_Temp` → `vA_v_Pitch_Temp`).
 - `x…` is **deleted**. Processes or items still using one are listed with line numbers.
-- `glb…` was a typo for `gbl…`: renamed `glb` → `gbl` (setup and processes), then a vKonstant like the rest.
-- `DX_gblV_…` becomes a **vAPI**, renamed `DX_gblV_` → `vA_` in the setup and every process.
+- `glb…` was a typo for `gbl…`: renamed `glb` → `gbl` (Schema and processes), then a vKonstant like the rest.
+- `DX_gblV_…` becomes a **vAPI**, renamed `DX_gblV_` → `vA_` in the Schema and every process.
 - `insp_…` is **deleted** like `x…` (processes still using one are listed).
 - Any other name becomes a vAPI with the same name (it works exactly like the Global did) and is listed so it can be sorted later.
 
-On start-up the old setup is copied to `config/backups/brewery-before-globals-<date>.json`, each changed process keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Processes page console). A vKonstant is never written to the database, so a `gbl` that had a database trigger is listed too.
+On start-up the old Schema is copied to `config/backups/brewery-before-globals-<date>.json`, each changed process keeps a `.before-globals.bak` copy, and the list of what moved is in `data/globals-retired.txt` (and on the Processes page console). A vKonstant is never written to the database, so a `gbl` that had a database trigger is listed too.
 
 ## 3. Processes
 
@@ -175,6 +175,8 @@ Names have no spaces (a space typed in a name becomes `_`). Processes have a cla
 - A `[label]` inside an if/endif works. Labels and gotos can be anywhere.
 - A `//` comment can contain quote marks.
 - **A process with an error does not start.** Errors include an if without endif, a goto to a missing label, an unknown variable, an unknown element or a missing process. The Processes page lists the errors with line numbers; click one to jump to it.
+- **Find and Replace.** On the Processes page press **Find** (or Ctrl+F; Ctrl+H to replace). Tick **Aa** to match upper and lower case and **Whole word** to skip longer names. **Replace** changes one match, **Replace all** every match in the open Process; press Save to keep it, Ctrl+Z undoes it. **All Processes** searches every Process and lists each match with how the line will look; untick the ones to leave alone, then **Replace ticked** saves those Processes. A running Process keeps the old text until it is stopped and started.
+- **Editor tools** (Help > The Process editor): line numbers and **Go to line** (Ctrl+G); colors by what each word does (Commands blue, Devices magenta, Widgets teal, vKonstants purple, vAPI red, variables black on white, operators orange, comments green), with a **Colors** switch and **Color key**; **Save to file** for the whole Process or the highlighted lines as text or as XML in color, plus a **Notepad++ colors file** (a general one is `docs/Skynet_Process_Notepad++.xml`). Comments can be `//`, `#`, `'` or `/* ... */`. **Delete** moves a Process to the **Recycle Bin** (`scripts/Recycle_Bin`), where admins can restore it or delete it for good; both ask first.
 - `start` on a process that is already running does nothing and prints a note. Stop it first to restart it.
 - Inputs from hardware (digitalIn, temperature, analogIn) cannot be set by processes.
 - `fileindex` and other BruControl-only properties are stored but ignored. Alarms use `sound` (a path).
@@ -192,6 +194,15 @@ Names have no spaces (a space typed in a name becomes `_`). Processes have a cla
 | `Demo_Mash_Steps` | A 60-minute mash with a pH check at 10 and a stir at 30; made for trying simulation mode. |
 
 **Simulation mode** (Settings > Simulation, admins): every board is replaced by the simulator so no real hardware is switched, a yellow bar shows on every screen, and time can run up to 120× faster, skip ahead by hand, skip to the next event, or skip by itself from a Time jumps table. The Process timeline works out when each step of a Process happens. See the Help page *Simulation mode*.
+
+## 3a. Config Editor (admins only)
+
+The **Config** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
+
+- **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
+- **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
+- **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
+- **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
 
 ## 4. API (for Node-RED or other programs)
 
@@ -214,7 +225,9 @@ Only **vAPI** variables are in the API (the old `/api/globals/...` address works
 server.js            the server
 lib/                 engine (scripts), store (elements), logger (SQLite), hardware, beerxml, mqtt
 public/              the browser app
-config/brewery.json  workspaces (the tabs), elements, graphics, devices, settings (edited by the app; a .bak is kept)
+config/brewery.json  the loaded Schema (tabs, elements, graphics, devices) and the panel settings (edited by the app; a .bak is kept)
+config/schemas/      one file per Schema (picked in the Schema dropdown), its saved values, daily and by-hand backups
+config/equipment/    Equipment Profiles (Brewing page), used by any Schema
 scripts/*.txt        scripts
 media/               images and sounds (your background is media/brewery_main.png;
                      put all your BruControl pictures in media/Images - a few are already there)
