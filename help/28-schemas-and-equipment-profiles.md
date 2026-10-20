@@ -2,7 +2,9 @@
 
 A **Schema** is one whole brewery setup: its tabs, devices, elements, pipes and the **Equipment Profile** it uses. You can keep as many Schemas as you like, for example one for the 10 gallon system and one for the BrewZilla. Each Schema is kept in its own file on the Brain, in `config/schemas`.
 
-An **Equipment Profile** describes your brewing equipment: the batch size, the boil off, the losses, the vessel sizes, the efficiency, and the equipment itself. Profiles live on their own, so **any Schema can use any profile**. A profile used by one Schema is **unique**. A profile used by several Schemas is **shared**, and a change to it changes all of them.
+An **Equipment Profile** describes your brewing equipment: the batch size, the boil off, the losses, the vessel sizes, the efficiency, the equipment itself **and its piping**. Profiles live on their own, so **any Schema can use any profile**. A profile used by one Schema is **unique**. A profile used by several Schemas is **shared**, and a change to it changes all of them.
+
+The profile is not copied into the Schema. It is where the information is stored. The vessels, chillers, coils, filters, fittings, IPs, pipes and hoses you draw on a Schema's tabs are saved in its Equipment Profile. Load another Schema that uses the same profile, and the same equipment and pipes are on its tabs. Devices (pumps, valves, probes on a board), pictures and text stay with the Schema.
 
 Only an **Admin** can load, add, rename, back up, restore or delete a Schema, or change an Equipment Profile. Everyone else can look.
 
@@ -56,8 +58,26 @@ The **Worked out from these numbers** box updates while you type. It shows the p
 The box at the top of the **Brewing** page shows the loaded Schema and its Equipment Profile.
 
 - Pick a profile in the dropdown to use it. Pick **Add new ...** to make a new one.
+  - If that profile already has equipment drawn, its equipment and pipes take the place of the ones on this Schema's tabs. The old ones stay saved in the profile they came from.
+  - If it has none drawn yet (a new profile), it takes the equipment and pipes that are on this Schema's tabs now.
+  - Picking **(none yet)** takes the profile off. The equipment and pipes stay on the tabs, kept in the Schema itself.
 - Under the dropdown it says whether the profile is **Unique** (only this Schema uses it) or **Shared** (and with which Schemas).
 - **Make it unique to this Schema** shows when the profile is shared. It makes a copy of the profile just for this Schema, and the other Schemas keep the original.
+
+## Lock the Equipment Profile
+
+When the profile is right, lock it so nothing gets bumped on brew day.
+
+- Switch on **🔒 Locked** next to the profile in the box at the top of the Brewing page. Operators and Admins can do this.
+- Or put `lock_Equipment` in a Process (and `unlock_Equipment` to unlock). See [The Process language](22-process-language).
+
+While it is locked:
+
+- Its numbers and its equipment list can't be changed, and it can't be deleted.
+- On the tabs, **Edit layout** can't move, add, change or delete equipment, IPs, pipes or hoses. **Save layout** says it is locked. Devices, pictures and text can still be changed.
+- The Schema can't switch to another profile.
+
+To unlock, switch **🔒 Locked** off (the panel asks first), or run `unlock_Equipment`. The Brew Day (coming soon) will lock the profile by itself when it starts.
 
 ## Build and bundle equipment
 

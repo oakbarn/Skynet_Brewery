@@ -1090,7 +1090,8 @@ function setEditing(on) {
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
-  $('#editHint').textContent = on ? 'Drag to move, corner to resize, double-click (or hold a finger) for properties. Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.' : '';
+  const lockedEq = S.profiles?.find(p => p.id === S.config.equipmentProfile && p.locked);
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" is locked: equipment, IPs and pipes can't be changed. ` : '') + 'Drag to move, corner to resize, double-click (or hold a finger) for properties. Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
   renderTabs(); renderWs();
 }
 
@@ -2825,6 +2826,9 @@ const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 
 function renderBrewing() {
   if (!S?.profiles) return;
+  const fresh = eqWork && S.profiles.find(x => x.id === eqWork.id);       // locked or unlocked elsewhere (a Process, another screen)
+  if (eqWork && !fresh) { eqWork = null; eqDirty = false; }
+  else if (fresh) { if (!eqDirty) eqWork = clone(fresh); else Object.assign(eqWork, { locked: fresh.locked, lockedBy: fresh.lockedBy, lockedAt: fresh.lockedAt, usedBy: fresh.usedBy, drawn: fresh.drawn, pipes: fresh.pipes }); }
   const menu = $('#brewMenu'), admin = can('admin');
   menu.innerHTML = '';
   menu.append(h('option', { value: '' }, 'Choose ...'),
@@ -2848,18 +2852,31 @@ function renderBrewSchema() {
   const box = $('#brewSchema'), c = S.config, pid = c.equipmentProfile, p = S.profiles.find(x => x.id === pid), admin = can('admin');
   const pick = h('select', { id: 'bsProfile', ...(admin ? {} : { disabled: true }) }, h('option', { value: '' }, '(none yet)'),
     ...S.profiles.map(x => h('option', { value: x.id, ...(x.id === pid ? { selected: true } : {}) }, x.name)), ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
+  if (p?.locked) pick.disabled = true;
   pick.onchange = guard(async () => {
     if (pick.value === '__add__') { pick.value = pid || ''; return newProfile(); }
+    const to = S.profiles.find(x => x.id === pick.value), here = S.config.graphics.filter(g => g.kind === 'vessel').length;
+    const msg = !to ? `Take the Equipment Profile off this Schema?\n\nThe equipment and pipes stay on its tabs, kept in the Schema itself.`
+      : to.hasDrawing ? `Use "${to.name}" for this Schema?\n\nThe equipment and pipes on this Schema's tabs are replaced by the ones stored in "${to.name}" (${to.drawn} equipment, ${to.pipes} pipes).${p ? ` They stay saved in "${p.name}".` : ' A backup of this Schema is made first.'}`
+      : `Use "${to.name}" for this Schema?\n\n"${to.name}" has no equipment drawn yet, so it takes the ${here} piece${here === 1 ? '' : 's'} of equipment and the pipes on this Schema's tabs.`;
+    if (!confirm(msg)) { pick.value = pid || ''; return; }
     await api('PUT', '/ui/schema/profile', { id: pick.value }); await load();
     toast(pick.value ? `This Schema now uses "${profileName(pick.value)}"` : 'This Schema has no Equipment Profile now');
   });
+  const lock = p ? h('label', { class: 'toggle op-only', title: 'A locked Equipment Profile (its numbers, equipment and pipes) cannot be changed until it is unlocked. A Process can do the same with lock_Equipment and unlock_Equipment.' },
+    h('span', { class: 'sw' }, h('input', { type: 'checkbox', ...(p.locked ? { checked: true } : {}), onchange: guard(async ev => {
+      const on = ev.target.checked;
+      if (!on && !confirm(`Unlock "${p.name}"?${p.lockedBy ? `\n\nIt was locked by ${p.lockedBy}.` : ''}`)) { ev.target.checked = true; return; }
+      await api('PUT', `/ui/equipment/${p.id}/lock`, { locked: on }); await load(); toast(on ? '🔒 Equipment Profile locked' : 'Equipment Profile unlocked');
+    }) }), h('span', { class: 'swk' })), ' 🔒 Locked') : '';
   const others = p ? p.usedBy.filter(n => n !== S.schemas.active?.name) : [];
   const share = !p ? 'Pick one, or Add new to make one.' : others.length ? `Shared: also used by ${others.join(', ')}. A change to it changes every one of them.` : 'Unique: only this Schema uses it.';
   box.innerHTML = '';
-  box.append(h('div', { class: 'bar' }, h('span', {}, 'Schema ', h('b', {}, S.schemas.active?.name || ''), ' uses the Equipment Profile'), pick,
-    p ? h('button', { onclick: () => openProfile(pid) }, admin ? 'Edit it' : 'View it') : '',
+  box.append(h('div', { class: 'bar' }, h('span', {}, 'Schema ', h('b', {}, S.schemas.active?.name || ''), ' uses the Equipment Profile'), pick, lock,
+    p ? h('button', { onclick: () => openProfile(pid) }, admin && !p.locked ? 'Edit it' : 'View it') : '',
     p && others.length && admin ? h('button', { class: 'admin-only', title: 'Copy the profile and use the copy for this Schema only', onclick: guard(makeUnique) }, 'Make it unique to this Schema') : ''),
-    h('div', { class: 'muted' }, share));
+    h('div', { class: 'muted' }, share, p ? ` It holds this Schema's equipment and piping (${p.drawn} equipment, ${p.pipes} pipes).` : ''),
+    p?.locked ? h('div', { class: 'eqWarn' }, `🔒 Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}${p.lockedAt ? ', ' + new Date(p.lockedAt).toLocaleString() : ''}. Its numbers, equipment and pipes can't be changed until it is unlocked.`) : '');
 }
 async function makeUnique() {
   const p = S.profiles.find(x => x.id === S.config.equipmentProfile), sch = S.schemas.active?.name;
@@ -2903,7 +2920,7 @@ async function saveProfile() {
 function renderEqEditor() {
   const box = $('#eqEditor'); box.innerHTML = '';
   if (!eqWork) { box.append(h('p', { class: 'muted' }, 'Pick an Equipment Profile in the Menu to edit it, or "New Equipment Profile" to make one.')); return; }
-  const p = eqWork, admin = can('admin'), ro = admin ? {} : { disabled: true };
+  const p = eqWork, admin = can('admin') && !p.locked, ro = admin ? {} : { disabled: true };
   const changed = () => { eqDirty = true; calc(); $('#eqSaveState').textContent = 'Not saved yet'; };
   const buttons = () => h('div', { class: 'bar' }, admin ? h('button', { class: 'danger', onclick: guard(() => deleteProfile(p.id)) }, 'Delete') : '', h('span', { class: 'spacer' }),
     h('button', { onclick: () => { if (eqDirty && !confirm('Leave the changes that are not saved?')) return; eqWork = null; eqDirty = false; renderEqEditor(); } }, admin ? 'Cancel' : 'Close'),
@@ -2925,14 +2942,15 @@ function renderEqEditor() {
       ...v.warnings.map(w => h('div', { class: 'eqWarn' }, '⚠ ' + w)));
   };
   calc();
-  box.append(h('h3', {}, `Equipment Profile: ${p.name}`), h('div', { class: 'muted' }, p.usedBy?.length ? `Used by: ${p.usedBy.join(', ')}` : 'Not used by any Schema yet', ' · ', h('span', { id: 'eqSaveState' }, eqDirty ? 'Not saved yet' : 'Saved')),
+  box.append(h('h3', {}, `${p.locked ? '🔒 ' : ''}Equipment Profile: ${p.name}`),
+    p.locked ? h('div', { class: 'eqWarn' }, `Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}. Unlock it to change it (the 🔒 Locked switch above when this Schema uses it, or unlock_Equipment in a Process).`) : '', h('div', { class: 'muted' }, p.usedBy?.length ? `Used by: ${p.usedBy.join(', ')}` : 'Not used by any Schema yet', ' · ', h('span', { id: 'eqSaveState' }, eqDirty ? 'Not saved yet' : 'Saved')),
     buttons(), h('div', { class: 'eqTop' }, grid, out), eqPane(p, changed), buttons());
 }
 
 // the subset pane: the equipment this profile is built from. Each piece is built here (type, size, ports) and can be put on
 // the Equipment tab of the loaded Schema, bundled with its IPs.
 function eqPane(p, changed) {
-  const admin = can('admin'), onTab = it => S.config.graphics.find(g => g.kind === 'vessel' && g.profileItem === it.id);
+  const admin = can('admin') && !p.locked, onTab = it => S.config.graphics.find(g => g.kind === 'vessel' && g.profileItem === it.id);
   const u = p.units === 'Metric' ? 'L' : 'gal';
   const rows = (p.equipment || []).map(it => h('tr', {},
     h('td', {}, it.name), h('td', {}, `${EQ[it.vesselType]?.title || it.vesselType}${it.vtype ? ': ' + it.vtype : ''}`),
