@@ -31,6 +31,6 @@ The **Default** Menu tab picks the Tab Background Profile a **new tab** gets.
 A Valve Profile is how a new valve starts:
 
 - **Graphic when open** and **Graphic when closed**.
-- **Orientation**: **Horizontal** (pipe ends left and right), **Vertical** (top and bottom), **45 degrees Left** (top left and bottom right corners) or **45 degrees Right** (top right and bottom left). Pick graphics drawn the same way.
+- **Orientation**: **Horizontal** (pipe ends left and right), **Vertical** (top and bottom), **45 degrees Left** (top left and bottom right corners) or **45 degrees Right** (top right and bottom left). For Horizontal and Vertical, pick graphics drawn that way. For the 45s, pick the **vertical** graphics: the panel turns them 45 degrees left or right for you. The 45s are for a valve sitting on a 45 degree elbow.
 
 You pick the Valve Profile **only when you make a new valve**: in Edit layout, **Add element > Valve**, and the panel asks which Valve Profile to start from (the **Default** Menu tab sets the one picked first). After that, the valve is changed in its own properties, where **Orientation** and the graphics can be set again.
