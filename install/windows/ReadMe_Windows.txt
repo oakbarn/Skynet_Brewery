@@ -54,9 +54,10 @@ see Minimum_Equipment_and_Limitations.txt, or Help > Minimum equipment in the pa
 SOFTWARE YOU WILL INSTALL
   Program            Needed?                       Why
   -----------------  ----------------------------  -----------------------------------
-  Node.js (LTS)      YES, always                   The panel runs on it. It must be
-                                                    installed and the panel's black
-                                                    window must be RUNNING to use it.
+  Node.js (LTS)      YES, always                   The panel runs on it. The two .bat
+                                                    files install it for you (step 3).
+                                                    The panel's black window must be
+                                                    RUNNING to use the panel.
   A web browser      YES (you already have Edge)   This is how you see the panel.
   USB board driver   Only with an Arduino board    So Windows can talk to the board.
   Tailscale          Only to use it away from home Safe remote access from your phone.
@@ -67,7 +68,8 @@ STEP 1. MAKE SURE WINDOWS IS 64-BIT
   [ ] Click Start, type  about  and open "About your PC".
   [ ] Under "Device specifications", find "System type".
       It should say "64-bit operating system, x64-based processor".
-      If it says "ARM-based processor", choose ARM64 in step 3 instead of x64.
+      If it says "ARM-based processor", that is fine too. If you ever install
+      Node.js by hand (step 3), choose ARM64 instead of x64.
 
 
 STEP 2. MAKE THE FOLDER C:\Brewing
@@ -78,12 +80,22 @@ STEP 2. MAKE THE FOLDER C:\Brewing
       (capital B, no spaces). You now have the folder C:\Brewing
 
 
-STEP 3. DOWNLOAD AND INSTALL NODE.JS (REQUIRED)
------------------------------------------------
+STEP 3. NODE.JS (DONE FOR YOU)
+------------------------------
 Node.js is free. The panel is a Node.js program, so it cannot start without it.
-The panel needs Node.js version 22.13 or newer. The "LTS" version on the website
-is always new enough.
+The panel needs Node.js version 22.13 or newer.
 
+You do NOT have to install it yourself. Skynet_First_Install.bat (step 7) and
+Skynet_Brewer.bat (every day) check for Node.js each time. If it is missing or too
+old, they download the LTS version from nodejs.org and install it, then carry on.
+  - It needs the internet, and takes a few minutes the first time.
+  - Windows asks "Do you want to allow this app to make changes to your device?".
+    Click Yes. (On an account that is not an administrator, Windows asks for the
+    administrator's password.)
+  [ ] Nothing to do here. Go on to step 4.
+
+ONLY IF THE AUTOMATIC INSTALL DID NOT WORK (the black window says so and opens
+the Node.js page), install it by hand:
   [ ] Open your browser and go to:   https://nodejs.org/en/download
   [ ] Pick the LTS version (LTS means Long Term Support, the steady one), for
       Windows, x64 (or ARM64 if step 1 said ARM).
@@ -163,7 +175,8 @@ STEP 7. RUN THE FIRST TIME INSTALL FILE
       "Run anyway". (The file is not signed with a paid certificate, that is all.)
   [ ] A black window opens and works through 5 steps:
         [1/5] finds the panel
-        [2/5] checks Node.js
+        [2/5] checks Node.js, and installs it if it is missing or too old
+              (a few minutes; click Yes when Windows asks for permission)
         [3/5] gets the USB board support from the internet (about a minute)
         [4/5] puts "Skynet Brewer" on your Desktop
         [5/5] starts the panel
@@ -225,18 +238,11 @@ STEP 9. STARTING THE PANEL EVERY DAY
       Skynet_Brewer.bat, choose "Show more options" > "Send to" >
       "Desktop (create shortcut)". Rename the shortcut to  Skynet Brewer
 
-  What Skynet_Brewer.bat contains (in case you need to make it in Notepad):
-
-        :: MIT License Granted
-        :: Copyright (c) OakBarn Brewery 2026
-        @echo off
-        title Skynet Brewery Panel
-        cd /d C:\Brewing\BrewPanel
-        if exist "%ProgramFiles%\nodejs\node.exe" set "PATH=%ProgramFiles%\nodejs;%PATH%"
-        where node >nul 2>nul || (echo Node.js is not installed. Get it from https://nodejs.org and try again. & pause & exit /b)
-        start "" /min cmd /c "timeout /t 4 /nobreak >nul & start "" http://localhost:8080"
-        npm start
-        pause
+  Lost Skynet_Brewer.bat? A copy is in C:\Brewing\BrewPanel\install\windows.
+  Copy it into C:\Brewing. Each time it starts, it installs Node.js if it is
+  missing, gets the USB board support if it is missing, then starts the panel.
+  If your panel is not in C:\Brewing\BrewPanel, open the file in Notepad and
+  change the line  set "PANEL=C:\Brewing\BrewPanel" .
 
   To stop the panel: click in the black window and press Ctrl+C, or close it.
 
@@ -272,10 +278,12 @@ Never open a port on your router for the panel. Use Tailscale (free for home use
 
 PROBLEMS
 --------
-"'node' is not recognized" or "Node.js is not installed"
-    Do step 3 again, then restart the PC.
-"Node.js ... is too old"
-    Install the LTS version from step 3. It replaces the old one.
+"Node.js could not be installed by itself"
+    Check the internet, then double-click the .bat file again. Still not? Install
+    it by hand: see "Only if the automatic install did not work" in step 3, then
+    restart the PC.
+"'node' is not recognized"
+    Restart the PC, then double-click Skynet Brewer again.
 "The panel is not in C:\Brewing\BrewPanel"
     Do step 6 again. The folder must be exactly C:\Brewing\BrewPanel with server.js inside.
 The browser says "This site can't be reached"
