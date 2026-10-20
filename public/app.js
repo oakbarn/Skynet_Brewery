@@ -83,7 +83,8 @@ async function load() {
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
-  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'), api('GET', '/ui/profiles/mash'), api('GET', '/ui/profiles/boil')]);
+  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
+    ...['mash', 'boil', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
   fillAddType();
   renderAll();
 }
@@ -158,7 +159,7 @@ function renderWs() {
   if (!w) return;
   ws.querySelectorAll('.el,.gfx').forEach(n => n.remove());
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
-  ws.style.backgroundColor = w.color || '';
+  ws.style.backgroundColor = w.color || tabProfileOf(w)?.bgColor || '';      // its own color, else its Tab Background Profile's
   // background image fills the workspace, or sits at bgX/bgY with size bgW x bgH (leaves room for side panels)
   const placed = w.bgW && w.bgH;
   const bgSize = placed ? `${w.bgW}px ${w.bgH}px` : '100% 100%', bgPos = placed ? `${w.bgX || 0}px ${w.bgY || 0}px` : '0 0';
@@ -180,6 +181,7 @@ function renderWs() {
   renderPipes(); fitZoom(); updLockBtn();
 }
 
+const tabProfileOf = w => w?.tabProfile ? (S.tabProfiles || []).find(p => p.id === w.tabProfile) : null;
 function place(node, o) { node.style.left = (o.x || 0) + 'px'; node.style.top = (o.y || 0) + 'px'; node.style.width = (o.w || 120) + 'px'; node.style.height = (o.h || 60) + 'px'; }
 
 // Bundle (Fritz): a vessel and the IPs attached to it move as one unit and can't be edited until it is un-bundled
@@ -479,8 +481,11 @@ function propPct(e) {
   return hi === lo ? 0 : (v - lo) / (hi - lo) * 100;
 }
 const SIDES = ['left', 'right', 'top', 'bottom'];
+const VALVE_ENDS = { h: ['left', 'right'], v: ['top', 'bottom'], l45: ['topleft', 'bottomright'], r45: ['topright', 'bottomleft'] };
 function sidePt(e, side) {
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60;
+  if (side === 'topleft') return [x, y]; if (side === 'topright') return [x + w, y];
+  if (side === 'bottomleft') return [x, y + hh]; if (side === 'bottomright') return [x + w, y + hh];
   return side === 'right' ? [x + w, y + hh / 2] : side === 'top' ? [x + w / 2, y] : side === 'bottom' ? [x + w / 2, y + hh] : [x, y + hh / 2];
 }
 // A valve has no inlet or outlet: its two IPs are plain ends and flow goes either way while it is open. They sit on the long
@@ -491,9 +496,9 @@ const devIps = e => {
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   if (!v) return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
     { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: sidePt(e, e.ipOut || 'right') }];
-  const wide = (e.w || 120) >= (e.h || 60);
-  return [{ id: `dev:${e.name}:in`, label: `${e.name} end`, text: '', c: sidePt(e, e.ipIn || (wide ? 'left' : 'top')) },
-    { id: `dev:${e.name}:out`, label: `${e.name} end`, text: '', c: sidePt(e, e.ipOut || (wide ? 'right' : 'bottom')) }];
+  const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
+  return [{ id: `dev:${e.name}:in`, label: `${e.name} end`, text: '', c: sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top')) },
+    { id: `dev:${e.name}:out`, label: `${e.name} end`, text: '', c: sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom')) }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
@@ -555,14 +560,33 @@ function styleEl(n, e) {
 
 function fmtVal(e, v) {
   if (v === undefined || v === null) return '';
+  if (typeof v === 'number' && +e.digits > 0) {          // a Gauge: the whole number part padded to its digits (with figure spaces)
+    const t = e.precision !== undefined && e.precision !== null && e.precision !== '' ? v.toFixed(+e.precision) : String(v), [i, f] = t.split('.');
+    return i.padStart(+e.digits, '\u2007') + (f !== undefined ? '.' + f : '');
+  }
   if (typeof v === 'number' && e.precision !== undefined && e.precision !== null && e.precision !== '') return v.toFixed(+e.precision);
   if (typeof v === 'boolean') return v ? 'true' : 'false';
   return String(v);
 }
 
-function fillEl(n, e) {
-  const v = S.values[e.name] || {};
+// a Process can change the look while running (Pump_1.valueColor = "Red"); "" puts back the look from its properties
+const LOOK_KEYS = { namecolor: 'nameColor', namebg: 'nameBg', valuecolor: 'valueColor', valuebg: 'valueBg', namealign: 'nameAlign', valuealign: 'valueAlign', digits: 'digits' };
+function withLook(e, v) {
+  if (!Object.keys(LOOK_KEYS).some(k => v[k] !== undefined) && v.valuetype === undefined) return e;
+  const o = { ...e };
+  for (const [k, K] of Object.entries(LOOK_KEYS)) if (v[k] !== undefined && v[k] !== '') o[K] = v[k];
+  if (v.valuetype) o.look = lookFor(v.valuetype, e);
+  return o;
+}
+function fillEl(n, e0) {
+  const v = S.values[e0.name] || {}, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
+  if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
+    n._looked = e !== e0;
+    for (const x of [nm, vl]) { x.style.color = x.style.backgroundColor = x.style.textAlign = x.style.textShadow = ''; }
+    vl.style.alignItems = vl.style.justifyContent = '';
+    styleEl(n, e);
+  }
   nm.textContent = v.displayname ?? e.name;
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
@@ -632,7 +656,11 @@ function fillEl(n, e) {
   n.classList.toggle('img-missing', !!missing);
   const stretch = !!e.imagePathsLocked && hasPictures(e, v);
   n.style.backgroundColor = img || missing ? '' : bg(v.background);
-  n.style.backgroundImage = img ? `url("${media(img)}")` : '';
+  // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
+  const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] : 0;
+  n.classList.toggle('turned', !!turn);
+  if (turn) { n.style.backgroundImage = ''; n.style.setProperty('--pic', `url("${media(img)}")`); n.style.setProperty('--turn', turn + 'deg'); }
+  else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
@@ -1443,7 +1471,7 @@ function fillAddType() {
   $('#addType').innerHTML = '';
   $('#addType').append(...ADD_MENU.map(([group, items], gi) => h('optgroup', { label: group }, ...items.map((it, ii) => h('option', { value: gi + ':' + ii }, it[0])))));
 }
-$('#addEl').onclick = () => {
+$('#addEl').onclick = guard(async () => {
   const [gi, ii] = $('#addType').value.split(':').map(Number);
   const [, pick, prefix, extra] = ADD_MENU[gi][1][ii], preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
@@ -1460,8 +1488,38 @@ $('#addEl').onclick = () => {
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/samples/led_green.svg'; e.imageOff = 'Images/samples/led_red.svg'; }
+  if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
+  useTabProfile(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
-};
+});
+// Fritz, 2026-10-20: a new valve starts from the Valve Profile picked now (only now; after that it is changed in its properties)
+async function useValveProfile(e) {
+  const def = S.config.brewDefaults?.valveProfile;
+  const id = await choose('Valve Profile for the new valve', [...S.valveProfiles.map(p => [`${p.name}  (${ORIENTATIONS[p.orientation] || ''})`, p.id]), ['No profile (a plain vertical valve)', '']], def);
+  if (id === undefined) return false;
+  const p = S.valveProfiles.find(x => x.id === id); if (!p) return true;
+  if (p.imageOpen) e.imageOn = p.imageOpen;
+  if (p.imageClosed) e.imageOff = p.imageClosed;
+  e.orientation = p.orientation; delete e.ipIn; delete e.ipOut;
+  if (p.orientation === 'h') [e.w, e.h] = [e.h, e.w];
+  if (p.orientation === 'l45' || p.orientation === 'r45') e.w = e.h = Math.max(e.w, e.h);   // the vertical picture is turned 45 degrees in a square
+  return true;
+}
+// Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Background Profile (only when it is made).
+// Something with an ON / OFF state can be an LED or Text; something with a value also a Gauge; with neither, only the colors.
+const hasStateEl = e => isBoolEl(e) || (['vKonstant'].includes(e.type) && ['switch', 'pushbutton', 'momentary', 'bool'].includes(e.kind));
+const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual'].includes(e.type) && !(e.type === 'vKonstant' && ['graphic', 'list', 'longstring'].includes(e.kind));
+function useTabProfile(e) {
+  const p = tabProfileOf(draft.workspaces.find(w => w.name === e.workspace)); if (!p) return;
+  for (const k of ['nameColor', 'nameBg', 'nameAlign', 'valueColor', 'valueBg', 'valueAlign']) if (p[k]) e[k] = p[k];
+  if (!p.valueType || hasIps(e) || isPropValve(e) || (!hasStateEl(e) && !hasValueEl(e))) return;    // pumps and valves show their pictures
+  const type = p.valueType === 'gauge' && hasStateEl(e) ? 'text' : p.valueType;
+  e.look = lookFor(type, e);
+  if (type === 'led' && hasStateEl(e) && ['digitalOut', 'switch'].includes(e.type)) e.tap = p.ledMode === 'momentary' ? 'hold' : 'toggle';
+  if (type === 'gauge') { if (p.digits) e.digits = p.digits; if (p.precision !== undefined) e.precision = p.precision; }
+}
+// LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
+const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : 'normal';
 $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#addText').onclick = () => { const g = { id: newId(), kind: 'text', workspace: wsName, x: 40, y: 40, w: 220, h: 40, text: 'Text', fontSize: 18 }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 $('#finishPipe').onclick = () => finishPipe();
@@ -1509,7 +1567,8 @@ $('#addIp').onclick = () => {
 $('#addWs').onclick = () => {
   const n = prompt('New tab name'); if (!n) return;
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
-  draft.workspaces.push({ name: n, width: 1600, height: 900 }); wsName = n; renderTabs(); renderWs();
+  const tp = S.config.brewDefaults?.tabProfile;
+  draft.workspaces.push({ name: n, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) }); wsName = n; renderTabs(); renderWs();
 };
 $('#wsProps').onclick = () => editWorkspace();
 const saveLayout = guard(async () => {
@@ -1541,12 +1600,13 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
-    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button']], ['fontSize', 'Value font size', 'num'],
-    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
+    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
+    ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
     ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool']] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
@@ -2033,7 +2093,8 @@ async function editWorkspace() {
   await loadMediaPictures();
   const r = await dialog('Tab settings', [['name', 'Name', 'text'],
     ['_bgHead', 'Background', 'head'],
-    ['color', 'Background color', 'color'],
+    ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
+    ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
     ['background', 'Background picture', 'gpick', 'backgrounds'],
     ['_bgPlace', 'The list shows the pictures in media/Images and its folders (Add new ... takes another picture name there; the File Move page copies pictures from your computer). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
@@ -3141,7 +3202,7 @@ async function restoreSchema() {
 // show next to the screen tabs only once picked (each has a ✕ to close it). Each Menu tab has an Order number (Default tab).
 let eqWork = null, eqDirty = false;           // the Equipment Profile open on the Equipment Profile tab, and whether it has unsaved changes
 let vesselWork = null, vesselDirty = false;   // the piece of equipment open on the Vessel tab
-const profWork = { mash: null, boil: null }, profDirty = { mash: false, boil: false };   // the Mash and Boil Profile open on their tabs
+const profWork = { mash: null, boil: null, tab: null, valve: null }, profDirty = { mash: false, boil: false, tab: false, valve: false };   // the profile open on each profile tab
 let menuTab = null;                           // the Menu tab showing now (null: the screen tabs)
 const menuOpen = [];                          // Menu tabs picked and not closed yet
 const EQ_KINDS = ['vessel', 'pchiller', 'ccoil', 'herms', 'trub'];
@@ -3154,6 +3215,8 @@ const MENU = [
   { key: 'layout', title: 'Default Layout', tip: 'The vessels and pipes a Schema gets with its Equipment Profile', render: renderLayoutTab },
   { key: 'mash', title: 'Mash Profile', tip: 'Up to 4 mash steps and the sparge', render: renderBrewProfileTab('mash') },
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
+  { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
+  { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
   { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
@@ -3232,7 +3295,7 @@ function renderMenuPane() {
   const m = MENU.find(x => x.key === menuTab); if (!m) return;
   m.render(box);
 }
-window.addEventListener('beforeunload', e => { if (eqDirty || vesselDirty || profDirty.mash || profDirty.boil) { e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('beforeunload', e => { if (eqDirty || vesselDirty || Object.values(profDirty).some(Boolean)) { e.preventDefault(); e.returnValue = ''; } });
 
 // a form for a Menu tab: the same fields as the properties dialogs; read only (greyed) when you can't change it
 function paneForm(fields, obj, onChange, ro) {
@@ -3246,12 +3309,15 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 function renderDefaultTab(box) {
   const admin = can('admin'), d = { units: 'US', ...(S.config.brewDefaults || {}) };
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
-  const fields = w => [['_d', 'A new Recipe starts with these. You can change each one in the Recipe.', 'note'],
+  const fields = w => [['_d', 'Every default is set here. A new Recipe starts with the first ones, and you can change each one in the Recipe.', 'note'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
     ['batchSize', `Batch size (${volUnit(w.units)}, into the fermenter)`, 'num'],
     ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Schema\'s own)')],
     ['mashProfile', 'Mash Profile', 'sel', pick(S.mashProfiles, '(none)')],
-    ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')]];
+    ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
+    ['_t', 'New tabs and valves', 'head'],
+    ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
+    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')]];
   const f = paneForm(fields, d, () => { }, !admin);
   const save = guard(async () => { f.read(); await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
@@ -3607,10 +3673,32 @@ function renderLayoutTab(box) {
 }
 
 // ---- Mash Profile and Boil Profile tabs (a Recipe picks one of each from a dropdown)
-const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles }, boil: { title: 'Boil Profile', list: () => S.boilProfiles } };
+const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: 'One step at 152 °F (67 °C) for 60 minutes',
+    about: 'Up to 4 mash steps, each with its temperature and time, then the sparge. A Recipe picks its Mash Profile from a dropdown.' },
+  boil: { title: 'Boil Profile', list: () => S.boilProfiles, start: 'A 60 minute boil',
+    about: 'The total boil time and how much boils off each hour. A Recipe picks its Boil Profile from a dropdown, and the volume check on the Equipment Profile tab uses it.' },
+  tab: { title: 'Tab Background Profile', list: () => S.tabProfiles, start: 'Default colors, values as Text', noUnits: true,
+    about: 'The background color of the tabs that use it, and the look a new device or widget on those tabs starts with. The look is copied only when the device or widget is made; after that, change it in its properties (or from a Process, for example Pump_1.valueColor = "Red").' },
+  valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
+    about: 'The pictures and orientation a new valve starts with. You pick the Valve Profile only when you make a new valve; after that, change the valve in its properties.' } };
+const ALIGN_LIST = [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight'];
+const VALUE_TYPES = { text: 'Text', led: 'LED (push button)', gauge: 'Gauge (digits)' };
+const LED_MODES = { locking: 'Locking (press: ON, press again: OFF)', momentary: 'Momentary (ON only while held)' };
+const ORIENTATIONS = { h: 'Horizontal', v: 'Vertical', l45: '45 degrees Left', r45: '45 degrees Right' };
 function profFields(kind) {
   return w => {
     const t = tempUnit(w.units), u = volUnit(w.units);
+    if (kind === 'tab') return [['name', 'Name', 'text'], ['bgColor', 'Background color of the tab', 'color'],
+      ['_n', 'Name', 'head'], ['nameColor', 'Name text color', 'color'], ['nameBg', 'Name background color', 'color'], ['nameAlign', 'Name placement', 'sel', ALIGN_LIST],
+      ['_v', 'Value', 'head'], ['valueColor', 'Value text color', 'color'], ['valueBg', 'Value background color', 'color'], ['valueAlign', 'Value placement', 'sel', ALIGN_LIST],
+      ['valueType', 'Value type', 'sel', Object.entries(VALUE_TYPES), true],
+      ...(w.valueType === 'led' ? [['ledMode', 'LED push button', 'sel', Object.entries(LED_MODES)]] : []),
+      ...(w.valueType === 'gauge' ? [['digits', 'Digits (how many)', 'num'], ['precision', 'Precision (decimals)', 'num']] : []),
+      ['_s', 'A device with an ON / OFF state (a pump, valve, switch) can only be an LED or Text; a Gauge shows it as Text. A picture or label has no value, so it takes only the colors.', 'note'],
+      ['notes', 'Notes', 'area']];
+    if (kind === 'valve') return [['name', 'Name', 'text'], ['imageOpen', 'Graphic when open', 'gpick'], ['imageClosed', 'Graphic when closed', 'gpick'],
+      ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
+      ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
     if (kind === 'boil') return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
       ['boilTime', 'Total boil time (minutes)', 'num'], ['boilOffRate', `Boil off (${u} per hour)`, 'num'], ['notes', 'Notes', 'area']];
     return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
@@ -3636,9 +3724,7 @@ function renderBrewProfileTab(kind) {
       if (pick.value === '__add__') { pick.value = profWork[kind]?.id || ''; return newBrewProfile(kind); }
       profWork[kind] = stepsToFields(clone(list.find(x => x.id === pick.value))); profDirty[kind] = false; renderMenuPane();
     });
-    box.append(h('h3', {}, K.title), h('p', { class: 'muted' }, kind === 'mash' ? 'Up to 4 mash steps, each with its temperature and time, then the sparge. A Recipe picks its Mash Profile from a dropdown.'
-      : 'The total boil time and how much boils off each hour. A Recipe picks its Boil Profile from a dropdown, and the volume check on the Equipment Profile tab uses it.'),
-    h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick));
+    box.append(h('h3', {}, K.title), h('p', { class: 'muted' }, K.about), h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick));
     const w = profWork[kind];
     if (!w) return box.append(h('p', { class: 'muted' }, admin ? 'Pick Add new ... to make one.' : 'None made yet.'));
     const state = h('span', { class: 'muted' }, profDirty[kind] ? 'Not saved yet' : 'Saved');
@@ -3657,12 +3743,30 @@ function renderBrewProfileTab(kind) {
       h('button', { onclick: () => { if (profDirty[kind] && !confirm('Leave the changes that are not saved?')) return; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); } }, 'Cancel'),
       h('button', { class: 'primary', onclick: save }, 'Save')) : '';
     box.append(h('div', {}, state), buttons(), f.box, buttons());
+    if (kind === 'tab') box.append(tabsUsing(w, admin));
   };
+}
+// which of this Schema's tabs use a Tab Background Profile
+function tabsUsing(p, admin) {
+  const rows = S.config.workspaces.map(ws => {
+    const s = h('select', admin ? {} : { disabled: true }, h('option', { value: '' }, '(none)'),
+      ...S.tabProfiles.map(x => h('option', { value: x.id, ...(x.id === ws.tabProfile ? { selected: true } : {}) }, x.name)));
+    s.onchange = guard(async () => {
+      const workspaces = clone(S.config.workspaces), t = workspaces.find(x => x.name === ws.name);
+      if (s.value) t.tabProfile = s.value; else delete t.tabProfile;
+      await api('PUT', '/ui/layout', { workspaces }); S.config.workspaces = workspaces;
+      toast(s.value ? `The ${ws.name} tab uses "${S.tabProfiles.find(x => x.id === s.value).name}"` : `The ${ws.name} tab has no Tab Background Profile now`);
+    });
+    return h('tr', {}, h('td', {}, ws.name), h('td', {}, s), h('td', { class: 'muted' }, ws.color ? 'Has its own background color (Tab settings)' : ''));
+  });
+  return h('div', { class: 'eqPane' }, h('h3', {}, `Tabs of the Schema "${S.schemas.active?.name}"`),
+    h('p', { class: 'muted' }, 'Pick the Tab Background Profile of each tab. A tab with its own background color in Tab settings keeps that color.'),
+    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Tab'), h('th', {}, 'Tab Background Profile'), h('th', {}, ''))), h('tbody', {}, ...rows)));
 }
 async function newBrewProfile(kind) {
   const K = PK[kind], list = K.list(), w = { name: '', from: '', units: S.config.brewDefaults?.units || 'US' };
-  if (await dialog(`New ${K.title}`, [['name', 'Name', 'text'], ['from', 'Start from', 'sel', [['', kind === 'mash' ? 'One step at 152 °F (67 °C) for 60 minutes' : 'A 60 minute boil'], ...list.map(p => [p.id, `A copy of "${p.name}"`])]],
-    ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)]], w) !== 'ok') return;
+  if (await dialog(`New ${K.title}`, [['name', 'Name', 'text'], ['from', 'Start from', 'sel', [['', K.start], ...list.map(p => [p.id, `A copy of "${p.name}"`])]],
+    ...(K.noUnits ? [] : [['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)]])], w) !== 'ok') return;
   readFields(w);
   const r = await api('POST', `/ui/profiles/${kind}`, { name: w.name, from: w.from || undefined, units: w.units });
   S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.list.find(x => x.id === r.made))); profDirty[kind] = false;

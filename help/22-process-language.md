@@ -44,6 +44,28 @@ Any attribute with only two choices is `true` or `false`:
 
 If a name has characters other than letters, digits and `_`, put it in quotes before the dot: `"BK (Front)".visible = true`.
 
+## Change the look of a device or widget
+
+A Process can change the colors, placement and value type of any device or widget while it runs:
+
+```
+BK_Temp.valueColor = "Red"
+BK_Temp.valueBackColor = "Black"
+BK_Temp.nameColor = "#ffffff"
+BK_Temp.nameAlign = "TopCenter"
+BK_Temp.valueAlign = "MiddleRight"
+BK_Temp.valueType = "Gauge"
+BK_Temp.digits = 4
+BK_Temp.valueColor = ""
+```
+
+- Colors are a name (Red, Black, ...) or a code like `#ffffff`. `nameBackColor` is the same as `nameBg`, and `valueBackColor` the same as `valueBg`.
+- Placement is one of TopLeft, TopCenter, TopRight, MiddleLeft, MiddleCenter, MiddleRight, BottomLeft, BottomCenter, BottomRight.
+- `valueType` is `LED`, `Text` or `Gauge`. Something with an ON / OFF state (a pump, valve, switch) can only be `LED` or `Text`.
+- `""` puts back the look set in its properties.
+
+The change lasts until the panel restarts. To keep a look, set it in the item's properties, or start new items from a [Tab Background Profile](36-tab-and-valve-profiles).
+
 ## Names have no spaces
 
 Names of Devices, Widgets and Processes cannot have spaces any more. When you type a space in a name it becomes `_`. Names that already had spaces were changed once, for example `Test Timer` became `Test_Timer`. The screen still shows the old name, because it became the **Display name**. Every Process that used the old name was updated too, and a copy of each one was kept as `.before-no-spaces.bak`.
