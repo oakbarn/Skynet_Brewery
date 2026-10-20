@@ -1264,8 +1264,8 @@
    "units": "°F",
    "precision": 1,
    "volumeUnits": "gal",
-   "imageOn": "samples/brewzilla.svg",
-   "imageOff": "samples/brewzilla.svg",
+   "imageOn": "Images/samples/brewzilla.svg",
+   "imageOff": "Images/samples/brewzilla.svg",
    "setpoint": 0
   },
   {
@@ -1281,8 +1281,8 @@
    "precision": 1,
    "volumeUnits": "gal",
    "noPump": true,
-   "imageOn": "samples/digiboil.svg",
-   "imageOff": "samples/digiboil.svg",
+   "imageOn": "Images/samples/digiboil.svg",
+   "imageOff": "Images/samples/digiboil.svg",
    "setpoint": 0
   }
  ],

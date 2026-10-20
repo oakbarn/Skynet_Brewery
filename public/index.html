@@ -17,6 +17,7 @@
     <button data-view="log">Log</button>
     <button data-view="devices">Devices</button>
     <button data-view="media">Media</button>
+    <button data-view="filemove" class="admin-only" title="Copy files and whole folders from this computer to the Brain">File Move</button>
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
     <button data-view="help">Help</button>
@@ -247,6 +248,33 @@
     <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
   </section>
 
+  <!-- ===== File Move: copy files and folders from this computer to the Brain (public/filemove.js) ===== -->
+  <section id="view-filemove" class="view">
+    <h2>File Move: copy files from this computer to the Brain</h2>
+    <p class="muted">Works in any browser on Windows, Mac or Linux; nothing to install. Each kind of file goes to its one place on the Brain:
+      pictures to <b>media/Images</b> (folders inside the one you pick are kept), sounds to <b>media/sounds</b>, Processes to <b>scripts</b>, help pages to <b>help</b>.
+      Files already on the Brain are skipped unless you tick Replace.</p>
+    <div id="fmMissing" class="fmMissing"></div>
+    <div class="bar fmTools">
+      <label>Put them in <select id="fmKind">
+        <option value="auto">Pictures and sounds (sorted for you)</option>
+        <option value="pictures">Pictures only (media/Images)</option>
+        <option value="sounds">Sounds only (media/sounds)</option>
+        <option value="processes">Processes (.txt to scripts)</option>
+        <option value="help">Help pages (.md to help)</option>
+      </select></label>
+      <label class="mdPickBtn">📁 Pick a folder<input id="fmPickFolder" type="file" webkitdirectory multiple hidden></label>
+      <label class="mdPickBtn">📄 Pick files<input id="fmPickFiles" type="file" multiple hidden></label>
+      <label class="toggle"><input type="checkbox" id="fmReplace"> Replace files already on the Brain</label>
+      <label class="toggle"><input type="checkbox" id="fmOnlyMissing"> Only the ones this Schema is missing</label>
+    </div>
+    <div id="fmDrop" class="fmDrop">…or drag files or folders from Explorer / Finder and drop them here</div>
+    <div class="bar"><button id="fmGo" class="primary" disabled>Copy to the Brain</button><button id="fmClear" disabled>Clear list</button>
+      <span id="fmCount" class="muted"></span><span id="fmProgress"></span></div>
+    <table id="fmTable" class="fmTable" hidden><thead><tr><th>File</th><th>Size</th><th>Goes to on the Brain</th><th>What happens</th></tr></thead><tbody id="fmRows"></tbody></table>
+    <p id="fmMore" class="muted"></p>
+  </section>
+
   <!-- ===== Help: the manual, read from the help/ folder on the Brew Panel computer ===== -->
   <section id="view-help" class="view">
     <div class="hpLayout">
@@ -463,6 +491,7 @@
 <script type="module" src="app.js"></script>
 <script type="module" src="pictures.js"></script>
 <script type="module" src="media.js"></script>
+<script type="module" src="filemove.js"></script>
 <script type="module" src="help.js"></script>
 </body>
 </html>
