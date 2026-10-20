@@ -3,7 +3,7 @@
 The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit layout box used to be. Press it to see its choices.
 
 - **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
-- The **Menu tabs**: Default, Equipment Profile, Vessel, Default Layout, Mash Profile and Boil Profile.
+- The **Menu tabs**: Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
 
@@ -19,7 +19,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 ## The Default tab
 
-**What a new Recipe starts with:** the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile. Each one can be changed in the Recipe itself. Press **Save**.
+**Every default is set here.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. Press **Save**.
 
 **Order of the Menu:** each Menu tab has an Order number. Type a new number to move a Menu tab there. The others are numbered again to make room (1, 2, 3 ...), and the Menu and the open Menu tabs sort themselves. New Menu tabs added later go at the end.
 
@@ -29,3 +29,4 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 - **Vessel**: one vessel (or chiller, coil, filter) at a time. See [The Vessel tab](34-vessel-tab).
 - **Default Layout**: the vessels and pipes a Schema gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
+- **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).

@@ -397,7 +397,9 @@ async function route(req, res) {
   if (p === '/ui/hold' && m === 'POST') {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
-    if (!el || el.type !== 'vKonstant' || el.kind !== 'pushbutton') return fail(res, 400, `"${name}" is not a Push Button`);
+    // a Push Button vKonstant, or an output or switch set to "push button (on while held)" (an LED momentary button)
+    const push = el && ((el.type === 'vKonstant' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
+    if (!push) return fail(res, 400, `"${name}" is not a Push Button`);
     hold(el.name, down);
     return ok(res);
   }
@@ -491,8 +493,8 @@ async function route(req, res) {
     if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
     if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
   }
-  // Mash and Boil Profiles: everyone sees them, admins make and change them
-  sc = /^\/ui\/profiles\/(mash|boil)(?:\/([a-z0-9-]+))?$/.exec(p);
+  // Mash, Boil, Tab Background and Valve Profiles: everyone sees them, admins make and change them
+  sc = /^\/ui\/profiles\/(mash|boil|tab|valve)(?:\/([a-z0-9-]+))?$/.exec(p);
   if (sc) {
     const ps = brewProfiles[sc[1]];
     if (!sc[2] && m === 'GET') return ok(res, ps.list());
