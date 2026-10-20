@@ -15,6 +15,8 @@ import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
+import { Schemas } from './lib/schemas.js';
+import { EquipmentProfiles, withVolumes } from './lib/equipment.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
 import { Pictures } from './lib/vectorize.js';
@@ -70,6 +72,12 @@ if (retired) for (const l of retired.lines) { console.log(l); engine.print('syst
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
+// Schemas (the Schema dropdown at the top) and Equipment Profiles (Brewing page)
+const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipment'));
+const schemas = new Schemas(store, { engine, hw, profiles });
+if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
+const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
+dailyBackups(); setInterval(dailyBackups, 3600 * 1000);       // every Schema gets one backup a day (config/schemas/backups)
 
 // ---------------- live updates to browsers (Server-Sent Events) ----------------
 const clients = new Map();       // response -> session token (closed when the session ends)
@@ -432,7 +440,43 @@ async function route(req, res) {
   }
   if (p === '/ui/samples' && m === 'GET') return ok(res, listSamples(SAMPLES));
   const smp = /^\/ui\/samples\/([\w-]+)\/load$/.exec(p);
-  if (smp && m === 'POST') return ok(res, loadSample(SAMPLES, smp[1], { store, engine, hw }));
+  if (smp && m === 'POST') {
+    const meta = listSamples(SAMPLES).find(x => x.id === smp[1]); if (!meta) return fail(res, 404, 'No such sample');
+    // a sample comes in as a new Schema; the pick on the very first start fills (and names) the one you have
+    if (!store.config.chooseSample) schemas.startNew(meta.name); else if (store.config.schema) store.config.schema.name = schemas.freeName(meta.name);
+    return ok(res, loadSample(SAMPLES, smp[1], { store, engine, hw }));
+  }
+
+  // Schemas: everyone sees the list, admins load, add, rename and delete
+  const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
+  if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
+  if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
+  if (p === '/ui/schema/profile' && m === 'PUT') { schemas.setProfile((await jsonBody(req)).id || null); return ok(res, schemaView()); }
+  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore))?$/.exec(p);
+  if (sc) {
+    if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
+    if (sc[2] === 'backup' && m === 'POST') return ok(res, { ok: true, file: schemas.backupSchema(sc[1]) });
+    if (sc[2] === 'backups' && m === 'GET') return ok(res, schemas.listBackups(sc[1]));
+    if (sc[2] === 'restore' && m === 'POST') { schemas.restore(sc[1], (await jsonBody(req)).file); return ok(res, schemaView()); }
+    if (sc[2] === 'load' && m === 'POST') { schemas.load(sc[1]); return ok(res, schemaView()); }
+    if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
+    if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
+  }
+  // Equipment Profiles: everyone sees them, admins make and change them
+  const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id) }));
+  if (p === '/ui/equipment' && m === 'GET') return ok(res, profileView());
+  if (p === '/ui/equipment' && m === 'POST') {
+    const b = await jsonBody(req), made = profiles.create(b.name, b.from);
+    if (b.assign) schemas.setProfile(made.id);           // "Make it unique to this Schema": the copy goes on the loaded Schema
+    return ok(res, { made: made.id, list: profileView() });
+  }
+  sc = /^\/ui\/equipment\/([a-z0-9-]+)$/.exec(p);
+  if (sc) {
+    if (!profiles.has(sc[1])) return fail(res, 404, 'No such Equipment Profile');
+    if (m === 'GET') return ok(res, withVolumes(profiles.get(sc[1])));
+    if (m === 'PUT') { const q = profiles.save(sc[1], await jsonBody(req)); broadcast('config', {}); return ok(res, { saved: withVolumes(q), list: profileView() }); }
+    if (m === 'DELETE') { profiles.remove(sc[1]); schemas.dropProfile(sc[1]); return ok(res, { list: profileView() }); }
+  }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
   let s = /^\/ui\/log\/(once|now)\/(.+)$/.exec(p);

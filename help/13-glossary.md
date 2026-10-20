@@ -61,3 +61,7 @@
 **vKonstant**: a variable for processes and the screen only. Names start with `vK`.
 
 **Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
+
+**Schema**: one whole brewery setup (tabs, devices, elements, pipes and its Equipment Profile), kept in its own file and picked from the Schema dropdown at the top. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+
+**Equipment Profile**: the sizes, losses and equipment of a brewery, made on the Brewing page. Any Schema can use any profile: unique to one Schema, or shared by several.

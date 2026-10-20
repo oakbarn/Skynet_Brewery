@@ -493,3 +493,25 @@ body.role-viewer .op-only { display: none !important; }
 .alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
 #dlgBody .lockedPath { opacity: 0.65; cursor: help; background-image: none; }
+
+/* Schema dropdown (top bar) and the Brewing page: Equipment Profiles */
+.schemaPick { margin-left: 12px; font-size: 13px; color: var(--muted); }
+.schemaPick select { max-width: 220px; font-weight: 600; color: var(--text); }
+.brewCard { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; }
+.brewCard .bar { margin-bottom: 4px; }
+#eqEditor h3 { margin: 8px 0 2px; }
+.eqTop { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; margin: 8px 0; }
+.eqGrid { display: grid; grid-template-columns: max-content minmax(160px, 260px); gap: 6px 12px; align-items: center; flex: 0 1 auto; }
+.eqGrid textarea { width: 100%; box-sizing: border-box; }
+.eqNum { display: flex; gap: 6px; align-items: center; }
+.eqNum input { width: 7em; }
+.eqCalc { flex: 1 1 280px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.eqRow { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+.eqWarn { color: var(--warn); margin-top: 6px; }
+.eqPane { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 10px 0; overflow-x: auto; }
+.eqPane td button { margin: 2px; }
+@media (max-width: 700px) {
+  .eqGrid { grid-template-columns: 1fr; }
+  .schemaPick { margin-left: 0; }
+  .schemaPick select { max-width: 160px; }
+}
