@@ -14,7 +14,7 @@ A **Tab** is one screen of your brewery: a background picture with pumps, valves
 
 ## Changing the layout (admins)
 
-Tick **Edit layout**. A dashed bar appears with these buttons:
+Press **☰ Menu** and pick **Edit layout**. A dashed bar appears with these buttons:
 
 | Button | What it does |
 |---|---|
@@ -28,13 +28,13 @@ Tick **Edit layout**. A dashed bar appears with these buttons:
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. Press again to unlock. |
 | **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
 | **New tab** | Adds a tab. |
-| **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Unticking **Edit layout** asks the same. Nothing is changed until you save. |
+| **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Picking **☰ Menu > Exit Edit layout** asks the same. Nothing is changed until you save. |
 
 Drag items to move them, drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.
 
 ## Background color and picture
 
-Each tab has one background picture and a background color. Turn on **Edit layout**, then open **⚙ Tab settings** (the button, or double-click an empty spot; on a phone hold a finger on an empty spot). Step by step: [Tab background picture and color](26-tab-background).
+Each tab has one background picture and a background color. Pick **☰ Menu > Edit layout**, then open **⚙ Tab settings** (the button, or double-click an empty spot; on a phone hold a finger on an empty spot). Step by step: [Tab background picture and color](26-tab-background).
 
 ## Timers
 
@@ -48,7 +48,7 @@ A timer shows hh:mm:ss with four buttons: **▶** start, **■** stop, **↺** r
 2. Press **Draw pipe**, click the start IP, click the bends, then click the end IP.
 3. Pumps come with **IN** and **OUT** IPs; a valve has one IP at each end.
 
-IPs only show while **Edit layout** is ticked.
+IPs only show while **Edit layout** is on.
 
 The panel works out the flow itself: it starts at a running pump and follows pipes, fittings and open valves. A closed valve stops it. A pipe only shows flow when it is joined IP to IP; in Edit layout a **red ring** marks a pipe end that is not on an IP yet.
 

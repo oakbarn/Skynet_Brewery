@@ -1,6 +1,6 @@
 # Variables
 
-Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. Add new ones in **Tabs > Edit layout > Add element**. The name prefixes below are suggestions; any name works.
+Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. Add new ones in **Tabs > ☰ Menu > Edit layout > Add element**. The name prefixes below are suggestions; any name works.
 
 ## Which kind to use
 
@@ -48,6 +48,6 @@ The written values appear on the [Log](06-log) screen.
 
 ## vKonstant List (a dropdown on a tab)
 
-**Tabs > Edit layout > Add element > vKonstant > List (dropdown: Value + Text)** makes a dropdown. Its settings have a two-column table: **Value** (a number) and **Text**. **+ Add row** adds a choice and ✕ removes one.
+**Tabs > ☰ Menu > Edit layout > Add element > vKonstant > List (dropdown: Value + Text)** makes a dropdown. Its settings have a two-column table: **Value** (a number) and **Text**. **+ Add row** adds a choice and ✕ removes one.
 
 Example: `vKList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil and Chill. Picking Boil sets the value to 2, and that number is what Processes read (`if vKList_BrewStatus == 2`). A Process that sets it to 3 makes the dropdown show Chill.
