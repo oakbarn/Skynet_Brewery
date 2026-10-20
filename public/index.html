@@ -8,9 +8,11 @@
 </head>
 <body>
 <header id="top">
-  <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span></div>
+  <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span>
+    <label class="schemaPick" title="The Schema is your whole brewery setup: tabs, devices, elements, pipes and its Equipment Profile. Pick one to load it.">Schema <select id="schemaPick"></select></label></div>
   <nav id="views">
     <button data-view="workspace" class="active">Tabs</button>
+    <button data-view="brewing">Brewing</button>
     <button data-view="scripts">Processes</button>
     <button data-view="globals">Variables</button>
     <button data-view="log">Log</button>
@@ -70,6 +72,17 @@
       <button id="cancelLayout" title="Leave Edit layout. If anything changed you can still pick Save or Exit without Saving.">Exit</button>
     </div>
     <div id="wsScroll"><div id="wsSizer"><div id="ws"><svg id="pipes"></svg></div></div></div>
+  </section>
+
+  <!-- ===== Brewing: Equipment Profiles (Recipe Profiles, Brew Day and reports come next) ===== -->
+  <section id="view-brewing" class="view">
+    <div class="bar">
+      <label class="brewMenu">Menu <select id="brewMenu"></select></label>
+      <span class="spacer"></span>
+      <span class="muted">Equipment Profiles live on their own. Any Schema can use any of them.</span>
+    </div>
+    <div id="brewSchema" class="brewCard"></div>
+    <div id="eqEditor"></div>
   </section>
 
   <!-- ===== Processes (internally "scripts") ===== -->
