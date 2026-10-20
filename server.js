@@ -76,7 +76,7 @@ if (retired) for (const l of retired.lines) { console.log(l); engine.print('syst
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
-// Schemas (the Schema dropdown at the top) and Equipment Profiles (Brewing page)
+// Schemas (the Schema dropdown at the top) and Equipment Profiles (☰ Menu > Equipment Profile)
 const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipment'));
 const schemas = new Schemas(store, { engine, hw, profiles });
 // Mash and Boil Profiles (Menu > Mash Profile / Boil Profile), shared by every Schema

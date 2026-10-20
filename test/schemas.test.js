@@ -118,6 +118,28 @@ schemas.dropProfile(shared.id, profiles.get(shared.id).graphics); profiles.remov
 assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(sec))).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g4'], 'a deleted profile leaves its drawing in each Schema');
 assert.equal(store.config.equipmentProfile, undefined);
 
+// Default Layout: a Schema follows its profile's layout, or keeps its own (Fritz: the tabs change only when you choose)
+const rigB = profiles.create('Rig B');
+schemas.setProfile(rigB.id);
+assert.deepEqual(profiles.get(rigB.id).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g4'], 'a new profile takes the tabs as its Default Layout');
+const rigC = profiles.create('Rig C'); profiles.setDrawing(rigC.id, [{ id: 'c1', kind: 'vessel', workspace: 'Equipment' }], [{ name: 'Equipment' }]);
+r = schemas.setProfile(rigC.id, { layout: 'keep' });
+assert.equal(store.config.layoutFromProfile, false);
+assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2', 'g3', 'g4'], 'keep: the tabs stay as they are');
+store.saveLayout({ graphics: [...store.config.graphics, { id: 'g5', kind: 'pipe', workspace: 'Equipment' }] });
+assert.deepEqual(profiles.get(rigC.id).graphics.map(g => g.id), ['c1'], 'keep: the profile\'s Default Layout is not touched');
+assert.ok(JSON.parse(fs.readFileSync(schemas.file(first))).graphics.some(g => g.id === 'g5'), 'keep: the drawing stays in the Schema file');
+schemas.load(sec); schemas.load(first);
+assert.ok(store.config.graphics.some(g => g.id === 'g5') && !store.config.graphics.some(g => g.id === 'c1'), 'keep survives a reload');
+schemas.layoutAction('save');
+assert.deepEqual(profiles.get(rigC.id).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g4', 'g5'], 'save: the tabs become the Default Layout');
+assert.equal(store.config.layoutFromProfile, undefined);
+profiles.setDrawing(rigC.id, [{ id: 'c2', kind: 'vessel', workspace: 'Equipment' }], [{ name: 'Equipment' }]);
+schemas.layoutAction('use');
+assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['c2', 'g3'], 'use: the Default Layout goes on the tabs, pictures stay');
+schemas.layoutAction('keep'); assert.equal(store.config.layoutFromProfile, false);
+assert.throws(() => schemas.layoutAction('nope'), /Unknown/);
+
 // volumes as in BeerSmith
 const v = equipVolumes({ batchSize: 5.5, boilTime: 60, boilOffRate: 1, trubChillerLoss: 0.5, coolingShrinkage: 4, kettleVolume: 7 });
 assert.equal(v.postBoil, 6.25); assert.equal(v.preBoil, 7.25);

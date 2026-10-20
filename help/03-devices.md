@@ -22,7 +22,7 @@ The table at the top shows each board and whether it is connected.
 
 ## Putting a device on a tab
 
-In **Tabs > Edit layout > Add element**, the list groups devices by kind:
+In **Tabs > ☰ Menu > Edit layout > Add element**, the list groups devices by kind:
 
 - **Outputs**: on/off (relays), PWM %, analog 0-10 V or 4-20 mA. A **Pump** and a **Valve** are ready-made outputs with their pictures and flow points already set.
 - **Digital inputs**: switches, float and level switches, flow switches, interlocks, and buttons. A **push button** is ON only while it is held and OFF when released. A **toggle button** stays ON after one press and OFF after the next. A **pulse button** gives one short ON per press.

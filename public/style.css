@@ -594,7 +594,7 @@ body.role-viewer .op-only { display: none !important; }
 @media (max-width: 700px) {
   .menuForm { grid-template-columns: 1fr; }
   .menuPane { padding: 8px 10px; }
-  .menuList { right: auto; left: 0; }
+  .menuList { max-width: calc(100vw - 24px); }
 }
 .menuNarrow { max-width: 660px; }
 .menuMode .zoomBox, .menuMode #fullScreen { display: none; }

@@ -227,7 +227,8 @@ lib/                 engine (scripts), store (elements), logger (SQLite), hardwa
 public/              the browser app
 config/brewery.json  the loaded Schema (tabs, elements, graphics, devices) and the panel settings (edited by the app; a .bak is kept)
 config/schemas/      one file per Schema (picked in the Schema dropdown), its saved values, daily and by-hand backups
-config/equipment/    Equipment Profiles (Brewing page), used by any Schema
+config/equipment/    Equipment Profiles (☰ Menu > Equipment Profile), used by any Schema
+config/profiles/     Mash and Boil Profiles (☰ Menu), used by any Recipe
 scripts/*.txt        scripts
 media/Images/        every picture (backgrounds too, e.g. media/Images/brewery_main.png); put all your
                      BruControl pictures here - the File Move page copies a whole folder from your computer
