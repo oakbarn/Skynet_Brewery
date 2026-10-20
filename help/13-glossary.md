@@ -66,4 +66,18 @@
 
 **Schema**: one whole brewery setup (tabs, devices, elements, pipes and its Equipment Profile), kept in its own file and picked from the Schema dropdown at the top. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
-**Equipment Profile**: the sizes, losses and equipment of a brewery, made on the Brewing page. Any Schema can use any profile: unique to one Schema, or shared by several.
+**Equipment Profile**: the losses, vessels and piping of a brewery, made on the Equipment Profile tab of the ☰ Menu. Any Schema can use any profile: unique to one Schema, or shared by several. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+
+**☰ Menu**: the button at the top right of the Tabs page. Edit layout is its first choice; the rest open Menu tabs. See [The ☰ Menu](33-menu).
+
+**Menu tab**: a page opened from the ☰ Menu (Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile). It shows next to the screen tabs, with a ✕ to close it, and has an Order number.
+
+**Default Layout**: the vessels, IPs, pipes and hoses stored in an Equipment Profile. A Schema follows it, or keeps its own layout.
+
+**Mash Profile**: up to 4 mash steps (temperature and time) and the sparge. See [Mash and Boil Profiles](35-mash-and-boil-profiles).
+
+**Boil Profile**: the total boil time and the boil off per hour.
+
+**Heat Source**: how a vessel is heated: Gas, Electric, RIMS, HERMS, Other or Unheated. See [The Vessel tab](34-vessel-tab).
+
+**Service**: what a valve carries: Gas, Room Temperature Liquid, or High Temperature Liquid (Stainless Steel). A gas valve can be a vessel's heat source.
