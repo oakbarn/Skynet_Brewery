@@ -54,4 +54,17 @@ assert.equal(p.equipment[2].heatKind, 'gas', 'older free text heat is read');
 assert.equal(p.equipment[3].heatKind, undefined); assert.equal(p.equipment[3].reportUnit, undefined); assert.equal(p.equipment[3].otherType, 'Grant');
 assert.equal(p.batchSize, undefined, 'batch size belongs to the Recipe');
 
+// Tab Background Profile and Valve Profile (no units)
+const tabs = new ProfileStore(path.join(dir, 'tab'), 'tab'), valves = new ProfileStore(path.join(dir, 'valve'), 'valve');
+const t1 = tabs.create('Dark panel');
+assert.equal(t1.units, undefined); assert.equal(t1.valueType, 'text');
+const t2 = tabs.save(t1.id, { ...t1, bgColor: 'Black', nameColor: 'White', nameAlign: 'TopCenter', valueAlign: 'Sideways', valueType: 'gauge', digits: 4, precision: 1, ledMode: 'momentary' });
+assert.deepEqual([t2.bgColor, t2.nameAlign, t2.valueAlign, t2.digits, t2.precision, t2.ledMode], ['Black', 'TopCenter', undefined, 4, 1, undefined]);
+assert.equal(tabs.save(t1.id, { ...t2, valueType: 'led', ledMode: 'momentary' }).ledMode, 'momentary');
+assert.throws(() => tabs.save(t1.id, { ...t2, digits: 20 }), /1 to 12/);
+const v1 = valves.create('Ball H');
+assert.equal(v1.orientation, 'v'); assert.match(v1.imageOpen, /Valve_Ball_Open/);
+assert.equal(valves.save(v1.id, { ...v1, orientation: 'l45' }).orientation, 'l45');
+assert.equal(valves.save(v1.id, { ...v1, orientation: 'sideways' }).orientation, 'v');
+
 console.log('profiles tests passed');
