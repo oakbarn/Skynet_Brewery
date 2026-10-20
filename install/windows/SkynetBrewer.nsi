@@ -209,21 +209,8 @@ Section "Skynet Brew Panel" SecMain
     CopyFiles /SILENT "$OldPanel\help\*.*" "$INSTDIR\help"
   ${EndIf}
 
-  ; The start file. Same as the sample in install\windows\Skynet_Brewer.bat, with this folder filled in.
-  FileOpen $9 "$INSTDIR\Skynet_Brewer.bat" w
-  FileWrite $9 ":: MIT License Granted$\r$\n"
-  FileWrite $9 ":: Copyright (c) OakBarn Brewery 2026$\r$\n"
-  FileWrite $9 ":: Starts the Skynet Brew Panel and opens it in your browser.$\r$\n"
-  FileWrite $9 "@echo off$\r$\n"
-  FileWrite $9 "title Skynet Brewery Panel$\r$\n"
-  FileWrite $9 `cd /d "$INSTDIR"$\r$\n`
-  FileWrite $9 `if exist "%ProgramFiles%\nodejs\node.exe" set "PATH=%ProgramFiles%\nodejs;%PATH%"$\r$\n`
-  FileWrite $9 `where node >nul 2>nul || (echo Node.js is not installed. Get it from https://nodejs.org and try again. & pause & exit /b)$\r$\n`
-  FileWrite $9 ":: Opens the browser after 4 seconds, so the panel has time to start$\r$\n"
-  FileWrite $9 `start "" /min cmd /c "timeout /t 4 /nobreak >nul & start "" http://localhost:${PORT}"$\r$\n`
-  FileWrite $9 "npm start$\r$\n"
-  FileWrite $9 "pause$\r$\n"
-  FileClose $9
+  ; The start file. It finds this folder by itself, and installs Node.js if it is ever missing.
+  CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Brewer.bat" "$INSTDIR\Skynet_Brewer.bat"
 
   ; Shortcuts. "Start in" is the panel folder.
   SetOutPath "$INSTDIR"
