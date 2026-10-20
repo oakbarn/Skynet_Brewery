@@ -12,7 +12,7 @@ const bell = traceFile(path.join(d, 'Bell.png'));
 assert.ok(bell.score >= DRAWING_SCORE, 'bell is a drawing');
 assert.match(bell.svg, /^<svg [^>]*width="600" height="600" viewBox="0 0 600 600" preserveAspectRatio="none"/);
 assert.ok(traceFile(path.join(d, 'Burner.png')).score < DRAWING_SCORE, 'burner is photo-like');
-assert.match(traceFile(path.join(ROOT, 'media/brewery_main.png')).skipped, /too big/);
+assert.match(traceFile(path.join(ROOT, 'media/Images/brewery_main.png')).skipped, /too big/);
 
 const store = { config: {}, writeConfig() {} };
 const pics = new Pictures(store, () => [d]);
