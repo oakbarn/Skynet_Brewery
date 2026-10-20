@@ -4,7 +4,7 @@ A stepper motor turns to an exact position: a motorised ball valve, a dosing pum
 
 ## Add one
 
-**Tabs > Edit layout > Add element > Devices: motors**. Then set:
+**Tabs > ☰ Menu > Edit layout > Add element > Devices: motors**. Then set:
 
 - **Device** and **Driver board** (A4988, DRV8825, TMC2208 / 2209, TB6600 / DM542, ULN2003 with a 28BYJ-48, L298N). Picking one fills in the usual wiring.
 - **Pins**: STEP, DIR and ENABLE, or IN1-IN4 for 4-pin boards.

@@ -5,7 +5,7 @@ Each tab has its own **background picture** (one picture path) and **background 
 ## On a PC or Mac
 
 1. Open the **Tabs** screen and click the tab you want to change (its button at the top).
-2. Tick **Edit layout** at the top right. A dashed bar of buttons appears.
+2. Press **☰ Menu** at the top right and pick **Edit layout**. A dashed bar of buttons appears.
 3. Open **⚙ Tab settings** in one of these ways:
    - press the **⚙ Tab settings** button in the dashed bar, or
    - **double-click an empty spot** on the tab (not on a pump, valve or pipe), or

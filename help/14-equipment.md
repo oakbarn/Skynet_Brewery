@@ -4,7 +4,7 @@ Equipment is drawn on the screen and has **IPs** (connection points) where pipes
 
 ## Add a vessel
 
-1. **Tabs > Edit layout**, pick **Vessel** next to **Add equipment**, then tap **Add equipment**.
+1. **Tabs > ☰ Menu > Edit layout**, pick **Vessel** next to **Add equipment**, then tap **Add equipment**.
 2. It goes on the **Equipment** tab, which is always there.
 3. Set its **Name**, **Type** (Brew Kettle, HLT, MLT, Mash Tun, Whirlpool), **Label** and **Graphic** (a picture path).
 4. Switch on **Installed** for each port the vessel has: **Outlet**, **Tangential**, **Thermowell**, **Steam Slayer**, **Sparge** and **CIP**. Each has a **Position** (for example Center Bottom or Lid) and a **Standard** (for example TC 1.5 or NPT 1/2 FPT).
@@ -24,7 +24,7 @@ Bundling locks a vessel and its IPs together as one unit, so nothing gets bumped
 
 **To bundle (PC or iPhone):**
 
-1. Go to the vessel's tab and switch on **Edit layout**.
+1. Go to the vessel's tab and pick **☰ Menu > Edit layout**.
 2. Open the vessel's properties. On a PC, **double-click** it. On an iPhone, **hold a finger on it**.
 3. Press **Save**. The panel asks **Bundle ... with its IPs?** Press **OK** to bundle, or **Cancel** if you still need to drag IPs into place.
 4. Or switch on **Bundled** at the bottom of its properties and press **Save**.
@@ -42,7 +42,7 @@ Bundling locks a vessel and its IPs together as one unit, so nothing gets bumped
 
 New vessels, chillers, coils and filters start on the **Equipment** tab. To move one to another tab:
 
-1. Go to the tab it is on and switch on **Edit layout**.
+1. Go to the tab it is on and pick **☰ Menu > Edit layout**.
 2. Open its properties. On a PC, **double-click** it. On an iPhone, **hold a finger on it**.
 3. Pick the new tab in the **Tab** list near the bottom.
 4. Press **Save**, then **Save layout**.

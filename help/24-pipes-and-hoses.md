@@ -4,11 +4,11 @@ In Skynet Brewery you can easily add interactive **Pipes**, **Hoses**, **Pumps**
 
 ## IPs only show in Edit layout
 
-**IPs** (the round connection points on pumps, valves, vessels and plain IP widgets) only show while **Edit layout** is ticked. On brew day you see the pipes, hoses, fittings and pictures, not the dots. A label you set to show stays on screen.
+**IPs** (the round connection points on pumps, valves, vessels and plain IP widgets) only show while **Edit layout** is on. On brew day you see the pipes, hoses, fittings and pictures, not the dots. A label you set to show stays on screen.
 
 ## Pipes
 
-1. Tick **Edit layout** and press **Draw pipe**.
+1. Pick **☰ Menu > Edit layout** and press **Draw pipe**.
 2. Click the start IP, click the bends, then click the end IP. Pipes go straight and turn square corners (hold **Shift** for any angle).
 3. Double-click the pipe to open its settings.
 
