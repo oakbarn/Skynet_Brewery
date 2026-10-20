@@ -86,6 +86,37 @@ schemas.remove(bz);
 assert.equal(schemas.list().length, 1);
 assert.equal(fs.readdirSync(path.join(dir, 'config', 'schemas', 'deleted')).length, 1);
 
+// the Equipment Profile stores the equipment and piping; every Schema using it shows the same drawing
+const kettle = { id: 'g1', kind: 'vessel', vesselType: 'vessel', workspace: 'Equipment', name: 'Kettle' };
+const pipe = { id: 'g2', kind: 'pipe', workspace: 'Equipment', points: [[0, 0], [10, 0]] };
+const pic = { id: 'g3', kind: 'image', workspace: 'Main', src: 'x.png' };
+store.saveLayout({ graphics: [kettle, pipe, pic] });
+const shared = profiles.create('Shared rig');
+let r = schemas.setProfile(shared.id);
+assert.equal(r.took, true, 'a profile with no drawing takes what is on the tabs');
+assert.deepEqual(profiles.get(shared.id).graphics.map(g => g.id), ['g1', 'g2'], 'equipment and pipes in the profile');
+assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(first))).graphics.map(g => g.id), ['g3'], 'the Schema file keeps the rest');
+schemas.create('Second', { empty: true });
+schemas.setProfile(shared.id);
+assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2'], 'a second Schema shows the shared drawing');
+assert.ok(store.config.workspaces.some(w => w.name === 'Equipment'));
+store.saveLayout({ graphics: [...store.config.graphics, { id: 'g4', kind: 'pipe', workspace: 'Equipment' }] });
+schemas.load(first);
+assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2', 'g3', 'g4'], 'a pipe added in one Schema shows in the other');
+
+// locks: by hand or lock_Equipment in a Process; layout changes to equipment / pipes are refused while locked
+assert.match(schemas.lock(true, 'Process Brew_Day'), /locked/);
+assert.throws(() => schemas.checkLayout(store.config.graphics.filter(g => g.id !== 'g4')), /locked/);
+schemas.checkLayout(store.config.graphics.map(g => g.id === 'g3' ? { ...g, x: 50 } : g));   // a picture may still move
+assert.throws(() => profiles.save(shared.id, { ...profiles.get(shared.id), batchSize: 10 }), /locked/);
+assert.throws(() => schemas.setProfile(null), /locked/);
+schemas.lock(false, 'fritz');
+schemas.checkLayout([]);
+const sec = schemas.list().find(s => s.name === 'Second').id;
+schemas.dropProfile(shared.id, profiles.get(shared.id).graphics); profiles.remove(shared.id);
+assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(sec))).graphics.map(g => g.id).sort(), ['g1', 'g2', 'g4'], 'a deleted profile leaves its drawing in each Schema');
+assert.equal(store.config.equipmentProfile, undefined);
+
 // volumes as in BeerSmith
 const v = equipVolumes({ batchSize: 5.5, boilTime: 60, boilOffRate: 1, trubChillerLoss: 0.5, coolingShrinkage: 4, kettleVolume: 7 });
 assert.equal(v.postBoil, 6.25); assert.equal(v.preBoil, 7.25);
