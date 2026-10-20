@@ -612,3 +612,6 @@ body.role-viewer .op-only { display: none !important; }
 .fmTable td.num { text-align: right; white-space: nowrap; }
 .fmTable tr.fm-skip td { color: var(--muted); }
 .fmTable tr.fm-done td:last-child { color: #3fae5a; }
+/* a valve at 45 degrees: its vertical picture turned left or right (the box stays square and upright) */
+.el.turned { overflow: visible; }
+.el.turned::before { content: ''; position: absolute; inset: 0; background: var(--pic) center / contain no-repeat; transform: rotate(var(--turn)); pointer-events: none; }
