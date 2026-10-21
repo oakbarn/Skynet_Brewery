@@ -140,6 +140,19 @@ assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['c2', 'g3'], 'use
 schemas.layoutAction('keep'); assert.equal(store.config.layoutFromProfile, false);
 assert.throws(() => schemas.layoutAction('nope'), /Unknown/);
 
+// Schema.json: Save as .json file holds the Schema with its profile drawing, never the panel settings
+const ex = schemas.exportSchema(store.config.schema.id);
+assert.match(ex.file, /^[\w.-]+_\d{8}_\d\d_\d\d\.json$/, 'named Name_yyyymmdd_hh_mm');
+assert.equal(ex.schema.name, store.config.schema.name);
+assert.equal(ex.schema.mqtt, undefined, 'no panel settings');
+assert.equal(ex.schema.users, undefined, 'no logins');
+assert.deepEqual(ex.schema.graphics.map(g => g.id).sort(), store.config.graphics.map(g => g.id).sort(), 'the equipment drawing is put back in');
+const other = schemas.list().find(x => !x.active);
+if (other) assert.equal(schemas.exportSchema(other.id).schema.name, other.name, 'a Schema that is not loaded');
+store.config.schema.version = 'My Rig_20261021_14_05';
+assert.equal(schemas.exportSchema(store.config.schema.id).file, 'My_Rig_20261021_14_05.json', 'the version name when there is one');
+delete store.config.schema.version;
+
 // volumes as in BeerSmith
 const v = equipVolumes({ batchSize: 5.5, boilTime: 60, boilOffRate: 1, trubChillerLoss: 0.5, coolingShrinkage: 4, kettleVolume: 7 });
 assert.equal(v.postBoil, 6.25); assert.equal(v.preBoil, 7.25);

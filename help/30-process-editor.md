@@ -6,7 +6,7 @@ The **Processes** screen has a row of tools above the editor: **Find**, **All Pr
 
 Every line has its number down the left side. A red number is a line with a problem, a green one is the line a running Process is on.
 
-To jump to a line, press **Go to line** (or **Ctrl+G** on a PC), type the number and press **OK**. The line is highlighted and scrolled into view. Go to line works in the **Config** editor too.
+To jump to a line, press **Go to line** (or **Ctrl+G** on a PC), type the number and press **OK**. The line is highlighted and scrolled into view. Go to line works in the **Schema.json** editor too.
 
 ## Colors
 
@@ -89,11 +89,12 @@ Everyone can look in the Recycle Bin; only admins can restore or erase.
 
 **All Processes** searches every Process and lists each match with how the line will look after the change. Untick the ones to leave alone, then press **Replace ticked** to save those Processes. A running Process keeps the old text until it is restarted.
 
-## The Config editor (admins)
+## The Schema.json editor (admins)
 
-The **Config** tab (admins only) shows the whole setup file, `config/brewery.json`, as text: tabs, elements, pipes, devices and settings. It has the same **Find**, **Replace** and **Go to line**.
+The **Schema.json** page (admins only, on the Menu Bar; it was called **Config** before) shows the whole setup file, `config/brewery.json`, as text: tabs, elements, pipes, devices and settings. It has the same **Find**, **Replace** and **Go to line**.
 
 - Opening it copies the file to `config/backups` first (no new copy when nothing changed).
 - **Check** tests the file the way the panel loads it at start-up and points at the line with a problem.
 - **Save** checks it first and will not save a file the panel cannot load. Saving stops running Processes and reconnects the boards. The old file is copied to `config/backups` first.
+- **Save as .json file** saves a Schema as one `.json` file on this computer (see the Help page *Schema.json*).
 - **Backups** lists the copies. **Open** shows one in the editor (nothing changes until you press Save); **Restore** puts it back after asking.
