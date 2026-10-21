@@ -629,3 +629,7 @@ body.role-viewer .op-only { display: none !important; }
 /* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
 .rt-b { font-weight: bolder; }
 .rt-L { font-size: max(var(--textLarge, 28px), 1.25em); line-height: 1.1; }
+/* Log page > Download CSV */
+.csvBox { margin-bottom: 14px; padding: 4px 12px 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.csvBox h3 { margin: 6px 0; }
+.csvNames { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 8px; max-height: 14em; overflow: auto; }

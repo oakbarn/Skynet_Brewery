@@ -10,6 +10,7 @@ import { modernize, removeSpacesOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
+import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
@@ -198,7 +199,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -540,6 +541,16 @@ async function route(req, res) {
   }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
+  // Log page > Download CSV: pick values (or a saved CSV set) and a time span; the file is named after them
+  if (p === '/ui/log/export.csv' && m === 'GET') {
+    const sp = url.searchParams, names = (sp.get('names') || '').split(',').map(s => s.trim()).filter(Boolean), tz = Number(sp.get('tz')) || 0;
+    const rows = logger.exportRows({ names, from: sp.get('from'), to: sp.get('to') });
+    const label = sp.get('label') || (names.length === 1 ? names[0] : names.length ? `${names.length}_values` : 'All');
+    const name = csvFileName(label, rows, tz);
+    res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Disposition': `attachment; filename="${name}"` });
+    return res.end(buildCsv(rows, { names, layout: sp.get('layout'), tz }));
+  }
+  if (p === '/ui/log/sets' && m === 'PUT') { store.config.logSets = cleanLogSets((await jsonBody(req)).sets); store.writeConfig(); broadcast('config', {}); return ok(res); }
   let s = /^\/ui\/log\/(once|now)\/(.+)$/.exec(p);
   if (s && m === 'POST') { if (s[1] === 'once') logger.arm(s[2]); else logger.logNow(s[2], 'ondemand'); return ok(res); }
 

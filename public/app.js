@@ -2900,7 +2900,60 @@ const saveLog = guard(async (name, log) => {
 async function loadLogNames() {
   const names = await api('GET', '/ui/log/names'); const sel = $('#logName'); const cur = sel.value;
   sel.innerHTML = ''; sel.append(h('option', { value: '' }, '(all)'), ...names.map(n => h('option', { value: n.name, ...(n.name === cur ? { selected: true } : {}) }, `${n.name} (${n.count})`)));
+  renderCsvBox(names);
 }
+
+// Download CSV: tick values (or pick a saved CSV set like Mash Profile), a time span and a layout
+let csvNames = [];
+function renderCsvBox(names = csvNames) {
+  csvNames = names;
+  const sets = S.config.logSets || [], picked = $('#csvSet').value, ticked = new Set($$('#csvNames input:checked').map(c => c.value));
+  $('#csvSet').innerHTML = '';
+  $('#csvSet').append(h('option', { value: '' }, '(the ticked values)'), ...sets.map(s => h('option', { value: s.name, ...(s.name === picked ? { selected: true } : {}) }, s.name)));
+  const set = sets.find(s => s.name === $('#csvSet').value);
+  const all = [...new Set([...names.map(n => n.name), ...(set?.names || [])])];
+  const count = Object.fromEntries(names.map(n => [n.name, n.count]));
+  $('#csvNames').innerHTML = '';
+  $('#csvNames').append(...all.map(n => h('label', { class: 'toggle' }, h('input', { type: 'checkbox', value: n, ...((set ? set.names.includes(n) : ticked.has(n)) ? { checked: true } : {}) }), `${n} (${count[n] ?? 0})`)));
+  if (!all.length) $('#csvNames').append(h('span', { class: 'muted' }, 'Nothing has been written to the brew database yet. Give a vAPI variable a database trigger (Variables page).'));
+  $('#csvDelSet').disabled = !set;
+}
+const csvTicked = () => $$('#csvNames input:checked').map(c => c.value);
+$('#csvSet').onchange = () => renderCsvBox();
+$('#csvAll').onclick = () => $$('#csvNames input').forEach(c => c.checked = true);
+$('#csvNone').onclick = () => { $$('#csvNames input').forEach(c => c.checked = false); $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
+$('#csvNames').onchange = () => { $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
+$('#csvRange').onchange = () => $('#csvCustom').classList.toggle('hidden', $('#csvRange').value !== 'custom');
+const saveCsvSets = async sets => { await api('PUT', '/ui/log/sets', { sets }); S.config.logSets = sets; };
+$('#csvSaveSet').onclick = guard(async () => {
+  const names = csvTicked(); if (!names.length) throw new Error('Tick at least one value first');
+  const name = (prompt('Name for this CSV set (like Mash Profile or Fermentor Profile):', $('#csvSet').value) || '').trim(); if (!name) return;
+  const sets = (S.config.logSets || []).filter(s => s.name.toLowerCase() !== name.toLowerCase());
+  await saveCsvSets([...sets, { name, names }].sort((a, b) => a.name.localeCompare(b.name)));
+  renderCsvBox(); $('#csvSet').value = name; renderCsvBox(); toast('Saved');
+});
+$('#csvDelSet').onclick = guard(async () => {
+  const name = $('#csvSet').value; if (!name || !confirm(`Delete the CSV set "${name}"? The readings stay in the brew database.`)) return;
+  await saveCsvSets((S.config.logSets || []).filter(s => s.name !== name)); $('#csvSet').value = ''; renderCsvBox();
+});
+function csvSpan() {
+  const r = $('#csvRange').value, now = Date.now(), H = 3600_000;
+  if (r === 'all') return {};
+  if (r === 'today') { const d = new Date(); d.setHours(0, 0, 0, 0); return { from: d.getTime() }; }
+  if (r === 'custom') {
+    const from = $('#csvFrom').value ? new Date($('#csvFrom').value).getTime() : null, to = $('#csvTo').value ? new Date($('#csvTo').value).getTime() : null;
+    if (from && to && to < from) throw new Error('"To" is before "From"');
+    return { from, to };
+  }
+  return { from: now - { '1h': 1, '4h': 4, '12h': 12, '24h': 24, '7d': 168, '30d': 720 }[r] * H };
+}
+$('#csvGo').onclick = guard(async () => {
+  const names = csvTicked(); if (!names.length) throw new Error('Tick at least one value (or pick a CSV set)');
+  const { from, to } = csvSpan(), q = new URLSearchParams({ names: names.join(','), layout: $('#csvLayout').value, tz: new Date().getTimezoneOffset() });
+  if (from) q.set('from', from); if (to) q.set('to', to);
+  if ($('#csvSet').value) q.set('label', $('#csvSet').value);
+  const a = h('a', { href: '/ui/log/export.csv?' + q, download: '' }); document.body.append(a); a.click(); a.remove();
+});
 function logQuery() {
   const q = new URLSearchParams(); const n = $('#logName').value;
   if (n) q.set('name', n);
@@ -2912,7 +2965,6 @@ $('#logLoad').onclick = guard(async () => {
   const rows = await api('GET', '/api/log?' + logQuery());
   const tb = $('#logBody'); tb.innerHTML = '';
   for (const r of rows) tb.append(h('tr', {}, h('td', {}, new Date(r.ts).toLocaleString()), h('td', {}, r.name), h('td', {}, r.value), h('td', {}, r.reason)));
-  $('#logCsv').href = '/api/log.csv?' + logQuery();
 });
 
 // ---------------------------------------------------------------- devices
