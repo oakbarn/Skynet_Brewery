@@ -36,6 +36,7 @@ export function graphicTopic(g) {
   if (!g) return null;
   switch (g.kind) {
     case 'vessel':
+      if (g.vesselType === 'bfit' || g.template) return ['vessel-and-fitting-templates', 'tabvessel-and-tabfitting'];
       if (g.bundled) return ['equipment', 'bundle-a-vessel-with-its-ips'];
       return g.vesselType === 'vessel' ? ['vessel-tab'] : ['equipment', 'other-equipment'];
     case 'ip':
@@ -73,8 +74,9 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'vAPI', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
   elementTopic({ type: 'vKonstant', kind: 'list' }), elementTopic({ type: 'vKonstant' }),
-  ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }].map(v => graphicTopic({ kind: 'vessel', ...v })),
+  ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
+  ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
   graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }),
   ...BAR.map(b => b[1])];
 
@@ -86,6 +88,9 @@ const MENU_TOPICS = {
     'Vessels and equipment': ['schemas-and-equipment-profiles', 'build-and-bundle-equipment'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
     Build: ['vessel-tab', 'ports-and-build'], _: ['vessel-tab'] },
+  vtemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },
+  etemplates: { _: ['vessel-and-fitting-templates', 'equipment-template-settings'] },
+  ftemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },
   layout: { _: ['schemas-and-equipment-profiles', 'the-default-layout'] },
   mash: { _: ['mash-and-boil-profiles', 'mash-profile'] },
   boil: { _: ['mash-and-boil-profiles', 'boil-profile'] },

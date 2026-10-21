@@ -645,3 +645,19 @@ body.role-viewer .op-only { display: none !important; }
 .verState.ver-current { color: var(--ok); }
 .verState.ver-old { color: var(--warn); font-weight: 700; }
 .verState.ver-changed { color: var(--warn); }
+
+/* Vessel and Fitting Templates: small icons with names (there will be many), double-click for the pop-up */
+.tplGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 10px; }
+.tplIcon { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; min-width: 0; }
+.tplIcon:hover, .tplIcon:focus { border-color: var(--accent); }
+.tplIcon img { width: 56px; height: 56px; object-fit: contain; pointer-events: none; }
+.tplIcon .tplName { font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tplIcon .tplBadge { position: absolute; top: 3px; right: 3px; }
+.tplBadge { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 6px; vertical-align: middle; }
+.tplBadge.skynet { background: #2f6f9f; color: #fff; }
+.tplBadge.user { background: #4a7a3a; color: #fff; }
+.tplDlg { width: min(620px, 96vw); }
+.tplHead { display: flex; align-items: flex-start; gap: 8px; }
+.tplHead h3 { flex: 1; margin: 6px 0; }
+.tplX { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 16px; line-height: 1.2; }
+.tplMini { width: min(420px, 94vw); }
