@@ -575,6 +575,14 @@ body.role-viewer .op-only { display: none !important; }
 .menuList .menuItem { text-align: left; border-color: transparent; background: none; padding: 7px 10px; }
 .menuList .menuItem:hover:not(:disabled) { background: var(--panel2); border-color: var(--line); }
 .menuList .menuItem:disabled { opacity: .55; cursor: default; }
+.menuList .menuItem.cur { font-weight: 600; background: var(--panel2); }
+.menuList .menuNote { font-size: 12px; padding: 2px 10px; }
+.menuList.menuFixed { position: fixed; right: auto; overflow-y: auto; z-index: 1000; }
+/* the ☰ in a dialog's top right corner (the title wraps around it) */
+.dlgMenu { float: right; align-self: flex-end; margin: 0 0 6px 10px; }
+.dlgMenu .menuBtn { padding: 4px 8px; }
+/* the Menu Bar's ☰: every page but the Tabs, which have their own */
+body.onWorkspace #top .menuCopy { display: none; }
 .menuList hr { border: 0; border-top: 1px solid var(--line); margin: 3px 0; }
 .menuTabs:empty { display: none; }
 .menuTabs { padding-left: 6px; border-left: 2px solid var(--line); }

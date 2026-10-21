@@ -52,6 +52,7 @@ export function graphicTopic(g) {
 const BAR = [
   ['#schemaPick, .schemaPick', ['schemas-and-equipment-profiles', 'pick-and-load-a-schema']],
   ['#menuTabs', ['menu', 'menu-tabs']],
+  ['.menuCopy', ['menu-everywhere']],
   ['.menuWrap', ['menu']],
   ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
