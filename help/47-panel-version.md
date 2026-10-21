@@ -21,6 +21,8 @@ The **Versions on GitHub** link opens the list of every version (GitHub Releases
 
 `Skynet-v.yyyymmdd_hh_mm`, the year, month, day, hour and minute of the merge, for example `Skynet-v.20261021_16_30` is 21 October 2026 at 16:30. The time is **UTC** (GMT), the same everywhere in the world. If two merges land in the same minute, the second one ends in `_2`.
 
+The first word says whose copy of the code it is. The original Skynet Brewery code (GitHub user **oakbarn**) says **Skynet**. When someone makes their own copy on GitHub (a fork) and merges changes there, their versions start with their GitHub user name instead, for example `brewer42-v.20261105_19_02`. So you can always tell whose build you are running.
+
 ## How it works
 
 When a pull request is merged into the main branch, GitHub runs **Panel version** (the file `.github/workflows/panel-version.yml`). It:
