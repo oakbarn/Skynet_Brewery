@@ -6,7 +6,7 @@
 <title>Skynet Brew Panel</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="onWorkspace">
 <header id="top">
   <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span><span id="panelVer" class="panelVer" title="Panel version: made by GitHub when code is merged. ☰ Menu > About says if it is the latest."></span>
     <label class="schemaPick" title="The Schema is your whole brewery setup: tabs, devices, elements, pipes and the Equipment Profile of each Tab. Pick one to load it.">Schema <select id="schemaPick" class="schemaSel"></select></label></div>
@@ -504,7 +504,7 @@
   <pre id="binView" class="binView hidden"></pre>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
 </form></dialog>
-<dialog id="keyDlg"><form method="dialog">
+<dialog id="keyDlg" data-nomenu><form method="dialog">
   <h3>Process colors</h3>
   <div id="keyList" class="keyList"></div>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
@@ -517,8 +517,8 @@
 </form></dialog>
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
-<dialog id="sampleDlg"><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery Schema to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample Schema</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
-<dialog id="donateDlg"><h3>🍺 Beer money</h3><p id="donateText"></p>
+<dialog id="sampleDlg" data-nomenu><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery Schema to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample Schema</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
+<dialog id="donateDlg" data-nomenu><h3>🍺 Beer money</h3><p id="donateText"></p>
   <div class="bar"><button id="donateDone">Already donated</button><span class="spacer"></span><button id="donateLater">Maybe later</button><button id="donateGo" class="primary"></button></div></dialog>
 <div id="toast"></div>
 <script type="module" src="app.js"></script>
