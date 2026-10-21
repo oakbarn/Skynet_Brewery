@@ -135,6 +135,8 @@ BK_Temp.valueColor = ""
 - `valueType` is `LED`, `Text` or `Gauge`. Something with an ON / OFF state (a pump, valve, switch) can only be `LED` or `Text`.
 - `""` puts back the look set in its properties.
 
+Every text box also has `.foreColor`, `.backColor`, `.alignment` (Left, Center, Right), `.width`, `.height`, `.xPosition` and `.yPosition`, for example `Pump_1.foreColor = "Red"` or `Text_1.xPosition = 400`. A Text added with **+ Text** has a name too (`Text_1`). See [Text boxes](47-text-boxes).
+
 The change lasts until the panel restarts. To keep a look, set it in the item's properties, or start new items from a [Tab Background Profile](36-tab-and-valve-profiles).
 
 ## Names have no spaces
