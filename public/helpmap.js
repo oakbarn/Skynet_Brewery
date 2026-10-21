@@ -1,0 +1,101 @@
+// Right-click Help (Fritz): which Help page, and which part of it, explains an item on a tab or on the Menu Bar.
+// Each answer is [page, section]: the page name without its number is enough, the section is the id of a heading on it
+// (the heading in lower case, every run of other characters turned into one "-"). test/helpmap.test.js checks they all exist.
+
+// the screens on the Menu Bar (data-view of each button)
+const VIEWS = {
+  workspace: ['tabs'], scripts: ['scripts'], globals: ['variables'], log: ['log'], devices: ['devices'], media: ['media'],
+  filemove: ['file-move'], import: ['import'], settings: ['settings'], help: ['editing-help'], config: ['schema-json'],
+};
+const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
+
+// a device or widget element (the things added with Add element)
+export function elementTopic(e) {
+  if (!e) return null;
+  switch (e.type) {
+    case 'digitalOut':
+      if (e.subtype === 'valve' && e.valveType === 'manual') return ['manual-valves'];
+      if (e.subtype === 'valve' && e.tapwater) return ['tap-water-valves'];
+      return DEVICE;
+    case 'stepper': return ['stepper-motors'];
+    case 'alarm': return ['alarms-and-sound'];
+    case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
+    case 'timer': return ['tabs', 'timers'];
+    case 'vKonstant': return e.kind === 'list' ? ['variables', 'vkonstant-list-a-dropdown-on-a-tab'] : ['variables', 'vkonstant-kinds'];
+    case 'vAPI': return ['variables', 'vapi-kinds'];
+    case 'shared': return ['variables', 'which-kind-to-use'];
+    case 'picture': return ['picture-paths'];
+    case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];
+    case 'temperature': return e.sensor === 'ds18b20' ? ['devices', 'onewire-probes-ds18b20'] : DEVICE;
+    default: return DEVICE;      // the other devices on a board pin: outputs, inputs, probes, sensors, flow meters, scales
+  }
+}
+
+// a graphic: equipment, an IP or fitting, a pipe or hose, a picture or a text
+export function graphicTopic(g) {
+  if (!g) return null;
+  switch (g.kind) {
+    case 'vessel':
+      if (g.bundled) return ['equipment', 'bundle-a-vessel-with-its-ips'];
+      return g.vesselType === 'vessel' ? ['vessel-tab'] : ['equipment', 'other-equipment'];
+    case 'ip':
+      if (g.fitting === 'manualValve') return ['manual-valves'];
+      if (g.fitting && g.fitting !== 'point') return ['pipes-and-hoses', 'sizes'];
+      return ['pipes-and-hoses', 'ips-only-show-in-edit-layout'];
+    case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
+    case 'image': return ['picture-paths'];
+    default: return ['tabs', 'changing-the-layout-admins'];      // a text
+  }
+}
+
+// a spot on the Menu Bar or the bars under it: the first selector the clicked element sits in wins
+const BAR = [
+  ['#schemaPick, .schemaPick', ['schemas-and-equipment-profiles', 'pick-and-load-a-schema']],
+  ['#menuTabs', ['menu', 'menu-tabs']],
+  ['.menuWrap', ['menu']],
+  ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
+  ['#editBar', ['tabs', 'changing-the-layout-admins']],
+  ['#simBar', ['simulation']],
+  ['#soundBtn', ['alarms-and-sound']],
+  ['#who', ['login']],
+  ['#top', ['getting-started', 'finding-your-way']],
+];
+export function barTopic(target) {
+  const view = target.closest?.('#views button')?.dataset.view;
+  if (view) return VIEWS[view] || null;
+  return BAR.find(([sel]) => target.closest?.(sel))?.[1] || null;
+}
+
+export const TAB_SPOT = ['tab-background'];      // an empty spot on a tab, and Tab settings: its background color and picture
+export const DB_TRIGGER = ['variables', 'database-trigger'];
+export const RIGHT_CLICK_PAGE = ['right-click-help'];
+export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,
+  ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'vAPI', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
+  elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
+  elementTopic({ type: 'vKonstant', kind: 'list' }), elementTopic({ type: 'vKonstant' }),
+  ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }].map(v => graphicTopic({ kind: 'vessel', ...v })),
+  ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
+  graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }),
+  ...BAR.map(b => b[1])];
+
+// The yellow ? icons on the ☰ Menu tabs: a heading in a Menu tab goes to the Help part named for it ("_" = any other heading).
+// A heading matches when its text starts with the name (after a 🔒). Section headings inside a form only get an icon when named.
+const MENU_TOPICS = {
+  default: { _: ['menu', 'the-default-tab'] },
+  equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-a-schema-its-equipment-profile'],
+    'Vessels and equipment': ['schemas-and-equipment-profiles', 'build-and-bundle-equipment'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
+  vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
+    Build: ['vessel-tab', 'ports-and-build'], _: ['vessel-tab'] },
+  layout: { _: ['schemas-and-equipment-profiles', 'the-default-layout'] },
+  mash: { _: ['mash-and-boil-profiles', 'mash-profile'] },
+  boil: { _: ['mash-and-boil-profiles', 'boil-profile'] },
+  tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'give-a-tab-its-profile'], _: ['tab-and-valve-profiles', 'tab-background-profile'] },
+  valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
+};
+export function menuTopic(key, heading, main = true) {
+  const m = MENU_TOPICS[key]; if (!m) return null;
+  const text = String(heading).replace(/^🔒\s*/, '').trim();
+  const named = Object.keys(m).find(k => k !== '_' && text.startsWith(k));
+  return named ? m[named] : main ? m._ : null;
+}
+export const MENU_ALL = () => Object.values(MENU_TOPICS).flatMap(Object.values);

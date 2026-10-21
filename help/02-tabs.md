@@ -1,8 +1,8 @@
 # Tabs (your brewery screens)
 
-A **Tab** is one screen of your brewery: a background picture with pumps, valves, temperatures, timers and pipes placed on it. The tab buttons sit at the top of the **Tabs** screen. Processes can switch every screen to a tab with `show tab "Brew Day"`.
+A **Tab** is one screen of your brewery: a background picture with pumps, valves, temperatures, timers and pipes placed on it. The tab buttons sit at the top of the **Tabs** screen. On this screen the Menu Bar is hidden; pick **☰ Menu > Show Menu Bar** to bring it back (see [The Menu Bar](40-menu-bar)). Processes can switch every screen to a tab with `show tab "Brew Day"`.
 
-**Zoom** sets the size: **Fit** fills the width of your screen; 50 % to 125 % are fixed sizes.
+**Zoom** and **Full screen** are in the **☰ Menu > Zoom** Menu tab. See [Zoom and Full screen](41-zoom-and-full-screen).
 
 ## Using a tab on brew day
 
@@ -10,7 +10,7 @@ A **Tab** is one screen of your brewery: a background picture with pumps, valves
 - **Tap a value** to get a large dialog with − / + buttons and a number pad.
 - Items set to **Ask before changing** show large ON / OFF buttons first, so a bump on the screen does not start a pump.
 - Pipes show **moving flow** when liquid is really moving through them.
-- Alarms only make a sound after you press **Enable sound** at the top, once on each screen that should sound them (browsers insist on that).
+- Alarms only make a sound after you press **Enable sound** in the Menu Bar (pick **☰ Menu > Show Menu Bar** first), once on each screen that should sound them (browsers insist on that).
 
 ## Changing the layout (admins)
 
@@ -25,12 +25,14 @@ Press **☰ Menu** and pick **Edit layout**. A dashed bar appears with these but
 | **Add IP** | A flow point or pipe fitting (see below). |
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
 | **Draw hose** | Like a pipe, but it bends in smooth curves. Loose ends get a coupling. See [Pipes, hoses and reducers](24-pipes-and-hoses). |
-| **🔒 Lock** | Locks the selected item so it can't be dragged or resized. Press again to unlock. |
+| **🔒 Lock** | Locks the selected item so it can't be dragged or resized. The button then says **🔓 Unlock**: press it to unlock. Every item's properties also have a **Lock position** switch. |
 | **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
 | **New tab** | Adds a tab. |
 | **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Picking **☰ Menu > Exit Edit layout** asks the same. Nothing is changed until you save. |
 
 Drag items to move them, drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.
+
+**On a phone or tablet** nothing can be dragged or resized, so a finger can't move something by accident. Tap to pick an item, hold a finger on it for its properties (X, Y, Width and Height are there). See [Phones and tablets](45-phones-and-tablets).
 
 ## Background color and picture
 

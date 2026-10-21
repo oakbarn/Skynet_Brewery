@@ -31,6 +31,7 @@ import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
+import { checkIds } from './public/naming.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -202,6 +203,7 @@ function needRole(p, m) {
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
+  if (/^\/ui\/schemas\/[a-z0-9-]+\/export$/.test(p)) return 'admin';   // Schema.json: Save as .json file
   if (p.startsWith('/ui/filemove/')) return 'admin';   // File Move: copies files onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
@@ -408,12 +410,16 @@ async function route(req, res) {
   if (p === '/ui/layout' && m === 'PUT') {
     const body = await jsonBody(req);
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: its equipment and pipes can't change
+    if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
     store.saveLayout(body);
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
+    if (body.updateVersion) return ok(res, schemas.newVersion());   // the "Update Version" switch next to Save
     return ok(res);
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
+    const tl = body.brewDefaults?.textLarge;         // \L large text in strings: bigger than normal text (18 px)
+    if (tl !== undefined && tl !== null && !(+tl > 18 && +tl <= 200)) return fail(res, 400, 'Large text size must be more than 18 (normal text) and at most 200');
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm', 'brewDefaults', 'menuOrder']) if (k in body) store.config[k] = body[k];
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     if ('passwordRules' in body) store.config.passwordRules = cleanPasswordRules(body.passwordRules);
@@ -486,12 +492,14 @@ async function route(req, res) {
   if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') return ok(res, schemas.layoutAction((await jsonBody(req)).action));
-  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore))?$/.exec(p);
+  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version|export))?$/.exec(p);
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
     if (sc[2] === 'backup' && m === 'POST') return ok(res, { ok: true, file: schemas.backupSchema(sc[1]) });
+    if (sc[2] === 'export' && m === 'GET') return ok(res, schemas.exportSchema(sc[1]));
     if (sc[2] === 'backups' && m === 'GET') return ok(res, schemas.listBackups(sc[1]));
-    if (sc[2] === 'restore' && m === 'POST') { schemas.restore(sc[1], (await jsonBody(req)).file); return ok(res, schemaView()); }
+    if (sc[2] === 'restore' && m === 'POST') { const b = await jsonBody(req); schemas.restore(sc[1], b.file, { version: !!b.version }); return ok(res, schemaView()); }
+    if (sc[2] === 'version' && m === 'POST') { const r = schemas.newVersion(sc[1]); return ok(res, { ...schemaView(), ...r }); }
     if (sc[2] === 'load' && m === 'POST') { schemas.load(sc[1]); return ok(res, schemaView()); }
     if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
     if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
