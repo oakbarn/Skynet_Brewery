@@ -86,6 +86,7 @@ async function load() {
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
     ...['mash', 'boil', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
   fillAddType();
+  document.body.classList.toggle('hideMenuBar', menuBarHides());
   renderAll();
 }
 function renderAll() { renderValves(S.valves); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
@@ -118,6 +119,9 @@ function setView(v) {
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
+  // the Menu Bar is hidden on the Tabs page; coming back to Tabs hides it again
+  document.body.classList.toggle('onTabs', v === 'workspace');
+  showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
   if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
@@ -1590,6 +1594,15 @@ document.addEventListener('fullscreenchange', () => {
   document.body.classList.toggle('fullscreen', on);
   refit();
 });
+// the Menu Bar is hidden on the Tabs page (Default tab: "Hide the Menu Bar on Tabs", on unless switched off);
+// ☰ Menu > Show Menu Bar brings it back until you hide it again or leave the Tabs page
+const menuBarHides = () => S?.config?.brewDefaults?.hideMenuBar !== false;
+const menuBarHidden = () => view === 'workspace' && menuBarHides() && !document.body.classList.contains('menuBarOn');
+function showMenuBar(on) {
+  document.body.classList.toggle('hideMenuBar', menuBarHides());
+  document.body.classList.toggle('menuBarOn', on);
+  refit();
+}
 // Full screen hides the browser's own bars (phones without it, like iPhones, just do not show the button)
 if (!document.documentElement.requestFullscreen) $('#fullScreen').classList.add('hidden');
 $('#fullScreen').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => { });
@@ -3267,7 +3280,9 @@ const paneDirty = () => menuTab === 'equipment' ? eqDirty : menuTab === 'vessel'
 function renderMenu() {
   if (!S?.profiles) return;
   const list = $('#menuList'); list.innerHTML = '';
-  if (can('admin')) list.append(h('button', { role: 'menuitem', class: 'menuItem', onclick: guard(menuEditLayout) }, editing ? '✎ Exit Edit layout' : '✎ Edit layout'), h('hr'));
+  if (view === 'workspace' && menuBarHides()) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: 'The top line: Schema, Processes, Variables, Log, Settings, Help, Enable sound, Sign out', onclick: () => { closeMenuList(); showMenuBar(menuBarHidden()); } }, menuBarHidden() ? '▼ Show Menu Bar' : '▲ Hide Menu Bar'));
+  if (can('admin')) list.append(h('button', { role: 'menuitem', class: 'menuItem', onclick: guard(menuEditLayout) }, editing ? '✎ Exit Edit layout' : '✎ Edit layout'));
+  list.append(h('hr'));
   for (const m of menuSorted().filter(m => !m.admin || can('admin'))) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: m.coming || m.tip, ...(m.coming ? { disabled: true } : {}), onclick: () => { closeMenuList(); if (m.view) setView(m.view); else openMenuTab(m.key); } },
     m.title, m.coming ? h('span', { class: 'muted' }, ' (coming)') : ''));
   const tabs = $('#menuTabs'); tabs.innerHTML = '';
@@ -3335,7 +3350,7 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 
 // ---- Default tab: what new Recipes start with, and the order of the Menu
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', ...(S.config.brewDefaults || {}) };
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, ...(S.config.brewDefaults || {}) };
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here. A new Recipe starts with the first ones, and you can change each one in the Recipe.', 'note'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
@@ -3345,9 +3360,11 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')]];
+    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
+    ['_m', 'Menu Bar', 'head'],
+    ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool']];
   const f = paneForm(fields, d, () => { }, !admin);
-  const save = guard(async () => { f.read(); await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; toast('Defaults saved'); });
+  const save = guard(async () => { f.read(); await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin ? {} : { disabled: true }) });
