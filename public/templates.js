@@ -12,6 +12,9 @@ export const CONNECTION_STANDARDS = {
   MMF: 'MM Female', MMM: 'MM Male', DIN: 'DIN',
 };
 export const textSize = std => std === 'DIN';
+// short names for labels on a Tab ("Outlet (TC 1.5)")
+const STD_SHORT = { BSPFRp: 'BSP F Rp', BSPFRc: 'BSP F Rc', BSPMRp: 'BSP M Rp', BSPMRc: 'BSP M Rc', MMF: 'MM F', MMM: 'MM M' };
+export const stdShort = s => s?.type ? (STD_SHORT[s.type] || s.type) + (s.size !== undefined && s.size !== '' ? ' ' + s.size : '') : '';
 
 // the fittings a Bundled Fitting is built from, up to four, from the vessel port outward. The list is set by Skynet:
 // a new kind is added here, through GitHub.
@@ -82,14 +85,15 @@ export function fittingEnds(t) {
 export const VESSEL_KINDS = { vessel: 'Vessel', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter' };
 export function cleanVessel(b = {}) {
   const vesselType = VESSEL_KINDS[b.vesselType] ? b.vesselType : 'vessel';
-  const t = { vesselType, vtype: text(b.vtype, 80) || undefined, otherType: text(b.otherType, 80) || undefined, image: text(b.image, 300) || undefined,
+  const t = { vesselType, units: b.units === 'Metric' ? 'Metric' : undefined, vtype: text(b.vtype, 80) || undefined, otherType: text(b.otherType, 80) || undefined, image: text(b.image, 300) || undefined,
     heatKind: text(b.heatKind, 20) || undefined, otherHeat: text(b.otherHeat, 80) || undefined, std: cleanStd(b.std), notes: text(b.notes, 2000) || undefined, ports: {} };
   for (const k of ['volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume']) t[k] = num(b[k], k);
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;
     const p = { installed: !!q?.installed, position: text(q?.position, 60) || undefined };
-    if (p.installed && FITTING_PORTS[k] && text(q?.fitting, 60)) p.fitting = text(q.fitting, 60);
+    if (p.installed && FITTING_PORTS[k] && text(q?.fitting, 60)) { p.fitting = text(q.fitting, 60); p.bundleName = text(q.bundleName, 80) || undefined; }
     const std = cleanStd(q?.std, `${k} Connection Standard`); if (std) p.std = std;
+    for (const x of Object.keys(p)) if (p[x] === undefined) delete p[x];
     t.ports[k] = p;
   }
   return t;

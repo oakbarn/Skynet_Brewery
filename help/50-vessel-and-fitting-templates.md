@@ -1,0 +1,102 @@
+# Vessel and Fitting Templates
+
+A **Template** is a ready-made vessel or fitting kept in a library, not on a Tab. **Add to Tab** puts a copy on a Tab. The copy is a **Tab_Vessel** or a **Tab_Fitting**, and it is yours to change or delete. Changing the copy never changes the Template.
+
+There are two kinds of Template:
+
+- **Vessel Templates**: kettles, HLTs, mash tuns, fermenters, chillers, coils and trub filters.
+- **Bundled Fitting Templates**: up to four fittings joined together (for example a valve, a tee with a thermowell and a 90 degree elbow) that go on a vessel port, or on a Tab by themselves.
+
+## Skynet Templates and User Templates
+
+| | Skynet Template | User Template |
+|---|---|---|
+| Made by | Skynet (changed only through GitHub) | You, in the panel (Admins) |
+| Change it | No (see Building Skynet Templates below) | Yes |
+| Delete it | Never | Yes |
+| Clone it | Yes: the clone is a User Template | Yes |
+| Add to Tab | Yes | Yes |
+| Badge | **Skynet** (listed first) | **User** |
+
+The panel checks this on the Brain, so a locked Skynet Template can't be changed or deleted from any screen.
+
+Skynet Templates come with the panel, in its `templates` folder, and an update brings the newest ones. User Templates are kept on the Brain in `config/templates/user`, which an update never touches.
+
+## The Template panes
+
+1. Press **☰ Menu** and pick **Vessel Templates** or **Fitting Templates**.
+2. Each Template shows as a small icon with its name, so many of them fit on one screen.
+3. **Double-click** an icon (on a phone, double-tap it) to open its pop-up with the settings.
+4. **New Vessel Template ...** (or **New Bundled Fitting Template ...**) makes a blank one (Admins).
+
+The buttons on a Template's pop-up:
+
+- **✕** and **Cancel**: close it without saving.
+- **Clone**: asks for a new name (it suggests Copy1_ and the name; change it to what you want), then makes a copy with every setting showing in the pop-up.
+- **Add to Tab**: pick the Tab and a name (it suggests bndl1_TemplateName_TabID; change it to what you want), then press **Add**.
+- **Add to Vessel** (Bundled Fittings only): puts this fitting on a port of a Vessel Template (Outlet, Tangential Inlet, Steam Slayer or CIP Inlet). The name it suggests is bndl1_FittingName_VesselName.
+- **Save**: only on Templates you can change.
+- **Delete**: only on User Templates. A Bundled Fitting that a Vessel Template uses can't be deleted until it is taken off that vessel.
+
+A **Template Name** has no spaces (use _ instead) and must be unique.
+
+## Vessel Template settings
+
+- **Template Name**, **Kind** (Vessel, Plate chiller, Chilling coil, HERMS coil, Trub filter) and **Type** (HLT, Brew Kettle, Mash Tun, Fermenter ...).
+- **Graphic**: the picture drawn on the Tab.
+- **Size**: Units, Size, Dead space and Extra trub loss (a Fermenter has Largest batch, Smallest batch and Trub loss).
+- **Heat Source**. The Device that heats it, and its probe, are picked later on the Tab_Vessel, because they belong to a Schema.
+- **Connection Standard** and its **Size**: TC, FPT, MPT, BSP Female Rp, BSP Female Rc, BSP Male Rp, BSP Male Rc, MM Female, MM Male (a number, for example 1.5) or DIN (text, for example DN25). It is the default for every port and Bundled Fitting. It goes on the Equipment list and sets the default size of the pictures.
+- **Ports**: switch on each port it has and pick its **position**. The **Outlet**, **Tangential Inlet**, **Steam Slayer** and **CIP Inlet** also have a **Bundled Fitting** dropdown:
+  - a Skynet or User Bundled Fitting,
+  - **New ...**: name it, and its pop-up opens so you can build it. Close it to come back to the vessel.
+  - **Clone ...**: pick a Bundled Fitting to copy, and name the copy.
+
+## Bundled Fitting Template settings
+
+- **Template Name** and **Connection Standard** (empty = the vessel's).
+- **First, Second, Third and Fourth Fitting**, from the vessel port outward. Each is a dropdown:
+  - **Valve**: the valve itself (a Device or a manual valve Widget) is picked when it is on a Tab.
+  - **Tee**: switch on **Thermowell** if a probe sits in it, and pick its **Position** (Short or Long). A thermowell stops flow, so that side of the tee has no IP. The probe is picked when it is on a Tab.
+  - **90 Degree Elbow**, **45 Degree Elbow**, **U**, **CIP Ball Valve**, or **None**.
+- **Graphic**: a Skynet Bundled Fitting picks one of the Skynet pictures. A User one can have any picture.
+
+The list of fittings is set by Skynet. A new kind of fitting is added through GitHub.
+
+## Add to Tab
+
+**Add to Tab** opens **Edit layout** on that Tab with the copy on it, **Bundled**:
+
+- A **Tab_Vessel** gets its ports as IPs, and a **Tab_Fitting** joined to each port that has a Bundled Fitting. It all moves as one.
+- A **Tab_Fitting** by itself gets a **Start** IP, its **End** IP and one IP for the open side of each tee.
+
+Drag it to its place, then press **Save layout**.
+
+## Tab_Vessel and Tab_Fitting
+
+A Tab_Vessel or Tab_Fitting is not a Device and not a Widget. It is an item on a Tab that can hold both: a heating element and a probe on a Tab_Vessel, a valve on a Tab_Fitting, and IPs on both.
+
+Open it in **Edit layout** (double-click, or hold a finger on it). Switch **Bundled** off first if it is bundled. Everything can be changed, or it can be deleted, even when it came from a Skynet Template. The note at the top says which Template it came from. Its **Label** can stay empty: the Name shows instead.
+
+On a Tab_Fitting you pick:
+
+- each **Valve**: **Select Device, Widget or None**. While that valve is closed, nothing flows through the Tab_Fitting.
+- each thermowell's **Temperature Probe**: **Select Temperature Probe or None**.
+
+Deleting a Tab_Vessel also deletes the Tab_Fittings joined to it.
+
+## Joining a Tab_Fitting to a vessel
+
+A Bundled Fitting is usually on the Vessel Template already, so it comes joined. When you need another one, or the Tab_Vessel was put on the Tab first:
+
+1. Add the Bundled Fitting to the Tab by itself (**Add to Tab** on its pop-up).
+2. In Edit layout, drag the Tab_Fitting (or its **Start** IP) so the Start IP sits on the vessel's port IP, and let go.
+3. It joins that port: its Start IP goes away, and flow passes between the vessel and the fitting with no pipe.
+
+To take it off again, open the Tab_Fitting and switch off **Joined to its vessel port**. It gets its own Start IP back.
+
+## Building Skynet Templates
+
+For now Skynet is still building its Templates, so the Skynet Templates can be changed in the panel, and new ones and clones can be Skynet Templates (a switch in the name pop-up; off makes a User Template). The ones made or changed this way are kept in `config/templates/skynet` on the Brain, so an update can't overwrite them. Send that folder in and they go into the panel's `templates` folder on GitHub.
+
+When all of them are done, Skynet locks them. From then on Skynet Templates can't be changed or deleted, and every new Template or clone is a User Template.
