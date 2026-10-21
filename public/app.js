@@ -248,9 +248,12 @@ const EQ = {
       thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
     } },
   ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/samples/chill_coil.svg', size: [180, 180], tab: 'Equipment',
-    ports: { in: pt('In', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }) } },
+    ports: { in: pt('In', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }),
+      // a 4 port coil (Chillzilla): a second circuit that never mixes with the first (Fritz, 2026-10-21: 2 ins, 2 outs)
+      in2: pt('In 2', CORNERS.concat(SIDE4), { def: 'Bottom Left', circuit: 'b' }), out2: pt('Out 2', CORNERS.concat(SIDE4), { def: 'Bottom Right', circuit: 'b' }) } },
   herms: { title: 'HERMS coil', types: ['Stainless 25 ft', 'Stainless 50 ft', 'Copper'], image: 'Images/samples/herms_coil.svg', size: [180, 180], tab: 'Equipment',
-    ports: { wortIn: pt('Wort In', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), wortOut: pt('Wort Out', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }) } },
+    ports: { wortIn: pt('Wort In', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), wortOut: pt('Wort Out', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }),
+      in2: pt('In 2', CORNERS.concat(SIDE4), { def: 'Bottom Left', circuit: 'b' }), out2: pt('Out 2', CORNERS.concat(SIDE4), { def: 'Bottom Right', circuit: 'b' }) } },
   trub: { title: 'Trub filter', types: ['Inline filter', 'Hop rocket', 'Hop spider'], image: 'Images/samples/trub_filter.svg', size: [100, 170], tab: 'Equipment',
     ports: { inlet: pt('Inlet', SIDE4.concat(CORNERS), { on: true, def: 'Top', circuit: 'a' }), outlet: pt('Outlet', SIDE4.concat(CORNERS), { on: true, def: 'Bottom', circuit: 'a' }) } },
   eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/samples/pipe_tee.svg', size: [90, 90],
@@ -521,8 +524,10 @@ const devIps = e => {
   if (!v) return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
     { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: sidePt(e, e.ipOut || 'right') }];
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
-  return [{ id: `dev:${e.name}:in`, label: `${e.name} end`, text: '', c: sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top')) },
-    { id: `dev:${e.name}:out`, label: `${e.name} end`, text: '', c: sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom')) }];
+  const tap = e.subtype === 'valve' && e.tapwater && tapOut(e) !== 'both' ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
+  const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
+  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top')) },
+    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom')) }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
@@ -1008,6 +1013,9 @@ function allIps(ws) {
 // A pipe between two plain IP points with a "Flow when" list keeps the old rule: it flows, as drawn, while all of those are on.
 // my_Valve.tapwater set by a Process wins over the valve's setting until the valve is saved again or the panel restarts
 const tapWater = e => !!(editing ? e.tapwater : S.values[e.name]?.tapwater ?? e.tapwater);
+// which end tap water leaves by: 'out' (the second end, right or bottom), 'in' (the first end, left or top) or 'both'
+const TAP_OUT = [['out', 'The second end (right or bottom), one way'], ['in', 'The first end (left or top), one way'], ['both', 'Both ends']];
+const tapOut = e => TAP_OUT.some(([k]) => k === e.tapwaterOut) ? e.tapwaterOut : 'out';
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
 function ipNode(id, ws) {
   const q = eqOfIp(id) !== null && eqPort(id, ws);
@@ -1015,8 +1023,9 @@ function ipNode(id, ws) {
   const dn = devOfIp(id);
   if (dn !== null) {
     const e = L().elements.find(x => x.name === dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
-    // a tap water valve that is open is a source: water pushes out of both of its ends (only the pipe side shows flow)
-    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? { key: id, push: true } : { key: 'dev:' + dn, pass: true };
+    // a tap water valve that is open is a source: water pushes out of its out end only (Fritz, 2026-10-21: one way; the tap end
+    // takes nothing in), or out of both ends when it is set to Both
+    if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === 'both' || tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
     if (isInline(e)) return { key: 'dev:' + dn, pass: true };
     if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
     return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
@@ -1791,7 +1800,7 @@ const F = {
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
-    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool']] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool'], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT]] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
@@ -3506,7 +3515,8 @@ const MENU = [
   { key: 'default', title: 'Default', tip: 'What new Recipes start with, and the order of the Menu', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'The equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
-  { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel') },
+  { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
+  { key: 'etemplates', title: 'Equipment Templates', tip: 'Ready-made chillers, coils and trub filters (2 or 4 liquid ports)', render: renderTemplatesTab('vessel', 'equip') },
   { key: 'ftemplates', title: 'Fitting Templates', tip: 'Ready-made Bundled Fittings (valve, tee, elbows ...) for vessel ports or a Tab', render: renderTemplatesTab('fitting') },
   { key: 'layout', title: 'Default Layout', tip: 'The vessels and pipes a Schema gets with its Equipment Profile', render: renderLayoutTab },
   { key: 'mash', title: 'Mash Profile', tip: 'Up to 4 mash steps and the sparge', render: renderBrewProfileTab('mash') },
@@ -4067,6 +4077,7 @@ function fittingSlotFields(w, onTab) {
 // Vessel Template ports: switched on, a port with a fitting place picks its Bundled Fitting (Skynet, User, New or Clone)
 function vesselTplToFields(t) {
   const C = EQ[t.vesselType] || EQ.vessel;
+  if (C.ports.in2) t.liquidPorts = String(t.liquidPorts || (t.ports?.in2?.installed ? 4 : 2));
   for (const [k, d] of Object.entries(C.ports)) { const q = t.ports?.[k]; t[k + '_on'] = q ? !!q.installed : !!d.on; t[k + '_pos'] = q?.position; t[k + '_fit'] = q?.fitting || ''; }
   return stdToFields(t);
 }
@@ -4075,6 +4086,7 @@ function vesselTplFromFields(w, old) {
   w.ports = {};
   for (const [k, d] of Object.entries(C.ports)) {
     const p = { installed: !!w[k + '_on'], position: w[k + '_pos'] || portDefPos(d) };
+    if ((k === 'in2' || k === 'out2') && C.ports.in2) p.installed = String(w.liquidPorts) === '4';     // 2 or 4 liquid ports
     const fit = FITTING_PORTS[k] && p.installed && w[k + '_fit'] && !w[k + '_fit'].startsWith('__') ? w[k + '_fit'] : '';
     if (fit) { p.fitting = fit; const was = old?.ports?.[k]; if (was?.fitting === fit && was.bundleName) p.bundleName = was.bundleName; }
     w.ports[k] = p;
@@ -4088,9 +4100,12 @@ function vesselTplFields(w) {
   const types = isV ? Object.keys(VESSEL_TYPES).filter(t => !['MLT', 'Whirlpool'].includes(t) || t === w.vtype) : C.types;
   const heat = isV && !ferm ? heatKindsFor(w.vtype || types[0]) : [];
   if (heat.length && !heat.includes(w.heatKind)) w.heatKind = heat[0];
+  const equip = w.vesselType !== 'vessel', twoOrFour = C.ports.in2 && C.ports.out2;
   const fits = [['', '(none)'], ...(TPL?.fitting || []).map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User)')]), ['__new', 'New ...'], ['__clone', 'Clone ...']];
   return [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],
-    ['vesselType', 'Kind', 'sel', Object.entries(VESSEL_KINDS), true],
+    ['vesselType', 'Kind', 'sel', Object.entries(VESSEL_KINDS).filter(([k]) => equip === (k !== 'vessel')), true],
+    ...(twoOrFour ? [['liquidPorts', 'Liquid ports', 'sel', [['2', '2 (1 in, 1 out)'], ['4', '4 (2 ins, 2 outs: two circuits that never mix)']], true]]
+      : equip ? [['_lp', `Liquid ports: ${Object.values(C.ports).filter(d => d.ip).length} (${w.vesselType === 'pchiller' ? '2 ins, 2 outs: wort and water never mix' : '1 in, 1 out'})`, 'note']] : []),
     ['vtype', 'Type', 'sel', types, true],
     ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
     ['image', 'Graphic (picture path)', 'path'],
@@ -4103,7 +4118,7 @@ function vesselTplFields(w) {
     ['_cs', 'Connection Standard', 'head'], ...stdFields(w, 'Connection Standard (the default for every port and Bundled Fitting)'),
     ['_cn', 'It goes on the Equipment list and sets the default size of the pictures. A Bundled Fitting can have its own.', 'note'],
     ['_p', 'Ports', 'head'],
-    ...Object.entries(C.ports).flatMap(([k, d]) => [[k + '_on', portTitle(k, d) + ' installed' + (d.ip ? '' : ' (not an IP)'), 'yn', false, true],
+    ...Object.entries(C.ports).filter(([k]) => !(twoOrFour && (k === 'in2' || k === 'out2') && String(w.liquidPorts) !== '4')).flatMap(([k, d]) => [[k + '_on', portTitle(k, d) + ' installed' + (d.ip ? '' : ' (not an IP)'), 'yn', false, true],
       ...(w[k + '_on'] ? [[k + '_pos', portTitle(k, d) + ' position', 'sel', d.pos.map(q => q[0])],
         ...(FITTING_PORTS[k] ? [[k + '_fit', `Bundled Fitting on the ${portTitle(k, d)}`, 'sel', fits]] : [])] : [])]),
     ['notes', 'Notes', 'area']];
@@ -4134,16 +4149,16 @@ function miniDialog(title, fields, obj, okText = 'Save') {
 }
 const skynetField = () => TPL?.locked ? [] : [['skynet', 'Skynet Template (Skynet is still building them; off = a User Template)', 'bool']];
 // a new Template, blank or a copy of another. Returns its name.
-async function newTemplate(kind, { from, body, std } = {}) {
-  const what = TEMPLATE_KINDS[kind];
+async function newTemplate(kind, { from, body, std, init, what = TEMPLATE_KINDS[kind] } = {}) {
   const w = { name: from ? copyName(from, tplNames(kind)) : kind === 'vessel' ? 'My_Vessel' : 'My_Fitting', skynet: true };
+  if (init?.vesselType) w.name = 'My_Equipment';
   if (!from && tplOf(kind, w.name)) w.name = copyName(w.name, tplNames(kind));
   const ok = await miniDialog(from ? `Clone ${from}` : `New ${what}`, [['_n', 'Change the name to what you want. No spaces (use _ instead), and it must be unique.', 'note'],
     ['name', 'Template Name', 'text'], ...skynetField()], w, 'Save');
   if (!ok) return null;
   const name = (w.name || '').trim(), bad = nameProblem(name); if (bad) throw new Error(bad);
   let r = await api('POST', `/ui/templates/${kind}`, { name, from, skynet: TPL.locked ? false : !!w.skynet });
-  if (body || std) r = await api('PUT', `/ui/templates/${kind}/${name}`, { ...(body || {}), ...(std && !body ? { std } : {}), name });   // a clone gets the settings showing in the pop-up
+  if (body || std || init) r = await api('PUT', `/ui/templates/${kind}/${name}`, { ...(init || {}), ...(body || {}), ...(std && !body ? { std } : {}), name });   // a clone gets the settings showing in the pop-up
   setTPL(r);
   toast(`${what} "${name}" made`);
   return name;
@@ -4234,19 +4249,21 @@ function openTemplate(kind, name) {
 }
 
 // the Vessel Templates and Fitting Templates Menu tabs: small icons with names, double-click for the pop-up
-function renderTemplatesTab(kind) { return box => {
-  box.append(h('h3', {}, kind === 'vessel' ? 'Vessel Templates' : 'Fitting Templates'));
+function renderTemplatesTab(kind, group) { return box => {
+  const title = group === 'equip' ? 'Equipment Templates' : kind === 'vessel' ? 'Vessel Templates' : 'Fitting Templates', what = group === 'equip' ? 'Equipment Template' : TEMPLATE_KINDS[kind];
+  box.append(h('h3', {}, title));
   if (!TPL) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadTemplates().then(() => renderMenuPane()).catch(e => toast(e.message, true)); return; }
   if (!TPL.locked) box.append(h('p', { class: 'muted' }, 'Skynet is still building its Templates: for now Skynet Templates can be changed here. Once they are locked they can only be cloned.'));
-  if (can('admin')) box.append(h('div', { class: 'bar' }, h('button', { onclick: guard(async () => { const n = await newTemplate(kind); if (n) { renderMenuPane(); openTemplate(kind, n); } }) }, `New ${TEMPLATE_KINDS[kind]} ...`),
+  if (can('admin')) box.append(h('div', { class: 'bar' }, h('button', { onclick: guard(async () => { const n = await newTemplate(kind, { init: group === 'equip' ? { vesselType: 'pchiller', vtype: EQ.pchiller.types[0], liquidPorts: 4 } : null, what }); if (n) { renderMenuPane(); openTemplate(kind, n); } }) }, `New ${what} ...`),
     h('span', { class: 'muted' }, 'Double-click a Template for its settings.')));
   const grid = h('div', { class: 'tplGrid' });
-  for (const t of TPL[kind]) {
+  const list = TPL[kind].filter(t => !group || (group === 'equip') === (t.vesselType && t.vesselType !== 'vessel'));
+  for (const t of list) {
     const open = () => openTemplate(kind, t.name);
     grid.append(h('button', { class: 'tplIcon ' + t.cls, title: `${t.name} (${t.cls === 'skynet' ? 'Skynet' : 'User'} Template). Double-click for its settings.`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
       h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : ''));
   }
-  if (!TPL[kind].length) grid.append(h('p', { class: 'muted' }, 'No Templates yet.'));
+  if (!list.length) grid.append(h('p', { class: 'muted' }, 'No Templates yet.'));
   box.append(grid);
 }; }
 

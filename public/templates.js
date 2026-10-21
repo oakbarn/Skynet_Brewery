@@ -88,6 +88,7 @@ export function cleanVessel(b = {}) {
   const t = { vesselType, units: b.units === 'Metric' ? 'Metric' : undefined, vtype: text(b.vtype, 80) || undefined, otherType: text(b.otherType, 80) || undefined, image: text(b.image, 300) || undefined,
     heatKind: text(b.heatKind, 20) || undefined, otherHeat: text(b.otherHeat, 80) || undefined, std: cleanStd(b.std), notes: text(b.notes, 2000) || undefined, ports: {} };
   for (const k of ['volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume']) t[k] = num(b[k], k);
+  if (['ccoil', 'herms'].includes(vesselType)) t.liquidPorts = String(b.liquidPorts) === '4' ? 4 : 2;     // 2 or 4 liquid ports (Chillzilla: 4)
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;
     const p = { installed: !!q?.installed, position: text(q?.position, 60) || undefined };

@@ -20,7 +20,7 @@ Each kind of file has one home on the Brain, so nothing lands in the wrong place
 5. The list shows every file, where it goes, and what will happen: **New**, **Already on the Brain** (skipped), or why it cannot be copied. Tick **Only the ones this Schema is missing** to copy just those.
 6. Click **Copy ... to the Brain**. When it is done, the count of missing files at the top goes down.
 
-A file that is already on the Brain is never replaced unless you tick **Replace files already on the Brain**.
+A file that is already on the Brain is never replaced unless you tick **Replace files already on the Brain**. An SVG picture (.svg) that is already there is never replaced, even then: see [Media](07-media).
 
 ## Good to know
 

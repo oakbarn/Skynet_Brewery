@@ -4,7 +4,7 @@ A **Template** is a ready-made vessel or fitting kept in a library, not on a Tab
 
 There are two kinds of Template:
 
-- **Vessel Templates**: kettles, HLTs, mash tuns, fermenters, chillers, coils and trub filters.
+- **Vessel Templates**: kettles, HLTs, mash tuns and fermenters. Chillers, coils and trub filters are Vessel Templates too, shown on their own **Equipment Templates** pane.
 - **Bundled Fitting Templates**: up to four fittings joined together (for example a valve, a tee with a thermowell and a 90 degree elbow) that go on a vessel port, or on a Tab by themselves.
 
 ## Skynet Templates and User Templates
@@ -24,7 +24,7 @@ Skynet Templates come with the panel, in its `templates` folder, and an update b
 
 ## The Template panes
 
-1. Press **☰ Menu** and pick **Vessel Templates** or **Fitting Templates**.
+1. Press **☰ Menu** and pick **Vessel Templates**, **Equipment Templates** (chillers, coils, trub filters) or **Fitting Templates**.
 2. Each Template shows as a small icon with its name, so many of them fit on one screen.
 3. **Double-click** an icon (on a phone, double-tap it) to open its pop-up with the settings.
 4. **New Vessel Template ...** (or **New Bundled Fitting Template ...**) makes a blank one (Admins).
@@ -52,6 +52,18 @@ A **Template Name** has no spaces (use _ instead) and must be unique.
   - **New ...**: name it, and its pop-up opens so you can build it. Close it to come back to the vessel.
   - **Clone ...**: pick a Bundled Fitting to copy, and name the copy.
 
+## Equipment Template settings
+
+Chillers, coils and trub filters have the same settings as a vessel, plus how many **Liquid ports** they have to move liquid:
+
+| Kind | Liquid ports |
+|---|---|
+| Plate chiller | 4: wort in and out, water in and out (the two never mix) |
+| Chilling coil, HERMS coil | **2** (1 in, 1 out) or **4** (2 ins, 2 outs, for example a Chillzilla) |
+| Trub filter | 2: in and out |
+
+With 4, the second circuit is **In 2** and **Out 2**. Liquid in one circuit never flows into the other.
+
 ## Bundled Fitting Template settings
 
 - **Template Name** and **Connection Standard** (empty = the vessel's).
@@ -62,6 +74,10 @@ A **Template Name** has no spaces (use _ instead) and must be unique.
 - **Graphic**: a Skynet Bundled Fitting picks one of the Skynet pictures. A User one can have any picture.
 
 The list of fittings is set by Skynet. A new kind of fitting is added through GitHub.
+
+Flow through a Bundled Fitting goes **both ways**. The First Fitting sits on the port, but liquid can run in or out. For example, tap water can be run backwards through a pump to prime it.
+
+The pictures of Skynet Templates are SVG files, and an SVG file can't be deleted, renamed or replaced on the Media page. See [Media](07-media).
 
 ## Add to Tab
 

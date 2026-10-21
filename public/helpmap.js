@@ -89,6 +89,7 @@ const MENU_TOPICS = {
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
     Build: ['vessel-tab', 'ports-and-build'], _: ['vessel-tab'] },
   vtemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },
+  etemplates: { _: ['vessel-and-fitting-templates', 'equipment-template-settings'] },
   ftemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },
   layout: { _: ['schemas-and-equipment-profiles', 'the-default-layout'] },
   mash: { _: ['mash-and-boil-profiles', 'mash-profile'] },
