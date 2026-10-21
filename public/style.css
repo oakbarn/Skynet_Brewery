@@ -590,6 +590,7 @@ body.role-viewer .op-only { display: none !important; }
 .menuPick select { min-width: 14em; }
 .schemaBox { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; }
 .orderNum { width: 5em; }
+.scriptList .orderNum { width: 3.4em; padding: 1px 4px; font-size: 12px; }
 .bar.wrap { flex-wrap: wrap; }
 @media (max-width: 700px) {
   .menuForm { grid-template-columns: 1fr; }

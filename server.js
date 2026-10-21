@@ -537,13 +537,14 @@ async function route(req, res) {
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
   if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
-  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart))?$/.exec(p);
+  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];
     if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
     if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
     if (act === 'restart' && m === 'POST') return ok(res, await engine.restart(name, 'user'));
+    if (act === 'order' && m === 'POST') { const { n } = await jsonBody(req); return ok(res, { order: engine.setOrder(name, n) }); }
     if (act === 'autorestart' && m === 'POST') { const { on } = await jsonBody(req); engine.setAutoRestart(name, !!on); return ok(res); }
     if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
