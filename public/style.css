@@ -616,3 +616,7 @@ body.role-viewer .op-only { display: none !important; }
 /* a valve at 45 degrees: its vertical picture turned left or right (the box stays square and upright) */
 .el.turned { overflow: visible; }
 .el.turned::before { content: ''; position: absolute; inset: 0; background: var(--pic) center / contain no-repeat; transform: rotate(var(--turn)); pointer-events: none; }
+
+/* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
+.rt-b { font-weight: bolder; }
+.rt-L { font-size: max(var(--textLarge, 28px), 1.25em); line-height: 1.1; }

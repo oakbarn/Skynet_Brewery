@@ -81,6 +81,24 @@ The `{` can also go on a line of its own, under the `if` or `else` (the way C# i
 
 You can mix both styles in one Process. Old Processes and BruControl imports keep working as they are, and **Save** never changes one style into the other.
 
+## Codes inside text
+
+Text in quotes can carry codes that change how it looks on the screen. They work wherever a Process shows text: a string value on a Tab, a display name, `print` lines in the Process output, and pop-ups such as a manual valve's message. Bold, large, subscript and superscript are switches: the first code turns it on, the next one turns it off.
+
+| Code | What it does | Example | Shows |
+|---|---|---|---|
+| `\n` | a new line | `"Mash in\nStir well"` | Mash in, then Stir well on the next line |
+| `\b` | bold on / off | `"Add \bhops\b now"` | Add **hops** now |
+| `\L` | large text on / off | `"\LSTRIKE\L 165"` | STRIKE in large letters |
+| `\_` | subscript on / off | `"CO\_2\_"` | CO₂ |
+| `\^` | superscript on / off | `"ft\^3\^"` | ft³ |
+| `\deg` | a degree sign | `"152\degF"` | 152°F |
+| `\\` | one backslash | `"C:\\Brewing"` | C:\Brewing |
+
+Codes can be used together: `"\L\bBOIL\b\L 60 min"`.
+
+The size of large text is **Large text size** on the ☰ Menu **Default** tab, in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font.
+
 ## Change the look of a device or widget
 
 A Process can change the colors, placement and value type of any device or widget while it runs:
