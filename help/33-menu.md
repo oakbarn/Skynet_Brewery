@@ -7,7 +7,8 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 - The **Menu tabs**: Zoom (number 1 to start with), Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
-- **About** (at the end): who is signed in, **Sign out**, and the loaded Schema and its version. See [About and Schema versions](42-about-and-schema-versions).
+- **Schema**: the Schema dropdown (the same one as on the Menu Bar), every Schema on the Brain with **Load** and **Clone**. See [Switching and cloning Schemas](47-schema-switching-and-cloning).
+- **About** (at the end): who is signed in, **Sign out**, the Schema dropdown and the Schema version. See [About and Schema versions](42-about-and-schema-versions).
 
 ## Menu tabs
 
@@ -15,6 +16,8 @@ A Menu tab only shows once you pick it. It opens next to your screen tabs, with 
 
 - Press a screen tab (Brewery, Equipment ...) to go back to your tabs. The Menu tabs you opened stay up there, so one press takes you back.
 - Press the **✕** on a Menu tab to close it.
+- Every Menu tab also has **Close** and a boxed **✕** at its top right corner. Either one closes the Menu tab you are looking at. The Help page and the File Move page have them too; there they take you back to where you were.
+- The Menu Bar always shows on a Menu tab (only your own Tabs hide it, see [The Menu Bar](40-menu-bar)).
 - If a Menu tab has changes that are not saved, the panel asks before closing it or switching away.
 
 Everyone can look at the Menu tabs. Only an Admin can change them (an Operator can lock and unlock the Equipment Profile).
@@ -40,4 +43,5 @@ Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any s
 - **Default Layout**: the vessels and pipes a Schema gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
 - **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
+- **Schema**: see [Switching and cloning Schemas](47-schema-switching-and-cloning).
 - **About**: see [About and Schema versions](42-about-and-schema-versions).

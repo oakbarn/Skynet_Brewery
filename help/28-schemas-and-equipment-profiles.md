@@ -10,10 +10,10 @@ Only an **Admin** can load, add, rename, back up, restore or delete a Schema, or
 
 ## Pick and load a Schema
 
-1. The **Schema** dropdown is at the top of every screen, next to the panel's name. It shows the Schema that is loaded now.
+1. The **Schema** dropdown is on the Menu Bar, next to the panel's name, and also on **☰ Menu > Schema** and **☰ Menu > About**. It shows the Schema that is loaded now.
 2. Pick another Schema in the list.
-3. The panel asks if you want to load it. Press **OK**.
-4. Running Processes stop, and the new Schema's tabs, devices and elements take over. The one you left is kept just as it was. Pick it in the list to go back to it.
+3. The panel asks if you want to load it, with a ⚠ warning if any Process is running. Press **OK**.
+4. Running Processes stop, every output is switched off, and the new Schema's tabs, devices and elements take over. The one you left is kept just as it was. Pick it in the list to go back to it.
 
 Each Schema remembers its own variable values (vKonstants, vAPI), so they come back when you load it again.
 
@@ -24,6 +24,7 @@ Processes, logins, MQTT, media folders and the lists behind the dropdowns belong
 At the bottom of the **Schema** dropdown:
 
 - **Add new Schema ...**: give it a name, then pick what it starts from. **A copy of** the loaded Schema copies everything, which is good for trying changes. **An empty Schema** starts with just a Main tab and the Equipment tab. The new Schema is loaded straight away.
+- **Clone a Schema ...**: a copy of any Schema under a new name, loaded only if you say so. See [Switching and cloning Schemas](47-schema-switching-and-cloning).
 - **Rename this Schema ...**: gives the loaded Schema a new name.
 - **Delete a Schema ...**: pick one that is not loaded. It is moved to `config/schemas/deleted`, so it can be got back.
 

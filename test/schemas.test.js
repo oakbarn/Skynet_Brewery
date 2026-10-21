@@ -174,6 +174,24 @@ store.config.schema.version = 'My Rig_20261021_14_05';
 assert.equal(schemas.exportSchema(store.config.schema.id).file, 'My_Rig_20261021_14_05.json', 'the version name when there is one');
 store.config.schema.version = keepVersion;
 
+// Clone a Schema: a copy with its saved values; the loaded one stays loaded unless asked
+const loadedNow = store.config.schema.id, src = schemas.list().find(x => x.name === 'Oak Barn');
+const made = schemas.clone(src.id, 'Oak Barn Test');
+assert.equal(store.config.schema.id, loadedNow, 'cloning does not load the copy');
+const cl = JSON.parse(fs.readFileSync(schemas.file(made.id)));
+assert.equal(cl.name, 'Oak Barn Test'); assert.equal(cl.clonedFrom, 'Oak Barn'); assert.equal(cl.version, undefined, 'no version of its own yet');
+assert.ok(fs.existsSync(schemas.statePath(made.id)), 'its saved values come too');
+assert.throws(() => schemas.clone(src.id, 'oak barn test'), /already a Schema/);
+schemas.clone(made.id, 'Oak Barn Test 2', { load: true });
+assert.equal(store.config.schema.name, 'Oak Barn Test 2', 'loaded when asked');
+assert.equal(store.getProp('vKV_Setpoint', 'value'), 160, 'with the values of the one it was cloned from');
+
+// loading a Schema switches everything off first, and again once the new one is in
+let offs = 0; hw.allOff = () => { offs++; };
+schemas.load(loadedNow);
+assert.equal(offs, 2, 'all off before and after the switch');
+delete hw.allOff;
+
 // volumes as in BeerSmith
 const v = equipVolumes({ batchSize: 5.5, boilTime: 60, boilOffRate: 1, trubChillerLoss: 0.5, coolingShrinkage: 4, kettleVolume: 7 });
 assert.equal(v.postBoil, 6.25); assert.equal(v.preBoil, 7.25);

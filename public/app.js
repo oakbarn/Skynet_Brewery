@@ -34,6 +34,7 @@ const hasPictures = (e, v) => !!(slotsOf(e).length || v.imagepath_1 || v.imagepa
 
 let S = null;                 // server state
 let view = 'workspace', wsName = null, zoom = 'fit';
+let helpFrom = 'workspace';                 // the page Help was opened from (its Close button goes back there)
 try { zoom = localStorage.getItem('bp.zoom') || 'fit'; } catch { /* private window: default */ }
 if (zoom === 'page') zoom = 'fit';         // "Whole tab" is now "Fit screen"
 
@@ -112,7 +113,7 @@ function connect() {
     for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; updateEl(n); }
     renderPipes(); updateAlarms(); if (view === 'globals') refreshGlobalValues(ch);
   });
-  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); });
+  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); });
@@ -124,11 +125,13 @@ function connect() {
 }
 
 function setView(v) {
+  const prev = view;
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   // the Menu Bar is hidden on the Tabs page; coming back to Tabs hides it again
-  document.body.classList.toggle('onTabs', v === 'workspace');
+  if (v === 'help' && helpFrom !== 'help') helpFrom = prev;
+  markOnTabs();
   showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
@@ -1734,7 +1737,9 @@ document.addEventListener('fullscreenchange', () => {
 // the Menu Bar is hidden on the Tabs page (Default tab: "Hide the Menu Bar on Tabs", on unless switched off);
 // ☰ Menu > Show Menu Bar brings it back until you hide it again or leave the Tabs page
 const menuBarHides = () => S?.config?.brewDefaults?.hideMenuBar !== false;
-const menuBarHidden = () => view === 'workspace' && menuBarHides() && !document.body.classList.contains('menuBarOn');
+const menuBarHidden = () => view === 'workspace' && !menuTab && menuBarHides() && !document.body.classList.contains('menuBarOn');
+// Fritz, 2026-10-21: only the Tabs themselves lose the Menu Bar; every Menu tab (Zoom, Default, About ...) and every other page keeps it
+function markOnTabs() { document.body.classList.toggle('onTabs', view === 'workspace' && !menuTab); }
 function showMenuBar(on) {
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   document.body.classList.toggle('menuBarOn', on);
@@ -2146,11 +2151,13 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select, #
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
-  const work = { bundled: true, workspace: v.workspace };
+  const work = { bundled: true, workspace: v.workspace, clone: false };
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', 'This vessel and its IPs are bundled: they move as one and can\'t be edited. Switch off Bundled to edit, move or delete them.', 'note'],
-    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws']], work, false, graphicTopic(v));
+    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
+    ['clone', 'Clone: put a copy of this vessel and its IPs next to it', 'bool']], work, false, graphicTopic(v));
   if (r !== 'ok') return;
   readFields(work);
+  if (work.clone) return cloneBundle(v);
   if (work.workspace && work.workspace !== v.workspace) {
     const old = v.workspace;
     for (const g of [v, ...bundledIps(v)]) g.workspace = work.workspace;
@@ -2161,6 +2168,26 @@ async function editBundle(v) {
   }
   if (!work.bundled) { delete v.bundled; toast('Un-bundled: the vessel and its IPs can be edited again'); }
   sel = { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
+}
+// Clone a Bundled item (Fritz, 2026-10-21): the vessel and every IP bundled with it, copied side by side under a new name.
+// Pipes are not copied (they belong where they are drawn); the copy is not linked to the Equipment Profile until you bring it in.
+function cloneBundle(v) {
+  const names = new Set(draft.graphics.filter(g => g.kind === 'vessel').map(g => String(g.name || g.label || '').toLowerCase()));
+  const base = v.name || v.label || VESSELS[v.vesselType] || 'Vessel';
+  let name = `${base} copy`; for (let i = 2; names.has(name.toLowerCase()); i++) name = `${base} copy ${i}`;
+  const dx = (v.w || 200) + 40, g = { ...clone(v), id: newId(), name, x: (v.x || 0) + dx };
+  if (v.label) g.label = v.label === v.name ? name : `${v.label} copy`;
+  delete g.profileItem; delete g.locked;
+  draft.graphics.push(g);
+  const ips = bundledIps(v).map(ip => {
+    const c = { ...clone(ip), id: newId(), attachTo: g.id, x: (ip.x || 0) + dx };
+    if (c.port && g.ports?.[c.port]) c.label = vPortLabel(g, c.port, g.ports[c.port]);
+    delete c.locked;
+    return c;
+  });
+  draft.graphics.push(...ips);
+  sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); renderWs();
+  toast(`Cloned: "${name}" with ${ips.length} IP${ips.length === 1 ? '' : 's'}, bundled, next to the first one. Pipes are not copied. Save layout to keep it.`);
 }
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -3437,19 +3464,40 @@ $('#tlMake').onclick = () => {
 
 // ---------------------------------------------------------------- Schemas (the dropdown at the top)
 // Each Schema is a whole brewery setup in its own file (config/schemas). Picking one loads it; the one you leave is kept as is.
-function renderSchemaPick() {
-  const s = $('#schemaPick'), sc = S.schemas || { list: [] }, act = sc.active?.id;
+// The same dropdown is on the Menu Bar, the ☰ Menu Schema tab and the About tab (Fritz, 2026-10-21): every one of them is filled here.
+function renderSchemaPick() { for (const s of $$('select.schemaSel')) fillSchemaSelect(s); }
+function fillSchemaSelect(s) {
+  const sc = S.schemas || { list: [] }, act = sc.active?.id;
   s.innerHTML = '';
   s.append(...sc.list.map(x => h('option', { value: x.id, ...(x.id === act ? { selected: true } : {}) }, x.name)));
   if (can('admin')) s.append(h('optgroup', { label: '──────────' },
-    h('option', { value: '__new' }, 'Add new Schema ...'), h('option', { value: '__ren' }, 'Rename this Schema ...'),
+    h('option', { value: '__new' }, 'Add new Schema ...'), h('option', { value: '__clone' }, 'Clone a Schema ...'), h('option', { value: '__ren' }, 'Rename this Schema ...'),
     h('option', { value: '__ver' }, 'Save a new version now'),
     h('option', { value: '__bak' }, 'Back up this Schema now'), h('option', { value: '__res' }, 'Restore a backup or version ...'),
     h('option', { value: '__del' }, 'Delete a Schema ...')));
   s.disabled = !can('admin') && sc.list.length < 2;
   s.title = can('admin') ? 'Pick a Schema to load it' : 'Only an admin can load another Schema';
+  s.onchange = schemaPicked;
 }
-$('#schemaPick').onchange = guard(async ev => {
+// Processes running now: switching the Schema stops them, so you are warned first (Fritz, 2026-10-21)
+const runningProcs = () => (S.scripts || []).filter(x => x.state === 'running');
+function okToSwitch(toName, what = 'Loading') {
+  const act = S.schemas.active?.name, run = runningProcs();
+  const off = 'Every output is switched off first: digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms.';
+  if (run.length) return confirm(`⚠ The Schema "${act}" is active: ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running:\n${run.slice(0, 12).map(x => '• ' + x.name).join('\n')}${run.length > 12 ? '\n• ...' : ''}\n\n` +
+    `${what} "${toName}" stops ${run.length > 1 ? 'them' : 'it'}. ${off}\n\nIs it OK to proceed?`);
+  return confirm(`${what} "${toName}"?\n\n${off}\n\nIts tabs, devices, elements and Equipment Profile take the place of "${act}". "${act}" is kept just as it is: pick it in the Schema list to go back to it.`);
+}
+// after another Schema is loaded: start fresh on its first tab
+async function afterSchemaSwitch(msg) {
+  wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false;
+  const keep = menuTab;                                  // picked on the Schema or About Menu tab: stay there
+  if (!['schema', 'about'].includes(keep)) leaveMenuTab();
+  await load(); soundOnStart();
+  if (['schema', 'about'].includes(keep)) openMenuTab(keep); else setView('workspace');
+  toast(msg + '. Every output was switched off.');
+}
+const schemaPicked = guard(async ev => {
   const v = ev.target.value, act = S.schemas.active, back = () => renderSchemaPick();
   try {
     if (!can('admin')) return toast('Only an admin can load another Schema', true);
@@ -3460,9 +3508,11 @@ $('#schemaPick').onchange = guard(async ev => {
         ['start', 'Start from', 'sel', [['copy', `A copy of "${act?.name}"`], ['empty', 'An empty Schema (a Main tab and the Equipment tab)']]],
         ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
       readFields(w);
+      if (!okToSwitch(w.name, 'Making and loading')) return;
       await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
-      wsName = null; await load(); return toast(`Schema "${w.name}" made and loaded`);
+      return afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
     }
+    if (v === '__clone') return cloneSchema(act.id);
     if (v === '__ren') {
       const n = (prompt('New name for this Schema', act?.name) || '').trim(); if (!n || n === act?.name) return;
       await api('PUT', `/ui/schemas/${act.id}`, { name: n }); await load(); return toast('Schema renamed');
@@ -3483,11 +3533,30 @@ $('#schemaPick').onchange = guard(async ev => {
     }
     if (v === act?.id) return;
     const to = S.schemas.list.find(x => x.id === v);
-    if (!confirm(`Load the Schema "${to.name}"?\n\nRunning Processes stop, and its tabs, devices, elements and Equipment Profile take the place of "${act?.name}".\n\n"${act?.name}" is kept just as it is. Pick it in this list to go back to it.`)) return;
+    if (!okToSwitch(to.name)) return;
     await api('POST', `/ui/schemas/${v}/load`);
-    wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; leaveMenuTab(); await load(); soundOnStart(); setView('workspace'); toast(`Schema "${to.name}" loaded`);
+    await afterSchemaSwitch(`Schema "${to.name}" loaded`);
   } finally { back(); }
 });
+// Clone a Schema (Fritz, 2026-10-21): a copy of any Schema, loaded or not, with its saved values. It is only loaded if you say so.
+async function cloneSchema(id) {
+  if (!can('admin')) return toast('Only an admin can clone a Schema', true);
+  if (editing) return toast('Save or exit Edit layout first', true);
+  const list = S.schemas.list, src = list.find(x => x.id === id) || list.find(x => x.active);
+  const w = { id: src.id, name: '', load: false };
+  if (await dialog('Clone a Schema', [['id', 'Schema to clone', 'sel', list.map(x => [x.id, x.name + (x.active ? '  (loaded)' : '')])],
+    ['name', 'Name of the clone (empty: "<name> copy")', 'text'], ['load', 'Load the clone now', 'bool'],
+    ['_n', 'The clone gets everything in the Schema: its tabs, devices, elements, pictures, pipes, probes, autostart list, Equipment Profile and saved values. It starts without a version of its own. The Schema you clone is not changed.', 'note']], w) !== 'ok') return;
+  readFields(w);
+  const from = list.find(x => x.id === w.id);
+  let name = String(w.name || '').trim();
+  if (!name) { name = `${from.name} copy`; for (let i = 2; list.some(x => x.name.toLowerCase() === name.toLowerCase()); i++) name = `${from.name} copy ${i}`; }
+  if (w.load && !okToSwitch(name, 'Loading the clone')) return;
+  await api('POST', `/ui/schemas/${w.id}/clone`, { name, load: !!w.load });
+  if (w.load) return afterSchemaSwitch(`Clone "${name}" made and loaded`);
+  S.schemas = await api('GET', '/ui/schemas'); renderSchemaPick(); if (['schema', 'about'].includes(menuTab)) renderMenuPane();
+  toast(`Clone "${name}" made. Pick it in the Schema list to load it.`);
+}
 async function restoreSchema() {
   const act = S.schemas.active, list = await api('GET', `/ui/schemas/${act.id}/backups`);
   if (!list.length) return toast('This Schema has no backups or versions yet', true);
@@ -3496,8 +3565,9 @@ async function restoreSchema() {
   if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}${b.daily ? '  (daily)' : '  (made by hand)'}`])],
     ['_n', 'The Schema as it is now is backed up first, so you can undo this by restoring that backup. Running Processes stop.', 'note']], w) !== 'ok') return;
   readFields(w);
+  if (!okToSwitch(act.name, 'Restoring and loading again')) return;
   await api('POST', `/ui/schemas/${act.id}/restore`, { file: w.file.slice(2), version: w.file.startsWith('v:') });
-  wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; await load(); toast('Backup restored');
+  await afterSchemaSwitch('Backup restored');
 }
 
 // ---------------------------------------------------------------- ☰ Menu and Menu tabs (Fritz, 2026-10-20)
@@ -3524,6 +3594,7 @@ const MENU = [
   { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
+  { key: 'schema', title: 'Schema', tip: 'Pick the Schema to load, and clone, add, rename, back up or restore one', render: renderSchemaTab },
   { key: 'about', title: 'About', tip: 'Who is signed in, Sign out, and the Schema and its version', render: renderAboutTab },
 ];
 // the Menu tabs in their order: numbered ones first, then the rest as listed above (new Menu tabs land at the end,
@@ -3545,7 +3616,7 @@ const paneDirty = () => menuTab === 'equipment' ? eqDirty : menuTab === 'vessel'
 function renderMenu() {
   if (!S?.profiles) return;
   const list = $('#menuList'); list.innerHTML = '';
-  if (view === 'workspace' && menuBarHides()) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: 'The top line: Schema, Processes, Variables, Log, Settings, Help, Enable sound, Sign out', onclick: () => { closeMenuList(); showMenuBar(menuBarHidden()); } }, menuBarHidden() ? '▼ Show Menu Bar' : '▲ Hide Menu Bar'));
+  if (view === 'workspace' && !menuTab && menuBarHides()) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: 'The top line: Schema, Processes, Variables, Log, Settings, Help, Enable sound, Sign out', onclick: () => { closeMenuList(); showMenuBar(menuBarHidden()); } }, menuBarHidden() ? '▼ Show Menu Bar' : '▲ Hide Menu Bar'));
   if (can('admin')) list.append(h('button', { role: 'menuitem', class: 'menuItem', onclick: guard(menuEditLayout) }, editing ? '✎ Exit Edit layout' : '✎ Edit layout'));
   list.append(h('hr'));
   for (const m of menuSorted().filter(m => !m.admin || can('admin'))) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: m.coming || m.tip, ...(m.coming ? { disabled: true } : {}), onclick: () => { closeMenuList(); if (m.view) setView(m.view); else openMenuTab(m.key); } },
@@ -3575,6 +3646,7 @@ function openMenuTab(k) {
   menuTab = k;
   setView('workspace');
   $('#wsScroll').classList.add('hidden'); $('#menuPane').classList.remove('hidden'); $('#view-workspace').classList.add('menuMode');
+  markOnTabs(); refit();
   renderTabs(); renderMenu(); renderMenuPane();
 }
 function leaveMenuTab() {
@@ -3582,6 +3654,7 @@ function leaveMenuTab() {
   dropDirty(menuTab);
   menuTab = null;
   $('#menuPane').classList.add('hidden'); $('#wsScroll').classList.remove('hidden'); $('#view-workspace').classList.remove('menuMode');
+  markOnTabs(); showMenuBar(false);
   renderMenu(); renderTabs(); fitZoom();
 }
 function closeMenuTab(k) {
@@ -3601,9 +3674,19 @@ function dropDirty(k) {
 function renderMenuPane() {
   const box = $('#menuPane'); box.innerHTML = '';
   const m = MENU.find(x => x.key === menuTab); if (!m) return;
+  const k = menuTab;
+  box.append(paneClose(() => closeMenuTab(k)));
   m.render(box);
   menuHelpIcons(box);
 }
+// Fritz, 2026-10-21: every Menu tab, File Move and Help has a Close button and a boxed ✕ in its top right corner; both close it
+function paneClose(close) {
+  return h('div', { class: 'paneClose' }, h('button', { onclick: close, title: 'Close' }, 'Close'), h('button', { class: 'boxX', onclick: close, title: 'Close', 'aria-label': 'Close' }, '✕'));
+}
+// Help and File Move are pages of their own: closing them goes back to where you were (the Tabs, or the Menu tab you came from)
+const closePage = () => setView(view === 'help' && helpFrom && helpFrom !== 'help' ? helpFrom : 'workspace');
+$('#hpTools').append(paneClose(closePage));
+$('#fmClose').append(paneClose(closePage));
 // a ? beside each heading of the Menu tab showing (again after a form redraws itself)
 function menuHelpIcons(box) {
   if (!menuTab || !box.closest('#menuPane')) return;
@@ -3682,6 +3765,32 @@ function renderZoomTab(box) {
       'The Default Menu tab sets the zoom and Full screen the panel starts with.'));
 }
 
+// a Schema dropdown for a Menu tab: the same list and choices as the one on the Menu Bar
+function schemaSelect() { const s = h('select', { class: 'schemaSel' }); fillSchemaSelect(s); return s; }
+
+// ---- Schema tab (Fritz, 2026-10-21): the Schema dropdown, and every Schema with Load and Clone
+function renderSchemaTab(box) {
+  const admin = can('admin'), list = S.schemas?.list || [], act = S.schemas?.active, run = runningProcs();
+  const when = x => x.updated ? new Date(x.updated).toLocaleString() : '';
+  const rows = list.map(x => h('tr', { class: x.active ? 'active' : '' },
+    h('td', {}, x.active ? h('b', {}, x.name) : x.name, x.active ? h('span', { class: 'muted' }, '  (loaded)') : ''),
+    h('td', {}, String(x.tabs)), h('td', {}, profileName(x.equipmentProfile) || h('span', { class: 'muted' }, 'none')), h('td', {}, when(x)),
+    h('td', {}, admin && !x.active ? h('button', { onclick: guard(async () => {
+      if (editing) return toast('Save or exit Edit layout first', true);
+      if (!okToSwitch(x.name)) return;
+      await api('POST', `/ui/schemas/${x.id}/load`); await afterSchemaSwitch(`Schema "${x.name}" loaded`);
+    }) }, 'Load') : '',
+      admin ? h('button', { title: 'Make a copy of this Schema under a new name', onclick: guard(() => cloneSchema(x.id)) }, 'Clone') : '')));
+  box.append(h('h3', {}, 'Schema'), h('div', { class: 'schemaPane' },
+    h('div', { class: 'bar menuPick' }, h('span', {}, 'Loaded Schema'), schemaSelect(),
+      act?.version ? h('span', { class: 'muted' }, 'Version ' + act.version) : ''),
+    run.length ? h('div', { class: 'eqWarn' }, `⚠ ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running (${run.map(x => x.name).join(', ')}). Loading another Schema stops ${run.length > 1 ? 'them' : 'it'}; you are asked first.`) : '',
+    h('p', { class: 'muted' }, 'Loading another Schema switches every output off first (digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms), then its tabs, devices and Equipment Profile take the place of the loaded one. The one you leave is kept as it is.'),
+    h('h3', {}, 'Schemas on this Brain'),
+    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Tabs', 'Equipment Profile', 'Last saved', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
+    admin ? '' : h('p', { class: 'muted' }, 'Only an admin can load, clone or change a Schema.')));
+}
+
 // ---- About tab: who is signed in, Sign out, and the loaded Schema with its version
 function renderAboutTab(box) {
   const act = S.schemas?.active || S.config.schema || {}, row = S.schemas?.list.find(x => x.id === act.id);
@@ -3691,7 +3800,7 @@ function renderAboutTab(box) {
       ...item('Panel', S.config.title || 'Skynet Brew Panel'),
       ...item('Panel version', panelVersionBox()),
       ...item('Signed in as', `${S.me.name} (${S.me.role})`),
-      ...item('Schema', act.name || '(none)'),
+      ...item('Schema', schemaSelect()),
       ...item('Schema version', act.version || 'No version yet'),
       ...(row?.updated ? item('Last saved', new Date(row.updated).toLocaleString()) : [])),
     act.version ? '' : h('p', { class: 'muted' }, 'Turn on "Update Version" next to Save layout (or pick "Save a new version now" in the Schema list) to give the Schema a version.'),
@@ -3856,7 +3965,8 @@ function eqPane(p) {
     h('td', {}, it.volume !== undefined ? `${it.volume} ${u}` : ''), h('td', {}, it.heatKind ? HEAT_KINDS[it.heatKind] + (it.heatDevice ? ': ' + it.heatDevice : '') : ''),
     h('td', {}, it.bundled ? '📦 Bundled' : 'Loose'), h('td', {}, onTab(it) ? '✓ on ' + onTab(it).workspace : h('span', { class: 'muted' }, 'not on a tab')),
     h('td', {}, h('button', { onclick: guard(() => openVessel(it.id)) }, admin ? 'Open in Vessel tab' : 'View'),
-      admin ? h('button', { title: 'Put it on the Equipment tab of this Schema (or bring the drawing there up to date), with its ports as IPs', onclick: guard(() => placeEqItems(p, [it])) }, onTab(it) ? 'Update on tab' : 'Put on Equipment tab') : '')));
+      admin ? h('button', { title: 'Put it on the Equipment tab of this Schema (or bring the drawing there up to date), with its ports as IPs', onclick: guard(() => placeEqItems(p, [it])) }, onTab(it) ? 'Update on tab' : 'Put on Equipment tab') : '',
+      admin ? h('button', { title: 'Make a copy of it (size, heat, probe, ports, bundle) that opens on the Vessel tab to be saved', onclick: guard(() => cloneVessel(it.id)) }, 'Clone') : '')));
   const kind = h('select', {}, ...EQ_KINDS.map(k => h('option', { value: k }, EQ[k].title)));
   const loose = S.config.graphics.filter(g => g.kind === 'vessel' && EQ_KINDS.includes(g.vesselType) && !(p.equipment || []).some(it => it.id === g.profileItem));
   return h('div', { class: 'eqPane' }, h('h3', {}, 'Vessels and equipment in this profile'),
@@ -3889,6 +3999,17 @@ function newVessel(kind = 'vessel') {
   vesselWork = { isNew: true, item: toPortFields({ id: 'e' + Date.now().toString(36), vesselType: kind, name: (kind === 'vessel' ? 'Vessel' : EQ[kind].title) + ' ' + n, vtype: EQ[kind].types[0], image: EQ[kind].image, bundled: true, ports: eqDefaultPorts(kind) }) };
   vesselDirty = true;
   if (menuTab === 'vessel') renderMenuPane(); else openMenuTab('vessel');
+}
+// Clone a piece of equipment of the open profile: the copy opens on the Vessel tab as a new one, saved with Save there
+function cloneVessel(id) {
+  if (vesselDirty && !confirm('The open vessel has changes that are not saved. Leave them?')) return;
+  const p = vesselProfile(), it = p?.equipment?.find(x => x.id === id); if (!it) return;
+  const names = new Set(p.equipment.map(x => String(x.name).toLowerCase()));
+  let name = `${it.name} copy`; for (let i = 2; names.has(name.toLowerCase()); i++) name = `${it.name} copy ${i}`;
+  vesselWork = { isNew: true, item: toPortFields({ ...clone(it), id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name }) };
+  vesselDirty = true;
+  if (menuTab === 'vessel') renderMenuPane(); else openMenuTab('vessel');
+  toast(`"${name}" is a copy of "${it.name}". Change what you need, then Save.`);
 }
 // the port settings as flat fields for the form (and back)
 function toPortFields(w) {
