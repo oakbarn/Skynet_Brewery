@@ -8,6 +8,8 @@
 const WORDS = ['if', 'elseif', 'else if', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'restart', 'reset', 'print', 'clear', 'show tab', 'log', 'step',
   'new value', 'new string', 'new bool', 'new time', 'new datetime', 'true', 'false', 'now', 'and', 'or', 'not'];
 const IDENT = /[A-Za-z_][A-Za-z0-9_]*$/;
+// my_Process_Mash.running: true while it runs (read only)
+const PROCESS_ATTRS = ['running'];
 
 export function attachAutofill(ta, box, words) {
   let items = [], sel = 0, ctx = null, skip = null, busy = false;
@@ -32,7 +34,8 @@ export function attachAutofill(ta, box, words) {
   function attrsFor(name) {
     if (declared().has(name)) return ['precision'];
     const el = words()?.elements?.find(e => e.name === name);
-    return el ? el.attrs : null;
+    if (el) return el.attrs;
+    return words()?.processes?.includes(name) ? PROCESS_ATTRS : null;
   }
 
   function place() {
@@ -79,7 +82,7 @@ export function attachAutofill(ta, box, words) {
       const name = dot[1] ?? dot[2], typed = dot[3].toLowerCase(), attrs = attrsFor(name);
       if (!attrs) return close();
       const hits = attrs.filter(a => a.startsWith(typed));
-      const atStart = /^\s*$/.test(line.slice(0, dot.index));
+      const atStart = attrs !== PROCESS_ATTRS && /^\s*$/.test(line.slice(0, dot.index));     // a Process's attributes are read only: no " = "
       if (typed && hits.length === 1) {                       // only one fits: fill it in now
         const tail = atStart ? ' = ' : '';
         close();
