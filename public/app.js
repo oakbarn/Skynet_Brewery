@@ -2161,10 +2161,12 @@ function renderScripts() { renderScriptList(); }
 // grouped by class: Flow, Sub, Repeat, Looper (lib/scaffold.js); a group can be folded
 let foldedClasses = new Set();
 try { foldedClasses = new Set(JSON.parse(localStorage.getItem('bp.foldedClasses') || '[]')); } catch { /* private window */ }
-function renderScriptList() {
-  const ul = $('#scriptList'); ul.innerHTML = '';
+function renderScriptList(force) {
+  const ul = $('#scriptList');
+  if (!force && ul.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return;   // someone is typing an Order number
+  ul.innerHTML = '';
   for (const [c, d] of Object.entries(S.processClasses || { sub: { label: 'Processes' } })) {
-    const list = S.scripts.filter(s => (s.cls || 'sub') === c);
+    const list = S.scripts.filter(s => (s.cls || 'sub') === c).sort((a, b) => (a.order ?? 1e9) - (b.order ?? 1e9));
     if (!list.length) continue;
     const folded = foldedClasses.has(c);
     ul.append(h('li', { class: 'clsHead', title: d.about || '', onclick: () => {
@@ -2175,7 +2177,11 @@ function renderScriptList() {
     if (folded) continue;
     for (const s of list) {
       const st = s.state === 'running' ? (s.waiting ? 'waiting' : 'running') : s.state === 'error' ? 'error' : '';
-      ul.append(h('li', { class: s.name === curScript ? 'active' : '', title: s.error || s.state, onclick: () => openScript(s.name) }, h('span', { class: 'st ' + st }), s.name, s.modified ? ' *' : ''));
+      // Order: type a new number and the others in the group are numbered again around it (like the Menu Order)
+      const n = h('input', { type: 'number', min: 1, max: list.length, step: 1, value: s.order ?? '', class: 'orderNum', title: 'Order in this list. Type a new number to move this Process there.', onclick: ev => ev.stopPropagation(), ...(can('admin') ? {} : { disabled: true }) });
+      n.onchange = guard(async () => { await api('POST', `/ui/scripts/${encodeURIComponent(s.name)}/order`, { n: +n.value }); S.scripts = await api('GET', '/ui/scripts'); renderScriptList(true); });
+      n.onblur = () => setTimeout(() => renderScriptList(), 0);
+      ul.append(h('li', { class: s.name === curScript ? 'active' : '', title: s.error || s.state, onclick: () => openScript(s.name) }, n, h('span', { class: 'st ' + st }), s.name, s.modified ? ' *' : ''));
     }
   }
 }
