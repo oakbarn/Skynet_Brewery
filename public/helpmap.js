@@ -44,7 +44,7 @@ export function graphicTopic(g) {
       return ['pipes-and-hoses', 'ips-only-show-in-edit-layout'];
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
-    default: return ['tabs', 'changing-the-layout-admins'];      // a text
+    default: return ['text-boxes'];      // a text
   }
 }
 
@@ -81,7 +81,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
 // The yellow ? icons on the ☰ Menu tabs: a heading in a Menu tab goes to the Help part named for it ("_" = any other heading).
 // A heading matches when its text starts with the name (after a 🔒). Section headings inside a form only get an icon when named.
 const MENU_TOPICS = {
-  default: { _: ['menu', 'the-default-tab'] },
+  default: { Text: ['text-boxes', 'defaults'], _: ['menu', 'the-default-tab'] },
   equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-a-schema-its-equipment-profile'],
     'Vessels and equipment': ['schemas-and-equipment-profiles', 'build-and-bundle-equipment'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],

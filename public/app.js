@@ -3,6 +3,7 @@ import { elementTopic, graphicTopic, barTopic, menuTopic, TAB_SPOT, DB_TRIGGER }
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
+import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -227,7 +228,8 @@ const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 
 const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
-  vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/samples/kettle.svg', size: [220, 270], tab: 'Equipment',
+  // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
+  vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/samples/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
     ports: {
       outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92]], { on: true }),
       tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75]]),
@@ -360,11 +362,18 @@ function buildEqIp(g, q) {
 }
 function placeEqIps(g) { for (const q of eqPorts(g)) { const n = $(`#ws .devip[data-ipid="${CSS.escape(q.id)}"]`); if (n) place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 }); } }
 // label shared by vessels, equipment and IP widgets: position, color, size, show / hide
+// It is a text box (public/textbox.js): what is not set here comes from the ☰ Menu > Default tab, and the text codes (\b \L \n) work.
 function widgetLabel(g, defPos) {
-  const lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) }, g.label);
-  lb.style.color = g.labelColor || ''; lb.style.fontSize = (g.labelSize || 16) + 'px';
+  const D = TD(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
+  setRich(lb, g.label);
+  lb.style.color = firstSet(g.labelColor, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, D.backColor);
+  lb.style.fontSize = (g.labelSize || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = D.nameFont;
+  lb.style.textAlign = (D.align || '').toLowerCase();
+  if (g.labelBg || D.backColor) lb.style.textShadow = 'none';
   return lb;
 }
+// the Default tab's text box settings (colors, alignment, name font ...): public/textbox.js
+const TD = () => textDefaults(S.config.brewDefaults);
 // standard colors for the flow widgets' color dropdowns ('' = the default color)
 // Default = the item's normal color, None = no color at all (see-through)
 const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
@@ -394,12 +403,27 @@ function attachIp(ip) {
 }
 
 function buildGfx(g) {
-  const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id });
-  place(n, g);
-  if (g.kind === 'image') n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : '';
-  else { setRich(n, g.text || ''); n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.color = g.color || ''; n.style.fontWeight = g.bold ? '700' : ''; }
+  const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id, ...(g.name ? { 'data-tname': g.name } : {}) });
+  if (g.kind === 'image') { place(n, g); n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : ''; }
+  else fillText(n, g);
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
+}
+// A Text ("+ Text" in Edit layout) is a text box: a Process can change it (Text_1.visible = false, Text_1.foreColor = "Red",
+// Text_1 = "Mashing"). What a Process set comes first, then its own settings, then the ☰ Menu > Default tab.
+function fillText(n, g) {
+  const D = TD(), v = (!editing && g.name && S.values[g.name]) || {};
+  place(n, editing ? g : placeWith(g, v));
+  setRich(n, v.text ?? g.text ?? '');
+  n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.fontWeight = g.bold ? '700' : '';
+  n.style.fontFamily = firstSet(g.font, D.nameFont);
+  n.style.color = firstSet(v.forecolor, g.color, D.foreColor);
+  n.style.backgroundColor = firstSet(v.backcolor, g.backColor, D.backColor);
+  const al = firstSet(v.alignment, g.align, D.align);
+  n.style.textAlign = al.toLowerCase();
+  n.style.whiteSpace = g.wrap === false ? 'pre' : '';
+  n.style.overflow = g.wrap === false ? 'hidden' : '';
+  n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden');
 }
 
 // variable classes: shared, vKonstant, vAPI (the old Global class is retired: lib/globals.js)
@@ -444,11 +468,12 @@ function sizeFitting(g) {
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
 // its settings and in the IP lists but cannot be typed over; the Label stays free text. Vessels keep the names users give them.
-const NAME_PREFIX = { point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', cap: 'Cap' };
-const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : null;
+const NAME_PREFIX = { text: 'Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', cap: 'Cap' };
+const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : g.kind === 'text' ? 'Text' : null;
 function giveName(g, all) {
   const p = autoPrefix(g); if (!p || (g.name && g.name.startsWith(p + '_'))) return;
-  const used = new Set(all.map(x => x.name)); let n = 1; while (used.has(p + '_' + n)) n++;
+  // a Text's name is used by Processes (Text_1.visible = false), so it can't be a Device's name either
+  const used = new Set([...all.map(x => x.name), ...(g.kind === 'text' ? (draft || S.config).elements.map(e => e.name) : [])]); let n = 1; while (used.has(p + '_' + n)) n++;
   g.name = p + '_' + n;
 }
 const nameAll = gs => { for (const g of gs || []) giveName(g, gs); };
@@ -559,17 +584,29 @@ function fontCss(node, f) {
   if (f.italic) node.style.fontStyle = 'italic';
   if (f.family) node.style.fontFamily = `"${f.family}", var(--font)`;
 }
+// Its Name and its Value are text boxes (public/textbox.js): Name color / Value color win, then Fore color (all its text),
+// then the ☰ Menu > Default tab. The Default fore color leaves the LED and Gauge digits their own colors.
+const OWN_DIGITS = ['led', 'lcd', 'indicator'];
 function styleEl(n, e) {
-  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
-  if (e.nameColor) nm.style.color = e.nameColor;
-  if (e.nameBg) nm.style.backgroundColor = e.nameBg;
-  if (e.valueColor) { vl.style.color = e.valueColor; vl.style.textShadow = 'none'; }
-  if (e.valueBg) vl.style.backgroundColor = e.valueBg;
+  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD();
+  const nc = firstSet(e.nameColor, e.foreColor, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : D.foreColor);
+  const nb = firstSet(e.nameBg, e.backColor, D.backColor), vb = firstSet(e.valueBg, e.backColor, D.backColor);
+  if (nc) nm.style.color = nc;
+  if (nb) nm.style.backgroundColor = nb;
+  if (vc) { vl.style.color = vc; vl.style.textShadow = 'none'; }
+  if (vb) vl.style.backgroundColor = vb;
   fontCss(nm, e.nameFont); fontCss(vl, e.valueFont);
+  // Name font and Name font size: its own, else the Default tab's (px; an imported BruControl font keeps its size)
+  const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : D.nameFont), size = +e.nameFontSize || (e.nameFont?.size ? 0 : D.nameFontSize);
+  if (fam) nm.style.fontFamily = fam;
+  if (size) nm.style.fontSize = size + 'px';
   if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
-  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/;
-  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase();
+  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, D.align);
+  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (al) nm.style.textAlign = al.toLowerCase();
   m = a.exec(e.valueAlign ?? ''); if (m) { vl.style.alignItems = ALIGN[m[1]]; vl.style.justifyContent = ALIGN[m[2]]; vl.style.textAlign = m[2].toLowerCase(); }
+  else if (al) { vl.style.justifyContent = ALIGN[al]; vl.style.textAlign = al.toLowerCase(); }
+  // Word wrap on: a long name goes onto more lines (off: one line, cut off with ...). Values always wrap.
+  if (e.wrap) nm.style.whiteSpace = 'normal';
   if (e.border === 'hidden') n.classList.add('no-border');
   if (e.border === 'visible') n.classList.add('show-border');
 }
@@ -588,8 +625,12 @@ function fmtVal(e, v) {
 // a Process can change the look while running (Pump_1.valueColor = "Red"); "" puts back the look from its properties
 const LOOK_KEYS = { namecolor: 'nameColor', namebg: 'nameBg', valuecolor: 'valueColor', valuebg: 'valueBg', namealign: 'nameAlign', valuealign: 'valueAlign', digits: 'digits' };
 function withLook(e, v) {
-  if (!Object.keys(LOOK_KEYS).some(k => v[k] !== undefined) && v.valuetype === undefined) return e;
+  if (![...Object.keys(LOOK_KEYS), 'forecolor', 'backcolor', 'alignment'].some(k => v[k] !== undefined && v[k] !== '') && !v.valuetype) return e;
   const o = { ...e };
+  // Pump_1.foreColor / backColor / alignment: all its text, over what its properties say
+  if (v.forecolor) { o.foreColor = v.forecolor; o.nameColor = o.valueColor = ''; }
+  if (v.backcolor) { o.backColor = v.backcolor; o.nameBg = o.valueBg = ''; }
+  if (v.alignment) { o.align = v.alignment; o.nameAlign = o.valueAlign = ''; }
   for (const [k, K] of Object.entries(LOOK_KEYS)) if (v[k] !== undefined && v[k] !== '') o[K] = v[k];
   if (v.valuetype) o.look = lookFor(v.valuetype, e);
   return o;
@@ -599,10 +640,13 @@ function fillEl(n, e0) {
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;
-    for (const x of [nm, vl]) { x.style.color = x.style.backgroundColor = x.style.textAlign = x.style.textShadow = ''; }
+    for (const x of [nm, vl]) { x.style.color = x.style.backgroundColor = x.style.textAlign = x.style.textShadow = x.style.whiteSpace = ''; }
     vl.style.alignItems = vl.style.justifyContent = '';
     styleEl(n, e);
   }
+  // Pump_1.xPosition / yPosition / width / height from a Process move and size it (not in Edit layout, where you drag it)
+  const at = editing ? e0 : placeWith(e0, v);
+  if (at !== e0 || n._moved) { n._moved = at !== e0; place(n, elGeom(at)); if (hasIps(e0)) placeDevIps(at); }
   setRich(nm, v.displayname ?? e.name);
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
@@ -701,6 +745,8 @@ function updateEl(name) {
   const n = $(`#ws .el[data-name="${CSS.escape(name)}"]`);
   const e = L().elements.find(x => x.name === name);
   if (n && e) fillEl(n, e);
+  const tn = !e && $(`#ws .gfx.txt[data-tname="${CSS.escape(name)}"]`), t = tn && L().graphics.find(g => g.kind === 'text' && g.name === name);
+  if (t) fillText(tn, t);
   for (const p of L().elements) if (p.type === 'picture' && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
 }
 
@@ -1549,7 +1595,10 @@ $('#addEl').onclick = guard(async () => {
   const [, pick, prefix, extra] = ADD_MENU[gi][1][ii], preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
-  const e = { name: base + i, type, workspace: wsName, x: 40, y: 40, w: type === 'label' ? 200 : type === 'flowMeter' || type === 'stepper' ? 190 : 130, h: type === 'timer' ? 80 : 60, ...clone(preset || {}), ...clone(extra || {}) };
+  const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
+  const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : 130, h: type === 'timer' ? 80 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
+  if (!D.visible) e.visibility = 'hidden';
+  if (D.wrap) e.wrap = true;
   if (type === 'shared') e.dataType = 'value';
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
@@ -1656,7 +1705,11 @@ function useTabProfile(e) {
 // LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
 const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : 'normal';
 $('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
-$('#addText').onclick = () => { const g = { id: newId(), kind: 'text', workspace: wsName, x: 40, y: 40, w: 220, h: 40, text: 'Text', fontSize: 18 }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
+// a new Text starts with the Default tab's size, place, Visible and Word wrap (copied now; colors and alignment follow the Default)
+$('#addText').onclick = () => {
+  const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }), ...(D.wrap ? {} : { wrap: false }) };
+  draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
+};
 $('#finishPipe').onclick = () => finishPipe();
 // Lock / Unlock the selected item so it cannot be dragged or resized by accident
 function updLockBtn() {
@@ -1757,14 +1810,19 @@ function startupView() {
 window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); });
 
 // ---------------------------------------------------------------- properties dialog
+const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 'Center' ? 'ed' : '') + ' justified'])];
 // field: [key, label, kind, options]
 const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
-    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visibility', 'sel', ['visible', 'hidden']], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
-    ['nameColor', 'Name color', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color', 'color'], ['valueBg', 'Value background color', 'color'],
-    ['nameFont', 'Name font (JSON, e.g. {"size":14,"bold":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
+    ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
+    ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
+    ['wrap', 'Word wrap as needed (a long name goes onto more lines; off = one line, cut off with ...)', 'bool'],
+    ['nameFontFamily', 'Name font', 'sel', FONTS], ['nameFontSize', 'Name font size (px; empty = Default)', 'num'],
+    ['nameColor', 'Name color (over Fore color)', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color (over Fore color)', 'color'], ['valueBg', 'Value background color', 'color'],
+    ['nameFont', 'Name font, more (JSON, e.g. {"bold":true,"italic":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
@@ -1800,12 +1858,13 @@ const F = {
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
-  text: [['text', 'Text', 'area'], ['fontSize', 'Font size', 'num'], ['color', 'Color', 'color'], ['bold', 'Bold', 'bool'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
+  text: [['text', 'Text (codes like \\b bold, \\L large, \\n new line work here)', 'area'], ['visible', 'Visible', 'bool', true], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
+    ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['wrap', 'Word wrap as needed (off = one line, cut off at the edge)', 'bool', true], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
-  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
+  vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
-  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'yn'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
+  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'yn'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
     ['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
@@ -1817,10 +1876,10 @@ const F = {
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'bool']],
 };
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
-F.vesselNew = it => [['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+F.vesselNew = it => [['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' standard', 'vlist', 'standard']] : [])]),
-  ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
+  ['_look', 'Display Name and place', 'note'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
@@ -1960,6 +2019,9 @@ function field([key, label, kind, opts, rerender], obj) {
   if (kind === 'stpick') return [h('label', {}, label), stepperPick(key, opts, v)];
   if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
     ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)));
+  else if (kind === 'vis') {      // Visible as a switch, kept as BruControl's visibility = visible / hidden
+    input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'vis', ...(v === 'hidden' ? {} : { checked: true }) }), h('span', { class: 'swk' }));
+  }
   else if (kind === 'bool' || kind === 'yn') {     // a simple true / false is a switch (Fritz); choices with more options are dropdowns
     input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'bool', ...(v ?? opts ? { checked: true } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) }), h('span', { class: 'swk' }));
   }
@@ -2076,6 +2138,7 @@ function readFields(obj, root = $('#dlgBody')) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
     let v;
     if (kind === 'bool') v = inp.checked;
+    else if (kind === 'vis') v = inp.checked ? undefined : 'hidden';
     else if (kind === 'vkitems') {
       v = [...inp.querySelectorAll('.vkrow')].map(tr => ({ value: tr.querySelector('.vkv').value.trim(), text: tr.querySelector('.vkt').value.trim() })).filter(r => r.value !== '' || r.text);
       for (const r of v) { if (r.value === '' || !Number.isFinite(+r.value)) throw new Error(`Choice "${r.text}": its Value must be a number`); r.value = +r.value; }
@@ -2176,11 +2239,11 @@ async function editItem(kind, id) {
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it) || '(type a Display name and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return f;
-  } : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)`, 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  } : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item);
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
@@ -3571,7 +3634,7 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 
 // ---- Default tab: what new Recipes start with, and the order of the Menu
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, ...(S.config.brewDefaults || {}) };
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, ...(S.config.brewDefaults || {}) };
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here. A new Recipe starts with the first ones, and you can change each one in the Recipe.', 'note'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
@@ -3591,6 +3654,20 @@ function renderDefaultTab(box) {
     ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
     ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
     ['_x', 'Text', 'head'],
+    ['_tbn', 'Every text box (the Name and Value of each Device and Widget, a Label, a Text, the Display Name on a vessel) starts from these. ' +
+      'An item left on Default follows the colors, alignment and name font here, so changing one here changes them all. ' +
+      'Visible, Word wrap, the size and the place are copied into each new item when it is made.', 'note'],
+    ['textVisible', 'Visible (new Devices, Widgets and Texts start shown)', 'bool'],
+    ['textForeColor', 'Fore color (the color of the text)', 'color'],
+    ['textBackColor', 'Back color (behind the text)', 'color'],
+    ['textAlign', 'Alignment', 'sel', [['', 'Default (as each kind of item has it)'], ...TB_ALIGN_CHOICES.slice(1)]],
+    ['textWrap', 'Word wrap as needed', 'bool'],
+    ['nameFont', 'Name font (names, Display Names and Texts)', 'sel', FONTS.map(([v, t]) => [v, v ? t : 'Default (the panel\'s normal font)'])],
+    ['nameFontSize', 'Name font size (px; empty = the panel\'s normal size)', 'num'],
+    ['textWidth', 'Width of a new Text or Label (px; empty = 220)', 'num'],
+    ['textHeight', 'Height of a new Text or Label (px; empty = 40)', 'num'],
+    ['textX', 'X position of new items (px from the left of the Tab; empty = 40)', 'num'],
+    ['textY', 'Y position of new items (px from the top of the Tab; empty = 40)', 'num'],
     ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px); empty = ${TEXT_LARGE}`, 'num'],
     ['_p', 'Phones and tablets', 'head'],
     ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
@@ -3604,7 +3681,9 @@ function renderDefaultTab(box) {
     f.read();
     if (d.textLarge === '' || d.textLarge === null) delete d.textLarge;
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
-    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); toast('Defaults saved'); });
+    for (const [k, t, min] of [['nameFontSize', 'Name font size', 6], ['textWidth', 'Width', 10], ['textHeight', 'Height', 10], ['textX', 'X position', 0], ['textY', 'Y position', 0]])
+      if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
+    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); renderWs(); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin ? {} : { disabled: true }) });
