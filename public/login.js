@@ -22,6 +22,13 @@ function setMode(m) {
   $('#lgCodeLink').classList.toggle('hidden', m !== 'login' || !st.codeSignIn);
   $('#lgCodeRow').classList.toggle('hidden', m !== 'forgot');
   $('#lgPass2Row').classList.toggle('hidden', !newPw);
+  // the admin's password rules (Settings > Password rules), next to the new-password box
+  const rules = st.passwordRules;
+  $('#lgRules').textContent = rules?.text ?? '';
+  $('#lgRules').classList.toggle('hidden', !newPw || !rules);
+  for (const i of ['#lgPass', '#lgPass2']) {
+    if (newPw && rules) $(i).maxLength = rules.max; else $(i).removeAttribute('maxlength');
+  }
   $('#lgPassLabel').textContent = m === 'forgot' ? 'New password' : 'Password';
   $('#lgPass').autocomplete = newPw ? 'new-password' : 'current-password';
   $('#lgForgot').classList.toggle('hidden', m !== 'login');
