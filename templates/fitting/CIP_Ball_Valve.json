@@ -1,0 +1,5 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "cipBallValve" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "notes": "A CIP spray ball with its valve"
+}

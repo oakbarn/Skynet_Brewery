@@ -1,0 +1,5 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "valve" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "notes": "Just a valve on the port"
+}
