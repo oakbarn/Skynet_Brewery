@@ -7,7 +7,7 @@
 //   vapi  vAPI                                                                          red
 //   var   variables made with "new value x" ...                                         black on white
 //   proc  names of Processes (start my_Process)                                         olive
-//   op    operators  = + - * / < > ! ^ ( ) , .  and, or, not                            orange
+//   op    operators  = + - * / < > ! ^ ( ) , . ++ -- { } ;  and, or, not                 orange
 //   str   "text in quotes"                                                              brown
 //   num   numbers and times (185.5, 00:10:00)                                           gold
 //   com   comments: //, #, ' and /* ... */ (C, C++, C#, JavaScript, Node.js, Python, VB)  green
@@ -49,7 +49,7 @@ function lookup(words) {
 }
 export const declaredVars = text => new Set([...String(text).matchAll(/^\s*new\s+\w+\s+([A-Za-z_]\w*)/gim)].map(m => m[1].toLowerCase()));
 
-const OPS = /^(==|!=|<>|<=|>=|\+=|-=|\*=|\/=|&&|\|\||[=<>+\-*/^()!,.])/;
+const OPS = /^(==|!=|<>|<=|>=|\+\+|--|\+=|-=|\*=|\/=|&&|\|\||[=<>+\-*/^()!,.{};])/;
 // text -> Uint8Array, one class number (index in CLASSES) per character
 export function classify(text, words) {
   text = String(text ?? '');
@@ -202,12 +202,15 @@ export function notepadPlusPlus(words, texts = []) {
         <KeywordLists>
             <Keywords name="Comments">00// 00# 00' 01 02 03/* 04*/</Keywords>
 ${['Numbers, prefix1', 'Numbers, prefix2', 'Numbers, extras1', 'Numbers, extras2', 'Numbers, suffix1', 'Numbers, suffix2', 'Numbers, range'].map(empty).join('\n')}
-            <Keywords name="Operators1">= + - * / &lt; &gt; ! ^ ( ) , . &amp;&amp; ||</Keywords>
+            <Keywords name="Operators1">= + - * / &lt; &gt; ! ^ ( ) , . &amp;&amp; || ++ -- ;</Keywords>
             <Keywords name="Operators2"></Keywords>
             <Keywords name="Folders in code1, open">if</Keywords>
             <Keywords name="Folders in code1, middle">elseif else</Keywords>
             <Keywords name="Folders in code1, close">endif</Keywords>
-${['Folders in code2, open', 'Folders in code2, middle', 'Folders in code2, close', 'Folders in comment, open', 'Folders in comment, middle', 'Folders in comment, close'].map(empty).join('\n')}
+            <Keywords name="Folders in code2, open">{</Keywords>
+            <Keywords name="Folders in code2, middle"></Keywords>
+            <Keywords name="Folders in code2, close">}</Keywords>
+${['Folders in comment, open', 'Folders in comment, middle', 'Folders in comment, close'].map(empty).join('\n')}
 ${kw.map((w, i) => `            <Keywords name="Keywords${i + 1}">${xmlEsc(w)}</Keywords>`).join('\n')}
             <Keywords name="Delimiters">00&quot; 01 02&quot; 03[ 04 05] 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23</Keywords>
         </KeywordLists>
