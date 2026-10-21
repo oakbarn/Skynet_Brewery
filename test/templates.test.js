@@ -69,6 +69,9 @@ const S = new Templates(path.join(ROOT, 'templates'), path.join(dir, 'none'), { 
 for (const kind of ['vessel', 'fitting']) for (const t of S.list(kind)) { assert.equal(nameProblem(t.name), '', t.name); (kind === 'vessel' ? cleanVessel : cleanFitting)(t); }
 for (const t of S.list('vessel')) for (const p of Object.values(t.ports || {})) if (p.fitting) assert.ok(S.find('fitting', p.fitting), `${t.name}: no Bundled Fitting "${p.fitting}"`);
 assert.ok(S.list('vessel').length >= 5 && S.list('fitting').length >= 4);
+assert.equal(S.get('vessel', 'Chillzilla').liquidPorts, 4, 'a Chillzilla coil has 4 liquid ports');
+assert.equal(cleanVessel({ vesselType: 'herms', liquidPorts: '7' }).liquidPorts, 2, '2 or 4 only');
+assert.equal(cleanVessel({ vesselType: 'vessel', liquidPorts: 4 }).liquidPorts, undefined, 'only coils have the choice');
 
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('templates ok');
