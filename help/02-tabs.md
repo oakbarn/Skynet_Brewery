@@ -1,6 +1,6 @@
 # Tabs (your brewery screens)
 
-A **Tab** is one screen of your brewery: a background picture with pumps, valves, temperatures, timers and pipes placed on it. The tab buttons sit at the top of the **Tabs** screen. Processes can switch every screen to a tab with `show tab "Brew Day"`.
+A **Tab** is one screen of your brewery: a background picture with pumps, valves, temperatures, timers and pipes placed on it. The tab buttons sit at the top of the **Tabs** screen. On this screen the Menu Bar is hidden; pick **☰ Menu > Show Menu Bar** to bring it back (see [The Menu Bar](40-menu-bar)). Processes can switch every screen to a tab with `show tab "Brew Day"`.
 
 **Zoom** sets the size: **Fit** fills the width of your screen; 50 % to 125 % are fixed sizes.
 
@@ -10,7 +10,7 @@ A **Tab** is one screen of your brewery: a background picture with pumps, valves
 - **Tap a value** to get a large dialog with − / + buttons and a number pad.
 - Items set to **Ask before changing** show large ON / OFF buttons first, so a bump on the screen does not start a pump.
 - Pipes show **moving flow** when liquid is really moving through them.
-- Alarms only make a sound after you press **Enable sound** at the top, once on each screen that should sound them (browsers insist on that).
+- Alarms only make a sound after you press **Enable sound** in the Menu Bar (pick **☰ Menu > Show Menu Bar** first), once on each screen that should sound them (browsers insist on that).
 
 ## Changing the layout (admins)
 

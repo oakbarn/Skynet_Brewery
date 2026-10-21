@@ -1,7 +1,8 @@
 # The ☰ Menu
 
-The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit layout box used to be. Press it to see its choices.
+The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit layout box used to be. Press it to see its choices. (The top line of the panel with Processes, Settings, Help ... is the Menu Bar, see [The Menu Bar](40-menu-bar).)
 
+- **Show Menu Bar** / **Hide Menu Bar**: the top line of the panel is hidden on the Tabs page; this brings it back. See [The Menu Bar](40-menu-bar).
 - **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
 - The **Menu tabs**: Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
@@ -19,7 +20,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 ## The Default tab
 
-**Every default is set here.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. Press **Save**.
+**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. Press **Save**.
 
 **Order of the Menu:** each Menu tab has an Order number. Type a new number to move a Menu tab there. The others are numbered again to make room (1, 2, 3 ...), and the Menu and the open Menu tabs sort themselves. New Menu tabs added later go at the end.
 
