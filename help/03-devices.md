@@ -7,11 +7,11 @@
 
 "PLC" here means hobby boards: Arduino-compatible boards (such as the Mega), ESP32 and the Raspberry Pi. They connect by **USB**, by **Ethernet** where the board has it, or by **WiFi** through an ESP32.
 
-## Adding a board
+## Adding a board (Interface)
 
-On the **Devices** screen, under **Add device**:
+A board is called an **Interface**. On the **Devices** screen, under **Add Interface**:
 
-1. Give it a **Name**, for example `MEGA1`.
+1. Give it a **Name**, for example `Main Brewery Mega USB`. Its **Interface ID** (`MB`) is filled in from the name; see [Interface, Tab and Device names](44-interface-tab-device-names).
 2. Pick the **Type**: a board on USB, a board on Ethernet, an ESP32 on WiFi, or the **Simulator** (no hardware; handy for trying things).
 3. For USB, press **Scan ports** and pick the port (Windows: `COM3`; Pi: `/dev/ttyACM0`). For Ethernet or WiFi, type its network address.
 4. Press **Add**.
@@ -30,7 +30,7 @@ In **Tabs > ☰ Menu > Edit layout > Add element**, the list groups devices by k
 - **Analog sensors**: 0-5 V, 0-10 V, 4-20 mA, pressure, level, pH (with two-point calibration).
 - **Flow meters** (pulse) and **vessel scales** (HX711 load cells, with tare and calibration).
 
-Then pick the **Device** (board) and **Pin / channel** in its properties. The properties show only the settings that kind needs, plus the live reading for calibration.
+A new Device first asks for its **Display name**, **Interface**, **Port** and **Type**, and gets a name like `MB_25_PWM_VlV_Fly_Sparge_SP` ([Interface, Tab and Device names](44-interface-tab-device-names)). Only one Device can use a port. The rest is in its properties. The properties show only the settings that kind needs, plus the live reading for calibration.
 
 ## OneWire probes (DS18B20)
 
