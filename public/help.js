@@ -141,25 +141,26 @@ function show(box, text, mark) {
   }
 }
 
-function open(name, mark, back = false) {
+function open(name, mark, back = false, section) {
   const p = find(name);
   if (!p) { say(`No help page "${name}"`, true); return; }
   if (changed() && !confirm('Throw away your changes to this page?')) return;
   if (!back && cur && cur !== p.name) trail.push(cur);
   cur = p.name; stopEdit();
   show($('#hpPage'), p.text, mark);
-  if (!mark) window.scrollTo(0, 0);
+  const at = section && $('#hpPage').querySelector('#' + CSS.escape(section));
+  if (at) at.scrollIntoView(); else if (!mark) window.scrollTo(0, 0);
   $('#hpBack').disabled = !trail.length;
   renderList();
 }
 
-async function load(want) {
+async function load(want, section) {
   pages = await call('GET', '/ui/help');
   if (!pages.length) {
     $('#hpPage').innerHTML = '<p class="muted">The manual is empty. Its pages are the <code>.md</code> files in the <code>help</code> folder of the Brew Panel.</p>';
     renderList(); return;
   }
-  open(want && find(want) ? want : cur && find(cur) ? cur : pages[0].name, null, true);
+  open(want && find(want) ? want : cur && find(cur) ? cur : pages[0].name, null, true, section);
 }
 
 function startEdit() {
@@ -202,12 +203,16 @@ $('#hpNew').onclick = async () => {
   catch (e) { say(e.message, true); }
 };
 
-// Opening Help: show the page for the screen you were on (once per visit), else the last page read
+// Opening Help: show the page for the screen you were on (once per visit), else the last page read.
+// A right-click on an item asks for its own page and part (the 'skynet-help' event from app.js, see helpmap.js).
+let asked = null;
 for (const b of document.querySelectorAll('#views button')) b.addEventListener('click', () => {
   const v = b.dataset.view;
   if (v !== 'help') { cameFrom = v; return; }
-  if (changed()) return;
-  load(FOR_VIEW[cameFrom]).catch(e => say(e.message, true));
-  cameFrom = null;
+  if (changed()) { asked = null; return; }
+  const [want, section] = asked || [FOR_VIEW[cameFrom]];
+  load(want, section).catch(e => say(e.message, true));
+  cameFrom = null; asked = null;
 });
+window.addEventListener('skynet-help', e => { asked = e.detail; $('#views [data-view="help"]').click(); });
 window.addEventListener('beforeunload', e => { if (changed()) e.preventDefault(); });

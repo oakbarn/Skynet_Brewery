@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { elementTopic, graphicTopic, barTopic, menuTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
@@ -752,7 +753,7 @@ function release() {
   held = null;
 }
 $('#ws').addEventListener('pointerdown', ev => {
-  if (editing) return;
+  if (editing || ev.button !== 0) return;     // the right button is for Help, it never presses a push button
   const n = ev.target.closest('.el'); const e = n && elByName(n.dataset.name);
   if (!e || tapAction(e) !== 'hold') return;
   ev.preventDefault(); release();
@@ -1260,6 +1261,55 @@ function startLongPress(ev, kind, id) {
   lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } kind === 'tab' ? editWorkspace() : editItem(kind, id); }, 600) };
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
+
+// Right-click Help (Fritz): a right-click on anything that can't be moved opens Help at the part that explains it:
+// any item when the layout is not being edited, a 🔒 locked item in Edit layout, an empty spot on a tab, the Menu Bar.
+// An unlocked item in Edit layout keeps the right button for dragging. Shift + right-click gives the browser's own menu.
+// Phones have no right-click: holding a finger on an item for 0.7 s does the same, but only outside Edit layout,
+// where holding a finger already opens Properties.
+const openHelp = topic => window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
+// the yellow ? Help icon (Fritz): on the ☰ Menu tabs and in Properties dialogs, never on a tab itself.
+// `leave` runs first and may say no (a dialog with changes asks before it closes).
+const helpIcon = (topic, leave) => h('button', { type: 'button', class: 'helpIcon', title: 'Help on this', 'aria-label': 'Help on this',
+  onclick: ev => { ev.preventDefault(); ev.stopPropagation(); if (!leave || leave() !== false) openHelp(topic); } }, '?');
+function tabItemAt(target) {
+  const pip = target.closest('.devip'), node = target.closest('.el,.gfx'), pipe = target.closest('#pipes g');
+  const kind = pip ? (pip.dataset.eq ? 'gfx' : 'el') : node ? (node.dataset.name ? 'el' : 'gfx') : pipe ? 'gfx' : null;
+  const id = pip ? pip.dataset.eq || pip.dataset.dev : node ? node.dataset.name || node.dataset.gid : pipe?.dataset.gid;
+  const item = kind === 'el' ? L().elements.find(e => e.name === id) : kind ? L().graphics.find(g => g.id === id) : null;
+  return item && { kind, item };
+}
+function rightClickTopic(target) {
+  if (target.closest('#ws') && !menuTab) {
+    const hit = tabItemAt(target);
+    if (!hit) return TAB_SPOT;
+    const mover = editing ? bundleOf(hit.item) || hit.item : null;
+    if (mover && !mover.locked) return null;              // it can move: the right button drags it
+    return hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item);
+  }
+  return barTopic(target);
+}
+let pointerKind = 'mouse';
+document.addEventListener('pointerdown', ev => { pointerKind = ev.pointerType; }, true);
+document.addEventListener('contextmenu', ev => {
+  if (ev.shiftKey || pointerKind !== 'mouse') return;     // a finger: see the long press below
+  const topic = rightClickTopic(ev.target);
+  if (topic) { ev.preventDefault(); openHelp(topic); }
+});
+let helpPress = null, helpShownAt = 0;
+$('#ws').addEventListener('pointerdown', ev => {
+  if (editing || ev.pointerType === 'mouse' || ev.target.closest('.btns, select, button, input')) return;
+  const hit = tabItemAt(ev.target);
+  if (!hit || (hit.kind === 'el' && tapAction(hit.item) === 'hold')) return;     // a push button is held on purpose
+  clearTimeout(helpPress?.t);
+  helpPress = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { helpPress = null; helpShownAt = Date.now(); openHelp(hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item)); }, 700) };
+});
+const dropHelpPress = () => { if (helpPress) { clearTimeout(helpPress.t); helpPress = null; } };
+$('#ws').addEventListener('pointermove', ev => { if (helpPress && Math.hypot(ev.clientX - helpPress.x, ev.clientY - helpPress.y) > 8) dropHelpPress(); });
+for (const t of ['pointerup', 'pointercancel']) window.addEventListener(t, dropHelpPress);
+// the finger lifting after Help opened must not also switch the item
+document.addEventListener('click', ev => { if (Date.now() - helpShownAt < 1500 && ev.target.closest('#ws')) { ev.stopPropagation(); ev.preventDefault(); helpShownAt = 0; } }, true);
+$('#ws').addEventListener('contextmenu', ev => { if (!editing && pointerKind !== 'mouse' && tabItemAt(ev.target)) ev.preventDefault(); });   // Android's own long-press menu
 
 // The joint Skynet put at a pipe end turns into the fitting the pipes on it need: one or two in line = coupling,
 // a corner = 90° elbow, three = tee, four = cross, each turned the right way. A joint with a hose on it stays a coupling.
@@ -1970,7 +2020,7 @@ function readFields(obj, root = $('#dlgBody')) {
 // A form of fields in a box (a dialog, or a Menu tab): "Add new ..." in a list and selects that change the fields are handled here.
 // onChange runs after any change. Returns build(), which draws the fields again.
 function bindForm(body, fields, obj, onChange) {
-  const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); };
+  const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); menuHelpIcons(body); };
   build();
   body.onchange = ev => {
     const t = ev.target;
@@ -1995,10 +2045,17 @@ function bindForm(body, fields, obj, onChange) {
 }
 
 // fields: a list, or a function of the item (the list changes when a [.., true] select changes, e.g. probe type)
-function dialog(title, fields, obj, canDelete) {
+function dialog(title, fields, obj, canDelete, topic) {
   return new Promise(res => {
     $('#dlgTitle').textContent = title;
     bindForm($('#dlgBody'), fields, obj);
+    if (topic) {      // the ? beside the title: closes the dialog (asking first when something was changed) and opens Help
+      const d = $('#dlg'), before = formSnap();
+      $('#dlgTitle').append(' ', helpIcon(topic, () => {
+        if (formSnap() !== before && !confirm('Leave these Properties without saving your changes, and open Help?')) return false;
+        d.close('cancel');
+      }));
+    }
     for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
     const d = $('#dlg');
     // Delete and Cancel are plain buttons so Enter in a field always means Save
@@ -2008,11 +2065,13 @@ function dialog(title, fields, obj, canDelete) {
   });
 }
 
+const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select, #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
+
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
   const work = { bundled: true, workspace: v.workspace };
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', 'This vessel and its IPs are bundled: they move as one and can\'t be edited. Switch off Bundled to edit, move or delete them.', 'note'],
-    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws']], work, false);
+    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws']], work, false, graphicTopic(v));
   if (r !== 'ok') return;
   readFields(work);
   if (work.workspace && work.workspace !== v.workspace) {
@@ -2043,7 +2102,7 @@ async function editItem(kind, id) {
   const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item);
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true);
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
@@ -2135,7 +2194,7 @@ async function editWorkspace() {
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
     ['_sizeHead', 'Size', 'head'],
     ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
-    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num']], work, draft.workspaces.length > 1);
+    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num']], work, draft.workspaces.length > 1, TAB_SPOT);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
@@ -2716,7 +2775,7 @@ async function editLog(e) {
     ['interval', 'Interval 00:00:00 (for "Every 00:00:00")', 'text'],
     ['at', 'At clock time (optional, for the "Every" choices), e.g. 12 AM, 6:30 PM or 18:30', 'text'],
     ['_n', '"Every 1 days at 12 AM" writes at midnight every day. "Every 6 hours at 1 AM" writes at 1 AM, 7 AM, 1 PM and 7 PM. Without a clock time it counts from when the server starts. Fastest is 100 ms.', 'note'],
-  ], work, false);
+  ], work, false, DB_TRIGGER);
   if (r !== 'ok') return;
   try { readFields(work); } catch (x) { return toast(x.message, true); }
   if (work.mode === 'script' && !work.script) return toast('Pick the process that writes this value', true);
@@ -3381,6 +3440,15 @@ function renderMenuPane() {
   const box = $('#menuPane'); box.innerHTML = '';
   const m = MENU.find(x => x.key === menuTab); if (!m) return;
   m.render(box);
+  menuHelpIcons(box);
+}
+// a ? beside each heading of the Menu tab showing (again after a form redraws itself)
+function menuHelpIcons(box) {
+  if (!menuTab || !box.closest('#menuPane')) return;
+  for (const hd of box.querySelectorAll('h3, .dlgHead')) {
+    const topic = !hd.querySelector('.helpIcon') && menuTopic(menuTab, hd.textContent, hd.tagName === 'H3');
+    if (topic) hd.append(' ', helpIcon(topic));
+  }
 }
 window.addEventListener('beforeunload', e => { if (eqDirty || vesselDirty || Object.values(profDirty).some(Boolean)) { e.preventDefault(); e.returnValue = ''; } });
 
