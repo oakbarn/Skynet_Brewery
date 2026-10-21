@@ -28,6 +28,8 @@ The buttons along the top are the main screens:
 | **Settings** | Samples, your password, users and panel settings. |
 | **Help** | This manual. |
 
+**Quick help:** right-click any item on a tab (or hold a finger on it on a phone), or press a yellow **?**, and this manual opens at the part about it. See [Right-click and ? for Help](43-right-click-help).
+
 What you can see depends on your role. An **Admin** sees everything; an **Operator** can run a brew day; a **Viewer** can only watch. See [Login, users and passwords](10-login).
 
 ## Common jobs

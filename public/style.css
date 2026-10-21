@@ -621,3 +621,7 @@ body.role-viewer .op-only { display: none !important; }
 /* a valve at 45 degrees: its vertical picture turned left or right (the box stays square and upright) */
 .el.turned { overflow: visible; }
 .el.turned::before { content: ''; position: absolute; inset: 0; background: var(--pic) center / contain no-repeat; transform: rotate(var(--turn)); pointer-events: none; }
+
+/* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
+.helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
+.helpIcon:hover, .helpIcon:focus-visible { background: #ffe24d; outline: 2px solid #000; outline-offset: 1px; }
