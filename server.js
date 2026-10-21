@@ -202,6 +202,7 @@ function needRole(p, m) {
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
+  if (/^\/ui\/schemas\/[a-z0-9-]+\/export$/.test(p)) return 'admin';   // Schema.json: Save as .json file
   if (p.startsWith('/ui/filemove/')) return 'admin';   // File Move: copies files onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
@@ -489,10 +490,11 @@ async function route(req, res) {
   if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') return ok(res, schemas.layoutAction((await jsonBody(req)).action));
-  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version))?$/.exec(p);
+  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version|export))?$/.exec(p);
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
     if (sc[2] === 'backup' && m === 'POST') return ok(res, { ok: true, file: schemas.backupSchema(sc[1]) });
+    if (sc[2] === 'export' && m === 'GET') return ok(res, schemas.exportSchema(sc[1]));
     if (sc[2] === 'backups' && m === 'GET') return ok(res, schemas.listBackups(sc[1]));
     if (sc[2] === 'restore' && m === 'POST') { const b = await jsonBody(req); schemas.restore(sc[1], b.file, { version: !!b.version }); return ok(res, schemaView()); }
     if (sc[2] === 'version' && m === 'POST') { const r = schemas.newVersion(sc[1]); return ok(res, { ...schemaView(), ...r }); }

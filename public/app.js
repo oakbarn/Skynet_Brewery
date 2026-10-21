@@ -4043,7 +4043,7 @@ $('#cfgSave').onclick = guard(async () => {
   if (!r.ok) { cfgProblem = r.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + r.problem.line + ': ' + r.problem.msg); }
   cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(true);
   $('#cfgBackupNote').textContent = 'Saved. The old file was copied to config/backups/' + r.backup;
-  toast('Config saved');
+  toast('Schema.json saved');
 });
 $('#cfgReload').onclick = () => { if (cfgDirty && !confirm('Throw away your unsaved changes?')) return; cfgDirty = false; openConfig(); };
 $('#cfgBackups').onclick = guard(async () => {
@@ -4066,6 +4066,20 @@ $('#cfgBackups').onclick = guard(async () => {
       toast('Config restored');
     }) }, 'Restore')));
   $('#cfgBackupDlg').showModal();
+});
+// Schema.json: Save as .json file. The file is named after the Schema version (Name_yyyymmdd_hh_mm) when it has one.
+$('#cfgExport').onclick = guard(async () => {
+  const sc = S.schemas || { list: [] }, act = sc.active?.id, list = [...sc.list].sort((a, b) => (b.id === act) - (a.id === act));
+  if (!list.length) throw new Error('There is no Schema to save yet');
+  const w = { id: act || list[0].id };
+  const fields = [['id', 'Schema', 'sel', list.map(x => [x.id, x.id === act ? `${x.name}  (loaded)` : x.name])],
+    ['_n', 'The file goes to the Downloads folder of this computer. It holds the Schema only (tabs, devices, widgets, pictures, pipes and its Equipment Profile drawing), not logins or panel settings.', 'note']];
+  if (cfgDirty) fields.push(['_d', 'The changes in the editor are not saved yet, so they are not in the file. Press Save first to include them.', 'note']);
+  if (await dialog('Save a Schema as a .json file', fields, w) !== 'ok') return;
+  readFields(w);
+  const r = await api('GET', `/ui/schemas/${encodeURIComponent(w.id)}/export`);
+  download(r.file, JSON.stringify(r.schema, null, 2), 'application/json');
+  toast(`Saved ${r.file}`);
 });
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 

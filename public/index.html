@@ -21,7 +21,7 @@
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
     <button data-view="help">Help</button>
-    <button data-view="config" class="admin-only" title="Edit the config file (admin only)">Config</button>
+    <button data-view="config" class="admin-only" title="The Schema as a .json file: edit it, or save it to this computer (admin only)">Schema.json</button>
   </nav>
   <div class="right">
     <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
@@ -136,10 +136,10 @@
     </div>
   </section>
 
-  <!-- ===== Config Editor (admin only) ===== -->
+  <!-- ===== Schema.json: the Config Editor (admin only) ===== -->
   <section id="view-config" class="view admin-only">
     <div class="bar">
-      <strong>Config Editor</strong>
+      <strong>Schema.json</strong>
       <code id="cfgFile" class="muted"></code>
       <span id="cfgState" class="muted"></span>
       <span class="spacer"></span>
@@ -148,6 +148,7 @@
       <button id="cfgFind" title="Find (Ctrl+F) and Replace (Ctrl+H)">Find</button>
       <button id="cfgReload" title="Throw away unsaved changes and read the file again">Reload</button>
       <button id="cfgBackups">Backups</button>
+      <button id="cfgExport" title="Save a Schema as a .json file on this computer (your Downloads folder)">Save as .json file</button>
     </div>
     <p id="cfgBackupNote" class="cfgNote"></p>
     <div class="editor"><pre id="cfgGutter"></pre><div class="codeWrap"><pre id="cfgCodeHl" aria-hidden="true"></pre><textarea id="cfgCode" spellcheck="false" wrap="off"></textarea></div></div>
