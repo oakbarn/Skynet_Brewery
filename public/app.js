@@ -64,7 +64,7 @@ function alertBar(text) {
 function renderValves(list = []) {
   let d = $('#valveDlg');
   if (!list.length) { if (d?.open) d.close(); return; }
-  if (!d) { d = h('dialog', { id: 'valveDlg', class: 'valveDlg' }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
+  if (!d) { d = h('dialog', { id: 'valveDlg', class: 'valveDlg', 'data-nomenu': true }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
   d.innerHTML = '';
   d.append(h('h3', {}, '✋ Manual valve'), ...list.map(a => h('div', { class: 'valveAsk' },
     h('div', { class: 'valveDo' }, `${a.open ? 'OPEN' : 'CLOSE'} ${a.label} by hand`),
@@ -1824,7 +1824,7 @@ document.addEventListener('fullscreenchange', () => {
 const menuBarHides = () => S?.config?.brewDefaults?.hideMenuBar !== false;
 const menuBarHidden = () => view === 'workspace' && !menuTab && menuBarHides() && !document.body.classList.contains('menuBarOn');
 // Fritz, 2026-10-21: only the Tabs themselves lose the Menu Bar; every Menu tab (Zoom, Default, About ...) and every other page keeps it
-function markOnTabs() { document.body.classList.toggle('onTabs', view === 'workspace' && !menuTab); }
+function markOnTabs() { document.body.classList.toggle('onTabs', view === 'workspace' && !menuTab); document.body.classList.toggle('onWorkspace', view === 'workspace'); }
 function showMenuBar(on) {
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   document.body.classList.toggle('menuBarOn', on);
@@ -3748,10 +3748,7 @@ function renderMenu() {
   if (!S?.profiles) return;
   const list = $('#menuList'); list.innerHTML = '';
   if (view === 'workspace' && !menuTab && menuBarHides()) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: 'The top line: Schema, Processes, Variables, Log, Settings, Help, Enable sound, Sign out', onclick: () => { closeMenuList(); showMenuBar(menuBarHidden()); } }, menuBarHidden() ? '▼ Show Menu Bar' : '▲ Hide Menu Bar'));
-  if (can('admin')) list.append(h('button', { role: 'menuitem', class: 'menuItem', onclick: guard(menuEditLayout) }, editing ? '✎ Exit Edit layout' : '✎ Edit layout'));
-  list.append(h('hr'));
-  for (const m of menuSorted().filter(m => !m.admin || can('admin'))) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: m.coming || m.tip, ...(m.coming ? { disabled: true } : {}), onclick: () => { closeMenuList(); if (m.view) setView(m.view); else openMenuTab(m.key); } },
-    m.title, m.coming ? h('span', { class: 'muted' }, ' (coming)') : ''));
+  menuItems(list, fn => () => { closeMenuList(); fn(); });
   const tabs = $('#menuTabs'); tabs.innerHTML = '';
   for (const k of menuSorted().map(m => m.key).filter(k => menuOpen.includes(k))) {
     const m = MENU.find(x => x.key === k);
@@ -3760,9 +3757,77 @@ function renderMenu() {
   }
   if (menuTab && !paneDirty()) renderMenuPane();
 }
+// the ☰ Menu choices: Edit layout, then the Menu tabs in their order. `go` wraps each choice (it closes the list first,
+// and in a dialog it closes the dialog). `pages` adds the Menu Bar pages too, for a ☰ that sits where the Menu Bar can't be reached.
+function menuItems(list, go, pages = false) {
+  const item = (label, fn, attrs = {}) => h('button', { type: 'button', role: 'menuitem', class: 'menuItem', ...attrs, onclick: fn ? go(fn) : null }, ...[label].flat());
+  if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
+  list.append(h('hr'));
+  if (editing) list.append(h('div', { class: 'menuNote muted' }, 'Save or exit Edit layout to open a Menu tab'));
+  for (const m of menuSorted().filter(m => !m.admin || can('admin'))) {
+    const off = m.coming || (editing && !m.view);
+    list.append(item([m.title, m.coming ? h('span', { class: 'muted' }, ' (coming)') : ''], () => { if (m.view) setView(m.view); else openMenuTab(m.key); },
+      { title: m.coming || m.tip, ...(off ? { disabled: true } : {}) }));
+  }
+  if (!pages) return;
+  list.append(h('hr'), h('div', { class: 'menuNote muted' }, 'Pages'));
+  for (const b of $$('#views button')) {
+    if (b.classList.contains('admin-only') && !can('admin') || b.classList.contains('op-only') && !can('operator')) continue;
+    const v = b.dataset.view;
+    list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(v === view && !(v === 'workspace' && menuTab) ? { class: 'menuItem cur' } : {}) }));
+  }
+}
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
 $('#menuBtn').onclick = ev => { ev.stopPropagation(); const l = $('#menuList'), show = l.classList.contains('hidden'); renderMenu(); l.classList.toggle('hidden', !show); $('#menuBtn').setAttribute('aria-expanded', String(show)); };
-document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) closeMenuList(); });
+document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) { closeMenuList(); closeMenuCopies(); } });
+
+// Fritz, 2026-10-21: the ☰ Menu is on almost every dialog and on the Menu Bar of every page, as a way to get around.
+// A copy of the button opens its own list (fixed to the window, so a small dialog can't cut it off). `leave` runs before
+// a choice and may say no; in a dialog it asks about unsaved changes and closes the dialog.
+const MENU_SVG = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 4h14M3 8h14M3 12h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const closeMenuCopies = () => { for (const l of $$('.menuCopy .menuList')) l.classList.add('hidden'); for (const b of $$('.menuCopy .menuBtn')) b.setAttribute('aria-expanded', 'false'); };
+function menuButton(leave, label = ' Menu') {
+  const list = h('div', { class: 'menuList menuFixed hidden', role: 'menu' });
+  const btn = h('button', { type: 'button', class: 'menuBtn', title: 'Menu: Edit layout, the Menu tabs and the pages', 'aria-haspopup': 'true', 'aria-expanded': 'false' });
+  btn.innerHTML = MENU_SVG + label;
+  btn.onclick = ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    const show = list.classList.contains('hidden');
+    closeMenuList(); closeMenuCopies();
+    if (!show) return;
+    list.innerHTML = '';
+    menuItems(list, fn => () => { list.classList.add('hidden'); if (!leave || leave() !== false) fn(); }, true);
+    list.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true');
+    const r = btn.getBoundingClientRect();
+    // right edge under the button, but never off either side of a phone screen
+    list.style.top = Math.round(r.bottom + 4) + 'px';
+    list.style.maxHeight = Math.max(160, innerHeight - r.bottom - 16) + 'px';
+    list.style.left = Math.round(Math.max(8, Math.min(r.right - list.offsetWidth, innerWidth - list.offsetWidth - 8))) + 'px';
+  };
+  return h('div', { class: 'menuWrap menuCopy' }, btn, list);
+}
+// every dialog gets the ☰ in its top right corner when it opens, except the ones that must be answered first
+// (a manual valve a Process waits on, the recovery code, the first-run sample pick, beer money): those carry data-nomenu
+const dlgSnap = d => JSON.stringify([...d.querySelectorAll('input, select, textarea')].map(i => i.type === 'checkbox' || i.type === 'radio' ? i.checked : i.value));
+function addDialogMenu(d) {
+  if ('nomenu' in d.dataset) return;
+  d._menuSnap = dlgSnap(d);
+  const host = d.querySelector(':scope > form') || d;
+  if (host.querySelector(':scope > .dlgMenu')) return;
+  const wrap = menuButton(() => {
+    if (dlgSnap(d) !== d._menuSnap && !confirm('This window has changes that are not saved. Leave them?')) return false;
+    // the dialog's own Cancel / Esc runs first, so whatever waits on it hears "cancel"
+    const ev = new Event('cancel', { cancelable: true });
+    d.dispatchEvent(ev);
+    if (d.open && !ev.defaultPrevented) d.close('cancel');
+  }, '');
+  wrap.classList.add('dlgMenu');
+  host.prepend(wrap);
+}
+const showModalPlain = HTMLDialogElement.prototype.showModal;
+HTMLDialogElement.prototype.showModal = function () { try { addDialogMenu(this); } catch (e) { console.error(e); } return showModalPlain.call(this); };
+// the Menu Bar's own ☰, for every page but the Tabs (the Tabs have theirs on the tab line)
+$('#top .right').prepend(menuButton());
 async function menuEditLayout() {
   closeMenuList();
   if (editing) return leaveLayout();

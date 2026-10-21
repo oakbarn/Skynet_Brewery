@@ -1,6 +1,6 @@
 # The ☰ Menu
 
-The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit layout box used to be. Press it to see its choices. (The top line of the panel with Processes, Settings, Help ... is the Menu Bar, see [The Menu Bar](40-menu-bar).)
+The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit layout box used to be. Press it to see its choices. The same ☰ Menu button is also on almost every window that pops up, and on the Menu Bar of every other page, see [The ☰ Menu everywhere](51-menu-everywhere). (The top line of the panel with Processes, Settings, Help ... is the Menu Bar, see [The Menu Bar](40-menu-bar).)
 
 - **Show Menu Bar** / **Hide Menu Bar**: the top line of the panel is hidden on the Tabs page; this brings it back. See [The Menu Bar](40-menu-bar).
 - **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
