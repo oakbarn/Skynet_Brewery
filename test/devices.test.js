@@ -75,6 +75,13 @@ sent.length = 0;
 store.setProp('Pump_Speed', 'enabled', false);
 assert.deepEqual(sent, ['PWM 44 0'], 'disabled PWM output goes to 0');
 
+// a Schema switch turns every output off (Relay is active low, so off is a 1 on its pin)
+store.setProp('Pump_Speed', 'enabled', true); store.setProp('Relay', 'state', true); store.setProp('Pump_Speed', 'value', 60); sent.length = 0;
+assert.equal(hw.allOff(), 3, 'relay, PWM and analog out switched off');
+assert.deepEqual(sent, ['DO 5 1', 'PWM 44 0', 'AO 45 0']);
+assert.equal(hw.allOff(), 0, 'nothing left on');
+sent.length = 0;
+
 hw._onLine(dev, 'DI 30 1'); assert.equal(store.getProp('Float', 'state'), false, 'inverted input');
 hw._onLine(dev, `A 1 ${1023 * 12 / 20}`); near(store.getProp('Press', 'value'), 15, 0.01, 'pressure'); assert.equal(store.getProp('Press', 'fault'), false);
 hw._onLine(dev, 'A 1 3'); assert.equal(store.getProp('Press', 'fault'), true, 'pressure fault');
