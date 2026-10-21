@@ -2,7 +2,7 @@
 
 A **Tab** is one screen of your brewery: a background picture with pumps, valves, temperatures, timers and pipes placed on it. The tab buttons sit at the top of the **Tabs** screen. On this screen the Menu Bar is hidden; pick **☰ Menu > Show Menu Bar** to bring it back (see [The Menu Bar](40-menu-bar)). Processes can switch every screen to a tab with `show tab "Brew Day"`.
 
-**Zoom** sets the size: **Fit** fills the width of your screen; 50 % to 125 % are fixed sizes.
+**Zoom** and **Full screen** are in the **☰ Menu > Zoom** Menu tab. See [Zoom and Full screen](41-zoom-and-full-screen).
 
 ## Using a tab on brew day
 

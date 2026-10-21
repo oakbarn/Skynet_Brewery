@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Store } from '../lib/store.js';
-import { Schemas } from '../lib/schemas.js';
+import { Schemas, versionName, versionFile } from '../lib/schemas.js';
 import { EquipmentProfiles } from '../lib/equipment.js';
 import { equipVolumes } from '../public/brewcalc.js';
 
@@ -139,6 +139,25 @@ schemas.layoutAction('use');
 assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['c2', 'g3'], 'use: the Default Layout goes on the tabs, pictures stay');
 schemas.layoutAction('keep'); assert.equal(store.config.layoutFromProfile, false);
 assert.throws(() => schemas.layoutAction('nope'), /Unknown/);
+
+// Schema versions: <name>_yyyymmdd_hh_mm, kept under that file name; the version survives a reload and can be restored
+assert.equal(versionName('Oak Barn', new Date(2026, 9, 21, 9, 5)), 'Oak Barn_20261021_09_05');
+assert.equal(versionFile('Oak Barn_20261021_09_05'), 'Oak_Barn_20261021_09_05.json');
+const act = store.config.schema.id;
+const nv = schemas.newVersion();
+assert.match(nv.version, new RegExp(`^${store.config.schema.name}_\\d{8}_\\d{2}_\\d{2}$`));
+assert.equal(store.config.schema.version, nv.version);
+assert.equal(JSON.parse(fs.readFileSync(schemas.file(act))).version, nv.version, 'the Schema file has its version');
+assert.ok(fs.existsSync(path.join(schemas.versionsDir(act), nv.file)), 'a copy under the version file name');
+assert.ok(schemas.listBackups(act).some(b => b.version && b.file === nv.file), 'versions are listed with the backups');
+assert.throws(() => schemas.newVersion(sec === act ? first : sec), /Only the loaded Schema/);
+const other = sec === act ? first : sec;
+schemas.load(other); assert.equal(store.config.schema.version, undefined, 'another Schema has its own (no) version');
+schemas.load(act); assert.equal(store.config.schema.version, nv.version, 'the version comes back on load');
+store.config.workspaces.push({ name: 'After version' }); store.writeConfig();
+schemas.restore(act, nv.file, { version: true });
+assert.ok(!store.config.workspaces.some(w => w.name === 'After version'), 'restoring a version puts it back');
+assert.equal(store.config.schema.version, nv.version);
 
 // volumes as in BeerSmith
 const v = equipVolumes({ batchSize: 5.5, boilTime: 60, boilOffRate: 1, trubChillerLoss: 0.5, coolingShrinkage: 4, kettleVolume: 7 });
