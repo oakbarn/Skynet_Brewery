@@ -44,6 +44,22 @@ Any attribute with only two choices is `true` or `false`:
 
 If a name has characters other than letters, digits and `_`, put it in quotes before the dot: `"BK (Front)".visible = true`.
 
+## Is a Process running?
+
+`.running` on a Process name is `true` while that Process runs and `false` when it is stopped, finished or stopped by an error. It works in an `if`, `elseif`, `wait` or anywhere a value goes:
+
+```
+if my_Process_Mash.running = true
+  stop my_Process_Mash
+endif
+```
+
+`if my_Process_Mash.running == true` means the same: in an `if` a single `=` asks, just like `==`. The C style works too: `if (my_Process_Mash.running) stop my_Process_Mash;` and `if (!Looper_Temps.running) start Looper_Temps;`.
+
+`.running` on a Process is read only. A line like `my_Process_Mash.running = false` is an error ("my_Process_Mash.running is read only: use start my_Process_Mash or stop my_Process_Mash"); use `start` and `stop` to change it. A timer's `.running` is different: it can be set, and it starts or stops the timer.
+
+Autofill shows `running` after a Process name and a dot.
+
 ## C, C# and JavaScript spellings
 
 If you know C, C++, C# or JavaScript, you can use the spellings you are used to. They are only other ways to write the same Process commands, so the Process works the same either way. It is not JavaScript: only the spellings below are understood.
@@ -119,6 +135,8 @@ BK_Temp.valueColor = ""
 - `valueType` is `LED`, `Text` or `Gauge`. Something with an ON / OFF state (a pump, valve, switch) can only be `LED` or `Text`.
 - `""` puts back the look set in its properties.
 
+Every text box also has `.foreColor`, `.backColor`, `.alignment` (Left, Center, Right), `.width`, `.height`, `.xPosition` and `.yPosition`, for example `Pump_1.foreColor = "Red"` or `Text_1.xPosition = 400`. A Text added with **+ Text** has a name too (`Text_1`). See [Text boxes](49-text-boxes).
+
 The change lasts until the panel restarts. To keep a look, set it in the item's properties, or start new items from a [Tab Background Profile](36-tab-and-valve-profiles).
 
 ## Names have no spaces
@@ -165,7 +183,7 @@ While a Process runs, the Processes screen shows the step it is on. To show it o
 
 ## Lock the Equipment Profile
 
-`lock_Equipment` locks the Equipment Profile of the loaded Schema, so its numbers, equipment and pipes can't be changed. `unlock_Equipment` unlocks it again. Put them on a line of their own, for example at the start and end of a brew day:
+`lock_Equipment` locks the Equipment Profiles of every Tab of the loaded Schema (usually the Hot Side and Fermentation profiles), so their numbers, equipment and pipes can't be changed. `unlock_Equipment` unlocks them again. Put them on a line of their own, for example at the start and end of a brew day:
 
 ```
 lock_Equipment
@@ -174,4 +192,4 @@ step "Mash in"
 unlock_Equipment
 ```
 
-The Process output says which profile was locked. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.
+The Process output says which profiles were locked. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.

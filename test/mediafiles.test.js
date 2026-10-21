@@ -51,4 +51,10 @@ assert.deepEqual(mf.tree(0).folders[0].folders.map(f => f.name), ['B']);
 assert.throws(() => mf.rename(0, 'A', 'A/B/A'), /inside itself/);
 mf.rename(0, 'bru/alarm.wav', 'C/alarm.wav'); assert.ok(fs.existsSync(path.join(d, 'C/alarm.wav')));
 assert.equal(mf.tree(0).name, path.basename(d));
+// SVG pictures (Skynet Templates are drawn with them) can't be deleted, renamed or moved, nor a folder holding one
+fs.mkdirSync(path.join(d, 'S'), { recursive: true }); fs.writeFileSync(path.join(d, 'S/kettle.svg'), '<svg/>');
+assert.throws(() => mf.remove(0, 'S/kettle.svg'), /SVG pictures can't be deleted/);
+assert.throws(() => mf.rename(0, 'S/kettle.svg', 'S/pot.svg'), /SVG/);
+assert.throws(() => mf.rename(0, 'S', 'T'), /folder has SVG/);
+assert.ok(fs.existsSync(path.join(d, 'S/kettle.svg')));
 console.log('mediafiles tests passed');

@@ -4,11 +4,13 @@ The **Menu Bar** is the top line of the panel: the panel name, the **Schema** pi
 
 ## Hidden on every Tab
 
-When a Tab is showing (one of your screen tabs, or a Menu tab like Default), the Menu Bar is hidden, so the tab gets the room. This is handy on a phone.
+When one of your Tabs is showing, the Menu Bar is hidden, so the Tab gets the room. This is handy on a phone.
+
+Only your Tabs hide it. Every **☰ Menu** tab (Zoom, Default, Equipment Profile, Schema, About ...) and every other page (Processes, Log, Settings, Help ...) always shows the Menu Bar.
 
 - Press **☰ Menu** (top right) and pick **▼ Show Menu Bar** to bring it back.
 - Press **☰ Menu** and pick **▲ Hide Menu Bar** to hide it again.
-- Going to another page (Processes, Log, Settings ...) shows the Menu Bar there. When you come back to the Tabs page it is hidden again.
+- Going to a ☰ Menu tab or another page (Processes, Log, Settings ...) shows the Menu Bar there. When you come back to a Tab it is hidden again.
 - In **Full screen** the Menu Bar stays hidden too. Press Esc or **Exit full screen** to leave full screen.
 
 ## Always showing the Menu Bar

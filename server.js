@@ -10,6 +10,7 @@ import { modernize, removeSpacesOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
+import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
 import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
@@ -18,6 +19,7 @@ import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas } from './lib/schemas.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
+import { Templates } from './lib/templates.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
@@ -32,6 +34,7 @@ import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds } from './public/naming.js';
+import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -59,6 +62,9 @@ auth.passwordRules = () => store.config.passwordRules;    // Settings > Password
 const passwordRulesView = () => ({ ...auth.rules(), text: describePasswordRules(auth.rules()), choices: Object.fromEntries(Object.entries(PW_CHARSETS).map(([k, v]) => [k, v.text])), limits: PW_LIMITS });
 const messaging = new Messaging(DATA);
 // Testing mode (Settings > "Start fresh logins after each update", on unless turned off)
+// Panel version (version.json, stamped by GitHub on every merge): Menu Bar and ☰ Menu > About
+const PANEL_VERSION = readVersion(ROOT);
+const versionCheck = new VersionCheck(PANEL_VERSION);
 const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
 const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
 sim.apply();
@@ -84,6 +90,8 @@ const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipmen
 const schemas = new Schemas(store, { engine, hw, profiles });
 // Mash and Boil Profiles (Menu > Mash Profile / Boil Profile), shared by every Schema
 const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
+// Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
+const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
 const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
@@ -198,7 +206,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/stopall' || p === '/ui/import/beerxml' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -387,8 +395,9 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
+  if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
     const el = store.get(name);
@@ -409,7 +418,8 @@ async function route(req, res) {
   }
   if (p === '/ui/layout' && m === 'PUT') {
     const body = await jsonBody(req);
-    schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: its equipment and pipes can't change
+    schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
+    if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
     store.saveLayout(body);
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
@@ -490,9 +500,10 @@ async function route(req, res) {
   const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
   if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
   if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
-  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
-  if (p === '/ui/schema/layout' && m === 'POST') return ok(res, schemas.layoutAction((await jsonBody(req)).action));
-  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version|export))?$/.exec(p);
+  // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
+  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
+  if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
+  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version|export|clone))?$/.exec(p);
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
     if (sc[2] === 'backup' && m === 'POST') return ok(res, { ok: true, file: schemas.backupSchema(sc[1]) });
@@ -500,6 +511,7 @@ async function route(req, res) {
     if (sc[2] === 'backups' && m === 'GET') return ok(res, schemas.listBackups(sc[1]));
     if (sc[2] === 'restore' && m === 'POST') { const b = await jsonBody(req); schemas.restore(sc[1], b.file, { version: !!b.version }); return ok(res, schemaView()); }
     if (sc[2] === 'version' && m === 'POST') { const r = schemas.newVersion(sc[1]); return ok(res, { ...schemaView(), ...r }); }
+    if (sc[2] === 'clone' && m === 'POST') { const b = await jsonBody(req); const made = schemas.clone(sc[1], b.name, { load: !!b.load }); return ok(res, { ...schemaView(), made }); }
     if (sc[2] === 'load' && m === 'POST') { schemas.load(sc[1]); return ok(res, schemaView()); }
     if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
     if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
@@ -514,12 +526,21 @@ async function route(req, res) {
     if (sc[2] && m === 'PUT') { const q = ps.save(sc[2], await jsonBody(req)); return ok(res, { saved: q, list: ps.list() }); }
     if (sc[2] && m === 'DELETE') { ps.remove(sc[2]); return ok(res, { list: ps.list() }); }
   }
+  // Vessel and Bundled Fitting Templates: everyone sees them, admins make and change them (Skynet ones only while Skynet builds them)
+  if (p === '/ui/templates' && m === 'GET') return ok(res, templates.view());
+  sc = /^\/ui\/templates\/(vessel|fitting)(?:\/([A-Za-z0-9_-]+))?$/.exec(p);
+  if (sc) {
+    if (!sc[2] && m === 'POST') { const b = await jsonBody(req); const made = templates.create(sc[1], b.name, { from: b.from, skynet: b.skynet }); return ok(res, { made: made.name, ...templates.view() }); }
+    if (sc[2] && m === 'GET') return ok(res, templates.get(sc[1], sc[2]));
+    if (sc[2] && m === 'PUT') { const t = templates.save(sc[1], sc[2], await jsonBody(req)); return ok(res, { saved: t, ...templates.view() }); }
+    if (sc[2] && m === 'DELETE') { templates.remove(sc[1], sc[2]); return ok(res, templates.view()); }
+  }
   // Equipment Profiles: everyone sees them, admins make and change them
-  const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id) }));
+  const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id), usedOn: schemas.usedOn(q.id) }));
   if (p === '/ui/equipment' && m === 'GET') return ok(res, profileView());
   if (p === '/ui/equipment' && m === 'POST') {
     const b = await jsonBody(req), made = profiles.create(b.name, b.from);
-    if (b.assign) schemas.setProfile(made.id);           // "Make it unique to this Schema": the copy goes on the loaded Schema
+    if (b.assign) schemas.setProfile(b.tab, made.id, { layout: b.layout });   // "Make it unique" or "Use it on this Tab": the new one goes on that Tab
     return ok(res, { made: made.id, list: profileView() });
   }
   sc = /^\/ui\/equipment\/([a-z0-9-]+)(\/lock)?$/.exec(p);
@@ -527,7 +548,7 @@ async function route(req, res) {
     if (!profiles.has(sc[1])) return fail(res, 404, 'No such Equipment Profile');
     if (sc[2] && m === 'PUT') {
       const on = !!(await jsonBody(req)).locked;
-      if (sc[1] === store.config.equipmentProfile) schemas.lock(on, me.name); else profiles.setLock(sc[1], on, me.name);
+      schemas.lockProfile(sc[1], on, me.name);
       return ok(res, { list: profileView() });
     }
     if (sc[2]) return fail(res, 405, 'Use PUT');
@@ -540,6 +561,16 @@ async function route(req, res) {
   }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
+  // Log page > Download CSV: pick values (or a saved CSV set) and a time span; the file is named after them
+  if (p === '/ui/log/export.csv' && m === 'GET') {
+    const sp = url.searchParams, names = (sp.get('names') || '').split(',').map(s => s.trim()).filter(Boolean), tz = Number(sp.get('tz')) || 0;
+    const rows = logger.exportRows({ names, from: sp.get('from'), to: sp.get('to') });
+    const label = sp.get('label') || (names.length === 1 ? names[0] : names.length ? `${names.length}_values` : 'All');
+    const name = csvFileName(label, rows, tz);
+    res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Disposition': `attachment; filename="${name}"` });
+    return res.end(buildCsv(rows, { names, layout: sp.get('layout'), tz }));
+  }
+  if (p === '/ui/log/sets' && m === 'PUT') { store.config.logSets = cleanLogSets((await jsonBody(req)).sets); store.writeConfig(); broadcast('config', {}); return ok(res); }
   let s = /^\/ui\/log\/(once|now)\/(.+)$/.exec(p);
   if (s && m === 'POST') { if (s[1] === 'once') logger.arm(s[2]); else logger.logNow(s[2], 'ondemand'); return ok(res); }
 
@@ -659,6 +690,7 @@ const server = http.createServer((req, res) => {
 });
 const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
 server.listen(PORT, () => {
+  console.log(`Panel version: ${PANEL_VERSION.version || 'not stamped (not from a GitHub merge)'}`);
   console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();

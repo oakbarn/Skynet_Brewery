@@ -36,6 +36,7 @@ export function graphicTopic(g) {
   if (!g) return null;
   switch (g.kind) {
     case 'vessel':
+      if (g.vesselType === 'bfit' || g.template) return ['vessel-and-fitting-templates', 'tabvessel-and-tabfitting'];
       if (g.bundled) return ['equipment', 'bundle-a-vessel-with-its-ips'];
       return g.vesselType === 'vessel' ? ['vessel-tab'] : ['equipment', 'other-equipment'];
     case 'ip':
@@ -44,7 +45,7 @@ export function graphicTopic(g) {
       return ['pipes-and-hoses', 'ips-only-show-in-edit-layout'];
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
-    default: return ['tabs', 'changing-the-layout-admins'];      // a text
+    default: return ['text-boxes'];      // a text
   }
 }
 
@@ -52,6 +53,7 @@ export function graphicTopic(g) {
 const BAR = [
   ['#schemaPick, .schemaPick', ['schemas-and-equipment-profiles', 'pick-and-load-a-schema']],
   ['#menuTabs', ['menu', 'menu-tabs']],
+  ['.menuCopy', ['menu-everywhere']],
   ['.menuWrap', ['menu']],
   ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
@@ -73,24 +75,29 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'vAPI', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
   elementTopic({ type: 'vKonstant', kind: 'list' }), elementTopic({ type: 'vKonstant' }),
-  ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }].map(v => graphicTopic({ kind: 'vessel', ...v })),
+  ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
+  ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
   graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }),
   ...BAR.map(b => b[1])];
 
 // The yellow ? icons on the ☰ Menu tabs: a heading in a Menu tab goes to the Help part named for it ("_" = any other heading).
 // A heading matches when its text starts with the name (after a 🔒). Section headings inside a form only get an icon when named.
 const MENU_TOPICS = {
-  default: { _: ['menu', 'the-default-tab'] },
-  equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-a-schema-its-equipment-profile'],
-    'Vessels and equipment': ['schemas-and-equipment-profiles', 'build-and-bundle-equipment'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
+  default: { Text: ['text-boxes', 'defaults'], _: ['menu', 'the-default-tab'] },
+  equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-each-tab-its-equipment-profile'],
+    'Equipment list': ['schemas-and-equipment-profiles', 'build-the-equipment-list'], 'Made on the Vessel tab': ['vessel-tab'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
     Build: ['vessel-tab', 'ports-and-build'], _: ['vessel-tab'] },
+  vtemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },
+  etemplates: { _: ['vessel-and-fitting-templates', 'equipment-template-settings'] },
+  ftemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },
   layout: { _: ['schemas-and-equipment-profiles', 'the-default-layout'] },
   mash: { _: ['mash-and-boil-profiles', 'mash-profile'] },
   boil: { _: ['mash-and-boil-profiles', 'boil-profile'] },
   tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'give-a-tab-its-profile'], _: ['tab-and-valve-profiles', 'tab-background-profile'] },
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
+  schema: { 'Schemas on this Brain': ['schema-switching-and-cloning', 'clone-a-schema'], _: ['schema-switching-and-cloning'] },
 };
 export function menuTopic(key, heading, main = true) {
   const m = MENU_TOPICS[key]; if (!m) return null;

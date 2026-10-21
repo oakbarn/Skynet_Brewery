@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 320">
+  <!-- A plain gray tank (Fritz, 2026-10-21): no text on it. The vessel's Display Name is its only text. -->
+  <defs>
+    <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#7d858d"/><stop offset=".35" stop-color="#d4d9de"/><stop offset=".6" stop-color="#b3bac1"/><stop offset="1" stop-color="#6b737b"/></linearGradient>
+  </defs>
+  <rect x="20" y="22" width="220" height="276" rx="18" fill="url(#steel)" stroke="#3b4148" stroke-width="3"/>
+  <rect x="12" y="14" width="236" height="16" rx="6" fill="#9aa2aa" stroke="#3b4148" stroke-width="2"/>
+</svg>

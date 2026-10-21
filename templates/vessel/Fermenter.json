@@ -1,0 +1,10 @@
+{
+  "vesselType": "vessel", "vtype": "Fermenter", "image": "Images/samples/kettle.svg",
+  "maxVolume": 7, "minVolume": 3, "extraTrub": 0.5,
+  "std": { "type": "TC", "size": 1.5 },
+  "ports": {
+    "outlet": { "installed": true, "position": "Center Bottom", "fitting": "Valve_Only" },
+    "thermowell": { "installed": true, "position": "Center Low" },
+    "cip": { "installed": true, "position": "Lid", "fitting": "CIP_Ball_Valve" }
+  }
+}

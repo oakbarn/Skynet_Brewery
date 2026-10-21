@@ -68,15 +68,15 @@
 
 **Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
 
-**Schema**: one whole brewery setup (tabs, devices, elements, pipes and its Equipment Profile), kept in its own file and picked from the Schema dropdown at the top. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+**Schema**: one whole brewery setup (tabs, devices, elements, pipes and the Equipment Profile of each Tab), kept in its own file and picked from the Schema dropdown at the top. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
-**Equipment Profile**: the losses, vessels and piping of a brewery, made on the Equipment Profile tab of the ☰ Menu. Any Schema can use any profile: unique to one Schema, or shared by several. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+**Equipment Profile**: the losses, vessels and piping on one Tab of a brewery (for example the Hot Side, or Fermentation), made on the Equipment Profile tab of the ☰ Menu. Each Tab can have its own. Any Schema can use any profile on one of its Tabs: unique to one Tab, or shared by several Schemas. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **☰ Menu**: the button at the top right of the Tabs page. Edit layout is its first choice; the rest open Menu tabs. See [The ☰ Menu](33-menu).
 
 **Menu tab**: a page opened from the ☰ Menu (Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile). It shows next to the screen tabs, with a ✕ to close it, and has an Order number.
 
-**Default Layout**: the vessels, IPs, pipes and hoses stored in an Equipment Profile. A Schema follows it, or keeps its own layout.
+**Default Layout**: the vessels, fittings, IPs, pipes and hoses of one Tab, stored in that Tab's Equipment Profile. The Tab follows it, or keeps its own layout.
 
 **Mash Profile**: up to 4 mash steps (temperature and time) and the sparge. See [Mash and Boil Profiles](35-mash-and-boil-profiles).
 
@@ -89,3 +89,7 @@
 **Heat Source**: how a vessel is heated: Gas, Electric, RIMS, HERMS, Other or Unheated. See [The Vessel tab](34-vessel-tab).
 
 **Service**: what a valve carries: Gas, Room Temperature Liquid, or High Temperature Liquid (Stainless Steel). A gas valve can be a vessel's heat source.
+
+**Template**: a ready-made vessel (Vessel Template) or set of up to four fittings (Bundled Fitting Template), kept in a library. Skynet Templates come with the panel and are only cloned; User Templates are your own. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+
+**Tab_Vessel, Tab_Fitting**: the copy of a Template on a Tab. Not a Device and not a Widget, but it can hold both. Fully editable. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
