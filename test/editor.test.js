@@ -38,6 +38,8 @@ const blk = classify('/* a\nPump */ Pump', words);
 assert.equal(CLASSES[blk[5]], 'com'); assert.equal(CLASSES[blk[13]], 'dev');
 assert.equal(toHtml('a < b', classify('a < b')), 'a <span class="hl-op">&lt;</span> b');
 assert.equal(toHtml('if x', classify('if x'), 0, 4, [[3, 4]], 0), '<span class="hl-cmd">if</span> <mark class="cur">x</mark>');
+// C-style spellings are operators too: { } ; ++ --
+{ const t = 'if (x) { x++; }', c = classify(t); for (const ch of ['{', '}', ';', '++']) assert.equal(CLASSES[c[t.indexOf(ch)]], 'op', ch); }
 
 // ---- XML file: XHTML in color, with the plain text kept; the highlighted part keeps its line numbers
 const xml = processXml('Fill', text, words, text.indexOf('start'), text.indexOf('[L]') + 3);

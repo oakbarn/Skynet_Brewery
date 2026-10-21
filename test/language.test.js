@@ -160,5 +160,54 @@ assert.equal(store.getProp('vKStep_Brew', 'value'), '1.00001  Mash');
 eng.setClass('scrZ_Brew', 'sub');
 assert.match(eng.read('scrZ_Brew'), /step S\d+\.00000 "Heat"/);
 
+// ---- C, C# and JavaScript spellings (Fritz, 2026-10-21): the same commands, other spellings
+prints.length = 0;
+await run('proc_c', `new value vN;
+vN = 0;
+vN++;
+++vN;
+vN--;
+Kettle_SP = 10;
+Kettle_SP++;
+if (vN == 1 && !vKB_Flag == false) {
+  print "braces";
+} else if (vN == 2) {
+  print "wrong";
+} else {
+  print "wrong";
+}
+if (vN != 1)
+{
+  print "wrong"
+}
+else
+{
+  print "Allman"
+}
+if (vN == 1) print "one line"; else print "wrong";
+if (vN > 5) print "wrong"
+if vN == 1 {
+  if (Kettle_SP == 11) { print "nested" }
+}
+if vN == 2
+  print "wrong"
+else if Kettle_SP == 11
+  print "old if, else if"
+endif
+vN = 5--3;
+print vN;
+`);
+assert.deepEqual(prints, ['braces', 'Allman', 'one line', 'nested', 'old if, else if', '8']);
+assert.equal(store.getProp('Kettle_SP', 'value'), 11);
+// one condition in ( ) followed by more of it is still one condition, not a one-line if
+assert.deepEqual(compile('if (1 + 1) > 3\nprint "x"\nendif').stmts.map(s => s.op), ['if', 'print', 'endif']);
+assert.match(compile('}').errors[0].msg, /} without {/);
+assert.match(compile('{').errors[0].msg, /{ needs an if/);
+assert.deepEqual(compile('if (a) {\nx = 1').errors.map(e => e.msg), ['{ has no }']);
+assert.equal(compile('step "Mash in";').stmts[0].name, 'Mash in');
+assert.deepEqual(compile('print "a;b{}"').errors, []);
+// the rewriter leaves the new spellings alone and still updates BruControl lines written with them
+assert.equal(modernize('if ("Pump_Red" state == true) {\n"Kettle_SP" value++;\n}\n', n => store.get(n)).text, 'if (Pump_Red == true) {\nKettle_SP++;\n}\n');
+
 console.log('language tests passed');
 process.exit(0);
