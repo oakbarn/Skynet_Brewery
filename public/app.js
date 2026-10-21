@@ -2,6 +2,7 @@ import { addEyes } from './eye.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
+import { setRich } from './richtext.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -75,6 +76,9 @@ const can = need => RANK[S?.me?.role] >= RANK[need];
 const guard = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
 
 // ---------------------------------------------------------------- load + live
+// the size of \L large text in strings (☰ Menu > Default), always bigger than the text around it (style.css .rt-L)
+const TEXT_NORMAL = 18, TEXT_LARGE = 28;
+const setTextLarge = () => document.documentElement.style.setProperty('--textLarge', (+S.config.brewDefaults?.textLarge || TEXT_LARGE) + 'px');
 async function load() {
   S = await api('GET', '/ui/state');
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
@@ -82,6 +86,7 @@ async function load() {
   $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
+  setTextLarge();
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
     ...['mash', 'boil', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
@@ -386,7 +391,7 @@ function buildGfx(g) {
   const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id });
   place(n, g);
   if (g.kind === 'image') n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : '';
-  else { n.textContent = g.text || ''; n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.color = g.color || ''; n.style.fontWeight = g.bold ? '700' : ''; }
+  else { setRich(n, g.text || ''); n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.color = g.color || ''; n.style.fontWeight = g.bold ? '700' : ''; }
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
@@ -592,7 +597,7 @@ function fillEl(n, e0) {
     vl.style.alignItems = vl.style.justifyContent = '';
     styleEl(n, e);
   }
-  nm.textContent = v.displayname ?? e.name;
+  setRich(nm, v.displayname ?? e.name);
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
   switch (e.type) {
@@ -649,7 +654,7 @@ function fillEl(n, e0) {
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
-  vl.textContent = e.hideValue ? '' : text;
+  setRich(vl, e.hideValue ? '' : text);
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden');
   n.classList.toggle('fault', !!v.fault);
@@ -789,7 +794,8 @@ function choose(title, buttons, current) {
   return new Promise(res => {
     const d = $('#valDlg'); d.innerHTML = '';
     const close = v => { d.close(); res(v); };
-    d.append(h('div', { class: 'vdTitle' }, title),
+    const tt = h('div', { class: 'vdTitle' }); setRich(tt, title);
+    d.append(tt,
       h('div', { class: 'vdBtns' }, ...buttons.map(([label, val]) => h('button', { type: 'button', class: 'big' + (val === current ? ' cur' : '') + (val === true ? ' onb' : val === false ? ' offb' : ''), onclick: () => close(val) }, label))),
       h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => close(undefined) }, 'Cancel')));
     d.oncancel = () => res(undefined);
@@ -2715,7 +2721,11 @@ function renderConsole() {
   const all = $('#consoleAll').checked;
   const rows = S.console.filter(c => all || !curScript || c.script === curScript).slice(-400);
   const pad = n => String(n).padStart(2, '0');
-  $('#console').textContent = rows.map(c => { const d = new Date(c.ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${all ? '[' + c.script + '] ' : ''}${c.text}`; }).join('\n');
+  $('#console').replaceChildren(...rows.map(c => {
+    const d = new Date(c.ts), row = h('div');
+    setRich(row, `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${all ? '[' + c.script + '] ' : ''}${c.text}`);
+    return row;
+  }));
   $('#console').scrollTop = 1e9;
 }
 $('#consoleAll').onchange = renderConsole;
@@ -3480,13 +3490,19 @@ function renderDefaultTab(box) {
     ['_sn', 'Browsers (Chrome, Edge, Safari, iPhone, Android) play no sound until the screen is tapped or clicked once. So with this on, the button at the top says "Sound on (tap anywhere)" until your first tap or click, and the sound is on from then.', 'note'],
     ['_z', 'On startup', 'head'],
     ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
-    ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool']];
+    ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
+    ['_x', 'Text', 'head'],
+    ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px); empty = ${TEXT_LARGE}`, 'num']];
   const f = paneForm(fields, d, () => { }, !admin);
   // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
   const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
   now.onchange = () => setSound(now.checked);
   const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
-  const save = guard(async () => { f.read(); await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); toast('Defaults saved'); });
+  const save = guard(async () => {
+    f.read();
+    if (d.textLarge === '' || d.textLarge === null) delete d.textLarge;
+    if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
+    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin ? {} : { disabled: true }) });

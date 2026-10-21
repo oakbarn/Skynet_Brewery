@@ -21,7 +21,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 ## The Default tab
 
-**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). Press **Save**.
+**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). **Large text size** is how big `\L` large text in a Process string is (more than 18, see [Codes inside text](22-process-language)). Press **Save**.
 
 **Sound** (at the top of the Default tab and under the defaults):
 
