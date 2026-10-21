@@ -4,9 +4,10 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 
 - **Show Menu Bar** / **Hide Menu Bar**: the top line of the panel is hidden on the Tabs page; this brings it back. See [The Menu Bar](40-menu-bar).
 - **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
-- The **Menu tabs**: Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
+- The **Menu tabs**: Zoom (number 1 to start with), Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
+- **About** (at the end): who is signed in, **Sign out**, and the loaded Schema and its version. See [About and Schema versions](42-about-and-schema-versions).
 
 ## Menu tabs
 
@@ -20,7 +21,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 ## The Default tab
 
-**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. Press **Save**.
+**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). Press **Save**.
 
 **Sound** (at the top of the Default tab and under the defaults):
 
@@ -33,8 +34,10 @@ Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any s
 
 ## The other Menu tabs
 
+- **Zoom**: how big the tabs show, and Full screen. See [Zoom and Full screen](41-zoom-and-full-screen).
 - **Equipment Profile**: the losses and efficiency, the vessels, and which profile the loaded Schema uses. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Vessel**: one vessel (or chiller, coil, filter) at a time. See [The Vessel tab](34-vessel-tab).
 - **Default Layout**: the vessels and pipes a Schema gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
 - **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
+- **About**: see [About and Schema versions](42-about-and-schema-versions).

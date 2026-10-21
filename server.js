@@ -410,6 +410,7 @@ async function route(req, res) {
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: its equipment and pipes can't change
     store.saveLayout(body);
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
+    if (body.updateVersion) return ok(res, schemas.newVersion());   // the "Update Version" switch next to Save
     return ok(res);
   }
   if (p === '/ui/settings' && m === 'PUT') {
@@ -486,12 +487,13 @@ async function route(req, res) {
   if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') return ok(res, schemas.layoutAction((await jsonBody(req)).action));
-  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore))?$/.exec(p);
+  let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version))?$/.exec(p);
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
     if (sc[2] === 'backup' && m === 'POST') return ok(res, { ok: true, file: schemas.backupSchema(sc[1]) });
     if (sc[2] === 'backups' && m === 'GET') return ok(res, schemas.listBackups(sc[1]));
-    if (sc[2] === 'restore' && m === 'POST') { schemas.restore(sc[1], (await jsonBody(req)).file); return ok(res, schemaView()); }
+    if (sc[2] === 'restore' && m === 'POST') { const b = await jsonBody(req); schemas.restore(sc[1], b.file, { version: !!b.version }); return ok(res, schemaView()); }
+    if (sc[2] === 'version' && m === 'POST') { const r = schemas.newVersion(sc[1]); return ok(res, { ...schemaView(), ...r }); }
     if (sc[2] === 'load' && m === 'POST') { schemas.load(sc[1]); return ok(res, schemaView()); }
     if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
     if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
