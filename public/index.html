@@ -183,10 +183,13 @@
 
   <!-- ===== Devices ===== -->
   <section id="view-devices" class="view">
-    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
-    <h3 class="admin-only">Add device</h3>
+    <h3>Interfaces (boards)</h3>
+    <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID (1 to 4 letters) starts the suggested name of every Device on it, for example MB_25_PWM_VlV_Fly_Sparge_SP.</p>
+    <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
+    <h3 class="admin-only">Add Interface</h3>
     <div class="form row admin-only">
-      <label>Name <input id="devName" placeholder="MEGA1"></label>
+      <label>Name <input id="devName" placeholder="Main Brewery Mega USB"></label>
+      <label>Interface ID (1-4 letters, empty = first letters of the name) <input id="devId" placeholder="MB" maxlength="7" size="6"></label>
       <label>Type <select id="devType"><option value="serial">Arduino / ESP32 board (USB)</option><option value="ethernet">Board on Ethernet (wired)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
       <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
       <button id="scanPorts">Scan ports</button>
