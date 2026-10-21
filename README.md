@@ -195,14 +195,15 @@ Names have no spaces (a space typed in a name becomes `_`). Processes have a cla
 
 **Simulation mode** (Settings > Simulation, admins): every board is replaced by the simulator so no real hardware is switched, a yellow bar shows on every screen, and time can run up to 120× faster, skip ahead by hand, skip to the next event, or skip by itself from a Time jumps table. The Process timeline works out when each step of a Process happens. See the Help page *Simulation mode*.
 
-## 3a. Config Editor (admins only)
+## 3a. Schema.json (admins only)
 
-The **Config** page shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
+The **Schema.json** page (it was called **Config**) shows the whole setup file (`config/brewery.json`) as text. Operators and viewers do not see it and cannot reach it.
 
 - **A backup copy is made every time the page opens** (in `config/backups`, named with the date and time). If nothing has changed since the newest copy, no new copy is made. Another copy is made before every save or restore.
 - **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
 - **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
 - **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
+- **Save as .json file** saves a Schema (its tabs, devices, widgets, pipes and Equipment Profile drawing, no logins or panel settings) to this computer. The file is named after the Schema version, `Name_yyyymmdd_hh_mm.json`.
 
 ## 4. API (for Node-RED or other programs)
 
