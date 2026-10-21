@@ -157,6 +157,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #toast.bad { border-color: var(--bad); color: var(--bad); }
 #wsSizer { position: relative; margin: 0 auto; }
 body.fullscreen header#top { display: none; }
+body.onTabs.hideMenuBar:not(.menuBarOn) header#top { display: none; }   /* on the Tabs page the Menu Bar is hidden; ☰ Menu > Show Menu Bar brings it back */
 body.fullscreen main { padding-top: 6px; }
 #ws { transform-origin: 0 0; position: absolute; left: 0; top: 0; }
 
