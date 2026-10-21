@@ -199,6 +199,21 @@ print vN;
 `);
 assert.deepEqual(prints, ['braces', 'Allman', 'one line', 'nested', 'old if, else if', '8']);
 assert.equal(store.getProp('Kettle_SP', 'value'), 11);
+// make a variable and set it on one line, the same as two lines
+prints.length = 0;
+await run('proc_d', `new value vV_Hop1F = 10
+new string vS = "Hop " + vV_Hop1F;
+new bool vB = vV_Hop1F > 5
+new value vTwo
+vTwo = 10
+print vS
+if (vB && vTwo == vV_Hop1F) print "same"
+`);
+assert.deepEqual(prints, ['Hop 10', 'same']);
+assert.deepEqual(compile('new value vX = 1').stmts.map(s => s.op), ['new', 'assign']);
+assert.match(compile('new value vX 5').errors[0].msg, /Too many words after new/);
+assert.match(compile('new value vX =').errors[0].msg, /needs a value/);
+assert.equal(modernize('new value vX = 1\nvX = 2\n').changed, 0);
 // one condition in ( ) followed by more of it is still one condition, not a one-line if
 assert.deepEqual(compile('if (1 + 1) > 3\nprint "x"\nendif').stmts.map(s => s.op), ['if', 'print', 'endif']);
 assert.match(compile('}').errors[0].msg, /} without {/);

@@ -51,6 +51,7 @@ If you know C, C++, C# or JavaScript, you can use the spellings you are used to.
 | You can write | It means |
 |---|---|
 | `Kettle_SP = 185.5;` | A `;` at the end of a line is allowed. It also lets you put two commands on one line: `Pump_Red = true; Pump_Blue = false;` |
+| `new value vV_Hop1F = 10` | `new value vV_Hop1F` and then `vV_Hop1F = 10` on the next line (both ways work) |
 | `vCount++` and `vCount--` | `vCount += 1` and `vCount -= 1` (`++vCount` works too) |
 | `if (a) { ... }` | `if a` ... `endif` |
 | `} else if (b) {` | `elseif b` |
@@ -63,8 +64,7 @@ If you know C, C++, C# or JavaScript, you can use the spellings you are used to.
 A Process in this style:
 
 ```
-new value vCount;
-vCount = 0;
+new value vCount = 0;
 [Again]
 vCount++;
 if (vCount < 3 && !alm_Hops) {
