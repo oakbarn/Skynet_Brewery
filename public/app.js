@@ -2853,6 +2853,7 @@ function renderSettings() {
   $('#setRestartAlarm').value = alarms.some(e => e.name === c.restartAlarm) ? c.restartAlarm : '';
   renderDonate();
   renderSimSettings();
+  renderPasswordRules();
 }
 // ---- accounts
 addEyes();
@@ -2863,6 +2864,27 @@ $('#pwSave').onclick = guard(async () => {
   for (const i of ['#pwCur', '#pwNew', '#pwNew2']) $(i).value = '';
   toast('Password changed. Other phones and computers signed in as you are signed out.');
 });
+// ---- password rules: shown next to every new-password box; admins change them in Settings > Password rules
+function renderPasswordRules() {
+  const r = S.passwordRules;
+  for (const p of $$('.pwRulesText')) p.textContent = r.text;
+  for (const i of ['#pwNew', '#pwNew2', '#nuPass']) $(i).maxLength = r.max;
+  if (!can('admin')) return;
+  $('#prAllowed').replaceChildren(...Object.entries(r.choices).map(([k, t]) => h('option', { value: k }, t)));
+  $('#prAllowed').value = r.allowed;
+  $('#prCustom').value = r.custom;
+  $('#prCustomRow').classList.toggle('hidden', r.allowed !== 'custom');
+  $('#prMin').value = r.min; $('#prMax').value = r.max;
+  for (const i of ['#prMin', '#prMax']) { $(i).min = r.limits.min; $(i).max = r.limits.max; }
+}
+$('#prAllowed').onchange = () => $('#prCustomRow').classList.toggle('hidden', $('#prAllowed').value !== 'custom');
+$('#prSave').onclick = guard(async () => {
+  const min = Number($('#prMin').value), max = Number($('#prMax').value), { limits } = S.passwordRules;
+  if (!(min >= limits.min && min <= limits.max)) throw new Error(`Min length must be ${limits.min} to ${limits.max}`);
+  if (!(max >= min && max <= limits.max)) throw new Error(`Max length must be from the min length (${min}) up to ${limits.max}`);
+  await api('PUT', '/ui/settings', { passwordRules: { allowed: $('#prAllowed').value, custom: $('#prCustom').value, min, max } });
+  await load(); toast('Password rules saved');
+});
 async function renderUsers() {
   if (!can('admin')) return;
   const users = await api('GET', '/auth/users');
@@ -2871,7 +2893,7 @@ async function renderUsers() {
     const role = h('select', { onchange: guard(async ev => { try { await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { role: ev.target.value }); toast(`${u.name} is now ${ev.target.value}`); } finally { if (u.name === S.me.name) location.reload(); else renderUsers(); } }) },
       ...S.roles.map(r => h('option', { value: r, ...(r === u.role ? { selected: true } : {}) }, r[0].toUpperCase() + r.slice(1))));
     tb.append(h('tr', {}, h('td', {}, u.name + (u.name === S.me.name ? ' (you)' : '')), h('td', {}, role), h('td', {},
-      h('button', { onclick: guard(async () => { const pw = prompt(`New password for ${u.name} (at least 8 characters)`); if (!pw) return; await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { password: pw }); toast('Password set'); }) }, 'Set password'), ' ',
+      h('button', { onclick: guard(async () => { const pw = prompt(`New password for ${u.name}\n${S.passwordRules.text}`); if (!pw) return; await api('PUT', '/auth/users/' + encodeURIComponent(u.name), { password: pw }); toast('Password set'); }) }, 'Set password'), ' ',
       h('button', { class: 'danger', onclick: guard(async () => { if (!confirm(`Remove user ${u.name}?`)) return; await api('DELETE', '/auth/users/' + encodeURIComponent(u.name)); renderUsers(); }) }, 'Remove'))));
   }
 }
@@ -2890,7 +2912,7 @@ async function renderContact(who) {
     $('#ctUser').innerHTML = ''; for (const u of users) $('#ctUser').append(h('option', { value: u.name, ...(u.name === who ? { selected: true } : {}) }, u.name));
   }
   const c = await api('GET', '/auth/contact?user=' + encodeURIComponent(who));
-  $('#ctEmail').value = c.email; $('#ctPhone').value = c.phone;
+  $('#ctEmail').value = c.email || ''; $('#ctPhone').value = c.phone || '';
   $('#ctVia').innerHTML = '';
   $('#ctVia').append(h('option', { value: '' }, '(no texts)'), ...Object.entries(c.carriers).map(([k, n]) => h('option', { value: k }, n)), h('option', { value: 'twilio' }, 'Twilio'));
   $('#ctVia').value = c.textVia;

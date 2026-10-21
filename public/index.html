@@ -318,6 +318,7 @@
       <label>New password again <input type="password" id="pwNew2" autocomplete="new-password"></label>
       <button id="pwSave">Change password</button>
     </div>
+    <p class="muted pwRulesText"></p>
     <h4>Sign-in codes by email or text</h4>
     <p class="muted">Instead of a password you can tap <b>Email or text me a code</b> on the sign-in page. The code goes to the email address and/or mobile number here.</p>
     <div class="form row">
@@ -337,6 +338,16 @@
         <label>Password <input type="password" id="nuPass" autocomplete="new-password"></label>
         <label>Role <select id="nuRole"><option value="viewer">Viewer</option><option value="operator">Operator</option><option value="admin">Admin</option></select></label>
         <button id="nuAdd" class="primary">Add user</button>
+      </div>
+      <p class="muted pwRulesText"></p>
+      <h3>Password rules</h3>
+      <p class="muted">What a new password may look like. The rules are checked when a password is made or changed (first admin setup, Change password, Add user, Set password and Forgot password). Passwords made before a change keep working.</p>
+      <div class="form row">
+        <label>Allowed characters <select id="prAllowed"></select></label>
+        <label id="prCustomRow" class="hidden">Characters a password may use <input id="prCustom" autocomplete="off" spellcheck="false" placeholder="e.g. abcdefghijklmnopqrstuvwxyz0123456789!#$"></label>
+        <label>Min length <input id="prMin" type="number" step="1"></label>
+        <label>Max length <input id="prMax" type="number" step="1"></label>
+        <button id="prSave" class="primary">Save password rules</button>
       </div>
       <h3>Recovery code</h3>
       <p class="muted">For a forgotten password: on the sign-in page, <b>Forgot password?</b> takes a user name, this code and a new password. It only works from your home WiFi or Tailscale, and each code works once. Forgot a helper's password? Use <b>Set password</b> above instead.</p>
