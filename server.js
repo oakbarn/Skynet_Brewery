@@ -32,6 +32,7 @@ import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds } from './public/naming.js';
+import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -59,6 +60,9 @@ auth.passwordRules = () => store.config.passwordRules;    // Settings > Password
 const passwordRulesView = () => ({ ...auth.rules(), text: describePasswordRules(auth.rules()), choices: Object.fromEntries(Object.entries(PW_CHARSETS).map(([k, v]) => [k, v.text])), limits: PW_LIMITS });
 const messaging = new Messaging(DATA);
 // Testing mode (Settings > "Start fresh logins after each update", on unless turned off)
+// Panel version (version.json, stamped by GitHub on every merge): Menu Bar and ☰ Menu > About
+const PANEL_VERSION = readVersion(ROOT);
+const versionCheck = new VersionCheck(PANEL_VERSION);
 const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
 const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
 sim.apply();
@@ -387,8 +391,9 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
+  if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   if (p === '/ui/set' && m === 'POST') {
     const { name, prop, value } = await jsonBody(req);
     const el = store.get(name);
@@ -659,6 +664,7 @@ const server = http.createServer((req, res) => {
 });
 const PORT = Number(process.env.PORT ?? store.config.port ?? 8080);
 server.listen(PORT, () => {
+  console.log(`Panel version: ${PANEL_VERSION.version || 'not stamped (not from a GitHub merge)'}`);
   console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();

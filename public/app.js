@@ -87,6 +87,7 @@ async function load() {
   $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
+  $('#panelVer').textContent = panelVersionName();
   setTextLarge();
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
@@ -3636,12 +3637,28 @@ function renderAboutTab(box) {
   box.append(h('h3', {}, 'About'), h('div', { class: 'menuNarrow' },
     h('dl', { class: 'aboutGrid' },
       ...item('Panel', S.config.title || 'Skynet Brew Panel'),
+      ...item('Panel version', panelVersionBox()),
       ...item('Signed in as', `${S.me.name} (${S.me.role})`),
       ...item('Schema', act.name || '(none)'),
       ...item('Schema version', act.version || 'No version yet'),
       ...(row?.updated ? item('Last saved', new Date(row.updated).toLocaleString()) : [])),
     act.version ? '' : h('p', { class: 'muted' }, 'Turn on "Update Version" next to Save layout (or pick "Save a new version now" in the Schema list) to give the Schema a version.'),
     saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: signOut }, 'Sign out'))));
+}
+
+const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + (v.changed ? ' + changes' : '') : 'Skynet-v.(not stamped)'; };
+// Panel version (version.json, stamped by GitHub on every merge) and whether GitHub has a newer one
+function panelVersionBox() {
+  const v = S.panelVersion || {}, note = h('div', { class: 'muted' }, v.version ? 'Checking GitHub ...' : '');
+  if (!v.version) note.textContent = 'Not stamped: this copy did not come from a GitHub merge.';
+  else {
+    api('GET', '/ui/version/latest').then(r => {
+      note.replaceChildren(h('span', { class: 'verState ver-' + r.state }, r.text));
+      if (v.repo) note.append(' ', h('a', { href: `https://github.com/${v.repo}/releases`, target: '_blank', rel: 'noopener' }, 'Versions on GitHub'));
+    }).catch(e => { note.textContent = 'Could not check GitHub: ' + e.message; });
+  }
+  return h('div', {}, h('b', {}, panelVersionName()),
+    v.merged ? h('div', { class: 'muted' }, `Merged ${new Date(v.merged).toLocaleString()}` + (v.commit ? ` (code ${v.commit})` : '')) : '', note);
 }
 
 // ---- Equipment Profile tab

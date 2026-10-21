@@ -629,3 +629,8 @@ body.role-viewer .op-only { display: none !important; }
 /* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
 .rt-b { font-weight: bolder; }
 .rt-L { font-size: max(var(--textLarge, 28px), 1.25em); line-height: 1.1; }
+/* Panel version (version.json from GitHub) on the Menu Bar and in ☰ Menu > About */
+.panelVer { font-weight: 400; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.verState.ver-current { color: var(--ok); }
+.verState.ver-old { color: var(--warn); font-weight: 700; }
+.verState.ver-changed { color: var(--warn); }
