@@ -33,6 +33,16 @@ assert.equal((await new VersionCheck(v, gh('', 404)).latest()).state, 'unknown',
 assert.equal((await new VersionCheck(v, async () => { throw new Error('offline'); }).latest()).state, 'unknown');
 assert.equal((await new VersionCheck({ version: '' }, gh('x')).latest()).state, 'unknown', 'not stamped: nothing to compare');
 
+// someone else's copy (a fork): their GitHub user name instead of Skynet
+stamp('brewer-42-v.20261021_16_00');
+const fork = readVersion(root);
+assert.equal(fork.version, 'brewer-42-v.20261021_16_00');
+assert.equal((await new VersionCheck(fork, gh('brewer-42-v.20261021_16_00')).latest()).state, 'current');
+assert.equal((await new VersionCheck(fork, gh('brewer-42-v.20261101_09_00')).latest()).state, 'old', 'newer by date, whatever the name');
+stamp('bad name!-v.20261021_16_00');
+assert.equal(readVersion(root).version, '', 'only GitHub user name characters');
+stamp('Skynet-v.20261021_16_00');
+
 // the program files changed after the stamp (a copy of a pull request, or edited by hand)
 fs.writeFileSync(path.join(root, 'lib', 'new.js'), 'export {}');
 const ch = readVersion(root);

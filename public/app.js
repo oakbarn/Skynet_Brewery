@@ -3646,7 +3646,7 @@ function renderAboutTab(box) {
     saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: signOut }, 'Sign out'))));
 }
 
-const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + (v.changed ? ' + changes' : '') : 'Skynet-v.(not stamped)'; };
+const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + (v.changed ? ' + changes' : '') : '(not stamped)'; };
 // Panel version (version.json, stamped by GitHub on every merge) and whether GitHub has a newer one
 function panelVersionBox() {
   const v = S.panelVersion || {}, note = h('div', { class: 'muted' }, v.version ? 'Checking GitHub ...' : '');

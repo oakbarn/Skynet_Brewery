@@ -1,4 +1,6 @@
-# Panel version: every merge (push) to the default branch gets a version named Skynet-v.yyyymmdd_hh_mm.
+# Panel version: every merge (push) to the default branch gets a version named <owner>-v.yyyymmdd_hh_mm,
+# where <owner> is the GitHub user who owns this copy of the code. oakbarn's own copy says Skynet: Skynet-v.yyyymmdd_hh_mm.
+# Someone else's copy (a fork) says their user name, for example brewer42-v.yyyymmdd_hh_mm.
 # It writes version.json at the top of the panel (the panel shows it on the Menu Bar and in ☰ Menu > About),
 # commits it back to the branch, and makes a GitHub tag and Release with the same name.
 # Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
@@ -35,7 +37,9 @@ jobs:
       - name: Write version.json
         id: v
         run: |
-          VERSION="Skynet-v.$(date +%Y%m%d_%H_%M)"
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          if [ "$OWNER" = "oakbarn" ]; then PREFIX="Skynet"; else PREFIX="$OWNER"; fi
+          VERSION="$PREFIX-v.$(date +%Y%m%d_%H_%M)"
           # two merges in the same minute: add _2, _3 ...
           base="$VERSION"; n=2
           while git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; do VERSION="${base}_$n"; n=$((n+1)); done
@@ -45,6 +49,7 @@ jobs:
           {
             "version": "$VERSION",
             "merged": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "owner": "$OWNER",
             "commit": "${GITHUB_SHA}",
             "code": "$CODE",
             "repo": "${GITHUB_REPOSITORY}",
