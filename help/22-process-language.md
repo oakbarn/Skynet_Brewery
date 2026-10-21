@@ -183,7 +183,7 @@ While a Process runs, the Processes screen shows the step it is on. To show it o
 
 ## Lock the Equipment Profile
 
-`lock_Equipment` locks the Equipment Profile of the loaded Schema, so its numbers, equipment and pipes can't be changed. `unlock_Equipment` unlocks it again. Put them on a line of their own, for example at the start and end of a brew day:
+`lock_Equipment` locks the Equipment Profiles of every Tab of the loaded Schema (usually the Hot Side and Fermentation profiles), so their numbers, equipment and pipes can't be changed. `unlock_Equipment` unlocks them again. Put them on a line of their own, for example at the start and end of a brew day:
 
 ```
 lock_Equipment
@@ -192,4 +192,4 @@ step "Mash in"
 unlock_Equipment
 ```
 
-The Process output says which profile was locked. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.
+The Process output says which profiles were locked. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles). A matching `lock_BrewDayRecipe` comes with the Brew Day Recipe.

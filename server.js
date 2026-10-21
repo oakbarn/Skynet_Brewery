@@ -418,7 +418,8 @@ async function route(req, res) {
   }
   if (p === '/ui/layout' && m === 'PUT') {
     const body = await jsonBody(req);
-    schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: its equipment and pipes can't change
+    schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
+    if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
     store.saveLayout(body);
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
@@ -499,8 +500,9 @@ async function route(req, res) {
   const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
   if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
   if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
-  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
-  if (p === '/ui/schema/layout' && m === 'POST') return ok(res, schemas.layoutAction((await jsonBody(req)).action));
+  // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
+  if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
+  if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
   let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version|export|clone))?$/.exec(p);
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
@@ -534,11 +536,11 @@ async function route(req, res) {
     if (sc[2] && m === 'DELETE') { templates.remove(sc[1], sc[2]); return ok(res, templates.view()); }
   }
   // Equipment Profiles: everyone sees them, admins make and change them
-  const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id) }));
+  const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id), usedOn: schemas.usedOn(q.id) }));
   if (p === '/ui/equipment' && m === 'GET') return ok(res, profileView());
   if (p === '/ui/equipment' && m === 'POST') {
     const b = await jsonBody(req), made = profiles.create(b.name, b.from);
-    if (b.assign) schemas.setProfile(made.id);           // "Make it unique to this Schema": the copy goes on the loaded Schema
+    if (b.assign) schemas.setProfile(b.tab, made.id, { layout: b.layout });   // "Make it unique" or "Use it on this Tab": the new one goes on that Tab
     return ok(res, { made: made.id, list: profileView() });
   }
   sc = /^\/ui\/equipment\/([a-z0-9-]+)(\/lock)?$/.exec(p);
@@ -546,7 +548,7 @@ async function route(req, res) {
     if (!profiles.has(sc[1])) return fail(res, 404, 'No such Equipment Profile');
     if (sc[2] && m === 'PUT') {
       const on = !!(await jsonBody(req)).locked;
-      if (sc[1] === store.config.equipmentProfile) schemas.lock(on, me.name); else profiles.setLock(sc[1], on, me.name);
+      schemas.lockProfile(sc[1], on, me.name);
       return ok(res, { list: profileView() });
     }
     if (sc[2]) return fail(res, 405, 'Use PUT');
