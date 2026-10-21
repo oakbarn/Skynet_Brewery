@@ -2266,7 +2266,7 @@ async function editBundle(v) {
   sel = { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
 }
 // Clone a Bundled item (Fritz, 2026-10-21): the vessel and every IP bundled with it, copied side by side under a new name.
-// Pipes are not copied (they belong where they are drawn); the copy is not linked to the Equipment Profile until you bring it in.
+// Pipes are not copied (they belong where they are drawn); on a Tab with an Equipment Profile the copy joins its Equipment list when the layout is saved.
 function cloneBundle(v) {
   const names = new Set(draft.graphics.filter(g => g.kind === 'vessel').map(g => String(g.name || g.label || '').toLowerCase()));
   const base = v.name || v.label || VESSELS[v.vesselType] || 'Vessel';
@@ -3921,7 +3921,7 @@ function renderSchemaTab(box) {
   const when = x => x.updated ? new Date(x.updated).toLocaleString() : '';
   const rows = list.map(x => h('tr', { class: x.active ? 'active' : '' },
     h('td', {}, x.active ? h('b', {}, x.name) : x.name, x.active ? h('span', { class: 'muted' }, '  (loaded)') : ''),
-    h('td', {}, String(x.tabs)), h('td', {}, profileName(x.equipmentProfile) || h('span', { class: 'muted' }, 'none')), h('td', {}, when(x)),
+    h('td', {}, String(x.tabs)), h('td', {}, (x.tabProfiles || []).map(t => (t.tab ? t.tab + ': ' : '') + profileName(t.id)).join(', ') || h('span', { class: 'muted' }, 'none')), h('td', {}, when(x)),
     h('td', {}, admin && !x.active ? h('button', { onclick: guard(async () => {
       if (editing) return toast('Save or exit Edit layout first', true);
       if (!okToSwitch(x.name)) return;
@@ -3932,9 +3932,9 @@ function renderSchemaTab(box) {
     h('div', { class: 'bar menuPick' }, h('span', {}, 'Loaded Schema'), schemaSelect(),
       act?.version ? h('span', { class: 'muted' }, 'Version ' + act.version) : ''),
     run.length ? h('div', { class: 'eqWarn' }, `⚠ ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running (${run.map(x => x.name).join(', ')}). Loading another Schema stops ${run.length > 1 ? 'them' : 'it'}; you are asked first.`) : '',
-    h('p', { class: 'muted' }, 'Loading another Schema switches every output off first (digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms), then its tabs, devices and Equipment Profile take the place of the loaded one. The one you leave is kept as it is.'),
+    h('p', { class: 'muted' }, 'Loading another Schema switches every output off first (digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms), then its tabs, devices and Equipment Profiles take the place of the loaded one. The one you leave is kept as it is.'),
     h('h3', {}, 'Schemas on this Brain'),
-    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Tabs', 'Equipment Profile', 'Last saved', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
+    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Tabs', 'Equipment Profiles (Tab: profile)', 'Last saved', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
     admin ? '' : h('p', { class: 'muted' }, 'Only an admin can load, clone or change a Schema.')));
 }
 

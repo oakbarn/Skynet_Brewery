@@ -1,6 +1,6 @@
 # Switching and cloning Schemas
 
-A **Schema** is one whole brewery setup: its tabs, devices, elements, pictures, pipes, probes, autostart list and Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+A **Schema** is one whole brewery setup: its tabs, devices, elements, pictures, pipes, probes, autostart list, and the Equipment Profile of each Tab. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
 ## Where to pick the Schema
 
@@ -12,7 +12,7 @@ The same Schema dropdown is in three places. Use whichever is handy:
 
 Picking another Schema loads it. Only an Admin can load or change a Schema.
 
-The **☰ Menu > Schema** tab also lists every Schema on the Brain: how many tabs it has, its Equipment Profile and when it was last saved, with a **Load** and a **Clone** button on each one.
+The **☰ Menu > Schema** tab also lists every Schema on the Brain: how many tabs it has, the Equipment Profile of each Tab and when it was last saved, with a **Load** and a **Clone** button on each one.
 
 ## When Processes are running
 
@@ -48,7 +48,7 @@ A clone is a copy of a Schema under a new name. Use it to try changes without to
 4. Turn on **Load the clone now** if you want to switch to it at once. Leave it off and the loaded Schema stays loaded.
 5. Press **Save**.
 
-The clone gets everything in the Schema, its saved values too (vKonstants, vAPI ...). It uses the same Equipment Profile, so equipment and piping stay shared. It starts without a version of its own. The Schema you cloned is not changed.
+The clone gets everything in the Schema, its saved values too (vKonstants, vAPI ...). Its Tabs use the same Equipment Profiles, so equipment and piping stay shared. It starts without a version of its own. The Schema you cloned is not changed.
 
 ## Clone a Bundled item
 
@@ -59,6 +59,6 @@ A Bundled vessel and its IPs can be copied in one go:
 3. The copy is placed just to the right of the first one, still bundled, named "<name> copy". Pipes are not copied: draw new ones to it.
 4. Press **Save layout** to keep it.
 
-The copy is not part of the Equipment Profile yet. To add it, open **☰ Menu > Equipment Profile** and press **Bring in ... from the tabs**.
+If the Tab has an Equipment Profile, the copy is in that profile's **Equipment list** as soon as you save the layout, like everything else on the Tab.
 
-On the **☰ Menu > Equipment Profile** tab each piece of equipment also has a **Clone** button. The copy opens on the Vessel tab as a new one (with the same size, heat, probe, ports and bundle setting). Change what you need, then press **Save** there.
+On the **☰ Menu > Equipment Profile** tab each vessel in the **Made on the Vessel tab** list also has a **Clone** button. The copy opens on the Vessel tab as a new one (with the same size, heat, probe, ports and bundle setting). Change what you need, then press **Save** there.

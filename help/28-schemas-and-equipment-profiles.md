@@ -28,7 +28,7 @@ Processes, logins, MQTT, media folders and the lists behind the dropdowns belong
 At the bottom of the **Schema** dropdown:
 
 - **Add new Schema ...**: give it a name, then pick what it starts from. **A copy of** the loaded Schema copies everything, which is good for trying changes. **An empty Schema** starts with just a Main tab and the Equipment tab. The new Schema is loaded straight away.
-- **Clone a Schema ...**: a copy of any Schema under a new name, loaded only if you say so. See [Switching and cloning Schemas](47-schema-switching-and-cloning).
+- **Clone a Schema ...**: a copy of any Schema under a new name, loaded only if you say so. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **Rename this Schema ...**: gives the loaded Schema a new name.
 - **Delete a Schema ...**: pick one that is not loaded. It is moved to `config/schemas/deleted`, so it can be got back.
 

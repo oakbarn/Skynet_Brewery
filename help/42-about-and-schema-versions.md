@@ -5,7 +5,7 @@
 **☰ Menu > About** shows:
 
 - **Signed in as**: your user name and whether you are a Viewer, Operator or Admin.
-- **Schema**: the Schema that is loaded now, as a dropdown. Pick another Schema there to load it, right from the About tab (Admins). It is the same list as on the Menu Bar and the **☰ Menu > Schema** tab, with the same choices (Add new, Clone, Rename, versions, backups, Delete). If any Process is running you are warned first, and every output is switched off before the other Schema loads. See [Switching and cloning Schemas](47-schema-switching-and-cloning).
+- **Schema**: the Schema that is loaded now, as a dropdown. Pick another Schema there to load it, right from the About tab (Admins). It is the same list as on the Menu Bar and the **☰ Menu > Schema** tab, with the same choices (Add new, Clone, Rename, versions, backups, Delete). If any Process is running you are warned first, and every output is switched off before the other Schema loads. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **Schema version**: its version, or "No version yet".
 - **Last saved**: when the Schema was last saved.
 
