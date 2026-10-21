@@ -9,7 +9,7 @@
 <body>
 <header id="top">
   <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span>
-    <label class="schemaPick" title="The Schema is your whole brewery setup: tabs, devices, elements, pipes and its Equipment Profile. Pick one to load it.">Schema <select id="schemaPick"></select></label></div>
+    <label class="schemaPick" title="The Schema is your whole brewery setup: tabs, devices, elements, pipes and its Equipment Profile. Pick one to load it.">Schema <select id="schemaPick" class="schemaSel"></select></label></div>
   <nav id="views">
     <button data-view="workspace" class="active">Tabs</button>
     <button data-view="scripts">Processes</button>
@@ -252,6 +252,7 @@
 
   <!-- ===== File Move: copy files and folders from this computer to the Brain (public/filemove.js) ===== -->
   <section id="view-filemove" class="view">
+    <div id="fmClose" class="pageClose"></div>
     <h2>File Move: copy files from this computer to the Brain</h2>
     <p class="muted">Works in any browser on Windows, Mac or Linux; nothing to install. Each kind of file goes to its one place on the Brain:
       pictures to <b>media/Images</b> (folders inside the one you pick are kept), sounds to <b>media/sounds</b>, Processes to <b>scripts</b>, help pages to <b>help</b>.
@@ -287,7 +288,7 @@
         <button id="hpNew" class="admin-only">＋ New page</button>
       </aside>
       <article class="hpMain">
-        <div class="bar hpTools">
+        <div class="bar hpTools" id="hpTools">
           <button id="hpBack" title="Back">◀ Back</button>
           <span class="spacer"></span>
           <button id="hpPrint" title="Print this page">🖨 Print</button>
