@@ -18,6 +18,7 @@ import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas } from './lib/schemas.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
+import { Templates } from './lib/templates.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
@@ -84,6 +85,8 @@ const profiles = new EquipmentProfiles(path.join(path.dirname(CONFIG), 'equipmen
 const schemas = new Schemas(store, { engine, hw, profiles });
 // Mash and Boil Profiles (Menu > Mash Profile / Boil Profile), shared by every Schema
 const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
+// Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
+const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
 const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
@@ -513,6 +516,15 @@ async function route(req, res) {
     if (sc[2] && !ps.has(sc[2])) return fail(res, 404, 'No such profile');
     if (sc[2] && m === 'PUT') { const q = ps.save(sc[2], await jsonBody(req)); return ok(res, { saved: q, list: ps.list() }); }
     if (sc[2] && m === 'DELETE') { ps.remove(sc[2]); return ok(res, { list: ps.list() }); }
+  }
+  // Vessel and Bundled Fitting Templates: everyone sees them, admins make and change them (Skynet ones only while Skynet builds them)
+  if (p === '/ui/templates' && m === 'GET') return ok(res, templates.view());
+  sc = /^\/ui\/templates\/(vessel|fitting)(?:\/([A-Za-z0-9_-]+))?$/.exec(p);
+  if (sc) {
+    if (!sc[2] && m === 'POST') { const b = await jsonBody(req); const made = templates.create(sc[1], b.name, { from: b.from, skynet: b.skynet }); return ok(res, { made: made.name, ...templates.view() }); }
+    if (sc[2] && m === 'GET') return ok(res, templates.get(sc[1], sc[2]));
+    if (sc[2] && m === 'PUT') { const t = templates.save(sc[1], sc[2], await jsonBody(req)); return ok(res, { saved: t, ...templates.view() }); }
+    if (sc[2] && m === 'DELETE') { templates.remove(sc[1], sc[2]); return ok(res, templates.view()); }
   }
   // Equipment Profiles: everyone sees them, admins make and change them
   const profileView = () => profiles.list().map(q => ({ ...withVolumes(q), usedBy: schemas.usedBy(q.id) }));
