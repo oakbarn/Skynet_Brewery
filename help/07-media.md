@@ -14,6 +14,7 @@ It looks like Windows File Explorer: folders on the left, files on the right.
 - **New folder**, **Up**, and **Large icons** or **Details** view.
 - Drag a file onto a folder on the left to move it (on a phone use **Move**).
 - Click a file to preview it, play it, **copy its path**, rename or delete it.
+- **SVG pictures (.svg) can't be deleted, renamed, moved or replaced**, not even one you added yourself. The Skynet Templates and the panel are drawn with them, and a missing one would break every Tab that uses it. A folder with an SVG in it can't be renamed or moved either. To change an SVG, add a new one under a name of its own and pick that one instead.
 
 Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a.
 

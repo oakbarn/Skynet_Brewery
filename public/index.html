@@ -6,10 +6,10 @@
 <title>Skynet Brew Panel</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="onWorkspace">
 <header id="top">
-  <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span>
-    <label class="schemaPick" title="The Schema is your whole brewery setup: tabs, devices, elements, pipes and its Equipment Profile. Pick one to load it.">Schema <select id="schemaPick"></select></label></div>
+  <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span><span id="panelVer" class="panelVer" title="Panel version: made by GitHub when code is merged. ☰ Menu > About says if it is the latest."></span>
+    <label class="schemaPick" title="The Schema is your whole brewery setup: tabs, devices, elements, pipes and the Equipment Profile of each Tab. Pick one to load it.">Schema <select id="schemaPick" class="schemaSel"></select></label></div>
   <nav id="views">
     <button data-view="workspace" class="active">Tabs</button>
     <button data-view="scripts">Processes</button>
@@ -169,13 +169,32 @@
 
   <!-- ===== Log ===== -->
   <section id="view-log" class="view">
+    <div class="csvBox">
+      <h3>Download CSV</h3>
+      <div class="bar">
+        <label title="A saved list of values, like Mash Profile or Fermentor Profile">CSV set <select id="csvSet"></select></label>
+        <button id="csvSaveSet" class="op-only" title="Save the ticked values under a name, like Mash Profile">Save as set</button>
+        <button id="csvDelSet" class="op-only">Delete set</button>
+      </div>
+      <div class="bar"><button id="csvAll">Tick all</button><button id="csvNone">Untick all</button><span class="muted">Values in the brew database (number of readings):</span></div>
+      <div id="csvNames" class="csvNames"></div>
+      <div class="bar">
+        <label>Time <select id="csvRange">
+          <option value="1h">Last hour</option><option value="4h">Last 4 hours</option><option value="12h">Last 12 hours</option>
+          <option value="today">Today</option><option value="24h" selected>Last 24 hours</option><option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option><option value="all">Everything</option><option value="custom">From ... To ...</option></select></label>
+        <span id="csvCustom" class="hidden"><label>From <input type="datetime-local" id="csvFrom"></label> <label>To <input type="datetime-local" id="csvTo"></label></span>
+        <label>Layout <select id="csvLayout">
+          <option value="wide">One column per value (for graphs)</option><option value="list">One row per reading</option></select></label>
+        <button id="csvGo" class="primary">Download CSV</button>
+      </div>
+    </div>
     <div class="bar">
       <select id="logName"></select>
       <label>From <input type="datetime-local" id="logFrom"></label>
       <label>To <input type="datetime-local" id="logTo"></label>
       <label>Max <input type="number" id="logLimit" value="500" min="1" style="width:6em"></label>
       <button id="logLoad" class="primary">Show</button>
-      <a id="logCsv" href="#" download="brewlog.csv">Download CSV</a>
     </div>
     <table class="grid"><thead><tr><th>Time</th><th>Name</th><th>Value</th><th>Trigger</th></tr></thead><tbody id="logBody"></tbody></table>
   </section>
@@ -252,6 +271,7 @@
 
   <!-- ===== File Move: copy files and folders from this computer to the Brain (public/filemove.js) ===== -->
   <section id="view-filemove" class="view">
+    <div id="fmClose" class="pageClose"></div>
     <h2>File Move: copy files from this computer to the Brain</h2>
     <p class="muted">Works in any browser on Windows, Mac or Linux; nothing to install. Each kind of file goes to its one place on the Brain:
       pictures to <b>media/Images</b> (folders inside the one you pick are kept), sounds to <b>media/sounds</b>, Processes to <b>scripts</b>, help pages to <b>help</b>.
@@ -287,7 +307,7 @@
         <button id="hpNew" class="admin-only">＋ New page</button>
       </aside>
       <article class="hpMain">
-        <div class="bar hpTools">
+        <div class="bar hpTools" id="hpTools">
           <button id="hpBack" title="Back">◀ Back</button>
           <span class="spacer"></span>
           <button id="hpPrint" title="Print this page">🖨 Print</button>
@@ -484,7 +504,7 @@
   <pre id="binView" class="binView hidden"></pre>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
 </form></dialog>
-<dialog id="keyDlg"><form method="dialog">
+<dialog id="keyDlg" data-nomenu><form method="dialog">
   <h3>Process colors</h3>
   <div id="keyList" class="keyList"></div>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
@@ -497,8 +517,8 @@
 </form></dialog>
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div id="dlgBody"></div><div class="bar"><button value="delete" id="dlgDelete" class="danger">Delete</button><span class="spacer"></span><button value="cancel">Cancel</button><button value="ok" class="primary">OK</button></div></form></dialog>
 <dialog id="valDlg"></dialog>
-<dialog id="sampleDlg"><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery Schema to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample Schema</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
-<dialog id="donateDlg"><h3>🍺 Beer money</h3><p id="donateText"></p>
+<dialog id="sampleDlg" data-nomenu><h3>Welcome to the Skynet Brew Panel</h3><p>Pick a ready-made brewery Schema to start from. You can change anything afterwards, and load another one any time under <em>Settings &gt; Start from a sample Schema</em>.</p><div id="sampleDlgList" class="samples"></div><div class="bar"><span class="spacer"></span><button id="sampleKeep">Keep what I have</button></div></dialog>
+<dialog id="donateDlg" data-nomenu><h3>🍺 Beer money</h3><p id="donateText"></p>
   <div class="bar"><button id="donateDone">Already donated</button><span class="spacer"></span><button id="donateLater">Maybe later</button><button id="donateGo" class="primary"></button></div></dialog>
 <div id="toast"></div>
 <script type="module" src="app.js"></script>

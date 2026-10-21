@@ -1,0 +1,9 @@
+{
+  "vesselType": "ccoil", "vtype": "Immersion coil", "image": "Images/samples/chill_coil.svg", "liquidPorts": 4,
+  "std": { "type": "MPT", "size": 0.5 },
+  "notes": "A Chillzilla style coil: two circuits, 2 ins and 2 outs",
+  "ports": {
+    "in": { "installed": true, "position": "Top Left" }, "out": { "installed": true, "position": "Top Right" },
+    "in2": { "installed": true, "position": "Bottom Left" }, "out2": { "installed": true, "position": "Bottom Right" }
+  }
+}

@@ -2,7 +2,7 @@
 
 The **Vessel** tab (in the **☰ Menu**) sets up one vessel of the Equipment Profile at a time. Chillers, coils and trub filters open here too. A profile can have as many vessels as you need.
 
-1. Press **☰ Menu** and pick **Vessel**. It works on the profile open on the Equipment Profile tab, or the loaded Schema's profile.
+1. Press **☰ Menu** and pick **Vessel**. It works on the profile open on the Equipment Profile tab, or the profile of the Tab you are on.
 2. Pick a vessel in the dropdown, or **Add new vessel ...**.
 3. Fill in its settings (below), then press **Save**.
 4. **Save and put on Equipment tab** also draws it on the Equipment tab with its ports as IPs.

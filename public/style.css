@@ -70,14 +70,14 @@ main { padding: 10px 14px; }
 @keyframes blink { 50% { background-color: var(--bad); color: #fff; } }
 .el.timer .btns { display: flex; justify-content: center; gap: 4px; padding-bottom: 3px; }
 .el.timer .btns button { padding: 0 7px; font-size: 12px; }
-.el.vhidden { display: none; }
+.el.vhidden, .gfx.vhidden { display: none; }
 .gfx { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; }
 .gfx.txt { background: none; white-space: pre-wrap; }
 /* Edit layout: every item gets a black-and-white dashed edge that shows on any background (Fritz: hard to see what is where) */
 #ws.editing .el, #ws.editing .gfx { cursor: move; outline: 2px dashed #fff; box-shadow: 0 0 0 2px #000; display: flex; }
 #ws.editing .gfx:not(.ip):not(.vessel):not(.has-img) { background-color: rgba(128,128,128,.3); }
 #ws.editing .gfx { display: block; }
-#ws.editing .el.vhidden { opacity: 0.35; }
+#ws.editing .el.vhidden, #ws.editing .gfx.vhidden { opacity: 0.35; }
 #ws.editing .sel { outline: 2px solid var(--accent); }
 .rs { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; background: var(--accent); cursor: nwse-resize; display: none; }
 #ws.editing .rs { display: block; }
@@ -282,7 +282,6 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 /* Vessel widgets */
 #ws .gfx.vessel { border-radius: 14px 14px 22px 22px; background-size: 100% 100%; background-repeat: no-repeat; overflow: visible; }
 #ws .gfx.vessel:not(.has-img) { background: linear-gradient(90deg, #6f7780, #d9dee3 35%, #f4f6f8 50%, #b9c0c7 70%, #6f7780); border: 2px solid #4a5058; }
-#ws .gfx.vessel.v-mashTun:not(.has-img) { background: linear-gradient(90deg, #3b5f8a, #8fb5de 35%, #c9def3 50%, #7aa1cb 70%, #3b5f8a); }
 #ws .gfx.vessel .heat { position: absolute; left: 12%; right: 12%; bottom: 6%; height: 7%; border-radius: 4px; opacity: .45; pointer-events: none; }
 #ws .gfx.vessel.v-electric .heat { background: repeating-linear-gradient(90deg, #8a1f1f 0 8px, #d04a2a 8px 12px); }
 #ws .gfx.vessel.v-gas .heat { bottom: -12%; height: 10%; background: radial-gradient(circle at 50% 100%, #3a7be8 0 30%, transparent 31%) 0 0 / 14px 100%; }
@@ -575,6 +574,14 @@ body.role-viewer .op-only { display: none !important; }
 .menuList .menuItem { text-align: left; border-color: transparent; background: none; padding: 7px 10px; }
 .menuList .menuItem:hover:not(:disabled) { background: var(--panel2); border-color: var(--line); }
 .menuList .menuItem:disabled { opacity: .55; cursor: default; }
+.menuList .menuItem.cur { font-weight: 600; background: var(--panel2); }
+.menuList .menuNote { font-size: 12px; padding: 2px 10px; }
+.menuList.menuFixed { position: fixed; right: auto; overflow-y: auto; z-index: 1000; }
+/* the ☰ in a dialog's top right corner (the title wraps around it) */
+.dlgMenu { float: right; align-self: flex-end; margin: 0 0 6px 10px; }
+.dlgMenu .menuBtn { padding: 4px 8px; }
+/* the Menu Bar's ☰: every page but the Tabs, which have their own */
+body.onWorkspace #top .menuCopy { display: none; }
 .menuList hr { border: 0; border-top: 1px solid var(--line); margin: 3px 0; }
 .menuTabs:empty { display: none; }
 .menuTabs { padding-left: 6px; border-left: 2px solid var(--line); }
@@ -583,6 +590,14 @@ body.role-viewer .op-only { display: none !important; }
 .menuTab .mtX:hover { opacity: 1; background: rgba(0,0,0,.2); }
 .menuPane { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 10px 16px 16px; overflow: auto; max-height: calc(100vh - 150px); }
 .menuPane h3 { margin: 6px 0 8px; }
+/* Close and a boxed ✕ in the top right corner of every Menu tab, File Move and Help (Fritz, 2026-10-21) */
+.paneClose { display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+.menuPane > .paneClose { float: right; position: sticky; top: 0; z-index: 2; margin: 0 0 4px 12px; }
+.pageClose { float: right; }
+.hpTools .paneClose { margin-left: 6px; }
+.paneClose .boxX { width: 30px; height: 30px; padding: 0; font-size: 16px; line-height: 1; border: 2px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; }
+.paneClose .boxX:hover { border-color: var(--text, currentColor); }
+.schemaPane select { min-width: 16em; }
 .menuSet { border: 0; padding: 0; margin: 0; min-width: 0; }
 .menuForm { display: grid; grid-template-columns: minmax(9em, 22em) minmax(0, 340px); gap: 6px 12px; align-items: center; margin: 8px 0; }
 .menuForm .full { grid-column: 1 / -1; }
@@ -590,6 +605,7 @@ body.role-viewer .op-only { display: none !important; }
 .menuForm > select, .menuForm > input { min-width: 0; max-width: 100%; }
 .menuPick select { min-width: 14em; }
 .schemaBox { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; }
+.tabProfile { border-top: 1px solid var(--line); padding-top: 6px; margin-top: 6px; }
 .orderNum { width: 5em; }
 .scriptList .orderNum { width: 3.4em; padding: 1px 4px; font-size: 12px; }
 .bar.wrap { flex-wrap: wrap; }
@@ -629,3 +645,28 @@ body.role-viewer .op-only { display: none !important; }
 /* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
 .rt-b { font-weight: bolder; }
 .rt-L { font-size: max(var(--textLarge, 28px), 1.25em); line-height: 1.1; }
+/* Log page > Download CSV */
+.csvBox { margin-bottom: 14px; padding: 4px 12px 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.csvBox h3 { margin: 6px 0; }
+.csvNames { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 8px; max-height: 14em; overflow: auto; }
+/* Panel version (version.json from GitHub) on the Menu Bar and in ☰ Menu > About */
+.panelVer { font-weight: 400; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.verState.ver-current { color: var(--ok); }
+.verState.ver-old { color: var(--warn); font-weight: 700; }
+.verState.ver-changed { color: var(--warn); }
+
+/* Vessel and Fitting Templates: small icons with names (there will be many), double-click for the pop-up */
+.tplGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 10px; }
+.tplIcon { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; min-width: 0; }
+.tplIcon:hover, .tplIcon:focus { border-color: var(--accent); }
+.tplIcon img { width: 56px; height: 56px; object-fit: contain; pointer-events: none; }
+.tplIcon .tplName { font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tplIcon .tplBadge { position: absolute; top: 3px; right: 3px; }
+.tplBadge { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 6px; vertical-align: middle; }
+.tplBadge.skynet { background: #2f6f9f; color: #fff; }
+.tplBadge.user { background: #4a7a3a; color: #fff; }
+.tplDlg { width: min(620px, 96vw); }
+.tplHead { display: flex; align-items: flex-start; gap: 8px; }
+.tplHead h3 { flex: 1; margin: 6px 0; }
+.tplX { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 16px; line-height: 1.2; }
+.tplMini { width: min(420px, 94vw); }
