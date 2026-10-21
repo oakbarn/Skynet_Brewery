@@ -19,7 +19,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 ## The Default tab
 
-**Every default is set here.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. Press **Save**.
+**Every default is set here.** What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. Whether **phones and tablets can move and resize things** in Edit layout (off at first, see [Phones and tablets](41-phones-and-tablets)). Press **Save**.
 
 **Order of the Menu:** each Menu tab has an Order number. Type a new number to move a Menu tab there. The others are numbered again to make room (1, 2, 3 ...), and the Menu and the open Menu tabs sort themselves. New Menu tabs added later go at the end.
 
