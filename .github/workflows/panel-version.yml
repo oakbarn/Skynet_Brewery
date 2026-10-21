@@ -1,0 +1,75 @@
+# Panel version: every merge (push) to the default branch gets a version named <owner>-v.yyyymmdd_hh_mm,
+# where <owner> is the GitHub user who owns this copy of the code. oakbarn's own copy says Skynet: Skynet-v.yyyymmdd_hh_mm.
+# Someone else's copy (a fork) says their user name, for example brewer42-v.yyyymmdd_hh_mm.
+# It writes version.json at the top of the panel (the panel shows it on the Menu Bar and in ☰ Menu > About),
+# commits it back to the branch, and makes a GitHub tag and Release with the same name.
+# Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
+# Never edit version.json by hand or in a pull request: this workflow owns it.
+name: Panel version
+
+on:
+  push:
+    branches: [claude/project-thread-vzxi0a]
+    paths-ignore: [version.json]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: panel-version
+  cancel-in-progress: false
+
+jobs:
+  stamp:
+    runs-on: ubuntu-latest
+    env:
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Write version.json
+        id: v
+        run: |
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          if [ "$OWNER" = "oakbarn" ]; then PREFIX="Skynet"; else PREFIX="$OWNER"; fi
+          VERSION="$PREFIX-v.$(date +%Y%m%d_%H_%M)"
+          # two merges in the same minute: add _2, _3 ...
+          base="$VERSION"; n=2
+          while git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; do VERSION="${base}_$n"; n=$((n+1)); done
+          # the fingerprint of the program files, so the panel can tell when its files were changed after this merge
+          CODE=$(node -e "import('./lib/auth.js').then(m => console.log(m.codeFingerprint('.')))")
+          cat > version.json <<JSON
+          {
+            "version": "$VERSION",
+            "merged": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "owner": "$OWNER",
+            "commit": "${GITHUB_SHA}",
+            "code": "$CODE",
+            "repo": "${GITHUB_REPOSITORY}",
+            "branch": "${GITHUB_REF_NAME}"
+          }
+          JSON
+          cat version.json
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Commit, tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -m "Panel version $VERSION [skip ci]"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+          gh release create "$VERSION" --title "$VERSION" --generate-notes --latest
