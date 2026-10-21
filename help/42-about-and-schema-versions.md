@@ -1,0 +1,31 @@
+# About and Schema versions
+
+## The About Menu tab
+
+**☰ Menu > About** shows:
+
+- **Signed in as**: your user name and whether you are a Viewer, Operator or Admin.
+- **Schema**: the Schema that is loaded now.
+- **Schema version**: its version, or "No version yet".
+- **Last saved**: when the Schema was last saved.
+
+The **Sign out** button is here too. Your user name and Sign out are no longer on the Menu Bar.
+
+## Schema versions
+
+A version is the Schema's name with the date and time it was saved, on the Brain's clock:
+
+`<Schema name>_yyyymmdd_hh_mm`, for example `Oak Barn_20261021_09_40`.
+
+### Making a version
+
+- In **Edit layout**, switch on **Update Version** next to **Save layout**, then save. The same switch is in the "Leave Edit layout?" box. The switch stays the way you left it on this browser.
+- Or pick **Save a new version now** in the **Schema** list on the Menu Bar (Admins).
+
+Each version is kept as its own file, named after the version, in `config/schemas/versions/<Schema>/` on the Brain (spaces in the name become `_`). Old versions are never removed.
+
+The Schema itself is still saved in `config/schemas/<Schema>.json`, as before, so loading Schemas, the daily backups and restoring keep working the same way.
+
+### Going back to a version
+
+Pick **Restore a backup or version ...** in the **Schema** list. Versions show as **Version <name>** next to the backups. The Schema as it is now is backed up first, so a restore can be undone.

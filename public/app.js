@@ -78,7 +78,6 @@ async function load() {
   S = await api('GET', '/ui/state');
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + S.me.role);
-  $('#whoName').textContent = `${S.me.name} (${S.me.role})`;
   $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
@@ -87,6 +86,7 @@ async function load() {
     ...['mash', 'boil', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
   fillAddType();
   renderAll();
+  startupView();
 }
 function renderAll() { renderValves(S.valves); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
@@ -1368,6 +1368,7 @@ function leaveLayoutDialog() {
     const close = v => { d.oncancel = null; d.close(); res(v); };
     d.append(h('div', { class: 'vdTitle' }, 'Leave Edit layout?'),
       h('p', {}, 'You have changes to this layout that are not saved yet.'),
+      versionSwitch(),
       h('div', { class: 'vdBtns' },
         h('button', { type: 'button', class: 'big primary', onclick: () => close('save') }, 'Save'),
         h('button', { type: 'button', class: 'big danger', onclick: () => close('discard') }, 'Exit without Saving')),
@@ -1375,6 +1376,12 @@ function leaveLayoutDialog() {
     d.oncancel = () => res(undefined);
     d.showModal();
   });
+}
+// a copy of the Update Version switch next to Save layout (both stay the same)
+function versionSwitch() {
+  const box = h('input', { type: 'checkbox', ...($('#updateVersion').checked ? { checked: true } : {}) });
+  box.onchange = () => { $('#updateVersion').checked = box.checked; $('#updateVersion').dispatchEvent(new Event('change')); };
+  return h('label', { class: 'toggle', title: $('#updateVersion').closest('label').title }, h('span', { class: 'sw' }, box, h('span', { class: 'swk' })), ' Update Version');
 }
 async function leaveLayout() {
   if (!layoutChanged()) return setEditing(false);
@@ -1572,27 +1579,42 @@ $('#addWs').onclick = () => {
 };
 $('#wsProps').onclick = () => editWorkspace();
 const saveLayout = guard(async () => {
-  await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics });
-  toast('Layout saved'); editing = false; await load(); setEditing(false);
+  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
+  toast(r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved'); editing = false; await load(); setEditing(false);
 });
+// the Update Version switch is remembered on this browser
+try { $('#updateVersion').checked = localStorage.getItem('bp.updateVersion') === '1'; } catch { }
+$('#updateVersion').onchange = e => { try { localStorage.setItem('bp.updateVersion', e.target.checked ? '1' : '0'); } catch { } };
 $('#saveLayout').onclick = saveLayout;
 $('#cancelLayout').onclick = () => leaveLayout();
-$('#zoom').value = zoom;
-$('#zoom').onchange = e => { zoom = e.target.value; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); };
+// Zoom and Full screen live on the Zoom Menu tab (Fritz, 2026-10-21); the Default tab picks what the panel starts with
+const ZOOMS = [['fit', 'Fit screen'], ['width', 'Fit width'], ['0.5', '50%'], ['0.75', '75%'], ['1', '100%'], ['1.25', '125%'], ['1.5', '150%']];
+function setZoom(z) { zoom = z; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); }
 let fitTimer;
 const refit = () => { clearTimeout(fitTimer); fitTimer = setTimeout(() => { if (view === 'workspace') fitZoom(); }, 100); };
 { const ro = new ResizeObserver(refit); for (const s of ['#top', '#view-workspace > .bar', '#editBar']) ro.observe($(s)); }   // a menu or the tab buttons wrapped onto another line
 window.addEventListener('resize', refit);
 // in full screen the top menu is hidden too, so the tab gets every pixel (Esc or Exit full screen brings it back)
 document.addEventListener('fullscreenchange', () => {
-  const on = !!document.fullscreenElement;
-  $('#fullScreen').textContent = on ? 'Exit full screen' : 'Full screen';
-  document.body.classList.toggle('fullscreen', on);
+  document.body.classList.toggle('fullscreen', !!document.fullscreenElement);
+  if (menuTab === 'zoom') renderMenuPane();
   refit();
 });
-// Full screen hides the browser's own bars (phones without it, like iPhones, just do not show the button)
-if (!document.documentElement.requestFullscreen) $('#fullScreen').classList.add('hidden');
-$('#fullScreen').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => { });
+// Full screen hides the browser's own bars (phones without it, like iPhones, can't: the Zoom tab says so)
+const canFullScreen = !!document.documentElement.requestFullscreen;
+const setFullScreen = on => on ? document.documentElement.requestFullscreen().catch(() => { }) : document.fullscreenElement && document.exitFullscreen();
+// on startup: the Default tab's zoom (if one is picked), and Full screen. Browsers only allow Full screen after a click or tap,
+// so it starts with the first click or tap on the page.
+let started = false;
+function startupView() {
+  if (started) return; started = true;
+  const d = S.config.brewDefaults || {};
+  if (d.startZoom && ZOOMS.some(z => z[0] === d.startZoom)) setZoom(d.startZoom);
+  if (d.startFullScreen && canFullScreen && !document.fullscreenElement) {
+    const go = () => { document.removeEventListener('pointerup', go, true); setFullScreen(true); };
+    document.addEventListener('pointerup', go, true);
+  }
+}
 window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); });
 
 // ---------------------------------------------------------------- properties dialog
@@ -2857,7 +2879,7 @@ function renderSettings() {
 }
 // ---- accounts
 addEyes();
-$('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
+const signOut = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
 $('#pwSave').onclick = guard(async () => {
   if ($('#pwNew').value !== $('#pwNew2').value) throw new Error('The two new passwords are not the same');
   await api('POST', '/auth/password', { current: $('#pwCur').value, password: $('#pwNew').value });
@@ -3171,7 +3193,8 @@ function renderSchemaPick() {
   s.append(...sc.list.map(x => h('option', { value: x.id, ...(x.id === act ? { selected: true } : {}) }, x.name)));
   if (can('admin')) s.append(h('optgroup', { label: '──────────' },
     h('option', { value: '__new' }, 'Add new Schema ...'), h('option', { value: '__ren' }, 'Rename this Schema ...'),
-    h('option', { value: '__bak' }, 'Back up this Schema now'), h('option', { value: '__res' }, 'Restore a backup ...'),
+    h('option', { value: '__ver' }, 'Save a new version now'),
+    h('option', { value: '__bak' }, 'Back up this Schema now'), h('option', { value: '__res' }, 'Restore a backup or version ...'),
     h('option', { value: '__del' }, 'Delete a Schema ...')));
   s.disabled = !can('admin') && sc.list.length < 2;
   s.title = can('admin') ? 'Pick a Schema to load it' : 'Only an admin can load another Schema';
@@ -3196,6 +3219,7 @@ $('#schemaPick').onchange = guard(async ev => {
     }
     if (v === '__bak') { const r = await api('POST', `/ui/schemas/${act.id}/backup`); return toast(`Backed up: config/schemas/backups/${act.id}/${r.file}`); }
     if (v === '__res') return restoreSchema();
+    if (v === '__ver') { const r = await api('POST', `/ui/schemas/${act.id}/version`); await load(); return toast(`New Schema version: ${r.version}`); }
     if (v === '__del') {
       const others = S.schemas.list.filter(x => !x.active);
       if (!others.length) return toast('This is your only Schema. Add another before deleting one.', true);
@@ -3216,12 +3240,13 @@ $('#schemaPick').onchange = guard(async ev => {
 });
 async function restoreSchema() {
   const act = S.schemas.active, list = await api('GET', `/ui/schemas/${act.id}/backups`);
-  if (!list.length) return toast('This Schema has no backups yet', true);
-  const w = { file: list[0].file };
-  if (await dialog(`Restore a backup of "${act.name}"`, [['file', 'Backup', 'sel', list.map(b => [b.file, `${new Date(b.when).toLocaleString()}${b.daily ? '  (daily)' : '  (made by hand)'}`])],
+  if (!list.length) return toast('This Schema has no backups or versions yet', true);
+  const key = b => (b.version ? 'v:' : 'b:') + b.file;
+  const w = { file: key(list[0]) };
+  if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}${b.daily ? '  (daily)' : '  (made by hand)'}`])],
     ['_n', 'The Schema as it is now is backed up first, so you can undo this by restoring that backup. Running Processes stop.', 'note']], w) !== 'ok') return;
   readFields(w);
-  await api('POST', `/ui/schemas/${act.id}/restore`, { file: w.file });
+  await api('POST', `/ui/schemas/${act.id}/restore`, { file: w.file.slice(2), version: w.file.startsWith('v:') });
   wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; await load(); toast('Backup restored');
 }
 
@@ -3237,6 +3262,7 @@ const EQ_KINDS = ['vessel', 'pchiller', 'ccoil', 'herms', 'trub'];
 const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
+  { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
   { key: 'default', title: 'Default', tip: 'What new Recipes start with, and the order of the Menu', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'The equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
@@ -3248,10 +3274,12 @@ const MENU = [
   { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
+  { key: 'about', title: 'About', tip: 'Who is signed in, Sign out, and the Schema and its version', render: renderAboutTab },
 ];
-// the Menu tabs in their order: numbered ones first, then the rest as listed above (new Menu tabs land at the end)
+// the Menu tabs in their order: numbered ones first, then the rest as listed above (new Menu tabs land at the end,
+// except Zoom, which is number 1 until the order is changed)
 function menuSorted() {
-  const o = S.config.menuOrder || {}, at = m => Number.isFinite(+o[m.key]) ? +o[m.key] : 1e6 + MENU.indexOf(m);
+  const o = S.config.menuOrder || {}, at = m => Number.isFinite(+o[m.key]) ? +o[m.key] : m.key === 'zoom' ? 0 : 1e6 + MENU.indexOf(m);
   return [...MENU].sort((a, b) => at(a) - at(b) || MENU.indexOf(a) - MENU.indexOf(b));
 }
 // move one Menu tab to place n; the others are numbered again 1, 2, 3 ... around it
@@ -3345,7 +3373,10 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')]];
+    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
+    ['_z', 'On startup', 'head'],
+    ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
+    ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool']];
   const f = paneForm(fields, d, () => { }, !admin);
   const save = guard(async () => { f.read(); await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
@@ -3356,6 +3387,35 @@ function renderDefaultTab(box) {
     })));
   box.append(h('h3', {}, 'Default'), h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
+}
+
+// ---- Zoom tab: how big the tabs show, and Full screen. Picking one goes back to the tab, so you see it at once.
+function renderZoomTab(box) {
+  const back = () => closeMenuTab('zoom');
+  const fs = !!document.fullscreenElement;
+  box.append(h('h3', {}, 'Zoom'),
+    h('div', { class: 'zoomPick' }, ...ZOOMS.map(([v, t]) => h('button', { class: v === zoom ? 'active' : '', onclick: () => { setZoom(v); back(); } }, t))),
+    h('h3', {}, 'Full screen'),
+    canFullScreen
+      ? h('div', { class: 'zoomPick' }, h('button', { class: 'primary', onclick: () => { setFullScreen(!fs); back(); } }, fs ? 'Exit full screen' : 'Full screen'))
+      : h('p', { class: 'muted' }, 'This browser cannot go full screen (iPhones cannot). On an iPhone, Share > Add to Home Screen opens the panel without the browser bars.'),
+    h('p', { class: 'muted' }, 'Full screen hides the browser\'s own bars and the Menu Bar. Esc, or Full screen here again, brings them back. ' +
+      'The Default Menu tab sets the zoom and Full screen the panel starts with.'));
+}
+
+// ---- About tab: who is signed in, Sign out, and the loaded Schema with its version
+function renderAboutTab(box) {
+  const act = S.schemas?.active || S.config.schema || {}, row = S.schemas?.list.find(x => x.id === act.id);
+  const item = (k, v) => [h('dt', {}, k), h('dd', {}, v)];
+  box.append(h('h3', {}, 'About'), h('div', { class: 'menuNarrow' },
+    h('dl', { class: 'aboutGrid' },
+      ...item('Panel', S.config.title || 'Skynet Brew Panel'),
+      ...item('Signed in as', `${S.me.name} (${S.me.role})`),
+      ...item('Schema', act.name || '(none)'),
+      ...item('Schema version', act.version || 'No version yet'),
+      ...(row?.updated ? item('Last saved', new Date(row.updated).toLocaleString()) : [])),
+    act.version ? '' : h('p', { class: 'muted' }, 'Turn on "Update Version" next to Save layout (or pick "Save a new version now" in the Schema list) to give the Schema a version.'),
+    saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: signOut }, 'Sign out'))));
 }
 
 // ---- Equipment Profile tab
