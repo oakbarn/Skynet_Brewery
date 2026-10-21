@@ -7,7 +7,7 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 - The **Menu tabs**: Zoom (number 1 to start with), Default, Equipment Profile, Vessel, Vessel Templates, Equipment Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
-- **Schema**: the Schema dropdown (the same one as on the Menu Bar), every Schema on the Brain with **Load** and **Clone**. See [Switching and cloning Schemas](47-schema-switching-and-cloning).
+- **Schema**: the Schema dropdown (the same one as on the Menu Bar), every Schema on the Brain with **Load** and **Clone**. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **About** (at the end): who is signed in, **Sign out**, the Schema dropdown and the Schema version. See [About and Schema versions](42-about-and-schema-versions).
 
 ## Menu tabs
@@ -24,7 +24,7 @@ Everyone can look at the Menu tabs. Only an Admin can change them (an Operator c
 
 ## The Default tab
 
-**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). **Large text size** is how big `\L` large text in a Process string is (more than 18, see [Codes inside text](22-process-language)). **Text**: the Defaults of every text box (Visible, Fore color, Back color, Alignment, Word wrap, Name font and Name font size, and the size and place of new items, see [Text boxes](47-text-boxes)). Whether **phones and tablets can move and resize things** in Edit layout (off at first, see [Phones and tablets](45-phones-and-tablets)). Press **Save**.
+**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). **Large text size** is how big `\L` large text in a Process string is (more than 18, see [Codes inside text](22-process-language)). **Text**: the Defaults of every text box (Visible, Fore color, Back color, Alignment, Word wrap, Name font and Name font size, and the size and place of new items, see [Text boxes](49-text-boxes)). Whether **phones and tablets can move and resize things** in Edit layout (off at first, see [Phones and tablets](45-phones-and-tablets)). Press **Save**.
 
 **Sound** (at the top of the Default tab and under the defaults):
 
@@ -44,5 +44,5 @@ Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any s
 - **Default Layout**: the vessels and pipes a Tab gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
 - **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
-- **Schema**: see [Switching and cloning Schemas](47-schema-switching-and-cloning).
+- **Schema**: see [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **About**: see [About and Schema versions](42-about-and-schema-versions).

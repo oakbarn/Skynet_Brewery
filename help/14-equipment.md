@@ -34,7 +34,7 @@ Bundling locks a vessel and its IPs together as one unit, so nothing gets bumped
 
 - It shows a 📦 in Edit layout.
 - Drag the vessel, or any of its IPs, and the whole bundle moves as one (on an iPhone, drag with one finger).
-- The vessel and its IPs can't be resized, edited or deleted. Opening it only shows **Bundled**, **Tab** and **Clone** (a copy of the vessel and its IPs, see [Clone a Bundled item](47-schema-switching-and-cloning#clone-a-bundled-item)).
+- The vessel and its IPs can't be resized, edited or deleted. Opening it only shows **Bundled**, **Tab** and **Clone** (a copy of the vessel and its IPs, see [Clone a Bundled item](48-schema-switching-and-cloning#clone-a-bundled-item)).
 
 **To un-bundle:** open the vessel (double-click, or hold a finger on it), switch **Bundled** off, press **Save**, then **Save layout**. Now you can edit, move or delete its IPs again.
 
