@@ -21,11 +21,10 @@
     <button data-view="import">Import</button>
     <button data-view="settings">Settings</button>
     <button data-view="help">Help</button>
-    <button data-view="config" class="admin-only" title="Edit the config file (admin only)">Config</button>
+    <button data-view="config" class="admin-only" title="The Schema as a .json file: edit it, or save it to this computer (admin only)">Schema.json</button>
   </nav>
   <div class="right">
     <button id="soundBtn" title="Browsers only play alarm sounds after you click once">Enable sound</button>
-    <span id="who"><span id="whoName" class="muted"></span><button id="signOut">Sign out</button></span>
   </div>
 </header>
 <div id="simBar" class="simBar hidden" role="status">
@@ -48,8 +47,6 @@
       <div id="wsTabs" class="tabs"></div>
       <div id="menuTabs" class="tabs menuTabs"></div>
       <div class="spacer"></div>
-      <label class="zoomBox">Zoom <select id="zoom"><option value="fit">Fit screen</option><option value="width">Fit width</option><option value="0.5">50%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select></label>
-      <button id="fullScreen" title="Hide the browser bars so the tab gets the whole screen (Esc to leave)">Full screen</button>
       <input type="checkbox" id="editMode" class="hidden" aria-hidden="true">
       <div class="menuWrap"><button id="menuBtn" class="menuBtn" title="Menu: Edit layout, profiles, recipes" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 4h14M3 8h14M3 12h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Menu</button><div id="menuList" class="menuList hidden" role="menu"></div></div>
     </div>
@@ -70,6 +67,7 @@
       <button id="addWs">New tab</button>
       <span class="spacer"></span>
       <span id="editHint" class="muted"></span>
+      <label class="toggle" title="On: Save also gives this Schema a new version, <Schema name>_yyyymmdd_hh_mm, and keeps a copy under that file name (config/schemas/versions)"><span class="sw"><input type="checkbox" id="updateVersion"><span class="swk"></span></span> Update Version</label>
       <button id="saveLayout" class="primary">Save layout</button>
       <button id="cancelLayout" title="Leave Edit layout. If anything changed you can still pick Save or Exit without Saving.">Exit</button>
     </div>
@@ -138,10 +136,10 @@
     </div>
   </section>
 
-  <!-- ===== Config Editor (admin only) ===== -->
+  <!-- ===== Schema.json: the Config Editor (admin only) ===== -->
   <section id="view-config" class="view admin-only">
     <div class="bar">
-      <strong>Config Editor</strong>
+      <strong>Schema.json</strong>
       <code id="cfgFile" class="muted"></code>
       <span id="cfgState" class="muted"></span>
       <span class="spacer"></span>
@@ -150,6 +148,7 @@
       <button id="cfgFind" title="Find (Ctrl+F) and Replace (Ctrl+H)">Find</button>
       <button id="cfgReload" title="Throw away unsaved changes and read the file again">Reload</button>
       <button id="cfgBackups">Backups</button>
+      <button id="cfgExport" title="Save a Schema as a .json file on this computer (your Downloads folder)">Save as .json file</button>
     </div>
     <p id="cfgBackupNote" class="cfgNote"></p>
     <div class="editor"><pre id="cfgGutter"></pre><div class="codeWrap"><pre id="cfgCodeHl" aria-hidden="true"></pre><textarea id="cfgCode" spellcheck="false" wrap="off"></textarea></div></div>
@@ -183,10 +182,13 @@
 
   <!-- ===== Devices ===== -->
   <section id="view-devices" class="view">
-    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
-    <h3 class="admin-only">Add device</h3>
+    <h3>Interfaces (boards)</h3>
+    <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID (1 to 4 letters) starts the suggested name of every Device on it, for example MB_25_PWM_VlV_Fly_Sparge_SP.</p>
+    <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
+    <h3 class="admin-only">Add Interface</h3>
     <div class="form row admin-only">
-      <label>Name <input id="devName" placeholder="MEGA1"></label>
+      <label>Name <input id="devName" placeholder="Main Brewery Mega USB"></label>
+      <label>Interface ID (1-4 letters, empty = first letters of the name) <input id="devId" placeholder="MB" maxlength="7" size="6"></label>
       <label>Type <select id="devType"><option value="serial">Arduino / ESP32 board (USB)</option><option value="ethernet">Board on Ethernet (wired)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
       <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
       <button id="scanPorts">Scan ports</button>

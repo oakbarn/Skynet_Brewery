@@ -50,7 +50,7 @@ stop SoundPlayer
 
 There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Sound Player on a tab (tap it to play or stop), use **Add element > Widgets > Sound Player**.
 
-Press **Enable sound** at the top once on each screen that should play sounds (browsers insist on that).
+Press **Enable sound** at the top once on each screen that should play sounds (browsers insist on that). To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.
 
 ## Importing from BruControl
 

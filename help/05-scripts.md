@@ -20,6 +20,7 @@ The saved file is read every time a process starts, so it never runs an old copy
 ```
 new value vVCount              make a number variable
 vVCount = 3                    set it
+new value vVHops = 10          make one and set it on one line
 V_BK_In = true                 open a valve (turn an output on)
 gblS_Msg = "Mash in"           set a variable
 tm_Whirlpool = 00:20:00        set a timer

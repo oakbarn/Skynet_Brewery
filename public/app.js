@@ -1,6 +1,9 @@
 import { addEyes } from './eye.js';
+import { elementTopic, graphicTopic, barTopic, menuTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
+import { setRich } from './richtext.js';
+import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -74,19 +77,24 @@ const can = need => RANK[S?.me?.role] >= RANK[need];
 const guard = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
 
 // ---------------------------------------------------------------- load + live
+// the size of \L large text in strings (☰ Menu > Default), always bigger than the text around it (style.css .rt-L)
+const TEXT_NORMAL = 18, TEXT_LARGE = 28;
+const setTextLarge = () => document.documentElement.style.setProperty('--textLarge', (+S.config.brewDefaults?.textLarge || TEXT_LARGE) + 'px');
 async function load() {
   S = await api('GET', '/ui/state');
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + S.me.role);
-  $('#whoName').textContent = `${S.me.name} (${S.me.role})`;
   $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
+  setTextLarge();
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
     ...['mash', 'boil', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
   fillAddType();
+  document.body.classList.toggle('hideMenuBar', menuBarHides());
   renderAll();
+  startupView();
 }
 function renderAll() { renderValves(S.valves); renderSchemaPick(); renderTabs(); renderMenu(); renderWs(); renderScripts(); renderGlobals(); renderDevices(); renderSettings(); renderMqtt(); renderConsole(); renderSimBar(); }
 
@@ -118,6 +126,9 @@ function setView(v) {
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   $$('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
+  // the Menu Bar is hidden on the Tabs page; coming back to Tabs hides it again
+  document.body.classList.toggle('onTabs', v === 'workspace');
+  showMenuBar(false);
   if (v === 'workspace') fitZoom();
   if (v === 'log') loadLogNames();
   if (v === 'settings') { $('#recShow').classList.add('hidden'); renderUsers().then(renderRecovery).then(renderMessaging).then(() => renderContact(S.me.name)).catch(e => toast(e.message, true)); }
@@ -132,7 +143,7 @@ const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspace
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
   for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName && !menuTab ? 'active' : '', onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: 'Double-click for Tab settings' } : {}) }, w.name));
+    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: `Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.name));
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -168,7 +179,7 @@ function renderWs() {
   if (w.background) { imgs.push(`url("${media(w.background)}")`); sizes.push(bgSize); poss.push(bgPos); }
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
-  ws.classList.toggle('editing', editing);
+  ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
   for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel'].includes(g.kind))) ws.append(buildGfx(g));
@@ -180,6 +191,11 @@ function renderWs() {
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
   renderPipes(); fitZoom(); updLockBtn();
 }
+
+// Phones and tablets (Fritz): in Edit layout a finger only picks things, so nothing is moved or resized by accident.
+// A finger screen has no pointer that hovers; an iPad can say it is a Mac, so its touch points count too.
+const touchOnly = () => matchMedia('(hover: none) and (pointer: coarse)').matches || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+const noMove = () => editing && touchOnly() && !S.config.brewDefaults?.touchMove;   // the Default tab switch lets them move again
 
 const tabProfileOf = w => w?.tabProfile ? (S.tabProfiles || []).find(p => p.id === w.tabProfile) : null;
 function place(node, o) { node.style.left = (o.x || 0) + 'px'; node.style.top = (o.y || 0) + 'px'; node.style.width = (o.w || 120) + 'px'; node.style.height = (o.h || 60) + 'px'; }
@@ -381,7 +397,7 @@ function buildGfx(g) {
   const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id });
   place(n, g);
   if (g.kind === 'image') n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : '';
-  else { n.textContent = g.text || ''; n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.color = g.color || ''; n.style.fontWeight = g.bold ? '700' : ''; }
+  else { setRich(n, g.text || ''); n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.color = g.color || ''; n.style.fontWeight = g.bold ? '700' : ''; }
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
@@ -452,7 +468,7 @@ function buildIp(g) {
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
   if (g.labelVisible && g.label) n.append(widgetLabel(g, 'below'));
-  if (editing) { if (!fit) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  if (editing) { if (g.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); } else if (!fit) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
 
@@ -587,7 +603,7 @@ function fillEl(n, e0) {
     vl.style.alignItems = vl.style.justifyContent = '';
     styleEl(n, e);
   }
-  nm.textContent = v.displayname ?? e.name;
+  setRich(nm, v.displayname ?? e.name);
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
   switch (e.type) {
@@ -644,7 +660,7 @@ function fillEl(n, e0) {
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
-  vl.textContent = e.hideValue ? '' : text;
+  setRich(vl, e.hideValue ? '' : text);
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden');
   n.classList.toggle('fault', !!v.fault);
@@ -748,7 +764,7 @@ function release() {
   held = null;
 }
 $('#ws').addEventListener('pointerdown', ev => {
-  if (editing) return;
+  if (editing || ev.button !== 0) return;     // the right button is for Help, it never presses a push button
   const n = ev.target.closest('.el'); const e = n && elByName(n.dataset.name);
   if (!e || tapAction(e) !== 'hold') return;
   ev.preventDefault(); release();
@@ -784,7 +800,8 @@ function choose(title, buttons, current) {
   return new Promise(res => {
     const d = $('#valDlg'); d.innerHTML = '';
     const close = v => { d.close(); res(v); };
-    d.append(h('div', { class: 'vdTitle' }, title),
+    const tt = h('div', { class: 'vdTitle' }); setRich(tt, title);
+    d.append(tt,
       h('div', { class: 'vdBtns' }, ...buttons.map(([label, val]) => h('button', { type: 'button', class: 'big' + (val === current ? ' cur' : '') + (val === true ? ' onb' : val === false ? ' offb' : ''), onclick: () => close(val) }, label))),
       h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => close(undefined) }, 'Cancel')));
     d.oncancel = () => res(undefined);
@@ -1146,7 +1163,7 @@ function setEditing(on) {
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
   const lockedEq = S.profiles?.find(p => p.id === S.config.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" is locked: equipment, IPs and pipes can't be changed. ` : '') + 'Drag to move, corner to resize, double-click (or hold a finger) for properties. Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" is locked: equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
   renderTabs(); renderWs();
 }
 
@@ -1166,7 +1183,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     drawPts.push(c); renderPipes(); return;
   }
   const handle = ev.target.closest('circle.handle');
-  if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
+  if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = noMove() ? null : { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
   const pip = ev.target.closest('.devip');
   let node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
@@ -1177,7 +1194,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     if (again) { sel = { kind: 'gfx', id: hit.dataset.gid }; renderWs(); editItem('gfx', sel.id); return; }
     startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid };
     const pipe = findItem('gfx', sel.id);
-    drag = pipe.locked ? null : startPipeMove(pipe, p);
+    drag = pipe.locked || noMove() ? null : startPipeMove(pipe, p);
     renderWs(); return;
   }
   if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
@@ -1187,7 +1204,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (bundle) { item = bundle; sel = { kind: 'gfx', id: bundle.id }; node = $(`#ws .gfx[data-gid="${CSS.escape(bundle.id)}"]`) || node; }
   startLongPress(ev, sel.kind, sel.id);
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel'); updLockBtn();
-  if (item.locked) { drag = null; ev.preventDefault(); return; }   // locked: select only, no move or resize
+  if (item.locked || noMove()) { drag = null; ev.preventDefault(); return; }   // locked, or a phone or tablet: select only, no move or resize
   if (item.fitting === 'coupling') {     // the open end of one straight pipe: dragging it moves that whole pipe
     const ps = pipesOn(item.id, item.workspace);
     if (ps.length === 1 && ps[0].straight && !ps[0].locked) { drag = startPipeMove(ps[0], p); ev.preventDefault(); return; }
@@ -1256,6 +1273,55 @@ function startLongPress(ev, kind, id) {
   lp = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { lp = null; if (drag) { drag = null; renderWs(); } kind === 'tab' ? editWorkspace() : editItem(kind, id); }, 600) };
 }
 function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
+
+// Right-click Help (Fritz): a right-click on anything that can't be moved opens Help at the part that explains it:
+// any item when the layout is not being edited, a 🔒 locked item in Edit layout, an empty spot on a tab, the Menu Bar.
+// An unlocked item in Edit layout keeps the right button for dragging. Shift + right-click gives the browser's own menu.
+// Phones have no right-click: holding a finger on an item for 0.7 s does the same, but only outside Edit layout,
+// where holding a finger already opens Properties.
+const openHelp = topic => window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
+// the yellow ? Help icon (Fritz): on the ☰ Menu tabs and in Properties dialogs, never on a tab itself.
+// `leave` runs first and may say no (a dialog with changes asks before it closes).
+const helpIcon = (topic, leave) => h('button', { type: 'button', class: 'helpIcon', title: 'Help on this', 'aria-label': 'Help on this',
+  onclick: ev => { ev.preventDefault(); ev.stopPropagation(); if (!leave || leave() !== false) openHelp(topic); } }, '?');
+function tabItemAt(target) {
+  const pip = target.closest('.devip'), node = target.closest('.el,.gfx'), pipe = target.closest('#pipes g');
+  const kind = pip ? (pip.dataset.eq ? 'gfx' : 'el') : node ? (node.dataset.name ? 'el' : 'gfx') : pipe ? 'gfx' : null;
+  const id = pip ? pip.dataset.eq || pip.dataset.dev : node ? node.dataset.name || node.dataset.gid : pipe?.dataset.gid;
+  const item = kind === 'el' ? L().elements.find(e => e.name === id) : kind ? L().graphics.find(g => g.id === id) : null;
+  return item && { kind, item };
+}
+function rightClickTopic(target) {
+  if (target.closest('#ws') && !menuTab) {
+    const hit = tabItemAt(target);
+    if (!hit) return TAB_SPOT;
+    const mover = editing ? bundleOf(hit.item) || hit.item : null;
+    if (mover && !mover.locked) return null;              // it can move: the right button drags it
+    return hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item);
+  }
+  return barTopic(target);
+}
+let pointerKind = 'mouse';
+document.addEventListener('pointerdown', ev => { pointerKind = ev.pointerType; }, true);
+document.addEventListener('contextmenu', ev => {
+  if (ev.shiftKey || pointerKind !== 'mouse') return;     // a finger: see the long press below
+  const topic = rightClickTopic(ev.target);
+  if (topic) { ev.preventDefault(); openHelp(topic); }
+});
+let helpPress = null, helpShownAt = 0;
+$('#ws').addEventListener('pointerdown', ev => {
+  if (editing || ev.pointerType === 'mouse' || ev.target.closest('.btns, select, button, input')) return;
+  const hit = tabItemAt(ev.target);
+  if (!hit || (hit.kind === 'el' && tapAction(hit.item) === 'hold')) return;     // a push button is held on purpose
+  clearTimeout(helpPress?.t);
+  helpPress = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { helpPress = null; helpShownAt = Date.now(); openHelp(hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item)); }, 700) };
+});
+const dropHelpPress = () => { if (helpPress) { clearTimeout(helpPress.t); helpPress = null; } };
+$('#ws').addEventListener('pointermove', ev => { if (helpPress && Math.hypot(ev.clientX - helpPress.x, ev.clientY - helpPress.y) > 8) dropHelpPress(); });
+for (const t of ['pointerup', 'pointercancel']) window.addEventListener(t, dropHelpPress);
+// the finger lifting after Help opened must not also switch the item
+document.addEventListener('click', ev => { if (Date.now() - helpShownAt < 1500 && ev.target.closest('#ws')) { ev.stopPropagation(); ev.preventDefault(); helpShownAt = 0; } }, true);
+$('#ws').addEventListener('contextmenu', ev => { if (!editing && pointerKind !== 'mouse' && tabItemAt(ev.target)) ev.preventDefault(); });   // Android's own long-press menu
 
 // The joint Skynet put at a pipe end turns into the fitting the pipes on it need: one or two in line = coupling,
 // a corner = 90° elbow, three = tee, four = cross, each turned the right way. A joint with a hose on it stays a coupling.
@@ -1368,6 +1434,7 @@ function leaveLayoutDialog() {
     const close = v => { d.oncancel = null; d.close(); res(v); };
     d.append(h('div', { class: 'vdTitle' }, 'Leave Edit layout?'),
       h('p', {}, 'You have changes to this layout that are not saved yet.'),
+      versionSwitch(),
       h('div', { class: 'vdBtns' },
         h('button', { type: 'button', class: 'big primary', onclick: () => close('save') }, 'Save'),
         h('button', { type: 'button', class: 'big danger', onclick: () => close('discard') }, 'Exit without Saving')),
@@ -1375,6 +1442,12 @@ function leaveLayoutDialog() {
     d.oncancel = () => res(undefined);
     d.showModal();
   });
+}
+// a copy of the Update Version switch next to Save layout (both stay the same)
+function versionSwitch() {
+  const box = h('input', { type: 'checkbox', ...($('#updateVersion').checked ? { checked: true } : {}) });
+  box.onchange = () => { $('#updateVersion').checked = box.checked; $('#updateVersion').dispatchEvent(new Event('change')); };
+  return h('label', { class: 'toggle', title: $('#updateVersion').closest('label').title }, h('span', { class: 'sw' }, box, h('span', { class: 'swk' })), ' Update Version');
 }
 async function leaveLayout() {
   if (!layoutChanged()) return setEditing(false);
@@ -1488,10 +1561,72 @@ $('#addEl').onclick = guard(async () => {
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/samples/led_green.svg'; e.imageOff = 'Images/samples/led_red.svg'; }
+  if (isDevice(e) && !(await newDeviceDialog(e, prefix))) return;
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 });
+// Fritz, 2026-10-21: a new Device starts with its Display Name, then its Interface, Port and Type, and its name is suggested from them:
+// InterfaceID_Port_Type_DisplayName_TabID, e.g. MB_25_PWM_VlV_Fly_Sparge_SP (public/naming.js). An Admin may type another name;
+// it must be unique and has no spaces. Only one Device per port of an Interface.
+const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
+const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
+const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
+// the port as written in the name: the pin, OW3 for OneWire probe 3, ADS0 for ADS1115 channel 0, the first DT pin of a scale
+function portForName(e) {
+  if (isOneWire(e)) return e.probeIndex ? 'OW' + e.probeIndex : 'OW';
+  if (e.type === 'analogIn' && e.adc === 'ads1115') return e.channel === undefined || e.channel === '' ? '' : 'ADS' + e.channel;
+  return String(e.channel ?? '').split(',')[0].trim();
+}
+const deviceSuggestion = e => suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, displayName: e.displayName, tab: tabIdOf(e.workspace) });
+const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
+const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
+// a name used by another Device or Widget (any capitals)
+const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self && x.name.toLowerCase() === n.toLowerCase());
+function portError(e, self) {
+  const c = portClash(e, (draft || S.config).elements.filter(x => x !== self));
+  return c && `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only one Device can use a port.`;
+}
+async function newDeviceDialog(e, hint) {
+  const devs = S.config.devices || [];
+  const work = { displayName: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
+  const port = isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
+    : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
+      : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
+        : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || 'digital'];
+  const fields = [['_n', 'Type the Display Name first. The name is made from it: Interface ID _ Port _ Type _ Display Name _ Tab ID. You can type your own name instead: it must be unique, and spaces become _.', 'note'],
+    ['displayName', 'Display name (shown on the tab, e.g. Fly Sparge)', 'text'],
+    ['device', 'Interface (board)', 'dev'], port,
+    ['typeCode', 'Type (for the name)', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
+    ['workspace', 'Tab', 'ws'],
+    ['name', 'Name (filled in for you)', 'text']];
+  const body = $('#dlgBody');
+  try {
+    for (;;) {
+      let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
+      const shown = dialog('New Device', fields, work, false);
+      const nameBox = body.querySelector('[data-k="name"]');
+      if (!touched) nameBox.value = last;
+      body.oninput = ev => {
+        if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
+        const w = { ...work }; try { readFields(w, body); } catch { }
+        last = deviceSuggestion(w); if (!touched) nameBox.value = last;
+      };
+      if (await shown !== 'ok') return false;
+      try {
+        readFields(work, body);
+        const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
+        if (!name) throw new Error('Type a Display Name (or a Name)');
+        if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
+        const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
+        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        e.name = name; wsName = e.workspace || wsName;
+        if (name === sug) autoNamed.add(e);
+        return true;
+      } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
+    }
+  } finally { body.oninput = null; }
+}
 // Fritz, 2026-10-20: a new valve starts from the Valve Profile picked now (only now; after that it is changed in its properties)
 async function useValveProfile(e) {
   const def = S.config.brewDefaults?.valveProfile;
@@ -1568,31 +1703,57 @@ $('#addWs').onclick = () => {
   const n = prompt('New tab name'); if (!n) return;
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
   const tp = S.config.brewDefaults?.tabProfile;
-  draft.workspaces.push({ name: n, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) }); wsName = n; renderTabs(); renderWs();
+  const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
+  draft.workspaces.push({ name: n, id, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) }); wsName = n; renderTabs(); renderWs();
+  toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
 };
 $('#wsProps').onclick = () => editWorkspace();
 const saveLayout = guard(async () => {
-  await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics });
-  toast('Layout saved'); editing = false; await load(); setEditing(false);
+  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
+  toast(r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved'); editing = false; await load(); setEditing(false);
 });
+// the Update Version switch is remembered on this browser
+try { $('#updateVersion').checked = localStorage.getItem('bp.updateVersion') === '1'; } catch { }
+$('#updateVersion').onchange = e => { try { localStorage.setItem('bp.updateVersion', e.target.checked ? '1' : '0'); } catch { } };
 $('#saveLayout').onclick = saveLayout;
 $('#cancelLayout').onclick = () => leaveLayout();
-$('#zoom').value = zoom;
-$('#zoom').onchange = e => { zoom = e.target.value; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); };
+// Zoom and Full screen live on the Zoom Menu tab (Fritz, 2026-10-21); the Default tab picks what the panel starts with
+const ZOOMS = [['fit', 'Fit screen'], ['width', 'Fit width'], ['0.5', '50%'], ['0.75', '75%'], ['1', '100%'], ['1.25', '125%'], ['1.5', '150%']];
+function setZoom(z) { zoom = z; try { localStorage.setItem('bp.zoom', zoom); } catch { } fitZoom(); }
 let fitTimer;
 const refit = () => { clearTimeout(fitTimer); fitTimer = setTimeout(() => { if (view === 'workspace') fitZoom(); }, 100); };
 { const ro = new ResizeObserver(refit); for (const s of ['#top', '#view-workspace > .bar', '#editBar']) ro.observe($(s)); }   // a menu or the tab buttons wrapped onto another line
 window.addEventListener('resize', refit);
 // in full screen the top menu is hidden too, so the tab gets every pixel (Esc or Exit full screen brings it back)
 document.addEventListener('fullscreenchange', () => {
-  const on = !!document.fullscreenElement;
-  $('#fullScreen').textContent = on ? 'Exit full screen' : 'Full screen';
-  document.body.classList.toggle('fullscreen', on);
+  document.body.classList.toggle('fullscreen', !!document.fullscreenElement);
+  if (menuTab === 'zoom') renderMenuPane();
   refit();
 });
-// Full screen hides the browser's own bars (phones without it, like iPhones, just do not show the button)
-if (!document.documentElement.requestFullscreen) $('#fullScreen').classList.add('hidden');
-$('#fullScreen').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => { });
+// the Menu Bar is hidden on the Tabs page (Default tab: "Hide the Menu Bar on Tabs", on unless switched off);
+// ☰ Menu > Show Menu Bar brings it back until you hide it again or leave the Tabs page
+const menuBarHides = () => S?.config?.brewDefaults?.hideMenuBar !== false;
+const menuBarHidden = () => view === 'workspace' && menuBarHides() && !document.body.classList.contains('menuBarOn');
+function showMenuBar(on) {
+  document.body.classList.toggle('hideMenuBar', menuBarHides());
+  document.body.classList.toggle('menuBarOn', on);
+  refit();
+}
+// Full screen hides the browser's own bars (phones without it, like iPhones, can't: the Zoom tab says so)
+const canFullScreen = !!document.documentElement.requestFullscreen;
+const setFullScreen = on => on ? document.documentElement.requestFullscreen().catch(() => { }) : document.fullscreenElement && document.exitFullscreen();
+// on startup: the Default tab's zoom (if one is picked), and Full screen. Browsers only allow Full screen after a click or tap,
+// so it starts with the first click or tap on the page.
+let started = false;
+function startupView() {
+  if (started) return; started = true;
+  const d = S.config.brewDefaults || {};
+  if (d.startZoom && ZOOMS.some(z => z[0] === d.startZoom)) setZoom(d.startZoom);
+  if (d.startFullScreen && canFullScreen && !document.fullscreenElement) {
+    const go = () => { document.removeEventListener('pointerup', go, true); setFullScreen(true); };
+    document.addEventListener('pointerup', go, true);
+  }
+}
 window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); });
 
 // ---------------------------------------------------------------- properties dialog
@@ -1643,9 +1804,9 @@ const F = {
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'yn']]],
+    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'yn'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num', ['locked', 'Lock position (no drag or resize)', 'yn']]],
+    ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'bool']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
     ['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
     ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
@@ -1849,7 +2010,7 @@ function field([key, label, kind, opts, rerender], obj) {
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}_   ${d.name}` : d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
   else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
@@ -1935,7 +2096,7 @@ function readFields(obj, root = $('#dlgBody')) {
 // A form of fields in a box (a dialog, or a Menu tab): "Add new ..." in a list and selects that change the fields are handled here.
 // onChange runs after any change. Returns build(), which draws the fields again.
 function bindForm(body, fields, obj, onChange) {
-  const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); };
+  const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); menuHelpIcons(body); };
   build();
   body.onchange = ev => {
     const t = ev.target;
@@ -1960,10 +2121,17 @@ function bindForm(body, fields, obj, onChange) {
 }
 
 // fields: a list, or a function of the item (the list changes when a [.., true] select changes, e.g. probe type)
-function dialog(title, fields, obj, canDelete) {
+function dialog(title, fields, obj, canDelete, topic) {
   return new Promise(res => {
     $('#dlgTitle').textContent = title;
     bindForm($('#dlgBody'), fields, obj);
+    if (topic) {      // the ? beside the title: closes the dialog (asking first when something was changed) and opens Help
+      const d = $('#dlg'), before = formSnap();
+      $('#dlgTitle').append(' ', helpIcon(topic, () => {
+        if (formSnap() !== before && !confirm('Leave these Properties without saving your changes, and open Help?')) return false;
+        d.close('cancel');
+      }));
+    }
     for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
     const d = $('#dlg');
     // Delete and Cancel are plain buttons so Enter in a field always means Save
@@ -1973,11 +2141,13 @@ function dialog(title, fields, obj, canDelete) {
   });
 }
 
+const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select, #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
+
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
   const work = { bundled: true, workspace: v.workspace };
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', 'This vessel and its IPs are bundled: they move as one and can\'t be edited. Switch off Bundled to edit, move or delete them.', 'note'],
-    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws']], work, false);
+    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws']], work, false, graphicTopic(v));
   if (r !== 'ok') return;
   readFields(work);
   if (work.workspace && work.workspace !== v.workspace) {
@@ -2003,12 +2173,14 @@ async function editItem(kind, id) {
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
+    if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it) || '(type a Display name and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
+      ['typeCode', 'Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return f;
   } : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)`, 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item);
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true);
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
@@ -2049,7 +2221,13 @@ async function editItem(kind, id) {
     }
     if (kind === 'el') {
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
+      // a new Device keeps following the suggested name (Display name, Interface, port, type, tab) until a name of its own is typed
+      const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
+      if (follow) work.name = deviceSuggestion(work) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
+      if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
+      const isNew = !S.config.elements.some(x => x.name === item.name);
+      if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)))) { const err = portError(work, item); if (err) throw new Error(err); }
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
@@ -2092,6 +2270,7 @@ async function editWorkspace() {
   const w = curWs(); const work = clone(w);
   await loadMediaPictures();
   const r = await dialog('Tab settings', [['name', 'Name', 'text'],
+    ['id', 'Tab ID (exactly 2 letters, unique; it ends the suggested name of each new Device on this tab, e.g. ..._Fly_Sparge_SP)', 'text'],
     ['_bgHead', 'Background', 'head'],
     ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
     ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
@@ -2100,7 +2279,7 @@ async function editWorkspace() {
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
     ['_sizeHead', 'Size', 'head'],
     ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
-    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num']], work, draft.workspaces.length > 1);
+    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num']], work, draft.workspaces.length > 1, TAB_SPOT);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
@@ -2108,7 +2287,14 @@ async function editWorkspace() {
     draft.graphics = draft.graphics.filter(g => g.workspace !== w.name);
     wsName = draft.workspaces[0].name;
   } else if (r === 'ok') {
-    try { readFields(work); } catch (e) { return toast(e.message, true); }
+    try {
+      readFields(work);
+      const others = draft.workspaces.filter(x => x !== w);
+      if (!work.name?.trim()) throw new Error('The tab needs a name');
+      if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
+      work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
+      if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
+    } catch (e) { return toast(e.message, true); }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
     Object.keys(w).forEach(k => delete w[k]); Object.assign(w, work);     // a cleared box (picture "(none)", color Default) must remove the old value
   }
@@ -2116,12 +2302,28 @@ async function editWorkspace() {
 }
 
 // ---------------------------------------------------------------- alarms / sound
-$('#soundBtn').onclick = () => {
-  soundOn = !soundOn;
-  $('#soundBtn').textContent = soundOn ? 'Sound on' : 'Enable sound';
-  if (soundOn) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
+// Browsers play nothing until this screen is tapped or clicked once, so a sound turned on before that waits for the first tap.
+const tappedYet = () => navigator.userActivation ? navigator.userActivation.hasBeenActive : soundTapped;
+let soundTapped = false;
+function showSound() {
+  $('#soundBtn').textContent = !soundOn ? 'Enable sound' : tappedYet() ? 'Sound on' : 'Sound on (tap anywhere)';
+  document.querySelectorAll('.soundNowSw').forEach(x => { x.checked = soundOn; });
+}
+function setSound(on) {
+  soundOn = on; showSound();
+  if (soundOn && tappedYet()) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
   updateAlarms();
+}
+$('#soundBtn').onclick = () => setSound(!soundOn);
+// the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
+const firstTap = () => {
+  soundTapped = true;
+  document.removeEventListener('pointerdown', firstTap, true); document.removeEventListener('keydown', firstTap, true);
+  setTimeout(() => { for (const a of audios.values()) if (a.paused) a._playing = false; if (soundOn) setSound(true); else showSound(); });
 };
+document.addEventListener('pointerdown', firstTap, true); document.addEventListener('keydown', firstTap, true);
+// Default tab: "Turn Sound On when starting" turns sound on when the panel opens and when a Schema is loaded
+const soundOnStart = () => { if (S.config.brewDefaults?.soundOnStart && !soundOn) setSound(true); };
 const isSoundEl = e => e.type === 'alarm' || e.type === 'soundPlayer';
 // the sound file an alarm / sound player plays now (Default = the panel's beep)
 function soundSrc(e, v) {
@@ -2605,7 +2807,11 @@ function renderConsole() {
   const all = $('#consoleAll').checked;
   const rows = S.console.filter(c => all || !curScript || c.script === curScript).slice(-400);
   const pad = n => String(n).padStart(2, '0');
-  $('#console').textContent = rows.map(c => { const d = new Date(c.ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${all ? '[' + c.script + '] ' : ''}${c.text}`; }).join('\n');
+  $('#console').replaceChildren(...rows.map(c => {
+    const d = new Date(c.ts), row = h('div');
+    setRich(row, `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${all ? '[' + c.script + '] ' : ''}${c.text}`);
+    return row;
+  }));
   $('#console').scrollTop = 1e9;
 }
 $('#consoleAll').onchange = renderConsole;
@@ -2665,7 +2871,7 @@ async function editLog(e) {
     ['interval', 'Interval 00:00:00 (for "Every 00:00:00")', 'text'],
     ['at', 'At clock time (optional, for the "Every" choices), e.g. 12 AM, 6:30 PM or 18:30', 'text'],
     ['_n', '"Every 1 days at 12 AM" writes at midnight every day. "Every 6 hours at 1 AM" writes at 1 AM, 7 AM, 1 PM and 7 PM. Without a clock time it counts from when the server starts. Fastest is 100 ms.', 'note'],
-  ], work, false);
+  ], work, false, DB_TRIGGER);
   if (r !== 'ok') return;
   try { readFields(work); } catch (x) { return toast(x.message, true); }
   if (work.mode === 'script' && !work.script) return toast('Pick the process that writes this value', true);
@@ -2718,9 +2924,16 @@ function renderDevices() {
       if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
-    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
+    const cfg = S.config.devices.find(x => x.name === d.name);
+    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...)',
+      onchange: guard(async ev => {
+        const id = cleanInterfaceId(ev.target.value);
+        if (S.config.devices.some(x => x.name !== d.name && String(x.id).toUpperCase() === id)) { ev.target.value = cfg?.id ?? ''; throw new Error(`Interface ID ${id} is used by another Interface`); }
+        await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, id } : x) }); await load(); toast(`Interface ID is now ${id}_ (Devices made before keep their names)`);
+      }) });
+    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
-      h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   renderProbes();
 }
@@ -2767,12 +2980,18 @@ $('#scanPorts').onclick = guard(async () => {
 $('#addDev').onclick = guard(async () => {
   const name = $('#devName').value.trim(), type = $('#devType').value;
   if (!name) throw new Error('Device name is required');
-  if (S.config.devices.some(d => d.name === name)) throw new Error('That device name is used');
-  const d = { name, type };
+  if (S.config.devices.some(d => d.name === name)) throw new Error('That Interface name is used');
+  const taken = S.config.devices.map(x => x.id), typed = $('#devId').value.trim();
+  const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
+  if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Leave the box empty for one that is free.`);
+  const d = { name, id, type };
   if (type === 'serial') { d.port = $('#devPort').value.trim(); d.baud = 115200; if (!d.port) throw new Error('USB port is required'); }
   if (type === 'esp32' || type === 'ethernet') { d.host = $('#devHost').value.trim(); d.port = 4100; if (!d.host) throw new Error('Network address is required'); }
-  await api('PUT', '/ui/layout', { devices: [...S.config.devices, d] }); await load(); toast('Device added');
+  await api('PUT', '/ui/layout', { devices: [...S.config.devices, d] }); await load(); toast(`Interface ${name} added, ID ${id}_`);
+  $('#devName').value = ''; $('#devId').value = ''; $('#devId').placeholder = 'MB';
 });
+// the Interface ID box shows the ID a name would get (first letters of its first two words), until one is typed
+$('#devName').addEventListener('input', () => { $('#devId').placeholder = defaultInterfaceId($('#devName').value, S.config.devices.map(x => x.id)) || 'MB'; });
 
 // ---------------------------------------------------------------- import
 $('#importBtn').onclick = guard(async () => {
@@ -2857,7 +3076,7 @@ function renderSettings() {
 }
 // ---- accounts
 addEyes();
-$('#signOut').onclick = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
+const signOut = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
 $('#pwSave').onclick = guard(async () => {
   if ($('#pwNew').value !== $('#pwNew2').value) throw new Error('The two new passwords are not the same');
   await api('POST', '/auth/password', { current: $('#pwCur').value, password: $('#pwNew').value });
@@ -3171,7 +3390,8 @@ function renderSchemaPick() {
   s.append(...sc.list.map(x => h('option', { value: x.id, ...(x.id === act ? { selected: true } : {}) }, x.name)));
   if (can('admin')) s.append(h('optgroup', { label: '──────────' },
     h('option', { value: '__new' }, 'Add new Schema ...'), h('option', { value: '__ren' }, 'Rename this Schema ...'),
-    h('option', { value: '__bak' }, 'Back up this Schema now'), h('option', { value: '__res' }, 'Restore a backup ...'),
+    h('option', { value: '__ver' }, 'Save a new version now'),
+    h('option', { value: '__bak' }, 'Back up this Schema now'), h('option', { value: '__res' }, 'Restore a backup or version ...'),
     h('option', { value: '__del' }, 'Delete a Schema ...')));
   s.disabled = !can('admin') && sc.list.length < 2;
   s.title = can('admin') ? 'Pick a Schema to load it' : 'Only an admin can load another Schema';
@@ -3196,6 +3416,7 @@ $('#schemaPick').onchange = guard(async ev => {
     }
     if (v === '__bak') { const r = await api('POST', `/ui/schemas/${act.id}/backup`); return toast(`Backed up: config/schemas/backups/${act.id}/${r.file}`); }
     if (v === '__res') return restoreSchema();
+    if (v === '__ver') { const r = await api('POST', `/ui/schemas/${act.id}/version`); await load(); return toast(`New Schema version: ${r.version}`); }
     if (v === '__del') {
       const others = S.schemas.list.filter(x => !x.active);
       if (!others.length) return toast('This is your only Schema. Add another before deleting one.', true);
@@ -3211,17 +3432,18 @@ $('#schemaPick').onchange = guard(async ev => {
     const to = S.schemas.list.find(x => x.id === v);
     if (!confirm(`Load the Schema "${to.name}"?\n\nRunning Processes stop, and its tabs, devices, elements and Equipment Profile take the place of "${act?.name}".\n\n"${act?.name}" is kept just as it is. Pick it in this list to go back to it.`)) return;
     await api('POST', `/ui/schemas/${v}/load`);
-    wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; leaveMenuTab(); await load(); setView('workspace'); toast(`Schema "${to.name}" loaded`);
+    wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; leaveMenuTab(); await load(); soundOnStart(); setView('workspace'); toast(`Schema "${to.name}" loaded`);
   } finally { back(); }
 });
 async function restoreSchema() {
   const act = S.schemas.active, list = await api('GET', `/ui/schemas/${act.id}/backups`);
-  if (!list.length) return toast('This Schema has no backups yet', true);
-  const w = { file: list[0].file };
-  if (await dialog(`Restore a backup of "${act.name}"`, [['file', 'Backup', 'sel', list.map(b => [b.file, `${new Date(b.when).toLocaleString()}${b.daily ? '  (daily)' : '  (made by hand)'}`])],
+  if (!list.length) return toast('This Schema has no backups or versions yet', true);
+  const key = b => (b.version ? 'v:' : 'b:') + b.file;
+  const w = { file: key(list[0]) };
+  if (await dialog(`Restore a backup or version of "${act.name}"`, [['file', 'Backup or version', 'sel', list.map(b => [key(b), b.version ? `Version ${b.file.slice(0, -5)}` : `${new Date(b.when).toLocaleString()}${b.daily ? '  (daily)' : '  (made by hand)'}`])],
     ['_n', 'The Schema as it is now is backed up first, so you can undo this by restoring that backup. Running Processes stop.', 'note']], w) !== 'ok') return;
   readFields(w);
-  await api('POST', `/ui/schemas/${act.id}/restore`, { file: w.file });
+  await api('POST', `/ui/schemas/${act.id}/restore`, { file: w.file.slice(2), version: w.file.startsWith('v:') });
   wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; await load(); toast('Backup restored');
 }
 
@@ -3237,6 +3459,7 @@ const EQ_KINDS = ['vessel', 'pchiller', 'ccoil', 'herms', 'trub'];
 const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
+  { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
   { key: 'default', title: 'Default', tip: 'What new Recipes start with, and the order of the Menu', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'The equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
@@ -3248,10 +3471,12 @@ const MENU = [
   { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
+  { key: 'about', title: 'About', tip: 'Who is signed in, Sign out, and the Schema and its version', render: renderAboutTab },
 ];
-// the Menu tabs in their order: numbered ones first, then the rest as listed above (new Menu tabs land at the end)
+// the Menu tabs in their order: numbered ones first, then the rest as listed above (new Menu tabs land at the end,
+// except Zoom, which is number 1 until the order is changed)
 function menuSorted() {
-  const o = S.config.menuOrder || {}, at = m => Number.isFinite(+o[m.key]) ? +o[m.key] : 1e6 + MENU.indexOf(m);
+  const o = S.config.menuOrder || {}, at = m => Number.isFinite(+o[m.key]) ? +o[m.key] : m.key === 'zoom' ? 0 : 1e6 + MENU.indexOf(m);
   return [...MENU].sort((a, b) => at(a) - at(b) || MENU.indexOf(a) - MENU.indexOf(b));
 }
 // move one Menu tab to place n; the others are numbered again 1, 2, 3 ... around it
@@ -3267,7 +3492,9 @@ const paneDirty = () => menuTab === 'equipment' ? eqDirty : menuTab === 'vessel'
 function renderMenu() {
   if (!S?.profiles) return;
   const list = $('#menuList'); list.innerHTML = '';
-  if (can('admin')) list.append(h('button', { role: 'menuitem', class: 'menuItem', onclick: guard(menuEditLayout) }, editing ? '✎ Exit Edit layout' : '✎ Edit layout'), h('hr'));
+  if (view === 'workspace' && menuBarHides()) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: 'The top line: Schema, Processes, Variables, Log, Settings, Help, Enable sound, Sign out', onclick: () => { closeMenuList(); showMenuBar(menuBarHidden()); } }, menuBarHidden() ? '▼ Show Menu Bar' : '▲ Hide Menu Bar'));
+  if (can('admin')) list.append(h('button', { role: 'menuitem', class: 'menuItem', onclick: guard(menuEditLayout) }, editing ? '✎ Exit Edit layout' : '✎ Edit layout'));
+  list.append(h('hr'));
   for (const m of menuSorted().filter(m => !m.admin || can('admin'))) list.append(h('button', { role: 'menuitem', class: 'menuItem', title: m.coming || m.tip, ...(m.coming ? { disabled: true } : {}), onclick: () => { closeMenuList(); if (m.view) setView(m.view); else openMenuTab(m.key); } },
     m.title, m.coming ? h('span', { class: 'muted' }, ' (coming)') : ''));
   const tabs = $('#menuTabs'); tabs.innerHTML = '';
@@ -3322,6 +3549,15 @@ function renderMenuPane() {
   const box = $('#menuPane'); box.innerHTML = '';
   const m = MENU.find(x => x.key === menuTab); if (!m) return;
   m.render(box);
+  menuHelpIcons(box);
+}
+// a ? beside each heading of the Menu tab showing (again after a form redraws itself)
+function menuHelpIcons(box) {
+  if (!menuTab || !box.closest('#menuPane')) return;
+  for (const hd of box.querySelectorAll('h3, .dlgHead')) {
+    const topic = !hd.querySelector('.helpIcon') && menuTopic(menuTab, hd.textContent, hd.tagName === 'H3');
+    if (topic) hd.append(' ', helpIcon(topic));
+  }
 }
 window.addEventListener('beforeunload', e => { if (eqDirty || vesselDirty || Object.values(profDirty).some(Boolean)) { e.preventDefault(); e.returnValue = ''; } });
 
@@ -3335,7 +3571,7 @@ const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 
 // ---- Default tab: what new Recipes start with, and the order of the Menu
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', ...(S.config.brewDefaults || {}) };
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, ...(S.config.brewDefaults || {}) };
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here. A new Recipe starts with the first ones, and you can change each one in the Recipe.', 'note'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
@@ -3345,17 +3581,67 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
-    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')]];
+    ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
+    ['_m', 'Menu Bar', 'head'],
+    ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool'],
+    ['_s', 'Sound', 'head'],
+    ['soundOnStart', 'Turn Sound On when starting (when the panel opens or a Schema is loaded)', 'bool'],
+    ['_sn', 'Browsers (Chrome, Edge, Safari, iPhone, Android) play no sound until the screen is tapped or clicked once. So with this on, the button at the top says "Sound on (tap anywhere)" until your first tap or click, and the sound is on from then.', 'note'],
+    ['_z', 'On startup', 'head'],
+    ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
+    ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
+    ['_x', 'Text', 'head'],
+    ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px); empty = ${TEXT_LARGE}`, 'num'],
+    ['_p', 'Phones and tablets', 'head'],
+    ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
+    ['_pn', `This screen counts as ${touchOnly() ? 'a phone or tablet' : 'a computer (mouse)'}. Computers can always move things.`, 'note']];
   const f = paneForm(fields, d, () => { }, !admin);
-  const save = guard(async () => { f.read(); await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; toast('Defaults saved'); });
+  // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
+  const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
+  now.onchange = () => setSound(now.checked);
+  const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
+  const save = guard(async () => {
+    f.read();
+    if (d.textLarge === '' || d.textLarge === null) delete d.textLarge;
+    if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
+    await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
       const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin ? {} : { disabled: true }) });
       n.onchange = guard(() => setMenuOrder(m.key, +n.value));
       return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
     })));
-  box.append(h('h3', {}, 'Default'), h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+  box.append(h('h3', {}, 'Default'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
+}
+
+// ---- Zoom tab: how big the tabs show, and Full screen. Picking one goes back to the tab, so you see it at once.
+function renderZoomTab(box) {
+  const back = () => closeMenuTab('zoom');
+  const fs = !!document.fullscreenElement;
+  box.append(h('h3', {}, 'Zoom'),
+    h('div', { class: 'zoomPick' }, ...ZOOMS.map(([v, t]) => h('button', { class: v === zoom ? 'active' : '', onclick: () => { setZoom(v); back(); } }, t))),
+    h('h3', {}, 'Full screen'),
+    canFullScreen
+      ? h('div', { class: 'zoomPick' }, h('button', { class: 'primary', onclick: () => { setFullScreen(!fs); back(); } }, fs ? 'Exit full screen' : 'Full screen'))
+      : h('p', { class: 'muted' }, 'This browser cannot go full screen (iPhones cannot). On an iPhone, Share > Add to Home Screen opens the panel without the browser bars.'),
+    h('p', { class: 'muted' }, 'Full screen hides the browser\'s own bars and the Menu Bar. Esc, or Full screen here again, brings them back. ' +
+      'The Default Menu tab sets the zoom and Full screen the panel starts with.'));
+}
+
+// ---- About tab: who is signed in, Sign out, and the loaded Schema with its version
+function renderAboutTab(box) {
+  const act = S.schemas?.active || S.config.schema || {}, row = S.schemas?.list.find(x => x.id === act.id);
+  const item = (k, v) => [h('dt', {}, k), h('dd', {}, v)];
+  box.append(h('h3', {}, 'About'), h('div', { class: 'menuNarrow' },
+    h('dl', { class: 'aboutGrid' },
+      ...item('Panel', S.config.title || 'Skynet Brew Panel'),
+      ...item('Signed in as', `${S.me.name} (${S.me.role})`),
+      ...item('Schema', act.name || '(none)'),
+      ...item('Schema version', act.version || 'No version yet'),
+      ...(row?.updated ? item('Last saved', new Date(row.updated).toLocaleString()) : [])),
+    act.version ? '' : h('p', { class: 'muted' }, 'Turn on "Update Version" next to Save layout (or pick "Save a new version now" in the Schema list) to give the Schema a version.'),
+    saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: signOut }, 'Sign out'))));
 }
 
 // ---- Equipment Profile tab
@@ -3851,7 +4137,7 @@ $('#cfgSave').onclick = guard(async () => {
   if (!r.ok) { cfgProblem = r.problem; renderCfgProblems(); cfgGoto(cfgProblem); throw new Error('Not saved: line ' + r.problem.line + ': ' + r.problem.msg); }
   cfgDirty = false; cfgProblem = null; $('#cfgState').textContent = ''; renderCfgProblems(true);
   $('#cfgBackupNote').textContent = 'Saved. The old file was copied to config/backups/' + r.backup;
-  toast('Config saved');
+  toast('Schema.json saved');
 });
 $('#cfgReload').onclick = () => { if (cfgDirty && !confirm('Throw away your unsaved changes?')) return; cfgDirty = false; openConfig(); };
 $('#cfgBackups').onclick = guard(async () => {
@@ -3875,6 +4161,20 @@ $('#cfgBackups').onclick = guard(async () => {
     }) }, 'Restore')));
   $('#cfgBackupDlg').showModal();
 });
+// Schema.json: Save as .json file. The file is named after the Schema version (Name_yyyymmdd_hh_mm) when it has one.
+$('#cfgExport').onclick = guard(async () => {
+  const sc = S.schemas || { list: [] }, act = sc.active?.id, list = [...sc.list].sort((a, b) => (b.id === act) - (a.id === act));
+  if (!list.length) throw new Error('There is no Schema to save yet');
+  const w = { id: act || list[0].id };
+  const fields = [['id', 'Schema', 'sel', list.map(x => [x.id, x.id === act ? `${x.name}  (loaded)` : x.name])],
+    ['_n', 'The file goes to the Downloads folder of this computer. It holds the Schema only (tabs, devices, widgets, pictures, pipes and its Equipment Profile drawing), not logins or panel settings.', 'note']];
+  if (cfgDirty) fields.push(['_d', 'The changes in the editor are not saved yet, so they are not in the file. Press Save first to include them.', 'note']);
+  if (await dialog('Save a Schema as a .json file', fields, w) !== 'ok') return;
+  readFields(w);
+  const r = await api('GET', `/ui/schemas/${encodeURIComponent(w.id)}/export`);
+  download(r.file, JSON.stringify(r.schema, null, 2), 'application/json');
+  toast(`Saved ${r.file}`);
+});
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
-load().then(() => { connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
