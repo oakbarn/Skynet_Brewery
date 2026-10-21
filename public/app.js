@@ -2129,12 +2129,28 @@ async function editWorkspace() {
 }
 
 // ---------------------------------------------------------------- alarms / sound
-$('#soundBtn').onclick = () => {
-  soundOn = !soundOn;
-  $('#soundBtn').textContent = soundOn ? 'Sound on' : 'Enable sound';
-  if (soundOn) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
+// Browsers play nothing until this screen is tapped or clicked once, so a sound turned on before that waits for the first tap.
+const tappedYet = () => navigator.userActivation ? navigator.userActivation.hasBeenActive : soundTapped;
+let soundTapped = false;
+function showSound() {
+  $('#soundBtn').textContent = !soundOn ? 'Enable sound' : tappedYet() ? 'Sound on' : 'Sound on (tap anywhere)';
+  document.querySelectorAll('.soundNowSw').forEach(x => { x.checked = soundOn; });
+}
+function setSound(on) {
+  soundOn = on; showSound();
+  if (soundOn && tappedYet()) for (const e of S.config.elements.filter(isSoundEl)) { const a = getAudio(e); if (a) { a.muted = true; a.play().then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); } }
   updateAlarms();
+}
+$('#soundBtn').onclick = () => setSound(!soundOn);
+// the first tap or click anywhere: a sound that is already on can play now (an alarm that tried before starts again)
+const firstTap = () => {
+  soundTapped = true;
+  document.removeEventListener('pointerdown', firstTap, true); document.removeEventListener('keydown', firstTap, true);
+  setTimeout(() => { for (const a of audios.values()) if (a.paused) a._playing = false; if (soundOn) setSound(true); else showSound(); });
 };
+document.addEventListener('pointerdown', firstTap, true); document.addEventListener('keydown', firstTap, true);
+// Default tab: "Turn Sound On when starting" turns sound on when the panel opens and when a Schema is loaded
+const soundOnStart = () => { if (S.config.brewDefaults?.soundOnStart && !soundOn) setSound(true); };
 const isSoundEl = e => e.type === 'alarm' || e.type === 'soundPlayer';
 // the sound file an alarm / sound player plays now (Default = the panel's beep)
 function soundSrc(e, v) {
@@ -3224,7 +3240,7 @@ $('#schemaPick').onchange = guard(async ev => {
     const to = S.schemas.list.find(x => x.id === v);
     if (!confirm(`Load the Schema "${to.name}"?\n\nRunning Processes stop, and its tabs, devices, elements and Equipment Profile take the place of "${act?.name}".\n\n"${act?.name}" is kept just as it is. Pick it in this list to go back to it.`)) return;
     await api('POST', `/ui/schemas/${v}/load`);
-    wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; leaveMenuTab(); await load(); setView('workspace'); toast(`Schema "${to.name}" loaded`);
+    wsName = null; eqWork = null; vesselWork = null; vesselDirty = eqDirty = false; leaveMenuTab(); await load(); soundOnStart(); setView('workspace'); toast(`Schema "${to.name}" loaded`);
   } finally { back(); }
 });
 async function restoreSchema() {
@@ -3362,8 +3378,15 @@ function renderDefaultTab(box) {
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
     ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
     ['_m', 'Menu Bar', 'head'],
-    ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool']];
+    ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool'],
+    ['_s', 'Sound', 'head'],
+    ['soundOnStart', 'Turn Sound On when starting (when the panel opens or a Schema is loaded)', 'bool'],
+    ['_sn', 'Browsers (Chrome, Edge, Safari, iPhone, Android) play no sound until the screen is tapped or clicked once. So with this on, the button at the top says "Sound on (tap anywhere)" until your first tap or click, and the sound is on from then.', 'note']];
   const f = paneForm(fields, d, () => { }, !admin);
+  // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
+  const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
+  now.onchange = () => setSound(now.checked);
+  const soundNow = h('div', { class: 'menuForm' }, h('label', {}, 'Sound on (this screen, right now; the same as the button at the top)'), h('label', { class: 'sw' }, now, h('span', { class: 'swk' })));
   const save = guard(async () => { f.read(); await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
@@ -3371,7 +3394,7 @@ function renderDefaultTab(box) {
       n.onchange = guard(() => setMenuOrder(m.key, +n.value));
       return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
     })));
-  box.append(h('h3', {}, 'Default'), h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+  box.append(h('h3', {}, 'Default'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
 }
 
@@ -3894,4 +3917,4 @@ $('#cfgBackups').onclick = guard(async () => {
 });
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
-load().then(() => { connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
+load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));
