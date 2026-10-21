@@ -44,6 +44,22 @@ Any attribute with only two choices is `true` or `false`:
 
 If a name has characters other than letters, digits and `_`, put it in quotes before the dot: `"BK (Front)".visible = true`.
 
+## Is a Process running?
+
+`.running` on a Process name is `true` while that Process runs and `false` when it is stopped, finished or stopped by an error. It works in an `if`, `elseif`, `wait` or anywhere a value goes:
+
+```
+if my_Process_Mash.running = true
+  stop my_Process_Mash
+endif
+```
+
+`if my_Process_Mash.running == true` means the same: in an `if` a single `=` asks, just like `==`. The C style works too: `if (my_Process_Mash.running) stop my_Process_Mash;` and `if (!Looper_Temps.running) start Looper_Temps;`.
+
+`.running` on a Process is read only. A line like `my_Process_Mash.running = false` is an error ("my_Process_Mash.running is read only: use start my_Process_Mash or stop my_Process_Mash"); use `start` and `stop` to change it. A timer's `.running` is different: it can be set, and it starts or stops the timer.
+
+Autofill shows `running` after a Process name and a dot.
+
 ## C, C# and JavaScript spellings
 
 If you know C, C++, C# or JavaScript, you can use the spellings you are used to. They are only other ways to write the same Process commands, so the Process works the same either way. It is not JavaScript: only the spellings below are understood.
