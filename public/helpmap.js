@@ -84,8 +84,8 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
 // A heading matches when its text starts with the name (after a 🔒). Section headings inside a form only get an icon when named.
 const MENU_TOPICS = {
   default: { Text: ['text-boxes', 'defaults'], _: ['menu', 'the-default-tab'] },
-  equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-a-schema-its-equipment-profile'],
-    'Vessels and equipment': ['schemas-and-equipment-profiles', 'build-and-bundle-equipment'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
+  equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-each-tab-its-equipment-profile'],
+    'Equipment list': ['schemas-and-equipment-profiles', 'build-the-equipment-list'], 'Made on the Vessel tab': ['vessel-tab'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
     Build: ['vessel-tab', 'ports-and-build'], _: ['vessel-tab'] },
   vtemplates: { _: ['vessel-and-fitting-templates', 'the-template-panes'] },

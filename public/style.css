@@ -597,6 +597,7 @@ body.role-viewer .op-only { display: none !important; }
 .menuForm > select, .menuForm > input { min-width: 0; max-width: 100%; }
 .menuPick select { min-width: 14em; }
 .schemaBox { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; }
+.tabProfile { border-top: 1px solid var(--line); padding-top: 6px; margin-top: 6px; }
 .orderNum { width: 5em; }
 .scriptList .orderNum { width: 3.4em; padding: 1px 4px; font-size: 12px; }
 .bar.wrap { flex-wrap: wrap; }
