@@ -5,7 +5,7 @@
 // the screens on the Menu Bar (data-view of each button)
 const VIEWS = {
   workspace: ['tabs'], scripts: ['scripts'], globals: ['variables'], log: ['log'], devices: ['devices'], media: ['media'],
-  filemove: ['file-move'], import: ['import'], settings: ['settings'], help: ['editing-help'], config: ['process-editor', 'the-config-editor-admins'],
+  filemove: ['file-move'], import: ['import'], settings: ['settings'], help: ['editing-help'], config: ['schema-json'],
 };
 const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 
