@@ -4,6 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
+import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -201,7 +202,13 @@ const tabProfileOf = w => w?.tabProfile ? (S.tabProfiles || []).find(p => p.id =
 function place(node, o) { node.style.left = (o.x || 0) + 'px'; node.style.top = (o.y || 0) + 'px'; node.style.width = (o.w || 120) + 'px'; node.style.height = (o.h || 60) + 'px'; }
 
 // Bundle (Fritz): a vessel and the IPs attached to it move as one unit and can't be edited until it is un-bundled
-const bundleOf = g => g?.kind === 'ip' && g.attachTo ? draft.graphics.find(v => v.id === g.attachTo && v.kind === 'vessel' && v.bundled) : null;
+// A Tab_Fitting joined to a vessel port is part of that vessel's bundle too.
+function bundleOf(g) {
+  if (!g) return null;
+  let v = g.kind === 'ip' && g.attachTo ? draft.graphics.find(x => x.id === g.attachTo && x.kind === 'vessel') : isBfit(g) && g.onVessel ? g : null;
+  if (isBfit(v) && v.onVessel) v = draft.graphics.find(x => x.id === v.onVessel && x.kind === 'vessel') || v;
+  return v?.bundled && v !== g ? v : null;
+}
 const bundledIps = v => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id);
 
 // Edit layout: a resize corner, or a padlock when the item is locked in place
@@ -214,7 +221,7 @@ function editDeco(n, o) {
 // Vessel widgets (app-only): electrically heated, gas heated, or an unheated mash tun. A background picture by path,
 // a label (alignment, color, size, show / hide), and IPs placed on them become its ports and move with it.
 const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter',
-  eqTee: 'Pipe tee', eqElbow90: 'Pipe 90° elbow', eqElbow45: 'Pipe 45° elbow', eqCross: 'Pipe cross',
+  bfit: 'Tab_Fitting (Bundled Fitting)', eqTee: 'Pipe tee', eqElbow90: 'Pipe 90° elbow', eqElbow45: 'Pipe 45° elbow', eqCross: 'Pipe cross',
   electric: 'Electric heated vessel (older)', gas: 'Gas heated vessel (older)', mashTun: 'Unheated mash tun (older)', coil: 'Cooling coil (older)', plateChiller: 'Plate chiller (older)' };
 // Equipment widgets (Fritz's spec): a picture with a Name, a Type, a Label and ports. Every port except a thermowell is an IP:
 // it is created on screen near its Position when installed, and stays attached to the widget. Each list (types, positions,
@@ -273,7 +280,7 @@ function usedPaths(re) {
 }
 const HEAT_SOURCES = ['None', 'Electric element', 'Gas burner', 'Induction', 'Steam jacket', 'HERMS coil'];
 const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
-const eqClass = g => g?.kind === 'vessel' ? EQ[g.vesselType] : null;
+const eqClass = g => g?.kind === 'vessel' ? (g.vesselType === 'bfit' ? bfitClass(g) : EQ[g.vesselType]) : null;
 // list keys: "standard" (shared), "<class>.types", "<class>.<port>"
 function vList(key) {
   const [c, p] = key.split('.');
@@ -372,7 +379,7 @@ const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
 function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
-  const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (EQ[t] && g.name ? g.name + ': ' : '') + (g.label || VESSELS[t]) });
+  const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
   if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
   if (t === 'electric' || t === 'gas') n.append(h('div', { class: 'heat' }));
@@ -381,7 +388,8 @@ function buildVessel(g) {
     const q = d.pos.find(q => q[0] === p.position) || [0, 0.5, 0.5];
     n.append(h('div', { class: 'twell', title: vPortLabel(g, k, p), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, 'T'));
   }
-  if (g.labelVisible !== false && g.label) n.append(widgetLabel(g, 'top'));
+  const lbl = g.label || (g.template ? g.name : '');       // a Tab_Vessel or Tab_Fitting: empty Label = its Name
+  if (g.labelVisible !== false && lbl) n.append(widgetLabel({ ...g, label: lbl }, 'top'));
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
@@ -1016,6 +1024,7 @@ function ipNode(id, ws) {
   const g = L().graphics.find(g => g.id === id && g.workspace === ws);
   if (g?.port) {      // a port of an equipment widget: ports on the same circuit pass flow (chiller side, coil, filter, fitting)
     const v = L().graphics.find(x => x.id === g.attachTo), c = eqClass(v)?.ports[g.port]?.circuit;
+    if (isBfit(v) && bfitClosed(v)) return { closed: true };       // a closed valve in a Tab_Fitting
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
   if ((g?.fitting === 'manualValve' && !g.open) || g?.fitting === 'cap') return { closed: true };
@@ -1033,6 +1042,16 @@ function computeFlow(ws) {
     if (a.closed || b.closed || a.key === b.key) continue;
     if (a.end && b.end) { if ((p.flowWhen || []).length) dir.set(p.id, 1); continue; }
     for (const [u, v, d] of [[a.key, b.key, 1], [b.key, a.key, -1]]) { if (!adj.has(u)) adj.set(u, []); adj.get(u).push({ v, p, d }); }
+  }
+  // a Tab_Fitting joined to a vessel port passes flow to and from that port (no pipe between them), unless a valve in it is closed
+  for (const f of L().graphics.filter(g => isBfit(g) && g.onVessel && g.workspace === ws)) {
+    const ip = L().graphics.find(x => x.kind === 'ip' && x.attachTo === f.onVessel && x.port === f.onPort);
+    if (!ip || bfitClosed(f)) continue;
+    const a = node(ip.id), key = `eq:${f.id}:a`;
+    if (!nodes.has(key)) nodes.set(key, { key, pass: true });
+    if (a.closed || a.key === key) continue;
+    const p = { id: 'join:' + f.id };
+    for (const [u, v, d] of [[a.key, key, 1], [key, a.key, -1]]) { if (!adj.has(u)) adj.set(u, []); adj.get(u).push({ v, p, d }); }
   }
   // breadth-first trace from a pump to every plain IP point (or other running pump) it reaches; mark the pipes on each route
   const trace = (start, outward) => {
@@ -1210,7 +1229,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     if (ps.length === 1 && ps[0].straight && !ps[0].locked) { drag = startPipeMove(ps[0], p); ev.preventDefault(); return; }
   }
   drag = { mode: !pip && !bundle && !item.bundled && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
-  if (item.kind === 'vessel') drag.ports = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
+  if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
   if (item.kind === 'ip') drag.stubs = pipesOn(item.id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === item.id ? pp.to : pp.from, pp) })).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
   node.setPointerCapture?.(ev.pointerId);
@@ -1228,7 +1247,7 @@ $('#ws').addEventListener('pointermove', ev => {
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
   if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
     const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
-    for (const q of drag.ports) { q.g.x = q.x + mx; q.g.y = q.y + my; const pn = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (pn) place(pn, q.g); }
+    for (const q of drag.ports) { q.g.x = q.x + mx; q.g.y = q.y + my; const pn = $(`#ws .gfx[data-gid="${CSS.escape(q.g.id)}"]`); if (pn) place(pn, q.g); }
     placeEqIps(drag.item);
     renderPipes();
   }
@@ -1246,6 +1265,10 @@ $('#ws').addEventListener('pointermove', ev => {
 window.addEventListener('pointerup', () => {
   cancelLongPress();
   if (drag?.mode === 'move' && drag.item.kind === 'ip' && !isFitting(drag.item)) attachIp(drag.item);
+  if (drag?.mode === 'move' && drag.moved) {      // a free Tab_Fitting (or its Start IP) dropped on a vessel port joins it
+    const f = isBfit(drag.item) ? drag.item : drag.item.kind === 'ip' && drag.item.port === 'start' ? draft.graphics.find(x => x.id === drag.item.attachTo && isBfit(x)) : null;
+    if (f && !f.onVessel) { joinFitting(f); if (f.onVessel) renderWs(); }
+  }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
   drag = null;
@@ -1817,9 +1840,9 @@ const F = {
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'bool']],
 };
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
-F.vesselNew = it => [['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
-    ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' standard', 'vlist', 'standard']] : [])]),
+    ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
@@ -2146,14 +2169,15 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select, #
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
   const work = { bundled: true, workspace: v.workspace };
-  const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', 'This vessel and its IPs are bundled: they move as one and can\'t be edited. Switch off Bundled to edit, move or delete them.', 'note'],
+  const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
+  const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
     ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws']], work, false, graphicTopic(v));
   if (r !== 'ok') return;
   readFields(work);
   if (work.workspace && work.workspace !== v.workspace) {
     const old = v.workspace;
-    for (const g of [v, ...bundledIps(v)]) g.workspace = work.workspace;
-    const ids = [...bundledIps(v).map(g => g.id), ...eqPorts(v).map(q => q.id)];
+    for (const g of [v, ...bundleParts(v)]) g.workspace = work.workspace;
+    const ids = [...bundleParts(v).map(g => g.id), ...eqPorts(v).map(q => q.id)];
     const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === old && (ids.includes(p.from) || ids.includes(p.to)));
     wsName = v.workspace;
     toast(`Moved the bundle to the ${v.workspace} tab.` + (piped ? ` Its pipes stayed on ${old}; draw new ones here.` : ''));
@@ -2164,7 +2188,7 @@ async function editBundle(v) {
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const bundle = bundleOf(item);
-  if (bundle) return toast(`This IP is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to edit, move or delete it.`, true);
+  if (bundle) return toast(`This ${item.kind === 'ip' ? 'IP' : 'Tab_Fitting'} is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to edit, move or delete it.`, true);
   if (item.kind === 'vessel' && item.bundled) return editBundle(item);
   await loadMediaPictures();
   const type = kind === 'el' ? item.type : item.kind;
@@ -2176,17 +2200,22 @@ async function editItem(kind, id) {
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it) || '(type a Display name and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return f;
-  } : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)`, 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  } : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)`, 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
-  const isV = !!eqClass(item);
+  const isV = !!eqClass(item), bf = isBfit(item);
+  if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
   try {
     if (r === 'delete') {
       if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : eqPorts(item).map(q => q.id);
       if (type === 'vessel') {       // its own port IPs go with it; IPs that were only dropped on it stay
+        for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === item.id)) {     // and the Tab_Fittings joined to it
+          for (const g of draft.graphics) if (g.attachTo === f.id && g.port) gone.push(g.id);
+          draft.graphics = draft.graphics.filter(g => g !== f && !(g.attachTo === f.id && g.port));
+        }
         for (const g of draft.graphics) if (g.attachTo === item.id && g.port) gone.push(g.id);
         draft.graphics = draft.graphics.filter(g => !(g.attachTo === item.id && g.port));
         for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
@@ -2199,14 +2228,23 @@ async function editItem(kind, id) {
       return;
     }
     readFields(work);
-    if (isV) {
+    if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
+      fitFromFields(work);
+      if (item.onVessel && !work.joined) { delete work.onVessel; delete work.onPort; }
+      delete work.joined;
+      const pos = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_pos')).map(k => [k.slice(0, -4), work[k]]));
+      work.ports = {};
+      for (const [k, d] of Object.entries(bfitClass(work).ports)) work.ports[k] = { installed: true, position: pos[k] || item.ports?.[k]?.position || portDefPos(d), standard: d.ip ? stdShort(work.std) : '' };
+      for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
+      work.name = noSpaces(work.name || '') || item.name;
+    } else if (isV) {
       work.ports = {};
       for (const [k, d] of Object.entries(eqClass(item).ports)) {
         work.ports[k] = { installed: !!work[k + '_on'], position: work[k + '_pos'] || portDefPos(d), standard: work[k + '_std'] || EQ_STANDARDS[0] };
         delete work[k + '_on']; delete work[k + '_pos']; delete work[k + '_std'];
       }
       work.name = (work.name || '').trim() || item.name;
-      if (!work.label || work.label === item.vtype) work.label = work.vtype;   // the label follows the Type until it is changed
+      if (!item.template && (!work.label || work.label === item.vtype)) work.label = work.vtype;   // the label follows the Type until it is changed (a Tab_Vessel's empty label shows its Name)
     }
     if (type === 'pipe') {
       if (work.from && work.from === work.to) throw new Error('A pipe needs two different IPs');
@@ -2248,11 +2286,16 @@ async function editItem(kind, id) {
       toast(`Moved to the ${item.workspace} tab.` + (piped ? ` Its pipes stayed on ${oldTab}; draw new ones here.` : ''));
     }
     if (isV) {
+      if (bf) {         // IPs of fittings that are gone go too (and the Start IP once it is joined)
+        const gone = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id && g.port && !eqClass(item).ports[g.port]).map(g => g.id);
+        draft.graphics = draft.graphics.filter(g => !gone.includes(g.id));
+        for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
+      }
       const placed = syncVesselPorts(item, before.isNew ? null : before);
-      if (placed.length || before.isNew) vesselPopup(item, placed);
+      if (!bf && (placed.length || before.isNew)) vesselPopup(item, placed);
       delete item.isNew;
     }
-    if (type === 'vessel' && !item.bundled && bundledIps(item).length &&
+    if (type === 'vessel' && !item.bundled && !item.onVessel && bundledIps(item).length &&
       confirm(`Bundle ${item.label || item.name} with its ${bundledIps(item).length === 1 ? 'IP' : bundledIps(item).length + ' IPs'}?\n\nThey will move as one unit, and the vessel and its IPs can't be edited until you switch Bundled off.\n\nPress Cancel if you still need to drag its IPs into place.`)) {
       item.bundled = true; $('#vpop')?.remove(); toast('Bundled');
     }
@@ -3463,6 +3506,8 @@ const MENU = [
   { key: 'default', title: 'Default', tip: 'What new Recipes start with, and the order of the Menu', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'The equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
+  { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel') },
+  { key: 'ftemplates', title: 'Fitting Templates', tip: 'Ready-made Bundled Fittings (valve, tee, elbows ...) for vessel ports or a Tab', render: renderTemplatesTab('fitting') },
   { key: 'layout', title: 'Default Layout', tip: 'The vessels and pipes a Schema gets with its Equipment Profile', render: renderLayoutTab },
   { key: 'mash', title: 'Mash Profile', tip: 'Up to 4 mash steps and the sparge', render: renderBrewProfileTab('mash') },
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
@@ -3917,6 +3962,357 @@ function renderVesselTab(box) {
     admin ? h('button', { class: 'primary', onclick: guard(save) }, 'Save') : '');
   box.append(h('div', { class: 'muted' }, `${EQ[w.vesselType].title} · `, state), buttons(), f.box, buttons());
 }
+
+// ---- Vessel Templates and Bundled Fitting Templates (Fritz, 2026-10-21)
+// Two Menu tabs show the Templates as small icons with their names (there will be many, so they take little room); a
+// double-click opens a pop-up with the settings. Skynet Templates come first. Once Skynet locks them (SKYNET_LOCKED in
+// lib/templates.js) they can only be cloned; until then Skynet is still building them and they can be changed here.
+// User Templates are changed and deleted by Admins. Add to Tab puts a copy on a Tab: a Tab_Vessel (with a Tab_Fitting on
+// each port that has a Bundled Fitting) or a Tab_Fitting. The copy is fully editable; the Template does not change.
+let TPL = null;           // { locked, vessel: [...], fitting: [...] } from the Brain
+const loadTemplates = async () => { const r = await api('GET', '/ui/templates'); TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fitting }; return TPL; };
+const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fitting }; };
+const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
+const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
+// the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
+const SKYNET_FIT_PICS = ['Images/samples/pipe_elbow90.svg', 'Images/samples/pipe_elbow45.svg', 'Images/samples/pipe_tee.svg', 'Images/samples/pipe_cross.svg',
+  'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
+const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
+  return { tee: 'Images/samples/pipe_tee.svg', elbow45: 'Images/samples/pipe_elbow45.svg' }[k] || (k ? 'Images/samples/pipe_elbow90.svg' : 'Images/Valve_Ball_OpenV-1x1.png'); };
+const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/samples/kettle.svg';
+const tplClassNote = t => t.cls === 'skynet'
+  ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
+  : 'User Template: Admins can change and delete it.';
+
+// A Tab_Fitting is drawn like equipment (kind vessel, vesselType bfit), but its ports come from its fittings: a Start (where it
+// joins a vessel port; none while it is joined), the End of the chain, the open side of each tee, and a thermowell mark on a tee
+// that has one (a thermowell stops flow, so that side has no IP). All its IPs are one circuit: flow passes through, unless a valve
+// in it is closed.
+const BF_POS = SIDE4.concat(CORNERS);
+function bfitClass(g) {
+  const ports = {}, flat = g.flat;            // flat: the fitting runs left or right from its vessel port
+  if (!g.onVessel) ports.start = pt('Start (vessel side)', BF_POS, { on: true, def: flat ? 'Left' : 'Top', circuit: 'a' });
+  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right'), circuit: 'a' }));
+  (g.fittings || []).forEach((f, i) => { if (f.kind === 'tee' && f.thermowell) ports['tw' + (i + 1)] = pt(`Thermowell ${i + 1} (${THERMOWELL_POS[f.thermowellPos] || 'Short'})`, BF_POS, { ip: false, def: flat ? 'Top' : 'Right' }); });
+  return { title: 'Tab_Fitting', types: [], image: fitImage(g), size: [90, 90], ports };
+}
+const isBfit = g => g?.kind === 'vessel' && g.vesselType === 'bfit';
+// a valve in a Tab_Fitting: a valve Device (closed while off) or a manual valve IP widget (closed until opened)
+function valveShut(name) {
+  const e = L().elements.find(x => x.name === name);
+  if (e) return e.subtype === 'propValve' ? !(propPct(e) > 0) : !isOn(name);
+  const g = L().graphics.find(x => x.id === name && x.kind === 'ip');
+  return !!g && g.fitting === 'manualValve' && !g.open;
+}
+const bfitClosed = f => (f.fittings || []).some(x => x.kind === 'valve' && x.valve && valveShut(x.valve));
+// every part that moves with a vessel: its port IPs, the Tab_Fittings joined to it and their IPs
+function bundleParts(v) {
+  const out = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id);
+  for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === v.id)) out.push(f, ...draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === f.id));
+  return out;
+}
+// a free Tab_Fitting dropped with its Start on a vessel port joins that vessel: the Start IP goes, flow passes between them
+function joinFitting(f) {
+  const st = draft.graphics.find(g => g.kind === 'ip' && g.attachTo === f.id && g.port === 'start'); if (!st) return;
+  const [cx, cy] = ipCenter(st);
+  const ip = draft.graphics.find(g => g.kind === 'ip' && g.port && g.workspace === f.workspace && g.attachTo !== f.id && !isBfit(draft.graphics.find(v => v.id === g.attachTo)) &&
+    Math.hypot(ipCenter(g)[0] - cx, ipCenter(g)[1] - cy) < 24);
+  const v = ip && draft.graphics.find(x => x.id === ip.attachTo && x.kind === 'vessel'); if (!v) return;
+  Object.assign(f, { onVessel: v.id, onPort: ip.port });
+  delete f.ports?.start;
+  const [px, py] = ipCenter(ip), dx = Math.round(px - cx), dy = Math.round(py - cy);     // it snaps onto the port
+  for (const g of [f, ...draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === f.id)]) { g.x = (g.x || 0) + dx; g.y = (g.y || 0) + dy; }
+  draft.graphics = draft.graphics.filter(g => g !== st);
+  for (const g of draft.graphics) { if (g.from === st.id) delete g.from; if (g.to === st.id) delete g.to; }
+  toast(`${f.name} joined ${v.name || v.label} at its ${eqClass(v).ports[ip.port]?.name || ip.port}`);
+}
+
+// the settings as flat fields for the forms, and back
+function stdToFields(w) { w.std_type = w.std?.type; w.std_size = w.std?.size; return w; }
+function stdFromFields(w) {
+  w.std = w.std_type ? { type: w.std_type, ...(w.std_size !== undefined && w.std_size !== '' ? { size: textSize(w.std_type) ? String(w.std_size) : +w.std_size } : {}) } : undefined;
+  delete w.std_type; delete w.std_size; if (!w.std) delete w.std;
+  return w;
+}
+const stdFields = (w, what = 'Connection Standard') => [['std_type', what, 'sel', [['', '(none)'], ...Object.entries(CONNECTION_STANDARDS)], true],
+  ...(w.std_type ? [['std_size', textSize(w.std_type) ? 'Size (text, for example DN25)' : 'Size (for example 1.5)', textSize(w.std_type) ? 'text' : 'num']] : [])];
+function fitToFields(w) {
+  (w.fittings || []).forEach((f, i) => { w['f' + i] = f.kind; w['tw' + i] = !!f.thermowell; w['twp' + i] = f.thermowellPos; w['fv' + i] = f.valve; w['fp' + i] = f.probe; });
+  return stdToFields(w);
+}
+function fitFromFields(w) {
+  w.fittings = FITTING_SLOTS.map((_, i) => {
+    const f = { kind: w['f' + i] || 'none' };
+    if (f.kind === 'tee' && w['tw' + i]) { f.thermowell = true; f.thermowellPos = w['twp' + i] || 'short'; if (w['fp' + i]) f.probe = w['fp' + i]; }
+    if (f.kind === 'valve' && w['fv' + i]) f.valve = w['fv' + i];
+    for (const k of ['f', 'tw', 'twp', 'fv', 'fp']) delete w[k + i];
+    return f;
+  });
+  return stdFromFields(w);
+}
+// the fittings, one dropdown each; on a Tab the valve and the probe are picked too
+function fittingSlotFields(w, onTab) {
+  const valves = onTab ? [['', 'None'], ...L().elements.filter(e => e.subtype === 'valve' || e.subtype === 'propValve').map(e => [e.name, e.name + ' (Device)']),
+    ...L().graphics.filter(g => g.kind === 'ip' && g.fitting === 'manualValve' && g.workspace === w.workspace).map(g => [g.id, (g.name || g.label || g.id) + ' (manual valve Widget)'])] : null;
+  const probes = onTab ? [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])] : null;
+  return FITTING_SLOTS.flatMap((label, i) => {
+    const k = w['f' + i] || 'none';
+    return [['f' + i, label, 'sel', Object.entries(FITTING_KINDS), true],
+      ...(k === 'valve' ? [onTab ? ['fv' + i, 'Valve: Select Device, Widget or None', 'sel', valves] : ['_v' + i, 'Valve: Select Device, Widget or None (picked when it is on a Tab)', 'note']] : []),
+      ...(k === 'tee' ? [['tw' + i, 'Thermowell in this tee (it stops flow: that side has no IP)', 'yn', false, true],
+        ...(w['tw' + i] ? [['twp' + i, 'Position of Thermowell', 'sel', Object.entries(THERMOWELL_POS)],
+          onTab ? ['fp' + i, 'Temperature Probe: Select Temperature Probe or None', 'sel', probes] : ['_p' + i, 'Temperature Probe: Select Temperature Probe or None (picked when it is on a Tab)', 'note']] : [])] : [])];
+  });
+}
+// Vessel Template ports: switched on, a port with a fitting place picks its Bundled Fitting (Skynet, User, New or Clone)
+function vesselTplToFields(t) {
+  const C = EQ[t.vesselType] || EQ.vessel;
+  for (const [k, d] of Object.entries(C.ports)) { const q = t.ports?.[k]; t[k + '_on'] = q ? !!q.installed : !!d.on; t[k + '_pos'] = q?.position; t[k + '_fit'] = q?.fitting || ''; }
+  return stdToFields(t);
+}
+function vesselTplFromFields(w, old) {
+  const C = EQ[w.vesselType] || EQ.vessel;
+  w.ports = {};
+  for (const [k, d] of Object.entries(C.ports)) {
+    const p = { installed: !!w[k + '_on'], position: w[k + '_pos'] || portDefPos(d) };
+    const fit = FITTING_PORTS[k] && p.installed && w[k + '_fit'] && !w[k + '_fit'].startsWith('__') ? w[k + '_fit'] : '';
+    if (fit) { p.fitting = fit; const was = old?.ports?.[k]; if (was?.fitting === fit && was.bundleName) p.bundleName = was.bundleName; }
+    w.ports[k] = p;
+  }
+  for (const k of Object.keys(w)) if (/_(on|pos|fit)$/.test(k)) delete w[k];
+  return stdFromFields(w);
+}
+const portTitle = (k, d) => FITTING_PORTS[k] || d.name;
+function vesselTplFields(w) {
+  const C = EQ[w.vesselType] || EQ.vessel, isV = w.vesselType === 'vessel', ferm = isV && w.vtype === 'Fermenter', u = volUnit(w.units);
+  const types = isV ? Object.keys(VESSEL_TYPES).filter(t => !['MLT', 'Whirlpool'].includes(t) || t === w.vtype) : C.types;
+  const heat = isV && !ferm ? heatKindsFor(w.vtype || types[0]) : [];
+  if (heat.length && !heat.includes(w.heatKind)) w.heatKind = heat[0];
+  const fits = [['', '(none)'], ...(TPL?.fitting || []).map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User)')]), ['__new', 'New ...'], ['__clone', 'Clone ...']];
+  return [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],
+    ['vesselType', 'Kind', 'sel', Object.entries(VESSEL_KINDS), true],
+    ['vtype', 'Type', 'sel', types, true],
+    ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
+    ['image', 'Graphic (picture path)', 'path'],
+    ['_s', 'Size', 'head'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)],
+    ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
+      : [['volume', `Size (${u})`, 'num'], ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
+    ...(heat.length ? [['_h', 'Heat', 'head'], ['heatKind', 'Heat Source', 'sel', heat.map(k => [k, HEAT_KINDS[k]]), true],
+      ...(w.heatKind === 'other' ? [['otherHeat', 'Other heat source (what it is)', 'text']] : []),
+      ['_hd', 'The Device that heats it, and its probe, are picked on the Tab_Vessel.', 'note']] : []),
+    ['_cs', 'Connection Standard', 'head'], ...stdFields(w, 'Connection Standard (the default for every port and Bundled Fitting)'),
+    ['_cn', 'It goes on the Equipment list and sets the default size of the pictures. A Bundled Fitting can have its own.', 'note'],
+    ['_p', 'Ports', 'head'],
+    ...Object.entries(C.ports).flatMap(([k, d]) => [[k + '_on', portTitle(k, d) + ' installed' + (d.ip ? '' : ' (not an IP)'), 'yn', false, true],
+      ...(w[k + '_on'] ? [[k + '_pos', portTitle(k, d) + ' position', 'sel', d.pos.map(q => q[0])],
+        ...(FITTING_PORTS[k] ? [[k + '_fit', `Bundled Fitting on the ${portTitle(k, d)}`, 'sel', fits]] : [])] : [])]),
+    ['notes', 'Notes', 'area']];
+}
+function fittingTplFields(w) {
+  return [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],
+    ['_cs', 'Connection Standard', 'head'], ...stdFields(w, 'Connection Standard (empty = the vessel\'s)'),
+    ['_f', 'Fittings (from the vessel port outward)', 'head'], ...fittingSlotFields(w, false),
+    ['_g', 'Graphic', 'head'],
+    w.cls === 'skynet' ? ['image', 'Graphic (a Skynet picture)', 'sel', [['', '(the one that matches the fittings)'], ...SKYNET_FIT_PICS.map(p => [p, p.split('/').pop()])]] : ['image', 'Graphic (picture path)', 'path'],
+    ['notes', 'Notes', 'area']];
+}
+
+// a small pop-up with a few fields (a name, a Tab ...). Resolves true when its button is pressed.
+function miniDialog(title, fields, obj, okText = 'Save') {
+  return new Promise(res => {
+    const body = h('div', { class: 'menuForm' });
+    bindForm(body, fields, obj);
+    const d = h('dialog', { class: 'tplMini' }, h('h3', {}, title), body);
+    const done = ok => {
+      if (ok) { try { readFields(obj, body); } catch (e) { return toast(e.message, true); } }
+      d.close(); d.remove(); res(ok);
+    };
+    d.append(h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { onclick: () => done(false) }, 'Cancel'), h('button', { class: 'primary', onclick: () => done(true) }, okText)));
+    d.oncancel = ev => { ev.preventDefault(); done(false); };
+    document.body.append(d); d.showModal();
+  });
+}
+const skynetField = () => TPL?.locked ? [] : [['skynet', 'Skynet Template (Skynet is still building them; off = a User Template)', 'bool']];
+// a new Template, blank or a copy of another. Returns its name.
+async function newTemplate(kind, { from, body, std } = {}) {
+  const what = TEMPLATE_KINDS[kind];
+  const w = { name: from ? copyName(from, tplNames(kind)) : kind === 'vessel' ? 'My_Vessel' : 'My_Fitting', skynet: true };
+  if (!from && tplOf(kind, w.name)) w.name = copyName(w.name, tplNames(kind));
+  const ok = await miniDialog(from ? `Clone ${from}` : `New ${what}`, [['_n', 'Change the name to what you want. No spaces (use _ instead), and it must be unique.', 'note'],
+    ['name', 'Template Name', 'text'], ...skynetField()], w, 'Save');
+  if (!ok) return null;
+  const name = (w.name || '').trim(), bad = nameProblem(name); if (bad) throw new Error(bad);
+  let r = await api('POST', `/ui/templates/${kind}`, { name, from, skynet: TPL.locked ? false : !!w.skynet });
+  if (body || std) r = await api('PUT', `/ui/templates/${kind}/${name}`, { ...(body || {}), ...(std && !body ? { std } : {}), name });   // a clone gets the settings showing in the pop-up
+  setTPL(r);
+  toast(`${what} "${name}" made`);
+  return name;
+}
+
+// the pop-up of one Template: its settings, and Close ✕, Clone, Add to Tab, (Add to Vessel), Save, Delete, Cancel
+function openTemplate(kind, name) {
+  return new Promise(async done => {
+    await loadMediaPictures();
+    const t = tplOf(kind, name); if (!t) return done();
+    const admin = can('admin'), ed = admin && t.editable;
+    const work = kind === 'vessel' ? vesselTplToFields(clone(t)) : fitToFields(clone(t));
+    let dirty = false;
+    const body = h('div', { class: 'menuForm' });
+    const build = bindForm(body, kind === 'vessel' ? vesselTplFields : fittingTplFields, work, ev => { dirty = true; portFitPicked(ev); });
+    const d = h('dialog', { class: 'tplDlg' });
+    const finish = () => { d.close(); d.remove(); if (menuTab === 'vtemplates' || menuTab === 'ftemplates') renderMenuPane(); done(); };
+    const close = () => { if (ed && dirty && !confirm('Close without saving your changes?')) return; finish(); };
+    // what the form holds now, as a Template
+    const current = () => { readFields(work, body); const w = clone(work); return kind === 'vessel' ? vesselTplFromFields(w, t) : fitFromFields(w); };
+    // New ... or Clone ... picked as a port's Bundled Fitting
+    async function portFitPicked(ev) {
+      const k = ev?.target?.dataset?.k; if (!k?.endsWith('_fit') || !ev.target.value.startsWith('__')) return;
+      const port = k.slice(0, -4), how = ev.target.value;
+      try {
+        let made = null;
+        if (how === '__new') made = await newTemplate('fitting', { std: current().std });
+        else {
+          const c = { from: TPL.fitting[0]?.name };
+          if (!await miniDialog('Clone a Bundled Fitting', [['from', 'Bundled Fitting to clone (Skynet or User)', 'sel', TPL.fitting.map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User)')])]], c, 'Next')) made = null;
+          else if (c.from) made = await newTemplate('fitting', { from: c.from });
+        }
+        readFields(work, body);
+        work[port + '_fit'] = made || '';
+        build();
+        if (made && how === '__new') { await openTemplate('fitting', made); build(); }    // design the new one, then back here
+      } catch (e) { toast(e.message, true); work[port + '_fit'] = ''; build(); }
+    }
+    const save = guard(async () => {
+      const b = current(), bad = nameProblem((b.name || '').trim()); if (bad) throw new Error(bad);
+      const r = await api('PUT', `/ui/templates/${kind}/${t.name}`, b);
+      setTPL(r); dirty = false; toast(`Saved ${r.saved.name}`); finish();
+    });
+    const del = guard(async () => {
+      if (!confirm(`Delete the ${TEMPLATE_KINDS[kind]} "${t.name}"?\n\nTab items made from it stay on their Tabs.`)) return;
+      setTPL(await api('DELETE', `/ui/templates/${kind}/${t.name}`)); toast(`Deleted ${t.name}`); finish();
+    });
+    const cloneIt = guard(async () => { const made = await newTemplate(kind, { from: t.name, body: { ...current(), name: undefined } }); if (made) { dirty = false; finish(); } });
+    const toTab = guard(async () => {
+      const tabs = S.config.workspaces, eq = tabs.find(x => x.name === 'Equipment');
+      const first = kind === 'vessel' && eq ? eq : tabs.find(x => x.name === wsName) || tabs[0];
+      const taken = [...S.config.graphics.map(g => g.name), ...S.config.elements.map(e => e.name)];
+      const w = { tab: first.name }, def = tab => bundleName(t.name, tabs.find(x => x.name === tab)?.id || tab, taken);
+      w.name = def(w.tab);
+      const ok = await miniDialog('Add to Tab', [['tab', 'Tab', 'sel', tabs.map(x => x.name)], ['name', 'Name (change it to what you want)', 'text'],
+        ['_n', 'It goes on the Tab Bundled, in Edit layout: drag it to its place, then press Save layout.', 'note']], w, 'Add');
+      if (!ok) return;
+      if (w.name === def(first.name) && w.tab !== first.name) w.name = def(w.tab);    // the name follows the Tab until it is typed
+      const b = current(); finish();
+      addTemplateToTab(kind, { ...t, ...b, name: t.name, cls: t.cls }, w.tab, noSpaces(w.name || def(w.tab)));
+    });
+    const toVessel = guard(async () => {
+      const vs = TPL.vessel.filter(v => v.editable && can('admin'));
+      if (!vs.length) throw new Error('There is no Vessel Template that can be changed. Clone one first.');
+      const w = { vessel: vs[0].name, port: 'outlet' }, def = () => bundleName(t.name, w.vessel, []);
+      const ok = await miniDialog('Add to Vessel Template', [['vessel', 'Vessel Template', 'sel', vs.map(v => v.name)], ['port', 'On its', 'sel', Object.entries(FITTING_PORTS)],
+        ['name', 'Name (empty = bndl#_FittingName_VesselName; change it to what you want)', 'text']], w, 'Add');
+      if (!ok) return;
+      const v = tplOf('vessel', w.vessel), ports = clone(v.ports || {});
+      const d0 = (EQ[v.vesselType] || EQ.vessel).ports[w.port]; if (!d0) throw new Error(`A ${VESSEL_KINDS[v.vesselType]} has no ${FITTING_PORTS[w.port]}`);
+      ports[w.port] = { ...(ports[w.port] || {}), installed: true, position: ports[w.port]?.position || portDefPos(d0), fitting: t.name, bundleName: noSpaces(w.name || '') || def() };
+      setTPL(await api('PUT', `/ui/templates/vessel/${v.name}`, { ...v, ports }));
+      toast(`${t.name} is now on the ${FITTING_PORTS[w.port]} of ${v.name}`);
+    });
+    const btns = () => h('div', { class: 'bar' },
+      t.deletable && admin ? h('button', { class: 'danger', onclick: del }, 'Delete') : '',
+      admin ? h('button', { title: 'A copy under a new name', onclick: cloneIt }, 'Clone') : '',
+      admin ? h('button', { title: 'Put a copy on a Tab', onclick: toTab }, 'Add to Tab') : '',
+      admin && kind === 'fitting' ? h('button', { title: 'Put it on a port of a Vessel Template', onclick: toVessel }, 'Add to Vessel') : '',
+      h('span', { class: 'spacer' }), h('button', { onclick: close }, 'Cancel'), ed ? h('button', { class: 'primary', onclick: save }, 'Save') : '');
+    d.append(h('div', { class: 'tplHead' }, h('h3', {}, `${TEMPLATE_KINDS[kind]}: ${t.name} `, h('span', { class: 'tplBadge ' + t.cls }, t.cls === 'skynet' ? 'Skynet' : 'User'),
+      ' ', helpIcon(['vessel-and-fitting-templates', kind === 'vessel' ? 'vessel-template-settings' : 'bundled-fitting-template-settings'], () => { finish(); })),
+      h('button', { class: 'tplX', title: 'Close', onclick: close }, '✕')),
+      btns(), h('fieldset', { class: 'menuSet', ...(ed ? {} : { disabled: true }) }, body), btns());
+    d.oncancel = ev => { ev.preventDefault(); close(); };
+    document.body.append(d); d.showModal();
+  });
+}
+
+// the Vessel Templates and Fitting Templates Menu tabs: small icons with names, double-click for the pop-up
+function renderTemplatesTab(kind) { return box => {
+  box.append(h('h3', {}, kind === 'vessel' ? 'Vessel Templates' : 'Fitting Templates'));
+  if (!TPL) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadTemplates().then(() => renderMenuPane()).catch(e => toast(e.message, true)); return; }
+  if (!TPL.locked) box.append(h('p', { class: 'muted' }, 'Skynet is still building its Templates: for now Skynet Templates can be changed here. Once they are locked they can only be cloned.'));
+  if (can('admin')) box.append(h('div', { class: 'bar' }, h('button', { onclick: guard(async () => { const n = await newTemplate(kind); if (n) { renderMenuPane(); openTemplate(kind, n); } }) }, `New ${TEMPLATE_KINDS[kind]} ...`),
+    h('span', { class: 'muted' }, 'Double-click a Template for its settings.')));
+  const grid = h('div', { class: 'tplGrid' });
+  for (const t of TPL[kind]) {
+    const open = () => openTemplate(kind, t.name);
+    grid.append(h('button', { class: 'tplIcon ' + t.cls, title: `${t.name} (${t.cls === 'skynet' ? 'Skynet' : 'User'} Template). Double-click for its settings.`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
+      h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : ''));
+  }
+  if (!TPL[kind].length) grid.append(h('p', { class: 'muted' }, 'No Templates yet.'));
+  box.append(grid);
+}; }
+
+// Add to Tab: the copy goes on the Tab in Edit layout, Bundled, so it can be dragged to its place before Save layout
+function addTemplateToTab(kind, t, tab, name) {
+  if (editing) return toast('Save or exit Edit layout first', true);
+  setEditing(true);
+  if (!draft.workspaces.some(w => w.name === tab)) return toast(`There is no Tab "${tab}"`, true);
+  wsName = tab;
+  const g = kind === 'vessel' ? placeTabVessel(t, tab, name) : placeTabFitting(t, tab, name, null);
+  sel = { kind: 'gfx', id: g.id };
+  renderTabs(); renderWs();
+  toast(`${name} is on the ${tab} tab. Drag it to its place, then press Save layout.`);
+}
+function placeTabVessel(t, tab, name) {
+  const C = EQ[t.vesselType] || EQ.vessel, n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
+  const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1],
+    labelAlign: 'above', labelSize: 16, labelVisible: true, name, template: t.name, templateCls: t.cls, image: t.image || C.image, bundled: true, ports: {} };
+  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes']) if (t[k] !== undefined) g[k] = clone(t[k]);
+  for (const [k, d] of Object.entries(C.ports)) {
+    const q = t.ports?.[k]; if (!q?.installed) continue;
+    g.ports[k] = { installed: true, position: q.position || portDefPos(d), standard: stdShort(q.std || t.std) };
+  }
+  draft.graphics.push(g); syncVesselPorts(g, null);
+  const taken = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
+  for (const k of Object.keys(FITTING_PORTS)) {
+    const q = t.ports?.[k], ft = q?.installed && q.fitting && tplOf('fitting', q.fitting); if (!ft) continue;
+    placeTabFitting({ ...ft, std: ft.std || t.std }, tab, q.bundleName && !taken().includes(q.bundleName) ? q.bundleName : bundleName(ft.name, t.name, taken()), { vessel: g, port: k });
+  }
+  return g;
+}
+// a Tab_Fitting, alone on a Tab or joined to a port of a Tab_Vessel (it then runs out from that port, away from the vessel)
+function placeTabFitting(ft, tab, name, on) {
+  const f = { id: newId(), kind: 'vessel', vesselType: 'bfit', workspace: tab, w: 90, h: 90, name, template: ft.name, templateCls: ft.cls, fittings: clone(ft.fittings || []),
+    image: ft.image || fitImage(ft), labelAlign: 'below', labelSize: 12, labelVisible: !on, ports: {} };     // joined to a vessel: its name shows on hover, not on the Tab
+  if (ft.std) f.std = clone(ft.std);
+  let dir = 'down';
+  if (on) {
+    const ip = draft.graphics.find(x => x.kind === 'ip' && x.attachTo === on.vessel.id && x.port === on.port);
+    const [cx, cy] = ip ? ipCenter(ip) : vPortXY(on.vessel, on.port, on.vessel.ports[on.port].position);
+    const fx = (cx - on.vessel.x) / on.vessel.w, fy = (cy - on.vessel.y) / on.vessel.h;
+    dir = fy >= 0.9 ? 'down' : fy <= 0.12 ? 'up' : fx <= 0.1 ? 'left' : fx >= 0.9 ? 'right' : 'down';
+    Object.assign(f, { onVessel: on.vessel.id, onPort: on.port, x: Math.round({ down: cx - 45, up: cx - 45, left: cx - 100, right: cx + 10 }[dir]), y: Math.round({ down: cy + 10, up: cy - 100, left: cy - 45, right: cy - 45 }[dir]) });
+  } else {
+    const n = draft.graphics.filter(x => isBfit(x) && x.workspace === tab).length;
+    Object.assign(f, { x: 60 + (n % 8) * 130, y: 60 + Math.floor(n / 8) * 140, bundled: true });
+  }
+  if (dir === 'left' || dir === 'right') f.flat = true;
+  const C = bfitClass(f), flip = { Bottom: 'Top', Top: 'Bottom', Left: 'Right', Right: 'Left' };
+  for (const [k, d] of Object.entries(C.ports)) {
+    let pos = portDefPos(d);
+    if (dir === 'up' || dir === 'left') pos = flip[pos] || pos;          // the far end points away from the vessel
+    f.ports[k] = { installed: true, position: pos, standard: d.ip ? stdShort(f.std) : '' };
+  }
+  draft.graphics.push(f); syncVesselPorts(f, null);
+  return f;
+}
+// the Properties of a Tab_Fitting on a Tab: everything, fully editable (even one from a Skynet Template)
+F.tabFitting = it => [['_t', `Tab_Fitting, made from the Bundled Fitting Template ${it.template || '(none)'}. Changing it here does not change the Template.`, 'note'],
+  ['name', 'Name', 'text'], ['label', 'Label (empty = the Name)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+  ...stdFields(it), ['_f', 'Fittings (from the vessel port outward)', 'head'], ...fittingSlotFields(it, true),
+  ['_p', 'IPs', 'head'], ...Object.entries(bfitClass(it).ports).map(([k, d]) => [k + '_pos', d.name + ' position', 'sel', d.pos.map(q => q[0])]),
+  ...(it.onVessel ? [['joined', 'Joined to its vessel port (flow passes between them; off = it gets a Start IP of its own)', 'bool']] : []),
+  ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
+  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn'],
+  ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 
 // draw profile equipment on the loaded Schema's Equipment tab (a fresh drawing, or the old one brought up to date)
 async function placeEqItems(p, items) {

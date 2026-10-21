@@ -4,7 +4,7 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 
 - **Show Menu Bar** / **Hide Menu Bar**: the top line of the panel is hidden on the Tabs page; this brings it back. See [The Menu Bar](40-menu-bar).
 - **Edit layout** (Admins): changes the tabs. It is the first choice. While you are in Edit layout it says **Exit Edit layout**. See [Tabs](02-tabs).
-- The **Menu tabs**: Zoom (number 1 to start with), Default, Equipment Profile, Vessel, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
+- The **Menu tabs**: Zoom (number 1 to start with), Default, Equipment Profile, Vessel, Vessel Templates, Fitting Templates, Default Layout, Mash Profile, Boil Profile, Tab Background Profile and Valve Profile.
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
 - **About** (at the end): who is signed in, **Sign out**, and the loaded Schema and its version. See [About and Schema versions](42-about-and-schema-versions).
@@ -37,6 +37,7 @@ Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any s
 - **Zoom**: how big the tabs show, and Full screen. See [Zoom and Full screen](41-zoom-and-full-screen).
 - **Equipment Profile**: the losses and efficiency, the vessels, and which profile the loaded Schema uses. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Vessel**: one vessel (or chiller, coil, filter) at a time. See [The Vessel tab](34-vessel-tab).
+- **Vessel Templates** and **Fitting Templates**: ready-made vessels and Bundled Fittings (Skynet and your own) as small icons. Double-click one for its settings, or put a copy on a Tab. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
 - **Default Layout**: the vessels and pipes a Schema gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
 - **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).

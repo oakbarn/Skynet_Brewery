@@ -89,3 +89,7 @@
 **Heat Source**: how a vessel is heated: Gas, Electric, RIMS, HERMS, Other or Unheated. See [The Vessel tab](34-vessel-tab).
 
 **Service**: what a valve carries: Gas, Room Temperature Liquid, or High Temperature Liquid (Stainless Steel). A gas valve can be a vessel's heat source.
+
+**Template**: a ready-made vessel (Vessel Template) or set of up to four fittings (Bundled Fitting Template), kept in a library. Skynet Templates come with the panel and are only cloned; User Templates are your own. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+
+**Tab_Vessel, Tab_Fitting**: the copy of a Template on a Tab. Not a Device and not a Widget, but it can hold both. Fully editable. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
