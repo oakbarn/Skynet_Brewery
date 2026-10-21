@@ -4,7 +4,7 @@ Nobody can see or switch anything without signing in. Phones and computers stay 
 
 ## First time
 
-The first time the panel opens, it asks you to create the **admin account** (a user name and a password of at least 8 characters). This only works from your home network, so a stranger can never create it.
+The first time the panel opens, it asks you to create the **admin account** (a user name and a password; by default at least 8 characters, see [Password rules](39-password-rules)). This only works from your home network, so a stranger can never create it.
 
 ## Roles
 

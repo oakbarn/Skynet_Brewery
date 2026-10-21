@@ -1,6 +1,6 @@
 // node test/auth.test.js
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
-import { Auth, codeFingerprint, isPrivateAddress, roleAtLeast, parseCookies } from '../lib/auth.js';
+import { Auth, cleanPasswordRules, describePasswordRules, codeFingerprint, isPrivateAddress, roleAtLeast, parseCookies } from '../lib/auth.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpa'));
 let a = new Auth(d);
 assert.equal(a.needsSetup(), true);
@@ -51,4 +51,29 @@ b = new Auth(d2); assert.equal(b.resetIfNewVersion('v1', true), false); assert.e
 b = new Auth(d2); assert.equal(b.resetIfNewVersion('v2', false), false); assert.equal(b.needsSetup(), false);  // turned off
 b = new Auth(d2); assert.equal(b.resetIfNewVersion('v3', true), true); assert.equal(new Auth(d2).needsSetup(), true);
 assert.match(codeFingerprint(path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')), /^[0-9a-f]{16}$/);
+// password rules (Settings > Password rules)
+const d3 = fs.mkdtempSync(path.join(os.tmpdir(), 'bpc'));
+const c = new Auth(d3); let rules = {};
+c.passwordRules = () => rules;
+c.addUser('Fritz', 'any thing ok!', 'admin');                       // defaults: any characters, at least 8
+rules = { allowed: 'letnum', min: 6, max: 10 };
+assert.throws(() => c.setPassword('Fritz', 'abc12'), /at least 6/);
+assert.throws(() => c.setPassword('Fritz', 'abcdef123456'), /at most 10/);
+assert.throws(() => c.setPassword('Fritz', 'abc 12!x'), /letters and numbers only.*Not allowed: space !/);
+c.setPassword('Fritz', 'abc123');
+assert.ok(c.login('Fritz', 'abc123', '1.2.3.4'));
+rules = { allowed: 'digits', min: 4, max: 4 };
+assert.throws(() => c.addUser('Helper', '12a4', 'viewer'), /Not allowed: a/);
+c.addUser('Helper', '1234', 'viewer');
+assert.ok(c.login('Fritz', 'abc123', '1.2.3.4'));                   // old passwords still work under new rules
+rules = { allowed: 'custom', custom: 'ab', min: 4, max: 200 };
+c.setPassword('Helper', 'abba'); assert.throws(() => c.setPassword('Helper', 'abbc'), /Not allowed: c/);
+rules = { allowed: 'keyboard', min: 4, max: 200 };
+assert.throws(() => c.setPassword('Helper', 'pass word'), /Not allowed: space/); c.setPassword('Helper', 'p@ss~W0rd');
+assert.deepEqual(cleanPasswordRules({ allowed: 'nope', min: 1, max: 999 }), { allowed: 'any', custom: '', min: 4, max: 200 });
+assert.deepEqual(cleanPasswordRules({ allowed: 'letnum', min: 12, max: 6 }), { allowed: 'letnum', custom: '', min: 12, max: 12 });
+assert.deepEqual(cleanPasswordRules(undefined), { allowed: 'any', custom: '', min: 8, max: 200 });
+assert.throws(() => cleanPasswordRules({ allowed: 'custom', custom: '' }), /Type the characters/);
+assert.equal(describePasswordRules(cleanPasswordRules({})), 'Password: at least 8 characters, any characters.');
+assert.equal(describePasswordRules(cleanPasswordRules({ allowed: 'digits', min: 4, max: 6 })), 'Password: 4 to 6 characters, numbers only.');
 console.log('auth tests passed');
