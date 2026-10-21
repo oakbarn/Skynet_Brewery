@@ -44,6 +44,61 @@ Any attribute with only two choices is `true` or `false`:
 
 If a name has characters other than letters, digits and `_`, put it in quotes before the dot: `"BK (Front)".visible = true`.
 
+## C, C# and JavaScript spellings
+
+If you know C, C++, C# or JavaScript, you can use the spellings you are used to. They are only other ways to write the same Process commands, so the Process works the same either way. It is not JavaScript: only the spellings below are understood.
+
+| You can write | It means |
+|---|---|
+| `Kettle_SP = 185.5;` | A `;` at the end of a line is allowed. It also lets you put two commands on one line: `Pump_Red = true; Pump_Blue = false;` |
+| `new value vV_Hop1F = 10` | `new value vV_Hop1F` and then `vV_Hop1F = 10` on the next line (both ways work) |
+| `vCount++` and `vCount--` | `vCount += 1` and `vCount -= 1` (`++vCount` works too) |
+| `if (a) { ... }` | `if a` ... `endif` |
+| `} else if (b) {` | `elseif b` |
+| `} else {` | `else` |
+| `if (vCount > 5) print "done";` | an `if` with one command on the same line, no `endif` needed |
+| `!=`  `&&`  `\|\|`  `!` | not equal, `and`, `or`, `not` (these always worked) |
+| `//` and `/* ... */` | comments (these always worked) |
+| `+=`  `-=`  `*=`  `/=` | add to, take from, multiply, divide (these always worked) |
+
+A Process in this style:
+
+```
+new value vCount = 0;
+[Again]
+vCount++;
+if (vCount < 3 && !alm_Hops) {
+  print "pass " + vCount;
+  goto Again;
+} else if (vCount == 3) {
+  print "three";
+} else {
+  print "done";
+}
+```
+
+The `{` can also go on a line of its own, under the `if` or `else` (the way C# is often written). Every `{` needs its `}`, and the Process check tells you the line when one is missing.
+
+You can mix both styles in one Process. Old Processes and BruControl imports keep working as they are, and **Save** never changes one style into the other.
+
+## Codes inside text
+
+Text in quotes can carry codes that change how it looks on the screen. They work wherever a Process shows text: a string value on a Tab, a display name, `print` lines in the Process output, and pop-ups such as a manual valve's message. Bold, large, subscript and superscript are switches: the first code turns it on, the next one turns it off.
+
+| Code | What it does | Example | Shows |
+|---|---|---|---|
+| `\n` | a new line | `"Mash in\nStir well"` | Mash in, then Stir well on the next line |
+| `\b` | bold on / off | `"Add \bhops\b now"` | Add **hops** now |
+| `\L` | large text on / off | `"\LSTRIKE\L 165"` | STRIKE in large letters |
+| `\_` | subscript on / off | `"CO\_2\_"` | CO₂ |
+| `\^` | superscript on / off | `"ft\^3\^"` | ft³ |
+| `\deg` | a degree sign | `"152\degF"` | 152°F |
+| `\\` | one backslash | `"C:\\Brewing"` | C:\Brewing |
+
+Codes can be used together: `"\L\bBOIL\b\L 60 min"`.
+
+The size of large text is **Large text size** on the ☰ Menu **Default** tab, in pixels. It has to be bigger than normal text (18), and it is 28 when the box is empty. Large text is always at least a quarter bigger than the text around it, so it still stands out in an item with a big font.
+
 ## Change the look of a device or widget
 
 A Process can change the colors, placement and value type of any device or widget while it runs:

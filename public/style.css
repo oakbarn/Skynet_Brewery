@@ -625,3 +625,6 @@ body.role-viewer .op-only { display: none !important; }
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
 .helpIcon:hover, .helpIcon:focus-visible { background: #ffe24d; outline: 2px solid #000; outline-offset: 1px; }
+/* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
+.rt-b { font-weight: bolder; }
+.rt-L { font-size: max(var(--textLarge, 28px), 1.25em); line-height: 1.1; }
