@@ -1181,8 +1181,8 @@ function setEditing(on) {
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
-  const lockedEq = S.profiles?.find(p => p.id === S.config.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" is locked: equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
+  const lockedEq = S.profiles?.find(p => p.id === S.config.workspaces.find(w => w.name === wsName)?.equipmentProfile && p.locked);
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
   renderTabs(); renderWs();
 }
 
@@ -3494,6 +3494,14 @@ async function restoreSchema() {
 // The ☰ Menu button sits where the Edit layout checkbox was. Edit layout is its first choice; the rest open Menu tabs, which
 // show next to the screen tabs only once picked (each has a ✕ to close it). Each Menu tab has an Order number (Default tab).
 let eqWork = null, eqDirty = false;           // the Equipment Profile open on the Equipment Profile tab, and whether it has unsaved changes
+let eqTabName = null;                          // the Tab the Equipment Profile and Default Layout tabs are about
+// Equipment Profiles belong to Tabs (Fritz, 2026-10-21): each Tab of a Schema can have its own, usually a Hot Side Tab and a
+// Fermentation Tab. A Schema uses a profile on one Tab only.
+const tabOfProfile = pid => pid ? S.config.workspaces.find(w => w.equipmentProfile === pid) ?? null : null;
+const eqTab = () => { const ws = S.config.workspaces, by = n => ws.find(w => w.name === n);
+  return by(eqTabName) || (by(wsName)?.equipmentProfile ? by(wsName) : null) || ws.find(w => w.equipmentProfile) || by(wsName) || ws[0]; };
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const usedOnText = p => (p.usedOn || []).map(u => `${u.schema} (Tab ${u.tab ?? '?'})`).join(', ');
 let vesselWork = null, vesselDirty = false;   // the piece of equipment open on the Vessel tab
 const profWork = { mash: null, boil: null, tab: null, valve: null }, profDirty = { mash: false, boil: false, tab: false, valve: false };   // the profile open on each profile tab
 let menuTab = null;                           // the Menu tab showing now (null: the screen tabs)
@@ -3504,11 +3512,11 @@ const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
   { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
   { key: 'default', title: 'Default', tip: 'What new Recipes start with, and the order of the Menu', render: renderDefaultTab },
-  { key: 'equipment', title: 'Equipment Profile', tip: 'The equipment, its losses and its piping', render: renderEquipTab },
+  { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel') },
   { key: 'ftemplates', title: 'Fitting Templates', tip: 'Ready-made Bundled Fittings (valve, tee, elbows ...) for vessel ports or a Tab', render: renderTemplatesTab('fitting') },
-  { key: 'layout', title: 'Default Layout', tip: 'The vessels and pipes a Schema gets with its Equipment Profile', render: renderLayoutTab },
+  { key: 'layout', title: 'Default Layout', tip: 'The vessels and pipes a Tab gets with its Equipment Profile', render: renderLayoutTab },
   { key: 'mash', title: 'Mash Profile', tip: 'Up to 4 mash steps and the sparge', render: renderBrewProfileTab('mash') },
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
   { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
@@ -3621,7 +3629,7 @@ function renderDefaultTab(box) {
   const fields = w => [['_d', 'Every default is set here. A new Recipe starts with the first ones, and you can change each one in the Recipe.', 'note'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
     ['batchSize', `Batch size (${volUnit(w.units)}, into the fermenter)`, 'num'],
-    ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Schema\'s own)')],
+    ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Tab\'s own)')],
     ['mashProfile', 'Mash Profile', 'sel', pick(S.mashProfiles, '(none)')],
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['_t', 'New tabs and valves', 'head'],
@@ -3691,15 +3699,15 @@ function renderAboutTab(box) {
 
 // ---- Equipment Profile tab
 function renderEquipTab(box) {
-  const pid = S.config.equipmentProfile;
+  const pid = eqTab()?.equipmentProfile;
   const fresh = eqWork && S.profiles.find(x => x.id === eqWork.id);       // locked or unlocked elsewhere (a Process, another screen)
   if (eqWork && !fresh) { eqWork = null; eqDirty = false; }
-  else if (fresh) { if (!eqDirty) eqWork = clone(fresh); else Object.assign(eqWork, { locked: fresh.locked, lockedBy: fresh.lockedBy, lockedAt: fresh.lockedAt, usedBy: fresh.usedBy, drawn: fresh.drawn, pipes: fresh.pipes }); }
+  else if (fresh) { if (!eqDirty) eqWork = clone(fresh); else Object.assign(eqWork, { locked: fresh.locked, lockedBy: fresh.lockedBy, lockedAt: fresh.lockedAt, usedBy: fresh.usedBy, usedOn: fresh.usedOn, items: fresh.items, fittings: fresh.fittings, drawn: fresh.drawn, pipes: fresh.pipes }); }
   if (!eqWork && pid && S.profiles.some(x => x.id === pid)) eqWork = clone(S.profiles.find(x => x.id === pid));
   box.append(h('h3', {}, 'Equipment Profile'), schemaProfileBox());
   const admin = can('admin');
   const pick = h('select', {}, h('option', { value: '' }, S.profiles.length ? 'Pick one to open ...' : '(none yet)'),
-    ...S.profiles.map(x => h('option', { value: x.id, ...(x.id === eqWork?.id ? { selected: true } : {}) }, x.name + (x.id === pid ? '  (this Schema)' : ''))),
+    ...S.profiles.map(x => h('option', { value: x.id, ...(x.id === eqWork?.id ? { selected: true } : {}) }, x.name + (tabOfProfile(x.id) ? `  (Tab ${tabOfProfile(x.id).name})` : ''))),
     ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
   pick.onchange = guard(async () => {
     if (pick.value === '__add__') { pick.value = eqWork?.id || ''; return newProfile(); }
@@ -3708,57 +3716,73 @@ function renderEquipTab(box) {
   box.append(h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick));
   box.append(eqEditor());
 }
-// the loaded Schema and its profile: pick one (and say what happens to the drawing), lock it, see whether it is shared
+// each Tab of the loaded Schema and its profile: pick one (and say what happens to the Tab's drawing), lock it, shared or unique
 function schemaProfileBox() {
-  const c = S.config, pid = c.equipmentProfile, p = S.profiles.find(x => x.id === pid), admin = can('admin');
-  const pick = h('select', { id: 'bsProfile', ...(admin ? {} : { disabled: true }) }, h('option', { value: '' }, '(none yet)'),
-    ...S.profiles.map(x => h('option', { value: x.id, ...(x.id === pid ? { selected: true } : {}) }, x.name)), ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
+  return h('div', { class: 'schemaBox' },
+    h('div', { class: 'muted' }, 'Each Tab of the Schema ', h('b', {}, S.schemas.active?.name || ''), ' can have its own Equipment Profile, for example one for the Hot Side and one for Fermentation. ',
+      'A profile\'s equipment list is the Tab_Vessels and Tab_Fittings on its Tab.'),
+    ...S.config.workspaces.map(tabProfileRow));
+}
+function tabProfileRow(w) {
+  const pid = w.equipmentProfile, p = S.profiles.find(x => x.id === pid), admin = can('admin');
+  const elsewhere = id => S.config.workspaces.find(x => x !== w && x.equipmentProfile === id);
+  const pick = h('select', { 'data-tab': w.name, ...(admin ? {} : { disabled: true }) }, h('option', { value: '' }, '(none)'),
+    ...S.profiles.map(x => h('option', { value: x.id, ...(x.id === pid ? { selected: true } : {}), ...(elsewhere(x.id) ? { disabled: true } : {}) }, x.name + (elsewhere(x.id) ? `  (on Tab ${elsewhere(x.id).name})` : ''))),
+    ...(admin ? [h('option', { value: '__add__' }, 'Add new ...')] : []));
   if (p?.locked) pick.disabled = true;
   pick.onchange = guard(async () => {
     const back = () => { pick.value = pid || ''; };
-    if (pick.value === '__add__') { back(); return newProfile(); }
-    const to = S.profiles.find(x => x.id === pick.value), here = c.graphics.filter(g => g.kind === 'vessel').length;
+    if (pick.value === '__add__') { back(); return newProfile(w.name); }
+    const to = S.profiles.find(x => x.id === pick.value), here = S.config.graphics.filter(g => g.kind === 'vessel' && g.workspace === w.name).length;
     let layout = 'use';
-    if (!to) { if (!confirm('Take the Equipment Profile off this Schema?\n\nThe equipment and pipes stay on its tabs, kept in the Schema itself.')) return back(); }
+    if (!to) { if (!confirm(`Take the Equipment Profile off the Tab "${w.name}"?\n\nThe equipment and pipes stay on the Tab, kept in the Schema itself.`)) return back(); }
     else if (to.hasDrawing) {
       // Fritz: the tabs are only changed when you say so
-      layout = await choose(`Use "${to.name}" for this Schema. What goes on its tabs?`, [[`Use its Default Layout (${to.drawn} equipment, ${to.pipes} pipes)`, 'use'], ['Keep this Schema\'s layout as it is', 'keep']]);
+      layout = await choose(`Use "${to.name}" on the Tab "${w.name}". What goes on the Tab?`, [[`Use its Default Layout (${to.drawn} equipment, ${to.fittings || 0} fittings, ${to.pipes} pipes)`, 'use'], ['Keep this Tab\'s layout as it is', 'keep']]);
       if (!layout) return back();
-    } else if (!confirm(`Use "${to.name}" for this Schema?\n\n"${to.name}" has no Default Layout yet, so the ${here} piece${here === 1 ? '' : 's'} of equipment and the pipes on this Schema's tabs become its Default Layout.`)) return back();
+    } else if (!confirm(`Use "${to.name}" on the Tab "${w.name}"?\n\n"${to.name}" has no Default Layout yet, so the ${here} piece${here === 1 ? '' : 's'} of equipment and the pipes on this Tab become its Default Layout.`)) return back();
     if (eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return back();
-    eqDirty = false; eqWork = null;
-    await api('PUT', '/ui/schema/profile', { id: pick.value, layout }); await load();
-    toast(!pick.value ? 'This Schema has no Equipment Profile now' : layout === 'keep' ? `This Schema uses "${profileName(pick.value)}" and keeps its own layout` : `This Schema uses "${profileName(pick.value)}"`);
+    eqDirty = false; eqWork = null; eqTabName = w.name;
+    await api('PUT', '/ui/schema/profile', { tab: w.name, id: pick.value, layout }); await load();
+    toast(!pick.value ? `The Tab "${w.name}" has no Equipment Profile now` : layout === 'keep' ? `The Tab "${w.name}" uses "${profileName(pick.value)}" and keeps its own layout` : `The Tab "${w.name}" uses "${profileName(pick.value)}"`);
   });
-  const lock = p ? h('label', { class: 'toggle op-only', title: 'A locked Equipment Profile (its numbers, equipment and pipes) cannot be changed until it is unlocked. A Process can do the same with lock_Equipment and unlock_Equipment.' },
+  const lock = p ? h('label', { class: 'toggle op-only', title: 'A locked Equipment Profile (its numbers, equipment and pipes) cannot be changed until it is unlocked. A Process can do the same with lock_Equipment and unlock_Equipment (they lock or unlock every Tab\'s profile).' },
     h('span', { class: 'sw' }, h('input', { type: 'checkbox', ...(p.locked ? { checked: true } : {}), onchange: guard(async ev => {
       const on = ev.target.checked;
       if (!on && !confirm(`Unlock "${p.name}"?${p.lockedBy ? `\n\nIt was locked by ${p.lockedBy}.` : ''}`)) { ev.target.checked = true; return; }
       await api('PUT', `/ui/equipment/${p.id}/lock`, { locked: on }); await load(); toast(on ? '🔒 Equipment Profile locked' : 'Equipment Profile unlocked');
     }) }), h('span', { class: 'swk' })), ' 🔒 Locked') : '';
-  const others = p ? p.usedBy.filter(n => n !== S.schemas.active?.name) : [];
-  const share = !p ? 'Pick one, or Add new to make one.' : others.length ? `Shared: also used by ${others.join(', ')}. A change to it changes every one of them.` : 'Unique: only this Schema uses it.';
-  const own = p && c.layoutFromProfile === false ? ' This Schema keeps its own layout (see the Default Layout tab).' : p ? ` Its tabs show the profile's Default Layout (${p.drawn} equipment, ${p.pipes} pipes).` : '';
-  return h('div', { class: 'schemaBox' }, h('div', { class: 'bar' }, h('span', {}, 'Schema ', h('b', {}, S.schemas.active?.name || ''), ' uses'), pick, lock,
-    p && others.length && admin ? h('button', { class: 'admin-only', title: 'Copy the profile and use the copy for this Schema only', onclick: guard(makeUnique) }, 'Make it unique to this Schema') : ''),
+  const others = p ? (p.usedOn || []).filter(u => !u.active) : [];
+  const share = !p ? '' : others.length ? `Shared: also used by ${others.map(u => `${u.schema} (Tab ${u.tab ?? '?'})`).join(', ')}. A change to it changes every one of them.` : 'Unique: only this Tab uses it.';
+  const own = p && w.layoutFromProfile === false ? ' This Tab keeps its own layout (see the Default Layout tab).' : p ? ` The Tab shows its Default Layout (${p.drawn} equipment, ${plural(p.fittings || 0, 'fitting')}, ${plural(p.pipes, 'pipe')}).` : '';
+  return h('div', { class: 'tabProfile' }, h('div', { class: 'bar wrap' }, h('span', {}, 'Tab ', h('b', {}, w.name), ' uses'), pick, lock,
+    p ? h('button', { onclick: () => { eqTabName = w.name; openProfile(p.id); } }, 'Open') : '',
+    p && others.length && admin ? h('button', { class: 'admin-only', title: 'Copy the profile and use the copy on this Tab only', onclick: guard(() => makeUnique(w.name)) }, 'Make it unique to this Tab') : ''),
     h('div', { class: 'muted' }, share, own),
     p?.locked ? h('div', { class: 'eqWarn' }, `🔒 Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}${p.lockedAt ? ', ' + new Date(p.lockedAt).toLocaleString() : ''}. Its numbers, equipment and pipes can't be changed until it is unlocked.`) : '');
 }
-async function makeUnique() {
-  const p = S.profiles.find(x => x.id === S.config.equipmentProfile), sch = S.schemas.active?.name;
-  let name = `${p.name} (${sch})`; for (let i = 2; S.profiles.some(x => x.name.toLowerCase() === name.toLowerCase()); i++) name = `${p.name} (${sch} ${i})`;
-  if (!confirm(`Make a copy of "${p.name}" called "${name}" and use it for this Schema only?\n\nThe other Schemas keep using "${p.name}".`)) return;
-  const r = await api('POST', '/ui/equipment', { name, from: p.id, assign: true });
-  eqDirty = false; await load(); openProfile(r.made); toast(`"${name}" is now this Schema's own profile`);
+async function makeUnique(tab) {
+  const w = S.config.workspaces.find(x => x.name === tab), p = S.profiles.find(x => x.id === w?.equipmentProfile), sch = S.schemas.active?.name;
+  if (!p) return;
+  let name = `${p.name} (${sch} ${tab})`; for (let i = 2; S.profiles.some(x => x.name.toLowerCase() === name.toLowerCase()); i++) name = `${p.name} (${sch} ${tab} ${i})`;
+  if (!confirm(`Make a copy of "${p.name}" called "${name}" and use it on the Tab "${tab}" only?\n\nThe others keep using "${p.name}".`)) return;
+  const r = await api('POST', '/ui/equipment', { name, from: p.id, assign: true, tab, layout: w.layoutFromProfile === false ? 'keep' : 'use' });
+  eqDirty = false; eqTabName = tab; await load(); openProfile(r.made); toast(`"${name}" is now the Tab's own profile`);
 }
-async function newProfile() {
+async function newProfile(tab) {
   if (eqDirty && !confirm('The open Equipment Profile has changes that are not saved. Leave them?')) return;
-  const w = { name: '', from: '', units: 'US', use: !S.config.equipmentProfile };
-  if (await dialog('New Equipment Profile', [['name', 'Name (for example "Oak Barn 10 gallon")', 'text'],
+  const free = S.config.workspaces.filter(x => !x.equipmentProfile).map(x => x.name);
+  if (tab && !free.includes(tab)) free.unshift(tab);
+  const w = { name: '', from: '', units: 'US', tab: tab ?? free[0] ?? '' };
+  if (await dialog('New Equipment Profile', [['name', 'Name (for example "Oak Barn Hot Side" or "Fermentation room")', 'text'],
     ['from', 'Start from', 'sel', [['', 'The usual numbers (change them after)'], ...S.profiles.map(p => [p.id, `A copy of "${p.name}"`])]],
-    ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)], ['use', `Use it for the Schema "${S.schemas.active?.name}"`, 'bool']], w) !== 'ok') return;
+    ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)],
+    ['tab', `Use it on a Tab of the Schema "${S.schemas.active?.name}"`, 'sel', [['', '(not now)'], ...free.map(n => [n, 'Tab ' + n + (S.config.workspaces.find(x => x.name === n)?.equipmentProfile ? ' (instead of its profile now)' : '')])]]], w) !== 'ok') return;
   readFields(w);
-  const r = await api('POST', '/ui/equipment', { name: w.name, from: w.from || undefined, assign: w.use });
+  // a new blank profile takes the equipment on its Tab as its Default Layout; a copy keeps a Tab that already has equipment as it is
+  const drawn = S.config.graphics.some(g => g.kind === 'vessel' && g.workspace === w.tab);
+  const r = await api('POST', '/ui/equipment', { name: w.name, from: w.from || undefined, assign: !!w.tab, tab: w.tab || undefined, layout: w.from && drawn ? 'keep' : 'use' });
+  if (w.tab) eqTabName = w.tab;
   if (!w.from && w.units === 'Metric') {     // a blank metric profile starts with the metric numbers
     const p = r.list.find(x => x.id === r.made);
     await api('PUT', `/ui/equipment/${r.made}`, { ...p, units: 'Metric', ...Object.fromEntries(EQUIP_FIELDS.map(f => [f[0], f[5]])) });
@@ -3774,7 +3798,7 @@ function openProfile(id) {
 }
 async function deleteProfile(id) {
   const p = S.profiles.find(x => x.id === id); if (!p) return;
-  const used = p.usedBy.length ? `\n\nIt is used by: ${p.usedBy.join(', ')}. Those Schemas will have no Equipment Profile. Their tabs and drawings stay as they are.` : '';
+  const used = p.usedOn?.length ? `\n\nIt is used by: ${usedOnText(p)}. Those Tabs will have no Equipment Profile. Their equipment and pipes stay on them.` : '';
   if (!confirm(`Delete the Equipment Profile "${p.name}"?${used}`)) return;
   await api('DELETE', `/ui/equipment/${id}`);
   if (eqWork?.id === id) { eqWork = null; eqDirty = false; vesselWork = null; vesselDirty = false; }
@@ -3801,7 +3825,8 @@ function eqEditor() {
   const chk = { batchSize: S.config.brewDefaults?.batchSize ?? (p.units === 'Metric' ? 20 : 5), boil: S.config.brewDefaults?.boilProfile || S.boilProfiles[0]?.id || '' };
   const out = h('div', { class: 'eqCalc' });
   const calc = () => {
-    const u = volUnit(p.units), bp = S.boilProfiles.find(x => x.id === chk.boil), kettle = firstOfType(p, 'Brew Kettle'), ferm = firstOfType(p, 'Fermenter');
+    const all = { equipment: [...eqItems(p), ...(p.equipment || [])] };
+    const u = volUnit(p.units), bp = S.boilProfiles.find(x => x.id === chk.boil), kettle = firstOfType(all, 'Brew Kettle'), ferm = firstOfType(all, 'Fermenter');
     const v = brewVolumes({ ...p, batchSize: chk.batchSize, boilTime: bp?.boilTime, boilOffRate: bp?.boilOffRate, kettleVolume: kettle?.volume, fermenterVolume: ferm?.maxVolume ?? ferm?.volume, fermenterLoss: ferm?.extraTrub });
     const bs = h('input', { type: 'number', step: 'any', min: 0, value: chk.batchSize, class: 'orderNum' }); bs.onchange = () => { chk.batchSize = +bs.value; calc(); };
     const bsel = h('select', {}, h('option', { value: '' }, '(no Boil Profile)'), ...S.boilProfiles.map(x => h('option', { value: x.id, ...(x.id === chk.boil ? { selected: true } : {}) }, x.name)));
@@ -3817,31 +3842,57 @@ function eqEditor() {
   };
   calc();
   box.append(h('h3', {}, `${p.locked ? '🔒 ' : ''}${p.name}`),
-    p.locked ? h('div', { class: 'eqWarn' }, `Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}. Unlock it to change it (the 🔒 Locked switch above when this Schema uses it, or unlock_Equipment in a Process).`) : '',
-    h('div', { class: 'muted' }, p.usedBy?.length ? `Used by: ${p.usedBy.join(', ')}` : 'Not used by any Schema yet', ' · ', h('span', { id: 'eqSaveState' }, eqDirty ? 'Not saved yet' : 'Saved')),
+    p.locked ? h('div', { class: 'eqWarn' }, `Locked${p.lockedBy ? ' by ' + p.lockedBy : ''}. Unlock it to change it (the 🔒 Locked switch above when a Tab of this Schema uses it, or unlock_Equipment in a Process).`) : '',
+    h('div', { class: 'muted' }, p.usedOn?.length ? `Used by: ${usedOnText(p)}` : 'Not used on any Tab yet', ' · ', h('span', { id: 'eqSaveState' }, eqDirty ? 'Not saved yet' : 'Saved')),
     buttons(), h('div', { class: 'eqTop' }, f.box, out), eqPane(p), buttons());
   return box;
 }
 
-// the vessels and other equipment this profile is built from; each one opens on the Vessel tab
+// the profile's Equipment list: the Tab_Vessels, Tab_Fittings and other equipment on its Tab (Fritz, 2026-10-21). On the Tab of
+// this Schema that uses it they come from the Tab itself, otherwise from the profile's Default Layout.
+function eqItems(p) {
+  const w = tabOfProfile(p.id);
+  if (!w || w.layoutFromProfile === false) return p.items || [];
+  return S.config.graphics.filter(g => g.kind === 'vessel' && g.workspace === w.name);
+}
 function eqPane(p) {
+  const admin = can('admin') && !p.locked, w = tabOfProfile(p.id), items = eqItems(p);
+  const nameOf = id => items.find(x => x.id === id)?.name || '';
+  const kindOf = it => it.vesselType === 'bfit' ? 'Tab_Fitting' : (it.template ? 'Tab_Vessel' : EQ[it.vesselType]?.title || it.vesselType) + (it.vtype ? ': ' + (it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype) : '');
+  const size = it => it.maxVolume ?? it.volume;
+  const rows = items.map(it => h('tr', {}, h('td', {}, it.name || ''), h('td', {}, kindOf(it)),
+    h('td', {}, size(it) !== undefined ? `${size(it)} ${volUnit(it.units || p.units)}` : ''),
+    h('td', {}, it.template ? `${it.template}${it.templateCls ? ' (' + (it.templateCls === 'skynet' ? 'Skynet' : 'User') + ')' : ''}` : ''),
+    h('td', {}, it.onVessel ? 'on ' + nameOf(it.onVessel) : '')));
+  const goTab = () => { if (!w) return; leaveMenuTab(); wsName = w.name; sel = null; setView('workspace'); renderTabs(); renderWs(); };
+  const own = w && w.layoutFromProfile === false;
+  const out = h('div', { class: 'eqPane' }, h('h3', {}, 'Equipment list'),
+    h('p', { class: 'muted' }, w ? (own ? `The Tab "${w.name}" uses this profile but keeps its own layout, so this list is the profile's Default Layout. ` : `The Tab_Vessels and Tab_Fittings on the Tab "${w.name}". `) : 'The Tab_Vessels and Tab_Fittings in this profile\'s Default Layout. ',
+      'Put them on the Tab from the Vessel Templates and Fitting Templates tabs (Add to Tab), and change each one in its properties on the Tab.'),
+    rows.length ? h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Kind', 'Size', 'Template', 'Joined'].map(t => h('th', {}, t)))), h('tbody', {}, ...rows))
+      : h('p', {}, 'No equipment on the Tab yet.'),
+    h('div', { class: 'bar wrap' }, w ? h('button', { onclick: goTab }, `Go to the Tab "${w.name}"`) : '',
+      admin ? h('button', { onclick: () => openMenuTab('vtemplates') }, 'Vessel Templates ...') : '',
+      admin ? h('button', { onclick: () => openMenuTab('ftemplates') }, 'Fitting Templates ...') : ''));
+  if (p.equipment?.length) out.append(oldEqList(p, w));
+  return out;
+}
+// the older list made on the Vessel tab (before Templates); each one opens on the Vessel tab
+function oldEqList(p, w) {
   const admin = can('admin') && !p.locked, onTab = it => S.config.graphics.find(g => g.kind === 'vessel' && g.profileItem === it.id);
-  const u = volUnit(p.units);
+  const u = volUnit(p.units), tab = w?.name || 'Equipment';
   const rows = (p.equipment || []).map(it => h('tr', {},
     h('td', {}, it.name), h('td', {}, `${EQ[it.vesselType]?.title || it.vesselType}${it.vtype ? ': ' + (it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype) : ''}`),
     h('td', {}, it.volume !== undefined ? `${it.volume} ${u}` : ''), h('td', {}, it.heatKind ? HEAT_KINDS[it.heatKind] + (it.heatDevice ? ': ' + it.heatDevice : '') : ''),
     h('td', {}, it.bundled ? '📦 Bundled' : 'Loose'), h('td', {}, onTab(it) ? '✓ on ' + onTab(it).workspace : h('span', { class: 'muted' }, 'not on a tab')),
     h('td', {}, h('button', { onclick: guard(() => openVessel(it.id)) }, admin ? 'Open in Vessel tab' : 'View'),
-      admin ? h('button', { title: 'Put it on the Equipment tab of this Schema (or bring the drawing there up to date), with its ports as IPs', onclick: guard(() => placeEqItems(p, [it])) }, onTab(it) ? 'Update on tab' : 'Put on Equipment tab') : '')));
+      admin ? h('button', { title: `Put it on the Tab "${tab}" (or bring the drawing there up to date), with its ports as IPs`, onclick: guard(() => placeEqItems(p, [it])) }, onTab(it) ? 'Update on tab' : `Put on Tab ${tab}`) : '')));
   const kind = h('select', {}, ...EQ_KINDS.map(k => h('option', { value: k }, EQ[k].title)));
-  const loose = S.config.graphics.filter(g => g.kind === 'vessel' && EQ_KINDS.includes(g.vesselType) && !(p.equipment || []).some(it => it.id === g.profileItem));
-  return h('div', { class: 'eqPane' }, h('h3', {}, 'Vessels and equipment in this profile'),
-    h('p', { class: 'muted' }, 'Add as many as you need. Each one opens on the Vessel tab: its type, size, heat, probe and ports. Bundled equipment goes on the Equipment tab as one unit with its IPs.'),
-    rows.length ? h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Kind', 'Size', 'Heat', 'Bundle', 'This Schema', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows))
-      : h('p', {}, 'No equipment yet.'),
+  return h('div', {}, h('h3', {}, 'Made on the Vessel tab'),
+    h('p', { class: 'muted' }, 'Vessels made on the Vessel tab, before Templates. They go on the Tab with "Put on Tab".'),
+    h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Kind', 'Size', 'Heat', 'Bundle', 'This Schema', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
     admin ? h('div', { class: 'bar' }, kind, h('button', { onclick: guard(() => newVessel(kind.value)) }, 'Add'),
-      p.equipment?.length ? h('button', { onclick: guard(() => placeEqItems(p, p.equipment)) }, 'Put all on Equipment tab') : '',
-      loose.length ? h('button', { title: 'Copy the vessels, chillers, coils and filters already drawn on this Schema\'s tabs into this profile', onclick: guard(() => bringInEq(p, loose)) }, `Bring in ${loose.length} from the tabs`) : '') : '');
+      h('button', { onclick: guard(() => placeEqItems(p, p.equipment)) }, `Put all on Tab ${tab}`)) : '');
 }
 
 // ---- Vessel tab: one vessel (or chiller, coil, filter) of the open Equipment Profile
@@ -3849,7 +3900,7 @@ function eqPane(p) {
 // and the device that heats it; the temperature probe on the same board as that device; a fermenter's largest and smallest
 // batch, trub loss, probe and how often its temperature is reported; the ports, as on the Equipment tab.
 function vesselProfile() {
-  if (!eqWork) { const pid = S.config.equipmentProfile; if (pid && S.profiles.some(x => x.id === pid)) eqWork = clone(S.profiles.find(x => x.id === pid)); }
+  if (!eqWork) { const pid = eqTab()?.equipmentProfile; if (pid && S.profiles.some(x => x.id === pid)) eqWork = clone(S.profiles.find(x => x.id === pid)); }
   return eqWork;
 }
 function openVessel(id) {
@@ -4321,7 +4372,7 @@ async function placeEqItems(p, items) {
   setEditing(true);
   let made = 0, updated = 0;
   for (const it of items) {
-    const C = EQ[it.vesselType], tab = C.tab || 'Equipment';
+    const C = EQ[it.vesselType], tab = tabOfProfile(p.id)?.name || C.tab || 'Equipment';
     if (!draft.workspaces.some(w => w.name === tab)) draft.workspaces.push({ name: tab, width: 1600, height: 900 });
     let g = draft.graphics.find(x => x.kind === 'vessel' && x.profileItem === it.id);
     const old = g ? clone(g) : null;
@@ -4343,43 +4394,31 @@ async function placeEqItems(p, items) {
   setView('workspace'); renderTabs(); renderWs();
   toast(`${made ? made + ' put on the tab' : ''}${made && updated ? ', ' : ''}${updated ? updated + ' brought up to date' : ''}. Drag the IPs onto the picture if they need it (switch Bundled off first).`);
 }
-// equipment already drawn on this Schema's tabs becomes part of the profile (and stays linked to its drawing)
-async function bringInEq(p, loose) {
-  if (editing) return toast('Save or exit Edit layout first', true);
-  if (!confirm(`Copy ${loose.length} piece${loose.length > 1 ? 's' : ''} of equipment from this Schema's tabs into "${p.name}"?\n\n${loose.map(g => '• ' + (g.name || g.label)).join('\n')}`)) return;
-  p.equipment ??= [];
-  const links = [];
-  for (const g of loose) {
-    const id = 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-    p.equipment.push({ id, vesselType: g.vesselType, name: g.name || g.label || EQ[g.vesselType].title, vtype: g.vtype || '', label: g.label || '', image: g.image || '', bundled: !!g.bundled, ports: clone(g.ports || {}) });
-    links.push([g.id, id]);
-  }
-  await saveProfile();
-  setEditing(true);
-  for (const [gid, id] of links) { const g = draft.graphics.find(x => x.id === gid); if (g) g.profileItem = id; }
-  await saveLayout();
-  if (!editing) { openMenuTab('equipment'); toast(`${links.length} brought into "${p.name}"`); }
-}
-
-// ---- Default Layout tab: the vessels and pipes that go on a Schema's tabs with its Equipment Profile
-// A Schema follows its profile's Default Layout (changes on its tabs go into the profile, and every Schema following it shows
-// them), or keeps its own layout (Fritz: picking another profile never replaces the tabs unless you choose it).
+// ---- Default Layout tab: the vessels and pipes that go on a Tab with its Equipment Profile
+// A Tab follows its profile's Default Layout (changes on the Tab go into the profile, and every Tab following it shows them),
+// or keeps its own layout (Fritz: picking another profile never replaces a Tab's drawing unless you choose it).
 function renderLayoutTab(box) {
-  const c = S.config, p = S.profiles.find(x => x.id === c.equipmentProfile), admin = can('admin');
+  const c = S.config, admin = can('admin'), w = eqTab();
   box.append(h('h3', {}, 'Default Layout'));
-  if (!p) return box.append(h('p', { class: 'muted' }, 'This Schema has no Equipment Profile yet. Pick or make one on the Equipment Profile tab.'));
-  const follows = c.layoutFromProfile !== false, ro = !admin || p.locked;
-  const act = (action, ask, done) => guard(async () => { if (!confirm(ask)) return; await api('POST', '/ui/schema/layout', { action }); await load(); toast(done); });
-  const others = p.usedBy.filter(n => n !== S.schemas.active?.name);
-  box.append(h('p', {}, `The Default Layout of "${p.name}": `, p.hasDrawing ? h('b', {}, `${p.drawn} equipment and ${p.pipes} pipes on the ${p.layoutTabs.join(', ') || 'Equipment'} tab${p.layoutTabs.length === 1 ? '' : 's'}`) : h('b', {}, 'none yet')),
-    h('p', {}, follows ? `This Schema follows it: what you draw on its tabs (vessels, IPs, pipes and hoses) is saved as the Default Layout${others.length ? `, and ${others.join(', ')} show${others.length === 1 ? 's' : ''} it too when they follow it` : ''}.`
-      : 'This Schema keeps its own layout. Its tabs are not changed by the profile, and its drawing does not change the profile.'),
+  const withP = c.workspaces.filter(x => x.equipmentProfile);
+  if (!withP.length) return box.append(h('p', { class: 'muted' }, 'No Tab of this Schema has an Equipment Profile yet. Pick or make one on the Equipment Profile tab.'));
+  const tabSel = h('select', {}, ...c.workspaces.map(x => h('option', { value: x.name, ...(x === w ? { selected: true } : {}) }, x.name + (x.equipmentProfile ? `  (${profileName(x.equipmentProfile)})` : '  (no profile)'))));
+  tabSel.onchange = () => { eqTabName = tabSel.value; renderMenuPane(); };
+  box.append(h('div', { class: 'bar menuPick' }, h('span', {}, 'Tab'), tabSel));
+  const p = S.profiles.find(x => x.id === w?.equipmentProfile);
+  if (!p) return box.append(h('p', { class: 'muted' }, `The Tab "${w?.name}" has no Equipment Profile. Pick or make one on the Equipment Profile tab.`));
+  const follows = w.layoutFromProfile !== false, ro = !admin || p.locked;
+  const act = (action, ask, done) => guard(async () => { if (!confirm(ask)) return; await api('POST', '/ui/schema/layout', { tab: w.name, action }); await load(); toast(done); });
+  const others = (p.usedOn || []).filter(u => !u.active).map(u => `${u.schema} (Tab ${u.tab ?? '?'})`);
+  box.append(h('p', {}, `The Default Layout of "${p.name}": `, p.hasDrawing ? h('b', {}, `${p.drawn} equipment, ${p.fittings || 0} fittings and ${p.pipes} pipes${p.layoutTab ? `, drawn on the Tab "${p.layoutTab}"` : ''}`) : h('b', {}, 'none yet')),
+    h('p', {}, follows ? `The Tab "${w.name}" follows it: what you draw on it (vessels, fittings, IPs, pipes and hoses) is saved as the Default Layout${others.length ? `, and ${others.join(', ')} show${others.length === 1 ? 's' : ''} it too when they follow it` : ''}.`
+      : `The Tab "${w.name}" keeps its own layout. It is not changed by the profile, and its drawing does not change the profile.`),
     p.locked ? h('div', { class: 'eqWarn' }, '🔒 The Equipment Profile is locked, so its Default Layout can\'t be changed.') : '',
     ro ? '' : h('div', { class: 'bar wrap' },
-      h('button', { title: 'Open Edit layout on the tabs', onclick: guard(async () => { leaveMenuTab(); const t = p.layoutTabs[0]; if (t && c.workspaces.some(w => w.name === t)) wsName = t; setEditing(true); if (!follows) toast('This Schema keeps its own layout: the changes stay in this Schema'); }) }, follows ? 'Edit it' : 'Edit this Schema\'s layout'),
-      p.hasDrawing ? h('button', { onclick: act('use', `Put the Default Layout of "${p.name}" on this Schema's tabs?\n\nThe equipment, IPs and pipes on its tabs now are replaced. A backup of this Schema is made first.`, 'This Schema now shows the Default Layout') }, follows ? 'Load it on this Schema again' : 'Use it on this Schema') : '',
-      h('button', { onclick: act('save', `Make the equipment and pipes on this Schema's tabs the Default Layout of "${p.name}"?${others.length ? `\n\n${others.join(', ')} use this profile too and get this layout when they follow it.` : ''}`, 'Saved as the Default Layout') }, 'Save this Schema\'s layout as the Default Layout'),
-      follows ? h('button', { onclick: act('keep', 'Keep this Schema\'s own layout from now on?\n\nIts tabs stay as they are, and changes to them no longer change the profile\'s Default Layout.', 'This Schema keeps its own layout') }, 'Keep this Schema\'s own layout') : ''));
+      h('button', { title: 'Open Edit layout on the Tab', onclick: guard(async () => { leaveMenuTab(); wsName = w.name; setEditing(true); if (!follows) toast('This Tab keeps its own layout: the changes stay in this Schema'); }) }, follows ? 'Edit it' : 'Edit this Tab\'s layout'),
+      p.hasDrawing ? h('button', { onclick: act('use', `Put the Default Layout of "${p.name}" on the Tab "${w.name}"?\n\nThe equipment, IPs and pipes on this Tab now are replaced. The other Tabs are not touched. A backup of this Schema is made first.`, 'The Tab now shows the Default Layout') }, follows ? 'Load it on this Tab again' : 'Use it on this Tab') : '',
+      h('button', { onclick: act('save', `Make the equipment and pipes on the Tab "${w.name}" the Default Layout of "${p.name}"?${others.length ? `\n\n${others.join(', ')} use this profile too and get this layout when they follow it.` : ''}`, 'Saved as the Default Layout') }, 'Save this Tab\'s layout as the Default Layout'),
+      follows ? h('button', { onclick: act('keep', `Keep the Tab "${w.name}"'s own layout from now on?\n\nIt stays as it is, and changes to it no longer change the profile's Default Layout.`, 'This Tab keeps its own layout') }, 'Keep this Tab\'s own layout') : ''));
 }
 
 // ---- Mash Profile and Boil Profile tabs (a Recipe picks one of each from a dropdown)

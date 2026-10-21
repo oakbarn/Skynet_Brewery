@@ -35,10 +35,10 @@ Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any s
 ## The other Menu tabs
 
 - **Zoom**: how big the tabs show, and Full screen. See [Zoom and Full screen](41-zoom-and-full-screen).
-- **Equipment Profile**: the losses and efficiency, the vessels, and which profile the loaded Schema uses. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+- **Equipment Profile**: the losses and efficiency, the vessels, and which profile each Tab of the loaded Schema uses. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Vessel**: one vessel (or chiller, coil, filter) at a time. See [The Vessel tab](34-vessel-tab).
 - **Vessel Templates** and **Fitting Templates**: ready-made vessels and Bundled Fittings (Skynet and your own) as small icons. Double-click one for its settings, or put a copy on a Tab. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
-- **Default Layout**: the vessels and pipes a Schema gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+- **Default Layout**: the vessels and pipes a Tab gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
 - **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
 - **About**: see [About and Schema versions](42-about-and-schema-versions).
