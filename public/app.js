@@ -3,6 +3,7 @@ import { elementTopic, graphicTopic, barTopic, menuTopic, TAB_SPOT, DB_TRIGGER }
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
+import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -142,7 +143,7 @@ const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspace
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
   for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName && !menuTab ? 'active' : '', onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: 'Double-click for Tab settings' } : {}) }, w.name));
+    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: `Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.name));
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -1560,10 +1561,72 @@ $('#addEl').onclick = guard(async () => {
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/samples/led_green.svg'; e.imageOff = 'Images/samples/led_red.svg'; }
+  if (isDevice(e) && !(await newDeviceDialog(e, prefix))) return;
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 });
+// Fritz, 2026-10-21: a new Device starts with its Display Name, then its Interface, Port and Type, and its name is suggested from them:
+// InterfaceID_Port_Type_DisplayName_TabID, e.g. MB_25_PWM_VlV_Fly_Sparge_SP (public/naming.js). An Admin may type another name;
+// it must be unique and has no spaces. Only one Device per port of an Interface.
+const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
+const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
+const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
+// the port as written in the name: the pin, OW3 for OneWire probe 3, ADS0 for ADS1115 channel 0, the first DT pin of a scale
+function portForName(e) {
+  if (isOneWire(e)) return e.probeIndex ? 'OW' + e.probeIndex : 'OW';
+  if (e.type === 'analogIn' && e.adc === 'ads1115') return e.channel === undefined || e.channel === '' ? '' : 'ADS' + e.channel;
+  return String(e.channel ?? '').split(',')[0].trim();
+}
+const deviceSuggestion = e => suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, displayName: e.displayName, tab: tabIdOf(e.workspace) });
+const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
+const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
+// a name used by another Device or Widget (any capitals)
+const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self && x.name.toLowerCase() === n.toLowerCase());
+function portError(e, self) {
+  const c = portClash(e, (draft || S.config).elements.filter(x => x !== self));
+  return c && `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only one Device can use a port.`;
+}
+async function newDeviceDialog(e, hint) {
+  const devs = S.config.devices || [];
+  const work = { displayName: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
+  const port = isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
+    : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
+      : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
+        : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || 'digital'];
+  const fields = [['_n', 'Type the Display Name first. The name is made from it: Interface ID _ Port _ Type _ Display Name _ Tab ID. You can type your own name instead: it must be unique, and spaces become _.', 'note'],
+    ['displayName', 'Display name (shown on the tab, e.g. Fly Sparge)', 'text'],
+    ['device', 'Interface (board)', 'dev'], port,
+    ['typeCode', 'Type (for the name)', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
+    ['workspace', 'Tab', 'ws'],
+    ['name', 'Name (filled in for you)', 'text']];
+  const body = $('#dlgBody');
+  try {
+    for (;;) {
+      let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
+      const shown = dialog('New Device', fields, work, false);
+      const nameBox = body.querySelector('[data-k="name"]');
+      if (!touched) nameBox.value = last;
+      body.oninput = ev => {
+        if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
+        const w = { ...work }; try { readFields(w, body); } catch { }
+        last = deviceSuggestion(w); if (!touched) nameBox.value = last;
+      };
+      if (await shown !== 'ok') return false;
+      try {
+        readFields(work, body);
+        const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
+        if (!name) throw new Error('Type a Display Name (or a Name)');
+        if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
+        const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
+        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        e.name = name; wsName = e.workspace || wsName;
+        if (name === sug) autoNamed.add(e);
+        return true;
+      } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
+    }
+  } finally { body.oninput = null; }
+}
 // Fritz, 2026-10-20: a new valve starts from the Valve Profile picked now (only now; after that it is changed in its properties)
 async function useValveProfile(e) {
   const def = S.config.brewDefaults?.valveProfile;
@@ -1640,7 +1703,9 @@ $('#addWs').onclick = () => {
   const n = prompt('New tab name'); if (!n) return;
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
   const tp = S.config.brewDefaults?.tabProfile;
-  draft.workspaces.push({ name: n, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) }); wsName = n; renderTabs(); renderWs();
+  const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
+  draft.workspaces.push({ name: n, id, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) }); wsName = n; renderTabs(); renderWs();
+  toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
 };
 $('#wsProps').onclick = () => editWorkspace();
 const saveLayout = guard(async () => {
@@ -1945,7 +2010,7 @@ function field([key, label, kind, opts, rerender], obj) {
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.name)));
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}_   ${d.name}` : d.name)));
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
   else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
@@ -2108,6 +2173,8 @@ async function editItem(kind, id) {
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
+    if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it) || '(type a Display name and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
+      ['typeCode', 'Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return f;
   } : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)`, 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
@@ -2154,7 +2221,13 @@ async function editItem(kind, id) {
     }
     if (kind === 'el') {
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
+      // a new Device keeps following the suggested name (Display name, Interface, port, type, tab) until a name of its own is typed
+      const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
+      if (follow) work.name = deviceSuggestion(work) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
+      if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
+      const isNew = !S.config.elements.some(x => x.name === item.name);
+      if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)))) { const err = portError(work, item); if (err) throw new Error(err); }
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
@@ -2197,6 +2270,7 @@ async function editWorkspace() {
   const w = curWs(); const work = clone(w);
   await loadMediaPictures();
   const r = await dialog('Tab settings', [['name', 'Name', 'text'],
+    ['id', 'Tab ID (exactly 2 letters, unique; it ends the suggested name of each new Device on this tab, e.g. ..._Fly_Sparge_SP)', 'text'],
     ['_bgHead', 'Background', 'head'],
     ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
     ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
@@ -2213,7 +2287,14 @@ async function editWorkspace() {
     draft.graphics = draft.graphics.filter(g => g.workspace !== w.name);
     wsName = draft.workspaces[0].name;
   } else if (r === 'ok') {
-    try { readFields(work); } catch (e) { return toast(e.message, true); }
+    try {
+      readFields(work);
+      const others = draft.workspaces.filter(x => x !== w);
+      if (!work.name?.trim()) throw new Error('The tab needs a name');
+      if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
+      work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
+      if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
+    } catch (e) { return toast(e.message, true); }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
     Object.keys(w).forEach(k => delete w[k]); Object.assign(w, work);     // a cleared box (picture "(none)", color Default) must remove the old value
   }
@@ -2843,9 +2924,16 @@ function renderDevices() {
       if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
-    tb.append(h('tr', {}, h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
+    const cfg = S.config.devices.find(x => x.name === d.name);
+    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...)',
+      onchange: guard(async ev => {
+        const id = cleanInterfaceId(ev.target.value);
+        if (S.config.devices.some(x => x.name !== d.name && String(x.id).toUpperCase() === id)) { ev.target.value = cfg?.id ?? ''; throw new Error(`Interface ID ${id} is used by another Interface`); }
+        await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, id } : x) }); await load(); toast(`Interface ID is now ${id}_ (Devices made before keep their names)`);
+      }) });
+    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
-      h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove device ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   renderProbes();
 }
@@ -2892,12 +2980,18 @@ $('#scanPorts').onclick = guard(async () => {
 $('#addDev').onclick = guard(async () => {
   const name = $('#devName').value.trim(), type = $('#devType').value;
   if (!name) throw new Error('Device name is required');
-  if (S.config.devices.some(d => d.name === name)) throw new Error('That device name is used');
-  const d = { name, type };
+  if (S.config.devices.some(d => d.name === name)) throw new Error('That Interface name is used');
+  const taken = S.config.devices.map(x => x.id), typed = $('#devId').value.trim();
+  const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
+  if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Leave the box empty for one that is free.`);
+  const d = { name, id, type };
   if (type === 'serial') { d.port = $('#devPort').value.trim(); d.baud = 115200; if (!d.port) throw new Error('USB port is required'); }
   if (type === 'esp32' || type === 'ethernet') { d.host = $('#devHost').value.trim(); d.port = 4100; if (!d.host) throw new Error('Network address is required'); }
-  await api('PUT', '/ui/layout', { devices: [...S.config.devices, d] }); await load(); toast('Device added');
+  await api('PUT', '/ui/layout', { devices: [...S.config.devices, d] }); await load(); toast(`Interface ${name} added, ID ${id}_`);
+  $('#devName').value = ''; $('#devId').value = ''; $('#devId').placeholder = 'MB';
 });
+// the Interface ID box shows the ID a name would get (first letters of its first two words), until one is typed
+$('#devName').addEventListener('input', () => { $('#devId').placeholder = defaultInterfaceId($('#devName').value, S.config.devices.map(x => x.id)) || 'MB'; });
 
 // ---------------------------------------------------------------- import
 $('#importBtn').onclick = guard(async () => {
