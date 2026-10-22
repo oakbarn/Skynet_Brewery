@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+  <!-- On overlay: a big half see-through lightning bolt over the middle of the picture -->
+  <path d="M57 8 L24 56 H46 L38 92 L76 40 H53 Z" fill="#ffd23a" fill-opacity=".6" stroke="#22272c" stroke-opacity=".8" stroke-width="3" stroke-linejoin="round"/>
+</svg>
