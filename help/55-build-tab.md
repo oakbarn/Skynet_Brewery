@@ -23,7 +23,7 @@ Press **💾 Save Build ...** on the Edit layout bar. A pop-up asks where it sho
 
 | Pick | What happens |
 |---|---|
-| **To a Tab** | Pick the Tab (the one you came from is first) and press **Save to Tab**. Everything on the Build Tab moves there, in the same spot it had on the Build Tab. Drag it to its place, then press **Save layout**. |
+| **To a Tab** | Pick the Tab (the one you came from is first) and press **Save to Tab**. Everything on the Build Tab moves there at the size it is now, in the middle of that Tab. Drag it to its place, then press **Save layout**. |
 | **As a Template** | Type a **Template Name** (no spaces, unique) and press **Save as Template**. It is saved at once in **☰ Menu**, and the Build Tab closes. Use **Add to Tab** on the Template to put it on a Tab. |
 | **Throw it away** | Everything on the Build Tab is deleted (it asks first). |
 | **Keep building** | Back to the Build Tab, nothing changes. |
@@ -31,6 +31,22 @@ Press **💾 Save Build ...** on the Edit layout bar. A pop-up asks where it sho
 A new Device whose name still follows the suggested name gets the **Tab ID** of the Tab it moves to at the end of its name (for example `MB_25_PWM_VlV_Fly_Sparge_SP`). A name you typed yourself is never changed.
 
 If you press **Save layout** while something is still on the Build Tab, the Save Build pop-up opens first, so nothing is lost. **Exit without Saving** throws away the Build Tab with the rest of your changes.
+
+## Change a bundled item on the Build Tab
+
+A bundled item (a vessel or Tab_Fitting with its IPs) can be taken off its Tab, changed on the Build Tab, and put back in the same place.
+
+1. In **Edit layout**, double-click the bundled item. Switch off **Bundled** and press **Save**.
+2. A pop-up asks **Move it to the 🔨 Build Tab to work on it?**
+   - **OK (Yes)**: Skynet remembers its Tab, its spot and its size, and moves it with its IPs to the Build Tab. Pipes drawn to it stay on its Tab.
+   - **Cancel (No)**: it is un-bundled where it is, as before.
+3. Change it on the Build Tab, then press **💾 Save Build ...**.
+4. A pop-up asks **Put it back where it came from?**
+   - **OK (Yes)**: it goes back on the same Tab, in the same spot and at the same size, and is bundled again. Its IPs keep their place on the picture.
+   - **Cancel (No)**: it is saved like a new build. The Save Build pop-up opens: pick a Tab and it goes there at the size it is now, in the middle of the Tab, bundled again.
+5. Press **Save layout** to keep it.
+
+If its Tab was deleted or renamed in the meantime, the question is skipped and it is saved like a new build. **Throw it away** and **As a Template** both take it off your Tab for good (Throw it away names it and asks first).
 
 ## What can be a Template
 
