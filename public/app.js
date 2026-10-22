@@ -763,7 +763,7 @@ function fillEl(n, e0) {
   if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
   let ov = n.querySelector(':scope > .onov');
   if (ovl && !ov) n.append(ov = h('div', { class: 'onov' }));
-  if (ov) { ov.style.backgroundImage = ovl ? `url("${media(ovl)}")` : ''; ov.classList.toggle('hidden', !ovl); }
+  if (ov) { ov.style.backgroundImage = ovl ? `url("${media(ovl)}")` : ''; ov.classList.toggle('hidden', !ovl); if (ovl) fitOverlay(n, ov, img, stretchPic(e, v)); }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
@@ -777,7 +777,7 @@ function fillEl(n, e0) {
   const missing = img && isButton && imgMissing(media(img), n);
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
-  const stretch = !!e.imagePathsLocked && hasPictures(e, v);
+  const stretch = stretchPic(e, v);
   n.style.backgroundColor = img || missing ? '' : bg(v.background);
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] : 0;
@@ -789,6 +789,23 @@ function fillEl(n, e0) {
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
 }
+// The On overlay covers just the picture underneath (Fritz: sized to the picture), not the empty sides of a wide or tall item.
+// The picture is drawn "contain" in the item, so its box comes from the picture's own width and height (loaded once).
+const picSize = new Map();
+function fitOverlay(n, ov, img, stretch) {
+  const full = () => { ov.style.inset = '0'; ov.style.width = ov.style.height = ''; };
+  if (!img || stretch) return full();
+  const url = media(img), sz = picSize.get(url);
+  if (!sz) {
+    full();
+    if (!picSize.has(url)) { picSize.set(url, null); const im = new Image(); im.onload = () => { picSize.set(url, [im.naturalWidth, im.naturalHeight]); if (n.isConnected) fitOverlay(n, ov, img, stretch); }; im.src = url; }
+    return;
+  }
+  const W = n.clientWidth, H = n.clientHeight, k = Math.min(W / (sz[0] || 1), H / (sz[1] || 1)), w = sz[0] * k, hh = sz[1] * k;
+  if (!W || !H || !w || !hh) return full();
+  Object.assign(ov.style, { inset: 'auto', left: (W - w) / 2 + 'px', top: (H - hh) / 2 + 'px', width: w + 'px', height: hh + 'px' });
+}
+const stretchPic = (e, v) => !!e.imagePathsLocked && hasPictures(e, v);     // imported BruControl pictures fill the item
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
 const imgState = new Map();
 function imgMissing(url, node) {
