@@ -2464,7 +2464,8 @@ function field([key, label, kind, opts, rerender], obj) {
     s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value || isTint(s.value)); if (s.value && !isTint(s.value)) pv.src = media(s.value); } });
     const ss = gk === 'sounds' ? null : h('select', { class: 'gpickGroup', title: 'Show the Skynet pictures, your own, or both', onchange: ev => { ev.stopPropagation(); src = ss.value; keepGroup('src', src); fill(); } },
       ...SOURCES.map(([k, l]) => h('option', { value: k, ...(k === src ? { selected: true } : {}) }, l)));
-    input = h('div', { class: 'gpick' }, ss, gs, s, pv);
+    const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
+    input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv);
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
@@ -2982,17 +2983,30 @@ $('#code').addEventListener('keydown', ev => {
   if (ev.altKey && !ev.ctrlKey && !ev.metaKey && ev.code === 'KeyP' && can('admin')) { ev.preventDefault(); openPicPicker(); }   // Option+P types π on a Mac: the key's place counts
 });
 // ---------------------------------------------------------------- picture picker (Alt+P, Option+P on a Mac, or the Picture button)
-// Lists the pictures in media/Images (or sounds in media/sounds), one group or All, and types the path picked at the cursor:
-// in quotes, unless the cursor is already just after a quote.
-let ppAt = null;
+// Shows the pictures in media/Images as icons, like Explorer (or the sounds in media/sounds), Skynet / Mine / Both and one
+// group or All. From the Process editor it types the path picked at the cursor: in quotes, unless the cursor is already
+// just after a quote. From the 🖼 button beside a picture list in Properties it picks that list's picture.
+let ppAt = null, ppFor = null, ppVal = '', ppShown = [];
 async function openPicPicker() {
   const ta = $('#code'); if (!curScript || ta.readOnly) return;
-  ppAt = [ta.selectionStart, ta.selectionEnd];
+  ppAt = [ta.selectionStart, ta.selectionEnd]; ppFor = null;
+  await ppOpen(lastGroup.ppKind === 'sounds' ? 'sounds' : 'pictures', '');
+}
+// the 🖼 button of a picture or sound list (a gpick select)
+async function pickForSelect(sel) {
+  ppFor = sel; ppAt = null;
+  await ppOpen(sel.dataset.list === 'sounds' ? 'sounds' : 'pictures', sel.value === '__add__' ? '' : sel.value);
+}
+async function ppOpen(kind, cur) {
   await loadMediaPictures();
-  const kind = lastGroup.ppKind === 'sounds' ? 'sounds' : 'pictures';
-  $('#ppKind').value = kind; $('#ppFilter').value = ''; $('#ppSrc').value = srcPick();
+  $('#ppKind').value = kind; $('#ppKind').disabled = !!ppFor; $('#ppFilter').value = ''; $('#ppSrc').value = srcPick();
+  $('#ppTitle').textContent = ppFor ? (kind === 'sounds' ? 'Pick a sound' : 'Pick a picture') : 'Insert a picture or sound path';
+  $('#ppInsert').textContent = ppFor ? 'Use this one' : 'Insert';
+  $('#ppHint').textContent = ppFor ? 'Click a picture, then Use this one (or double-click it). Arrow keys move, Enter picks.' : 'Double-click a file, or press Enter, to put its path where the cursor is. Arrow keys move through the icons.';
+  ppVal = cur || '';
   ppGroups(); ppFill();
-  $('#picPickDlg').showModal(); $('#ppList').focus();
+  $('#picPickDlg').showModal(); $('#ppGrid').focus();
+  $('#ppGrid .ppTile.sel')?.scrollIntoView({ block: 'nearest' });
 }
 const ppPaths = () => $('#ppKind').value === 'sounds' ? mediaSounds : mediaPics;
 function ppGroups() {
@@ -3001,24 +3015,51 @@ function ppGroups() {
   $('#ppGroup').value = groups.some(([n]) => n === g) ? g : '';
 }
 function ppFill() {
-  const g = $('#ppGroup').value, f = $('#ppFilter').value.toLowerCase(), was = $('#ppList').value;
-  const src = $('#ppKind').value === 'sounds' ? 'both' : $('#ppSrc').value;
-  $('#ppSrc').hidden = $('#ppKind').value === 'sounds';
-  const list = ppPaths().filter(p => inGroup(p, g) && inSource(p, src) && (!f || p.toLowerCase().includes(f)));
-  $('#ppList').replaceChildren(...list.map(p => h('option', { value: p }, p.replace(/^(Images|sounds)\//i, ''))));
-  $('#ppList').value = list.includes(was) ? was : (list[0] ?? '');
+  const g = $('#ppGroup').value, f = $('#ppFilter').value.toLowerCase(), snd = $('#ppKind').value === 'sounds';
+  const src = snd ? 'both' : $('#ppSrc').value;
+  $('#ppSrc').hidden = snd;
+  ppShown = ppPaths().filter(p => inGroup(p, g) && inSource(p, src) && (!f || p.toLowerCase().includes(f)));
+  if (!ppShown.includes(ppVal)) ppVal = ppShown[0] ?? '';
+  $('#ppGrid').replaceChildren(...ppShown.map(p => {
+    const name = p.split('/').pop();
+    return h('div', { class: 'ppTile' + (p === ppVal ? ' sel' : ''), 'data-p': p, title: p, onclick: () => ppSelect(p), ondblclick: () => { ppSelect(p); ppInsert(); } },
+      snd ? h('div', { class: 'ppSnd' }, '🔊') : h('img', { loading: 'lazy', alt: '', src: media(p) }), h('div', { class: 'ppName' }, name));
+  }));
+  $('#ppEmpty').hidden = !!ppShown.length;
+  ppShow();
+}
+function ppSelect(p) {
+  ppVal = p;
+  for (const t of $$('#ppGrid .ppTile')) t.classList.toggle('sel', t.dataset.p === p);
+  $('#ppGrid .ppTile.sel')?.scrollIntoView({ block: 'nearest' });
   ppShow();
 }
 function ppShow() {
-  const p = $('#ppList').value, snd = $('#ppKind').value === 'sounds';
+  const p = ppVal, snd = $('#ppKind').value === 'sounds';
   $('#ppPath').textContent = p || 'Nothing here: add pictures on the Media page';
-  $('#ppImg').hidden = snd || !p; $('#ppAudio').hidden = !snd || !p;
-  if (p && !snd) $('#ppImg').src = media(p); if (p && snd) $('#ppAudio').src = media(p);
+  $('#ppAudio').hidden = !snd || !p; if (p && snd) $('#ppAudio').src = media(p);
   $('#ppInsert').disabled = !p;
 }
+// arrow keys move through the icons like in Explorer: left / right one, up / down one row
+function ppKey(ev) {
+  const i = ppShown.indexOf(ppVal), tiles = $$('#ppGrid .ppTile');
+  if (ev.key === 'Enter') { ev.preventDefault(); return ppInsert(); }
+  const top = tiles[0]?.offsetTop, cols = Math.max(1, tiles.findIndex(t => t.offsetTop !== top) === -1 ? tiles.length : tiles.findIndex(t => t.offsetTop !== top));
+  const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: cols, ArrowUp: -cols, Home: -1e9, End: 1e9 }[ev.key];
+  if (step === undefined || !ppShown.length) return;
+  ev.preventDefault();
+  ppSelect(ppShown[Math.min(ppShown.length - 1, Math.max(0, (i < 0 ? 0 : i) + step))]);
+}
 function ppInsert() {
-  const p = $('#ppList').value; if (!p || !ppAt) return;
+  const p = ppVal; if (!p) return;
   $('#picPickDlg').close('ok');
+  if (ppFor) {         // a picture list in Properties: pick it there (and let the list show its preview)
+    const sel = ppFor; ppFor = null;
+    if (![...sel.options].some(o => o.value === p)) sel.insertBefore(h('option', { value: p }, p), sel.querySelector('option[value="__add__"]'));
+    sel.value = p; sel.dispatchEvent(new Event('change', { bubbles: true })); sel.focus();
+    return;
+  }
+  if (!ppAt) return;
   const ta = $('#code'), [a, b] = ppAt, before = ta.value[a - 1], after = ta.value[b];
   const text = before === '"' ? p + (after === '"' ? '' : '"') : `"${p}"`;
   editCode(a, b, text); const end = a + text.length + (before === '"' && after === '"' ? 1 : 0); ta.setSelectionRange(end, end);
@@ -3028,12 +3069,14 @@ $('#ppKind').onchange = () => { keepGroup('ppKind', $('#ppKind').value); ppGroup
 $('#ppSrc').onchange = () => { keepGroup('src', $('#ppSrc').value); ppFill(); };
 $('#ppGroup').onchange = () => { keepGroup($('#ppKind').value, $('#ppGroup').value); ppFill(); };
 $('#ppFilter').oninput = ppFill;
-$('#ppList').onchange = ppShow;
-$('#ppList').ondblclick = ppInsert;
-$('#ppList').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); ppInsert(); } });
-$('#ppFilter').addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { ev.preventDefault(); $('#ppList').focus(); } else if (ev.key === 'Enter') { ev.preventDefault(); ppInsert(); } });
+$('#ppGrid').addEventListener('keydown', ppKey);
+$('#ppFilter').addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { ev.preventDefault(); $('#ppGrid').focus(); } else if (ev.key === 'Enter') { ev.preventDefault(); ppInsert(); } });
 $('#ppInsert').onclick = ev => { ev.preventDefault(); ppInsert(); };
-$('#picPickDlg').addEventListener('close', () => { if ($('#picPickDlg').returnValue !== 'ok') { const ta = $('#code'); ta.focus(); if (ppAt) ta.setSelectionRange(...ppAt); } });
+$('#picPickDlg').addEventListener('close', () => {
+  if ($('#picPickDlg').returnValue === 'ok') return;
+  if (ppFor) { ppFor.focus(); ppFor = null; return; }
+  const ta = $('#code'); ta.focus(); if (ppAt) ta.setSelectionRange(...ppAt);
+});
 
 // ---------------------------------------------------------------- find and replace
 // In the open script or the Config Editor (the bar moves to whichever page is open): Ctrl+F (find), Ctrl+H (replace), or the Find button (phones). Matches are painted on a layer behind the editor.

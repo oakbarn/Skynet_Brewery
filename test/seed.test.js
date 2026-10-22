@@ -29,6 +29,18 @@ assert.deepEqual(seedDefaults(root), [], 'nothing more to add');
 assert.equal(fs.readFileSync(path.join(root, 'media/Images/Pump_On.png'), 'utf8'), 'mine');
 assert.equal(fs.existsSync(path.join(root, 'scripts/Demo.txt')), false, 'a deleted sample stays deleted');
 
+const TRACED = '<svg xmlns="http://www.w3.org/2000/svg" data-brewpanel-traced="Pump_On.png" data-score="0.8"></svg>';
+put('media/Images/Pump_On.svg', TRACED);
+put('media/Images/Mine.svg', '<svg>mine</svg>');
+put('defaults/media/Images/Pump_On.svg', '<svg>drawn</svg>');
+put('defaults/media/Images/Mine.svg', '<svg>sample</svg>');
+assert.deepEqual(seedDefaults(root), ['media (1 sample file)'], 'a traced SVG is swapped for the hand-drawn Skynet one');
+assert.equal(fs.readFileSync(path.join(root, 'media/Images/Pump_On.svg'), 'utf8'), '<svg>drawn</svg>');
+assert.equal(fs.readFileSync(path.join(root, 'media/Images/Mine.svg'), 'utf8'), '<svg>mine</svg>', 'an SVG you made is never replaced');
+put('defaults/media/Images/Pump_On.svg', TRACED);
+put('media/Images/Pump_On.svg', '<svg>drawn</svg>');
+assert.deepEqual(seedDefaults(root), [], 'a hand-drawn SVG is never swapped back for a traced one');
+
 fs.rmSync(path.join(root, 'config/brewery.json'));
 assert.deepEqual(seedDefaults(root), ['config/brewery.json'], 'a missing layout file is filled in');
 fs.rmSync(path.join(root, 'media'), { recursive: true });
