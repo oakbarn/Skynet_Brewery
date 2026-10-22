@@ -1,0 +1,24 @@
+{
+  "vesselType": "trub",
+  "vtype": "Hop rocket",
+  "image": "Images/samples/Filter_Hop_Inline.svg",
+  "size": [
+    110,
+    165
+  ],
+  "std": {
+    "type": "MPT",
+    "size": 0.5
+  },
+  "ports": {
+    "inlet": {
+      "installed": true,
+      "position": "Top"
+    },
+    "outlet": {
+      "installed": true,
+      "position": "Bottom Right"
+    }
+  },
+  "notes": "An inline hop filter (hop rocket style): wort in at the top, out at the side near the bottom. 2 liquid ports."
+}

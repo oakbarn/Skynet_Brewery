@@ -293,6 +293,13 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red
   ['Manual ball valve open (horizontal)', 'Images/samples/Valve_Manual_OpenH.svg'], ['Manual ball valve closed (horizontal)', 'Images/samples/Valve_Manual_ClosedH.svg'],
   ['Manual ball valve open (vertical, handle right)', 'Images/samples/Valve_Manual_OpenV_R.svg'], ['Manual ball valve closed (vertical, handle right)', 'Images/samples/Valve_Manual_ClosedV_R.svg'],
   ['Manual ball valve open (vertical, handle left)', 'Images/samples/Valve_Manual_OpenV_L.svg'], ['Manual ball valve closed (vertical, handle left)', 'Images/samples/Valve_Manual_ClosedV_L.svg'],
+  ['Manual butterfly valve open (horizontal)', 'Images/samples/Valve_Manual_Butterfly_OpenH.svg'], ['Manual butterfly valve closed (horizontal)', 'Images/samples/Valve_Manual_Butterfly_ClosedH.svg'],
+  ['Manual butterfly valve open (vertical, handle right)', 'Images/samples/Valve_Manual_Butterfly_OpenV_R.svg'], ['Manual butterfly valve closed (vertical, handle right)', 'Images/samples/Valve_Manual_Butterfly_ClosedV_R.svg'],
+  ['Manual butterfly valve open (vertical, handle left)', 'Images/samples/Valve_Manual_Butterfly_OpenV_L.svg'], ['Manual butterfly valve closed (vertical, handle left)', 'Images/samples/Valve_Manual_Butterfly_ClosedV_L.svg'],
+  ['Solenoid gas valve open (horizontal)', 'Images/samples/Valve_Gas_Solenoid_OpenH.svg'], ['Solenoid gas valve closed (horizontal)', 'Images/samples/Valve_Gas_Solenoid_ClosedH.svg'],
+  ['Solenoid gas valve open (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_R.svg'],
+  ['Solenoid gas valve open (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_L.svg'],
+  ['Submersible sump pump on', 'Images/samples/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/samples/Pump_Sump_Off.svg'],
   ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
@@ -2241,6 +2248,18 @@ function readFields(obj, root = $('#dlgBody')) {
 
 // A form of fields in a box (a dialog, or a Menu tab): "Add new ..." in a list and selects that change the fields are handled here.
 // onChange runs after any change. Returns build(), which draws the fields again.
+// Open / closed (on / off) pictures come in pairs (Fritz, 2026-10-22): picking one fills in its partner when a picture with the
+// matching name exists, e.g. Valve_Manual_ClosedV_R.svg -> Valve_Manual_OpenV_R.svg. The orientation is the user's pick.
+const PIC_PAIR = { imageOff: 'imageOn', imageOn: 'imageOff', imageClosed: 'imageOpen', imageOpen: 'imageClosed' };
+const picPartner = p => { const swap = { Closed: 'Open', Open: 'Closed', closed: 'open', open: 'closed', Off: 'On', On: 'Off', off: 'on', on: 'off' };
+  const file = p.split('/').pop(), m = file.match(/(Closed|Open|Off|On|(?<![A-Za-z])(?:closed|open|off|on))(?=[^a-z]|$)/);
+  return m ? p.slice(0, p.length - file.length) + file.slice(0, m.index) + swap[m[1]] + file.slice(m.index + m[1].length) : null; };
+function fillPicPair(body, sel) {
+  const other = body.querySelector(`select[data-k="${PIC_PAIR[sel.dataset.k]}"][data-kind="gpick"]`), p = picPartner(sel.value);
+  if (!other || !p || p === sel.value || !vList(other.dataset.list || 'onoff').concat(mediaPics).includes(p)) return;
+  if (![...other.options].some(o => o.value === p)) other.insertBefore(h('option', { value: p }, p), other.lastChild);
+  other.value = p; other.dispatchEvent(new Event('change'));      // shows its preview (does not bubble back here)
+}
 function bindForm(body, fields, obj, onChange) {
   const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); menuHelpIcons(body); };
   build();
@@ -2260,6 +2279,7 @@ function bindForm(body, fields, obj, onChange) {
       if (obj[k] === undefined) delete obj[k];
       build();
     } else if (t.dataset?.rerender) { try { readFields(obj, body); } catch { } build(); }
+    else if (t.dataset?.kind === 'gpick' && PIC_PAIR[t.dataset.k] && t.value) fillPicPair(body, t);
     onChange?.(ev);
   };
   if (onChange) body.oninput = onChange;
@@ -4424,7 +4444,7 @@ const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === Str
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
 const SKYNET_FIT_PICS = ['Images/samples/Fitting_Elbow90.svg', 'Images/samples/Fitting_Elbow45.svg', 'Images/samples/Fitting_Tee.svg', 'Images/samples/Fitting_Reducer.svg', 'Images/samples/pipe_elbow90.svg', 'Images/samples/pipe_elbow45.svg', 'Images/samples/pipe_tee.svg', 'Images/samples/pipe_cross.svg',
-  'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg', 'Images/samples/Valve_Motor_Ball_OpenH.svg', 'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
+  'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg', 'Images/samples/Valve_Motor_Ball_OpenH.svg', 'Images/samples/Valve_Manual_OpenH.svg', 'Images/samples/Valve_Manual_Butterfly_OpenH.svg', 'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
   return { tee: 'Images/samples/Fitting_Tee.svg', reducer: 'Images/samples/Fitting_Reducer.svg', elbow45: 'Images/samples/Fitting_Elbow45.svg' }[k] || (k ? 'Images/samples/Fitting_Elbow90.svg' : 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/samples/kettle.svg';
@@ -4515,7 +4535,7 @@ function fittingSlotFields(w, onTab) {
     const k = w['f' + i] || 'none';
     return [['f' + i, label, 'sel', Object.entries(FITTING_KINDS), true],
       ...(k === 'valve' ? [onTab ? ['fv' + i, 'Valve: Select Device, Widget or None', 'sel', valves] : ['_v' + i, 'Valve: Select Device, Widget or None (picked when it is on a Tab)', 'note']] : []),
-      ...(k === 'reducer' ? [['rs' + i, 'Small end size (the big end is the Connection Standard size)', 'text']] : []),
+      ...(k === 'reducer' ? [['rs' + i, 'Other end size (it goes from the size before it to this size, up or down)', 'text']] : []),
       ...(k === 'tee' ? [['tw' + i, 'Thermowell in this tee (it stops flow: that side has no IP)', 'yn', false, true],
         ...(w['tw' + i] ? [['twp' + i, 'Position of Thermowell', 'sel', Object.entries(THERMOWELL_POS)],
           onTab ? ['fp' + i, 'Temperature Probe: Select Temperature Probe or None', 'sel', probes] : ['_p' + i, 'Temperature Probe: Select Temperature Probe or None (picked when it is on a Tab)', 'note']] : [])] : [])];

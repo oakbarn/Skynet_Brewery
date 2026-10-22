@@ -67,6 +67,8 @@ Chillers, coils and trub filters have the same settings as a vessel, plus how ma
 
 With 4, the second circuit is **In 2** and **Out 2**. Liquid in one circuit never flows into the other.
 
+On the Skynet counterflow chillers the plain copper ends are the wort and the brass hose fittings the water. A chiller can be piped either way: to swap them, pick other corners for **Wort In**, **Wort Out**, **Water In** and **Water Out** (on the Template, or on the Tab_Vessel in Edit layout).
+
 A **RIMS tube** is part of the piping: wort flows in at one end and out at the other. Its **Heating element** (an Electric Element Device) goes in one end and its **Thermowell** (a Temperature Probe) in the other. Both are picked on the Tab_Vessel. Neither one is an IP, so no liquid flows there. A Mash Tun whose Heat Source is **RIMS** picks its RIMS tube from the Equipment Profile.
 
 ## Bundled Fitting Template settings
@@ -75,7 +77,7 @@ A **RIMS tube** is part of the piping: wort flows in at one end and out at the o
 - **First, Second, Third and Fourth Fitting**, from the vessel port outward. Each is a dropdown:
   - **Valve**: the valve itself (a Device or a manual valve Widget) is picked when it is on a Tab.
   - **Tee**: switch on **Thermowell** if a probe sits in it, and pick its **Position** (Short or Long). A thermowell stops flow, so that side of the tee has no IP. The probe is picked when it is on a Tab.
-  - **Reducer**: type the **Small end size**. The big end is the Connection Standard size. Every IP past the reducer gets the small size.
+  - **Reducer**: type its **Other end size**. It goes from the size before it (at first the Connection Standard size) to that size, down or up. Every IP past the reducer gets the new size.
   - **90 Degree Elbow**, **45 Degree Elbow**, **U**, **CIP Ball Valve**, or **None**.
 - **Graphic**: a Skynet Bundled Fitting picks one of the Skynet pictures. A User one can have any picture.
 
@@ -95,6 +97,7 @@ Skynet comes with single fittings ready to put in the piping, with their IPs whe
 | **Elbow_45** | Left and the Top Right corner |
 | **Tee** | Left, Right and Top (flow goes any way through it) |
 | **Reducer** | Left (the big end, TC 2) and Right (the small end, TC 1.5) |
+| **Butterfly_Valve_1in** | Left and Right, TC 1.5: a reducer down to TC 1, a 1" butterfly valve, and a reducer back up to TC 1.5 |
 
 Add one to a Tab (**Add to Tab** on its pop-up), drag it to its place and draw pipes to its IPs. To point it another way, open it in Edit layout (switch **Bundled** off first) and pick **Turn**: 90, 180 or 270 degrees clockwise. The picture and its IPs turn together, so one Elbow_90 covers all four directions.
 

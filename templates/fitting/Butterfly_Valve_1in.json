@@ -1,0 +1,28 @@
+{
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "reducer",
+      "toSize": "1"
+    },
+    {
+      "kind": "valve"
+    },
+    {
+      "kind": "reducer",
+      "toSize": "1.5"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/samples/Valve_Manual_Butterfly_OpenH.svg",
+  "ipPos": {
+    "start": "Left",
+    "end": "Right"
+  },
+  "notes": "A 1 inch butterfly valve with a reducer on each side, so it fits TC 1.5 piping (Fritz: most butterfly valves are 1 inch). Pick the valve (Device or manual valve Widget) when it is on a Tab."
+}

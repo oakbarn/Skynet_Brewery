@@ -19,7 +19,7 @@ Every Device or Widget that has an On / Off state has two settings, **.imageOn**
 3. Pick **Picture when off** the same way.
 4. Press **Save**.
 
-The dropdown has LEDs (green, red, grey), lightning bolts and ball valves. Pick **Add new ...** for your own picture: type its name in `media/Images`, for example `MyPump_On.png` or `Pumps/MyPump_On.svg`. PNG, JPG, GIF and SVG pictures all work. Put your pictures on the Brain with the **File Move** page first.
+The dropdown has LEDs (green, red, grey), lightning bolts, valves and a submersible sump pump (Pump_Sump_On and Pump_Sump_Off: green and pumping when on). Pick one picture of a pair and the other fills in by itself. Pick **Add new ...** for your own picture: type its name in `media/Images`, for example `MyPump_On.png` or `Pumps/MyPump_On.svg`. PNG, JPG, GIF and SVG pictures all work. Put your pictures on the Brain with the **File Move** page first.
 
 Leave a picture at **(none)** and the item shows its normal background picture (picture path 1-3) or color in that state instead.
 

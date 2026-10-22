@@ -1,0 +1,22 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/samples/Vessel_DigiBoil.svg",
+  "heatKind": "electric",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "size": [
+    180,
+    346
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom",
+      "fitting": "Valve_90"
+    }
+  },
+  "notes": "A DigiBoil all-in-one electric kettle (Fritz's drawing): the element is built in, so it only comes as an electric Template. Its tap is at the bottom middle. It has no thermowell: its own thermometer is inside and the panel can't read it, so there is no probe to pick."
+}
