@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140">
+  <!-- Skynet manual ball valve, open (handle along the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the left -->
+  <g transform="translate(0 140) rotate(-90)">
+    <rect x="8" y="81" width="124" height="22" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <path d="M10 87 H130" stroke="#c4c7cb" stroke-width="3" stroke-linecap="round"/>
+    <rect x="2" y="74" width="9" height="36" rx="3" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <rect x="129" y="74" width="9" height="36" rx="3" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <rect x="46" y="74" width="48" height="36" rx="6" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <rect x="63" y="52" width="14" height="24" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <circle cx="70" cy="92" r="9" fill="#e02020" stroke="#111" stroke-width="4"/>
+    <rect x="62" y="40" width="70" height="16" rx="5" fill="#2b2b2b"/><rect x="65" y="43" width="64" height="10" rx="3" fill="#5b6066"/>
+  </g>
+</svg>

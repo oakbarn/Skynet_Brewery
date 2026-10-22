@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+  <!-- Skynet RIMS tube: liquid in at the top left, out at the bottom right; probe (purple) in the left end, element (red) in the right end -->
+  <g fill="#8f9296" stroke="#2b2b2b" stroke-width="3">
+    <rect x="34" y="7" width="20" height="30" rx="2"/>
+    <rect x="24" y="2" width="40" height="9" rx="3"/>
+    <rect x="146" y="63" width="20" height="30" rx="2"/>
+    <rect x="136" y="89" width="40" height="9" rx="3"/>
+    <rect x="14" y="33" width="172" height="34" rx="4"/>
+    <rect x="8" y="27" width="10" height="46" rx="3"/>
+    <rect x="182" y="27" width="10" height="46" rx="3"/>
+  </g>
+  <path d="M20 39 H180" stroke="#c4c7cb" stroke-width="4" stroke-linecap="round"/>
+  <path d="M4 50 H52" stroke="#8e44ad" stroke-width="6" stroke-linecap="round"/>
+  <path d="M60 50 H196" stroke="#e02020" stroke-width="8" stroke-linecap="round"/>
+</svg>
