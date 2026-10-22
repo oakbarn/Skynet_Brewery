@@ -3,7 +3,7 @@
 vAS_Batch_Status = "Demo running"
 vKDT_Brew_Day = now
 vADT_Last_Brew = now
-vK_Burner_Pic = "Images/Other_Equipment/Burner No Flame.png"
+vK_Burner_Pic = "Images/Skynet/Other_Equipment/Burner No Flame.png"
 print "Brewer: " + vKS_Brewer
 print "Strike target: " + vKV_Strike_Target
 if vKSW_Testing == true
@@ -12,7 +12,7 @@ endif
 print "Press Ping (the momentary button) on the Variables Demo workspace"
 wait vKMB_Ping == true
 print "Ping seen - lighting the burner picture"
-vK_Burner_Pic = "Images/Other_Equipment/BurnerFlame.png"
+vK_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.png"
 vKL_Brew_Notes = vKL_Brew_Notes + "\n- Ping pressed " + now
 vAS_Batch_Status = "Ping pressed"
 log "vAS_Batch_Status"

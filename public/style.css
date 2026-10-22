@@ -692,3 +692,5 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .buildOpt { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
 .buildOpt p { margin: 4px 0 6px; }
 .buildOpt label { display: block; margin: 6px 0; }
+.mdReadOnly { margin: 6px 0; padding: 6px 10px; border: 1px solid #e8a33a; border-radius: 8px; background: #e8a33a22; }
+.mdPickBtn.off { opacity: .45; pointer-events: none; }

@@ -268,6 +268,7 @@
       <label class="mdReplace"><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
     </div>
     <div class="mdAddress"><span id="mdCrumbs" class="mdCrumbs"></span><input id="mdFilter" placeholder="🔍 Search this folder"></div>
+    <p id="mdReadOnly" class="mdReadOnly" hidden>🔒 <b>Skynet pictures, read only.</b> These come with Skynet: they can be looked at and their path copied, but not added to, renamed, moved or deleted. Put your own pictures in the groups in <b>Images</b>.</p>
     <div class="mdExplorer">
       <nav id="mdTree" class="mdTree" aria-label="Folders"></nav>
       <div class="mdPane">
@@ -276,7 +277,7 @@
       </div>
     </div>
     <div class="mdStatus"><span id="mdCount"></span><span id="mdProgress"></span></div>
-    <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). Pick several with Ctrl+click or Shift+click (on a phone tick <b>Select many</b>), then drag them or use <b>Move picked</b>. Images has a folder for each picture group: the 🔒 Skynet groups can't be deleted, renamed or moved; any other folder in Images is a group of your own. PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
+    <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). Pick several with Ctrl+click or Shift+click (on a phone tick <b>Select many</b>), then drag them or use <b>Move picked</b>. Images has a folder for each picture group for your pictures (the 🔒 standard ones can't be deleted, renamed or moved; any other folder in Images is a group of your own), and <b>Images/Skynet</b> holds the Skynet pictures, read only. PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
   </section>
 
   <!-- ===== File Move: copy files and folders from this computer to the Brain (public/filemove.js) ===== -->
@@ -326,7 +327,7 @@
         </div>
         <div id="hpPage" class="hpPage"></div>
         <div id="hpEditor" class="hpEditor" hidden>
-          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](Images/Pumps/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
+          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](Images/Skynet/Pumps/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
           <div class="hpEditPanes">
             <textarea id="hpText" spellcheck="true"></textarea>
             <div id="hpPreview" class="hpPage"></div>
@@ -497,6 +498,7 @@
   <h3>Insert a picture or sound path</h3>
   <div class="bar ppTools">
     <select id="ppKind" title="Pictures (media/Images) or sounds (media/sounds)"><option value="pictures">Pictures</option><option value="sounds">Sounds</option></select>
+    <select id="ppSrc" title="Show the Skynet pictures, your own, or both"><option value="skynet">Skynet pictures</option><option value="mine">My pictures</option><option value="both">Both</option></select>
     <select id="ppGroup" title="Show one group (folder), or All"></select>
     <input id="ppFilter" type="search" placeholder="🔍 Search" autocomplete="off" spellcheck="false">
   </div>

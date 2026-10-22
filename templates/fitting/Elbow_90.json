@@ -1,7 +1,7 @@
 {
   "std": { "type": "TC", "size": 1.5 },
   "fittings": [{ "kind": "elbow90" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/Other_Equipment/Fitting_Elbow90.svg",
+  "image": "Images/Skynet/Other_Equipment/Fitting_Elbow90.svg",
   "ipPos": { "start": "Bottom", "end": "Right" },
   "notes": "A 90 degree elbow, for piping. Openings at the bottom and the right."
 }
