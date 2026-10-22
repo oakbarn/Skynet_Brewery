@@ -7,7 +7,7 @@ The panel has two version codes:
 
 ## Where you see it
 
-- On the **Menu Bar**, in small grey letters after the panel name, for example `Skynet-v.20261021_16_30`.
+- On the **Menu Bar**, in small grey letters after the panel name, for example `PR85_Skynet-v.20261022_18_05`.
 - In **☰ Menu > About**, next to **Panel version**, with the date and time it was merged and a line that says whether it is the latest:
   - **Up to date: this is the latest merged version.** (green)
   - **A newer version is on GitHub: ...** (yellow). Download and install the new version (see **Updating**).
@@ -19,9 +19,9 @@ The **Versions on GitHub** link opens the list of every version (GitHub Releases
 
 ## How the name is made
 
-`Skynet-v.yyyymmdd_hh_mm`, the year, month, day, hour and minute of the merge, for example `Skynet-v.20261021_16_30` is 21 October 2026 at 16:30. The time is **UTC** (GMT), the same everywhere in the world. If two merges land in the same minute, the second one ends in `_2`.
+`PR<number>_Skynet-v.yyyymmdd_hh_mm`. For the time being the name starts with the number of the highest merged pull request, so you can see at a glance which pull requests are in your copy. Then come the year, month, day, hour and minute of the merge, for example `PR85_Skynet-v.20261022_18_05` has every pull request up to #85 and was merged on 22 October 2026 at 18:05. Versions made before 22 October 2026 have no `PR<number>_` in front, for example `Skynet-v.20261021_16_30`. The time is **UTC** (GMT), the same everywhere in the world. If two merges land in the same minute, the second one ends in `_2`.
 
-The first word says whose copy of the code it is. The original Skynet Brewery code (GitHub user **oakbarn**) says **Skynet**. When someone makes their own copy on GitHub (a fork) and merges changes there, their versions start with their GitHub user name instead, for example `brewer42-v.20261105_19_02`. So you can always tell whose build you are running.
+The first word says whose copy of the code it is. The original Skynet Brewery code (GitHub user **oakbarn**) says **Skynet**. When someone makes their own copy on GitHub (a fork) and merges changes there, their versions start with their GitHub user name instead, for example `PR3_brewer42-v.20261105_19_02`. So you can always tell whose build you are running.
 
 ## How it works
 
