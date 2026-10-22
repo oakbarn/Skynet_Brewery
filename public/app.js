@@ -4202,6 +4202,7 @@ const MENU = [
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
   { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
+  { key: 'skynetpics', title: 'Get Skynet pictures', tip: 'Copy new and changed Skynet pictures from GitHub onto the Brain (into media/Images/Skynet)', render: renderSkynetPicsTab, admin: true },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
   { key: 'schema', title: 'Schema', tip: 'Pick the Schema to load, and clone, add, rename, back up or restore one', render: renderSchemaTab },
   { key: 'about', title: 'About', tip: 'Who is signed in, Sign out, and the Schema and its version', render: renderAboutTab },
@@ -4484,6 +4485,43 @@ function renderSchemaTab(box) {
 }
 
 // ---- About tab: who is signed in, Sign out, and the loaded Schema with its version
+// Get Skynet pictures (Fritz, 2026-10-22): ask GitHub which Skynet pictures this Brain is missing, show them, copy them over.
+// The Brain does the downloading, so it works the same on a Pi, Windows, Mac or Linux; no GitHub account is needed.
+function renderSkynetPicsTab(box) {
+  const out = h('div', { class: 'spOut' }), go = h('button', { class: 'primary', disabled: true }, 'Get them');
+  const check = h('button', {}, 'Check GitHub');
+  let found = null;
+  const kb = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+  const show = r => {
+    found = r; const all = [...r.add.map(x => ({ ...x, what: 'New' })), ...r.update.map(x => ({ ...x, what: 'Newer on GitHub' }))];
+    go.disabled = !all.length; go.textContent = all.length ? `Get ${all.length} picture${all.length === 1 ? '' : 's'} (${kb(all.reduce((a, x) => a + x.size, 0))})` : 'Get them';
+    out.replaceChildren(h('p', {}, all.length ? `GitHub has ${r.total} Skynet pictures: ${r.add.length} new and ${r.update.length} changed for this Brain, ${r.same} already here.` : `All ${r.total} Skynet pictures on GitHub are already on this Brain. Nothing to get.`),
+      all.length ? h('table', { class: 'spTable' }, h('thead', {}, h('tr', {}, h('th', {}, ''), h('th', {}, 'Picture'), h('th', {}, 'Size'), h('th', {}, ''))),
+        h('tbody', {}, ...all.map(x => h('tr', {}, h('td', {}, h('img', { class: 'spThumb', loading: 'lazy', alt: '', src: `https://raw.githubusercontent.com/${r.repo}/${r.commit}/media/Images/Skynet/${x.path.split('/').map(encodeURIComponent).join('/')}`, onerror: ev => ev.target.remove() })),
+          h('td', {}, 'Skynet/' + x.path), h('td', { class: 'num' }, kb(x.size)), h('td', { class: 'muted' }, x.what))))) : '');
+  };
+  check.onclick = guard(async () => {
+    check.disabled = go.disabled = true; out.replaceChildren(h('p', { class: 'muted' }, 'Asking GitHub ...'));
+    try { show(await api('GET', '/ui/skynetpics/check')); } catch (e) { out.replaceChildren(h('p', { class: 'bad' }, e.message)); } finally { check.disabled = false; }
+  });
+  go.onclick = guard(async () => {
+    if (!found) return;
+    check.disabled = go.disabled = true; go.textContent = 'Copying ...';
+    try {
+      const r = await api('POST', '/ui/skynetpics/get', { paths: [...found.add, ...found.update].map(x => x.path) });
+      await loadMediaPictures();
+      out.replaceChildren(h('p', { class: r.failed.length ? 'bad' : '' }, `Copied ${r.saved.length} picture${r.saved.length === 1 ? '' : 's'} into media/Images/Skynet.` + (r.failed.length ? ` ${r.failed.length} could not be copied:` : ' They are in every picture list now.')),
+        r.failed.length ? h('ul', {}, ...r.failed.map(f => h('li', {}, f))) : '');
+      toast(`Copied ${r.saved.length} Skynet picture(s)`, !!r.failed.length);
+    } catch (e) { out.replaceChildren(h('p', { class: 'bad' }, e.message)); }
+    finally { check.disabled = false; go.disabled = true; go.textContent = 'Get them'; found = null; }
+  });
+  box.append(h('h3', {}, 'Get Skynet pictures'), h('div', { class: 'menuNarrow' },
+    h('p', {}, 'Skynet adds new pictures to GitHub from time to time. This copies the new and changed ones onto this Brain, into ', h('b', {}, 'media/Images/Skynet'), '. Your own pictures are never touched, and nothing is deleted. No GitHub account is needed; the Brain must be on the internet.'),
+    saveBar(check, go), out));
+  check.click();
+}
+
 function renderAboutTab(box) {
   const act = S.schemas?.active || S.config.schema || {}, row = S.schemas?.list.find(x => x.id === act.id);
   const item = (k, v) => [h('dt', {}, k), h('dd', {}, v)];

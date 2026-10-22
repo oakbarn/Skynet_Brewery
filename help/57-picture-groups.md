@@ -29,7 +29,7 @@ The folder names have `_` in place of spaces, so a Process can use a path as it 
 
 ## The Skynet pictures are read only
 
-Nothing in `Images/Skynet` can be added, changed, renamed, moved or deleted from the panel, by anyone. On the Media screen it shows a 🔒 and a yellow note; you can still look at each picture and **Copy path**. New Skynet pictures come with a Skynet update.
+Nothing in `Images/Skynet` can be added, changed, renamed, moved or deleted from the panel, by anyone. On the Media screen it shows a 🔒 and a yellow note; you can still look at each picture and **Copy path**. New Skynet pictures come with a Skynet update, or with **☰ Menu > Get Skynet pictures** (see [Get Skynet pictures](59-get-skynet-pictures)).
 
 To change a Skynet picture, copy it to your computer, change it, and add it under a name of its own to one of your groups.
 
