@@ -24,7 +24,7 @@ export const FITTING_KINDS = {
 export const FITTING_SLOTS = ['First Fitting', 'Second Fitting', 'Third Fitting', 'Fourth Fitting'];
 export const THERMOWELL_POS = { short: 'Short', long: 'Long' };
 // the vessel ports that take a Bundled Fitting
-export const FITTING_PORTS = { outlet: 'Outlet', tangential: 'Tangential Inlet', steamSlayer: 'Steam Slayer', cip: 'CIP Inlet' };
+export const FITTING_PORTS = { outlet: 'Outlet', outlet2: 'Second Outlet', tangential: 'Tangential Inlet', steamSlayer: 'Steam Slayer', cip: 'CIP Inlet' };
 
 export const TEMPLATE_KINDS = { vessel: 'Vessel Template', fitting: 'Bundled Fitting Template' };
 // a Template Name: letters, digits, _ and -, no spaces, unique (any letter case) across Skynet and User Templates
@@ -102,6 +102,8 @@ export function cleanVessel(b = {}) {
   const t = { vesselType, units: b.units === 'Metric' ? 'Metric' : undefined, vtype: text(b.vtype, 80) || undefined, otherType: text(b.otherType, 80) || undefined, image: text(b.image, 300) || undefined,
     heatKind: text(b.heatKind, 20) || undefined, otherHeat: text(b.otherHeat, 80) || undefined, std: cleanStd(b.std), notes: text(b.notes, 2000) || undefined, ports: {} };
   for (const k of ['volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume']) t[k] = num(b[k], k);
+  // the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (empty = the kind's own size)
+  if (Array.isArray(b.size) && b.size.length === 2 && b.size.every(v => Number.isFinite(+v) && +v >= 20 && +v <= 2000)) t.size = b.size.map(v => Math.round(+v));
   if (['ccoil', 'herms'].includes(vesselType)) t.liquidPorts = String(b.liquidPorts) === '4' ? 4 : 2;     // 2 or 4 liquid ports (Chillzilla: 4)
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;

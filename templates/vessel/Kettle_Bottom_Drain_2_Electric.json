@@ -7,6 +7,11 @@
     "type": "TC",
     "size": 1.5
   },
+  "notes": "A kettle with a bottom drain and a low side port at the left (Fritz's drawing), set up as the Tangential Inlet. Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab.",
+  "size": [
+    180,
+    303
+  ],
   "ports": {
     "outlet": {
       "installed": true,
@@ -21,6 +26,5 @@
       "installed": true,
       "position": "Bottom Left"
     }
-  },
-  "notes": "A kettle with a bottom drain and a low side port at the left (Fritz's drawing), set up as the Tangential Inlet. Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab."
+  }
 }

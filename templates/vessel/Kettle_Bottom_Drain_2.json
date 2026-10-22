@@ -6,6 +6,11 @@
     "type": "TC",
     "size": 1.5
   },
+  "notes": "A kettle with a bottom drain and a low side port at the left (Fritz's drawing), set up as the Tangential Inlet. Plain version (no heat source); see the _Electric one for an electric kettle.",
+  "size": [
+    180,
+    303
+  ],
   "ports": {
     "outlet": {
       "installed": true,
@@ -20,6 +25,5 @@
       "installed": true,
       "position": "Bottom Left"
     }
-  },
-  "notes": "A kettle with a bottom drain and a low side port at the left (Fritz's drawing), set up as the Tangential Inlet. Plain version (no heat source); see the _Electric one for an electric kettle."
+  }
 }

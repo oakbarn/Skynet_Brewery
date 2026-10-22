@@ -6,6 +6,11 @@
     "type": "TC",
     "size": 1.5
   },
+  "notes": "A kettle with a bottom drain (Fritz's drawing). Type, heat source and ports can be changed while Skynet is building its Templates. Plain version (no heat source); see the _Electric one for an electric kettle.",
+  "size": [
+    180,
+    303
+  ],
   "ports": {
     "outlet": {
       "installed": true,
@@ -16,6 +21,5 @@
       "installed": true,
       "position": "Center Low"
     }
-  },
-  "notes": "A kettle with a bottom drain (Fritz's drawing). Type, heat source and ports can be changed while Skynet is building its Templates. Plain version (no heat source); see the _Electric one for an electric kettle."
+  }
 }

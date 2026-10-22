@@ -1,0 +1,30 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/samples/Vessel_Kettle_BigFatty.svg",
+  "heatKind": "electric",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "notes": "A wide, short kettle (Fritz's Big Fatty): no bottom drain, a Tangential Inlet low at the left, and one drain on the front, and the thermowell and element ports on the back. Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab.",
+  "size": [
+    250,
+    248
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Front Low",
+      "fitting": "Valve_90"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Bottom Left"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Back Low"
+    }
+  }
+}

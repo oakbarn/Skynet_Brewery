@@ -7,6 +7,11 @@
     "type": "TC",
     "size": 1.5
   },
+  "notes": "A kettle with a bottom drain, a Tangential Inlet low at the left and a Steam Slayer high at the right (Fritz's drawing). Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab.",
+  "size": [
+    180,
+    303
+  ],
   "ports": {
     "outlet": {
       "installed": true,
@@ -25,6 +30,5 @@
       "installed": true,
       "position": "Right High"
     }
-  },
-  "notes": "A kettle with a bottom drain, a Tangential Inlet low at the left and a Steam Slayer high at the right (Fritz's drawing). Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab."
+  }
 }
