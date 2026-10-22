@@ -1,0 +1,34 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/samples/Vessel_Kettle_BottomDrain_Side_SteamSlayer.svg",
+  "heatKind": "electric",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "notes": "A kettle with a bottom drain, a Tangential Inlet low at the left and a Steam Slayer high at the right (Fritz's drawing). Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab.",
+  "size": [
+    180,
+    303
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom",
+      "fitting": "Valve_90"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Center Low"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Bottom Left"
+    },
+    "steamSlayer": {
+      "installed": true,
+      "position": "Right High"
+    }
+  }
+}
