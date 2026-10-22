@@ -33,7 +33,7 @@ The buttons on a Template's pop-up:
 
 - **✕** and **Cancel**: close it without saving.
 - **Clone**: asks for a new name (it suggests Copy1_ and the name; change it to what you want), then makes a copy with every setting showing in the pop-up.
-- **Add to Tab**: pick the Tab and a name (it suggests bndl1_TemplateName_TabID; change it to what you want), then press **Add**.
+- **Add to Tab**: pick the Tab and a name (it suggests bndl1_TemplateName_TabID; change it to what you want), then press **Add**. Pick **🔨 Build Tab** to work on it on a clean Tab first (see [Build Tab](55-build-tab)).
 - **Add to Vessel** (Bundled Fittings only): puts this fitting on a port of a Vessel Template (Outlet, Tangential Inlet, Steam Slayer or CIP Inlet). The name it suggests is bndl1_FittingName_VesselName.
 - **Save**: only on Templates you can change.
 - **Delete**: only on User Templates. A Bundled Fitting that a Vessel Template uses can't be deleted until it is taken off that vessel.
