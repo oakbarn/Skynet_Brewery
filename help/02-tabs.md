@@ -28,7 +28,7 @@ Press **☰ Menu** and pick **Edit layout**. A dashed bar appears with these but
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. The button then says **🔓 Unlock**: press it to unlock. Every item's properties also have a **Lock position** switch. |
 | **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
 | **New tab** | Adds a tab. |
-| **🔨 Build Tab** / **💾 Save Build ...** | A clean Tab to build something new on, away from a busy screen. **Save Build ...** puts it on a Tab or saves it as a Template. See [Build Tab](54-build-tab). |
+| **🔨 Build Tab** / **💾 Save Build ...** | A clean Tab to build something new on, away from a busy screen. **Save Build ...** puts it on a Tab or saves it as a Template. See [Build Tab](55-build-tab). |
 | **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Picking **☰ Menu > Exit Edit layout** asks the same. Nothing is changed until you save. |
 
 Drag items to move them, drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.
