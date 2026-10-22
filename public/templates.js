@@ -67,7 +67,7 @@ export function cleanFitting(b = {}) {
     const kind = FITTING_KINDS[f.kind] ? f.kind : 'none';
     const out = { kind };
     if (kind === 'tee' && f.thermowell) { out.thermowell = true; out.thermowellPos = THERMOWELL_POS[f.thermowellPos] ? f.thermowellPos : 'short'; }
-    if (kind === 'reducer' && text(f.toSize, 30)) out.toSize = text(f.toSize, 30);       // the size of its small end (the type stays the same)
+    if (kind === 'reducer' && text(f.toSize, 30)) out.toSize = text(f.toSize, 30);       // the size of its other end, smaller or bigger (the type stays the same)
     return out;
   });
   // where each IP sits on the picture (port key -> position name, e.g. { start: 'Bottom', end: 'Right' }), for a Skynet picture

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
+  <!-- Skynet inline hop filter (a generic drawing, no maker's name or logo): domed stainless body, inlet at the middle of the Top edge,
+       outlet low on the Right edge, a clamp near the bottom. Flow goes in at the top and out at the side. -->
+  <defs><linearGradient id="ss" x1="0" x2="1"><stop offset="0" stop-color="#7d858d"/><stop offset=".35" stop-color="#e4e8ec"/><stop offset=".6" stop-color="#b9c0c7"/><stop offset="1" stop-color="#6b737b"/></linearGradient></defs>
+  <rect x="88" y="2" width="24" height="30" rx="3" fill="url(#ss)" stroke="#3b4148" stroke-width="3"/>
+  <path d="M30 110 Q30 34 100 30 Q170 34 170 110 V262 H30 Z" fill="url(#ss)" stroke="#3b4148" stroke-width="3"/>
+  <rect x="166" y="246" width="30" height="18" rx="3" fill="url(#ss)" stroke="#3b4148" stroke-width="3"/>
+  <rect x="20" y="258" width="160" height="20" rx="6" fill="url(#ss)" stroke="#3b4148" stroke-width="3"/>
+  <rect x="28" y="276" width="144" height="16" rx="5" fill="#9aa2aa" stroke="#3b4148" stroke-width="3"/>
+  <path d="M100 130 V200 M90 190 L100 204 L110 190" fill="none" stroke="#3b4148" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+</svg>

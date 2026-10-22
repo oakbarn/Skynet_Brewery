@@ -1,0 +1,29 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/samples/Vessel_Kettle_Tall.svg",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "size": [
+    180,
+    302
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Front Low",
+      "fitting": "Valve_90"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Center Low"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Bottom Left"
+    }
+  },
+  "notes": "A tall brew kettle (Fritz's drawing): one outlet on the front near the bottom, the thermowell above it, and a Tangential Inlet low at the left. Plain version (no heat source); see the _Electric one for an electric kettle."
+}
