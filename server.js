@@ -23,6 +23,7 @@ import { Templates } from './lib/templates.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
 import { setupPictureGroups, listGroups } from './lib/picgroups.js';
+import { SkynetPictures } from './lib/skynetpics.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
@@ -86,7 +87,8 @@ setInterval(() => store.tickTimers(timerDt() / 1000), 100);   // timers follow t
 setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants follow their text files
 store.on('warn', m => engine.print('system', m));
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
-const mediaFiles = new MediaFiles(() => store.mediaRoots());        // Media page: add / rename / delete pictures and sounds
+const mediaFiles = new MediaFiles(() => store.mediaRoots());
+const skynetPics = new SkynetPictures(() => store._findMedia('Images'), { source: store.config.skynetPictures });   // ☰ Menu > Get Skynet pictures        // Media page: add / rename / delete pictures and sounds
 const fileMove = new FileMove(() => ({ root: ROOT, media: store.mediaRoots()[0], scripts: SCRIPTS, help: HELP }));   // File Move page
 const help = new Help(HELP);                                        // Help tab: the manual, one Markdown file per page
 engine.on('started', n => logger.scriptStarted(n));
@@ -222,6 +224,7 @@ function needRole(p, m) {
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   if (/^\/ui\/schemas\/[a-z0-9-]+\/export$/.test(p)) return 'admin';   // Schema.json: Save as .json file
   if (p.startsWith('/ui/filemove/')) return 'admin';   // File Move: copies files onto the Brain
+  if (p.startsWith('/ui/skynetpics/')) return 'admin';   // Get Skynet pictures: copies pictures from GitHub onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
 const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico']);
@@ -658,6 +661,14 @@ async function route(req, res) {
       } catch (e) { return fail(res, e.code === 409 ? 409 : 400, e.message); }
     }
     return fail(res, 404, 'Unknown File Move route');
+  }
+  // Get Skynet pictures (admin only, see needRole): what GitHub has that this Brain is missing, then copy them
+  if (p === '/ui/skynetpics/check' && m === 'GET') return ok(res, await skynetPics.check());
+  if (p === '/ui/skynetpics/get' && m === 'POST') {
+    const { paths } = await jsonBody(req);
+    const r = await skynetPics.get(Array.isArray(paths) ? paths.map(String) : [], f => pictures.add(f));
+    if (r.saved.length) broadcast('media', {});
+    return ok(res, { ok: true, ...r });
   }
   // Media page
   if (p.startsWith('/ui/media/')) {
