@@ -427,6 +427,10 @@ body.role-viewer .op-only { display: none !important; }
 .sw input:checked + .swk { background: #3fbf6a; }
 .sw input:checked + .swk::after { transform: translateX(20px); }
 .sw input:focus-visible + .swk { outline: 2px solid #4fb3ff; outline-offset: 2px; }
+.lktog { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 30px; flex: none; cursor: pointer; border: 1px solid #9aa2aa; border-radius: 6px; background: #f4f5f6; font-size: 18px; line-height: 1; user-select: none; }
+.lktog.on { border-color: #d39e00; background: #fff3c4; }
+.lktog input { position: absolute; opacity: 0; width: 0; height: 0; }
+.lktog:has(input:focus-visible) { outline: 2px solid #4fb3ff; outline-offset: 2px; }
 /* vKonstant List: the Value / Text table in its settings, and the dropdown on screen */
 .vkitems table { border-collapse: collapse; width: 100%; margin-bottom: 6px; }
 .vkitems th { text-align: left; font-weight: 600; padding: 2px 4px; }

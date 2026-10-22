@@ -25,7 +25,7 @@ Press the **red circle with the yellow hammer**, right next to **☰ Menu** on t
 | **Add IP** | A flow point or pipe fitting (see below). |
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
 | **Draw hose** | Like a pipe, but it bends in smooth curves. Loose ends get a coupling. See [Pipes, hoses and reducers](24-pipes-and-hoses). |
-| **🔒 Lock** | Locks the selected item so it can't be dragged or resized. The button then says **🔓 Unlock**: press it to unlock. Every item's properties also have a **Lock position** switch. |
+| **🔒 Lock** | Locks the selected item so it can't be dragged or resized. The button then says **🔓 Unlock**: press it to unlock. Every item's properties also have a small **Lock position** icon: 🔓 means unlocked, 🔒 means locked. Click it to switch, then Save. |
 | **🔒 Lock All** | Locks every item on this tab in place in one press. It is an action, not a switch: afterwards you can unlock single items with **🔓 Unlock**. See [Locking items in place](56-locking). |
 | **🔓 Unlock All** | Unlocks every item on this tab in one press. Also an action, not a switch. |
 | **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
