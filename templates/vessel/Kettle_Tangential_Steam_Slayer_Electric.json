@@ -29,6 +29,10 @@
     "steamSlayer": {
       "installed": true,
       "position": "Right High"
+    },
+    "element": {
+      "installed": true,
+      "position": "Right Low"
     }
   }
 }

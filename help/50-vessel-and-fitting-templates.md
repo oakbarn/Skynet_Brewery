@@ -54,7 +54,7 @@ A **Template Name** has no spaces (use _ instead) and must be unique.
 
 A **Second Outlet** is a second drain, for example one above the heating element so the element always stays under water (clone Kettle_Big_Fatty, switch on its Second Outlet and pick the picture Vessel_Kettle_BigFatty_TwoDrains.svg).
 
-**All-in-one kettles**: **Kettle_DigiBoil_Electric** and **Kettle_Brewzilla_Electric** have the heating element built in, so they only come as electric Templates. The Brewzilla picture shows its recirculation arm and valve up the left side, and its tap is the Outlet at the bottom middle. Neither has a thermowell, because the panel can't read their own thermometers.
+**All-in-one kettles**: **Kettle_DigiBoil_Electric**, **Kettle_Brewzilla_Electric**, **Kettle_Grainfather_Electric** and **Kettle_Foundry_Electric** have the heating element built in, so they only come as electric Templates (see [Skynet Vessels](62-skynet-vessels)). The Brewzilla picture shows its recirculation arm and valve up the left side, and its tap is the Outlet at the bottom middle. None of them has a thermowell, because the panel can't read their own thermometers.
 
 ## Equipment Template settings
 

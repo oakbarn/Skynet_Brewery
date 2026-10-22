@@ -1,11 +1,35 @@
 {
-  "vesselType": "vessel", "vtype": "HLT", "image": "Images/Skynet/Vessels/hlt.svg", "heatKind": "electric",
-  "volume": 15, "deadspace": 0.5,
-  "std": { "type": "TC", "size": 1.5 },
+  "vesselType": "vessel",
+  "vtype": "HLT",
+  "image": "Images/Skynet/Vessels/hlt.svg",
+  "heatKind": "electric",
+  "volume": 15,
+  "deadspace": 0.5,
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
   "ports": {
-    "outlet": { "installed": true, "position": "Center Bottom", "fitting": "Valve_90" },
-    "thermowell": { "installed": true, "position": "Center Low" },
-    "tangential": { "installed": true, "position": "Bottom Left" },
-    "sparge": { "installed": true, "position": "Center High" }
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom",
+      "fitting": "Valve_90"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Center Low"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Bottom Left"
+    },
+    "sparge": {
+      "installed": true,
+      "position": "Center High"
+    },
+    "element": {
+      "installed": true,
+      "position": "Right Low"
+    }
   }
 }

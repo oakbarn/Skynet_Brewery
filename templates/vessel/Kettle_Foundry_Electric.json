@@ -1,0 +1,22 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Vessel_Foundry.svg",
+  "heatKind": "electric",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "size": [
+    220,
+    279
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Front Low",
+      "fitting": "Valve_90"
+    }
+  },
+  "notes": "A wide all-in-one electric kettle, Foundry style: the element is built in, so it only comes as an electric Template. Its drain valve is on the front near the bottom. Its own thermometer is inside and the panel can't read it, so there is no probe to pick."
+}

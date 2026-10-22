@@ -24,6 +24,10 @@
     "tangential": {
       "installed": true,
       "position": "Bottom Left"
+    },
+    "element": {
+      "installed": true,
+      "position": "Right Low"
     }
   },
   "notes": "A basic brew kettle (Fritz's drawing): one outlet on the front near the bottom, the thermowell above it, and a Tangential Inlet low at the left. Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab."
