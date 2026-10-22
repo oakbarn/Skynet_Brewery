@@ -217,7 +217,7 @@ function bundleOf(g) {
   if (!g) return null;
   let v = g.kind === 'ip' && g.attachTo ? draft.graphics.find(x => x.id === g.attachTo && x.kind === 'vessel') : isBfit(g) && g.onVessel ? g : null;
   if (isBfit(v) && v.onVessel) v = draft.graphics.find(x => x.id === v.onVessel && x.kind === 'vessel') || v;
-  if (v?.bundled && v !== g) return v;
+  if ((v?.bundled || isSkyV(v)) && v !== g) return v;        // a Skynet vessel is always one bundle with its IPs and fittings
   const u = g.kind === 'ip' && g.attachTo ? draft.graphics.find(x => x.id === g.attachTo) : null;
   return isUnit(u) ? u : null;          // the IPs of a Skynet Fitting are part of it: they never move on their own
 }
@@ -226,7 +226,7 @@ const bundledIps = v => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo
 // Edit layout: a resize corner, or a padlock when the item is locked in place
 function editDeco(n, o) {
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
-  else if (o.bundled && !isUnit(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
+  else if (o.bundled && !isUnit(o) && !isSkyV(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
   else n.append(h('div', { class: 'rs' }));
 }
 
@@ -256,6 +256,8 @@ const EQ = {
       tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75]]),
       thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7]], { ip: false }),
       steamSlayer: pt('Steam Slayer', V_HIGH), sparge: pt('Sparge', V_HIGH), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH]),
+      // where the heating element goes in (Fritz, 2026-10-22): a mark, not an IP; its Device is picked on the Tab_Vessel
+      element: pt('Heating element', [['Right Low', 1, 0.88], ['Left Low', 0, 0.88], ['Center Low', 0.5, 0.92], ['Back Low', 0.3, 0.88]], { ip: false }),
     } },
   pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/Skynet/Chillers/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
@@ -372,7 +374,7 @@ const portDefPos = d => d.def || d.pos[0][0];
 function vPortXY(g, k, pos) {
   if (isUnit(g)) { const d = eqClass(g).ports[k], q = d.pos.find(q => q[0] === portDefPos(d)) || [0, 0.5, 0.5]; return unitPoint(g, q[1], q[2]); }
   const q = eqClass(g).ports[k].pos.find(q => q[0] === pos) || [pos, 0.5, 0.5];
-  return [(g.x || 0) + q[1] * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
+  return [(g.x || 0) + (isSkyV(g) && g.flipH ? 1 - q[1] : q[1]) * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
 }
 const vPortLabel = (g, k, p) => `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
 // the starting port settings of a new widget
@@ -458,6 +460,7 @@ function buildVessel(g) {
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
   if (g.image && isUnit(g)) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated
+  else if (g.image && isSkyV(g) && g.flipH) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:scaleX(-1)` }));   // a Skynet vessel flipped
   else if (g.image && t === 'bfit' && +g.turn) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:rotate(${+g.turn}deg)` }));   // a turned Tab_Fitting
   else if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
   if (t === 'electric' || t === 'gas') n.append(h('div', { class: 'heat' }));
@@ -465,7 +468,9 @@ function buildVessel(g) {
     const p = g.ports?.[k]; if (d.ip || !p?.installed) continue;
     let q = d.pos.find(q => q[0] === (isUnit(g) ? portDefPos(d) : p.position)) || [0, 0.5, 0.5];
     if (isUnit(g)) { const [px, py] = unitPoint({ ...g, x: 0, y: 0 }, q[1], q[2]); q = [0, px / (g.w || 90), py / (g.h || 90)]; }
-    n.append(h('div', { class: 'twell', title: vPortLabel(g, k, p), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, 'T'));
+    if (isSkyV(g) && g.flipH) q = [0, 1 - q[1], q[2]];
+    const el = k === 'element';      // the heating element's spot: E, and it glows while its Device is on
+    n.append(h('div', { class: 'twell' + (el ? ' elmark' : ''), title: vPortLabel(g, k, p) + (el && g.heater ? ': ' + g.heater : !el && g.probe ? ': ' + g.probe : ''), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, el ? 'E' : 'T'));
   }
   if (t === 'bfit' && (g.fittings || []).some(f => METERS.includes(f.kind) && f.meter)) n.append(h('div', { class: 'fmRead', 'data-gid': g.id }, meterText(g)));
   const lbl = g.label || (g.template ? g.name : '');       // a Tab_Vessel or Tab_Fitting: empty Label = its Name
@@ -1407,7 +1412,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   }
   const riders = lockedRiders(item);
   if (riders.length) { drag = lockedDrag(item, p, riders); ev.preventDefault(); return; }
-  drag = { mode: !pip && !bundle && (!item.bundled || isUnit(item)) && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
+  drag = { mode: !pip && !bundle && (!item.bundled || isUnit(item) || isSkyV(item)) && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
   if (item.kind === 'ip') drag.stubs = pipesOn(item.id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === item.id ? pp.to : pp.from, pp) })).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
@@ -1442,7 +1447,7 @@ $('#ws').addEventListener('pointermove', ev => {
   if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
   else if (drag.mode === 'resize') {
     const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
-    drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx / k)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy / k)); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item)) renderPipes(); }
+    drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx / k)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy / k)); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
   else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
@@ -2695,11 +2700,11 @@ function cloneBundle(v) {
 }
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
-  const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && isUnit(x)) : null;
-  if (unitOf) return editItem('gfx', unitOf.id);        // an IP of a Skynet Fitting: open the fitting, its IPs have no settings of their own
-  const bundle = isUnit(item) ? null : bundleOf(item);   // a Skynet Fitting opens its Properties even when it sits on a bundled vessel
+  const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
+  if (unitOf) return editItem('gfx', unitOf.id);        // an IP of a Skynet Fitting or vessel: open it, its IPs have no settings of their own
+  const bundle = isUnit(item) || isSkyV(item) ? null : bundleOf(item);   // a Skynet Fitting opens its Properties even when it sits on a bundled vessel
   if (bundle) return toast(`This ${item.kind === 'ip' ? 'IP' : 'Tab_Fitting'} is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to edit, move or delete it.`, true);
-  if (item.kind === 'vessel' && item.bundled && !isUnit(item)) return editBundle(item);
+  if (item.kind === 'vessel' && item.bundled && !isUnit(item) && !isSkyV(item)) return editBundle(item);
   await loadMediaPictures();
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
@@ -2710,7 +2715,7 @@ async function editItem(kind, id) {
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it) || '(type a Display name and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return f;
-  } : isUnit(item) ? F.skynetFitting : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item), bf = isBfit(item);
   if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
@@ -2756,6 +2761,11 @@ async function editItem(kind, id) {
       for (const [k, d] of Object.entries(bfitClass(work).ports)) work.ports[k] = { installed: true, position: (isUnit(item) ? '' : pos[k] || item.ports?.[k]?.position) || portDefPos(d), standard: d.ip ? stdShort(fittingPortStd(work, k)) : '' };
       for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
       work.name = noSpaces(work.name || '') || item.name;
+    } else if (isSkyV(item)) {        // a Skynet vessel: its ports come from its Template and don't change here
+      for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
+      work.ports = clone(item.ports || {}); work.bundled = true;
+      if (!work.flipH) delete work.flipH;
+      work.name = (work.name || '').trim() || item.name;
     } else if (isV) {
       work.ports = {};
       for (const [k, d] of Object.entries(eqClass(item).ports)) {
@@ -2812,8 +2822,14 @@ async function editItem(kind, id) {
         for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
       }
       const placed = syncVesselPorts(item, before.isNew ? null : before);
+      if (isSkyV(item) && !!item.flipH !== !!before.flipH) for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === item.id)) {    // its fittings flip with it,
+        const ip = draft.graphics.find(x => x.kind === 'ip' && x.attachTo === item.id && x.port === f.onPort); if (!ip) continue;   // mirrored about their port
+        const cx = ipCenter(ip)[0], ids = new Set(draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === f.id).map(g => g.id));
+        for (const g of [f, ...draft.graphics.filter(g => ids.has(g.id) || (isCap(g) && ids.has(g.capOn)))]) g.x = Math.round(2 * cx - (g.x || 0) - (g.w || 30));
+        if (isUnit(f)) { if (f.flipH) delete f.flipH; else f.flipH = true; }
+      }
       placeUnitParts(item);
-      if (!bf && (placed.length || before.isNew)) vesselPopup(item, placed);
+      if (!bf && !isSkyV(item) && (placed.length || before.isNew)) vesselPopup(item, placed);
       delete item.isNew;
     }
     if (type === 'vessel' && !item.bundled && !item.onVessel && !isUnit(item) && bundledIps(item).length &&
@@ -4979,6 +4995,10 @@ function updateMeters() { for (const n of $$('#ws .fmRead')) { const g = L().gra
 // Flip Vertical and Rotate (in steps of 45 degrees) instead, and the picture and its IPs follow. Fittings built from a
 // User Template keep their own IP settings.
 function isUnit(g) { return isBfit(g) && g.templateCls === 'skynet'; }
+// Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
+// built in where the Template puts it; they can't be moved, set or unbundled. Flip Horizontal is its only orientation (a kettle
+// is never turned on its side). Vessels made from a User Template keep their port settings.
+function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet'; }
 const ROTATE = [0, 45, 90, 135, 180, 225, 270, 315].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
 function unitRot(g) { return ((Math.round((+(g.rot ?? g.turn) || 0) / 45) * 45) % 360 + 360) % 360; }    // an older Turn counts as a Rotate
 const unitTransform = g => `rotate(${unitRot(g)}deg) scale(${g.flipH ? -1 : 1},${g.flipV ? -1 : 1})`;
@@ -4991,6 +5011,7 @@ function unitPoint(g, fx, fy) {
 }
 // put a Skynet Fitting's IPs back on its openings (after a resize, a flip or a rotate), and the End Caps on them
 function placeUnitParts(g) {
+  if (isSkyV(g)) return placeVesselParts(g);
   if (!isUnit(g)) return;
   const caps = draft.graphics.filter(isCap);
   for (const ip of draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port && eqClass(g).ports[x.port])) {
@@ -4999,6 +5020,23 @@ function placeUnitParts(g) {
     const n = $(`#ws .gfx[data-gid="${CSS.escape(ip.id)}"]`); if (n) place(n, ip);
     for (const c of caps.filter(c => c.capOn === ip.id)) { capOnto(c, ip); const cn = $(`#ws .gfx[data-gid="${CSS.escape(c.id)}"]`); if (cn) place(cn, c); }
   }
+}
+// a Skynet vessel's port IPs back on their spots (after a resize or a flip); the fittings joined to a port go along
+function placeVesselParts(v) {
+  for (const ip of draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === v.id && x.port && v.ports?.[x.port])) {
+    const [ox, oy] = ipCenter(ip), [cx, cy] = vPortXY(v, ip.port, v.ports[ip.port].position), dx = Math.round(cx - ox), dy = Math.round(cy - oy);
+    Object.assign(ip, { workspace: v.workspace, x: (ip.x || 0) + dx, y: (ip.y || 0) + dy, labelVisible: false });
+    const n = $(`#ws .gfx[data-gid="${CSS.escape(ip.id)}"]`); if (n) place(n, ip);
+    for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === v.id && g.onPort === ip.port)) {
+      const ids = new Set(draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === f.id).map(g => g.id));
+      for (const g of [f, ...draft.graphics.filter(g => ids.has(g.id) || (isCap(g) && ids.has(g.capOn)))]) {
+        Object.assign(g, { workspace: v.workspace, x: (g.x || 0) + dx, y: (g.y || 0) + dy });
+        const gn = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"]`); if (gn) place(gn, g);
+      }
+      placeUnitParts(f);
+    }
+  }
+  for (const c of draft.graphics.filter(c => isCap(c) && c.capOn)) { const ip = draft.graphics.find(x => x.id === c.capOn && x.attachTo === v.id); if (ip) capOnto(c, ip); }
 }
 // End Cap (Fritz, 2026-10-22): a Skynet fitting with no IP. Dropped on an opening (an IP with no pipe on it) it closes it:
 // that IP is hidden, no pipe can join it and no flow passes. It then moves with what it caps; drag it off to take it away.
@@ -5321,6 +5359,7 @@ function placeTabVessel(t, tab, name) {
     const q = t.ports?.[k], ft = q?.installed && q.fitting && tplOf('fitting', q.fitting); if (!ft) continue;
     placeTabFitting({ ...ft, std: ft.std || t.std }, tab, q.bundleName && !taken().includes(q.bundleName) ? q.bundleName : bundleName(ft.name, t.name, taken()), { vessel: g, port: k });
   }
+  placeUnitParts(g);
   return g;
 }
 // a Tab_Fitting, alone on a Tab or joined to a port of a Tab_Vessel (it then runs out from that port, away from the vessel)
@@ -5374,6 +5413,23 @@ F.skynetFitting = it => {
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
     ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : [['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num'],
       ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']])];
+};
+
+// the Properties of a Skynet vessel: no port or IP settings (its openings have their IPs built in), Flip Horizontal, and the
+// Devices that belong to a Schema: its heating element and its Temperature Probe
+F.skynetVessel = it => {
+  const ports = Object.entries(eqClass(it).ports).filter(([k]) => it.ports?.[k]?.installed).map(([, d]) => d.name).join(', ');
+  const elems = [['', 'None'], ...L().elements.filter(e => ['digitalOut', 'pwmOut', 'dutyCycle', 'pid', 'hysteresis'].includes(e.type) && e.subtype !== 'valve' && e.subtype !== 'pump').map(e => [e.name, e.name])];
+  const probes = [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])];
+  const electric = it.heatKind === 'electric' || it.ports?.element?.installed, well = it.ports?.thermowell?.installed;
+  return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
+    ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Name)', 'text'],
+    ...(electric || well ? [['_d', 'Devices', 'head']] : []),
+    ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
+    ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : []),
+    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
+    ['_look', 'Display Name and place', 'head'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
+    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']];
 };
 
 // draw profile equipment on the loaded Schema's Equipment tab (a fresh drawing, or the old one brought up to date)

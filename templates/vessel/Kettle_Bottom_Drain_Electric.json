@@ -21,6 +21,10 @@
     "thermowell": {
       "installed": true,
       "position": "Center Low"
+    },
+    "element": {
+      "installed": true,
+      "position": "Right Low"
     }
   }
 }

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 500">
+  <!-- Skynet tall all-in-one (Grainfather style): stainless body, glass lid, black base with its control panel, the pump
+       recirculation arm up the right side and over the lid, and its outlet at the middle of the Bottom edge. No text or logo. -->
+  <rect x="38" y="44" width="164" height="12" rx="6" fill="#c9d7e0" stroke="#111" stroke-width="3"/>
+  <rect x="34" y="56" width="172" height="350" rx="8" fill="#9fa4a9" stroke="#111" stroke-width="3"/>
+  <path d="M46 70 V394" stroke="#c9ced3" stroke-width="7" stroke-linecap="round"/>
+  <path d="M190 70 V394" stroke="#7d8287" stroke-width="5" stroke-linecap="round"/>
+  <rect x="26" y="404" width="188" height="72" rx="10" fill="#26282b" stroke="#111" stroke-width="3"/>
+  <rect x="96" y="420" width="48" height="26" rx="5" fill="#3a3d41" stroke="#111" stroke-width="2"/>
+  <rect x="104" y="427" width="32" height="12" rx="2" fill="#4fb3ff"/>
+  <path d="M214 446 H232 V24 Q232 12 220 12 H128 Q120 12 120 22 V44" fill="none" stroke="#111" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M214 446 H232 V24 Q232 12 220 12 H128 Q120 12 120 22 V44" fill="none" stroke="#c4c7cb" stroke-width="7" stroke-linejoin="round"/>
+  <rect x="224" y="230" width="16" height="22" rx="3" fill="#26282b" stroke="#111" stroke-width="2"/>
+  <path d="M130 476 V490" stroke="#111" stroke-width="10"/>
+  <path d="M130 476 V490" stroke="#c4c7cb" stroke-width="6"/>
+</svg>
