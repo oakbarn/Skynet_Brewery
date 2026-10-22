@@ -1,6 +1,6 @@
 {
   "std": { "type": "TC", "size": 1.5 },
   "fittings": [{ "kind": "valve" }, { "kind": "tee", "thermowell": true, "thermowellPos": "short" }, { "kind": "elbow90" }, { "kind": "none" }],
-  "image": "Images/samples/pipe_elbow90.svg",
+  "image": "Images/Skynet/Other_Equipment/pipe_elbow90.svg",
   "notes": "Outlet valve, a tee with a thermowell, then a 90 degree elbow"
 }

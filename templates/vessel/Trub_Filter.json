@@ -1,5 +1,5 @@
 {
-  "vesselType": "trub", "vtype": "Inline filter", "image": "Images/samples/trub_filter.svg",
+  "vesselType": "trub", "vtype": "Inline filter", "image": "Images/Skynet/Other_Equipment/trub_filter.svg",
   "std": { "type": "TC", "size": 1.5 },
   "ports": { "inlet": { "installed": true, "position": "Top" }, "outlet": { "installed": true, "position": "Bottom" } }
 }

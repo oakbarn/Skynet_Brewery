@@ -1,5 +1,5 @@
 {
-  "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/samples/boil_kettle.svg", "heatKind": "electric",
+  "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/Skynet/Vessels/boil_kettle.svg", "heatKind": "electric",
   "volume": 15, "deadspace": 0.5,
   "std": { "type": "TC", "size": 1.5 },
   "ports": {

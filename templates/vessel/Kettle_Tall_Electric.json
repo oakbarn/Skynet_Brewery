@@ -1,7 +1,7 @@
 {
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
-  "image": "Images/samples/Vessel_Kettle_Tall.svg",
+  "image": "Images/Skynet/Vessels/Vessel_Kettle_Tall.svg",
   "heatKind": "electric",
   "std": {
     "type": "TC",

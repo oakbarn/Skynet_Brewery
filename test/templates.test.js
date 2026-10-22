@@ -78,7 +78,7 @@ assert.equal(cleanVessel({ vesselType: 'vessel', liquidPorts: 4 }).liquidPorts, 
 for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: 'Bottom', end: 'Right' }], ['Elbow_45', 'elbow45', { start: 'Left', end: 'Top Right 45' }], ['Tee', 'tee', { start: 'Left', end: 'Right', branch1: 'Top' }], ['Reducer', 'reducer', { start: 'Left', end: 'Right' }]]) {
   const t = S.get('fitting', n);
   assert.equal(t.fittings[0].kind, k); assert.deepEqual(t.ipPos, ip, n);
-  assert.match(t.image, /^Images\/samples\/Fitting_.+\.svg$/);
+  assert.match(t.image, /^Images\/Skynet\/Other_Equipment\/Fitting_.+\.svg$/);
   assert.ok(fs.existsSync(path.join(ROOT, 'media', t.image)), `${n}: picture ${t.image} is missing`);
   assert.deepEqual(fittingEnds(t).map(e => e.key), k === 'tee' ? ['end', 'branch1'] : ['end']);
 }

@@ -17,7 +17,9 @@ const when = t => new Date(t).toLocaleString([], { dateStyle: 'short', timeStyle
 const join = (a, b) => a ? `${a}/${b}` : b;
 const parent = p => p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '';
 const DRAG = 'application/x-brewpanel-media';
-let root = 0, dir = '', busy = false, selected = null, roots = [], trees = [];
+let root = 0, dir = '', busy = false, roots = [], trees = [], kept = [], shown = [];
+const selected = new Set();                   // paths picked: click, Ctrl+click adds one, Shift+click a run (or Select many on a phone)
+let many = false, anchor = null, readOnly = false;      // readOnly: inside Images/Skynet
 const open = new Set(['0:']);                 // expanded tree nodes "root:path"
 let mode = 'icons'; try { mode = localStorage.getItem('mdView') || 'icons'; } catch { }
 
@@ -52,23 +54,32 @@ async function render(withTree = true) {
   const box = $('#mdFiles'); box.className = 'mdFiles ' + mode;
   box.replaceChildren(
     ...folders.map(f => {
-      const p = join(dir, f), item = el('div', { class: 'mdItem', draggable: 'true', title: 'Open ' + f, ondblclick: () => go(root, p) },
+      const p = join(dir, f), lock = st.kept?.includes(f), group = /^images$/i.test(dir) && root === 0, sky = group && /^skynet$/i.test(f);
+      const item = el('div', { class: 'mdItem' + (selected.has(p) ? ' sel' : ''), 'data-p': p, draggable: lock ? false : 'true', title: (st.readOnly || sky ? '🔒 Skynet pictures: read only. ' : lock ? '🔒 Standard folder: can\'t be deleted, renamed or moved. ' : '') + 'Open ' + f, ondblclick: () => go(root, p) },
         el('div', { class: 'mdIcon', onclick: () => go(root, p) }, '📁'),
-        el('div', { class: 'mdName', onclick: () => select(item, p) }, f), el('div', { class: 'muted mdMeta' }, 'Folder'),
-        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: () => go(root, p) }, 'Open'), ...actions(p, f)));
-      item.addEventListener('click', e => { if (e.target === item) select(item, p); });
-      dragSource(item, p); dropTarget(item, root, p); return item;
+        el('div', { class: 'mdName', onclick: e => { e.stopPropagation(); select(e, p); } }, (lock ? '🔒 ' : '') + f), el('div', { class: 'muted mdMeta' }, sky ? 'Skynet pictures (read only)' : st.readOnly ? 'Skynet group (read only)' : group ? (lock ? 'Standard picture group' : 'Your picture group') : 'Folder'),
+        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: () => go(root, p) }, 'Open'), ...(lock || st.readOnly ? [] : actions(p, f))));
+      item.addEventListener('click', e => { if (e.target === item) select(e, p); });
+      if (!lock && !st.readOnly) dragSource(item, p); if (!st.readOnly && !sky) dropTarget(item, root, p); return item;
     }),
     ...files.map(f => {
-      const item = el('div', { class: 'mdItem' + (selected === f.path ? ' sel' : ''), draggable: 'true', title: f.name, onclick: () => select(item, f.path) },
+      const item = el('div', { class: 'mdItem' + (selected.has(f.path) ? ' sel' : ''), 'data-p': f.path, draggable: st.readOnly ? false : 'true', title: f.name, onclick: e => select(e, f.path) },
         f.kind === 'sound' ? el('div', { class: 'mdIcon' }, '🔊') : el('img', { class: 'mdThumb', loading: 'lazy', alt: '', src: `/media?path=${encodeURIComponent(f.use)}&as=original&t=${f.modified}` }),
         el('div', { class: 'mdName' }, f.name),
         el('div', { class: 'muted mdMeta' }, `${size(f.size)} · ${when(f.modified)}`),
         f.kind === 'sound' ? el('audio', { controls: true, preload: 'none', src: `/media?path=${encodeURIComponent(f.use)}`, onclick: e => e.stopPropagation() }) : null,
         el('div', { class: 'mdUse muted' }, 'Path to use: ', el('code', {}, f.use)),
-        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: e => { e.stopPropagation(); copy(f.use); } }, 'Copy path'), ...actions(f.path, f.name)));
-      dragSource(item, f.path); return item;
+        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: e => { e.stopPropagation(); copy(f.use); } }, 'Copy path'), ...(st.readOnly ? [] : actions(f.path, f.name))));
+      if (!st.readOnly) dragSource(item, f.path); return item;
     }));
+  kept = st.kept || []; shown = st.readOnly ? [] : [...folders.filter(f => !kept.includes(f)).map(f => join(dir, f)), ...files.map(f => f.path)];
+  readOnly = !!st.readOnly;
+  $('#mdNew').disabled = $('#mdPick').disabled = readOnly;
+  $('#mdPick').closest('label').classList.toggle('off', readOnly);
+  $('#mdReadOnly').hidden = !readOnly;
+  for (const p of [...selected]) if (!shown.includes(p)) selected.delete(p);
+  showSelection();
+  $('#mdNew').textContent = root === 0 && /^images$/i.test(dir) ? '📁 New picture group' : '📁 New folder';
   $('#mdEmpty').hidden = !!(st.files.length || st.folders.length);
   $('#mdCount').textContent = `${st.folders.length + st.files.length} items` + (filter ? `, ${folders.length + files.length} shown` : '');
 }
@@ -78,45 +89,80 @@ function actions(p, name) {
     el('button', { class: 'small', onclick: stop(() => moveTo(p)) }, 'Move'),
     el('button', { class: 'small danger', onclick: stop(() => remove(p, name)) }, 'Delete')];
 }
-function select(item, p) {
-  selected = selected === p ? null : p;
-  for (const i of document.querySelectorAll('.mdItem.sel')) i.classList.remove('sel');
-  if (selected) item.classList.add('sel');
+// Like Explorer: a click picks one, Ctrl (Cmd on a Mac) + click adds or takes away one, Shift + click picks a run.
+// On a phone, Select many makes every tap add or take away one.
+function select(e, p) {
+  if (!shown.includes(p)) return;
+  if (e.shiftKey && anchor && shown.includes(anchor)) {
+    const [a, b] = [shown.indexOf(anchor), shown.indexOf(p)].sort((x, y) => x - y);
+    if (!(e.ctrlKey || e.metaKey)) selected.clear();
+    for (const q of shown.slice(a, b + 1)) selected.add(q);
+  } else if (e.ctrlKey || e.metaKey || many) { if (selected.has(p)) selected.delete(p); else selected.add(p); anchor = p; }
+  else { const only = selected.size === 1 && selected.has(p); selected.clear(); if (!only) selected.add(p); anchor = p; }
+  for (const i of document.querySelectorAll('#mdFiles .mdItem')) i.classList.toggle('sel', selected.has(i.dataset.p));
+  showSelection();
 }
-function go(r, d) { root = r; dir = d; selected = null; $('#mdFilter').value = ''; render(); }
+function showSelection() {
+  const n = selected.size;
+  $('#mdSelInfo').textContent = n ? `${n} picked` : '';
+  $('#mdMoveSel').disabled = $('#mdDelSel').disabled = !n;
+}
+function go(r, d) { root = r; dir = d; selected.clear(); anchor = null; $('#mdFilter').value = ''; render(); }
 
 // ---- drag a file or folder onto a folder (tree, address bar or folder icon) to move it ----
-function dragSource(item, p) { item.addEventListener('dragstart', e => { e.dataTransfer.setData(DRAG, JSON.stringify({ root, path: p })); e.dataTransfer.effectAllowed = 'move'; }); }
+function dragSource(item, p) {
+  item.addEventListener('dragstart', e => {
+    const paths = selected.has(p) ? [...selected] : [p];
+    e.dataTransfer.setData(DRAG, JSON.stringify({ root, paths })); e.dataTransfer.effectAllowed = 'move';
+  });
+}
 function dropTarget(node, r, p) {
   node.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); node.classList.add('drop'); });
   node.addEventListener('dragleave', () => node.classList.remove('drop'));
   node.addEventListener('drop', e => {
     e.preventDefault(); e.stopPropagation(); node.classList.remove('drop');
     const m = e.dataTransfer.getData(DRAG);
-    if (m) { const s = JSON.parse(m); move(s.root, s.path, r, p); }
+    if (r === 0 && /^images\/skynet(\/|$)/i.test(p)) return say('Images/Skynet is read only: put your pictures in the groups in Images', true);
+    if (m) { const s = JSON.parse(m); moveMany(s.root, s.paths ?? [s.path], r, p); }
     else if (e.dataTransfer.files.length) { root = r; dir = p; upload(e.dataTransfer.files); }
   });
 }
-async function move(fromRoot, from, toRoot, toDir) {
-  const name = from.split('/').pop();
+// Moves files and folders into toDir. A picture moved straight from Images into a picture group keeps working by its old path.
+async function moveMany(fromRoot, paths, toRoot, toDir) {
   if (fromRoot !== toRoot) return say('Moving between different media folders is not possible; download and add the file there', true);
-  if (parent(from) === toDir) return;
-  try { await call('POST', '/ui/media/rename', { root: fromRoot, from, to: join(toDir, name) }); say(`Moved ${name}. Elements that used the old path need the new one.`); render(); }
-  catch (e) { say(e.message, true); }
+  paths = paths.filter(f => parent(f) !== toDir && f !== toDir && !toDir.startsWith(f + '/'));
+  if (!paths.length) return;
+  const errors = []; let done = 0;
+  for (const from of paths) {
+    try { await call('POST', '/ui/media/rename', { root: fromRoot, from, to: join(toDir, from.split('/').pop()) }); done++; }
+    catch (e) { errors.push(`${from.split('/').pop()}: ${e.message}`); }
+  }
+  selected.clear(); render();
+  if (errors.length) say(`Moved ${done}. ${errors[0]}${errors.length > 1 ? ` (and ${errors.length - 1} more)` : ''}`, true);
+  else say(done === 1 ? `Moved ${paths[0].split('/').pop()}.` : `Moved ${done} items.`);
 }
-function moveTo(p) {   // phones cannot drag: pick the folder from a list
+const move = (fromRoot, from, toRoot, toDir) => moveMany(fromRoot, [from], toRoot, toDir);
+function moveTo(p) {   // phones cannot drag: pick the folder from a list (p: one path, or a list of the picked ones)
+  const list = Array.isArray(p) ? p : [p]; p = list[0];
   const all = [''], walk = (base, fs) => { for (const f of fs) { all.push(join(base, f.name)); walk(join(base, f.name), f.folders); } };
   walk('', trees.find(t => t.root === root)?.folders ?? []);
-  const sel = el('select', {}, ...all.filter(f => f !== p && !f.startsWith(p + '/')).map(f => el('option', { value: f, selected: f === parent(p) }, (roots[root]?.name ?? 'Media') + (f ? ' › ' + f.replaceAll('/', ' › ') : ''))));
-  const dlg = el('dialog', {}, el('form', { method: 'dialog' }, el('h3', {}, 'Move ' + p.split('/').pop() + ' to'), sel,
+  const sel = el('select', {}, ...all.filter(f => !list.some(q => f === q || f.startsWith(q + '/'))).map(f => el('option', { value: f, selected: f === parent(p) }, (roots[root]?.name ?? 'Media') + (f ? ' › ' + f.replaceAll('/', ' › ') : ''))));
+  const dlg = el('dialog', {}, el('form', { method: 'dialog' }, el('h3', {}, 'Move ' + (list.length > 1 ? `${list.length} items` : p.split('/').pop()) + ' to'), sel,
     el('div', { class: 'bar' }, el('span', { class: 'spacer' }), el('button', { value: 'cancel' }, 'Cancel'), el('button', { value: 'ok', class: 'primary' }, 'Move'))));
-  dlg.addEventListener('close', () => { if (dlg.returnValue === 'ok') move(root, p, root, sel.value); dlg.remove(); });
+  dlg.addEventListener('close', () => { if (dlg.returnValue === 'ok') moveMany(root, list, root, sel.value); dlg.remove(); });
   document.body.append(dlg); dlg.showModal();
 }
 async function copy(t) { try { await navigator.clipboard.writeText(t); say('Copied: ' + t); } catch { prompt('Copy this path', t); } }
 async function rename(p, name) {
   const to = prompt('New name', name); if (!to || to === name) return;
   try { await call('POST', '/ui/media/rename', { root, from: p, to: join(parent(p), to) }); render(); say('Renamed. Elements that used the old name need the new path.'); } catch (e) { say(e.message, true); }
+}
+async function removeMany(paths) {
+  if (!paths.length || !confirm(`Delete these ${paths.length} items from the Brew Panel computer?\n${paths.map(f => f.split('/').pop()).slice(0, 15).join('\n')}${paths.length > 15 ? '\n...' : ''}`)) return;
+  const errors = []; let done = 0;
+  for (const p of paths) { try { await call('POST', '/ui/media/delete', { root, path: p }); done++; } catch (e) { errors.push(`${p.split('/').pop()}: ${e.message}`); } }
+  selected.clear(); render();
+  if (errors.length) say(`Deleted ${done}. ${errors[0]}${errors.length > 1 ? ` (and ${errors.length - 1} more)` : ''}`, true); else say(`Deleted ${done} items`);
 }
 async function remove(p, name) {
   if (!confirm(`Delete ${name} from the Brew Panel computer?`)) return;
@@ -131,6 +177,7 @@ async function send(file, overwrite) {
 }
 async function upload(files) {
   files = [...files]; if (!files.length || busy) return;
+  if (readOnly) return say('Images/Skynet is read only: open one of the groups in Images to add your pictures', true);
   busy = true; const replace = $('#mdReplace').checked, saved = [], skipped = [], exists = [], errors = [];
   try {
     for (const [i, f] of files.entries()) {
@@ -153,8 +200,12 @@ $('#mdView').onchange = e => { mode = e.target.value; try { localStorage.setItem
 $('#mdFilter').oninput = () => render(false);
 $('#mdUp').onclick = () => go(root, parent(dir));
 $('#mdPick').onchange = e => { upload(e.target.files); e.target.value = ''; };
+$('#mdMoveSel').onclick = () => selected.size && moveTo([...selected]);
+$('#mdDelSel').onclick = () => removeMany([...selected]);
+$('#mdMany').onchange = e => { many = e.target.checked; };
 $('#mdNew').onclick = async () => {
-  const n = prompt('New folder name', 'New folder'); if (!n) return;
+  const grp = root === 0 && /^images$/i.test(dir);
+  const n = prompt(grp ? 'Name of your new picture group (for example Fermenters)' : 'New folder name', grp ? '' : 'New folder'); if (!n) return;
   try { await call('POST', '/ui/media/folder', { root, path: join(dir, n) }); go(root, join(dir, n)); } catch (e) { say(e.message, true); }
 };
 const page = $('#view-media');
