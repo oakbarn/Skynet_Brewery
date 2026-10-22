@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Templates } from '../lib/templates.js';
-import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText, fittingPortStd } from '../public/templates.js';
+import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText, fittingPortStd, isCapOnly } from '../public/templates.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'templates-'));
@@ -95,5 +95,14 @@ assert.deepEqual(fittingPortStd({ std: { type: 'TC', size: 2 }, fittings: [{ kin
 assert.deepEqual(fittingPortStd({ std: { type: 'TC', size: 2 }, fittings: [{ kind: 'tee' }, { kind: 'reducer', toSize: '1' }] }, 'branch1'), { type: 'TC', size: 2 });
 assert.deepEqual(cleanFitting({ ipPos: { end: 'Right', 'bad key': 'x', start: '' } }).ipPos, { end: 'Right' });
 assert.equal(cleanFitting({}).ipPos, undefined);
+// End Cap (Fritz, 2026-10-22): a cap at the end of a chain closes it, so there is no End IP; a cap by itself has no IP at all
+assert.equal(cleanFitting({ fittings: [{ kind: 'cap' }] }).fittings[0].kind, 'cap');
+assert.deepEqual(fittingEnds({ fittings: [{ kind: 'cap' }, { kind: 'none' }] }), []);
+assert.deepEqual(fittingEnds({ fittings: [{ kind: 'tee' }, { kind: 'cap' }] }).map(e => e.key), ['branch1']);
+assert.ok(isCapOnly({ fittings: [{ kind: 'cap' }, { kind: 'none' }] }) && !isCapOnly({ fittings: [{ kind: 'tee' }, { kind: 'cap' }] }));
+for (const n of ['End_Cap', 'U_Bend']) {          // the new Skynet fittings ship with an SVG picture
+  const t = JSON.parse(fs.readFileSync(path.join(ROOT, 'templates', 'fitting', n + '.json'), 'utf8'));
+  assert.ok(t.image.endsWith('.svg') && fs.existsSync(path.join(ROOT, 'media', t.image)), n + ' picture');
+}
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('templates ok');

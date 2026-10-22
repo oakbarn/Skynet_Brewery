@@ -1,0 +1,6 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "cap" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "image": "Images/Skynet/Other_Equipment/Fitting_End_Cap.svg",
+  "notes": "An End Cap. Drag it onto an opening (an IP with no pipe on it) to close it: no pipe can join there and no flow passes. Drag it off to open it again."
+}
