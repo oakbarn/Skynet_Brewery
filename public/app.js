@@ -714,6 +714,9 @@ function withLook(e, v) {
   if (v.valuetype) o.look = lookFor(v.valuetype, e);
   return o;
 }
+// The name shown on a Device or Widget: its Display name, or its Name when the Display name is empty. In Edit layout it follows
+// the Properties you just changed (the live value from the Brain only catches up after Save).
+const shownName = (e, v) => editing ? (e.displayName || e.name) : (v.displayname || e.name);
 function fillEl(n, e0) {
   const v = S.values[e0.name] || {}, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
@@ -726,7 +729,7 @@ function fillEl(n, e0) {
   // Pump_1.xPosition / yPosition / width / height from a Process move and size it (not in Edit layout, where you drag it)
   const at = editing ? e0 : placeWith(e0, v);
   if (at !== e0 || n._moved) { n._moved = at !== e0; place(n, elGeom(at)); if (hasIps(e0)) placeDevIps(at); }
-  setRich(nm, v.displayname ?? e.name);
+  setRich(nm, shownName(e0, v));
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
   switch (e.type) {
@@ -768,7 +771,7 @@ function fillEl(n, e0) {
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic)); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
-    case 'label': text = v.displayname ?? e.name; nm.classList.add('hidden'); break;
+    case 'label': text = shownName(e0, v); nm.classList.add('hidden'); break;
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)

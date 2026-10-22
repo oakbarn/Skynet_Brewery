@@ -43,5 +43,14 @@ assert.match(off[0].why, /another computer/);
 assert.equal(store.findMedia('oakbarn/Pump.png'), path.join(d, 'media', 'Images', 'Pump.png'));
 fs.renameSync(path.join(d, 'media', 'Images'), path.join(d, 'media', 'oakbarn'));
 assert.equal(store.findMedia('Images/Pump.png'), path.join(d, 'media', 'oakbarn', 'Pump.png'));
+// a Display name cleared in Properties (Fritz, 2026-10-22): the Tab shows the Name again, not the old Display name
+const heat = { name: 'MB_25_ElM_HLT_BH', type: 'digitalOut', displayName: 'HLT' };
+store.saveLayout({ elements: [...store.config.elements, heat] });
+assert.equal(store.getProp(heat.name, 'displayname'), 'HLT');
+const { displayName, ...cleared } = heat;
+store.saveLayout({ elements: [...store.config.elements.filter(e => e.name !== heat.name), cleared] });
+assert.equal(store.getProp(heat.name, 'displayname'), heat.name);
+store.saveLayout({ elements: [...store.config.elements.filter(e => e.name !== heat.name), { ...heat, displayName: '' }] });
+assert.equal(store.getProp(heat.name, 'displayname'), heat.name, 'an empty Display name shows the Name');
 console.log('displayname and path tests: all passed');
 process.exit(0);
