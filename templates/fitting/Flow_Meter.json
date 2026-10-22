@@ -1,0 +1,7 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "flowMeter" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "image": "Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg",
+  "ipPos": { "start": "Left", "end": "Right" },
+  "notes": "A flow meter in the piping. Liquid passes either way. On the Tab, pick its Flow meter Device: its rate and total show above the picture."
+}

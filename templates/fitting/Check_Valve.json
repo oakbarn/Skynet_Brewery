@@ -1,0 +1,7 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "check" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "image": "Images/Skynet/Valves/Valve_Check.svg",
+  "ipPos": { "start": "Left", "end": "Right" },
+  "notes": "A check valve: liquid only goes one way, in at the Left opening (Start) and out at the Right (End). The arrow on the picture shows the way. Flip or rotate it to point the arrow where the flow goes."
+}
