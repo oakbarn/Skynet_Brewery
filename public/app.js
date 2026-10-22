@@ -243,7 +243,9 @@ const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
   vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/samples/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
     ports: {
-      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92]], { on: true }),
+      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86]], { on: true }),
+      // a second drain, for example above the element so it always stays under water (Fritz's Big Fatty, 2026-10-22)
+      outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92]]),
       tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75]]),
       thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7]], { ip: false }),
       steamSlayer: pt('Steam Slayer', V_HIGH), sparge: pt('Sparge', V_HIGH), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH]),
@@ -4695,7 +4697,7 @@ function addTemplateToTab(kind, t, tab, name) {
 }
 function placeTabVessel(t, tab, name) {
   const C = EQ[t.vesselType] || EQ.vessel, n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
-  const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1],
+  const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: (t.size || C.size)[0], h: (t.size || C.size)[1],
     labelAlign: 'above', labelSize: 16, labelVisible: true, name, template: t.name, templateCls: t.cls, image: t.image || C.image, bundled: true, ports: {} };
   for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes']) if (t[k] !== undefined) g[k] = clone(t[k]);
   for (const [k, d] of Object.entries(C.ports)) {
