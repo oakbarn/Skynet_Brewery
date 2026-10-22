@@ -307,9 +307,14 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red
 // On overlay pictures (Fritz, 2026-10-22): drawn on top of the item's picture while it is on, the picture below stays visible.
 // They have see-through backgrounds and live in media/Images/On_Off (Fritz: its own folder); the list shows that folder first,
 // then every other picture, and Add new takes any picture path in media/Images.
+// "tint:red" is not a file: it colors the picture underneath itself (Fritz: a heating element in a vessel glows red when on).
+// Only the drawn part is colored, so it works best on pictures with a see-through background (SVG or PNG).
+const TINTS = { red: ['Glow red (colors the picture itself; heating elements)', 'rgb(255,30,0)'], orange: ['Glow orange (colors the picture itself)', 'rgb(255,140,0)'],
+  blue: ['Glow blue (colors the picture itself; cooling)', 'rgb(0,120,255)'] };
+const isTint = p => /^tint:/.test(p || '');
 const onOffPic = p => /^Images\/On_Off\//i.test(p);
 const OVERLAY_GRAPHICS = [['Lightning bolt (corner badge)', 'Images/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/On_Off/Overlay_Bolt_Center.svg'],
-  ['Green glow ring', 'Images/On_Off/Overlay_Glow_Ring.svg']];
+  ['Green glow ring', 'Images/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
@@ -763,7 +768,15 @@ function fillEl(n, e0) {
   if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
   let ov = n.querySelector(':scope > .onov');
   if (ovl && !ov) n.append(ov = h('div', { class: 'onov' }));
-  if (ov) { ov.style.backgroundImage = ovl ? `url("${media(ovl)}")` : ''; ov.classList.toggle('hidden', !ovl); if (ovl) fitOverlay(n, ov, img, stretchPic(e, v)); }
+  if (ov) {
+    const tint = isTint(ovl) && img && TINTS[ovl.slice(5)];
+    ov.style.backgroundImage = ovl && !isTint(ovl) ? `url("${media(ovl)}")` : '';
+    ov.style.backgroundColor = tint ? tint[1] : '';
+    ov.style.webkitMaskImage = ov.style.maskImage = tint ? `url("${media(img)}")` : '';
+    ov.classList.toggle('tint', !!tint);
+    ov.classList.toggle('hidden', !ovl || (isTint(ovl) && !tint));
+    if (ovl) fitOverlay(n, ov, img, stretchPic(e, v));
+  }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
@@ -2412,10 +2425,10 @@ function field([key, label, kind, opts, rerender], obj) {
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
     const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
     const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
-    const pv = h('img', { class: 'gprev' + (v && pic ? '' : ' hidden'), ...(v && pic ? { src: media(v) } : {}), alt: '' });
+    const pv = h('img', { class: 'gprev' + (v && pic && !isTint(v) ? '' : ' hidden'), ...(v && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
     const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list }, h('option', { value: '' }, '(none)'),
       ...os.map(p => h('option', { value: p, ...(p === v ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
-    s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value); if (s.value) pv.src = media(s.value); } });
+    s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value || isTint(s.value)); if (s.value && !isTint(s.value)) pv.src = media(s.value); } });
     input = h('div', { class: 'gpick' }, s, pv);
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to

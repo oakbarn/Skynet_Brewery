@@ -20,10 +20,11 @@ The **On overlay** dropdown has:
 - **Lightning bolt (corner badge)**: a small yellow bolt in the top right corner.
 - **Lightning bolt (big, see-through)**: a large half see-through bolt over the middle.
 - **Green glow ring**: a green glow around the picture.
+- **Glow red**, **Glow orange** and **Glow blue**: no extra picture. They color the picture itself while it is On, for example a heating element inside a vessel turns red. Only the drawn part is colored, so use a picture with a see-through background; on a picture with a white or solid background the whole box turns red.
 - Your own overlays from the **On_Off** folder (`media/Images/On_Off`), listed next.
 - Then every other picture in `media/Images`, and **Add new ...** to type the name of your own.
 
-Pick **(none)** to turn the overlay off. The three built-in overlays are in the On_Off folder too.
+Pick **(none)** to turn the overlay off. The three built-in overlay pictures are in the On_Off folder too.
 
 ## Your own overlay picture
 
