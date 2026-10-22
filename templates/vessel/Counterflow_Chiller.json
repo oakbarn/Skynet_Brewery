@@ -1,0 +1,32 @@
+{
+  "vesselType": "pchiller",
+  "vtype": "Counterflow",
+  "image": "Images/samples/Chiller_Counterflow.svg",
+  "size": [
+    150,
+    175
+  ],
+  "std": {
+    "type": "MPT",
+    "size": 0.5
+  },
+  "ports": {
+    "wortIn": {
+      "installed": true,
+      "position": "Top Left"
+    },
+    "wortOut": {
+      "installed": true,
+      "position": "Bottom Right"
+    },
+    "waterIn": {
+      "installed": true,
+      "position": "Bottom Left"
+    },
+    "waterOut": {
+      "installed": true,
+      "position": "Top Right"
+    }
+  },
+  "notes": "A counterflow chiller (Fritz's CounterFlow_1): wort and water flow opposite ways in a copper coil, 4 liquid ports. The wort and water sides never mix."
+}
