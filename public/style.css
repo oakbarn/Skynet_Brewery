@@ -684,3 +684,4 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .buildOpt label { display: block; margin: 6px 0; }
 /* On overlay: a see-through picture drawn on top of the item while it is on (Fritz, 2026-10-22) */
 .el > .onov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; }
+.el > .onov.tint { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mix-blend-mode: color; }
