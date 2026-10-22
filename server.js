@@ -34,6 +34,7 @@ import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds } from './public/naming.js';
+import { renameMap, renameInProcesses, renameElementRefs } from './lib/renames.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
@@ -421,10 +422,24 @@ async function route(req, res) {
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
-    store.saveLayout(body);
+    // renamed Devices and Widgets: old name -> new name, only names that were there and are there now (lib/renames.js)
+    let renames = new Map();
+    if (body.renames && body.elements) {
+      const now = new Set(body.elements.map(e => cleanName(e.name)));
+      renames = new Map([...renameMap(body.renames)].filter(([from, to]) => store.has(from) && now.has(to)));
+      for (const el of body.elements) renameElementRefs(el, renames);     // settings that point to a renamed one (follow, input ...)
+    }
+    store.saveLayout({ ...body, renames });
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
-    if (body.updateVersion) return ok(res, schemas.newVersion());   // the "Update Version" switch next to Save
-    return ok(res);
+    const out = { ok: true };
+    if (renames.size) {
+      out.renamed = [...renames].map(([from, to]) => ({ from, to }));
+      out.processes = renameInProcesses(engine, renames);              // the scripts/ folder: shared by every Schema
+      if (store.config.logSets) { store.config.logSets = store.config.logSets.map(s => renameElementRefs(s, renames)); store.writeConfig(); }
+      out.otherSchemas = schemas.usingNames([...renames.keys()]);   // other Schemas that still have a Device or Widget by the old name
+    }
+    if (body.updateVersion) Object.assign(out, schemas.newVersion());   // the "Update Version" switch next to Save
+    return ok(res, out);
   }
   if (p === '/ui/settings' && m === 'PUT') {
     const body = await jsonBody(req);
