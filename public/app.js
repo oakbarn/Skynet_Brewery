@@ -1475,13 +1475,24 @@ function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 const HELP_WIN = 'skynetHelp';
 let helpBlockedSaid = false;
 function helpWindow([page, section] = []) {
-  const url = '/help.html' + (page ? '?page=' + encodeURIComponent(page) + (section ? '&section=' + encodeURIComponent(section) : '') : '');
+  const url = (trail = []) => '/help.html' + (page ? '?page=' + encodeURIComponent(page) + (section ? '&section=' + encodeURIComponent(section) : '') : '')
+    + (trail.length ? (page ? '&' : '?') + 'trail=' + encodeURIComponent(trail.join(',')) : '');
   const sw = screen.availWidth || 1200, sh = screen.availHeight || 800, w = Math.min(900, Math.max(480, Math.round(sw * 0.42)));
+  const where = (p = { w, h: sh - 60, x: (screen.availLeft || 0) + sw - w, y: screen.availTop || 0 }) => `width=${p.w},height=${p.h},left=${p.x},top=${p.y}`;
   let win = null;
-  try { win = window.open('', HELP_WIN, `width=${w},height=${sh - 60},left=${(screen.availLeft || 0) + sw - w},top=${screen.availTop || 0}`); } catch { }
+  try { win = window.open('', HELP_WIN, where()); } catch { }      // the Help window if it is open, else a new empty one
   if (!win) return false;
-  try { if (win.skynetHelp) { win.skynetHelp(page, section); win.focus(); return true; } } catch { }
-  win.location.href = url; win.focus();      // a new window (or one still loading)
+  let keep = null;
+  try { keep = win.skynetHelpKeep?.(); } catch { }
+  if (keep?.busy) { win.skynetHelp(page, section); win.focus(); return true; }      // a page being edited is never closed
+  if (keep) {
+    // Fritz, 2026-10-22: clicking the panel puts it in front of the Help window, and browsers won't bring that window back
+    // (focus() is ignored). So the open Help window is closed and opened again, on top, where it was, with its ◀ Back list.
+    win.close();
+    try { win = window.open(url(keep.trail), HELP_WIN, where(keep.place)); } catch { win = null; }
+    return !!win;
+  }
+  win.location.href = url(); win.focus();      // a new window (or one still loading)
   return true;
 }
 function openHelp(topic, quiet = false) {

@@ -8,7 +8,7 @@ Help opens in a **window of its own**, so you can read the steps in one window a
 - **Help** on the Menu Bar, and **Help** in the ☰ Menu's list of Pages, open the Help for the page you are on.
 - A **right-click** on an item, and every yellow **?**, open Help at the part about that item (see [Right-click and ? for Help](43-right-click-help)).
 
-There is only ever **one** Help window. Asking for Help again shows the new page in the same window and brings it to the front, so windows don't pile up.
+There is only ever **one** Help window, so windows don't pile up. Clicking the panel puts the panel in front of Help, and browsers don't let a page bring another window back to the front. So when you ask for Help again, the panel closes the Help window and opens it again on top, in the same place and size, with its **◀ Back** list kept. A page an admin is editing is never closed: it shows its question about unsaved changes instead.
 
 ## Putting it beside the panel
 
