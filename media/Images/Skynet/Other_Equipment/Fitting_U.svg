@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet U bend: two openings at the Bottom edge, a quarter in from the left and from the right -->
+  <path d="M25 93 V45 A25 25 0 0 1 75 45 V93" fill="none" stroke="#2b2b2b" stroke-width="34"/>
+  <path d="M25 93 V45 A25 25 0 0 1 75 45 V93" fill="none" stroke="#8f9296" stroke-width="28"/>
+  <path d="M16 90 V45 A34 34 0 0 1 84 45 V90" fill="none" stroke="#c4c7cb" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#8f9296" stroke="#2b2b2b" stroke-width="3">
+    <rect x="6" y="89" width="38" height="9" rx="3"/>
+    <rect x="56" y="89" width="38" height="9" rx="3"/>
+  </g>
+</svg>

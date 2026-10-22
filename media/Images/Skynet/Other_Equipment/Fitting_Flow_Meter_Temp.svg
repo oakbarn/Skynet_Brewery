@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet flow meter with temperature: openings at the middle of the Left and Right edges; liquid can pass either way. The red thermometer on top marks its temperature sensor. -->
+  <path d="M7 50 H93" fill="none" stroke="#2b2b2b" stroke-width="34"/>
+  <path d="M7 50 H93" fill="none" stroke="#8f9296" stroke-width="28"/>
+  <rect x="26" y="24" width="48" height="52" rx="8" fill="#2f6fa8" stroke="#1b1b1b" stroke-width="3"/>
+  <circle cx="50" cy="54" r="13" fill="#e9f2fa" stroke="#1b1b1b" stroke-width="3"/>
+  <g stroke="#2f6fa8" stroke-width="4" stroke-linecap="round"><path d="M50 45 V63 M41 54 H59 M44 48 L56 60 M56 48 L44 60"/></g>
+  <circle cx="50" cy="54" r="3" fill="#1b1b1b"/>
+  <rect x="45" y="4" width="10" height="26" rx="5" fill="#ffffff" stroke="#1b1b1b" stroke-width="3"/>
+  <path d="M50 12 V26" stroke="#d63a2f" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="50" cy="30" r="6" fill="#d63a2f" stroke="#1b1b1b" stroke-width="3"/>
+  <g fill="#8f9296" stroke="#2b2b2b" stroke-width="3">
+    <rect x="2" y="28" width="9" height="44" rx="3"/>
+    <rect x="89" y="28" width="9" height="44" rx="3"/>
+  </g>
+</svg>

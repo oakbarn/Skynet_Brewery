@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet flow meter: openings at the middle of the Left and Right edges; liquid can pass either way -->
+  <path d="M7 50 H93" fill="none" stroke="#2b2b2b" stroke-width="34"/>
+  <path d="M7 50 H93" fill="none" stroke="#8f9296" stroke-width="28"/>
+  <rect x="26" y="24" width="48" height="52" rx="8" fill="#2f6fa8" stroke="#1b1b1b" stroke-width="3"/>
+  <circle cx="50" cy="50" r="15" fill="#e9f2fa" stroke="#1b1b1b" stroke-width="3"/>
+  <g stroke="#2f6fa8" stroke-width="4" stroke-linecap="round"><path d="M50 39 V61 M39 50 H61 M42 42 L58 58 M58 42 L42 58"/></g>
+  <circle cx="50" cy="50" r="3.5" fill="#1b1b1b"/>
+  <g fill="#8f9296" stroke="#2b2b2b" stroke-width="3">
+    <rect x="2" y="28" width="9" height="44" rx="3"/>
+    <rect x="89" y="28" width="9" height="44" rx="3"/>
+  </g>
+</svg>

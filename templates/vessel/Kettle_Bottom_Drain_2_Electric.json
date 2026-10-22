@@ -25,6 +25,10 @@
     "tangential": {
       "installed": true,
       "position": "Bottom Left"
+    },
+    "element": {
+      "installed": true,
+      "position": "Right Low"
     }
   }
 }

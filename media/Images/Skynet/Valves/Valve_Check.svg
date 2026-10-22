@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet check valve: openings at the middle of the Left (flow in) and Right (flow out) edges. The arrow shows the only way liquid can go. -->
+  <path d="M7 50 H93" fill="none" stroke="#2b2b2b" stroke-width="34"/>
+  <path d="M7 50 H93" fill="none" stroke="#8f9296" stroke-width="28"/>
+  <rect x="24" y="26" width="52" height="48" rx="10" fill="#b08d3c" stroke="#2b2b2b" stroke-width="3"/>
+  <path d="M30 34 H66" stroke="#d9bd78" stroke-width="4" stroke-linecap="round"/>
+  <path d="M32 50 H60 M52 41 L64 50 L52 59" fill="none" stroke="#1b1b1b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#8f9296" stroke="#2b2b2b" stroke-width="3">
+    <rect x="2" y="28" width="9" height="44" rx="3"/>
+    <rect x="89" y="28" width="9" height="44" rx="3"/>
+  </g>
+</svg>
