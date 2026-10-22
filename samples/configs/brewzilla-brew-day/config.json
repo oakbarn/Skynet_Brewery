@@ -126,7 +126,7 @@
    "displayName": "Hop alarm (tap = added)",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
-   "imageOn": "Images/Alarms/AlarmBitter.png",
+   "imageOn": "Images/Skynet/Alarms/AlarmBitter.png",
    "hideName": true,
    "activeText": ""
   },
@@ -1264,8 +1264,8 @@
    "units": "°F",
    "precision": 1,
    "volumeUnits": "gal",
-   "imageOn": "Images/Vessels/brewzilla.svg",
-   "imageOff": "Images/Vessels/brewzilla.svg",
+   "imageOn": "Images/Skynet/Vessels/brewzilla.svg",
+   "imageOff": "Images/Skynet/Vessels/brewzilla.svg",
    "setpoint": 0
   },
   {
@@ -1281,8 +1281,8 @@
    "precision": 1,
    "volumeUnits": "gal",
    "noPump": true,
-   "imageOn": "Images/Vessels/digiboil.svg",
-   "imageOff": "Images/Vessels/digiboil.svg",
+   "imageOn": "Images/Skynet/Vessels/digiboil.svg",
+   "imageOff": "Images/Skynet/Vessels/digiboil.svg",
    "setpoint": 0
   }
  ],

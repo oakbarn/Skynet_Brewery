@@ -1,5 +1,5 @@
 {
-  "vesselType": "vessel", "vtype": "Fermenter", "image": "Images/Vessels/kettle.svg",
+  "vesselType": "vessel", "vtype": "Fermenter", "image": "Images/Skynet/Vessels/kettle.svg",
   "maxVolume": 7, "minVolume": 3, "extraTrub": 0.5,
   "std": { "type": "TC", "size": 1.5 },
   "ports": {

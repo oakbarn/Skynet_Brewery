@@ -19,7 +19,7 @@ const parent = p => p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '';
 const DRAG = 'application/x-brewpanel-media';
 let root = 0, dir = '', busy = false, roots = [], trees = [], kept = [], shown = [];
 const selected = new Set();                   // paths picked: click, Ctrl+click adds one, Shift+click a run (or Select many on a phone)
-let many = false, anchor = null;
+let many = false, anchor = null, readOnly = false;      // readOnly: inside Images/Skynet
 const open = new Set(['0:']);                 // expanded tree nodes "root:path"
 let mode = 'icons'; try { mode = localStorage.getItem('mdView') || 'icons'; } catch { }
 
@@ -54,25 +54,29 @@ async function render(withTree = true) {
   const box = $('#mdFiles'); box.className = 'mdFiles ' + mode;
   box.replaceChildren(
     ...folders.map(f => {
-      const p = join(dir, f), lock = st.kept?.includes(f), group = /^images$/i.test(dir) && root === 0;
-      const item = el('div', { class: 'mdItem' + (selected.has(p) ? ' sel' : ''), 'data-p': p, draggable: lock ? false : 'true', title: (lock ? '🔒 Skynet folder: can\'t be deleted, renamed or moved. ' : '') + 'Open ' + f, ondblclick: () => go(root, p) },
+      const p = join(dir, f), lock = st.kept?.includes(f), group = /^images$/i.test(dir) && root === 0, sky = group && /^skynet$/i.test(f);
+      const item = el('div', { class: 'mdItem' + (selected.has(p) ? ' sel' : ''), 'data-p': p, draggable: lock ? false : 'true', title: (st.readOnly || sky ? '🔒 Skynet pictures: read only. ' : lock ? '🔒 Standard folder: can\'t be deleted, renamed or moved. ' : '') + 'Open ' + f, ondblclick: () => go(root, p) },
         el('div', { class: 'mdIcon', onclick: () => go(root, p) }, '📁'),
-        el('div', { class: 'mdName', onclick: e => { e.stopPropagation(); select(e, p); } }, (lock ? '🔒 ' : '') + f), el('div', { class: 'muted mdMeta' }, group ? (lock ? 'Skynet picture group' : 'Your picture group') : 'Folder'),
-        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: () => go(root, p) }, 'Open'), ...(lock ? [] : actions(p, f))));
+        el('div', { class: 'mdName', onclick: e => { e.stopPropagation(); select(e, p); } }, (lock ? '🔒 ' : '') + f), el('div', { class: 'muted mdMeta' }, sky ? 'Skynet pictures (read only)' : st.readOnly ? 'Skynet group (read only)' : group ? (lock ? 'Standard picture group' : 'Your picture group') : 'Folder'),
+        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: () => go(root, p) }, 'Open'), ...(lock || st.readOnly ? [] : actions(p, f))));
       item.addEventListener('click', e => { if (e.target === item) select(e, p); });
-      if (!lock) dragSource(item, p); dropTarget(item, root, p); return item;
+      if (!lock && !st.readOnly) dragSource(item, p); if (!st.readOnly && !sky) dropTarget(item, root, p); return item;
     }),
     ...files.map(f => {
-      const item = el('div', { class: 'mdItem' + (selected.has(f.path) ? ' sel' : ''), 'data-p': f.path, draggable: 'true', title: f.name, onclick: e => select(e, f.path) },
+      const item = el('div', { class: 'mdItem' + (selected.has(f.path) ? ' sel' : ''), 'data-p': f.path, draggable: st.readOnly ? false : 'true', title: f.name, onclick: e => select(e, f.path) },
         f.kind === 'sound' ? el('div', { class: 'mdIcon' }, '🔊') : el('img', { class: 'mdThumb', loading: 'lazy', alt: '', src: `/media?path=${encodeURIComponent(f.use)}&as=original&t=${f.modified}` }),
         el('div', { class: 'mdName' }, f.name),
         el('div', { class: 'muted mdMeta' }, `${size(f.size)} · ${when(f.modified)}`),
         f.kind === 'sound' ? el('audio', { controls: true, preload: 'none', src: `/media?path=${encodeURIComponent(f.use)}`, onclick: e => e.stopPropagation() }) : null,
         el('div', { class: 'mdUse muted' }, 'Path to use: ', el('code', {}, f.use)),
-        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: e => { e.stopPropagation(); copy(f.use); } }, 'Copy path'), ...actions(f.path, f.name)));
-      dragSource(item, f.path); return item;
+        el('div', { class: 'mdBtns' }, el('button', { class: 'small', onclick: e => { e.stopPropagation(); copy(f.use); } }, 'Copy path'), ...(st.readOnly ? [] : actions(f.path, f.name))));
+      if (!st.readOnly) dragSource(item, f.path); return item;
     }));
-  kept = st.kept || []; shown = [...folders.filter(f => !kept.includes(f)).map(f => join(dir, f)), ...files.map(f => f.path)];
+  kept = st.kept || []; shown = st.readOnly ? [] : [...folders.filter(f => !kept.includes(f)).map(f => join(dir, f)), ...files.map(f => f.path)];
+  readOnly = !!st.readOnly;
+  $('#mdNew').disabled = $('#mdPick').disabled = readOnly;
+  $('#mdPick').closest('label').classList.toggle('off', readOnly);
+  $('#mdReadOnly').hidden = !readOnly;
   for (const p of [...selected]) if (!shown.includes(p)) selected.delete(p);
   showSelection();
   $('#mdNew').textContent = root === 0 && /^images$/i.test(dir) ? '📁 New picture group' : '📁 New folder';
@@ -118,6 +122,7 @@ function dropTarget(node, r, p) {
   node.addEventListener('drop', e => {
     e.preventDefault(); e.stopPropagation(); node.classList.remove('drop');
     const m = e.dataTransfer.getData(DRAG);
+    if (r === 0 && /^images\/skynet(\/|$)/i.test(p)) return say('Images/Skynet is read only: put your pictures in the groups in Images', true);
     if (m) { const s = JSON.parse(m); moveMany(s.root, s.paths ?? [s.path], r, p); }
     else if (e.dataTransfer.files.length) { root = r; dir = p; upload(e.dataTransfer.files); }
   });
@@ -172,6 +177,7 @@ async function send(file, overwrite) {
 }
 async function upload(files) {
   files = [...files]; if (!files.length || busy) return;
+  if (readOnly) return say('Images/Skynet is read only: open one of the groups in Images to add your pictures', true);
   busy = true; const replace = $('#mdReplace').checked, saved = [], skipped = [], exists = [], errors = [];
   try {
     for (const [i, f] of files.entries()) {

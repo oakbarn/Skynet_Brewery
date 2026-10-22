@@ -1,7 +1,7 @@
 {
   "std": { "type": "TC", "size": 2 },
   "fittings": [{ "kind": "reducer", "toSize": "1.5" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/Other_Equipment/Fitting_Reducer.svg",
+  "image": "Images/Skynet/Other_Equipment/Fitting_Reducer.svg",
   "ipPos": { "start": "Left", "end": "Right" },
   "notes": "A reducer, TC 2 to TC 1.5. The big end is at the left, the small end at the right. Pipes of two sizes that meet on one IP get a reducer cone drawn by themselves; use this one where it should be on the Equipment list, or on a vessel port of another size."
 }

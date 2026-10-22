@@ -1,5 +1,5 @@
 {
-  "vesselType": "rims", "vtype": "RIMS", "image": "Images/Other_Equipment/Equipment_RIMS.svg",
+  "vesselType": "rims", "vtype": "RIMS", "image": "Images/Skynet/Other_Equipment/Equipment_RIMS.svg",
   "std": { "type": "TC", "size": 1.5 },
   "ports": { "inlet": { "installed": true, "position": "Top Left" }, "outlet": { "installed": true, "position": "Bottom Right" },
     "thermowell": { "installed": true, "position": "Left End" }, "element": { "installed": true, "position": "Right End" } },

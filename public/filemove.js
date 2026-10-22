@@ -39,7 +39,7 @@ const dest = r => r.kind === 'pictures' && $('#fmGroup').value ? `${$('#fmGroup'
 async function loadGroups() {
   try {
     const { groups } = await call('GET', '/ui/media/groups'), sel = $('#fmGroup'), was = sel.value;
-    sel.replaceChildren(el('option', { value: '' }, 'No group (straight into Images)'), ...groups.map(g => el('option', { value: g.name }, g.label + (g.skynet ? '' : ' (yours)'))));
+    sel.replaceChildren(el('option', { value: '' }, 'No group (straight into Images)'), ...groups.map(g => el('option', { value: g.name }, g.label + (g.standard ? '' : ' (yours)'))));
     sel.value = groups.some(g => g.name === was) ? was : '';
   } catch { }
 }
