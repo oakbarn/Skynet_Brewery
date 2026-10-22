@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="51" height="24" viewBox="0 0 51 24" preserveAspectRatio="none">
+  <!-- Skynet drawing: BigMac heating element, off (grey), mounting flange on the right. Same size as BigMacRElementOff.png. -->
+  <!-- see-through background, so the vessel picture shows behind it and an On overlay can tint just the element -->
+  <rect x="46" y="0" width="5" height="24" fill="#c3c3c3" stroke="#8a8a8a" stroke-width=".6"/>
+  <path d="M46 7 H8 L3 9 V16 L8 18 H46 V14 H7 V11 H46 Z" fill="#7f7f7f" stroke="#555" stroke-width=".6" stroke-linejoin="round"/>
+  <path d="M8 8 H45" stroke="#a5a5a5" stroke-width=".8"/><path d="M8 15 H45" stroke="#a5a5a5" stroke-width=".8"/>
+</svg>

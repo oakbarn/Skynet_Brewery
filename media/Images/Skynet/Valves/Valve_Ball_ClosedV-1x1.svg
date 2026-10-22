@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="119" height="141" viewBox="0 0 119 141" preserveAspectRatio="none">
+  <!-- Skynet drawing: motorised ball valve, closed, vertical pipe. Same size and pipe spot as Valve_Ball_ClosedV-1x1.png. -->
+  <rect x="10" y="0" width="24" height="141" fill="#7f7f7f"/>
+  <path d="M15 2 V139" stroke="#a3a3a3" stroke-width="3"/>
+  <rect x="1" y="1" width="40" height="10" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>
+  <rect x="2" y="130" width="40" height="10" rx="3" fill="#6f6f6f" stroke="#2b2b2b" stroke-width="2"/>
+  <rect x="5" y="38" width="34" height="10" rx="2" fill="#a9aaa6" stroke="#2b2b2b" stroke-width="2"/>
+  <rect x="5" y="98" width="34" height="10" rx="2" fill="#a9aaa6" stroke="#2b2b2b" stroke-width="2"/>
+  <rect x="2" y="46" width="42" height="54" rx="10" fill="#c8c9c4" stroke="#2b2b2b" stroke-width="2.5"/>
+  <path d="M9 52 V94" stroke="#eeefec" stroke-width="3" stroke-linecap="round"/>
+  <rect x="43" y="65" width="12" height="16" fill="#9fa09b" stroke="#2b2b2b" stroke-width="2"/>
+  <rect x="54" y="36" width="62" height="86" rx="8" fill="#2f6fd6"/>
+  <rect x="54" y="36" width="14" height="86" rx="8" fill="#4f8ff0"/>
+  <path d="M68 46 V112" stroke="#1f55b0" stroke-width="2"/><path d="M80 46 V112" stroke="#1f55b0" stroke-width="2"/><path d="M92 46 V112" stroke="#1f55b0" stroke-width="2"/><path d="M104 46 V112" stroke="#1f55b0" stroke-width="2"/>
+  <rect x="54" y="36" width="62" height="86" rx="8" fill="none" stroke="#1b3f7a" stroke-width="3"/>
+</svg>
