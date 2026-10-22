@@ -296,6 +296,9 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red
   ['Manual butterfly valve open (horizontal)', 'Images/samples/Valve_Manual_Butterfly_OpenH.svg'], ['Manual butterfly valve closed (horizontal)', 'Images/samples/Valve_Manual_Butterfly_ClosedH.svg'],
   ['Manual butterfly valve open (vertical, handle right)', 'Images/samples/Valve_Manual_Butterfly_OpenV_R.svg'], ['Manual butterfly valve closed (vertical, handle right)', 'Images/samples/Valve_Manual_Butterfly_ClosedV_R.svg'],
   ['Manual butterfly valve open (vertical, handle left)', 'Images/samples/Valve_Manual_Butterfly_OpenV_L.svg'], ['Manual butterfly valve closed (vertical, handle left)', 'Images/samples/Valve_Manual_Butterfly_ClosedV_L.svg'],
+  ['Solenoid gas valve open (horizontal)', 'Images/samples/Valve_Gas_Solenoid_OpenH.svg'], ['Solenoid gas valve closed (horizontal)', 'Images/samples/Valve_Gas_Solenoid_ClosedH.svg'],
+  ['Solenoid gas valve open (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_R.svg'],
+  ['Solenoid gas valve open (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_L.svg'],
   ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
