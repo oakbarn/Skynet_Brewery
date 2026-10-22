@@ -115,7 +115,7 @@ function connect() {
   es.addEventListener('values', e => {
     const ch = JSON.parse(e.data);
     for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; updateEl(n); }
-    renderPipes(); updateAlarms(); if (view === 'globals') refreshGlobalValues(ch);
+    renderPipes(); updateMeters(); updateAlarms(); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
@@ -467,6 +467,7 @@ function buildVessel(g) {
     if (isUnit(g)) { const [px, py] = unitPoint({ ...g, x: 0, y: 0 }, q[1], q[2]); q = [0, px / (g.w || 90), py / (g.h || 90)]; }
     n.append(h('div', { class: 'twell', title: vPortLabel(g, k, p), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, 'T'));
   }
+  if (t === 'bfit' && (g.fittings || []).some(f => METERS.includes(f.kind) && f.meter)) n.append(h('div', { class: 'fmRead', 'data-gid': g.id }, meterText(g)));
   const lbl = g.label || (g.template ? g.name : '');       // a Tab_Vessel or Tab_Fitting: empty Label = its Name
   if (g.labelVisible !== false && lbl) n.append(widgetLabel({ ...g, label: lbl }, 'top'));
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
@@ -1195,24 +1196,34 @@ function ipNode(id, ws) {
 }
 function computeFlow(ws) {
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
-  const nodes = new Map(), adj = new Map();
+  const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
+  const link = (a, b, p, oneWay) => {
+    const add = (m, u, v, d) => { if (!m.has(u)) m.set(u, []); m.get(u).push({ v, p, d }); };
+    add(adj, a, b, 1); add(radj, b, a, -1);
+    if (!oneWay) { add(adj, b, a, -1); add(radj, a, b, 1); }
+  };
   const node = id => { const n = ipNode(id, ws); if (n.key && !nodes.has(n.key)) nodes.set(n.key, n); return n; };
   for (const p of L().graphics.filter(g => g.kind === 'pipe' && g.workspace === ws && pipeJoined(g))) {
     if (!(p.flowWhen || []).every(isOn)) continue;
     const a = node(p.from), b = node(p.to);
     if (a.closed || b.closed || a.key === b.key) continue;
     if (a.end && b.end) { if ((p.flowWhen || []).length) dir.set(p.id, 1); continue; }
-    for (const [u, v, d] of [[a.key, b.key, 1], [b.key, a.key, -1]]) { if (!adj.has(u)) adj.set(u, []); adj.get(u).push({ v, p, d }); }
+    link(a.key, b.key, p);
   }
   // a Tab_Fitting joined to a vessel port passes flow to and from that port (no pipe between them), unless a valve in it is closed
   for (const f of L().graphics.filter(g => isBfit(g) && g.onVessel && g.workspace === ws)) {
     const ip = L().graphics.find(x => x.kind === 'ip' && x.attachTo === f.onVessel && x.port === f.onPort);
     if (!ip || bfitClosed(f)) continue;
-    const a = node(ip.id), key = `eq:${f.id}:a`;
+    const a = node(ip.id), key = `eq:${f.id}:${hasCheck(f) ? 'ci' : 'a'}`;
     if (!nodes.has(key)) nodes.set(key, { key, pass: true });
     if (a.closed || a.key === key) continue;
-    const p = { id: 'join:' + f.id };
-    for (const [u, v, d] of [[a.key, key, 1], [key, a.key, -1]]) { if (!adj.has(u)) adj.set(u, []); adj.get(u).push({ v, p, d }); }
+    link(a.key, key, { id: 'join:' + f.id });
+  }
+  // a check valve (Fritz, 2026-10-22) lets flow through one way only: from its Start (in) side to its other openings
+  for (const f of L().graphics.filter(g => isBfit(g) && g.workspace === ws && hasCheck(g) && !bfitClosed(g))) {
+    const ci = `eq:${f.id}:ci`, co = `eq:${f.id}:co`;
+    for (const k of [ci, co]) if (!nodes.has(k)) nodes.set(k, { key: k, pass: true });
+    link(ci, co, { id: 'check:' + f.id }, true);
   }
   // breadth-first trace from a pump to every plain IP point (or other running pump) it reaches; mark the pipes on each route
   const trace = (start, outward) => {
@@ -1224,7 +1235,7 @@ function computeFlow(ws) {
         if (n.end || (outward ? n.pull : n.push)) for (let k = u; prev.get(k); k = prev.get(k).from) { const st = prev.get(k); dir.set(st.p.id, outward ? st.d : -st.d); }
         continue;
       }
-      for (const { v, p, d } of adj.get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); queue.push(v); }
+      for (const { v, p, d } of (outward ? adj : radj).get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); queue.push(v); }
     }
   };
   for (const [k, n] of nodes) { if (n.push) trace(k, true); if (n.pull) trace(k, false); }
@@ -4917,10 +4928,10 @@ const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fit
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
-const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
+const SKYNET_FIT_PICS = ['Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
   'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
-  return { tee: 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', reducer: 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', elbow45: 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
+  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', reducer: 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', elbow45: 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
@@ -4941,12 +4952,28 @@ function turnPos(pos, deg) { for (let i = 0; i < (((+deg || 0) / 90) % 4 + 4) % 
 function bfitClass(g) {
   const ports = {}, flat = g.flat;            // flat: the fitting runs left or right from its vessel port
   const at = (k, def) => turnPos(g.ipPos?.[k] && BF_POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def, isUnit(g) ? 0 : g.turn);   // a Template can say where its openings are on its picture
-  if (!g.onVessel && !isCapOnly(g)) ports.start = pt('Start (vessel side)', BF_POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: 'a' });
-  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: 'a' }));
+  const chk = hasCheck(g);         // with a check valve in it, the Start side and the far side are two circuits, joined one way
+  if (!g.onVessel && !isCapOnly(g)) ports.start = pt(chk ? 'Start (flow goes in here)' : 'Start (vessel side)', BF_POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: chk ? 'ci' : 'a' });
+  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: chk ? 'co' : 'a' }));
   (g.fittings || []).forEach((f, i) => { if (f.kind === 'tee' && f.thermowell) ports['tw' + (i + 1)] = pt(`Thermowell ${i + 1} (${THERMOWELL_POS[f.thermowellPos] || 'Short'})`, BF_POS, { ip: false, def: flat ? 'Top' : 'Right' }); });
   return { title: 'Tab_Fitting', types: [], image: fitImage(g), size: [90, 90], ports };
 }
 const isBfit = g => g?.kind === 'vessel' && g.vesselType === 'bfit';
+const hasCheck = g => (g?.fittings || []).some(f => f.kind === 'check');
+// Flow meters (Fritz, 2026-10-22): liquid passes either way. One shows its Flow meter Device (rate and total), the other a
+// Temperature Probe as well. The reading shows above the picture.
+const METERS = ['flowMeter', 'flowMeterTemp'];
+function meterText(g) {
+  const out = [];
+  for (const f of (g.fittings || []).filter(f => METERS.includes(f.kind))) {
+    const e = f.meter && L().elements.find(x => x.name === f.meter), v = e ? S.values[e.name] || {} : null;
+    if (e) out.push(`${fmtVal(e, v.rate ?? 0)} ${e.units || 'gal'}/min · ${fmtVal(e, v.total ?? 0)} ${e.units || 'gal'}`);
+    const t = f.kind === 'flowMeterTemp' && f.probe && L().elements.find(x => x.name === f.probe);
+    if (t) { const tv = S.values[t.name]?.value; out.push(tv === undefined || tv === null ? '--' : `${fmtVal(t, tv)} ${t.units || '°F'}`); }
+  }
+  return out.join(' · ');
+}
+function updateMeters() { for (const n of $$('#ws .fmRead')) { const g = L().graphics.find(x => x.id === n.dataset.gid); if (g) n.textContent = meterText(g); } }
 // Skynet Fittings (Fritz, 2026-10-22): a Tab_Fitting made from a Skynet Template is one unit. Every opening has a two-way IP
 // built in, sitting on the opening of the picture: it can't be moved, unbundled or set. Its Properties have Flip Horizontal,
 // Flip Vertical and Rotate (in steps of 45 degrees) instead, and the picture and its IPs follow. Fittings built from a
@@ -5037,7 +5064,7 @@ function stdFromFields(w) {
 const stdFields = (w, what = 'Connection Standard') => [['std_type', what, 'sel', [['', '(none)'], ...Object.entries(CONNECTION_STANDARDS)], true],
   ...(w.std_type ? [['std_size', textSize(w.std_type) ? 'Size (text, for example DN25)' : 'Size (for example 1.5)', textSize(w.std_type) ? 'text' : 'num']] : [])];
 function fitToFields(w) {
-  (w.fittings || []).forEach((f, i) => { w['f' + i] = f.kind; w['tw' + i] = !!f.thermowell; w['twp' + i] = f.thermowellPos; w['fv' + i] = f.valve; w['fp' + i] = f.probe; w['rs' + i] = f.toSize; });
+  (w.fittings || []).forEach((f, i) => { w['f' + i] = f.kind; w['tw' + i] = !!f.thermowell; w['twp' + i] = f.thermowellPos; w['fv' + i] = f.valve; w['fp' + i] = f.probe; w['fm' + i] = f.meter; w['rs' + i] = f.toSize; });
   return stdToFields(w);
 }
 function fitFromFields(w) {
@@ -5046,7 +5073,9 @@ function fitFromFields(w) {
     if (f.kind === 'tee' && w['tw' + i]) { f.thermowell = true; f.thermowellPos = w['twp' + i] || 'short'; if (w['fp' + i]) f.probe = w['fp' + i]; }
     if (f.kind === 'valve' && w['fv' + i]) f.valve = w['fv' + i];
     if (f.kind === 'reducer' && w['rs' + i]) f.toSize = String(w['rs' + i]);
-    for (const k of ['f', 'tw', 'twp', 'fv', 'fp', 'rs']) delete w[k + i];
+    if (METERS.includes(f.kind) && w['fm' + i]) f.meter = w['fm' + i];          // a flow meter: its Flow meter Device (and probe), picked on the Tab
+    if (f.kind === 'flowMeterTemp' && w['fp' + i]) f.probe = w['fp' + i];
+    for (const k of ['f', 'tw', 'twp', 'fv', 'fp', 'fm', 'rs']) delete w[k + i];
     return f;
   });
   return stdFromFields(w);
@@ -5056,10 +5085,13 @@ function fittingSlotFields(w, onTab) {
   const valves = onTab ? [['', 'None'], ...L().elements.filter(e => e.subtype === 'valve' || e.subtype === 'propValve').map(e => [e.name, e.name + ' (Device)']),
     ...L().graphics.filter(g => g.kind === 'ip' && g.fitting === 'manualValve' && g.workspace === w.workspace).map(g => [g.id, (g.name || g.label || g.id) + ' (manual valve Widget)'])] : null;
   const probes = onTab ? [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])] : null;
+  const meters = onTab ? [['', 'None'], ...L().elements.filter(e => e.type === 'flowMeter').map(e => [e.name, e.name])] : null;
   return FITTING_SLOTS.flatMap((label, i) => {
     const k = w['f' + i] || 'none';
     return [['f' + i, label, 'sel', Object.entries(FITTING_KINDS), true],
       ...(k === 'valve' ? [onTab ? ['fv' + i, 'Valve: Select Device, Widget or None', 'sel', valves] : ['_v' + i, 'Valve: Select Device, Widget or None (picked when it is on a Tab)', 'note']] : []),
+      ...(METERS.includes(k) ? [onTab ? ['fm' + i, 'Flow Meter: Select Flow meter Device or None', 'sel', meters] : ['_m' + i, 'Flow Meter: Select Flow meter Device or None (picked when it is on a Tab)', 'note']] : []),
+      ...(k === 'flowMeterTemp' ? [onTab ? ['fp' + i, 'Temperature: Select Temperature Probe or None', 'sel', probes] : ['_t' + i, 'Temperature: Select Temperature Probe or None (picked when it is on a Tab)', 'note']] : []),
       ...(k === 'reducer' ? [['rs' + i, 'Other end size (it goes from the size before it to this size, up or down)', 'text']] : []),
       ...(k === 'tee' ? [['tw' + i, 'Thermowell in this tee (it stops flow: that side has no IP)', 'yn', false, true],
         ...(w['tw' + i] ? [['twp' + i, 'Position of Thermowell', 'sel', Object.entries(THERMOWELL_POS)],
@@ -5334,7 +5366,7 @@ F.tabFitting = it => [['_t', `Tab_Fitting, made from the Bundled Fitting Templat
 // the Properties of a Skynet Fitting: no IP settings (every opening has its IP built in), and Flip / Rotate for its orientation
 F.skynetFitting = it => {
   const made = (it.fittings || []).filter(f => f.kind !== 'none').map(f => FITTING_KINDS[f.kind] + (f.thermowell ? ' with a thermowell' : '')).join(', ');
-  const picks = fittingSlotFields(it, true).filter(f => /^f[vp]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
+  const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
   return [['_t', isCapOnly(it) ? `Skynet End Cap. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet Fitting ${it.template || ''}: ${made}. Every opening has a two-way IP built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['label', 'Label (empty = the Name)', 'text'], ...stdFields(it), ...picks,

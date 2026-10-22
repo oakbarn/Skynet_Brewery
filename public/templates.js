@@ -20,6 +20,7 @@ export const stdShort = s => s?.type ? (STD_SHORT[s.type] || s.type) + (s.size !
 // a new kind is added here, through GitHub.
 export const FITTING_KINDS = {
   none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve', reducer: 'Reducer', cap: 'End Cap',
+  check: 'Check Valve', flowMeter: 'Flow Meter', flowMeterTemp: 'Flow Meter with Temperature',
 };
 export const FITTING_SLOTS = ['First Fitting', 'Second Fitting', 'Third Fitting', 'Fourth Fitting'];
 export const THERMOWELL_POS = { short: 'Short', long: 'Long' };
