@@ -496,15 +496,17 @@
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div></form></dialog>
 <!-- Process editor: Alt+P (or the Picture button) picks a picture or sound and types its path at the cursor -->
 <dialog id="picPickDlg" class="picPickDlg"><form method="dialog">
-  <h3>Insert a picture or sound path</h3>
+  <h3 id="ppTitle">Insert a picture or sound path</h3>
   <div class="bar ppTools">
     <select id="ppKind" title="Pictures (media/Images) or sounds (media/sounds)"><option value="pictures">Pictures</option><option value="sounds">Sounds</option></select>
     <select id="ppSrc" title="Show the Skynet pictures, your own, or both"><option value="skynet">Skynet pictures</option><option value="mine">My pictures</option><option value="both">Both</option></select>
     <select id="ppGroup" title="Show one group (folder), or All"></select>
     <input id="ppFilter" type="search" placeholder="🔍 Search" autocomplete="off" spellcheck="false">
   </div>
-  <div class="ppBody"><select id="ppList" size="14"></select><div class="ppPrev"><img id="ppImg" alt="" hidden><audio id="ppAudio" controls preload="none" hidden></audio><code id="ppPath"></code></div></div>
-  <p class="muted">Double-click a file, or press Enter, to put its path where the cursor is. Arrow keys move through the list.</p>
+  <div id="ppGrid" class="ppGrid" tabindex="0" role="listbox" aria-label="Pictures"></div>
+  <p id="ppEmpty" class="muted" hidden>Nothing here. Pick another group, or Both.</p>
+  <div class="ppFoot"><code id="ppPath"></code><audio id="ppAudio" controls preload="none" hidden></audio></div>
+  <p id="ppHint" class="muted"></p>
   <div class="bar"><span class="spacer"></span><button value="cancel">Cancel</button><button id="ppInsert" value="ok" class="primary">Insert</button></div>
 </form></dialog>
 <dialog id="findAllDlg" class="findAllDlg"><form method="dialog">
