@@ -29,7 +29,7 @@ Pick **(none)** to turn the overlay off. The three built-in overlays are in the 
 
 Use a **PNG or SVG with a see-through (transparent) background**, so the picture underneath shows through. A JPG, or a PNG with a white background, will cover the picture underneath. Put the file in the **On_Off** folder on the Brain with the **File Move** page (or the Media page), and it shows up in the On overlay dropdown near the top. A picture somewhere else works too: pick it with **Add new ...**, for example `MyBolt.png`.
 
-The overlay is stretched to fit the item, keeping its shape. Draw it on a square canvas and put the mark where you want it (for example in a corner).
+You pick the overlay once per item, and it is sized to the picture underneath (not to the empty space beside a wide or tall picture). A PNG or JPG overlay is stretched to the same width and height as that picture, so draw it the same shape as your pictures. An SVG can say where its mark sits instead: the built-in corner bolt always stays in the top right corner of the picture, the big bolt stays in the middle, and the glow ring stretches around the picture.
 
 ## Two pictures still work
 

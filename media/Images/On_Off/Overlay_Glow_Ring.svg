@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
   <!-- On overlay: a green glow around the picture -->
   <defs><radialGradient id="g" r=".5"><stop offset=".72" stop-color="#3cff6a" stop-opacity="0"/><stop offset=".88" stop-color="#3cff6a" stop-opacity=".55"/><stop offset="1" stop-color="#3cff6a" stop-opacity="0"/></radialGradient></defs>
   <circle cx="50" cy="50" r="50" fill="url(#g)"/>
