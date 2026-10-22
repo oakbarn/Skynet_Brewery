@@ -1,5 +1,5 @@
 {
-  "vesselType": "herms", "vtype": "Stainless 50 ft", "image": "Images/samples/herms_coil.svg", "liquidPorts": 2,
+  "vesselType": "herms", "vtype": "Stainless 50 ft", "image": "Images/Other_Equipment/herms_coil.svg", "liquidPorts": 2,
   "std": { "type": "TC", "size": 1.5 },
   "ports": { "wortIn": { "installed": true, "position": "Top Left" }, "wortOut": { "installed": true, "position": "Top Right" } }
 }

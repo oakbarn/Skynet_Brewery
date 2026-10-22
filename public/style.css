@@ -414,6 +414,7 @@ body.role-viewer .op-only { display: none !important; }
 /* on / off graphic dropdown with a small preview */
 .gpick { display: flex; align-items: center; gap: 8px; }
 .gpick select { flex: 1; min-width: 0; }
+.gpick select.gpickGroup { flex: 0 1 9em; }
 .gpick .gprev { width: 32px; height: 32px; object-fit: contain; flex: none; }
 .gpick .hidden { display: none; }
 /* true / false settings are switches */
@@ -671,3 +672,12 @@ body.onWorkspace #top .menuCopy { display: none; }
 .tplX { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 16px; line-height: 1.2; }
 .tplMini { width: min(420px, 94vw); }
 #ws .gfx.vessel .bfImg { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
+/* Process editor picture picker (Alt+P) */
+.picPickDlg { width: min(760px, 96vw); }
+.picPickDlg .ppTools { flex-wrap: wrap; gap: 8px; }
+.picPickDlg .ppTools input { flex: 1; min-width: 8em; }
+.picPickDlg .ppBody { display: flex; gap: 12px; flex-wrap: wrap; }
+.picPickDlg #ppList { flex: 1 1 320px; min-width: 0; font-family: ui-monospace, Consolas, monospace; }
+.picPickDlg .ppPrev { flex: 0 1 200px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.picPickDlg #ppImg { width: 180px; height: 180px; object-fit: contain; background: repeating-conic-gradient(#8884 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
+.picPickDlg #ppPath { word-break: break-all; font-size: 12px; }

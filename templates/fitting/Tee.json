@@ -1,7 +1,7 @@
 {
   "std": { "type": "TC", "size": 1.5 },
   "fittings": [{ "kind": "tee" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/samples/Fitting_Tee.svg",
+  "image": "Images/Other_Equipment/Fitting_Tee.svg",
   "ipPos": { "start": "Left", "end": "Right", "branch1": "Top" },
   "notes": "A tee, for piping. Openings at the left, the right and the top. Flow goes any way through it."
 }

@@ -1,5 +1,5 @@
 {
-  "vesselType": "pchiller", "vtype": "Brazed plate 30", "image": "Images/samples/plate_chiller.svg",
+  "vesselType": "pchiller", "vtype": "Brazed plate 30", "image": "Images/Chillers/plate_chiller.svg",
   "std": { "type": "MPT", "size": 0.5 },
   "ports": {
     "wortIn": { "installed": true, "position": "Top Left" }, "wortOut": { "installed": true, "position": "Bottom Right" },

@@ -1,7 +1,7 @@
 {
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
-  "image": "Images/samples/Vessel_Kettle_BottomDrain_Side_SteamSlayer.svg",
+  "image": "Images/Vessels/Vessel_Kettle_BottomDrain_Side_SteamSlayer.svg",
   "std": {
     "type": "TC",
     "size": 1.5
