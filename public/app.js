@@ -299,6 +299,7 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red
   ['Solenoid gas valve open (horizontal)', 'Images/samples/Valve_Gas_Solenoid_OpenH.svg'], ['Solenoid gas valve closed (horizontal)', 'Images/samples/Valve_Gas_Solenoid_ClosedH.svg'],
   ['Solenoid gas valve open (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_R.svg'],
   ['Solenoid gas valve open (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_L.svg'],
+  ['Submersible sump pump on', 'Images/samples/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/samples/Pump_Sump_Off.svg'],
   ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
