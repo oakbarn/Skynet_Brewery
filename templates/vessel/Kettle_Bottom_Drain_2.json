@@ -2,7 +2,6 @@
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
   "image": "Images/samples/Vessel_Kettle_BottomDrain_Side.svg",
-  "heatKind": "electric",
   "std": {
     "type": "TC",
     "size": 1.5
@@ -22,5 +21,5 @@
       "position": "Bottom Left"
     }
   },
-  "notes": "A kettle with a bottom drain and a low side port at the left (Fritz's drawing), set up as the Tangential Inlet."
+  "notes": "A kettle with a bottom drain and a low side port at the left (Fritz's drawing), set up as the Tangential Inlet. Plain version (no heat source); see the _Electric one for an electric kettle."
 }
