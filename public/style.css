@@ -671,3 +671,10 @@ body.onWorkspace #top .menuCopy { display: none; }
 .tplX { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 16px; line-height: 1.2; }
 .tplMini { width: min(420px, 94vw); }
 #ws .gfx.vessel .bfImg { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
+/* Build Tab (only while building something new) and the Save Build dialog */
+button.buildTab { border-style: dashed; border-color: #e8a33a; }
+button.buildTab.active { background: #e8a33a; color: #111; }
+.buildDlg { width: min(480px, 94vw); }
+.buildOpt { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+.buildOpt p { margin: 4px 0 6px; }
+.buildOpt label { display: block; margin: 6px 0; }
