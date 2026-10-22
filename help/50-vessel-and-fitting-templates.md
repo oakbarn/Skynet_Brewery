@@ -54,7 +54,7 @@ A **Template Name** has no spaces (use _ instead) and must be unique.
 
 A **Second Outlet** is a second drain, for example one above the heating element so the element always stays under water (clone Kettle_Big_Fatty, switch on its Second Outlet and pick the picture Vessel_Kettle_BigFatty_TwoDrains.svg).
 
-**All-in-one kettles**: **Kettle_DigiBoil_Electric** and **Kettle_Brewzilla_Electric** have the heating element built in, so they only come as electric Templates. The Brewzilla picture shows its recirculation arm and valve up the left side, and its tap is the Outlet at the bottom middle. Neither has a thermowell, because the panel can't read their own thermometers.
+**All-in-one kettles**: **Kettle_DigiBoil_Electric**, **Kettle_Brewzilla_Electric**, **Kettle_Grainfather_Electric** and **Kettle_Foundry_Electric** have the heating element built in, so they only come as electric Templates (see [Skynet Vessels](62-skynet-vessels)). The Brewzilla picture shows its recirculation arm and valve up the left side, and its tap is the Outlet at the bottom middle. None of them has a thermowell, because the panel can't read their own thermometers.
 
 ## Equipment Template settings
 
@@ -100,8 +100,10 @@ Skynet comes with single fittings ready to put in the piping, with their IPs whe
 | **Tee** | Left, Right and Top (flow goes any way through it) |
 | **Reducer** | Left (the big end, TC 2) and Right (the small end, TC 1.5) |
 | **Butterfly_Valve_1in** | Left and Right, TC 1.5: a reducer down to TC 1, a 1" butterfly valve, and a reducer back up to TC 1.5 |
+| **U_Bend** | Both at the bottom |
+| **End_Cap** | None: drag it onto an opening to close it |
 
-Add one to a Tab (**Add to Tab** on its pop-up), drag it to its place and draw pipes to its IPs. To point it another way, open it in Edit layout (switch **Bundled** off first) and pick **Turn**: 90, 180 or 270 degrees clockwise. The picture and its IPs turn together, so one Elbow_90 covers all four directions.
+Add one to a Tab (**Add to Tab** on its pop-up), drag it to its place and draw pipes to its IPs. On the Tab it is a **Skynet Fitting**: every opening has its IP built in. To point it another way, open it in Edit layout and use **Flip Horizontal**, **Flip Vertical** and **Rotate** (45 degree steps). The picture and its IPs turn together, so one Elbow_90 covers every direction. See [Skynet Fittings](60-skynet-fittings).
 
 Where two pipes of different sizes meet on one IP, the panel draws a reducer cone by itself (see [Pipes, hoses and reducers](24-pipes-and-hoses)). Use the **Reducer** fitting where it should be on the Equipment list, or on a vessel port that is not the size of its piping.
 
@@ -122,7 +124,7 @@ Open it in **Edit layout** (double-click, or hold a finger on it). Switch **Bund
 
 On a Tab_Fitting you pick:
 
-- **Turn**: 90, 180 or 270 degrees clockwise. The picture and its IPs turn together.
+- **Turn** (a fitting from a User Template): 90, 180 or 270 degrees clockwise. The picture and its IPs turn together. A fitting from a Skynet Template has **Flip Horizontal**, **Flip Vertical** and **Rotate** instead, and no IP settings: see [Skynet Fittings](60-skynet-fittings).
 
 - each **Valve**: **Select Device, Widget or None**. While that valve is closed, nothing flows through the Tab_Fitting.
 - each thermowell's **Temperature Probe**: **Select Temperature Probe or None**.
@@ -137,7 +139,7 @@ A Bundled Fitting is usually on the Vessel Template already, so it comes joined.
 2. In Edit layout, drag the Tab_Fitting (or its **Start** IP) so the Start IP sits on the vessel's port IP, and let go.
 3. It joins that port: its Start IP goes away, and flow passes between the vessel and the fitting with no pipe.
 
-To take it off again, open the Tab_Fitting and switch off **Joined to its vessel port**. It gets its own Start IP back.
+To take it off again, open the Tab_Fitting and switch off **Joined to its vessel port**. It gets its own Start IP back. A Skynet Fitting has no such switch: with the vessel un-bundled, drag the fitting off the port. Drop it back on the port and it joins again.
 
 ## Building Skynet Templates
 

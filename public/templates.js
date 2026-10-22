@@ -19,7 +19,8 @@ export const stdShort = s => s?.type ? (STD_SHORT[s.type] || s.type) + (s.size !
 // the fittings a Bundled Fitting is built from, up to four, from the vessel port outward. The list is set by Skynet:
 // a new kind is added here, through GitHub.
 export const FITTING_KINDS = {
-  none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve', reducer: 'Reducer',
+  none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve', reducer: 'Reducer', cap: 'End Cap',
+  check: 'Check Valve', flowMeter: 'Flow Meter', flowMeterTemp: 'Flow Meter with Temperature',
 };
 export const FITTING_SLOTS = ['First Fitting', 'Second Fitting', 'Third Fitting', 'Fourth Fitting'];
 export const THERMOWELL_POS = { short: 'Short', long: 'Long' };
@@ -76,17 +77,21 @@ export function cleanFitting(b = {}) {
   for (const [k, v] of Object.entries(b.ipPos && typeof b.ipPos === 'object' ? b.ipPos : {})) if (/^\w{1,20}$/.test(k) && text(v, 40)) ipPos[k] = text(v, 40);
   return { std: cleanStd(b.std), fittings, image: text(b.image, 300) || undefined, ipPos: Object.keys(ipPos).length ? ipPos : undefined, notes: text(b.notes, 2000) || undefined };
 }
-// the IPs a Bundled Fitting has: the far end of the chain, plus the open side of every tee without a thermowell
+// the IPs a Bundled Fitting has: the far end of the chain (none when an End Cap closes it), plus the open side of every tee
+// without a thermowell
 export function fittingEnds(t) {
   const fs = (t.fittings || []).filter(f => f.kind !== 'none');
   if (!fs.length) return [];
-  const ends = [{ key: 'end', name: 'End' }];
+  const ends = fs[fs.length - 1].kind === 'cap' ? [] : [{ key: 'end', name: 'End' }];
   fs.forEach((f, i) => { if (f.kind === 'tee' && !f.thermowell) ends.push({ key: 'branch' + (i + 1), name: `Tee ${i + 1} branch` }); });
   return ends;
 }
 
 // the Connection Standard of one of a Bundled Fitting's IPs: past a reducer the size is the reducer's small end
 // (key 'start' sits before every fitting, 'branchN' at fitting N, 'end' after the last one)
+// an End Cap by itself (Fritz, 2026-10-22): it has no IP; dropped on an opening it closes it
+export const isCapOnly = t => { const fs = (t?.fittings || []).filter(f => f.kind !== 'none'); return fs.length === 1 && fs[0].kind === 'cap'; };
+
 export function fittingPortStd(t, key) {
   const at = key === 'start' ? 0 : key === 'end' ? Infinity : +String(key).replace(/\D/g, '') || 0;
   let std = t.std ? { ...t.std } : undefined;

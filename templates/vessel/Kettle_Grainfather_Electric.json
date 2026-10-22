@@ -1,0 +1,22 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Vessel_Grainfather.svg",
+  "heatKind": "electric",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "size": [
+    170,
+    327
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom",
+      "fitting": "Valve_90"
+    }
+  },
+  "notes": "A tall all-in-one electric kettle, Grainfather style: the element and pump are built in, so it only comes as an electric Template. Its recirculation arm runs up the right side and over the lid, and its outlet is at the bottom middle. Its own thermometer is inside and the panel can't read it, so there is no probe to pick."
+}
