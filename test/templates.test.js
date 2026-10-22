@@ -85,6 +85,8 @@ for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: 'Bottom', end: 'Right
 assert.equal(S.get('vessel', 'RIMS_Tube').vesselType, 'rims');
 assert.deepEqual(S.get('vessel', 'Kettle_Big_Fatty').size, [250, 248], 'a Template can keep its picture\'s shape');
 assert.equal(cleanVessel({ size: [5, 100] }).size, undefined);
+const bv = S.get('fitting', 'Butterfly_Valve_1in');
+assert.deepEqual([fittingPortStd(bv, 'start'), fittingPortStd(bv, 'end')], [{ type: 'TC', size: 1.5 }, { type: 'TC', size: 1.5 }], 'down to 1 inch and back up');
 const red = S.get('fitting', 'Reducer');
 assert.equal(red.fittings[0].toSize, '1.5');
 assert.deepEqual(fittingPortStd(red, 'start'), { type: 'TC', size: 2 }, 'the big end');
