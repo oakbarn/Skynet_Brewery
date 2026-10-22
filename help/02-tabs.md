@@ -26,7 +26,7 @@ Press **☰ Menu** and pick **Edit layout**. A dashed bar appears with these but
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
 | **Draw hose** | Like a pipe, but it bends in smooth curves. Loose ends get a coupling. See [Pipes, hoses and reducers](24-pipes-and-hoses). |
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. The button then says **🔓 Unlock**: press it to unlock. Every item's properties also have a **Lock position** switch. |
-| **🔒 Lock All** | Locks every item on this tab in place in one press. It is an action, not a switch: afterwards you can unlock single items with **🔓 Unlock**. See [Locking items in place](54-locking). |
+| **🔒 Lock All** | Locks every item on this tab in place in one press. It is an action, not a switch: afterwards you can unlock single items with **🔓 Unlock**. See [Locking items in place](56-locking). |
 | **🔓 Unlock All** | Unlocks every item on this tab in one press. Also an action, not a switch. |
 | **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
 | **New tab** | Adds a tab. |
