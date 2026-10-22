@@ -2241,6 +2241,18 @@ function readFields(obj, root = $('#dlgBody')) {
 
 // A form of fields in a box (a dialog, or a Menu tab): "Add new ..." in a list and selects that change the fields are handled here.
 // onChange runs after any change. Returns build(), which draws the fields again.
+// Open / closed (on / off) pictures come in pairs (Fritz, 2026-10-22): picking one fills in its partner when a picture with the
+// matching name exists, e.g. Valve_Manual_ClosedV_R.svg -> Valve_Manual_OpenV_R.svg. The orientation is the user's pick.
+const PIC_PAIR = { imageOff: 'imageOn', imageOn: 'imageOff', imageClosed: 'imageOpen', imageOpen: 'imageClosed' };
+const picPartner = p => { const swap = { Closed: 'Open', Open: 'Closed', closed: 'open', open: 'closed', Off: 'On', On: 'Off', off: 'on', on: 'off' };
+  const file = p.split('/').pop(), m = file.match(/(Closed|Open|Off|On|(?<![A-Za-z])(?:closed|open|off|on))(?=[^a-z]|$)/);
+  return m ? p.slice(0, p.length - file.length) + file.slice(0, m.index) + swap[m[1]] + file.slice(m.index + m[1].length) : null; };
+function fillPicPair(body, sel) {
+  const other = body.querySelector(`select[data-k="${PIC_PAIR[sel.dataset.k]}"][data-kind="gpick"]`), p = picPartner(sel.value);
+  if (!other || !p || p === sel.value || !vList(other.dataset.list || 'onoff').concat(mediaPics).includes(p)) return;
+  if (![...other.options].some(o => o.value === p)) other.insertBefore(h('option', { value: p }, p), other.lastChild);
+  other.value = p; other.dispatchEvent(new Event('change'));      // shows its preview (does not bubble back here)
+}
 function bindForm(body, fields, obj, onChange) {
   const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); menuHelpIcons(body); };
   build();
@@ -2260,6 +2272,7 @@ function bindForm(body, fields, obj, onChange) {
       if (obj[k] === undefined) delete obj[k];
       build();
     } else if (t.dataset?.rerender) { try { readFields(obj, body); } catch { } build(); }
+    else if (t.dataset?.kind === 'gpick' && PIC_PAIR[t.dataset.k] && t.value) fillPicPair(body, t);
     onChange?.(ev);
   };
   if (onChange) body.oninput = onChange;
