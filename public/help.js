@@ -213,6 +213,11 @@ if (ALONE) {
     if (changed() && !confirm('Throw away your changes to this page?')) return;
     stopEdit(); load(want, section).catch(e => say(e.message, true));
   };
+  // the panel reopens this window on top to show it again: it keeps its place and its ◀ Back list, and leaves it alone while a page is edited
+  window.skynetHelpKeep = () => ({ busy: changed(), trail: [...trail, cur].filter(Boolean).slice(-30),
+    place: { w: window.innerWidth, h: window.innerHeight, x: window.screenX, y: window.screenY } });
+  trail = (q.get('trail') || '').split(',').filter(Boolean);
+  if (trail.length && bare(trail.at(-1)) === bare(q.get('page') || '')) trail.pop();      // the same page again: not a step back
   fetch('/auth/status').then(r => r.json()).then(st => {
     if (!st.user) return location.replace('/login.html');
     document.body.classList.add('role-' + st.user.role);
