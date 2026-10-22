@@ -380,7 +380,7 @@ async function route(req, res) {
   // ===== Everything below needs a signed-in user =====
   if (m === 'GET' && PUBLIC_FILES.has(p)) return sendFile(req, res, path.join(PUBLIC, p));
   if (!me) {
-    if (m === 'GET' && (p === '/' || p === '/index.html')) { res.writeHead(302, { Location: '/login.html' }); return res.end(); }
+    if (m === 'GET' && (p === '/' || p === '/index.html' || p === '/help.html')) { res.writeHead(302, { Location: '/login.html' }); return res.end(); }
     return fail(res, 401, 'Please sign in');
   }
   const need = needRole(p, m);
