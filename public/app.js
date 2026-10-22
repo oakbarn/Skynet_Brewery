@@ -304,13 +304,19 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red
   ['Submersible sump pump on', 'Images/samples/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/samples/Pump_Sump_Off.svg'],
   ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
+// On overlay pictures (Fritz, 2026-10-22): drawn on top of the item's picture while it is on, the picture below stays visible.
+// They have see-through backgrounds and live in media/Images/On_Off (Fritz: its own folder); the list shows that folder first,
+// then every other picture, and Add new takes any picture path in media/Images.
+const onOffPic = p => /^Images\/On_Off\//i.test(p);
+const OVERLAY_GRAPHICS = [['Lightning bolt (corner badge)', 'Images/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/On_Off/Overlay_Bolt_Center.svg'],
+  ['Green glow ring', 'Images/On_Off/Overlay_Glow_Ring.svg']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
 // pictures and sounds already used anywhere in the layout
 function usedPaths(re) {
   const c = draft || S.config;
-  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.image, o.background, o.sound, ...slotsOf(o).map(n => o['imagePath_' + n]), ...(o.sounds || [])])
+  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.imageOverlay, o.image, o.background, o.sound, ...slotsOf(o).map(n => o['imagePath_' + n]), ...(o.sounds || [])])
     .filter(p => typeof p === 'string' && re.test(p)))].sort();
 }
 const HEAT_SOURCES = ['None', 'Electric element', 'Gas burner', 'Induction', 'Steam jacket', 'HERMS coil'];
@@ -319,7 +325,7 @@ const eqClass = g => g?.kind === 'vessel' ? (g.vesselType === 'bfit' ? bfitClass
 // list keys: "standard" (shared), "<class>.types", "<class>.<port>"
 function vList(key) {
   const [c, p] = key.split('.');
-  const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'units' ? UNITS : key === 'colors' ? [] :
+  const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'overlays' ? [...OVERLAY_GRAPHICS.map(g => g[1]), ...mediaPics.filter(onOffPic).sort(), ...inImages(mediaPics).filter(p => !onOffPic(p)).sort()] : key === 'units' ? UNITS : key === 'colors' ? [] :
     key === 'pictures' ? inImages([...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE), ...mediaPics]) :
     key === 'backgrounds' ? inImages([...mediaPics, ...(draft || S.config).workspaces.map(w => w.background).filter(Boolean)]).sort() : key === 'sounds' ? [...new Set([...mediaSounds, ...usedPaths(SND_RE)])].sort() : key === 'heat' ? HEAT_SOURCES : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
   return [...new Set([...(base || []), ...(S.config.vesselLists?.[key] || [])])];
@@ -559,6 +565,8 @@ const PROP_TYPES = ['analogOut', 'pwmOut', 'vKonstant', 'vAPI', 'shared'];
 // Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
 const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
 const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
+// One picture plus an On overlay instead of two pictures (Fritz, 2026-10-22): .imageOverlay is drawn on top while the item is on
+const OVERLAY_PIC = ['imageOverlay', 'On overlay (on top while on)', 'gpick', 'overlays'];
 const isPropValve = e => e && e.subtype === 'propValve' && PROP_TYPES.includes(e.type);
 function propPct(e) {
   const v = Number(S.values[e.name]?.value) || 0;
@@ -750,6 +758,12 @@ function fillEl(n, e0) {
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
     img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
   }
+  // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
+  const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay || e.imageOverlay);
+  if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
+  let ov = n.querySelector(':scope > .onov');
+  if (ovl && !ov) n.append(ov = h('div', { class: 'onov' }));
+  if (ov) { ov.style.backgroundImage = ovl ? `url("${media(ovl)}")` : ''; ov.classList.toggle('hidden', !ovl); }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
@@ -2286,8 +2300,11 @@ function alarmFields(item) {
 }
 
 function fieldsFor(item) {
-  const fs = fieldsOf(item);
-  return STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn') ? [...fs, ...ONOFF_PICS] : fs;
+  let fs = fieldsOf(item);
+  if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
+  // every item with on / off pictures can also have an On overlay, offered right below them (not the Manual vessel widget)
+  const at = fs.findIndex(f => f[0] === 'imageOff');
+  return at < 0 || item.type === 'manual' ? fs : [...fs.slice(0, at + 1), OVERLAY_PIC, ...fs.slice(at + 1)];
 }
 
 function fieldsOf(item) {
@@ -2376,8 +2393,8 @@ function field([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'cpick' }, sw, s, pick, val);
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
-    const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds'].includes(list);
-    const named = new Map(ONOFF_GRAPHICS.map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
+    const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
+    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
     const pv = h('img', { class: 'gprev' + (v && pic ? '' : ' hidden'), ...(v && pic ? { src: media(v) } : {}), alt: '' });
     const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list }, h('option', { value: '' }, '(none)'),
       ...os.map(p => h('option', { value: p, ...(p === v ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
