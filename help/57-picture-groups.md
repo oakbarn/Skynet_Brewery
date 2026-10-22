@@ -7,9 +7,9 @@ Pictures in `media/Images` are sorted into **groups**: one folder for each kind 
 | `media/Images/Skynet/<group>` | The **Skynet pictures**. Read only. |
 | `media/Images/<group>` | **Your pictures**. Add, rename, move and delete them as you like. |
 
-## The ten groups
+## The eleven groups
 
-Both places have the same ten groups. They are made on every start.
+Both places have the same eleven groups. They are made on every start.
 
 | Group | Folder | For example |
 |---|---|---|
@@ -23,6 +23,7 @@ Both places have the same ten groups. They are made on every start.
 | Hop Infusion | `Hop_Infusion` | Hop droppers, hop rockets, hop filters |
 | Other Equipment | `Other_Equipment` | Burners, elements, fittings, RIMS tubes |
 | Miscellaneous | `Miscellaneous` | Backgrounds and anything else |
+| On Off | `On_Off` | On overlays: see-through pictures drawn on top of an item while it is on (see On overlay) |
 
 The folder names have `_` in place of spaces, so a Process can use a path as it is, for example `my_pump.image = "Images/Skynet/Pumps/Pump_Red_Rip_On.png"` or `my_pump.image = "Images/Pumps/MyPump.png"`.
 
@@ -34,7 +35,7 @@ To change a Skynet picture, copy it to your computer, change it, and add it unde
 
 ## Your own groups
 
-The ten standard folders for your pictures can't be deleted, renamed or moved (they show a 🔒), but the pictures in them can. Any other folder you make in `media/Images` is a group of your own: on the **Media** screen open **Images** and press **New picture group** (the button is called **New folder** everywhere else). Your own groups can be renamed, moved and deleted like any folder (empty it first to delete it).
+The eleven standard folders for your pictures can't be deleted, renamed or moved (they show a 🔒), but the pictures in them can. Any other folder you make in `media/Images` is a group of your own: on the **Media** screen open **Images** and press **New picture group** (the button is called **New folder** everywhere else). Your own groups can be renamed, moved and deleted like any folder (empty it first to delete it).
 
 ## Where the Skynet pictures went
 

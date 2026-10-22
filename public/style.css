@@ -644,6 +644,11 @@ body.onWorkspace #top .menuCopy { display: none; }
 
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
+/* the red circle with a yellow hammer beside ☰ Menu: Edit layout on and off; a yellow ring while it is on */
+button.barEdit { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #8f1d17; background: #d32f2f; }
+button.barEdit:hover { background: #e53935; }
+button.barEdit:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
+button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
 /* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */
 .helpIcon.barHelp { width: 30px; height: 30px; margin: 0; font-size: 17px; }
 .helpIcon:hover, .helpIcon:focus-visible { background: #ffe24d; outline: 2px solid #000; outline-offset: 1px; }
@@ -692,5 +697,8 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .buildOpt { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
 .buildOpt p { margin: 4px 0 6px; }
 .buildOpt label { display: block; margin: 6px 0; }
+/* On overlay: a see-through picture drawn on top of the item while it is on (Fritz, 2026-10-22) */
+.el > .onov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; }
+.el > .onov.tint { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mix-blend-mode: color; }
 .mdReadOnly { margin: 6px 0; padding: 6px 10px; border: 1px solid #e8a33a; border-radius: 8px; background: #e8a33a22; }
 .mdPickBtn.off { opacity: .45; pointer-events: none; }
