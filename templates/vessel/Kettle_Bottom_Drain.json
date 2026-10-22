@@ -1,0 +1,10 @@
+{
+  "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/samples/Vessel_Kettle_BottomDrain.svg", "heatKind": "electric",
+  "std": { "type": "TC", "size": 1.5 },
+  "ports": {
+    "outlet": { "installed": true, "position": "Center Bottom", "fitting": "Valve_90" },
+    "thermowell": { "installed": true, "position": "Center Low" },
+    "tangential": { "installed": true, "position": "Bottom Left" }
+  },
+  "notes": "A kettle with a bottom drain (Fritz's drawing). Type, heat source and ports can be changed while Skynet is building its Templates."
+}
