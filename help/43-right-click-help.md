@@ -23,7 +23,7 @@ Phones have no right-click. **Hold a finger on an item for about a second** whil
 
 - A **push button** is left alone: holding it is how you press it.
 - In **Edit layout** holding a finger opens **Properties**, as before, so there is no Help gesture there.
-- The Menu Bar and empty spots have no phone gesture yet: open **Help** from the Menu Bar.
+- The Menu Bar and empty spots have no phone gesture yet: tap the yellow **?** beside **☰ Menu**, or **Help** on the Menu Bar.
 
 ## The yellow ? icon
 
@@ -31,7 +31,9 @@ A yellow circle with a black **?** opens Help at the part about the thing next t
 
 - **☰ Menu tabs**: beside each heading (Default, Equipment Profile, Vessel and its Size, Heat, Temperature, Ports and Build parts, Default Layout, Mash, Boil, Tab Background and Valve Profiles).
 - **Properties** pop-ups: beside the title, for every device and widget, pipes, IPs, equipment, and Tab settings. If you changed something in the pop-up, it asks first, because opening Help closes the pop-up without saving.
-- There is **no** ? on a tab itself, so your brew day screens stay clean.
+- There is **no** ? on a tab itself, so your brew day screens stay clean. The one ? on the Tabs bar sits beside **☰ Menu**, not on the tab.
+
+Help opens in a window of its own: see [Help in its own window](54-help-window).
 
 ## Where each item goes
 

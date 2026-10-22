@@ -463,6 +463,8 @@ body.role-viewer .op-only { display: none !important; }
 .hpEditPanes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
 #hpText { width: 100%; min-height: 60vh; font-family: var(--mono); font-size: 13px; line-height: 1.45; resize: vertical; }
 #hpPreview { border: 1px dashed var(--line); border-radius: 6px; padding: 4px 12px; max-height: 70vh; overflow: auto; }
+/* the Help window (help.html): no Menu Bar above it */
+@media (min-width: 761px) { .helpWindow .hpSide { top: 10px; max-height: calc(100vh - 20px); } }
 @media (max-width: 760px) {
   .hpLayout { grid-template-columns: 1fr; }
   .hpSide { position: static; max-height: none; }
@@ -642,6 +644,8 @@ body.onWorkspace #top .menuCopy { display: none; }
 
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
+/* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */
+.helpIcon.barHelp { width: 30px; height: 30px; margin: 0; font-size: 17px; }
 .helpIcon:hover, .helpIcon:focus-visible { background: #ffe24d; outline: 2px solid #000; outline-offset: 1px; }
 /* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
 .rt-b { font-weight: bolder; }
@@ -681,3 +685,10 @@ body.onWorkspace #top .menuCopy { display: none; }
 .picPickDlg .ppPrev { flex: 0 1 200px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
 .picPickDlg #ppImg { width: 180px; height: 180px; object-fit: contain; background: repeating-conic-gradient(#8884 0 25%, transparent 0 50%) 0 0 / 16px 16px; }
 .picPickDlg #ppPath { word-break: break-all; font-size: 12px; }
+/* Build Tab (only while building something new) and the Save Build dialog */
+button.buildTab { border-style: dashed; border-color: #e8a33a; }
+button.buildTab.active { background: #e8a33a; color: #111; }
+.buildDlg { width: min(480px, 94vw); }
+.buildOpt { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+.buildOpt p { margin: 4px 0 6px; }
+.buildOpt label { display: block; margin: 6px 0; }

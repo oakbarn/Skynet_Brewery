@@ -7,6 +7,7 @@ const VIEWS = {
   workspace: ['tabs'], scripts: ['scripts'], globals: ['variables'], log: ['log'], devices: ['devices'], media: ['media'],
   filemove: ['file-move'], import: ['import'], settings: ['settings'], help: ['editing-help'], config: ['schema-json'],
 };
+export const viewTopic = v => VIEWS[v] || null;      // Help for the page you are on (the Help button)
 const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 
 // a device or widget element (the things added with Add element)
@@ -55,8 +56,10 @@ const BAR = [
   ['#menuTabs', ['menu', 'menu-tabs']],
   ['.menuCopy', ['menu-everywhere']],
   ['.menuWrap', ['menu']],
+  ['#buildTab, #saveBuild, #wsTabs .buildTab', ['build-tab']],
   ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
+  ['#barHelp', ['help-window']],
   ['#simBar', ['simulation']],
   ['#soundBtn', ['alarms-and-sound']],
   ['#who', ['login']],

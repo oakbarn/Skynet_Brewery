@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { elementTopic, graphicTopic, barTopic, menuTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
+import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
@@ -128,7 +128,8 @@ function connect() {
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
-function setView(v) {
+function setView(v, here = false) {
+  if (v === 'help' && !here) return openHelp(pageTopic());      // Help opens in its own window (see openHelp)
   const prev = view;
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
@@ -150,8 +151,9 @@ const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspace
 
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
-  for (const w of L().workspaces) t.append(h('button', { class: w.name === wsName && !menuTab ? 'active' : '', onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: `Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.name));
+  for (const w of L().workspaces) t.append(h('button', { class: (w.name === wsName && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : ''), onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
+    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : w.name));
+  $('#saveBuild').classList.toggle('hidden', !buildWs());
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -1285,7 +1287,7 @@ function setEditing(on) {
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
   const lockedEq = S.profiles?.find(p => p.id === S.config.workspaces.find(w => w.name === wsName)?.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).';
   renderTabs(); renderWs();
 }
 
@@ -1316,7 +1318,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     if (again) { sel = { kind: 'gfx', id: hit.dataset.gid }; renderWs(); editItem('gfx', sel.id); return; }
     startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid };
     const pipe = findItem('gfx', sel.id);
-    drag = pipe.locked || noMove() ? null : startPipeMove(pipe, p);
+    drag = noMove() ? null : pipe.locked ? lockedDrag(pipe, p) : startPipeMove(pipe, p);
     renderWs(); return;
   }
   if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
@@ -1326,11 +1328,14 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (bundle) { item = bundle; sel = { kind: 'gfx', id: bundle.id }; node = $(`#ws .gfx[data-gid="${CSS.escape(bundle.id)}"]`) || node; }
   startLongPress(ev, sel.kind, sel.id);
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel'); updLockBtn();
-  if (item.locked || noMove()) { drag = null; ev.preventDefault(); return; }   // locked, or a phone or tablet: select only, no move or resize
+  if (noMove()) { drag = null; ev.preventDefault(); return; }   // a phone or tablet: select only, no move or resize
+  if (item.locked) { drag = lockedDrag(item, p); ev.preventDefault(); return; }   // locked: select only, a try to drag says why
   if (item.fitting === 'coupling') {     // the open end of one straight pipe: dragging it moves that whole pipe
     const ps = pipesOn(item.id, item.workspace);
     if (ps.length === 1 && ps[0].straight && !ps[0].locked) { drag = startPipeMove(ps[0], p); ev.preventDefault(); return; }
   }
+  const riders = lockedRiders(item);
+  if (riders.length) { drag = lockedDrag(item, p, riders); ev.preventDefault(); return; }
   drag = { mode: !pip && !bundle && !item.bundled && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
@@ -1346,6 +1351,11 @@ $('#ws').addEventListener('pointermove', ev => {
     renderPipes(); return;
   }
   if (!drag) return;
+  if (drag.mode === 'locked') {        // a locked item (or one that would carry a locked one) was dragged: say why it stays
+    const q = canvasPt(ev);
+    if (Math.hypot(q[0] - drag.start[0], q[1] - drag.start[1]) > 5) { toast(drag.why, true); drag = null; }
+    return;
+  }
   drag.moved = true;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
   if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
@@ -1405,7 +1415,29 @@ function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 // An unlocked item in Edit layout keeps the right button for dragging. Shift + right-click gives the browser's own menu.
 // Phones have no right-click: holding a finger on an item for 0.7 s does the same, but only outside Edit layout,
 // where holding a finger already opens Properties.
-const openHelp = topic => window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
+// Fritz, 2026-10-22: Help opens in a window of its own, so it can sit beside the panel while you follow it.
+// There is one Help window: asking again shows the new page in it. Only when the browser blocks the window does Help show
+// on the panel's own Help page (`quiet`: without saying so, for a phone's long press, which browsers never let open a window).
+const HELP_WIN = 'skynetHelp';
+let helpBlockedSaid = false;
+function helpWindow([page, section] = []) {
+  const url = '/help.html' + (page ? '?page=' + encodeURIComponent(page) + (section ? '&section=' + encodeURIComponent(section) : '') : '');
+  const sw = screen.availWidth || 1200, sh = screen.availHeight || 800, w = Math.min(900, Math.max(480, Math.round(sw * 0.42)));
+  let win = null;
+  try { win = window.open('', HELP_WIN, `width=${w},height=${sh - 60},left=${(screen.availLeft || 0) + sw - w},top=${screen.availTop || 0}`); } catch { }
+  if (!win) return false;
+  try { if (win.skynetHelp) { win.skynetHelp(page, section); win.focus(); return true; } } catch { }
+  win.location.href = url; win.focus();      // a new window (or one still loading)
+  return true;
+}
+function openHelp(topic, quiet = false) {
+  if (!quiet && helpWindow(topic || undefined)) return;
+  if (!quiet && !helpBlockedSaid) { helpBlockedSaid = true; toast('The browser blocked the Help window, so Help is shown here. Allow pop-ups for the panel to read Help beside it.', true); }
+  setView('help', true);
+  window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
+}
+// Help for what is showing: the Menu tab that is open, else the page you are on
+const pageTopic = () => view === 'workspace' && menuTab ? menuTopic(menuTab, '') || ['menu'] : viewTopic(view);
 // the yellow ? Help icon (Fritz): on the ☰ Menu tabs and in Properties dialogs, never on a tab itself.
 // `leave` runs first and may say no (a dialog with changes asks before it closes).
 const helpIcon = (topic, leave) => h('button', { type: 'button', class: 'helpIcon', title: 'Help on this', 'aria-label': 'Help on this',
@@ -1440,7 +1472,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   const hit = tabItemAt(ev.target);
   if (!hit || (hit.kind === 'el' && tapAction(hit.item) === 'hold')) return;     // a push button is held on purpose
   clearTimeout(helpPress?.t);
-  helpPress = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { helpPress = null; helpShownAt = Date.now(); openHelp(hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item)); }, 700) };
+  helpPress = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { helpPress = null; helpShownAt = Date.now(); openHelp(hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item), true); }, 700) };
 });
 const dropHelpPress = () => { if (helpPress) { clearTimeout(helpPress.t); helpPress = null; } };
 $('#ws').addEventListener('pointermove', ev => { if (helpPress && Math.hypot(ev.clientX - helpPress.x, ev.clientY - helpPress.y) > 8) dropHelpPress(); });
@@ -1517,6 +1549,7 @@ function finishPipe(to) {
 // a shared IP (a fitting, pump, valve or vessel port) lets go. Dropped with an end on another IP, it joins that IP.
 const ownCoupling = (id, pipe) => { const g = draft.graphics.find(x => x.id === id && x.fitting === 'coupling'); return g && pipesOn(id, pipe.workspace).every(p => p === pipe) ? g : null; };
 function startPipeMove(pipe, p) {
+  const riders = lockedRiders(pipe); if (riders.length) return lockedDrag(pipe, p, riders);
   const d = { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points), carry: [] };
   if (!pipe.straight) return d;
   for (const k of ['from', 'to']) {
@@ -1671,6 +1704,7 @@ function fillAddType() {
   $('#addType').append(...ADD_MENU.map(([group, items], gi) => h('optgroup', { label: group }, ...items.map((it, ii) => h('option', { value: gi + ':' + ii }, it[0])))));
 }
 $('#addEl').onclick = guard(async () => {
+  toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   const [gi, ii] = $('#addType').value.split(':').map(Number);
   const [, pick, prefix, extra] = ADD_MENU[gi][1][ii], preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
@@ -1797,20 +1831,63 @@ function updLockBtn() {
   const item = editing && sel ? findItem(sel.kind, sel.id) : null;
   b.disabled = !item; b.textContent = item?.locked ? '🔓 Unlock' : '🔒 Lock';
 }
+// Lock holds in Edit layout too (Fritz, 2026-10-22): only unlocked items move. An unlocked item also stays put when moving it
+// would carry or bend a 🔒 locked one: a vessel's ports and joined fittings, a straight pipe's own end couplings, a pipe or hose joined to it.
+const lockName = o => o.name || o.label || (o.kind === 'pipe' ? (o.hose ? 'a hose' : 'a pipe') : o.kind === 'ip' ? 'an IP' : 'an item');
+function lockedRiders(item) {
+  const out = [], add = g => { if (g?.locked && g !== item && !out.includes(g)) out.push(g); };
+  if (item.kind === 'pipe') { if (item.straight) for (const k of ['from', 'to']) add(ownCoupling(item[k], item)); return out; }
+  const parts = item.kind === 'vessel' ? bundleParts(item) : [];
+  parts.forEach(add);
+  const ids = item.kind ? [item.id, ...eqPorts(item).map(q => q.id), ...parts.map(g => g.id)] : hasIps(item) ? devIps(item).map(q => q.id) : [];
+  for (const id of ids) for (const pp of pipesOn(id, item.workspace)) { add(pp); if (pp.straight) add(ownCoupling(pp.from === id ? pp.to : pp.from, pp)); }
+  return out;
+}
+function lockedDrag(item, p, riders) {
+  const names = riders?.slice(0, 3).map(lockName).join(', ') + (riders?.length > 3 ? ` and ${riders.length - 3} more` : '');
+  const why = riders ? `🔒 ${lockName(item)} can't move: ${names} ${riders.length > 1 ? 'are' : 'is'} locked and would move with it. Unlock ${riders.length > 1 ? 'them' : 'it'} first (🔓 Unlock, or 🔓 Unlock All).`
+    : `🔒 ${lockName(item)} is locked in place. Press 🔓 Unlock (or 🔓 Unlock All) to move it.`;
+  return { mode: 'locked', item, start: p, why };
+}
+// an Equipment Profile that is locked owns the equipment, IPs and pipes on its Tab: their lock can't change either
+function profileFrozen(o) {
+  if (!['vessel', 'ip', 'pipe'].includes(o?.kind)) return null;
+  const w = draft.workspaces.find(x => x.name === o.workspace);
+  return w && w.layoutFromProfile !== false ? S.profiles?.find(p => p.id === w.equipmentProfile && p.locked) : null;
+}
+const setLock = (o, on) => { if (on) o.locked = true; else delete o.locked; };
 $('#lockItem').onclick = () => {
   const item = sel && findItem(sel.kind, sel.id); if (!item) return toast('Select an item first', true);
-  if (item.locked) delete item.locked; else item.locked = true;
-  toast(item.locked ? 'Locked in place' : 'Unlocked'); renderWs();
+  const frozen = profileFrozen(item); if (frozen) return toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
+  const on = !item.locked;
+  for (const g of [item, ...(item.kind === 'vessel' ? bundleParts(item) : [])]) setLock(g, on);   // a vessel's ports and joined fittings go with it
+  toast(on ? 'Locked in place' : 'Unlocked'); renderWs(); updLockBtn();
 };
+// 🔒 Lock All / 🔓 Unlock All (Fritz, 2026-10-22): actions, not a switch. Every item on this Tab is locked (or unlocked) once;
+// after that each one can still be unlocked (or locked) by itself with the 🔒 Lock button.
+function lockTab(on) {
+  const mine = o => o.workspace === wsName;
+  let n = 0, kept = 0;
+  for (const o of [...draft.elements.filter(mine), ...draft.graphics.filter(mine)]) {
+    if (!!o.locked === on) continue;
+    if (profileFrozen(o)) { kept++; continue; }
+    setLock(o, on); n++;
+  }
+  toast((n ? `${on ? '🔒 Locked' : '🔓 Unlocked'} ${n} item${n === 1 ? '' : 's'} on "${wsName}". Save layout keeps it.` : `Everything on "${wsName}" was already ${on ? 'locked' : 'unlocked'}.`)
+    + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : ''));
+  renderWs(); updLockBtn();
+}
+$('#lockAll').onclick = () => lockTab(true);
+$('#unlockAll').onclick = () => lockTab(false);
 $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run straight across or up and down. Esc cancels.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
 $('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
-// a new equipment widget: vessels, chillers, coils and filters go on the Equipment tab (made if it is missing), fittings on this tab
+// a new equipment widget: made on the Build Tab, then Save Build ... puts it on a Tab (pipe fittings go on the Tab you are on)
 function addVesselWidget(c) {
-  const C = EQ[c], tab = C.tab || wsName;
-  if (!draft.workspaces.some(w => w.name === tab)) draft.workspaces.push({ name: tab, width: 1600, height: 900 });
-  wsName = tab;
+  const C = EQ[c];
+  if (C.tab) toBuild();
+  const tab = wsName;
   let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.name === C.title + ' ' + i)) i++;
   const n = draft.graphics.filter(g => eqClass(g) && g.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: c, workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1],
@@ -1819,6 +1896,7 @@ function addVesselWidget(c) {
 }
 $('#addVessel').onclick = () => {
   if (EQ[$('#addVesselType').value]) return addVesselWidget($('#addVesselType').value);
+  toBuild();
   const t = $('#addVesselType').value, base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' }[t];
   let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.label === base + ' ' + i)) i++;
   const size = { coil: [160, 160], plateChiller: [90, 160] }[t] || [200, 260];
@@ -1841,6 +1919,157 @@ $('#addWs').onclick = () => {
   toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
 };
 $('#wsProps').onclick = () => editWorkspace();
+
+// ---- Build Tab (Fritz, 2026-10-22): something new is made first on a clean Tab, not on a busy one. The Build Tab is only in
+// the Edit layout draft (never saved) and shows only while you build. New Devices, Widgets and equipment go on it (Add element,
+// Add equipment, a Template's Add to Tab > Build Tab). Save Build ... then puts it on a Tab, or saves it as a Template.
+const buildWs = () => draft?.workspaces.find(w => w.build);
+const buildItems = b => b ? [...draft.elements.filter(e => e.workspace === b.name), ...draft.graphics.filter(g => g.workspace === b.name)] : [];
+// open the Build Tab (made if it is not there yet), the size of the Tab you came from
+function toBuild() {
+  if (!editing) return;
+  let b = buildWs();
+  if (!b) {
+    const from = curWs(); let n = 'Build Tab', i = 2;
+    while (draft.workspaces.some(w => w.name === n)) n = 'Build Tab ' + i++;
+    b = { name: n, build: true, width: from?.width || 1600, height: from?.height || 900, from: from?.name };
+    draft.workspaces.push(b);
+  }
+  if (wsName === b.name) return b;
+  if (!curWs()?.build) b.from = wsName;           // Save Build ... offers this Tab first
+  wsName = b.name; sel = null;
+  $('#editHint').textContent = '🔨 Build Tab: build the new thing here (Add element, Add equipment, IPs, pipes), then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
+  renderTabs(); renderWs();
+  return b;
+}
+$('#buildTab').onclick = () => toBuild();
+$('#saveBuild').onclick = guard(saveBuild);
+function dropBuild() {
+  const b = buildWs(); if (!b) return;
+  const gone = new Set(buildItems(b));
+  draft.elements = draft.elements.filter(e => !gone.has(e)); draft.graphics = draft.graphics.filter(g => !gone.has(g));
+  draft.workspaces = draft.workspaces.filter(w => w !== b);
+  if (wsName === b.name) wsName = draft.workspaces.some(w => w.name === b.from) ? b.from : draft.workspaces[0]?.name;
+  sel = null;
+}
+// a string value anywhere in these items that is exactly the old name gets the new one (pipes that flow when it is on, ...)
+function swapName(items, from, to) {
+  const walk = o => { for (const k of Object.keys(o)) { if (o[k] === from) o[k] = to; else if (o[k] && typeof o[k] === 'object') walk(o[k]); } };
+  items.forEach(walk);
+}
+// To a Tab: everything moves there in the same spot it had on the Build Tab
+function moveBuildTo(tab) {
+  const b = buildWs(), to = draft.workspaces.find(w => w.name === tab && !w.build);
+  if (!to) throw new Error(`There is no Tab "${tab}"`);
+  const items = buildItems(b);
+  for (const x of items) x.workspace = to.name;
+  // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_PWM_VlV_Fly_Sparge_SP)
+  for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
+    const n = deviceSuggestion(e);
+    if (n && n !== e.name && !nameTaken(n, e)) { swapName(items.filter(x => x !== e), e.name, n); e.name = n; }
+  }
+  draft.workspaces = draft.workspaces.filter(w => w !== b);
+  wsName = to.name; sel = null;
+  return items.length;
+}
+// what on the Build Tab can be a Template: one vessel (with the Bundled Fittings on its ports) or one Bundled Fitting
+function buildTemplate(b) {
+  const gs = draft.graphics.filter(g => g.workspace === b.name), els = draft.elements.filter(e => e.workspace === b.name);
+  const vessels = gs.filter(g => g.kind === 'vessel' && !isBfit(g)), fits = gs.filter(isBfit);
+  const owned = g => g.kind === 'ip' && g.attachTo && gs.some(v => v.id === g.attachTo && v.kind === 'vessel');
+  const rest = gs.filter(g => g.kind !== 'vessel' && !owned(g));
+  const one = 'A Template is one vessel (with the fittings on its ports) or one Bundled Fitting.';
+  if (els.length || rest.length) return { why: `${one} Devices, Widgets, IPs, pipes, pictures and text can't go in a Template: save to a Tab, or delete them from the Build Tab first.` };
+  if (vessels.length === 1 && VESSEL_KINDS[vessels[0].vesselType] && fits.every(f => f.onVessel === vessels[0].id)) return { kind: 'vessel', g: vessels[0], fits };
+  if (!vessels.length && fits.length === 1) return { kind: 'fitting', g: fits[0] };
+  return { why: vessels.length === 1 ? `A ${eqClass(vessels[0])?.title || 'pipe fitting'} can't be a Template. ${one}` : one };
+}
+// a Template Name from a name on a Tab: no spaces, only letters, digits, _ and -, and not taken
+function tplNameFrom(n, kind) {
+  const base = String(n || '').trim().replace(/\s+/g, '_').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60) || (kind === 'vessel' ? 'My_Vessel' : 'My_Fitting');
+  return tplOf(kind, base) ? copyName(base, tplNames(kind)) : base;
+}
+const fitBody = f => ({ std: f.std, fittings: clone(f.fittings || []), image: f.image, ipPos: f.ipPos });
+const sameFit = (f, t) => JSON.stringify(cleanFit(fitBody(f))) === JSON.stringify(cleanFit(fitBody(t)));
+const cleanFit = b => ({ std: b.std || null, fittings: (b.fittings || []).map(x => ({ ...x })), image: b.image || '', ipPos: b.ipPos || null });
+async function makeTemplate(kind, name, skynet, body) {
+  await api('POST', `/ui/templates/${kind}`, { name, skynet: TPL.locked ? false : !!skynet });
+  const r = await api('PUT', `/ui/templates/${kind}/${name}`, { ...body, name });
+  setTPL(r);
+  return r;
+}
+// As a Template: a Tab_Vessel becomes a Vessel Template. A Bundled Fitting on one of its ports that is still the same as its
+// Template is used as it is; one that was changed on the Build Tab is saved as a Bundled Fitting Template of its own first.
+async function saveBuildTemplate({ name, skynet }) {
+  const b = buildWs(), w = buildTemplate(b);
+  if (!w.kind) throw new Error(w.why);
+  name = String(name || '').trim();
+  const bad = nameProblem(name); if (bad) throw new Error(bad);
+  if (tplOf(w.kind, name)) throw new Error(`There is already a ${TEMPLATE_KINDS[w.kind]} called "${name}"`);
+  const made = [];
+  if (w.kind === 'fitting') { await makeTemplate('fitting', name, skynet, fitBody(w.g)); made.push(name); }
+  else {
+    const g = w.g, t = { vesselType: g.vesselType, image: g.image, size: [Math.round(g.w), Math.round(g.h)], ports: {} };
+    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]);
+    if (EQ[g.vesselType]?.ports.in2) t.liquidPorts = g.ports?.in2?.installed ? 4 : 2;
+    for (const [k, p] of Object.entries(g.ports || {})) t.ports[k] = { installed: !!p.installed, position: p.position };
+    for (const f of w.fits) {
+      const q = t.ports[f.onPort]; if (!q || !FITTING_PORTS[f.onPort]) continue;
+      let ft = tplOf('fitting', f.template);
+      if (!ft || !sameFit(f, ft)) {
+        const fn = tplNameFrom(f.name, 'fitting');
+        await makeTemplate('fitting', fn, skynet, fitBody(f)); made.push(fn); ft = tplOf('fitting', fn);
+      }
+      Object.assign(q, { installed: true, fitting: ft.name, bundleName: f.name });
+    }
+    await makeTemplate('vessel', name, skynet, t); made.unshift(name);
+  }
+  dropBuild();
+  return made;
+}
+// Save Build ...: where does it go? To a Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
+async function saveBuild() {
+  const b = buildWs(); if (!b) return true;
+  if (!buildItems(b).length) { dropBuild(); renderTabs(); renderWs(); return true; }
+  if (!TPL) await loadTemplates();
+  const r = await saveBuildDialog(b); if (!r) return false;
+  if (r.to === 'trash') {
+    if (!confirm('Throw away everything on the Build Tab?')) return false;
+    dropBuild(); toast('The Build Tab was thrown away');
+  } else if (r.to === 'tab') {
+    const n = moveBuildTo(r.tab);
+    toast(`${n} item${n === 1 ? '' : 's'} moved to the ${r.tab} tab, in the same spot. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
+  } else {
+    const made = await saveBuildTemplate(r);
+    toast(`Saved as ${made.length > 1 ? 'Templates' : 'a Template'}: ${made.join(', ')}. ☰ Menu > ${r.kind === 'fitting' ? 'Fitting' : 'Vessel or Equipment'} Templates, Add to Tab puts it on a Tab.`, false, 9000);
+  }
+  renderTabs(); renderWs();
+  return true;
+}
+function saveBuildDialog(b) {
+  return new Promise(res => {
+    const tabs = draft.workspaces.filter(w => !w.build), tk = buildTemplate(b);
+    const d = h('dialog', { class: 'tplMini buildDlg' });
+    const close = v => { d.close(); d.remove(); res(v); };
+    const tabSel = h('select', {}, ...tabs.map(w => h('option', { value: w.name, ...(w.name === b.from ? { selected: true } : {}) }, w.name)));
+    const tplBox = h('div', { class: 'buildOpt' }, h('b', {}, 'As a Template'));
+    if (tk.kind) {
+      const nm = h('input', { type: 'text', value: tplNameFrom(tk.g.name || tk.g.label, tk.kind) }), sky = h('input', { type: 'checkbox', checked: true });
+      tplBox.append(h('p', { class: 'muted' }, `A ${tk.kind === 'vessel' ? (tk.g.vesselType === 'vessel' ? 'Vessel' : 'Equipment') + ' Template' : 'Bundled Fitting Template'}, in ☰ Menu. Name: no spaces (use _ instead), and it must be unique.`),
+        h('label', {}, 'Template Name ', nm),
+        TPL.locked ? '' : h('label', { class: 'toggle' }, h('span', { class: 'sw' }, sky, h('span', { class: 'swk' })), ' Skynet Template (off = a User Template)'),
+        h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: () => close({ to: 'template', kind: tk.kind, name: nm.value, skynet: sky.checked }) }, 'Save as Template')));
+    } else tplBox.append(h('p', { class: 'muted' }, tk.why));
+    d.append(h('h3', {}, 'Save Build: where should it go?'),
+      h('div', { class: 'buildOpt' }, h('b', {}, 'To a Tab'),
+        h('p', { class: 'muted' }, 'Everything on the Build Tab moves to this Tab, in the same spot. Drag it to its place, then press Save layout.'),
+        h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value }) }, 'Save to Tab'))),
+      tplBox,
+      h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }), h('button', { onclick: () => close(null) }, 'Keep building')));
+    d.oncancel = ev => { ev.preventDefault(); close(null); };
+    document.body.append(d); d.showModal();
+  });
+}
 // a rename on top of a rename (A -> B -> C) is one rename A -> C; back to the first name is no rename
 function noteRename(from, to) {
   const first = [...draftRenames].find(([, now]) => now === from)?.[0] ?? from;
@@ -1857,6 +2086,7 @@ function renameNote(r) {
   return t;
 }
 const saveLayout = guard(async () => {
+  if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
   const renames = [...draftRenames].map(([from, to]) => ({ from, to }));
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, renames, updateVersion: $('#updateVersion').checked });
   const note = renameNote(r);
@@ -3923,6 +4153,7 @@ function menuItems(list, go, pages = false) {
   }
 }
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
+$('#barHelp').onclick = () => openHelp(pageTopic());      // the ? beside ☰ Menu on the Tabs bar (Fritz, 2026-10-22)
 $('#menuBtn').onclick = ev => { ev.stopPropagation(); const l = $('#menuList'), show = l.classList.contains('hidden'); renderMenu(); l.classList.toggle('hidden', !show); $('#menuBtn').setAttribute('aria-expanded', String(show)); };
 document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) { closeMenuList(); closeMenuCopies(); } });
 
@@ -4755,10 +4986,12 @@ function openTemplate(kind, name) {
       const tabs = S.config.workspaces, eq = tabs.find(x => x.name === 'Equipment');
       const first = kind === 'vessel' && eq ? eq : tabs.find(x => x.name === wsName) || tabs[0];
       const taken = [...S.config.graphics.map(g => g.name), ...S.config.elements.map(e => e.name)];
-      const w = { tab: first.name }, def = tab => bundleName(t.name, tabs.find(x => x.name === tab)?.id || tab, taken);
+      // the Build Tab is a clean Tab to work on it first; its name ends with the ID of the Tab you are on
+      const idOf = tab => (tab === BUILD ? tabs.find(x => x.name === wsName) || tabs[0] : tabs.find(x => x.name === tab))?.id || tab;
+      const w = { tab: first.name }, def = tab => bundleName(t.name, idOf(tab), taken);
       w.name = def(w.tab);
-      const ok = await miniDialog('Add to Tab', [['tab', 'Tab', 'sel', tabs.map(x => x.name)], ['name', 'Name (change it to what you want)', 'text'],
-        ['_n', 'It goes on the Tab Bundled, in Edit layout: drag it to its place, then press Save layout.', 'note']], w, 'Add');
+      const ok = await miniDialog('Add to Tab', [['tab', 'Tab', 'sel', [[BUILD, '🔨 Build Tab (a clean Tab to work on it first)'], ...tabs.map(x => [x.name, x.name])]], ['name', 'Name (change it to what you want)', 'text'],
+        ['_n', 'It goes on the Tab Bundled, in Edit layout: drag it to its place, then press Save layout. On the Build Tab, press Save Build ... when it is ready.', 'note']], w, 'Add');
       if (!ok) return;
       if (w.name === def(first.name) && w.tab !== first.name) w.name = def(w.tab);    // the name follows the Tab until it is typed
       const b = current(); finish();
@@ -4812,15 +5045,17 @@ function renderTemplatesTab(kind, group) { return box => {
 }; }
 
 // Add to Tab: the copy goes on the Tab in Edit layout, Bundled, so it can be dragged to its place before Save layout
+const BUILD = '__build';
 function addTemplateToTab(kind, t, tab, name) {
   if (editing) return toast('Save or exit Edit layout first', true);
   setEditing(true);
+  if (tab === BUILD) tab = toBuild().name;
   if (!draft.workspaces.some(w => w.name === tab)) return toast(`There is no Tab "${tab}"`, true);
   wsName = tab;
   const g = kind === 'vessel' ? placeTabVessel(t, tab, name) : placeTabFitting(t, tab, name, null);
   sel = { kind: 'gfx', id: g.id };
   renderTabs(); renderWs();
-  toast(`${name} is on the ${tab} tab. Drag it to its place, then press Save layout.`);
+  toast(buildWs()?.name === tab ? `${name} is on the Build Tab. Change it there, then press Save Build ... to put it on a Tab or save it as a Template.` : `${name} is on the ${tab} tab. Drag it to its place, then press Save layout.`);
 }
 function placeTabVessel(t, tab, name) {
   const C = EQ[t.vesselType] || EQ.vessel, n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;

@@ -48,6 +48,7 @@
       <div id="menuTabs" class="tabs menuTabs"></div>
       <div class="spacer"></div>
       <input type="checkbox" id="editMode" class="hidden" aria-hidden="true">
+      <button id="barHelp" class="helpIcon barHelp" title="Help: opens in its own window, beside the panel" aria-label="Help">?</button>
       <div class="menuWrap"><button id="menuBtn" class="menuBtn" title="Menu: Edit layout, profiles, recipes" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 4h14M3 8h14M3 12h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Menu</button><div id="menuList" class="menuList hidden" role="menu"></div></div>
     </div>
     <div id="editBar" class="bar edit hidden">
@@ -63,8 +64,12 @@
       <button id="drawHose" title="A hose bends: click points for it to curve through. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling (an IP).">Draw hose</button>
       <button id="finishPipe" class="primary hidden">Finish pipe</button>
       <button id="lockItem" title="Lock or unlock the selected item so it cannot be dragged or resized" disabled>🔒 Lock</button>
+      <button id="lockAll" title="Lock every item on this Tab in place. Then unlock single items with 🔒 Lock / 🔓 Unlock. It is an action, not a switch.">🔒 Lock All</button>
+      <button id="unlockAll" title="Unlock every item on this Tab. It is an action, not a switch.">🔓 Unlock All</button>
       <button id="wsProps" title="Name, background color, background picture, size and pipe size of this tab. You can also double-click an empty spot on the tab.">⚙ Tab settings</button>
       <button id="addWs">New tab</button>
+      <button id="buildTab" title="A clean Tab to build something new on (Devices, Widgets, vessels, fittings). It only shows while you build. Save Build ... puts it on a Tab or saves it as a Template.">🔨 Build Tab</button>
+      <button id="saveBuild" class="primary hidden" title="Put what is on the Build Tab on a Tab, or save it as a Template">💾 Save Build ...</button>
       <span class="spacer"></span>
       <span id="editHint" class="muted"></span>
       <label class="toggle" title="On: Save also gives this Schema a new version, <Schema name>_yyyymmdd_hh_mm, and keeps a copy under that file name (config/schemas/versions)"><span class="sw"><input type="checkbox" id="updateVersion"><span class="swk"></span></span> Update Version</label>
