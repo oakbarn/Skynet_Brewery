@@ -682,3 +682,5 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .buildOpt { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
 .buildOpt p { margin: 4px 0 6px; }
 .buildOpt label { display: block; margin: 6px 0; }
+/* On overlay: a see-through picture drawn on top of the item while it is on (Fritz, 2026-10-22) */
+.el > .onov { position: absolute; inset: 0; background: center / contain no-repeat; pointer-events: none; z-index: 1; }
