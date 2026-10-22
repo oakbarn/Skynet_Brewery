@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="434" height="292" viewBox="0 0 434 292" preserveAspectRatio="none">
+  <!-- Skynet drawing: Riptide-style pump, off, no cover. Same size and pipe spots as the other Riptide pumps. -->
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d887d"/><stop offset=".45" stop-color="#e4e0d6"/><stop offset="1" stop-color="#9c978b"/></linearGradient>
+    <linearGradient id="steelV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8e4da"/><stop offset=".5" stop-color="#b3ad9f"/><stop offset="1" stop-color="#8a8579"/></linearGradient>
+    <linearGradient id="motor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4a4a"/><stop offset=".35" stop-color="#2a2a2a"/><stop offset="1" stop-color="#141414"/></linearGradient>
+  </defs>
+  <!-- outlet pipe, branch and the white line, where the PNG has them -->
+  <rect x="326" y="0" width="12" height="200" rx="3" fill="#f8f8f8" stroke="#c9c9c9" stroke-width="1"/>
+  <rect x="349" y="0" width="24" height="136" fill="#7f7f7f"/>
+  <rect x="373" y="54" width="48" height="23" fill="#7f7f7f"/>
+  <rect x="421" y="58" width="12" height="15" fill="#f8f8f8"/>
+  <circle cx="361" cy="22" r="10" fill="#00a2e8" stroke="#3f48cc" stroke-width="4"/>
+  <circle cx="398" cy="66" r="10" fill="#00a2e8" stroke="#3f48cc" stroke-width="4"/>
+  <!-- power cord and plug -->
+  <path d="M146 246 C 128 238 120 226 112 214 C 100 196 82 196 70 210 C 64 217 60 222 52 226" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 216 L52 214 L58 236 L36 246 Z" fill="#1c1c1c" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M33 224 L14 230 M37 238 L18 244" stroke="#b9bcc0" stroke-width="4" stroke-linecap="round"/>
+  <!-- base plate, stand and switch -->
+  <rect x="144" y="250" width="182" height="36" rx="5" fill="#1d1d1d" stroke="#000" stroke-width="2"/>
+  <circle cx="158" cy="279" r="4" fill="#3c3c3c"/><circle cx="312" cy="279" r="4" fill="#3c3c3c"/><circle cx="312" cy="257" r="4" fill="#3c3c3c"/>
+  <rect x="146" y="214" width="108" height="40" fill="#232323" stroke="#000" stroke-width="2"/>
+  <rect x="192" y="244" width="24" height="20" rx="3" fill="#2e2e2e" stroke="#555" stroke-width="2"/>
+  <rect x="197" y="248" width="14" height="12" rx="2" fill="#e53935"/>
+  <rect x="198" y="249" width="12" height="4" rx="1" fill="#ff8a80"/>
+  <!-- motor -->
+  <rect x="124" y="136" width="140" height="104" rx="20" fill="url(#motor)" stroke="#000" stroke-width="2"/>
+  <ellipse cx="134" cy="188" rx="10" ry="50" fill="#1a1a1a" stroke="#000" stroke-width="2"/>
+  <rect x="158" y="212" width="96" height="16" fill="#cfd2d4" stroke="#6e7173" stroke-width="1.5"/>
+  <circle cx="172" cy="220" r="2.5" fill="#6e7173"/><circle cx="206" cy="220" r="2.5" fill="#6e7173"/><circle cx="240" cy="220" r="2.5" fill="#6e7173"/>
+  <!-- coupling between motor and pump head -->
+  <rect x="256" y="148" width="42" height="82" rx="6" fill="#383838" stroke="#000" stroke-width="2"/>
+  <path d="M266 156 V222 M276 156 V222 M286 156 V222" stroke="#555" stroke-width="3"/>
+  <!-- pump head: clamp ring, volute and outlet union -->
+  <path d="M314 142 C 352 140 366 170 364 196 C 362 226 344 240 316 240 Z" fill="url(#steel)" stroke="#5e5a52" stroke-width="2"/>
+  <rect x="294" y="134" width="26" height="106" rx="10" fill="url(#steel)" stroke="#5e5a52" stroke-width="2"/>
+  <rect x="306" y="134" width="5" height="106" fill="#f3f1ec" opacity=".7"/>
+  <rect x="344" y="122" width="54" height="30" rx="4" fill="url(#steelV)" stroke="#5e5a52" stroke-width="2"/>
+  <rect x="349" y="114" width="24" height="12" fill="url(#steel)" stroke="#5e5a52" stroke-width="2"/>
+  <rect x="397" y="118" width="18" height="40" rx="5" fill="#1b1b1b" stroke="#000" stroke-width="2"/>
+  <path d="M401 120 V156 M406 120 V156 M411 120 V156" stroke="#444" stroke-width="2"/>
+  <!-- no cover: the motor's cooling fins show -->
+  <path d="M150 146 V210 M164 140 V210 M178 138 V210 M192 138 V210 M206 138 V210 M220 138 V210 M234 138 V210 M248 140 V210" stroke="#3d3d3d" stroke-width="4"/>
+  <path d="M150 146 V210 M164 140 V210 M178 138 V210 M192 138 V210 M206 138 V210 M220 138 V210 M234 138 V210 M248 140 V210" stroke="#0c0c0c" stroke-width="1.5" transform="translate(3 0)"/>
+  <rect x="174" y="122" width="40" height="18" rx="3" fill="#262626" stroke="#000" stroke-width="2"/>
+</svg>
