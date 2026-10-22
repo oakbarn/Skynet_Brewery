@@ -67,6 +67,8 @@ Chillers, coils and trub filters have the same settings as a vessel, plus how ma
 
 With 4, the second circuit is **In 2** and **Out 2**. Liquid in one circuit never flows into the other.
 
+On the Skynet counterflow chillers the plain copper ends are the wort and the brass hose fittings the water. A chiller can be piped either way: to swap them, pick other corners for **Wort In**, **Wort Out**, **Water In** and **Water Out** (on the Template, or on the Tab_Vessel in Edit layout).
+
 A **RIMS tube** is part of the piping: wort flows in at one end and out at the other. Its **Heating element** (an Electric Element Device) goes in one end and its **Thermowell** (a Temperature Probe) in the other. Both are picked on the Tab_Vessel. Neither one is an IP, so no liquid flows there. A Mash Tun whose Heat Source is **RIMS** picks its RIMS tube from the Equipment Profile.
 
 ## Bundled Fitting Template settings
