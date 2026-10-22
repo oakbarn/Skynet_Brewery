@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Templates } from '../lib/templates.js';
-import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText } from '../public/templates.js';
+import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText, fittingPortStd } from '../public/templates.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'templates-'));
@@ -73,5 +73,25 @@ assert.equal(S.get('vessel', 'Chillzilla').liquidPorts, 4, 'a Chillzilla coil ha
 assert.equal(cleanVessel({ vesselType: 'herms', liquidPorts: '7' }).liquidPorts, 2, '2 or 4 only');
 assert.equal(cleanVessel({ vesselType: 'vessel', liquidPorts: 4 }).liquidPorts, undefined, 'only coils have the choice');
 
+
+// the standard piping fittings (Fritz, 2026-10-22): one fitting each, a Skynet SVG picture, and where its IPs sit on it
+for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: 'Bottom', end: 'Right' }], ['Elbow_45', 'elbow45', { start: 'Left', end: 'Top Right 45' }], ['Tee', 'tee', { start: 'Left', end: 'Right', branch1: 'Top' }], ['Reducer', 'reducer', { start: 'Left', end: 'Right' }]]) {
+  const t = S.get('fitting', n);
+  assert.equal(t.fittings[0].kind, k); assert.deepEqual(t.ipPos, ip, n);
+  assert.match(t.image, /^Images\/samples\/Fitting_.+\.svg$/);
+  assert.ok(fs.existsSync(path.join(ROOT, 'media', t.image)), `${n}: picture ${t.image} is missing`);
+  assert.deepEqual(fittingEnds(t).map(e => e.key), k === 'tee' ? ['end', 'branch1'] : ['end']);
+}
+assert.equal(S.get('vessel', 'RIMS_Tube').vesselType, 'rims');
+assert.deepEqual(S.get('vessel', 'Kettle_Big_Fatty').size, [250, 248], 'a Template can keep its picture\'s shape');
+assert.equal(cleanVessel({ size: [5, 100] }).size, undefined);
+const red = S.get('fitting', 'Reducer');
+assert.equal(red.fittings[0].toSize, '1.5');
+assert.deepEqual(fittingPortStd(red, 'start'), { type: 'TC', size: 2 }, 'the big end');
+assert.deepEqual(fittingPortStd(red, 'end'), { type: 'TC', size: 1.5 }, 'the small end');
+assert.deepEqual(fittingPortStd({ std: { type: 'TC', size: 2 }, fittings: [{ kind: 'tee' }, { kind: 'reducer', toSize: '1' }, { kind: 'tee' }] }, 'branch3'), { type: 'TC', size: 1 }, 'a tee past the reducer is the small size');
+assert.deepEqual(fittingPortStd({ std: { type: 'TC', size: 2 }, fittings: [{ kind: 'tee' }, { kind: 'reducer', toSize: '1' }] }, 'branch1'), { type: 'TC', size: 2 });
+assert.deepEqual(cleanFitting({ ipPos: { end: 'Right', 'bad key': 'x', start: '' } }).ipPos, { end: 'Right' });
+assert.equal(cleanFitting({}).ipPos, undefined);
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('templates ok');

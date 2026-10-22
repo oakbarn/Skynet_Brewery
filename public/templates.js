@@ -19,12 +19,12 @@ export const stdShort = s => s?.type ? (STD_SHORT[s.type] || s.type) + (s.size !
 // the fittings a Bundled Fitting is built from, up to four, from the vessel port outward. The list is set by Skynet:
 // a new kind is added here, through GitHub.
 export const FITTING_KINDS = {
-  none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve',
+  none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve', reducer: 'Reducer',
 };
 export const FITTING_SLOTS = ['First Fitting', 'Second Fitting', 'Third Fitting', 'Fourth Fitting'];
 export const THERMOWELL_POS = { short: 'Short', long: 'Long' };
 // the vessel ports that take a Bundled Fitting
-export const FITTING_PORTS = { outlet: 'Outlet', tangential: 'Tangential Inlet', steamSlayer: 'Steam Slayer', cip: 'CIP Inlet' };
+export const FITTING_PORTS = { outlet: 'Outlet', outlet2: 'Second Outlet', tangential: 'Tangential Inlet', steamSlayer: 'Steam Slayer', cip: 'CIP Inlet' };
 
 export const TEMPLATE_KINDS = { vessel: 'Vessel Template', fitting: 'Bundled Fitting Template' };
 // a Template Name: letters, digits, _ and -, no spaces, unique (any letter case) across Skynet and User Templates
@@ -67,9 +67,14 @@ export function cleanFitting(b = {}) {
     const kind = FITTING_KINDS[f.kind] ? f.kind : 'none';
     const out = { kind };
     if (kind === 'tee' && f.thermowell) { out.thermowell = true; out.thermowellPos = THERMOWELL_POS[f.thermowellPos] ? f.thermowellPos : 'short'; }
+    if (kind === 'reducer' && text(f.toSize, 30)) out.toSize = text(f.toSize, 30);       // the size of its small end (the type stays the same)
     return out;
   });
-  return { std: cleanStd(b.std), fittings, image: text(b.image, 300) || undefined, notes: text(b.notes, 2000) || undefined };
+  // where each IP sits on the picture (port key -> position name, e.g. { start: 'Bottom', end: 'Right' }), for a Skynet picture
+  // whose openings are not where a Tab_Fitting puts them by itself
+  const ipPos = {};
+  for (const [k, v] of Object.entries(b.ipPos && typeof b.ipPos === 'object' ? b.ipPos : {})) if (/^\w{1,20}$/.test(k) && text(v, 40)) ipPos[k] = text(v, 40);
+  return { std: cleanStd(b.std), fittings, image: text(b.image, 300) || undefined, ipPos: Object.keys(ipPos).length ? ipPos : undefined, notes: text(b.notes, 2000) || undefined };
 }
 // the IPs a Bundled Fitting has: the far end of the chain, plus the open side of every tee without a thermowell
 export function fittingEnds(t) {
@@ -80,14 +85,25 @@ export function fittingEnds(t) {
   return ends;
 }
 
+// the Connection Standard of one of a Bundled Fitting's IPs: past a reducer the size is the reducer's small end
+// (key 'start' sits before every fitting, 'branchN' at fitting N, 'end' after the last one)
+export function fittingPortStd(t, key) {
+  const at = key === 'start' ? 0 : key === 'end' ? Infinity : +String(key).replace(/\D/g, '') || 0;
+  let std = t.std ? { ...t.std } : undefined;
+  (t.fittings || []).forEach((f, i) => { if (i + 1 < at && f.kind === 'reducer' && f.toSize && std) std = { type: std.type, size: textSize(std.type) ? f.toSize : (Number.isFinite(+f.toSize) ? +f.toSize : f.toSize) }; });
+  return std;
+}
+
 // a Vessel Template: what today's Vessel tab holds, without the Devices of a Schema (those are picked on the Tab_Vessel),
 // with a Connection Standard and, on each port, a Bundled Fitting
-export const VESSEL_KINDS = { vessel: 'Vessel', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter' };
+export const VESSEL_KINDS = { vessel: 'Vessel', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter', rims: 'RIMS tube' };
 export function cleanVessel(b = {}) {
   const vesselType = VESSEL_KINDS[b.vesselType] ? b.vesselType : 'vessel';
   const t = { vesselType, units: b.units === 'Metric' ? 'Metric' : undefined, vtype: text(b.vtype, 80) || undefined, otherType: text(b.otherType, 80) || undefined, image: text(b.image, 300) || undefined,
     heatKind: text(b.heatKind, 20) || undefined, otherHeat: text(b.otherHeat, 80) || undefined, std: cleanStd(b.std), notes: text(b.notes, 2000) || undefined, ports: {} };
   for (const k of ['volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume']) t[k] = num(b[k], k);
+  // the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (empty = the kind's own size)
+  if (Array.isArray(b.size) && b.size.length === 2 && b.size.every(v => Number.isFinite(+v) && +v >= 20 && +v <= 2000)) t.size = b.size.map(v => Math.round(+v));
   if (['ccoil', 'herms'].includes(vesselType)) t.liquidPorts = String(b.liquidPorts) === '4' ? 4 : 2;     // 2 or 4 liquid ports (Chillzilla: 4)
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;
