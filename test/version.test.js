@@ -39,6 +39,17 @@ const fork = readVersion(root);
 assert.equal(fork.version, 'brewer-42-v.20261021_16_00');
 assert.equal((await new VersionCheck(fork, gh('brewer-42-v.20261021_16_00')).latest()).state, 'current');
 assert.equal((await new VersionCheck(fork, gh('brewer-42-v.20261101_09_00')).latest()).state, 'old', 'newer by date, whatever the name');
+// the highest merged pull request number in front (since 2026-10-22); older names without it still count
+stamp('PR85_Skynet-v.20261022_18_05');
+const pr = readVersion(root);
+assert.equal(pr.version, 'PR85_Skynet-v.20261022_18_05');
+assert.equal((await new VersionCheck(pr, gh('PR86_Skynet-v.20261022_19_00')).latest()).state, 'old');
+assert.equal((await new VersionCheck(v, gh('PR85_Skynet-v.20261022_18_05')).latest()).state, 'old', 'an old name compared with a new one');
+assert.equal((await new VersionCheck(pr, gh('PR85_Skynet-v.20261022_18_05')).latest()).state, 'current');
+stamp('PR_Skynet-v.20261022_18_05');
+assert.equal(readVersion(root).version, '', 'PR needs a number');
+stamp('PR85-Skynet-v.20261022_18_05x');
+assert.equal(readVersion(root).version, '', 'a wrong ending is ignored');
 stamp('bad name!-v.20261021_16_00');
 assert.equal(readVersion(root).version, '', 'only GitHub user name characters');
 stamp('Skynet-v.20261021_16_00');

@@ -1,6 +1,7 @@
-# Panel version: every merge (push) to the default branch gets a version named <owner>-v.yyyymmdd_hh_mm,
-# where <owner> is the GitHub user who owns this copy of the code. oakbarn's own copy says Skynet: Skynet-v.yyyymmdd_hh_mm.
-# Someone else's copy (a fork) says their user name, for example brewer42-v.yyyymmdd_hh_mm.
+# Panel version: every merge (push) to the default branch gets a version named PR<n>_<owner>-v.yyyymmdd_hh_mm,
+# where PR<n> is the highest merged pull request number (for the time being, Fritz 2026-10-22),
+# and <owner> is the GitHub user who owns this copy of the code. oakbarn's own copy says Skynet: PR85_Skynet-v.yyyymmdd_hh_mm.
+# Someone else's copy (a fork) says their user name, for example PR3_brewer42-v.yyyymmdd_hh_mm.
 # It writes version.json at the top of the panel (the panel shows it on the Menu Bar and in ☰ Menu > About),
 # commits it back to the branch, and makes a GitHub tag and Release with the same name.
 # Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
@@ -15,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 concurrency:
   group: panel-version
@@ -36,9 +38,16 @@ jobs:
 
       - name: Write version.json
         id: v
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           OWNER="${GITHUB_REPOSITORY%%/*}"
           if [ "$OWNER" = "oakbarn" ]; then PREFIX="Skynet"; else PREFIX="$OWNER"; fi
+          # the highest merged pull request number; if GitHub does not answer, the #number in the merge message
+          PR=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=closed&sort=created&direction=desc&per_page=100" \
+            --jq '[.[] | select(.merged_at != null) | .number] | max // empty' 2>/dev/null || true)
+          [ -n "$PR" ] || PR=$(git log -1 --format=%s | grep -o '#[0-9]\+' | head -1 | tr -d '#' || true)
+          [ -n "$PR" ] && PREFIX="PR${PR}_$PREFIX"
           VERSION="$PREFIX-v.$(date +%Y%m%d_%H_%M)"
           # two merges in the same minute: add _2, _3 ...
           base="$VERSION"; n=2
