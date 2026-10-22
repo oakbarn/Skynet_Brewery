@@ -1,5 +1,5 @@
 {
-  "vesselType": "ccoil", "vtype": "Immersion coil", "image": "Images/samples/chill_coil.svg", "liquidPorts": 2,
+  "vesselType": "ccoil", "vtype": "Immersion coil", "image": "Images/Chillers/chill_coil.svg", "liquidPorts": 2,
   "std": { "type": "MPT", "size": 0.5 },
   "ports": { "in": { "installed": true, "position": "Top Left" }, "out": { "installed": true, "position": "Top Right" } }
 }

@@ -100,6 +100,7 @@
           <button id="findBtn" title="Find (Ctrl+F) and Replace (Ctrl+H)">Find</button>
           <button id="findAllBtn" title="Find, and replace, in every Process">All Processes</button>
           <button id="goLine" title="Go to a line number (Ctrl+G)">Go to line</button>
+          <button id="picPick" class="admin-only" title="Pick a picture or sound and put its path at the cursor (Alt+P)">Picture</button>
           <select id="saveAs" title="Save this Process, or the highlighted lines, to a file on this computer or phone">
             <option value="">Save to file...</option>
             <option value="all-txt">Whole Process as text (.txt)</option>
@@ -254,6 +255,10 @@
       <label class="mdPickBtn">⬆ Add pictures / sounds<input id="mdPick" type="file" multiple accept="image/*,audio/*,.zip,.wav,.mp3,.ogg,.m4a,.svg" hidden></label>
       <button id="mdNew">📁 New folder</button>
       <button id="mdUp" title="Up one folder">⬆ Up</button>
+      <button id="mdMoveSel" title="Move the picked files and folders to another folder" disabled>Move picked</button>
+      <button id="mdDelSel" class="danger" title="Delete the picked files and folders" disabled>Delete picked</button>
+      <label class="mdReplace" title="On a phone: every tap adds or takes away one (on a PC use Ctrl+click or Shift+click)"><input id="mdMany" type="checkbox"> Select many</label>
+      <span id="mdSelInfo" class="muted"></span>
       <select id="mdView" title="View"><option value="icons">Large icons</option><option value="details">Details</option></select>
       <label class="mdReplace"><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
     </div>
@@ -266,7 +271,7 @@
       </div>
     </div>
     <div class="mdStatus"><span id="mdCount"></span><span id="mdProgress"></span></div>
-    <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
+    <p class="muted mdHelp">Pictures: png, jpg, gif, svg, webp, bmp. Sounds: wav, mp3, ogg, m4a. A .zip of them is unpacked keeping its folders. Drag files onto a folder on the left to move them (on a phone use <b>Move</b>). Pick several with Ctrl+click or Shift+click (on a phone tick <b>Select many</b>), then drag them or use <b>Move picked</b>. Images has a folder for each picture group: the 🔒 Skynet groups can't be deleted, renamed or moved; any other folder in Images is a group of your own. PNG and JPG pictures also get a sharp SVG copy automatically (Settings &gt; Pictures); those copies are not listed here.</p>
   </section>
 
   <!-- ===== File Move: copy files and folders from this computer to the Brain (public/filemove.js) ===== -->
@@ -285,6 +290,7 @@
         <option value="processes">Processes (.txt to scripts)</option>
         <option value="help">Help pages (.md to help)</option>
       </select></label>
+      <label title="Pictures go into this picture group in media/Images">Picture group <select id="fmGroup"><option value="">No group (straight into Images)</option></select></label>
       <label class="mdPickBtn">📁 Pick a folder<input id="fmPickFolder" type="file" webkitdirectory multiple hidden></label>
       <label class="mdPickBtn">📄 Pick files<input id="fmPickFiles" type="file" multiple hidden></label>
       <label class="toggle"><input type="checkbox" id="fmReplace"> Replace files already on the Brain</label>
@@ -315,7 +321,7 @@
         </div>
         <div id="hpPage" class="hpPage"></div>
         <div id="hpEditor" class="hpEditor" hidden>
-          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](Images/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
+          <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](Images/Pumps/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
           <div class="hpEditPanes">
             <textarea id="hpText" spellcheck="true"></textarea>
             <div id="hpPreview" class="hpPage"></div>
@@ -481,6 +487,18 @@
 </main>
 
 <dialog id="dlg"><form method="dialog" id="dlgForm"><h3 id="dlgTitle"></h3><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div><div id="dlgBody"></div><div class="bar dlgBar"><button type="button" data-close="delete" class="danger dlgDelete">Delete</button><span class="spacer"></span><button type="button" data-close="cancel">Cancel</button><button value="ok" class="primary">Save</button></div></form></dialog>
+<!-- Process editor: Alt+P (or the Picture button) picks a picture or sound and types its path at the cursor -->
+<dialog id="picPickDlg" class="picPickDlg"><form method="dialog">
+  <h3>Insert a picture or sound path</h3>
+  <div class="bar ppTools">
+    <select id="ppKind" title="Pictures (media/Images) or sounds (media/sounds)"><option value="pictures">Pictures</option><option value="sounds">Sounds</option></select>
+    <select id="ppGroup" title="Show one group (folder), or All"></select>
+    <input id="ppFilter" type="search" placeholder="🔍 Search" autocomplete="off" spellcheck="false">
+  </div>
+  <div class="ppBody"><select id="ppList" size="14"></select><div class="ppPrev"><img id="ppImg" alt="" hidden><audio id="ppAudio" controls preload="none" hidden></audio><code id="ppPath"></code></div></div>
+  <p class="muted">Double-click a file, or press Enter, to put its path where the cursor is. Arrow keys move through the list.</p>
+  <div class="bar"><span class="spacer"></span><button value="cancel">Cancel</button><button id="ppInsert" value="ok" class="primary">Insert</button></div>
+</form></dialog>
 <dialog id="findAllDlg" class="findAllDlg"><form method="dialog">
   <h3>Find in all Processes</h3>
   <div class="findRow">

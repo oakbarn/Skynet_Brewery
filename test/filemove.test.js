@@ -50,9 +50,9 @@ const miss = missingMedia({ workspaces: [{ name: 'B1', background: 'Images/Syste
 assert.deepEqual(miss.map(m => [m.path, m.kind]), [['Images/System_Back_1.png', 'pictures'], ['sounds/Hops.wav', 'sounds']]);
 
 // old paths still work
-assert.deepEqual(mediaAliases('brewery_main.png'), ['Images/brewery_main.png']);
+assert.deepEqual(mediaAliases('brewery_main.png'), ['Images/brewery_main.png', 'Images/Miscellaneous/brewery_main.png']);
 assert.deepEqual(mediaAliases('Images/wave/Done.wav'), ['oakbarn/wave/Done.wav', 'sounds/Done.wav']);
-assert.deepEqual(mediaAliases('samples/kettle.svg'), ['Images/samples/kettle.svg']);
+assert.deepEqual(mediaAliases('samples/kettle.svg'), ['Images/samples/kettle.svg', 'Images/Vessels/kettle.svg']);
 assert.deepEqual(mediaAliases('sounds/a.wav'), []);
 fs.rmSync(root, { recursive: true });
 console.log('filemove tests passed');

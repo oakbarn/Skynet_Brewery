@@ -1,6 +1,6 @@
 {
   "std": { "type": "TC", "size": 1.5 },
   "fittings": [{ "kind": "valve" }, { "kind": "elbow90" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/samples/pipe_elbow90.svg",
+  "image": "Images/Other_Equipment/pipe_elbow90.svg",
   "notes": "A valve, then a 90 degree elbow"
 }

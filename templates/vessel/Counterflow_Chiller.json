@@ -1,7 +1,7 @@
 {
   "vesselType": "pchiller",
   "vtype": "Counterflow",
-  "image": "Images/samples/Chiller_Counterflow.svg",
+  "image": "Images/Chillers/Chiller_Counterflow.svg",
   "size": [
     150,
     175

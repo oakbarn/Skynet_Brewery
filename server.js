@@ -22,6 +22,7 @@ import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
 import { Templates } from './lib/templates.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
+import { setupPictureGroups, listGroups } from './lib/picgroups.js';
 import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfigText } from './lib/configfile.js';
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
@@ -55,6 +56,13 @@ const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, d
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
+// Picture groups: the ten Skynet folders in media/Images are made, and the Skynet pictures moved into them once (lib/picgroups.js)
+{
+  const before = JSON.stringify(store.config.svgChoices ?? {});
+  const grouped = setupPictureGroups(store._findMedia('Images'), store.config.svgChoices);
+  if (grouped.moved.length) console.log(`Picture groups: moved ${grouped.moved.length} Skynet picture(s) into their group in media/Images (old paths still work)`);
+  if (JSON.stringify(store.config.svgChoices ?? {}) !== before) store.writeConfig();
+}
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 const hw = new Hardware(store);
@@ -656,6 +664,7 @@ async function route(req, res) {
     const q = Object.fromEntries(url.searchParams), root = Number(q.root) || 0;
     if (p === '/ui/media/list' && m === 'GET') return ok(res, mediaFiles.list(root, q.dir ?? ''));
     if (p === '/ui/media/tree' && m === 'GET') return ok(res, mediaFiles.tree(root));
+    if (p === '/ui/media/groups' && m === 'GET') return ok(res, { groups: listGroups(store._findMedia('Images')) });
     if (p === '/ui/media/all' && m === 'GET') return ok(res, { files: mediaFiles.all(root, q.dir ?? '') });
     if (p === '/ui/media/upload' && m === 'PUT') {
       try {
