@@ -34,6 +34,15 @@ const missingNames = () => new Set(missing.map(m => `${m.kind}:${m.name.toLowerC
 
 // ---- files picked or dropped ----
 // rel = the path inside the picked folder (the picked folder's own name left off), so C:\BruControl\Media\Pumps\a.png -> Pumps/a.png
+// Picture group (Help > Picture groups): pictures can go into one group folder of media/Images, keeping their own folders inside it
+const dest = r => r.kind === 'pictures' && $('#fmGroup').value ? `${$('#fmGroup').value}/${r.rel}` : r.rel;
+async function loadGroups() {
+  try {
+    const { groups } = await call('GET', '/ui/media/groups'), sel = $('#fmGroup'), was = sel.value;
+    sel.replaceChildren(el('option', { value: '' }, 'No group (straight into Images)'), ...groups.map(g => el('option', { value: g.name }, g.label + (g.standard ? '' : ' (yours)'))));
+    sel.value = groups.some(g => g.name === was) ? was : '';
+  } catch { }
+}
 const kindFor = name => { const want = $('#fmKind').value; return want === 'auto' ? kindOf(name) : (TEST[want].test(name) ? want : null); };
 async function addFiles(list) {
   if (busy) return;
@@ -66,7 +75,7 @@ async function check() {
   for (let i = 0; i < todo.length; i += 500) {
     const part = todo.slice(i, i + 500);
     try {
-      const { items } = await call('POST', '/ui/filemove/check', { items: part.map(r => ({ kind: r.kind, path: r.rel, size: r.file.size })) });
+      const { items } = await call('POST', '/ui/filemove/check', { items: part.map(r => ({ kind: r.kind, path: dest(r), size: r.file.size })) });
       part.forEach((r, j) => r.check = items[j]);
     } catch (e) { say(e.message, true); break; }
   }
@@ -111,7 +120,7 @@ async function go() {
   for (const [i, r] of todo.entries()) {
     $('#fmProgress').textContent = `Copying ${i + 1} of ${todo.length}: ${r.rel}`;
     try {
-      const res = await fetch(`/ui/filemove/upload?kind=${r.kind}&path=${encodeURIComponent(r.rel)}&overwrite=${replace ? 1 : 0}`, { method: 'PUT', body: r.file });
+      const res = await fetch(`/ui/filemove/upload?kind=${r.kind}&path=${encodeURIComponent(dest(r))}&overwrite=${replace ? 1 : 0}`, { method: 'PUT', body: r.file });
       const d = await res.json().catch(() => ({ ok: false, error: res.statusText }));
       if (!res.ok || d.ok === false) { r.done = d.error || 'Not copied'; problems++; } else { r.done = 'copied'; copied++; }
     } catch (e) { r.done = e.message; problems++; }
@@ -126,6 +135,7 @@ async function go() {
 $('#fmPickFolder').onchange = e => { addFiles(fromInput(e.target.files)); e.target.value = ''; };
 $('#fmPickFiles').onchange = e => { addFiles(fromInput(e.target.files)); e.target.value = ''; };
 $('#fmKind').onchange = () => { if (busy) return; for (const r of rows) Object.assign(r, { kind: kindFor(r.file.name), check: undefined, done: undefined }); check(); };
+$('#fmGroup').onchange = () => { if (busy) return; for (const r of rows) Object.assign(r, { check: undefined, done: undefined }); check(); };
 $('#fmReplace').onchange = render;
 $('#fmOnlyMissing').onchange = render;
 $('#fmGo').onclick = go;
@@ -134,4 +144,4 @@ const drop = $('#fmDrop');
 drop.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('Files')) { e.preventDefault(); drop.classList.add('dropping'); } });
 drop.addEventListener('dragleave', e => { if (!drop.contains(e.relatedTarget)) drop.classList.remove('dropping'); });
 drop.addEventListener('drop', async e => { drop.classList.remove('dropping'); if (!e.dataTransfer.files.length) return; e.preventDefault(); addFiles(await fromDrop(e.dataTransfer)); });
-document.querySelector('#views button[data-view="filemove"]')?.addEventListener('click', () => { loadMissing(); render(); });
+document.querySelector('#views button[data-view="filemove"]')?.addEventListener('click', () => { loadMissing(); loadGroups(); render(); });

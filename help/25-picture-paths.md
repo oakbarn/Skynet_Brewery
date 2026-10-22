@@ -9,7 +9,7 @@ Every item on a tab (a Device or a Widget) can show a picture. It has three pict
 | **imagePath_3** | A third picture (BruControl's background 3). |
 | **Background picture** | Which one shows: **1**, **2** or **3**. **None** shows no picture. |
 
-Double-click an item in **Edit layout** (or hold a finger on it) to see these fields. A picture path is a file in one of your media folders, for example `Images/Pump_Red_Rip_On.png` (see [Media](07-media)).
+Double-click an item in **Edit layout** (or hold a finger on it) to see these fields. A picture path is a file in one of your media folders, for example `Images/Skynet/Pumps/Pump_Red_Rip_On.png` (see [Media](07-media)).
 
 ## Changing the picture from a Process: the Skynet way
 
