@@ -1273,7 +1273,7 @@ function setEditing(on) {
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
   const lockedEq = S.profiles?.find(p => p.id === S.config.workspaces.find(w => w.name === wsName)?.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place.';
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).';
   renderTabs(); renderWs();
 }
 
@@ -1304,7 +1304,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     if (again) { sel = { kind: 'gfx', id: hit.dataset.gid }; renderWs(); editItem('gfx', sel.id); return; }
     startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid };
     const pipe = findItem('gfx', sel.id);
-    drag = pipe.locked || noMove() ? null : startPipeMove(pipe, p);
+    drag = noMove() ? null : pipe.locked ? lockedDrag(pipe, p) : startPipeMove(pipe, p);
     renderWs(); return;
   }
   if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
@@ -1314,11 +1314,14 @@ $('#ws').addEventListener('pointerdown', ev => {
   if (bundle) { item = bundle; sel = { kind: 'gfx', id: bundle.id }; node = $(`#ws .gfx[data-gid="${CSS.escape(bundle.id)}"]`) || node; }
   startLongPress(ev, sel.kind, sel.id);
   $$('#ws .sel').forEach(n => n.classList.remove('sel')); node.classList.add('sel'); updLockBtn();
-  if (item.locked || noMove()) { drag = null; ev.preventDefault(); return; }   // locked, or a phone or tablet: select only, no move or resize
+  if (noMove()) { drag = null; ev.preventDefault(); return; }   // a phone or tablet: select only, no move or resize
+  if (item.locked) { drag = lockedDrag(item, p); ev.preventDefault(); return; }   // locked: select only, a try to drag says why
   if (item.fitting === 'coupling') {     // the open end of one straight pipe: dragging it moves that whole pipe
     const ps = pipesOn(item.id, item.workspace);
     if (ps.length === 1 && ps[0].straight && !ps[0].locked) { drag = startPipeMove(ps[0], p); ev.preventDefault(); return; }
   }
+  const riders = lockedRiders(item);
+  if (riders.length) { drag = lockedDrag(item, p, riders); ev.preventDefault(); return; }
   drag = { mode: !pip && !bundle && !item.bundled && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
@@ -1334,6 +1337,11 @@ $('#ws').addEventListener('pointermove', ev => {
     renderPipes(); return;
   }
   if (!drag) return;
+  if (drag.mode === 'locked') {        // a locked item (or one that would carry a locked one) was dragged: say why it stays
+    const q = canvasPt(ev);
+    if (Math.hypot(q[0] - drag.start[0], q[1] - drag.start[1]) > 5) { toast(drag.why, true); drag = null; }
+    return;
+  }
   drag.moved = true;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
   if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
@@ -1527,6 +1535,7 @@ function finishPipe(to) {
 // a shared IP (a fitting, pump, valve or vessel port) lets go. Dropped with an end on another IP, it joins that IP.
 const ownCoupling = (id, pipe) => { const g = draft.graphics.find(x => x.id === id && x.fitting === 'coupling'); return g && pipesOn(id, pipe.workspace).every(p => p === pipe) ? g : null; };
 function startPipeMove(pipe, p) {
+  const riders = lockedRiders(pipe); if (riders.length) return lockedDrag(pipe, p, riders);
   const d = { mode: 'pipe', item: pipe, start: p, orig: clone(pipe.points), carry: [] };
   if (!pipe.straight) return d;
   for (const k of ['from', 'to']) {
@@ -1808,11 +1817,54 @@ function updLockBtn() {
   const item = editing && sel ? findItem(sel.kind, sel.id) : null;
   b.disabled = !item; b.textContent = item?.locked ? '🔓 Unlock' : '🔒 Lock';
 }
+// Lock holds in Edit layout too (Fritz, 2026-10-22): only unlocked items move. An unlocked item also stays put when moving it
+// would carry or bend a 🔒 locked one: a vessel's ports and joined fittings, a straight pipe's own end couplings, a pipe or hose joined to it.
+const lockName = o => o.name || o.label || (o.kind === 'pipe' ? (o.hose ? 'a hose' : 'a pipe') : o.kind === 'ip' ? 'an IP' : 'an item');
+function lockedRiders(item) {
+  const out = [], add = g => { if (g?.locked && g !== item && !out.includes(g)) out.push(g); };
+  if (item.kind === 'pipe') { if (item.straight) for (const k of ['from', 'to']) add(ownCoupling(item[k], item)); return out; }
+  const parts = item.kind === 'vessel' ? bundleParts(item) : [];
+  parts.forEach(add);
+  const ids = item.kind ? [item.id, ...eqPorts(item).map(q => q.id), ...parts.map(g => g.id)] : hasIps(item) ? devIps(item).map(q => q.id) : [];
+  for (const id of ids) for (const pp of pipesOn(id, item.workspace)) { add(pp); if (pp.straight) add(ownCoupling(pp.from === id ? pp.to : pp.from, pp)); }
+  return out;
+}
+function lockedDrag(item, p, riders) {
+  const names = riders?.slice(0, 3).map(lockName).join(', ') + (riders?.length > 3 ? ` and ${riders.length - 3} more` : '');
+  const why = riders ? `🔒 ${lockName(item)} can't move: ${names} ${riders.length > 1 ? 'are' : 'is'} locked and would move with it. Unlock ${riders.length > 1 ? 'them' : 'it'} first (🔓 Unlock, or 🔓 Unlock All).`
+    : `🔒 ${lockName(item)} is locked in place. Press 🔓 Unlock (or 🔓 Unlock All) to move it.`;
+  return { mode: 'locked', item, start: p, why };
+}
+// an Equipment Profile that is locked owns the equipment, IPs and pipes on its Tab: their lock can't change either
+function profileFrozen(o) {
+  if (!['vessel', 'ip', 'pipe'].includes(o?.kind)) return null;
+  const w = draft.workspaces.find(x => x.name === o.workspace);
+  return w && w.layoutFromProfile !== false ? S.profiles?.find(p => p.id === w.equipmentProfile && p.locked) : null;
+}
+const setLock = (o, on) => { if (on) o.locked = true; else delete o.locked; };
 $('#lockItem').onclick = () => {
   const item = sel && findItem(sel.kind, sel.id); if (!item) return toast('Select an item first', true);
-  if (item.locked) delete item.locked; else item.locked = true;
-  toast(item.locked ? 'Locked in place' : 'Unlocked'); renderWs();
+  const frozen = profileFrozen(item); if (frozen) return toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
+  const on = !item.locked;
+  for (const g of [item, ...(item.kind === 'vessel' ? bundleParts(item) : [])]) setLock(g, on);   // a vessel's ports and joined fittings go with it
+  toast(on ? 'Locked in place' : 'Unlocked'); renderWs(); updLockBtn();
 };
+// 🔒 Lock All / 🔓 Unlock All (Fritz, 2026-10-22): actions, not a switch. Every item on this Tab is locked (or unlocked) once;
+// after that each one can still be unlocked (or locked) by itself with the 🔒 Lock button.
+function lockTab(on) {
+  const mine = o => o.workspace === wsName;
+  let n = 0, kept = 0;
+  for (const o of [...draft.elements.filter(mine), ...draft.graphics.filter(mine)]) {
+    if (!!o.locked === on) continue;
+    if (profileFrozen(o)) { kept++; continue; }
+    setLock(o, on); n++;
+  }
+  toast((n ? `${on ? '🔒 Locked' : '🔓 Unlocked'} ${n} item${n === 1 ? '' : 's'} on "${wsName}". Save layout keeps it.` : `Everything on "${wsName}" was already ${on ? 'locked' : 'unlocked'}.`)
+    + (kept ? ` ${kept} item${kept === 1 ? '' : 's'} of the locked Equipment Profile stayed as ${kept === 1 ? 'it was' : 'they were'}.` : ''));
+  renderWs(); updLockBtn();
+}
+$('#lockAll').onclick = () => lockTab(true);
+$('#unlockAll').onclick = () => lockTab(false);
 $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run straight across or up and down. Esc cancels.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
