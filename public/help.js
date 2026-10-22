@@ -1,5 +1,6 @@
 // Help tab: the manual. Pages are Markdown files in the help/ folder on the Brew Panel computer (see lib/help.js).
-// Everyone can read them; admins can edit, add and delete pages here. Opening Help shows the page for the screen you came from.
+// Everyone can read them; admins can edit, add and delete pages here. Help shows the page for the screen you came from
+// (helpmap.js says which); it runs in the Help window (help.html) and, when a browser blocks that window, on the panel's Help page.
 const $ = s => document.querySelector(s);
 const el = (tag, attrs = {}, ...kids) => {
   const e = document.createElement(tag);
@@ -12,9 +13,7 @@ async function call(method, url, body, raw) {
   const d = await r.json(); if (!r.ok || d.ok === false) throw new Error(d.error || r.statusText); return d;
 }
 
-// Which page belongs to which screen (matched on the page name without its number, e.g. "02-tabs" -> "tabs")
-const FOR_VIEW = { workspace: 'tabs', scripts: 'scripts', globals: 'variables', log: 'log', devices: 'devices', media: 'media', import: 'import', settings: 'settings' };
-let pages = [], cur = null, trail = [], cameFrom = null, editing = false;
+let pages = [], cur = null, trail = [], editing = false;
 const bare = n => n.replace(/^\d+[-_]/, '');
 const find = n => n ? pages.find(p => p.name === n) || pages.find(p => bare(p.name) === bare(n)) : undefined;
 
@@ -203,16 +202,29 @@ $('#hpNew').onclick = async () => {
   catch (e) { say(e.message, true); }
 };
 
-// Opening Help: show the page for the screen you were on (once per visit), else the last page read.
-// A right-click on an item asks for its own page and part (the 'skynet-help' event from app.js, see helpmap.js).
-let asked = null;
-for (const b of document.querySelectorAll('#views button')) b.addEventListener('click', () => {
-  const v = b.dataset.view;
-  if (v !== 'help') { cameFrom = v; return; }
-  if (changed()) { asked = null; return; }
-  const [want, section] = asked || [FOR_VIEW[cameFrom]];
-  load(want, section).catch(e => say(e.message, true));
-  cameFrom = null; asked = null;
-});
-window.addEventListener('skynet-help', e => { asked = e.detail; $('#views [data-view="help"]').click(); });
+// Fritz, 2026-10-22: Help opens in a window of its own (help.html), so it can sit beside the panel while you follow it.
+// The panel (app.js) opens or reuses that one window. Only when the browser blocks it does the panel show Help on its own
+// Help page, asking for a page and part with the 'skynet-help' event (see helpmap.js).
+const ALONE = !document.getElementById('views');
+if (ALONE) {
+  const q = new URLSearchParams(location.search);
+  // the panel calls this to show another page in this window when it is already open
+  window.skynetHelp = (want, section) => {
+    if (changed() && !confirm('Throw away your changes to this page?')) return;
+    stopEdit(); load(want, section).catch(e => say(e.message, true));
+  };
+  fetch('/auth/status').then(r => r.json()).then(st => {
+    if (!st.user) return location.replace('/login.html');
+    document.body.classList.add('role-' + st.user.role);
+    document.title = (st.title || 'Skynet Brew Panel') + ' Help';
+  }).catch(() => { });
+  $('#hpClose').onclick = () => window.close();
+  load(q.get('page'), q.get('section')).catch(e => say(e.message, true));
+} else {
+  window.addEventListener('skynet-help', e => {
+    if (changed()) return;
+    const [want, section] = e.detail || [];
+    load(want, section).catch(e => say(e.message, true));
+  });
+}
 window.addEventListener('beforeunload', e => { if (changed()) e.preventDefault(); });

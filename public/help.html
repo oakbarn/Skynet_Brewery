@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skynet Help</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<!-- The Help window (Fritz, 2026-10-22): the manual in a window of its own, opened by the panel, so you can read it beside the panel. -->
+<body class="helpWindow">
+<main>
+  <div class="hpLayout">
+    <aside class="hpSide" id="hpSide">
+      <input id="hpSearch" type="search" placeholder="🔍 Search the manual">
+      <select id="hpPick" aria-label="Help page"></select>
+      <nav id="hpList" aria-label="Help pages"></nav>
+      <button id="hpNew" class="admin-only">＋ New page</button>
+    </aside>
+    <article class="hpMain">
+      <div class="bar hpTools" id="hpTools">
+        <button id="hpBack" title="Back">◀ Back</button>
+        <span class="spacer"></span>
+        <button id="hpPrint" title="Print this page">🖨 Print</button>
+        <button id="hpEdit" class="admin-only">✏ Edit page</button>
+        <button id="hpClose" title="Close the Help window">Close</button>
+      </div>
+      <div id="hpPage" class="hpPage"></div>
+      <div id="hpEditor" class="hpEditor" hidden>
+        <p class="muted">Write in Markdown: <code># Title</code>, <code>## Heading</code>, <code>**bold**</code>, <code>*italic*</code>, <code>- list item</code>, <code>1. numbered</code>, <code>`code`</code>, <code>[link](https://…)</code>, <code>[other page](02-tabs)</code>, <code>![picture](Images/Pump_Red_Rip_On.png)</code> (a path in a media folder), <code>&gt; Note</code>, tables with <code>|</code>. The preview updates as you type.</p>
+        <div class="hpEditPanes">
+          <textarea id="hpText" spellcheck="true"></textarea>
+          <div id="hpPreview" class="hpPage"></div>
+        </div>
+        <div class="bar"><button id="hpDelete" class="danger">Delete page</button><span class="spacer"></span><button id="hpCancel">Cancel</button><button id="hpSave" class="primary">Save page</button></div>
+      </div>
+    </article>
+  </div>
+</main>
+<div id="toast"></div>
+<script type="module" src="help.js"></script>
+</body>
+</html>
