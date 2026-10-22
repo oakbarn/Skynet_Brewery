@@ -4,7 +4,7 @@ A **Template** is a ready-made vessel or fitting kept in a library, not on a Tab
 
 There are two kinds of Template:
 
-- **Vessel Templates**: kettles, HLTs, mash tuns and fermenters. Chillers, coils and trub filters are Vessel Templates too, shown on their own **Equipment Templates** pane.
+- **Vessel Templates**: kettles, HLTs, mash tuns and fermenters. Chillers, coils, trub filters and RIMS tubes are Vessel Templates too, shown on their own **Equipment Templates** pane.
 - **Bundled Fitting Templates**: up to four fittings joined together (for example a valve, a tee with a thermowell and a 90 degree elbow) that go on a vessel port, or on a Tab by themselves.
 
 ## Skynet Templates and User Templates
@@ -24,7 +24,7 @@ Skynet Templates come with the panel, in its `templates` folder, and an update b
 
 ## The Template panes
 
-1. Press **☰ Menu** and pick **Vessel Templates**, **Equipment Templates** (chillers, coils, trub filters) or **Fitting Templates**.
+1. Press **☰ Menu** and pick **Vessel Templates**, **Equipment Templates** (chillers, coils, trub filters, RIMS tubes) or **Fitting Templates**.
 2. Each Template shows as a small icon with its name, so many of them fit on one screen.
 3. **Double-click** an icon (on a phone, double-tap it) to open its pop-up with the settings.
 4. **New Vessel Template ...** (or **New Bundled Fitting Template ...**) makes a blank one (Admins).
@@ -61,8 +61,11 @@ Chillers, coils and trub filters have the same settings as a vessel, plus how ma
 | Plate chiller | 4: wort in and out, water in and out (the two never mix) |
 | Chilling coil, HERMS coil | **2** (1 in, 1 out) or **4** (2 ins, 2 outs, for example a Chillzilla) |
 | Trub filter | 2: in and out |
+| RIMS tube | 2: Wort In and Wort Out |
 
 With 4, the second circuit is **In 2** and **Out 2**. Liquid in one circuit never flows into the other.
+
+A **RIMS tube** is part of the piping: wort flows in at one end and out at the other. Its **Heating element** (an Electric Element Device) goes in one end and its **Thermowell** (a Temperature Probe) in the other. Both are picked on the Tab_Vessel. Neither one is an IP, so no liquid flows there. A Mash Tun whose Heat Source is **RIMS** picks its RIMS tube from the Equipment Profile.
 
 ## Bundled Fitting Template settings
 
@@ -70,6 +73,7 @@ With 4, the second circuit is **In 2** and **Out 2**. Liquid in one circuit neve
 - **First, Second, Third and Fourth Fitting**, from the vessel port outward. Each is a dropdown:
   - **Valve**: the valve itself (a Device or a manual valve Widget) is picked when it is on a Tab.
   - **Tee**: switch on **Thermowell** if a probe sits in it, and pick its **Position** (Short or Long). A thermowell stops flow, so that side of the tee has no IP. The probe is picked when it is on a Tab.
+  - **Reducer**: type the **Small end size**. The big end is the Connection Standard size. Every IP past the reducer gets the small size.
   - **90 Degree Elbow**, **45 Degree Elbow**, **U**, **CIP Ball Valve**, or **None**.
 - **Graphic**: a Skynet Bundled Fitting picks one of the Skynet pictures. A User one can have any picture.
 
@@ -78,6 +82,21 @@ The list of fittings is set by Skynet. A new kind of fitting is added through Gi
 Flow through a Bundled Fitting goes **both ways**. The First Fitting sits on the port, but liquid can run in or out. For example, tap water can be run backwards through a pump to prime it.
 
 The pictures of Skynet Templates are SVG files, and an SVG file can't be deleted, renamed or replaced on the Media page. See [Media](07-media).
+
+## Standard fittings for piping
+
+Skynet comes with single fittings ready to put in the piping, with their IPs where the openings are on the picture:
+
+| Fitting Template | IPs |
+|---|---|
+| **Elbow_90** | Bottom and Right |
+| **Elbow_45** | Left and the Top Right corner |
+| **Tee** | Left, Right and Top (flow goes any way through it) |
+| **Reducer** | Left (the big end, TC 2) and Right (the small end, TC 1.5) |
+
+Add one to a Tab (**Add to Tab** on its pop-up), drag it to its place and draw pipes to its IPs. For now each picture faces one way, as in the table.
+
+Where two pipes of different sizes meet on one IP, the panel draws a reducer cone by itself (see [Pipes, hoses and reducers](24-pipes-and-hoses)). Use the **Reducer** fitting where it should be on the Equipment list, or on a vessel port that is not the size of its piping.
 
 ## Add to Tab
 
