@@ -43,8 +43,11 @@ Skynet's own valve pictures are SVG files in `Images/samples`, so they stay shar
 | Manual ball valve, horizontal | Valve_Manual_OpenH.svg | Valve_Manual_ClosedH.svg |
 | Manual ball valve, vertical, handle on the right | Valve_Manual_OpenV_R.svg | Valve_Manual_ClosedV_R.svg |
 | Manual ball valve, vertical, handle on the left | Valve_Manual_OpenV_L.svg | Valve_Manual_ClosedV_L.svg |
+| Manual butterfly valve, horizontal | Valve_Manual_Butterfly_OpenH.svg | Valve_Manual_Butterfly_ClosedH.svg |
+| Manual butterfly valve, vertical, handle on the right | Valve_Manual_Butterfly_OpenV_R.svg | Valve_Manual_Butterfly_ClosedV_R.svg |
+| Manual butterfly valve, vertical, handle on the left | Valve_Manual_Butterfly_OpenV_L.svg | Valve_Manual_Butterfly_ClosedV_L.svg |
 
-Open shows red lightning bolts on the motor; closed shows a ring on the valve body. A manual valve shows a red dot when open and a ring when closed, and its handle lies along the pipe when open and across it when closed. A new Valve Profile and a new valve start with the motorized ones (vertical, motor on the right). Pick the motor-on-the-left pair where the motor would be in the way. Valves made before keep the pictures they have.
+Open shows red lightning bolts on the motor; closed shows a ring on the valve body. A manual ball or butterfly valve shows a red dot when open and a ring when closed, and its handle lies along the pipe when open and across it when closed. A new Valve Profile and a new valve start with the motorized ones (vertical, motor on the right). Pick the motor-on-the-left pair where the motor would be in the way. Valves made before keep the pictures they have.
 
 The pictures come in **pairs**. Pick the closed (or off) one that matches how the valve is installed, and its open (or on) partner fills in by itself. This works the other way round too, for any picture whose name has Closed/Open or Off/On in it (for example Pump_Off.png and Pump_On.png), as long as the partner is in your pictures.
 
