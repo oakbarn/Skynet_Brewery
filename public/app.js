@@ -41,7 +41,9 @@ try { zoom = localStorage.getItem('bp.zoom') || 'fit'; } catch { /* private wind
 if (zoom === 'page') zoom = 'fit';         // "Whole tab" is now "Fit screen"
 
 let knownPaths = new Set();   // file paths in the open process that were already warned about (not on the Brain)
-let editing = false, draft = null, sel = null;   // sel = {kind:'el'|'gfx', id}
+let editing = false, draft = null, sel = null;
+// renamed Devices and Widgets in this Edit layout: first saved name -> name now; sent with Save so the Processes follow (lib/renames.js)
+let draftRenames = new Map();   // sel = {kind:'el'|'gfx', id}
 let soundOn = false;
 const audios = new Map();
 
@@ -74,7 +76,7 @@ function renderValves(list = []) {
       : h('span', { class: 'muted' }, 'An operator or admin must press Done.')))));
   if (!d.open) d.showModal();
 }
-function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', bad ? 5000 : 2200); }
+function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', ms || (bad ? 5000 : 2200)); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
 const can = need => RANK[S?.me?.role] >= RANK[need];
 const guard = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
@@ -1236,7 +1238,7 @@ function setEditing(on) {
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
-  draft = on ? clone(S.config) : null;
+  draft = on ? clone(S.config) : null; draftRenames = new Map();
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
@@ -1797,9 +1799,26 @@ $('#addWs').onclick = () => {
   toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
 };
 $('#wsProps').onclick = () => editWorkspace();
+// a rename on top of a rename (A -> B -> C) is one rename A -> C; back to the first name is no rename
+function noteRename(from, to) {
+  const first = [...draftRenames].find(([, now]) => now === from)?.[0] ?? from;
+  if (!S.config.elements.some(e => e.name === first)) return;     // added in this Edit layout: nothing uses it yet
+  if (first === to) draftRenames.delete(first); else draftRenames.set(first, to);
+}
+// what Save tells you about the Processes that follow a renamed Device or Widget
+function renameNote(r) {
+  if (!r?.renamed?.length) return '';
+  const ps = r.processes || [], run = ps.filter(p => p.running).map(p => p.name);
+  let t = ps.length ? ` Renamed in ${ps.length} Process${ps.length > 1 ? 'es' : ''}: ${ps.map(p => p.name).join(', ')}.` : ' No Process used the old name.';
+  if (run.length) t += ` Restart ${run.join(', ')} to use the new name.`;
+  if (r.otherSchemas?.length) t += ` Note: ${r.otherSchemas.map(o => `Schema ${o.schema} still has ${o.name}`).join('; ')}.`;
+  return t;
+}
 const saveLayout = guard(async () => {
-  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
-  toast(r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved'); editing = false; await load(); setEditing(false);
+  const renames = [...draftRenames].map(([from, to]) => ({ from, to }));
+  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, renames, updateVersion: $('#updateVersion').checked });
+  const note = renameNote(r);
+  toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note, false, note ? 9000 : 0); editing = false; await load(); setEditing(false);
 });
 // the Update Version switch is remembered on this browser
 try { $('#updateVersion').checked = localStorage.getItem('bp.updateVersion') === '1'; } catch { }
@@ -2372,6 +2391,7 @@ async function editItem(kind, id) {
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)))) { const err = portError(work, item); if (err) throw new Error(err); }
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
+      if (work.name !== item.name) noteRename(item.name, work.name);
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
         if (g.heater === item.name) g.heater = work.name;
