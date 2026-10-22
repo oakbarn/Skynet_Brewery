@@ -16,10 +16,6 @@
     "thermowell": {
       "installed": true,
       "position": "Center Low"
-    },
-    "tangential": {
-      "installed": true,
-      "position": "Bottom Left"
     }
   },
   "notes": "A kettle with a bottom drain (Fritz's drawing). Type, heat source and ports can be changed while Skynet is building its Templates. Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab."
