@@ -20,17 +20,23 @@ put('Images/samples/led_red.svg', 'mine, changed');
 put('Images/Skynet/Lights_LEDs/led_red.svg', 'the new one');            // a newer release already put it there
 put('Images/Valves/Valve_Manual_OpenH.svg', '<svg>valve</svg>');        // where the first try of picture groups put it
 put('Images/MyPump.png', 'my own picture');
+put('Images/Pump_Blue_Rip_Off.png', 'blue pump');                // the new release already put the pump and its hand-drawn SVG in Skynet/Pumps
+put('Images/Pump_Blue_Rip_Off.svg', '<svg data-brewpanel-traced="Pump_Blue_Rip_Off.png" data-score="0.9"></svg>');
+put('Images/Skynet/Pumps/Pump_Blue_Rip_Off.png', 'blue pump');
+put('Images/Skynet/Pumps/Pump_Blue_Rip_Off.svg', '<svg>drawn</svg>');
 
 const choices = { 'Images/Pump_Red_Rip_On.png': 'original' };
 const r = setupPictureGroups(images, choices);
 assert.deepEqual(r.made.filter(g => !g.startsWith('Skynet/')).sort(), PICTURE_GROUPS.filter(g => g !== 'Valves').sort(), 'the ten groups of your own');
-assert.deepEqual(r.made.filter(g => g.startsWith('Skynet/')).sort(), PICTURE_GROUPS.filter(g => g !== 'Lights_LEDs').map(g => 'Skynet/' + g).sort(), 'and the ten Skynet groups');
+assert.deepEqual(r.made.filter(g => g.startsWith('Skynet/')).sort(), PICTURE_GROUPS.filter(g => g !== 'Lights_LEDs' && g !== 'Pumps').map(g => 'Skynet/' + g).sort(), 'and the ten Skynet groups');
 assert.equal(fs.readFileSync(path.join(images, 'Skynet/Pumps/Pump_Red_Rip_On.png'), 'utf8'), 'red pump');
 assert.ok(has('Skynet/Pumps/Pump_Red_Rip_On.svg'), 'its SVG copy goes along');
 assert.ok(!has('Pump_Red_Rip_On.png'));
 assert.deepEqual(choices, { 'Images/Skynet/Pumps/Pump_Red_Rip_On.png': 'original' }, 'the Settings > Pictures choice follows it');
 assert.ok(has('Skynet/Vessels/kettle.svg'));
 assert.ok(has('Skynet/Valves/Valve_Manual_OpenH.svg') && !has('Valves/Valve_Manual_OpenH.svg'), 'moved out of a standard group of your own');
+assert.equal(fs.readFileSync(path.join(images, 'Skynet/Pumps/Pump_Blue_Rip_Off.svg'), 'utf8'), '<svg>drawn</svg>', 'the hand-drawn SVG wins');
+assert.ok(!has('Pump_Blue_Rip_Off.svg') && !has('Pump_Blue_Rip_Off.png'), 'the old traced copy is cleared away');
 assert.equal(fs.readFileSync(path.join(images, 'samples/led_red.svg'), 'utf8'), 'mine, changed', 'a changed copy is never thrown away');
 assert.ok(has('MyPump.png'), 'your own pictures stay where they are');
 assert.equal(skynetGroupOf('Images/samples/Valve_Manual_OpenH.svg'), 'Valves');
