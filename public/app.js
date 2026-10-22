@@ -529,6 +529,9 @@ function elGeom(e) {
 // A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
 // it can also be a vKonstant value holding the percent. It passes flow whenever it is above 0 % open.
 const PROP_TYPES = ['analogOut', 'pwmOut', 'vKonstant', 'vAPI', 'shared'];
+// Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
+const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
+const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
 const isPropValve = e => e && e.subtype === 'propValve' && PROP_TYPES.includes(e.type);
 function propPct(e) {
   const v = Number(S.values[e.name]?.value) || 0;
@@ -713,6 +716,8 @@ function fillEl(n, e0) {
       if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
       text = e.text ?? ''; break;
   }
+  // outputs on while running above 0, timers while running, steppers while moving, flow meters while flowing, sound players while playing
+  if (STATE_PICS.has(e.type) && (e.imageOn || e.imageOff || v.imageon || v.imageoff)) img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
   if (isPropValve(e)) {                              // show percent open, and the open / closed picture
     const pct = propPct(e); on = pct > 0;
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
@@ -1864,7 +1869,7 @@ const F = {
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
-    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool'], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT]] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Graphic when on', 'gpick'], ['imageOff', 'Graphic when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool'], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT]] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
@@ -2009,6 +2014,11 @@ function alarmFields(item) {
 }
 
 function fieldsFor(item) {
+  const fs = fieldsOf(item);
+  return STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn') ? [...fs, ...ONOFF_PICS] : fs;
+}
+
+function fieldsOf(item) {
   if (item.type === 'stepper') return stepperFields(item);
   if (item.type === 'alarm') return alarmFields(item);
   if (item.type === 'temperature') {
