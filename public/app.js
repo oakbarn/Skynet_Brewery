@@ -4443,7 +4443,7 @@ const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === Str
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
 const SKYNET_FIT_PICS = ['Images/samples/Fitting_Elbow90.svg', 'Images/samples/Fitting_Elbow45.svg', 'Images/samples/Fitting_Tee.svg', 'Images/samples/Fitting_Reducer.svg', 'Images/samples/pipe_elbow90.svg', 'Images/samples/pipe_elbow45.svg', 'Images/samples/pipe_tee.svg', 'Images/samples/pipe_cross.svg',
-  'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg', 'Images/samples/Valve_Motor_Ball_OpenH.svg', 'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
+  'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg', 'Images/samples/Valve_Motor_Ball_OpenH.svg', 'Images/samples/Valve_Manual_OpenH.svg', 'Images/samples/Valve_Manual_Butterfly_OpenH.svg', 'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
   return { tee: 'Images/samples/Fitting_Tee.svg', reducer: 'Images/samples/Fitting_Reducer.svg', elbow45: 'Images/samples/Fitting_Elbow45.svg' }[k] || (k ? 'Images/samples/Fitting_Elbow90.svg' : 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/samples/kettle.svg';
@@ -4534,7 +4534,7 @@ function fittingSlotFields(w, onTab) {
     const k = w['f' + i] || 'none';
     return [['f' + i, label, 'sel', Object.entries(FITTING_KINDS), true],
       ...(k === 'valve' ? [onTab ? ['fv' + i, 'Valve: Select Device, Widget or None', 'sel', valves] : ['_v' + i, 'Valve: Select Device, Widget or None (picked when it is on a Tab)', 'note']] : []),
-      ...(k === 'reducer' ? [['rs' + i, 'Small end size (the big end is the Connection Standard size)', 'text']] : []),
+      ...(k === 'reducer' ? [['rs' + i, 'Other end size (it goes from the size before it to this size, up or down)', 'text']] : []),
       ...(k === 'tee' ? [['tw' + i, 'Thermowell in this tee (it stops flow: that side has no IP)', 'yn', false, true],
         ...(w['tw' + i] ? [['twp' + i, 'Position of Thermowell', 'sel', Object.entries(THERMOWELL_POS)],
           onTab ? ['fp' + i, 'Temperature Probe: Select Temperature Probe or None', 'sel', probes] : ['_p' + i, 'Temperature Probe: Select Temperature Probe or None (picked when it is on a Tab)', 'note']] : [])] : [])];
