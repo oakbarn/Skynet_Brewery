@@ -286,6 +286,9 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red
   ['Motorized ball valve open (horizontal)', 'Images/samples/Valve_Motor_Ball_OpenH.svg'], ['Motorized ball valve closed (horizontal)', 'Images/samples/Valve_Motor_Ball_ClosedH.svg'],
   ['Motorized ball valve open (vertical, motor right)', 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg'], ['Motorized ball valve closed (vertical, motor right)', 'Images/samples/Valve_Motor_Ball_ClosedV_RC.svg'],
   ['Motorized ball valve open (vertical, motor left)', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg'], ['Motorized ball valve closed (vertical, motor left)', 'Images/samples/Valve_Motor_Ball_ClosedV_LC.svg'],
+  ['Manual ball valve open (horizontal)', 'Images/samples/Valve_Manual_OpenH.svg'], ['Manual ball valve closed (horizontal)', 'Images/samples/Valve_Manual_ClosedH.svg'],
+  ['Manual ball valve open (vertical, handle right)', 'Images/samples/Valve_Manual_OpenV_R.svg'], ['Manual ball valve closed (vertical, handle right)', 'Images/samples/Valve_Manual_ClosedV_R.svg'],
+  ['Manual ball valve open (vertical, handle left)', 'Images/samples/Valve_Manual_OpenV_L.svg'], ['Manual ball valve closed (vertical, handle left)', 'Images/samples/Valve_Manual_ClosedV_L.svg'],
   ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
@@ -407,7 +410,8 @@ function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
-  if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
+  if (g.image && t === 'bfit' && +g.turn) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:rotate(${+g.turn}deg)` }));   // a turned Tab_Fitting
+  else if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
   if (t === 'electric' || t === 'gas') n.append(h('div', { class: 'heat' }));
   for (const [k, d] of Object.entries(eqClass(g)?.ports || {})) {    // ports that are not IPs (thermowells) show as a mark
     const p = g.ports?.[k]; if (d.ip || !p?.installed) continue;
@@ -2348,6 +2352,8 @@ async function editItem(kind, id) {
       if (item.onVessel && !work.joined) { delete work.onVessel; delete work.onPort; }
       delete work.joined;
       const pos = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_pos')).map(k => [k.slice(0, -4), work[k]]));
+      if ((+work.turn || 0) !== (+item.turn || 0)) for (const k of Object.keys(pos)) pos[k] = turnPos(pos[k], (+work.turn || 0) - (+item.turn || 0));   // the IPs turn with the picture
+      if (!+work.turn) delete work.turn;
       work.ports = {};
       for (const [k, d] of Object.entries(bfitClass(work).ports)) work.ports[k] = { installed: true, position: pos[k] || item.ports?.[k]?.position || portDefPos(d), standard: d.ip ? stdShort(fittingPortStd(work, k)) : '' };
       for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
@@ -4400,9 +4406,14 @@ const tplClassNote = t => t.cls === 'skynet'
 // in it is closed.
 // The 45 positions sit where a 45 degree opening meets the corner of a square picture (Fitting_Elbow45.svg).
 const BF_POS = SIDE4.concat(CORNERS, [['Top Right 45', 0.84, 0.16], ['Top Left 45', 0.16, 0.16], ['Bottom Right 45', 0.84, 0.84], ['Bottom Left 45', 0.16, 0.84]]);
+// Turn (Fritz, 2026-10-22): a Tab_Fitting's picture can be turned 90, 180 or 270 degrees clockwise; its IP positions turn with it
+const TURN_STEP = { Left: 'Top', Top: 'Right', Right: 'Bottom', Bottom: 'Left', 'Top Left': 'Top Right', 'Top Right': 'Bottom Right', 'Bottom Right': 'Bottom Left', 'Bottom Left': 'Top Left',
+  'Top Left 45': 'Top Right 45', 'Top Right 45': 'Bottom Right 45', 'Bottom Right 45': 'Bottom Left 45', 'Bottom Left 45': 'Top Left 45' };
+const TURNS = [['0', 'Not turned'], ['90', '90 degrees clockwise'], ['180', '180 degrees'], ['270', '270 degrees clockwise (90 counter-clockwise)']];
+function turnPos(pos, deg) { for (let i = 0; i < (((+deg || 0) / 90) % 4 + 4) % 4; i++) pos = TURN_STEP[pos] || pos; return pos; }
 function bfitClass(g) {
   const ports = {}, flat = g.flat;            // flat: the fitting runs left or right from its vessel port
-  const at = (k, def) => g.ipPos?.[k] && BF_POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def;   // a Template can say where its openings are on its picture
+  const at = (k, def) => turnPos(g.ipPos?.[k] && BF_POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def, g.turn);   // a Template can say where its openings are on its picture
   if (!g.onVessel) ports.start = pt('Start (vessel side)', BF_POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: 'a' });
   fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: 'a' }));
   (g.fittings || []).forEach((f, i) => { if (f.kind === 'tee' && f.thermowell) ports['tw' + (i + 1)] = pt(`Thermowell ${i + 1} (${THERMOWELL_POS[f.thermowellPos] || 'Short'})`, BF_POS, { ip: false, def: flat ? 'Top' : 'Right' }); });
@@ -4729,6 +4740,7 @@ function placeTabFitting(ft, tab, name, on) {
 // the Properties of a Tab_Fitting on a Tab: everything, fully editable (even one from a Skynet Template)
 F.tabFitting = it => [['_t', `Tab_Fitting, made from the Bundled Fitting Template ${it.template || '(none)'}. Changing it here does not change the Template.`, 'note'],
   ['name', 'Name', 'text'], ['label', 'Label (empty = the Name)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+  ['turn', 'Turn (the picture and its IPs)', 'sel', TURNS],
   ...stdFields(it), ['_f', 'Fittings (from the vessel port outward)', 'head'], ...fittingSlotFields(it, true),
   ['_p', 'IPs', 'head'], ...Object.entries(bfitClass(it).ports).map(([k, d]) => [k + '_pos', d.name + ' position', 'sel', d.pos.map(q => q[0])]),
   ...(it.onVessel ? [['joined', 'Joined to its vessel port (flow passes between them; off = it gets a Start IP of its own)', 'bool']] : []),
