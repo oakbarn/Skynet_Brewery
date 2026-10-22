@@ -62,12 +62,12 @@ Every picture list in a Properties dialog (Picture when on / off, Graphic, Backg
 - **Skynet pictures**, **My pictures** or **Both**. It starts at Skynet pictures, since most brewers only use those.
 - A **group**: **All groups**, or one group.
 
-Both are remembered on that computer or phone. The picture already picked is always in the list. Sound lists have the group list only (the folders in `media/sounds`). **Add new ...** still takes any path, for example `Valves/MyValve_On.png`.
+Both are remembered on that computer or phone. The picture already picked is always in the list. Press the **🖼** button beside the list to pick from **icons**, like the Large icons view in Windows Explorer: click a picture and press **Use this one**, or double-click it. Sound lists have the group list only (the folders in `media/sounds`). **Add new ...** still takes any path, for example `Valves/MyValve_On.png`.
 
 ## In the Process editor: Alt+P
 
 While writing a Process, press **Alt+P** (Option+P on a Mac), or the **Picture** button above the editor. A list of pictures opens:
 
 - Choose **Pictures** or **Sounds**, **Skynet / My pictures / Both**, a group (or **All groups**), and type in **Search** to narrow it down.
-- The arrow keys move through the list; the picture is shown beside it (a sound can be played).
+- The pictures show as **icons**, like in Windows Explorer. Click one, or move with the arrow keys; its path shows below (a sound can be played).
 - **Double-click** or press **Enter** to put the path where the cursor is, in quotes: `"Images/Skynet/Pumps/Pump_Red_Rip_On.png"`. If you already typed the opening `"`, only the path (and the closing `"`) is added.
