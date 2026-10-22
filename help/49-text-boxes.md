@@ -61,4 +61,4 @@ endif
 
 ## Vessels
 
-A new vessel is a **plain gray tank** with no writing on it (the picture `Images/samples/vessel_gray.svg`). Its **Display Name** is its only text: set it in the vessel's properties, with its position, color, back color and size. A vessel made before this keeps its picture; pick `Images/samples/vessel_gray.svg` as its Graphic to make it plain gray.
+A new vessel is a **plain gray tank** with no writing on it (the picture `Images/Skynet/Vessels/vessel_gray.svg`). Its **Display Name** is its only text: set it in the vessel's properties, with its position, color, back color and size. A vessel made before this keeps its picture; pick `Images/Skynet/Vessels/vessel_gray.svg` as its Graphic to make it plain gray.

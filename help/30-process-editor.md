@@ -8,6 +8,10 @@ Every line has its number down the left side. A red number is a line with a prob
 
 To jump to a line, press **Go to line** (or **Ctrl+G** on a PC), type the number and press **OK**. The line is highlighted and scrolled into view. Go to line works in the **Schema.json** editor too.
 
+## Picture paths: Alt+P
+
+Press **Alt+P** (Option+P on a Mac) or the **Picture** button to pick a picture or sound from a list, one group or all, and have its path typed where the cursor is. See [Picture groups](57-picture-groups).
+
 ## Colors
 
 The words of a Process are colored by what they do:

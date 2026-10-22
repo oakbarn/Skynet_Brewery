@@ -245,7 +245,7 @@ const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left',
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
-  vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/samples/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
+  vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/Skynet/Vessels/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
     ports: {
       outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86]], { on: true }),
       // a second drain, for example above the element so it always stays under water (Fritz's Big Fatty, 2026-10-22)
@@ -254,63 +254,74 @@ const EQ = {
       thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7]], { ip: false }),
       steamSlayer: pt('Steam Slayer', V_HIGH), sparge: pt('Sparge', V_HIGH), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH]),
     } },
-  pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/samples/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
+  pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/Skynet/Chillers/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
       wortIn: pt('Wort In', CORNERS, { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS, { on: true, def: 'Bottom Right', circuit: 'wort' }),
       waterIn: pt('Water In', CORNERS, { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS, { on: true, def: 'Top Right', circuit: 'water' }),
       thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
     } },
-  ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/samples/chill_coil.svg', size: [180, 180], tab: 'Equipment',
+  ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/Skynet/Chillers/chill_coil.svg', size: [180, 180], tab: 'Equipment',
     ports: { in: pt('In', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), out: pt('Out', CORNERS.slice(0, 2).concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }),
       // a 4 port coil (Chillzilla): a second circuit that never mixes with the first (Fritz, 2026-10-21: 2 ins, 2 outs)
       in2: pt('In 2', CORNERS.concat(SIDE4), { def: 'Bottom Left', circuit: 'b' }), out2: pt('Out 2', CORNERS.concat(SIDE4), { def: 'Bottom Right', circuit: 'b' }) } },
-  herms: { title: 'HERMS coil', types: ['Stainless 25 ft', 'Stainless 50 ft', 'Copper'], image: 'Images/samples/herms_coil.svg', size: [180, 180], tab: 'Equipment',
+  herms: { title: 'HERMS coil', types: ['Stainless 25 ft', 'Stainless 50 ft', 'Copper'], image: 'Images/Skynet/Other_Equipment/herms_coil.svg', size: [180, 180], tab: 'Equipment',
     ports: { wortIn: pt('Wort In', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Left', circuit: 'a' }), wortOut: pt('Wort Out', CORNERS.concat(SIDE4.slice(0, 2)), { on: true, def: 'Top Right', circuit: 'a' }),
       in2: pt('In 2', CORNERS.concat(SIDE4), { def: 'Bottom Left', circuit: 'b' }), out2: pt('Out 2', CORNERS.concat(SIDE4), { def: 'Bottom Right', circuit: 'b' }) } },
-  trub: { title: 'Trub filter', types: ['Inline filter', 'Hop rocket', 'Hop spider'], image: 'Images/samples/trub_filter.svg', size: [100, 170], tab: 'Equipment',
+  trub: { title: 'Trub filter', types: ['Inline filter', 'Hop rocket', 'Hop spider'], image: 'Images/Skynet/Other_Equipment/trub_filter.svg', size: [100, 170], tab: 'Equipment',
     ports: { inlet: pt('Inlet', SIDE4.concat(CORNERS), { on: true, def: 'Top', circuit: 'a' }), outlet: pt('Outlet', SIDE4.concat(CORNERS), { on: true, def: 'Bottom', circuit: 'a' }) } },
   // RIMS tube (Fritz, 2026-10-22): wort in at the top of one end, out at the bottom of the other; the probe goes in one end and
   // the element in the other (both picked on the Tab_Vessel; neither is an IP, so no flow there)
-  rims: { title: 'RIMS tube', types: ['RIMS'], image: 'Images/samples/Equipment_RIMS.svg', size: [200, 100], tab: 'Equipment',
+  rims: { title: 'RIMS tube', types: ['RIMS'], image: 'Images/Skynet/Other_Equipment/Equipment_RIMS.svg', size: [200, 100], tab: 'Equipment',
     ports: { inlet: pt('Wort In', RIMS_POS, { on: true, def: 'Top Left', circuit: 'a' }), outlet: pt('Wort Out', RIMS_POS, { on: true, def: 'Bottom Right', circuit: 'a' }),
       thermowell: pt('Thermowell (probe)', [['Left End', 0, 0.5], ['Right End', 1, 0.5]], { ip: false, on: true, def: 'Left End' }),
       element: pt('Heating element', [['Right End', 1, 0.5], ['Left End', 0, 0.5]], { ip: false, on: true, def: 'Right End' }) } },
-  eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/samples/pipe_tee.svg', size: [90, 90],
+  eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/Skynet/Other_Equipment/pipe_tee.svg', size: [90, 90],
     ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
-  eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/samples/pipe_elbow90.svg', size: [90, 90],
+  eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
-  eqElbow45: { title: 'Pipe 45° elbow', types: ['Short radius', 'Long radius'], image: 'Images/samples/pipe_elbow45.svg', size: [90, 90],
+  eqElbow45: { title: 'Pipe 45° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Left', circuit: 'a' }),
       b: pt('End B', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Bottom Right', circuit: 'a' }) } },
-  eqCross: { title: 'Pipe cross', types: ['Equal cross', 'Reducing cross'], image: 'Images/samples/pipe_cross.svg', size: [90, 90],
+  eqCross: { title: 'Pipe cross', types: ['Equal cross', 'Reducing cross'], image: 'Images/Skynet/Other_Equipment/pipe_cross.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Right', circuit: 'a' }),
       c: pt('End C', SIDE4, { on: true, def: 'Top', circuit: 'a' }), d: pt('End D', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
 };
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
-const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red', 'Images/samples/led_red.svg'], ['LED off (grey)', 'Images/samples/led_off.svg'],
-  ['Lightning bolt on', 'Images/samples/bolt_on.svg'], ['Lightning bolt off', 'Images/samples/bolt_off.svg'],
-  ['Motorized ball valve open (horizontal)', 'Images/samples/Valve_Motor_Ball_OpenH.svg'], ['Motorized ball valve closed (horizontal)', 'Images/samples/Valve_Motor_Ball_ClosedH.svg'],
-  ['Motorized ball valve open (vertical, motor right)', 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg'], ['Motorized ball valve closed (vertical, motor right)', 'Images/samples/Valve_Motor_Ball_ClosedV_RC.svg'],
-  ['Motorized ball valve open (vertical, motor left)', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg'], ['Motorized ball valve closed (vertical, motor left)', 'Images/samples/Valve_Motor_Ball_ClosedV_LC.svg'],
-  ['Manual ball valve open (horizontal)', 'Images/samples/Valve_Manual_OpenH.svg'], ['Manual ball valve closed (horizontal)', 'Images/samples/Valve_Manual_ClosedH.svg'],
-  ['Manual ball valve open (vertical, handle right)', 'Images/samples/Valve_Manual_OpenV_R.svg'], ['Manual ball valve closed (vertical, handle right)', 'Images/samples/Valve_Manual_ClosedV_R.svg'],
-  ['Manual ball valve open (vertical, handle left)', 'Images/samples/Valve_Manual_OpenV_L.svg'], ['Manual ball valve closed (vertical, handle left)', 'Images/samples/Valve_Manual_ClosedV_L.svg'],
-  ['Manual butterfly valve open (horizontal)', 'Images/samples/Valve_Manual_Butterfly_OpenH.svg'], ['Manual butterfly valve closed (horizontal)', 'Images/samples/Valve_Manual_Butterfly_ClosedH.svg'],
-  ['Manual butterfly valve open (vertical, handle right)', 'Images/samples/Valve_Manual_Butterfly_OpenV_R.svg'], ['Manual butterfly valve closed (vertical, handle right)', 'Images/samples/Valve_Manual_Butterfly_ClosedV_R.svg'],
-  ['Manual butterfly valve open (vertical, handle left)', 'Images/samples/Valve_Manual_Butterfly_OpenV_L.svg'], ['Manual butterfly valve closed (vertical, handle left)', 'Images/samples/Valve_Manual_Butterfly_ClosedV_L.svg'],
-  ['Solenoid gas valve open (horizontal)', 'Images/samples/Valve_Gas_Solenoid_OpenH.svg'], ['Solenoid gas valve closed (horizontal)', 'Images/samples/Valve_Gas_Solenoid_ClosedH.svg'],
-  ['Solenoid gas valve open (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_R.svg'],
-  ['Solenoid gas valve open (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/samples/Valve_Gas_Solenoid_ClosedV_L.svg'],
-  ['Submersible sump pump on', 'Images/samples/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/samples/Pump_Sump_Off.svg'],
-  ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
-  ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
+const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg'], ['LED red', 'Images/Skynet/Lights_LEDs/led_red.svg'], ['LED off (grey)', 'Images/Skynet/Lights_LEDs/led_off.svg'],
+  ['Lightning bolt on', 'Images/Skynet/Lights_LEDs/bolt_on.svg'], ['Lightning bolt off', 'Images/Skynet/Lights_LEDs/bolt_off.svg'],
+  ['Motorized ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg'], ['Motorized ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg'],
+  ['Motorized ball valve open (vertical, motor right)', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'], ['Motorized ball valve closed (vertical, motor right)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg'],
+  ['Motorized ball valve open (vertical, motor left)', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg'], ['Motorized ball valve closed (vertical, motor left)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg'],
+  ['Manual ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg'], ['Manual ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg'],
+  ['Manual ball valve open (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_OpenV_R.svg'], ['Manual ball valve closed (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_ClosedV_R.svg'],
+  ['Manual ball valve open (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_OpenV_L.svg'], ['Manual ball valve closed (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_ClosedV_L.svg'],
+  ['Manual butterfly valve open (horizontal)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg'], ['Manual butterfly valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg'],
+  ['Manual butterfly valve open (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenV_R.svg'], ['Manual butterfly valve closed (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_R.svg'],
+  ['Manual butterfly valve open (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenV_L.svg'], ['Manual butterfly valve closed (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg'],
+  ['Solenoid gas valve open (horizontal)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenH.svg'], ['Solenoid gas valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedH.svg'],
+  ['Solenoid gas valve open (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_R.svg'],
+  ['Solenoid gas valve open (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_L.svg'],
+  ['Submersible sump pump on', 'Images/Skynet/Pumps/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/Skynet/Pumps/Pump_Sump_Off.svg'],
+  ['Ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Ball_ClosedH_1.png'],
+  ['Ball valve open (vertical)', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png']];
+// On overlay pictures (Fritz, 2026-10-22): drawn on top of the item's picture while it is on, the picture below stays visible.
+// They have see-through backgrounds and live in the On_Off picture group (Fritz: its own folder): Skynet's in Images/Skynet/On_Off,
+// your own in Images/On_Off. The list shows that group first, then every other picture; Add new takes any picture in media/Images.
+// "tint:red" is not a file: it colors the picture underneath itself (Fritz: a heating element in a vessel glows red when on).
+// Only the drawn part is colored, so it works best on pictures with a see-through background (SVG or PNG).
+const TINTS = { red: ['Glow red (colors the picture itself; heating elements)', 'rgb(255,30,0)'], orange: ['Glow orange (colors the picture itself)', 'rgb(255,140,0)'],
+  blue: ['Glow blue (colors the picture itself; cooling)', 'rgb(0,120,255)'] };
+const isTint = p => /^tint:/.test(p || '');
+const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
+const OVERLAY_GRAPHICS = [['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
+  ['Green glow ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
 const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)$/i;
 // pictures and sounds already used anywhere in the layout
 function usedPaths(re) {
   const c = draft || S.config;
-  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.image, o.background, o.sound, ...slotsOf(o).map(n => o['imagePath_' + n]), ...(o.sounds || [])])
+  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.imageOverlay, o.image, o.background, o.sound, ...slotsOf(o).map(n => o['imagePath_' + n]), ...(o.sounds || [])])
     .filter(p => typeof p === 'string' && re.test(p)))].sort();
 }
 const HEAT_SOURCES = ['None', 'Electric element', 'Gas burner', 'Induction', 'Steam jacket', 'HERMS coil'];
@@ -319,22 +330,41 @@ const eqClass = g => g?.kind === 'vessel' ? (g.vesselType === 'bfit' ? bfitClass
 // list keys: "standard" (shared), "<class>.types", "<class>.<port>"
 function vList(key) {
   const [c, p] = key.split('.');
-  const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'units' ? UNITS : key === 'colors' ? [] :
+  const base = key === 'standard' ? EQ_STANDARDS : key === 'onoff' ? ONOFF_GRAPHICS.map(g => g[1]) : key === 'overlays' ? [...OVERLAY_GRAPHICS.map(g => g[1]), ...mediaPics.filter(onOffPic).sort(), ...inImages(mediaPics).filter(p => !onOffPic(p)).sort()] : key === 'units' ? UNITS : key === 'colors' ? [] :
     key === 'pictures' ? inImages([...ONOFF_GRAPHICS.map(g => g[1]), ...Object.values(EQ).map(c => c.image), ...usedPaths(IMG_RE), ...mediaPics]) :
     key === 'backgrounds' ? inImages([...mediaPics, ...(draft || S.config).workspaces.map(w => w.background).filter(Boolean)]).sort() : key === 'sounds' ? [...new Set([...mediaSounds, ...usedPaths(SND_RE)])].sort() : key === 'heat' ? HEAT_SOURCES : p === 'types' ? EQ[c]?.types : EQ[c]?.ports[p]?.pos.map(q => q[0]);
   return [...new Set([...(base || []), ...(S.config.vesselLists?.[key] || [])])];
 }
 // Picture lists only offer pictures in media/Images (and its folders); sound lists add what is in media/sounds.
 // Fetched when a dialog needs them.
-let mediaPics = [], mediaSounds = [];
+let mediaPics = [], mediaSounds = [], picGroups = [];
 // a picture typed by hand always lands in media/Images: "pump.png", "/images/pump.png" and "media\Images\pump.png" -> "Images/pump.png"
 const imagesPath = p => 'Images/' + p.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^media\//i, '').replace(/^images\//i, '');
 const inImages = list => [...new Set(list)].filter(p => /^Images\//i.test(p));
 async function loadMediaPictures() {
-  const [pics, snds] = await Promise.all(['Images', 'sounds'].map(dir => api('GET', `/ui/media/all?root=0&dir=${dir}`).catch(() => null)));
+  const [pics, snds, grp] = await Promise.all([...['Images', 'sounds'].map(dir => api('GET', `/ui/media/all?root=0&dir=${dir}`).catch(() => null)), api('GET', '/ui/media/groups').catch(() => null)]);
+  picGroups = grp?.groups || picGroups;
   mediaPics = (pics?.files || []).filter(f => f.kind === 'picture').map(f => f.use);
   mediaSounds = (snds?.files || []).filter(f => f.kind === 'sound').map(f => f.use);
 }
+// Picture groups (Help > Picture groups): every picture list can show one group (a folder in media/Images, or in media/sounds
+// for sounds) or All. The pick is remembered on this computer or phone.
+// Skynet pictures are in Images/Skynet/<group>, yours in Images/<group>; the Show list picks Skynet, Mine or Both.
+const groupOf = p => { const m = /^(?:Images\/(?:Skynet\/(?=[^/]+\/))?|sounds\/)([^/]+)\//i.exec(p || ''); return m ? m[1] : ''; };
+const isSkynetPic = p => /^Images\/Skynet\//i.test(p || '');
+const inSource = (p, src) => src === 'both' || !/^Images\//i.test(p || '') || (src === 'mine') !== isSkynetPic(p);
+const SOURCES = [['skynet', 'Skynet pictures'], ['mine', 'My pictures'], ['both', 'Both']];
+function groupChoices(sound, paths) {
+  const top = sound ? 'sounds' : 'Images', seen = new Set(paths.map(groupOf).filter(Boolean));
+  const out = sound ? [] : picGroups.map(g => [g.name, g.label + (g.standard ? '' : ' (yours)')]);
+  for (const g of [...seen].sort()) if (!out.some(([n]) => n.toLowerCase() === g.toLowerCase())) out.push([g, g]);
+  if (paths.some(p => p && !groupOf(p))) out.push(['-', `Not in a group (loose in ${top})`]);
+  return out;
+}
+const inGroup = (p, g) => !g || (g === '-' ? !groupOf(p) : groupOf(p).toLowerCase() === g.toLowerCase());
+let lastGroup = {}; try { lastGroup = JSON.parse(localStorage.getItem('picGroup') || '{}'); } catch { }
+const srcPick = () => SOURCES.some(([k]) => k === lastGroup.src) ? lastGroup.src : 'skynet';      // most people only use the Skynet ones
+const keepGroup = (kind, g) => { lastGroup[kind] = g; try { localStorage.setItem('picGroup', JSON.stringify(lastGroup)); } catch { } };
 const portDefPos = d => d.def || d.pos[0][0];
 function vPortXY(g, k, pos) {
   const q = eqClass(g).ports[k].pos.find(q => q[0] === pos) || [pos, 0.5, 0.5];
@@ -559,6 +589,8 @@ const PROP_TYPES = ['analogOut', 'pwmOut', 'vKonstant', 'vAPI', 'shared'];
 // Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
 const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
 const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
+// One picture plus an On overlay instead of two pictures (Fritz, 2026-10-22): .imageOverlay is drawn on top while the item is on
+const OVERLAY_PIC = ['imageOverlay', 'On overlay (on top while on)', 'gpick', 'overlays'];
 const isPropValve = e => e && e.subtype === 'propValve' && PROP_TYPES.includes(e.type);
 function propPct(e) {
   const v = Number(S.values[e.name]?.value) || 0;
@@ -750,6 +782,20 @@ function fillEl(n, e0) {
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
     img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
   }
+  // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
+  const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay || e.imageOverlay);
+  if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
+  let ov = n.querySelector(':scope > .onov');
+  if (ovl && !ov) n.append(ov = h('div', { class: 'onov' }));
+  if (ov) {
+    const tint = isTint(ovl) && img && TINTS[ovl.slice(5)];
+    ov.style.backgroundImage = ovl && !isTint(ovl) ? `url("${media(ovl)}")` : '';
+    ov.style.backgroundColor = tint ? tint[1] : '';
+    ov.style.webkitMaskImage = ov.style.maskImage = tint ? `url("${media(img)}")` : '';
+    ov.classList.toggle('tint', !!tint);
+    ov.classList.toggle('hidden', !ovl || (isTint(ovl) && !tint));
+    if (ovl) fitOverlay(n, ov, img, stretchPic(e, v));
+  }
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
@@ -763,7 +809,7 @@ function fillEl(n, e0) {
   const missing = img && isButton && imgMissing(media(img), n);
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
-  const stretch = !!e.imagePathsLocked && hasPictures(e, v);
+  const stretch = stretchPic(e, v);
   n.style.backgroundColor = img || missing ? '' : bg(v.background);
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] : 0;
@@ -775,6 +821,23 @@ function fillEl(n, e0) {
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
 }
+// The On overlay covers just the picture underneath (Fritz: sized to the picture), not the empty sides of a wide or tall item.
+// The picture is drawn "contain" in the item, so its box comes from the picture's own width and height (loaded once).
+const picSize = new Map();
+function fitOverlay(n, ov, img, stretch) {
+  const full = () => { ov.style.inset = '0'; ov.style.width = ov.style.height = ''; };
+  if (!img || stretch) return full();
+  const url = media(img), sz = picSize.get(url);
+  if (!sz) {
+    full();
+    if (!picSize.has(url)) { picSize.set(url, null); const im = new Image(); im.onload = () => { picSize.set(url, [im.naturalWidth, im.naturalHeight]); if (n.isConnected) fitOverlay(n, ov, img, stretch); }; im.src = url; }
+    return;
+  }
+  const W = n.clientWidth, H = n.clientHeight, k = Math.min(W / (sz[0] || 1), H / (sz[1] || 1)), w = sz[0] * k, hh = sz[1] * k;
+  if (!W || !H || !w || !hh) return full();
+  Object.assign(ov.style, { inset: 'auto', left: (W - w) / 2 + 'px', top: (H - hh) / 2 + 'px', width: w + 'px', height: hh + 'px' });
+}
+const stretchPic = (e, v) => !!e.imagePathsLocked && hasPictures(e, v);     // imported BruControl pictures fill the item
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
 const imgState = new Map();
 function imgMissing(url, node) {
@@ -977,7 +1040,7 @@ function valueDialog(t) {
   const num = t.dataType === 'value', k = vkKind(t);
   const inp = t.dataType === 'string' && k !== 'graphic'
     ? h('textarea', { class: 'vdInput', rows: k === 'longstring' ? 12 : 3 }, v.value ?? '')
-    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: { time: 'hh:mm:ss', datetime: 'mm/dd/yyyy hh:mm:ss' }[t.dataType] ?? (k === 'graphic' ? 'image path, e.g. Images/BurnerFlame.png' : '') });
+    : h('input', { class: 'vdInput', value: num ? fmtVal(t, v.value) : (v.value ?? ''), inputmode: num ? 'decimal' : 'text', placeholder: { time: 'hh:mm:ss', datetime: 'mm/dd/yyyy hh:mm:ss' }[t.dataType] ?? (k === 'graphic' ? 'image path, e.g. Images/Skynet/Other_Equipment/BurnerFlame.png' : '') });
   const step = +t.step || 1;
   const bump = k => { const x = (parseFloat(inp.value) || 0) + k * step; inp.value = t.precision !== undefined && t.precision !== '' ? x.toFixed(+t.precision) : String(+x.toFixed(6)); };
   const done = ok => {
@@ -1609,14 +1672,14 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Pump_Red_Rip_On.png', imageOff: 'Images/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a vKonstant value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/samples/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/samples/Valve_Motor_Ball_ClosedH.svg' };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg' };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'vKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
   },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/samples/Valve_Motor_Ball_ClosedV_RC.svg', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
@@ -1711,7 +1774,7 @@ $('#addEl').onclick = guard(async () => {
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
-  if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/samples/led_green.svg'; e.imageOff = 'Images/samples/led_red.svg'; }
+  if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
   if (isDevice(e) && !(await newDeviceDialog(e, prefix))) return;
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
@@ -2288,8 +2351,11 @@ function alarmFields(item) {
 }
 
 function fieldsFor(item) {
-  const fs = fieldsOf(item);
-  return STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn') ? [...fs, ...ONOFF_PICS] : fs;
+  let fs = fieldsOf(item);
+  if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
+  // every item with on / off pictures can also have an On overlay, offered right below them (not the Manual vessel widget)
+  const at = fs.findIndex(f => f[0] === 'imageOff');
+  return at < 0 || item.type === 'manual' ? fs : [...fs.slice(0, at + 1), OVERLAY_PIC, ...fs.slice(at + 1)];
 }
 
 function fieldsOf(item) {
@@ -2378,13 +2444,27 @@ function field([key, label, kind, opts, rerender], obj) {
     input = h('div', { class: 'cpick' }, sw, s, pick, val);
   }
   else if (kind === 'gpick') {     // a picture from the on / off list, with a preview; Add new ... takes any media path
-    const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds'].includes(list);
-    const named = new Map(ONOFF_GRAPHICS.map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
-    const pv = h('img', { class: 'gprev' + (v && pic ? '' : ' hidden'), ...(v && pic ? { src: media(v) } : {}), alt: '' });
-    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list }, h('option', { value: '' }, '(none)'),
-      ...os.map(p => h('option', { value: p, ...(p === v ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
-    s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value); if (s.value) pv.src = media(s.value); } });
-    input = h('div', { class: 'gpick' }, s, pv);
+    const list = opts || 'onoff', pic = ['onoff', 'pictures', 'backgrounds', 'overlays'].includes(list);
+    const named = new Map([...ONOFF_GRAPHICS, ...OVERLAY_GRAPHICS].map(([n, p]) => [p, n])), os = vList(list); if (v && !os.includes(v)) os.push(v);
+    const pv = h('img', { class: 'gprev' + (v && pic && !isTint(v) ? '' : ' hidden'), ...(v && pic && !isTint(v) ? { src: media(v) } : {}), alt: '' });
+    const s = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': list });
+    // the Group list beside it shows one picture group or All (it has no data-k, so it is never saved)
+    const gk = list === 'sounds' ? 'sounds' : 'pictures', groups = groupChoices(gk === 'sounds', os);
+    let g = lastGroup[gk] || ''; if (!groups.some(([n]) => n === g)) g = '';
+    let src = gk === 'sounds' ? 'both' : srcPick();
+    const fill = () => {
+      const cur = s.value || v || '';
+      s.replaceChildren(h('option', { value: '' }, '(none)'),
+        ...os.filter(p => p === cur || isTint(p) || (inGroup(p, g) && inSource(p, src))).map(p => h('option', { value: p, ...(p === cur ? { selected: true } : {}) }, named.get(p) || p)), h('option', { value: '__add__' }, 'Add new ...'));
+      s.value = cur;
+    };
+    fill();
+    const gs = groups.length ? h('select', { class: 'gpickGroup', title: 'Show the pictures of one group, or All', onchange: ev => { ev.stopPropagation(); g = gs.value; keepGroup(gk, g); fill(); } },
+      h('option', { value: '' }, 'All groups'), ...groups.map(([n, l]) => h('option', { value: n, ...(n === g ? { selected: true } : {}) }, l))) : null;
+    s.addEventListener('change', () => { if (pic && s.value !== '__add__') { pv.classList.toggle('hidden', !s.value || isTint(s.value)); if (s.value && !isTint(s.value)) pv.src = media(s.value); } });
+    const ss = gk === 'sounds' ? null : h('select', { class: 'gpickGroup', title: 'Show the Skynet pictures, your own, or both', onchange: ev => { ev.stopPropagation(); src = ss.value; keepGroup('src', src); fill(); } },
+      ...SOURCES.map(([k, l]) => h('option', { value: k, ...(k === src ? { selected: true } : {}) }, l)));
+    input = h('div', { class: 'gpick' }, ss, gs, s, pv);
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
@@ -2539,7 +2619,7 @@ function dialog(title, fields, obj, canDelete, topic) {
   });
 }
 
-const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select, #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
+const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
@@ -2899,7 +2979,62 @@ attachAutofill($('#code'), $('#autofill'), () => S?.words);
 $('#code').addEventListener('keydown', ev => {
   if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '\t'); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }
+  if (ev.altKey && !ev.ctrlKey && !ev.metaKey && ev.code === 'KeyP' && can('admin')) { ev.preventDefault(); openPicPicker(); }   // Option+P types π on a Mac: the key's place counts
 });
+// ---------------------------------------------------------------- picture picker (Alt+P, Option+P on a Mac, or the Picture button)
+// Lists the pictures in media/Images (or sounds in media/sounds), one group or All, and types the path picked at the cursor:
+// in quotes, unless the cursor is already just after a quote.
+let ppAt = null;
+async function openPicPicker() {
+  const ta = $('#code'); if (!curScript || ta.readOnly) return;
+  ppAt = [ta.selectionStart, ta.selectionEnd];
+  await loadMediaPictures();
+  const kind = lastGroup.ppKind === 'sounds' ? 'sounds' : 'pictures';
+  $('#ppKind').value = kind; $('#ppFilter').value = ''; $('#ppSrc').value = srcPick();
+  ppGroups(); ppFill();
+  $('#picPickDlg').showModal(); $('#ppList').focus();
+}
+const ppPaths = () => $('#ppKind').value === 'sounds' ? mediaSounds : mediaPics;
+function ppGroups() {
+  const kind = $('#ppKind').value, groups = groupChoices(kind === 'sounds', ppPaths()), g = lastGroup[kind] || '';
+  $('#ppGroup').replaceChildren(h('option', { value: '' }, 'All groups'), ...groups.map(([n, l]) => h('option', { value: n }, l)));
+  $('#ppGroup').value = groups.some(([n]) => n === g) ? g : '';
+}
+function ppFill() {
+  const g = $('#ppGroup').value, f = $('#ppFilter').value.toLowerCase(), was = $('#ppList').value;
+  const src = $('#ppKind').value === 'sounds' ? 'both' : $('#ppSrc').value;
+  $('#ppSrc').hidden = $('#ppKind').value === 'sounds';
+  const list = ppPaths().filter(p => inGroup(p, g) && inSource(p, src) && (!f || p.toLowerCase().includes(f)));
+  $('#ppList').replaceChildren(...list.map(p => h('option', { value: p }, p.replace(/^(Images|sounds)\//i, ''))));
+  $('#ppList').value = list.includes(was) ? was : (list[0] ?? '');
+  ppShow();
+}
+function ppShow() {
+  const p = $('#ppList').value, snd = $('#ppKind').value === 'sounds';
+  $('#ppPath').textContent = p || 'Nothing here: add pictures on the Media page';
+  $('#ppImg').hidden = snd || !p; $('#ppAudio').hidden = !snd || !p;
+  if (p && !snd) $('#ppImg').src = media(p); if (p && snd) $('#ppAudio').src = media(p);
+  $('#ppInsert').disabled = !p;
+}
+function ppInsert() {
+  const p = $('#ppList').value; if (!p || !ppAt) return;
+  $('#picPickDlg').close('ok');
+  const ta = $('#code'), [a, b] = ppAt, before = ta.value[a - 1], after = ta.value[b];
+  const text = before === '"' ? p + (after === '"' ? '' : '"') : `"${p}"`;
+  editCode(a, b, text); const end = a + text.length + (before === '"' && after === '"' ? 1 : 0); ta.setSelectionRange(end, end);
+}
+$('#picPick').onclick = openPicPicker;
+$('#ppKind').onchange = () => { keepGroup('ppKind', $('#ppKind').value); ppGroups(); ppFill(); };
+$('#ppSrc').onchange = () => { keepGroup('src', $('#ppSrc').value); ppFill(); };
+$('#ppGroup').onchange = () => { keepGroup($('#ppKind').value, $('#ppGroup').value); ppFill(); };
+$('#ppFilter').oninput = ppFill;
+$('#ppList').onchange = ppShow;
+$('#ppList').ondblclick = ppInsert;
+$('#ppList').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); ppInsert(); } });
+$('#ppFilter').addEventListener('keydown', ev => { if (ev.key === 'ArrowDown') { ev.preventDefault(); $('#ppList').focus(); } else if (ev.key === 'Enter') { ev.preventDefault(); ppInsert(); } });
+$('#ppInsert').onclick = ev => { ev.preventDefault(); ppInsert(); };
+$('#picPickDlg').addEventListener('close', () => { if ($('#picPickDlg').returnValue !== 'ok') { const ta = $('#code'); ta.focus(); if (ppAt) ta.setSelectionRange(...ppAt); } });
+
 // ---------------------------------------------------------------- find and replace
 // In the open script or the Config Editor (the bar moves to whichever page is open): Ctrl+F (find), Ctrl+H (replace), or the Find button (phones). Matches are painted on a layer behind the editor.
 // Across every script: the All scripts button lists each match first; only the ticked ones are replaced.
@@ -4677,11 +4812,11 @@ const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fit
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
-const SKYNET_FIT_PICS = ['Images/samples/Fitting_Elbow90.svg', 'Images/samples/Fitting_Elbow45.svg', 'Images/samples/Fitting_Tee.svg', 'Images/samples/Fitting_Reducer.svg', 'Images/samples/pipe_elbow90.svg', 'Images/samples/pipe_elbow45.svg', 'Images/samples/pipe_tee.svg', 'Images/samples/pipe_cross.svg',
-  'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg', 'Images/samples/Valve_Motor_Ball_OpenH.svg', 'Images/samples/Valve_Manual_OpenH.svg', 'Images/samples/Valve_Manual_Butterfly_OpenH.svg', 'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
+const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
+  'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
-  return { tee: 'Images/samples/Fitting_Tee.svg', reducer: 'Images/samples/Fitting_Reducer.svg', elbow45: 'Images/samples/Fitting_Elbow45.svg' }[k] || (k ? 'Images/samples/Fitting_Elbow90.svg' : 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg'); };
-const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/samples/kettle.svg';
+  return { tee: 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', reducer: 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', elbow45: 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
+const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
   : 'User Template: Admins can change and delete it.';

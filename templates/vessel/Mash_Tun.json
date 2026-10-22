@@ -1,5 +1,5 @@
 {
-  "vesselType": "vessel", "vtype": "Mash Tun", "image": "Images/samples/mash_tun.svg", "heatKind": "unheated",
+  "vesselType": "vessel", "vtype": "Mash Tun", "image": "Images/Skynet/Vessels/mash_tun.svg", "heatKind": "unheated",
   "volume": 15, "deadspace": 0.5,
   "std": { "type": "TC", "size": 1.5 },
   "ports": {
