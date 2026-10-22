@@ -94,7 +94,7 @@ Skynet comes with single fittings ready to put in the piping, with their IPs whe
 | **Tee** | Left, Right and Top (flow goes any way through it) |
 | **Reducer** | Left (the big end, TC 2) and Right (the small end, TC 1.5) |
 
-Add one to a Tab (**Add to Tab** on its pop-up), drag it to its place and draw pipes to its IPs. For now each picture faces one way, as in the table.
+Add one to a Tab (**Add to Tab** on its pop-up), drag it to its place and draw pipes to its IPs. To point it another way, open it in Edit layout (switch **Bundled** off first) and pick **Turn**: 90, 180 or 270 degrees clockwise. The picture and its IPs turn together, so one Elbow_90 covers all four directions.
 
 Where two pipes of different sizes meet on one IP, the panel draws a reducer cone by itself (see [Pipes, hoses and reducers](24-pipes-and-hoses)). Use the **Reducer** fitting where it should be on the Equipment list, or on a vessel port that is not the size of its piping.
 
@@ -114,6 +114,8 @@ A Tab_Vessel or Tab_Fitting is not a Device and not a Widget. It is an item on a
 Open it in **Edit layout** (double-click, or hold a finger on it). Switch **Bundled** off first if it is bundled. Everything can be changed, or it can be deleted, even when it came from a Skynet Template. The note at the top says which Template it came from. Its **Label** can stay empty: the Name shows instead.
 
 On a Tab_Fitting you pick:
+
+- **Turn**: 90, 180 or 270 degrees clockwise. The picture and its IPs turn together.
 
 - each **Valve**: **Select Device, Widget or None**. While that valve is closed, nothing flows through the Tab_Fitting.
 - each thermowell's **Temperature Probe**: **Select Temperature Probe or None**.

@@ -670,3 +670,4 @@ body.onWorkspace #top .menuCopy { display: none; }
 .tplHead h3 { flex: 1; margin: 6px 0; }
 .tplX { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 16px; line-height: 1.2; }
 .tplMini { width: min(420px, 94vw); }
+#ws .gfx.vessel .bfImg { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
