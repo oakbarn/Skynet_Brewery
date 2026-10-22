@@ -2008,12 +2008,14 @@ function swapName(items, from, to) {
   const walk = o => { for (const k of Object.keys(o)) { if (o[k] === from) o[k] = to; else if (o[k] && typeof o[k] === 'object') walk(o[k]); } };
   items.forEach(walk);
 }
-// To a Tab: everything moves there in the same spot it had on the Build Tab
+// To a Tab: everything moves there as it is (same size, same spots to each other), in the dead center of the Tab (Fritz, 2026-10-22)
 function moveBuildTo(tab) {
   const b = buildWs(), to = draft.workspaces.find(w => w.name === tab && !w.build);
   if (!to) throw new Error(`There is no Tab "${tab}"`);
   const items = buildItems(b);
+  centerOn(items, to);
   for (const x of items) x.workspace = to.name;
+  for (const v of items.filter(x => x.buildFrom)) rebundle(v);
   // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_PWM_VlV_Fly_Sparge_SP)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
     const n = deviceSuggestion(e);
@@ -2022,6 +2024,22 @@ function moveBuildTo(tab) {
   draft.workspaces = draft.workspaces.filter(w => w !== b);
   wsName = to.name; sel = null;
   return items.length;
+}
+// shift these items as one so the box around them sits in the middle of the Tab (never off its top or left edge)
+function centerOn(items, to) {
+  const bx = [];
+  for (const x of items) {
+    if (x.kind === 'pipe') { for (const c of x.points || []) bx.push([c[0], c[1], c[0], c[1]]); continue; }
+    const g = x.kind ? x : elGeom(x), X = g.x || 0, Y = g.y || 0;
+    bx.push([X, Y, X + (g.w || 120), Y + (g.h || 60)]);
+  }
+  if (!bx.length) return;
+  const x0 = Math.min(...bx.map(q => q[0])), y0 = Math.min(...bx.map(q => q[1])), x1 = Math.max(...bx.map(q => q[2])), y1 = Math.max(...bx.map(q => q[3]));
+  const dx = Math.round(Math.max(0, ((to.width || 1600) - (x1 - x0)) / 2) - x0), dy = Math.round(Math.max(0, ((to.height || 900) - (y1 - y0)) / 2) - y0);
+  for (const x of items) {
+    if (x.kind === 'pipe') x.points = (x.points || []).map(c => [c[0] + dx, c[1] + dy]);
+    else { x.x = (x.x || 0) + dx; x.y = (x.y || 0) + dy; }
+  }
 }
 // what on the Build Tab can be a Template: one vessel (with the Bundled Fittings on its ports) or one Bundled Fitting
 function buildTemplate(b) {
@@ -2081,15 +2099,24 @@ async function saveBuildTemplate({ name, skynet }) {
 // Save Build ...: where does it go? To a Tab, as a Template, thrown away, or keep building. True when the Build Tab is done.
 async function saveBuild() {
   const b = buildWs(); if (!b) return true;
-  if (!buildItems(b).length) { dropBuild(); renderTabs(); renderWs(); return true; }
+  // an item un-bundled to the Build Tab: back where it came from (same Tab, spot and size), or saved like a new build
+  for (const v of draft.graphics.filter(g => g.workspace === b.name && g.buildFrom)) {
+    const to = draft.workspaces.find(w => w.name === v.buildFrom.tab && !w.build);
+    if (to && confirm(`Put ${v.label || v.name} back where it came from?\n\nOK = Yes: back on the ${to.name} tab, in the same spot and at the same size, bundled again.\nCancel = No: save it like a new build. Pick a Tab and it goes there at the size it is now, in the middle of the Tab.`)) {
+      putBack(v, to); wsName = to.name;
+      toast(`${v.label || v.name} is back on the ${to.name} tab, bundled. Press Save layout to keep it.`, false, 8000);
+    }
+  }
+  if (!buildItems(b).length) { const back = wsName; dropBuild(); if (draft.workspaces.some(w => w.name === back)) wsName = back; renderTabs(); renderWs(); return true; }
   if (!TPL) await loadTemplates();
   const r = await saveBuildDialog(b); if (!r) return false;
   if (r.to === 'trash') {
-    if (!confirm('Throw away everything on the Build Tab?')) return false;
+    const came = draft.graphics.filter(g => g.workspace === b.name && g.buildFrom).map(g => `${g.label || g.name} (from the ${g.buildFrom.tab} tab)`);
+    if (!confirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''))) return false;
     dropBuild(); toast('The Build Tab was thrown away');
   } else if (r.to === 'tab') {
     const n = moveBuildTo(r.tab);
-    toast(`${n} item${n === 1 ? '' : 's'} moved to the ${r.tab} tab, in the same spot. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
+    toast(`${n} item${n === 1 ? '' : 's'} moved to the middle of the ${r.tab} tab. Drag ${n === 1 ? 'it' : 'them'} to ${n === 1 ? 'its' : 'their'} place, then press Save layout.`, false, 8000);
   } else {
     const made = await saveBuildTemplate(r);
     toast(`Saved as ${made.length > 1 ? 'Templates' : 'a Template'}: ${made.join(', ')}. ☰ Menu > ${r.kind === 'fitting' ? 'Fitting' : 'Vessel or Equipment'} Templates, Add to Tab puts it on a Tab.`, false, 9000);
@@ -2113,7 +2140,7 @@ function saveBuildDialog(b) {
     } else tplBox.append(h('p', { class: 'muted' }, tk.why));
     d.append(h('h3', {}, 'Save Build: where should it go?'),
       h('div', { class: 'buildOpt' }, h('b', {}, 'To a Tab'),
-        h('p', { class: 'muted' }, 'Everything on the Build Tab moves to this Tab, in the same spot. Drag it to its place, then press Save layout.'),
+        h('p', { class: 'muted' }, 'Everything on the Build Tab moves to the middle of this Tab, at the size it is now. Drag it to its place, then press Save layout.'),
         h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value }) }, 'Save to Tab'))),
       tplBox,
       h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }), h('button', { onclick: () => close(null) }, 'Keep building')));
@@ -2640,8 +2667,47 @@ async function editBundle(v) {
     wsName = v.workspace;
     toast(`Moved the bundle to the ${v.workspace} tab.` + (piped ? ` Its pipes stayed on ${old}; draw new ones here.` : ''));
   }
-  if (!work.bundled) { delete v.bundled; toast('Un-bundled: the vessel and its IPs can be edited again'); }
+  if (!work.bundled) {
+    delete v.bundled;
+    // Fritz (2026-10-22): before un-bundling, offer to take it to the Build Tab; its Tab, spot and size are remembered for Save Build ...
+    if (!draft.workspaces.find(w => w.name === v.workspace)?.build && confirm(`Move ${v.label || v.name} to the 🔨 Build Tab to work on it?\n\nIts Tab, spot and size are remembered, so Save Build ... can put it back in the same place.\n\nOK = Yes, move it to the Build Tab.\nCancel = No, un-bundle it here.`))
+      return unbundleToBuild(v);
+    toast('Un-bundled: the vessel and its IPs can be edited again');
+  }
   sel = { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
+}
+// an un-bundled item goes to the Build Tab with its parts, in the same spot; buildFrom remembers where it came from
+function unbundleToBuild(v) {
+  const old = v.workspace;
+  v.buildFrom = { tab: old, x: v.x || 0, y: v.y || 0, w: v.w || 200, h: v.h || 260 };
+  wsName = old;                                    // the Build Tab is the size of this Tab and offers it first
+  const b = toBuild(); if (!b) return;
+  const parts = bundleParts(v), ids = [...parts.map(g => g.id), ...eqPorts(v).map(q => q.id)];
+  for (const g of [v, ...parts]) g.workspace = b.name;
+  const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === old && (ids.includes(p.from) || ids.includes(p.to)));
+  sel = { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
+  toast(`${v.label || v.name} is on the Build Tab, un-bundled.` + (piped ? ` Its pipes stayed on ${old}.` : '') + ' Change it, then press 💾 Save Build ... to put it back.', false, 8000);
+}
+// Save Build ... > Yes: back on the Tab it came from, in the same spot and at the same size, bundled again.
+// Its IPs keep their place on the picture; pipes drawn on the Build Tab between its own IPs go along.
+function putBack(v, to) {
+  const f = v.buildFrom, ox = v.x || 0, oy = v.y || 0, sx = f.w / (v.w || f.w), sy = f.h / (v.h || f.h);
+  const parts = bundleParts(v), ids = new Set([...parts.map(g => g.id), ...eqPorts(v).map(q => q.id)]);
+  for (const p of parts) {
+    const cw = (p.w || 22) / 2, ch = (p.h || 22) / 2;
+    p.x = Math.round(f.x + ((p.x || 0) + cw - ox) * sx - cw); p.y = Math.round(f.y + ((p.y || 0) + ch - oy) * sy - ch);
+    p.workspace = to.name;
+  }
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.workspace === v.workspace && ids.has(p.from) && ids.has(p.to))) {
+    p.points = p.points.map(c => [Math.round(f.x + (c[0] - ox) * sx), Math.round(f.y + (c[1] - oy) * sy)]); p.workspace = to.name;
+  }
+  Object.assign(v, { x: f.x, y: f.y, w: f.w, h: f.h, workspace: to.name });
+  rebundle(v);
+}
+// Save (re-bundle): an item that came from a Tab is bundled again when it leaves the Build Tab
+function rebundle(v) {
+  delete v.buildFrom;
+  if (bundleParts(v).length) v.bundled = true;
 }
 // Clone a Bundled item (Fritz, 2026-10-21): the vessel and every IP bundled with it, copied side by side under a new name.
 // Pipes are not copied (they belong where they are drawn); on a Tab with an Equipment Profile the copy joins its Equipment list when the layout is saved.
