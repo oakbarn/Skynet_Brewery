@@ -1,4 +1,4 @@
-// Picture groups (Fritz, 2026-10-22): the ten standard groups in media/Images (your pictures) and in media/Images/Skynet
+// Picture groups (Fritz, 2026-10-22): the eleven standard groups in media/Images (your pictures) and in media/Images/Skynet
 // (the pictures that come with Skynet, read only). The Skynet pictures are moved into Skynet/<group> once (with their SVG
 // copies and Settings > Pictures choices), old paths still find them, and your own pictures are found after a move too.
 import assert from 'node:assert/strict';
@@ -27,8 +27,8 @@ put('Images/Skynet/Pumps/Pump_Blue_Rip_Off.svg', '<svg>drawn</svg>');
 
 const choices = { 'Images/Pump_Red_Rip_On.png': 'original' };
 const r = setupPictureGroups(images, choices);
-assert.deepEqual(r.made.filter(g => !g.startsWith('Skynet/')).sort(), PICTURE_GROUPS.filter(g => g !== 'Valves').sort(), 'the ten groups of your own');
-assert.deepEqual(r.made.filter(g => g.startsWith('Skynet/')).sort(), PICTURE_GROUPS.filter(g => g !== 'Lights_LEDs' && g !== 'Pumps').map(g => 'Skynet/' + g).sort(), 'and the ten Skynet groups');
+assert.deepEqual(r.made.filter(g => !g.startsWith('Skynet/')).sort(), PICTURE_GROUPS.filter(g => g !== 'Valves').sort(), 'the eleven groups of your own');
+assert.deepEqual(r.made.filter(g => g.startsWith('Skynet/')).sort(), PICTURE_GROUPS.filter(g => g !== 'Lights_LEDs' && g !== 'Pumps').map(g => 'Skynet/' + g).sort(), 'and the eleven Skynet groups');
 assert.equal(fs.readFileSync(path.join(images, 'Skynet/Pumps/Pump_Red_Rip_On.png'), 'utf8'), 'red pump');
 assert.ok(has('Skynet/Pumps/Pump_Red_Rip_On.svg'), 'its SVG copy goes along');
 assert.ok(!has('Pump_Red_Rip_On.png'));
@@ -47,11 +47,11 @@ assert.ok(inSkynet('Images/Skynet') && inSkynet('images/skynet/Pumps/a.png') && 
 fs.rmSync(path.join(images, 'samples/led_red.svg'));
 setupPictureGroups(images, {}); assert.ok(!has('samples'));
 
-// the groups list: the ten standard ones first, then your own (Skynet is not one)
+// the groups list: the eleven standard ones first, then your own (Skynet is not one)
 fs.mkdirSync(path.join(images, 'Fermenters'));
 const groups = listGroups(images);
-assert.deepEqual(groups.slice(0, 10).map(g => g.name), PICTURE_GROUPS);
-assert.equal(groups.length, 11);
+assert.deepEqual(groups.slice(0, PICTURE_GROUPS.length).map(g => g.name), PICTURE_GROUPS);
+assert.equal(groups.length, PICTURE_GROUPS.length + 1);
 assert.deepEqual(groups.at(-1), { name: 'Fermenters', label: 'Fermenters', standard: false });
 assert.equal(groups.find(g => g.name === 'Lights_LEDs').label, 'Lights / LEDs');
 

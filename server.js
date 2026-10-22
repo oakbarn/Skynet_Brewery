@@ -56,7 +56,7 @@ const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, d
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
-// Picture groups: the ten Skynet folders in media/Images are made, and the Skynet pictures moved into them once (lib/picgroups.js)
+// Picture groups: the eleven Skynet folders in media/Images are made, and the Skynet pictures moved into them once (lib/picgroups.js)
 {
   const before = JSON.stringify(store.config.svgChoices ?? {});
   const grouped = setupPictureGroups(store._findMedia('Images'), store.config.svgChoices);
