@@ -1,0 +1,30 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/samples/Vessel_Kettle_Basic.svg",
+  "heatKind": "electric",
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "size": [
+    180,
+    239
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Front Low",
+      "fitting": "Valve_90"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Center Low"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Bottom Left"
+    }
+  },
+  "notes": "A basic brew kettle (Fritz's drawing): one outlet on the front near the bottom, the thermowell above it, and a Tangential Inlet low at the left. Electric version: pick its Heating Element Device and Temperature Probe when it is on a Tab."
+}

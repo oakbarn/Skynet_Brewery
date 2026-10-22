@@ -55,4 +55,4 @@ Every other item (devices, pictures, text, IPs and pipes) has the same **Tab** l
 
 Wherever there is a choice you get a dropdown, and lists that can grow end with **Add new ...** (picture paths, sounds, units and more). A yes / no setting is a switch. Colors are a dropdown of standard colors, or **Custom ...** for any other.
 
-A Digital Output's **Graphic when on** and **Graphic when off** show a small preview: LEDs, a lightning bolt and ball valve pictures, or **Add new ...** for your own.
+A Digital Output's **Picture when on** and **Picture when off** show a small preview: LEDs, a lightning bolt and ball valve pictures, or **Add new ...** for your own. PWM, Analog, Duty Cycle, Hysteresis and PID outputs have the same two pictures (see Help 52, On and Off Pictures).

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet 90 degree elbow: openings at the middle of the Bottom and Right edges -->
+  <path d="M50 93 V50 H93" fill="none" stroke="#2b2b2b" stroke-width="34" stroke-linejoin="round"/>
+  <path d="M50 93 V50 H93" fill="none" stroke="#8f9296" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M41 90 V50 Q41 41 50 41 H90" fill="none" stroke="#c4c7cb" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#8f9296" stroke="#2b2b2b" stroke-width="3">
+    <rect x="28" y="89" width="44" height="9" rx="3"/>
+    <rect x="89" y="28" width="9" height="44" rx="3"/>
+  </g>
+</svg>

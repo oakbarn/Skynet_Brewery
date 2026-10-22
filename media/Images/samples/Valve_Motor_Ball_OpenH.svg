@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120">
+  <!-- Skynet motorized ball valve, open, horizontal: pipe ends at the middle of the Left and Right edges; the red bolts mean open -->
+  <g>
+    <rect x="8" y="81" width="124" height="22" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <path d="M10 87 H130" stroke="#c4c7cb" stroke-width="3" stroke-linecap="round"/>
+    <rect x="2" y="74" width="9" height="36" rx="3" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <rect x="129" y="74" width="9" height="36" rx="3" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <rect x="46" y="76" width="48" height="32" rx="6" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="3"/>
+    <rect x="63" y="60" width="14" height="18" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
+    <path d="M70 83 V101" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+    <rect x="28" y="6" width="84" height="56" rx="7" fill="#2f6fd6" stroke="#1b3f7a" stroke-width="3"/>
+    <rect x="28" y="6" width="84" height="14" rx="7" fill="#4f8ff0"/>
+    <path d="M36 28 H104 M36 40 H104 M36 52 H104" stroke="#1f55b0" stroke-width="2"/>
+    <rect x="28" y="6" width="84" height="56" rx="7" fill="none" stroke="#1b3f7a" stroke-width="3"/>
+  </g>
+  <path transform="translate(40 4)" d="M14 0 L0 30 H12 L4 56 L30 20 H17 L26 0 Z" fill="#e02020" stroke="#ffd21a" stroke-width="3" stroke-linejoin="round"/><path transform="translate(78 4)" d="M14 0 L0 30 H12 L4 56 L30 20 H17 L26 0 Z" fill="#e02020" stroke="#ffd21a" stroke-width="3" stroke-linejoin="round"/>
+</svg>

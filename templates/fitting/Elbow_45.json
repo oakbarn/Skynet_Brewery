@@ -1,0 +1,7 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "elbow45" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "image": "Images/samples/Fitting_Elbow45.svg",
+  "ipPos": { "start": "Left", "end": "Top Right 45" },
+  "notes": "A 45 degree elbow, for piping. Openings at the left and the top right corner."
+}
