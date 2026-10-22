@@ -58,7 +58,7 @@ A proportional valve on PWM, called *Fly Sparge*, on port 25 of the Mega `MB`, o
 
 ## Devices you already have
 
-Devices made before this keep their names, so your Processes still work. Their properties show the **Suggested name**; you can type it into **Name** if you like, but then change the name in your Processes too (Processes are not updated by themselves yet).
+Devices made before this keep their names, so your Processes still work. Their properties show the **Suggested name**; you can type it into **Name** if you like. Your Processes are changed to the new name by themselves when you save the layout (see [Renaming Devices and Widgets](53-renaming)).
 
 Interfaces and tabs from before get an ID by themselves the first time the Schema opens. Changing an Interface ID or Tab ID later does not rename Devices that already exist.
 
