@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet Tee: openings at the middle of the Left, Right and Top edges -->
+  <path d="M7 50 H93 M50 50 V7" fill="none" stroke="#2b2b2b" stroke-width="34" stroke-linejoin="round"/>
+  <path d="M7 50 H93 M50 50 V7" fill="none" stroke="#8f9296" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M8 41 H38 M41 38 V8 M59 8 V38 M62 41 H92" fill="none" stroke="#c4c7cb" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#8f9296" stroke="#2b2b2b" stroke-width="3">
+    <rect x="2" y="28" width="9" height="44" rx="3"/>
+    <rect x="89" y="28" width="9" height="44" rx="3"/>
+    <rect x="28" y="2" width="44" height="9" rx="3"/>
+  </g>
+</svg>

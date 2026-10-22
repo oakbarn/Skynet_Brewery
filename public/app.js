@@ -5,7 +5,7 @@ import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './coloriz
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
-import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds } from './templates.js';
+import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -225,7 +225,7 @@ function editDeco(n, o) {
 
 // Vessel widgets (app-only): electrically heated, gas heated, or an unheated mash tun. A background picture by path,
 // a label (alignment, color, size, show / hide), and IPs placed on them become its ports and move with it.
-const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter',
+const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter', rims: 'RIMS tube',
   bfit: 'Tab_Fitting (Bundled Fitting)', eqTee: 'Pipe tee', eqElbow90: 'Pipe 90° elbow', eqElbow45: 'Pipe 45° elbow', eqCross: 'Pipe cross',
   electric: 'Electric heated vessel (older)', gas: 'Gas heated vessel (older)', mashTun: 'Unheated mash tun (older)', coil: 'Cooling coil (older)', plateChiller: 'Plate chiller (older)' };
 // Equipment widgets (Fritz's spec): a picture with a Name, a Type, a Label and ports. Every port except a thermowell is an IP:
@@ -237,6 +237,7 @@ const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chil
 const V_HIGH = [['Center High', 0.5, 0.1], ['Left High', 0, 0.15], ['Right High', 1, 0.15], ['Back High', 0.7, 0.12]];
 const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 0.5, 1]];
 const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
+const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left', 0.22, 1], ['Bottom Right', 0.78, 1]];
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
@@ -262,6 +263,12 @@ const EQ = {
       in2: pt('In 2', CORNERS.concat(SIDE4), { def: 'Bottom Left', circuit: 'b' }), out2: pt('Out 2', CORNERS.concat(SIDE4), { def: 'Bottom Right', circuit: 'b' }) } },
   trub: { title: 'Trub filter', types: ['Inline filter', 'Hop rocket', 'Hop spider'], image: 'Images/samples/trub_filter.svg', size: [100, 170], tab: 'Equipment',
     ports: { inlet: pt('Inlet', SIDE4.concat(CORNERS), { on: true, def: 'Top', circuit: 'a' }), outlet: pt('Outlet', SIDE4.concat(CORNERS), { on: true, def: 'Bottom', circuit: 'a' }) } },
+  // RIMS tube (Fritz, 2026-10-22): wort in at the top of one end, out at the bottom of the other; the probe goes in one end and
+  // the element in the other (both picked on the Tab_Vessel; neither is an IP, so no flow there)
+  rims: { title: 'RIMS tube', types: ['RIMS'], image: 'Images/samples/Equipment_RIMS.svg', size: [200, 100], tab: 'Equipment',
+    ports: { inlet: pt('Wort In', RIMS_POS, { on: true, def: 'Top Left', circuit: 'a' }), outlet: pt('Wort Out', RIMS_POS, { on: true, def: 'Bottom Right', circuit: 'a' }),
+      thermowell: pt('Thermowell (probe)', [['Left End', 0, 0.5], ['Right End', 1, 0.5]], { ip: false, on: true, def: 'Left End' }),
+      element: pt('Heating element', [['Right End', 1, 0.5], ['Left End', 0, 0.5]], { ip: false, on: true, def: 'Right End' }) } },
   eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/samples/pipe_tee.svg', size: [90, 90],
     ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
   eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/samples/pipe_elbow90.svg', size: [90, 90],
@@ -276,6 +283,9 @@ const EQ = {
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'Images/samples/led_green.svg'], ['LED red', 'Images/samples/led_red.svg'], ['LED off (grey)', 'Images/samples/led_off.svg'],
   ['Lightning bolt on', 'Images/samples/bolt_on.svg'], ['Lightning bolt off', 'Images/samples/bolt_off.svg'],
+  ['Motorized ball valve open (horizontal)', 'Images/samples/Valve_Motor_Ball_OpenH.svg'], ['Motorized ball valve closed (horizontal)', 'Images/samples/Valve_Motor_Ball_ClosedH.svg'],
+  ['Motorized ball valve open (vertical, motor right)', 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg'], ['Motorized ball valve closed (vertical, motor right)', 'Images/samples/Valve_Motor_Ball_ClosedV_RC.svg'],
+  ['Motorized ball valve open (vertical, motor left)', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg'], ['Motorized ball valve closed (vertical, motor left)', 'Images/samples/Valve_Motor_Ball_ClosedV_LC.svg'],
   ['Ball valve open (horizontal)', 'Images/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Valve_Ball_ClosedV-1x1.png']];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
@@ -1547,11 +1557,11 @@ const PRESETS = {
   pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Pump_Red_Rip_On.png', imageOff: 'Images/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a vKonstant value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Valve_Ball_OpenH_1.png', imageOff: 'Images/Valve_Ball_ClosedH_1.png' };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/samples/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/samples/Valve_Motor_Ball_ClosedH.svg' };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'vKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
   },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Valve_Ball_OpenV-1x1.png', imageOff: 'Images/Valve_Ball_ClosedV-1x1.png', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/samples/Valve_Motor_Ball_ClosedV_RC.svg', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
@@ -2339,7 +2349,7 @@ async function editItem(kind, id) {
       delete work.joined;
       const pos = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_pos')).map(k => [k.slice(0, -4), work[k]]));
       work.ports = {};
-      for (const [k, d] of Object.entries(bfitClass(work).ports)) work.ports[k] = { installed: true, position: pos[k] || item.ports?.[k]?.position || portDefPos(d), standard: d.ip ? stdShort(work.std) : '' };
+      for (const [k, d] of Object.entries(bfitClass(work).ports)) work.ports[k] = { installed: true, position: pos[k] || item.ports?.[k]?.position || portDefPos(d), standard: d.ip ? stdShort(fittingPortStd(work, k)) : '' };
       for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
       work.name = noSpaces(work.name || '') || item.name;
     } else if (isV) {
@@ -3706,7 +3716,7 @@ let vesselWork = null, vesselDirty = false;   // the piece of equipment open on 
 const profWork = { mash: null, boil: null, tab: null, valve: null }, profDirty = { mash: false, boil: false, tab: false, valve: false };   // the profile open on each profile tab
 let menuTab = null;                           // the Menu tab showing now (null: the screen tabs)
 const menuOpen = [];                          // Menu tabs picked and not closed yet
-const EQ_KINDS = ['vessel', 'pchiller', 'ccoil', 'herms', 'trub'];
+const EQ_KINDS = ['vessel', 'pchiller', 'ccoil', 'herms', 'trub', 'rims'];
 const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
@@ -3715,7 +3725,7 @@ const MENU = [
   { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
-  { key: 'etemplates', title: 'Equipment Templates', tip: 'Ready-made chillers, coils and trub filters (2 or 4 liquid ports)', render: renderTemplatesTab('vessel', 'equip') },
+  { key: 'etemplates', title: 'Equipment Templates', tip: 'Ready-made chillers, coils, trub filters and RIMS tubes (2 or 4 liquid ports)', render: renderTemplatesTab('vessel', 'equip') },
   { key: 'ftemplates', title: 'Fitting Templates', tip: 'Ready-made Bundled Fittings (valve, tee, elbows ...) for vessel ports or a Tab', render: renderTemplatesTab('fitting') },
   { key: 'layout', title: 'Default Layout', tip: 'The vessels and pipes a Tab gets with its Equipment Profile', render: renderLayoutTab },
   { key: 'mash', title: 'Mash Profile', tip: 'Up to 4 mash steps and the sparge', render: renderBrewProfileTab('mash') },
@@ -4375,10 +4385,10 @@ const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fit
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
-const SKYNET_FIT_PICS = ['Images/samples/pipe_elbow90.svg', 'Images/samples/pipe_elbow45.svg', 'Images/samples/pipe_tee.svg', 'Images/samples/pipe_cross.svg',
-  'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
+const SKYNET_FIT_PICS = ['Images/samples/Fitting_Elbow90.svg', 'Images/samples/Fitting_Elbow45.svg', 'Images/samples/Fitting_Tee.svg', 'Images/samples/Fitting_Reducer.svg', 'Images/samples/pipe_elbow90.svg', 'Images/samples/pipe_elbow45.svg', 'Images/samples/pipe_tee.svg', 'Images/samples/pipe_cross.svg',
+  'Images/samples/Valve_Motor_Ball_OpenV_RC.svg', 'Images/samples/Valve_Motor_Ball_OpenV_LC.svg', 'Images/samples/Valve_Motor_Ball_OpenH.svg', 'Images/Valve_Ball_OpenV-1x1.png', 'Images/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
-  return { tee: 'Images/samples/pipe_tee.svg', elbow45: 'Images/samples/pipe_elbow45.svg' }[k] || (k ? 'Images/samples/pipe_elbow90.svg' : 'Images/Valve_Ball_OpenV-1x1.png'); };
+  return { tee: 'Images/samples/Fitting_Tee.svg', reducer: 'Images/samples/Fitting_Reducer.svg', elbow45: 'Images/samples/Fitting_Elbow45.svg' }[k] || (k ? 'Images/samples/Fitting_Elbow90.svg' : 'Images/samples/Valve_Motor_Ball_OpenV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/samples/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
@@ -4388,11 +4398,13 @@ const tplClassNote = t => t.cls === 'skynet'
 // joins a vessel port; none while it is joined), the End of the chain, the open side of each tee, and a thermowell mark on a tee
 // that has one (a thermowell stops flow, so that side has no IP). All its IPs are one circuit: flow passes through, unless a valve
 // in it is closed.
-const BF_POS = SIDE4.concat(CORNERS);
+// The 45 positions sit where a 45 degree opening meets the corner of a square picture (Fitting_Elbow45.svg).
+const BF_POS = SIDE4.concat(CORNERS, [['Top Right 45', 0.84, 0.16], ['Top Left 45', 0.16, 0.16], ['Bottom Right 45', 0.84, 0.84], ['Bottom Left 45', 0.16, 0.84]]);
 function bfitClass(g) {
   const ports = {}, flat = g.flat;            // flat: the fitting runs left or right from its vessel port
-  if (!g.onVessel) ports.start = pt('Start (vessel side)', BF_POS, { on: true, def: flat ? 'Left' : 'Top', circuit: 'a' });
-  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right'), circuit: 'a' }));
+  const at = (k, def) => g.ipPos?.[k] && BF_POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def;   // a Template can say where its openings are on its picture
+  if (!g.onVessel) ports.start = pt('Start (vessel side)', BF_POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: 'a' });
+  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: 'a' }));
   (g.fittings || []).forEach((f, i) => { if (f.kind === 'tee' && f.thermowell) ports['tw' + (i + 1)] = pt(`Thermowell ${i + 1} (${THERMOWELL_POS[f.thermowellPos] || 'Short'})`, BF_POS, { ip: false, def: flat ? 'Top' : 'Right' }); });
   return { title: 'Tab_Fitting', types: [], image: fitImage(g), size: [90, 90], ports };
 }
@@ -4437,7 +4449,7 @@ function stdFromFields(w) {
 const stdFields = (w, what = 'Connection Standard') => [['std_type', what, 'sel', [['', '(none)'], ...Object.entries(CONNECTION_STANDARDS)], true],
   ...(w.std_type ? [['std_size', textSize(w.std_type) ? 'Size (text, for example DN25)' : 'Size (for example 1.5)', textSize(w.std_type) ? 'text' : 'num']] : [])];
 function fitToFields(w) {
-  (w.fittings || []).forEach((f, i) => { w['f' + i] = f.kind; w['tw' + i] = !!f.thermowell; w['twp' + i] = f.thermowellPos; w['fv' + i] = f.valve; w['fp' + i] = f.probe; });
+  (w.fittings || []).forEach((f, i) => { w['f' + i] = f.kind; w['tw' + i] = !!f.thermowell; w['twp' + i] = f.thermowellPos; w['fv' + i] = f.valve; w['fp' + i] = f.probe; w['rs' + i] = f.toSize; });
   return stdToFields(w);
 }
 function fitFromFields(w) {
@@ -4445,7 +4457,8 @@ function fitFromFields(w) {
     const f = { kind: w['f' + i] || 'none' };
     if (f.kind === 'tee' && w['tw' + i]) { f.thermowell = true; f.thermowellPos = w['twp' + i] || 'short'; if (w['fp' + i]) f.probe = w['fp' + i]; }
     if (f.kind === 'valve' && w['fv' + i]) f.valve = w['fv' + i];
-    for (const k of ['f', 'tw', 'twp', 'fv', 'fp']) delete w[k + i];
+    if (f.kind === 'reducer' && w['rs' + i]) f.toSize = String(w['rs' + i]);
+    for (const k of ['f', 'tw', 'twp', 'fv', 'fp', 'rs']) delete w[k + i];
     return f;
   });
   return stdFromFields(w);
@@ -4459,6 +4472,7 @@ function fittingSlotFields(w, onTab) {
     const k = w['f' + i] || 'none';
     return [['f' + i, label, 'sel', Object.entries(FITTING_KINDS), true],
       ...(k === 'valve' ? [onTab ? ['fv' + i, 'Valve: Select Device, Widget or None', 'sel', valves] : ['_v' + i, 'Valve: Select Device, Widget or None (picked when it is on a Tab)', 'note']] : []),
+      ...(k === 'reducer' ? [['rs' + i, 'Small end size (the big end is the Connection Standard size)', 'text']] : []),
       ...(k === 'tee' ? [['tw' + i, 'Thermowell in this tee (it stops flow: that side has no IP)', 'yn', false, true],
         ...(w['tw' + i] ? [['twp' + i, 'Position of Thermowell', 'sel', Object.entries(THERMOWELL_POS)],
           onTab ? ['fp' + i, 'Temperature Probe: Select Temperature Probe or None', 'sel', probes] : ['_p' + i, 'Temperature Probe: Select Temperature Probe or None (picked when it is on a Tab)', 'note']] : [])] : [])];
@@ -4690,6 +4704,7 @@ function placeTabFitting(ft, tab, name, on) {
   const f = { id: newId(), kind: 'vessel', vesselType: 'bfit', workspace: tab, w: 90, h: 90, name, template: ft.name, templateCls: ft.cls, fittings: clone(ft.fittings || []),
     image: ft.image || fitImage(ft), labelAlign: 'below', labelSize: 12, labelVisible: !on, ports: {} };     // joined to a vessel: its name shows on hover, not on the Tab
   if (ft.std) f.std = clone(ft.std);
+  if (ft.ipPos) f.ipPos = clone(ft.ipPos);
   let dir = 'down';
   if (on) {
     const ip = draft.graphics.find(x => x.kind === 'ip' && x.attachTo === on.vessel.id && x.port === on.port);
@@ -4705,8 +4720,8 @@ function placeTabFitting(ft, tab, name, on) {
   const C = bfitClass(f), flip = { Bottom: 'Top', Top: 'Bottom', Left: 'Right', Right: 'Left' };
   for (const [k, d] of Object.entries(C.ports)) {
     let pos = portDefPos(d);
-    if (dir === 'up' || dir === 'left') pos = flip[pos] || pos;          // the far end points away from the vessel
-    f.ports[k] = { installed: true, position: pos, standard: d.ip ? stdShort(f.std) : '' };
+    if ((dir === 'up' || dir === 'left') && !f.ipPos?.[k]) pos = flip[pos] || pos;          // the far end points away from the vessel
+    f.ports[k] = { installed: true, position: pos, standard: d.ip ? stdShort(fittingPortStd(f, k)) : '' };
   }
   draft.graphics.push(f); syncVesselPorts(f, null);
   return f;
