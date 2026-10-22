@@ -462,6 +462,8 @@ body.role-viewer .op-only { display: none !important; }
 .hpEditPanes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
 #hpText { width: 100%; min-height: 60vh; font-family: var(--mono); font-size: 13px; line-height: 1.45; resize: vertical; }
 #hpPreview { border: 1px dashed var(--line); border-radius: 6px; padding: 4px 12px; max-height: 70vh; overflow: auto; }
+/* the Help window (help.html): no Menu Bar above it */
+@media (min-width: 761px) { .helpWindow .hpSide { top: 10px; max-height: calc(100vh - 20px); } }
 @media (max-width: 760px) {
   .hpLayout { grid-template-columns: 1fr; }
   .hpSide { position: static; max-height: none; }
@@ -641,6 +643,8 @@ body.onWorkspace #top .menuCopy { display: none; }
 
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
+/* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */
+.helpIcon.barHelp { width: 30px; height: 30px; margin: 0; font-size: 17px; }
 .helpIcon:hover, .helpIcon:focus-visible { background: #ffe24d; outline: 2px solid #000; outline-offset: 1px; }
 /* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
 .rt-b { font-weight: bolder; }

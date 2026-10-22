@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { elementTopic, graphicTopic, barTopic, menuTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
+import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
@@ -128,7 +128,8 @@ function connect() {
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
-function setView(v) {
+function setView(v, here = false) {
+  if (v === 'help' && !here) return openHelp(pageTopic());      // Help opens in its own window (see openHelp)
   const prev = view;
   view = v;
   $$('#views button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
@@ -1391,7 +1392,29 @@ function cancelLongPress() { if (lp) { clearTimeout(lp.t); lp = null; } }
 // An unlocked item in Edit layout keeps the right button for dragging. Shift + right-click gives the browser's own menu.
 // Phones have no right-click: holding a finger on an item for 0.7 s does the same, but only outside Edit layout,
 // where holding a finger already opens Properties.
-const openHelp = topic => window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
+// Fritz, 2026-10-22: Help opens in a window of its own, so it can sit beside the panel while you follow it.
+// There is one Help window: asking again shows the new page in it. Only when the browser blocks the window does Help show
+// on the panel's own Help page (`quiet`: without saying so, for a phone's long press, which browsers never let open a window).
+const HELP_WIN = 'skynetHelp';
+let helpBlockedSaid = false;
+function helpWindow([page, section] = []) {
+  const url = '/help.html' + (page ? '?page=' + encodeURIComponent(page) + (section ? '&section=' + encodeURIComponent(section) : '') : '');
+  const sw = screen.availWidth || 1200, sh = screen.availHeight || 800, w = Math.min(900, Math.max(480, Math.round(sw * 0.42)));
+  let win = null;
+  try { win = window.open('', HELP_WIN, `width=${w},height=${sh - 60},left=${(screen.availLeft || 0) + sw - w},top=${screen.availTop || 0}`); } catch { }
+  if (!win) return false;
+  try { if (win.skynetHelp) { win.skynetHelp(page, section); win.focus(); return true; } } catch { }
+  win.location.href = url; win.focus();      // a new window (or one still loading)
+  return true;
+}
+function openHelp(topic, quiet = false) {
+  if (!quiet && helpWindow(topic || undefined)) return;
+  if (!quiet && !helpBlockedSaid) { helpBlockedSaid = true; toast('The browser blocked the Help window, so Help is shown here. Allow pop-ups for the panel to read Help beside it.', true); }
+  setView('help', true);
+  window.dispatchEvent(new CustomEvent('skynet-help', { detail: topic }));
+}
+// Help for what is showing: the Menu tab that is open, else the page you are on
+const pageTopic = () => view === 'workspace' && menuTab ? menuTopic(menuTab, '') || ['menu'] : viewTopic(view);
 // the yellow ? Help icon (Fritz): on the ☰ Menu tabs and in Properties dialogs, never on a tab itself.
 // `leave` runs first and may say no (a dialog with changes asks before it closes).
 const helpIcon = (topic, leave) => h('button', { type: 'button', class: 'helpIcon', title: 'Help on this', 'aria-label': 'Help on this',
@@ -1426,7 +1449,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   const hit = tabItemAt(ev.target);
   if (!hit || (hit.kind === 'el' && tapAction(hit.item) === 'hold')) return;     // a push button is held on purpose
   clearTimeout(helpPress?.t);
-  helpPress = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { helpPress = null; helpShownAt = Date.now(); openHelp(hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item)); }, 700) };
+  helpPress = { x: ev.clientX, y: ev.clientY, t: setTimeout(() => { helpPress = null; helpShownAt = Date.now(); openHelp(hit.kind === 'el' ? elementTopic(hit.item) : graphicTopic(hit.item), true); }, 700) };
 });
 const dropHelpPress = () => { if (helpPress) { clearTimeout(helpPress.t); helpPress = null; } };
 $('#ws').addEventListener('pointermove', ev => { if (helpPress && Math.hypot(ev.clientX - helpPress.x, ev.clientY - helpPress.y) > 8) dropHelpPress(); });
@@ -3846,6 +3869,7 @@ function menuItems(list, go, pages = false) {
   }
 }
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
+$('#barHelp').onclick = () => openHelp(pageTopic());      // the ? beside ☰ Menu on the Tabs bar (Fritz, 2026-10-22)
 $('#menuBtn').onclick = ev => { ev.stopPropagation(); const l = $('#menuList'), show = l.classList.contains('hidden'); renderMenu(); l.classList.toggle('hidden', !show); $('#menuBtn').setAttribute('aria-expanded', String(show)); };
 document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) { closeMenuList(); closeMenuCopies(); } });
 
