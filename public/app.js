@@ -4,7 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1837,7 +1837,7 @@ const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an 
 const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
 // the port as written in the name (Fritz: always in it): the pin, OW3 for OneWire probe 3, ADS0 for ADS1115 channel 0, the first DT pin of a scale
 function portForName(e) {
-  if (isOneWire(e)) return e.probeIndex ? 'OW' + e.probeIndex : 'OW';
+  if (isOneWire(e)) return oneWirePort(e.probeIndex);      // virtual port 700-799 (Fritz, 2026-10-23)
   if (e.type === 'analogIn' && e.adc === 'ads1115') return e.channel === undefined || e.channel === '' ? '' : 'ADS' + e.channel;
   const pin = String(e.channel ?? '').split(',')[0].trim(), a = /^A(\d{1,2})$/i.exec(pin);
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)

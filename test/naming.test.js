@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { suggestName, uniqueName, hydroPort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash } from '../public/naming.js';
+import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash } from '../public/naming.js';
 import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
@@ -17,7 +17,7 @@ assert.equal(parseLabel('.Kettle'), '~Kettle', 'a leading dot becomes ~ too');
 assert.equal(parseLabel('Mash 🍺 Tun\u0007'), 'Mash_Tun', 'emoji and control characters are dropped');
 assert.equal(parseLabel('Mash 👨‍👩‍👧 Tun © 2'), 'Mash_Tun_©_2', 'joined emoji go, © stays (as the name rules count it)');
 assert.equal(parseLabel('Kettle #2 (Boil)'), 'Kettle_#2_(Boil)', 'other characters stay');
-assert.equal(suggestName({ iface: 'MB', port: 'OW1', code: '1W', label: '', tab: 'BR' }), 'MB_OW1_1W__BR', 'an empty Label is left out');
+assert.equal(suggestName({ iface: 'MB', port: '700', code: '1W', label: '', tab: 'BR' }), 'MB_700_1W__BR', 'an empty Label is left out');
 assert.equal(suggestName({ iface: 'MB', code: 'Pump', label: 'Wort' }), 'MB_Pump_Wort', 'no tab: no __');
 const used = new Set(['MB_Pump_Wort__BR', 'MB_Pump_Wort_2__BR']);
 assert.equal(uniqueName('MB_Pump_Wort__BR', n => used.has(n)), 'MB_Pump_Wort_3__BR', 'a name already used gets a number after the Label');
@@ -64,6 +64,9 @@ assert.deepEqual(checkIds([{ name: 'Sparge' }, { name: 'S', id: 'sp' }], 'tab').
 
 assert.equal(hydroPort(1), '200', 'the first hydrometer is virtual port 200, as in BruControl');
 assert.equal(hydroPort(3), '202');
+assert.equal(oneWirePort(1), '700', 'OneWire probe 1 is virtual port 700');
+assert.equal(oneWirePort(100), '799');
+assert.equal(oneWirePort(''), '', 'no probe picked yet');
 
 // Device Type IDs a new Device starts with
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'valve' }), 'E_L_Vlv');
@@ -102,6 +105,7 @@ assert.equal(portClash({ name: 'New', type: 'pwmOut', device: 'MEGA', channel: '
 assert.equal(portClash({ name: 'New', type: 'analogIn', device: 'MEGA', channel: 'A5' }, els).other, 'MB_59_AI_Level_SP');
 assert.equal(portClash({ name: 'New', type: 'pwmOut', device: 'MEGA2', channel: 25 }, els), null, 'same port on another Interface is fine');
 assert.equal(portClash({ name: 'Probe2', type: 'temperature', device: 'MEGA', probeIndex: 2 }, els), null, 'DS18B20 probes share one wire');
+assert.equal(portClash({ name: 'Probe1b', type: 'temperature', probeIndex: 1 }, els).other, 'Probe1', 'one Device per OneWire probe number');
 assert.equal(portClash({ name: 'Step', type: 'stepper', device: 'MEGA', channel: 30, dirPin: 25 }, els).other, 'MB_25_VlV_Fly_Sparge_SP', 'every stepper pin counts');
 
 // the server gives IDs when a Schema loads, and refuses a Tab ID used twice
