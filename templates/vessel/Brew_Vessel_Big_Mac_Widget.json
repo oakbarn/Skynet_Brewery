@@ -40,5 +40,5 @@
       }
     }
   },
-  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23, \"the fat one\"): built on Brew_Vessel_TC_Temperature_Tangential_Element_Port_Widget, 10 in wider and 6 in taller, the Thermowell moved up to 10 in and a TC 2 added on the Left side at 11 in. Its IPs are built in on the ports; the Right side TC 2 is the Heating Element port (a mark, no IP)."
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23, \"the fat one\"): built on Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget, 10 in wider and 6 in taller, the Thermowell moved up to 10 in and a TC 2 added on the Left side at 11 in. Its IPs are built in on the ports; the Right side TC 2 is the Heating Element port (a mark, no IP)."
 }

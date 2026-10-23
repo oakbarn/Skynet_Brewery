@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 236 256">
-  <!-- Skynet Vessel Widget "Brew_Vessel_TC_Temperature_Tangential_Element_Port_Widget" (Fritz, 2026-10-23): Brew Vessel TC Temperature Tangential (Tangential face-on, 1 in in from the Left side, 4 in up) + a TC 2 Heating Element port on the Right side, center 6 in above the bottom.
+  <!-- Skynet Vessel Widget "Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget" (Fritz, 2026-10-23): Brew Vessel TC Temperature Tangential (Tangential face-on, 1 in in from the Left side, 4 in up) + a TC 2 Heating Element port on the Right side, center 6 in above the bottom.
        All Skynet Brew Vessel Widgets share one box (viewBox -20 0 236 256, 10 units = 1 in) so a port position is the same spot on each;
        face-on TC ports: flange, gasket groove, opening; side ports: tube and flange seen side-on. -->
   <g stroke="#111" stroke-width="1.5">

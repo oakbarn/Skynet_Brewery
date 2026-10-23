@@ -1,7 +1,7 @@
 {
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
-  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Temperature_Tangential_Element_Port_Widget.svg",
+  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget.svg",
   "size": [
     217,
     235
