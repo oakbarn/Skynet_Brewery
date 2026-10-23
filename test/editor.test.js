@@ -78,6 +78,11 @@ eng.remove('Fill'); bin = eng.binList();
 eng.binPurge(bin[0].id);
 assert.deepEqual(eng.binList(), []);
 assert.throws(() => eng.binRead('../c'), /Bad Recycle Bin item/);
+// ISO 8601 names (2026-10-23): new items are <name>.yyyymmddThhmmss; items from before keep their old names and still show
+eng.write('Mash', 'print "m"'); eng.remove('Mash');
+assert.match(eng.binList()[0].id, /^Mash\.\d{8}T\d{6}$/);
+for (const old of ['Sparge.2026-10-21-14-05-03', 'Boil.20261023T113005-2']) fs.writeFileSync(path.join(eng.binDir(), old + '.txt'), 'print "x"');
+assert.deepEqual(eng.binList().map(b => b.name).sort(), ['Boil', 'Mash', 'Sparge']);
 assert.deepEqual(eng.names(), ['Fill_old'], 'the Recycle_Bin folder is not a Process');
 fs.rmSync(d, { recursive: true, force: true });
 console.log('process editor tests passed');
