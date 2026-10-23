@@ -146,7 +146,8 @@ function setView(v, here = false) {
 }
 
 // ---------------------------------------------------------------- workspaces
-const L = () => editing ? draft : S.config;          // layout being shown
+let previewing = false;
+const L = () => editing || previewing ? draft : S.config;          // layout being shown (a Build Tab Preview shows the draft too)
 const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspaces[0];
 
 function renderTabs() {
@@ -154,6 +155,7 @@ function renderTabs() {
   for (const w of L().workspaces) t.append(h('button', { class: (w.name === wsName && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : ''), onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
     ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : w.name));
   $('#saveBuild').classList.toggle('hidden', !buildWs());
+  $('#previewBuild').classList.toggle('hidden', !buildWs());
 }
 
 // Fit screen (default): the whole tab fits in the space left under the header and tab buttons, so nothing scrolls.
@@ -175,7 +177,17 @@ function fitZoom(again = true) {
 }
 const Z = () => +$('#ws').dataset.z || 1;
 
+// Build Tab Preview (Fritz, 2026-10-23): the Build Tab drawn the way it looks on Brew Day (no grid, outlines or handles),
+// while it is still in Edit layout. It ends when you leave the Build Tab, press Back to building, or the build is sent away.
 function renderWs() {
+  if (previewing && !(editing && curWs()?.build)) { previewing = false; if (editing) $('#editHint').textContent = curWs()?.build ? BUILD_HINT : ''; }
+  document.body.classList.toggle('previewing', previewing); $('#ws').classList.toggle('preview', previewing);
+  $('#previewBuild').textContent = previewing ? '✏ Back to building' : '👁 Preview';
+  if (!previewing) return drawWs();
+  editing = false;
+  try { drawWs(); } finally { editing = true; }
+}
+function drawWs() {
   const w = curWs(); const ws = $('#ws');
   if (!w) return;
   ws.querySelectorAll('.el,.gfx').forEach(n => n.remove());
@@ -1355,6 +1367,7 @@ const newId = () => 'g' + Date.now().toString(36) + Math.random().toString(36).s
 
 function setEditing(on) {
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
+  previewing = false;
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null; draftRenames = new Map();
@@ -1912,9 +1925,11 @@ function useTabProfile(e) {
 }
 // LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
 const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : 'normal';
-$('#addImg').onclick = () => { const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
+// Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
+$('#addImg').onclick = () => { toBuild(); const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 // a new Text starts with the Default tab's size, place, Visible and Word wrap (copied now; colors and alignment follow the Default)
 $('#addText').onclick = () => {
+  toBuild();
   const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }), ...(D.wrap ? {} : { wrap: false }) };
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
@@ -1977,10 +1992,10 @@ $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 $('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
 $('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
-// a new equipment widget: made on the Build Tab, then Save Build ... puts it on a Tab (pipe fittings go on the Tab you are on)
+// a new equipment widget (pipe fittings too): made on the Build Tab, then Save Build ... puts it on a Tab
 function addVesselWidget(c) {
   const C = EQ[c];
-  if (C.tab) toBuild();
+  toBuild();
   const tab = wsName;
   let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.name === C.title + ' ' + i)) i++;
   const n = draft.graphics.filter(g => eqClass(g) && g.workspace === tab).length;
@@ -1998,6 +2013,7 @@ $('#addVessel').onclick = () => {
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
 $('#addIp').onclick = () => {
+  toBuild();
   const fit = $('#addIpType').value, base = { point: 'IP', pipe: 'Pipe', cap: 'Cap', coupling: 'Coupling' }[fit] || FITTINGS[fit];
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
   const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
@@ -2015,8 +2031,8 @@ $('#addWs').onclick = () => {
 $('#wsProps').onclick = () => editWorkspace();
 
 // ---- Build Tab (Fritz, 2026-10-22): something new is made first on a clean Tab, not on a busy one. The Build Tab is only in
-// the Edit layout draft (never saved) and shows only while you build. New Devices, Widgets and equipment go on it (Add element,
-// Add equipment, a Template's Add to Tab > Build Tab). Save Build ... then puts it on a Tab, or saves it as a Template.
+// the Edit layout draft (never saved) and shows only while you build. Every new Device, Widget, IP, picture, text, piece of
+// equipment and copy of a Template goes on it (Fritz, 2026-10-23). Save Build ... then puts it on a Tab, or saves it as a Template.
 const buildWs = () => draft?.workspaces.find(w => w.build);
 const buildItems = b => b ? [...draft.elements.filter(e => e.workspace === b.name), ...draft.graphics.filter(g => g.workspace === b.name)] : [];
 // open the Build Tab (made if it is not there yet), the size of the Tab you came from
@@ -2032,12 +2048,20 @@ function toBuild() {
   if (wsName === b.name) return b;
   if (!curWs()?.build) b.from = wsName;           // Save Build ... offers this Tab first
   wsName = b.name; sel = null;
-  $('#editHint').textContent = '🔨 Build Tab: build the new thing here (Add element, Add equipment, IPs, pipes), then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
+  $('#editHint').textContent = BUILD_HINT;
   renderTabs(); renderWs();
   return b;
 }
 $('#buildTab').onclick = () => toBuild();
 $('#saveBuild').onclick = guard(saveBuild);
+const BUILD_HINT = '🔨 Build Tab: build the new thing here (Add element, Add equipment, IPs, pipes). 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
+function setPreview(on) {
+  if (on && !toBuild()) return;
+  previewing = !!on && !!buildWs(); sel = null; drag = null;
+  $('#editHint').textContent = previewing ? '👁 Preview: this is how the build looks on Brew Day. Nothing can be moved or changed here: press ✏ Back to building to change it, or 💾 Save Build ... when it is ready.' : BUILD_HINT;
+  renderTabs(); renderWs();
+}
+$('#previewBuild').onclick = () => setPreview(!previewing);
 function dropBuild() {
   const b = buildWs(); if (!b) return;
   const gone = new Set(buildItems(b));
@@ -2102,6 +2126,11 @@ function tplNameFrom(n, kind) {
   return tplOf(kind, base) ? copyName(base, tplNames(kind)) : base;
 }
 const fitBody = f => ({ std: f.std, fittings: clone(f.fittings || []), image: f.image, ipPos: f.ipPos });
+// the Template a Tab item was copied from (Clone or Add to Tab), without its name and class: a new Template starts from it
+function tplBase(kind, g) {
+  const { name, cls, editable, deletable, ...t } = clone(tplOf(kind, g.template) || {});
+  return t;
+}
 const sameFit = (f, t) => JSON.stringify(cleanFit(fitBody(f))) === JSON.stringify(cleanFit(fitBody(t)));
 const cleanFit = b => ({ std: b.std || null, fittings: (b.fittings || []).map(x => ({ ...x })), image: b.image || '', ipPos: b.ipPos || null });
 async function makeTemplate(kind, name, skynet, body) {
@@ -2119,12 +2148,16 @@ async function saveBuildTemplate({ name, skynet }) {
   const bad = nameProblem(name); if (bad) throw new Error(bad);
   if (tplOf(w.kind, name)) throw new Error(`There is already a ${TEMPLATE_KINDS[w.kind]} called "${name}"`);
   const made = [];
-  if (w.kind === 'fitting') { await makeTemplate('fitting', name, skynet, fitBody(w.g)); made.push(name); }
+  if (w.kind === 'fitting') { await makeTemplate('fitting', name, skynet, { ...tplBase('fitting', w.g), ...fitBody(w.g) }); made.push(name); }
   else {
-    const g = w.g, t = { vesselType: g.vesselType, image: g.image, size: [Math.round(g.w), Math.round(g.h)], ports: {} };
-    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]);
+    const g = w.g, base = tplBase('vessel', g), t = { ...base, vesselType: g.vesselType, image: g.image, size: [Math.round(g.w), Math.round(g.h)], ports: {} };
+    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
     if (EQ[g.vesselType]?.ports.in2) t.liquidPorts = g.ports?.in2?.installed ? 4 : 2;
-    for (const [k, p] of Object.entries(g.ports || {})) t.ports[k] = { installed: !!p.installed, position: p.position };
+    for (const [k, p] of Object.entries(base.ports || {})) if (!g.ports?.[k]) t.ports[k] = p;     // ports the Tab item doesn't have stay as they were
+    for (const [k, p] of Object.entries(g.ports || {})) {
+      const { fitting, bundleName, ...was } = base.ports?.[k] || {};       // its fitting is set again below, from what is on the Build Tab
+      t.ports[k] = { ...was, installed: !!p.installed, position: p.position };
+    }
     for (const f of w.fits) {
       const q = t.ports[f.onPort]; if (!q || !FITTING_PORTS[f.onPort]) continue;
       let ft = tplOf('fitting', f.template);
@@ -2175,18 +2208,21 @@ function saveBuildDialog(b) {
     const tabSel = h('select', {}, ...tabs.map(w => h('option', { value: w.name, ...(w.name === b.from ? { selected: true } : {}) }, w.name)));
     const tplBox = h('div', { class: 'buildOpt' }, h('b', {}, 'As a Template'));
     if (tk.kind) {
-      const nm = h('input', { type: 'text', value: tplNameFrom(tk.g.name || tk.g.label, tk.kind) }), sky = h('input', { type: 'checkbox', checked: true });
+      const cl = b.cloneAs && !tplOf(tk.kind, b.cloneAs) ? b.cloneAs : '';
+      const nm = h('input', { type: 'text', value: cl || tplNameFrom(tk.g.name || tk.g.label, tk.kind) }), sky = h('input', { type: 'checkbox', checked: true });
       tplBox.append(h('p', { class: 'muted' }, `A ${tk.kind === 'vessel' ? (tk.g.vesselType === 'vessel' ? 'Vessel' : 'Equipment') + ' Template' : 'Bundled Fitting Template'}, in ☰ Menu. Name: no spaces (use _ instead), and it must be unique.`),
         h('label', {}, 'Template Name ', nm),
-        TPL.locked ? '' : h('label', { class: 'toggle' }, h('span', { class: 'sw' }, sky, h('span', { class: 'swk' })), ' Skynet Template (off = a User Template)'),
+        TPL.locked ? '' : h('label', { class: 'toggle' }, h('span', { class: 'sw' }, sky, h('span', { class: 'swk' })), ' Skynet Template (off = a User Bundled Template)'),
         h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: () => close({ to: 'template', kind: tk.kind, name: nm.value, skynet: sky.checked }) }, 'Save as Template')));
     } else tplBox.append(h('p', { class: 'muted' }, tk.why));
+    const tabBox = h('div', { class: 'buildOpt' }, h('b', {}, 'To a Tab'),
+      h('p', { class: 'muted' }, 'Everything on the Build Tab moves to the middle of this Tab, at the size it is now. Drag it to its place, then press Save layout.'),
+      h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value }) }, 'Save to Tab')));
     d.append(h('h3', {}, 'Save Build: where should it go?'),
-      h('div', { class: 'buildOpt' }, h('b', {}, 'To a Tab'),
-        h('p', { class: 'muted' }, 'Everything on the Build Tab moves to the middle of this Tab, at the size it is now. Drag it to its place, then press Save layout.'),
-        h('div', { class: 'bar' }, tabSel, h('button', { class: 'primary', onclick: () => close({ to: 'tab', tab: tabSel.value }) }, 'Save to Tab'))),
-      tplBox,
-      h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }), h('button', { onclick: () => close(null) }, 'Keep building')));
+      ...(b.cloneAs && tk.kind ? [tplBox, tabBox] : [tabBox, tplBox]),         // a clone of a Template is saved as a Template first
+      h('div', { class: 'bar' }, h('button', { class: 'danger', onclick: () => close({ to: 'trash' }) }, 'Throw it away'), h('span', { class: 'spacer' }),
+        h('button', { title: 'Close this and see the Build Tab the way it looks on Brew Day', onclick: () => { close(null); setPreview(true); } }, '👁 Preview'),
+        h('button', { onclick: () => close(null) }, 'Keep building')));
     d.oncancel = ev => { ev.preventDefault(); close(null); };
     document.body.append(d); d.showModal();
   });
@@ -4856,7 +4892,7 @@ function eqPane(p) {
   const size = it => it.maxVolume ?? it.volume;
   const rows = items.map(it => h('tr', {}, h('td', {}, it.name || ''), h('td', {}, kindOf(it)),
     h('td', {}, size(it) !== undefined ? `${size(it)} ${volUnit(it.units || p.units)}` : ''),
-    h('td', {}, it.template ? `${it.template}${it.templateCls ? ' (' + (it.templateCls === 'skynet' ? 'Skynet' : 'User') + ')' : ''}` : ''),
+    h('td', {}, it.template ? `${it.template}${it.templateCls ? ' (' + (it.templateCls === 'skynet' ? 'Skynet' : 'User Bundled') + ')' : ''}` : ''),
     h('td', {}, it.onVessel ? 'on ' + nameOf(it.onVessel) : '')));
   const goTab = () => { if (!w) return; leaveMenuTab(); wsName = w.name; sel = null; setView('workspace'); renderTabs(); renderWs(); };
   const own = w && w.layoutFromProfile === false;
@@ -5039,7 +5075,7 @@ const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k =
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
-  : 'User Template: Admins can change and delete it.';
+  : 'User Bundled Template: Admins can change and delete it.';
 
 // A Tab_Fitting is drawn like equipment (kind vessel, vesselType bfit), but its ports come from its fittings: a Start (where it
 // joins a vessel port; none while it is joined), the End of the chain, the open side of each tee, and a thermowell mark on a tee
@@ -5251,7 +5287,7 @@ function vesselTplFields(w) {
   const heat = isV && !ferm ? heatKindsFor(w.vtype || types[0]) : [];
   if (heat.length && !heat.includes(w.heatKind)) w.heatKind = heat[0];
   const equip = w.vesselType !== 'vessel', twoOrFour = C.ports.in2 && C.ports.out2;
-  const fits = [['', '(none)'], ...(TPL?.fitting || []).map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User)')]), ['__new', 'New ...'], ['__clone', 'Clone ...']];
+  const fits = [['', '(none)'], ...(TPL?.fitting || []).map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User Bundled)')]), ['__new', 'New ...'], ['__clone', 'Clone ...']];
   return [['_c', tplClassNote(w), 'note'], ['name', 'Template Name (no spaces)', 'text'],
     ['vesselType', 'Kind', 'sel', Object.entries(VESSEL_KINDS).filter(([k]) => equip === (k !== 'vessel')), true],
     ...(twoOrFour ? [['liquidPorts', 'Liquid ports', 'sel', [['2', '2 (1 in, 1 out)'], ['4', '4 (2 ins, 2 outs: two circuits that never mix)']], true]]
@@ -5297,7 +5333,7 @@ function miniDialog(title, fields, obj, okText = 'Save') {
     document.body.append(d); d.showModal();
   });
 }
-const skynetField = () => TPL?.locked ? [] : [['skynet', 'Skynet Template (Skynet is still building them; off = a User Template)', 'bool']];
+const skynetField = () => TPL?.locked ? [] : [['skynet', 'Skynet Template (Skynet is still building them; off = a User Bundled Template)', 'bool']];
 // a new Template, blank or a copy of another. Returns its name.
 async function newTemplate(kind, { from, body, std, init, what = TEMPLATE_KINDS[kind] } = {}) {
   const w = { name: from ? copyName(from, tplNames(kind)) : kind === 'vessel' ? 'My_Vessel' : 'My_Fitting', skynet: true };
@@ -5338,7 +5374,7 @@ function openTemplate(kind, name) {
         if (how === '__new') made = await newTemplate('fitting', { std: current().std });
         else {
           const c = { from: TPL.fitting[0]?.name };
-          if (!await miniDialog('Clone a Bundled Fitting', [['from', 'Bundled Fitting to clone (Skynet or User)', 'sel', TPL.fitting.map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User)')])]], c, 'Next')) made = null;
+          if (!await miniDialog('Clone a Bundled Fitting', [['from', 'Bundled Fitting to clone (Skynet or User Bundled)', 'sel', TPL.fitting.map(f => [f.name, f.name + (f.cls === 'skynet' ? ' (Skynet)' : ' (User Bundled)')])]], c, 'Next')) made = null;
           else if (c.from) made = await newTemplate('fitting', { from: c.from });
         }
         readFields(work, body);
@@ -5356,17 +5392,28 @@ function openTemplate(kind, name) {
       if (!confirm(`Delete the ${TEMPLATE_KINDS[kind]} "${t.name}"?\n\nTab items made from it stay on their Tabs.`)) return;
       setTPL(await api('DELETE', `/ui/templates/${kind}/${t.name}`)); toast(`Deleted ${t.name}`); finish();
     });
-    const cloneIt = guard(async () => { const made = await newTemplate(kind, { from: t.name, body: { ...current(), name: undefined } }); if (made) { dirty = false; finish(); } });
+    // Fritz (2026-10-23): a copy of a Template (Skynet or User Bundled) is always made on the 🔨 Build Tab first. Clone: change it
+    // there, then Save Build ... > As a Template saves it under the new name. Add to Tab: Save Build ... > To a Tab puts it on the Tab.
+    const taken = () => [...L().graphics.map(g => g.name), ...L().elements.map(e => e.name)].filter(Boolean);
+    const cloneIt = guard(async () => {
+      const w = { name: copyName(t.name, [...tplNames(kind), ...taken()]) };
+      const ok = await miniDialog(`Clone ${t.name}`, [['name', 'Name of the new Template (no spaces, use _ instead; it must be unique)', 'text'],
+        ['_n', 'The copy is made on the 🔨 Build Tab first. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick As a Template to save it under this name.', 'note']], w, 'Clone');
+      if (!ok) return;
+      const name = (w.name || '').trim(), bad = nameProblem(name); if (bad) throw new Error(bad);
+      if (tplOf(kind, name)) throw new Error(`There is already a ${TEMPLATE_KINDS[kind]} called "${name}"`);
+      const b = current(); dirty = false; finish();
+      addTemplateToTab(kind, { ...t, ...b, name: t.name, cls: t.cls }, wsName, name, { cloneAs: name });
+    });
     const toTab = guard(async () => {
-      const tabs = S.config.workspaces, eq = tabs.find(x => x.name === 'Equipment');
+      const tabs = L().workspaces.filter(x => !x.build), eq = tabs.find(x => x.name === 'Equipment');
       const first = kind === 'vessel' && eq ? eq : tabs.find(x => x.name === wsName) || tabs[0];
-      const taken = [...S.config.graphics.map(g => g.name), ...S.config.elements.map(e => e.name)];
-      // the Build Tab is a clean Tab to work on it first; its name ends with the ID of the Tab you are on
-      const idOf = tab => (tab === BUILD ? tabs.find(x => x.name === wsName) || tabs[0] : tabs.find(x => x.name === tab))?.id || tab;
-      const w = { tab: first.name }, def = tab => bundleName(t.name, idOf(tab), taken);
+      // its name ends with the ID of the Tab it is going to
+      const idOf = tab => tabs.find(x => x.name === tab)?.id || tab;
+      const w = { tab: first.name }, def = tab => bundleName(t.name, idOf(tab), taken());
       w.name = def(w.tab);
-      const ok = await miniDialog('Add to Tab', [['tab', 'Tab', 'sel', [[BUILD, '🔨 Build Tab (a clean Tab to work on it first)'], ...tabs.map(x => [x.name, x.name])]], ['name', 'Name (change it to what you want)', 'text'],
-        ['_n', 'It goes on the Tab Bundled, in Edit layout: drag it to its place, then press Save layout. On the Build Tab, press Save Build ... when it is ready.', 'note']], w, 'Add');
+      const ok = await miniDialog('Add to Tab', [['tab', 'Tab it goes on', 'sel', tabs.map(x => [x.name, x.name])], ['name', 'Name (change it to what you want)', 'text'],
+        ['_n', 'The copy is made on the 🔨 Build Tab first, Bundled. Change it there and look at it with 👁 Preview, then press 💾 Save Build ... and pick To a Tab: this Tab is offered first.', 'note']], w, 'Add');
       if (!ok) return;
       if (w.name === def(first.name) && w.tab !== first.name) w.name = def(w.tab);    // the name follows the Tab until it is typed
       const b = current(); finish();
@@ -5387,11 +5434,11 @@ function openTemplate(kind, name) {
     });
     const btns = () => h('div', { class: 'bar' },
       t.deletable && admin ? h('button', { class: 'danger', onclick: del }, 'Delete') : '',
-      admin ? h('button', { title: 'A copy under a new name', onclick: cloneIt }, 'Clone') : '',
-      admin ? h('button', { title: 'Put a copy on a Tab', onclick: toTab }, 'Add to Tab') : '',
+      admin ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Save Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',
+      admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > To a Tab', onclick: toTab }, 'Add to Tab') : '',
       admin && kind === 'fitting' ? h('button', { title: 'Put it on a port of a Vessel Template', onclick: toVessel }, 'Add to Vessel') : '',
       h('span', { class: 'spacer' }), h('button', { onclick: close }, 'Cancel'), ed ? h('button', { class: 'primary', onclick: save }, 'Save') : '');
-    d.append(h('div', { class: 'tplHead' }, h('h3', {}, `${TEMPLATE_KINDS[kind]}: ${t.name} `, h('span', { class: 'tplBadge ' + t.cls }, t.cls === 'skynet' ? 'Skynet' : 'User'),
+    d.append(h('div', { class: 'tplHead' }, h('h3', {}, `${TEMPLATE_KINDS[kind]}: ${t.name} `, h('span', { class: 'tplBadge ' + t.cls }, t.cls === 'skynet' ? 'Skynet' : 'User Bundled'),
       ' ', helpIcon(['vessel-and-fitting-templates', kind === 'vessel' ? 'vessel-template-settings' : 'bundled-fitting-template-settings'], () => { finish(); })),
       h('button', { class: 'tplX', title: 'Close', onclick: close }, '✕')),
       btns(), h('fieldset', { class: 'menuSet', ...(ed ? {} : { disabled: true }) }, body), btns());
@@ -5412,25 +5459,26 @@ function renderTemplatesTab(kind, group) { return box => {
   const list = TPL[kind].filter(t => !group || (group === 'equip') === (t.vesselType && t.vesselType !== 'vessel'));
   for (const t of list) {
     const open = () => openTemplate(kind, t.name);
-    grid.append(h('button', { class: 'tplIcon ' + t.cls, title: `${t.name} (${t.cls === 'skynet' ? 'Skynet' : 'User'} Template). Double-click for its settings.`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
+    grid.append(h('button', { class: 'tplIcon ' + t.cls, title: `${t.name} (${t.cls === 'skynet' ? 'Skynet' : 'User Bundled'} Template). Double-click for its settings.`, ondblclick: open, onkeydown: ev => { if (ev.key === 'Enter') open(); } },
       h('img', { src: media(tplIcon(kind, t)), alt: '' }), h('span', { class: 'tplName' }, t.name), t.cls === 'skynet' ? h('span', { class: 'tplBadge skynet' }, 'Skynet') : ''));
   }
   if (!list.length) grid.append(h('p', { class: 'muted' }, 'No Templates yet.'));
   box.append(grid);
 }; }
 
-// Add to Tab: the copy goes on the Tab in Edit layout, Bundled, so it can be dragged to its place before Save layout
-const BUILD = '__build';
-function addTemplateToTab(kind, t, tab, name) {
-  if (editing) return toast('Save or exit Edit layout first', true);
-  setEditing(true);
-  if (tab === BUILD) tab = toBuild().name;
-  if (!draft.workspaces.some(w => w.name === tab)) return toast(`There is no Tab "${tab}"`, true);
-  wsName = tab;
-  const g = kind === 'vessel' ? placeTabVessel(t, tab, name) : placeTabFitting(t, tab, name, null);
+// Add to Tab and Clone: the copy is made on the Build Tab (in Edit layout, Bundled). Save Build ... then offers the Tab it is
+// going to first (Add to Tab), or As a Template under the new name (Clone).
+function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
+  if (menuTab) leaveMenuTab();
+  if (!editing) setEditing(true);
+  const b = toBuild(); if (!b) return;
+  if (draft.workspaces.some(w => w.name === tab && !w.build)) b.from = tab;
+  if (cloneAs) b.cloneAs = cloneAs;
+  const g = kind === 'vessel' ? placeTabVessel(t, b.name, name) : placeTabFitting(t, b.name, name, null);
   sel = { kind: 'gfx', id: g.id };
   renderTabs(); renderWs();
-  toast(buildWs()?.name === tab ? `${name} is on the Build Tab. Change it there, then press Save Build ... to put it on a Tab or save it as a Template.` : `${name} is on the ${tab} tab. Drag it to its place, then press Save layout.`);
+  toast(cloneAs ? `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > As a Template to save the new Template.`
+    : `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > To a Tab to put it on the ${b.from} tab.`, false, 8000);
 }
 function placeTabVessel(t, tab, name) {
   const C = EQ[t.vesselType] || EQ.vessel, n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
