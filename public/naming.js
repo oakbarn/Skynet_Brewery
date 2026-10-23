@@ -97,6 +97,10 @@ export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filt
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). Used in its name when Hydro Devices are built.
 export const HYDRO_PORT_BASE = 200;
 export const hydroPort = index => String(HYDRO_PORT_BASE + Math.max(1, Math.trunc(Number(index) || 1)) - 1);
+// OneWire (DS18B20) probes share one wire, so each probe number is a virtual port 700-799: probe 1 = 700, probe 2 = 701 ...
+// A probe number can be used by one Device only.
+export const ONEWIRE_PORT_BASE = 700;
+export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ? String(ONEWIRE_PORT_BASE + Math.trunc(Number(index)) - 1) : '';
 
 export function suggestName({ iface, port, code, label, tab } = {}) {
   const head = [iface, port, code, parseLabel(label)].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
@@ -181,15 +185,17 @@ export function checkIds(list, what) {
 }
 
 // ---- one Device per Interface port ----
-// Every board pin a Device uses, as "Interface|pin" (A5 and 59 are the same Mega pin). DS18B20 probes share one wire, so they have none.
+// Every board pin a Device uses, as "Interface|pin" (A5 and 59 are the same Mega pin). DS18B20 probes share one wire, so they use
+// their probe number instead (virtual port 700 + number - 1), on any Interface: one Device per probe.
 const pinKey = p => {
   const s = String(p ?? '').trim().toUpperCase(); if (!s) return '';
   let m = /^A(\d{1,2})$/.exec(s); if (m && +m[1] <= 15) return String(54 + +m[1]);
   m = /^D?(\d+)$/.exec(s); return m ? String(+m[1]) : s;
 };
 export function portKeys(el) {
-  if (!isDevice(el) || !el.device) return [];
-  if (el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20')) return [];
+  if (!isDevice(el)) return [];
+  if (!el.device && !(el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20'))) return [];
+  if (el.type === 'temperature' && (!el.sensor || el.sensor === 'ds18b20')) return el.probeIndex ? [`OneWire|${oneWirePort(el.probeIndex) || el.probeIndex}`] : [];
   if (el.type === 'analogIn' && el.adc === 'ads1115') return el.channel === undefined || el.channel === '' ? [] : [`${el.device}|ADS${el.channel}`];
   const pins = el.type === 'scale' ? String(el.channel ?? '').split(',') : el.type === 'stepper' ? [el.channel, el.dirPin, el.enablePin, el.pin2, el.pin3, el.pin4, el.homePin] : [el.channel];
   return [...new Set(pins.map(pinKey).filter(Boolean))].map(p => `${el.device}|${p}`);

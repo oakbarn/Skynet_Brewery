@@ -36,7 +36,7 @@ The port is always in the name, and the Device Type ID comes third. There are **
 
 `MB_25_P_L_Vlv_Fly_Sparge__SP`
 
-Analog pins are written the way BruControl numbers them, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun__SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so they use their probe number instead: `MB_OW1_1W_HLT__HL`.
+Analog pins are written the way BruControl numbers them, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun__SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT__HL`. A probe number can belong to one Device only.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 
@@ -77,7 +77,7 @@ A **DIN** gives one trigger per press, however long the button is held, and a se
 
 **Kept for later** (Skynet can't read these yet): `DHT11`, `DHT22`, `Hydro` (a Tilt or any other hydrometer).
 
-**Virtual ports.** A hydrometer has no pin, so, as in BruControl, it gets a virtual port: the first one is `200`, the next `201`, and so on. A Tilt would be named like `MB_200_Hydro_Red_Tilt__FE`.
+**Virtual ports.** Some Devices have no pin of their own, so, as in BruControl, they get a virtual port: hydrometers `200`, `201` ..., OneWire probes `700` to `799`. A Tilt would be named like `MB_200_Hydro_Red_Tilt__FE`.
 
 ## Thermistors
 
