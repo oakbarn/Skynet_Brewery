@@ -4413,7 +4413,7 @@ function menuItems(list, go, pages = false) {
   }
 }
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
-$('#barEdit').onclick = guard(menuEditLayout);      // the red hammer beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
+$('#barEdit').onclick = guard(menuEditLayout);      // the red button (crossed hammers over a square) beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
 $('#barHelp').onclick = () => openHelp(pageTopic());      // the ? beside ☰ Menu on the Tabs bar (Fritz, 2026-10-22)
 $('#menuBtn').onclick = ev => { ev.stopPropagation(); const l = $('#menuList'), show = l.classList.contains('hidden'); renderMenu(); l.classList.toggle('hidden', !show); $('#menuBtn').setAttribute('aria-expanded', String(show)); };
 document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) { closeMenuList(); closeMenuCopies(); } });
