@@ -236,8 +236,39 @@ export function busCheck(el, elements, devices) {
     const spi = mine.find(p => SPI_PINS.includes(p));
     if (spi && spiUsers.length) return { error: `Pin ${spi} on ${iface} is blocked: pins 50, 51 and 52 carry the RTD and thermocouple boards (${spiUsers.map(o => o.name).join(', ')}).` };
     if (mine.includes(owPin) && owUsers.length) return { error: `Pin ${owPin} on ${iface} is blocked: it is the OneWire data pin of the DS18B20 probes (${owUsers.map(o => o.name).join(', ')}).` };
-    if (spi) return { warn: `Heads up: pin ${spi} is one of the SPI pins 50, 51, 52. RTD and thermocouple boards can only use those pins, so while this Device is on pin ${spi} you can't add RTD or thermocouple probes to ${iface}.` };
-    if (mine.includes(owPin)) return { warn: `Heads up: pin ${owPin} is the OneWire data pin. While this Device is on it, you can't add DS18B20 probes to ${iface}.` };
+  }
+  return pinAdvice(el, mine, others, owPin);
+}
+// Fritz, 2026-10-23: PWM and counter (interrupt) pins are few. A Device that doesn't need what its pin is kept for gets a heads-up
+// naming a free pin that fits it better; when no such pin is left there is no heads-up.
+export const PWM_PINS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
+export const COUNTER_PINS = ['2', '3', '18', '19', '20', '21'];
+const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0 and D1 are the USB link)
+const needsPwm = e => ['pwmOut', 'analogOut'].includes(e.type) || (e.type === 'pid' && e.pwm);
+const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
+const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins 50, 51, 52 that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
+// Fritz, 2026-10-23: the free pins a new Device can take on its Interface, best fit first (a relay gets plain pins before PWM or
+// counter pins, a PWM output PWM pins, a flow meter counter pins, analog inputs A0-A15)
+export function freePins(el, elements, devices, analog) {
+  const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter'].filter(Boolean);
+  const pool = analog ? [...Array(16).keys()].map(i => 'A' + i) : need.includes('pwm') ? PWM_PINS : need.includes('counter') ? COUNTER_PINS : MEGA_PINS;
+  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? ONEWIRE_PIN);
+  const extras = p => [PWM_PINS.includes(p) && 'pwm', COUNTER_PINS.includes(p) && 'counter', (SPI_PINS.includes(p) || p === owPin) && 'bus'].filter(k => k && !need.includes(k)).length;
+  return pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
+    .map((p, i) => [p, extras(p), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+}
+function pinAdvice(el, mine, others, owPin) {
+  const kept = p => [PWM_PINS.includes(p) && 'pwm', COUNTER_PINS.includes(p) && 'counter', SPI_PINS.includes(p) && 'spi', p === owPin && 'onewire'].filter(Boolean);
+  const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter', usesSpi(el) && 'spi', isProbe(el) && 'onewire'].filter(Boolean);
+  const used = new Set(others.filter(o => o.device === el.device).flatMap(pinsOn));
+  for (const p of mine) {
+    const extra = kept(p).filter(k => !need.includes(k)); if (!extra.length) continue;
+    const xs = q => kept(q).filter(k => !need.includes(k));
+    const better = MEGA_PINS.filter(q => !used.has(q) && !mine.includes(q) && need.every(k => kept(q).includes(k)) && xs(q).length < extra.length && !xs(q).some(k => k === 'spi' || k === 'onewire'))
+      .sort((a, b) => xs(a).length - xs(b).length)[0];
+    if (!better) continue;
+    const lose = extra.map(k => KEPT[k]).join(' and ');
+    return { warn: `Heads up: pin ${p} is ${lose}. Those are few, and this Device doesn't need that. Pin ${better} is free and fits it.` + (extra.includes('spi') ? ` While this Device is on pin ${p} you can't add RTD or thermocouple probes to ${el.device}.` : '') + (extra.includes('onewire') ? ` While this Device is on pin ${p} you can't add DS18B20 probes to ${el.device}.` : ''), pin: better };
   }
   return null;
 }

@@ -4,7 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins } from './naming.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1850,12 +1850,14 @@ const autoNamed = new WeakSet();      // new Devices whose name still follows th
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
 const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self && x.name.toLowerCase() === n.toLowerCase());
+const pinsOf = e => portKeys(e).map(k => k.split('|')[1]);
 function portError(e, self) {
   const els = (draft || S.config).elements.filter(x => x !== self), c = portClash(e, els);
   if (c) return `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only outputs of different Device Types can share a port.`;
-  const b = busCheck(e, els, S.config.devices);      // RTD / thermocouple SPI pins and the OneWire data pin (Fritz, 2026-10-23)
+  const b = busCheck(e, els, S.config.devices);      // RTD / thermocouple SPI pins, the OneWire data pin, few PWM and counter pins (Fritz, 2026-10-23)
   if (b?.error) return b.error;
-  if (b?.warn && !confirm(b.warn + '\n\nUse this pin anyway?')) return 'Pick another pin.';
+  const pin = pinsOf(e).find(Boolean);
+  if (b?.warn && !confirm(b.warn + `\n\nOK = use pin ${pin} anyway.  Cancel = go back and pick another pin.`)) return b.pin ? `Pick another pin, for example pin ${b.pin}.` : 'Pick another pin.';
   return null;
 }
 async function newDeviceDialog(e, hint) {
@@ -1865,9 +1867,10 @@ async function newDeviceDialog(e, hint) {
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
-  const fields = [['_n', '1. Pick the Interface, 2. the Port, 3. the Device Type, then type the Label. The name is made from them: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). The Tab ID is added when you put it on a Tab with 💾 Save Build. You can type your own name instead: it must be unique. Create puts the Device on the Build Tab and opens its Properties for everything else.', 'note'],
-    ['device', '1. Interface (board)', 'dev'], [port[0], '2. ' + port[1], ...port.slice(2)],
-    ['typeCode', '3. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
+  const fields = [['_n', '1. Pick the Interface, 2. the Device Type, 3. the Port (the list shows only the free pins that fit, best first), then type the Label. The name is made from them: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). The Tab ID is added when you put it on a Tab with 💾 Save Build. You can type your own name instead: it must be unique. Create puts the Device on the Build Tab and opens its Properties for everything else.', 'note'],
+    ['device', '1. Interface (board)', 'dev'],
+    ['typeCode', '2. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
+    [port[0], '3. ' + port[1], ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
     ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
     ['name', 'Name (filled in for you)', 'text']];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
@@ -1878,9 +1881,14 @@ async function newDeviceDialog(e, hint) {
       const shown = dialog('New Device', fields, work, false);
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
-      body.oninput = ev => {
+      // the Port list: only the free pins on this Interface that fit this Device Type, best first (Fritz, 2026-10-23)
+      const free = h('datalist', { id: 'pins-free' }); body.append(free);
+      const fillFree = w => free.replaceChildren(...(w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : []).map(p => h('option', { value: p })));
+      fillFree(work);
+      body.oninput = body.onchange = ev => {
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         const w = { ...work }; try { readFields(w, body); } catch { }
+        fillFree(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
       };
       if (await shown !== 'ok') return false;
@@ -1899,7 +1907,7 @@ async function newDeviceDialog(e, hint) {
         return true;
       } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
     }
-  } finally { body.oninput = null; for (const b of oks) b.textContent = 'Save'; }
+  } finally { body.oninput = body.onchange = null; for (const b of oks) b.textContent = 'Save'; }
 }
 // Fritz, 2026-10-23: as in BruControl, several new things made at the same spot stack down and to the right instead of hiding each other
 function stackNew(e) {

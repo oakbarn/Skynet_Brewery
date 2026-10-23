@@ -23,8 +23,8 @@ An **Interface** is a board (PLC) the Devices are wired to: a Mega on USB, a Meg
 When you add a Device (anything wired to a port), the **New Device** box asks for these, in this order, as BruControl does:
 
 1. **Interface**
-2. **Port** (the pin)
-3. **Device Type** (see the list below). An output port can have more than one type, see below.
+2. **Device Type** (see the list below)
+3. **Port** (the pin). The list shows only the pins that are free on that Interface and fit that Device Type, best first: plain pins for a relay or switch, PWM pins for a PWM output, counter pins for a flow meter, A0-A15 for an analog input. You can still type another pin. An output port can have more than one type, see below.
 4. **Label**, the Display name the tab shows, for example *Fly Sparge*.
 
 Press **Create**. The Device is always made on the **Build Tab** first, the same way as a new Widget or Template, and its **Properties** open right away so you can set everything else. If you make several in a row, each new one sits a little down and to the right of the last, so none hide each other. Then press **💾 Save Build ...** and pick the Tab: the Device moves there and the Tab ID is added to the end of its name.
@@ -69,6 +69,12 @@ What the panel does:
 - **Not allowed the other way round either:** if a pump already sits on pin 51, you can't add an RTD to that Interface until you move the pump.
 
 Tip: keep pins 40 and 50-52 free, even if you have no such probes yet. Then you can add them later without rewiring.
+
+### PWM and counter pins
+
+A Mega has only 15 **PWM pins** (2-13, 44-46), for pump speed, SSR power and the like, and only 6 **counter pins** (2, 3, 18, 19, 20, 21), for flow meters. If you put a Device that doesn't need them (a relay, a switch, a valve) on one of those, the panel gives you a heads-up and names a free pin that fits it better, for example *Pin 14 is free and fits it*. A PWM output on pin 2 or 3 is offered a PWM pin that isn't a counter pin, and a flow meter on 2 or 3 is offered 18-21.
+
+Press **OK** to keep your pin anyway, or **Cancel** to go back and pick another one. Once no better pin is free, there is no heads-up any more.
 
 ## Device Type IDs
 
