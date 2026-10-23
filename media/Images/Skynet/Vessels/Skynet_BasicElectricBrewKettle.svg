@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 256">
+  <!-- Skynet basic electric brew kettle, an Integrated Device (Fritz's drawing BasicElectricBrewKettle, 2026-10-23): the base of every
+       Skynet Integrated Electric Kettle. Three holes: the thermowell (upper, front center), the outlet (lower, front center, its IP
+       built in) and the heating element (right side). No text: the Display Name shows below it. -->
+  <rect x="5" y="9" width="182" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
+  <rect x="12.5" y="22" width="167" height="227" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
+  <g fill="#c4c7cb" stroke="#111" stroke-width="2">
+    <circle cx="88.5" cy="187" r="9"/>
+    <circle cx="91.5" cy="225" r="9"/>
+    <circle cx="181.5" cy="185" r="9"/>
+  </g>
+  <g fill="none" stroke="#9a9a9a" stroke-width="1.5">
+    <circle cx="88.5" cy="187" r="7"/>
+    <circle cx="91.5" cy="225" r="7"/>
+    <circle cx="181.5" cy="185" r="7"/>
+  </g>
+</svg>

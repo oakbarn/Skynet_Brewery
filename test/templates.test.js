@@ -117,4 +117,9 @@ assert.equal(rims.image, 'Images/Skynet/Other_Equipment/Skynet_TC1_2_Rims_Device
 assert.equal(cleanVessel(rims).integrated, 'device', 'kept when saved');
 assert.equal(cleanVessel({ integrated: 'gizmo' }).integrated, undefined);
 for (const f of ['Thermowell_Short', 'Thermowell_Medium', 'Thermowell_Long']) assert.ok(fs.existsSync(path.join(ROOT, 'media/Images/Skynet/Other_Equipment', `Skynet_TC15_${f}.svg`)), f);
+// the Basic electric kettle (Fritz, 2026-10-23): a Skynet_Integrated_Device, the base of every Integrated Electric Kettle
+const ek = S.get('vessel', 'Integrated_Electric_Kettle_Basic');
+assert.equal(ek.integrated, 'device'); assert.equal(ek.cls, 'skynet');
+assert.ok(fs.existsSync(path.join(ROOT, 'media', ek.image)), 'kettle picture');
+assert.deepEqual(Object.keys(ek.ports).sort(), ['element', 'outlet', 'thermowell']);
 console.log('templates ok');
