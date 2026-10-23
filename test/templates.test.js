@@ -78,7 +78,7 @@ assert.equal(cleanVessel({ vesselType: 'vessel', liquidPorts: 4 }).liquidPorts, 
 for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: 'Bottom', end: 'Right' }], ['Elbow_45', 'elbow45', { start: 'Left', end: 'Top Right 45' }], ['Tee', 'tee', { start: 'Left', end: 'Right', branch1: 'Top' }], ['Reducer', 'reducer', { start: 'Left', end: 'Right' }]]) {
   const t = S.get('fitting', n);
   assert.equal(t.fittings[0].kind, k); assert.deepEqual(t.ipPos, ip, n);
-  assert.match(t.image, /^Images\/Skynet\/Other_Equipment\/Fitting_.+\.svg$/);
+  assert.match(t.image, /^Images\/Skynet\/Other_Equipment\/(Fitting|Skynet_TC15)_.+\.svg$/);
   assert.ok(fs.existsSync(path.join(ROOT, 'media', t.image)), `${n}: picture ${t.image} is missing`);
   assert.deepEqual(fittingEnds(t).map(e => e.key), k === 'tee' ? ['end', 'branch1'] : ['end']);
 }
@@ -105,4 +105,16 @@ for (const n of ['End_Cap', 'U_Bend']) {          // the new Skynet fittings shi
   assert.ok(t.image.endsWith('.svg') && fs.existsSync(path.join(ROOT, 'media', t.image)), n + ' picture');
 }
 fs.rmSync(dir, { recursive: true, force: true });
+// Fritz's TC 1.5 drawings (2026-10-23): the fittings use them; the Instrument_Tee is not square; the RIMS tube is a Skynet_Integrated_Device
+for (const [n, pic] of [['Elbow_90', 'Skynet_TC15_90'], ['Elbow_45', 'Skynet_TC15_45'], ['Tee', 'Skynet_TC15_EqualTee'], ['End_Cap', 'Skynet_TC15_EndCap'], ['Instrument_Tee', 'Skynet_TC15_InstrumentTee']])
+  assert.equal(S.get('fitting', n).image, `Images/Skynet/Other_Equipment/${pic}.svg`, n);
+assert.deepEqual(S.get('fitting', 'Instrument_Tee').size, [90, 50]);
+assert.deepEqual(cleanFitting({ size: [90, 50] }).size, [90, 50], 'a fitting keeps its size');
+assert.equal(cleanFitting({ size: [5, 50] }).size, undefined, 'too small');
+const rims = S.get('vessel', 'RIMS_Tube');
+assert.equal(rims.integrated, 'device');
+assert.equal(rims.image, 'Images/Skynet/Other_Equipment/Skynet_TC1_2_Rims_Device.svg');
+assert.equal(cleanVessel(rims).integrated, 'device', 'kept when saved');
+assert.equal(cleanVessel({ integrated: 'gizmo' }).integrated, undefined);
+for (const f of ['Thermowell_Short', 'Thermowell_Medium', 'Thermowell_Long']) assert.ok(fs.existsSync(path.join(ROOT, 'media/Images/Skynet/Other_Equipment', `Skynet_TC15_${f}.svg`)), f);
 console.log('templates ok');

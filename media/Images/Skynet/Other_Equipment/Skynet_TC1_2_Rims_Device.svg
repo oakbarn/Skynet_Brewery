@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 413 58">
+  <!-- Skynet RIMS tube, an Integrated Device (Fritz's drawing, 2026-10-23): wort in at the top left and out at the bottom
+       (TC fittings with their IPs built in), the thermowell and its probe (purple) in the left end, the heating element (red)
+       in the right end with its housing, and the power cord to the AC supply. -->
+  <g fill="#808080" stroke="#000" stroke-width="2" stroke-linejoin="round">
+    <path d="M27 17 V5 H45 V17 Z"/>
+    <rect x="23" y="1" width="26" height="5" rx="1.5"/>
+    <path d="M214 42 V53 H232 V42 Z"/>
+    <rect x="210" y="52" width="26" height="5" rx="1.5"/>
+    <rect x="12" y="16" width="236" height="27"/>
+    <rect x="7" y="13" width="7" height="33" rx="2"/>
+    <rect x="3" y="14" width="5" height="31" rx="2"/>
+    <rect x="245" y="13" width="7" height="33" rx="2"/>
+    <path d="M252 13 H280 Q287 13 287 20 V39 Q287 46 280 46 H252 Z"/>
+  </g>
+  <rect x="8" y="25.5" width="29" height="5" fill="#a24ca0" stroke="#c8c8c8" stroke-width="1"/>
+  <rect x="132" y="26" width="120" height="5" fill="#e02020"/>
+  <path d="M287 31 C298 24 308 18 322 21 C334 24 340 30 348 30" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="371" cy="30" r="23" fill="#fff" stroke="#000" stroke-width="3"/>
+  <text x="371" y="30" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" text-anchor="middle">AC</text>
+  <path d="M352 37 Q355 33 360 35 Q366 38 366 44 Q368 50 374 49 Q380 48 382 41" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+</svg>
