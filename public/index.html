@@ -125,8 +125,8 @@
             <span id="findCount" class="muted"></span>
             <button id="findPrev" title="Previous match (Shift+Enter)">&#9650;</button>
             <button id="findNext" title="Next match (Enter)">&#9660;</button>
-            <label class="toggle" title="Match upper and lower case exactly"><input type="checkbox" id="findCase"> Aa</label>
-            <label class="toggle" title="Whole words only"><input type="checkbox" id="findWord"> Whole word</label>
+            <label class="toggle" title="Match upper and lower case exactly"><input type="checkbox" class="swc" id="findCase"> Aa</label>
+            <label class="toggle" title="Whole words only"><input type="checkbox" class="swc" id="findWord"> Whole word</label>
             <button id="findClose" title="Close (Esc)">&#10005;</button>
           </div>
           <div class="findRow admin-only">
@@ -137,7 +137,7 @@
         </div>
         <div class="editor"><pre id="gutter"></pre><div class="codeWrap"><pre id="codeHl" aria-hidden="true"></pre><textarea id="code" spellcheck="false" wrap="off" autocomplete="off" autocapitalize="off"></textarea></div><ul id="autofill" class="hidden"></ul></div>
         <ul id="problems"></ul>
-        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" id="consoleAll"> all processes</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
+        <div class="bar"><strong>Output</strong><label class="toggle"><input type="checkbox" class="swc" id="consoleAll"> all processes</label><span class="spacer"></span><button id="clearConsole">Clear</button></div>
         <pre id="console"></pre>
       </div>
     </div>
@@ -245,8 +245,8 @@
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
       <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
-      <label class="toggle"><input type="checkbox" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
-      <label class="toggle"><input type="checkbox" id="bruOverwrite" checked> Replace processes with the same name (old copy kept as .bak)</label>
+      <label class="toggle"><input type="checkbox" class="swc" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
+      <label class="toggle"><input type="checkbox" class="swc" id="bruOverwrite" checked> Replace processes with the same name (old copy kept as .bak)</label>
       <label>Picture folder <input id="bruMedia" value="Images" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
     </div>
     <button id="bruPreview">Check file</button>
@@ -263,10 +263,10 @@
       <button id="mdUp" title="Up one folder">⬆ Up</button>
       <button id="mdMoveSel" title="Move the picked files and folders to another folder" disabled>Move picked</button>
       <button id="mdDelSel" class="danger" title="Delete the picked files and folders" disabled>Delete picked</button>
-      <label class="mdReplace" title="On a phone: every tap adds or takes away one (on a PC use Ctrl+click or Shift+click)"><input id="mdMany" type="checkbox"> Select many</label>
+      <label class="mdReplace" title="On a phone: every tap adds or takes away one (on a PC use Ctrl+click or Shift+click)"><input id="mdMany" type="checkbox" class="swc"> Select many</label>
       <span id="mdSelInfo" class="muted"></span>
       <select id="mdView" title="View"><option value="icons">Large icons</option><option value="details">Details</option></select>
-      <label class="mdReplace"><input id="mdReplace" type="checkbox"> Replace files with the same name</label>
+      <label class="mdReplace"><input id="mdReplace" type="checkbox" class="swc"> Replace files with the same name</label>
     </div>
     <div class="mdAddress"><span id="mdCrumbs" class="mdCrumbs"></span><input id="mdFilter" placeholder="🔍 Search this folder"></div>
     <p id="mdReadOnly" class="mdReadOnly" hidden>🔒 <b>Skynet pictures, read only.</b> These come with Skynet: they can be looked at and their path copied, but not added to, renamed, moved or deleted. Put your own pictures in the groups in <b>Images</b>.</p>
@@ -300,8 +300,8 @@
       <label title="Pictures go into this picture group in media/Images">Picture group <select id="fmGroup"><option value="">No group (straight into Images)</option></select></label>
       <label class="mdPickBtn">📁 Pick a folder<input id="fmPickFolder" type="file" webkitdirectory multiple hidden></label>
       <label class="mdPickBtn">📄 Pick files<input id="fmPickFiles" type="file" multiple hidden></label>
-      <label class="toggle"><input type="checkbox" id="fmReplace"> Replace files already on the Brain</label>
-      <label class="toggle"><input type="checkbox" id="fmOnlyMissing"> Only the ones this Schema is missing</label>
+      <label class="toggle"><input type="checkbox" class="swc" id="fmReplace"> Replace files already on the Brain</label>
+      <label class="toggle"><input type="checkbox" class="swc" id="fmOnlyMissing"> Only the ones this Schema is missing</label>
     </div>
     <div id="fmDrop" class="fmDrop">…or drag files or folders from Explorer / Finder and drop them here</div>
     <div class="bar"><button id="fmGo" class="primary" disabled>Copy to the Brain</button><button id="fmClear" disabled>Clear list</button>
@@ -412,7 +412,7 @@
       </div>
       <div class="bar"><button id="msSave" class="primary">Save sending settings</button><button id="msTest">Send me a test</button><span id="msResult" class="muted"></span></div>
       <h3>Testing mode</h3>
-      <label class="toggle"><input type="checkbox" id="setFresh"> Start fresh logins after each update</label>
+      <label class="toggle"><input type="checkbox" class="swc" id="setFresh"> Start fresh logins after each update</label>
       <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>
       <h3 id="simulation">Simulation (test mode)</h3>
       <p class="muted">Try out a brew without touching any hardware. While it is on, every board is replaced by the simulator: processes, timers, alarms and the screen work as on brew day, but heaters, pumps and valves are only pretend. Time can run faster, and can skip ahead so you do not wait out a 60 minute mash. Turning it on or off stops every process and turns every output off.</p>
@@ -442,7 +442,7 @@
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
       <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> to change vAPI variables through the API.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
-      <label class="check"><input type="checkbox" id="setWarnPaths"> Warn me when a process uses a file that is not on the Brain (saved right away)</label>
+      <label class="check"><input type="checkbox" class="swc" id="setWarnPaths"> Warn me when a process uses a file that is not on the Brain (saved right away)</label>
       <div>Start these processes when the server starts:</div>
       <div id="setAuto" class="checks"></div>
       <label>Most restarts a minute for one Process. Restarts by the <code>restart</code> command or by "Restart if it fails" past this number leave the Process stopped, so a broken Process cannot restart forever.<input id="setRestartLimit" type="number" min="1" max="60" step="1"></label>
@@ -452,7 +452,7 @@
     <div class="form admin-only" id="donateSettings">
       <h3>Beer money pop-up</h3>
       <p class="muted">About once a month each phone or computer gets a small pop-up asking for a few dollars of beer money. It never shows while a Process is running (other than ones that start with the server), while a tab is being edited, or over another window.</p>
-      <label class="check"><input type="checkbox" id="donOn"> Show the pop-up</label>
+      <label class="check"><input type="checkbox" class="swc" id="donOn"> Show the pop-up</label>
       <p>Donations go to Fritz's PayPal (fritz.range@gmail.com). This is built in and cannot be changed here.</p>
       <label>Message (leave empty for the standard one)<textarea id="donMsg" rows="3"></textarea></label>
       <label>Button text (leave empty for "Buy Fritz a beer")<input id="donBtn"></label>
@@ -475,7 +475,7 @@
     <div class="form admin-only">
       <p class="muted">Shares vAPI variables and Devices with an MQTT broker (for example Mosquitto on the Raspberry Pi), so ESP32 boards, Node-RED or Home Assistant can read and change them. Through Home Assistant you can also ask Alexa, Google Home or Siri. Setup steps: <code>docs/MQTT_AND_VOICE.md</code>.</p>
       <div id="mqttStatus" class="mqtt-status"></div>
-      <div class="checks"><label><input type="checkbox" id="mqEnabled"> Turn on MQTT</label><label><input type="checkbox" id="mqTls"> Encrypted (TLS)</label></div>
+      <div class="checks"><label><input type="checkbox" class="swc" id="mqEnabled"> Turn on MQTT</label><label><input type="checkbox" class="swc" id="mqTls"> Encrypted (TLS)</label></div>
       <div class="form row">
         <label>Broker address<input id="mqHost" placeholder="localhost"></label>
         <label>Port<input id="mqPort" type="number" placeholder="1883" style="width:7em"></label>
@@ -483,7 +483,7 @@
         <label>Password<input id="mqPass" type="password" autocomplete="new-password"></label>
         <label>Topic name<input id="mqBase" placeholder="brewpanel"></label>
       </div>
-      <div class="checks"><label><input type="checkbox" id="mqHa"> Announce to Home Assistant (needed for Alexa, Google Home and Siri)</label></div>
+      <div class="checks"><label><input type="checkbox" class="swc" id="mqHa"> Announce to Home Assistant (needed for Alexa, Google Home and Siri)</label></div>
       <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop processes. They can change vAPI variables that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start processes that you tick below. Inputs from hardware are read only, and Shared variables are never shared.</p>
       <table class="grid"><thead><tr><th>Element</th><th>Type</th><th>Voice can hear it</th><th>Can change it</th></tr></thead><tbody id="mqItems"></tbody></table>
       <div>Voice and MQTT may <b>start</b> these processes:</div>
@@ -513,8 +513,8 @@
   <h3>Find in all Processes</h3>
   <div class="findRow">
     <input id="faText" type="search" placeholder="Find" autocomplete="off" spellcheck="false" enterkeyhint="search">
-    <label class="toggle"><input type="checkbox" id="faCase"> Aa</label>
-    <label class="toggle"><input type="checkbox" id="faWord"> Whole word</label>
+    <label class="toggle"><input type="checkbox" class="swc" id="faCase"> Aa</label>
+    <label class="toggle"><input type="checkbox" class="swc" id="faWord"> Whole word</label>
     <button type="button" id="faSearch" class="primary">Search</button>
   </div>
   <div class="findRow admin-only">
