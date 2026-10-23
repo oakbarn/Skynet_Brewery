@@ -1,0 +1,8 @@
+{
+  "std": { "type": "TC", "size": 1.5 },
+  "fittings": [{ "kind": "tee" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg",
+  "size": [90, 50],
+  "ipPos": { "start": "Left", "end": "Right", "branch1": "Top" },
+  "notes": "An instrument tee: a short tee with a short, narrow branch for a probe or a gauge. Openings at the left, the right and the top. Flow goes any way through it."
+}

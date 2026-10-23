@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet TC 1.5 inch 90 degree elbow (after Fritz's drawing): openings at the middle of the Bottom and Right edges, a long round bend -->
+  <path d="M36 92 V70 A34 34 0 0 1 70 36 H92 V64 H70 A6 6 0 0 0 64 70 V92 Z" fill="#808080" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+  <g fill="#808080" stroke="#000" stroke-width="2.5">
+    <rect x="28" y="90" width="44" height="8" rx="2"/>
+    <rect x="90" y="28" width="8" height="44" rx="2"/>
+  </g>
+</svg>
