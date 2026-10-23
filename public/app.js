@@ -265,12 +265,13 @@ const EQ = {
   vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/Skynet/Vessels/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
     ports: {
       // 'Front Bottom Center', 'Front Center' and 'Right Side' are the three holes of Fritz's Skynet_BasicElectricBrewKettle.svg (2026-10-23)
-      // 'Center Bottom 1 in' is the TC 1.5 port of Skynet_Brew_Vessel_Low_TC_Output_Widget.svg (Fritz, 2026-10-23): its center 1 inch above the bottom
-      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Front Bottom Center', 0.467, 0.879], ['Center Bottom 1 in', 0.49, 0.934]], { on: true }),
+      // '... in' positions are the ports of the Skynet Brew Vessel Widgets (Fritz, 2026-10-23): all share one picture box, and the
+      // number is the port center's height above the bottom
+      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Front Bottom Center', 0.467, 0.879], ['Center Bottom 1 in', 0.492, 0.934]], { on: true }),
       // a second drain, for example above the element so it always stays under water (Fritz's Big Fatty, 2026-10-22)
-      outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92]]),
-      tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75]]),
-      thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7], ['Front Center', 0.452, 0.73]], { ip: false }),
+      outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92], ['Right 6 in', 0.962, 0.738]]),
+      tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75], ['Left 4 in', 0.025, 0.816]]),
+      thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7], ['Front Center', 0.452, 0.73], ['Center 5 in', 0.492, 0.777]], { ip: false }),
       steamSlayer: pt('Steam Slayer', V_HIGH), sparge: pt('Sparge', V_HIGH), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH]),
       // where the heating element goes in (Fritz, 2026-10-22): a mark, not an IP; its Device is picked on the Tab_Vessel
       element: pt('Heating element', [['Right Low', 1, 0.88], ['Left Low', 0, 0.88], ['Center Low', 0.5, 0.92], ['Back Low', 0.3, 0.88], ['Right Side', 0.926, 0.723]], { ip: false }),

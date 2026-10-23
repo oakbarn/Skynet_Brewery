@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 256">
-  <!-- Skynet Vessel Widget "Generic Brew Vessel Widget" (Fritz, 2026-10-23): a plain kettle with no ports, drawn like his BasicElectricBrewKettle. No text: the Display Name shows below it. Scale 10 units = 1 inch (body 16.7 in wide). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 236 256">
+  <!-- Skynet Vessel Widget "Generic Brew Vessel Widget" (Fritz, 2026-10-23): a plain kettle with no ports, drawn like his BasicElectricBrewKettle. No text: the Display Name shows below it. Scale 10 units = 1 inch (body 16.7 in wide).
+       All Skynet Brew Vessel Widgets share one box (viewBox -20 0 236 256, 10 units = 1 in) so a port position is the same spot on each;
+       face-on TC ports: flange, gasket groove, opening; side ports: tube and flange seen side-on. -->
   <rect x="5" y="9" width="182" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
   <rect x="12.5" y="22" width="167" height="227" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
 </svg>
