@@ -30,7 +30,7 @@ In **Tabs > ☰ Menu > Edit layout > Add element**, the list groups devices by k
 - **Analog sensors**: 0-5 V, 0-10 V, 4-20 mA, pressure, level, pH (with two-point calibration).
 - **Flow meters** (pulse) and **vessel scales** (HX711 load cells, with tare and calibration).
 
-A new Device first asks for its **Interface**, **Port**, **Device Type** and **Display name**, and gets a name like `MB_25_P_L_Vlv_Fly_Sparge__SP` ([Interface, Tab and Device names](46-interface-tab-device-names)). **Create** puts it on the tab and opens its properties for the rest. Only outputs of different Device Types can share a port. The properties show only the settings that kind needs, plus the live reading for calibration.
+A new Device first asks for its **Interface**, **Port**, **Device Type** and **Display name**, and gets a name like `MB_25_P_L_Vlv_Fly_Sparge__SP` ([Interface, Tab and Device names](46-interface-tab-device-names)). **Create** puts it on the Build Tab and opens its properties for the rest; **💾 Save Build ...** then puts it on a Tab. Only outputs of different Device Types can share a port. The properties show only the settings that kind needs, plus the live reading for calibration.
 
 ## OneWire probes (DS18B20)
 
