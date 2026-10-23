@@ -24,7 +24,7 @@ When you add a Device (anything wired to a port), the **New Device** box asks fo
 
 1. **Interface**
 2. **Device Type** (see the list below)
-3. **Port** (the pin). The list shows only the pins that are free on that Interface and fit that Device Type, best first: plain pins for a relay or switch, PWM pins for a PWM output, counter pins for a flow meter, A0-A15 for an analog input. You can still type another pin. An output port can have more than one type, see below.
+3. **Port** (the pin). The list shows only the pins that are free on that Interface and fit that Device Type, best first: plain pins for a relay or switch, PWM pins for a PWM output, counter pins for a flow meter, A0-A15 for an analog input. Each pin in the list says what it is kept for: **PWM**, **Counter**, **PWM + Counter**, **SPI, for RTD boards** or **OneWire probes**; a plain pin has no tag. You can still type another pin. An output port can have more than one type, see below.
 4. **Label**, the Display name the tab shows, for example *Fly Sparge*.
 
 Press **Create**. The Device is always made on the **Build Tab** first, the same way as a new Widget or Template, and its **Properties** open right away so you can set everything else. If you make several in a row, each new one sits a little down and to the right of the last, so none hide each other. Then press **💾 Save Build ...** and pick the Tab: the Device moves there and the Tab ID is added to the end of its name.
