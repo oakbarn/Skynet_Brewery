@@ -247,6 +247,12 @@ const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0
 const needsPwm = e => ['pwmOut', 'analogOut'].includes(e.type) || (e.type === 'pid' && e.pwm);
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
 const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins 50, 51, 52 that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
+// what a Mega pin is kept for, shown beside it in the pin picker (Fritz, 2026-10-23): "PWM", "Counter", "PWM + Counter" ...
+export function pinTag(p) {
+  p = String(p);
+  const t = [PWM_PINS.includes(p) && 'PWM', COUNTER_PINS.includes(p) && 'Counter'].filter(Boolean).join(' + ');
+  return t || (SPI_PINS.includes(p) ? 'SPI, for RTD boards' : p === ONEWIRE_PIN ? 'OneWire probes' : p === '0' || p === '1' ? 'USB link' : '');
+}
 // Fritz, 2026-10-23: the free pins a new Device can take on its Interface, best fit first (a relay gets plain pins before PWM or
 // counter pins, a PWM output PWM pins, a flow meter counter pins, analog inputs A0-A15)
 export function freePins(el, elements, devices, analog) {
