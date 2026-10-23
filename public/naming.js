@@ -3,7 +3,7 @@
 // Interface ID: 1 to 4 letters, unique. A new Interface gets the first letter of its first two words ("Main Brewery Mega USB" = MB),
 //   or MB_2, MB_3 ... when MB is taken. An Admin can change it. (Fritz, 2026-10-21)
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
-// Device name (Fritz, 2026-10-23): InterfaceID_DeviceTypeID_ParsedLabel__TabID, e.g. MB_E_L_Vlv_Fly~Sparge_In__SP
+// Device name (Fritz, 2026-10-23): InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_E_L_Vlv_Fly~Sparge_In__SP
 //   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 
 // Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list (DO is a plain relay and
@@ -29,11 +29,12 @@ const T = {
   PWM: 'PWM (plain)', P_L_Vlv: 'Low Temperature Proportional Valve', P_H_Vlv: 'High Temperature Proportional Valve',
   P_Pump: 'Pump speed', P_Fan: 'Fan speed', P_Mtr: 'Motor speed', P_LED: 'LED / light dimmer', AO: 'Analog output 0-10 V / 4-20 mA (plain)',
   // analog inputs and the rest
-  AI: 'Analog input (plain)', Pres: 'Pressure', Level: 'Level', Vol: 'Volume', pH: 'pH', FlowM: 'Flow meter', Scale: 'Scale (load cells)',
+  AI: 'Analog input (plain)', Pres: 'Pressure', Level: 'Level', Vol: 'Volume', PH_Met: 'pH meter', FlowM: 'Flow meter', Scale: 'Scale (load cells)',
   Step: 'Stepper motor',
 };
-// IDs kept for Devices Skynet can't read yet, so nothing else takes them: DHT11 and DHT22 need firmware first, a Tilt is Bluetooth.
-export const RESERVED_TYPE_IDS = { DHT11: 'DHT11 temperature / humidity', DHT22: 'DHT22 temperature / humidity', Tilt: 'Tilt hydrometer' };
+// IDs kept for Devices Skynet can't read yet, so nothing else takes them: DHT11 and DHT22 need firmware first;
+// Hydro is a Tilt or any other hydrometer (Fritz, 2026-10-23), not built yet (a Tilt is Bluetooth).
+export const RESERVED_TYPE_IDS = { DHT11: 'DHT11 temperature / humidity', DHT22: 'DHT22 temperature / humidity', Hydro: 'Hydrometer (Tilt or any other)' };
 export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
 const list = ids => ids.split(' ').map(id => [id, T[id]]);
 export const TYPE_CODES = {
@@ -42,7 +43,7 @@ export const TYPE_CODES = {
   pwmOut: list('PWM H_PWM P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr P_LED'),
   analogOut: list('AO H_AO P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr'),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
-  analogIn: list('AI Pres Level Vol pH'),
+  analogIn: list('AI Pres Level Vol PH_Met'),
   flowMeter: list('FlowM'),
   scale: list('Scale'),
   stepper: list('Step'),
@@ -54,7 +55,7 @@ export const isDevice = el => !!el && Object.hasOwn(TYPE_CODES, el.type);
 export const typeCodes = el => TYPE_CODES[el?.type] ?? [];
 
 // The Device Type ID a new Device starts with: from its kind (pump, valve ...), its probe, or the Add menu entry it came from
-const BY_HINT = { Float: 'Float', FlowSw: 'FlowSw', PB: 'PB', Toggle: 'Toggle', Pulse: 'DIN', Interlock: 'Intlk', Count: 'Count', Pressure: 'Pres', Level: 'Level', pH: 'pH' };
+const BY_HINT = { Float: 'Float', FlowSw: 'FlowSw', PB: 'PB', Toggle: 'Toggle', Pulse: 'DIN', Interlock: 'Intlk', Count: 'Count', Pressure: 'Pres', Level: 'Level', pH: 'PH_Met' };
 const NTC_BY_OHM = { 5000: '5KNTC', 10000: '10KNTC', 50000: '50KNTC', 100000: '100KNT' };
 function tempCode(el) {
   const s = el.sensor || 'ds18b20';
@@ -76,7 +77,7 @@ export function defaultCode(el, hint) {
 const OLD_CODES = { PmP: 'Pump', VlV: 'E_L_Vlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
   PWM_PmP: 'P_Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'P_Mtr', PWM_FaN: 'P_Fan', PWM_LgT: 'P_LED', PWM_LeD: 'P_LED', PWM_ElM: 'H_PWM',
   AO_PmP: 'P_Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'P_Mtr', AO_FaN: 'P_Fan', AO_ElM: 'H_AO',
-  DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'pH',
+  DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'PH_Met',
   FlM: 'FlowM', ScL: 'Scale', StP: 'Step', DtY: 'DutyCy', HyS: 'Hys', PiD: 'PID' };
 export function upgradeCode(el) {
   if (!el?.typeCode) return '';
@@ -92,11 +93,11 @@ const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0
 export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
   .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '_');
 
-export function suggestName({ iface, code, label, tab } = {}) {
-  const head = [iface, code, parseLabel(label)].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
+export function suggestName({ iface, port, code, label, tab } = {}) {
+  const head = [iface, port, code, parseLabel(label)].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
   return tab ? (head ? `${head}__${tab}` : tab) : head;
 }
-// A suggested name that is already used gets _2, _3 ... after the Label: MB_Pump_Wort_2__BR
+// A suggested name that is already used (an old Device, or a Widget) gets _2, _3 ... after the Label: MB_25_Pump_Wort_2__BR
 export function uniqueName(name, isTaken) {
   if (!name || !isTaken(name)) return name;
   const cut = name.lastIndexOf('__'), head = cut > 0 ? name.slice(0, cut) : name, tail = cut > 0 ? name.slice(cut) : '';

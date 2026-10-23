@@ -1829,14 +1829,20 @@ $('#addEl').onclick = guard(async () => {
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 });
 // Fritz, 2026-10-21 / 2026-10-23: a new Device starts with its Label (Display name), then its Interface, Port and Type, and its name is
-// suggested from them: InterfaceID_DeviceTypeID_ParsedLabel__TabID, e.g. MB_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
+// suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface.
 const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
 const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an analog pin
 const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
-// the port is not in the name any more, so a name already used by another Device or Widget gets _2, _3 ... after the Label
-const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), code: e.typeCode, label: e.displayName, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
+// the port as written in the name (Fritz: always in it): the pin, OW3 for OneWire probe 3, ADS0 for ADS1115 channel 0, the first DT pin of a scale
+function portForName(e) {
+  if (isOneWire(e)) return e.probeIndex ? 'OW' + e.probeIndex : 'OW';
+  if (e.type === 'analogIn' && e.adc === 'ads1115') return e.channel === undefined || e.channel === '' ? '' : 'ADS' + e.channel;
+  return String(e.channel ?? '').split(',')[0].trim();
+}
+// a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.displayName, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
@@ -1852,7 +1858,7 @@ async function newDeviceDialog(e, hint) {
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
-  const fields = [['_n', 'Type the Label first. The name is made from it: Interface ID _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). You can type your own name instead: it must be unique.', 'note'],
+  const fields = [['_n', 'Type the Label first. The name is made from it: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). You can type your own name instead: it must be unique.', 'note'],
     ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
     ['device', 'Interface (board)', 'dev'], port,
     ['typeCode', 'Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
@@ -2063,7 +2069,7 @@ function moveBuildTo(tab) {
   centerOn(items, to);
   for (const x of items) x.workspace = to.name;
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
-  // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_P_L_Vlv_Fly_Sparge__SP)
+  // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_P_L_Vlv_Fly_Sparge__SP)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
     const n = deviceSuggestion(e);
     if (n && n !== e.name && !nameTaken(n, e)) { swapName(items.filter(x => x !== e), e.name, n); e.name = n; }
@@ -2806,7 +2812,7 @@ async function editItem(kind, id) {
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
-    if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
+    if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return f;
   } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];

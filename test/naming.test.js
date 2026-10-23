@@ -8,15 +8,16 @@ import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
 
-// Fritz, 2026-10-23: InterfaceID_DeviceTypeID_ParsedLabel__TabID
-assert.equal(suggestName({ iface: 'MB', code: 'P_L_Vlv', label: 'Fly Sparge', tab: 'SP' }), 'MB_P_L_Vlv_Fly_Sparge__SP');
+// Fritz, 2026-10-23: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID (the port always in it, the type third)
+assert.equal(suggestName({ iface: 'MB', port: 25, code: 'P_L_Vlv', label: 'Fly Sparge', tab: 'SP' }), 'MB_25_P_L_Vlv_Fly_Sparge__SP');
+assert.equal(suggestName({ iface: 'MB', port: 'A0', code: '10KNTC', label: 'Mash/Tun', tab: 'SP' }), 'MB_A0_10KNTC_Mash~Tun__SP');
 assert.equal(parseLabel('  Hot  Liquor Tank '), 'Hot_Liquor_Tank', 'spaces at the ends go, spaces inside become _');
 assert.equal(parseLabel('a<b>c:d"e/f\\g|h?i*j.k,l'), 'a~b~c~d~e~f~g~h~i~j~k~l', 'each of < > : " / \\ | ? * . , becomes ~');
 assert.equal(parseLabel('.Kettle'), '~Kettle', 'a leading dot becomes ~ too');
 assert.equal(parseLabel('Mash 🍺 Tun\u0007'), 'Mash_Tun', 'emoji and control characters are dropped');
 assert.equal(parseLabel('Mash 👨‍👩‍👧 Tun © 2'), 'Mash_Tun_©_2', 'joined emoji go, © stays (as the name rules count it)');
 assert.equal(parseLabel('Kettle #2 (Boil)'), 'Kettle_#2_(Boil)', 'other characters stay');
-assert.equal(suggestName({ iface: 'MB', code: '1W', label: '', tab: 'BR' }), 'MB_1W__BR', 'an empty Label is left out');
+assert.equal(suggestName({ iface: 'MB', port: 'OW1', code: '1W', label: '', tab: 'BR' }), 'MB_OW1_1W__BR', 'an empty Label is left out');
 assert.equal(suggestName({ iface: 'MB', code: 'Pump', label: 'Wort' }), 'MB_Pump_Wort', 'no tab: no __');
 const used = new Set(['MB_Pump_Wort__BR', 'MB_Pump_Wort_2__BR']);
 assert.equal(uniqueName('MB_Pump_Wort__BR', n => used.has(n)), 'MB_Pump_Wort_3__BR', 'a name already used gets a number after the Label');
@@ -72,6 +73,7 @@ assert.equal(defaultCode({ type: 'analogOut', subtype: 'propValve' }), 'P_L_Vlv'
 assert.equal(defaultCode({ type: 'digitalIn' }, 'Float'), 'Float');
 assert.equal(defaultCode({ type: 'digitalIn' }, 'Pulse'), 'DIN');
 assert.equal(defaultCode({ type: 'hysteresis' }), 'Hys');
+assert.equal(defaultCode({ type: 'analogIn' }, 'pH'), 'PH_Met');
 assert.equal(defaultCode({ type: 'pid' }), 'PID');
 assert.equal(defaultCode({ type: 'temperature' }), '1W', 'DS18B20 when no probe type is set');
 assert.equal(defaultCode({ type: 'temperature', sensor: 'ntc', r0: 10000 }), '10KNTC');
