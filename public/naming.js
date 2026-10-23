@@ -93,6 +93,11 @@ const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0
 export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
   .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '_');
 
+// Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
+// so the 1st one is port 200, the 2nd 201 ... (index from 1). Used in its name when Hydro Devices are built.
+export const HYDRO_PORT_BASE = 200;
+export const hydroPort = index => String(HYDRO_PORT_BASE + Math.max(1, Math.trunc(Number(index) || 1)) - 1);
+
 export function suggestName({ iface, port, code, label, tab } = {}) {
   const head = [iface, port, code, parseLabel(label)].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
   return tab ? (head ? `${head}__${tab}` : tab) : head;
