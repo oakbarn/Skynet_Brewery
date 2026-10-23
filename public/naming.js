@@ -1,47 +1,107 @@
-// Interface IDs, Tab IDs and suggested Device names (Fritz, 2026-10-21). Used by the browser (app.js) and the server (lib/store.js).
+// Interface IDs, Tab IDs and suggested Device names. Used by the browser (app.js) and the server (lib/store.js).
 //
 // Interface ID: 1 to 4 letters, unique. A new Interface gets the first letter of its first two words ("Main Brewery Mega USB" = MB),
-//   or MB_2, MB_3 ... when MB is taken. An Admin can change it. It is written with an underscore after it: MB_
+//   or MB_2, MB_3 ... when MB is taken. An Admin can change it. (Fritz, 2026-10-21)
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
-// Device name: InterfaceID_Port_Type_DisplayName_TabID, e.g. MB_25_PWM_VlV_Fly_Sparge_SP. No spaces in Device names.
+// Device name (Fritz, 2026-10-23): InterfaceID_DeviceTypeID_ParsedLabel__TabID, e.g. MB_E_L_Vlv_Fly~Sparge_In__SP
+//   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 
-// Type codes for the name. Fritz's list: PmP VlV MtR FaN LgT LeD (outputs), DiN VoL (inputs), DO and DI as the plain ones,
-// PWM_ before an output code for PWM. The rest follow his NnN / NnnN pattern.
-const OUT = [['DO', 'Direct output (plain on / off)'], ['PmP', 'Pump'], ['VlV', 'Valve'], ['MtR', 'Motor'], ['FaN', 'Fan'], ['LgT', 'Light'], ['LeD', 'LED'],
-  ['ElM', 'Heating element (electric)'], ['BrN', 'Burner (gas)']];
+// Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list (DO is a plain relay and
+// a heating element on a relay). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
+const T = {
+  // temperature
+  '1W': 'DS18B20 (OneWire probe)', RTD: 'RTD: PT100 / PT1000 (MAX31865 board)', TC: 'Thermocouple (MAX31855 / MAX31856 board)',
+  '10KNTC': '10K NTC thermistor (BCS-462 and BruControl type)', '5KNTC': '5K NTC thermistor', '50KNTC': '50K NTC thermistor',
+  '100KNT': '100K NTC thermistor (3D printer type)', NTC: 'NTC thermistor, other size', LM35: 'LM35 analog temperature sensor',
+  TMP36: 'TMP36 analog temperature sensor',
+  // heating
+  PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DO: 'Direct On / Off (relay, SSR, contactor; also a heating element on one)',
+  H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
+  // direct on / off
+  Pump: 'Pump', M_L_Vlv: 'Low Temperature Manual Valve', E_L_Vlv: 'Low Temperature Electric Valve', M_H_Vlv: 'High Temperature Manual Valve',
+  E_H_Vlv: 'High Temperature Electric Valve', G_Vlv: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
+  Fan: 'Fan', Chill: 'Chiller / glycol / fridge compressor', HtPad: 'Fermenter heat wrap or pad', Ignit: 'Burner igniter',
+  // direct input
+  DI: 'Direct Input (plain)', Float: 'Float (true while made)', DIN: 'DIN momentary push button (one trigger per press, 3 s lockout)',
+  PB: 'Push button (ON only while held)', Toggle: 'Toggle button (press ON, press again OFF)', Latch: 'Latching input (ON until reset)',
+  FlowSw: 'Flow switch', Intlk: 'Door / lid / safety interlock', EStop: 'Emergency stop', Leak: 'Leak sensor', Count: 'Pulse counter',
+  // PWM and analog outputs
+  PWM: 'PWM (plain)', P_L_Vlv: 'Low Temperature Proportional Valve', P_H_Vlv: 'High Temperature Proportional Valve',
+  P_Pump: 'Pump speed', P_Fan: 'Fan speed', P_Mtr: 'Motor speed', P_LED: 'LED / light dimmer', AO: 'Analog output 0-10 V / 4-20 mA (plain)',
+  // analog inputs and the rest
+  AI: 'Analog input (plain)', Pres: 'Pressure', Level: 'Level', Vol: 'Volume', pH: 'pH', FlowM: 'Flow meter', Scale: 'Scale (load cells)',
+  Step: 'Stepper motor',
+};
+// IDs kept for Devices Skynet can't read yet, so nothing else takes them: DHT11 and DHT22 need firmware first, a Tilt is Bluetooth.
+export const RESERVED_TYPE_IDS = { DHT11: 'DHT11 temperature / humidity', DHT22: 'DHT22 temperature / humidity', Tilt: 'Tilt hydrometer' };
+export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
+const list = ids => ids.split(' ').map(id => [id, T[id]]);
 export const TYPE_CODES = {
-  digitalOut: OUT,
-  pwmOut: [['PWM', 'PWM output (plain)'], ...OUT.slice(1).map(([c, l]) => ['PWM_' + c, 'PWM ' + l])],
-  analogOut: [['AO', 'Analog output (plain 0-10 V / 4-20 mA)'], ...OUT.slice(1).map(([c, l]) => ['AO_' + c, 'Analog ' + l])],
-  digitalIn: [['DI', 'Direct input (plain)'], ['DiN', 'DIN'], ['VoL', 'Volume'], ['FlT', 'Float / level switch'], ['FlS', 'Flow switch'], ['BtN', 'Button (push, toggle or pulse)'],
-    ['SfT', 'Safety interlock (door, lid, E-stop)'], ['CnT', 'Pulse counter']],
-  analogIn: [['AI', 'Analog input (plain)'], ['PrS', 'Pressure'], ['LvL', 'Level'], ['VoL', 'Volume'], ['PhM', 'pH meter']],
-  temperature: [['TmP', 'Temperature probe']],
-  flowMeter: [['FlM', 'Flow meter']],
-  scale: [['ScL', 'Scale (load cells)']],
-  stepper: [['StP', 'Stepper motor']],
-  dutyCycle: [['DtY', 'Duty cycle']],
-  hysteresis: [['HyS', 'Hysteresis']],
-  pid: [['PiD', 'PID']],
+  temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
+  digitalOut: list('DO Pump M_L_Vlv E_L_Vlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  pwmOut: list('PWM H_PWM P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr P_LED'),
+  analogOut: list('AO H_AO P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr'),
+  digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
+  analogIn: list('AI Pres Level Vol pH'),
+  flowMeter: list('FlowM'),
+  scale: list('Scale'),
+  stepper: list('Step'),
+  dutyCycle: list('DutyCy'),
+  hysteresis: list('Hys'),
+  pid: list('PID'),
 };
 export const isDevice = el => !!el && Object.hasOwn(TYPE_CODES, el.type);
 export const typeCodes = el => TYPE_CODES[el?.type] ?? [];
 
-// The type code a new Device starts with: from its kind (pump, valve ...) or the Add menu entry it came from
-const BY_HINT = { Float: 'FlT', FlowSw: 'FlS', PB: 'BtN', Toggle: 'BtN', Pulse: 'BtN', Interlock: 'SfT', Count: 'CnT', Pressure: 'PrS', Level: 'LvL', pH: 'PhM' };
+// The Device Type ID a new Device starts with: from its kind (pump, valve ...), its probe, or the Add menu entry it came from
+const BY_HINT = { Float: 'Float', FlowSw: 'FlowSw', PB: 'PB', Toggle: 'Toggle', Pulse: 'DIN', Interlock: 'Intlk', Count: 'Count', Pressure: 'Pres', Level: 'Level', pH: 'pH' };
+const NTC_BY_OHM = { 5000: '5KNTC', 10000: '10KNTC', 50000: '50KNTC', 100000: '100KNT' };
+function tempCode(el) {
+  const s = el.sensor || 'ds18b20';
+  if (s === 'ntc') return NTC_BY_OHM[Number(el.r0) || 10000] || 'NTC';
+  return { ds18b20: '1W', pt100: 'RTD', pt1000: 'RTD', thermocouple: 'TC', lm35: 'LM35', tmp36: 'TMP36' }[s] || '1W';
+}
 export function defaultCode(el, hint) {
-  const list = typeCodes(el); if (!list.length) return '';
-  const out = { pump: 'PmP', valve: 'VlV', element: 'ElM', propValve: 'VlV' }[el.subtype];
-  if (out) { const c = el.type === 'pwmOut' ? 'PWM_' + out : el.type === 'analogOut' ? 'AO_' + out : out; if (list.some(x => x[0] === c)) return c; }
-  if (BY_HINT[hint] && list.some(x => x[0] === BY_HINT[hint])) return BY_HINT[hint];
-  return list[0][0];
+  const codes = typeCodes(el); if (!codes.length) return '';
+  const has = c => codes.some(x => x[0] === c);
+  let c = '';
+  if (el.type === 'temperature') c = tempCode(el);
+  else if (el.type === 'digitalOut') c = { pump: 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'E_L_Vlv' }[el.subtype];
+  else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: el.type === 'pwmOut' ? 'H_PWM' : 'H_AO', propValve: 'P_L_Vlv', pump: 'P_Pump' }[el.subtype];
+  else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
+  else c = BY_HINT[hint];
+  return c && has(c) ? c : codes[0][0];
+}
+// The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
+const OLD_CODES = { PmP: 'Pump', VlV: 'E_L_Vlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
+  PWM_PmP: 'P_Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'P_Mtr', PWM_FaN: 'P_Fan', PWM_LgT: 'P_LED', PWM_LeD: 'P_LED', PWM_ElM: 'H_PWM',
+  AO_PmP: 'P_Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'P_Mtr', AO_FaN: 'P_Fan', AO_ElM: 'H_AO',
+  DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'pH',
+  FlM: 'FlowM', ScL: 'Scale', StP: 'Step', DtY: 'DutyCy', HyS: 'Hys', PiD: 'PID' };
+export function upgradeCode(el) {
+  if (!el?.typeCode) return '';
+  const codes = typeCodes(el), c = OLD_CODES[el.typeCode] ?? el.typeCode;
+  return codes.some(x => x[0] === c) ? c : defaultCode(el);
 }
 
-// Display name -> the part of a name: spaces (and anything that is not a letter, digit or _) become _
-export const namePart = s => String(s ?? '').trim().replace(/[^A-Za-z0-9_]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+// Label -> the part of a name (Fritz, 2026-10-23): control characters and emoji are dropped, spaces at the ends trimmed,
+// < > : " / \ | ? * . , each become ~ and spaces become _
+// Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners; © ® ™ stay
+const PICTO = /\p{Extended_Pictographic}/u, EMOJI_PART = /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u200D\uFE0E\uFE0F\u20E3]/u;
+const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0) >= 0x2190);
+export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
+  .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '_');
 
-export function suggestName({ iface, port, code, displayName, tab } = {}) {
-  return [iface, port, code, namePart(displayName), tab].map(x => namePart(x)).filter(Boolean).join('_');
+export function suggestName({ iface, code, label, tab } = {}) {
+  const head = [iface, code, parseLabel(label)].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
+  return tab ? (head ? `${head}__${tab}` : tab) : head;
+}
+// A suggested name that is already used gets _2, _3 ... after the Label: MB_Pump_Wort_2__BR
+export function uniqueName(name, isTaken) {
+  if (!name || !isTaken(name)) return name;
+  const cut = name.lastIndexOf('__'), head = cut > 0 ? name.slice(0, cut) : name, tail = cut > 0 ? name.slice(cut) : '';
+  let i = 2; while (isTaken(`${head}_${i}${tail}`)) i++;
+  return `${head}_${i}${tail}`;
 }
 
 const words = name => String(name ?? '').split(/[^A-Za-z]+/).filter(Boolean);
@@ -80,7 +140,7 @@ export function defaultTabId(name, taken) {
   return '';
 }
 
-// Interfaces and tabs without a (good) ID get one; a second use of the same ID gets a new one. True when something changed.
+// Interfaces and tabs without a (good) ID get one, and old type codes are brought up to date; a second use of the same ID gets a new one. True when something changed.
 export function assignIds(c) {
   let changed = false;
   const fill = (list, clean, def) => {
@@ -95,6 +155,10 @@ export function assignIds(c) {
   };
   fill(c.devices, cleanInterfaceId, defaultInterfaceId);
   fill(c.workspaces, cleanTabId, defaultTabId);
+  for (const e of c.elements ?? []) {          // Device Type IDs of PR #61 (PmP, VlV ...) -> the 2026-10-23 list (names are not changed)
+    const code = upgradeCode(e);
+    if (code && code !== e.typeCode) { e.typeCode = code; changed = true; }
+  }
   return changed;
 }
 // The IDs a list has to be saved with: each one checked, none used twice. Missing ones are given.
