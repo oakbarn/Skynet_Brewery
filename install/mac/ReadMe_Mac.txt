@@ -250,7 +250,9 @@ Starting over gives you a brand-new panel, as if it had never been installed,
 and ALL OF THE WORK DONE SO FAR WILL BE OVERWRITTEN: your Tabs, layout, Devices,
 pipes, settings, Processes, pictures, sounds, brew log, users and passwords.
   [ ] Type  YES  (capital letters) and press Return to start over.
-      As a safety net the old work is moved to Brewing/Old_Panel_<date>, not deleted.
+      As a safety net the old work is moved to Brewing/Old_Panel_<date>, not deleted
+      (the date is ISO 8601, year month day T hour minute second,
+      for example Old_Panel_20261023T113005).
       Nothing from it is used by the new panel. Delete that folder later if you
       do not need it.
   [ ] Type  KEEP  and press Return to keep all your work and only finish the

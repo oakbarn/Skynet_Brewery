@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
 import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf } from './lib/store.js';
-import { modernize, removeSpacesOnDisk } from './lib/modernize.js';
+import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
@@ -58,6 +58,8 @@ const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, d
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
+// Old "X" visibility = hidden / hiddenlocked lines become X.visible = false (and X.hidden = true), once (*.before-hidden.bak)
+const visFixed = visibilityOnDisk(SCRIPTS, n => store.get(n));
 // Picture groups: the eleven Skynet folders in media/Images are made, and the Skynet pictures moved into them once (lib/picgroups.js)
 {
   const before = JSON.stringify(store.config.svgChoices ?? {});
@@ -95,6 +97,7 @@ const help = new Help(HELP);                                        // Help tab:
 engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
+if (visFixed.length) { const l = `Processes changed to .visible / .hidden: ${visFixed.join(', ')} (old copies saved as .before-hidden.bak).`; console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
 // Schemas (the Schema dropdown at the top) and Equipment Profiles (☰ Menu > Equipment Profile)

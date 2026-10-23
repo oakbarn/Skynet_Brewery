@@ -663,7 +663,7 @@ body.onWorkspace #top .menuCopy { display: none; }
 
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
-/* the red circle with a yellow hammer beside ☰ Menu: Edit layout on and off; a yellow ring while it is on */
+/* the red circle with yellow tools (hammer and pick over a square) beside ☰ Menu: Edit layout on and off; a yellow ring while it is on */
 button.barEdit { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #8f1d17; background: #d32f2f; }
 button.barEdit:hover { background: #e53935; }
 button.barEdit:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
