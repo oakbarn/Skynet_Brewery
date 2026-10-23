@@ -15,7 +15,7 @@ In **Edit layout**, double-click the vessel (or one of its IPs). You set:
 - **Name**, **Type** and **Display Name**.
 - **Heating Element: Select Device or None**, on an electric vessel. The **E** mark on the picture shows where the element goes in. It glows while that Device is on.
 - **Temperature Probe: Select Temperature Probe or None**, on a vessel with a thermowell (the **T** mark).
-- **Flip Horizontal**: the picture turns left for right, and its IPs and the fittings on its ports go with it. It is the only orientation a vessel has: a kettle is never turned on its side.
+- **Flip Horizontal**, **Flip Vertical** and **Rotate** (45 degree steps), the same as a [Skynet Fitting](60-skynet-fittings). The picture turns, and its IPs and the fittings on its ports (with their End Caps) turn with it about the middle of the vessel. Turned 90 or 270 degrees, the vessel's box turns too, so a tall kettle lies wide.
 - The Display Name settings, the Tab, the place and the size. Drag the corner to make it bigger or smaller: the IPs stay on their openings.
 
 Double-clicking a fitting on one of its ports opens that fitting's own Properties.
