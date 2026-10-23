@@ -25,9 +25,9 @@ assert.equal(list[0], 'Time,Name,Value,Trigger');
 assert.equal(list[4], '2026-10-21 14:06:03,Note,"dough in, ""thick""",sim ondemand');
 assert.equal(buildCsv([], { names: ['A'] }), '﻿Time,Minutes,A\r\n');
 
-assert.equal(csvFileName('Mash Profile', rows, 0), 'Skynet_Log_Mash_Profile_20261021_14_05.csv');
-assert.equal(csvFileName('', [], 0, t), 'Skynet_Log_All_20261021_14_05.csv');
-assert.equal(csvFileName('../x?', rows, 0), 'Skynet_Log_x_20261021_14_05.csv');
+assert.equal(csvFileName('Mash Profile', rows, 0), 'Skynet_Log_Mash_Profile_20261021T1405.csv');
+assert.equal(csvFileName('', [], 0, t), 'Skynet_Log_All_20261021T1405.csv');
+assert.equal(csvFileName('../x?', rows, 0), 'Skynet_Log_x_20261021T1405.csv');
 
 assert.deepEqual(cleanLogSets([{ name: ' Mash Profile ', names: ['MLT_Temp', 'MLT_Temp', ' HLT_Temp'] }]), [{ name: 'Mash Profile', names: ['MLT_Temp', 'HLT_Temp'] }]);
 assert.throws(() => cleanLogSets([{ name: 'A', names: ['x'] }, { name: 'a', names: ['y'] }]), /Two CSV sets/);

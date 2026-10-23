@@ -68,7 +68,7 @@ while lsof -nP -iTCP:$PORT -sTCP:LISTEN >/dev/null 2>&1; do
 done
 
 # ---------------------------------------------------------------- Copy the files
-STAMP="$(date +%Y-%m-%d_%H%M%S)"
+STAMP="$(date +%Y%m%dT%H%M%S)"
 UPDATE=no
 [ -f "$DEST/server.js" ] && UPDATE=yes
 mkdir -p "$DEST"

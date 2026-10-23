@@ -15,7 +15,7 @@ The **Sign out** button is here too. Your user name and Sign out are no longer o
 
 A version is the Schema's name with the date and time it was saved, on the Brain's clock:
 
-`<Schema name>_yyyymmdd_hh_mm`, for example `Oak Barn_20261021_09_40`.
+`<Schema name>_yyyymmddThhmm` (ISO 8601: year, month, day, T, hour, minute), for example `Oak Barn_20261021T0940`. Versions saved before 23 October 2026 keep their older names, for example `Oak Barn_20261021_09_40`, and can still be restored.
 
 ### Making a version
 
