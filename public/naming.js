@@ -200,11 +200,20 @@ export function portKeys(el) {
   const pins = el.type === 'scale' ? String(el.channel ?? '').split(',') : el.type === 'stepper' ? [el.channel, el.dirPin, el.enablePin, el.pin2, el.pin3, el.pin4, el.homePin] : [el.channel];
   return [...new Set(pins.map(pinKey).filter(Boolean))].map(p => `${el.device}|${p}`);
 }
+// Fritz, 2026-10-23: outputs of different Device Types may share a port, e.g. MB_05_Hys_HLT__BR and MB_05_PID_HLT__BR on one
+// heater. The one turned on or enabled last wins: the others on that port are turned off (lib/store.js).
+export const SHARED_PORT_TYPES = ['digitalOut', 'pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid'];
+const mayShare = (a, b) => SHARED_PORT_TYPES.includes(a.type) && SHARED_PORT_TYPES.includes(b.type) && (a.typeCode || a.type) !== (b.typeCode || b.type);
+// Devices that share a port with this one (other names)
+export function portSharers(el, elements) {
+  const mine = new Set(portKeys(el)); if (!mine.size) return [];
+  return (elements ?? []).filter(o => o !== el && o.name !== el.name && portKeys(o).some(k => mine.has(k)));
+}
 // The other Device already on one of this Device's ports, or null
 export function portClash(el, elements) {
   const mine = new Set(portKeys(el)); if (!mine.size) return null;
   for (const o of elements ?? []) {
-    if (o === el || o.name === el.name) continue;
+    if (o === el || o.name === el.name || mayShare(el, o)) continue;
     const k = portKeys(o).find(x => mine.has(x));
     if (k) return { other: o.name, device: el.device, pin: k.split('|')[1] };
   }

@@ -1826,11 +1826,12 @@ $('#addEl').onclick = guard(async () => {
   if (isDevice(e) && !(await newDeviceDialog(e, prefix))) return;
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
+  stackNew(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 });
-// Fritz, 2026-10-21 / 2026-10-23: a new Device starts with its Label (Display name), then its Interface, Port and Type, and its name is
-// suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
-// type another name; it must be unique and has no spaces. Only one Device per port of an Interface.
+// Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
+// then its Label and Tab, and Create puts it on the tab and opens its Properties for everything else. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
+// type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
 const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an analog pin
@@ -1850,7 +1851,7 @@ const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMete
 const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self && x.name.toLowerCase() === n.toLowerCase());
 function portError(e, self) {
   const c = portClash(e, (draft || S.config).elements.filter(x => x !== self));
-  return c && `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only one Device can use a port.`;
+  return c && `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only outputs of different Device Types can share a port.`;
 }
 async function newDeviceDialog(e, hint) {
   const devs = S.config.devices || [];
@@ -1859,13 +1860,14 @@ async function newDeviceDialog(e, hint) {
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
-  const fields = [['_n', 'Type the Label first. The name is made from it: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). You can type your own name instead: it must be unique.', 'note'],
+  const fields = [['_n', '1. Pick the Interface, 2. the Port, 3. the Device Type, then type the Label. The name is made from them: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). You can type your own name instead: it must be unique. Create puts the Device on the tab and opens its Properties for everything else.', 'note'],
+    ['device', '1. Interface (board)', 'dev'], [port[0], '2. ' + port[1], ...port.slice(2)],
+    ['typeCode', '3. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
     ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
-    ['device', 'Interface (board)', 'dev'], port,
-    ['typeCode', 'Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
     ['workspace', 'Tab', 'ws'],
     ['name', 'Name (filled in for you)', 'text']];
-  const body = $('#dlgBody');
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
+  for (const b of oks) b.textContent = 'Create';
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
@@ -1893,7 +1895,12 @@ async function newDeviceDialog(e, hint) {
         return true;
       } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
     }
-  } finally { body.oninput = null; }
+  } finally { body.oninput = null; for (const b of oks) b.textContent = 'Save'; }
+}
+// Fritz, 2026-10-23: as in BruControl, several new things made at the same spot stack down and to the right instead of hiding each other
+function stackNew(e) {
+  const at = (x, y) => draft.elements.some(o => o.workspace === e.workspace && o.x === x && o.y === y);
+  for (let n = 0; n < 50 && at(e.x, e.y); n++) { e.x += 20; e.y += 20; }
 }
 // Fritz, 2026-10-20: a new valve starts from the Valve Profile picked now (only now; after that it is changed in its properties)
 async function useValveProfile(e) {

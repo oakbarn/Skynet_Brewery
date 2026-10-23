@@ -101,7 +101,10 @@ assert.equal(Math.round(temperatureFrom({ sensor: 'tmp36', units: '°F' }, 'A', 
 // one Device per Interface port (A5 and 59 are the same Mega pin)
 const els = [{ name: 'MB_25_VlV_Fly_Sparge_SP', type: 'digitalOut', device: 'MEGA', channel: 25 }, { name: 'MB_59_AI_Level_SP', type: 'analogIn', device: 'MEGA', channel: 59 },
   { name: 'Probe1', type: 'temperature', device: 'MEGA', probeIndex: 1 }];
-assert.equal(portClash({ name: 'New', type: 'pwmOut', device: 'MEGA', channel: '25' }, els).other, 'MB_25_VlV_Fly_Sparge_SP');
+assert.equal(portClash({ name: 'New', type: 'digitalOut', device: 'MEGA', channel: '25' }, els).other, 'MB_25_VlV_Fly_Sparge_SP', 'same Device Type on one port');
+assert.equal(portClash({ name: 'New', type: 'pwmOut', device: 'MEGA', channel: '25' }, els), null, 'outputs of different Device Types may share a port');
+assert.equal(portClash({ name: 'New', type: 'pid', typeCode: 'PID', device: 'MEGA', channel: '25' }, els), null);
+assert.equal(portClash({ name: 'New', type: 'digitalIn', device: 'MEGA', channel: '25' }, els).other, 'MB_25_VlV_Fly_Sparge_SP', 'an input never shares');
 assert.equal(portClash({ name: 'New', type: 'analogIn', device: 'MEGA', channel: 'A5' }, els).other, 'MB_59_AI_Level_SP');
 assert.equal(portClash({ name: 'New', type: 'pwmOut', device: 'MEGA2', channel: 25 }, els), null, 'same port on another Interface is fine');
 assert.equal(portClash({ name: 'Probe2', type: 'temperature', device: 'MEGA', probeIndex: 2 }, els), null, 'DS18B20 probes share one wire');
