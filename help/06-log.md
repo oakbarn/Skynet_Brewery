@@ -21,9 +21,9 @@ Times are in the local time of the computer or phone you download on, written li
 
 The file is called `Skynet_Log_` + what is in it + the date and time of its first reading, like:
 
-- `Skynet_Log_Mash_Profile_20261021_14_05.csv` for the CSV set Mash Profile
-- `Skynet_Log_HLT_Temp_20261021_14_05.csv` for one value
-- `Skynet_Log_3_values_20261021_14_05.csv` for several ticked values
+- `Skynet_Log_Mash_Profile_20261021T1405.csv` for the CSV set Mash Profile
+- `Skynet_Log_HLT_Temp_20261021T1405.csv` for one value
+- `Skynet_Log_3_values_20261021T1405.csv` for several ticked values
 
 When there are no readings in the time span, the file only has its heading row and the date is today's.
 

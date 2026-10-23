@@ -51,7 +51,7 @@ if [ -n "$OLD" ]; then
         stop "The panel is still running. Stop it first (Ctrl+C in its window, or close the window),
 then run this file again. Nothing was changed."
       fi
-      KEEP_DIR="$HOME/Brewing/Old_Panel_$(date +%Y-%m-%d_%H%M%S)"
+      KEEP_DIR="$HOME/Brewing/Old_Panel_$(date +%Y%m%dT%H%M%S)"
       mkdir -p "$KEEP_DIR" || stop "Could not make $KEEP_DIR. Nothing was changed."
       for d in $OLD; do mv "$PANEL/$d" "$KEEP_DIR/" || stop "Could not move $d. Close any window that uses the panel's files and try again."; done
       echo "Started over. The old work was moved to $KEEP_DIR"
