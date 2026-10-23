@@ -40,7 +40,7 @@ export function graphicTopic(g) {
   switch (g.kind) {
     case 'vessel':
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet') return ['skynet-fittings'];
-      if (g.integrated) return ['skynet-integrated-devices'];
+      if (g.integrated) return g.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle'];
       if (g.template && g.templateCls === 'skynet') return ['skynet-vessels'];
       if (g.vesselType === 'bfit' || g.template) return ['vessel-and-fitting-templates', 'tabvessel-and-tabfitting'];
       if (g.bundled) return ['equipment', 'bundle-a-vessel-with-its-ips'];
