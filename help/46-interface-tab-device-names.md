@@ -20,13 +20,15 @@ An **Interface** is a board (PLC) the Devices are wired to: a Mega on USB, a Meg
 
 ## Device names
 
-When you add a Device (anything wired to a port), the **New Device** box asks for these, in this order:
+When you add a Device (anything wired to a port), the **New Device** box asks for these, in this order, as BruControl does:
 
-1. **Label**, the Display name the tab shows, for example *Fly Sparge*.
-2. **Interface**
-3. **Port** (the pin)
-4. **Device Type** (see the list below)
+1. **Interface**
+2. **Port** (the pin)
+3. **Device Type** (see the list below). An output port can have more than one type, see below.
+4. **Label**, the Display name the tab shows, for example *Fly Sparge*.
 5. **Tab**
+
+Press **Create**. The Device is put on the tab and its **Properties** open right away, so you can set everything else. If you make several in a row, each new one sits a little down and to the right of the last, so none hide each other. You can also build on the Build Tab and place it on the right tab later.
 
 The name is filled in for you as you go:
 
@@ -51,7 +53,8 @@ More rules:
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
 - A name with `~` in it works in a Process as it is: `MB_25_E_L_Vlv_Fly~Sparge__SP = true`.
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
-- **One Device per port.** Two Devices can't use the same port on the same Interface.
+- **One Device per port, with one exception.** Two Devices can't use the same port on the same Interface, except outputs of different Device Types. Like in BruControl, you pick the Interface, then the Port, and then you can add more than one type on that Port. Example: one heater wired to port 5 can have `MB_05_Hys_HLT__BR` and `MB_05_PID_HLT__BR`.
+- **The last one turned on wins.** When you enable (or turn on) one of them, the others on that port are turned off at once, so only one drives the heater. Inputs, like a probe or a switch, never share a port.
 
 ## Device Type IDs
 
