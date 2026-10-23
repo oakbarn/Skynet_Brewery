@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 0 316 316">
+  <!-- Skynet Vessel Widget "Brew_Vessel_Fat_Widget" (Fritz, 2026-10-23, "the fat one"): 26.7 in wide, 28.7 in tall (10 units = 1 in). Ports, their heights
+       measured from the bottom: TC 1.5 Outlet Center Bottom 1 in, TC 1.5 Thermowell Center 10 in, TC 1.5 Tangential 4 in (1 in in from
+       the Left side, faces forward), TC 2 Left side 11 in, TC 2 Right side 6 in. Own box, so its port positions are named Fat ... -->
+  <g stroke="#111" stroke-width="1.5">
+    <rect x="2.5" y="189.0" width="10.5" height="20" fill="#808080"/>
+    <rect x="-4.5" y="186.4" width="7" height="25.2" rx="1.5" fill="#808080"/>
+  </g>
+  <g stroke="#111" stroke-width="1.5">
+    <rect x="279.0" y="239.0" width="10.5" height="20" fill="#808080"/>
+    <rect x="289.5" y="236.4" width="7" height="25.2" rx="1.5" fill="#808080"/>
+  </g>
+  <rect x="5" y="9" width="282" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
+  <rect x="12.5" y="22" width="267" height="287" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
+  <g stroke="#111">
+    <circle cx="146.0" cy="299" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="146.0" cy="299" r="8.4" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="146.0" cy="299" r="6.9" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="146.0" cy="209" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="146.0" cy="209" r="8.4" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="146.0" cy="209" r="6.9" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="22.5" cy="269" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="22.5" cy="269" r="8.4" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="22.5" cy="269" r="6.9" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+</svg>
