@@ -508,7 +508,7 @@ function fillText(n, g) {
   n.style.textAlign = al.toLowerCase();
   n.style.whiteSpace = g.wrap === false ? 'pre' : '';
   n.style.overflow = g.wrap === false ? 'hidden' : '';
-  n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden');
+  n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden' || (v.hidden ?? g.hidden) === true);
 }
 
 // variable classes: shared, vKonstant, vAPI (the old Global class is retired: lib/globals.js)
@@ -817,7 +817,7 @@ function fillEl(n, e0) {
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
   setRich(vl, e.hideValue ? '' : text);
   n.classList.toggle('on', on && e.type !== 'picture');
-  n.classList.toggle('vhidden', v.visibility === 'hidden');
+  n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true);   // .hidden = true wins over .visible = true
   n.classList.toggle('fault', !!v.fault);
   // a picture that is not in the media folders (BruControl pictures not copied yet) would leave a see-through
   // button with white text: show the plain gray button with black text instead
@@ -2267,7 +2267,7 @@ const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 
 const F = {
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
-    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
@@ -2310,7 +2310,7 @@ const F = {
   picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
-  text: [['text', 'Text (codes like \\b bold, \\L large, \\n new line work here)', 'area'], ['visible', 'Visible', 'bool', true], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
+  text: [['text', 'Text (codes like \\b bold, \\L large, \\n new line work here)', 'area'], ['visible', 'Visible', 'bool', true], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on)', 'bool'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
     ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['wrap', 'Word wrap as needed (off = one line, cut off at the edge)', 'bool', true], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
