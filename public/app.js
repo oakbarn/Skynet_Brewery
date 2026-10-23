@@ -4,7 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck } from './naming.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1851,8 +1851,12 @@ const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMete
 // a name used by another Device or Widget (any capitals)
 const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self && x.name.toLowerCase() === n.toLowerCase());
 function portError(e, self) {
-  const c = portClash(e, (draft || S.config).elements.filter(x => x !== self));
-  return c && `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only outputs of different Device Types can share a port.`;
+  const els = (draft || S.config).elements.filter(x => x !== self), c = portClash(e, els);
+  if (c) return `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only outputs of different Device Types can share a port.`;
+  const b = busCheck(e, els, S.config.devices);      // RTD / thermocouple SPI pins and the OneWire data pin (Fritz, 2026-10-23)
+  if (b?.error) return b.error;
+  if (b?.warn && !confirm(b.warn + '\n\nUse this pin anyway?')) return 'Pick another pin.';
+  return null;
 }
 async function newDeviceDialog(e, hint) {
   const devs = S.config.devices || [];
@@ -2902,7 +2906,7 @@ async function editItem(kind, id) {
       if (!work.name) throw new Error('Name is required');
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
-      if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)))) { const err = portError(work, item); if (err) throw new Error(err); }
+      if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) noteRename(item.name, work.name);
       if (work.name !== item.name) for (const g of draft.graphics) {
