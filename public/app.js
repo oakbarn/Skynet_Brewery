@@ -374,7 +374,8 @@ const portDefPos = d => d.def || d.pos[0][0];
 function vPortXY(g, k, pos) {
   if (isUnit(g)) { const d = eqClass(g).ports[k], q = d.pos.find(q => q[0] === portDefPos(d)) || [0, 0.5, 0.5]; return unitPoint(g, q[1], q[2]); }
   const q = eqClass(g).ports[k].pos.find(q => q[0] === pos) || [pos, 0.5, 0.5];
-  return [(g.x || 0) + (isSkyV(g) && g.flipH ? 1 - q[1] : q[1]) * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
+  if (isSkyV(g)) return unitPoint(g, q[1], q[2]);           // a Skynet vessel: flipped and rotated with its picture
+  return [(g.x || 0) + q[1] * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
 }
 const vPortLabel = (g, k, p) => `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
 // the starting port settings of a new widget
@@ -460,15 +461,17 @@ function buildVessel(g) {
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
   if (g.image && isUnit(g)) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated
-  else if (g.image && isSkyV(g) && g.flipH) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:scaleX(-1)` }));   // a Skynet vessel flipped
+  else if (g.image && isSkyV(g) && (g.flipH || g.flipV || unitRot(g))) {     // a Skynet vessel flipped or rotated
+    const [pw, ph] = picWH(g);
+    n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));
+  }
   else if (g.image && t === 'bfit' && +g.turn) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:rotate(${+g.turn}deg)` }));   // a turned Tab_Fitting
   else if (g.image) n.style.backgroundImage = `url("${media(g.image)}")`;
   if (t === 'electric' || t === 'gas') n.append(h('div', { class: 'heat' }));
   for (const [k, d] of Object.entries(eqClass(g)?.ports || {})) {    // ports that are not IPs (thermowells) show as a mark
     const p = g.ports?.[k]; if (d.ip || !p?.installed) continue;
     let q = d.pos.find(q => q[0] === (isUnit(g) ? portDefPos(d) : p.position)) || [0, 0.5, 0.5];
-    if (isUnit(g)) { const [px, py] = unitPoint({ ...g, x: 0, y: 0 }, q[1], q[2]); q = [0, px / (g.w || 90), py / (g.h || 90)]; }
-    if (isSkyV(g) && g.flipH) q = [0, 1 - q[1], q[2]];
+    if (isUnit(g) || isSkyV(g)) { const [px, py] = unitPoint({ ...g, x: 0, y: 0 }, q[1], q[2]); q = [0, px / (g.w || 90), py / (g.h || 90)]; }
     const el = k === 'element';      // the heating element's spot: E, and it glows while its Device is on
     n.append(h('div', { class: 'twell' + (el ? ' elmark' : ''), title: vPortLabel(g, k, p) + (el && g.heater ? ': ' + g.heater : !el && g.probe ? ': ' + g.probe : ''), style: `left:${q[1] * 100}%;top:${q[2] * 100}%` }, el ? 'E' : 'T'));
   }
@@ -2807,7 +2810,7 @@ async function editItem(kind, id) {
   const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item), bf = isBfit(item);
   if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
-  if (isUnit(item)) { work.rot = String(unitRot(item)); delete work.turn; }
+  if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
   const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
   try {
@@ -2852,7 +2855,12 @@ async function editItem(kind, id) {
     } else if (isSkyV(item)) {        // a Skynet vessel: its ports come from its Template and don't change here
       for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
       work.ports = clone(item.ports || {}); work.bundled = true;
-      if (!work.flipH) delete work.flipH;
+      work.rot = +work.rot || 0; if (!work.rot) delete work.rot;
+      for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
+      if (sideways({ ...work, kind: 'vessel' }) !== sideways(item)) {      // turned onto its side or back up: the box turns too, about its middle
+        const w = +work.w || item.w || 200, hh = +work.h || item.h || 200;
+        Object.assign(work, { w: hh, h: w, x: Math.round((+work.x || 0) + (w - hh) / 2), y: Math.round((+work.y || 0) + (hh - w) / 2) });
+      }
       work.name = (work.name || '').trim() || item.name;
     } else if (isV) {
       work.ports = {};
@@ -2910,12 +2918,7 @@ async function editItem(kind, id) {
         for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
       }
       const placed = syncVesselPorts(item, before.isNew ? null : before);
-      if (isSkyV(item) && !!item.flipH !== !!before.flipH) for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === item.id)) {    // its fittings flip with it,
-        const ip = draft.graphics.find(x => x.kind === 'ip' && x.attachTo === item.id && x.port === f.onPort); if (!ip) continue;   // mirrored about their port
-        const cx = ipCenter(ip)[0], ids = new Set(draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === f.id).map(g => g.id));
-        for (const g of [f, ...draft.graphics.filter(g => ids.has(g.id) || (isCap(g) && ids.has(g.capOn)))]) g.x = Math.round(2 * cx - (g.x || 0) - (g.w || 30));
-        if (isUnit(f)) { if (f.flipH) delete f.flipH; else f.flipH = true; }
-      }
+      if (isSkyV(item)) turnVesselParts(item, before);         // flipped or rotated: its IPs and fittings turn with it
       placeUnitParts(item);
       if (!bf && !isSkyV(item) && (placed.length || before.isNew)) vesselPopup(item, placed);
       delete item.isNew;
@@ -5084,8 +5087,8 @@ function updateMeters() { for (const n of $$('#ws .fmRead')) { const g = L().gra
 // User Template keep their own IP settings.
 function isUnit(g) { return isBfit(g) && g.templateCls === 'skynet'; }
 // Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
-// built in where the Template puts it; they can't be moved, set or unbundled. Flip Horizontal is its only orientation (a kettle
-// is never turned on its side). Vessels made from a User Template keep their port settings.
+// built in where the Template puts it; they can't be moved, set or unbundled. It has Flip Horizontal, Flip Vertical and Rotate
+// like a Skynet Fitting (Fritz, 2026-10-23). Vessels made from a User Template keep their port settings.
 function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet'; }
 const ROTATE = [0, 45, 90, 135, 180, 225, 270, 315].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
 function unitRot(g) { return ((Math.round((+(g.rot ?? g.turn) || 0) / 45) * 45) % 360 + 360) % 360; }    // an older Turn counts as a Rotate
@@ -5093,10 +5096,13 @@ const unitTransform = g => `rotate(${unitRot(g)}deg) scale(${g.flipH ? -1 : 1},$
 // a point of the picture as drawn in its file (fractions of its width and height) -> where it is on the Tab: flipped, then
 // rotated about the middle, the same way the picture is (unitTransform)
 function unitPoint(g, fx, fy) {
-  const w = g.w || 90, hh = g.h || 90, a = unitRot(g) * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a);
+  const [w, hh] = picWH(g), a = unitRot(g) * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a);
   const dx = (fx - 0.5) * w * (g.flipH ? -1 : 1), dy = (fy - 0.5) * hh * (g.flipV ? -1 : 1);
-  return [(g.x || 0) + w / 2 + dx * c - dy * sn, (g.y || 0) + hh / 2 + dx * sn + dy * c];
+  return [(g.x || 0) + (g.w || 90) / 2 + dx * c - dy * sn, (g.y || 0) + (g.h || 90) / 2 + dx * sn + dy * c];
 }
+// a Skynet vessel standing on its side (rotated 90 or 270): its box is wide where its picture is tall, so the picture keeps its shape
+const sideways = g => isSkyV(g) && unitRot(g) % 180 === 90;
+const picWH = g => sideways(g) ? [g.h || 90, g.w || 90] : [g.w || 90, g.h || 90];
 // put a Skynet Fitting's IPs back on its openings (after a resize, a flip or a rotate), and the End Caps on them
 function placeUnitParts(g) {
   if (isSkyV(g)) return placeVesselParts(g);
@@ -5108,6 +5114,28 @@ function placeUnitParts(g) {
     const n = $(`#ws .gfx[data-gid="${CSS.escape(ip.id)}"]`); if (n) place(n, ip);
     for (const c of caps.filter(c => c.capOn === ip.id)) { capOnto(c, ip); const cn = $(`#ws .gfx[data-gid="${CSS.escape(c.id)}"]`); if (cn) place(cn, c); }
   }
+}
+// orientation as a 2x2 matrix [a, b, c, d] (flip first, then rotate, as unitTransform), and back
+function orientM(g) { const r = unitRot(g) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r), x = g.flipH ? -1 : 1, y = g.flipV ? -1 : 1; return [c * x, -s * y, s * x, c * y]; }
+const mMul = (m, n) => [m[0] * n[0] + m[1] * n[2], m[0] * n[1] + m[1] * n[3], m[2] * n[0] + m[3] * n[2], m[2] * n[1] + m[3] * n[3]];
+const mT = m => [m[0], m[2], m[1], m[3]];          // the inverse of a turn or flip
+function setOrient(g, m) {        // any turn and flip is a rotation, or Flip Horizontal then a rotation
+  const flip = m[0] * m[3] - m[1] * m[2] < 0, rot = Math.round((flip ? Math.atan2(-m[2], -m[0]) : Math.atan2(m[2], m[0])) * 180 / Math.PI / 45) * 45;
+  delete g.flipV; delete g.turn; if (flip) g.flipH = true; else delete g.flipH;
+  const r = (rot % 360 + 360) % 360; if (r) g.rot = r; else delete g.rot;
+}
+// a Skynet vessel flipped or rotated in its Properties: its port IPs, the fittings on its ports (with their IPs and End Caps)
+// turn about its middle the same way, and a Skynet Fitting on it turns its picture too
+function turnVesselParts(v, before) {
+  const M = mMul(orientM(v), mT(orientM(before)));
+  if (Math.abs(M[0] - 1) < 1e-9 && Math.abs(M[3] - 1) < 1e-9) return;
+  const bc = [(before.x || 0) + (before.w || 200) / 2, (before.y || 0) + (before.h || 200) / 2], nc = [(v.x || 0) + (v.w || 200) / 2, (v.y || 0) + (v.h || 200) / 2];
+  const fits = draft.graphics.filter(g => isBfit(g) && g.onVessel === v.id), ips = new Set([v, ...fits].flatMap(o => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === o.id).map(g => g.id)));
+  for (const g of [...fits, ...draft.graphics.filter(g => ips.has(g.id) || (isCap(g) && ips.has(g.capOn)))]) {
+    const w = g.w || 30, hh = g.h || 30, dx = (g.x || 0) + w / 2 - bc[0], dy = (g.y || 0) + hh / 2 - bc[1];
+    g.x = Math.round(nc[0] + M[0] * dx + M[1] * dy - w / 2); g.y = Math.round(nc[1] + M[2] * dx + M[3] * dy - hh / 2);
+  }
+  for (const f of fits.filter(isUnit)) setOrient(f, mMul(M, orientM(f)));
 }
 // a Skynet vessel's port IPs back on their spots (after a resize or a flip); the fittings joined to a port go along
 function placeVesselParts(v) {
@@ -5515,7 +5543,7 @@ F.skynetVessel = it => {
     ...(electric || well ? [['_d', 'Devices', 'head']] : []),
     ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
     ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : []),
-    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
+    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
     ['_look', 'Display Name and place', 'head'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']];
 };
