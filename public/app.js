@@ -1830,7 +1830,8 @@ $('#addEl').onclick = guard(async () => {
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 });
 // Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
-// then its Label and Tab, and Create puts it on the tab and opens its Properties for everything else. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
+// then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
+// 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
@@ -1860,11 +1861,10 @@ async function newDeviceDialog(e, hint) {
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
-  const fields = [['_n', '1. Pick the Interface, 2. the Port, 3. the Device Type, then type the Label. The name is made from them: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). You can type your own name instead: it must be unique. Create puts the Device on the tab and opens its Properties for everything else.', 'note'],
+  const fields = [['_n', '1. Pick the Interface, 2. the Port, 3. the Device Type, then type the Label. The name is made from them: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). The Tab ID is added when you put it on a Tab with 💾 Save Build. You can type your own name instead: it must be unique. Create puts the Device on the Build Tab and opens its Properties for everything else.', 'note'],
     ['device', '1. Interface (board)', 'dev'], [port[0], '2. ' + port[1], ...port.slice(2)],
     ['typeCode', '3. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
     ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
-    ['workspace', 'Tab', 'ws'],
     ['name', 'Name (filled in for you)', 'text']];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
   for (const b of oks) b.textContent = 'Create';
@@ -1886,8 +1886,8 @@ async function newDeviceDialog(e, hint) {
         if (!name) throw new Error('Type a Label (or a Name)');
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
-        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
-        e.name = name; wsName = e.workspace || wsName;
+        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        e.name = name;
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
         if (e.type === 'digitalIn' && work.typeCode === 'DIN') { e.mode = 'momentary'; e.pulse ??= 100; e.lockout ??= 3000; }
