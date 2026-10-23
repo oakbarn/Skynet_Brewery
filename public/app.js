@@ -264,14 +264,15 @@ const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
   vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/Skynet/Vessels/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
     ports: {
-      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86]], { on: true }),
+      // 'Front Bottom Center', 'Front Center' and 'Right Side' are the three holes of Fritz's Skynet_BasicElectricBrewKettle.svg (2026-10-23)
+      outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Front Bottom Center', 0.467, 0.879]], { on: true }),
       // a second drain, for example above the element so it always stays under water (Fritz's Big Fatty, 2026-10-22)
       outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92]]),
       tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75]]),
-      thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7]], { ip: false }),
+      thermowell: pt('Thermowell', [['Center Low', 0.5, 0.75], ['Left Low', 0, 0.75], ['Right Low', 1, 0.75], ['Back Low', 0.7, 0.7], ['Front Center', 0.452, 0.73]], { ip: false }),
       steamSlayer: pt('Steam Slayer', V_HIGH), sparge: pt('Sparge', V_HIGH), cip: pt('CIP', [['Lid', 0.5, 0], ...V_HIGH]),
       // where the heating element goes in (Fritz, 2026-10-22): a mark, not an IP; its Device is picked on the Tab_Vessel
-      element: pt('Heating element', [['Right Low', 1, 0.88], ['Left Low', 0, 0.88], ['Center Low', 0.5, 0.92], ['Back Low', 0.3, 0.88]], { ip: false }),
+      element: pt('Heating element', [['Right Low', 1, 0.88], ['Left Low', 0, 0.88], ['Center Low', 0.5, 0.92], ['Back Low', 0.3, 0.88], ['Right Side', 0.926, 0.723]], { ip: false }),
     } },
   pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/Skynet/Chillers/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
@@ -1791,13 +1792,14 @@ const ADD_MENU = [
     ['LM35 analog temperature sensor (10 mV per °C)', 'temperature', 'Temp', { sensor: 'lm35' }],
     ['TMP36 analog temperature sensor (10 mV per °C, 0.5 V at 0 °C)', 'temperature', 'Temp', { sensor: 'tmp36' }],
   ]],
-  // Skynet Devices with their own picture (Fritz, 2026-10-23): a thermowell is a Temperature Device; the RIMS tube is a
-  // Skynet_Integrated_Device with its heating element and its temperature probe built in
+  // Skynet Devices with their own picture (Fritz, 2026-10-23): a thermowell is a Temperature Device; the RIMS tube and the
+  // electric kettle are Skynet_Integrated_Devices with their heating element and their temperature probe built in
   ['Devices: Skynet', [
     ['Thermowell, Short (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Short' }],
     ['Thermowell, Medium (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Medium' }],
     ['Thermowell, Long (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Long' }],
-    ['RIMS tube (Skynet_Integrated_Device: heating element and temperature probe built in)', 'rimsDevice', 'RIMS'],
+    ['RIMS tube (Skynet_Integrated_Device: heating element and temperature probe built in)', 'integratedDevice', 'RIMS', { template: 'RIMS_Tube' }],
+    ['Electric kettle, basic (Skynet_Integrated_Device: Thermowell probe and heating element built in, outlet IP)', 'integratedDevice', 'Kettle', { template: 'Integrated_Electric_Kettle_Basic' }],
   ]],
   ['Devices: analog sensors (board analog pin or ADS1115)', [
     ['Analog input 0-5 V', 'analogIn', 'AI', { signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
@@ -1833,7 +1835,7 @@ $('#addEl').onclick = guard(async () => {
   toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   const [gi, ii] = $('#addType').value.split(':').map(Number);
   const [, pick, prefix, extra] = ADD_MENU[gi][1][ii];
-  if (pick === 'rimsDevice') return newRimsDevice();
+  if (pick === 'integratedDevice') return newIntegratedDevice(extra.template);
   if (pick === 'thermowell') return newThermowell(extra.length);
   const preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
@@ -1963,6 +1965,12 @@ async function newThermowell(length) {
 // Interface, each on its own Port. It is made like any Device: 1. Interface, 2. Device Type RIMS, 3. Available Ports (the
 // element's pin and the probe's pin or OneWire number). Its Properties set them again, with the element's control: PWM,
 // Duty Cycle, PID or Hysteresis (PID and Hysteresis read its own probe). They can never be taken out of it.
+// The Basic electric kettle (Fritz, 2026-10-23, Skynet_BasicElectricBrewKettle.svg) is made the same way: the probe in its
+// Thermowell (front center), the element in the right side, the outlet (front bottom center) a plain IP. It is the base of
+// every Skynet Integrated Electric Kettle; later ones add fittings and a valve to it.
+// INT_DEVICES: what each one is called in its dialogs, and its Label to start with
+const INT_DEVICES = { RIMS_Tube: ['RIMS tube', 'RIMS'], Integrated_Electric_Kettle_Basic: ['electric kettle', 'Kettle'] };
+const intWhat = g => INT_DEVICES[g?.template] || (g?.vesselType === 'rims' ? INT_DEVICES.RIMS_Tube : ['electric kettle', 'Kettle']);
 const HEAT_CTL = [['pid', 'PID (holds a target temperature)'], ['hysteresis', 'Hysteresis (on / off around a target)'], ['dutyCycle', 'Duty Cycle (on for a % of each cycle)'], ['pwmOut', 'PWM (element power %)']];
 const RIMS_KEYS = ['iface', 'heatCtl', 'heatPin', 'tempKind', 'tempPin', 'tempProbe'];
 const intEls = g => ({ heat: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'heat'), temp: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'temp') });
@@ -1974,7 +1982,7 @@ function rimsWork(g) {
 function rimsFields(w) {
   const ow = isOneWire({ type: 'temperature', ...tempKindOf(w.tempKind) });
   return [['iface', '1. Interface (board)', 'dev'],
-    ['_dt', '2. Device Type: RIMS tube, a Skynet_Integrated_Device. Its heating element and its temperature probe are built in, so each gets a Port.', 'note'],
+    ['_dt', `2. Device Type: ${intWhat(w)[0]}, a Skynet_Integrated_Device. Its heating element and its temperature probe are built in, so each gets a Port.`, 'note'],
     ['heatCtl', 'Heating element control', 'sel', HEAT_CTL],
     ['heatPin', '3. Available Ports / Pins: heating element', 'pin', 'rimsHeat'],
     ['tempKind', 'Temperature probe in its thermowell', 'sel', tempKinds().map(([k, l]) => [k, l]), true],
@@ -1992,16 +2000,16 @@ function rimsPinLists(w, g) {
     document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => { const t = /^A/.test(p) ? `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)` : `D${p}` + (pinTag(p) ? `  (${pinTag(p)})` : ''); return h('option', { value: p, label: t }, t); })));
   }
 }
-// make the RIMS tube's own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Display Name.
+// make the RIMS tube's (or kettle's) own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Display Name.
 // Nothing changes when something is wrong (the error is thrown). No Interface and no Ports: it has no Devices yet.
 function applyRims(g, w, tab, label) {
   const { heat: h0, temp: t0 } = intEls(g), tk = tempKindOf(w.tempKind), ow = isOneWire({ type: 'temperature', ...tk });
   const none = v => v === undefined || v === null || v === '';
   if (!h0 && !t0 && none(w.iface) && none(w.heatPin) && none(w.tempPin) && none(w.tempProbe)) return;
-  if (none(w.iface)) throw new Error('1. Pick the Interface (board) the RIMS tube is wired to');
+  if (none(w.iface)) throw new Error(`1. Pick the Interface (board) the ${intWhat(g)[0]} is wired to`);
   if (none(w.heatPin)) throw new Error('3. Pick the Port for the heating element');
   if (ow ? none(w.tempProbe) : none(w.tempPin)) throw new Error(ow ? '3. Pick the OneWire probe number of the temperature probe' : '3. Pick the Port for the temperature probe');
-  const base = String(label || 'RIMS').trim();
+  const base = String(label || intWhat(g)[1]).trim();
   const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
   if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
   heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.displayName ??= base + ' Heat';
@@ -2026,30 +2034,32 @@ function applyRims(g, w, tab, label) {
   }
   return { heater: heat.name, probe: temp.name };
 }
-async function newRimsDevice() {
+// a new Skynet_Integrated_Device from its Skynet Template (RIMS_Tube, Integrated_Electric_Kettle_Basic)
+async function newIntegratedDevice(tname) {
   if (!TPL) await loadTemplates();
-  const t = tplOf('vessel', 'RIMS_Tube'); if (!t) return toast('The Skynet Template RIMS_Tube is missing', true);
-  const w = { ...rimsWork(null), label: 'RIMS' };
-  const fields = o => [...rimsFields(o), ['label', 'Label (Display Name shown on the tab, e.g. RIMS)', 'text']];
+  const t = tplOf('vessel', tname); if (!t) return toast(`The Skynet Template ${tname} is missing`, true);
+  const [what, lbl] = intWhat({ template: t.name, vesselType: t.vesselType });
+  const w = { ...rimsWork(null), template: t.name, vesselType: t.vesselType, label: lbl };
+  const fields = o => [...rimsFields(o), ['label', `Label (Display Name shown on the tab, e.g. ${lbl})`, 'text']];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), refresh = () => { const x = { ...w }; try { readFields(x, body); } catch { } rimsPinLists(x, null); };
   for (const b of oks) b.textContent = 'Create';
   body.addEventListener('change', refresh);
   try {
     for (;;) {
       rimsPinLists(w, null);
-      if (await dialog('New Device: RIMS tube', fields, w, false, ['skynet-integrated-devices']) !== 'ok') return;
+      if (await dialog(`New Device: ${what}`, fields, w, false, t.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle']) !== 'ok') return;
       const g0 = draft.graphics.length;
       try {
         readFields(w, body);
-        if (!String(w.iface ?? '').trim()) throw new Error('1. Pick the Interface (board) the RIMS tube is wired to');
+        if (!String(w.iface ?? '').trim()) throw new Error(`1. Pick the Interface (board) the ${what} is wired to`);
         const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
         const g = placeTabVessel(t, wsName, bundleName(t.name, tabIdOf(wsName) || 'Build', taken));
         if (w.label) g.label = String(w.label).trim();
-        Object.assign(g, applyRims(g, w, wsName, w.label || 'RIMS'));
+        Object.assign(g, applyRims(g, w, wsName, w.label || lbl));
         sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
         return;
       } catch (err) {
-        for (const g of draft.graphics.splice(g0)) draft.graphics = draft.graphics.filter(x => x.attachTo !== g.id);      // the half-made RIMS tube goes again
+        for (const g of draft.graphics.splice(g0)) draft.graphics = draft.graphics.filter(x => x.attachTo !== g.id);      // the half-made one goes again
         toast(err.message, true);
       }
     }
