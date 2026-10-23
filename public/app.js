@@ -5768,7 +5768,7 @@ $('#cfgBackups').onclick = guard(async () => {
     }) }, 'Restore')));
   $('#cfgBackupDlg').showModal();
 });
-// Schema.json: Save as .json file. The file is named after the Schema version (Name_yyyymmdd_hh_mm) when it has one.
+// Schema.json: Save as .json file. The file is named after the Schema version (Name_yyyymmddThhmm, ISO 8601) when it has one.
 $('#cfgExport').onclick = guard(async () => {
   const sc = S.schemas || { list: [] }, act = sc.active?.id, list = [...sc.list].sort((a, b) => (b.id === act) - (a.id === act));
   if (!list.length) throw new Error('There is no Schema to save yet');
