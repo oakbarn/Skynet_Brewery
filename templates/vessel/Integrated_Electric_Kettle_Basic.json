@@ -1,0 +1,9 @@
+{
+  "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/Skynet/Vessels/Skynet_BasicElectricBrewKettle.svg", "size": [180, 235],
+  "heatKind": "electric",
+  "integrated": "device",
+  "std": { "type": "TC", "size": 1.5 },
+  "ports": { "outlet": { "installed": true, "position": "Front Bottom Center" },
+    "thermowell": { "installed": true, "position": "Front Center" }, "element": { "installed": true, "position": "Right Side" } },
+  "notes": "A Skynet_Integrated_Device (Fritz's drawing): the base of every Skynet Integrated Electric Kettle. The temperature probe in its Thermowell (front center) and the heating element (right side) are built in; the outlet (front bottom center) is a plain IP. Its Properties set the Interface, the Ports and the control (PWM, Duty Cycle, PID or Hysteresis) of both."
+}
