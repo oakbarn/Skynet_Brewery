@@ -1,0 +1,32 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_NPT_Temperature_Widget.svg",
+  "size": [
+    217,
+    235
+  ],
+  "std": {
+    "type": "FPT",
+    "size": 0.5
+  },
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom 1 in",
+      "std": {
+        "type": "FPT",
+        "size": 0.5
+      }
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Center 5 in",
+      "std": {
+        "type": "FPT",
+        "size": 0.5
+      }
+    }
+  },
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): a clone of Brew_Vessel_TC_Temperature_Widget with a 1/2 in NPT Female Outlet at Center Bottom 1 in and a 1/2 in NPT Female Temperature port (thermowell) at Center 5 in. Its IPs are built in on the ports."
+}
