@@ -22,7 +22,12 @@ The Skynet Vessel Widgets so far:
 - **Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget**: the one above plus a TC 2 Heating Element port on the Right side at 6".
 - **Brew_Vessel_Big_Mac_Widget**: the one above made 10" wider and 6" taller, the Temperature port moved up to 10", and a TC 2 (Sparge) added on the Left side at 11".
 
-Each one is built on the one before it. A port's inches are the height of its center above the bottom of the vessel.
+Each one is built on the one before it.
+
+NPT versions (1/2" NPT Female ports instead of TC):
+
+- **Brew_Vessel_Low_NPT_Output_Widget**: like Brew_Vessel_Low_TC_Output_Widget.
+- **Brew_Vessel_NPT_Temperature_Widget**: like Brew_Vessel_TC_Temperature_Widget. A port's inches are the height of its center above the bottom of the vessel.
 
 A port (a hole in the vessel) is drawn as a TC or NPT fitting, sized in proportion to the vessel, so a TC 2 port looks a little bigger than a TC 1.5 one.
 
