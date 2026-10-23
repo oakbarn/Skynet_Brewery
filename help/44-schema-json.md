@@ -14,7 +14,7 @@ The page does two things:
 3. Pick the Schema. The loaded one is first and is picked for you.
 4. Press **Save**. The file goes to the Downloads folder of this computer (your browser may ask where to put it).
 
-The file is named after the Schema version, for example `Main_Brewery_20261021_14_05.json`. A Schema that has no version yet gets its name and the time now, in the same `Name_yyyymmdd_hh_mm` form. Spaces become `_`.
+The file is named after the Schema version, for example `Main_Brewery_20261021T1405.json`. A Schema that has no version yet gets its name and the time now, in the same `Name_yyyymmddThhmm` form (ISO 8601). Spaces become `_`.
 
 ## What is in the file
 

@@ -42,7 +42,7 @@ Run the same installer you used the first time, from the new release. It sees th
 - **Mac:** `Install Skynet Brewer.command` next to the new zip.
 - **Linux / Pi:** `bash install-skynet-brewer.sh` next to the new zip.
 
-It asks **Keep all of them as they are?** about your config, data, media and scripts folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case.
+It asks **Keep all of them as they are?** about your config, data, media and scripts folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
 
 ## Update by hand: unzip over the panel
 

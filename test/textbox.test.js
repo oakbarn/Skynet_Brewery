@@ -58,7 +58,7 @@ assert.throws(() => s.setProp('Pump_1', 'alignment', 'Up'), /Left, Center or Rig
 s.setProp('Pump_1', 'xposition', '');
 assert.equal(s.getProp('Pump_1', 'xposition'), 10, '"" puts back its properties');
 for (const a of ['visible', 'forecolor', 'backcolor', 'alignment', 'width', 'height', 'xposition', 'yposition']) assert.ok(attrsOf(s.get('Pump_1')).includes(a), a);
-assert.deepEqual(attrsOf(s.get('Text_2')), ['alignment', 'backcolor', 'forecolor', 'height', 'text', 'visible', 'width', 'xposition', 'yposition']);
+assert.deepEqual(attrsOf(s.get('Text_2')), ['alignment', 'backcolor', 'forecolor', 'height', 'hidden', 'text', 'visible', 'width', 'xposition', 'yposition']);
 // a layout save names a new Text and starts the Texts over from their properties
 s.saveLayout({ graphics: [...s.config.graphics, { id: 'c', kind: 'text', text: 'New' }] });
 assert.equal(s.config.graphics[2].name, 'Text_3');
