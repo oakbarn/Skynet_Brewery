@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { Store, noSpaces, attrsOf, mainProp } from '../lib/store.js';
 import { Engine, compile } from '../lib/engine.js';
-import { modernize, removeSpacesOnDisk } from '../lib/modernize.js';
+import { modernize, removeSpacesOnDisk, visibilityOnDisk } from '../lib/modernize.js';
 import { renumber, addSteps, guessClass, flowOrder } from '../lib/scaffold.js';
 
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'lang'));
@@ -223,6 +223,36 @@ assert.equal(compile('step "Mash in";').stmts[0].name, 'Mash in');
 assert.deepEqual(compile('print "a;b{}"').errors, []);
 // the rewriter leaves the new spellings alone and still updates BruControl lines written with them
 assert.equal(modernize('if ("Pump_Red" state == true) {\n"Kettle_SP" value++;\n}\n', n => store.get(n)).text, 'if (Pump_Red == true) {\nKettle_SP++;\n}\n');
+
+// ---- .hidden (Fritz, 2026-10-23): a true / false of its own; .hidden = true wins over .visible = true
+assert.ok(attrsOf(store.get('Pump_Red')).includes('hidden'));
+await run('proc_hidden', `Pump_Red.visible = hidden
+Pump_Red.visible = visible
+Pump_Red.hidden = true
+`);
+assert.equal(store.getProp('Pump_Red', 'visible'), true);
+assert.equal(store.getProp('Pump_Red', 'hidden'), true);
+assert.equal(store.snapshotOne('Pump_Red').hidden, true);
+assert.throws(() => store.setProp('Pump_Red', 'hidden', 'visible'), /true or false/);
+store.setProp('Pump_Red', 'hidden', false);
+// the old BruControl word still runs: hiddenlocked = .visible false and .hidden true
+await run('proc_hl', `"Pump_Red" visibility = hiddenlocked
+`);
+assert.equal(store.getProp('Pump_Red', 'visible'), false);
+assert.equal(store.getProp('Pump_Red', 'hidden'), true);
+store.setProp('Pump_Red', 'hidden', false); store.setProp('Pump_Red', 'visible', true);
+// ... and is rewritten in the new style
+const hl = modernize(`"Pump_Red" visibility = visible\n"Pump_Red" visibility = hidden\n  "Pump_Red" visibility = hiddenlocked // note`);
+assert.equal(hl.text, `Pump_Red.visible = true\nPump_Red.visible = false\n  Pump_Red.visible = false; Pump_Red.hidden = true // note`);
+await run('proc_hl2', hl.text.split('\n')[2] + '\n');
+assert.equal(store.getProp('Pump_Red', 'hidden'), true);
+// Processes on disk are changed once at start-up, the old copy kept
+const vdir = path.join(d, 'visdisk'); fs.mkdirSync(vdir);
+fs.writeFileSync(path.join(vdir, 'Old.txt'), `"Msg" visibility = hiddenlocked\nprint "x"\n`);
+assert.deepEqual(visibilityOnDisk(vdir), ['Old']);
+assert.equal(fs.readFileSync(path.join(vdir, 'Old.txt'), 'utf8'), `Msg.visible = false; Msg.hidden = true\nprint "x"\n`);
+assert.ok(fs.existsSync(path.join(vdir, 'Old.txt.before-hidden.bak')));
+assert.deepEqual(visibilityOnDisk(vdir), []);
 
 console.log('language tests passed');
 process.exit(0);
