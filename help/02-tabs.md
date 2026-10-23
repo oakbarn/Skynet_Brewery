@@ -19,10 +19,10 @@ Press the **red circle with the yellow tools** (a hammer and a pick crossed over
 | Button | What it does |
 |---|---|
 | **Add element** | Pick from the list (outputs, inputs, probes, variables, timers, alarms...) and press it. It is made on the **Build Tab** first. |
-| **Add graphic** | A picture from a media folder. |
-| **Add text** | A label. |
+| **Add graphic** | A picture from a media folder. It is made on the **Build Tab** first. |
+| **Add text** | A label. It is made on the **Build Tab** first. |
 | **Add equipment** | A vessel: electric or gas heated kettle, mash tun, cooling coil, plate chiller. It is made on the **Build Tab** first. |
-| **Add IP** | A flow point or pipe fitting (see below). |
+| **Add IP** | A flow point or pipe fitting (see below). It is made on the **Build Tab** first. |
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
 | **Draw hose** | Like a pipe, but it bends in smooth curves. Loose ends get a coupling. See [Pipes, hoses and reducers](24-pipes-and-hoses). |
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. The button then says **🔓 Unlock**: press it to unlock. Every item's properties also have a small **Lock position** icon: 🔓 means unlocked, 🔒 means locked. Click it to switch, then Save. |
@@ -30,7 +30,7 @@ Press the **red circle with the yellow tools** (a hammer and a pick crossed over
 | **🔓 Unlock All** | Unlocks every item on this tab in one press. Also an action, not a switch. |
 | **⚙ Tab settings** | Name, background color, background picture, size and **Pipe size** of this tab. Double-clicking an empty spot on the tab opens it too. |
 | **New tab** | Adds a tab. |
-| **🔨 Build Tab** / **💾 Save Build ...** | A clean Tab to build something new on, away from a busy screen. **Save Build ...** puts it on a Tab or saves it as a Template. See [Build Tab](55-build-tab). |
+| **🔨 Build Tab** / **👁 Preview** / **💾 Save Build ...** | A clean Tab where everything new is made first, away from a busy screen. **👁 Preview** shows it the way it looks on Brew Day. **Save Build ...** puts it on a Tab or saves it as a Template. See [Build Tab](55-build-tab). |
 | **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Picking **☰ Menu > Exit Edit layout** asks the same. Nothing is changed until you save. |
 
 Drag unlocked items to move them (🔒 locked items stay where they are, also in Edit layout), drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.

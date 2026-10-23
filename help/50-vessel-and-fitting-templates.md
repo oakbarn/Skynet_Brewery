@@ -7,20 +7,20 @@ There are two kinds of Template:
 - **Vessel Templates**: kettles, HLTs, mash tuns and fermenters. Chillers, coils, trub filters and RIMS tubes are Vessel Templates too, shown on their own **Equipment Templates** pane.
 - **Bundled Fitting Templates**: up to four fittings joined together (for example a valve, a tee with a thermowell and a 90 degree elbow) that go on a vessel port, or on a Tab by themselves.
 
-## Skynet Templates and User Templates
+## Skynet Templates and User Bundled Templates
 
-| | Skynet Template | User Template |
+| | Skynet Template | User Bundled Template |
 |---|---|---|
 | Made by | Skynet (changed only through GitHub) | You, in the panel (Admins) |
 | Change it | No (see Building Skynet Templates below) | Yes |
 | Delete it | Never | Yes |
-| Clone it | Yes: the clone is a User Template | Yes |
+| Clone it | Yes: the clone is a User Bundled Template | Yes |
 | Add to Tab | Yes | Yes |
 | Badge | **Skynet** (listed first) | **User** |
 
 The panel checks this on the Brain, so a locked Skynet Template can't be changed or deleted from any screen.
 
-Skynet Templates come with the panel, in its `templates` folder, and an update brings the newest ones. User Templates are kept on the Brain in `config/templates/user`, which an update never touches.
+Skynet Templates come with the panel, in its `templates` folder, and an update brings the newest ones. User Bundled Templates are kept on the Brain in `config/templates/user`, which an update never touches.
 
 ## The Template panes
 
@@ -32,11 +32,11 @@ Skynet Templates come with the panel, in its `templates` folder, and an update b
 The buttons on a Template's pop-up:
 
 - **✕** and **Cancel**: close it without saving.
-- **Clone**: asks for a new name (it suggests Copy1_ and the name; change it to what you want), then makes a copy with every setting showing in the pop-up.
-- **Add to Tab**: pick the Tab and a name (it suggests bndl1_TemplateName_TabID; change it to what you want), then press **Add**. Pick **🔨 Build Tab** to work on it on a clean Tab first (see [Build Tab](55-build-tab)).
+- **Clone**: asks for a new name (it suggests Copy1_ and the name; change it to what you want). The copy, with every setting showing in the pop-up, is made on the **🔨 Build Tab** first. Change it there, look at it with **👁 Preview**, then press **💾 Save Build ...** and pick **As a Template**: it is saved under the new name (see [Build Tab](55-build-tab)).
+- **Add to Tab**: pick the Tab it goes on and a name (it suggests bndl1_TemplateName_TabID; change it to what you want), then press **Add**. The copy is made on the **🔨 Build Tab** first. Change it there if you want, then press **💾 Save Build ...** and **Save to Tab**: the Tab you picked is offered first (see [Build Tab](55-build-tab)).
 - **Add to Vessel** (Bundled Fittings only): puts this fitting on a port of a Vessel Template (Outlet, Tangential Inlet, Steam Slayer or CIP Inlet). The name it suggests is bndl1_FittingName_VesselName.
 - **Save**: only on Templates you can change.
-- **Delete**: only on User Templates. A Bundled Fitting that a Vessel Template uses can't be deleted until it is taken off that vessel.
+- **Delete**: only on User Bundled Templates. A Bundled Fitting that a Vessel Template uses can't be deleted until it is taken off that vessel.
 
 A **Template Name** has no spaces (use _ instead) and must be unique.
 
@@ -81,7 +81,7 @@ A **RIMS tube** is part of the piping: wort flows in at one end and out at the o
   - **Tee**: switch on **Thermowell** if a probe sits in it, and pick its **Position** (Short or Long). A thermowell stops flow, so that side of the tee has no IP. The probe is picked when it is on a Tab.
   - **Reducer**: type its **Other end size**. It goes from the size before it (at first the Connection Standard size) to that size, down or up. Every IP past the reducer gets the new size.
   - **90 Degree Elbow**, **45 Degree Elbow**, **U**, **CIP Ball Valve**, or **None**.
-- **Graphic**: a Skynet Bundled Fitting picks one of the Skynet pictures. A User one can have any picture.
+- **Graphic**: a Skynet Bundled Fitting picks one of the Skynet pictures. A User Bundled one can have any picture.
 
 The list of fittings is set by Skynet. A new kind of fitting is added through GitHub.
 
@@ -124,7 +124,7 @@ Open it in **Edit layout** (double-click, or hold a finger on it). Switch **Bund
 
 On a Tab_Fitting you pick:
 
-- **Turn** (a fitting from a User Template): 90, 180 or 270 degrees clockwise. The picture and its IPs turn together. A fitting from a Skynet Template has **Flip Horizontal**, **Flip Vertical** and **Rotate** instead, and no IP settings: see [Skynet Fittings](60-skynet-fittings).
+- **Turn** (a fitting from a User Bundled Template): 90, 180 or 270 degrees clockwise. The picture and its IPs turn together. A fitting from a Skynet Template has **Flip Horizontal**, **Flip Vertical** and **Rotate** instead, and no IP settings: see [Skynet Fittings](60-skynet-fittings).
 
 - each **Valve**: **Select Device, Widget or None**. While that valve is closed, nothing flows through the Tab_Fitting.
 - each thermowell's **Temperature Probe**: **Select Temperature Probe or None**.
@@ -143,6 +143,6 @@ To take it off again, open the Tab_Fitting and switch off **Joined to its vessel
 
 ## Building Skynet Templates
 
-For now Skynet is still building its Templates, so the Skynet Templates can be changed in the panel, and new ones and clones can be Skynet Templates (a switch in the name pop-up; off makes a User Template). The ones made or changed this way are kept in `config/templates/skynet` on the Brain, so an update can't overwrite them. Send that folder in and they go into the panel's `templates` folder on GitHub.
+For now Skynet is still building its Templates, so the Skynet Templates can be changed in the panel, and new ones and clones can be Skynet Templates (a switch in the name pop-up; off makes a User Bundled Template). The ones made or changed this way are kept in `config/templates/skynet` on the Brain, so an update can't overwrite them. Send that folder in and they go into the panel's `templates` folder on GitHub.
 
-When all of them are done, Skynet locks them. From then on Skynet Templates can't be changed or deleted, and every new Template or clone is a User Template.
+When all of them are done, Skynet locks them. From then on Skynet Templates can't be changed or deleted, and every new Template or clone is a User Bundled Template.
