@@ -44,6 +44,31 @@ Any attribute with only two choices is `true` or `false`:
 
 If a name has characters other than letters, digits and `_`, put it in quotes before the dot: `"BK (Front)".visible = true`.
 
+## Visible and Hidden
+
+Every Device, Widget and Text has two true / false attributes:
+
+- `.visible`: shown or not. It also takes the words `visible` (same as `true`) and `hidden` (same as `false`), so `Pump_Red.visible = hidden` works.
+- `.hidden`: a lock that keeps the item hidden. Only `true` or `false`. **`.hidden = true` wins over `.visible = true`**: the item is on the Tab only while `.visible` is `true` and `.hidden` is `false`.
+
+```
+Pump_Red.visible = true
+Pump_Red.hidden = true        // stays hidden, even though .visible is true
+Pump_Red.hidden = false       // shown again
+```
+
+You can set both in the item's **Properties** too: **Visible** and **Hidden, locked** are switches. In Edit layout a hidden item shows faded so you can still find it.
+
+Older Processes are changed for you (once, when the panel starts, and whenever a Process is saved or imported). The old file is kept as `.before-hidden.bak`:
+
+| Old line | New line |
+| --- | --- |
+| `"my Element" visibility = visible` | `"my Element".visible = true` |
+| `"my Element" visibility = hidden` | `"my Element".visible = false` |
+| `"my Element" visibility = hiddenlocked` | `"my Element".visible = false; "my Element".hidden = true` |
+
+The old lines still run the same way if you leave them.
+
 ## Is a Process running?
 
 `.running` on a Process name is `true` while that Process runs and `false` when it is stopped, finished or stopped by an error. It works in an `if`, `elseif`, `wait` or anywhere a value goes:
