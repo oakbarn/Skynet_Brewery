@@ -156,7 +156,7 @@ FunctionEnd
 Section "Skynet Brew Panel" SecMain
   SectionIn RO
   ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6
-  StrCpy $Stamp "$2-$1-$0_$4$5$6"
+  StrCpy $Stamp "$2$1$0T$4$5$6"   ; ISO 8601, for example 20261023T113005
 
   Call NeedNode
   Call WaitForPanelStopped

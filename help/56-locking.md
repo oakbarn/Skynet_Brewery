@@ -11,7 +11,7 @@ You can still open a locked item's properties (double-click it) and change it th
 3. Press **🔒 Lock** on the Edit layout bar. The button then says **🔓 Unlock**: press it again to unlock.
 4. Press **Save layout**.
 
-Every item's properties also have a small **Lock position** icon: 🔓 means unlocked, 🔒 means locked. Click it to switch, then Save.
+Every item's properties also have a small **Lock position** icon: 🔓 means unlocked, 🔒 means locked. Click it to switch, then Save. This includes Skynet Fittings, Skynet vessels and bundled vessels (their bundled Properties have the icon too).
 
 Locking or unlocking a vessel does the same to its ports (IPs) and the fittings joined to it, because they move with it.
 
