@@ -77,6 +77,8 @@ A **DIN** gives one trigger per press, however long the button is held, and a se
 
 **Kept for later** (Skynet can't read these yet): `DHT11`, `DHT22`, `Hydro` (a Tilt or any other hydrometer).
 
+**Virtual ports.** A hydrometer has no pin, so, as in BruControl, it gets a virtual port: the first one is `200`, the next `201`, and so on. A Tilt would be named like `MB_200_Hydro_Red_Tilt__FE`.
+
 ## Thermistors
 
 An NTC thermistor is read on an analog pin with a series resistor, using its **ohms at 25 °C** and its **Beta** value from the data sheet. The Add list has 10K (Beta 3950), 10K BCS-462 / BruControl (Beta 3977), 50K and 100K ready; for any other one pick **NTC** and type its numbers. The temperature is worked out in °C, and each probe shows **°F or °C**, whichever you pick in its properties.

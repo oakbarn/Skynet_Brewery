@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { suggestName, uniqueName, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash } from '../public/naming.js';
+import { suggestName, uniqueName, hydroPort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash } from '../public/naming.js';
 import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
@@ -61,6 +61,9 @@ assert.deepEqual(c.workspaces.map(w => w.id), ['BR', 'BH', 'BO'], 'a second BR g
 assert.equal(assignIds(c), false, 'nothing changes the second time');
 assert.throws(() => checkIds([{ name: 'A', id: 'MB' }, { name: 'B', id: 'mb' }], 'interface'), /used twice/);
 assert.deepEqual(checkIds([{ name: 'Sparge' }, { name: 'S', id: 'sp' }], 'tab').map(w => w.id), ['SA', 'SP'], 'a typed ID wins, the missing one is given');
+
+assert.equal(hydroPort(1), '200', 'the first hydrometer is virtual port 200, as in BruControl');
+assert.equal(hydroPort(3), '202');
 
 // Device Type IDs a new Device starts with
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'valve' }), 'E_L_Vlv');
