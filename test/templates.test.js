@@ -123,3 +123,29 @@ assert.equal(ek.integrated, 'device'); assert.equal(ek.cls, 'skynet');
 assert.ok(fs.existsSync(path.join(ROOT, 'media', ek.image)), 'kettle picture');
 assert.deepEqual(Object.keys(ek.ports).sort(), ['element', 'outlet', 'thermowell']);
 console.log('templates ok');
+
+// Add a Vessel (Fritz, 2026-10-23): Skynet Vessel Widgets, Integrated Vessels, and User Bundled Templates built on a Widget
+{
+  const { isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel } = await import('../public/templates.js');
+  const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'vbase-'));
+  fs.mkdirSync(path.join(d2, 'shipped', 'vessel'), { recursive: true });
+  fs.writeFileSync(path.join(d2, 'shipped', 'vessel', 'Kettle_W.json'), JSON.stringify({ vesselType: 'vessel', ports: {} }));
+  fs.writeFileSync(path.join(d2, 'shipped', 'vessel', 'Kettle_I.json'), JSON.stringify({ vesselType: 'vessel', integrated: 'device', ports: {} }));
+  fs.writeFileSync(path.join(d2, 'shipped', 'vessel', 'Chiller.json'), JSON.stringify({ vesselType: 'pchiller', ports: {} }));
+  const T = new Templates(path.join(d2, 'shipped'), path.join(d2, 'own'), { locked: true });
+  const all = () => T.list('vessel');
+  const W = T.get('vessel', 'Kettle_W'), I = T.get('vessel', 'Kettle_I'), C = T.get('vessel', 'Chiller');
+  assert.ok(isVesselWidget(W) && !isVesselWidget(I) && !isVesselWidget(C), 'a Widget: a Skynet vessel, not Integrated');
+  assert.ok(isIntegratedVessel(I) && !isIntegratedVessel(W));
+  assert.equal(vesselBase(W, all()), 'Kettle_W');
+  assert.equal(vesselBase(I, all()), undefined, 'an Integrated one is not a Widget');
+  const u = T.create('vessel', 'My_Kettle', { from: 'Kettle_W' });
+  assert.equal(u.base, 'Kettle_W', 'a clone of a Widget is built on it');
+  assert.ok(isUserBundledVessel(u, all()));
+  assert.equal(T.create('vessel', 'My_Kettle_2', { from: 'My_Kettle' }).base, 'Kettle_W', 'and a clone of that too');
+  assert.equal(T.create('vessel', 'My_Int', { from: 'Kettle_I' }).base, undefined);
+  assert.ok(!isUserBundledVessel(T.get('vessel', 'My_Int'), all()));
+  assert.equal(cleanVessel({ base: 'Bad Name!' }).base, undefined);
+  T.save('vessel', 'My_Kettle', { ...u, notes: 'x' });
+  assert.equal(T.get('vessel', 'My_Kettle').base, 'Kettle_W', 'kept on save');
+}
