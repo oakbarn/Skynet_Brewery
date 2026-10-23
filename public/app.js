@@ -1869,12 +1869,11 @@ async function newDeviceDialog(e, hint) {
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
-  const fields = [['_n', '1. Pick the Interface, 2. the Device Type, 3. the Port (the list shows only the free pins that fit, best first), then type the Label. The name is made from them: Interface ID _ Port _ Device Type ID _ Label __ Tab ID. In the name, < > : " / \\ | ? * . , become ~ and spaces become _ (the Label itself stays as you typed it). The Tab ID is added when you put it on a Tab with 💾 Save Build. You can type your own name instead: it must be unique. Create puts the Device on the Build Tab and opens its Properties for everything else.', 'note'],
-    ['device', '1. Interface (board)', 'dev'],
+  const fields = [['device', '1. Interface (board)', 'dev'],
     ['typeCode', '2. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
-    [port[0], '3. ' + port[1], ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
+    [port[0], '3. ' + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
     ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
-    ['name', 'Name (filled in for you)', 'text']];
+    ['name', 'Suggested Name (you may type your own)', 'text']];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
   for (const b of oks) b.textContent = 'Create';
   try {
@@ -2588,7 +2587,7 @@ function field([key, label, kind, opts, rerender], obj) {
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}_   ${d.name}` : d.name)));
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)));      // Fritz: the full Interface name first
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
   else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
