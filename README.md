@@ -203,7 +203,7 @@ The **Schema.json** page (it was called **Config**) shows the whole setup file (
 - **Find** (Ctrl+F) and **Replace** (Ctrl+H) work the same as on the Scripts page.
 - **Check** looks for mistakes and jumps to the line. **Save** checks first and refuses a file the panel cannot load, so a typo cannot break the panel. Saving stops running scripts and reconnects the boards.
 - **Backups** lists every copy. **Open** shows one in the editor without saving it; **Restore** puts it back straight away.
-- **Save as .json file** saves a Schema (its tabs, devices, widgets, pipes and Equipment Profile drawing, no logins or panel settings) to this computer. The file is named after the Schema version, `Name_yyyymmdd_hh_mm.json`.
+- **Save as .json file** saves a Schema (its tabs, devices, widgets, pipes and Equipment Profile drawing, no logins or panel settings) to this computer. The file is named after the Schema version, `Name_yyyymmddThhmm.json` (ISO 8601).
 
 ## 4. API (for Node-RED or other programs)
 
