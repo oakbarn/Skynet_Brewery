@@ -118,6 +118,7 @@ export function cleanVessel(b = {}) {
   // the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (empty = the kind's own size)
   const size = cleanSize(b.size); if (size) t.size = size;
   if (INTEGRATED[b.integrated]) t.integrated = b.integrated;
+  if (NAME_RE.test(text(b.base, 60))) t.base = text(b.base, 60);      // the Skynet Vessel Widget a User Bundled vessel Template is built on
   if (['ccoil', 'herms'].includes(vesselType)) t.liquidPorts = String(b.liquidPorts) === '4' ? 4 : 2;     // 2 or 4 liquid ports (Chillzilla: 4)
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;
@@ -129,3 +130,18 @@ export function cleanVessel(b = {}) {
   }
   return t;
 }
+
+// Add a Vessel (Fritz, 2026-10-23). A Skynet Vessel Widget is a vessel picture with its IPs built in and nothing else: no Device
+// properties. A Skynet Integrated Vessel (Skynet_Integrated_Device) has its Devices built in. A User Bundled vessel Template is
+// always built on a Skynet Vessel Widget: picked as a Widget, built and bundled on the Build Tab, then saved. base = that Widget.
+const vesselOnly = t => (t?.vesselType || 'vessel') === 'vessel';
+export const isVesselWidget = t => t?.cls === 'skynet' && vesselOnly(t) && !t.integrated;
+export const isIntegratedVessel = t => t?.cls === 'skynet' && vesselOnly(t) && t.integrated === 'device';
+// the Skynet Vessel Widget a vessel Template is built on (itself for a Widget), or nothing. all = every Vessel Template.
+export function vesselBase(t, all = []) {
+  if (!t || !vesselOnly(t)) return undefined;
+  if (isVesselWidget(t)) return t.name;
+  const b = t.base && all.find(x => x.name.toLowerCase() === String(t.base).toLowerCase());
+  return isVesselWidget(b) ? b.name : undefined;
+}
+export const isUserBundledVessel = (t, all) => t?.cls === 'user' && !!vesselBase(t, all);

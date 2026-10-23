@@ -6,7 +6,7 @@ import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
-import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly } from './templates.js';
+import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -2178,6 +2178,7 @@ function addVesselWidget(c) {
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderTabs(); renderWs(); editItem('gfx', g.id);
 }
 $('#addVessel').onclick = () => {
+  if ($('#addVesselType').value === 'vessel') return guard(addVessel)();
   if (EQ[$('#addVesselType').value]) return addVesselWidget($('#addVesselType').value);
   toBuild();
   const t = $('#addVesselType').value, base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' }[t];
@@ -2186,6 +2187,60 @@ $('#addVessel').onclick = () => {
   const g = { id: newId(), kind: 'vessel', vesselType: t, workspace: wsName, x: 60, y: 60, w: size[0], h: size[1], image: '', label: base + ' ' + i, labelAlign: 'top', labelColor: '#ffffff', labelSize: 16, labelVisible: true };
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 };
+// ---- Add a Vessel (Kettle, HLT, MLT ...) (Fritz, 2026-10-23). First: a Widget or Integrated?
+// Widget: pick one of the Skynet Vessel Widgets (a picture with its IPs built in and nothing else; the Template itself is set
+// and can only be cloned) or a Blank Vessel. Its picture is the Widget's to start with, and it is edited like any other Widget.
+// Integrated: a Skynet Integrated Vessel (its Devices built in), or a User Bundled Template. A User Bundled vessel Template is
+// always built on a Skynet Vessel Widget: picked as a Widget, built and bundled on the Build Tab, then Save Build ... > As a
+// Template. There is no other way to make one. Everything new is made on the 🔨 Build Tab first.
+async function addVessel() {
+  if (!TPL) await loadTemplates();
+  const how = await choose('Add a Vessel (Kettle, HLT, MLT ...): a Widget, or Integrated?',
+    [['Widget (you add everything to it)', 'widget'], ['Integrated (ready-made)', 'integrated']]);
+  if (!how) return;
+  const icon = (t, note) => ({ key: t.name, label: t.name, img: tplIcon('vessel', t), title: note || t.notes || t.name });
+  if (how === 'widget') {
+    const k = await pickVessel('Add a Vessel: pick its Widget', [
+      { head: 'Skynet Vessel Widgets', note: 'A picture with its IPs built in and nothing else. Add the Devices it needs on the 🔨 Build Tab and Bundle them with it.',
+        items: TPL.vessel.filter(isVesselWidget).map(t => icon(t)), empty: 'No Skynet Vessel Widgets yet.' },
+      { head: 'Blank', note: 'A plain vessel: pick its picture and set every port yourself.', items: [{ key: '\0blank', label: 'Blank_Vessel', img: EQ.vessel.image, title: 'A plain vessel widget' }] }]);
+    if (k === undefined) return;
+    if (k === '\0blank') return addVesselWidget('vessel');
+    return vesselToBuild(tplOf('vessel', k));
+  }
+  const user = TPL.vessel.filter(t => isUserBundledVessel(t, TPL.vessel));
+  const k = await pickVessel('Add a Vessel: pick an Integrated one', [
+    { head: 'Skynet Integrated Vessels', note: 'Their Devices are built in: the New Device box asks the Interface and Ports.', items: TPL.vessel.filter(isIntegratedVessel).map(t => icon(t)), empty: 'No Skynet Integrated Vessels yet.' },
+    { head: 'User Bundled Templates', note: 'Your own, each built on a Skynet Vessel Widget.', items: user.map(t => icon(t, `${t.name}, built on ${t.base}`)),
+      empty: 'None yet. To make one: Add equipment > Vessel > Widget, pick a Skynet Vessel Widget, add and Bundle what it needs on the 🔨 Build Tab, then 💾 Save Build ... > As a Template.' }]);
+  if (k === undefined) return;
+  const t = tplOf('vessel', k);
+  return isIntegratedVessel(t) ? newIntegratedDevice(t.name) : vesselToBuild(t);
+}
+// a copy of a Vessel Template on the Build Tab, its Properties open
+function vesselToBuild(t) {
+  if (!t) return toast('That Template is gone', true);
+  const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean);
+  const from = buildWs()?.name === wsName ? buildWs().from || wsName : wsName;
+  addTemplateToTab('vessel', t, from, bundleName(t.name, tabIdOf(from) || 'Build', taken));
+  if (sel) editItem('gfx', sel.id);
+}
+// a pop-up of small icons in groups; one click picks one. Resolves to its key, or undefined for Cancel.
+function pickVessel(title, groups) {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'tplMini vesselPick' });
+    const close = v => { d.close(); d.remove(); res(v); };
+    d.append(h('h3', {}, title, ' ', helpIcon(['add-a-vessel'], () => close(undefined))));
+    for (const g of groups) {
+      const grid = h('div', { class: 'tplGrid' }, ...g.items.map(it => h('button', { class: 'tplIcon', title: it.title, onclick: () => close(it.key) },
+        h('img', { src: media(it.img), alt: '' }), h('span', { class: 'tplName' }, it.label))));
+      d.append(h('b', {}, g.head), h('p', { class: 'muted' }, g.note), g.items.length ? grid : h('p', { class: 'muted' }, g.empty));
+    }
+    d.append(h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { onclick: () => close(undefined) }, 'Cancel')));
+    d.oncancel = ev => { ev.preventDefault(); close(undefined); };
+    document.body.append(d); d.showModal();
+  });
+}
 $('#addIp').onclick = () => {
   toBuild();
   const fit = $('#addIpType').value, base = { point: 'IP', pipe: 'Pipe', cap: 'Cap', coupling: 'Coupling' }[fit] || FITTINGS[fit];
@@ -2325,6 +2380,13 @@ async function saveBuildTemplate({ name, skynet }) {
   if (w.kind === 'fitting') { await makeTemplate('fitting', name, skynet, { ...tplBase('fitting', w.g), ...fitBody(w.g) }); made.push(name); }
   else {
     const g = w.g, base = tplBase('vessel', g), t = { ...base, vesselType: g.vesselType, image: g.image, size: [Math.round(g.w), Math.round(g.h)], ports: {} };
+    // a User Bundled vessel Template is always built on a Skynet Vessel Widget (Fritz, 2026-10-23)
+    const user = TPL.locked || !skynet, on = vesselBase(tplOf('vessel', g.template), TPL.vessel);
+    delete t.base;
+    if (user && g.vesselType === 'vessel') {
+      if (!on) throw new Error('A User Bundled vessel Template must be built on a Skynet Vessel Widget: Add equipment > Vessel > Widget, pick a Skynet Vessel Widget, build and Bundle it on the Build Tab, then save it here.');
+      t.base = on;
+    }
     for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
     if (EQ[g.vesselType]?.ports.in2) t.liquidPorts = g.ports?.in2?.installed ? 4 : 2;
     for (const [k, p] of Object.entries(base.ports || {})) if (!g.ports?.[k]) t.ports[k] = p;     // ports the Tab item doesn't have stay as they were
@@ -5591,6 +5653,8 @@ async function newTemplate(kind, { from, body, std, init, what = TEMPLATE_KINDS[
     ['name', 'Template Name', 'text'], ...skynetField()], w, 'Save');
   if (!ok) return null;
   const name = (w.name || '').trim(), bad = nameProblem(name); if (bad) throw new Error(bad);
+  if (kind === 'vessel' && !from && !init?.vesselType && (TPL.locked || !w.skynet))      // Fritz, 2026-10-23: no blank User vessel Templates
+    throw new Error('A User Bundled vessel Template is always built on a Skynet Vessel Widget. Add equipment > Vessel > Widget, pick one, build and Bundle it on the Build Tab, then 💾 Save Build ... > As a Template.');
   let r = await api('POST', `/ui/templates/${kind}`, { name, from, skynet: TPL.locked ? false : !!w.skynet });
   if (body || std || init) r = await api('PUT', `/ui/templates/${kind}/${name}`, { ...(init || {}), ...(body || {}), ...(std && !body ? { std } : {}), name });   // a clone gets the settings showing in the pop-up
   setTPL(r);
@@ -5810,6 +5874,8 @@ F.skynetVessel = it => {
   return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Name)', 'text'],
     ...(it.integrated === 'device' ? [['_d', 'Built-in Devices (Skynet_Integrated_Device: they can never be taken out of it)', 'head'], ...rimsFields(it)] : [
+      // its picture starts as the Widget's and is edited like any other Widget's (Fritz, 2026-10-23)
+      ['image', 'Graphic (picture path; its IPs stay on the openings of the Skynet picture)', 'path'],
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
       ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
