@@ -1,0 +1,6 @@
+{
+  "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_Low_TC_Output_Widget.svg", "size": [217, 235],
+  "std": { "type": "TC", "size": 1.5 },
+  "ports": { "outlet": { "installed": true, "position": "Center Bottom 1 in", "std": { "type": "TC", "size": 1.5 } } },
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): the Generic Brew Vessel with one TC 1.5 port, the outlet, at Center Bottom 1 in (its center 1 inch above the bottom). Its IP is built in on the port."
+}

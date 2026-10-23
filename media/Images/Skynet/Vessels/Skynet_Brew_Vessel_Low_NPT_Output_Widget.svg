@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 236 256">
+  <!-- Skynet Vessel Widget "Brew_Vessel_Low_NPT_Output_Widget" (Fritz, 2026-10-23): a clone of Brew_Vessel_Low_TC_Output_Widget with a 1/2 in NPT Female Outlet at Center Bottom 1 in.
+       A female NPT port is drawn face-on: half coupling, thread ring (dashed), opening; smaller than a TC 1.5 at the same scale.
+       Same box as the other Brew Vessel Widgets (viewBox -20 0 236 256, 10 units = 1 in). -->
+  <rect x="5" y="9" width="182" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
+  <rect x="12.5" y="22" width="167" height="227" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
+  <g stroke="#111">
+    <circle cx="96" cy="239" r="5.3" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="96" cy="239" r="4.3" fill="none" stroke="#6d6d6d" stroke-width="0.8" stroke-dasharray="1.2 0.9"/>
+    <circle cx="96" cy="239" r="3.5" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+</svg>
