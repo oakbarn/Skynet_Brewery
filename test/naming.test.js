@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash } from '../public/naming.js';
+import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck } from '../public/naming.js';
 import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
@@ -110,6 +110,23 @@ assert.equal(portClash({ name: 'New', type: 'pwmOut', device: 'MEGA2', channel: 
 assert.equal(portClash({ name: 'Probe2', type: 'temperature', device: 'MEGA', probeIndex: 2 }, els), null, 'DS18B20 probes share one wire');
 assert.equal(portClash({ name: 'Probe1b', type: 'temperature', probeIndex: 1 }, els).other, 'Probe1', 'one Device per OneWire probe number');
 assert.equal(portClash({ name: 'Step', type: 'stepper', device: 'MEGA', channel: 30, dirPin: 25 }, els).other, 'MB_25_VlV_Fly_Sparge_SP', 'every stepper pin counts');
+
+// bus pins: SPI 50-52 for RTD / thermocouple boards, the OneWire data pin 40 for DS18B20 probes
+const rtd = { name: 'MB_48_RTD_HLT', type: 'temperature', sensor: 'pt100', device: 'MEGA', channel: 48 };
+const pump = { name: 'MB_51_Pump', type: 'digitalOut', device: 'MEGA', channel: 51 };
+assert.match(busCheck(pump, [rtd]).error, /blocked/, 'an RTD on the board blocks 50-52');
+assert.equal(busCheck(pump, [rtd, { ...rtd, device: 'MEGA2' }].slice(1)).warn !== undefined, true, 'another board: only a heads-up');
+assert.match(busCheck(pump, []).warn, /Heads up/);
+assert.match(busCheck(rtd, [pump]).error, /Move MB_51_Pump/, 'no RTD while a pump holds an SPI pin');
+assert.match(busCheck({ ...rtd, channel: 52 }, []).error, /chip-select/);
+assert.equal(busCheck(rtd, []), null);
+const probe = { name: 'MB_700_1W_HLT', type: 'temperature', sensor: 'ds18b20', probeIndex: 1 };
+const led = { name: 'MB_40_LED', type: 'digitalOut', device: 'MEGA', channel: 'D40' };
+assert.match(busCheck(led, [probe]).error, /OneWire data pin/, 'a DS18B20 blocks pin 40');
+assert.match(busCheck(led, []).warn, /OneWire/);
+assert.match(busCheck(probe, [led]).error, /Move MB_40_LED/);
+assert.equal(busCheck({ ...led, channel: 41 }, [probe, rtd]), null);
+assert.match(busCheck({ ...led, channel: 41 }, [probe], [{ name: 'MEGA', oneWirePin: 41 }]).error, /41/, 'an Interface may set its own OneWire pin');
 
 // the server gives IDs when a Schema loads, and refuses a Tab ID used twice
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'naming-'));

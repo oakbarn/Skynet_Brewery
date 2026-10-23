@@ -55,6 +55,21 @@ More rules:
 - **One Device per port, with one exception.** Two Devices can't use the same port on the same Interface, except outputs of different Device Types. Like in BruControl, you pick the Interface, then the Port, and then you can add more than one type on that Port. Example: one heater wired to port 5 can have `MB_05_Hys_HLT__BR` and `MB_05_PID_HLT__BR`.
 - **The last one turned on wins.** When you enable (or turn on) one of them, the others on that port are turned off at once, so only one drives the heater. Inputs, like a probe or a switch, never share a port.
 
+## Pins kept for RTD and OneWire probes
+
+Some probes share pins on the board. On an Arduino Mega with the Skynet sketch:
+
+- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT__HL`. The CS pin can be any free pin except 50, 51 and 52.
+- **DS18B20 (OneWire) probes** all share one data pin, **pin 40**. Each probe gets its own virtual port 700-799 in its name instead.
+
+What the panel does:
+
+- **Blocked:** once an RTD or thermocouple is on an Interface, pins 50, 51 and 52 on it can't be used by anything else. Once a DS18B20 probe is set up, pin 40 can't be used by anything else.
+- **Heads up:** if no such probe is there yet and you put something else on pin 50, 51, 52 or 40, the panel asks first. It tells you that while that Device is on the pin, you can't add RTD, thermocouple or DS18B20 probes to that Interface. Press **Cancel** to pick another pin.
+- **Not allowed the other way round either:** if a pump already sits on pin 51, you can't add an RTD to that Interface until you move the pump.
+
+Tip: keep pins 40 and 50-52 free, even if you have no such probes yet. Then you can add them later without rewiring.
+
 ## Device Type IDs
 
 Every Device Type ID is unique. Some are in more than one list (`DO` is a plain relay and also a heating element on a relay).

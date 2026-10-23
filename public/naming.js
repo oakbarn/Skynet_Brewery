@@ -209,6 +209,38 @@ export function portSharers(el, elements) {
   const mine = new Set(portKeys(el)); if (!mine.size) return [];
   return (elements ?? []).filter(o => o !== el && o.name !== el.name && portKeys(o).some(k => mine.has(k)));
 }
+// Fritz, 2026-10-23: bus pins. All RTD (MAX31865) and thermocouple boards on an Interface share the SPI pins 50, 51, 52
+// (each board has its own chip-select pin), and all DS18B20 probes share one OneWire data pin (D40 in the Skynet sketch).
+// While a bus is in use those pins are blocked for anything else; using one for something else first gets a heads-up.
+export const SPI_PINS = ['50', '51', '52'];
+export const ONEWIRE_PIN = '40';
+const usesSpi = e => e.type === 'temperature' && ['pt100', 'pt1000', 'thermocouple'].includes(e.sensor);
+const isProbe = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
+const pinsOn = e => portKeys(e).filter(k => !k.startsWith('OneWire|')).map(k => k.split('|')[1]);
+// { error } when this Device takes a pin a bus on its Interface needs, { warn } when it takes a free bus pin, or null
+export function busCheck(el, elements, devices) {
+  const others = (elements ?? []).filter(o => o !== el && o.name !== el.name);
+  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? ONEWIRE_PIN);
+  const mine = el.device ? pinsOn(el) : [], iface = el.device;
+  const spiUsers = others.filter(o => usesSpi(o) && o.device === iface), owUsers = others.filter(o => isProbe(o) && (!o.device || o.device === iface));
+  const onPin = pins => others.find(o => o.device === iface && !usesSpi(o) && pinsOn(o).some(p => pins.includes(p)));
+  if (usesSpi(el)) {
+    const cs = mine.find(p => SPI_PINS.includes(p));
+    if (cs) return { error: `Pin ${cs} is part of the SPI bus (50, 51, 52) that every RTD and thermocouple board uses. Pick another pin for the board's chip-select (CS).` };
+    const o = onPin(SPI_PINS);
+    if (o) return { error: `RTD and thermocouple boards need pins 50, 51 and 52 on ${iface}, but ${o.name} uses pin ${pinsOn(o).find(p => SPI_PINS.includes(p))}. Move ${o.name} to another pin first.` };
+  } else if (isProbe(el)) {
+    const o = others.find(o => (!el.device || o.device === el.device) && pinsOn(o).includes(owPin));
+    if (o) return { error: `DS18B20 probes need pin ${owPin} (the OneWire data pin) on ${o.device}, but ${o.name} uses it. Move ${o.name} to another pin first.` };
+  } else {
+    const spi = mine.find(p => SPI_PINS.includes(p));
+    if (spi && spiUsers.length) return { error: `Pin ${spi} on ${iface} is blocked: pins 50, 51 and 52 carry the RTD and thermocouple boards (${spiUsers.map(o => o.name).join(', ')}).` };
+    if (mine.includes(owPin) && owUsers.length) return { error: `Pin ${owPin} on ${iface} is blocked: it is the OneWire data pin of the DS18B20 probes (${owUsers.map(o => o.name).join(', ')}).` };
+    if (spi) return { warn: `Heads up: pin ${spi} is one of the SPI pins 50, 51, 52. RTD and thermocouple boards can only use those pins, so while this Device is on pin ${spi} you can't add RTD or thermocouple probes to ${iface}.` };
+    if (mine.includes(owPin)) return { warn: `Heads up: pin ${owPin} is the OneWire data pin. While this Device is on it, you can't add DS18B20 probes to ${iface}.` };
+  }
+  return null;
+}
 // The other Device already on one of this Device's ports, or null
 export function portClash(el, elements) {
   const mine = new Set(portKeys(el)); if (!mine.size) return null;
