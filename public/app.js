@@ -5,6 +5,7 @@ import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './coloriz
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
+import { elementNameError, fileNameError } from './names.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1874,6 +1875,7 @@ async function newDeviceDialog(e, hint) {
         readFields(work, body);
         const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
         if (!name) throw new Error('Type a Display Name (or a Name)');
+        const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
@@ -2702,14 +2704,19 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:no
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
-  const work = { bundled: true, workspace: v.workspace, clone: false };
+  const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked };
   const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
-    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
+    ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
     ['clone', `Clone: put a copy of this ${what} and its IPs next to it`, 'bool']], work, false, graphicTopic(v));
   if (r !== 'ok') return;
   readFields(work);
   if (work.clone) return cloneBundle(v);
+  if (work.locked !== !!v.locked) {       // the same as the 🔒 Lock button: its ports and joined fittings go with it
+    const frozen = profileFrozen(v);
+    if (frozen) toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
+    else for (const g of [v, ...bundleParts(v)]) setLock(g, work.locked);
+  }
   if (work.workspace && work.workspace !== v.workspace) {
     const old = v.workspace;
     for (const g of [v, ...bundleParts(v)]) g.workspace = work.workspace;
@@ -2880,6 +2887,7 @@ async function editItem(kind, id) {
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
       if (follow) work.name = deviceSuggestion(work) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
+      if (work.name !== item.name) { const bad = elementNameError(work.name, isDevice(work) ? 'Device' : 'Widget'); if (bad) throw new Error(bad); }   // public/names.js
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)))) { const err = portError(work, item); if (err) throw new Error(err); }
@@ -2894,8 +2902,14 @@ async function editItem(kind, id) {
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
-    const before = isV ? clone(item) : null, oldTab = item.workspace;
+    const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
+    if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
+      const frozen = profileFrozen(item);
+      if (frozen) { setLock(item, lockWas); toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true); }
+      else if (item.kind === 'vessel') for (const g of bundleParts(item)) setLock(g, !!item.locked);
+    }
+    if (!item.locked) delete item.locked;
     if (item.workspace && item.workspace !== oldTab) {   // moved to another tab: go there with it, so it does not seem to vanish
       for (const g of draft.graphics) if (g.attachTo === (item.id ?? item.name) && !g.port && g.kind === 'ip') g.workspace = item.workspace;   // IPs dropped on it go along
       wsName = item.workspace;
@@ -3478,6 +3492,7 @@ async function restoreFromBin(b) {
     if (r.ok) break;
     as = prompt(`${r.msg}\n\nRestore it as:`, as + '_restored'); if (!as) return;
     as = noSpaces(as);
+    const bad = fileNameError(as, { ext: false, what: 'Process' }); if (bad) { toast(bad, true); as = b.name; }
   }
   S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
   $('#binDlg').close(); toast(`"${r.name}" is back`);
@@ -3505,7 +3520,7 @@ const saveScript = guard(async () => {
 // A path in a process that is not on the Brain (the Pi): files there cannot be reached from a phone or another computer
 function offBrainDialog(list) {
   const d = $('#valDlg'); d.innerHTML = '';
-  const off = h('input', { type: 'checkbox' });
+  const off = h('input', { type: 'checkbox', class: 'swc' });
   const close = guard(async () => {
     d.close();
     if (off.checked) { await api('PUT', '/ui/settings', { warnOffBrainPaths: false }); S.config.warnOffBrainPaths = false; toast('Path warnings are off. Turn them back on in Settings > Panel settings.'); }
@@ -3552,6 +3567,7 @@ $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
   n = noSpaces(n);
+  const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);   // a Process is the file scripts/<name>.txt
   if (S.scripts.some(s => s.name === n)) throw new Error('That name is used');
   await api('PUT', '/ui/scripts/' + encodeURIComponent(n), '//' + n + '\n', true);
   S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n);
@@ -3559,6 +3575,7 @@ $('#newScript').onclick = guard(async () => {
 $('#renScript').onclick = guard(async () => {
   if (!curScript) return; let n = prompt('Rename to', curScript); if (!n) return;
   n = noSpaces(n); if (n === curScript) return;
+  const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);
   await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n });
   curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
@@ -5500,7 +5517,7 @@ F.skynetFitting = it => {
     ...(isCapOnly(it) ? [] : [['_o', 'Orientation (the picture and its IPs follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
     ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : [['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num'],
-      ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']])];
+      ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']])];
 };
 
 // the Properties of a Skynet vessel: no port or IP settings (its openings have their IPs built in), Flip Horizontal, and the
@@ -5517,7 +5534,7 @@ F.skynetVessel = it => {
     ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : []),
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
     ['_look', 'Display Name and place', 'head'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
-    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']];
+    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 };
 
 // draw profile equipment on the loaded Schema's Equipment tab (a fresh drawing, or the old one brought up to date)
