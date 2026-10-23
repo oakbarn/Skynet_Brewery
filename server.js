@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
 import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf } from './lib/store.js';
-import { modernize, removeSpacesOnDisk } from './lib/modernize.js';
+import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
@@ -36,6 +36,7 @@ import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds } from './public/naming.js';
+import { elementNameError, checkFileName } from './public/names.js';
 import { renameMap, renameInProcesses, renameElementRefs } from './lib/renames.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -57,6 +58,8 @@ const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, d
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 const store = new Store(CONFIG, DATA);
 store.load();
+// Old "X" visibility = hidden / hiddenlocked lines become X.visible = false (and X.hidden = true), once (*.before-hidden.bak)
+const visFixed = visibilityOnDisk(SCRIPTS, n => store.get(n));
 // Picture groups: the eleven Skynet folders in media/Images are made, and the Skynet pictures moved into them once (lib/picgroups.js)
 {
   const before = JSON.stringify(store.config.svgChoices ?? {});
@@ -94,6 +97,7 @@ const help = new Help(HELP);                                        // Help tab:
 engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
+if (visFixed.length) { const l = `Processes changed to .visible / .hidden: ${visFixed.join(', ')} (old copies saved as .before-hidden.bak).`; console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
 // Schemas (the Schema dropdown at the top) and Equipment Profiles (☰ Menu > Equipment Profile)
@@ -433,6 +437,8 @@ async function route(req, res) {
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
+    // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
+    for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
     // renamed Devices and Widgets: old name -> new name, only names that were there and are there now (lib/renames.js)
     let renames = new Map();
     if (body.renames && body.elements) {
@@ -617,6 +623,7 @@ async function route(req, res) {
     if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
     if (!act && m === 'PUT') {
+      if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file scripts/<name>.txt (public/names.js)
       // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
       const mod = modernize(await readBody(req), n => store.get(n));
       engine.write(name, mod.text);

@@ -55,7 +55,7 @@ exit /b 1
 :startover
 netstat -ano | findstr /r /c:":8080 .*LISTENING" >nul
 if not errorlevel 1 goto stillrunning
-for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HHmmss"') do set "STAMP=%%t"
+for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd'T'HHmmss"') do set "STAMP=%%t"
 set "KEEPDIR=C:\Brewing\Old_Panel_%STAMP%"
 mkdir "%KEEPDIR%"
 for %%d in (config data media scripts) do if exist "%PANEL%\%%d" move "%PANEL%\%%d" "%KEEPDIR%\" >nul

@@ -175,11 +175,11 @@ assert.equal(store.config.workspaces.find(w => w.name === 'Equipment').equipment
 schemas.load(first);
 
 // Schema versions: <name>_yyyymmdd_hh_mm, kept under that file name; the version survives a reload and can be restored
-assert.equal(versionName('Oak Barn', new Date(2026, 9, 21, 9, 5)), 'Oak Barn_20261021_09_05');
+assert.equal(versionName('Oak Barn', new Date(2026, 9, 21, 9, 5)), 'Oak Barn_20261021T0905');
 assert.equal(versionFile('Oak Barn_20261021_09_05'), 'Oak_Barn_20261021_09_05.json');
 const act = store.config.schema.id;
 const nv = schemas.newVersion();
-assert.match(nv.version, new RegExp(`^${store.config.schema.name}_\\d{8}_\\d{2}_\\d{2}$`));
+assert.match(nv.version, new RegExp(`^${store.config.schema.name}_\\d{8}T\\d{4}$`));
 assert.equal(store.config.schema.version, nv.version);
 assert.equal(JSON.parse(fs.readFileSync(schemas.file(act))).version, nv.version, 'the Schema file has its version');
 assert.ok(fs.existsSync(path.join(schemas.versionsDir(act), nv.file)), 'a copy under the version file name');
@@ -195,7 +195,7 @@ assert.equal(store.config.schema.version, nv.version);
 
 // Schema.json: Save as .json file holds the Schema with its profile drawing, never the panel settings
 const ex = schemas.exportSchema(store.config.schema.id);
-assert.match(ex.file, /^[\w.-]+_\d{8}_\d\d_\d\d\.json$/, 'named Name_yyyymmdd_hh_mm');
+assert.match(ex.file, /^[\w.-]+_\d{8}T\d{4}\.json$/, 'named Name_yyyymmddThhmm');
 assert.equal(ex.schema.name, store.config.schema.name);
 assert.equal(ex.schema.mqtt, undefined, 'no panel settings');
 assert.equal(ex.schema.users, undefined, 'no logins');
