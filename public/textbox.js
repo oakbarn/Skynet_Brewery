@@ -16,7 +16,7 @@
 
 export const TB_ALIGNS = ['Left', 'Center', 'Right'];
 // the attributes a Process can read and set (written in any capitals: Text_1.ForeColor is the same as Text_1.forecolor)
-export const TB_ATTRS = ['visible', 'forecolor', 'backcolor', 'alignment', 'width', 'height', 'xposition', 'yposition'];
+export const TB_ATTRS = ['visible', 'hidden', 'forecolor', 'backcolor', 'alignment', 'width', 'height', 'xposition', 'yposition'];
 // fonts every computer and phone has (or a close match): [CSS font, name in the list]
 export const FONTS = [['', 'Default'], ['system-ui, sans-serif', 'System (the panel\'s normal font)'], ['Arial, Helvetica, sans-serif', 'Arial'],
   ['Verdana, Geneva, sans-serif', 'Verdana'], ['Tahoma, Verdana, sans-serif', 'Tahoma'], ['"Trebuchet MS", sans-serif', 'Trebuchet MS'],
