@@ -30,11 +30,13 @@ When you add a Device (anything wired to a port), the **New Device** box asks fo
 
 The name is filled in for you as you go:
 
-**Interface ID _ Device Type ID _ Label __ Tab ID**
+**Interface ID _ Port _ Device Type ID _ Label __ Tab ID**
 
-There are **two** underscores before the Tab ID. A low temperature proportional valve called *Fly Sparge*, on the Mega `MB`, on the Sparge tab `SP`, gets:
+The port is always in the name, and the Device Type ID comes third. There are **two** underscores before the Tab ID. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
-`MB_P_L_Vlv_Fly_Sparge__SP`
+`MB_25_P_L_Vlv_Fly_Sparge__SP`
+
+A 10K thermistor called *Mash/Tun* on pin A0 gets `MB_A0_10KNTC_Mash~Tun__SP`. DS18B20 probes all share one wire, so they use their probe number instead: `MB_OW1_1W_HLT__HL`.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 
@@ -45,9 +47,9 @@ How the Label is turned into the name part (the Label itself stays exactly as yo
 More rules:
 
 - **No spaces in Device names.**
-- If the name is already used, a number goes after the Label: `MB_Pump_Wort_2__BR`.
+- If the name is already used, a number goes after the Label: `MB_25_Pump_Wort_2__BR`.
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
-- A name with `~` in it works in a Process as it is: `MB_E_L_Vlv_Fly~Sparge__SP = true`.
+- A name with `~` in it works in a Process as it is: `MB_25_E_L_Vlv_Fly~Sparge__SP = true`.
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
 - **One Device per port.** Two Devices can't use the same port on the same Interface.
 
@@ -69,11 +71,11 @@ A **DIN** gives one trigger per press, however long the button is held, and a se
 
 **Analog outputs (0-10 V, 4-20 mA):** `AO` plain, `H_AO`, `P_L_Vlv`, `P_H_Vlv`, `P_Pump`, `P_Fan`, `P_Mtr`.
 
-**Analog inputs:** `AI` plain, `Pres` pressure, `Level`, `Vol` volume, `pH`.
+**Analog inputs:** `AI` plain, `Pres` pressure, `Level`, `Vol` volume, `PH_Met` pH meter.
 
 **Others:** `FlowM` flow meter, `Scale` scale (load cells), `Step` stepper motor.
 
-**Kept for later** (Skynet can't read these yet): `DHT11`, `DHT22`, `Tilt`.
+**Kept for later** (Skynet can't read these yet): `DHT11`, `DHT22`, `Hydro` (a Tilt or any other hydrometer).
 
 ## Thermistors
 
