@@ -5,6 +5,7 @@ import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './coloriz
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
+import { elementNameError, fileNameError } from './names.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1874,6 +1875,7 @@ async function newDeviceDialog(e, hint) {
         readFields(work, body);
         const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
         if (!name) throw new Error('Type a Display Name (or a Name)');
+        const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
@@ -2880,6 +2882,7 @@ async function editItem(kind, id) {
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
       if (follow) work.name = deviceSuggestion(work) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
+      if (work.name !== item.name) { const bad = elementNameError(work.name, isDevice(work) ? 'Device' : 'Widget'); if (bad) throw new Error(bad); }   // public/names.js
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)))) { const err = portError(work, item); if (err) throw new Error(err); }
@@ -3478,6 +3481,7 @@ async function restoreFromBin(b) {
     if (r.ok) break;
     as = prompt(`${r.msg}\n\nRestore it as:`, as + '_restored'); if (!as) return;
     as = noSpaces(as);
+    const bad = fileNameError(as, { ext: false, what: 'Process' }); if (bad) { toast(bad, true); as = b.name; }
   }
   S.scripts = await api('GET', '/ui/scripts'); renderScriptList();
   $('#binDlg').close(); toast(`"${r.name}" is back`);
@@ -3552,6 +3556,7 @@ $('#stopAll').onclick = guard(() => api('POST', '/ui/stopall'));
 $('#newScript').onclick = guard(async () => {
   let n = prompt('New process name'); if (!n) return;
   n = noSpaces(n);
+  const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);   // a Process is the file scripts/<name>.txt
   if (S.scripts.some(s => s.name === n)) throw new Error('That name is used');
   await api('PUT', '/ui/scripts/' + encodeURIComponent(n), '//' + n + '\n', true);
   S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n);
@@ -3559,6 +3564,7 @@ $('#newScript').onclick = guard(async () => {
 $('#renScript').onclick = guard(async () => {
   if (!curScript) return; let n = prompt('Rename to', curScript); if (!n) return;
   n = noSpaces(n); if (n === curScript) return;
+  const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);
   await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n });
   curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
