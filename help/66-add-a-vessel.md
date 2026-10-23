@@ -17,10 +17,10 @@ The Skynet Vessel Widgets so far:
 
 - **Generic_Brew_Vessel_Widget**: a plain brew vessel with no ports.
 - **Brew_Vessel_Low_TC_Output_Widget**: the same vessel with one TC 1.5 port (the outlet) at Center Bottom, its center 1 inch above the bottom.
-- **Brew_Vessel_TC_Thermowell_Widget**: the one above plus a TC 1.5 Thermowell at Center 5".
-- **Brew_Vessel_TC_Thermowell_Tangential_Widget**: the one above plus a TC 1.5 Tangential inlet at 4", 1" in from the Left side (it faces forward, so it is drawn face-on).
-- **Brew_Vessel_TC_Thermowell_Tangential_Side_Widget**: the one above plus a TC 2 Second Outlet on the Right side at 6".
-- **Brew_Vessel_Fat_Widget**: the one above made 10" wider and 6" taller, the Thermowell moved up to 10", and a TC 2 (Sparge) added on the Left side at 11".
+- **Brew_Vessel_TC_Temperature_Widget**: the one above plus a TC 1.5 Temperature port (thermowell) at Center 5".
+- **Brew_Vessel_TC_Temperature_Tangential_Widget**: the one above plus a TC 1.5 Tangential inlet at 4", 1" in from the Left side (it faces forward, so it is drawn face-on).
+- **Brew_Vessel_TC_Temperature_Tangential_Element_Port_Widget**: the one above plus a TC 2 Heating Element port on the Right side at 6".
+- **Brew_Vessel_Big_Mac_Widget**: the one above made 10" wider and 6" taller, the Temperature port moved up to 10", and a TC 2 (Sparge) added on the Left side at 11".
 
 Each one is built on the one before it. A port's inches are the height of its center above the bottom of the vessel.
 

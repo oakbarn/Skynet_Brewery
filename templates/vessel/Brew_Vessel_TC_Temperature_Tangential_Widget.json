@@ -1,7 +1,7 @@
 {
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
-  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Thermowell_Tangential_Widget.svg",
+  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Temperature_Tangential_Widget.svg",
   "size": [
     217,
     235
@@ -24,5 +24,5 @@
       "position": "Left 4 in"
     }
   },
-  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): the Brew Vessel TC Thermowell Widget plus a TC 1.5 Tangential inlet at 4 in, 1 in in from the Left side (faces forward). Its IPs are built in on the ports."
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): the Brew Vessel TC Temperature Widget plus a TC 1.5 Tangential inlet at 4 in, 1 in in from the Left side (faces forward). Its IPs are built in on the ports."
 }

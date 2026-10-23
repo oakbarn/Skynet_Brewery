@@ -1,7 +1,7 @@
 {
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
-  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Thermowell_Tangential_Side_Widget.svg",
+  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Temperature_Tangential_Element_Port_Widget.svg",
   "size": [
     217,
     235
@@ -23,7 +23,7 @@
       "installed": true,
       "position": "Left 4 in"
     },
-    "outlet2": {
+    "element": {
       "installed": true,
       "position": "Right 6 in",
       "std": {
@@ -32,5 +32,5 @@
       }
     }
   },
-  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): the Brew Vessel TC Thermowell Tangential Widget plus a TC 2 Second Outlet on the Right side at 6 in. Its IPs are built in on the ports."
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): the Brew Vessel TC Temperature Tangential Widget plus a TC 2 Heating Element port on the Right side at 6 in. Its IPs are built in on the ports; the Right side TC 2 is the Heating Element port (a mark, no IP)."
 }
