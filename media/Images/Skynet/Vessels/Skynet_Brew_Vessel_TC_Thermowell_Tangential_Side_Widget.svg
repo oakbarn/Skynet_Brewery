@@ -3,8 +3,8 @@
        All Skynet Brew Vessel Widgets share one box (viewBox -20 0 236 256, 10 units = 1 in) so a port position is the same spot on each;
        face-on TC ports: flange, gasket groove, opening; side ports: tube and flange seen side-on. -->
   <g stroke="#111" stroke-width="1.5">
-    <rect x="179" y="179" width="21" height="20" fill="#b4b7bb"/>
-    <rect x="200" y="176.4" width="7" height="25.2" rx="1.5" fill="#b4b7bb"/>
+    <rect x="179" y="179" width="10.5" height="20" fill="#808080"/>
+    <rect x="189.5" y="176.4" width="7" height="25.2" rx="1.5" fill="#808080"/>
   </g>
   <rect x="5" y="9" width="182" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
   <rect x="12.5" y="22" width="167" height="227" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
