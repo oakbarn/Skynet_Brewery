@@ -13,6 +13,13 @@ The box shows the **Skynet Vessel Widgets** as small pictures. Click one to use 
 
 The picture you clicked is the Widget's picture to start with, but the one on the Build Tab is yours: open its Properties and change the **Graphic** like on any other Widget. Its IPs stay on the openings of the Skynet picture.
 
+The Skynet Vessel Widgets so far:
+
+- **Generic_Brew_Vessel_Widget**: a plain brew vessel with no ports.
+- **Brew_Vessel_Low_TC_Output_Widget**: the same vessel with one TC 1.5 port (the outlet) at Center Bottom, its center 1 inch above the bottom.
+
+A port (a hole in the vessel) is drawn as a TC or NPT fitting, sized in proportion to the vessel, so a TC 2 port looks a little bigger than a TC 1.5 one.
+
 **Blank_Vessel** is a plain vessel where you pick the picture and set every port yourself.
 
 Devices (a heating element, a temperature probe, a valve) are placed on the Build Tab next to the Widget and bundled with it.
