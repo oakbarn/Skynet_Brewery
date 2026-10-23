@@ -1,6 +1,6 @@
 # Build Tab
 
-Building something new on a busy Tab is hard: it lands on top of other things and is fiddly to grab. So new things are made first on a clean **Build Tab**. When it is ready, **Save Build ...** asks where it goes: onto one of your Tabs, or into a Template.
+Building something new on a busy Tab is hard: it lands on top of other things and is fiddly to grab. So **everything new is made first on a clean Build Tab**: every Device, Widget, IP, picture, text, piece of equipment and copy of a Template. You can look at it with **👁 Preview** at any time. When it is ready, **Save Build ...** asks where it goes: onto one of your Tabs (one pick and one click), or into a Template.
 
 The Build Tab only shows while you are building. It has a dashed orange edge and a 🔨 in the Tab bar. It is never saved with the Schema.
 
@@ -8,14 +8,27 @@ The Build Tab only shows while you are building. It has a dashed orange edge and
 
 1. Press **☰ Menu** and pick **Edit layout**.
 2. Do one of these:
-   - Press **Add element** (a Device or Widget) or **Add equipment** (a vessel, chiller, coil, trub filter or RIMS tube). The Build Tab opens by itself and the new item is made there.
+   - Press **Add element** (a Device or Widget), **Add graphic**, **Add text**, **Add equipment** (a vessel, chiller, coil, trub filter, RIMS tube or pipe fitting) or **Add IP**. The Build Tab opens by itself and the new item is made there.
    - Press **🔨 Build Tab** on the Edit layout bar to open it empty.
-   - In **☰ Menu > Vessel Templates**, **Equipment Templates** or **Fitting Templates**, open a Template, press **Add to Tab** and pick **🔨 Build Tab** at the top of the Tab list.
+   - In **☰ Menu > Vessel Templates**, **Equipment Templates** or **Fitting Templates**, open a Template (a Skynet Template or a User Bundled Template) and press **Add to Tab** or **Clone**. The copy is made on the Build Tab (see **Copies of Templates** below).
 3. Build it on the Build Tab: set its properties, add its IPs, draw its pipes. Everything on the Edit layout bar works there.
 
-**Add IP**, **Add graphic**, **Add text** and the pipe fittings (tee, elbows, cross) still go on the Tab you are on, because they are small and are usually placed right where they belong.
-
 You can go back and forth between the Build Tab and your other Tabs at any time. The Build Tab is the size of the Tab you came from.
+
+## Preview
+
+Press **👁 Preview** on the Edit layout bar (it shows while there is a Build Tab). The Build Tab is drawn the way it will look on Brew Day: no grid, no dashed outlines, no resize corners or padlocks. Nothing can be moved or changed while you look: press **✏ Back to building** (the same button) to go on building.
+
+The Preview works before and after you change an item's Properties, as often as you like, until the build is sent to a Tab or a Template. Going to another Tab ends it too. The **Save Build** pop-up also has a **👁 Preview** button, so you can have one more look before you pick where it goes.
+
+## Copies of Templates
+
+A copy of a Template, from a **Skynet Template** or a **User Bundled Template**, is always made on the Build Tab first.
+
+- **Add to Tab**: pick the Tab it goes on and its name. The copy is made on the Build Tab, Bundled. **Save Build ... > Save to Tab** then offers that Tab first.
+- **Clone**: give the new Template a name. The copy is made on the Build Tab. Change it there, then **Save Build ...** shows **As a Template** first, with that name filled in. Press **Save as Template** and the new Template is saved. What the Build Tab doesn't show (like each port's Connection Standard) is copied from the Template you cloned.
+
+If you are not in Edit layout yet, it is switched on for you.
 
 ## Save Build
 
@@ -56,4 +69,4 @@ A Template is **one vessel** (with the Bundled Fittings on its ports) or **one B
 - A Bundled Fitting on one of its ports that is still the same as its Template is used as it is. One you changed on the Build Tab is saved as a new **Bundled Fitting Template** first, named after it.
 - A Tab_Fitting by itself becomes a **Bundled Fitting Template**.
 
-While Skynet is still building its Templates there is a **Skynet Template** switch (off = a User Template). See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+While Skynet is still building its Templates there is a **Skynet Template** switch (off = a User Bundled Template). See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).

@@ -41,6 +41,9 @@ main { padding: 10px 14px; }
 #wsScroll { overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); max-height: calc(100vh - 150px); }   /* exact height set by fitZoom */
 #ws { position: relative; background-size: cover; background-position: center; touch-action: manipulation; }
 #ws.editing { touch-action: none; }
+/* Build Tab Preview: drawn as on Brew Day; nothing on it, and nothing on the Edit layout bar but Preview and Save Build, can be pressed */
+#ws.preview { pointer-events: none; }
+body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout):not(.spacer):not(#editHint) { opacity: .4; pointer-events: none; }
 #ws.editing { background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 20px 20px; }
 #pipes { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 #pipes .pipe { fill: none; stroke-linecap: round; stroke-linejoin: round; }
