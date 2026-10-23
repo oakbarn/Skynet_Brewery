@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 256">
+  <!-- Skynet Vessel Widget "Brew Vessel Low TC Output Widget" (Fritz, 2026-10-23): the Generic Brew Vessel with a TC 1.5 port at
+       Center Bottom 1 in (port center 1 in above the bottom; 10 units = 1 in). A TC port is drawn face-on: flange, gasket groove, opening. -->
+  <rect x="5" y="9" width="182" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
+  <rect x="12.5" y="22" width="167" height="227" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
+  <g stroke="#111">
+    <circle cx="96" cy="239" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="96" cy="239" r="8.4" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="96" cy="239" r="6.9" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+</svg>

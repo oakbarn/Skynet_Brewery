@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 256">
+  <!-- Skynet Vessel Widget "Generic Brew Vessel Widget" (Fritz, 2026-10-23): a plain kettle with no ports, drawn like his BasicElectricBrewKettle. No text: the Display Name shows below it. Scale 10 units = 1 inch (body 16.7 in wide). -->
+  <rect x="5" y="9" width="182" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
+  <rect x="12.5" y="22" width="167" height="227" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
+</svg>
