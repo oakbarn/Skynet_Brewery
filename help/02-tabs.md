@@ -14,7 +14,7 @@ A **Tab** is one screen of your brewery: a background picture with pumps, valves
 
 ## Changing the layout (admins)
 
-Press the **red circle with the yellow hammer**, right next to **☰ Menu** on the Tabs bar (or press **☰ Menu** and pick **Edit layout**). A dashed bar appears with these buttons, and the hammer gets a yellow ring while Edit layout is on. Press the hammer again to leave Edit layout; if something changed it asks **Save** or **Exit without Saving**. Only admins see the hammer.
+Press the **red circle with the yellow tools** (a hammer and a pick crossed over a carpenter's square), right next to **☰ Menu** on the Tabs bar (or press **☰ Menu** and pick **Edit layout**). A dashed bar appears with these buttons, and the button gets a yellow ring while Edit layout is on. Press it again to leave Edit layout; if something changed it asks **Save** or **Exit without Saving**. Only admins see this button.
 
 | Button | What it does |
 |---|---|
