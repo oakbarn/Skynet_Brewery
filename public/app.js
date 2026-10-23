@@ -2704,14 +2704,19 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:no
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
-  const work = { bundled: true, workspace: v.workspace, clone: false };
+  const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked };
   const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
-    ['bundled', 'Bundled with its IPs', 'bool'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
+    ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
     ['clone', `Clone: put a copy of this ${what} and its IPs next to it`, 'bool']], work, false, graphicTopic(v));
   if (r !== 'ok') return;
   readFields(work);
   if (work.clone) return cloneBundle(v);
+  if (work.locked !== !!v.locked) {       // the same as the 🔒 Lock button: its ports and joined fittings go with it
+    const frozen = profileFrozen(v);
+    if (frozen) toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
+    else for (const g of [v, ...bundleParts(v)]) setLock(g, work.locked);
+  }
   if (work.workspace && work.workspace !== v.workspace) {
     const old = v.workspace;
     for (const g of [v, ...bundleParts(v)]) g.workspace = work.workspace;
@@ -2897,8 +2902,14 @@ async function editItem(kind, id) {
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
-    const before = isV ? clone(item) : null, oldTab = item.workspace;
+    const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
+    if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
+      const frozen = profileFrozen(item);
+      if (frozen) { setLock(item, lockWas); toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true); }
+      else if (item.kind === 'vessel') for (const g of bundleParts(item)) setLock(g, !!item.locked);
+    }
+    if (!item.locked) delete item.locked;
     if (item.workspace && item.workspace !== oldTab) {   // moved to another tab: go there with it, so it does not seem to vanish
       for (const g of draft.graphics) if (g.attachTo === (item.id ?? item.name) && !g.port && g.kind === 'ip') g.workspace = item.workspace;   // IPs dropped on it go along
       wsName = item.workspace;
@@ -3509,7 +3520,7 @@ const saveScript = guard(async () => {
 // A path in a process that is not on the Brain (the Pi): files there cannot be reached from a phone or another computer
 function offBrainDialog(list) {
   const d = $('#valDlg'); d.innerHTML = '';
-  const off = h('input', { type: 'checkbox' });
+  const off = h('input', { type: 'checkbox', class: 'swc' });
   const close = guard(async () => {
     d.close();
     if (off.checked) { await api('PUT', '/ui/settings', { warnOffBrainPaths: false }); S.config.warnOffBrainPaths = false; toast('Path warnings are off. Turn them back on in Settings > Panel settings.'); }
@@ -5506,7 +5517,7 @@ F.skynetFitting = it => {
     ...(isCapOnly(it) ? [] : [['_o', 'Orientation (the picture and its IPs follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
     ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : [['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num'],
-      ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']])];
+      ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']])];
 };
 
 // the Properties of a Skynet vessel: no port or IP settings (its openings have their IPs built in), Flip Horizontal, and the
@@ -5523,7 +5534,7 @@ F.skynetVessel = it => {
     ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : []),
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
     ['_look', 'Display Name and place', 'head'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
-    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'yn']];
+    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 };
 
 // draw profile equipment on the loaded Schema's Equipment tab (a fresh drawing, or the old one brought up to date)
