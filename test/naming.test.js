@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck } from '../public/naming.js';
+import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck, freePins } from '../public/naming.js';
 import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
@@ -117,6 +117,23 @@ const pump = { name: 'MB_51_Pump', type: 'digitalOut', device: 'MEGA', channel: 
 assert.match(busCheck(pump, [rtd]).error, /blocked/, 'an RTD on the board blocks 50-52');
 assert.equal(busCheck(pump, [rtd, { ...rtd, device: 'MEGA2' }].slice(1)).warn !== undefined, true, 'another board: only a heads-up');
 assert.match(busCheck(pump, []).warn, /Heads up/);
+// PWM and counter pins are few: a free plain pin is suggested, until none is left
+assert.equal(busCheck({ ...pump, channel: 5 }, []).pin, '14', 'a relay on a PWM pin is offered a plain pin');
+assert.equal(busCheck({ ...pump, channel: 2 }, []).pin, '14');
+assert.equal(busCheck({ name: 'P', type: 'pwmOut', device: 'MEGA', channel: 2 }, []).pin, '4', 'a PWM output on a counter pin is offered a PWM-only pin');
+assert.equal(busCheck({ name: 'P', type: 'pwmOut', device: 'MEGA', channel: 5 }, []), null);
+assert.equal(busCheck({ name: 'F', type: 'flowMeter', device: 'MEGA', channel: 18 }, []), null);
+assert.equal(busCheck({ name: 'F', type: 'flowMeter', device: 'MEGA', channel: 2 }, []).pin, '18');
+assert.equal(busCheck({ ...pump, channel: 22 }, []), null);
+const plain = ['14', '15', '16', '17', ...Array.from({ length: 32 }, (_, i) => String(22 + i))].filter(p => !['40', '44', '45', '46', '50', '51', '52'].includes(p));
+const full = plain.map((p, i) => ({ name: 'R' + i, type: 'digitalOut', device: 'MEGA', channel: p }));
+assert.equal(busCheck({ ...pump, channel: 5 }, full), null, 'no plain pin left: no heads-up');
+// the Port list in the New Device box: free pins that fit, best first
+assert.deepEqual(freePins({ name: 'N', type: 'digitalOut', device: 'MEGA' }, [pump]).slice(0, 3), ['14', '15', '16'], 'plain pins first');
+assert.ok(!freePins({ name: 'N', type: 'digitalOut', device: 'MEGA' }, [rtd]).includes('51'), 'SPI pins gone while an RTD is there');
+assert.equal(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [])[0], '4', 'PWM pins that are not counter pins first');
+assert.deepEqual(freePins({ name: 'N', type: 'flowMeter', device: 'MEGA' }, []), ['18', '19', '20', '21', '2', '3']);
+assert.equal(freePins({ name: 'N', type: 'analogIn', device: 'MEGA' }, [{ name: 'L', type: 'analogIn', device: 'MEGA', channel: 54 }], [], true)[0], 'A1');
 assert.match(busCheck(rtd, [pump]).error, /Move MB_51_Pump/, 'no RTD while a pump holds an SPI pin');
 assert.match(busCheck({ ...rtd, channel: 52 }, []).error, /chip-select/);
 assert.equal(busCheck(rtd, []), null);
