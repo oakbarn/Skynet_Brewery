@@ -36,6 +36,7 @@ import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds } from './public/naming.js';
+import { elementNameError, checkFileName } from './public/names.js';
 import { renameMap, renameInProcesses, renameElementRefs } from './lib/renames.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -433,6 +434,8 @@ async function route(req, res) {
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
+    // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
+    for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
     // renamed Devices and Widgets: old name -> new name, only names that were there and are there now (lib/renames.js)
     let renames = new Map();
     if (body.renames && body.elements) {
@@ -617,6 +620,7 @@ async function route(req, res) {
     if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
     if (!act && m === 'PUT') {
+      if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file scripts/<name>.txt (public/names.js)
       // saved in the new style (alm_Hops = true, my_Widget.visible = false), then every step is renumbered
       const mod = modernize(await readBody(req), n => store.get(n));
       engine.write(name, mod.text);
