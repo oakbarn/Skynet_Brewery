@@ -36,7 +36,7 @@ The port is always in the name, and the Device Type ID comes third. There are **
 
 `MB_25_P_L_Vlv_Fly_Sparge__SP`
 
-A 10K thermistor called *Mash/Tun* on pin A0 gets `MB_A0_10KNTC_Mash~Tun__SP`. DS18B20 probes all share one wire, so they use their probe number instead: `MB_OW1_1W_HLT__HL`.
+Analog pins are written the way BruControl numbers them, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun__SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so they use their probe number instead: `MB_OW1_1W_HLT__HL`.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 

@@ -1839,7 +1839,8 @@ const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'd
 function portForName(e) {
   if (isOneWire(e)) return e.probeIndex ? 'OW' + e.probeIndex : 'OW';
   if (e.type === 'analogIn' && e.adc === 'ads1115') return e.channel === undefined || e.channel === '' ? '' : 'ADS' + e.channel;
-  return String(e.channel ?? '').split(',')[0].trim();
+  const pin = String(e.channel ?? '').split(',')[0].trim(), a = /^A(\d{1,2})$/i.exec(pin);
+  return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
 const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.displayName, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
