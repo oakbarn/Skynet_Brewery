@@ -7,7 +7,7 @@
 //    Letters typed afterwards that spell the rest of the attribute are skipped, so typing it in full also works.
 const WORDS = ['if', 'elseif', 'else if', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'restart', 'reset', 'print', 'clear', 'show tab', 'log', 'step',
   'new value', 'new string', 'new bool', 'new time', 'new datetime', 'true', 'false', 'now', 'and', 'or', 'not'];
-const IDENT = /[A-Za-z_][A-Za-z0-9_]*$/;
+const IDENT = /[A-Za-z_][A-Za-z0-9_~]*$/;
 // my_Process_Mash.running: true while it runs (read only)
 const PROCESS_ATTRS = ['running'];
 
@@ -77,7 +77,7 @@ export function attachAutofill(ta, box, words) {
     const line = lineBefore(), p = ta.selectionStart;
     if (/^\s*\/\//.test(line)) return close();
     // after a dot: attributes
-    const dot = /(?:"([^"\n]+)"|([A-Za-z_]\w*))\.([A-Za-z]*)$/.exec(line);
+    const dot = /(?:"([^"\n]+)"|([A-Za-z_][\w~]*))\.([A-Za-z]*)$/.exec(line);
     if (dot) {
       const name = dot[1] ?? dot[2], typed = dot[3].toLowerCase(), attrs = attrsFor(name);
       if (!attrs) return close();
@@ -100,7 +100,7 @@ export function attachAutofill(ta, box, words) {
     const add = (text, hint) => { if (seen.has(text) || text === w || !text.toLowerCase().startsWith(lw)) return; seen.add(text); list.push({ text, hint }); };
     if (!q) {
       // names used above in this Process come first
-      for (const m of ta.value.slice(0, p - w.length).matchAll(/[A-Za-z_][A-Za-z0-9_]*/g)) add(m[0], 'used above');
+      for (const m of ta.value.slice(0, p - w.length).matchAll(/[A-Za-z_][A-Za-z0-9_~]*/g)) add(m[0], 'used above');
       for (const k of WORDS) add(k, '');
     }
     const W = words() || {};
