@@ -4,7 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
@@ -1728,8 +1728,9 @@ const PRESETS = {
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
   const an = [...Array(16).keys()].map(i => [`A${i}`, `A${i} = pin ${54 + i} (BruControl)`]);
-  const dig = [...Array(54).keys()].map(i => [String(i), `D${i}`]);
-  const lists = { analog: an, digital: [...dig, ...an], pwm: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 44, 45, 46].map(i => [String(i), `D${i} (PWM)`]), interrupt: [2, 3, 18, 19, 20, 21].map(i => [String(i), `D${i} (interrupt)`]) };
+  const tagged = i => [String(i), `D${i}` + (pinTag(i) ? `  (${pinTag(i)})` : '')];      // D5 (PWM), D2 (PWM + Counter), D18 (Counter)
+  const dig = [...Array(54).keys()].map(tagged);
+  const lists = { analog: an, digital: [...dig, ...an], pwm: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 44, 45, 46].map(tagged), interrupt: [2, 3, 18, 19, 20, 21].map(tagged) };
   for (const [k, opts] of Object.entries(lists)) document.body.append(h('datalist', { id: 'pins-' + k }, ...opts.map(([v, t]) => h('option', { value: v, label: t }, t))));
 })();
 
@@ -1753,7 +1754,7 @@ const ADD_MENU = [
     ['Switch (on while closed)', 'digitalIn', 'DI', { mode: 'switch' }],
     ['Push button (ON only while held, OFF when released)', 'digitalIn', 'PB', { mode: 'switch' }],
     ['Toggle button (press once: ON, press again: OFF)', 'digitalIn', 'Toggle', { mode: 'toggle' }],
-    ['Pulse button (one short ON per press, even if held)', 'digitalIn', 'Pulse', { mode: 'momentary', pulse: 100, lockout: 3000 }],
+    ['DIN / Pulse button (one short ON per press, even if held; 3 s lockout)', 'digitalIn', 'Pulse', { mode: 'momentary', pulse: 100, lockout: 3000 }],
     ['Latching input (stays on until reset: leak, E-stop, alarm)', 'digitalIn', 'DI', { mode: 'latch', onText: 'TRIPPED', offText: 'OK' }],
     ['Pulse counter (counts presses or pulses)', 'digitalIn', 'Count', { mode: 'counter' }],
     ['Float / level switch', 'digitalIn', 'Float', { mode: 'switch', onText: 'FULL', offText: 'LOW', onDelay: 2, offDelay: 2 }],
@@ -1766,7 +1767,12 @@ const ADD_MENU = [
     ['PT1000 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt1000', wires: 3 }],
     ['Thermocouple type K (MAX31855 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'K' }],
     ['Thermocouple K / J / T and others (MAX31856 board)', 'temperature', 'Temp', { sensor: 'thermocouple', tcType: 'J' }],
-    ['NTC thermistor 10k (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
+    ['NTC thermistor 10K, Beta 3950 (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
+    ['NTC thermistor 10K, BCS-462 / BruControl type, Beta 3977 (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3977, series: 10000 }],
+    ['NTC thermistor 50K, Beta 3950 (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 50000, beta: 3950, series: 50000 }],
+    ['NTC thermistor 100K, Beta 3950, 3D printer type (analog pin)', 'temperature', 'Temp', { sensor: 'ntc', r0: 100000, beta: 3950, series: 100000 }],
+    ['LM35 analog temperature sensor (10 mV per °C)', 'temperature', 'Temp', { sensor: 'lm35' }],
+    ['TMP36 analog temperature sensor (10 mV per °C, 0.5 V at 0 °C)', 'temperature', 'Temp', { sensor: 'tmp36' }],
   ]],
   ['Devices: analog sensors (board analog pin or ADS1115)', [
     ['Analog input 0-5 V', 'analogIn', 'AI', { signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
@@ -1822,28 +1828,39 @@ $('#addEl').onclick = guard(async () => {
   if (isDevice(e) && !(await newDeviceDialog(e, prefix))) return;
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
+  stackNew(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 });
-// Fritz, 2026-10-21: a new Device starts with its Display Name, then its Interface, Port and Type, and its name is suggested from them:
-// InterfaceID_Port_Type_DisplayName_TabID, e.g. MB_25_PWM_VlV_Fly_Sparge_SP (public/naming.js). An Admin may type another name;
-// it must be unique and has no spaces. Only one Device per port of an Interface.
+// Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
+// then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
+// 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
+// type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
+const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an analog pin
 const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
-// the port as written in the name: the pin, OW3 for OneWire probe 3, ADS0 for ADS1115 channel 0, the first DT pin of a scale
+// the port as written in the name (Fritz: always in it): the pin, OW3 for OneWire probe 3, ADS0 for ADS1115 channel 0, the first DT pin of a scale
 function portForName(e) {
-  if (isOneWire(e)) return e.probeIndex ? 'OW' + e.probeIndex : 'OW';
+  if (isOneWire(e)) return oneWirePort(e.probeIndex);      // virtual port 700-799 (Fritz, 2026-10-23)
   if (e.type === 'analogIn' && e.adc === 'ads1115') return e.channel === undefined || e.channel === '' ? '' : 'ADS' + e.channel;
-  return String(e.channel ?? '').split(',')[0].trim();
+  const pin = String(e.channel ?? '').split(',')[0].trim(), a = /^A(\d{1,2})$/i.exec(pin);
+  return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
-const deviceSuggestion = e => suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, displayName: e.displayName, tab: tabIdOf(e.workspace) });
+// a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.displayName, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
 const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self && x.name.toLowerCase() === n.toLowerCase());
+const pinsOf = e => portKeys(e).map(k => k.split('|')[1]);
 function portError(e, self) {
-  const c = portClash(e, (draft || S.config).elements.filter(x => x !== self));
-  return c && `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only one Device can use a port.`;
+  const els = (draft || S.config).elements.filter(x => x !== self), c = portClash(e, els);
+  if (c) return `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only outputs of different Device Types can share a port.`;
+  const b = busCheck(e, els, S.config.devices);      // RTD / thermocouple SPI pins, the OneWire data pin, few PWM and counter pins (Fritz, 2026-10-23)
+  if (b?.error) return b.error;
+  const pin = pinsOf(e).find(Boolean);
+  if (b?.warn && !confirm(b.warn + `\n\nOK = use pin ${pin} anyway.  Cancel = go back and pick another pin.`)) return b.pin ? `Pick another pin, for example pin ${b.pin}.` : 'Pick another pin.';
+  return null;
 }
 async function newDeviceDialog(e, hint) {
   const devs = S.config.devices || [];
@@ -1851,40 +1868,53 @@ async function newDeviceDialog(e, hint) {
   const port = isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
-        : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || 'digital'];
-  const fields = [['_n', 'Type the Display Name first. The name is made from it: Interface ID _ Port _ Type _ Display Name _ Tab ID. You can type your own name instead: it must be unique, and spaces become _.', 'note'],
-    ['displayName', 'Display name (shown on the tab, e.g. Fly Sparge)', 'text'],
-    ['device', 'Interface (board)', 'dev'], port,
-    ['typeCode', 'Type (for the name)', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
-    ['workspace', 'Tab', 'ws'],
-    ['name', 'Name (filled in for you)', 'text']];
-  const body = $('#dlgBody');
+        : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
+  const fields = [['device', '1. Interface (board)', 'dev'],
+    ['typeCode', '2. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
+    [port[0], '3. ' + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
+    ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
+    ['name', 'Suggested Name (you may type your own)', 'text']];
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
+  for (const b of oks) b.textContent = 'Create';
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
       const shown = dialog('New Device', fields, work, false);
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
-      body.oninput = ev => {
+      // the Port list: only the free pins on this Interface that fit this Device Type, best first (Fritz, 2026-10-23)
+      const free = h('datalist', { id: 'pins-free' }); body.append(free);
+      const fillFree = w => free.replaceChildren(...(w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : []).map(p => { const t = /^A/.test(p) ? `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)` : `D${p}` + (pinTag(p) ? `  (${pinTag(p)})` : ''); return h('option', { value: p, label: t }, t); }));
+      fillFree(work);
+      body.oninput = body.onchange = ev => {
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         const w = { ...work }; try { readFields(w, body); } catch { }
+        fillFree(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
       };
       if (await shown !== 'ok') return false;
       try {
         readFields(work, body);
         const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
-        if (!name) throw new Error('Type a Display Name (or a Name)');
+        if (!name) throw new Error('Type a Label (or a Name)');
         const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
-        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
-        e.name = name; wsName = e.workspace || wsName;
+        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        e.name = name;
         if (name === sug) autoNamed.add(e);
+        // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
+        if (e.type === 'digitalIn' && work.typeCode === 'DIN') { e.mode = 'momentary'; e.pulse ??= 100; e.lockout ??= 3000; }
+        if (e.type === 'digitalIn' && work.typeCode === 'Float') e.mode = 'switch';       // true while the float is made, false when not
         return true;
       } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
     }
-  } finally { body.oninput = null; }
+  } finally { body.oninput = body.onchange = null; for (const b of oks) b.textContent = 'Save'; }
+}
+// Fritz, 2026-10-23: as in BruControl, several new things made at the same spot stack down and to the right instead of hiding each other
+function stackNew(e) {
+  const at = (x, y) => draft.elements.some(o => o.workspace === e.workspace && o.x === x && o.y === y);
+  for (let n = 0; n < 50 && at(e.x, e.y); n++) { e.x += 20; e.y += 20; }
 }
 // Fritz, 2026-10-20: a new valve starts from the Valve Profile picked now (only now; after that it is changed in its properties)
 async function useValveProfile(e) {
@@ -2061,7 +2091,7 @@ function moveBuildTo(tab) {
   centerOn(items, to);
   for (const x of items) x.workspace = to.name;
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
-  // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_PWM_VlV_Fly_Sparge_SP)
+  // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_P_L_Vlv_Fly_Sparge__SP)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
     const n = deviceSuggestion(e);
     if (n && n !== e.name && !nameTaken(n, e)) { swapName(items.filter(x => x !== e), e.name, n); e.name = n; }
@@ -2362,6 +2392,8 @@ const SENSOR_FIELDS = {
   pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
   thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'pin', 'digital'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
   ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
+  lm35: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
+  tmp36: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
 };
 const SIGNAL_FIELDS = {
   raw: [['scale', 'Scale (multiplies the raw 0-1023 reading)', 'num'], ['offset', 'Offset', 'num']],
@@ -2435,7 +2467,7 @@ function fieldsOf(item) {
   if (item.type === 'alarm') return alarmFields(item);
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
-    return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
+    return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
   }
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
@@ -2555,7 +2587,7 @@ function field([key, label, kind, opts, rerender], obj) {
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}_   ${d.name}` : d.name)));
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)));      // Fritz: the full Interface name first
   else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
   else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
@@ -2807,8 +2839,8 @@ async function editItem(kind, id) {
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
-    if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it) || '(type a Display name and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
-      ['typeCode', 'Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
+    if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
+      ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return f;
   } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
@@ -2885,12 +2917,12 @@ async function editItem(kind, id) {
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       // a new Device keeps following the suggested name (Display name, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
-      if (follow) work.name = deviceSuggestion(work) || work.name; else autoNamed.delete(item);
+      if (follow) work.name = deviceSuggestion(work, item) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
       if (work.name !== item.name) { const bad = elementNameError(work.name, isDevice(work) ? 'Device' : 'Widget'); if (bad) throw new Error(bad); }   // public/names.js
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
       const isNew = !S.config.elements.some(x => x.name === item.name);
-      if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)))) { const err = portError(work, item); if (err) throw new Error(err); }
+      if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
       if (work.name !== item.name) noteRename(item.name, work.name);
       if (work.name !== item.name) for (const g of draft.graphics) {
