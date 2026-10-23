@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 100">
+  <!-- Skynet TC 1.5 inch short thermowell (after Fritz's drawing): the TC cap on the left, the well (purple) reaching right -->
+  <path d="M20 42 H144 V58 H20 Z" fill="#c0c0c0"/>
+  <path d="M20 46 H140 V54 H20 Z" fill="#a24ca0"/>
+  <path d="M8 6 H14 Q18 6 18 12 V88 Q18 94 14 94 H8 Q4 94 3 86 Q1 50 3 14 Q4 6 8 6 Z" fill="#808080" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+</svg>

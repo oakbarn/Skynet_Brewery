@@ -13,6 +13,8 @@ const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 // a device or widget element (the things added with Add element)
 export function elementTopic(e) {
   if (!e) return null;
+  if (e.integratedIn) return ['skynet-integrated-devices'];
+  if (e.subtype === 'thermowell') return ['skynet-integrated-devices', 'thermowells'];
   switch (e.type) {
     case 'digitalOut':
       if (e.subtype === 'valve' && e.valveType === 'manual') return ['manual-valves'];
@@ -38,6 +40,7 @@ export function graphicTopic(g) {
   switch (g.kind) {
     case 'vessel':
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet') return ['skynet-fittings'];
+      if (g.integrated) return ['skynet-integrated-devices'];
       if (g.template && g.templateCls === 'skynet') return ['skynet-vessels'];
       if (g.vesselType === 'bfit' || g.template) return ['vessel-and-fitting-templates', 'tabvessel-and-tabfitting'];
       if (g.bundled) return ['equipment', 'bundle-a-vessel-with-its-ips'];

@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet TC 1.5 inch End Cap, seen from the side (after Fritz's drawing). On an opening it turns to face it. -->
+  <path d="M46 6 H54 Q58 6 58 12 V88 Q58 94 54 94 H46 Q42 94 41 86 Q39 50 41 14 Q42 6 46 6 Z" fill="#808080" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+</svg>

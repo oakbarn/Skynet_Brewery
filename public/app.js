@@ -257,7 +257,8 @@ const VESSELS = { vessel: 'Vessel (kettle, HLT, MLT ...)', pchiller: 'Plate chil
 const V_HIGH = [['Center High', 0.5, 0.1], ['Left High', 0, 0.15], ['Right High', 1, 0.15], ['Back High', 0.7, 0.12]];
 const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 0.5, 1]];
 const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
-const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left', 0.22, 1], ['Bottom Right', 0.78, 1]];
+const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left', 0.22, 1], ['Bottom Right', 0.78, 1],
+  ['Top Left Branch', 0.087, 0], ['Bottom Branch', 0.54, 1]];         // the openings of the Skynet RIMS Device picture (Skynet_TC1_2_Rims_Device.svg)
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
@@ -292,7 +293,7 @@ const EQ = {
   rims: { title: 'RIMS tube', types: ['RIMS'], image: 'Images/Skynet/Other_Equipment/Equipment_RIMS.svg', size: [200, 100], tab: 'Equipment',
     ports: { inlet: pt('Wort In', RIMS_POS, { on: true, def: 'Top Left', circuit: 'a' }), outlet: pt('Wort Out', RIMS_POS, { on: true, def: 'Bottom Right', circuit: 'a' }),
       thermowell: pt('Thermowell (probe)', [['Left End', 0, 0.5], ['Right End', 1, 0.5]], { ip: false, on: true, def: 'Left End' }),
-      element: pt('Heating element', [['Right End', 1, 0.5], ['Left End', 0, 0.5]], { ip: false, on: true, def: 'Right End' }) } },
+      element: pt('Heating element', [['Right End', 1, 0.5], ['Left End', 0, 0.5], ['Element Housing', 0.65, 0.5]], { ip: false, on: true, def: 'Right End' }) } },
   eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/Skynet/Other_Equipment/pipe_tee.svg', size: [90, 90],
     ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
   eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', size: [90, 90],
@@ -473,8 +474,8 @@ function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
-  if (g.image && isUnit(g)) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated
-  else if (g.image && isSkyV(g) && (g.flipH || g.flipV || unitRot(g))) {     // a Skynet vessel flipped or rotated
+  if (g.image && isUnit({ ...g, loose: false })) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated
+  else if (g.image && isSkyV({ ...g, loose: false }) && (g.flipH || g.flipV || unitRot(g))) {     // a Skynet vessel flipped or rotated
     const [pw, ph] = picWH(g);
     n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));
   }
@@ -1790,6 +1791,14 @@ const ADD_MENU = [
     ['LM35 analog temperature sensor (10 mV per °C)', 'temperature', 'Temp', { sensor: 'lm35' }],
     ['TMP36 analog temperature sensor (10 mV per °C, 0.5 V at 0 °C)', 'temperature', 'Temp', { sensor: 'tmp36' }],
   ]],
+  // Skynet Devices with their own picture (Fritz, 2026-10-23): a thermowell is a Temperature Device; the RIMS tube is a
+  // Skynet_Integrated_Device with its heating element and its temperature probe built in
+  ['Devices: Skynet', [
+    ['Thermowell, Short (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Short' }],
+    ['Thermowell, Medium (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Medium' }],
+    ['Thermowell, Long (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Long' }],
+    ['RIMS tube (Skynet_Integrated_Device: heating element and temperature probe built in)', 'rimsDevice', 'RIMS'],
+  ]],
   ['Devices: analog sensors (board analog pin or ADS1115)', [
     ['Analog input 0-5 V', 'analogIn', 'AI', { signal: '0-5V', rangeLow: 0, rangeHigh: 100 }],
     ['Analog input 0-10 V (with voltage divider)', 'analogIn', 'AI', { signal: '0-10V', rangeLow: 0, rangeHigh: 100 }],
@@ -1823,7 +1832,10 @@ function fillAddType() {
 $('#addEl').onclick = guard(async () => {
   toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   const [gi, ii] = $('#addType').value.split(':').map(Number);
-  const [, pick, prefix, extra] = ADD_MENU[gi][1][ii], preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
+  const [, pick, prefix, extra] = ADD_MENU[gi][1][ii];
+  if (pick === 'rimsDevice') return newRimsDevice();
+  if (pick === 'thermowell') return newThermowell(extra.length);
+  const preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
   const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
@@ -1927,6 +1939,123 @@ async function newDeviceDialog(e, hint) {
     }
   } finally { body.oninput = body.onchange = null; for (const b of oks) b.textContent = 'Save'; }
 }
+// ---- Thermowell (Fritz, 2026-10-23): a Temperature Device drawn as a TC 1.5 thermowell, Short, Medium or Long. After picking it
+// (step 2) a pop-up asks the type of Temperature Probe in it (2a), then the New Device box goes on as for any Device.
+const THERMOWELLS = { Short: ['Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg', 90], Medium: ['Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Medium.svg', 138], Long: ['Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Long.svg', 192] };
+// the Temperature Probe types: the Add menu's list (key: what tells them apart, label, the settings it starts with)
+const TEMP_KEYS = ['sensor', 'tcType', 'r0', 'beta'];
+const tempKey = x => TEMP_KEYS.map(k => x?.[k] ?? '').join('|');
+const tempKinds = () => ADD_MENU.find(([g]) => g.startsWith('Devices: temperature'))[1].map(([l, , , x]) => [tempKey(x), l, x]);
+const tempKindOf = key => tempKinds().find(t => t[0] === key)?.[2] || { sensor: 'ds18b20' };
+async function newThermowell(length) {
+  const [img, w] = THERMOWELLS[length] || THERMOWELLS.Short;
+  const key = await choose(`2a. Type of Temperature Probe in the ${length} Thermowell`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
+  if (key === undefined) return;
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°F', precision: 1, ...clone(tempKindOf(key)), imagePath_1: img };
+  if (!D.visible) e.visibility = 'hidden';
+  if (!(await newDeviceDialog(e, 'Temp'))) return;
+  useTabProfile(e); stackNew(e);
+  draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
+}
+
+// ---- RIMS tube, the first Skynet_Integrated_Device (Fritz, 2026-10-23). One picture (Skynet_TC1_2_Rims_Device.svg, no choice).
+// Its heating element and its temperature probe are built in: two Devices of their own (integratedIn = the RIMS tube's id) on one
+// Interface, each on its own Port. It is made like any Device: 1. Interface, 2. Device Type RIMS, 3. Available Ports (the
+// element's pin and the probe's pin or OneWire number). Its Properties set them again, with the element's control: PWM,
+// Duty Cycle, PID or Hysteresis (PID and Hysteresis read its own probe). They can never be taken out of it.
+const HEAT_CTL = [['pid', 'PID (holds a target temperature)'], ['hysteresis', 'Hysteresis (on / off around a target)'], ['dutyCycle', 'Duty Cycle (on for a % of each cycle)'], ['pwmOut', 'PWM (element power %)']];
+const RIMS_KEYS = ['iface', 'heatCtl', 'heatPin', 'tempKind', 'tempPin', 'tempProbe'];
+const intEls = g => ({ heat: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'heat'), temp: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'temp') });
+function rimsWork(g) {
+  const { heat, temp } = g ? intEls(g) : {}, devs = S.config.devices || [];
+  return { iface: heat?.device ?? temp?.device ?? (devs.length === 1 ? devs[0].name : ''), heatCtl: heat?.type || 'pid', heatPin: heat?.channel ?? '',
+    tempKind: temp ? tempKey(temp) : tempKinds()[0][0], tempPin: temp?.channel ?? '', tempProbe: temp?.probeIndex ?? '' };
+}
+function rimsFields(w) {
+  const ow = isOneWire({ type: 'temperature', ...tempKindOf(w.tempKind) });
+  return [['iface', '1. Interface (board)', 'dev'],
+    ['_dt', '2. Device Type: RIMS tube, a Skynet_Integrated_Device. Its heating element and its temperature probe are built in, so each gets a Port.', 'note'],
+    ['heatCtl', 'Heating element control', 'sel', HEAT_CTL],
+    ['heatPin', '3. Available Ports / Pins: heating element', 'pin', 'rimsHeat'],
+    ['tempKind', 'Temperature probe in its thermowell', 'sel', tempKinds().map(([k, l]) => [k, l]), true],
+    ow ? ['tempProbe', '3. OneWire probe number (Devices page > OneWire probe index)', 'probe'] : ['tempPin', '3. Available Ports / Pins: temperature probe', 'pin', 'rimsTemp']];
+}
+// the Available Ports lists of the two pickers: the free pins on the Interface that fit each Device (best first)
+function rimsPinLists(w, g) {
+  const own = g ? Object.values(intEls(g)).filter(Boolean) : [], els = draft.elements.filter(e => !own.includes(e)), tk = tempKindOf(w.tempKind);
+  const lists = { rimsHeat: w.iface ? freePins({ type: w.heatCtl, subtype: w.heatCtl === 'pwmOut' ? 'element' : undefined, device: w.iface, name: '\0new' }, els, S.config.devices, false) : [],
+    rimsTemp: w.iface ? freePins({ type: 'temperature', ...tk, device: w.iface, name: '\0new' }, els, S.config.devices, ANALOG_TEMP.includes(tk.sensor)) : [] };
+  lists.rimsHeat = lists.rimsHeat.filter(p => p !== String(w.tempPin ?? ''));       // the two can't share a pin
+  lists.rimsTemp = lists.rimsTemp.filter(p => p !== String(w.heatPin ?? ''));
+  for (const [k, pins] of Object.entries(lists)) {
+    $('#pins-' + k)?.remove();
+    document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => { const t = /^A/.test(p) ? `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)` : `D${p}` + (pinTag(p) ? `  (${pinTag(p)})` : ''); return h('option', { value: p, label: t }, t); })));
+  }
+}
+// make the RIMS tube's own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Display Name.
+// Nothing changes when something is wrong (the error is thrown). No Interface and no Ports: it has no Devices yet.
+function applyRims(g, w, tab, label) {
+  const { heat: h0, temp: t0 } = intEls(g), tk = tempKindOf(w.tempKind), ow = isOneWire({ type: 'temperature', ...tk });
+  const none = v => v === undefined || v === null || v === '';
+  if (!h0 && !t0 && none(w.iface) && none(w.heatPin) && none(w.tempPin) && none(w.tempProbe)) return;
+  if (none(w.iface)) throw new Error('1. Pick the Interface (board) the RIMS tube is wired to');
+  if (none(w.heatPin)) throw new Error('3. Pick the Port for the heating element');
+  if (ow ? none(w.tempProbe) : none(w.tempPin)) throw new Error(ow ? '3. Pick the OneWire probe number of the temperature probe' : '3. Pick the Port for the temperature probe');
+  const base = String(label || 'RIMS').trim();
+  const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
+  if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
+  heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.displayName ??= base + ' Heat';
+  const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
+  for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
+  Object.assign(temp, clone(tk));
+  if (ow) { temp.probeIndex = +w.tempProbe; delete temp.channel; } else { temp.channel = w.tempPin; delete temp.probeIndex; }
+  temp.typeCode = t0 && tempKey(t0) === tempKey(temp) && t0.typeCode ? t0.typeCode : defaultCode(temp); temp.displayName ??= base + ' Temp';
+  // a new one gets the suggested name; one that still has its suggested name follows it (a name typed by hand stays)
+  const named = (e, old) => !old || old.name === deviceSuggestion(old, old) ? deviceSuggestion(e, old || e) : old.name;
+  heat.name = named(heat, h0); temp.name = named(temp, t0);
+  if (heat.name.toLowerCase() === temp.name.toLowerCase()) temp.name += '_2';
+  if (!ow && pinsOf(temp).some(p => pinsOf(heat).includes(p))) throw new Error('The heating element and the temperature probe need two different Ports');
+  for (const [e, old] of [[heat, h0], [temp, t0]]) { const err = portError(e, old || e); if (err) throw new Error(err); }
+  if (['pid', 'hysteresis'].includes(heat.type)) heat.input = temp.name;         // it holds the temperature its own probe reads
+  if (!h0 || !t0) { const [x, y] = [g.x || 0, (g.y || 0) + (g.h || 50) + 20]; if (!h0) Object.assign(heat, { x, y }); if (!t0) Object.assign(temp, { x: x + 150, y }); }
+  for (const [e, old] of [[heat, h0], [temp, t0]]) {
+    if (old) {
+      if (old.name !== e.name) { noteRename(old.name, e.name); for (const o of draft.graphics) if (o.heater === old.name) o.heater = e.name; for (const o of draft.elements) if (o.input === old.name) o.input = e.name; }
+      Object.keys(old).forEach(k => delete old[k]); Object.assign(old, e);
+    } else { useTabProfile(e); draft.elements.push(e); }
+  }
+  return { heater: heat.name, probe: temp.name };
+}
+async function newRimsDevice() {
+  if (!TPL) await loadTemplates();
+  const t = tplOf('vessel', 'RIMS_Tube'); if (!t) return toast('The Skynet Template RIMS_Tube is missing', true);
+  const w = { ...rimsWork(null), label: 'RIMS' };
+  const fields = o => [...rimsFields(o), ['label', 'Label (Display Name shown on the tab, e.g. RIMS)', 'text']];
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), refresh = () => { const x = { ...w }; try { readFields(x, body); } catch { } rimsPinLists(x, null); };
+  for (const b of oks) b.textContent = 'Create';
+  body.addEventListener('change', refresh);
+  try {
+    for (;;) {
+      rimsPinLists(w, null);
+      if (await dialog('New Device: RIMS tube', fields, w, false, ['skynet-integrated-devices']) !== 'ok') return;
+      const g0 = draft.graphics.length;
+      try {
+        readFields(w, body);
+        if (!String(w.iface ?? '').trim()) throw new Error('1. Pick the Interface (board) the RIMS tube is wired to');
+        const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
+        const g = placeTabVessel(t, wsName, bundleName(t.name, tabIdOf(wsName) || 'Build', taken));
+        if (w.label) g.label = String(w.label).trim();
+        Object.assign(g, applyRims(g, w, wsName, w.label || 'RIMS'));
+        sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+        return;
+      } catch (err) {
+        for (const g of draft.graphics.splice(g0)) draft.graphics = draft.graphics.filter(x => x.attachTo !== g.id);      // the half-made RIMS tube goes again
+        toast(err.message, true);
+      }
+    }
+  } finally { body.removeEventListener('change', refresh); for (const b of oks) b.textContent = 'Save'; }
+}
+
 // Fritz, 2026-10-23: as in BruControl, several new things made at the same spot stack down and to the right instead of hiding each other
 function stackNew(e) {
   const at = (x, y) => draft.elements.some(o => o.workspace === e.workspace && o.x === x && o.y === y);
@@ -2160,7 +2289,7 @@ function tplNameFrom(n, kind) {
   const base = String(n || '').trim().replace(/\s+/g, '_').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 60) || (kind === 'vessel' ? 'My_Vessel' : 'My_Fitting');
   return tplOf(kind, base) ? copyName(base, tplNames(kind)) : base;
 }
-const fitBody = f => ({ std: f.std, fittings: clone(f.fittings || []), image: f.image, ipPos: f.ipPos });
+const fitBody = f => ({ std: f.std, fittings: clone(f.fittings || []), image: f.image, ipPos: f.ipPos, size: f.size });
 // the Template a Tab item was copied from (Clone or Add to Tab), without its name and class: a new Template starts from it
 function tplBase(kind, g) {
   const { name, cls, editable, deletable, ...t } = clone(tplOf(kind, g.template) || {});
@@ -2186,7 +2315,7 @@ async function saveBuildTemplate({ name, skynet }) {
   if (w.kind === 'fitting') { await makeTemplate('fitting', name, skynet, { ...tplBase('fitting', w.g), ...fitBody(w.g) }); made.push(name); }
   else {
     const g = w.g, base = tplBase('vessel', g), t = { ...base, vesselType: g.vesselType, image: g.image, size: [Math.round(g.w), Math.round(g.h)], ports: {} };
-    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
+    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
     if (EQ[g.vesselType]?.ports.in2) t.liquidPorts = g.ports?.in2?.installed ? 4 : 2;
     for (const [k, p] of Object.entries(base.ports || {})) if (!g.ports?.[k]) t.ports[k] = p;     // ports the Tab item doesn't have stay as they were
     for (const [k, p] of Object.entries(g.ports || {})) {
@@ -2886,10 +3015,14 @@ async function editItem(kind, id) {
   const isV = !!eqClass(item), bf = isBfit(item);
   if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
   if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
+  const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
+  if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item));
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
+      const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
+      if (host) return toast(`${item.name} is built into ${host.label || host.name} (a Skynet_Integrated_Device), so it can't be taken out of it. Delete ${host.label || host.name} to delete it too.`, true);
       if (!confirm('Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
       const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : eqPorts(item).map(q => q.id);
@@ -2898,6 +3031,7 @@ async function editItem(kind, id) {
           for (const g of draft.graphics) if (g.attachTo === f.id && g.port) gone.push(g.id);
           draft.graphics = draft.graphics.filter(g => g !== f && !(g.attachTo === f.id && g.port));
         }
+        draft.elements = draft.elements.filter(e => e.integratedIn !== item.id);       // the Devices built into it go with it
         for (const g of draft.graphics) if (g.attachTo === item.id && g.port) gone.push(g.id);
         draft.graphics = draft.graphics.filter(g => !(g.attachTo === item.id && g.port));
         for (const g of draft.graphics) if (g.attachTo === item.id) delete g.attachTo;
@@ -2918,7 +3052,7 @@ async function editItem(kind, id) {
       if (isUnit(item)) {          // a Skynet Fitting: its IPs sit on its openings, wherever it is flipped or rotated
         work.rot = +work.rot || 0; if (!work.rot) delete work.rot;
         for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
-        if (!work.onVessel) work.bundled = true;
+        if (!work.onVessel) { if (canLoosen() && work.bundled === false) { work.loose = true; delete work.bundled; } else work.bundled = true; }
       }
       const pos = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_pos')).map(k => [k.slice(0, -4), work[k]]));
       if ((+work.turn || 0) !== (+item.turn || 0)) for (const k of Object.keys(pos)) pos[k] = turnPos(pos[k], (+work.turn || 0) - (+item.turn || 0));   // the IPs turn with the picture
@@ -2929,7 +3063,12 @@ async function editItem(kind, id) {
       work.name = noSpaces(work.name || '') || item.name;
     } else if (isSkyV(item)) {        // a Skynet vessel: its ports come from its Template and don't change here
       for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
-      work.ports = clone(item.ports || {}); work.bundled = true;
+      work.ports = clone(item.ports || {});
+      if (canLoosen() && work.bundled === false) { work.loose = true; delete work.bundled; } else work.bundled = true;
+      if (rims) {        // its own heating element and temperature probe follow its Properties
+        Object.assign(work, applyRims(item, work, work.workspace || item.workspace, work.label || work.name || item.name) || {});
+        for (const k of RIMS_KEYS) delete work[k];
+      }
       work.rot = +work.rot || 0; if (!work.rot) delete work.rot;
       for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
       if (sideways({ ...work, kind: 'vessel' }) !== sideways(item)) {      // turned onto its side or back up: the box turns too, about its middle
@@ -3005,10 +3144,12 @@ async function editItem(kind, id) {
       if (!bf && !isSkyV(item) && (placed.length || before.isNew)) vesselPopup(item, placed);
       delete item.isNew;
     }
-    if (type === 'vessel' && !item.bundled && !item.onVessel && !isUnit(item) && bundledIps(item).length &&
+    if (type === 'vessel' && !item.bundled && !item.onVessel && !isUnit(item) && !(item.loose && !before?.loose) && bundledIps(item).length &&
       confirm(`Bundle ${item.label || item.name} with its ${bundledIps(item).length === 1 ? 'IP' : bundledIps(item).length + ' IPs'}?\n\nThey will move as one unit, and the vessel and its IPs can't be edited until you switch Bundled off.\n\nPress Cancel if you still need to drag its IPs into place.`)) {
       item.bundled = true; $('#vpop')?.remove(); toast('Bundled');
     }
+    if (item.loose && item.bundled) { delete item.loose; placeUnitParts(item); toast(`${item.label || item.name} is one Skynet unit again: its IPs are back on its openings`); }
+    else if (item.loose && !before?.loose) toast(`Un-bundled: ${item.label || item.name} and its IPs can be edited. Switch Bundled on again to make it one Skynet unit.`);
     if (type === 'ip' && !isFitting(item) && !pickedPort) attachIp(item);   // typed a new X / Y: re-check which vessel it sits on
     if (type === 'ip' && before0 !== item.fitting) delete item.autoFit;   // a type picked by hand is kept
     giveName(item, draft.graphics);         // a new fitting type gets a matching name (IP_2 turned into a tee becomes Tee_1)
@@ -5120,10 +5261,11 @@ const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fit
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
-const SKYNET_FIT_PICS = ['Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
+const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
+  'Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
   'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
-  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', reducer: 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', elbow45: 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
+  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
@@ -5170,11 +5312,16 @@ function updateMeters() { for (const n of $$('#ws .fmRead')) { const g = L().gra
 // built in, sitting on the opening of the picture: it can't be moved, unbundled or set. Its Properties have Flip Horizontal,
 // Flip Vertical and Rotate (in steps of 45 degrees) instead, and the picture and its IPs follow. Fittings built from a
 // User Template keep their own IP settings.
-function isUnit(g) { return isBfit(g) && g.templateCls === 'skynet'; }
+function isUnit(g) { return isBfit(g) && g.templateCls === 'skynet' && !g.loose; }
+// Fritz (2026-10-23): while Skynet is still building its Templates (not locked), a Skynet item can be un-bundled and bundled
+// again, like any other. Un-bundled (loose) it is edited as a plain Tab_Fitting or Tab_Vessel; bundled again, it is one unit
+// and its IPs go back onto its openings. Once the Templates are Integrated (locked) this goes.
+const canLoosen = () => !TPL?.locked;
+const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) ? [['bundled', 'Bundled (for now a Skynet item can be un-bundled to work on it; once the Skynet Templates are Integrated it can\'t)', 'bool', true]] : [];
 // Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
 // built in where the Template puts it; they can't be moved, set or unbundled. It has Flip Horizontal, Flip Vertical and Rotate
 // like a Skynet Fitting (Fritz, 2026-10-23). Vessels made from a User Template keep their port settings.
-function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet'; }
+function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet' && !g.loose; }
 const ROTATE = [0, 45, 90, 135, 180, 225, 270, 315].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
 function unitRot(g) { return ((Math.round((+(g.rot ?? g.turn) || 0) / 45) * 45) % 360 + 360) % 360; }    // an older Turn counts as a Rotate
 const unitTransform = g => `rotate(${unitRot(g)}deg) scale(${g.flipH ? -1 : 1},${g.flipV ? -1 : 1})`;
@@ -5243,7 +5390,21 @@ function placeVesselParts(v) {
 // that IP is hidden, no pipe can join it and no flow passes. It then moves with what it caps; drag it off to take it away.
 function isCap(g) { return isUnit(g) && isCapOnly(g); }
 function cappedIps() { return new Set(L().graphics.filter(g => isCap(g) && g.capOn).map(g => g.capOn)); }
-function capOnto(c, ip) { const [cx, cy] = ipCenter(ip); Object.assign(c, { capOn: ip.id, labelVisible: false, workspace: ip.workspace, x: Math.round(cx - (c.w || 40) / 2), y: Math.round(cy - (c.h || 40) / 2) }); }
+function capOnto(c, ip) {
+  const [cx, cy] = ipCenter(ip); Object.assign(c, { capOn: ip.id, labelVisible: false, workspace: ip.workspace, x: Math.round(cx - (c.w || 40) / 2), y: Math.round(cy - (c.h || 40) / 2) });
+  const r = capFacing(ip); if (r === null) return;
+  if (r) c.rot = r; else delete c.rot; delete c.flipH; delete c.flipV;
+  const n = $(`#ws .gfx[data-gid="${CSS.escape(c.id)}"] .bfImg`); if (n) n.style.transform = unitTransform(c);
+}
+// The End Cap is drawn from the side (Fritz, 2026-10-23), standing up as on an opening that faces left or right. On an opening
+// it turns to face it: the way the opening points out of what it is on (up, down, sideways or at 45 degrees). null = not on anything.
+function capFacing(ip) {
+  const o = ip.attachTo && draft.graphics.find(g => g.id === ip.attachTo); if (!o || o.kind !== 'vessel') return null;
+  const [x, y] = ipCenter(ip), nx = (x - (o.x || 0) - (o.w || 90) / 2) / ((o.w || 90) / 2), ny = (y - (o.y || 0) - (o.h || 90) / 2) / ((o.h || 90) / 2);
+  if (Math.abs(nx) >= Math.abs(ny) + 0.25) return 0;
+  if (Math.abs(ny) >= Math.abs(nx) + 0.25) return 90;
+  return nx * ny < 0 ? 135 : 45;
+}
 function snapCap(c) {
   const [cx, cy] = [(c.x || 0) + (c.w || 40) / 2, (c.y || 0) + (c.h || 40) / 2], taken = new Set(draft.graphics.filter(g => isCap(g) && g !== c && g.capOn).map(g => g.capOn));
   let best = null;
@@ -5561,7 +5722,7 @@ function placeTabVessel(t, tab, name) {
   const C = EQ[t.vesselType] || EQ.vessel, n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: (t.size || C.size)[0], h: (t.size || C.size)[1],
     labelAlign: 'above', labelSize: 16, labelVisible: true, name, template: t.name, templateCls: t.cls, image: t.image || C.image, bundled: true, ports: {} };
-  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes']) if (t[k] !== undefined) g[k] = clone(t[k]);
+  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated']) if (t[k] !== undefined) g[k] = clone(t[k]);
   for (const [k, d] of Object.entries(C.ports)) {
     const q = t.ports?.[k]; if (!q?.installed) continue;
     g.ports[k] = { installed: true, position: q.position || portDefPos(d), standard: stdShort(q.std || t.std) };
@@ -5577,7 +5738,7 @@ function placeTabVessel(t, tab, name) {
 }
 // a Tab_Fitting, alone on a Tab or joined to a port of a Tab_Vessel (it then runs out from that port, away from the vessel)
 function placeTabFitting(ft, tab, name, on) {
-  const cap = isCapOnly(ft), f = { id: newId(), kind: 'vessel', vesselType: 'bfit', workspace: tab, w: cap ? 40 : 90, h: cap ? 40 : 90, name, template: ft.name, templateCls: ft.cls, fittings: clone(ft.fittings || []),
+  const cap = isCapOnly(ft), f = { id: newId(), kind: 'vessel', vesselType: 'bfit', workspace: tab, w: cap ? 40 : ft.size?.[0] || 90, h: cap ? 40 : ft.size?.[1] || 90, name, template: ft.name, templateCls: ft.cls, fittings: clone(ft.fittings || []),
     image: ft.image || fitImage(ft), labelAlign: 'below', labelSize: 12, labelVisible: !on, ports: {} };     // joined to a vessel: its name shows on hover, not on the Tab
   if (ft.std) f.std = clone(ft.std);
   if (ft.ipPos) f.ipPos = clone(ft.ipPos);
@@ -5623,6 +5784,7 @@ F.skynetFitting = it => {
       `Skynet Fitting ${it.template || ''}: ${made}. Every opening has a two-way IP built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['label', 'Label (empty = the Name)', 'text'], ...stdFields(it), ...picks,
     ...(isCapOnly(it) ? [] : [['_o', 'Orientation (the picture and its IPs follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
+    ...looseField(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
     ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : [['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num'],
       ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']])];
@@ -5637,10 +5799,12 @@ F.skynetVessel = it => {
   const electric = it.heatKind === 'electric' || it.ports?.element?.installed, well = it.ports?.thermowell?.installed;
   return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Name)', 'text'],
-    ...(electric || well ? [['_d', 'Devices', 'head']] : []),
-    ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
-    ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : []),
+    ...(it.integrated === 'device' ? [['_d', 'Built-in Devices (Skynet_Integrated_Device: they can never be taken out of it)', 'head'], ...rimsFields(it)] : [
+      ...(electric || well ? [['_d', 'Devices', 'head']] : []),
+      ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
+      ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
+    ...looseField(it),
     ['_look', 'Display Name and place', 'head'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 };
