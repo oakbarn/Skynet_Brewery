@@ -1,7 +1,8 @@
 {
-  "vesselType": "rims", "vtype": "RIMS", "image": "Images/Skynet/Other_Equipment/Equipment_RIMS.svg",
+  "vesselType": "rims", "vtype": "RIMS", "image": "Images/Skynet/Other_Equipment/Skynet_TC1_2_Rims_Device.svg", "size": [356, 50],
+  "integrated": "device",
   "std": { "type": "TC", "size": 1.5 },
-  "ports": { "inlet": { "installed": true, "position": "Top Left" }, "outlet": { "installed": true, "position": "Bottom Right" },
-    "thermowell": { "installed": true, "position": "Left End" }, "element": { "installed": true, "position": "Right End" } },
-  "notes": "A RIMS tube: wort in at the top left, out at the bottom right. The probe goes in the left end, the heating element in the right end; pick both on the Tab_Vessel."
+  "ports": { "inlet": { "installed": true, "position": "Top Left Branch" }, "outlet": { "installed": true, "position": "Bottom Branch" },
+    "thermowell": { "installed": true, "position": "Left End" }, "element": { "installed": true, "position": "Element Housing" } },
+  "notes": "A Skynet_Integrated_Device: a RIMS tube with its heating element and its temperature probe built in. Wort in at the top left, out at the bottom. Its Properties set the Interface, the Ports and the control (PWM, Duty Cycle, PID or Hysteresis) of both."
 }

@@ -75,7 +75,9 @@ export function cleanFitting(b = {}) {
   // whose openings are not where a Tab_Fitting puts them by itself
   const ipPos = {};
   for (const [k, v] of Object.entries(b.ipPos && typeof b.ipPos === 'object' ? b.ipPos : {})) if (/^\w{1,20}$/.test(k) && text(v, 40)) ipPos[k] = text(v, 40);
-  return { std: cleanStd(b.std), fittings, image: text(b.image, 300) || undefined, ipPos: Object.keys(ipPos).length ? ipPos : undefined, notes: text(b.notes, 2000) || undefined };
+  const out = { std: cleanStd(b.std), fittings, image: text(b.image, 300) || undefined, ipPos: Object.keys(ipPos).length ? ipPos : undefined, notes: text(b.notes, 2000) || undefined };
+  const size = cleanSize(b.size); if (size) out.size = size;       // a picture that is not square (Instrument_Tee: 90 x 50)
+  return out;
 }
 // the IPs a Bundled Fitting has: the far end of the chain (none when an End Cap closes it), plus the open side of every tee
 // without a thermowell
@@ -99,6 +101,12 @@ export function fittingPortStd(t, key) {
   return std;
 }
 
+// the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (none = the kind's own size)
+const cleanSize = v => Array.isArray(v) && v.length === 2 && v.every(x => Number.isFinite(+x) && +x >= 20 && +x <= 2000) ? v.map(x => Math.round(+x)) : undefined;
+// Integrated items (Fritz, 2026-10-23): a Skynet_Integrated_Device has its Devices built in (a RIMS tube: its heating element and
+// its temperature probe, each with its own Interface and Port); a Skynet_Integrated_Widget has its IPs built in (an elbow, a tee).
+// It can be bundled with other things, but what is built into it can never be unbundled.
+export const INTEGRATED = { device: 'Skynet_Integrated_Device', widget: 'Skynet_Integrated_Widget' };
 // a Vessel Template: what today's Vessel tab holds, without the Devices of a Schema (those are picked on the Tab_Vessel),
 // with a Connection Standard and, on each port, a Bundled Fitting
 export const VESSEL_KINDS = { vessel: 'Vessel', pchiller: 'Plate chiller', ccoil: 'Chilling coil', herms: 'HERMS coil', trub: 'Trub filter', rims: 'RIMS tube' };
@@ -108,7 +116,8 @@ export function cleanVessel(b = {}) {
     heatKind: text(b.heatKind, 20) || undefined, otherHeat: text(b.otherHeat, 80) || undefined, std: cleanStd(b.std), notes: text(b.notes, 2000) || undefined, ports: {} };
   for (const k of ['volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume']) t[k] = num(b[k], k);
   // the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (empty = the kind's own size)
-  if (Array.isArray(b.size) && b.size.length === 2 && b.size.every(v => Number.isFinite(+v) && +v >= 20 && +v <= 2000)) t.size = b.size.map(v => Math.round(+v));
+  const size = cleanSize(b.size); if (size) t.size = size;
+  if (INTEGRATED[b.integrated]) t.integrated = b.integrated;
   if (['ccoil', 'herms'].includes(vesselType)) t.liquidPorts = String(b.liquidPorts) === '4' ? 4 : 2;     // 2 or 4 liquid ports (Chillzilla: 4)
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;

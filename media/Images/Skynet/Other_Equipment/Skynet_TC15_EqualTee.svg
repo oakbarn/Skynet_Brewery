@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet TC 1.5 inch equal tee (after Fritz's drawing): openings at the middle of the Left, Right and Top edges, round inside corners -->
+  <path d="M9 64 V36 H30 A6 6 0 0 0 36 30 V9 H64 V30 A6 6 0 0 0 70 36 H91 V64 Z" fill="#808080" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/>
+  <g fill="#808080" stroke="#000" stroke-width="2.5">
+    <rect x="2" y="28" width="8" height="44" rx="2"/>
+    <rect x="90" y="28" width="8" height="44" rx="2"/>
+    <rect x="28" y="2" width="44" height="8" rx="2"/>
+  </g>
+</svg>

@@ -35,6 +35,8 @@ A capped opening has no IP showing, no pipe can join it and no liquid flows ther
 
 An IP that already has a pipe on it can't be capped.
 
+The End Cap is drawn from the side, like a real TC cap. On an opening it turns by itself to face it: standing up on an opening that points left or right, lying down on one that points up or down, and on a slant on a 45 degree opening.
+
 ## Older Tab_Fittings
 
 Tab_Fittings that came from a Skynet Template before this change become Skynet Fittings by themselves. A **Turn** they had is kept as their **Rotate**. If one of their IPs was dragged away from its opening, open the fitting's Properties and press **Save**: the IPs go back onto the openings.
