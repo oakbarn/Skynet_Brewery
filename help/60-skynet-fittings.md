@@ -6,7 +6,7 @@ A **Skynet Fitting** is a Tab_Fitting made from a Skynet Fitting Template: an el
 - The IPs can't be moved, set or taken off, and the fitting can't be un-bundled. Draw your pipes to the IPs.
 - Its **Properties** have no IP settings at all.
 
-Fittings you build yourself (from a User Template) work as before: you add the IPs, place them and bundle them. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+Fittings you build yourself (from a User Bundled Template) work as before: you add the IPs, place them and bundle them. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
 
 ## Opening its Properties
 

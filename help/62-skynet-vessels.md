@@ -6,7 +6,7 @@ A **Skynet vessel** is a Tab_Vessel made from a Skynet Vessel Template: a kettle
 - The IPs can't be moved, set or taken off, and the vessel can't be un-bundled. The Bundled Fittings on its ports belong to it and move with it.
 - Its **Properties** have no port or IP settings.
 
-Vessels you make from a User Template keep their port settings: you place the IPs and bundle them yourself. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
+Vessels you make from a User Bundled Template keep their port settings: you place the IPs and bundle them yourself. See [Vessel and Fitting Templates](50-vessel-and-fitting-templates).
 
 ## Its Properties
 

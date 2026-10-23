@@ -58,7 +58,7 @@ const BAR = [
   ['#menuTabs', ['menu', 'menu-tabs']],
   ['.menuCopy', ['menu-everywhere']],
   ['.menuWrap', ['menu']],
-  ['#buildTab, #saveBuild, #wsTabs .buildTab', ['build-tab']],
+  ['#buildTab, #saveBuild, #previewBuild, #wsTabs .buildTab', ['build-tab']],
   ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
   ['#barHelp', ['help-window']],
