@@ -1,0 +1,24 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_TC_Temperature_Widget.svg",
+  "size": [
+    217,
+    235
+  ],
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom 1 in"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Center 5 in"
+    }
+  },
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): the Brew Vessel Low TC Output Widget plus a TC 1.5 Thermowell at Center 5 in. Its IPs are built in on the ports."
+}
