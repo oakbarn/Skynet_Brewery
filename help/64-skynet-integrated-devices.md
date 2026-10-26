@@ -22,9 +22,15 @@ A **PID** or **Hysteresis** heating element holds the temperature that its own p
 
 ### Its Properties
 
-Double-click the RIMS tube in Edit layout. Besides the usual Name, Display Name, Flip, Rotate and place settings, **Built-in Devices** has the Interface, the heating element control and Port, and the temperature probe type and Port. Change them here and Save: both Devices follow. A Device whose name is still the suggested one gets the new suggested name.
+Double-click the RIMS tube in Edit layout. Besides the usual Name, Display Name, Flip, Rotate and place settings it has:
 
-The two Devices can't be deleted by themselves. Deleting the RIMS tube deletes them too.
+- **Interface**: the board it is wired to.
+- **Heating element**: its **Control** (PID, Hysteresis, Duty Cycle or PWM), its Port, and all of that control's own settings (for a PID: Target, Kp, Ki, Kd, Max output and so on). Change the Control and the settings below it change to match.
+- **Heating element: its thermowell**: the thermowell is part of the heating element. Pick the type of temperature probe in it and its Port. A PID or Hysteresis element holds the temperature this probe reads.
+
+Save, and the heating element and its probe follow. One whose name is still the suggested one gets the new suggested name.
+
+The RIMS tube is not a bundle: like an elbow, its IPs are built in and stay on its openings, and it has no Bundled switch. Its heating element and probe can't be deleted by themselves; deleting the RIMS tube deletes them too. A new RIMS tube is named from its Label (RIMS, RIMS_2 ...).
 
 A RIMS tube put on a Tab from **☰ Menu > Equipment Templates** (the **RIMS_Tube** Template) has no Devices yet: open its Properties and set the Interface and Ports.
 
