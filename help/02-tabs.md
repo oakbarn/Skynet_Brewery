@@ -33,7 +33,7 @@ Press the **red circle with the yellow tools** (a hammer and a pick crossed over
 | **🔨 Build Tab** / **👁 Preview** / **💾 Save Build ...** | A clean Tab where everything new is made first, away from a busy screen. **👁 Preview** shows it the way it looks on Brew Day. **Save Build ...** puts it on a Tab or saves it as a Template. See [Build Tab](55-build-tab). |
 | **Save layout** / **Exit** | Save keeps your changes. Exit leaves Edit layout; if something changed it asks **Save** or **Exit without Saving** (**Keep editing** goes back). Picking **☰ Menu > Exit Edit layout** asks the same. Nothing is changed until you save. |
 
-Drag unlocked items to move them (🔒 locked items stay where they are, also in Edit layout), drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties.
+Drag unlocked items to move them (🔒 locked items stay where they are, also in Edit layout), drag a corner to resize, and **double-click** (or hold a finger on it) to open its properties. In any list in the panel a double-click opens the Properties too: see [Double-click in lists](67-double-click-in-lists).
 
 **On a phone or tablet** nothing can be dragged or resized, so a finger can't move something by accident. Tap to pick an item, hold a finger on it for its properties (X, Y, Width and Height are there). See [Phones and tablets](45-phones-and-tablets).
 
