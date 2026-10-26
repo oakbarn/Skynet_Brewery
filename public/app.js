@@ -1975,20 +1975,28 @@ const INT_DEVICES = { RIMS_Tube: ['RIMS tube', 'RIMS'], Integrated_Electric_Kett
 const intWhat = g => INT_DEVICES[g?.template] || (g?.vesselType === 'rims' ? INT_DEVICES.RIMS_Tube : ['electric kettle', 'Kettle']);
 const HEAT_CTL = [['pid', 'PID (holds a target temperature)'], ['hysteresis', 'Hysteresis (on / off around a target)'], ['dutyCycle', 'Duty Cycle (on for a % of each cycle)'], ['pwmOut', 'PWM (element power %)']];
 const RIMS_KEYS = ['iface', 'heatCtl', 'heatPin', 'tempKind', 'tempPin', 'tempProbe'];
+// the heating element's own settings for its control (Fritz, 2026-10-26: its Properties are in the item's Properties), as el_<key>.
+// Its Interface and Port are set above them, and its Input is always its own thermowell's probe.
+const elSettings = type => (Array.isArray(F[type]) ? F[type] : []).filter(([k]) => !['device', 'channel', 'input'].includes(k));
 const intEls = g => ({ heat: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'heat'), temp: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'temp') });
 function rimsWork(g) {
   const { heat, temp } = g ? intEls(g) : {}, devs = S.config.devices || [];
   return { iface: heat?.device ?? temp?.device ?? (devs.length === 1 ? devs[0].name : ''), heatCtl: heat?.type || 'pid', heatPin: heat?.channel ?? '',
-    tempKind: temp ? tempKey(temp) : tempKinds()[0][0], tempPin: temp?.channel ?? '', tempProbe: temp?.probeIndex ?? '' };
+    tempKind: temp ? tempKey(temp) : tempKinds()[0][0], tempPin: temp?.channel ?? '', tempProbe: temp?.probeIndex ?? '',
+    ...Object.fromEntries(elSettings(heat?.type || 'pid').map(([k]) => ['el_' + k, heat?.[k]])) };
 }
 function rimsFields(w) {
   const ow = isOneWire({ type: 'temperature', ...tempKindOf(w.tempKind) });
+  // the thermowell is part of the heating element (Fritz, 2026-10-26): its probe is the element's Input
   return [['iface', '1. Interface (board)', 'dev'],
-    ['_dt', `2. Device Type: ${intWhat(w)[0]}, a Skynet_Integrated_Device. Its heating element and its temperature probe are built in, so each gets a Port.`, 'note'],
-    ['heatCtl', 'Heating element control', 'sel', HEAT_CTL],
+    ['_dt', `2. Device Type: ${intWhat(w)[0]}, a Skynet_Integrated_Device. Its heating element, with its thermowell, is built in.`, 'note'],
+    ['_he', 'Heating element', 'head'],
+    ['heatCtl', 'Control', 'sel', HEAT_CTL, true],
     ['heatPin', '3. Available Ports / Pins: heating element', 'pin', 'rimsHeat'],
-    ['tempKind', 'Temperature probe in its thermowell', 'sel', tempKinds().map(([k, l]) => [k, l]), true],
-    ow ? ['tempProbe', '3. OneWire probe number (Devices page > OneWire probe index)', 'probe'] : ['tempPin', '3. Available Ports / Pins: temperature probe', 'pin', 'rimsTemp']];
+    ...elSettings(w.heatCtl).map(([k, ...r]) => ['el_' + k, ...r]),
+    ['_tw', 'Heating element: its thermowell (the temperature it holds)', 'head'],
+    ['tempKind', 'Temperature probe in the thermowell', 'sel', tempKinds().map(([k, l]) => [k, l]), true],
+    ow ? ['tempProbe', '3. OneWire probe number (Devices page > OneWire probe index)', 'probe'] : ['tempPin', '3. Available Ports / Pins: thermowell probe', 'pin', 'rimsTemp']];
 }
 // the Available Ports lists of the two pickers: the free pins on the Interface that fit each Device (best first)
 function rimsPinLists(w, g) {
@@ -2014,6 +2022,7 @@ function applyRims(g, w, tab, label) {
   const base = String(label || intWhat(g)[1]).trim();
   const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
   if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
+  for (const [k] of elSettings(heat.type)) if ('el_' + k in w) { const v = w['el_' + k]; if (v === undefined || v === '') delete heat[k]; else heat[k] = v; }
   heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.displayName ??= base + ' Heat';
   const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
   for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
@@ -2055,7 +2064,9 @@ async function newIntegratedDevice(tname) {
         readFields(w, body);
         if (!String(w.iface ?? '').trim()) throw new Error(`1. Pick the Interface (board) the ${what} is wired to`);
         const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
-        const g = placeTabVessel(t, wsName, bundleName(t.name, tabIdOf(wsName) || 'Build', taken));
+        // its name comes from its Label (RIMS, RIMS_2 ...): it is one Device, not a bundle (Fritz, 2026-10-26)
+        let nm = noSpaces(w.label || lbl).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
+        const g = placeTabVessel(t, wsName, nm);
         if (w.label) g.label = String(w.label).trim();
         Object.assign(g, applyRims(g, w, wsName, w.label || lbl));
         sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
@@ -3138,10 +3149,10 @@ async function editItem(kind, id) {
     } else if (isSkyV(item)) {        // a Skynet vessel: its ports come from its Template and don't change here
       for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
       work.ports = clone(item.ports || {});
-      if (canLoosen() && work.bundled === false) { work.loose = true; delete work.bundled; } else work.bundled = true;
+      if (canLoosen() && work.bundled === false && !item.integrated) { work.loose = true; delete work.bundled; } else { work.bundled = true; delete work.loose; }
       if (rims) {        // its own heating element and temperature probe follow its Properties
         Object.assign(work, applyRims(item, work, work.workspace || item.workspace, work.label || work.name || item.name) || {});
-        for (const k of RIMS_KEYS) delete work[k];
+        for (const k of Object.keys(work)) if (RIMS_KEYS.includes(k) || k.startsWith('el_')) delete work[k];
       }
       work.rot = +work.rot || 0; if (!work.rot) delete work.rot;
       for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
@@ -5391,11 +5402,11 @@ function isUnit(g) { return isBfit(g) && g.templateCls === 'skynet' && !g.loose;
 // again, like any other. Un-bundled (loose) it is edited as a plain Tab_Fitting or Tab_Vessel; bundled again, it is one unit
 // and its IPs go back onto its openings. Once the Templates are Integrated (locked) this goes.
 const canLoosen = () => !TPL?.locked;
-const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) ? [['bundled', 'Bundled (for now a Skynet item can be un-bundled to work on it; once the Skynet Templates are Integrated it can\'t)', 'bool', true]] : [];
+const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.integrated ? [['bundled', 'Bundled (for now a Skynet item can be un-bundled to work on it; once the Skynet Templates are Integrated it can\'t)', 'bool', true]] : [];
 // Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
 // built in where the Template puts it; they can't be moved, set or unbundled. It has Flip Horizontal, Flip Vertical and Rotate
 // like a Skynet Fitting (Fritz, 2026-10-23). Vessels made from a User Template keep their port settings.
-function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet' && !g.loose; }
+function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet' && (!g.loose || !!g.integrated); }    // an Integrated Device is never loose (Fritz, 2026-10-26)
 const ROTATE = [0, 45, 90, 135, 180, 225, 270, 315].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
 function unitRot(g) { return ((Math.round((+(g.rot ?? g.turn) || 0) / 45) * 45) % 360 + 360) % 360; }    // an older Turn counts as a Rotate
 const unitTransform = g => `rotate(${unitRot(g)}deg) scale(${g.flipH ? -1 : 1},${g.flipV ? -1 : 1})`;
@@ -5869,13 +5880,13 @@ F.skynetFitting = it => {
 // the Properties of a Skynet vessel: no port or IP settings (its openings have their IPs built in), Flip Horizontal, and the
 // Devices that belong to a Schema: its heating element and its Temperature Probe
 F.skynetVessel = it => {
-  const ports = Object.entries(eqClass(it).ports).filter(([k]) => it.ports?.[k]?.installed).map(([, d]) => d.name).join(', ');
+  const ports = Object.entries(eqClass(it).ports).filter(([k, d]) => it.ports?.[k]?.installed && d.ip).map(([, d]) => d.name).join(', ');      // its openings (a thermowell or element spot is not one)
   const elems = [['', 'None'], ...L().elements.filter(e => ['digitalOut', 'pwmOut', 'dutyCycle', 'pid', 'hysteresis'].includes(e.type) && e.subtype !== 'valve' && e.subtype !== 'pump').map(e => [e.name, e.name])];
   const probes = [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])];
   const electric = it.heatKind === 'electric' || it.ports?.element?.installed, well = it.ports?.thermowell?.installed;
   return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Name)', 'text'],
-    ...(it.integrated === 'device' ? [['_d', 'Built-in Devices (Skynet_Integrated_Device: they can never be taken out of it)', 'head'], ...rimsFields(it)] : [
+    ...(it.integrated === 'device' ? [['_d', 'Built in (Skynet_Integrated_Device: its IPs and its heating element can never be taken out of it)', 'head'], ...rimsFields(it)] : [
       // its picture starts as the Widget's and is edited like any other Widget's (Fritz, 2026-10-23)
       ['image', 'Graphic (picture path; its IPs stay on the openings of the Skynet picture)', 'path'],
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
