@@ -167,18 +167,18 @@
   <!-- ===== Variables ===== -->
   <section id="view-globals" class="view">
     <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every process.</p>
-    <h3>vAPI <span class="muted">(processes, API <code>/api/vapi</code> and database)</span></h3>
+    <h3 id="sec-vapi">vAPI <span class="muted">(processes, API <code>/api/vapi</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="vapiBody"></tbody></table>
-    <h3>vKonstant <span class="muted">(processes and screen only: no API, no database)</span></h3>
+    <h3 id="sec-vkonstant">vKonstant <span class="muted">(processes and screen only: no API, no database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th></tr></thead><tbody id="vkBody"></tbody></table>
-    <h3>Shared variables <span class="muted">(processes only)</span></h3>
+    <h3 id="sec-shared">Shared variables <span class="muted">(processes only)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody id="sharedBody"></tbody></table>
   </section>
 
   <!-- ===== Log ===== -->
   <section id="view-log" class="view">
     <div class="csvBox">
-      <h3>Download CSV</h3>
+      <h3 id="sec-csv">Download CSV</h3>
       <div class="bar">
         <label title="A saved list of values, like Mash Profile or Fermentor Profile">CSV set <select id="csvSet"></select></label>
         <button id="csvSaveSet" class="op-only" title="Save the ticked values under a name, like Mash Profile">Save as set</button>
@@ -197,7 +197,7 @@
         <button id="csvGo" class="primary">Download CSV</button>
       </div>
     </div>
-    <div class="bar">
+    <div class="bar" id="sec-readings">
       <select id="logName"></select>
       <label>From <input type="datetime-local" id="logFrom"></label>
       <label>To <input type="datetime-local" id="logTo"></label>
@@ -209,10 +209,10 @@
 
   <!-- ===== Devices ===== -->
   <section id="view-devices" class="view">
-    <h3>Interfaces (boards)</h3>
+    <h3 id="sec-interfaces">Interfaces (boards)</h3>
     <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID (1 to 4 letters) starts the suggested name of every Device on it, for example MB_25_PWM_VlV_Fly_Sparge_SP.</p>
     <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
-    <h3 class="admin-only">Add Interface</h3>
+    <h3 id="sec-addInterface" class="admin-only">Add Interface</h3>
     <div class="form row admin-only">
       <label>Name <input id="devName" placeholder="Main Brewery Mega USB"></label>
       <label>Interface ID (1-4 letters, empty = first letters of the name) <input id="devId" placeholder="MB" maxlength="7" size="6"></label>
@@ -222,18 +222,18 @@
       <label>Network address (Ethernet / WiFi) <input id="devHost" placeholder="192.168.1.60"></label>
       <button id="addDev" class="primary">Add</button>
     </div>
-    <h3>OneWire probe index</h3>
+    <h3 id="sec-probeIndex">OneWire probe index</h3>
     <p class="muted">Each DS18B20 probe gets a number here, and temperature elements use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every element that uses that number follows it, nothing else changes.</p>
     <table class="grid"><thead><tr><th>#</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
     <div class="form row admin-only"><button id="addSlot">Add probe number</button></div>
-    <h3>OneWire probes seen</h3>
+    <h3 id="sec-probesSeen">OneWire probes seen</h3>
     <p class="muted">Every probe the boards report, by its ROM id (not its position on the bus). Give a new probe a number here.</p>
     <table class="grid"><thead><tr><th>Device</th><th>Probe ROM id</th><th>Reading</th><th>Probe number</th></tr></thead><tbody id="probeBody"></tbody></table>
   </section>
 
   <!-- ===== Import ===== -->
   <section id="view-import" class="view">
-    <h3>BeerSmith recipe</h3>
+    <h3 id="sec-beersmith">BeerSmith recipe</h3>
     <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the variables named in Settings &gt; BeerXML mapping.</p>
     <input type="file" id="xmlFile" accept=".xml,text/xml" class="op-only">
     <button id="importBtn" class="primary op-only">Import</button>
@@ -241,7 +241,7 @@
     <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
 
     <div class="admin-only">
-    <h3>BruControl Schema</h3>
+    <h3 id="sec-brucontrol">BruControl Schema</h3>
     <p>Choose a BruControl Schema file (BruControl calls it a configuration file, <code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
@@ -343,11 +343,11 @@
   <!-- ===== Settings ===== -->
   <section id="view-settings" class="view">
     <div class="admin-only">
-      <h3>Start from a sample Schema</h3>
+      <h3 id="sec-samples">Start from a sample Schema</h3>
       <p class="muted">Each sample is a whole brewery: tabs, pumps, valves, pipes, temperature probes, timers, alarms and starter processes. Every board is on the simulator until you pick real hardware on the Devices page. Loading one replaces your tabs, elements and devices; a copy of your current Schema is saved in <code>config/backups</code> first.</p>
       <div id="sampleList" class="samples"></div>
     </div>
-    <h3>My account</h3>
+    <h3 id="sec-account">My account</h3>
     <div class="form row">
       <label>Current password <input type="password" id="pwCur" autocomplete="current-password"></label>
       <label>New password <input type="password" id="pwNew" autocomplete="new-password"></label>
@@ -355,7 +355,7 @@
       <button id="pwSave">Change password</button>
     </div>
     <p class="muted pwRulesText"></p>
-    <h4>Sign-in codes by email or text</h4>
+    <h4 id="sec-signinCodes">Sign-in codes by email or text</h4>
     <p class="muted">Instead of a password you can tap <b>Email or text me a code</b> on the sign-in page. The code goes to the email address and/or mobile number here.</p>
     <div class="form row">
       <label class="admin-only">For user <select id="ctUser"></select></label>
@@ -366,7 +366,7 @@
     </div>
     <p id="ctNote" class="muted"></p>
     <div class="admin-only">
-      <h3>Users</h3>
+      <h3 id="sec-users">Users</h3>
       <p class="muted"><b>Admin</b>: everything. <b>Operator</b>: brew day use (switch outputs, set values, start and stop processes) but no layout, process, device or settings changes. <b>Viewer</b>: watch only.</p>
       <table class="grid"><thead><tr><th>User</th><th>Role</th><th></th></tr></thead><tbody id="userBody"></tbody></table>
       <div class="form row">
@@ -376,7 +376,7 @@
         <button id="nuAdd" class="primary">Add user</button>
       </div>
       <p class="muted pwRulesText"></p>
-      <h3>Password rules</h3>
+      <h3 id="sec-pwRules">Password rules</h3>
       <p class="muted">What a new password may look like. The rules are checked when a password is made or changed (first admin setup, Change password, Add user, Set password and Forgot password). Passwords made before a change keep working.</p>
       <div class="form row">
         <label>Allowed characters <select id="prAllowed"></select></label>
@@ -385,11 +385,11 @@
         <label>Max length <input id="prMax" type="number" step="1"></label>
         <button id="prSave" class="primary">Save password rules</button>
       </div>
-      <h3>Recovery code</h3>
+      <h3 id="sec-recovery">Recovery code</h3>
       <p class="muted">For a forgotten password: on the sign-in page, <b>Forgot password?</b> takes a user name, this code and a new password. It only works from your home WiFi or Tailscale, and each code works once. Forgot a helper's password? Use <b>Set password</b> above instead.</p>
       <div class="bar"><span id="recInfo"></span><button id="recNew">Make a new recovery code</button></div>
       <div id="recShow" class="hidden"><div class="recoveryCode" id="recCode"></div><p>Write this down now and keep it away from the Pi. It is shown only this once. Any older code no longer works.</p></div>
-      <h3>Sending codes (email and text)</h3>
+      <h3 id="sec-sending">Sending codes (email and text)</h3>
       <p class="muted">The panel sends sign-in codes from your own email account. Texts are sent free through your phone carrier's email-to-text address, or through <a href="https://www.twilio.com" target="_blank" rel="noopener">Twilio</a> (a paid service, about a cent per text, works with every carrier). Passwords here are kept on the Pi only.</p>
       <div class="form row">
         <button id="msGmail" type="button">Fill in for Gmail</button>
@@ -412,7 +412,7 @@
         <label>Twilio phone number <input id="msTwFrom" placeholder="+15551234567"></label>
       </div>
       <div class="bar"><button id="msSave" class="primary">Save sending settings</button><button id="msTest">Send me a test</button><span id="msResult" class="muted"></span></div>
-      <h3>Testing mode</h3>
+      <h3 id="sec-testing">Testing mode</h3>
       <label class="toggle"><input type="checkbox" class="swc" id="setFresh"> Start fresh logins after each update</label>
       <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>
       <h3 id="simulation">Simulation (test mode)</h3>
@@ -436,7 +436,7 @@
       <div class="bar"><select id="tlPick"></select><button id="tlShow">Work out timeline</button><button id="tlMake" disabled title="Add time jumps that skip to a few seconds before each timed step">Make time jumps from this</button></div>
       <p id="tlNote" class="muted"></p>
       <div class="tblScroll"><table class="grid tlTable hidden"><thead><tr><th>When</th><th>Line</th><th>What happens</th></tr></thead><tbody id="tlBody"></tbody></table></div>
-      <h3>Panel settings</h3>
+      <h3 id="sec-panel">Panel settings</h3>
     </div>
     <div class="form admin-only">
       <label>Title <input id="setTitle"></label>
@@ -451,7 +451,7 @@
       <button id="saveSettings" class="primary">Save settings</button>
     </div>
     <div class="form admin-only" id="donateSettings">
-      <h3>Beer money pop-up</h3>
+      <h3 id="sec-beerMoney">Beer money pop-up</h3>
       <p class="muted">About once a month each phone or computer gets a small pop-up asking for a few dollars of beer money. It never shows while a Process is running (other than ones that start with the server), while a tab is being edited, or over another window.</p>
       <label class="check"><input type="checkbox" class="swc" id="donOn"> Show the pop-up</label>
       <p>Donations go to Fritz's PayPal (fritz.range@gmail.com). This is built in and cannot be changed here.</p>
@@ -464,7 +464,7 @@
       <div class="bar"><button id="donSave" class="primary">Save pop-up settings</button><button id="donPreview">Show it now</button></div>
     </div>
     <div class="form" id="pictures">
-      <h3>Pictures (PNG / JPG to SVG)</h3>
+      <h3 id="sec-pictures">Pictures (PNG / JPG to SVG)</h3>
       <p class="muted">Every PNG or JPG put in a media folder gets an SVG copy next to it, so it stays sharp at any size. The original file is never changed, so BruControl can still use it. Tracing works best on drawings and icons; photo-like pictures come out blotchy, so check them here.</p>
       <label class="admin-only">Use SVG pictures <select id="picMode"></select></label>
       <div class="bar admin-only"><button id="picConvert" class="primary">Convert all now</button><button id="picRedo">Re-make all</button><input id="picFilter" placeholder="Filter by name"></div>
