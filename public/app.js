@@ -4678,25 +4678,60 @@ function renderMenu() {
   }
   if (menuTab && !paneDirty()) renderMenuPane();
 }
-// the ☰ Menu choices: Edit layout, then the Menu tabs in their order. `go` wraps each choice (it closes the list first,
-// and in a dialog it closes the dialog). `pages` adds the Menu Bar pages too, for a ☰ that sits where the Menu Bar can't be reached.
-function menuItems(list, go, pages = false) {
+// the ☰ Menu choices: Edit layout, then the Menu tabs in their order, then every page with its parts. `go` wraps each
+// choice (it closes the list first, and in a dialog it closes the dialog).
+function menuItems(list, go) {
   const item = (label, fn, attrs = {}) => h('button', { type: 'button', role: 'menuitem', class: 'menuItem', ...attrs, onclick: fn ? go(fn) : null }, ...[label].flat());
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   list.append(h('hr'));
   if (editing) list.append(h('div', { class: 'menuNote muted' }, 'Save or exit Edit layout to open a Menu tab'));
+  list.append(h('div', { class: 'menuNote muted' }, 'Menu tabs'));
   for (const m of menuSorted().filter(m => !m.admin || can('admin'))) {
     const off = m.coming || (editing && !m.view);
     list.append(item([m.title, m.coming ? h('span', { class: 'muted' }, ' (coming)') : ''], () => { if (m.view) setView(m.view); else openMenuTab(m.key); },
       { title: m.coming || m.tip, ...(off ? { disabled: true } : {}) }));
   }
-  if (!pages) return;
   list.append(h('hr'), h('div', { class: 'menuNote muted' }, 'Pages'));
   for (const b of $$('#views button')) {
-    if (b.classList.contains('admin-only') && !can('admin') || b.classList.contains('op-only') && !can('operator')) continue;
-    const v = b.dataset.view;
-    list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(v === view && !(v === 'workspace' && menuTab) ? { class: 'menuItem cur' } : {}) }));
+    if (!roleOk(b)) continue;
+    const v = b.dataset.view, here = v === view && !(v === 'workspace' && menuTab);
+    list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(here ? { class: 'menuItem cur' } : {}) }));
+    for (const p of pageParts(v)) list.append(item('↳ ' + p.label, p.go, { class: 'menuItem menuSub' + (p.cur ? ' cur' : ''), title: p.tip || '' }));
   }
+}
+// Fritz, 2026-10-26: "the ☰ Menu should fill out with any tab or sub tab you can navigate to" (he could not find the
+// Interfaces). Under each page the ☰ lists its parts: the screen Tabs, each part of a long page (it scrolls there and
+// lights it up a moment) and the windows a page opens with a button. A part inside .admin-only / .op-only only shows
+// for that role, the same as on the page.
+const PAGE_PARTS = {
+  scripts: [['Find in all Processes', '#findAllBtn'], ['Recycle Bin (deleted Processes)', '#binBtn'], ['Color key', '#colorKey']],
+  globals: [['vAPI', '#sec-vapi'], ['vKonstant', '#sec-vkonstant'], ['Shared variables', '#sec-shared']],
+  log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
+  devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
+  import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
+  settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
+    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
+    ['Testing mode', '#sec-testing'], ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
+  config: [['Backups', '#cfgBackups']],
+};
+const roleOk = el => !(el.closest('.admin-only') && !can('admin')) && !(el.closest('.op-only') && !can('operator'));
+function pageParts(v) {
+  if (v === 'workspace') return L().workspaces.filter(w => !w.build || editing).map(w => ({ label: w.name, cur: view === 'workspace' && !menuTab && w.name === wsName,
+    go: () => { if (menuTab) leaveMenuTab(); wsName = w.name; sel = null; setView('workspace'); renderTabs(); renderWs(); } }));
+  return (PAGE_PARTS[v] || []).flatMap(([label, q]) => {
+    const el = $(q);
+    if (!el || !roleOk(el)) return [];
+    // a button opens its window; a heading is scrolled to
+    return [{ label, go: () => { setView(v); if (el.tagName === 'BUTTON') el.click(); else showPart(el); } }];
+  });
+}
+function showPart(el) {
+  requestAnimationFrame(() => {
+    el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    el.classList.remove('menuFlash'); void el.offsetWidth; el.classList.add('menuFlash');
+    setTimeout(() => el.classList.remove('menuFlash'), 2000);
+  });
 }
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
 $('#barEdit').onclick = guard(menuEditLayout);      // the red button (crossed hammers over a square) beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
@@ -4719,7 +4754,7 @@ function menuButton(leave, label = ' Menu') {
     closeMenuList(); closeMenuCopies();
     if (!show) return;
     list.innerHTML = '';
-    menuItems(list, fn => () => { list.classList.add('hidden'); if (!leave || leave() !== false) fn(); }, true);
+    menuItems(list, fn => () => { list.classList.add('hidden'); if (!leave || leave() !== false) fn(); });
     list.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true');
     const r = btn.getBoundingClientRect();
     // right edge under the button, but never off either side of a phone screen
