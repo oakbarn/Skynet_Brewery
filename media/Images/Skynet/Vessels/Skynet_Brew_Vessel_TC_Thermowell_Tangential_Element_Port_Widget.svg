@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 236 256">
+  <!-- Skynet Vessel Widget "Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget" (Fritz, 2026-10-23): Brew Vessel TC Temperature Tangential (Tangential face-on, 1 in in from the Left side, 4 in up) + a TC 2 Heating Element port on the Right side, center 6 in above the bottom.
+       All Skynet Brew Vessel Widgets share one box (viewBox -20 0 236 256, 10 units = 1 in) so a port position is the same spot on each;
+       face-on TC ports: flange, gasket groove, opening; side ports: tube and flange seen side-on. -->
+  <g stroke="#111" stroke-width="1.5">
+    <rect x="179" y="179" width="10.5" height="20" fill="#808080"/>
+    <rect x="189.5" y="176.4" width="7" height="25.2" rx="1.5" fill="#808080"/>
+  </g>
+  <rect x="5" y="9" width="182" height="12" rx="3" fill="#808080" stroke="#111" stroke-width="3"/>
+  <rect x="12.5" y="22" width="167" height="227" rx="7" fill="#808080" stroke="#111" stroke-width="3"/>
+  <g stroke="#111">
+    <circle cx="96" cy="239" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="96" cy="239" r="8.4" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="96" cy="239" r="6.9" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="96" cy="199" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="96" cy="199" r="8.4" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="96" cy="199" r="6.9" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+  <g stroke="#111">
+    <circle cx="22.5" cy="209" r="9.9" fill="#b4b7bb" stroke-width="1.5"/>
+    <circle cx="22.5" cy="209" r="8.4" fill="none" stroke="#6d6d6d" stroke-width="1"/>
+    <circle cx="22.5" cy="209" r="6.9" fill="#3a3a3a" stroke-width="1"/>
+  </g>
+</svg>

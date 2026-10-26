@@ -1,6 +1,6 @@
 # Skynet Vessels
 
-A **Skynet vessel** is a Tab_Vessel made from a Skynet Vessel Template: a kettle, an HLT, a mash tun, an all-in-one and so on. Like a [Skynet Fitting](60-skynet-fittings), it is one unit:
+A **Skynet vessel** is a Tab_Vessel made from a Skynet Vessel Template (a Skynet Vessel Widget, see [Add a Vessel](66-add-a-vessel)): a kettle, an HLT, a mash tun, an all-in-one and so on. Like a [Skynet Fitting](60-skynet-fittings), it is one unit:
 
 - **Every opening has an IP built in**, where the Template puts it on the picture. Each one is two-way.
 - The IPs can't be moved, set or taken off, and the vessel can't be un-bundled. The Bundled Fittings on its ports belong to it and move with it.
@@ -13,6 +13,7 @@ Vessels you make from a User Bundled Template keep their port settings: you plac
 In **Edit layout**, double-click the vessel (or one of its IPs). You set:
 
 - **Name**, **Type** and **Display Name**.
+- **Graphic**: it starts as the Skynet picture and can be changed like on any other Widget. The IPs stay on the openings of the Skynet picture.
 - **Heating Element: Select Device or None**, on an electric vessel. The **E** mark on the picture shows where the element goes in. It glows while that Device is on.
 - **Temperature Probe: Select Temperature Probe or None**, on a vessel with a thermowell (the **T** mark).
 - **Flip Horizontal**, **Flip Vertical** and **Rotate** (45 degree steps), the same as a [Skynet Fitting](60-skynet-fittings). The picture turns, and its IPs and the fittings on its ports (with their End Caps) turn with it about the middle of the vessel. Turned 90 or 270 degrees, the vessel's box turns too, so a tall kettle lies wide.

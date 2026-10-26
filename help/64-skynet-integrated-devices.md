@@ -1,6 +1,6 @@
 # Skynet Integrated Devices
 
-A **Skynet_Integrated_Device** is one item with Devices built into it. The first one is the **RIMS tube**: its heating element and its temperature probe are part of it. A **Skynet_Integrated_Widget** is one with IPs built in, like the [Skynet Fittings](60-skynet-fittings) (elbows, tees).
+A **Skynet_Integrated_Device** is one item with Devices built into it. The first one is the **RIMS tube**: its heating element and its temperature probe are part of it. The second is the [Basic electric kettle](65-skynet-integrated-electric-kettle). A **Skynet_Integrated_Widget** is one with IPs built in, like the [Skynet Fittings](60-skynet-fittings) (elbows, tees).
 
 An Integrated item can be bundled with other things, but what is built into it can never be taken out of it (un-bundled).
 

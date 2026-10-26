@@ -1,0 +1,6 @@
+{
+  "vesselType": "vessel", "vtype": "Brew Kettle", "image": "Images/Skynet/Vessels/Skynet_Generic_Brew_Vessel_Widget.svg", "size": [217, 235],
+  "std": { "type": "TC", "size": 1.5 },
+  "ports": { "outlet": { "installed": false } },
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23): a plain brew vessel with no ports (no holes). Build on it when no other Skynet Vessel Widget has the ports you need."
+}

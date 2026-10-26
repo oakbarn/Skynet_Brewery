@@ -1,0 +1,44 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Skynet_Brew_Vessel_Big_Mac_Widget.svg",
+  "size": [
+    291,
+    291
+  ],
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Fat Center Bottom 1 in"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "Fat Center 10 in"
+    },
+    "tangential": {
+      "installed": true,
+      "position": "Fat Left 4 in"
+    },
+    "sparge": {
+      "installed": true,
+      "position": "Fat Left 11 in",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    },
+    "element": {
+      "installed": true,
+      "position": "Fat Right 6 in",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    }
+  },
+  "notes": "A Skynet Vessel Widget (Fritz, 2026-10-23, \"the fat one\"): built on Brew_Vessel_TC_Thermowell_Tangential_Element_Port_Widget, 10 in wider and 6 in taller, the Thermowell moved up to 10 in and a TC 2 added on the Left side at 11 in. Its IPs are built in on the ports; the Right side TC 2 is the Heating Element port (a mark, no IP)."
+}
