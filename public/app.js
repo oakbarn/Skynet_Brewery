@@ -3067,6 +3067,27 @@ function cloneBundle(v) {
   sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); renderWs();
   toast(`Cloned: "${name}" with ${ips.length} IP${ips.length === 1 ? '' : 's'}, bundled, next to the first one. Pipes are not copied. Save layout to keep it.`);
 }
+// Fritz (2026-10-26): in any list, double-click an entry to open its Properties. A Device, Widget or Tab_Vessel opens
+// in Edit layout on its Tab, the same dialog as a double-click on the Tab. A double-click on a box or button in the row does its own job.
+const rowDbl = open => ev => { if (ev.target.closest('input,select,button,textarea,a')) return; window.getSelection?.().removeAllRanges(); open(); };
+function openProps(kind, id) {
+  if (!can('admin')) return toast('Only an admin can open Properties (they are changed in Edit layout)', true);
+  const item = (kind === 'el' ? S.config.elements.find(e => e.name === id) : S.config.graphics.find(g => g.id === id)) || (editing && findItem(kind, id));
+  if (!item) return toast('That item is not on a Tab of this Schema', true);
+  if (menuTab) leaveMenuTab();
+  if (item.workspace && L().workspaces.some(w => w.name === item.workspace)) wsName = item.workspace;
+  if (view !== 'workspace') setView('workspace');
+  if (!editing) setEditing(true);
+  sel = { kind, id }; renderTabs(); renderWs(); editItem(kind, id);
+}
+// the Tab settings of one Tab, from a list of Tabs
+function openTabProps(name) {
+  if (!can('admin')) return toast('Only an admin can open Tab settings', true);
+  if (menuTab) leaveMenuTab();
+  wsName = name; if (view !== 'workspace') setView('workspace');
+  if (!editing) setEditing(true);
+  sel = null; renderTabs(); renderWs(); editWorkspace();
+}
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
@@ -3910,7 +3931,7 @@ function varRow(e, withLog) {
       h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Logged'); }) }, 'Log now'),
         lg.mode === 'once' ? h('button', { title: 'Write one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
   }
-  return h('tr', {}, ...cells);
+  return h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', e.name)) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
@@ -4377,7 +4398,7 @@ function renderMqtt() {
   const body = $('#mqItems'); body.innerHTML = '';
   for (const it of S.mqtt?.items || []) {
     const box = (k, dis) => h('input', { type: 'checkbox', 'data-name': it.name, 'data-k': k, ...(it[k] ? { checked: true } : {}), ...(dis ? { disabled: true, title: 'Inputs from hardware are read only' } : {}) });
-    body.append(h('tr', {}, h('td', {}, it.displayName ? `${it.displayName} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
+    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.displayName ? `${it.displayName} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
   }
   const sb = $('#mqScripts'); sb.innerHTML = '';
   for (const s of S.scripts) sb.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.scripts || []).includes(s.name) ? { checked: true } : {}) }), s.name));
@@ -5157,7 +5178,8 @@ function eqPane(p) {
   const nameOf = id => items.find(x => x.id === id)?.name || '';
   const kindOf = it => it.vesselType === 'bfit' ? 'Tab_Fitting' : (it.template ? 'Tab_Vessel' : EQ[it.vesselType]?.title || it.vesselType) + (it.vtype ? ': ' + (it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype) : '');
   const size = it => it.maxVolume ?? it.volume;
-  const rows = items.map(it => h('tr', {}, h('td', {}, it.name || ''), h('td', {}, kindOf(it)),
+  const live = w && w.layoutFromProfile !== false;      // these are the Tab's own pieces, so they have Properties there
+  const rows = items.map(it => h('tr', live ? { title: 'Double-click for its Properties on the Tab', ondblclick: rowDbl(() => openProps('gfx', it.id)) } : {}, h('td', {}, it.name || ''), h('td', {}, kindOf(it)),
     h('td', {}, size(it) !== undefined ? `${size(it)} ${volUnit(it.units || p.units)}` : ''),
     h('td', {}, it.template ? `${it.template}${it.templateCls ? ' (' + (it.templateCls === 'skynet' ? 'Skynet' : 'User Bundled') + ')' : ''}` : ''),
     h('td', {}, it.onVessel ? 'on ' + nameOf(it.onVessel) : '')));
@@ -5178,7 +5200,7 @@ function eqPane(p) {
 function oldEqList(p, w) {
   const admin = can('admin') && !p.locked, onTab = it => S.config.graphics.find(g => g.kind === 'vessel' && g.profileItem === it.id);
   const u = volUnit(p.units), tab = w?.name || 'Equipment';
-  const rows = (p.equipment || []).map(it => h('tr', {},
+  const rows = (p.equipment || []).map(it => h('tr', { title: 'Double-click to open it on the Vessel tab', ondblclick: rowDbl(guard(() => openVessel(it.id))) },
     h('td', {}, it.name), h('td', {}, `${EQ[it.vesselType]?.title || it.vesselType}${it.vtype ? ': ' + (it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype) : ''}`),
     h('td', {}, it.volume !== undefined ? `${it.volume} ${u}` : ''), h('td', {}, it.heatKind ? HEAT_KINDS[it.heatKind] + (it.heatDevice ? ': ' + it.heatDevice : '') : ''),
     h('td', {}, it.bundled ? '📦 Bundled' : 'Loose'), h('td', {}, onTab(it) ? '✓ on ' + onTab(it).workspace : h('span', { class: 'muted' }, 'not on a tab')),
@@ -6028,7 +6050,7 @@ function tabsUsing(p, admin) {
       await api('PUT', '/ui/layout', { workspaces }); S.config.workspaces = workspaces;
       toast(s.value ? `The ${ws.name} tab uses "${S.tabProfiles.find(x => x.id === s.value).name}"` : `The ${ws.name} tab has no Tab Background Profile now`);
     });
-    return h('tr', {}, h('td', {}, ws.name), h('td', {}, s), h('td', { class: 'muted' }, ws.color ? 'Has its own background color (Tab settings)' : ''));
+    return h('tr', { title: 'Double-click for its Tab settings', ondblclick: rowDbl(() => openTabProps(ws.name)) }, h('td', {}, ws.name), h('td', {}, s), h('td', { class: 'muted' }, ws.color ? 'Has its own background color (Tab settings)' : ''));
   });
   return h('div', { class: 'eqPane' }, h('h3', {}, `Tabs of the Schema "${S.schemas.active?.name}"`),
     h('p', { class: 'muted' }, 'Pick the Tab Background Profile of each tab. A tab with its own background color in Tab settings keeps that color.'),
