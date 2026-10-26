@@ -4,7 +4,7 @@ A browser-based brewery control panel with BruControl-style screens (called **Ta
 
 ```
  Browser(s) ──WiFi/LAN──>  Brew Panel server (Node.js)  ──USB──>  Arduino Mega(s)
-                           scripts, vAPI API,  SQLite ──Ethernet──> Mega + Ethernet shield, or ESP32 (Ethernet) ──> Mega
+                           scripts, vAPI API,  SQLite ──Ethernet──> ESP32 (Ethernet) ──> Mega
                                                         ──WiFi──> ESP32 ──> Mega
 ```
 
@@ -239,7 +239,7 @@ data/                state.json (variable values kept over restarts), brewlog.db
                      users.json (accounts, passwords are hashed) and sessions.json (who is signed in)
 tools/               reset-password.js (forgotten password)
 help/                the manual shown on the Help tab, one Markdown file per page
-firmware/            Mega_BrewPanel.ino (Mega: USB or Ethernet shield), ESP32_Bridge.ino (WiFi or Ethernet bridge)
+firmware/            Mega_BrewPanel.ino (Mega: USB only), ESP32_Bridge.ino (WiFi or Ethernet bridge)
 docs/                DEVICE_PROTOCOL.md, MQTT_AND_VOICE.md, brewpanel.service, REMOTE_ACCESS.md (login and Tailscale)
 ```
 

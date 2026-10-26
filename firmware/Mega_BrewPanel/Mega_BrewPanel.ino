@@ -36,25 +36,13 @@
 #endif
 
 const char* DEVICE_NAME = "MEGA1";
-const char* FIRMWARE = "0.3";
+const char* FIRMWARE = "0.4";
 
-// Link to the server:
-//   USB cable:      USE_ETHERNET 0 and LINK Serial (the default)
-//   ESP32 bridge:   USE_ETHERNET 0 and LINK Serial1 (pins 18/19)
-//   Ethernet:       USE_ETHERNET 1 with a W5500 or W5100 Ethernet shield. The panel connects to IP_ADDR on TCP port 4100.
-//                   The shield uses pins 10 (chip select), 4 (SD card) and SPI 50/51/52, so pins 4 and 10 cannot be outputs.
-#define USE_ETHERNET 0
-#if USE_ETHERNET
-#include <SPI.h>
-#include <Ethernet.h>
-byte MAC_ADDR[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x01};  // any MAC, but unique on your network
-IPAddress IP_ADDR(192, 168, 1, 60);                      // fixed address; add it on the panel's Devices page as "Board on Ethernet"
-EthernetServer netServer(4100);
-EthernetClient netClient;
-#define LINK netClient
-#else
+// Link to the server (the Brain):
+//   USB cable:      LINK Serial (the default)
+//   ESP32 bridge:   LINK Serial1 (pins 18/19)
+// Safety rule: a Mega never joins the network by itself. There is no Ethernet shield (W5500 / W5100) option.
 #define LINK Serial
-#endif
 
 // ---- your pins ----   (analog pins can be listed as A0-A15; in the panel they are A0-A15 or BruControl's 54-69)
 const uint8_t OUTPUT_PINS[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 22, 23, 24, 25};
@@ -113,9 +101,6 @@ String line;
 
 int indexOf(const uint8_t* pins, uint8_t n, int pin) { for (uint8_t i = 0; i < n; i++) if (pins[i] == pin) return i; return -1; }
 bool isOutput(int pin) {
-#if USE_ETHERNET
-  if (pin == 10 || pin == 4) return false;               // used by the Ethernet shield
-#endif
   return indexOf(OUTPUT_PINS, N_OUT, pin) >= 0;
 }
 
@@ -365,25 +350,13 @@ void setup() {
 #if USE_TC == 1
   for (uint8_t i = 0; i < N_TC; i++) { tc[i] = new Adafruit_MAX31856(TC_CS_PINS[i]); tc[i]->begin(); tc[i]->setThermocoupleType(MAX31856_TCTYPE_K); tc[i]->setConversionMode(MAX31856_CONTINUOUS); }
 #endif
-#if USE_ETHERNET
-  Ethernet.init(10);
-  Ethernet.begin(MAC_ADDR, IP_ADDR);
-  netServer.begin();
-#else
   LINK.begin(115200);
-#endif
   probes.begin();
   probes.setWaitForConversion(false);                     // do not block while probes convert
   lastRx = millis();
 }
 
 void loop() {
-#if USE_ETHERNET
-  if (!netClient || !netClient.connected()) {            // the panel (re)connects; newest connection wins
-    EthernetClient c = netServer.accept();
-    if (c) { netClient.stop(); netClient = c; line = ""; }
-  }
-#endif
   while (LINK.available()) {
     char c = LINK.read();
     if (c == '\n') { handle(line); line = ""; }
