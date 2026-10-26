@@ -19,6 +19,10 @@ assert.deepEqual(conv.summary.byType, { digitalOut: 2, analogIn: 2, hysteresis: 
 assert.equal(conv.devices[0].type, 'simulator'); assert.equal(conv.devices[0].realType, 'serial'); assert.equal(conv.devices[0].port, 'COM3');
 assert.equal(conv.devices[1].realType, 'esp32'); assert.equal(conv.devices[1].host, '192.168.1.60'); assert.equal(conv.devices[1].enabled, false);
 assert.deepEqual(conv.autostart, ['looper_Sample']);
+// Safety rule: a BruControl Mega on the network comes in as USB (no port yet), with a warning
+const megaNet = convertBruControl(xml.replace('<TypeName>ESP32</TypeName>', '<TypeName>Arduino MEGA</TypeName>'));
+assert.equal(megaNet.devices[1].type, 'serial'); assert.equal(megaNet.devices[1].port, ''); assert.equal(megaNet.devices[1].host, undefined);
+assert.ok(megaNet.warnings.some(w => w.includes('USB only')), 'Mega on the network is flagged');
 assert.match(conv.scripts[0].text, /^\/\/ sample & "quoted"\nnew value vV\n/);
 assert.ok(conv.warnings.some(w => w.includes('sw_Testing_2')));
 
