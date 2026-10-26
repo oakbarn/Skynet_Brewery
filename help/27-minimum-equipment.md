@@ -49,7 +49,7 @@ PWM-capable and flow-meter-capable pins are part of the digital pins, not extra.
 | Port | How many | Used for |
 |---|---|---|
 | USB-A sockets | 4 (2 fast blue USB 3, 2 USB 2) | Megas on USB, a USB stick for files. A powered USB hub adds more. |
-| Ethernet (gigabit) | 1 | Your home network (best for brewing) and ESP32s on Ethernet (a Mega is never on the network by itself) |
+| Ethernet (gigabit) | 1 | Your home network (best for brewing) and Megas or ESP32s on Ethernet |
 | WiFi and Bluetooth | built in | Your home network if no cable; ESP32s on WiFi |
 | Micro-HDMI | 2 | A monitor, only needed for setup |
 | USB-C | 1 | Power only (official supply) |
@@ -64,7 +64,7 @@ PWM-capable and flow-meter-capable pins are part of the digital pins, not extra.
 | Analog inputs (A0-A15) | 16 | 0-5 V sensors, pressure transducers, 4-20 mA sensors (250 ohm resistor), NTC thermistors, pH | 10-bit. An ADS1115 board adds 4 finer inputs on I2C. |
 | Interrupt pins | 6 (D2, D3, D18, D19, D20, D21) | Pulse flow meters, up to 6 | D18 and D19 are taken by an ESP32 link; D20 and D21 by I2C if used |
 | OneWire bus | 1 pin (D40 by default) | All DS18B20 temperature probes on one wire | Many probes share it; one 4.7k resistor. The panel blocks D40 for anything else once a DS18B20 is set up. |
-| SPI bus | D50, D51, D52 + 1 chip-select pin per board | MAX31865 (PT100 / PT1000) and MAX31856 / MAX31855 (thermocouple) boards | The panel blocks 50-52 for anything else once an RTD or thermocouple is on the board (see [Pins kept for RTD and OneWire probes](46-interface-tab-device-names)). |
+| SPI bus | D50, D51, D52 + 1 chip-select pin per board | MAX31865 (PT100 / PT1000) and MAX31856 / MAX31855 (thermocouple) boards | An Ethernet shield also uses SPI plus D4 and D10. The panel blocks 50-52 for anything else once an RTD or thermocouple is on the board (see [Pins kept for RTD and OneWire probes](46-interface-tab-device-names)). |
 | I2C bus | D20 (SDA), D21 (SCL) | ADS1115 analog board | |
 | Serial ports | 4 (Serial0 on D0/D1 = USB, Serial1 on D18/D19 = ESP32 link, Serial2, Serial3 free) | USB to the Pi, or the ESP32 bridge | |
 | Load cells | 2 digital pins per scale | HX711 boards (vessel weight and volume) | |

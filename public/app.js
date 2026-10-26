@@ -6,6 +6,7 @@ import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
+import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -4050,7 +4051,7 @@ $('#logLoad').onclick = guard(async () => {
 function renderDevices() {
   const tb = $('#devBody'); tb.innerHTML = '';
   for (const d of S.devices) {
-    const TYPES = { serial: 'USB', ethernet: 'ESP32 Ethernet', esp32: 'ESP32 (WiFi)', simulator: 'Simulator' };
+    const TYPES = LINK_NAMES;
     const real = d.type === 'simulator' && d.realType && !d.simMode ? h('button', { title: `Use the real ${TYPES[d.realType]} at ${d.port || d.host}`, onclick: guard(async () => {
       if (!confirm(`Switch ${d.name} from the simulator to the real ${TYPES[d.realType]} (${d.port || d.host})?`)) return;
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
@@ -4062,15 +4063,20 @@ function renderDevices() {
         if (S.config.devices.some(x => x.name !== d.name && String(x.id).toUpperCase() === id)) { ev.target.value = cfg?.id ?? ''; throw new Error(`Interface ID ${id} is used by another Interface`); }
         await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, id } : x) }); await load(); toast(`Interface ID is now ${id}_ (Devices made before keep their names)`);
       }) });
-    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
-      h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, megaOnNetwork(cfg) ? h('div', { style: 'color:var(--bad)', title: 'Safety rule: an Arduino Mega connects to the Brain by USB only. Remove this Interface and add it again as USB, or rename it if this is an ESP32 bridging to a Mega.' }, '⚠ A Mega must use USB') : '', d.info || ''),
+    // board and connection rating (public/links.js): USB best; a heating Device on a WiFi link is flagged
+    const boardSel = h('select', { disabled: !can('admin'), title: 'The board, for the connection rating', onchange: guard(async ev => {
+      await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, board: ev.target.value } : x) }); await load();
+    }) }, ...BOARDS.map(([v, t]) => h('option', { value: v, ...(v === boardOf(cfg || d) ? { selected: true } : {}) }, t)));
+    const heaters = S.config.elements.filter(e => e.device === d.name && isHeating(e)).map(e => e.name);
+    const rt = rating(cfg || d, heaters.length > 0);
+    const rateCell = h('td', { class: 'linkRating ' + rt.level, title: rt.text + (heaters.length && linkOf(cfg || d) === 'esp32' ? `\nHeating Devices on it: ${heaters.join(', ')}` : '') },
+      rt.text ? (rt.level === 'poor' ? '⚠ ' : '') + rt.text.split(':')[0] + (heaters.length && linkOf(cfg || d) === 'esp32' ? ` (heating: ${heaters.join(', ')})` : '') : '');
+    tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), rateCell, h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
+      h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
       h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   renderProbes();
 }
-
-// Safety rule: a Mega connects to the Brain by USB only. A network Interface named like a Mega (and not like an ESP32 bridge) is flagged.
-const megaOnNetwork = d => !!d && (d.type === 'ethernet' || d.realType === 'ethernet') && /mega/i.test(d.name) && !/esp/i.test(d.name);
 
 // ---- OneWire probe index: numbered slots; elements use the number, the slot holds the probe's ROM id
 const seenRoms = () => { const m = new Map(); for (const d of S.devices) for (const [rom, t] of Object.entries(d.probes || {})) m.set(rom, { dev: d.name, t }); return m; };
@@ -4118,13 +4124,15 @@ $('#addDev').onclick = guard(async () => {
   const taken = S.config.devices.map(x => x.id), typed = $('#devId').value.trim();
   const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
   if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Leave the box empty for one that is free.`);
-  const d = { name, id, type };
-  if (megaOnNetwork(d) && !confirm(`For safety an Arduino Mega connects to the Brain by USB only.\n\nOK only if "${name}" is an ESP32 on Ethernet bridging to a Mega. Cancel to pick USB.`)) return;
+  const d = { name, id, type, board: $('#devBoard').value };
   if (type === 'serial') { d.port = $('#devPort').value.trim(); d.baud = 115200; if (!d.port) throw new Error('USB port is required'); }
   if (type === 'esp32' || type === 'ethernet') { d.host = $('#devHost').value.trim(); d.port = 4100; if (!d.host) throw new Error('Network address is required'); }
   await api('PUT', '/ui/layout', { devices: [...S.config.devices, d] }); await load(); toast(`Interface ${name} added, ID ${id}_`);
   $('#devName').value = ''; $('#devId').value = ''; $('#devId').placeholder = 'MB';
 });
+// the connection rating for the board and Type being added
+const showDevRating = () => { const r = rating({ board: $('#devBoard').value, type: $('#devType').value }); $('#devRating').className = 'linkRating ' + r.level; $('#devRating').textContent = r.text; };
+$('#devBoard').onchange = showDevRating; $('#devType').addEventListener('change', showDevRating); showDevRating();
 // the Interface ID box shows the ID a name would get (first letters of its first two words), until one is typed
 $('#devName').addEventListener('input', () => { $('#devId').placeholder = defaultInterfaceId($('#devName').value, S.config.devices.map(x => x.id)) || 'MB'; });
 

@@ -6,7 +6,7 @@
 // In Mega_BrewPanel set  #define LINK Serial1
 
 // Wired Ethernet: set USE_ETHERNET 1 on an ESP32 board with an Ethernet jack (Olimex ESP32-POE, WT32-ETH01 …)
-// and pick that board under Tools > Board, so the Ethernet pins are known. In the panel add it as "ESP32 on Ethernet".
+// and pick that board under Tools > Board, so the Ethernet pins are known. In the panel add it as "Board on Ethernet".
 // On WT32-ETH01 GPIO16 powers the Ethernet chip, so set MEGA_RX = 5 there (its RXD pin; MEGA_TX stays 17).
 #define USE_ETHERNET 0
 const int MEGA_RX = 16, MEGA_TX = 17;
