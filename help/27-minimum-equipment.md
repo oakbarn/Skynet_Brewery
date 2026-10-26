@@ -172,7 +172,7 @@ Core cost, without sensors and outputs: about **$120-165 for System 1**, plus ab
 - **Phone layout:** works, but large Tabs are cramped on a phone screen.
 - **No graphs yet** on the Log page (the data can be downloaded as a spreadsheet file).
 - **Alarm sounds** play only on screens where **Enable sound** was pressed once (browsers block sound until you click).
-- **WiFi is the weakest link.** Use USB or Ethernet for anything that heats or pumps. On every link the board turns all outputs OFF if it hears nothing from the Pi for 10 seconds.
+- **WiFi is the weakest link.** Use USB or Ethernet for anything that heats or pumps. On every link the board turns all outputs OFF if it hears nothing from the Pi for its lost link delay (10 seconds unless you change it; see [Connection ratings](69-connection-ratings)).
 - **One Brain at a time.** Two panels driving the same boards fight each other.
 - **Away from home only through Tailscale.** Never open a port on your router for the panel.
 - **The microSD card wears out** with all-day logging. A small UPS (battery backup) and, on a Pi 5, an SSD instead of the card help. Always shut the Pi down before unplugging it.

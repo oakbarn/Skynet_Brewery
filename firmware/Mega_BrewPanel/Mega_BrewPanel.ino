@@ -36,10 +36,11 @@
 #endif
 
 const char* DEVICE_NAME = "MEGA1";
-const char* FIRMWARE = "0.3";
+const char* FIRMWARE = "0.4";
 
 // Link to the server (the Brain). Ranked safest first (Fritz): 1 USB = best, 2 Ethernet = OK (depends on the network),
-// 3 WiFi through an ESP32 bridge = poor (can drop often). Heating Devices are not allowed on a WiFi link.
+// 3 WiFi through an ESP32 bridge = poor (can drop often). Heating on a network link is allowed with a warning; the
+// lost link delay (CFG WD, set per Interface on the Devices page) turns all outputs OFF when the Brain goes quiet.
 //   USB cable:      USE_ETHERNET 0 and LINK Serial (the default)
 //   ESP32 bridge:   USE_ETHERNET 0 and LINK Serial1 (pins 18/19)
 //   Ethernet:       USE_ETHERNET 1 with a W5500 or W5100 Ethernet shield. The panel connects to IP_ADDR on TCP port 4100.
@@ -72,7 +73,7 @@ const uint8_t HX711_SCK_PINS[] = {};                     // and their clock (SCK
 const uint8_t STEPPER_PINS[]  = {};                     // every pin a stepper uses (STEP, DIR, ENABLE or IN1-IN4, home switch), e.g. {40, 41, 42, 43}; not also in other lists
 const uint8_t ONEWIRE_PIN = 40;                          // all DS18B20 probes on one bus, 4.7k pull-up to 5V
 const bool RELAY_ACTIVE_LOW = true;                      // most relay boards switch ON with LOW
-const unsigned long WATCHDOG_MS = 10000;                 // no message for 10 s -> all outputs OFF
+unsigned long watchdogMs = 10000;                        // no message for this long -> all outputs OFF (the panel sends CFG WD <s> S)
 
 const uint8_t N_OUT = sizeof(OUTPUT_PINS), N_IN = sizeof(INPUT_PINS), N_AN = sizeof(ANALOG_PINS), N_PWM = sizeof(PWM_PINS), N_AO = sizeof(AO_PINS);
 const uint8_t N_FLOW = sizeof(FLOW_PINS) > 6 ? 6 : sizeof(FLOW_PINS), N_RTD = sizeof(RTD_CS_PINS), N_TC = sizeof(TC_CS_PINS);
@@ -261,6 +262,7 @@ void runMotors() {
 // CFG <kind> <pin> <setting>: sensor settings sent by the server after HELLO
 void configure(String kind, int pin, String v) {
   int i;
+  if (kind == "WD") { watchdogMs = constrain(pin, 3, 600) * 1000UL; return; }   // CFG WD <seconds> S: the lost link delay
 #if USE_STEPPER
   if (kind == "STEP" || kind == "STEP4") { setupMotor(kind == "STEP4", pin, v); return; }
   if (kind == "HOME" && (i = findMotor(pin)) >= 0) {        // CFG HOME <step pin> <switch pin> <flags: 1 = switch reads HIGH when hit, 2 = switch at the + end>
@@ -391,7 +393,7 @@ void loop() {
     else if (c != '\r' && line.length() < 80) line += c;
   }
   unsigned long now = millis();
-  if (!watchdogTripped && now - lastRx > WATCHDOG_MS) { allOff(); watchdogTripped = true; LINK.println("ERR watchdog: no messages, all outputs OFF"); }
+  if (!watchdogTripped && now - lastRx > watchdogMs) { allOff(); watchdogTripped = true; LINK.println("ERR watchdog: no messages, all outputs OFF"); }
   for (uint8_t i = 0; i < N_IN; i++) {
     int v = digitalRead(INPUT_PINS[i]) == LOW ? 1 : 0;
     if (v != candIn[i]) { candIn[i] = v; candSince[i] = now; }                     // debounce: wait until the level holds

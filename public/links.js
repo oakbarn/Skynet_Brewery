@@ -1,6 +1,7 @@
 // Connection ranking (Fritz, 2026-10-26): how safe each link to the Brain is, by board.
-// USB is safest. Ethernet and WiFi depend on the network; on every link the board turns all outputs OFF after 10 s of silence.
-// Shared by the browser (Devices page) and the server (heating Devices are not allowed on a WiFi link).
+// USB is safest. Ethernet and WiFi depend on the network.
+// Heating Devices on a network link are allowed with a warning (Fritz, 2026-10-26); the board turns all outputs OFF
+// when it hears nothing from the Brain for the Interface's "lost link" delay (user set, 3 to 600 s, default 10).
 
 export const BOARDS = [['mega', 'Arduino Mega'], ['esp32', 'ESP32'], ['other', 'Other Arduino-type board']];
 export const LINK_NAMES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'WiFi', simulator: 'Simulator' };
@@ -9,12 +10,12 @@ export const LINK_NAMES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'WiFi', 
 const RANKS = {
   mega: {
     serial: ['best', 'Best: safest, most reliable'],
-    ethernet: ['ok', 'OK: depends on the network. If the network fails the board turns all outputs OFF after 10 s'],
+    ethernet: ['ok', 'OK: depends on the network. If the network fails the board turns all outputs OFF after the lost link delay'],
     esp32: ['poor', 'Poor: WiFi (through an ESP32 bridge) can drop often'],
   },
   esp32: {
     serial: ['best', 'Best: safest, most reliable'],
-    ethernet: ['good', 'Good: depends on the network. If the network fails the board turns all outputs OFF after 10 s'],
+    ethernet: ['good', 'Good: depends on the network. If the network fails the board turns all outputs OFF after the lost link delay'],
     esp32: ['good', 'Good, as long as no heating Device is on it'],
   },
 };
@@ -37,9 +38,17 @@ export function rating(d, heating = false) {
   return { level: r[0], text: r[1] };
 }
 
-// A heating Device can't go on a WiFi Interface: the message, or '' when it is fine
-export function heatingLinkError(el, devices) {
+// A heating Device on a network Interface (Ethernet or WiFi) is allowed, with this warning ('' when it is on USB)
+export function heatingLinkWarning(el, devices) {
   if (!isHeating(el) || !el.device) return '';
   const d = (devices || []).find(x => x.name === el.device);
-  return d && linkOf(d) === 'esp32' ? `${el.name} heats, so it can't be on ${d.name}: a heating Device is not allowed on a WiFi link. Use a USB or Ethernet Interface.` : '';
+  if (!d || !['ethernet', 'esp32'].includes(linkOf(d))) return '';
+  return `Warning: ${el.name} heats and ${d.name} is on ${linkOf(d) === 'esp32' ? 'WiFi' : 'Ethernet'}. If the link is lost, the board turns all outputs OFF after ${lostLinkSec(d)} s (set on the Devices page). USB is safest.`;
+}
+
+// Lost link delay: seconds of silence from the Brain before the board turns all outputs OFF (the Brain pings every 2 s)
+export const LOST_LINK = { min: 3, max: 600, def: 10 };
+export function lostLinkSec(d) {
+  const n = Math.round(Number(d?.lostLinkSec));
+  return Number.isFinite(n) && n > 0 ? Math.min(LOST_LINK.max, Math.max(LOST_LINK.min, n)) : LOST_LINK.def;
 }
