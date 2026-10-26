@@ -210,13 +210,15 @@
   <!-- ===== Devices ===== -->
   <section id="view-devices" class="view">
     <h3>Interfaces (boards)</h3>
-    <p class="muted">An Interface is a board (PLC) the Devices are wired to. For safety an Arduino Mega connects to the Brain by USB only (or through an ESP32 bridge); Ethernet and WiFi are for ESP32 boards. Its ID (1 to 4 letters) starts the suggested name of every Device on it, for example MB_25_PWM_VlV_Fly_Sparge_SP.</p>
-    <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
+    <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID (1 to 4 letters) starts the suggested name of every Device on it, for example MB_25_PWM_VlV_Fly_Sparge_SP.</p>
+    <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Board</th><th>Type</th><th>Connection</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
     <h3 class="admin-only">Add Interface</h3>
     <div class="form row admin-only">
       <label>Name <input id="devName" placeholder="Main Brewery Mega USB"></label>
       <label>Interface ID (1-4 letters, empty = first letters of the name) <input id="devId" placeholder="MB" maxlength="7" size="6"></label>
-      <label>Type <select id="devType"><option value="serial">Arduino / ESP32 board (USB)</option><option value="ethernet">ESP32 on Ethernet (wired)</option><option value="esp32">ESP32 (WiFi)</option><option value="simulator">Simulator</option></select></label>
+      <label>Board <select id="devBoard"><option value="mega">Arduino Mega</option><option value="esp32">ESP32</option><option value="other">Other Arduino-type board</option></select></label>
+      <label>Type <select id="devType"><option value="serial">USB</option><option value="ethernet">Ethernet (wired)</option><option value="esp32">WiFi (a Mega: through an ESP32 bridge)</option><option value="simulator">Simulator</option></select></label>
+      <span id="devRating" class="linkRating"></span>
       <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
       <button id="scanPorts">Scan ports</button>
       <label>Network address (Ethernet / WiFi) <input id="devHost" placeholder="192.168.1.60"></label>

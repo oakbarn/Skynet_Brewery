@@ -36,6 +36,7 @@ import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds } from './public/naming.js';
+import { heatingLinkError } from './public/links.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { renameMap, renameInProcesses, renameElementRefs } from './lib/renames.js';
 import { readVersion, VersionCheck } from './lib/version.js';
@@ -439,6 +440,16 @@ async function route(req, res) {
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
     // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
     for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
+    // a heating Device can't be put on a WiFi Interface (public/links.js); one already there in an older Schema stays, and is flagged on the Devices page
+    const devsNow = body.devices ?? store.config.devices ?? [];
+    for (const el of body.elements ?? []) {
+      const bad = heatingLinkError(el, devsNow); if (!bad) continue;
+      const was = store.has(cleanName(el.name)) ? store.get(cleanName(el.name)) : null;
+      if (!was || !heatingLinkError({ ...was, name: el.name }, store.config.devices)) return fail(res, 400, bad);
+    }
+    if (body.devices && !body.elements) for (const el of store.els.values()) {
+      const bad = heatingLinkError(el, body.devices); if (bad && !heatingLinkError(el, store.config.devices)) return fail(res, 400, bad);
+    }
     // renamed Devices and Widgets: old name -> new name, only names that were there and are there now (lib/renames.js)
     let renames = new Map();
     if (body.renames && body.elements) {

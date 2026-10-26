@@ -4,13 +4,13 @@ Every Interface and every tab has a short **ID**, and a new Device gets a name m
 
 ## Interface ID
 
-An **Interface** is a board (PLC) the Devices are wired to: a Mega on USB, an ESP32 bridge and so on. Interfaces are on the **Devices** page.
+An **Interface** is a board (PLC) the Devices are wired to: a Mega on USB, a Mega on Ethernet, an ESP32 and so on. Interfaces are on the **Devices** page.
 
 - The ID is **1 to 4 letters**, and is written with an underscore after it: `MB_`.
 - Each one must be **unique**.
 - A new Interface gets the first letter of the first two words of its name. **Main Brewery Mega USB** gets `MB_`.
 - If that ID is taken, the next one gets `MB_2`, then `MB_3`.
-- An Admin can type another ID when adding the Interface, or change it in the **ID** box in the table. For example `MBUB` for the Mega on USB and `MBES` for the Mega behind an ESP32.
+- An Admin can type another ID when adding the Interface, or change it in the **ID** box in the table. For example `MBUB` for the USB Mega and `MBET` for the Ethernet one.
 
 ## Tab ID
 
