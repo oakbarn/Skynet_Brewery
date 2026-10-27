@@ -74,6 +74,17 @@ OFF until pressed again. A 100 ms one-shot is a **Pulse**. (2026-10-05, PR #28)
 
 1.12 **User Bundled Template** = a Template a user builds (not "User Template"). (2026-10-23, PR #99)
 
+1.13 **Label** = the text a Tab shows on a Device or Widget (empty = its Name). It was called
+"Display Name" (`displayName`); every Display Name / displayname is now **label**, on screen, in the
+Schema file and in Processes (`tm_Mash.label = "Mash"`). Old Schemas move over when they load, and
+BruControl's `displayname` still works in a Process and means label. (2026-10-27, thread "Apply
+clean-up requests and standards", Help 72)
+
+1.14 **Skynet Standard: a Widget is a Widget, never an "element".** Things on a Tab are Devices or
+Widgets; stay away from the word Element. A Picture Widget's dialog is "Picture Widget" (it was
+"Picture Element"), and every Properties title says "... Device" or "... Widget". The only exception
+is a real *heating element*. (2026-10-27, Help 74)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -127,7 +138,19 @@ Admins. (2026-10-22, PR #82 and PR #98)
 2.15 **No up and down scrolling** on a Tab: "Fit screen" is the default. (2026-10-04, PR #12)
 
 2.16 **Any Device or Widget with an on/off state** has a Picture when on, a Picture when off and an
-On overlay, which swap by themselves with no Process needed. (2026-10-22, PR #72, PR #81)
+On overlay, which swap by themselves with no Process needed. (2026-10-22, PR #72, PR #81) The
+overlay is the preferred way: see Rule 7.8.
+
+2.18 **Skynet Standard: Show label.** Every dialog that has a Label also has a **Show label**
+switch with it (Devices, Widgets, the New Device dialog, vessels, Tab_Vessels, Tab_Fittings,
+Integrated items, IPs, pipes and hoses, Equipment Profile vessels). (2026-10-27, Help 72)
+
+2.19 **Skynet Standard: double-click a picker dropdown** to open the Properties of the one picked,
+when it has a Skynet dialog a user can reach. Example: in pic_Kettle_Element's Properties,
+double-clicking the Tab dropdown on **Brewhouse** opens the Brewhouse Tab settings. Works for Tab,
+Device / Widget, vessel and IP dropdowns and the pipe's "Only when" list. Picture and sound pickers
+work differently (preview and 🖼 icon picker), and plain choice lists have no dialog. Unsaved
+changes in the open dialog are asked about first. Extends Rule 2.10. (2026-10-27, Help 73)
 
 ## 3. Names and file names
 
@@ -304,6 +327,28 @@ now exist. Ask before deleting any On picture files. (2026-10-22, PR #81)
 docs/Image_Library.md (and the Image_Library folder) only when Fritz says to commit it.
 (2026-10-27)
 
+7.8 **Skynet Standard: On overlay when On / True is the preferred way** for on/off Devices and
+Widgets, and for heaters (Rule 7.9). Two pictures (on and off) are still allowed where needed. This
+is new in Skynet; BruControl never had it. In Properties the overlay comes right after the picture
+and the second picture comes last, marked optional. (2026-10-27, Help 58)
+
+7.9 **Heaters are On while Enabled.** A PID, Hysteresis or Duty Cycle counts as On from Enable to
+Disable (not only while its output fires): its overlay or On picture, a vessel's heater glow and a
+Picture Widget that turns on with it all follow Enabled. A PWM output is On above 0 %.
+(2026-10-27, Help 58, Help 74)
+
+7.10 **imagePath_2 and imagePath_3 work as in BruControl**, for compatibility: they can be changed
+in Properties and set by a Process; background = 1, 2 or 3 picks one. Changing one in Properties
+pops up a heads-up: any Device or Widget can have unlimited pictures with the `.image` attribute.
+(2026-10-27, Help 25)
+*Replaced:* after a BruControl import imagePath_2 and _3 were locked and a Process could only change
+imagePath_1 (2026-10-05).
+
+7.11 **Picture Widget: Turns on with** picks what turns it on: any on/off Device or Widget (output,
+switch, input, alarm, sound player, timer, true/false variable) or a heater (on while Enabled).
+**None** = a still picture, and its On pictures (Picture when on, On overlay) are greyed out. The
+pictures are picked from the Picture list. (2026-10-27, Help 74)
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -351,7 +396,7 @@ turns outputs off. (2026-10-05, PR #22)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **70**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **75**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -431,3 +476,8 @@ only when Fritz says the program is set. (2026-10-26)
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
+- 2026-10-27: Added Rules 1.13 (Label, was Display Name), 1.14 (a Widget is never an "element"),
+  2.18 (Show label), 2.19 (double-click a picker dropdown), 7.8 (On overlay preferred), 7.9 (heaters
+  On while Enabled), 7.10 (imagePath_2 / _3 as in BruControl; replaces the lock) and 7.11 (Picture
+  Widget Turns on with). Help 72-74; next free Help number 75. (thread "Apply clean-up requests and
+  standards")

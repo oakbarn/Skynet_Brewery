@@ -2943,7 +2943,7 @@ function imagePathHeadsUp() {
       h('p', {}, 'For on / off, the preferred way is one picture plus an On overlay (see its Properties).'),
       h('p', { class: 'muted' }, 'More in Help > Pictures on items.'),
       h('label', { class: 'check' }, off, ' Do not show this again'),
-      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: () => { if (off.checked) try { localStorage.setItem(HEADSUP_KEY, '1'); } catch { } d.close(); } }, 'OK')));
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: () => { if (off.checked) try { localStorage.setItem(HEADSUP_KEY, '1'); } catch { } d.close(); } }, '✔ OK')));
     document.body.append(d);
   }
   d.showModal();

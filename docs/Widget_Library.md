@@ -89,7 +89,7 @@ Two pipe sizes meeting on one IP get a reducer cone drawn by themselves.
 
 ## 3. Equipment Widgets ("Add equipment")
 
-All of these are a picture with a Name, a Type, a Display Name and ports. Every port except a thermowell or heating element spot is an IP that stays attached to the Widget.
+All of these are a picture with a Name, a Type, a Label and ports. Every port except a thermowell or heating element spot is an IP that stays attached to the Widget.
 
 **Settings every Equipment Widget has**
 
@@ -97,10 +97,10 @@ All of these are a picture with a Name, a Type, a Display Name and ports. Every 
 |---|---|
 | Name | |
 | Type | From the kind's Type list (below) |
-| Display Name | The only text on it (empty = the Type) |
+| Label | The only text on it (empty = the Type) |
 | Graphic | Picture path |
 | For each port: installed | on / off. When on: Position (list below) and Connection Standard (TC 1.5, NPT 1/2 FPT, BSP 1/2, MM, TC 2, NPT 3/4 FPT, NPT 1/2 MPT) |
-| Show the Display Name, position, color, back color, size | Size empty = the Name font size on the Default tab |
+| Show label, Label position, color, back color, size | Size empty = the Name font size on the Default tab |
 | Tab, X, Y, Width, Height, Lock position | |
 | Bundled with its IPs | Moves as one unit; no editing until switched off |
 
@@ -163,13 +163,13 @@ One unit: its openings have their IPs built in, nothing to set for them.
 
 | Setting | Notes |
 |---|---|
-| Name, Type, Display Name | |
+| Name, Type, Label | |
 | Graphic | Starts as the Skynet picture; editable. The IPs stay on the picture's openings. |
 | Heating Element | Select Device or None (shows when it is electric; glows while on) |
 | Temperature Probe | Select Temperature Probe or None (shows when it has a thermowell) |
 | Flip Horizontal, Flip Vertical, Rotate | Rotate in 45° steps; picture, IPs and fittings follow |
 | Bundled | For now a Skynet item can be un-bundled to work on it; once the Skynet Templates are locked it can't |
-| Display Name look, Tab, X, Y, Width, Height, Lock position | |
+| Show label and Label look, Tab, X, Y, Width, Height, Lock position | |
 
 A Skynet_Integrated_Device vessel (RIMS tube, Basic electric kettle) shows its Interface, ports and heater control here instead of the Graphic / Heating Element / Probe pickers, and can never be un-bundled.
 
@@ -314,15 +314,15 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 
 These are added from the same list as Devices but need no board pin.
 
-**Settings they all share:** Name, Display name, Tab, X, Y, Width, Height, Lock position, Background picture (1-3), imagePath_1-3 (a Process changes it: `name.image = "path"`), Visible, Hidden locked, Hide name, Hide value / text, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and Text box look (Fore / Back color, Alignment, Word wrap, Name font + size + color + background, Value color + background, Name / Value alignment, Border).
+**Settings they all share:** Name, Label (`label`; it was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1-3), imagePath_1-3 (all three editable and settable by a Process, as in BruControl; `name.image = "path"` gives unlimited pictures), Visible, Hidden locked, Hide value / text, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and Text box look (Fore / Back color, Alignment, Word wrap, Name font + size + color + background, Value color + background, Name / Value alignment, Border).
 
 | Widget | Its own settings |
 |---|---|
-| Picture | Follow element (on / off image follows it; empty = static), Image when on, Image when off, Text on picture |
+| Picture Widget | Turns on with (`follow`: an on/off Device or Widget, or a heater that is on while Enabled; None = a still picture and the On pictures are greyed out), Picture when off, On overlay (preferred), Picture when on (a second picture, optional), Text on picture |
 | Shared variable (older) | Data type (value, string, bool, time, datetime), Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Read only on screen, Keep value on restart |
-| Switch (on screen only) | Image when on / off, Text when on / off |
+| Switch (on screen only) | Picture when on / off, Text when on / off |
 | Timer | Type (count up, count down), Reset value, Start value (hh:mm:ss), Running when the server starts |
-| Alarm | Sound file, Sound files 1-3, Sound file number, Sound (custom, default, none), Repeat sound, Text when sounding, Image when sounding / quiet |
+| Alarm | Sound file, Sound files 1-3, Sound file number, Sound (custom, default, none), Repeat sound, Text when sounding, Picture when sounding / quiet |
 | Sound Player | Sound file, Repeat sound. Lowest priority (5): pauses while any alarm sounds. Process: play / stop SoundPlayer |
 | Label | Text box only (no own settings) |
 | Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading |
@@ -352,3 +352,4 @@ Kinds: String (vAS_), Value (vAV_), Time (vAT_), Date Time (vADT_), Boolean (vAB
 
 ## Change log
 - 2026-10-27: First version.
+- 2026-10-27: Display Name became Label (`label`) with a Show label switch; Picture became the Picture Widget with Turns on with; imagePath_2 / _3 editable again; On overlay preferred (thread "Apply clean-up requests and standards").
