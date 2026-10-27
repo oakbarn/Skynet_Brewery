@@ -538,7 +538,7 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .alertBar + .alertBar { top: auto; bottom: 10px; }
 .alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
-#dlgBody .lockedPath { opacity: 0.65; cursor: help; background-image: none; }
+#dlgBody label.greyed, #dlgBody label.greyed + * { opacity: 0.45; }
 
 /* ===== Process editor: colors (public/colorize.js), tools row, color key, Recycle Bin ===== */
 :root { --hl-cmd: #5aa9ff; --hl-dev: #ff5ce1; --hl-wid: #4dd0e1; --hl-vk: #c58bff; --hl-vapi: #ff5c5c; --hl-proc: #a5c95a; --hl-op: #ffa040;

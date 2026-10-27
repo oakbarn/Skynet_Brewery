@@ -48,7 +48,7 @@ The name alone means its main value, and other attributes use a dot. See [Proces
 
 ## Labels
 
-Every element has a **label**: the name shown on the tab (empty = its Name). The old BruControl word `displayname` still works and means the same thing. A process can change it on any kind of element, including String, Value and Graphic vKonstants, timers, alarms and outputs:
+Every Device and Widget has a **label**: the name shown on the tab (empty = its Name). The old BruControl word `displayname` still works and means the same thing. A process can change it on any kind of Device or Widget, including String, Value and Graphic vKonstants, timers, alarms and outputs:
 
 ```
 tm_Delay_W1.label = "1 Minute Delay"
