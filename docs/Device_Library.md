@@ -59,6 +59,16 @@ Name, Display name, Tab, X, Y, Width, Height, Lock position, Background picture 
 
 Devices with on/off states also have **Picture when on / off**, an **On overlay** picture, and **Text when on / off**. New ones start with a green LED for on and a red LED for off (pumps and valves bring their own pictures).
 
+### Cloned Devices (one Device on more than one Tab)
+A **Clone** shows a Device on another Tab too (Skynet Rule 4.4, Help 71). It is the same Device, not a new one: it has no
+Interface, port or settings of its own, so it never counts against "one Device per port".
+- **Name:** made by Skynet, never typed: the parent's name without its Tab ID, `_C1` (`_C2` ...), then the Clone's Tab ID.
+  `MB_06_Pump_Wort__HS` on the Tab CE -> `MB_06_Pump_Wort_C1__CE`. It follows a parent rename.
+- **Its own settings:** Visible, X, Y, Lock position (and the Tab it is on). A Process: `.visible`, `.hidden`, `.x` / `.xPosition`, `.y` / `.yPosition`.
+- **Everything else is the parent's** (pictures, look, size, value, on/off). `Clone = true` turns the parent and every Clone on.
+- A pump or valve Clone has its own IPs on its Tab, for pipes there.
+- Saved in the Schema as `{ kind: "clone", name, of: <parent name>, workspace, x, y, visibility }` in the graphics list.
+
 ---
 
 ## 2. Interfaces (the boards)
@@ -369,3 +379,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-27: RTD (PT100 / PT1000) CS pins on a Mega limited to D14-D17, D22-D39, D41-D43, D47-D49, D53 (Skynet Rule 6.9).
 - 2026-10-27: D10 kept for the Ethernet shield on an Ethernet Mega; no USB to Ethernet change while D10 is used (Skynet Rule 6.10).
 - 2026-10-27: D4 warning and SD card check (Skynet Rule 6.11).
+- 2026-10-27: Added Cloned Devices (Skynet Rule 4.4).

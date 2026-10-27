@@ -87,6 +87,10 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #ws.editing.nomove .rs, #ws.nomove circle.handle { display: none; }   /* phone or tablet: nothing to drag */
 .lock { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: rgba(255,255,255,.85); pointer-events: none; display: none; }
 #ws.editing .lock { display: block; }
+/* a Cloned Device (shown in Edit layout): the same Device as its parent on another Tab */
+.cloneMark { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 3px; border-radius: 4px; background: rgba(255,255,255,.85); color: #333; pointer-events: none; display: none; }
+#ws.editing .cloneMark { display: block; }
+#ws.editing .el.clone { outline: 1px dashed #4fb3ff; }
 #ws.editing .locked { cursor: default; outline: 2px dotted #fff; box-shadow: 0 0 0 2px #000; }
 #ws.editing .locked.sel { outline: 2px solid var(--accent); }
 
