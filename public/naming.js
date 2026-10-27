@@ -319,3 +319,12 @@ export function portClash(el, elements) {
   }
   return null;
 }
+
+// Cloned Devices (Fritz, 2026-10-27): a Clone's name is its parent's name, _Clone_ and the lowest free number:
+// MB_06_Pump_Wort__HS -> MB_06_Pump_Wort__HS_Clone_1. Skynet makes it; nobody types it. taken(name) says a name is used.
+export function cloneName(parent, taken, keep) {
+  if (keep && !taken(`${parent}_Clone_${keep}`)) return `${parent}_Clone_${keep}`;      // a parent rename keeps the Clone's number
+  let n = 1; while (taken(`${parent}_Clone_${n}`)) n++;
+  return `${parent}_Clone_${n}`;
+}
+export const cloneNumber = name => +(/_Clone_(\d+)$/.exec(name ?? '')?.[1] ?? 0) || undefined;

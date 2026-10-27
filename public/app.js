@@ -4,7 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, RTD_CS_PINS } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel } from './templates.js';
@@ -628,7 +628,7 @@ const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Pictu
 const OVERLAY_PIC = ['imageOverlay', 'On overlay (on top while on)', 'gpick', 'overlays'];
 const isPropValve = e => e && e.subtype === 'propValve' && PROP_TYPES.includes(e.type);
 function propPct(e) {
-  const v = Number(S.values[e.name]?.value) || 0;
+  const v = Number(S.values[e.cloneOf || e.name]?.value) || 0;
   if (e.type !== 'analogOut') return v;
   const lo = Number(e.rangeLow ?? 0), hi = Number(e.rangeHigh ?? 100);
   return hi === lo ? 0 : (v - lo) / (hi - lo) * 100;
@@ -666,8 +666,9 @@ function placeDevIps(e) {
 }
 
 // Cloned Devices (Fritz, 2026-10-27): the same Device on more than one Tab. A clone is a { kind: 'clone' } graphic with its own
-// name (made by Skynet, never typed), Tab, X, Y and Visible. Everything else, its value too, is its parent's (lib/store.js),
-// so it is drawn as the parent Device with the clone's name and place. A pump or valve clone has its own IPs on its own Tab.
+// name (made by Skynet, never typed), Tab, X, Y and Visible. Everything else, its value too, is its parent's: it is drawn as the
+// parent Device at the clone's place, and tapping it taps the parent. Clones are not used in Processes (Fritz), so the Brain
+// knows nothing of them. A pump or valve clone has its own IPs on its own Tab.
 const isClone = g => g?.kind === 'clone';
 const clonesOf = (name, gs = L().graphics) => gs.filter(g => isClone(g) && g.of === name);
 function cloneEl(g) {
@@ -681,22 +682,16 @@ function cloneEl(g) {
 }
 // a Device or Widget by name, or a clone (drawn as its parent)
 const elNamed = n => L().elements.find(e => e.name === n) ?? cloneEl(L().graphics.find(g => isClone(g) && g.name === n));
-// the clone's name: the parent's name without its Tab ID, _C1 (_C2 ...), then this Tab's ID: MB_06_Pump_Wort__HS -> MB_06_Pump_Wort_C1__CE
-function cloneName(parent, tab, self) {
-  const L0 = draft || S.config, base = parent.replace(/__[A-Za-z]{2}$/, ''), id = L0.workspaces.find(w => w.name === tab)?.id;
-  const taken = n => L0.elements.some(e => e.name.toLowerCase() === n.toLowerCase()) || L0.graphics.some(g => g !== self && g.name && g.name.toLowerCase() === n.toLowerCase());
-  let i = 1, n;
-  do n = `${base}_C${i++}${id ? '__' + id : ''}`; while (taken(n));
-  return n;
-}
 function makeClone(p, tab, at) {
   const D = TD(), g = { id: newId(), kind: 'clone', of: p.name, workspace: tab, x: at?.x ?? D.x, y: at?.y ?? D.y };
   const busy = (x, y) => [...draft.elements, ...draft.graphics].some(o => o !== g && o.workspace === tab && o.x === x && o.y === y);
   for (let n = 0; n < 50 && busy(g.x, g.y); n++) { g.x += 20; g.y += 20; }
-  g.name = cloneName(p.name, tab, g);
+  g.name = cloneName(p.name, cloneTaken(g));
   draft.graphics.push(g);
   return g;
 }
+// a name in use by any Device, Widget or graphic (but this clone)
+const cloneTaken = self => n => { const L0 = draft || S.config; n = n.toLowerCase(); return L0.elements.some(e => e.name.toLowerCase() === n) || L0.graphics.some(g => g !== self && g.name?.toLowerCase() === n); };
 const realTab = name => !!name && L().workspaces.some(w => w.name === name && !w.build);
 // a node on the Tab: [kind, id] for selecting and Properties. A clone is moved and edited as its own graphic, never as its parent.
 const refOf = n => n.dataset.clone ? ['gfx', n.dataset.gid] : n.dataset.name ? ['el', n.dataset.name] : ['gfx', n.dataset.gid];
@@ -789,7 +784,8 @@ function withLook(e, v) {
 // the Properties you just changed (the live value from the Brain only catches up after Save).
 const shownName = (e, v) => editing ? (e.displayName || e.name) : (v.displayname || e.name);
 function fillEl(n, e0) {
-  const v = S.values[e0.name] || (e0.cloneOf && { ...S.values[e0.cloneOf], visibility: e0.visibility, xposition: '', yposition: '' }) || {}, e = withLook(e0, v);
+  // a clone shows its parent's values, with its own Visible (a Process moving the parent leaves the clone where it is)
+  const v = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {}, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;
@@ -933,6 +929,7 @@ function updateEl(name) {
   if (n && e) fillEl(n, e);
   const tn = !e && $(`#ws .gfx.txt[data-tname="${CSS.escape(name)}"]`), t = tn && L().graphics.find(g => g.kind === 'text' && g.name === name);
   if (t) fillText(tn, t);
+  for (const cn of $$(`#ws .el[data-clone="${CSS.escape(name)}"]`)) { const ce = elNamed(cn.dataset.name); if (ce) fillEl(cn, ce); }     // its clones
   for (const p of L().elements) if (p.type === 'picture' && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
 }
 
@@ -959,7 +956,8 @@ function tapAction(e) {
     default: return 'none';
   }
 }
-const elByName = n => S.config.elements.find(x => x.name === n) ?? (!editing && cloneEl(S.config.graphics.find(g => isClone(g) && g.name === n))) ?? undefined;
+// a tap on a clone is a tap on its parent
+const elByName = n => S.config.elements.find(x => x.name === n) ?? S.config.elements.find(x => x.name === S.config.graphics.find(g => isClone(g) && g.name === n)?.of);
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
 const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
@@ -1232,7 +1230,7 @@ function allIps(ws) {
 // The direction of each pipe comes from that trace, so a pipe can show flow backwards through a pump that is off.
 // A pipe between two plain IP points with a "Flow when" list keeps the old rule: it flows, as drawn, while all of those are on.
 // my_Valve.tapwater set by a Process wins over the valve's setting until the valve is saved again or the panel restarts
-const tapWater = e => !!(editing ? e.tapwater : S.values[e.name]?.tapwater ?? e.tapwater);
+const tapWater = e => !!(editing ? e.tapwater : S.values[e.cloneOf || e.name]?.tapwater ?? e.tapwater);
 // which end tap water leaves by: 'out' (the second end, right or bottom), 'in' (the first end, left or top) or 'both'
 const TAP_OUT = [['out', 'The second end (right or bottom), one way'], ['in', 'The first end (left or top), one way'], ['both', 'Both ends']];
 const tapOut = e => TAP_OUT.some(([k]) => k === e.tapwaterOut) ? e.tapwaterOut : 'out';
@@ -1242,7 +1240,7 @@ function ipNode(id, ws) {
   if (q) return { key: `eq:${eqOfIp(id)}:${q.circuit}`, pass: true };
   const dn = devOfIp(id);
   if (dn !== null) {
-    const e = elNamed(dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
+    const e = elNamed(dn), on = isOn(e.cloneOf || dn), end = id.slice(id.lastIndexOf(':') + 1);
     // a tap water valve that is open is a source: water pushes out of its out end only (Fritz, 2026-10-21: one way; the tap end
     // takes nothing in), or out of both ends when it is set to Both
     if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === 'both' || tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
@@ -1905,17 +1903,26 @@ $('#addEl').onclick = guard(async () => {
   stackNew(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 });
-// ⧉ Clone Device (Fritz, 2026-10-27): the list holds only Devices already placed on a Tab (not the Build Tab), and not the ones
-// already shown on this Tab. The Clone goes on this Tab with a name Skynet makes; its Visible, X and Y are its own.
+// ⧉ Clone Device (Fritz, 2026-10-27): the only way to make a Clone. It works on any Tab, the Build Tab too. The list holds the
+// Devices already placed on a Tab (not the ones on this Tab), grouped by type: Pumps, Valves ... The Clone goes on this Tab
+// with a name Skynet makes; its Visible, X and Y are its own.
+const CLONE_GROUPS = [['Pumps', e => e.subtype === 'pump'], ['Valves', e => e.subtype === 'valve' || e.subtype === 'propValve'],
+  ['Heat (PID, Hysteresis, Duty Cycle)', e => ['pid', 'hysteresis', 'dutyCycle'].includes(e.type)], ['Temperature probes', e => e.type === 'temperature'],
+  ['Other outputs', e => ['digitalOut', 'pwmOut', 'analogOut'].includes(e.type)], ['Motors', e => e.type === 'stepper'],
+  ['Inputs and sensors', e => ['digitalIn', 'analogIn', 'flowMeter', 'scale'].includes(e.type)], ['Other Devices', () => true]];
 $('#cloneDev').onclick = guard(async () => {
-  const w = curWs();
-  if (!w || w.build) return toast('Go to the Tab the Clone should be on first. A Clone never goes on the Build Tab.', true);
+  const w = curWs(); if (!w) return;
   const here = new Set([...draft.elements.filter(e => e.workspace === w.name).map(e => e.name), ...draft.graphics.filter(g => isClone(g) && g.workspace === w.name).map(g => g.of)]);
   const list = draft.elements.filter(e => isDevice(e) && realTab(e.workspace) && !here.has(e.name)).sort((a, b) => a.name.localeCompare(b.name));
   if (!list.length) return toast('There is no Device on another Tab to clone here.', true);
-  const work = { of: list[0].name };
-  const r = await dialog('Clone Device', [['_c', `A Clone shows a Device from another Tab on this Tab (${w.name}) too. It is the same Device: everything it shows and does is the parent's. Only its Visible, X and Y are its own, and its name is made by Skynet.`, 'note'],
-    ['of', 'Device to clone (Devices already placed on a Tab)', 'sel', list.map(e => [e.name, `${e.name}   (Tab ${e.workspace})`])]], work, false, ['cloned-devices', 'make-a-clone']);
+  const left = new Set(list), groups = [];
+  for (const [group, fits] of CLONE_GROUPS) {
+    const items = [...left].filter(fits); items.forEach(e => left.delete(e));
+    if (items.length) groups.push({ group, items: items.map(e => [e.name, `${e.name}   (Tab ${e.workspace})`]) });
+  }
+  const work = { of: groups[0].items[0][0] };
+  const r = await dialog('Clone Device', [['_c', `A Clone shows a Device from another Tab on this Tab (${w.name}) too. It is the same Device: tapping it is tapping the Device, and it shows what the Device shows. Only its Visible, X and Y are its own, and its name is made by Skynet. A Clone is not used in Processes.`, 'note'],
+    ['of', 'Device to clone (Devices already placed on a Tab)', 'sel', groups]], work, false, ['cloned-devices', 'make-a-clone']);
   if (r !== 'ok') return;
   readFields(work);
   const p = draft.elements.find(e => e.name === work.of); if (!p) return;
@@ -2540,7 +2547,7 @@ function saveBuildDialog(b) {
 // a rename on top of a rename (A -> B -> C) is one rename A -> C; back to the first name is no rename
 function noteRename(from, to) {
   const first = [...draftRenames].find(([, now]) => now === from)?.[0] ?? from;
-  if (!S.config.elements.some(e => e.name === first) && !S.config.graphics.some(g => isClone(g) && g.name === first)) return;     // added in this Edit layout: nothing uses it yet
+  if (!S.config.elements.some(e => e.name === first)) return;     // added in this Edit layout: nothing uses it yet
   if (first === to) draftRenames.delete(first); else draftRenames.set(first, to);
 }
 // what Save tells you about the Processes that follow a renamed Device or Widget
@@ -2610,8 +2617,8 @@ const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 
 // field: [key, label, kind, options]
 const F = {
   // Cloned Devices: only Visible, X and Y are its own (and the lock); the rest is set in its parent's Properties
-  clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Process uses it: ${it.name}.visible = false, ${it.name}.x = 200`, 'note'],
-    ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Turning the Clone on or off turns the parent and every Clone on or off.`, 'note'],
+  clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
+    ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Tapping the Clone is tapping the parent: turning it on or off (or Enabled, for a PID) turns the parent and every Clone. A reading (a temperature probe) is shown the same way as the parent.`, 'note'],
     ['visibility', 'Visible (off = hidden on this Tab only; a Process: name.visible = true)', 'vis'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
@@ -2901,7 +2908,11 @@ function field([key, label, kind, opts, rerender], obj) {
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
     input = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': opts }, ...os.map(o => h('option', { value: o, ...(o === (v ?? os[0]) ? { selected: true } : {}) }, o)), h('option', { value: '__add__' }, 'Add new ...'));
   }
-  else if (kind === 'sel') { const os = opts.map(o => Array.isArray(o) ? o : [o, o]); input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...os.map(([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l))); }
+  else if (kind === 'sel') {       // an entry { group, items } is a heading with its choices under it
+    const pair = o => Array.isArray(o) ? o : [o, o], os = opts.flatMap(o => o?.group ? o.items.map(pair) : [pair(o)]);
+    const opt = ([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l);
+    input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => o?.group ? h('optgroup', { label: o.group }, ...o.items.map(i => opt(pair(i)))) : opt(pair(o))));
+  }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
@@ -3166,7 +3177,6 @@ function openTabProps(name) {
 }
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
-  let cloneTo = null;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
   if (unitOf) return editItem('gfx', unitOf.id);        // an IP of a Skynet Fitting or vessel: open it, its IPs have no settings of their own
   const bundle = isUnit(item) || isSkyV(item) ? null : bundleOf(item);   // a Skynet Fitting opens its Properties even when it sits on a bundled vessel
@@ -3291,18 +3301,8 @@ async function editItem(kind, id) {
       if (hasIps(item) && !hasIps(work)) for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) delete g[k];
       if (work.name !== item.name) for (const c of clonesOf(item.name, draft.graphics)) {      // its clones follow the new name
         const was = c.name;
-        c.of = work.name; c.name = cloneName(work.name, c.workspace, c);
-        noteRename(was, c.name);
+        c.of = work.name; c.name = cloneName(work.name, cloneTaken(c), cloneNumber(was));
         for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === was) g[k] = g[k].replace(`dev:${was}:`, `dev:${c.name}:`);
-      }
-      // Fritz, 2026-10-27: a Device that is already on a Tab, given another Tab, asks if it should be cloned there instead
-      if (isDevice(item) && work.workspace !== item.workspace && realTab(item.workspace) && realTab(work.workspace) && S.config.elements.some(x => x.name === item.name)) {
-        const has = clonesOf(item.name, draft.graphics).find(g => g.workspace === work.workspace);      // one Clone per Tab is enough
-        const a = has ? await choose(`${item.name} is already on the Tab ${item.workspace} and has a Clone on the Tab ${work.workspace} (${has.name}). Move ${item.name} itself to ${work.workspace}?`, [['No', 'no'], [`Move it to ${work.workspace}`, 'move']])
-          : await choose(`${item.name} is already on the Tab ${item.workspace}. Make a Clone of it on the Tab ${work.workspace}?`,
-            [['Yes, make a Clone', 'clone'], ['No', 'no'], [`Move it to ${work.workspace}`, 'move']]);
-        if (a === undefined || a === 'no') return editItem(kind, id);           // back to its Properties
-        if (a === 'clone') { cloneTo = work.workspace; work.workspace = item.workspace; }
       }
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
@@ -3344,11 +3344,6 @@ async function editItem(kind, id) {
     if (type === 'ip' && before0 !== item.fitting) delete item.autoFit;   // a type picked by hand is kept
     giveName(item, draft.graphics);         // a new fitting type gets a matching name (IP_2 turned into a tee becomes Tee_1)
     if (kind === 'el') sel = { kind, id: item.name };
-    if (cloneTo) {         // its Clone goes on the other Tab (the Device stays where it was), and that Tab shows
-      const g = makeClone(item, cloneTo, { x: item.x, y: item.y });
-      wsName = cloneTo; sel = { kind: 'gfx', id: g.id };
-      toast(`${g.name} is a Clone of ${item.name} on the Tab ${cloneTo}.`);
-    }
     renderTabs(); renderWs();
     if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
   } catch (e) { toast(e.message, true); }

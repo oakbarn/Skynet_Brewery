@@ -169,6 +169,8 @@ Skynet will be open source. (2026-10-22)
 4.1 **Every new Device, Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent
 to a Tab. (2026-10-23, PR #97 and PR #99)
 
+*Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
+
 4.2 **New Device order** (the BruControl way): 1 Interface, 2 Device Type, 3 Available Ports/Pins
 (only free ones that fit), then Label. Create puts it on the Build Tab and opens its Properties.
 (2026-10-23, PR #97)
@@ -178,15 +180,15 @@ back where it came from?". Save to Tab places the build in the center of the cho
 (2026-10-22, PR #88)
 
 4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
-a copy: it is made with ⧉ Clone Device on the Edit layout bar (the list holds only Devices already on a
-Tab), or by giving a Device that is already on a Tab another Tab (a box asks Yes / No / Move). Its name
-is made by Skynet and can't be typed: the parent's name without its Tab ID, `_C1` (`_C2` ...), then
-the Clone's Tab ID (`MB_06_Pump_Wort__HS` -> `MB_06_Pump_Wort_C1__CE`). Only **.visible, .hidden,
-.x, .y** (and its Tab and lock) are the Clone's own; everything else is the parent's, so setting a
-Clone true or false sets the parent and every Clone. Clones follow a parent rename; deleting the
-parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device per port) is not
-touched. Where a new Clone first appears (the Tab, or the Build Tab per Rule 4.1) waits on Fritz's
-pick. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar; it works on any Tab,
+**the Build Tab too** (an exception to Rule 4.1, Fritz 2026-10-27). Its list holds the Devices
+already placed on a Tab, grouped by type (Pumps, Valves ...). Its name is made by Skynet and can't
+be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). Only **.visible, .x, .y** (and
+its lock) are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
+Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
+only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
+rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
+per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
 
 ## 5. Templates and Integrated items
 
@@ -443,3 +445,4 @@ only when Fritz says the program is set. (2026-10-26)
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
 - 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).
+- 2026-10-27: Rule 4.4 rewritten from Fritz's answers: Clone button only, any Tab incl. the Build Tab (exception noted under Rule 4.1), names <Parent_Name>_Clone_N, not used in Processes.
