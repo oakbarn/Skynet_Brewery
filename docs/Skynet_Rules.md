@@ -1,0 +1,402 @@
+# Skynet Brewery: the Rules
+
+Started 2026-10-27 from everything Fritz has said since 2026-10-03. Each Rule has a number, plain
+wording, the date Fritz gave it, and where it came from (PR number or thread) when known.
+
+---
+
+## How Rules work
+
+- **Every new thing is built to these Rules.** Before building anything for Skynet, read this
+  document and follow it.
+- **When Fritz asks for something that breaks a Rule**, Claude tells him which Rule it breaks
+  (quoting it by number), and gives him two choices:
+  1. **Change the Rule** (it is rewritten here, with the date), or
+  2. **Allow this one exception** (the Rule stays; the exception is noted under the Rule).
+
+  The part that breaks the Rule is not built until Fritz picks. Rules are made to be broken, but
+  on purpose.
+- **When a Rule changes or a new one is given**, this document is updated the same day, and a
+  line goes in the Change log at the bottom.
+- When two Rules disagreed, only the latest one is kept here. The old wording is shown as
+  "Replaced" so the history is not lost.
+- Questions Fritz has not answered yet are at the end, under **Open questions**. They are not Rules.
+
+Companion documents (look things up there, do not copy them here):
+
+| Document | What it holds |
+|---|---|
+| docs/Device_Library.md (project folder) | Every Device, its Type ID, ports, pins and settings |
+| docs/Widget_Library.md (project folder) | Every Widget, Template and their settings |
+| docs/Image_Library.md (project folder) | Every Skynet picture, its group and what uses it |
+| docs/BRUCONTROL_IMPORT_RULES.md (in the GitHub repo) | How a BruControl Schema should come into Skynet |
+| docs/Minimum_Equipment_and_Limitations.md (project folder) | What the boards can do today |
+
+---
+
+## 1. Words we use (terminology)
+
+1.1 **Schema** = a setup or configuration, on screen and in the Help. A BruControl .brucfg file is a
+"BruControl Schema". (2026-10-19, PR #42)
+
+1.2 **Device** = something tied to a port on a PLC board. **Widget** = something that lives only in
+the app, with no PLC port (pipes, IPs, text, pictures, vessels drawn on screen). A Widget must never
+need a Device or port. (2026-10-03)
+
+1.3 **Tab** = a screen (never "Workspace" or "Pane"). (2026-10-03)
+
+1.4 **Process** = a script, on screen and in the Help. (The scripts/ folder keeps its old name inside
+the program.) (2026-10-04, PR #17)
+
+1.5 **Interface** = a board (Mega, ESP32, Pi ...). (2026-10-21, PR #61)
+
+1.6 **PLC** means hobby boards: Arduino-compatible, Raspberry Pi, ESP32 and similar. Not
+industrial PLCs. They connect by USB, and by Ethernet where the board has it. (2026-10-03)
+
+1.7 **The Brain** = the main computer: a Raspberry Pi 4 or newer, **or** a mini PC. The Brain holds
+all text, picture and Schema files so the panel can be reached from anywhere. (2026-10-26)
+
+1.8 **Menu Bar** = the top line of the page (panel name "Skynet Brewery Panel", Schema dropdown,
+Tabs, Processes and so on). (2026-10-21)
+
+1.9 **Buttons:** a **Push button** is ON only while held, OFF on release. A **Toggle** stays ON or
+OFF until pressed again. A 100 ms one-shot is a **Pulse**. (2026-10-05, PR #28)
+
+1.10 **Hole** or **Kettle Port** = an opening in a kettle. "Add TC 1.5 Port to the Center Bottom at
+1 inch" means the port's center is 1 inch above the bottom. (2026-10-23)
+
+1.11 **Hydro** = a Tilt or any other hydrometer. (2026-10-23, PR #97)
+
+1.12 **User Bundled Template** = a Template a user builds (not "User Template"). (2026-10-23, PR #99)
+
+## 2. Screen design and clicks
+
+2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
+screens clean for Brew Day; rarely-needed items go in the ☰ (hamburger) Menu. (2026-10-21, PR #56)
+
+2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
+is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
+
+2.3 **The ☰ Menu is on almost every dialog** as a way to move around. Only dialogs that must be
+answered first leave it out. (2026-10-21, PR #71)
+
+2.4 **The ☰ Menu lists every screen and every part of a screen** you can go to (for example
+Devices ↳ Interfaces). (2026-10-26, PR #106)
+
+2.5 **Yes / no choices are a toggle icon or a small switch, never a dropdown.** Lock position is the
+small 🔓 / 🔒 icon. Lists where you tick several items stay as tick boxes. (2026-10-04 corrected,
+restated 2026-10-23, PR #94)
+*Replaced:* the first wording on 2026-10-04 asked for Yes/No dropdowns. Fritz corrected it the same
+day.
+
+2.6 **Choices with more than two answers are dropdowns.** A list that can grow ends with
+"Add new ...". Behind a dropdown sits a vKonstant List: the list shows text, Processes see the
+number (Value). (2026-10-04, PR #14)
+
+2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
+a swatch, then Custom. (2026-10-05, PR #31)
+
+2.8 **Properties dialogs** have Delete, Cancel and Save at both the top and the bottom. (2026-10-04,
+PR #15)
+
+2.9 **Double-click opens Properties** (hold a finger on phones). **Right mouse button drags.**
+(2026-10-21)
+*Replaced:* right-click opening Properties (PR #51) was built, then Fritz turned it down and the PR
+was closed. Do not offer it again.
+
+2.10 **Double-click any entry in any list box** opens that item's Properties. (2026-10-26, PR #107)
+
+2.11 **Right-click gives Help** when the item can't move (outside Edit layout, a locked item, an
+empty spot, the Menu Bar). A yellow "?" sits by ☰ Menu tab headings and Properties titles, **but
+never on a Tab itself.** (2026-10-21, PR #57)
+
+2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
+one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
+
+2.13 **Phones and tablets do not move pictures** in Edit layout; they only select, and holding a
+finger opens Properties. A switch on ☰ Menu > Default can allow it. (2026-10-21, PR #59)
+
+2.14 **Edit layout button** (hammer and pick over a square) sits beside ☰ Menu on the Tabs bar, for
+Admins. (2026-10-22, PR #82 and PR #98)
+
+2.15 **No up and down scrolling** on a Tab: "Fit screen" is the default. (2026-10-04, PR #12)
+
+2.16 **Any Device or Widget with an on/off state** has a Picture when on, a Picture when off and an
+On overlay, which swap by themselves with no Process needed. (2026-10-22, PR #72, PR #81)
+
+## 3. Names and file names
+
+3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
+(example `MB_A0_10KNTC_Mash~Tun__SP`). The panel suggests the name; an Admin may type another.
+Full details (Type IDs, virtual ports, what happens to odd characters) are in the Device Library.
+(2026-10-23, PR #97)
+*Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
+
+3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. An Admin
+can change either. (2026-10-21, PR #61)
+
+3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
+
+3.4 **Allowed characters** in Device and Widget names: no control characters, no spaces at the
+start or end, no leading dot, no emoji, none of the Windows reserved names (CON, PRN, AUX, NUL,
+COM1-9, LPT1-9). **File and folder names** also refuse `< > : " / \ | ? *`, and a period only
+before the file ending (folders and Process names: no period). Only new or changed names are
+checked; old names are never refused. (2026-10-23, PR #95)
+
+3.5 **Never rename an existing Device by itself.** It would break Processes. (2026-10-21)
+
+3.6 **When a Device or Widget name changes, every Process that uses it follows** the new name.
+(2026-10-22, PR #73)
+
+3.7 **Every date in a file name follows ISO 8601**, safe for file names: `YYYY-MM-DD` for a day,
+`YYYYMMDDTHHMMSS` (no colons) for a date and time. (2026-10-23, PR #93)
+Note: the Panel Version name is not changed yet (see Open questions).
+
+3.8 **Template names:** no spaces, unique. A Label is only on Tab items (empty Label = the name).
+(2026-10-21)
+
+3.9 **Generic names and shapes only.** Product photos with a maker's logo or name are redrawn as
+generic shapes with generic names (for example Hop_Filter_Inline, not a brand name), because
+Skynet will be open source. (2026-10-22)
+
+## 4. Making things: the Build Tab
+
+4.1 **Every new Device, Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent
+to a Tab. (2026-10-23, PR #97 and PR #99)
+
+4.2 **New Device order** (the BruControl way): 1 Interface, 2 Device Type, 3 Available Ports/Pins
+(only free ones that fit), then Label. Create puts it on the Build Tab and opens its Properties.
+(2026-10-23, PR #97)
+
+4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
+back where it came from?". Save to Tab places the build in the center of the chosen Tab.
+(2026-10-22, PR #88)
+
+## 5. Templates and Integrated items
+
+5.1 **Two kinds of Template:** Skynet Templates (come with Skynet, read only, cannot be deleted,
+clone only) and User Bundled Templates (Admins can edit and delete). (2026-10-21, PR #68)
+
+5.2 **Two kinds of Skynet_Integrated item:**
+- **Skynet_Integrated_Device**, for example the Electric Heated Vessel and the RIMS tube.
+- **Skynet_Integrated_Widget**, for example a 90° TC elbow with its IPs built in.
+
+**Anything integrated from the Template can never be un-bundled.** An Integrated item can be
+bundled with other things. (2026-10-23 19:47Z)
+
+5.3 **The RIMS tube is not bundled.** It has no Bundled switch; its IPs are integrated like an
+elbow. Its heating element settings are in the RIMS Properties, and **the thermowell is part of the
+element**. (2026-10-26, PR #105)
+*Replaced:* on 2026-10-23 Fritz allowed Bundle/Unbundle on Skynet items "for now". For the RIMS this
+ended on 2026-10-26. For other Skynet fittings and vessels, see Open questions.
+
+5.4 **Skynet fittings** (elbows, tees, U and so on): every opening has a built-in two-way IP that
+can't be un-bundled, and End Caps where needed. Their Properties have no IP settings. Items a user
+builds still add IPs and bundle by hand. (2026-10-22, PR #91)
+
+5.5 **Every Skynet item gets the same turn and flip set:** Flip Vertical, Flip Horizontal,
+Rotate 90, Rotate 45, and the picture follows. (2026-10-22, PR #91; vessels 2026-10-23, PR #92)
+
+5.6 **A Skynet Template's picture is fixed.** A bottom-drain copy of a kettle changes only the
+picture. (2026-10-23)
+
+5.7 **Adding a Vessel asks: Widget or Integrated.** A Skynet Vessel Widget has no Devices, only
+built-in IPs. **A User Bundled vessel Template must be built on a Skynet Vessel Widget**; there is
+no other way to make one. (2026-10-23, PR #102)
+
+5.8 **A Template sent to a Tab becomes a Tab item** (Tab_Vessel, Tab_Fitting) that can be edited and
+deleted, even when it came from Skynet. (2026-10-21)
+
+5.9 **Equipment:** valves have no inlet or outlet side; pumps have no orientation setting; BruControl
+VGC outputs are valves. Equipment types have Type, ports, Position and Standard lists that users can
+add to. (2026-10-04, PR #14)
+
+5.10 **Flow rules:** flow only runs on pipes joined IP to IP, traced from running pumps. An OFF pump
+lets flow pass either way. Valves must be open. Dead ends show nothing. A check valve passes one way
+only. Fitting bundles flow both ways. Tap water valves push flow on their own. (2026-10-04, PR #3;
+PR #47; PR #91)
+
+5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
+(2026-10-04, PR #3)
+
+5.12 **Kettle pictures are empty:** no wort or liquid drawn, and no heating element drawn on a plain
+kettle. Each kettle has a plain and an _Electric version. (2026-10-22, 2026-10-23)
+
+5.13 **Manual valves** make a running Process wait for a "Done" pop-up. (2026-10-20, PR #44)
+
+## 6. Devices, connections and safety
+
+6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
+share a port (for example Hysteresis and PID on one heater). The last one turned on wins and the
+others turn off. (2026-10-23, PR #97)
+
+6.2 **Virtual ports:** OneWire probes 700-799 (one Device per probe); hydrometers 200, 201 and up.
+Analog pins use BruControl numbers (A0 = 54, A5 = 59). (2026-10-23, PR #97)
+
+6.3 **Connection ranking per board** (2026-10-26, PR #108, still open):
+- Mega and other Arduino boards: USB best, Ethernet OK (a network failure is a safety risk), WiFi
+  poor.
+- ESP32: USB best, Ethernet good, WiFi good **as long as no heating is on a pin**.
+- Heating on Ethernet or WiFi is allowed, with a warning. A lost link turns the board's outputs off
+  after a set delay (default 10 seconds).
+*Replaced:* Fritz first said "Mega by USB only" the same day, then changed it to this ranking.
+
+6.4 **Switching Schemas turns every output off** before and after the switch (manual valves are
+not touched), and warns if Processes are running. (2026-10-21, PR #66)
+
+6.5 **Never run real JavaScript inside a Process.** C-style spellings (`;`, `{ }`, `++`) are fine.
+(2026-10-21, PR #58)
+
+6.6 **Remote access is by Tailscale only.** Never open a port on the router. (2026-10-04, PR #8)
+
+6.7 **Digital input push buttons** (Pulse mode) have a 3 second lockout by default. (2026-10-04,
+PR #4)
+
+6.8 **Firmware for the boards**: ready firmware for boards that are not on the standard Arduino IDE
+is now a go (2026-10-27, thread "Build firmware for non-Arduino-IDE boards"). Every firmware keeps
+the same message language (docs/DEVICE_PROTOCOL.md) and the lost-link watchdog.
+
+## 7. Pictures
+
+7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
+only the SVG ships. (2026-10-22)
+
+7.2 **Skynet pictures live in media/Images/Skynet/<group>/** and are read only in the panel. User
+pictures go in media/Images/<group>/. The groups are Alarms, Vessels, Pumps, Valves, Chillers,
+Motors, Lights_LEDs, Hop_Infusion, Other_Equipment, Miscellaneous and On_Off. (2026-10-22, PR #80)
+
+7.3 **No .svg may be deleted, renamed or replaced from the panel**, not even a user's own.
+(2026-10-21)
+
+7.4 **Skynet drawing style:** flat grey #808080, black outline, see-through background. (2026-10-23)
+
+7.5 **Keep the two-picture (On and Off) code** until Fritz says to delete it, even though On overlays
+now exist. Ask before deleting any On picture files. (2026-10-22, PR #81)
+
+7.6 **Sounds** go in media/sounds; pictures in media/Images. (2026-10-20, PR #48)
+
+7.7 **The Image Library is never added to automatically.** A new picture goes into
+docs/Image_Library.md (and the Image_Library folder) only when Fritz says to commit it.
+(2026-10-27)
+
+## 8. Sign-in and roles
+
+8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
+Operator-only. Only Admins edit Schemas or move pictures. (2026-10-04, PR #8; 2026-10-21)
+
+8.2 **First Admin setup** works only from your own network or Tailscale. The recovery code screen
+must be impossible to miss: a big code, copy, download and print, and a required "I saved it" tick.
+(2026-10-04, PR #11)
+
+8.3 **Password rules** are set by the Admin in Settings > Password rules. Old passwords keep working.
+(2026-10-21, PR #53)
+
+## 9. Delivery: PRs and zips
+
+9.1 **Every code change ships as a pull request (PR)** on GitHub. (2026-10-21)
+
+9.2 **Zips of the whole panel are sent only when Fritz asks** for one (no data/ or node_modules
+inside). (2026-10-21 09:17Z)
+*Replaced:* from 2026-10-03 a zip came with every change.
+
+9.3 **The release zip carries no config/, media/ or scripts/ folders.** Samples ship in defaults/
+and are copied only into a missing folder, so unzipping over an old copy and choosing "Replace all"
+is safe. (2026-10-05, PR #39)
+
+9.4 **Never edit version.json in a PR.** A GitHub Action writes it on every merge. The version name
+is `PR<number>_Skynet-v.yyyymmdd_hh_mm`. (2026-10-21, PR #65; 2026-10-22, PR #86)
+
+9.5 **New pictures go in a fresh PR off the default branch.** (2026-10-22)
+
+9.6 **Skynet pictures and Templates are built and kept editable** during the building phase; Fritz
+locks them before a production zip. (2026-10-21)
+
+## 10. Testing
+
+10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
+Admin setup. It stays on until he is in real use. (2026-10-04)
+
+10.2 **Fritz's test bench** (week of 2026-10-20): a Pi, a Mega, an ESP32, one Tilt, a couple of
+valves, a 12 V LED as a burner and another as an electric element. Firmware has never run on real
+hardware, so expect first real-hardware bug reports. (2026-10-20)
+
+10.3 **Simulation (test mode) touches no hardware.** Turning it on or off stops all Processes and
+turns outputs off. (2026-10-05, PR #22)
+
+## 11. Help pages
+
+11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
+Markdown files in help/ on the Brain, numbered for order. Next free number: **70**. (2026-10-04,
+PR #16)
+
+11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
+PR #57)
+
+## 12. Privacy and sharing
+
+12.1 **Nothing is posted or announced anywhere without Fritz's word.** The announcement goes only to
+a few BruControl friends. (2026-10-04)
+*Replaced in part:* "never make the repo public" (2026-10-04). On 2026-10-22 Fritz said "Public is
+fine" for the GitHub repo, which the Get Skynet pictures feature needs.
+
+12.2 **The Beer money donation recipient is locked** to Fritz's PayPal in one file and can never be
+made editable again. (2026-10-04, PR #18)
+
+## 13. Libraries (reference documents)
+
+13.1 **Device Library** (docs/Device_Library.md in the project folder): when a new unique Device is
+added, add it there, with a Change log line. (2026-10-27)
+
+13.2 **Widget Library** (docs/Widget_Library.md in the project folder): when a new unique Widget,
+Widget setting or Skynet Template is added, add it there, with a Change log line. (2026-10-27)
+
+13.3 **Image Library**: see Rule 7.7. Never add a picture unless Fritz says so. (2026-10-27)
+
+13.4 **BruControl Import Rules** (docs/BRUCONTROL_IMPORT_RULES.md in the GitHub repo): every new
+import rule Fritz gives goes there. The importer itself waits for his go. (2026-10-23, PR #96)
+
+13.5 **This Rules document**: every new or changed Rule goes here the same day. (2026-10-27)
+
+13.6 **Every document Fritz asks for must be easy for him to open.** Save it in the project folder
+AND copy it to docs/ in the GitHub repo (by PR), then reply with a direct link he can open in a
+browser. The list of all documents is docs/README.md in the repo. (2026-10-27)
+
+## 14. Things on hold until Fritz says go
+
+14.1 **Hardware summary** for a Fritzing / screw-shield / daughter-board chat: not yet. Offer it again
+only when Fritz says the program is set. (2026-10-26)
+
+14.2 **Compile check of firmware** inside the app: deferred. (2026-10-04)
+
+---
+
+## Open questions (not Rules yet)
+
+1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
+   file names (Rule 3.7)? (asked 2026-10-23)
+2. **Other Skynet fittings and vessels:** Fritz allowed Bundle / Unbundle on them "for now"
+   (2026-10-23). Rule 5.2 says anything integrated can never be un-bundled. Is it time to make all
+   Skynet fittings and vessels fully Integrated, like the RIMS (Rule 5.3)?
+3. **Device names:** should `< > : " / \ | ? *` also be blocked in Device names, like file names?
+   (Rule 3.4, asked 2026-10-23)
+4. **Build Tab:** should Save layout keep the Build Tab as it is? (asked 2026-10-23)
+5. **RIMS readings:** drop the separate Heat / Temp boxes and show readings on the RIMS picture?
+   (asked 2026-10-26)
+6. **RIMS file name "TC1_2":** 1/2 inch or 2 inch TC? The Template still says TC 1.5.
+7. **Equipment Profile:** one per Tab (Hot Side, Fermentation; Fritz 2026-10-21) or one per Schema
+   (PR #44)? Still open in the Brewing rewrite.
+8. **Phones in Edit layout:** add a warning and an "Allow Edit layout on phones" switch (off)?
+   (asked 2026-10-26)
+9. **Bundled Devices on a vessel:** the plan to list bundled Devices in vessel Properties with Edit
+   buttons was OK'd but not built yet.
+10. **BruControl import:** keep the strict Process check, or allow BruControl-style lenient start?
+11. **Firmware:** which comes first: Pi GPIO agent, Pi Pico, or ready builds for Mega/ESP32
+    (recommended: Pi GPIO agent)? (2026-10-27)
+12. **Still undecided from the check-up:** phone layout, Pi GPIO pins, PID temperature control.
+
+---
+
+## Change log
+
+- 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
+  Widget and Image Libraries.
