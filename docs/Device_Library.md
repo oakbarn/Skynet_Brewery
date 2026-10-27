@@ -45,6 +45,9 @@ Example: `MB_25_E_L_Vlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID E_L_Vl
 | D2-D13, D44-D46 | PWM | Shown as "PWM" in the pin list |
 | D2, D3, D18-D21 | Counter (interrupt) | Shown as "Counter"; D2 and D3 are "PWM + Counter" |
 | D50, D51, D52 | SPI bus | Shared by every RTD and thermocouple board. Blocked for anything else once one of those boards is in use |
+| D14-D17, D22-D39, D41-D43, D47-D49, D53 | RTD chip-select (CS) pins | The ONLY pins an RTD (PT100 / PT1000, MAX31865) may use for its CS pin on a Mega (Skynet Rule 6.9). Any other pin is refused |
+| D10 | Ethernet shield | On a Mega on Ethernet, no Device may use D10, and a Mega can't change from USB to Ethernet while a Device is on D10 (Skynet Rule 6.10) |
+| D4 | Ethernet shield SD card pin | Allowed, with the warning "SD Card Not Supported. Never insert an SD Card!". An inserted card is reported by the Ethernet sketch and the panel says to remove it (Skynet Rule 6.11) |
 | D40 | OneWire data pin | Shared by every DS18B20 probe. Blocked for anything else once a probe is in use (can be changed per Interface) |
 | A0-A15 (= 54-69) | Analog inputs | Either name works |
 
@@ -237,8 +240,8 @@ What each ID means:
 | Add menu entry | Probe type | Type ID | Port |
 |---|---|---|---|
 | DS18B20 (OneWire, waterproof probe) | ds18b20 | 1W | OneWire probe number = virtual port 700-799 |
-| PT100 RTD (MAX31865 board) | pt100 | RTD | Chip-select (CS) pin; shares SPI 50-52 |
-| PT1000 RTD (MAX31865 board) | pt1000 | RTD | CS pin; shares SPI 50-52 |
+| PT100 RTD (MAX31865 board) | pt100 | RTD | Chip-select (CS) pin, Mega: only D14-D17, D22-D39, D41-D43, D47-D49, D53 (Rule 6.9); shares SPI 50-52 |
+| PT1000 RTD (MAX31865 board) | pt1000 | RTD | CS pin, Mega: only D14-D17, D22-D39, D41-D43, D47-D49, D53 (Rule 6.9); shares SPI 50-52 |
 | Thermocouple type K (MAX31855 board) | thermocouple | TC | CS pin; shares SPI 50-52 |
 | Thermocouple K / J / T and others (MAX31856 board) | thermocouple | TC | CS pin; shares SPI 50-52 |
 | NTC 10K, Beta 3950 | ntc | 10KNTC | Analog pin |
@@ -251,7 +254,7 @@ What each ID means:
 - **Settings for every probe:** Calibration offset (added to the reading), Units (°F or °C, new ones start °F), Decimals (starts 1), Simulator settings, Reading now.
 - **Extra settings by probe type:**
   - **DS18B20:** OneWire probe number (from Devices page > OneWire probe index), Interface (empty = any). The index holds each probe's ROM id; replacing a probe = give the new one the same number.
-  - **PT100 / PT1000:** Interface, CS pin, Probe wires (2, 3, 4; new ones 3), Board reference resistor (default 430 for PT100, 4300 for PT1000).
+  - **PT100 / PT1000:** Interface, CS pin (on a Mega only D14-D17, D22-D39, D41-D43, D47-D49 or D53, Rule 6.9; the pin list shows only those), Probe wires (2, 3, 4; new ones 3), Board reference resistor (default 430 for PT100, 4300 for PT1000).
   - **Thermocouple:** Interface, CS pin, Thermocouple type (K, J, T, N, E, R, S, B; MAX31855 boards are K only).
   - **NTC:** Interface, Analog pin, Thermistor ohm at 25 °C, Beta value, Series resistor (ohm), Wiring (toGround, toVcc).
   - **LM35 / TMP36:** Interface, Analog pin, Board voltage (5 for a Mega, 3.3 for an ESP32; default 5).
@@ -363,3 +366,6 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 
 ## Change log
 - 2026-10-27: First version, from panel version PR107_Skynet-v.20261026_23_23 (plus open PR #108).
+- 2026-10-27: RTD (PT100 / PT1000) CS pins on a Mega limited to D14-D17, D22-D39, D41-D43, D47-D49, D53 (Skynet Rule 6.9).
+- 2026-10-27: D10 kept for the Ethernet shield on an Ethernet Mega; no USB to Ethernet change while D10 is used (Skynet Rule 6.10).
+- 2026-10-27: D4 warning and SD card check (Skynet Rule 6.11).

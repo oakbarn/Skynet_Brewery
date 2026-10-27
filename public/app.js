@@ -4,7 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, RTD_CS_PINS } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel } from './templates.js';
@@ -1751,7 +1751,7 @@ const PRESETS = {
   const an = [...Array(16).keys()].map(i => [`A${i}`, `A${i} = pin ${54 + i} (BruControl)`]);
   const tagged = i => [String(i), `D${i}` + (pinTag(i) ? `  (${pinTag(i)})` : '')];      // D5 (PWM), D2 (PWM + Counter), D18 (Counter)
   const dig = [...Array(54).keys()].map(tagged);
-  const lists = { analog: an, digital: [...dig, ...an], pwm: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 44, 45, 46].map(tagged), interrupt: [2, 3, 18, 19, 20, 21].map(tagged) };
+  const lists = { analog: an, digital: [...dig, ...an], pwm: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 44, 45, 46].map(tagged), interrupt: [2, 3, 18, 19, 20, 21].map(tagged), rtdcs: RTD_CS_PINS.map(tagged) };      // rtdcs: RTD CS pins on a Mega (Rule 6.9)
   for (const [k, opts] of Object.entries(lists)) document.body.append(h('datalist', { id: 'pins-' + k }, ...opts.map(([v, t]) => h('option', { value: v, label: t }, t))));
 })();
 
@@ -2643,8 +2643,8 @@ const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'fun
 const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
 const SENSOR_FIELDS = {
   ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
-  pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
-  pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin', 'pin', 'digital'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
+  pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
+  pt1000: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 4300)', 'num']],
   thermocouple: [['device', 'Device', 'dev'], ['channel', 'MAX31855 / MAX31856 board chip-select (CS) pin', 'pin', 'digital'], ['tcType', 'Thermocouple type (MAX31855 boards are K only)', 'sel', ['K', 'J', 'T', 'N', 'E', 'R', 'S', 'B']]],
   ntc: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['r0', 'Thermistor ohm at 25 °C', 'num'], ['beta', 'Beta value (data sheet, often 3950)', 'num'], ['series', 'Series resistor (ohm)', 'num'], ['wiring', 'Wiring', 'sel', ['toGround', 'toVcc']]],
   lm35: [['device', 'Device', 'dev'], ['channel', 'Analog pin (A0-A15, or BruControl 54-69)', 'pin', 'analog'], ['vref', 'Board voltage (5 for a Mega, 3.3 for an ESP32; empty = 5)', 'num']],
@@ -4103,7 +4103,7 @@ function renderDevices() {
         await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, lostLinkSec: n } : x) }); await load(); toast(`${d.name}: all outputs OFF after ${n} s without the Brain`);
       }) });
     tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), rateCell, h('td', {}, lostBox, ' s'), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
-      h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
+      h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
       h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   renderProbes();

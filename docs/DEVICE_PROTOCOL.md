@@ -41,6 +41,7 @@ After every reconnect the server sends the `CFG` lines and then the state of eve
 | `T <romid> <°F>` | OneWire temperature, by the probe's 16-hex-digit ROM id. |
 | `SP <step pin> <steps> <0\|1> <0\|1>` | Stepper position in steps, moving, homed. Every 0.2 s while moving, every second when still. |
 | `SH <step pin> <1\|0>` | Stepper homing finished: 1 = found the switch, 0 = gave up. |
+| `SD <0\|1>` | Ethernet builds only: 1 = an SD card is in the Ethernet shield's slot. SD cards are not supported (Skynet Rule 6.11); the panel warns everyone to remove it. Sent after HELLO and when it changes (checked every 10 s). |
 | `ERR <text>` | Any problem. Shown on the Devices page. |
 
 ### OneWire probe index

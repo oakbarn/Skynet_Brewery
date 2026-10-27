@@ -84,6 +84,9 @@ sent.length = 0;
 
 hw._onLine(dev, 'DI 30 1'); assert.equal(store.getProp('Float', 'state'), false, 'inverted input');
 hw._onLine(dev, `A 1 ${1023 * 12 / 20}`); near(store.getProp('Press', 'value'), 15, 0.01, 'pressure'); assert.equal(store.getProp('Press', 'fault'), false);
+{ const seen = []; store.on('sdcard', m => seen.push(m));        // Skynet Rule 6.11: an SD card in an Ethernet Mega's shield
+  hw._onLine(dev, 'SD 1'); hw._onLine(dev, 'SD 1'); assert.equal(seen.length, 1, 'one alert per card'); assert.match(seen[0], /SD Card Not Supported/);
+  assert.equal(dev.sdCard, true); hw._onLine(dev, 'SD 0'); assert.equal(dev.sdCard, false); }
 hw._onLine(dev, 'A 1 3'); assert.equal(store.getProp('Press', 'fault'), true, 'pressure fault');
 { const before = store.getProp('Press', 'value'); hw._onLine(dev, `ADS 1 ${32767 * 2.5 / 6.144}`); near(store.getProp('AdsPH', 'value'), 7, 0.01, 'ADS1115 element'); assert.equal(store.getProp('Press', 'value'), before, 'ADS line leaves board pin 1 alone'); }
 hw._onLine(dev, 'A 2 511.5'); near(store.getProp('NTC', 'value'), 25, 0.01, 'NTC element');

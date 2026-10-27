@@ -261,6 +261,26 @@ PR #4)
 is now a go (2026-10-27, thread "Build firmware for non-Arduino-IDE boards"). Every firmware keeps
 the same message language (docs/DEVICE_PROTOCOL.md) and the lost-link watchdog.
 
+6.9 **RTD chip-select (CS) pins on an Arduino Mega:** an RTD Device (PT100 / PT1000 on a MAX31865
+board) may ONLY use **D14-D17, D22-D39, D41-D43, D47-D49 or D53** for its CS pin. Those pins are not
+PWM, counter, SPI (50-52), OneWire (40) or Ethernet shield (4, 10) pins. The pin list offers only
+these, and the panel refuses any other pin. Thermocouples are not covered (yet).
+(2026-10-27, thread "Limit RTD CS pins on the Mega")
+
+6.10 **Pin D10 on an Ethernet Mega:** the Ethernet shield uses pin D10, and a pin is hard wired to its
+equipment, so moving it is real work. On a Mega on Ethernet no Device may use D10 (the pin list
+doesn't offer it). Before a Mega Interface can be changed from USB to Ethernet, the panel checks
+pin 10: if a Device uses it, the panel says that Device and its wiring must move to another free
+pin first, and refuses the change until pin 10 is free. (2026-10-27, thread "Limit RTD CS pins on
+the Mega")
+
+6.11 **SD cards are not supported. Never insert an SD card** in a Mega's Ethernet shield. Pin D4 is
+the shield's SD card pin: it is NOT blocked, but picking D4 for a Device on a Mega shows the warning
+"SD Card Not Supported. Never insert an SD Card!". The Ethernet sketch (firmware 0.5) holds D4 HIGH,
+checks the slot every 10 seconds, and when a card is in, the panel shows "SD Card Not Supported.
+Remove the SD Card!" to everyone and on the Devices page. (2026-10-27, thread "Limit RTD CS pins on
+the Mega")
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -408,3 +428,6 @@ only when Fritz says the program is set. (2026-10-26)
   follows them.
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
+- 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
+- 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
+- 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
