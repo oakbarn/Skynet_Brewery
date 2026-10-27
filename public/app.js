@@ -804,7 +804,7 @@ function fillEl(n, e0) {
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic)); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
-    case 'label': text = shownName(e0, v); nm.classList.add('hidden'); break;
+    case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
