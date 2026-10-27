@@ -152,7 +152,11 @@ COM1-9, LPT1-9). **File and folder names** also refuse `< > : " / \ | ? *`, and 
 before the file ending (folders and Process names: no period). Only new or changed names are
 checked; old names are never refused. (2026-10-23, PR #95)
 
-3.5 **Never rename an existing Device by itself.** It would break Processes. (2026-10-21)
+3.5 **Never rename an existing item by itself**, with one exception: **a clone follows its parent.**
+A clone's name is always its parent's name plus `_Clone_N`; when the parent is renamed, the parent part
+of each clone's name changes with it, and every Process follows (Rule 3.6). Each clone has its own
+hidden key (Rule 3.10) but acts only through its parent's key. (2026-10-21; changed 2026-10-27)
+*Replaced:* "Never rename an existing Device by itself. It would break Processes." (2026-10-21)
 
 3.6 **When a name changes, every Process that uses it follows** the new name. The panel finds the
 rename by the item's hidden key (Rule 3.10). A Process running at the time keeps working and uses
@@ -454,3 +458,5 @@ only when Fritz says the program is set. (2026-10-26)
 - 2026-10-27: Added Rule 2.17 (one button style on every dialog), Rule 3.10 (hidden keys) and
   Rule 3.11 (locked names, Name Change pop-up); Rule 3.6 now covers keys, running Processes and
   clones. Help 70; next free Help number 71. (thread "Add hidden keys so names can change")
+- 2026-10-27: Changed Rule 3.5: a clone (Parent_Name_Clone_N) follows its parent's rename; each clone
+  has its own hidden key but acts only through its parent's key. (Fritz's answer, thread "Add hidden keys so names can change")
