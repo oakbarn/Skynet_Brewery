@@ -111,7 +111,7 @@ An NTC thermistor is read on an analog pin with a series resistor, using its **o
 
 ## Devices you already have
 
-Devices made before this keep their names, so your Processes still work. Their old type codes (`PmP`, `VlV` ...) are changed to the new Device Type IDs by themselves. Their properties show the **Suggested Name**; you can type it into **Name** if you like. Your Processes are changed to the new name by themselves when you save the layout (see [Renaming Devices and Widgets](53-renaming)).
+Devices made before this keep their names, so your Processes still work. Their old type codes (`PmP`, `VlV` ...) are changed to the new Device Type IDs by themselves. Their properties show the **Suggested Name**; you can give it that name with **✏ Change name** beside the **Name** if you like. Your Processes are changed to the new name by themselves when you save the layout (see [Renaming Devices and Widgets](53-renaming)).
 
 Interfaces and tabs from before get an ID by themselves the first time the Schema opens. Changing an Interface ID or Tab ID later does not rename Devices that already exist.
 
