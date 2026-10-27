@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck, freePins, pinTag } from '../public/naming.js';
+import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck, freePins, pinTag, rtdPinError, RTD_CS_PINS } from '../public/naming.js';
 import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
@@ -138,6 +138,13 @@ assert.equal(freePins({ name: 'N', type: 'analogIn', device: 'MEGA' }, [{ name: 
 assert.match(busCheck(rtd, [pump]).error, /Move MB_51_Pump/, 'no RTD while a pump holds an SPI pin');
 assert.match(busCheck({ ...rtd, channel: 52 }, []).error, /chip-select/);
 assert.equal(busCheck(rtd, []), null);
+// Skynet Rule 6.9 (Fritz, 2026-10-27): an RTD's CS pin on a Mega only D14-D17, D22-D39, D41-D43, D47-D49, D53
+assert.equal(RTD_CS_PINS.join(' '), '14 15 16 17 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 41 42 43 47 48 49 53');
+for (const p of [5, 10, 4, 18, 40, 44, 46, 'A0', 59]) assert.match(busCheck({ ...rtd, channel: p }, []).error, /Rule 6\.9/, `pin ${p} refused for an RTD`);
+assert.equal(rtdPinError({ ...rtd, channel: 'D53' }), null);
+assert.equal(rtdPinError({ ...rtd, channel: 5, sensor: 'thermocouple' }), null, 'thermocouples unchanged');
+assert.equal(rtdPinError({ ...rtd, channel: 5, device: 'ESP' }, [{ name: 'ESP', board: 'esp32' }]), null, 'only on a Mega');
+assert.deepEqual(freePins({ name: 'N', type: 'temperature', sensor: 'pt1000', device: 'MEGA' }, [rtd]), RTD_CS_PINS.filter(p => p !== '48'), 'the RTD pin list');
 const probe = { name: 'MB_700_1W_HLT', type: 'temperature', sensor: 'ds18b20', probeIndex: 1 };
 const led = { name: 'MB_40_LED', type: 'digitalOut', device: 'MEGA', channel: 'D40' };
 assert.match(busCheck(led, [probe]).error, /OneWire data pin/, 'a DS18B20 blocks pin 40');

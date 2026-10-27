@@ -35,7 +35,7 @@ import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
-import { checkIds } from './public/naming.js';
+import { checkIds, rtdPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { renameMap, renameInProcesses, renameElementRefs } from './lib/renames.js';
 import { readVersion, VersionCheck } from './lib/version.js';
@@ -439,6 +439,8 @@ async function route(req, res) {
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
     // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
     for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
+    // an RTD on a Mega: chip-select (CS) pin only on D14-D17, D22-D39, D41-D43, D47-D49 or D53 (Skynet Rule 6.9, public/naming.js)
+    for (const el of body.elements ?? []) { const bad = rtdPinError(el, body.devices ?? store.config.devices); if (bad) return fail(res, 400, bad); }
     // renamed Devices and Widgets: old name -> new name, only names that were there and are there now (lib/renames.js)
     let renames = new Map();
     if (body.renames && body.elements) {

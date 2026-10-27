@@ -5,6 +5,7 @@
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
 // Device name (Fritz, 2026-10-23): InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_E_L_Vlv_Fly~Sparge_In__SP
 //   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
+import { boardOf } from './links.js';
 
 // Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list (DO is a plain relay and
 // a heating element on a relay). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
@@ -214,6 +215,18 @@ export function portSharers(el, elements) {
 // While a bus is in use those pins are blocked for anything else; using one for something else first gets a heads-up.
 export const SPI_PINS = ['50', '51', '52'];
 export const ONEWIRE_PIN = '40';
+// Fritz, 2026-10-27 (Skynet Rule 6.9): on an Arduino Mega an RTD (MAX31865 board, PT100 / PT1000) may only have its chip-select
+// (CS) pin on D14-D17, D22-D39, D41-D43, D47-D49 or D53: no PWM, counter, SPI (50-52), OneWire (40) or Ethernet shield (4, 10) pins.
+export const RTD_CS_PINS = ['14', '15', '16', '17', ...Array.from({ length: 18 }, (_, i) => String(22 + i)), '41', '42', '43', '47', '48', '49', '53'];
+export const RTD_CS_TEXT = 'D14-D17, D22-D39, D41-D43, D47-D49 or D53';
+export const isRtd = e => e?.type === 'temperature' && ['pt100', 'pt1000'].includes(e.sensor);
+const onMega = (el, devices) => boardOf((devices ?? []).find(d => d.name === el.device)) === 'mega';
+// A plain message when an RTD on a Mega has a CS pin outside RTD_CS_PINS, or null
+export function rtdPinError(el, devices) {
+  if (!isRtd(el) || !el.device || !onMega(el, devices)) return null;
+  const cs = pinKey(el.channel); if (!cs) return null;
+  return RTD_CS_PINS.includes(cs) ? null : `${el.name && el.name !== '\0new' ? el.name + ': p' : 'P'}in ${/^\d+$/.test(cs) ? 'D' + cs : cs} can't be the chip-select (CS) pin of an RTD board on an Arduino Mega. Use ${RTD_CS_TEXT} (Skynet Rule 6.9).`;
+}
 const usesSpi = e => e.type === 'temperature' && ['pt100', 'pt1000', 'thermocouple'].includes(e.sensor);
 const isProbe = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
 const pinsOn = e => portKeys(e).filter(k => !k.startsWith('OneWire|')).map(k => k.split('|')[1]);
@@ -225,6 +238,7 @@ export function busCheck(el, elements, devices) {
   const spiUsers = others.filter(o => usesSpi(o) && o.device === iface), owUsers = others.filter(o => isProbe(o) && (!o.device || o.device === iface));
   const onPin = pins => others.find(o => o.device === iface && !usesSpi(o) && pinsOn(o).some(p => pins.includes(p)));
   if (usesSpi(el)) {
+    const rtd = rtdPinError(el, devices); if (rtd) return { error: rtd };
     const cs = mine.find(p => SPI_PINS.includes(p));
     if (cs) return { error: `Pin ${cs} is part of the SPI bus (50, 51, 52) that every RTD and thermocouple board uses. Pick another pin for the board's chip-select (CS).` };
     const o = onPin(SPI_PINS);
@@ -257,7 +271,7 @@ export function pinTag(p) {
 // counter pins, a PWM output PWM pins, a flow meter counter pins, analog inputs A0-A15)
 export function freePins(el, elements, devices, analog) {
   const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter'].filter(Boolean);
-  const pool = analog ? [...Array(16).keys()].map(i => 'A' + i) : need.includes('pwm') ? PWM_PINS : need.includes('counter') ? COUNTER_PINS : MEGA_PINS;
+  const pool = analog ? [...Array(16).keys()].map(i => 'A' + i) : isRtd(el) && onMega(el, devices) ? RTD_CS_PINS : need.includes('pwm') ? PWM_PINS : need.includes('counter') ? COUNTER_PINS : MEGA_PINS;
   const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? ONEWIRE_PIN);
   const extras = p => [PWM_PINS.includes(p) && 'pwm', COUNTER_PINS.includes(p) && 'counter', (SPI_PINS.includes(p) || p === owPin) && 'bus'].filter(k => k && !need.includes(k)).length;
   return pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
