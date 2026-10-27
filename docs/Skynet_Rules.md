@@ -74,6 +74,17 @@ OFF until pressed again. A 100 ms one-shot is a **Pulse**. (2026-10-05, PR #28)
 
 1.12 **User Bundled Template** = a Template a user builds (not "User Template"). (2026-10-23, PR #99)
 
+1.13 **Label** = the text a Tab shows on a Device or Widget (empty = its Name). It was called
+"Display Name" (`displayName`); every Display Name / displayname is now **label**, on screen, in the
+Schema file and in Processes (`tm_Mash.label = "Mash"`). Old Schemas move over when they load, and
+BruControl's `displayname` still works in a Process and means label. (2026-10-27, thread "Apply
+clean-up requests and standards", Help 72)
+
+1.14 **Skynet Standard: a Widget is a Widget, never an "element".** Things on a Tab are Devices or
+Widgets; stay away from the word Element. A Picture Widget's dialog is "Picture Widget" (it was
+"Picture Element"), and every Properties title says "... Device" or "... Widget". The only exception
+is a real *heating element*. (2026-10-27, Help 74)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -122,12 +133,34 @@ one-time **actions, not switches**, and work on the current Tab only. (2026-10-2
 finger opens Properties. A switch on ☰ Menu > Default can allow it. (2026-10-21, PR #59)
 
 2.14 **Edit layout button** (hammer and pick over a square) sits beside ☰ Menu on the Tabs bar, for
-Admins. (2026-10-22, PR #82 and PR #98)
+Admins. Its background is **navy blue**. (2026-10-22, PR #82 and PR #98; navy blue 2026-10-27)
 
 2.15 **No up and down scrolling** on a Tab: "Fit screen" is the default. (2026-10-04, PR #12)
 
 2.16 **Any Device or Widget with an on/off state** has a Picture when on, a Picture when off and an
-On overlay, which swap by themselves with no Process needed. (2026-10-22, PR #72, PR #81)
+On overlay, which swap by themselves with no Process needed. (2026-10-22, PR #72, PR #81) The
+overlay is the preferred way: see Rule 7.8.
+
+2.17 **Every dialog uses the same buttons, each an icon and its word:** ✖ Cancel (closes, saves
+nothing), 💾 Save (saves and closes), ✖ Close (a dialog with nothing to save), 🗑 Delete (asks
+first), ✔ OK (closes a message). (2026-10-27, thread "Add hidden keys so names can change")
+
+2.18 **Skynet Standard: Show label.** Every dialog that has a Label also has a **Show label**
+switch with it (Devices, Widgets, the New Device dialog, vessels, Tab_Vessels, Tab_Fittings,
+Integrated items, IPs, pipes and hoses, Equipment Profile vessels). (2026-10-27, Help 72)
+
+2.19 **Skynet Standard: double-click a picker dropdown** to open the Properties of the one picked,
+when it has a Skynet dialog a user can reach. Example: in pic_Kettle_Element's Properties,
+double-clicking the Tab dropdown on **Brewhouse** opens the Brewhouse Tab settings. Works for Tab,
+Device / Widget, vessel and IP dropdowns and the pipe's "Only when" list. Picture and sound pickers
+work differently (preview and 🖼 icon picker), and plain choice lists have no dialog. Unsaved
+changes in the open dialog are asked about first. Extends Rule 2.10. (2026-10-27, Help 73)
+
+2.20 **Resize grab points:** in Edit layout an unlocked item can be resized with the mouse from
+eight grab points: the four corners and the middle of each side. The picked item shows all eight,
+the others only the bottom right corner. A small box shows X, Y, Width and Height while moving or
+resizing. Locked items have none (Rule 2.12). Works on the Build Tab and every Tab. (2026-10-27,
+thread "Improve the Build Tab add and resize tools", Help 75)
 
 ## 3. Names and file names
 
@@ -150,8 +183,12 @@ checked; old names are never refused. (2026-10-23, PR #95)
 
 3.5 **Never rename an existing Device by itself.** It would break Processes. (2026-10-21)
 
-3.6 **When a Device or Widget name changes, every Process that uses it follows** the new name.
-(2026-10-22, PR #73)
+3.6 **When a name changes, every Process that uses it follows** the new name. The panel finds the
+rename by the item's hidden key (Rule 3.10). A Process running at the time keeps working and uses
+the new name from its next start. Renaming a Process changes the lines that start or stop it and
+the Autostart list. **Clones follow too:** renaming an item changes the old-name part of each of
+its clones' names (`HLT copy` becomes `Hot_Liquor_Tank copy`), unless that name is taken.
+(2026-10-22, PR #73; keys and clones 2026-10-27)
 
 3.7 **Every date in a file name follows ISO 8601**, safe for file names: `YYYY-MM-DD` for a day,
 `YYYYMMDDTHHMMSS` (no colons) for a date and time. (2026-10-23, PR #93)
@@ -163,6 +200,30 @@ Note: the Panel Version name is not changed yet (see Open questions).
 3.9 **Generic names and shapes only.** Product photos with a maker's logo or name are redrawn as
 generic shapes with generic names (for example Hop_Filter_Inline, not a brand name), because
 Skynet will be open source. (2026-10-22)
+
+3.10 **Every item with a name has a hidden key** (Devices, Widgets, variables, Texts, IPs, pipes,
+vessels, fittings, Tabs, Interfaces, Processes, Templates, Profiles). It is given when the item is
+first built (saved), is meaningless, unique and never changes. Nobody can see it (not on screen, not
+in the Config Editor, not in a saved Schema file) and nobody can use it in a Process: Processes
+always use names, and the panel ties each name to its key behind the scenes. Old Schemas get their keys
+when they are loaded. **Exception:** picture and sound paths have no key; a later request covers
+how the Graphic Picker handles a path. (2026-10-27)
+
+3.11 **Once an item is built, its Name is locked** (🔒). It is changed only with the **✏ Change
+name** button beside it, which opens the **Name Change** pop-up: the name now (read only), a box for
+the new name, ✖ Cancel and 💾 Save. The same pop-up renames Processes and Schemas. (2026-10-27)
+
+3.12 **Interfaces are easy to find and add.** ☰ Menu has **🔌 Interfaces (boards)** and **➕ Add
+Interface…**, and every Interface dropdown in a New Device box (any Tab, RIMS and kettle too) ends
+with **➕ Add new Interface…**, which opens the Add Interface pop-up and comes back with the new
+Interface picked. The pop-up explains the Interface ID: it becomes part of every Suggested Device
+name, must be unique, and should be set once and left. (2026-10-27, thread "Make Interfaces easy to
+add and simulate", Help 76)
+
+3.13 **Own Device names get a warning.** When a name is typed instead of the Suggested Name, the panel
+warns: a plain word like "Pump" becomes a reserved word in Processes and can cause problems in the
+code; the Device name is only used in Processes and never shown on a Tab, so a unique, meaningful
+name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 
 ## 4. Making things: the Build Tab
 
@@ -176,6 +237,23 @@ to a Tab. (2026-10-23, PR #97 and PR #99)
 4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
 back where it came from?". Save to Tab places the build in the center of the chosen Tab.
 (2026-10-22, PR #88)
+
+4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
+a copy: it is made with ⧉ Clone Device on the Edit layout bar (the list holds only Devices already on a
+Tab), or by giving a Device that is already on a Tab another Tab (a box asks Yes / No / Move). Its name
+is made by Skynet and can't be typed: the parent's name without its Tab ID, `_C1` (`_C2` ...), then
+the Clone's Tab ID (`MB_06_Pump_Wort__HS` -> `MB_06_Pump_Wort_C1__CE`). Only **.visible, .hidden,
+.x, .y** (and its Tab and lock) are the Clone's own; everything else is the parent's, so setting a
+Clone true or false sets the parent and every Clone. Clones follow a parent rename; deleting the
+parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device per port) is not
+touched. Where a new Clone first appears (the Tab, or the Build Tab per Rule 4.1) waits on Fritz's
+pick. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+
+4.5 **➕ Add box** on the Edit layout bar: the things added most, one click each, grouped as
+**Valves** (Device or Widget), **Pumps**, **Elements** (the RIMS tube and Integrated kettle too),
+**Probe ...** (a second box: 1-Wire, 10K NTC, RTD, Thermowell with its Temperature Device built in)
+and **Interface**. Everything still goes on the Build Tab first (Rule 4.1). The long Add element
+list keeps every kind. (2026-10-27, Help 75)
 
 ## 5. Templates and Integrated items
 
@@ -304,6 +382,28 @@ now exist. Ask before deleting any On picture files. (2026-10-22, PR #81)
 docs/Image_Library.md (and the Image_Library folder) only when Fritz says to commit it.
 (2026-10-27)
 
+7.8 **Skynet Standard: On overlay when On / True is the preferred way** for on/off Devices and
+Widgets, and for heaters (Rule 7.9). Two pictures (on and off) are still allowed where needed. This
+is new in Skynet; BruControl never had it. In Properties the overlay comes right after the picture
+and the second picture comes last, marked optional. (2026-10-27, Help 58)
+
+7.9 **Heaters are On while Enabled.** A PID, Hysteresis or Duty Cycle counts as On from Enable to
+Disable (not only while its output fires): its overlay or On picture, a vessel's heater glow and a
+Picture Widget that turns on with it all follow Enabled. A PWM output is On above 0 %.
+(2026-10-27, Help 58, Help 74)
+
+7.10 **imagePath_2 and imagePath_3 work as in BruControl**, for compatibility: they can be changed
+in Properties and set by a Process; background = 1, 2 or 3 picks one. Changing one in Properties
+pops up a heads-up: any Device or Widget can have unlimited pictures with the `.image` attribute.
+(2026-10-27, Help 25)
+*Replaced:* after a BruControl import imagePath_2 and _3 were locked and a Process could only change
+imagePath_1 (2026-10-05).
+
+7.11 **Picture Widget: Turns on with** picks what turns it on: any on/off Device or Widget (output,
+switch, input, alarm, sound player, timer, true/false variable) or a heater (on while Enabled).
+**None** = a still picture, and its On pictures (Picture when on, On overlay) are greyed out. The
+pictures are picked from the Picture list. (2026-10-27, Help 74)
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -336,6 +436,12 @@ is `PR<number>_Skynet-v.yyyymmdd_hh_mm`. (2026-10-21, PR #65; 2026-10-22, PR #86
 9.6 **Skynet pictures and Templates are built and kept editable** during the building phase; Fritz
 locks them before a production zip. (2026-10-21)
 
+9.7 **When Fritz closes a chat** ("close this chat", "goodbye" and the like), Claude checks GitHub
+for every open PR and rewrites **docs/Unresolved_PRs.md** (project folder and repo, by PR): number
+and link, plain title, what it does, what it waits on, merge-order notes, open questions tied to
+it, and the snapshot date and time (ISO 8601). It is not a Summary_N, so any chat may read it.
+(2026-10-27)
+
 ## 10. Testing
 
 10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
@@ -348,10 +454,22 @@ hardware, so expect first real-hardware bug reports. (2026-10-20)
 10.3 **Simulation (test mode) touches no hardware.** Turning it on or off stops all Processes and
 turns outputs off. (2026-10-05, PR #22)
 
+10.4 **One switch for Simulator or Real boards**, for the whole panel (every Interface at once): the
+🔌 Real / 🧪 Simulator button beside ☰ Menu (Admins), ☰ Menu > Switch to Simulator / Real boards,
+and Settings > Simulation. Timers run as before. **A wait on a reading** (temperature, boil start,
+level, weight, flow) **is pretended reached** after a set time (60 clock seconds by default, Settings
+> Simulation, can be switched off); a wait on a button or switch never is. (2026-10-27, Help 77)
+
+10.5 **A new Schema that is not a copy starts with a pretend Mega**: one Interface, Connection
+Simulator, named **New_Mega_2560_N** (N = the next number not used in any Schema). The panel switches
+to Simulator mode and says so, then opens the Interface pop-up to give it a meaningful name (example:
+the Skynet Home Brewery's 3 Megas Main_Brewery_HotSide, Valves, Fermentor) and set its Interface ID.
+A copy of a Schema keeps its Interfaces. (2026-10-27, Help 76)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **70**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **78**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -418,16 +536,37 @@ only when Fritz says the program is set. (2026-10-26)
 11. **Firmware:** which comes first: Pi GPIO agent, Pi Pico, or ready builds for Mega/ESP32
     (recommended: Pi GPIO agent)? (2026-10-27)
 12. **Still undecided from the check-up:** phone layout, Pi GPIO pins, PID temperature control.
+13. **Interface ID set once?** Fritz (2026-10-27) said the Interface ID "needs to be set once and not
+    changed". Rule 3.2 says an Admin can change it. Asked: change Rule 3.2, lock it with a ✏ change
+    button, or keep it. Until he picks, the ID stays changeable, with a warning when Devices use it.
 
 ---
 
 ## Change log
 
-- 2026-10-27: Added Rule 0a: never read a Summary_N document without Fritz's permission.
-- 2026-10-27: Added Rule 0 at the top of "How Rules work": a new chat opens these Rules first and
-  follows them.
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
+- 2026-10-27: Added Rule 0 at the top of "How Rules work": a new chat opens these Rules first and
+  follows them.
+- 2026-10-27: Added Rule 0a: never read a Summary_N document without Fritz's permission.
+- 2026-10-27: Added Rule 9.7: when Fritz closes a chat, rewrite docs/Unresolved_PRs.md.
+- 2026-10-27: Added Rule 2.17 (one button style on every dialog), Rule 3.10 (hidden keys) and
+  Rule 3.11 (locked names, Name Change pop-up); Rule 3.6 now covers keys, running Processes and
+  clones. Help 70; next free Help number 71. (thread "Add hidden keys so names can change")
+- 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).
+- 2026-10-27: Added Rules 1.13 (Label, was Display Name), 1.14 (a Widget is never an "element"),
+  2.18 (Show label), 2.19 (double-click a picker dropdown), 7.8 (On overlay preferred), 7.9 (heaters
+  On while Enabled), 7.10 (imagePath_2 / _3 as in BruControl; replaces the lock) and 7.11 (Picture
+  Widget Turns on with). Help 72-74; next free Help number 75. (thread "Apply clean-up requests and
+  standards")
+- 2026-10-27: Rule 2.14 now says the Edit layout button is navy blue; added Rule 2.20 (eight resize
+  grab points, X / Y / W / H read-out) and Rule 4.5 (➕ Add box). Help 75; next free Help number 76.
+  (thread "Improve the Build Tab add and resize tools")
+- 2026-10-27: Added Rules 3.12 (Interfaces easy to find and add, Add new Interface in New Device),
+  3.13 (own Device name warning), 10.4 (one Simulator / Real switch; waits on readings pretended
+  reached) and 10.5 (a new Schema starts with a pretend New_Mega_2560_N in Simulator mode); open
+  question 13 (Interface ID set once vs Rule 3.2). Help 76-77; next free Help number 78. (thread
+  "Make Interfaces easy to add and simulate")

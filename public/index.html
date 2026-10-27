@@ -48,6 +48,7 @@
       <div id="menuTabs" class="tabs menuTabs"></div>
       <div class="spacer"></div>
       <input type="checkbox" id="editMode" class="hidden" aria-hidden="true">
+      <button id="barSim" class="barSim admin-only" title="Simulator or real boards: press to switch the whole panel (every Interface) between the simulator and the real boards" aria-pressed="false">🔌 Real</button>
       <button id="barHelp" class="helpIcon barHelp" title="Help: opens in its own window, beside the panel" aria-label="Help">?</button>
       <button id="barEdit" class="barEdit admin-only" title="Edit layout (admins): move, add and change things on the Tabs. Press again to leave it" aria-label="Edit layout" aria-pressed="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><g stroke="#8f1d17" stroke-width=".8" stroke-linejoin="round" fill="#ffd400"><path d="M1.4 13.2l2.4-2.4 8.2 8.2 8.2-8.2 2.4 2.4L12 23.8z"/><path d="M3.9 15.7l1-1M6.4 18.2l1-1M8.9 20.7l1-1M20.1 15.7l-1-1M17.6 18.2l-1-1M15.1 20.7l-1-1" fill="none"/><g transform="rotate(45 12 12)"><rect x="10.9" y="5" width="2.2" height="16" rx="1"/><path d="M7.4 1.6h9.2v4.2H7.4z"/></g><g transform="rotate(-45 12 12)"><rect x="10.9" y="5" width="2.2" height="16" rx="1"/><path d="M3.6 7.6Q6.4 1.4 16.4 1.6v4.2H10.6Q6.4 5.4 3.6 7.6z"/></g></g></svg></button>
       <div class="menuWrap"><button id="menuBtn" class="menuBtn" title="Menu: Edit layout, profiles, recipes" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 4h14M3 8h14M3 12h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Menu</button><div id="menuList" class="menuList hidden" role="menu"></div></div>
@@ -213,6 +214,7 @@
     <p class="muted">An Interface is a board (PLC) the Devices are wired to. Its ID (1 to 4 letters) starts the suggested name of every Device on it, for example MB_25_PWM_VlV_Fly_Sparge_SP.</p>
     <table class="grid"><thead><tr><th>ID</th><th>Name</th><th>Board</th><th>Type</th><th>Connection</th><th title="If the board hears nothing from the Brain this long, it turns all outputs OFF">Lost link: all OFF after</th><th>Port / Host</th><th>Status</th><th>Info</th><th></th></tr></thead><tbody id="devBody"></tbody></table>
     <h3 id="sec-addInterface" class="admin-only">Add Interface</h3>
+    <div class="bar admin-only"><button id="addIfaceBtn" class="primary">➕ Add Interface…</button><span class="muted">opens the Add Interface pop-up (the same one as "➕ Add new Interface…" in the New Device box), or fill in the row below.</span></div>
     <div class="form row admin-only">
       <label>Name <input id="devName" placeholder="Main Brewery Mega USB"></label>
       <label>Interface ID (1-4 letters, empty = first letters of the name) <input id="devId" placeholder="MB" maxlength="7" size="6"></label>
@@ -428,7 +430,12 @@
         <label class="toggle simSwitch"><span class="sw"><input type="checkbox" id="simAuto"><span class="swk"></span></span> Auto skip</label>
         <label>Watch each step for (seconds) <input id="simWatch" type="number" min="1" max="600" style="width:6em"></label>
       </div>
-      <p class="muted"><b>Auto skip</b> needs no table: each step runs for the seconds above, then the clock skips to a few seconds before the next sleep end, timer wait or countdown, in every running Process (called ones and loopers too). A wait on a button or a temperature is never skipped: press the screen buttons as usual. Only time is skipped.</p>
+      <div class="form row">
+        <label class="toggle simSwitch"><span class="sw"><input type="checkbox" id="simReach"><span class="swk"></span></span> Pretend readings are reached</label>
+        <label>after (clock seconds) <input id="simReachAfter" type="number" min="1" max="7200" style="width:6em"></label>
+      </div>
+      <p class="muted"><b>Pretend readings are reached:</b> a Process that waits on a reading (a temperature reaching strike temperature, the boil starting, a level, a weight or a flow total) moves on by itself after the seconds above, as if the reading got there. Skip to next event and Auto skip count it as an event. Waits on a button or a switch are never pretended.</p>
+      <p class="muted"><b>Auto skip</b> needs no table: each step runs for the seconds above, then the clock skips to a few seconds before the next sleep end, timer wait or countdown, in every running Process (called ones and loopers too). A wait on a button is never skipped: press the screen buttons as usual. A wait on a temperature is skipped only when Pretend readings are reached is on. Only time is skipped.</p>
       <h4>Time jumps</h4>
       <p class="muted">Skips ahead by itself in simulation mode. Example: when timer <b>tm_Mash</b> starts, wait <b>5</b> seconds, then jump ahead <b>00:50:00</b>; the mash timer goes from 00:00:05 to 00:50:05, so a 60 minute mash takes about 15 seconds of watching.</p>
       <div class="tblScroll"><table class="grid simJumps"><thead><tr><th>On</th><th>When</th><th>Name</th><th>Then wait (seconds)</th><th>Jump ahead (hh:mm:ss)</th><th>Note</th><th></th></tr></thead><tbody id="simJumps"></tbody></table></div>

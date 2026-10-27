@@ -536,7 +536,13 @@ async function route(req, res) {
   // Schemas: everyone sees the list, admins load, add, rename and delete
   const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
   if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
-  if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
+  if (p === '/ui/schemas' && m === 'POST') {
+    const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty });
+    // a new empty Schema (not a copy) has only its simulated New_Mega_2560_N: the whole panel goes to Simulator mode (Fritz, 2026-10-27)
+    const wasSim = sim.cfg.on;
+    if (b.empty && !wasSim) sim.save({ on: true });
+    return ok(res, { ...schemaView(), simulator: !!b.empty, wasSim, iface: b.empty ? store.config.devices[0]?.name : undefined });
+  }
   // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
