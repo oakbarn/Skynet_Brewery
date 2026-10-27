@@ -24,7 +24,7 @@ Skynet makes the name, and it can't be typed over: the parent's name, then `_Clo
 
 `MB_06_Pump_Wort__HS` cloned once is `MB_06_Pump_Wort__HS_Clone_1`, the next Clone of it is `MB_06_Pump_Wort__HS_Clone_2`.
 
-If the parent is renamed, its Clones follow (`..._Clone_1` keeps its number).
+The name is only there so you can tell Clones apart when you look at their Properties; nothing else uses it. Behind the scenes a Clone is tied to its parent, so it keeps working whatever the parent is called. If the parent is renamed, its Clones follow (`..._Clone_1` keeps its number).
 
 ## A Clone's Properties
 
