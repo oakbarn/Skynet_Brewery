@@ -19,6 +19,7 @@ assert.deepEqual(conv.summary.byType, { digitalOut: 2, analogIn: 2, hysteresis: 
 assert.equal(conv.devices[0].type, 'simulator'); assert.equal(conv.devices[0].realType, 'serial'); assert.equal(conv.devices[0].port, 'COM3');
 assert.equal(conv.devices[1].realType, 'esp32'); assert.equal(conv.devices[1].host, '192.168.1.60'); assert.equal(conv.devices[1].enabled, false);
 assert.deepEqual(conv.autostart, ['looper_Sample']);
+assert.equal(conv.devices[0].board, 'mega'); assert.equal(conv.devices[1].board, 'esp32');   // board from BruControl's TypeName, for the connection rating
 assert.match(conv.scripts[0].text, /^\/\/ sample & "quoted"\nnew value vV\n/);
 assert.ok(conv.warnings.some(w => w.includes('sw_Testing_2')));
 

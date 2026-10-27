@@ -97,7 +97,7 @@ hw.stop();
   const hw2 = new Hardware(store2); hw2.stepQuietMs = 0; const sent = [], dev = { name: 'M', send: l => sent.push(l), status: 'connected' };
   hw2.devices.set('M', dev);
   hw2._resendOutputs(dev);
-  assert.deepEqual(sent, ['CFG STEP 22 23 -1 4 100 400 1', 'CFG HOME 22 30 0', 'CFG STEP 26 27 -1 4 200 400 2']);
+  assert.deepEqual(sent, ['CFG WD 10 S', 'CFG STEP 22 23 -1 4 100 400 1', 'CFG HOME 22 30 0', 'CFG STEP 26 27 -1 4 200 400 2']);
   sent.length = 0;
   store2.setProp('Valve_M', 'target', 25); assert.deepEqual(sent, ['GO 22 50 100']);
   assert.throws(() => store2.setProp('Valve_M', 'position', 3), /cannot be set by a process/, 'position comes from the board');

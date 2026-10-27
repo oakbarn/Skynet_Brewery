@@ -6,14 +6,15 @@ Both use the same plain-text protocol: one command per line, ending with a newli
 - **Ethernet:** TCP port 4100. A Mega with a W5500 / W5100 Ethernet shield (`USE_ETHERNET 1` in the Mega sketch), or an ESP32 board with an Ethernet jack running the bridge sketch with `USE_ETHERNET 1`. Add it on the Devices page as **Board on Ethernet** with its IP address.
 - **ESP32 over WiFi:** TCP port 4100. The ESP32 can bridge to a Mega on its second serial port. The included sketch does this.
 
-USB and Ethernet are preferred over WiFi for anything that heats or pumps. On every link, the board turns all outputs off if it hears nothing for 10 seconds.
+Connections are ranked by board (Help page 69, `public/links.js`). Arduino Mega: 1 USB best, 2 Ethernet OK (depends on the network), 3 WiFi through an ESP32 bridge poor. ESP32: USB best, Ethernet good, WiFi good as long as nothing heats on it. A heating Device (element, gas valve, igniter, heat pad, PID / Hysteresis / Duty Cycle output) on Ethernet or WiFi is allowed with a warning. On every link, the board turns all outputs off if it hears nothing for the Interface's **lost link delay** (Devices page, 3 to 600 s, default 10), sent as `CFG WD`.
 
 ## Server → device
 
 | Line | Meaning |
 |---|---|
 | `HELLO` | Sent after connecting. The device answers `HELLO <name> <firmware>` and reports all its inputs. |
-| `PING` | Sent every 2 seconds. **If the device hears nothing for 10 seconds it must turn every output OFF** (safety if the PC, cable or WiFi fails). |
+| `PING` | Sent every 2 seconds. **If the device hears nothing for the lost link delay (default 10 seconds) it must turn every output OFF** (safety if the PC, cable or WiFi fails). |
+| `CFG WD <seconds> S` | The lost link delay, 3 to 600 seconds. Sent first after every connect. |
 | `DO <pin> <0\|1>` | Set a digital output. The device answers with the same line to confirm. |
 | `PWM <pin> <0-255>` | Set a PWM output (pwmOut elements show 0-100 %; also PID elements with "PWM output" on). The device answers with the same line. |
 | `AO <pin> <0-1000>` | Set an analog output, in tenths of a percent of full scale (0 = 0 V / 4 mA, 1000 = 10 V / 20 mA). The Mega drives a PWM-to-0-10 V or 4-20 mA module from a PWM pin. |
@@ -170,6 +171,6 @@ On the simulator a stepper moves at its set speed; `sim` sets where it starts an
 
 Flags in `CFG STEP`: 1 reverse direction, 2 ENABLE HIGH = on, 4 keep powered when stopped, 8 half steps (4-pin boards), 16 28BYJ-48 coil order (IN1, IN3, IN2, IN4).
 
-The board also stops a move that runs into the home switch, and the 10-second watchdog stops every motor at once. After a USB reconnect the Mega restarts, so the motor reports `homed` 0 until it is homed again.
+The board also stops a move that runs into the home switch, and the lost link watchdog stops every motor at once. After a USB reconnect the Mega restarts, so the motor reports `homed` 0 until it is homed again.
 
 The Mega makes steps between its other jobs, so keep each motor under about 1,000-2,000 steps per second (fewer microsteps for fast moves). The Mega firmware for steppers has been compiled with the real AccelStepper library but not yet run on a real motor. Steppers on a Raspberry Pi's own pins are not built (the Pi is not exact enough for step timing; a Pi would use a Mega or ESP32 for the motor).
