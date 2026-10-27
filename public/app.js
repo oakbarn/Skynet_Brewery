@@ -262,7 +262,7 @@ const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left',
   ['Top Left Branch', 0.087, 0], ['Bottom Branch', 0.54, 1]];         // the openings of the Skynet RIMS Device picture (Skynet_TC1_2_Rims_Device.svg)
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
-  // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
+  // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Label is its only text
   vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/Skynet/Vessels/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
     ports: {
       // 'Front Bottom Center', 'Front Center' and 'Right Side' are the three holes of Fritz's Skynet_BasicElectricBrewKettle.svg (2026-10-23)
@@ -747,9 +747,9 @@ function withLook(e, v) {
   if (v.valuetype) o.look = lookFor(v.valuetype, e);
   return o;
 }
-// The name shown on a Device or Widget: its Display name, or its Name when the Display name is empty. In Edit layout it follows
+// The name shown on a Device or Widget: its Label, or its Name when the Label is empty. In Edit layout it follows
 // the Properties you just changed (the live value from the Brain only catches up after Save).
-const shownName = (e, v) => editing ? (e.displayName || e.name) : (v.displayname || e.name);
+const shownName = (e, v) => editing ? (e.label || e.name) : (v.label || e.name);
 function fillEl(n, e0) {
   const v = S.values[e0.name] || {}, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
@@ -942,7 +942,7 @@ async function doTap(e) {
   const t = elByName(targetName); if (!t) return toast(`No element "${targetName}"`, true);
   if (act === 'toggle' && isBoolEl(t)) {
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
-    if (e.confirm) { const r = await choose(`${S.values[t.name]?.displayname ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
+    if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
     return setProp(t.name, boolProp(t), !cur);
   }
   return valueDialog(t);
@@ -1018,7 +1018,7 @@ function controlDialog(t) {
     await setProp(t.name, prop, x);
     if (en !== undefined) await setProp(t.name, 'enabled', en);
   };
-  d.append(h('div', { class: 'vdTitle' }, `${v.displayname ?? t.name} - ${label}` + (t.type === 'pid' ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
+  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - ${label}` + (t.type === 'pid' ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
     h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+')),
     h('div', { class: 'vdBtns' },
       h('button', { type: 'button', class: 'big onb' + (v.enabled ? ' cur' : ''), onclick: () => done(true) }, 'Set + ON'),
@@ -1046,7 +1046,7 @@ function fillManual(n, e, v) {
   n.classList.toggle('waiting', !!v.waiting);
 }
 async function manualDialog(t) {
-  const v = S.values[t.name] || {}, title = v.displayname ?? t.name;
+  const v = S.values[t.name] || {}, title = v.label ?? t.name;
   const r = await choose(v.waiting ? `${title}: ${v.message || 'confirm when done'}` : title,
     [...(v.waiting ? [['Done ✓', 'ok']] : []), ['Enter the temperature it shows', 'reading'], ['Enter the volume in it', 'volume']]);
   if (r === 'ok') { await setProp(t.name, 'confirmed', true); return setProp(t.name, 'waiting', false); }
@@ -1059,7 +1059,7 @@ async function manualDialog(t) {
 function valueDialog(t) {
   if (CONTROL_MAIN[t.type]) return controlDialog(t);
   const v = S.values[t.name] || {};
-  const title = v.displayname ?? t.name;
+  const title = v.label ?? t.name;
   if (t.type === 'scale') return scaleDialog(t, title);
   if (t.type === 'stepper') return stepperDialog(t, title);
   if (t.type === 'digitalIn') {   // latch / toggle: reset to off; counter: count back to 0
@@ -1120,7 +1120,7 @@ function timerSetDialog(t) {
     if (m) { const parts = m[3] === undefined ? [0, m[1], m[2]] : [m[1], m[2], m[3]]; ins.forEach((x, k) => { x.value = String(parts[k]).padStart(2, '0'); }); }
   });
   for (const i of ins) i.addEventListener('keydown', ke => { if (ke.key === 'Enter') { ke.preventDefault(); done(true); } });
-  d.append(h('div', { class: 'vdTitle' }, `${v.displayname ?? t.name} - set time`),
+  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - set time`),
     h('div', { class: 'vdRow tmRow' }, hh, h('b', {}, ':'), mm, h('b', {}, ':'), ss),
     h('div', { class: 'muted' }, v.running ? 'It keeps running from the new time.' : ((v.type ?? t.timerType) === 'countdown' ? 'Counts down from this time when started.' : 'Counts up from this time when started.')),
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
@@ -1341,6 +1341,10 @@ function renderPipes() {
     }
     g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
     g.append(line(p, { class: 'hit' }));
+    if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
+      const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
+      const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TD().foreColor || '#e6e6e6', 'font-size': TD().nameFontSize || 14 }); t.textContent = p.label; g.append(t);
+    }
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
       if (!ipPoint(p.to, p.workspace)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
@@ -1880,7 +1884,7 @@ function portForName(e) {
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
-const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.displayName, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
@@ -1897,7 +1901,7 @@ function portError(e, self) {
 }
 async function newDeviceDialog(e, hint) {
   const devs = S.config.devices || [];
-  const work = { displayName: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
+  const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
   const port = isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
@@ -1905,7 +1909,7 @@ async function newDeviceDialog(e, hint) {
   const fields = [['device', '1. Interface (board)', 'dev'],
     ['typeCode', '2. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
     [port[0], '3. ' + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
-    ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
+    ['label', 'Label (shown on the tab, e.g. Fly Sparge; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'],
     ['name', 'Suggested Name (you may type your own)', 'text']];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
   for (const b of oks) b.textContent = 'Create';
@@ -1933,7 +1937,7 @@ async function newDeviceDialog(e, hint) {
         const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
-        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         e.name = name;
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
@@ -2012,7 +2016,7 @@ function rimsPinLists(w, g) {
     document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => { const t = /^A/.test(p) ? `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)` : `D${p}` + (pinTag(p) ? `  (${pinTag(p)})` : ''); return h('option', { value: p, label: t }, t); })));
   }
 }
-// make the RIMS tube's (or kettle's) own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Display Name.
+// make the RIMS tube's (or kettle's) own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Label.
 // Nothing changes when something is wrong (the error is thrown). No Interface and no Ports: it has no Devices yet.
 function applyRims(g, w, tab, label) {
   const { heat: h0, temp: t0 } = intEls(g), tk = tempKindOf(w.tempKind), ow = isOneWire({ type: 'temperature', ...tk });
@@ -2025,12 +2029,12 @@ function applyRims(g, w, tab, label) {
   const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
   if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
   for (const [k] of elSettings(heat.type)) if ('el_' + k in w) { const v = w['el_' + k]; if (v === undefined || v === '') delete heat[k]; else heat[k] = v; }
-  heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.displayName ??= base + ' Heat';
+  heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.label ??= base + ' Heat';
   const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
   for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
   Object.assign(temp, clone(tk));
   if (ow) { temp.probeIndex = +w.tempProbe; delete temp.channel; } else { temp.channel = w.tempPin; delete temp.probeIndex; }
-  temp.typeCode = t0 && tempKey(t0) === tempKey(temp) && t0.typeCode ? t0.typeCode : defaultCode(temp); temp.displayName ??= base + ' Temp';
+  temp.typeCode = t0 && tempKey(t0) === tempKey(temp) && t0.typeCode ? t0.typeCode : defaultCode(temp); temp.label ??= base + ' Temp';
   // a new one gets the suggested name; one that still has its suggested name follows it (a name typed by hand stays)
   const named = (e, old) => !old || old.name === deviceSuggestion(old, old) ? deviceSuggestion(e, old || e) : old.name;
   heat.name = named(heat, h0); temp.name = named(temp, t0);
@@ -2053,7 +2057,7 @@ async function newIntegratedDevice(tname) {
   const t = tplOf('vessel', tname); if (!t) return toast(`The Skynet Template ${tname} is missing`, true);
   const [what, lbl] = intWhat({ template: t.name, vesselType: t.vesselType });
   const w = { ...rimsWork(null), template: t.name, vesselType: t.vesselType, label: lbl };
-  const fields = o => [...rimsFields(o), ['label', `Label (Display Name shown on the tab, e.g. ${lbl})`, 'text']];
+  const fields = o => [...rimsFields(o), ['label', `Label (shown on the tab, e.g. ${lbl})`, 'text'], ['labelVisible', 'Show label', 'yn', true]];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), refresh = () => { const x = { ...w }; try { readFields(x, body); } catch { } rimsPinLists(x, null); };
   for (const b of oks) b.textContent = 'Create';
   body.addEventListener('change', refresh);
@@ -2070,6 +2074,7 @@ async function newIntegratedDevice(tname) {
         let nm = noSpaces(w.label || lbl).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
         const g = placeTabVessel(t, wsName, nm);
         if (w.label) g.label = String(w.label).trim();
+        g.labelVisible = w.labelVisible !== false;
         Object.assign(g, applyRims(g, w, wsName, w.label || lbl));
         sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
         return;
@@ -2550,9 +2555,9 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 'Center' ? 'ed' : '') + ' justified'])];
 // field: [key, label, kind, options]
 const F = {
-  common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
+  common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
-    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
@@ -2604,7 +2609,7 @@ const F = {
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'yn'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
-    ['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
+    ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
     ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
     ...(it.size === 'custom' ? [['sizeCustom', `Custom size (${it.sizeUnits === 'mm' ? 'mm' : 'inches, e.g. 1.5'})`, 'num']] : []),
     ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'],
@@ -2613,10 +2618,10 @@ const F = {
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock']],
 };
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
-F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
-  ['_look', 'Display Name and place', 'note'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
+  ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
@@ -2777,6 +2782,9 @@ function field([key, label, kind, opts, rerender], obj) {
     cb.addEventListener('change', show); show();
     input = tg;
   }
+  else if (kind === 'show') {     // Show label (Skynet Standard, Fritz 2026-10-27): a switch that is on when the item's hide flag (e.g. hideName) is off
+    input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'show', ...(v ? {} : { checked: true }) }), h('span', { class: 'swk' }));
+  }
   else if (kind === 'bool' || kind === 'yn') {     // a simple true / false is a switch (Fritz); choices with more options are dropdowns
     input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'bool', ...(v ?? opts ? { checked: true } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) }), h('span', { class: 'swk' }));
   }
@@ -2909,6 +2917,7 @@ function readFields(obj, root = $('#dlgBody')) {
     let v;
     if (kind === 'bool') v = inp.checked;
     else if (kind === 'vis') v = inp.checked ? undefined : 'hidden';
+    else if (kind === 'show') v = inp.checked ? undefined : true;
     else if (kind === 'vkitems') {
       v = [...inp.querySelectorAll('.vkrow')].map(tr => ({ value: tr.querySelector('.vkv').value.trim(), text: tr.querySelector('.vkt').value.trim() })).filter(r => r.value !== '' || r.text);
       for (const r of v) { if (r.value === '' || !Number.isFinite(+r.value)) throw new Error(`Choice "${r.text}": its Value must be a number`); r.value = +r.value; }
@@ -3206,7 +3215,7 @@ async function editItem(kind, id) {
     }
     if (kind === 'el') {
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
-      // a new Device keeps following the suggested name (Display name, Interface, port, type, tab) until a name of its own is typed
+      // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
       if (follow) work.name = deviceSuggestion(work, item) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
@@ -4431,7 +4440,7 @@ function renderMqtt() {
   const body = $('#mqItems'); body.innerHTML = '';
   for (const it of S.mqtt?.items || []) {
     const box = (k, dis) => h('input', { type: 'checkbox', 'data-name': it.name, 'data-k': k, ...(it[k] ? { checked: true } : {}), ...(dis ? { disabled: true, title: 'Inputs from hardware are read only' } : {}) });
-    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.displayName ? `${it.displayName} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
+    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.label ? `${it.label} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
   }
   const sb = $('#mqScripts'); sb.innerHTML = '';
   for (const s of S.scripts) sb.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.scripts || []).includes(s.name) ? { checked: true } : {}) }), s.name));
@@ -4935,7 +4944,7 @@ function renderDefaultTab(box) {
     ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
     ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
     ['_x', 'Text', 'head'],
-    ['_tbn', 'Every text box (the Name and Value of each Device and Widget, a Label, a Text, the Display Name on a vessel) starts from these. ' +
+    ['_tbn', 'Every text box (the Name and Value of each Device and Widget, a Label, a Text, the Label on a vessel) starts from these. ' +
       'An item left on Default follows the colors, alignment and name font here, so changing one here changes them all. ' +
       'Visible, Word wrap, the size and the place are copied into each new item when it is made.', 'note'],
     ['textVisible', 'Visible (new Devices, Widgets and Texts start shown)', 'bool'],
@@ -4943,7 +4952,7 @@ function renderDefaultTab(box) {
     ['textBackColor', 'Back color (behind the text)', 'color'],
     ['textAlign', 'Alignment', 'sel', [['', 'Default (as each kind of item has it)'], ...TB_ALIGN_CHOICES.slice(1)]],
     ['textWrap', 'Word wrap as needed', 'bool'],
-    ['nameFont', 'Name font (names, Display Names and Texts)', 'sel', FONTS.map(([v, t]) => [v, v ? t : 'Default (the panel\'s normal font)'])],
+    ['nameFont', 'Name font (names, Labels and Texts)', 'sel', FONTS.map(([v, t]) => [v, v ? t : 'Default (the panel\'s normal font)'])],
     ['nameFontSize', 'Name font size (px; empty = the panel\'s normal size)', 'num'],
     ['textWidth', 'Width of a new Text or Label (px; empty = 220)', 'num'],
     ['textHeight', 'Height of a new Text or Label (px; empty = 40)', 'num'],
@@ -5359,7 +5368,7 @@ function vesselFields(p) {
     return [['name', 'Name', 'text'],
       isV ? ['vtype', 'Type', 'sel', types, true] : ['vtype', 'Type', 'vlist', w.vesselType + '.types'],
       ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
-      ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+      ['label', 'Label (empty = the Type)', 'text'], ['labelVisible', 'Show label', 'yn', true], ['image', 'Graphic (picture path)', 'path'],
       ['_s', 'Size', 'head'],
       ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
         : [['volume', `Size (${u})`, 'num'], ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
@@ -5964,7 +5973,7 @@ F.skynetVessel = it => {
   const probes = [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])];
   const electric = it.heatKind === 'electric' || it.ports?.element?.installed, well = it.ports?.thermowell?.installed;
   return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
-    ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Name)', 'text'],
+    ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Name)', 'text'],
     ...(it.integrated === 'device' ? [['_d', 'Built in (Skynet_Integrated_Device: its IPs and its heating element can never be taken out of it)', 'head'], ...rimsFields(it)] : [
       // its picture starts as the Widget's and is edited like any other Widget's (Fritz, 2026-10-23)
       ['image', 'Graphic (picture path; its IPs stay on the openings of the Skynet picture)', 'path'],
@@ -5973,7 +5982,7 @@ F.skynetVessel = it => {
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
     ...looseField(it),
-    ['_look', 'Display Name and place', 'head'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
+    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 };
 
@@ -5996,7 +6005,7 @@ async function placeEqItems(p, items) {
       g = { id: newId(), kind: 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1], labelAlign: 'above', labelSize: 16, labelVisible: true, profileItem: it.id };
       draft.graphics.push(g); made++;
     } else updated++;
-    Object.assign(g, { vesselType: it.vesselType, name: it.name, vtype: it.vtype, label: it.label || it.vtype, image: it.image || C.image, ports: clone(it.ports || {}) });
+    Object.assign(g, { vesselType: it.vesselType, name: it.name, vtype: it.vtype, label: it.label || it.vtype, labelVisible: it.labelVisible !== false, image: it.image || C.image, ports: clone(it.ports || {}) });
     syncVesselPorts(g, old);
     if (it.bundled) g.bundled = true; else delete g.bundled;
     wsName = g.workspace;

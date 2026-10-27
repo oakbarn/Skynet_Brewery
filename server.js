@@ -251,7 +251,7 @@ function browserConfig() {
   return { ...c, mqtt: { ...m, hasPassword: !!password } };
 }
 function mqttView() {
-  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, displayName: e.displayName ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
+  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, label: e.label ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
 }
 
 // The API has vAPI variables only (never Shared or vKonstant)
