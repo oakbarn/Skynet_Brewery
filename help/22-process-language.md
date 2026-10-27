@@ -63,9 +63,9 @@ Older Processes are changed for you (once, when the panel starts, and whenever a
 
 | Old line | New line |
 | --- | --- |
-| `"my Element" visibility = visible` | `"my Element".visible = true` |
-| `"my Element" visibility = hidden` | `"my Element".visible = false` |
-| `"my Element" visibility = hiddenlocked` | `"my Element".visible = false; "my Element".hidden = true` |
+| `"my Widget" visibility = visible` | `"my Widget".visible = true` |
+| `"my Widget" visibility = hidden` | `"my Widget".visible = false` |
+| `"my Widget" visibility = hiddenlocked` | `"my Widget".visible = false; "my Widget".hidden = true` |
 
 The old lines still run the same way if you leave them.
 
