@@ -2616,10 +2616,10 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 'Center' ? 'ed' : '') + ' justified'])];
 // field: [key, label, kind, options]
 const F = {
-  // Cloned Devices: only Visible, X and Y are its own (and the lock); the rest is set in its parent's Properties
+  // Cloned Devices: only Visible, Tab, X and Y are its own (and the lock); the rest is set in its parent's Properties
   clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
     ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Tapping the Clone is tapping the parent: turning it on or off (or Enabled, for a PID) turns the parent and every Clone. A reading (a temperature probe) is shown the same way as the parent.`, 'note'],
-    ['visibility', 'Visible (off = hidden on this Tab only; a Process: name.visible = true)', 'vis'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
+    ['visibility', 'Visible (off = hidden on its Tab only)', 'vis'], ['workspace', 'Tab (the Tab this Clone is on)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
     ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],

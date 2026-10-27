@@ -183,8 +183,8 @@ back where it came from?". Save to Tab places the build in the center of the cho
 a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar; it works on any Tab,
 **the Build Tab too** (an exception to Rule 4.1, Fritz 2026-10-27). Its list holds the Devices
 already placed on a Tab, grouped by type (Pumps, Valves ...). Its name is made by Skynet and can't
-be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). Only **.visible, .x, .y** (and
-its lock) are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
+be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). Only **.visible, .x, .y and its Tab** (a
+Tab dropdown in its Properties; not in Processes) and its lock are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
 Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
 only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
 rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
@@ -446,3 +446,4 @@ only when Fritz says the program is set. (2026-10-26)
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
 - 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).
 - 2026-10-27: Rule 4.4 rewritten from Fritz's answers: Clone button only, any Tab incl. the Build Tab (exception noted under Rule 4.1), names <Parent_Name>_Clone_N, not used in Processes.
+- 2026-10-27: Rule 4.4: a Clone's Tab is its own too (Tab dropdown in its Properties).
