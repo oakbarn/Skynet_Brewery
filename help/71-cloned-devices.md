@@ -31,6 +31,7 @@ If the parent is renamed, its Clones follow (`..._Clone_1` keeps its number).
 Double-click a Clone in Edit layout. Only these are its own:
 
 - **Visible**: off hides the Clone on its Tab only. The parent and other Clones keep showing.
+- **Tab**: the Tab the Clone is on. Pick another Tab to move the Clone there (the parent stays where it is).
 - **X** and **Y**: where it sits on its Tab.
 - **Lock position**, like any other item.
 

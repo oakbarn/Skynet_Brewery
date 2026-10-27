@@ -64,7 +64,7 @@ A **Clone** shows a Device on another Tab too (Skynet Rule 4.4, Help 71). It is 
 Interface, port or settings of its own, so it never counts against "one Device per port".
 - **Made only with ⧉ Clone Device** (Edit layout bar), on any Tab, the Build Tab too. The list is grouped by type.
 - **Name:** made by Skynet, never typed: `<Parent_Name>_Clone_N`, e.g. `MB_06_Pump_Wort__HS_Clone_1`. It follows a parent rename.
-- **Its own settings:** Visible, X, Y, Lock position. **Not used in Processes.**
+- **Its own settings:** Visible, Tab, X, Y, Lock position. **Not used in Processes.**
 - **Everything else is the parent's** (pictures, look, size, value). Tapping it taps the parent: an on/off Device or one with
   Enabled (PID) turns on or off; a reading Device (1W) is only shown, in the parent's format.
 - A pump or valve Clone has its own IPs on its Tab, for pipes there.
