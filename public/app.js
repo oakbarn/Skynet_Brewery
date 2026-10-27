@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
@@ -43,9 +44,7 @@ try { zoom = localStorage.getItem('bp.zoom') || 'fit'; } catch { /* private wind
 if (zoom === 'page') zoom = 'fit';         // "Whole tab" is now "Fit screen"
 
 let knownPaths = new Set();   // file paths in the open process that were already warned about (not on the Brain)
-let editing = false, draft = null, sel = null;
-// renamed Devices and Widgets in this Edit layout: first saved name -> name now; sent with Save so the Processes follow (lib/renames.js)
-let draftRenames = new Map();   // sel = {kind:'el'|'gfx', id}
+let editing = false, draft = null, sel = null;   // sel = {kind:'el'|'gfx', id}
 let soundOn = false;
 const audios = new Map();
 
@@ -1379,7 +1378,7 @@ function setEditing(on) {
   previewing = false;
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
-  draft = on ? clone(S.config) : null; draftRenames = new Map();
+  draft = on ? clone(S.config) : null;
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
@@ -2041,7 +2040,7 @@ function applyRims(g, w, tab, label) {
   if (!h0 || !t0) { const [x, y] = [g.x || 0, (g.y || 0) + (g.h || 50) + 20]; if (!h0) Object.assign(heat, { x, y }); if (!t0) Object.assign(temp, { x: x + 150, y }); }
   for (const [e, old] of [[heat, h0], [temp, t0]]) {
     if (old) {
-      if (old.name !== e.name) { noteRename(old.name, e.name); for (const o of draft.graphics) if (o.heater === old.name) o.heater = e.name; for (const o of draft.elements) if (o.input === old.name) o.input = e.name; }
+      if (old.name !== e.name) { for (const o of draft.graphics) if (o.heater === old.name) o.heater = e.name; for (const o of draft.elements) if (o.input === old.name) o.input = e.name; }
       Object.keys(old).forEach(k => delete old[k]); Object.assign(old, e);
     } else { useTabProfile(e); draft.elements.push(e); }
   }
@@ -2478,25 +2477,21 @@ function saveBuildDialog(b) {
     document.body.append(d); d.showModal();
   });
 }
-// a rename on top of a rename (A -> B -> C) is one rename A -> C; back to the first name is no rename
-function noteRename(from, to) {
-  const first = [...draftRenames].find(([, now]) => now === from)?.[0] ?? from;
-  if (!S.config.elements.some(e => e.name === first)) return;     // added in this Edit layout: nothing uses it yet
-  if (first === to) draftRenames.delete(first); else draftRenames.set(first, to);
-}
 // what Save tells you about the Processes that follow a renamed Device or Widget
 function renameNote(r) {
   if (!r?.renamed?.length) return '';
   const ps = r.processes || [], run = ps.filter(p => p.running).map(p => p.name);
   let t = ps.length ? ` Renamed in ${ps.length} Process${ps.length > 1 ? 'es' : ''}: ${ps.map(p => p.name).join(', ')}.` : ' No Process used the old name.';
-  if (run.length) t += ` Restart ${run.join(', ')} to use the new name.`;
+  if (run.length) t += ` ${run.join(', ')} ${run.length > 1 ? 'are' : 'is'} running and keep${run.length > 1 ? '' : 's'} working; the new text is used from its next start.`;
+  const cl = r.renamed.filter(x => x.clone);
+  if (cl.length) t += ` Clones that follow: ${cl.map(x => `${x.from} is now ${x.to}`).join(', ')}.`;
   if (r.otherSchemas?.length) t += ` Note: ${r.otherSchemas.map(o => `Schema ${o.schema} still has ${o.name}`).join('; ')}.`;
   return t;
 }
 const saveLayout = guard(async () => {
   if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
-  const renames = [...draftRenames].map(([from, to]) => ({ from, to }));
-  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, renames, updateVersion: $('#updateVersion').checked });
+  // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
+  const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
   const note = renameNote(r);
   toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note, false, note ? 9000 : 0); editing = false; await load(); setEditing(false);
 });
@@ -2736,6 +2731,7 @@ function fieldsOf(item) {
 }
 
 function field([key, label, kind, opts, rerender], obj) {
+  if (key === 'name' && kind === 'text' && obj._ref && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const v = obj[key];
   let input;
@@ -2964,6 +2960,56 @@ function bindForm(body, fields, obj, onChange) {
   };
   if (onChange) body.oninput = onChange;
   return build;
+}
+
+// Locked names (Fritz, 2026-10-27). Once an item is built (saved once: that is when it gets its hidden key) its name is
+// locked. ✏ Change name beside it opens the Name Change pop-up; the new name goes in the box and is kept when these
+// Properties are saved. Every Process that uses the old name follows it when the layout is saved (lib/keys.js, lib/renames.js).
+function lockedName(key, label, obj) {
+  const input = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: obj[key], readonly: true, class: 'lockedName', title: 'The name is locked. Press ✏ Change name to change it.' });
+  const btn = h('button', { type: 'button', class: 'nameBtn', title: 'Open the Name Change pop-up', onclick: async () => {
+    const to = await nameChange(input.value, { check: n => nameCheck(n, obj) });
+    if (to === null) return;
+    input.value = to;
+    for (const t of ['input', 'change']) input.dispatchEvent(new Event(t, { bubbles: true }));
+  } }, '✏ Change name');
+  return [h('label', {}, label.replace(/\s*\(.*\)$/, '') + ' 🔒'), h('span', { class: 'nameRow' }, input, btn)];
+}
+// what is wrong with a new name for this item (null when it is fine); the Properties' own Save checks the rest
+function nameCheck(n, obj) {
+  const all = draft || S.config;
+  if (obj.type && (S.types || []).includes(obj.type)) {          // a Device or Widget element: Fritz's name rules, unique
+    const bad = elementNameError(n, isDevice(obj) ? 'Device' : 'Widget'); if (bad) return bad;
+    if (all.elements.some(x => x._ref !== obj._ref && x.name.toLowerCase() === n.toLowerCase()) || all.graphics.some(g => g.kind === 'text' && g.name === n)) return `The name ${n} is already used. Names must be unique.`;
+  } else if (all.workspaces.some(w => w === obj || w._ref === obj._ref)) {
+    if (all.workspaces.some(w => w._ref !== obj._ref && w.name.toLowerCase() === n.toLowerCase())) return `There is already a Tab called ${n}`;
+  }
+  return null;
+}
+// The Name Change pop-up: the name now (read only) and a box for the new one. ✖ Cancel changes nothing; 💾 Save gives the
+// new name back (null on Cancel). check(name) returns what is wrong with it, or null. Spaces become _ unless spaces: true.
+function nameChange(current, { title = 'Name Change', check, spaces = false } = {}) {
+  return new Promise(res => {
+    const box = h('input', { type: 'text', value: current, autocomplete: 'off', spellcheck: 'false', 'aria-label': 'New name' });
+    const err = h('p', { class: 'nameErr', role: 'alert' });
+    let out = null;
+    const save = () => {
+      const n = spaces ? box.value.trim() : noSpaces(box.value);
+      if (!n) { err.textContent = 'Type the new name.'; return box.focus(); }
+      if (n === current) { d.close(); return; }
+      const bad = check?.(n); if (bad) { err.textContent = bad; return box.focus(); }
+      out = n; d.close();
+    };
+    const d = h('dialog', { class: 'nameDlg', 'data-nomenu': true },
+      h('h3', {}, title),
+      h('label', {}, 'Name now'), h('input', { type: 'text', value: current, readonly: true, class: 'lockedName', tabindex: '-1' }),
+      h('label', {}, 'New name'), box, err,
+      h('p', { class: 'muted' }, 'Every Process that uses this name is changed to the new name for you. The panel keeps track of the item by a hidden key, so nothing is lost.'),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), h('button', { type: 'button', class: 'primary', onclick: save }, 'Save')));
+    box.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); save(); } });
+    d.addEventListener('close', () => { d.remove(); res(out); });
+    document.body.append(d); d.showModal(); box.focus(); box.select();
+  });
 }
 
 // fields: a list, or a function of the item (the list changes when a [.., true] select changes, e.g. probe type)
@@ -3215,7 +3261,6 @@ async function editItem(kind, id) {
       const isNew = !S.config.elements.some(x => x.name === item.name);
       if (isDevice(work) && (isNew || String(portKeys(work)) !== String(portKeys(item)) || work.sensor !== item.sensor || work.device !== item.device)) { const err = portError(work, item); if (err) throw new Error(err); }
       if (work.name !== item.name && draft.elements.some(e => e.name === work.name)) throw new Error('That name is already used');
-      if (work.name !== item.name) noteRename(item.name, work.name);
       if (work.name !== item.name) for (const g of draft.graphics) {
         if (g.flowWhen) g.flowWhen = g.flowWhen.map(n => n === item.name ? work.name : n);
         if (g.heater === item.name) g.heater = work.name;
@@ -3893,10 +3938,12 @@ $('#newScript').onclick = guard(async () => {
   S.scripts = await api('GET', '/ui/scripts'); dirty = false; openScript(n);
 });
 $('#renScript').onclick = guard(async () => {
-  if (!curScript) return; let n = prompt('Rename to', curScript); if (!n) return;
-  n = noSpaces(n); if (n === curScript) return;
-  const bad = fileNameError(n, { ext: false, what: 'Process' }); if (bad) throw new Error(bad);
-  await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n });
+  if (!curScript) return;
+  const n = await nameChange(curScript, { title: 'Name Change: Process', check: n => fileNameError(n, { ext: false, what: 'Process' }) || (S.scripts.some(s => s.name.toLowerCase() === n.toLowerCase() && s.name !== curScript) ? 'That name is used' : null) });
+  if (!n) return;
+  if (dirty && !confirm('Save your changes to this Process first? The rename keeps only what is saved.\n\nOK = rename anyway (unsaved changes are lost).  Cancel = go back.')) return;
+  const r = await api('POST', `/ui/scripts/${encodeURIComponent(curScript)}/rename`, { to: n });
+  if (r?.processes?.length) toast(`Renamed. ${r.processes.length} other Process${r.processes.length > 1 ? 'es' : ''} now use${r.processes.length > 1 ? '' : 's'} the new name: ${r.processes.map(p => p.name).join(', ')}.`, false, 8000);
   curScript = n; S.scripts = await api('GET', '/ui/scripts'); renderScriptList(); $('#scriptName').textContent = curScript;
 });
 $('#delScript').onclick = guard(async () => {
@@ -4608,7 +4655,8 @@ const schemaPicked = guard(async ev => {
     }
     if (v === '__clone') return cloneSchema(act.id);
     if (v === '__ren') {
-      const n = (prompt('New name for this Schema', act?.name) || '').trim(); if (!n || n === act?.name) return;
+      const n = await nameChange(act?.name || '', { title: 'Name Change: Schema', spaces: true, check: n => S.schemas.list.some(x => !x.active && x.name.toLowerCase() === n.toLowerCase()) ? `There is already a Schema called "${n}"` : null });
+      if (!n) return;
       await api('PUT', `/ui/schemas/${act.id}`, { name: n }); await load(); return toast('Schema renamed');
     }
     if (v === '__bak') { const r = await api('POST', `/ui/schemas/${act.id}/backup`); return toast(`Backed up: config/schemas/backups/${act.id}/${r.file}`); }
@@ -6224,4 +6272,5 @@ $('#cfgExport').onclick = guard(async () => {
 });
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
+watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)
 load().then(() => { soundOnStart(); connect(); setView('workspace'); firstRunSamples(); }).catch(e => toast('Cannot reach the server: ' + e.message, true));

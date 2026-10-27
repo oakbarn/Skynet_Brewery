@@ -129,6 +129,10 @@ Admins. (2026-10-22, PR #82 and PR #98)
 2.16 **Any Device or Widget with an on/off state** has a Picture when on, a Picture when off and an
 On overlay, which swap by themselves with no Process needed. (2026-10-22, PR #72, PR #81)
 
+2.17 **Every dialog uses the same buttons, each an icon and its word:** ✖ Cancel (closes, saves
+nothing), 💾 Save (saves and closes), ✖ Close (a dialog with nothing to save), 🗑 Delete (asks
+first), ✔ OK (closes a message). (2026-10-27, thread "Add hidden keys so names can change")
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -150,8 +154,12 @@ checked; old names are never refused. (2026-10-23, PR #95)
 
 3.5 **Never rename an existing Device by itself.** It would break Processes. (2026-10-21)
 
-3.6 **When a Device or Widget name changes, every Process that uses it follows** the new name.
-(2026-10-22, PR #73)
+3.6 **When a name changes, every Process that uses it follows** the new name. The panel finds the
+rename by the item's hidden key (Rule 3.10). A Process running at the time keeps working and uses
+the new name from its next start. Renaming a Process changes the lines that start or stop it and
+the Autostart list. **Clones follow too:** renaming an item changes the old-name part of each of
+its clones' names (`HLT copy` becomes `Hot_Liquor_Tank copy`), unless that name is taken.
+(2026-10-22, PR #73; keys and clones 2026-10-27)
 
 3.7 **Every date in a file name follows ISO 8601**, safe for file names: `YYYY-MM-DD` for a day,
 `YYYYMMDDTHHMMSS` (no colons) for a date and time. (2026-10-23, PR #93)
@@ -163,6 +171,18 @@ Note: the Panel Version name is not changed yet (see Open questions).
 3.9 **Generic names and shapes only.** Product photos with a maker's logo or name are redrawn as
 generic shapes with generic names (for example Hop_Filter_Inline, not a brand name), because
 Skynet will be open source. (2026-10-22)
+
+3.10 **Every item with a name has a hidden key** (Devices, Widgets, variables, Texts, IPs, pipes,
+vessels, fittings, Tabs, Interfaces, Processes, Templates, Profiles). It is given when the item is
+first built (saved), is meaningless, unique and never changes. Nobody can see it (not on screen, not
+in the Config Editor, not in a saved Schema file) and nobody can use it in a Process: Processes
+always use names, and the panel ties each name to its key behind the scenes. Old Schemas get their keys
+when they are loaded. **Exception:** picture and sound paths have no key; a later request covers
+how the Graphic Picker handles a path. (2026-10-27)
+
+3.11 **Once an item is built, its Name is locked** (🔒). It is changed only with the **✏ Change
+name** button beside it, which opens the **Name Change** pop-up: the name now (read only), a box for
+the new name, ✖ Cancel and 💾 Save. The same pop-up renames Processes and Schemas. (2026-10-27)
 
 ## 4. Making things: the Build Tab
 
@@ -351,7 +371,7 @@ turns outputs off. (2026-10-05, PR #22)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **70**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **71**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -431,3 +451,6 @@ only when Fritz says the program is set. (2026-10-26)
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
+- 2026-10-27: Added Rule 2.17 (one button style on every dialog), Rule 3.10 (hidden keys) and
+  Rule 3.11 (locked names, Name Change pop-up); Rule 3.6 now covers keys, running Processes and
+  clones. Help 70; next free Help number 71. (thread "Add hidden keys so names can change")

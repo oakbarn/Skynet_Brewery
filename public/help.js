@@ -1,7 +1,9 @@
 // Help tab: the manual. Pages are Markdown files in the help/ folder on the Brew Panel computer (see lib/help.js).
 // Everyone can read them; admins can edit, add and delete pages here. Help shows the page for the screen you came from
 // (helpmap.js says which); it runs in the Help window (help.html) and, when a browser blocks that window, on the panel's Help page.
+import { watchButtons } from './buttons.js';
 const $ = s => document.querySelector(s);
+if (!document.getElementById('dlg')) watchButtons();       // the Help window: one look for Cancel, Save, Close ... (public/buttons.js)
 const el = (tag, attrs = {}, ...kids) => {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) { if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? '' : v); }
