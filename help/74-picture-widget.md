@@ -10,7 +10,7 @@ A **Picture Widget** shows a picture on a Tab. It is a Widget (it lives only in 
 - **On / off Devices and Widgets**: an output, a switch, an input, an alarm, a sound player, a timer or a true / false variable. The picture is On while that one is on.
 - **Heaters: on while Enabled**: a PID, Hysteresis, Duty Cycle or PWM output. The picture is On while the heater is **Enabled** (a PWM output: while it is above 0 %), not only while its output fires.
 
-Double-click the dropdown to open the Properties of the one picked (see [Double-click in picker dropdowns](71-double-click-in-pickers)).
+Double-click the dropdown to open the Properties of the one picked (see [Double-click in picker dropdowns](73-double-click-in-pickers)).
 
 ## Its pictures
 
