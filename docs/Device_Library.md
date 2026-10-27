@@ -46,6 +46,8 @@ Example: `MB_25_E_L_Vlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID E_L_Vl
 | D2, D3, D18-D21 | Counter (interrupt) | Shown as "Counter"; D2 and D3 are "PWM + Counter" |
 | D50, D51, D52 | SPI bus | Shared by every RTD and thermocouple board. Blocked for anything else once one of those boards is in use |
 | D14-D17, D22-D39, D41-D43, D47-D49, D53 | RTD chip-select (CS) pins | The ONLY pins an RTD (PT100 / PT1000, MAX31865) may use for its CS pin on a Mega (Skynet Rule 6.9). Any other pin is refused |
+| D10 | Ethernet shield | On a Mega on Ethernet, no Device may use D10, and a Mega can't change from USB to Ethernet while a Device is on D10 (Skynet Rule 6.10) |
+| D4 | Ethernet shield SD card pin | Allowed, with the warning "SD Card Not Supported. Never insert an SD Card!". An inserted card is reported by the Ethernet sketch and the panel says to remove it (Skynet Rule 6.11) |
 | D40 | OneWire data pin | Shared by every DS18B20 probe. Blocked for anything else once a probe is in use (can be changed per Interface) |
 | A0-A15 (= 54-69) | Analog inputs | Either name works |
 
@@ -365,3 +367,5 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 ## Change log
 - 2026-10-27: First version, from panel version PR107_Skynet-v.20261026_23_23 (plus open PR #108).
 - 2026-10-27: RTD (PT100 / PT1000) CS pins on a Mega limited to D14-D17, D22-D39, D41-D43, D47-D49, D53 (Skynet Rule 6.9).
+- 2026-10-27: D10 kept for the Ethernet shield on an Ethernet Mega; no USB to Ethernet change while D10 is used (Skynet Rule 6.10).
+- 2026-10-27: D4 warning and SD card check (Skynet Rule 6.11).
