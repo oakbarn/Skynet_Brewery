@@ -28,7 +28,7 @@ The main value of each kind:
 ```
 my_Widget.visible = false
 tm_Mash.countdown = true
-tm_Mash.displayname = "Mash rest"
+tm_Mash.label = "Mash rest"
 Kettle_Temp.background = 2
 Pump_Red.image = "Images/RedPump.png"
 if Hop_Text.visible == true
@@ -124,7 +124,7 @@ You can mix both styles in one Process. Old Processes and BruControl imports kee
 
 ## Codes inside text
 
-Text in quotes can carry codes that change how it looks on the screen. They work wherever a Process shows text: a string value on a Tab, a display name, `print` lines in the Process output, and pop-ups such as a manual valve's message. Bold, large, subscript and superscript are switches: the first code turns it on, the next one turns it off.
+Text in quotes can carry codes that change how it looks on the screen. They work wherever a Process shows text: a string value on a Tab, a label, `print` lines in the Process output, and pop-ups such as a manual valve's message. Bold, large, subscript and superscript are switches: the first code turns it on, the next one turns it off.
 
 | Code | What it does | Example | Shows |
 |---|---|---|---|
@@ -166,7 +166,7 @@ The change lasts until the panel restarts. To keep a look, set it in the item's 
 
 ## Names have no spaces
 
-Names of Devices, Widgets and Processes cannot have spaces any more. When you type a space in a name it becomes `_`. Names that already had spaces were changed once, for example `Test Timer` became `Test_Timer`. The screen still shows the old name, because it became the **Display name**. Every Process that used the old name was updated too, and a copy of each one was kept as `.before-no-spaces.bak`.
+Names of Devices, Widgets and Processes cannot have spaces any more. When you type a space in a name it becomes `_`. Names that already had spaces were changed once, for example `Test Timer` became `Test_Timer`. The screen still shows the old name, because it became the **Label**. Every Process that used the old name was updated too, and a copy of each one was kept as `.before-no-spaces.bak`.
 
 ## Autofill
 

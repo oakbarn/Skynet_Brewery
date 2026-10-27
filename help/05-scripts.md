@@ -46,13 +46,13 @@ log "vAV_Kettle_Temp"          write a value to the database now
 
 The name alone means its main value, and other attributes use a dot. See [Process language and steps](22-process-language) for the full list, autofill, Process classes and step numbers.
 
-## Display names
+## Labels
 
-Every element has a **displayname**: the name shown on the tab. A process can change it on any kind of element, including String, Value and Graphic vKonstants, timers, alarms and outputs:
+Every element has a **label**: the name shown on the tab (empty = its Name). The old BruControl word `displayname` still works and means the same thing. A process can change it on any kind of element, including String, Value and Graphic vKonstants, timers, alarms and outputs:
 
 ```
-tm_Delay_W1.displayname = "1 Minute Delay"
-vKS_Brewery_Top.displayname = "Mash"
+tm_Delay_W1.label = "1 Minute Delay"
+vKS_Brewery_Top.label = "Mash"
 ```
 
 (In BruControl this failed on a Global String; here it works the same on every type.)

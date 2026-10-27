@@ -55,6 +55,7 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
 #pipes .pipe, #pipes .flow, #pipes .drawing, #pipes .reducer { pointer-events: none; }
 #pipes .drawing { fill: none; stroke: var(--accent); stroke-width: 5; stroke-dasharray: 10 5; filter: drop-shadow(0 0 1.5px #000); }
+#pipes .pipeLabel { pointer-events: none; paint-order: stroke; stroke: #000; stroke-width: 3px; stroke-linejoin: round; }
 @keyframes flow { to { stroke-dashoffset: -24; } }
 
 .el { position: absolute; border-radius: 7px; border: 1px solid var(--line); background: var(--panel2); display: flex; flex-direction: column; overflow: hidden; user-select: none; background-size: contain; background-repeat: no-repeat; background-position: center; }

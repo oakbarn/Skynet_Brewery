@@ -7,7 +7,7 @@ import { Engine } from '../lib/engine.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'mvalve'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ elements: [
-  { name: 'VGC_Kettle_Out', type: 'digitalOut', subtype: 'valve', valveType: 'manual', displayName: 'Kettle outlet' },
+  { name: 'VGC_Kettle_Out', type: 'digitalOut', subtype: 'valve', valveType: 'manual', label: 'Kettle outlet' },
   { name: 'VGC_HLT_Out', type: 'digitalOut', subtype: 'valve' },
   { name: 'Done', type: 'vKonstant', kind: 'value' },
 ] }));
