@@ -82,8 +82,13 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #ws.editing .gfx { display: block; }
 #ws.editing .el.vhidden, #ws.editing .gfx.vhidden { opacity: 0.35; }
 #ws.editing .sel { outline: 2px solid var(--accent); }
-.rs { position: absolute; right: 0; bottom: 0; width: 12px; height: 12px; background: var(--accent); cursor: nwse-resize; display: none; }
-#ws.editing .rs { display: block; }
+/* resize grab points (Fritz, 2026-10-27): four corners and the middle of each side on the picked item; the bottom right corner on the others */
+.rs { position: absolute; width: 12px; height: 12px; background: var(--accent); border: 1px solid #000; box-sizing: border-box; display: none; z-index: 2; }
+.rs-nw { left: 0; top: 0; cursor: nwse-resize; } .rs-n { left: calc(50% - 6px); top: 0; cursor: ns-resize; } .rs-ne { right: 0; top: 0; cursor: nesw-resize; }
+.rs-e { right: 0; top: calc(50% - 6px); cursor: ew-resize; } .rs-se { right: 0; bottom: 0; cursor: nwse-resize; } .rs-s { left: calc(50% - 6px); bottom: 0; cursor: ns-resize; }
+.rs-sw { left: 0; bottom: 0; cursor: nesw-resize; } .rs-w { left: 0; top: calc(50% - 6px); cursor: ew-resize; }
+#ws.editing .rs-se, #ws.editing .sel:not(.ip) > .rs { display: block; }
+.geoTip { position: fixed; z-index: 50; pointer-events: none; padding: 2px 6px; border-radius: 4px; background: #001f5b; color: #fff; font: 12px/1.4 monospace; white-space: pre; }
 #ws.editing.nomove .rs, #ws.nomove circle.handle { display: none; }   /* phone or tablet: nothing to drag */
 .lock { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: rgba(255,255,255,.85); pointer-events: none; display: none; }
 #ws.editing .lock { display: block; }
@@ -670,8 +675,8 @@ body.onWorkspace #top .menuCopy { display: none; }
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
 /* the red circle with yellow tools (hammer and pick over a square) beside ☰ Menu: Edit layout on and off; a yellow ring while it is on */
-button.barEdit { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #8f1d17; background: #d32f2f; }
-button.barEdit:hover { background: #e53935; }
+button.barEdit { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #0a1a3f; background: #001f5b; }      /* navy blue (Fritz, 2026-10-27) */
+button.barEdit:hover { background: #0b2f7a; }
 button.barEdit:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
 button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
 /* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */
@@ -707,6 +712,13 @@ button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
 .tplMini { width: min(420px, 94vw); }
 .vesselPick { width: min(600px, 94vw); max-height: 90vh; overflow-y: auto; }
 .vesselPick > b { display: block; margin-top: 12px; }
+/* ➕ Add box on the Edit layout bar (Fritz, 2026-10-27) */
+.addBox { width: min(620px, 94vw); max-height: 90vh; overflow-y: auto; }
+.addBox > b { display: block; margin-top: 12px; }
+.addBox > p { margin: 2px 0 6px; }
+.addBtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.addBtns button { text-align: left; }
+.turnBar { display: inline-flex; gap: 2px; padding: 0 4px; border-left: 1px solid var(--border, #555); border-right: 1px solid var(--border, #555); }
 #ws .gfx.vessel .bfImg { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
 /* Process editor picture picker (Alt+P) */
 .picPickDlg .ppTools { flex-wrap: wrap; gap: 8px; }

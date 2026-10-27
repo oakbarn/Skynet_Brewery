@@ -8,6 +8,7 @@ The Build Tab only shows while you are building. It has a dashed orange edge and
 
 1. Press **☰ Menu** and pick **Edit layout**.
 2. Do one of these:
+   - Press **➕ Add** for a Valve, Pump, Element, Probe or Interface, one click each (see [Build Tab Add button](75-build-tab-add-button)).
    - Press **Add element** (a Device or Widget), **Add graphic**, **Add text**, **Add equipment** (a vessel, chiller, coil, trub filter, RIMS tube or pipe fitting) or **Add IP**. The Build Tab opens by itself and the new item is made there.
    - Press **🔨 Build Tab** on the Edit layout bar to open it empty.
    - In **☰ Menu > Vessel Templates**, **Equipment Templates** or **Fitting Templates**, open a Template (a Skynet Template or a User Bundled Template) and press **Add to Tab** or **Clone**. The copy is made on the Build Tab (see **Copies of Templates** below).
