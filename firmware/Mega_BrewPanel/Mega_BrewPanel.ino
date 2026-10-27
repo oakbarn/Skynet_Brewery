@@ -36,7 +36,7 @@
 #endif
 
 const char* DEVICE_NAME = "MEGA1";
-const char* FIRMWARE = "0.4";
+const char* FIRMWARE = "0.5";
 
 // Link to the server (the Brain). Ranked safest first (Fritz): 1 USB = best, 2 Ethernet = OK (depends on the network),
 // 3 WiFi through an ESP32 bridge = poor (can drop often). Heating on a network link is allowed with a warning; the
@@ -45,6 +45,8 @@ const char* FIRMWARE = "0.4";
 //   ESP32 bridge:   USE_ETHERNET 0 and LINK Serial1 (pins 18/19)
 //   Ethernet:       USE_ETHERNET 1 with a W5500 or W5100 Ethernet shield. The panel connects to IP_ADDR on TCP port 4100.
 //                   The shield uses pins 10 (chip select), 4 (SD card) and SPI 50/51/52, so pins 4 and 10 cannot be outputs.
+//                   SD cards are NOT supported (Skynet Rule 6.11): never insert one. The sketch holds pin 4 HIGH so a card
+//                   can never take the SPI bus, checks the slot every 10 seconds and sends "SD 1" to the panel when a card is in.
 #define USE_ETHERNET 0
 #if USE_ETHERNET
 #include <SPI.h>
@@ -66,6 +68,7 @@ const uint8_t PWM_PINS[]    = {44, 45, 46};              // PWM outputs 0-100 % 
 const uint8_t AO_PINS[]     = {};                        // analog outputs: a PWM pin into a PWM-to-0-10V or 4-20mA module, e.g. {13}
 const uint8_t FLOW_PINS[]   = {};                        // pulse flow meters, interrupt pins only: 2, 3, 18, 19, 20, 21 (max 6)
 const uint8_t RTD_CS_PINS[] = {};                        // MAX31865 chip-select pins (PT100 / PT1000), SPI on 50/51/52, e.g. {48}
+// RTD CS pins may ONLY be D14-D17, D22-D39, D41-D43, D47-D49 or D53 (Skynet Rule 6.9, the panel refuses any other)
 const uint8_t TC_CS_PINS[]  = {};                        // MAX31856 / MAX31855 chip-select pins (thermocouples), SPI on 50/51/52, e.g. {49}
 const uint8_t ADS_CHANNELS[] = {0, 1, 2, 3};             // ADS1115 channels to report (only when USE_ADS1115 is 1)
 const uint8_t HX711_DT_PINS[]  = {};                     // HX711 boards: data (DT) pins, e.g. {26, 28}; the panel names a scale by these
@@ -109,6 +112,32 @@ unsigned long candSince[N_IN > 0 ? N_IN : 1]; unsigned int debounceMs[N_IN > 0 ?
 volatile unsigned long pulses[6];
 void f0() { pulses[0]++; } void f1() { pulses[1]++; } void f2() { pulses[2]++; } void f3() { pulses[3]++; } void f4() { pulses[4]++; } void f5() { pulses[5]++; }
 void (*const FLOW_ISR[6])() = {f0, f1, f2, f3, f4, f5};
+#if USE_ETHERNET
+// SD card check (Skynet Rule 6.11): one quick CMD0 on the shield's SD chip-select (pin 4). A card answers 0x01 (idle);
+// an empty slot answers nothing (0xFF). It takes about a millisecond, so it never holds up the loop or the Ethernet link.
+int sdState = -1;                                        // -1 = not checked yet, 0 = no card, 1 = card in the slot
+unsigned long lastSd = 0;
+bool sdCardIn() {
+  digitalWrite(10, HIGH);                                // the Ethernet chip lets go of the SPI bus
+  SPI.beginTransaction(SPISettings(250000, MSBFIRST, SPI_MODE0));
+  digitalWrite(4, HIGH);
+  for (uint8_t i = 0; i < 10; i++) SPI.transfer(0xFF);   // 80 clocks with the card not selected: wakes a card up
+  digitalWrite(4, LOW);
+  const uint8_t cmd0[] = {0x40, 0, 0, 0, 0, 0x95};       // CMD0 GO_IDLE_STATE
+  for (uint8_t i = 0; i < 6; i++) SPI.transfer(cmd0[i]);
+  uint8_t r = 0xFF;
+  for (uint8_t i = 0; i < 8 && r == 0xFF; i++) r = SPI.transfer(0xFF);
+  digitalWrite(4, HIGH);                                 // card (if any) let go again
+  SPI.transfer(0xFF);
+  SPI.endTransaction();
+  return r == 0x01;
+}
+void checkSd(bool always) {
+  int now = sdCardIn() ? 1 : 0;
+  if (always || now != sdState) { LINK.print("SD "); LINK.println(now); }
+  sdState = now;
+}
+#endif
 unsigned long lastRx = 0, lastReport = 0, lastTemp = 0, lastFast = 0;
 bool tempRequested = false, watchdogTripped = false;
 String line;
@@ -302,7 +331,11 @@ void handle(String cmd) {
   lastRx = millis();
   if (watchdogTripped) { watchdogTripped = false; LINK.println("ERR watchdog cleared"); }
   if (cmd == "PING") return;
-  if (cmd == "HELLO") { LINK.print("HELLO "); LINK.print(DEVICE_NAME); LINK.print(' '); LINK.println(FIRMWARE); reportInputs(); reportFast(); return; }
+  if (cmd == "HELLO") { LINK.print("HELLO "); LINK.print(DEVICE_NAME); LINK.print(' '); LINK.println(FIRMWARE); reportInputs(); reportFast();
+#if USE_ETHERNET
+    checkSd(true);                                       // SD 0 / SD 1: the panel warns when a card is in the slot
+#endif
+    return; }
   if (cmd.startsWith("DO ")) {
     int sp = cmd.indexOf(' ', 3);
     int pin = cmd.substring(3, sp).toInt(); int v = cmd.substring(sp + 1).toInt();
@@ -369,6 +402,8 @@ void setup() {
   for (uint8_t i = 0; i < N_TC; i++) { tc[i] = new Adafruit_MAX31856(TC_CS_PINS[i]); tc[i]->begin(); tc[i]->setThermocoupleType(MAX31856_TCTYPE_K); tc[i]->setConversionMode(MAX31856_CONTINUOUS); }
 #endif
 #if USE_ETHERNET
+  pinMode(4, OUTPUT); digitalWrite(4, HIGH);             // SD card slot never selected (SD cards are not supported)
+  SPI.begin();
   Ethernet.init(10);
   Ethernet.begin(MAC_ADDR, IP_ADDR);
   netServer.begin();
@@ -407,6 +442,9 @@ void loop() {
   for (uint8_t i = 0; i < N_HX; i++) if (hx[i].is_ready()) { hxSum[i] += hx[i].read(); hxN[i]++; }   // about 10 readings a second, never waits
 #endif
   if (now - lastFast > 1000) { lastFast = now; reportFast(); }
+#if USE_ETHERNET
+  if (now - lastSd > 10000) { lastSd = now; checkSd(false); }
+#endif
   if (!tempRequested && now - lastTemp > 2000) { probes.requestTemperatures(); tempRequested = true; lastTemp = now; }
   if (tempRequested && now - lastTemp > 800) { sendTemps(); tempRequested = false; }
 }

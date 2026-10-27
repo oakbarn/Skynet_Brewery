@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck, freePins, pinTag } from '../public/naming.js';
+import { suggestName, uniqueName, hydroPort, oneWirePort, parseLabel, upgradeCode, TYPE_CODES, TYPE_NAMES, defaultInterfaceId, cleanInterfaceId, defaultTabId, cleanTabId, assignIds, checkIds, defaultCode, typeCodes, portClash, busCheck, freePins, pinTag, rtdPinError, RTD_CS_PINS, ethernetPinError } from '../public/naming.js';
 import { tokenize } from '../lib/engine.js';
 import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
@@ -138,6 +138,32 @@ assert.equal(freePins({ name: 'N', type: 'analogIn', device: 'MEGA' }, [{ name: 
 assert.match(busCheck(rtd, [pump]).error, /Move MB_51_Pump/, 'no RTD while a pump holds an SPI pin');
 assert.match(busCheck({ ...rtd, channel: 52 }, []).error, /chip-select/);
 assert.equal(busCheck(rtd, []), null);
+// Skynet Rule 6.9 (Fritz, 2026-10-27): an RTD's CS pin on a Mega only D14-D17, D22-D39, D41-D43, D47-D49, D53
+assert.equal(RTD_CS_PINS.join(' '), '14 15 16 17 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 41 42 43 47 48 49 53');
+for (const p of [5, 10, 4, 18, 40, 44, 46, 'A0', 59]) assert.match(busCheck({ ...rtd, channel: p }, []).error, /Rule 6\.9/, `pin ${p} refused for an RTD`);
+assert.equal(rtdPinError({ ...rtd, channel: 'D53' }), null);
+assert.equal(rtdPinError({ ...rtd, channel: 5, sensor: 'thermocouple' }), null, 'thermocouples unchanged');
+assert.equal(rtdPinError({ ...rtd, channel: 5, device: 'ESP' }, [{ name: 'ESP', board: 'esp32' }]), null, 'only on a Mega');
+// Skynet Rule 6.10 (Fritz, 2026-10-27): an Ethernet Mega keeps pin D10 for its shield
+const ethMega = [{ name: 'MEGA', board: 'mega', type: 'ethernet' }], usbMega = [{ name: 'MEGA', board: 'mega', type: 'serial' }];
+const on10 = { name: 'MB_10_PWM_Fan', type: 'pwmOut', device: 'MEGA', channel: 10 };
+assert.match(busCheck(on10, [], ethMega).error, /Rule 6\.10/, 'no D10 on an Ethernet Mega');
+assert.equal(busCheck(on10, [], usbMega), null, 'D10 is fine on USB');
+assert.ok(!freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], ethMega).includes('10'), 'D10 not offered on an Ethernet Mega');
+assert.ok(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], usbMega).includes('10'));
+assert.match(ethernetPinError(ethMega[0], [on10]), /Move MB_10_PWM_Fan .*Rule 6\.10/, 'USB to Ethernet refused while D10 is used');
+assert.equal(ethernetPinError(usbMega[0], [on10]), null);
+assert.equal(ethernetPinError(ethMega[0], [{ ...on10, channel: 11 }]), null);
+assert.match(ethernetPinError({ name: 'MEGA', board: 'mega', type: 'simulator', realType: 'ethernet' }, [on10]), /D10/, 'a simulator standing in for Ethernet too');
+assert.equal(ethernetPinError({ name: 'MEGA', board: 'esp32', type: 'ethernet' }, [on10]), null, 'only a Mega');
+// Skynet Rule 6.11: D4 (the shield's SD card pin) is allowed, with a warning
+const on4 = { name: 'MB_04_DO_Light', type: 'digitalOut', device: 'MEGA', channel: 4 };
+assert.match(busCheck(on4, [], usbMega).warn, /SD Card Not Supported\. Never insert an SD Card!/);
+assert.match(busCheck(on4, [], ethMega).warn, /SD Card Not Supported/, 'warned, not blocked, on Ethernet too');
+assert.ok(freePins({ name: 'N', type: 'pwmOut', device: 'MEGA' }, [], ethMega).includes('4'));
+assert.equal(busCheck({ ...on4, device: 'ESP' }, [], [{ name: 'ESP', board: 'esp32' }])?.warn?.includes('SD') ?? false, false, 'only a Mega');
+assert.equal(pinTag(4), 'PWM, SD card pin');
+assert.deepEqual(freePins({ name: 'N', type: 'temperature', sensor: 'pt1000', device: 'MEGA' }, [rtd]), RTD_CS_PINS.filter(p => p !== '48'), 'the RTD pin list');
 const probe = { name: 'MB_700_1W_HLT', type: 'temperature', sensor: 'ds18b20', probeIndex: 1 };
 const led = { name: 'MB_40_LED', type: 'digitalOut', device: 'MEGA', channel: 'D40' };
 assert.match(busCheck(led, [probe]).error, /OneWire data pin/, 'a DS18B20 blocks pin 40');

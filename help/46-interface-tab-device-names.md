@@ -60,7 +60,7 @@ More rules:
 
 Some probes share pins on the board. On an Arduino Mega with the Skynet sketch:
 
-- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT__HL`. The CS pin can be any free pin except 50, 51 and 52.
+- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT__HL`. For a **thermocouple** the CS pin can be any free pin except 50, 51 and 52. For an **RTD** (PT100 / PT1000, MAX31865 board) on an Arduino Mega the CS pin can **only** be **D14-D17, D22-D39, D41-D43, D47-D49 or D53** (Skynet Rule 6.9). Those pins are not PWM, counter, SPI, OneWire (40) or Ethernet shield (4, 10) pins. The pin list in the New Device box and in the RTD's Properties shows only those pins, and the panel refuses any other pin with a message.
 - **DS18B20 (OneWire) probes** all share one data pin, **pin 40**. Each probe gets its own virtual port 700-799 in its name instead.
 
 What the panel does:
@@ -68,6 +68,8 @@ What the panel does:
 - **Blocked:** once an RTD or thermocouple is on an Interface, pins 50, 51 and 52 on it can't be used by anything else. Once a DS18B20 probe is set up, pin 40 can't be used by anything else.
 - **Heads up:** if no such probe is there yet and you put something else on pin 50, 51, 52 or 40, the panel asks first. It tells you that while that Device is on the pin, you can't add RTD, thermocouple or DS18B20 probes to that Interface. Press **Cancel** to pick another pin.
 - **Not allowed the other way round either:** if a pump already sits on pin 51, you can't add an RTD to that Interface until you move the pump.
+
+On a Mega on **Ethernet**, pin **D10** belongs to the Ethernet shield and can't be used by any Device (Skynet Rule 6.10, see Help: Connection ratings). Pin **D4** is the shield's SD card pin: you may use it, but the panel warns you: SD Card Not Supported. Never insert an SD Card! (Rule 6.11)
 
 Tip: keep pins 40 and 50-52 free, even if you have no such probes yet. Then you can add them later without rewiring.
 
