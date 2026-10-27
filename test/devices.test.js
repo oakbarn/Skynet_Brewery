@@ -67,7 +67,7 @@ const sent = [], dev = { name: 'M', send: l => sent.push(l), status: 'connected'
 hw.devices.set('M', dev); hw.probesSeen.set('M', {});
 
 hw._resendOutputs(dev);
-assert.deepEqual(sent, ['DO 5 1', 'PWM 44 0', 'AO 45 0', 'CFG DI 30 PULLUP 20', 'CFG RTD 49 4', 'CFG TC 48 J']);
+assert.deepEqual(sent, ['CFG WD 10 S', 'DO 5 1', 'PWM 44 0', 'AO 45 0', 'CFG DI 30 PULLUP 20', 'CFG RTD 49 4', 'CFG TC 48 J']);
 sent.length = 0;
 store.setProp('Relay', 'state', true); store.setProp('Pump_Speed', 'value', 50); store.setProp('VFD', 'value', 45);
 assert.deepEqual(sent, ['DO 5 0', 'PWM 44 128', 'AO 45 750']);

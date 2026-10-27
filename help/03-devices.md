@@ -12,11 +12,11 @@
 A board is called an **Interface**. On the **Devices** screen, under **Add Interface**:
 
 1. Give it a **Name**, for example `Main Brewery Mega USB`. Its **Interface ID** (`MB`) is filled in from the name; see [Interface, Tab and Device names](46-interface-tab-device-names).
-2. Pick the **Type**: a board on USB, a board on Ethernet, an ESP32 on WiFi, or the **Simulator** (no hardware; handy for trying things).
+2. Pick the **Board** (Arduino Mega, ESP32 or another Arduino-type board) and the **Type**: USB, Ethernet, WiFi, or the **Simulator** (no hardware; handy for trying things). The **connection rating** next to it says how safe that link is; see [Connection ratings](69-connection-ratings).
 3. For USB, press **Scan ports** and pick the port (Windows: `COM3`; Pi: `/dev/ttyACM0`). For Ethernet or WiFi, type its network address.
 4. Press **Add**.
 
-The table at the top shows each board and whether it is connected.
+The table at the top shows each board, its connection rating and whether it is connected.
 
 > On the Pi, USB boards need `npm install serialport` once in the panel folder, and `sudo usermod -aG dialout $USER` once (then log out and in).
 

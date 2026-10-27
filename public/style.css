@@ -740,3 +740,8 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .spTable td, .spTable th { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; }
 .spTable td.num { text-align: right; white-space: nowrap; }
 .spThumb { width: 40px; height: 40px; object-fit: contain; }
+
+/* connection rating on the Devices page (public/links.js) */
+.linkRating.best, .linkRating.good { color: var(--ok); }
+.linkRating.ok { color: #c98a00; }
+.linkRating.poor { color: var(--bad); font-weight: bold; }
