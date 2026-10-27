@@ -4103,7 +4103,7 @@ function renderDevices() {
         await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? { ...x, lostLinkSec: n } : x) }); await load(); toast(`${d.name}: all outputs OFF after ${n} s without the Brain`);
       }) });
     tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), rateCell, h('td', {}, lostBox, ' s'), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
-      h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || ''),
+      h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
       h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   renderProbes();

@@ -69,6 +69,8 @@ What the panel does:
 - **Heads up:** if no such probe is there yet and you put something else on pin 50, 51, 52 or 40, the panel asks first. It tells you that while that Device is on the pin, you can't add RTD, thermocouple or DS18B20 probes to that Interface. Press **Cancel** to pick another pin.
 - **Not allowed the other way round either:** if a pump already sits on pin 51, you can't add an RTD to that Interface until you move the pump.
 
+On a Mega on **Ethernet**, pin **D10** belongs to the Ethernet shield and can't be used by any Device (Skynet Rule 6.10, see Help: Connection ratings). Pin **D4** is the shield's SD card pin: you may use it, but the panel warns you: SD Card Not Supported. Never insert an SD Card! (Rule 6.11)
+
 Tip: keep pins 40 and 50-52 free, even if you have no such probes yet. Then you can add them later without rewiring.
 
 ### PWM and counter pins

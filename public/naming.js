@@ -5,7 +5,7 @@
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
 // Device name (Fritz, 2026-10-23): InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_E_L_Vlv_Fly~Sparge_In__SP
 //   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
-import { boardOf } from './links.js';
+import { boardOf, linkOf } from './links.js';
 
 // Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list (DO is a plain relay and
 // a heating element on a relay). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
@@ -227,6 +227,18 @@ export function rtdPinError(el, devices) {
   const cs = pinKey(el.channel); if (!cs) return null;
   return RTD_CS_PINS.includes(cs) ? null : `${el.name && el.name !== '\0new' ? el.name + ': p' : 'P'}in ${/^\d+$/.test(cs) ? 'D' + cs : cs} can't be the chip-select (CS) pin of an RTD board on an Arduino Mega. Use ${RTD_CS_TEXT} (Skynet Rule 6.9).`;
 }
+// Fritz, 2026-10-27 (Skynet Rule 6.10): the Ethernet shield on a Mega uses pin D10. A Device on an Ethernet Mega can't use D10, and a
+// Mega Interface can't be changed to Ethernet while a Device is on D10: that Device and its wiring move to another free pin first.
+export const ETHERNET_PIN = '10';
+export const SD_PIN = '4';
+export const SD_WARNING = 'Pin D4 is the SD card pin of the Ethernet shield. SD Card Not Supported. Never insert an SD Card! (Skynet Rule 6.11)';
+const ethernetMega = d => !!d && boardOf(d) === 'mega' && linkOf(d) === 'ethernet';
+// A plain message when Interface d is (or is being changed to) an Ethernet Mega and a Device on it uses pin 10, or null
+export function ethernetPinError(d, elements) {
+  if (!ethernetMega(d)) return null;
+  const on10 = (elements ?? []).filter(e => e.device === d.name && pinsOn(e).includes(ETHERNET_PIN)).map(e => e.name);
+  return on10.length ? `${d.name} can't be on Ethernet while pin D10 is in use: the Ethernet shield needs pin 10. Move ${on10.join(', ')} (and the wiring) to another free pin first, then change ${d.name} to Ethernet (Skynet Rule 6.10).` : null;
+}
 const usesSpi = e => e.type === 'temperature' && ['pt100', 'pt1000', 'thermocouple'].includes(e.sensor);
 const isProbe = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
 const pinsOn = e => portKeys(e).filter(k => !k.startsWith('OneWire|')).map(k => k.split('|')[1]);
@@ -235,6 +247,7 @@ export function busCheck(el, elements, devices) {
   const others = (elements ?? []).filter(o => o !== el && o.name !== el.name);
   const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? ONEWIRE_PIN);
   const mine = el.device ? pinsOn(el) : [], iface = el.device;
+  if (mine.includes(ETHERNET_PIN) && ethernetMega((devices ?? []).find(d => d.name === iface))) return { error: `Pin D10 on ${iface} is used by its Ethernet shield. Pick another pin (Skynet Rule 6.10).` };
   const spiUsers = others.filter(o => usesSpi(o) && o.device === iface), owUsers = others.filter(o => isProbe(o) && (!o.device || o.device === iface));
   const onPin = pins => others.find(o => o.device === iface && !usesSpi(o) && pinsOn(o).some(p => pins.includes(p)));
   if (usesSpi(el)) {
@@ -251,7 +264,10 @@ export function busCheck(el, elements, devices) {
     if (spi && spiUsers.length) return { error: `Pin ${spi} on ${iface} is blocked: pins 50, 51 and 52 carry the RTD and thermocouple boards (${spiUsers.map(o => o.name).join(', ')}).` };
     if (mine.includes(owPin) && owUsers.length) return { error: `Pin ${owPin} on ${iface} is blocked: it is the OneWire data pin of the DS18B20 probes (${owUsers.map(o => o.name).join(', ')}).` };
   }
-  return pinAdvice(el, mine, others, owPin);
+  const adv = pinAdvice(el, mine, others, owPin, ethernetMega((devices ?? []).find(d => d.name === iface)));
+  // Fritz, 2026-10-27 (Skynet Rule 6.11): D4 is the SD card pin of the Ethernet shield. Allowed, with a warning
+  if (mine.includes(SD_PIN) && iface && boardOf((devices ?? []).find(d => d.name === iface)) === 'mega') return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
+  return adv;
 }
 // Fritz, 2026-10-23: PWM and counter (interrupt) pins are few. A Device that doesn't need what its pin is kept for gets a heads-up
 // naming a free pin that fits it better; when no such pin is left there is no heads-up.
@@ -265,6 +281,7 @@ const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one
 export function pinTag(p) {
   p = String(p);
   const t = [PWM_PINS.includes(p) && 'PWM', COUNTER_PINS.includes(p) && 'Counter'].filter(Boolean).join(' + ');
+  if (p === SD_PIN) return t + ', SD card pin';      // Skynet Rule 6.11
   return t || (SPI_PINS.includes(p) ? 'SPI, for RTD boards' : p === ONEWIRE_PIN ? 'OneWire probes' : p === '0' || p === '1' ? 'USB link' : '');
 }
 // Fritz, 2026-10-23: the free pins a new Device can take on its Interface, best fit first (a relay gets plain pins before PWM or
@@ -277,14 +294,14 @@ export function freePins(el, elements, devices, analog) {
   return pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
     .map((p, i) => [p, extras(p), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
 }
-function pinAdvice(el, mine, others, owPin) {
+function pinAdvice(el, mine, others, owPin, eth) {
   const kept = p => [PWM_PINS.includes(p) && 'pwm', COUNTER_PINS.includes(p) && 'counter', SPI_PINS.includes(p) && 'spi', p === owPin && 'onewire'].filter(Boolean);
   const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter', usesSpi(el) && 'spi', isProbe(el) && 'onewire'].filter(Boolean);
   const used = new Set(others.filter(o => o.device === el.device).flatMap(pinsOn));
   for (const p of mine) {
     const extra = kept(p).filter(k => !need.includes(k)); if (!extra.length) continue;
     const xs = q => kept(q).filter(k => !need.includes(k));
-    const better = MEGA_PINS.filter(q => !used.has(q) && !mine.includes(q) && need.every(k => kept(q).includes(k)) && xs(q).length < extra.length && !xs(q).some(k => k === 'spi' || k === 'onewire'))
+    const better = MEGA_PINS.filter(q => !used.has(q) && !(eth && q === ETHERNET_PIN) && !mine.includes(q) && need.every(k => kept(q).includes(k)) && xs(q).length < extra.length && !xs(q).some(k => k === 'spi' || k === 'onewire'))
       .sort((a, b) => xs(a).length - xs(b).length)[0];
     if (!better) continue;
     const lose = extra.map(k => KEPT[k]).join(' and ');
