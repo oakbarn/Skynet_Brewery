@@ -4097,7 +4097,7 @@ function renderDevices() {
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
     const cfg = S.config.devices.find(x => x.name === d.name);
-    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...)',
+    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: (can('admin') ? '' : 'Only an Admin can change the Interface ID. ') + 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...). Set it once and leave it.',
       onchange: guard(async ev => {
         const id = cleanInterfaceId(ev.target.value);
         if (S.config.devices.some(x => x.name !== d.name && String(x.id).toUpperCase() === id)) { ev.target.value = cfg?.id ?? ''; throw new Error(`Interface ID ${id} is used by another Interface`); }

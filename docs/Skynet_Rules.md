@@ -170,8 +170,10 @@ Full details (Type IDs, virtual ports, what happens to odd characters) are in th
 (2026-10-23, PR #97)
 *Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
 
-3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. An Admin
-can change either. (2026-10-21, PR #61)
+3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. **Only an
+Admin can change either**; for everyone else the box is greyed out. The panel explains that the
+Interface ID is best set once (it is part of every Suggested Device name) and warns before changing
+one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27, PR #118)
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
 
@@ -536,9 +538,6 @@ only when Fritz says the program is set. (2026-10-26)
 11. **Firmware:** which comes first: Pi GPIO agent, Pi Pico, or ready builds for Mega/ESP32
     (recommended: Pi GPIO agent)? (2026-10-27)
 12. **Still undecided from the check-up:** phone layout, Pi GPIO pins, PID temperature control.
-13. **Interface ID set once?** Fritz (2026-10-27) said the Interface ID "needs to be set once and not
-    changed". Rule 3.2 says an Admin can change it. Asked: change Rule 3.2, lock it with a ✏ change
-    button, or keep it. Until he picks, the ID stays changeable, with a warning when Devices use it.
 
 ---
 
@@ -570,3 +569,5 @@ only when Fritz says the program is set. (2026-10-26)
   reached) and 10.5 (a new Schema starts with a pretend New_Mega_2560_N in Simulator mode); open
   question 13 (Interface ID set once vs Rule 3.2). Help 76-77; next free Help number 78. (thread
   "Make Interfaces easy to add and simulate")
+- 2026-10-27: Open question 13 answered: Rule 3.2 stays (only an Admin changes an Interface or Tab
+  ID; greyed out for everyone else), with the set-once explanation and warning. (PR #118)
