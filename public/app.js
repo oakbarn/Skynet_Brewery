@@ -3080,6 +3080,27 @@ function cloneBundle(v) {
   sel = { kind: 'gfx', id: g.id }; wsName = g.workspace; renderTabs(); renderWs();
   toast(`Cloned: "${name}" with ${ips.length} IP${ips.length === 1 ? '' : 's'}, bundled, next to the first one. Pipes are not copied. Save layout to keep it.`);
 }
+// Fritz (2026-10-26): in any list, double-click an entry to open its Properties. A Device, Widget or Tab_Vessel opens
+// in Edit layout on its Tab, the same dialog as a double-click on the Tab. A double-click on a box or button in the row does its own job.
+const rowDbl = open => ev => { if (ev.target.closest('input,select,button,textarea,a')) return; window.getSelection?.().removeAllRanges(); open(); };
+function openProps(kind, id) {
+  if (!can('admin')) return toast('Only an admin can open Properties (they are changed in Edit layout)', true);
+  const item = (kind === 'el' ? S.config.elements.find(e => e.name === id) : S.config.graphics.find(g => g.id === id)) || (editing && findItem(kind, id));
+  if (!item) return toast('That item is not on a Tab of this Schema', true);
+  if (menuTab) leaveMenuTab();
+  if (item.workspace && L().workspaces.some(w => w.name === item.workspace)) wsName = item.workspace;
+  if (view !== 'workspace') setView('workspace');
+  if (!editing) setEditing(true);
+  sel = { kind, id }; renderTabs(); renderWs(); editItem(kind, id);
+}
+// the Tab settings of one Tab, from a list of Tabs
+function openTabProps(name) {
+  if (!can('admin')) return toast('Only an admin can open Tab settings', true);
+  if (menuTab) leaveMenuTab();
+  wsName = name; if (view !== 'workspace') setView('workspace');
+  if (!editing) setEditing(true);
+  sel = null; renderTabs(); renderWs(); editWorkspace();
+}
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
@@ -3923,7 +3944,7 @@ function varRow(e, withLog) {
       h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Logged'); }) }, 'Log now'),
         lg.mode === 'once' ? h('button', { title: 'Write one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
   }
-  return h('tr', {}, ...cells);
+  return h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', e.name)) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
@@ -4410,7 +4431,7 @@ function renderMqtt() {
   const body = $('#mqItems'); body.innerHTML = '';
   for (const it of S.mqtt?.items || []) {
     const box = (k, dis) => h('input', { type: 'checkbox', 'data-name': it.name, 'data-k': k, ...(it[k] ? { checked: true } : {}), ...(dis ? { disabled: true, title: 'Inputs from hardware are read only' } : {}) });
-    body.append(h('tr', {}, h('td', {}, it.displayName ? `${it.displayName} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
+    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.displayName ? `${it.displayName} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
   }
   const sb = $('#mqScripts'); sb.innerHTML = '';
   for (const s of S.scripts) sb.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.scripts || []).includes(s.name) ? { checked: true } : {}) }), s.name));
@@ -4711,25 +4732,60 @@ function renderMenu() {
   }
   if (menuTab && !paneDirty()) renderMenuPane();
 }
-// the ☰ Menu choices: Edit layout, then the Menu tabs in their order. `go` wraps each choice (it closes the list first,
-// and in a dialog it closes the dialog). `pages` adds the Menu Bar pages too, for a ☰ that sits where the Menu Bar can't be reached.
-function menuItems(list, go, pages = false) {
+// the ☰ Menu choices: Edit layout, then the Menu tabs in their order, then every page with its parts. `go` wraps each
+// choice (it closes the list first, and in a dialog it closes the dialog).
+function menuItems(list, go) {
   const item = (label, fn, attrs = {}) => h('button', { type: 'button', role: 'menuitem', class: 'menuItem', ...attrs, onclick: fn ? go(fn) : null }, ...[label].flat());
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   list.append(h('hr'));
   if (editing) list.append(h('div', { class: 'menuNote muted' }, 'Save or exit Edit layout to open a Menu tab'));
+  list.append(h('div', { class: 'menuNote muted' }, 'Menu tabs'));
   for (const m of menuSorted().filter(m => !m.admin || can('admin'))) {
     const off = m.coming || (editing && !m.view);
     list.append(item([m.title, m.coming ? h('span', { class: 'muted' }, ' (coming)') : ''], () => { if (m.view) setView(m.view); else openMenuTab(m.key); },
       { title: m.coming || m.tip, ...(off ? { disabled: true } : {}) }));
   }
-  if (!pages) return;
   list.append(h('hr'), h('div', { class: 'menuNote muted' }, 'Pages'));
   for (const b of $$('#views button')) {
-    if (b.classList.contains('admin-only') && !can('admin') || b.classList.contains('op-only') && !can('operator')) continue;
-    const v = b.dataset.view;
-    list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(v === view && !(v === 'workspace' && menuTab) ? { class: 'menuItem cur' } : {}) }));
+    if (!roleOk(b)) continue;
+    const v = b.dataset.view, here = v === view && !(v === 'workspace' && menuTab);
+    list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(here ? { class: 'menuItem cur' } : {}) }));
+    for (const p of pageParts(v)) list.append(item('↳ ' + p.label, p.go, { class: 'menuItem menuSub' + (p.cur ? ' cur' : ''), title: p.tip || '' }));
   }
+}
+// Fritz, 2026-10-26: "the ☰ Menu should fill out with any tab or sub tab you can navigate to" (he could not find the
+// Interfaces). Under each page the ☰ lists its parts: the screen Tabs, each part of a long page (it scrolls there and
+// lights it up a moment) and the windows a page opens with a button. A part inside .admin-only / .op-only only shows
+// for that role, the same as on the page.
+const PAGE_PARTS = {
+  scripts: [['Find in all Processes', '#findAllBtn'], ['Recycle Bin (deleted Processes)', '#binBtn'], ['Color key', '#colorKey']],
+  globals: [['vAPI', '#sec-vapi'], ['vKonstant', '#sec-vkonstant'], ['Shared variables', '#sec-shared']],
+  log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
+  devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
+  import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
+  settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
+    ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
+    ['Testing mode', '#sec-testing'], ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
+  config: [['Backups', '#cfgBackups']],
+};
+const roleOk = el => !(el.closest('.admin-only') && !can('admin')) && !(el.closest('.op-only') && !can('operator'));
+function pageParts(v) {
+  if (v === 'workspace') return L().workspaces.filter(w => !w.build || editing).map(w => ({ label: w.name, cur: view === 'workspace' && !menuTab && w.name === wsName,
+    go: () => { if (menuTab) leaveMenuTab(); wsName = w.name; sel = null; setView('workspace'); renderTabs(); renderWs(); } }));
+  return (PAGE_PARTS[v] || []).flatMap(([label, q]) => {
+    const el = $(q);
+    if (!el || !roleOk(el)) return [];
+    // a button opens its window; a heading is scrolled to
+    return [{ label, go: () => { setView(v); if (el.tagName === 'BUTTON') el.click(); else showPart(el); } }];
+  });
+}
+function showPart(el) {
+  requestAnimationFrame(() => {
+    el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    el.classList.remove('menuFlash'); void el.offsetWidth; el.classList.add('menuFlash');
+    setTimeout(() => el.classList.remove('menuFlash'), 2000);
+  });
 }
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
 $('#barEdit').onclick = guard(menuEditLayout);      // the red button (crossed hammers over a square) beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
@@ -4752,7 +4808,7 @@ function menuButton(leave, label = ' Menu') {
     closeMenuList(); closeMenuCopies();
     if (!show) return;
     list.innerHTML = '';
-    menuItems(list, fn => () => { list.classList.add('hidden'); if (!leave || leave() !== false) fn(); }, true);
+    menuItems(list, fn => () => { list.classList.add('hidden'); if (!leave || leave() !== false) fn(); });
     list.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true');
     const r = btn.getBoundingClientRect();
     // right edge under the button, but never off either side of a phone screen
@@ -5190,7 +5246,8 @@ function eqPane(p) {
   const nameOf = id => items.find(x => x.id === id)?.name || '';
   const kindOf = it => it.vesselType === 'bfit' ? 'Tab_Fitting' : (it.template ? 'Tab_Vessel' : EQ[it.vesselType]?.title || it.vesselType) + (it.vtype ? ': ' + (it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype) : '');
   const size = it => it.maxVolume ?? it.volume;
-  const rows = items.map(it => h('tr', {}, h('td', {}, it.name || ''), h('td', {}, kindOf(it)),
+  const live = w && w.layoutFromProfile !== false;      // these are the Tab's own pieces, so they have Properties there
+  const rows = items.map(it => h('tr', live ? { title: 'Double-click for its Properties on the Tab', ondblclick: rowDbl(() => openProps('gfx', it.id)) } : {}, h('td', {}, it.name || ''), h('td', {}, kindOf(it)),
     h('td', {}, size(it) !== undefined ? `${size(it)} ${volUnit(it.units || p.units)}` : ''),
     h('td', {}, it.template ? `${it.template}${it.templateCls ? ' (' + (it.templateCls === 'skynet' ? 'Skynet' : 'User Bundled') + ')' : ''}` : ''),
     h('td', {}, it.onVessel ? 'on ' + nameOf(it.onVessel) : '')));
@@ -5211,7 +5268,7 @@ function eqPane(p) {
 function oldEqList(p, w) {
   const admin = can('admin') && !p.locked, onTab = it => S.config.graphics.find(g => g.kind === 'vessel' && g.profileItem === it.id);
   const u = volUnit(p.units), tab = w?.name || 'Equipment';
-  const rows = (p.equipment || []).map(it => h('tr', {},
+  const rows = (p.equipment || []).map(it => h('tr', { title: 'Double-click to open it on the Vessel tab', ondblclick: rowDbl(guard(() => openVessel(it.id))) },
     h('td', {}, it.name), h('td', {}, `${EQ[it.vesselType]?.title || it.vesselType}${it.vtype ? ': ' + (it.vtype === 'Other' && it.otherType ? it.otherType : it.vtype) : ''}`),
     h('td', {}, it.volume !== undefined ? `${it.volume} ${u}` : ''), h('td', {}, it.heatKind ? HEAT_KINDS[it.heatKind] + (it.heatDevice ? ': ' + it.heatDevice : '') : ''),
     h('td', {}, it.bundled ? '📦 Bundled' : 'Loose'), h('td', {}, onTab(it) ? '✓ on ' + onTab(it).workspace : h('span', { class: 'muted' }, 'not on a tab')),
@@ -6061,7 +6118,7 @@ function tabsUsing(p, admin) {
       await api('PUT', '/ui/layout', { workspaces }); S.config.workspaces = workspaces;
       toast(s.value ? `The ${ws.name} tab uses "${S.tabProfiles.find(x => x.id === s.value).name}"` : `The ${ws.name} tab has no Tab Background Profile now`);
     });
-    return h('tr', {}, h('td', {}, ws.name), h('td', {}, s), h('td', { class: 'muted' }, ws.color ? 'Has its own background color (Tab settings)' : ''));
+    return h('tr', { title: 'Double-click for its Tab settings', ondblclick: rowDbl(() => openTabProps(ws.name)) }, h('td', {}, ws.name), h('td', {}, s), h('td', { class: 'muted' }, ws.color ? 'Has its own background color (Tab settings)' : ''));
   });
   return h('div', { class: 'eqPane' }, h('h3', {}, `Tabs of the Schema "${S.schemas.active?.name}"`),
     h('p', { class: 'muted' }, 'Pick the Tab Background Profile of each tab. A tab with its own background color in Tab settings keeps that color.'),
