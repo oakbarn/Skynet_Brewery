@@ -311,6 +311,12 @@ is `PR<number>_Skynet-v.yyyymmdd_hh_mm`. (2026-10-21, PR #65; 2026-10-22, PR #86
 9.6 **Skynet pictures and Templates are built and kept editable** during the building phase; Fritz
 locks them before a production zip. (2026-10-21)
 
+9.7 **When Fritz closes a chat** ("close this chat", "goodbye" and the like), Claude checks GitHub
+for every open PR and rewrites **docs/Unresolved_PRs.md** (project folder and repo, by PR): number
+and link, plain title, what it does, what it waits on, merge-order notes, open questions tied to
+it, and the snapshot date and time (ISO 8601). It is not a Summary_N, so any chat may read it.
+(2026-10-27)
+
 ## 10. Testing
 
 10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
@@ -400,3 +406,4 @@ only when Fritz says the program is set. (2026-10-26)
 
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
+- 2026-10-27: Added Rule 9.7: when Fritz closes a chat, rewrite docs/Unresolved_PRs.md.

@@ -15,3 +15,4 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Remote access](REMOTE_ACCESS.md) | Reaching the panel from outside the house. |
 | [MQTT and voice](MQTT_AND_VOICE.md) | MQTT and voice assistant hookups. |
 | [Device protocol](DEVICE_PROTOCOL.md) | The message language between the Brain and the boards. |
+| [Unresolved PRs](Unresolved_PRs.md) | Every open PR, what it waits on and the merge order. Rewritten each time Fritz closes a chat. |
