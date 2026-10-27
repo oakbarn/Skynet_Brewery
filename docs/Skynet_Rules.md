@@ -177,6 +177,17 @@ to a Tab. (2026-10-23, PR #97 and PR #99)
 back where it came from?". Save to Tab places the build in the center of the chosen Tab.
 (2026-10-22, PR #88)
 
+4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
+a copy: it is made with ⧉ Clone Device on the Edit layout bar (the list holds only Devices already on a
+Tab), or by giving a Device that is already on a Tab another Tab (a box asks Yes / No / Move). Its name
+is made by Skynet and can't be typed: the parent's name without its Tab ID, `_C1` (`_C2` ...), then
+the Clone's Tab ID (`MB_06_Pump_Wort__HS` -> `MB_06_Pump_Wort_C1__CE`). Only **.visible, .hidden,
+.x, .y** (and its Tab and lock) are the Clone's own; everything else is the parent's, so setting a
+Clone true or false sets the parent and every Clone. Clones follow a parent rename; deleting the
+parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device per port) is not
+touched. Where a new Clone first appears (the Tab, or the Build Tab per Rule 4.1) waits on Fritz's
+pick. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+
 ## 5. Templates and Integrated items
 
 5.1 **Two kinds of Template:** Skynet Templates (come with Skynet, read only, cannot be deleted,
@@ -351,7 +362,7 @@ turns outputs off. (2026-10-05, PR #22)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **70**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **72**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -431,3 +442,4 @@ only when Fritz says the program is set. (2026-10-26)
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
+- 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).

@@ -206,13 +206,14 @@ function drawWs() {
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
-  for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel'].includes(g.kind))) ws.append(buildGfx(g));
-  for (const e of L().elements.filter(e => e.workspace === w.name)) ws.append(buildEl(e));
+  for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));
+  const clones = L().graphics.filter(g => g.workspace === w.name && isClone(g)).map(cloneEl).filter(Boolean);
+  for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones]) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
   if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
   const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
-  for (const e of L().elements.filter(e => e.workspace === w.name && hasIps(e))) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
+  for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
   renderPipes(); fitZoom(); updLockBtn();
 }
@@ -240,6 +241,7 @@ const bundledIps = v => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo
 // Edit layout: a resize corner, or a padlock when the item is locked in place
 function editDeco(n, o) {
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
+  else if (o.cloneId) n.append(h('div', { class: 'cloneMark', title: `Clone of ${o.cloneOf}: it moves, its size is its parent's` }, '⧉'));
   else if (o.bundled && !isUnit(o) && !isSkyV(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
   else n.append(h('div', { class: 'rs' }));
 }
@@ -663,8 +665,44 @@ function placeDevIps(e) {
   for (const q of devIps(e)) { const n = $(`#ws .devip[data-ipid="${CSS.escape(q.id)}"]`); if (n) place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 }); }
 }
 
+// Cloned Devices (Fritz, 2026-10-27): the same Device on more than one Tab. A clone is a { kind: 'clone' } graphic with its own
+// name (made by Skynet, never typed), Tab, X, Y and Visible. Everything else, its value too, is its parent's (lib/store.js),
+// so it is drawn as the parent Device with the clone's name and place. A pump or valve clone has its own IPs on its own Tab.
+const isClone = g => g?.kind === 'clone';
+const clonesOf = (name, gs = L().graphics) => gs.filter(g => isClone(g) && g.of === name);
+function cloneEl(g) {
+  const p = isClone(g) && L().elements.find(e => e.name === g.of);
+  if (!p) return null;
+  const e = { ...p, name: g.name, workspace: g.workspace, x: g.x, y: g.y, cloneOf: p.name, cloneId: g.id };
+  for (const k of ['locked', 'visibility', 'hidden', 'integratedIn', 'integratedAs']) delete e[k];
+  if (g.locked) e.locked = true;
+  if (g.visibility === 'hidden') e.visibility = 'hidden';
+  return e;
+}
+// a Device or Widget by name, or a clone (drawn as its parent)
+const elNamed = n => L().elements.find(e => e.name === n) ?? cloneEl(L().graphics.find(g => isClone(g) && g.name === n));
+// the clone's name: the parent's name without its Tab ID, _C1 (_C2 ...), then this Tab's ID: MB_06_Pump_Wort__HS -> MB_06_Pump_Wort_C1__CE
+function cloneName(parent, tab, self) {
+  const L0 = draft || S.config, base = parent.replace(/__[A-Za-z]{2}$/, ''), id = L0.workspaces.find(w => w.name === tab)?.id;
+  const taken = n => L0.elements.some(e => e.name.toLowerCase() === n.toLowerCase()) || L0.graphics.some(g => g !== self && g.name && g.name.toLowerCase() === n.toLowerCase());
+  let i = 1, n;
+  do n = `${base}_C${i++}${id ? '__' + id : ''}`; while (taken(n));
+  return n;
+}
+function makeClone(p, tab, at) {
+  const D = TD(), g = { id: newId(), kind: 'clone', of: p.name, workspace: tab, x: at?.x ?? D.x, y: at?.y ?? D.y };
+  const busy = (x, y) => [...draft.elements, ...draft.graphics].some(o => o !== g && o.workspace === tab && o.x === x && o.y === y);
+  for (let n = 0; n < 50 && busy(g.x, g.y); n++) { g.x += 20; g.y += 20; }
+  g.name = cloneName(p.name, tab, g);
+  draft.graphics.push(g);
+  return g;
+}
+const realTab = name => !!name && L().workspaces.some(w => w.name === name && !w.build);
+// a node on the Tab: [kind, id] for selecting and Properties. A clone is moved and edited as its own graphic, never as its parent.
+const refOf = n => n.dataset.clone ? ['gfx', n.dataset.gid] : n.dataset.name ? ['el', n.dataset.name] : ['gfx', n.dataset.gid];
+
 function buildEl(e) {
-  const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : ''), 'data-name': e.name }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
+  const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : '') + (e.cloneId ? ' clone' : ''), 'data-name': e.name, ...(e.cloneId ? { 'data-clone': e.cloneOf, 'data-gid': e.cloneId, title: `Clone of ${e.cloneOf}` } : {}) }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
   if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
   if (vkKind(e) === 'list') {        // vKonstant List: pick the Text, the element gets that choice's Value
@@ -682,7 +720,7 @@ function buildEl(e) {
     h('button', { title: 'Stop', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'running', false); } }, '■'),
     h('button', { title: 'Reset', onclick: ev => { ev.stopPropagation(); setProp(e.name, 'value', '00:00:00'); } }, '↺'),
     h('button', { class: 'tmSet', title: 'Set the time (hh:mm:ss)', onclick: ev => { ev.stopPropagation(); timerSetDialog(e); } }, 'Set')));
-  if (editing) { editDeco(n, e); if (sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
+  if (editing) { editDeco(n, e); if (e.cloneId ? sel?.kind === 'gfx' && sel.id === e.cloneId : sel?.kind === 'el' && sel.id === e.name) n.classList.add('sel'); }
   fillEl(n, e);
   return n;
 }
@@ -751,7 +789,7 @@ function withLook(e, v) {
 // the Properties you just changed (the live value from the Brain only catches up after Save).
 const shownName = (e, v) => editing ? (e.displayName || e.name) : (v.displayname || e.name);
 function fillEl(n, e0) {
-  const v = S.values[e0.name] || {}, e = withLook(e0, v);
+  const v = S.values[e0.name] || (e0.cloneOf && { ...S.values[e0.cloneOf], visibility: e0.visibility, xposition: '', yposition: '' }) || {}, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;
@@ -891,7 +929,7 @@ const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator
 
 function updateEl(name) {
   const n = $(`#ws .el[data-name="${CSS.escape(name)}"]`);
-  const e = L().elements.find(x => x.name === name);
+  const e = elNamed(name);
   if (n && e) fillEl(n, e);
   const tn = !e && $(`#ws .gfx.txt[data-tname="${CSS.escape(name)}"]`), t = tn && L().graphics.find(g => g.kind === 'text' && g.name === name);
   if (t) fillText(tn, t);
@@ -921,7 +959,7 @@ function tapAction(e) {
     default: return 'none';
   }
 }
-const elByName = n => S.config.elements.find(x => x.name === n);
+const elByName = n => S.config.elements.find(x => x.name === n) ?? (!editing && cloneEl(S.config.graphics.find(g => isClone(g) && g.name === n))) ?? undefined;
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
 const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
@@ -1171,7 +1209,7 @@ function ipPoint(id, ws) {
   if (!id) return null;
   if (eqOfIp(id) !== null) return eqPort(id, ws)?.c || null;
   const pn = devOfIp(id);
-  if (pn !== null) { const e = L().elements.find(x => x.name === pn); if (!hasIps(e) || (ws && e.workspace !== ws)) return null; return devIps(e).find(q => q.id === id)?.c || null; }
+  if (pn !== null) { const e = elNamed(pn); if (!hasIps(e) || (ws && e.workspace !== ws)) return null; return devIps(e).find(q => q.id === id)?.c || null; }
   const g = L().graphics.find(g => g.kind === 'ip' && g.id === id && (!ws || g.workspace === ws));
   return g ? ipCenter(g) : null;
 }
@@ -1179,7 +1217,7 @@ function allIps(ws) {
   const vn = id => { const v = L().graphics.find(x => x.id === id); return v ? (v.name || v.label || '') + ' ' : ''; };
   const capped = cappedIps();
   return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws && !capped.has(g.id)).map(g => ({ id: g.id, label: (g.port ? vn(g.attachTo) + (g.label || g.id) : ipName(g)) })),
-    ...L().elements.filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e)),
+    ...[...L().elements, ...L().graphics.filter(isClone).map(cloneEl).filter(Boolean)].filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e)),
     ...L().graphics.filter(g => g.workspace === ws).flatMap(eqPorts)];
 }
 // ---- flow through the pipe network
@@ -1204,7 +1242,7 @@ function ipNode(id, ws) {
   if (q) return { key: `eq:${eqOfIp(id)}:${q.circuit}`, pass: true };
   const dn = devOfIp(id);
   if (dn !== null) {
-    const e = L().elements.find(x => x.name === dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
+    const e = elNamed(dn), on = isOn(dn), end = id.slice(id.lastIndexOf(':') + 1);
     // a tap water valve that is open is a source: water pushes out of its out end only (Fritz, 2026-10-21: one way; the tap end
     // takes nothing in), or out of both ends when it is set to Both
     if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === 'both' || tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
@@ -1421,7 +1459,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     renderWs(); return;
   }
   if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
-  sel = node.dataset.name ? { kind: 'el', id: node.dataset.name } : { kind: 'gfx', id: node.dataset.gid };
+  const [k0, id0] = refOf(node); sel = { kind: k0, id: id0 };
   let item = findItem(sel.kind, sel.id);
   const bundle = bundleOf(item);
   const own = item?.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo) : null;
@@ -1469,7 +1507,11 @@ $('#ws').addEventListener('pointermove', ev => {
     const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
     for (const q of drag.stubs) { q.p.points = q.pts.map(c => [c[0] + mx, c[1] + my]); q.end.x = q.ex + mx; q.end.y = q.ey + my; const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.end.id)}"]`); if (n) place(n, q.end); }
   }
-  if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
+  if (drag.mode === 'move') {
+    drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy);
+    const de = isClone(drag.item) ? cloneEl(drag.item) : drag.item;      // a clone is drawn as its parent, at its own place
+    place(drag.node, de.kind ? de : elGeom(de)); if (hasIps(de)) placeDevIps(de); if (de.kind === 'ip' || hasIps(de)) renderPipes();
+  }
   else if (drag.mode === 'resize') {
     const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
     drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx / k)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy / k)); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
@@ -1496,9 +1538,9 @@ $('#ws').addEventListener('dblclick', ev => {
   const node = ev.target.closest('.el,.gfx');
   const pipe = ev.target.closest('#pipes g');
   const unit = hitUnit && findItem('gfx', hitUnit);
-  if (pip) pip.dataset.eq ? editItem('gfx', pip.dataset.eq) : editItem('el', pip.dataset.dev);
+  if (pip) pip.dataset.eq ? editItem('gfx', pip.dataset.eq) : editItem(...refOf($(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`) || { dataset: { name: pip.dataset.dev } }));
   else if (node && unit && [unit.id, bundleOf(unit)?.id].includes(node.dataset.gid)) editItem('gfx', unit.id);   // the pointer was caught by its vessel
-  else if (node) editItem(node.dataset.name ? 'el' : 'gfx', node.dataset.name || node.dataset.gid);
+  else if (node) editItem(...refOf(node));
   else if (pipe) editItem('gfx', pipe.dataset.gid);
   else editWorkspace();      // an empty spot on the tab: Tab settings (name, background color and picture, size)
 });
@@ -1560,8 +1602,7 @@ const helpIcon = (topic, leave) => h('button', { type: 'button', class: 'helpIco
   onclick: ev => { ev.preventDefault(); ev.stopPropagation(); if (!leave || leave() !== false) openHelp(topic); } }, '?');
 function tabItemAt(target) {
   const pip = target.closest('.devip'), node = target.closest('.el,.gfx'), pipe = target.closest('#pipes g');
-  const kind = pip ? (pip.dataset.eq ? 'gfx' : 'el') : node ? (node.dataset.name ? 'el' : 'gfx') : pipe ? 'gfx' : null;
-  const id = pip ? pip.dataset.eq || pip.dataset.dev : node ? node.dataset.name || node.dataset.gid : pipe?.dataset.gid;
+  const [kind, id] = pip ? (pip.dataset.eq ? ['gfx', pip.dataset.eq] : ['el', pip.dataset.dev]) : node ? refOf(node) : pipe ? ['gfx', pipe.dataset.gid] : [null];
   const item = kind === 'el' ? L().elements.find(e => e.name === id) : kind ? L().graphics.find(g => g.id === id) : null;
   return item && { kind, item };
 }
@@ -1863,6 +1904,24 @@ $('#addEl').onclick = guard(async () => {
   useTabProfile(e);
   stackNew(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
+});
+// ⧉ Clone Device (Fritz, 2026-10-27): the list holds only Devices already placed on a Tab (not the Build Tab), and not the ones
+// already shown on this Tab. The Clone goes on this Tab with a name Skynet makes; its Visible, X and Y are its own.
+$('#cloneDev').onclick = guard(async () => {
+  const w = curWs();
+  if (!w || w.build) return toast('Go to the Tab the Clone should be on first. A Clone never goes on the Build Tab.', true);
+  const here = new Set([...draft.elements.filter(e => e.workspace === w.name).map(e => e.name), ...draft.graphics.filter(g => isClone(g) && g.workspace === w.name).map(g => g.of)]);
+  const list = draft.elements.filter(e => isDevice(e) && realTab(e.workspace) && !here.has(e.name)).sort((a, b) => a.name.localeCompare(b.name));
+  if (!list.length) return toast('There is no Device on another Tab to clone here.', true);
+  const work = { of: list[0].name };
+  const r = await dialog('Clone Device', [['_c', `A Clone shows a Device from another Tab on this Tab (${w.name}) too. It is the same Device: everything it shows and does is the parent's. Only its Visible, X and Y are its own, and its name is made by Skynet.`, 'note'],
+    ['of', 'Device to clone (Devices already placed on a Tab)', 'sel', list.map(e => [e.name, `${e.name}   (Tab ${e.workspace})`])]], work, false, ['cloned-devices', 'make-a-clone']);
+  if (r !== 'ok') return;
+  readFields(work);
+  const p = draft.elements.find(e => e.name === work.of); if (!p) return;
+  const g = makeClone(p, w.name);
+  sel = { kind: 'gfx', id: g.id }; renderWs();
+  toast(`${g.name} is a Clone of ${p.name}. Drag it into place.`);
 });
 // Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
@@ -2481,7 +2540,7 @@ function saveBuildDialog(b) {
 // a rename on top of a rename (A -> B -> C) is one rename A -> C; back to the first name is no rename
 function noteRename(from, to) {
   const first = [...draftRenames].find(([, now]) => now === from)?.[0] ?? from;
-  if (!S.config.elements.some(e => e.name === first)) return;     // added in this Edit layout: nothing uses it yet
+  if (!S.config.elements.some(e => e.name === first) && !S.config.graphics.some(g => isClone(g) && g.name === first)) return;     // added in this Edit layout: nothing uses it yet
   if (first === to) draftRenames.delete(first); else draftRenames.set(first, to);
 }
 // what Save tells you about the Processes that follow a renamed Device or Widget
@@ -2550,6 +2609,10 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 'Center' ? 'ed' : '') + ' justified'])];
 // field: [key, label, kind, options]
 const F = {
+  // Cloned Devices: only Visible, X and Y are its own (and the lock); the rest is set in its parent's Properties
+  clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Process uses it: ${it.name}.visible = false, ${it.name}.x = 200`, 'note'],
+    ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Turning the Clone on or off turns the parent and every Clone on or off.`, 'note'],
+    ['visibility', 'Visible (off = hidden on this Tab only; a Process: name.visible = true)', 'vis'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
   common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
     ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
@@ -3103,6 +3166,7 @@ function openTabProps(name) {
 }
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
+  let cloneTo = null;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
   if (unitOf) return editItem('gfx', unitOf.id);        // an IP of a Skynet Fitting or vessel: open it, its IPs have no settings of their own
   const bundle = isUnit(item) || isSkyV(item) ? null : bundleOf(item);   // a Skynet Fitting opens its Properties even when it sits on a bundled vessel
@@ -3126,14 +3190,17 @@ async function editItem(kind, id) {
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
       if (host) return toast(`${item.name} is built into ${host.label || host.name} (a Skynet_Integrated_Device), so it can't be taken out of it. Delete ${host.label || host.name} to delete it too.`, true);
-      if (!confirm('Delete this item?')) return;
+      const kids = kind === 'el' ? clonesOf(item.name, draft.graphics) : [];       // a Device's clones go with it
+      if (!confirm(kids.length ? `Delete ${item.name}? Its ${kids.length === 1 ? 'Clone' : kids.length + ' Clones'} (${kids.map(g => g.name).join(', ')}) go too.` : 'Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
-      const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : eqPorts(item).map(q => q.id);
+      const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
+      for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
+      draft.graphics = draft.graphics.filter(g => !kids.includes(g));
       if (type === 'vessel') {       // its own port IPs go with it; IPs that were only dropped on it stay
         for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === item.id)) {     // and the Tab_Fittings joined to it
           for (const g of draft.graphics) if (g.attachTo === f.id && g.port) gone.push(g.id);
@@ -3222,6 +3289,21 @@ async function editItem(kind, id) {
         for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) g[k] = g[k].replace(`dev:${item.name}:`, `dev:${work.name}:`);
       }
       if (hasIps(item) && !hasIps(work)) for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === item.name) delete g[k];
+      if (work.name !== item.name) for (const c of clonesOf(item.name, draft.graphics)) {      // its clones follow the new name
+        const was = c.name;
+        c.of = work.name; c.name = cloneName(work.name, c.workspace, c);
+        noteRename(was, c.name);
+        for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === was) g[k] = g[k].replace(`dev:${was}:`, `dev:${c.name}:`);
+      }
+      // Fritz, 2026-10-27: a Device that is already on a Tab, given another Tab, asks if it should be cloned there instead
+      if (isDevice(item) && work.workspace !== item.workspace && realTab(item.workspace) && realTab(work.workspace) && S.config.elements.some(x => x.name === item.name)) {
+        const has = clonesOf(item.name, draft.graphics).find(g => g.workspace === work.workspace);      // one Clone per Tab is enough
+        const a = has ? await choose(`${item.name} is already on the Tab ${item.workspace} and has a Clone on the Tab ${work.workspace} (${has.name}). Move ${item.name} itself to ${work.workspace}?`, [['No', 'no'], [`Move it to ${work.workspace}`, 'move']])
+          : await choose(`${item.name} is already on the Tab ${item.workspace}. Make a Clone of it on the Tab ${work.workspace}?`,
+            [['Yes, make a Clone', 'clone'], ['No', 'no'], [`Move it to ${work.workspace}`, 'move']]);
+        if (a === undefined || a === 'no') return editItem(kind, id);           // back to its Properties
+        if (a === 'clone') { cloneTo = work.workspace; work.workspace = item.workspace; }
+      }
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
@@ -3262,6 +3344,11 @@ async function editItem(kind, id) {
     if (type === 'ip' && before0 !== item.fitting) delete item.autoFit;   // a type picked by hand is kept
     giveName(item, draft.graphics);         // a new fitting type gets a matching name (IP_2 turned into a tee becomes Tee_1)
     if (kind === 'el') sel = { kind, id: item.name };
+    if (cloneTo) {         // its Clone goes on the other Tab (the Device stays where it was), and that Tab shows
+      const g = makeClone(item, cloneTo, { x: item.x, y: item.y });
+      wsName = cloneTo; sel = { kind: 'gfx', id: g.id };
+      toast(`${g.name} is a Clone of ${item.name} on the Tab ${cloneTo}.`);
+    }
     renderTabs(); renderWs();
     if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
   } catch (e) { toast(e.message, true); }
@@ -3287,6 +3374,7 @@ async function editWorkspace() {
     draft.workspaces = draft.workspaces.filter(x => x !== w);
     draft.elements = draft.elements.filter(e => e.workspace !== w.name);
     draft.graphics = draft.graphics.filter(g => g.workspace !== w.name);
+    draft.graphics = draft.graphics.filter(g => !isClone(g) || draft.elements.some(e => e.name === g.of));     // clones of Devices that were on it
     wsName = draft.workspaces[0].name;
   } else if (r === 'ok') {
     try {

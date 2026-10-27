@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
-import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf, CLONE_OWN } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
@@ -125,6 +125,8 @@ store.on('change', (name, prop, v) => {
   // a Momentary button's short "true" is sent at once so every screen sees the flash
   if (v === false && pending[name]?.[prop] === true) flush();
   (pending[name] ??= {})[prop] = plain(v);
+  // Cloned Devices: every clone of it shows the change too (except its own .visible, .hidden and place)
+  if (!CLONE_OWN.includes(prop)) for (const c of store.clonesOf(name)) (pending[c] ??= {})[prop] = plain(v);
 });
 setInterval(flush, 150);
 
@@ -447,9 +449,10 @@ async function route(req, res) {
     // renamed Devices and Widgets: old name -> new name, only names that were there and are there now (lib/renames.js)
     let renames = new Map();
     if (body.renames && body.elements) {
-      const now = new Set(body.elements.map(e => cleanName(e.name)));
+      const now = new Set([...body.elements, ...(body.graphics ?? []).filter(g => g.kind === 'clone')].map(e => cleanName(e.name)));
       renames = new Map([...renameMap(body.renames)].filter(([from, to]) => store.has(from) && now.has(to)));
       for (const el of body.elements) renameElementRefs(el, renames);     // settings that point to a renamed one (follow, input ...)
+      for (const g of body.graphics ?? []) if (g.kind === 'clone' && renames.has(g.of)) g.of = renames.get(g.of);   // Cloned Devices keep their parent
     }
     store.saveLayout({ ...body, renames });
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
