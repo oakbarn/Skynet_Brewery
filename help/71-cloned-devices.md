@@ -2,25 +2,29 @@
 
 In BruControl a Device could sit on only one worksheet, so showing the same pump on two screens took extra code and globals. In Skynet a Device can be shown on more than one Tab with a **Clone**.
 
-A Clone is **the same Device**, not a copy. It shows what its parent (the Device it was cloned from) shows, and anything done to the Clone is done to the parent. Turn a pump Clone on and the pump turns on, on every Tab. Turn the parent off and every Clone shows it off.
+A Clone is **the same Device**, not a copy. It shows what its parent (the Device it was cloned from) shows, and tapping it is tapping the parent:
+
+- A Clone of an on / off Device (a pump, a valve, an output) turns the parent on or off, and the parent and every Clone show it.
+- A Clone of a Device with **Enabled** (a PID, Hysteresis or Duty Cycle) turns it on or off the same way the parent does.
+- A Clone of a reading Device (a OneWire temperature probe, a sensor) only shows the reading, in the same format as the parent.
 
 ## Make a Clone
 
-There are two ways. Both are in **Edit layout** (Admins).
+The only way to make a Clone is the **⧉ Clone Device** button on the Edit layout bar (Admins). It works on any Tab, the 🔨 Build Tab too.
 
-1. **⧉ Clone Device** on the Edit layout bar. Go to the Tab the Clone should be on and press **⧉ Clone Device**. The list holds only Devices already placed on a Tab (not the Build Tab, and not the ones already on this Tab). Pick one and press **Save**. The Clone appears on this Tab; drag it into place.
-2. **Give a Device another Tab.** In a Device's Properties, pick another **Tab** for a Device that is already on a Tab. A box asks *"Make a Clone of it on that Tab?"*
-   - **Yes, make a Clone**: the Device stays where it is and a Clone goes on the other Tab, at the same spot. That Tab is shown.
-   - **No**: back to the Device's Properties.
-   - **Move it**: the Device itself moves to the other Tab (no Clone).
+1. Go to the Tab the Clone should be on (or the Build Tab) and press **⧉ Clone Device**.
+2. The list holds the Devices already placed on a Tab (not the ones already on this Tab), grouped by type: Pumps, Valves, Heat, Temperature probes, Other outputs, Motors, Inputs and sensors.
+3. Pick one and press **Save**. The Clone appears on the Tab; drag it into place.
+
+A Clone made on the Build Tab goes to a Tab with **Save Build**, like everything else built there.
 
 ## The Clone's name
 
-Skynet makes the name, and it can't be typed over: the parent's name without its Tab ID, then `_C1` (or `_C2` ...), then the Tab ID of the Clone's Tab.
+Skynet makes the name, and it can't be typed over: the parent's name, then `_Clone_` and a number.
 
-`MB_06_Pump_Wort__HS` cloned onto the Tab `CE` is `MB_06_Pump_Wort_C1__CE`.
+`MB_06_Pump_Wort__HS` cloned once is `MB_06_Pump_Wort__HS_Clone_1`, the next Clone of it is `MB_06_Pump_Wort__HS_Clone_2`.
 
-If the parent is renamed, its Clones follow, and Processes that use a Clone's name are changed too when you Save.
+If the parent is renamed, its Clones follow (`..._Clone_1` keeps its number).
 
 ## A Clone's Properties
 
@@ -34,18 +38,9 @@ Everything else (pictures, look, size, Interface, port, value, on and off) belon
 
 A pump or valve Clone has its own IPs, so pipes on its Tab can be drawn to it. Flow on that Tab follows the pump or valve, the same as the parent.
 
-## Clones in a Process
+## Clones and Processes
 
-A Clone's name works in a Process like the parent's name:
-
-```
-MB_06_Pump_Wort_C1__CE = true        // turns the pump on (the parent and every Clone show ON)
-MB_06_Pump_Wort_C1__CE.visible = false   // hides only this Clone
-MB_06_Pump_Wort_C1__CE.x = 400       // moves only this Clone (.xPosition works too)
-MB_06_Pump_Wort_C1__CE.y = 120       // .yPosition works too
-```
-
-`.visible`, `.hidden`, `.x` and `.y` belong to the Clone. Every other attribute is the parent's.
+A Clone is **not used in Processes**. A Process uses the parent's name, and every Clone shows what the Process did.
 
 ## Deleting
 
