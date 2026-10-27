@@ -237,11 +237,15 @@ function bundleOf(g) {
 }
 const bundledIps = v => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id);
 
-// Edit layout: a resize corner, or a padlock when the item is locked in place
+// Edit layout: resize grab points, or a padlock when the item is locked in place. Fritz, 2026-10-27: grab points on all four
+// corners and the middle of each side. The picked item shows all eight; the others only the bottom right corner, so a busy Tab
+// stays readable. Only unlocked items have them, on the Build Tab and on every other Tab.
+const RS_DIRS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+const RS_TIP = { n: 'top', s: 'bottom', e: 'right', w: 'left', nw: 'top left', ne: 'top right', se: 'bottom right', sw: 'bottom left' };
 function editDeco(n, o) {
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
   else if (o.bundled && !isUnit(o) && !isSkyV(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
-  else n.append(h('div', { class: 'rs' }));
+  else n.append(...RS_DIRS.map(d => h('div', { class: 'rs rs-' + d, 'data-rs': d, title: `Drag to make it bigger or smaller (${RS_TIP[d]})` })));
 }
 
 // Vessel widgets (app-only): electrically heated, gas heated, or an unheated mash tun. A background picture by path,
@@ -1386,7 +1390,7 @@ function setEditing(on) {
   $('#barEdit').classList.toggle('on', on); $('#barEdit').setAttribute('aria-pressed', String(on));
   $('#barEdit').title = on ? 'Leave Edit layout (asks to Save if something changed)' : 'Edit layout (admins): move, add and change things on the Tabs. Press again to leave it';
   const lockedEq = S.profiles?.find(p => p.id === S.config.workspaces.find(w => w.name === wsName)?.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, corner to resize, double-click (or hold a finger) for properties. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).';
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, drag a grab point (corners and side middles) to resize, double-click (or hold a finger) for properties. ➕ Add makes Valves, Pumps, Elements, Probes and Interfaces. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).';
   renderTabs(); renderWs();
 }
 
@@ -1437,7 +1441,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   }
   const riders = lockedRiders(item);
   if (riders.length) { drag = lockedDrag(item, p, riders); ev.preventDefault(); return; }
-  drag = { mode: !pip && !bundle && (!item.bundled || isUnit(item) || isSkyV(item)) && ev.target.classList.contains('rs') ? 'resize' : 'move', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
+  drag = { mode: !pip && !bundle && (!item.bundled || isUnit(item) || isSkyV(item)) && ev.target.classList.contains('rs') ? 'resize' : 'move', dir: ev.target.dataset?.rs || 'se', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
   if (item.kind === 'ip') drag.stubs = pipesOn(item.id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === item.id ? pp.to : pp.from, pp) })).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
@@ -1472,12 +1476,32 @@ $('#ws').addEventListener('pointermove', ev => {
   if (drag.mode === 'move') { drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item)) renderPipes(); }
   else if (drag.mode === 'resize') {
     const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
-    drag.item.w = Math.max(drag.item.kind === 'ip' ? 10 : 20, snap(drag.orig.w + dx / k)); drag.item.h = Math.max(drag.item.kind === 'ip' ? 10 : 16, snap(drag.orig.h + dy / k)); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
-  else if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
+    resizeBy(drag, dx, dy, k); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
+  if (drag.mode === 'move' || drag.mode === 'resize') showGeo(ev, drag.item);
+  if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
+// one grab point dragged: its sides move, the opposite sides stay where they are. A scaled Device is drawn k times its size
+// about its middle, so x and y move by what keeps the far side still on screen.
+function resizeBy(d, dx, dy, k) {
+  const it = d.item, o = d.orig, ip = it.kind === 'ip';
+  const axis = (pos, size, delta, lo, hi, min) => {
+    if (!d.dir.includes(lo) && !d.dir.includes(hi)) return [o[pos], o[size]];
+    const n = Math.max(min, snap(o[size] + (d.dir.includes(hi) ? delta : -delta) / k));
+    return [Math.round(o[pos] + (o[size] - n) * (d.dir.includes(lo) ? 1 + k : 1 - k) / 2), n];
+  };
+  [it.x, it.w] = axis('x', 'w', dx, 'w', 'e', ip ? 10 : 20);
+  [it.y, it.h] = axis('y', 'h', dy, 'n', 's', ip ? 10 : 16);
+}
+// X, Y, Width and Height beside the pointer while something is moved or resized (Fritz, 2026-10-27)
+const geoTip = h('div', { id: 'geoTip', class: 'geoTip hidden' });
+document.body.append(geoTip);
+function showGeo(ev, it) {
+  geoTip.textContent = `X ${Math.round(it.x || 0)}   Y ${Math.round(it.y || 0)}   W ${Math.round(it.w || 0)}   H ${Math.round(it.h || 0)}`;
+  geoTip.style.left = ev.clientX + 16 + 'px'; geoTip.style.top = ev.clientY + 16 + 'px'; geoTip.classList.remove('hidden');
+}
 window.addEventListener('pointerup', () => {
-  cancelLongPress();
+  cancelLongPress(); geoTip.classList.add('hidden');
   if (drag?.mode === 'move' && drag.item.kind === 'ip' && !isFitting(drag.item)) attachIp(drag.item);
   if (drag?.mode === 'move' && drag.moved) {      // a free Tab_Fitting (or its Start IP) dropped on a vessel port joins it
     const f = isBfit(drag.item) ? drag.item : drag.item.kind === 'ip' && drag.item.port === 'start' ? draft.graphics.find(x => x.id === drag.item.attachTo && isBfit(x)) : null;
@@ -1744,6 +1768,8 @@ const PRESETS = {
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'vKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
   },
+  // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
+  element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
   valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
@@ -1834,10 +1860,14 @@ function fillAddType() {
   $('#addType').innerHTML = '';
   $('#addType').append(...ADD_MENU.map(([group, items], gi) => h('optgroup', { label: group }, ...items.map((it, ii) => h('option', { value: gi + ':' + ii }, it[0])))));
 }
-$('#addEl').onclick = guard(async () => {
-  toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
+$('#addEl').onclick = guard(() => {
   const [gi, ii] = $('#addType').value.split(':').map(Number);
   const [, pick, prefix, extra] = ADD_MENU[gi][1][ii];
+  return addThing(pick, prefix, extra);
+});
+// make one new Device or Widget of the Add element list (or of the ➕ Add box) on the Build Tab and open its Properties
+async function addThing(pick, prefix, extra) {
+  toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   if (pick === 'integratedDevice') return newIntegratedDevice(extra.template);
   if (pick === 'thermowell') return newThermowell(extra.length);
   const preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
@@ -1863,7 +1893,77 @@ $('#addEl').onclick = guard(async () => {
   useTabProfile(e);
   stackNew(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
-});
+}
+// ➕ Add on the Edit layout bar (Fritz, 2026-10-27): the things added most, one click each, sorted the way a brewer thinks
+// of them: Valves, Pumps, Elements, Probes and Interfaces. Each goes on the 🔨 Build Tab first, its Properties open. Probe opens
+// a second box of its own (1-Wire, 10K NTC, RTD, Thermowell). The long Add element list keeps every other kind.
+const ADD_BOX = [
+  ['🚰 Valves', 'A Device is switched by a board pin. A Widget has no pin: you turn it by hand and tap it on the Tab to show open or closed.', [
+    ['Motorized valve (Device: a board pin opens and closes it)', 'valve', 'Valve'],
+    ['Proportional valve 0-100 % (Device: analog output)', 'propValve', 'PropValve'],
+    ['Manual valve (Widget: no pin, turned by hand)', 'ip:manualValve'],
+  ]],
+  ['⚙ Pumps', 'Pumps have an inlet and an outlet IP for pipes.', [
+    ['Pump, on / off (Device: relay or SSR on a board pin)', 'pump', 'Pump'],
+    ['Pump speed 0-100 % (Device: PWM output, e.g. a MOSFET module; set beside its Pump)', 'pwmOut', 'PWM', { units: '%' }],
+  ]],
+  ['🔥 Elements', 'Electric heating elements, and the Skynet items with an element built in.', [
+    ['Heating element, on / off (Device: relay, SSR or contactor)', 'element', 'DO'],
+    ['Heating element power 0-100 % (Device: PWM output)', 'pwmOut', 'PWM', { units: '%' }],
+    ['Holds a target temperature (PID)', 'pid', 'PID'],
+    ['On / off around a target (Hysteresis)', 'hysteresis', 'Hyst'],
+    ['On for a % of each cycle (Duty cycle)', 'dutyCycle', 'Duty'],
+    ['RIMS tube (Skynet_Integrated_Device: element and probe built in)', 'integratedDevice', 'RIMS', { template: 'RIMS_Tube' }],
+    ['Electric kettle, basic (Skynet_Integrated_Device: element and thermowell probe built in)', 'integratedDevice', 'Kettle', { template: 'Integrated_Electric_Kettle_Basic' }],
+  ]],
+];
+const PROBE_BOX = [
+  ['1-Wire', 'Many probes share one pin. Each probe is its own Device (virtual port 700-799).', [
+    ['DS18B20 (waterproof 1-Wire probe)', 'temperature', 'Temp', { sensor: 'ds18b20' }]]],
+  ['10K NTC', 'A thermistor on an analog pin. Pick the one that matches your probe; BruControl and BCS probes are Beta 3977.', [
+    ['10K NTC, Beta 3950', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
+    ['10K NTC, Beta 3977 (BCS-462 / BruControl type)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3977, series: 10000 }]]],
+  ['RTD', 'A PT100 or PT1000 on a MAX31865 board (SPI pins 50-52 and a CS pin, see Rule 6.9).', [
+    ['PT100 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt100', wires: 3 }],
+    ['PT1000 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt1000', wires: 3 }]]],
+  ['Thermowell (a Temperature Device built in)', 'A Skynet TC 1.5 thermowell with its probe already in it. The next box asks which kind of probe is in it.', [
+    ['Thermowell, Short', 'thermowell', 'Temp', { length: 'Short' }],
+    ['Thermowell, Medium', 'thermowell', 'Temp', { length: 'Medium' }],
+    ['Thermowell, Long', 'thermowell', 'Temp', { length: 'Long' }]]],
+];
+// a box of groups of buttons; one click picks one. Resolves to the picked row, or undefined for Cancel.
+function pickAdd(title, groups, more = []) {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'tplMini addBox' });
+    const close = v => { d.close(); d.remove(); res(v); };
+    d.append(h('h3', {}, title, ' ', helpIcon(['build-tab-add-button'], () => close(undefined))));
+    for (const [head, note, rows] of groups) d.append(h('b', {}, head), h('p', { class: 'muted' }, note),
+      h('div', { class: 'addBtns' }, ...rows.map(r => h('button', { type: 'button', onclick: () => close(r) }, r[0]))));
+    for (const [head, note, label, val] of more) d.append(h('b', {}, head), h('p', { class: 'muted' }, note),
+      h('div', { class: 'addBtns' }, h('button', { type: 'button', class: 'primary', onclick: () => close(val) }, label)));
+    d.append(h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => close(undefined) }, '✖ Cancel')));
+    d.oncancel = ev => { ev.preventDefault(); close(undefined); };
+    document.body.append(d); d.showModal();
+  });
+}
+async function addBox() {
+  const r = await pickAdd('➕ Add (it goes on the 🔨 Build Tab)', ADD_BOX, [
+    ['🌡 Probe', 'Temperature probes: 1-Wire, 10K NTC, RTD, or a Thermowell with its probe built in.', '🌡 Probe ...', 'probe'],
+    ['🔌 Interface', 'A board (Mega, ESP32, Pi ...). Devices sit on its pins, so add the Interface first.', '🔌 Add an Interface ...', 'iface']]);
+  if (!r) return;
+  if (r === 'iface') return addInterfaceFromBuild();
+  const row = r === 'probe' ? await pickAdd('🌡 Probe: pick its kind', PROBE_BOX) : r;
+  if (!row) return;
+  if (row[1] === 'ip:manualValve') return addIpFit('manualValve');
+  return addThing(row[1], row[2], row[3]);
+}
+// the Add Interface pop-up when the panel has one; otherwise the Devices page, at Add Interface (the Edit layout draft is kept)
+async function addInterfaceFromBuild() {
+  if (typeof addInterfaceDialog === 'function') return addInterfaceDialog();      // made by the Interfaces work; until then, the Devices page
+  setView('devices'); const el = $('#sec-addInterface'); if (el) showPart(el);
+  toast('Add the Interface here, then go back to Tabs: your Edit layout is still open.');
+}
+$('#addBox').onclick = guard(addBox);
 // Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
 // 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
@@ -2128,7 +2228,40 @@ function updLockBtn() {
   const b = $('#lockItem'); if (!b) return;
   const item = editing && sel ? findItem(sel.kind, sel.id) : null;
   b.disabled = !item; b.textContent = item?.locked ? '🔓 Unlock' : '🔒 Lock';
+  updTurnBar(item);
 }
+// Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
+// Skynet Fitting or Skynet vessel is picked (all six: the picture, its IPs and what is joined to it follow, as in its
+// Properties), or an IP fitting (turn only: its shape is the same flipped).
+const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
+function updTurnBar(item) {
+  const k = editing && !previewing ? turnKind(item) : '';
+  $('#turnBar').classList.toggle('hidden', !k);
+  for (const b of $$('#turnBar .flip')) b.disabled = k !== 'all';
+}
+function turnSel(op) {
+  const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
+  if (!k) return;
+  if (lockedRiders(g).length) return toast(`${g.label || g.name} has a 🔒 locked part, so it can't turn.`, true);
+  if (k === 'turn') { if (typeof op === 'number') g.rotate = String(((+g.rotate || 0) + op + 360) % 360); renderWs(); return; }
+  const before = clone(g), r = (typeof op === 'number' ? op : 0) * Math.PI / 180;
+  const M = op === 'h' ? [-1, 0, 0, 1] : op === 'v' ? [1, 0, 0, -1] : [Math.cos(r), -Math.sin(r), Math.sin(r), Math.cos(r)];
+  setOrient(g, mMul(M, orientM(g)));
+  if (isSkyV(g)) {
+    if (sideways(g) !== sideways(before)) {      // turned onto its side or back up: the box turns too, about its middle
+      const w = before.w || 200, hh = before.h || 200;
+      Object.assign(g, { w: hh, h: w, x: Math.round((before.x || 0) + (w - hh) / 2), y: Math.round((before.y || 0) + (hh - w) / 2) });
+    }
+    turnVesselParts(g, before);
+  }
+  placeUnitParts(g); renderWs();
+}
+$('#turnFlipH').onclick = () => turnSel('h');
+$('#turnFlipV').onclick = () => turnSel('v');
+$('#turnL90').onclick = () => turnSel(-90);
+$('#turnR90').onclick = () => turnSel(90);
+$('#turnL45').onclick = () => turnSel(-45);
+$('#turnR45').onclick = () => turnSel(45);
 // Lock holds in Edit layout too (Fritz, 2026-10-22): only unlocked items move. An unlocked item also stays put when moving it
 // would carry or bend a 🔒 locked one: a vessel's ports and joined fittings, a straight pipe's own end couplings, a pipe or hose joined to it.
 const lockName = o => o.name || o.label || (o.kind === 'pipe' ? (o.hose ? 'a hose' : 'a pipe') : o.kind === 'ip' ? 'an IP' : 'an item');
@@ -2256,14 +2389,15 @@ function pickVessel(title, groups) {
     document.body.append(d); d.showModal();
   });
 }
-$('#addIp').onclick = () => {
+$('#addIp').onclick = () => addIpFit($('#addIpType').value);
+function addIpFit(fit) {
   toBuild();
-  const fit = $('#addIpType').value, base = { point: 'IP', pipe: 'Pipe', cap: 'Cap', coupling: 'Coupling' }[fit] || FITTINGS[fit];
+  const base = { point: 'IP', pipe: 'Pipe', cap: 'Cap', coupling: 'Coupling' }[fit] || FITTINGS[fit];
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
   const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
-};
+}
 $('#addWs').onclick = () => {
   const n = prompt('New tab name'); if (!n) return;
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
@@ -4788,7 +4922,7 @@ function showPart(el) {
   });
 }
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
-$('#barEdit').onclick = guard(menuEditLayout);      // the red button (crossed hammers over a square) beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
+$('#barEdit').onclick = guard(menuEditLayout);      // the navy blue button (crossed hammers over a square) beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
 $('#barHelp').onclick = () => openHelp(pageTopic());      // the ? beside ☰ Menu on the Tabs bar (Fritz, 2026-10-22)
 $('#menuBtn').onclick = ev => { ev.stopPropagation(); const l = $('#menuList'), show = l.classList.contains('hidden'); renderMenu(); l.classList.toggle('hidden', !show); $('#menuBtn').setAttribute('aria-expanded', String(show)); };
 document.addEventListener('click', ev => { if (!ev.target.closest('.menuWrap')) { closeMenuList(); closeMenuCopies(); } });

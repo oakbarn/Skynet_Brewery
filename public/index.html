@@ -53,7 +53,8 @@
       <div class="menuWrap"><button id="menuBtn" class="menuBtn" title="Menu: Edit layout, profiles, recipes" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 4h14M3 8h14M3 12h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Menu</button><div id="menuList" class="menuList hidden" role="menu"></div></div>
     </div>
     <div id="editBar" class="bar edit hidden">
-      <select id="addType"></select>
+      <button id="addBox" class="primary" title="Add a Valve, Pump, Element, Probe or Interface: one click each. It goes on the 🔨 Build Tab.">➕ Add</button>
+      <select id="addType" title="Every kind of Device and Widget there is. Pick one, then press Add element. It is not tied to any Device: it only says what Add element makes next."></select>
       <button id="addEl">Add element</button>
       <button id="addImg">Add graphic</button>
       <button id="addText">Add text</button>
@@ -64,6 +65,14 @@
       <button id="drawPipe" title="Click points on the tab. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
       <button id="drawHose" title="A hose bends: click points for it to curve through. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling (an IP).">Draw hose</button>
       <button id="finishPipe" class="primary hidden">Finish pipe</button>
+      <span id="turnBar" class="turnBar hidden" title="Turn or flip the picked fitting or vessel. Its IPs and what is joined to it follow.">
+        <button id="turnFlipH" class="flip" title="Flip Horizontal (mirror left and right)">⇆ Flip H</button>
+        <button id="turnFlipV" class="flip" title="Flip Vertical (mirror top and bottom)">⇅ Flip V</button>
+        <button id="turnL90" title="Turn 90 degrees Left (counter-clockwise)">⟲ 90</button>
+        <button id="turnR90" title="Turn 90 degrees Right (clockwise)">⟳ 90</button>
+        <button id="turnL45" title="Turn 45 degrees Left (counter-clockwise)">⟲ 45</button>
+        <button id="turnR45" title="Turn 45 degrees Right (clockwise)">⟳ 45</button>
+      </span>
       <button id="lockItem" title="Lock or unlock the selected item so it cannot be dragged or resized" disabled>🔒 Lock</button>
       <button id="lockAll" title="Lock every item on this Tab in place. Then unlock single items with 🔒 Lock / 🔓 Unlock. It is an action, not a switch.">🔒 Lock All</button>
       <button id="unlockAll" title="Unlock every item on this Tab. It is an action, not a switch.">🔓 Unlock All</button>
