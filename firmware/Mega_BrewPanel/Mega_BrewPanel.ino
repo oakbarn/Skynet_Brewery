@@ -66,6 +66,7 @@ const uint8_t PWM_PINS[]    = {44, 45, 46};              // PWM outputs 0-100 % 
 const uint8_t AO_PINS[]     = {};                        // analog outputs: a PWM pin into a PWM-to-0-10V or 4-20mA module, e.g. {13}
 const uint8_t FLOW_PINS[]   = {};                        // pulse flow meters, interrupt pins only: 2, 3, 18, 19, 20, 21 (max 6)
 const uint8_t RTD_CS_PINS[] = {};                        // MAX31865 chip-select pins (PT100 / PT1000), SPI on 50/51/52, e.g. {48}
+// RTD CS pins may ONLY be D14-D17, D22-D39, D41-D43, D47-D49 or D53 (Skynet Rule 6.9, the panel refuses any other)
 const uint8_t TC_CS_PINS[]  = {};                        // MAX31856 / MAX31855 chip-select pins (thermocouples), SPI on 50/51/52, e.g. {49}
 const uint8_t ADS_CHANNELS[] = {0, 1, 2, 3};             // ADS1115 channels to report (only when USE_ADS1115 is 1)
 const uint8_t HX711_DT_PINS[]  = {};                     // HX711 boards: data (DT) pins, e.g. {26, 28}; the panel names a scale by these

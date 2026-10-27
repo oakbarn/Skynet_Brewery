@@ -60,7 +60,7 @@ More rules:
 
 Some probes share pins on the board. On an Arduino Mega with the Skynet sketch:
 
-- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT__HL`. The CS pin can be any free pin except 50, 51 and 52.
+- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT__HL`. For a **thermocouple** the CS pin can be any free pin except 50, 51 and 52. For an **RTD** (PT100 / PT1000, MAX31865 board) on an Arduino Mega the CS pin can **only** be **D14-D17, D22-D39, D41-D43, D47-D49 or D53** (Skynet Rule 6.9). Those pins are not PWM, counter, SPI, OneWire (40) or Ethernet shield (4, 10) pins. The pin list in the New Device box and in the RTD's Properties shows only those pins, and the panel refuses any other pin with a message.
 - **DS18B20 (OneWire) probes** all share one data pin, **pin 40**. Each probe gets its own virtual port 700-799 in its name instead.
 
 What the panel does:

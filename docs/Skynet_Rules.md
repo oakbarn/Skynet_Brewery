@@ -256,6 +256,12 @@ PR #4)
 is now a go (2026-10-27, thread "Build firmware for non-Arduino-IDE boards"). Every firmware keeps
 the same message language (docs/DEVICE_PROTOCOL.md) and the lost-link watchdog.
 
+6.9 **RTD chip-select (CS) pins on an Arduino Mega:** an RTD Device (PT100 / PT1000 on a MAX31865
+board) may ONLY use **D14-D17, D22-D39, D41-D43, D47-D49 or D53** for its CS pin. Those pins are not
+PWM, counter, SPI (50-52), OneWire (40) or Ethernet shield (4, 10) pins. The pin list offers only
+these, and the panel refuses any other pin. Thermocouples are not covered (yet).
+(2026-10-27, thread "Limit RTD CS pins on the Mega")
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -400,3 +406,4 @@ only when Fritz says the program is set. (2026-10-26)
 
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
+- 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
