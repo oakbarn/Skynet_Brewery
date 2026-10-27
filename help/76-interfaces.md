@@ -27,6 +27,7 @@ The pop-up asks:
 
 - The Interface ID (1 to 4 letters) **becomes part of the Suggested Name of every Device on this Interface**. It is the start of the name: a pump on pin 25 of the Interface **HS** is suggested as `HS_25_Pump_Wort__HS`.
 - It **must be unique**: no two Interfaces may have the same ID.
+- **Only an Admin can change it.** For everyone else the ID box on the Devices page is greyed out.
 - **Set it once and leave it.** Devices made before a change keep the old ID in their names, so a change leaves a mix of names. The panel asks before it changes the ID of an Interface that already has Devices.
 
 Left empty, the ID is the first letters of the Name (*Hot Side* = HS).
