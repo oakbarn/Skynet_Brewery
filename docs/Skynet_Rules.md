@@ -7,6 +7,8 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
 
 ## How Rules work
 
+- **Rule 0: in a new chat, open these Rules first and follow them.** Every new chat or thread
+  about Skynet reads this document before it does anything else. (2026-10-27)
 - **Every new thing is built to these Rules.** Before building anything for Skynet, read this
   document and follow it.
 - **When Fritz asks for something that breaks a Rule**, Claude tells him which Rule it breaks
@@ -398,5 +400,7 @@ only when Fritz says the program is set. (2026-10-26)
 
 ## Change log
 
+- 2026-10-27: Added Rule 0 at the top of "How Rules work": a new chat opens these Rules first and
+  follows them.
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
