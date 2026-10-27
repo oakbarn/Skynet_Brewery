@@ -15,3 +15,4 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Remote access](REMOTE_ACCESS.md) | Reaching the panel from outside the house. |
 | [MQTT and voice](MQTT_AND_VOICE.md) | MQTT and voice assistant hookups. |
 | [Device protocol](DEVICE_PROTOCOL.md) | The message language between the Brain and the boards. |
+| [Summary 1](Summary_1.md) | Summary of the project chat up to 2026-10-27: decisions, Rules, PRs, documents, open questions. |
