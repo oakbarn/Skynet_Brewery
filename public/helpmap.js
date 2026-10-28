@@ -10,7 +10,7 @@ const VIEWS = {
 export const viewTopic = v => VIEWS[v] || null;      // Help for the page you are on (the Help button)
 const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 
-// a device or widget element (the things added with Add element)
+// a device or widget element (the things added with Add Device / Widget)
 export function elementTopic(e) {
   if (!e) return null;
   if (e.integratedIn) return ['skynet-integrated-devices'];
@@ -27,7 +27,7 @@ export function elementTopic(e) {
     case 'vKonstant': return e.kind === 'list' ? ['variables', 'vkonstant-list-a-dropdown-on-a-tab'] : ['variables', 'vkonstant-kinds'];
     case 'vAPI': return ['variables', 'vapi-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
-    case 'picture': return ['picture-paths'];
+    case 'picture': return ['picture-widget', 'turns-on-with'];
     case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];
     case 'temperature': return e.sensor === 'ds18b20' ? ['devices', 'onewire-probes-ds18b20'] : DEVICE;
     default: return DEVICE;      // the other devices on a board pin: outputs, inputs, probes, sensors, flow meters, scales
@@ -51,6 +51,7 @@ export function graphicTopic(g) {
       return ['pipes-and-hoses', 'ips-only-show-in-edit-layout'];
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
+    case 'clone': return ['cloned-devices', 'a-clone-s-properties'];
     default: return ['text-boxes'];      // a text
   }
 }
@@ -64,12 +65,14 @@ const BAR = [
   ['#addBox', ['build-tab-add-button', 'the-add-button']],
   ['#addType, #addEl', ['build-tab-add-button', 'the-add-element-list-relay-module-ssr']],
   ['#turnBar', ['build-tab-add-button', 'turn-and-flip-a-fitting-or-vessel']],
+  ['#cloneDev', ['cloned-devices', 'make-a-clone']],
   ['#buildTab, #saveBuild, #previewBuild, #wsTabs .buildTab', ['build-tab']],
   ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
   ['#barHelp', ['help-window']],
   ['#barEdit', ['tabs', 'changing-the-layout-admins']],
   ['#simBar', ['simulation']],
+  ['#barSim', ['simulator-or-real-boards']],
   ['#soundBtn', ['alarms-and-sound']],
   ['#who', ['login']],
   ['#top', ['getting-started', 'finding-your-way']],
@@ -90,7 +93,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
   ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
-  graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }),
+  graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }), graphicTopic({ kind: 'clone' }),
   ...BAR.map(b => b[1])];
 
 // The yellow ? icons on the ☰ Menu tabs: a heading in a Menu tab goes to the Help part named for it ("_" = any other heading).

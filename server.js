@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
-import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
@@ -37,7 +37,8 @@ import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
-import { renameMap, renameInProcesses, renameElementRefs } from './lib/renames.js';
+import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
+import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
@@ -56,6 +57,7 @@ if (seeded.length) console.log(`First start: copied the samples into ${seeded.jo
 const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 // Names have no spaces any more: an older configuration is changed once (backups in config/backups and *.before-no-spaces.bak)
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
+useKeySecret(DATA);           // hidden keys: the browser only ever gets stand-ins for them (lib/keys.js)
 const store = new Store(CONFIG, DATA);
 store.load();
 // Old "X" visibility = hidden / hiddenlocked lines become X.visible = false (and X.hidden = true), once (*.before-hidden.bak)
@@ -69,6 +71,7 @@ const visFixed = visibilityOnDisk(SCRIPTS, n => store.get(n));
 }
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
+engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
 const hw = new Hardware(store);
 const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
@@ -157,7 +160,7 @@ const MIME = {
   '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4',
 };
 function send(res, code, body, type = 'application/json') {
-  const data = type === 'application/json' ? JSON.stringify(body) : body;
+  const data = type === 'application/json' ? JSON.stringify(body, keyReplacer) : body;     // hidden keys never leave the Brain (lib/keys.js)
   res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' });
   res.end(data);
 }
@@ -171,7 +174,8 @@ function readBody(req, limit = 10 * 1024 * 1024) {
     req.on('error', reject);
   });
 }
-async function jsonBody(req) { const t = await readBody(req); return t ? JSON.parse(t) : {}; }
+// a hidden key sent in from outside is thrown away; only Save layout may send the stand-ins it was given (lib/keys.js)
+async function jsonBody(req, keepRefs = false) { const t = await readBody(req); return t ? dropKeys(JSON.parse(t), keepRefs) : {}; }
 
 function sendFile(req, res, file) {
   fs.stat(file, (err, st) => {
@@ -213,11 +217,13 @@ function cleanDonation(d = {}) {
   };
 }
 
-// Autofill in the Process editor: every Device, Widget and Process name, each with its attributes
+// Predictive text in the Process editor: every Device, Widget and Process name, each with its attributes, and the Tab names.
+// Only names go out: never a hidden key (Rule 3.10). Clones are graphics, not elements, so they are never offered (Rule 4.4).
 function processWords() {
   return {
-    elements: store.list().map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el) })),
+    elements: store.list().map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
     processes: engine.names(),
+    tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
   };
 }
 
@@ -251,7 +257,7 @@ function browserConfig() {
   return { ...c, mqtt: { ...m, hasPassword: !!password } };
 }
 function mqttView() {
-  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, displayName: e.displayName ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
+  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, label: e.label ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
 }
 
 // The API has vAPI variables only (never Shared or vKonstant)
@@ -434,28 +440,40 @@ async function route(req, res) {
     return ok(res);
   }
   if (p === '/ui/layout' && m === 'PUT') {
-    const body = await jsonBody(req);
+    const body = await jsonBody(req, true);
+    // each item gets the hidden key of the item it stands for; a copy gets a new one and remembers its first item (lib/keys.js)
+    for (const list of ['elements', 'graphics', 'workspaces', 'devices']) if (Array.isArray(body[list])) claimKeys(body[list], store.config[list]);
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
+    // renamed items, found by their hidden key (Fritz, 2026-10-27): old name -> new name. Clones of a renamed item follow it.
+    const renames = new Map(), clones = new Map();
+    if (body.elements) {
+      const r = keyRenames(store.config.elements, body.elements);
+      const texts = new Set((body.graphics ?? store.config.graphics).filter(g => g.kind === 'text').map(g => g.name));
+      const c = followClones(body.elements, r, texts);
+      for (const m of [r, c]) for (const [a, b] of m) renames.set(a, b);
+      for (const [a, b] of c) clones.set(a, b);
+    }
+    if (body.graphics) {
+      const r = keyRenames(store.config.graphics, body.graphics), c = followClones(body.graphics, r);
+      for (const m of [r, c]) for (const [a, b] of m) if (!renames.has(a)) renames.set(a, b);
+      for (const [a, b] of c) clones.set(a, b);
+    }
     // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
     for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
     // an RTD on a Mega: chip-select (CS) pin only on D14-D17, D22-D39, D41-D43, D47-D49 or D53 (Skynet Rule 6.9, public/naming.js)
     for (const el of body.elements ?? []) { const bad = rtdPinError(el, body.devices ?? store.config.devices); if (bad) return fail(res, 400, bad); }
     // an Ethernet Mega: no Device on pin D10, its Ethernet shield's pin (Skynet Rule 6.10, public/naming.js)
     if (body.devices || body.elements) for (const d of body.devices ?? store.config.devices) { const bad = ethernetPinError(d, body.elements ?? store.config.elements); if (bad) return fail(res, 400, bad); }
-    // renamed Devices and Widgets: old name -> new name, only names that were there and are there now (lib/renames.js)
-    let renames = new Map();
-    if (body.renames && body.elements) {
-      const now = new Set(body.elements.map(e => cleanName(e.name)));
-      renames = new Map([...renameMap(body.renames)].filter(([from, to]) => store.has(from) && now.has(to)));
-      for (const el of body.elements) renameElementRefs(el, renames);     // settings that point to a renamed one (follow, input ...)
-    }
+    if (renames.size && body.elements) for (const el of body.elements) renameElementRefs(el, renames);     // settings that point to a renamed one (follow, input ...)
+    // the browser already changed what points to a name it renamed; a clone renamed here needs the same done on the Brain
+    if (clones.size) for (const g of body.graphics ?? store.config.graphics) renameGraphicRefs(g, clones);
     store.saveLayout({ ...body, renames });
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }
     const out = { ok: true };
     if (renames.size) {
-      out.renamed = [...renames].map(([from, to]) => ({ from, to }));
+      out.renamed = [...renames].map(([from, to]) => ({ from, to, clone: clones.has(from) }));
       out.processes = renameInProcesses(engine, renames);              // the scripts/ folder: shared by every Schema
       if (store.config.logSets) { store.config.logSets = store.config.logSets.map(s => renameElementRefs(s, renames)); store.writeConfig(); }
       out.otherSchemas = schemas.usingNames([...renames.keys()]);   // other Schemas that still have a Device or Widget by the old name
@@ -511,18 +529,22 @@ async function route(req, res) {
     return ok(res, { ok: true, ...out, ...applied });
   }
   // Config Editor (admin only, see needRole)
-  if (p === '/ui/config/open' && m === 'POST') { const b = backupConfigFile(store); return ok(res, { ok: true, text: fs.readFileSync(CONFIG, 'utf8'), backup: b.name, made: b.made, file: path.relative(ROOT, CONFIG) }); }
+  // The Config Editor never shows the hidden keys; on Save each item gets its key back by its name (lib/keys.js)
+  if (p === '/ui/config/open' && m === 'POST') { const b = backupConfigFile(store); return ok(res, { ok: true, text: stripKeysText(fs.readFileSync(CONFIG, 'utf8')), backup: b.name, made: b.made, file: path.relative(ROOT, CONFIG) }); }
   if (p === '/ui/config/check' && m === 'POST') return ok(res, { ok: true, problem: checkConfigText(await readBody(req, 16 * 1024 * 1024), DATA) });
   if (p === '/ui/config' && m === 'PUT') {
-    try { return ok(res, { ok: true, ...applyConfigText(await readBody(req, 16 * 1024 * 1024), { store, engine, hw, pictures, dataDir: DATA }) }); }
+    let text = await readBody(req, 16 * 1024 * 1024);
+    try { const problem = checkConfigText(text, DATA); if (problem) return ok(res, { ok: false, problem }); } catch { /* applyConfigText says what is wrong */ }
+    try { text = JSON.stringify(keepKeysByName(dropKeys(JSON.parse(text)), store.config), null, 2); } catch { /* not JSON: applyConfigText says so */ }
+    try { return ok(res, { ok: true, ...applyConfigText(text, { store, engine, hw, pictures, dataDir: DATA }) }); }
     catch (e) { if (e.problem) return ok(res, { ok: false, problem: e.problem }); throw e; }
   }
   if (p === '/ui/config/backups' && m === 'GET') return ok(res, listBackups(store));
   const cb = /^\/ui\/config\/backups\/([^/]+?)(\/restore)?$/.exec(p);
-  if (cb && m === 'GET' && !cb[2]) return ok(res, readBackup(store, cb[1]));
+  if (cb && m === 'GET' && !cb[2]) return ok(res, stripKeysText(readBackup(store, cb[1])));
   if (cb && m === 'POST' && cb[2]) {
     const r = applyConfigText(readBackup(store, cb[1]), { store, engine, hw, pictures, dataDir: DATA });
-    return ok(res, { ok: true, ...r, text: fs.readFileSync(CONFIG, 'utf8') });
+    return ok(res, { ok: true, ...r, text: stripKeysText(fs.readFileSync(CONFIG, 'utf8')) });
   }
   if (p === '/ui/samples' && m === 'GET') return ok(res, listSamples(SAMPLES));
   const smp = /^\/ui\/samples\/([\w-]+)\/load$/.exec(p);
@@ -536,7 +558,13 @@ async function route(req, res) {
   // Schemas: everyone sees the list, admins load, add, rename and delete
   const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
   if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
-  if (p === '/ui/schemas' && m === 'POST') { const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty }); return ok(res, schemaView()); }
+  if (p === '/ui/schemas' && m === 'POST') {
+    const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty });
+    // a new empty Schema (not a copy) has only its simulated New_Mega_2560_N: the whole panel goes to Simulator mode (Fritz, 2026-10-27)
+    const wasSim = sim.cfg.on;
+    if (b.empty && !wasSim) sim.save({ on: true });
+    return ok(res, { ...schemaView(), simulator: !!b.empty, wasSim, iface: b.empty ? store.config.devices[0]?.name : undefined });
+  }
   // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
@@ -544,7 +572,7 @@ async function route(req, res) {
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');
     if (sc[2] === 'backup' && m === 'POST') return ok(res, { ok: true, file: schemas.backupSchema(sc[1]) });
-    if (sc[2] === 'export' && m === 'GET') return ok(res, schemas.exportSchema(sc[1]));
+    if (sc[2] === 'export' && m === 'GET') return ok(res, dropKeys(schemas.exportSchema(sc[1])));     // the file you keep has no keys: a Schema loaded from it gets new ones
     if (sc[2] === 'backups' && m === 'GET') return ok(res, schemas.listBackups(sc[1]));
     if (sc[2] === 'restore' && m === 'POST') { const b = await jsonBody(req); schemas.restore(sc[1], b.file, { version: !!b.version }); return ok(res, schemaView()); }
     if (sc[2] === 'version' && m === 'POST') { const r = schemas.newVersion(sc[1]); return ok(res, { ...schemaView(), ...r }); }
@@ -625,7 +653,13 @@ async function route(req, res) {
     if (act === 'restart' && m === 'POST') return ok(res, await engine.restart(name, 'user'));
     if (act === 'order' && m === 'POST') { const { n } = await jsonBody(req); return ok(res, { order: engine.setOrder(name, n) }); }
     if (act === 'autorestart' && m === 'POST') { const { on } = await jsonBody(req); engine.setAutoRestart(name, !!on); return ok(res); }
-    if (act === 'rename' && m === 'POST') { const { to } = await jsonBody(req); engine.rename(name, to); return ok(res); }
+    if (act === 'rename' && m === 'POST') {          // the Process keeps its hidden key; the other Processes that start or stop it follow
+      const { to } = await jsonBody(req), from = cleanName(name), now = cleanName(to);
+      engine.rename(from, now);
+      const auto = store.config.autostart ?? [];
+      if (auto.includes(from)) { store.config.autostart = auto.map(n => n === from ? now : n); store.writeConfig(); }
+      return ok(res, { ok: true, processes: renameInProcesses(engine, new Map([[from, now]])) });
+    }
     if (!act && m === 'GET') { if (!engine.exists(name)) return fail(res, 404, 'No process ' + name); return send(res, 200, engine.read(name), 'text/plain; charset=utf-8'); }
     if (!act && m === 'PUT') {
       if (!engine.exists(name)) checkFileName(name, { ext: false, what: 'Process' });   // a new Process is the file scripts/<name>.txt (public/names.js)

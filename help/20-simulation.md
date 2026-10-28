@@ -2,7 +2,7 @@
 
 Simulation mode (the test mode) lets you try a whole brew day without touching any hardware. Processes, timers, alarms and the screen work exactly as on brew day, but no real heater, pump or valve is switched. Time can also run faster, or skip ahead, so you do not have to sit through a 60 minute mash to see what happens at minute 50.
 
-An admin turns it on in **Settings > Simulation**.
+An admin turns it on with the **🔌 Real / 🧪 Simulator** button beside ☰ Menu, from **☰ Menu > Switch to Simulator**, or in **Settings > Simulation** (Help: [Simulator or Real boards](77-simulator-or-real-boards)).
 
 ## What happens when you turn it on
 
@@ -33,7 +33,7 @@ The bar also shows what the next event is and how long until it.
 
 Turn on **Auto skip** (in Settings or the yellow bar) and the panel skips by itself, with no table to fill in. Each step runs for a few seconds (**Watch each step for**, 5 seconds unless you change it), then the clock skips to a few seconds before the next thing that happens by itself: a `sleep` ending, a timer reaching its time, or a countdown running out. It looks at every running Process, including ones another Process started and loopers.
 
-Only time is skipped. A wait on a screen button, a switch or a temperature is never skipped: press the button as on brew day, and auto skip carries on from there.
+Only time is skipped. A wait on a screen button or a switch is never skipped: press the button as on brew day, and auto skip carries on from there. A wait on a reading (a temperature, a level, a weight) is pretended reached after a set time while **Pretend readings are reached** is on (Help: [Simulator or Real boards](77-simulator-or-real-boards)), and auto skip jumps to it like any other event.
 
 ## Time jumps table
 

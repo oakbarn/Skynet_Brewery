@@ -3,7 +3,7 @@
 // Heating Devices on a network link are allowed with a warning (Fritz, 2026-10-26); the board turns all outputs OFF
 // when it hears nothing from the Brain for the Interface's "lost link" delay (user set, 3 to 600 s, default 10).
 
-export const BOARDS = [['mega', 'Arduino Mega'], ['esp32', 'ESP32'], ['other', 'Other Arduino-type board']];
+export const BOARDS = [['mega', 'Arduino Mega'], ['esp32', 'ESP32'], ['other', 'Other Arduino-type board'], ['pi', 'Raspberry Pi (its own GPIO pins)']];
 export const LINK_NAMES = { serial: 'USB', ethernet: 'Ethernet', esp32: 'WiFi', simulator: 'Simulator' };
 
 // level: best, good, ok, poor (best first)
@@ -20,6 +20,14 @@ const RANKS = {
   },
 };
 RANKS.other = RANKS.mega;
+// Raspberry Pi GPIO (firmware/Pi_GPIO, 2026-10-27): the Pi program is reached over the network only. On the Brain itself
+// (address 127.0.0.1 or localhost) nothing leaves the computer, so it is as safe as USB.
+RANKS.pi = {
+  serial: ['poor', 'Not used: the Raspberry Pi program connects by Ethernet. On the Brain itself use Ethernet with address 127.0.0.1'],
+  ethernet: ['good', 'Good: depends on the network. If the network fails the Pi turns all outputs OFF after the lost link delay'],
+  esp32: ['ok', 'OK: depends on the WiFi. If it drops the Pi turns all outputs OFF after the lost link delay'],
+};
+const onThisComputer = d => /^(127\.\d+\.\d+\.\d+|localhost|::1)$/i.test(String(d?.host || '').trim());
 
 // An Interface saved before boards were asked: guess from its name (an "ESP..." name is an ESP32, anything else a Mega)
 export const boardOf = d => d?.board || (/esp/i.test(d?.name || '') ? 'esp32' : 'mega');
@@ -34,6 +42,7 @@ export const isHeating = el => !!el && (['pid', 'hysteresis', 'dutyCycle'].inclu
 export function rating(d, heating = false) {
   const r = RANKS[boardOf(d)]?.[linkOf(d)];
   if (!r) return { level: '', text: '' };
+  if (boardOf(d) === 'pi' && linkOf(d) === 'ethernet' && onThisComputer(d)) return { level: 'best', text: 'Best: the Brain\'s own pins, no network in between' };
   if (heating && linkOf(d) === 'esp32') return { level: 'poor', text: 'Poor: a heating Device is on a WiFi link' };
   return { level: r[0], text: r[1] };
 }
@@ -42,7 +51,7 @@ export function rating(d, heating = false) {
 export function heatingLinkWarning(el, devices) {
   if (!isHeating(el) || !el.device) return '';
   const d = (devices || []).find(x => x.name === el.device);
-  if (!d || !['ethernet', 'esp32'].includes(linkOf(d))) return '';
+  if (!d || !['ethernet', 'esp32'].includes(linkOf(d)) || (boardOf(d) === 'pi' && onThisComputer(d))) return '';
   return `Warning: ${el.name} heats and ${d.name} is on ${linkOf(d) === 'esp32' ? 'WiFi' : 'Ethernet'}. If the link is lost, the board turns all outputs OFF after ${lostLinkSec(d)} s (set on the Devices page). USB is safest.`;
 }
 

@@ -39,7 +39,7 @@ assert.equal(store.config.title, 'BrewZilla');
 assert.equal(store.get('vKV_Setpoint'), undefined, 'its own elements');
 assert.ok(store.get('SoundPlayer'), 'the built-in Sound Player is added');
 assert.equal(store.config.mqtt.host, 'x', 'panel settings stay');
-assert.equal(store.config.devices.length, 0);
+assert.deepEqual(store.config.devices.map(({ _key, ...d }) => d), [{ name: 'New_Mega_2560_1', id: 'NM', type: 'simulator', board: 'mega' }], 'a new empty Schema starts with a pretend Mega (Fritz, 2026-10-27)');
 assert.throws(() => schemas.create('brewzilla'), /already a Schema/);
 
 // back to the first one: its elements and its saved values come back
@@ -101,6 +101,7 @@ assert.equal(r.took, true, 'a profile with no drawing takes what is on the tabs'
 assert.deepEqual(profiles.get(shared.id).graphics.map(g => g.id), ['g1', 'g2'], 'equipment and pipes in the profile');
 assert.deepEqual(JSON.parse(fs.readFileSync(schemas.file(first))).graphics.map(g => g.id), ['g3'], 'the Schema file keeps the rest');
 schemas.create('Second', { empty: true });
+assert.equal(store.config.devices[0].name, 'New_Mega_2560_1', 'the BrewZilla Schema (and its New_Mega_2560_1) was deleted, so 1 is free again');
 schemas.setProfile('Equipment', shared.id);
 assert.deepEqual(store.config.graphics.map(g => g.id).sort(), ['g1', 'g2'], 'a second Schema shows the shared drawing');
 assert.ok(store.config.workspaces.some(w => w.name === 'Equipment'));
@@ -164,6 +165,7 @@ assert.match(schemas.lock(true, 'Process Brew_Day'), /"Rig C", "Fermentation roo
 schemas.lock(false, 'fritz');
 // the same profile on a Tab of another Schema whose names are taken: the copy gets new ids and names, nothing clashes
 const third = schemas.create('Third', { empty: true });
+assert.equal(store.config.devices[0].name, 'New_Mega_2560_2', 'Second has New_Mega_2560_1, so the next number');
 store.saveLayout({ graphics: [{ id: 'f1', kind: 'vessel', vesselType: 'vessel', workspace: 'Main', name: 'FV1' }] });
 schemas.setProfile('Equipment', ferm.id);
 const put = store.config.graphics.filter(g => g.workspace === 'Equipment');
