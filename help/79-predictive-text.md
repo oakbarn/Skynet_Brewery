@@ -2,6 +2,10 @@
 
 The Process editor helps you write a Process by offering what can come next, the way a phone keyboard does. You can still type everything by hand; the list is only there to help. A beginner can write a whole Process just by picking from the list.
 
+## Turning it on and off
+
+The **Predictive text** switch is on the editor's tool row, next to **Colors**. It is on at first. Turned off, no list pops up by itself while you type, but **Ctrl+Space** and **💡 Suggest** still open the list when you ask for it. The switch is for you on this computer or phone only; other people keep their own choice.
+
 ## While you type
 
 As soon as you type a letter, a list pops up under the cursor with what fits:
