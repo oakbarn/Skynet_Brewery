@@ -34,7 +34,7 @@ Companion documents (look things up there, do not copy them here):
 | docs/Device_Library.md (project folder) | Every Device, its Type ID, ports, pins and settings |
 | docs/Widget_Library.md (project folder) | Every Widget, Template and their settings |
 | docs/Image_Library.md (project folder) | Every Skynet picture, its group and what uses it |
-| docs/BRUCONTROL_IMPORT_RULES.md (in the GitHub repo) | How a BruControl Schema should come into Skynet |
+| docs/Importing_Norms.md (project folder and GitHub repo) | Every change an import makes to bring things up to the Skynet way |
 | docs/Minimum_Equipment_and_Limitations.md (project folder) | What the boards can do today |
 
 ---
@@ -84,6 +84,10 @@ clean-up requests and standards", Help 72)
 Widgets; stay away from the word Element. A Picture Widget's dialog is "Picture Widget" (it was
 "Picture Element"), and every Properties title says "... Device" or "... Widget". The only exception
 is a real *heating element*. (2026-10-27, Help 74)
+
+1.15 **Position attributes are `.x_hPosition` and `.y_vPosition`** (x = horizontal, y = vertical, so
+nobody has to remember which). Typing `.x` or `.y` in the Process editor fills in the whole name, even with
+Predictive text off. The old `.xPosition` / `.yPosition` still work. (2026-10-28, PR #121, Help 49, 79)
 
 1.16 **gKonstant and gAPI** are the two variable classes (they were vKonstant and vAPI). Suggested
 name prefixes: **gK** for gKonstant (`gK_`, `gKS_`, `gKV_`, `gKB_`, `gKList_` ...) and **gA** for gAPI
@@ -151,7 +155,8 @@ overlay is the preferred way: see Rule 7.8.
 
 2.17 **Every dialog uses the same buttons, each an icon and its word:** ✖ Cancel (closes, saves
 nothing), 💾 Save (saves and closes), ✖ Close (a dialog with nothing to save), 🗑 Delete (asks
-first), ✔ OK (closes a message). (2026-10-27, thread "Add hidden keys so names can change")
+first), ✔ OK (closes a message). (2026-10-27, thread "Add hidden keys so names can change") The **Add Device** box
+uses **➕ Add Device** in place of Save. (2026-10-28)
 
 2.18 **Skynet Standard: Show label.** Every dialog that has a Label also has a **Show label**
 switch with it (Devices, Widgets, the New Device dialog, vessels, Tab_Vessels, Tab_Fittings,
@@ -169,6 +174,9 @@ eight grab points: the four corners and the middle of each side. The picked item
 the others only the bottom right corner. A small box shows X, Y, Width and Height while moving or
 resizing. Locked items have none (Rule 2.12). Works on the Build Tab and every Tab. (2026-10-27,
 thread "Improve the Build Tab add and resize tools", Help 75)
+
+2.21 **🗂 Schema is at the top of the ☰ Menu** (under Edit layout), one click to the Schema Menu
+tab. (2026-10-28, thread "Add sample Schemas to the Schema list")
 
 ## 3. Names and file names
 
@@ -246,9 +254,14 @@ to a Tab. (2026-10-23, PR #97 and PR #99)
 
 *Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
 
-4.2 **New Device order** (the BruControl way): 1 Interface, 2 Device Type, 3 Available Ports/Pins
-(only free ones that fit), then Label. Create puts it on the Build Tab and opens its Properties.
-(2026-10-23, PR #97)
+4.2 **New Device order** (the **Add Device** box, Fritz 2026-10-28): 1 Interface, 2 Available Ports/Pins
+(only free ones that fit), 3 Suggested Name, 4 Label (or **Show label** off), then Width and Height
+(**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the
+Interface only when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and
+the bottom; Add Device works once the Label is typed or Show label is off. The Device goes in the
+**middle of the Build Tab** (unless ☰ Menu > Default sets X and Y), and the rest of its Properties open.
+(2026-10-23, PR #97; 2026-10-28, Help 82)
+*Replaced:* 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
 4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
 back where it came from?". Save to Tab places the build in the center of the chosen Tab.
@@ -266,6 +279,19 @@ Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a re
 only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
 rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
 per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+
+4.5 **The Edit layout bar has three rows** (Fritz's layout, 2026-10-28, Help 82):
+- **Row 1, Devices:** **Select Device Type** (the major kinds: On/Off, Pumps, Valves, Heating Element,
+  PWM / Analog out, Inputs, Probe, Sensors, Motors, Weight) and **Add Device** (only that kind's Devices;
+  a Pump, Valve or on/off heating element is in On/Off too). Then the shortcuts **Pumps**, **Valves**,
+  **Probe**, **Heating Element** and **PWM**: one click shows only that kind's list, the same as picking
+  the kind and then Add Device. Then **⧉ Clone Device** (a list of the Devices on other Tabs).
+- **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕**, **Text ➕**, **Vessel**,
+  **Manual Valve ➕**, and **Add equipment ➕** at the far right.
+- **Row 2:** Draw pipe, Draw hose, **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
+  All, Unlock All, Tab settings, New tab, Build Tab, Preview, Save Build.
+- **Row 3:** the hint, Update Version, Save layout, Exit.
+*Replaced:* the ➕ Add box of PR #117 (2026-10-27).
 
 ## 5. Templates and Integrated items
 
@@ -490,10 +516,16 @@ to Simulator mode and says so, then opens the Interface pop-up to give it a mean
 the Skynet Home Brewery's 3 Megas Main_Brewery_HotSide, Valves, Fermentor) and set its Interface ID.
 A copy of a Schema keeps its Interfaces. (2026-10-27, Help 76)
 
+10.6 **A Sample Schema always comes in as a new Schema** (Schema dropdown > Add a Sample Schema, the
+☰ Menu > 🗂 Schema tab, or Settings): it never writes over one of yours. Every Interface in it gets
+Connection Simulator (its real connection is kept to switch to later), and the panel switches to
+Simulator mode and says so, so nothing real is switched. (2026-10-28, thread "Add sample Schemas to
+the Schema list", Help 83)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **81**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **84**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -519,8 +551,9 @@ Widget setting or Skynet Template is added, add it there, with a Change log line
 
 13.3 **Image Library**: see Rule 7.7. Never add a picture unless Fritz says so. (2026-10-27)
 
-13.4 **BruControl Import Rules** (docs/BRUCONTROL_IMPORT_RULES.md in the GitHub repo): every new
-import rule Fritz gives goes there. The importer itself waits for his go. (2026-10-23, PR #96)
+13.4 **Importing Norms** (docs/Importing_Norms.md in the project folder and the GitHub repo): every
+new import rule Fritz gives goes there. The importer itself waits for his go. (2026-10-23, PR #96;
+2026-10-28: was docs/BRUCONTROL_IMPORT_RULES.md, now in Importing Norms)
 
 13.5 **This Rules document**: every new or changed Rule goes here the same day. (2026-10-27)
 
@@ -536,6 +569,14 @@ only when Fritz says the program is set. (2026-10-26)
 14.2 **Compile check of firmware** inside the app: deferred. (2026-10-04)
 
 ## 15. Importing
+
+15.1 **Importing always updates to the Skynet way.** When anything old comes in (a BruControl
+Schema, or an older Skynet Schema or Process), every attribute, name and line of Process code is
+changed to the current Skynet word or style, even where the old way still works. A Process line that
+cannot be changed safely stays as it was and is listed in the import report. Each change is listed
+in docs/Importing_Norms.md. First norm: `.xposition` / `.yposition` become `.x_hPosition` /
+`.y_vPosition` (Rule 1.15), on the item and in every Process. (2026-10-28, thread "Start the
+Importing Norms document")
 
 15.2 **Everything conforms to the latest standard. Backward compatibility is not needed.** When a
 standard changes, existing Schemas, Processes, names and files are changed to it (with backups),
@@ -605,11 +646,14 @@ and vKonstant to gAPI and gKonstant")
   (Raspberry Pi GPIO pins); firmware open question answered.
 - 2026-10-28: Help 79 = Predictive text in the Process editor (thread "Add predictive text to the Process editor"); next free Help number 80.
 - 2026-10-28: Rule 9.7 (Unresolved PRs document) Replaced: Fritz dropped it; PR #113 closed unmerged.
-- 2026-10-27: Added Rule 2.17 (one button style on every dialog), Rule 3.10 (hidden keys) and
-  Rule 3.11 (locked names, Name Change pop-up); Rule 3.6 now covers keys, running Processes and
-  clones. Help 80; next free Help number 81. (thread "Add hidden keys so names can change")
-- 2026-10-27: Changed Rule 3.5: a clone (Parent_Name_Clone_N) follows its parent's rename; each clone
-  has its own hidden key but acts only through its parent's key. (Fritz's answer, thread "Add hidden keys so names can change")
+- 2026-10-28: Help 81 = Check a Process (🔍 Check button and Error dialog, thread "Check Process code for errors"); next free Help number 82.
+- 2026-10-28: Added Rule 1.15 (x_hPosition / y_vPosition). (thread "Add predictive text to the Process editor")
+- 2026-10-28: Added Rule 15.1 (importing always updates to the Skynet way); Rule 13.4 now points to docs/Importing_Norms.md. (thread "Start the Importing Norms document")
+- 2026-10-28: Rule 4.2 rewritten (Add Device box order, 150 x 150, middle of the Build Tab), added Rule 4.5 (the three-row
+  Edit layout bar; replaces PR #117's ➕ Add box), Rule 2.17 notes ➕ Add Device. Help 82; next free Help number 83.
+  (thread "Add Device and Widget type buttons to Edit layout")
+- 2026-10-28: Added Rule 10.6 (Sample Schemas come in as a new Schema on the simulator) and Rule 2.21 (🗂 Schema at the
+  top of the ☰ Menu). Help 83 = Add a Sample Schema; next free Help number 84. (thread "Add sample Schemas to the Schema list")
 - 2026-10-28: Added Rule 1.16 (vKonstant / vAPI renamed gKonstant / gAPI, prefixes gK / gA); Rule 2.6 says
   gKonstant List. Help 84; next free Help number 85. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Rule 1.16 now renames older vK_ / vA_ names; added Rule 15.2 (everything conforms to the latest
