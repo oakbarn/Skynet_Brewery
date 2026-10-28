@@ -47,6 +47,8 @@ Marks where flow starts or ends (a pump outlet, a vessel port, a drain). Pipes a
 Name prefixes Skynet gives: IP, Straight, Tee, Elbow, Elbow45, Cross, ManualValve, Coupling, Cap.
 A Manual valve Widget can be picked as the valve in a Bundled Fitting.
 
+**Snap to align** (2026-10-28, Help 86): in Edit layout, anything with IPs that is dragged so one of its IPs comes within 10 px of another IP on the Tab jumps so the two sit exactly on each other (hold Alt to place it without the jump). On Skynet valve pictures (motorized ball, manual ball, butterfly, gas solenoid) the two IPs sit on the picture's pipe ends, not the middle of the box's sides.
+
 ### Pipe and Hose
 Drawn between IPs. When a pump or powered valve on it is on, flow runs from the source, through the pump, into the Pipe or Hose.
 
@@ -353,3 +355,4 @@ Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB
 ## Change log
 - 2026-10-27: First version.
 - 2026-10-27: Display Name became Label (`label`) with a Show label switch; Picture became the Picture Widget with Turns on with; imagePath_2 / _3 editable again; On overlay preferred (thread "Apply clean-up requests and standards").
+- 2026-10-28: IP Snap to align (10 px) and IPs on the pipe ends of Skynet valve pictures (thread "Lock Skynet Widget Templates and IPs", Help 86).
