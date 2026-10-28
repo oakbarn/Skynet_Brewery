@@ -771,3 +771,16 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .vdNote { max-width: 34em; margin: 0 auto 10px; text-align: left; line-height: 1.4; }
 /* Interface settings only an Admin may change (Rule 3.2): greyed out for everyone else */
 #devBody input:disabled, #devBody select:disabled { background: #e0e0e0; color: #777; border-color: #bbb; cursor: not-allowed; opacity: 1; }
+
+/* 🔍 Check: the Error dialog of the Process editor */
+.checkDlg .ckWhere { font-weight: 600; }
+.checkDlg .ckWhere.error { color: var(--bad); }
+.checkDlg .ckWhere.warning { color: #c88a00; }
+.checkDlg .ckMsg { margin: 0; font-weight: 600; }
+.checkDlg .ckLabel { color: var(--muted); font-size: 0.9em; margin-top: 4px; display: block; }
+.checkDlg .ckCode, .checkDlg .ckEdit { font-family: ui-monospace, Consolas, monospace; margin: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); white-space: pre; overflow: auto; }
+.checkDlg .ckEdit { width: 100%; box-sizing: border-box; color: var(--text); }
+.checkDlg .ckFix { margin: 0; }
+.checkDlg .ckLine { width: 6em; }
+.checkDlg #ckDone ul { margin: 4px 0; padding-left: 20px; }
+.checkDlg #ckDone .ok { color: var(--ok); font-weight: 600; }

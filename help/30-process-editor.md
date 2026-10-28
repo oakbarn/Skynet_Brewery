@@ -110,7 +110,7 @@ Everyone can look in the Recycle Bin; only admins can restore or erase.
 The **Schema.json** page (admins only, on the Menu Bar; it was called **Config** before) shows the whole setup file, `config/brewery.json`, as text: tabs, Devices, Widgets, pipes, Interfaces and settings. It has the same **Find**, **Replace** and **Go to line**.
 
 - Opening it copies the file to `config/backups` first (no new copy when nothing changed).
-- **Check** tests the file the way the panel loads it at start-up and points at the line with a problem.
+- **🔍 Check** runs the Process in a checking mode (no waiting, nothing switched) and opens the Error dialog with each problem, a suggested fix and a box to fix it. See *Check a Process*.
 - **Save** checks it first and will not save a file the panel cannot load. Saving stops running Processes and reconnects the boards. The old file is copied to `config/backups` first.
 - **Save as .json file** saves a Schema as one `.json` file on this computer (see the Help page *Schema.json*).
 - **Backups** lists the copies. **Open** shows one in the editor (nothing changes until you press Save); **Restore** puts it back after asking.
