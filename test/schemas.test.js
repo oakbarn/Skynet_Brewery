@@ -39,7 +39,7 @@ assert.equal(store.config.title, 'BrewZilla');
 assert.equal(store.get('vKV_Setpoint'), undefined, 'its own elements');
 assert.ok(store.get('SoundPlayer'), 'the built-in Sound Player is added');
 assert.equal(store.config.mqtt.host, 'x', 'panel settings stay');
-assert.deepEqual(store.config.devices, [{ name: 'New_Mega_2560_1', id: 'NM', type: 'simulator', board: 'mega' }], 'a new empty Schema starts with a pretend Mega (Fritz, 2026-10-27)');
+assert.deepEqual(store.config.devices.map(({ _key, ...d }) => d), [{ name: 'New_Mega_2560_1', id: 'NM', type: 'simulator', board: 'mega' }], 'a new empty Schema starts with a pretend Mega (Fritz, 2026-10-27)');
 assert.throws(() => schemas.create('brewzilla'), /already a Schema/);
 
 // back to the first one: its elements and its saved values come back
