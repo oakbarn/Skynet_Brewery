@@ -537,6 +537,8 @@ function fillText(n, g) {
 }
 
 // variable classes: shared, vKonstant, vAPI (the old Global class is retired: lib/globals.js)
+// On screen they are gKonstant and gAPI (Fritz, 2026-10-28); the type in the Schema files stays vKonstant / vAPI.
+const CLASS_WORD = { vKonstant: 'gKonstant', vAPI: 'gAPI' };
 const isVarEl = e => ['shared', 'vKonstant', 'vAPI'].includes(e?.type);
 const isApiEl = e => e?.type === 'vAPI';
 const vkKind = e => e?.type === 'vKonstant' ? (e.kind || 'value') : null;
@@ -1976,7 +1978,7 @@ const WGT_TYPES = () => [
   ['vessels', 'Vessels', VESSEL_ROWS],
   ['equipment', 'Equipment (chillers, coils, filters)', EQUIP_ROWS()],
   ['fittings', 'Fittings and IPs (elbows, tees ...)', FIT_ROWS()],
-  ...['vKonstant', 'vAPI'].map(t => [t, `${t} variables`, amGroup(t).map(r => [r[0], () => addThing(r[1], r[2], r[3])])]),
+  ...['vKonstant', 'vAPI'].map(t => [t, `${CLASS_WORD[t]} variables`, amGroup(CLASS_WORD[t]).map(r => [r[0], () => addThing(r[1], r[2], r[3])])]),
 ];
 const VESSEL_ROWS = [['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
@@ -1994,8 +1996,8 @@ function pickRun(sel) {
   if (f) guard(f)();
 }
 function fillAddType() {
-  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
-  if (!ADD_MENU.some(([g]) => g.startsWith('vKonstant'))) ADD_MENU.push(vars('vKonstant', S.vkKinds), vars('vAPI', S.vapiKinds));
+  const vars = (type, ks) => [`${CLASS_WORD[type]} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
+  if (!ADD_MENU.some(([g]) => g.startsWith('gKonstant'))) ADD_MENU.push(vars('vKonstant', S.vkKinds), vars('vAPI', S.vapiKinds));
   const dev = DEV_TYPES(), wgt = WGT_TYPES();
   const types = (sel, head, list) => { const v = sel.value; sel.replaceChildren(h('option', { value: '' }, head), ...list.map(([k, t]) => h('option', { value: k }, t))); sel.value = v; };
   types($('#devKind'), 'Select Device Type', dev); types($('#wgtKind'), 'Select Widget Type', wgt);
@@ -3457,7 +3459,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { vKonstant: 'vKonstant', vAPI: 'vAPI', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const TYPE_TITLE = { ...CLASS_WORD, pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -4135,10 +4137,10 @@ try { $('#colorsOn').checked = localStorage.getItem(COLORS_KEY) !== 'off'; } cat
 function applyColors() { $('#code').closest('.codeWrap').classList.toggle('colored', colorsOn()); paintFind(); }
 $('#colorsOn').onchange = () => { try { localStorage.setItem(COLORS_KEY, colorsOn() ? 'on' : 'off'); } catch { } applyColors(); };
 applyColors();
-const KEY_SAMPLES = { cmd: 'if  wait  start  true', dev: 'Pump_Red  HLT_Temp', wid: 'tm_Mash  alm_Hops', vk: 'vKV_Strike', vapi: 'vAV_Mash_Temp', var: 'new value x', proc: 'start sub_Fill',
+const KEY_SAMPLES = { cmd: 'if  wait  start  true', dev: 'Pump_Red  HLT_Temp', wid: 'tm_Mash  alm_Hops', vk: 'gKV_Strike', vapi: 'gAV_Mash_Temp', var: 'new value x', proc: 'start sub_Fill',
   op: '=  +  -  <  and', str: '"Mash in"', num: '185.5  00:10:00', com: '// note  # note  /* note */', lab: '[Mash]  goto Mash', attr: 'tm_Mash.visible' };
 const KEY_WORDS = { elements: [{ name: 'Pump_Red', type: 'digitalOut' }, { name: 'HLT_Temp', type: 'temperature' }, { name: 'tm_Mash', type: 'timer' }, { name: 'alm_Hops', type: 'alarm' },
-  { name: 'vKV_Strike', type: 'vKonstant' }, { name: 'vAV_Mash_Temp', type: 'vAPI' }], processes: ['sub_Fill'] };
+  { name: 'gKV_Strike', type: 'vKonstant' }, { name: 'gAV_Mash_Temp', type: 'vAPI' }], processes: ['sub_Fill'] };
 $('#colorKey').onclick = () => {
   const box = $('#keyList'); box.innerHTML = '';
   for (const [c, label] of LEGEND) {
@@ -4413,7 +4415,7 @@ function renderCsvBox(names = csvNames) {
   const count = Object.fromEntries(names.map(n => [n.name, n.count]));
   $('#csvNames').innerHTML = '';
   $('#csvNames').append(...all.map(n => h('label', { class: 'toggle' }, h('input', { type: 'checkbox', value: n, ...((set ? set.names.includes(n) : ticked.has(n)) ? { checked: true } : {}) }), `${n} (${count[n] ?? 0})`)));
-  if (!all.length) $('#csvNames').append(h('span', { class: 'muted' }, 'Nothing has been written to the brew database yet. Give a vAPI variable a database trigger (Variables page).'));
+  if (!all.length) $('#csvNames').append(h('span', { class: 'muted' }, 'Nothing has been written to the brew database yet. Give a gAPI variable a database trigger (Variables page).'));
   $('#csvDelSet').disabled = !set;
 }
 const csvTicked = () => $$('#csvNames input:checked').map(c => c.value);
@@ -4880,7 +4882,7 @@ $('#donSave').onclick = guard(async () => {
 $('#donPreview').onclick = () => showDonate(true);
 
 // ---------------------------------------------------------------- MQTT and voice
-const TYPE_WORD = { vAPI: 'vAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
+const TYPE_WORD = { vAPI: 'gAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
 function renderMqttStatus() {
   const st = S.mqtt?.status ?? { state: 'off', text: 'MQTT is off' };
   const box = $('#mqttStatus'); box.className = 'mqtt-status ' + st.state; box.textContent = st.text;
@@ -5253,7 +5255,7 @@ function menuItems(list, go) {
 // for that role, the same as on the page.
 const PAGE_PARTS = {
   scripts: [['Find in all Processes', '#findAllBtn'], ['Recycle Bin (deleted Processes)', '#binBtn'], ['Color key', '#colorKey']],
-  globals: [['vAPI', '#sec-vapi'], ['vKonstant', '#sec-vkonstant'], ['Shared variables', '#sec-shared']],
+  globals: [['gAPI', '#sec-vapi'], ['gKonstant', '#sec-vkonstant'], ['Shared variables', '#sec-shared']],
   log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],

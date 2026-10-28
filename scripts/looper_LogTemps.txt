@@ -2,8 +2,8 @@
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 //Copies the kettle probe into a vAPI so the database can log it.
-//vAV_Kettle_Temp is set to log every 10 seconds (Variables page).
+//gAV_Kettle_Temp is set to log every 10 seconds (Variables page).
 [Loop]
-vAV_Kettle_Temp = BK_Temp
+gAV_Kettle_Temp = BK_Temp
 sleep 5000
 goto "Loop"

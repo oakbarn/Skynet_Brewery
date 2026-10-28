@@ -54,7 +54,7 @@ const npp = notepadPlusPlus(words, [text]);
 assert.match(npp, /<Keywords name="Keywords2">Pump<\/Keywords>/);
 assert.match(npp, /<Keywords name="Keywords5">x<\/Keywords>/);
 assert.match(npp, /<Keywords name="Comments">00\/\/ 00# 00' 01 02 03\/\* 04\*\/<\/Keywords>/);
-assert.match(notepadPlusPlus(), /Keywords3="yes".*\n[\s\S]*<Keywords name="Keywords3">vK<\/Keywords>/);
+assert.match(notepadPlusPlus(), /Keywords3="yes".*\n[\s\S]*<Keywords name="Keywords3">gK vK<\/Keywords>/);
 assert.equal(fs.readFileSync(new URL('../docs/Skynet_Process_Notepad++.xml', import.meta.url), 'utf8'), notepadPlusPlus(), 'docs file is up to date (node tools/notepadpp.js)');
 
 // ---- Recycle Bin: delete moves, restore asks for a free name, purge erases

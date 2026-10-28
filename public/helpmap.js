@@ -24,8 +24,8 @@ export function elementTopic(e) {
     case 'alarm': return ['alarms-and-sound'];
     case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
     case 'timer': return ['tabs', 'timers'];
-    case 'vKonstant': return e.kind === 'list' ? ['variables', 'vkonstant-list-a-dropdown-on-a-tab'] : ['variables', 'vkonstant-kinds'];
-    case 'vAPI': return ['variables', 'vapi-kinds'];
+    case 'vKonstant': return e.kind === 'list' ? ['variables', 'gkonstant-list-a-dropdown-on-a-tab'] : ['variables', 'gkonstant-kinds'];
+    case 'vAPI': return ['variables', 'gapi-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
     case 'picture': return ['picture-widget', 'turns-on-with'];
     case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];

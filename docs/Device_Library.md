@@ -4,7 +4,7 @@ A reference list of every Device the panel can make today, with its settings. Pa
 
 - **Read from:** the panel code on the default branch, version PR107_Skynet-v.20261026_23_23 (2026-10-27). PR #108 (connection ratings) was still open; its rules are in section 2 and marked "PR #108".
 - **Rule:** whenever a new unique Device is added to Skynet, this document gets a new entry.
-- **What counts as a Device:** a Device sits on a port (pin) of an Interface (a PLC board). Widgets (pictures, timers, alarms, switches on screen, pipes, IPs, vessels without Devices, vKonstants, vAPIs) are app-only and are not in this library.
+- **What counts as a Device:** a Device sits on a port (pin) of an Interface (a PLC board). Widgets (pictures, timers, alarms, switches on screen, pipes, IPs, vessels without Devices, gKonstants, gAPIs) are app-only and are not in this library.
 
 ---
 

@@ -85,6 +85,12 @@ Widgets; stay away from the word Element. A Picture Widget's dialog is "Picture 
 "Picture Element"), and every Properties title says "... Device" or "... Widget". The only exception
 is a real *heating element*. (2026-10-27, Help 74)
 
+1.16 **gKonstant and gAPI** are the two variable classes (they were vKonstant and vAPI). Suggested
+name prefixes: **gK** for gKonstant (`gK_`, `gKS_`, `gKV_`, `gKB_`, `gKList_` ...) and **gA** for gAPI
+(`gAS_`, `gAV_`, `gAT_`, `gADT_`, `gAB_`). Prefixes are hints, never required. Inside the Schema files
+the type stays `vKonstant` / `vAPI`, and older `vK..._` / `vA..._` names and the `/api/vapi` address
+keep working. (2026-10-28, thread "Rename vAPI and vKonstant to gAPI and gKonstant", Help 84)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -106,7 +112,7 @@ restated 2026-10-23, PR #94)
 day.
 
 2.6 **Choices with more than two answers are dropdowns.** A list that can grow ends with
-"Add new ...". Behind a dropdown sits a vKonstant List: the list shows text, Processes see the
+"Add new ...". Behind a dropdown sits a gKonstant List: the list shows text, Processes see the
 number (Value). (2026-10-04, PR #14)
 
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
@@ -595,3 +601,5 @@ only when Fritz says the program is set. (2026-10-26)
   clones. Help 80; next free Help number 81. (thread "Add hidden keys so names can change")
 - 2026-10-27: Changed Rule 3.5: a clone (Parent_Name_Clone_N) follows its parent's rename; each clone
   has its own hidden key but acts only through its parent's key. (Fritz's answer, thread "Add hidden keys so names can change")
+- 2026-10-28: Added Rule 1.16 (vKonstant / vAPI renamed gKonstant / gAPI, prefixes gK / gA); Rule 2.6 says
+  gKonstant List. Help 84; next free Help number 85. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")

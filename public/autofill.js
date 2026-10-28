@@ -12,7 +12,7 @@
 //    play -> alarms and sound players, show tab -> Tab names, goto -> labels in this Process, new -> the kinds of variable.
 //  - After = or == on something that is on/off (Pump_Red =, tm_Mash.visible ==) it offers true, false, on and off.
 //  - Ctrl+Space (or the 💡 Suggest button, for phones) opens the list even before a letter is typed, with only what can
-//    stand there: after if, wait, = or and, the variables, timers, vAPI, vKonstants, Devices, Widgets and Processes.
+//    stand there: after if, wait, = or and, the variables, timers, gAPI, gKonstants, Devices, Widgets and Processes.
 //  - Picking a command or a name opens the list of what can come next, so a whole line can be made by picking:
 //    if -> MB_06_Pump_Wort__HS -> == (or .state, .visible ...) -> true. The line ends there, so Enter makes a new line;
 //    Ctrl+Space then offers and / or to go on.
@@ -39,8 +39,8 @@ const PROCESS_ATTRS = ['running'];
 const TARGETS = { start: ['timer', 'alarm', 'soundPlayer'], stop: ['timer', 'alarm', 'soundPlayer', 'stepper'], reset: ['timer', 'stepper'], restart: [] };
 
 // the kind of each item, in the order a value list shows them
-const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'vAPI' ? [2, 'vAPI']
-  : e.type === 'vKonstant' ? [3, 'vKonstant'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
+const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'vAPI' ? [2, 'gAPI']
+  : e.type === 'vKonstant' ? [3, 'gKonstant'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
 
 // how well a name fits the letters typed: 0 = it starts with them, 1 = a part of it after a _ does, -1 = not at all
 export function fit(name, typed) {
@@ -161,14 +161,14 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     }
   } else {
     // a value: in an if, a wait, after = or an operator. Only what can stand there, in this order (Fritz, 2026-10-28):
-    // variables made in this Process, timers, vAPI, vKonstants, Devices, Widgets, Processes, then true / false / now / not
+    // variables made in this Process, timers, gAPI, gKonstants, Devices, Widgets, Processes, then true / false / now / not
     for (const [n, k] of declared) add(n + (/(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre) ? '' : ' '), `variable (${k})`, n);
   }
   // a name the line goes on after (if Pump ...) ends in a space and opens the next list; a value after = or == ends the line
   const isRhs = /(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre);
   const nsp = isRhs ? '' : ' ';
   const ranked = [...els].sort((a, b) => GROUP(a)[0] - GROUP(b)[0] || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));     // each kind A to Z
-  for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // vAPI, not vAPI (vAPI)
+  for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // gAPI, not gAPI (vAPI)
   for (const n of W.processes || []) add(n + nsp, 'Process', n);
   // and / or only after a value (if Pump == true an...)
   const afterValue = /\S\s+$/.test(pre) && !/(==|!=|<=|>=|<|>|=|\+|-|\*|\/|\(|\bif|\belseif|\bwait|\bnot|\band|\bor)\s*$/i.test(pre);
@@ -285,7 +285,7 @@ export function attachAutofill(ta, box, words, on = () => true) {
       const hits = attrs.filter(a => a.toLowerCase().startsWith(typed));
       if (!live && !(typed && hits.length === 1)) return close();
       const atStart = attrs !== PROCESS_ATTRS && /^\s*$/.test(line.slice(0, dot.index));     // a Process's attributes are read only: no " = "
-      // in an if or a wait the line goes on: if vK_Tulip.visible -> = == != ... -> true (lib/engine.js reads a single = there as ==)
+      // in an if or a wait the line goes on: if gK_Tulip.visible -> = == != ... -> true (lib/engine.js reads a single = there as ==)
       const inCond = /^\s*(if|elseif|else\s+if|wait)\b/i.test(line);
       const tail = atStart ? ' = ' : inCond ? ' ' : '';
       if (typed && hits.length === 1) {                       // only one fits: fill it in now

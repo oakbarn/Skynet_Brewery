@@ -19,7 +19,7 @@ The main value of each kind:
 - Digital Out, Switch, Digital In, Duty Cycle, Hysteresis: on or off (`true` / `false`)
 - Alarm: sounding or not (`true` / `false`)
 - Timer: its time
-- vKonstant and vAPI: their value
+- gKonstant and gAPI: their value
 - Temperature, Analog In and Out, PWM, PID, Scale: their reading or value
 - Flow meter: its flow rate
 
@@ -206,7 +206,7 @@ If you add a step in the middle, the numbers after it move up by themselves. Nev
 
 **Add steps** (next to Save) puts a step at the start of the Process and after every `[label]` that doesn't have one yet. Save afterwards to number them.
 
-While a Process runs, the Processes screen shows the step it is on. To show it on a tab, add a **vKonstant** with the kind **Step**. In its properties, **Shows the steps of** picks the class to follow (Flow unless you change it). It then shows, for example, `2.00003  Mash in`.
+While a Process runs, the Processes screen shows the step it is on. To show it on a tab, add a **gKonstant** with the kind **Step**. In its properties, **Shows the steps of** picks the class to follow (Flow unless you change it). It then shows, for example, `2.00003  Mash in`.
 
 ## Lock the Equipment Profile
 
