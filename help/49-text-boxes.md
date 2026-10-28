@@ -16,7 +16,7 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 | Back color | the color behind the text | `Pump_1.backColor = "#000000"` |
 | Alignment | Left, Centered or Right justified | `Text_1.alignment = "Center"` |
 | Width, Height | its size in pixels | `Text_1.width = 300` |
-| X and Y position | its place in pixels from the left and top of the Tab | `Text_1.xPosition = 400`, `Text_1.yPosition = 120` |
+| X and Y position | its place in pixels from the left and top of the Tab: **x** is **h**orizontal (across), **y** is **v**ertical (up and down). The old names `.xPosition` and `.yPosition` still work. | `Text_1.x_hPosition = 400`, `Text_1.y_vPosition = 120` |
 
 - **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). On a Text, switching it off keeps the text on one line, cut off at the edge.
 - **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
@@ -43,8 +43,8 @@ Text_1 = "Mashing at 152\degF"
 Pump_1.foreColor = "Red"
 Pump_1.backColor = "Black"
 BK_Temp.alignment = "Right"
-Text_1.xPosition = 400
-Text_1.yPosition = 120
+Text_1.x_hPosition = 400
+Text_1.y_vPosition = 120
 Text_1.width = 300
 Pump_1.foreColor = ""
 if Text_1.visible == true
