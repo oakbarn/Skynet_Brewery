@@ -51,6 +51,7 @@ export function graphicTopic(g) {
       return ['pipes-and-hoses', 'ips-only-show-in-edit-layout'];
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
+    case 'clone': return ['cloned-devices', 'a-clone-s-properties'];
     default: return ['text-boxes'];      // a text
   }
 }
@@ -61,6 +62,7 @@ const BAR = [
   ['#menuTabs', ['menu', 'menu-tabs']],
   ['.menuCopy', ['menu-everywhere']],
   ['.menuWrap', ['menu']],
+  ['#cloneDev', ['cloned-devices', 'make-a-clone']],
   ['#buildTab, #saveBuild, #previewBuild, #wsTabs .buildTab', ['build-tab']],
   ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
@@ -88,7 +90,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
   ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
-  graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }),
+  graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }), graphicTopic({ kind: 'clone' }),
   ...BAR.map(b => b[1])];
 
 // The yellow ? icons on the ☰ Menu tabs: a heading in a Menu tab goes to the Help part named for it ("_" = any other heading).
