@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Templates } from '../lib/templates.js';
-import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText, fittingPortStd, isCapOnly } from '../public/templates.js';
+import { nameProblem, copyName, bundleName, fittingEnds, cleanFitting, cleanVessel, stdText, fittingPortStd, isCapOnly, cleanDevice, applyDeviceTemplate, deviceFixed } from '../public/templates.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'templates-'));
@@ -148,4 +148,34 @@ console.log('templates ok');
   assert.equal(cleanVessel({ base: 'Bad Name!' }).base, undefined);
   T.save('vessel', 'My_Kettle', { ...u, notes: 'x' });
   assert.equal(T.get('vessel', 'My_Kettle').base, 'Kettle_W', 'kept on save');
+}
+
+// Skynet Device Templates (Rules 5.16, 5.17): the Motorized Ball Valve Master H and its Daughters VL and VR ship in templates/device
+{
+  const T = new Templates(path.join(ROOT, 'templates'), path.join(dir, 'own3'), { locked: false });
+  const ds = T.list('device'), H = ds.find(t => t.name === 'Skynet_Motorized_Ball_Valve_H'), VL = ds.find(t => t.name === 'Skynet_Motorized_Ball_Valve_VL'), VR = ds.find(t => t.name === 'Skynet_Motorized_Ball_Valve_VR');
+  assert.ok(H && VL && VR, 'Master H and Daughters VL, VR ship');
+  assert.ok(ds.every(t => t.cls === 'skynet'));
+  assert.equal(VL.props.subtype, 'valve', 'a Daughter inherits from its Master');
+  assert.equal(VL.props.orientation, 'v'); assert.equal(VR.props.flipH, true); assert.equal(H.props.flipH, undefined);
+  assert.deepEqual(VR.userFields, H.userFields);
+  assert.ok(T.view().device.length >= 3);
+  // fixed: Kind, Valve type, Service, pictures, look, tap; user settable: orientation, flips, Tap water, Text On/Off
+  const fx = deviceFixed(H);
+  for (const k of ['subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'look', 'tap', 'confirm', 'background', 'imagePath_2']) assert.ok(fx.has(k), k + ' fixed');
+  for (const k of ['orientation', 'flipH', 'tapwater', 'showOnOffText', 'name', 'w']) assert.ok(!fx.has(k), k + ' user settable');
+  // a User version sent with changed fixed attributes is put back; its picture follows its orientation
+  const el = applyDeviceTemplate({ name: 'V1', template: VL.name, templateCls: 'skynet', subtype: 'pump', service: 'gas', imageOn: 'x.png', look: 'led', background: 2, orientation: 'h', w: 50 }, VL);
+  assert.equal(el.subtype, 'valve'); assert.equal(el.service, 'room'); assert.equal(el.look, 'normal'); assert.equal(el.background, undefined);
+  assert.equal(el.orientation, 'h', 'orientation is the user\'s'); assert.equal(el.w, 50);
+  assert.match(el.imageOn, /Valve_Motor_Ball_OpenH\.svg$/);
+  assert.match(applyDeviceTemplate({ orientation: 'v' }, VL).imageOff, /ClosedV_LC\.svg$/);
+  // Tap water: off by default; the source end sets which end the water leaves by; unset = Needs setting (no tap flow)
+  assert.equal(H.props.tapwater, false);
+  assert.equal(applyDeviceTemplate({ tapwater: true, tapSource: 'in' }, H).tapwaterOut, 'out');
+  assert.equal(applyDeviceTemplate({ tapwater: true, tapSource: 'out' }, H).tapwaterOut, 'in');
+  assert.equal(applyDeviceTemplate({ tapwater: true }, H).tapwaterOut, 'none');
+  assert.equal(applyDeviceTemplate({ tapwater: false, tapSource: 'in', tapwaterOut: 'in' }, H).tapwaterOut, undefined);
+  // a Template can't make a fixed attribute user settable
+  assert.ok(!cleanDevice({ userFields: ['service', 'flipH'] }).userFields.includes('service'));
 }
