@@ -281,6 +281,20 @@ checks the slot every 10 seconds, and when a card is in, the panel shows "SD Car
 Remove the SD Card!" to everyone and on the Devices page. (2026-10-27, thread "Limit RTD CS pins on
 the Mega")
 
+6.12 **Firmware order and add-ons** (Fritz, 2026-10-27/28): 1 Raspberry Pi GPIO program, 2 board
+profiles with ready-made firmware for Uno, Nano, R4, GIGA, Opta and the others, loaded from inside
+Skynet (board on the Brain's USB, the Brain uploads, terminal-style box and serial monitor, Admin
+only), 3 Pi Pico. Every board is a daughter board (Interface) of the Brain like a Mega 2560; the Brain
+holds all logic. **Each add-on (OneWire, RTD, thermocouple, ADS1115, load cells, steppers, Ethernet)
+goes to every Arduino board**: one shared Skynet firmware, built with only the add-ons that
+Interface's Devices use so small boards fit. (thread "Build firmware for non-Arduino-IDE boards")
+
+6.13 **Raspberry Pi GPIO pins:** an Interface with Board "Raspberry Pi" runs `firmware/Pi_GPIO`.
+Pins are GPIO (BCM) numbers 2-27. GPIO 4 is kept for DS18B20 probes, GPIO 7-11 for SPI (RTD and
+thermocouple boards), GPIO 2-3 for I2C (ADS1115). No analog pins and no stepper motors on a Pi: the
+panel refuses them. On the Brain itself (address 127.0.0.1) the rating is Best. Same protocol and
+lost-link watchdog as every other board. (2026-10-28, Help 78)
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -415,9 +429,7 @@ only when Fritz says the program is set. (2026-10-26)
 9. **Bundled Devices on a vessel:** the plan to list bundled Devices in vessel Properties with Edit
    buttons was OK'd but not built yet.
 10. **BruControl import:** keep the strict Process check, or allow BruControl-style lenient start?
-11. **Firmware:** which comes first: Pi GPIO agent, Pi Pico, or ready builds for Mega/ESP32
-    (recommended: Pi GPIO agent)? (2026-10-27)
-12. **Still undecided from the check-up:** phone layout, Pi GPIO pins, PID temperature control.
+11. **Still undecided from the check-up:** phone layout, PID temperature control.
 
 ---
 
@@ -431,3 +443,5 @@ only when Fritz says the program is set. (2026-10-26)
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
+- 2026-10-28: Added Rules 6.12 (firmware order, add-ons on every board, loading from Skynet) and 6.13
+  (Raspberry Pi GPIO pins); firmware open question answered.

@@ -1,0 +1,13 @@
+# systemd service for the Skynet Pi GPIO program (install.sh puts it in place)
+[Unit]
+Description=Skynet Pi GPIO (the Pi's own pins as an Interface of the Skynet Brain)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/opt/skynet-pi-gpio
+ExecStart=/usr/bin/python3 /opt/skynet-pi-gpio/skynet_pi_gpio.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
