@@ -6,7 +6,7 @@ Processes are the automatic steps of a brew: open valves, run a pump, wait for a
 
 - The list on the left shows every process; a running one is marked. The small number in front of each one is its **Order**: type a new number to move it, and the others renumber themselves. See [Process Order](38-process-order).
 - **New**, **Rename**, **Delete** (admins).
-- **Save** and **Check** (admins). Check finds mistakes without starting the process.
+- **Save** and **🔍 Check** (admins). Check runs the Process in a checking mode, with no waiting and nothing switched, and shows each mistake with a suggested fix (see *Check a Process*).
 - **Start**, **Stop** and **Restart** (operators and admins). **Stop all** stops every process. Restart stops the process, clears its memory and starts it again from the top.
 - **Restart if it fails** (admins): start the process again by itself if it stops on an error. See *Restarting Processes*.
 - **Output** shows what processes print. Tick **all processes** to see every process's output.
