@@ -343,7 +343,23 @@ PR #47; PR #91)
 5.12 **Kettle pictures are empty:** no wort or liquid drawn, and no heating element drawn on a plain
 kettle. Each kettle has a plain and an _Electric version. (2026-10-22, 2026-10-23)
 
-5.13 **Manual valves** make a running Process wait for a "Done" pop-up. (2026-10-20, PR #44)
+5.13 **Manual valves** make a running Process wait. A valve Device with Valve type Manual waits for a "Done"
+pop-up (2026-10-20, PR #44). A **Manual Valve Widget** waits for a click on it on its Tab (Rule 5.15).
+
+5.14 **Pipe fittings are only what they are.** A tee is only a tee (no Top Tee, Suction Tee or other Type),
+an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their only settings are **.x, .y, .width and
+.height**, plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
+Width and Height are greyed out until it is switched off). No label, Type or Connection Standard; turning and
+flipping stay on the Edit layout bar's turn buttons (Rule 5.5). **Pipe fittings have no Clone.** Fittings that
+do more than join pipes (valves, check valves, flow meters, a tee with a thermowell) keep their settings.
+(2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
+
+5.15 **The Manual Valve is a special Widget class**: something of a pipe fitting (Autosize to pipe, .x .y .width
+.height) and a pseudo Device. Its **.state** is true (open) or false (closed) and **only a click on it on its
+Tab changes it**, at any time. A Process line `ManualValve_1.state = true` does **not** change it: it shows the
+warning to open it by hand, the valve blinks on its Tab, and the Process waits until someone clicks it to the
+state asked for. While open it shows the open overlay (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg).
+(2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
 
 ## 6. Devices, connections and safety
 
@@ -525,7 +541,7 @@ the Schema list", Help 83)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **84**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **88**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -658,3 +674,6 @@ and vKonstant to gAPI and gKonstant")
   gKonstant List. Help 84; next free Help number 85. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Rule 1.16 now renames older vK_ / vA_ names; added Rule 15.2 (everything conforms to the latest
   standard, no backward compatibility). The OakBarn BruControl sample is out of the shipped samples for now.
+- 2026-10-28: Added Rules 5.14 (pipe fittings: only .x .y .width .height and Autosize to pipe, no Clone) and 5.15
+  (Manual Valve Widget: only a click changes .state; a Process asks for it by hand); Rule 5.13 covers both kinds of
+  manual valve. Help 87; next free Help number 88. (thread "Simplify pipe fittings and Manual Valves")

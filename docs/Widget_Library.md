@@ -46,6 +46,32 @@ Marks where flow starts or ends (a pump outlet, a vessel port, a drain). Pipes a
 
 Name prefixes Skynet gives: IP, Straight, Tee, Elbow, Elbow45, Cross, ManualValve, Coupling, Cap.
 A Manual valve Widget can be picked as the valve in a Bundled Fitting.
+The table above is now for an **IP point** only. Pipe fittings and the Manual Valve have their own settings (below, 2026-10-28).
+
+### Pipe fitting Widgets (tee, 90° and 45° elbow, cross, straight piece, coupling, cap; and the Skynet Tee, Instrument_Tee, Elbow_90, Elbow_45, U_Bend, Reducer, End_Cap)
+A tee is only a tee: no Type, label or Connection Standard (Rule 5.14, Help 87). No Clone.
+
+| Setting | Notes |
+|---|---|
+| Name | Given by Skynet (Tee_1, bndl1_Tee_BR ...), shown, can't be typed |
+| Autosize to pipe (`autoSize`) | On by default: it takes the size of the pipes joined to its IPs (IP fittings: 5 x the pipe; Skynet fittings: body as thick as the biggest pipe, Template shape kept, only once a pipe is joined). Width and Height are greyed out while on. Not on an End Cap. |
+| X, Y | Not shown while it sits on a vessel port or an opening |
+| Width, Height | Only when Autosize to pipe is off |
+| Lock position | |
+
+Turning and flipping: the turn buttons on the Edit layout bar.
+
+### Manual Valve Widget (`kind: ip`, `fitting: manualValve`)
+A pipe fitting turned by hand and a pseudo Device (Rule 5.15, Help 87). Name ManualValve_1, ManualValve_2 ...
+
+| Setting | Notes |
+|---|---|
+| .state | true = open, false = closed. Only a click on it on its Tab changes it (Operators and Admins), at any time. Kept in the layout (`open`). A closed one stops flow. |
+| Label, Show label | The Label is used in the "by hand" message |
+| Autosize to pipe, X, Y, Width, Height, Lock position | As a pipe fitting |
+| Open overlay | Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, drawn on top while open (fixed) |
+
+In a Process: `ManualValve_1.state = true` (or `ManualValve_1 = true`) does not change it. It shows "✋ OPEN ... by hand, then click it on the ... Tab to confirm" at the top of every screen, the valve blinks, and the Process waits until it is clicked to that state. Reading it (`if ManualValve_1 == true`) works as for any Device.
 
 ### Pipe and Hose
 Drawn between IPs. When a pump or powered valve on it is on, flow runs from the source, through the pump, into the Pipe or Hose.
@@ -196,6 +222,7 @@ One unit: every opening has a two-way IP built in, nothing to set for the IPs. (
 |---|---|
 | Name, Label, Connection Standard | |
 | Valve / Flow meter / Probe pickers | Only the ones its fittings use |
+| (pipe fittings) | A Skynet Fitting that is only a tee, elbow, U, reducer or End Cap has just Name, Autosize to pipe, X, Y, Width, Height and Lock position (see Pipe fitting Widgets) |
 | Flip Horizontal, Flip Vertical, Rotate | Rotate in 45° steps |
 | Bundled | Same rule as the Skynet vessel |
 | Label look, Tab, X, Y, Width, Height, Lock position | When it sits on a vessel port it moves with the vessel instead |
@@ -353,3 +380,4 @@ Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB
 ## Change log
 - 2026-10-27: First version.
 - 2026-10-27: Display Name became Label (`label`) with a Show label switch; Picture became the Picture Widget with Turns on with; imagePath_2 / _3 editable again; On overlay preferred (thread "Apply clean-up requests and standards").
+- 2026-10-28: Pipe fitting Widgets (only X, Y, Width, Height and Autosize to pipe; no Clone) and the Manual Valve Widget (click-only .state, Process asks by hand, open overlay) (thread "Simplify pipe fittings and Manual Valves", Help 87).

@@ -29,3 +29,5 @@ When the line runs, every screen shows **✋ Manual valve: OPEN Kettle outlet by
 - You can take out the old lines that asked for a manual valve some other way (a message and a wait), because this pop-up does the same job.
 
 A Brew Day Equipment Profile, where you change a valve to Manual for one brew day without changing the Equipment Profile, is coming with the Brew Day.
+
+A **Manual Valve Widget** (a valve drawn on a Tab, with no board pin) works another way: a click on it on its Tab is the only thing that opens or closes it, and a Process waits for that click. See [Pipe fittings and Manual Valves](87-pipe-fittings-and-manual-valves).
