@@ -52,7 +52,7 @@ export function fit(name, typed) {
 // commands that take something after them: the pick ends in a space and the next list opens by itself
 const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'log',
   'new value', 'new string', 'new bool', 'new time', 'new datetime']);
-const COMPARE = [['== ', 'is equal to'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
+const COMPARE = [['= ', 'is equal to'], ['== ', 'is equal to (the same as =)'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
 const SET = [['= ', 'set it to'], ['+= ', 'add to it'], ['-= ', 'take from it'], ['++', 'add 1']];
 const MATH = [['+ ', ''], ['- ', ''], ['* ', ''], ['/ ', '']];
 const JOIN = [['and ', 'both must be true'], ['or ', 'one must be true']];
@@ -280,16 +280,19 @@ export function attachAutofill(ta, box, words) {
       if (!attrs) return close();
       const hits = attrs.filter(a => a.startsWith(typed));
       const atStart = attrs !== PROCESS_ATTRS && /^\s*$/.test(line.slice(0, dot.index));     // a Process's attributes are read only: no " = "
+      // in an if or a wait the line goes on: if vK_Tulip.visible -> = == != ... -> true (lib/engine.js reads a single = there as ==)
+      const inCond = /^\s*(if|elseif|else\s+if|wait)\b/i.test(line);
+      const tail = atStart ? ' = ' : inCond ? ' ' : '';
       if (typed && hits.length === 1) {                       // only one fits: fill it in now
-        const tail = atStart ? ' = ' : '';
         close();
         insert(p - typed.length, hits[0] + tail);
         skip = { pos: ta.selectionStart, rest: hits[0].slice(typed.length) + tail };
+        if (inCond) update(true);                             // and show what can come next
         return;
       }
       const el = words()?.elements?.find(e => e.name === name);
       const hint = a => a === el?.main ? 'the same as the name alone' : el?.bools?.includes(a) ? 'true or false' : '';
-      return show(hits.map(a => ({ text: a + (atStart ? ' = ' : ''), label: a, hint: hint(a) })), p - typed.length, 'attr');
+      return show(hits.map(a => ({ text: a + tail, label: a, hint: hint(a) })), p - typed.length, 'attr');
     }
     const s = suggest(line, words(), ta.value.slice(0, p), ta.value, forced);
     if (!s) return close();
