@@ -54,4 +54,4 @@ Open shows red lightning bolts on the motor; closed shows a ring on the valve bo
 
 The pictures come in **pairs**. Pick the closed (or off) one that matches how the valve is installed, and its open (or on) partner fills in by itself. This works the other way round too, for any picture whose name has Closed/Open or Off/On in it (for example Pump_Off.png and Pump_On.png), as long as the partner is in your pictures.
 
-You pick the Valve Profile **only when you make a new valve**: in Edit layout, **Add Device / Widget > Valve**, and the panel asks which Valve Profile to start from (the **Default** Menu tab sets the one picked first). After that, the valve is changed in its own properties, where **Orientation** and the graphics can be set again.
+You pick the Valve Profile **only when you make a new valve**: in Edit layout, **Valves > Motorized valve**, and the panel asks which Valve Profile to start from (the **Default** Menu tab sets the one picked first). After that, the valve is changed in its own properties, where **Orientation** and the graphics can be set again.
