@@ -1,6 +1,6 @@
 # Schemas and Equipment Profiles
 
-A **Schema** is one whole brewery setup: its tabs, devices, elements, pipes and the **Equipment Profile** each of its Tabs uses. You can keep as many Schemas as you like, for example one for the 10 gallon system and one for the BrewZilla. Each Schema is kept in its own file on the Brain, in `config/schemas`.
+A **Schema** is one whole brewery setup: its tabs, Devices, Widgets, pipes and the **Equipment Profile** each of its Tabs uses. You can keep as many Schemas as you like, for example one for the 10 gallon system and one for the BrewZilla. Each Schema is kept in its own file on the Brain, in `config/schemas`.
 
 An **Equipment Profile** describes your brewing equipment: the losses, the efficiency, the vessels and other equipment it is built from **and its piping** (its Default Layout). Profiles live on their own, so **any Schema can use any profile**. A profile used by one Tab is **unique**. A profile used by several Schemas is **shared**, and a change to it changes all of them.
 
@@ -17,7 +17,7 @@ Only an **Admin** can load, add, rename, back up, restore or delete a Schema, or
 1. The **Schema** dropdown is on the Menu Bar, next to the panel's name, and also on **☰ Menu > Schema** and **☰ Menu > About**. It shows the Schema that is loaded now.
 2. Pick another Schema in the list.
 3. The panel asks if you want to load it, with a ⚠ warning if any Process is running. Press **OK**.
-4. Running Processes stop, every output is switched off, and the new Schema's tabs, devices and elements take over. The one you left is kept just as it was. Pick it in the list to go back to it.
+4. Running Processes stop, every output is switched off, and the new Schema's tabs, Devices and Widgets take over. The one you left is kept just as it was. Pick it in the list to go back to it.
 
 Each Schema remembers its own variable values (vKonstants, vAPI), so they come back when you load it again.
 

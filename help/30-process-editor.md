@@ -95,7 +95,7 @@ Everyone can look in the Recycle Bin; only admins can restore or erase.
 
 ## The Schema.json editor (admins)
 
-The **Schema.json** page (admins only, on the Menu Bar; it was called **Config** before) shows the whole setup file, `config/brewery.json`, as text: tabs, elements, pipes, devices and settings. It has the same **Find**, **Replace** and **Go to line**.
+The **Schema.json** page (admins only, on the Menu Bar; it was called **Config** before) shows the whole setup file, `config/brewery.json`, as text: tabs, Devices, Widgets, pipes, Interfaces and settings. It has the same **Find**, **Replace** and **Go to line**.
 
 - Opening it copies the file to `config/backups` first (no new copy when nothing changed).
 - **Check** tests the file the way the panel loads it at start-up and points at the line with a problem.

@@ -22,7 +22,7 @@ A **PID** or **Hysteresis** heating element holds the temperature that its own p
 
 ### Its Properties
 
-Double-click the RIMS tube in Edit layout. Besides the usual Name, Display Name, Flip, Rotate and place settings it has:
+Double-click the RIMS tube in Edit layout. Besides the usual Name, Label, Show label, Flip, Rotate and place settings it has:
 
 - **Interface**: the board it is wired to.
 - **Heating element**: its **Control** (PID, Hysteresis, Duty Cycle or PWM), its Port, and all of that control's own settings (for a PID: Target, Kp, Ki, Kd, Max output and so on). Change the Control and the settings below it change to match.

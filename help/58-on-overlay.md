@@ -2,9 +2,13 @@
 
 Instead of two pictures (one for **On**, one for **Off**), an item can keep **one picture** and show a small picture **on top of it** while it is On, for example a lightning bolt. The picture underneath stays visible.
 
+**Overlay when On is the preferred way** in Skynet (a Skynet Standard, 2026-10-27): one picture plus an On overlay. Two pictures are still allowed for the cases that need them. This is new in Skynet; BruControl never had it. In the Properties the overlay comes right after the picture, and the second picture (**Picture when on**) comes last, marked optional.
+
 ## Which items have it
 
-Every Device or Widget that has **Picture when on** and **Picture when off** (see On and Off pictures) also has **On overlay**, right below them. That is Digital Outputs (pumps, valves, burners, elements ...), Digital Inputs, Switches, Alarms (shown while sounding), PWM and Analog Outputs, PID, Duty Cycle, Hysteresis, Timers, Steppers, Flow meters, Sound Players and a Picture that follows another item.
+Every Device or Widget that has **Picture when on** and **Picture when off** (see On and Off pictures) also has **On overlay**, right below them. That is Digital Outputs (pumps, valves, burners, elements ...), Digital Inputs, Switches, Alarms (shown while sounding), PWM and Analog Outputs, PID, Duty Cycle, Hysteresis, Timers, Steppers, Flow meters, Sound Players and a Picture Widget that turns on with another item.
+
+**Heaters are On while Enabled.** A PID, Hysteresis or Duty Cycle counts as On from the moment it is Enabled until it is Disabled, not only while its output fires. Its overlay (or second picture) shows the whole time it is Enabled, and so does a vessel's heater glow and a Picture Widget that turns on with it.
 
 ## Setting it up
 

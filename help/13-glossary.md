@@ -2,7 +2,7 @@
 
 **Admin, Operator, Viewer**: the three user roles. See [Login](10-login).
 
-**Alarm**: an element that plays a sound file: Hop, Brew Flow, Pre-Hop, General or Sound only. Only one sound plays at a time, by priority. In a Process: `alm_Name = true`. See [Alarms and sound](21-alarms-and-sound).
+**Alarm**: a Widget that plays a sound file: Hop, Brew Flow, Pre-Hop, General or Sound only. Only one sound plays at a time, by priority. In a Process: `alm_Name = true`. See [Alarms and sound](21-alarms-and-sound).
 
 **Sound Player**: a Widget that plays one sound file (`play SoundPlayer`, `stop SoundPlayer`). It pauses while any alarm sounds.
 
@@ -22,9 +22,9 @@
 
 **Color selector**: every color setting is the same dropdown. **Default** (first) keeps the item's normal color, **None** (second) means no color at all (see-through), then colors by name with a swatch, and **Custom (add new) ...** for any other color, which is kept in the list for next time.
 
-**Device**: an element tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices).
+**Device**: a thing tied to a port or pin on a board, such as a pump relay or a probe. See [Devices](03-devices).
 
-**Element**: anything placed on a tab: an output, a reading, a variable, a timer, a picture.
+**Element**: an old BruControl word. Skynet does not use it: a thing on a Tab is a **Device** (tied to a port on a board) or a **Widget** (app only). The one exception is a *heating element*, the real part in a kettle.
 
 **Fitting**: a pipe part (tee, elbow, cross, coupling, cap, manual valve) placed as an IP type.
 
@@ -48,7 +48,7 @@
 
 **Step**: a `step "name"` line in a Process. Steps are numbered by themselves (1.00000, 1.00001 ...). See [Process language and steps](22-process-language).
 
-**Schema**: the whole setup of your brewery in the panel: Tabs, elements, pipes, Devices and settings (other programs call it a setup or configuration). The samples are ready-made Schemas, and a BruControl configuration file is imported as a Schema. It is saved in the `config` folder.
+**Schema**: the whole setup of your brewery in the panel: Tabs, Devices, Widgets, pipes and settings (other programs call it a setup or configuration). The samples are ready-made Schemas, and a BruControl configuration file is imported as a Schema. It is saved in the `config` folder.
 
 **Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
 
@@ -68,7 +68,7 @@
 
 **Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
 
-**Schema**: one whole brewery setup (tabs, devices, elements, pipes and the Equipment Profile of each Tab), kept in its own file and picked from the Schema dropdown at the top. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+**Schema**: one whole brewery setup (tabs, Devices, Widgets, pipes and the Equipment Profile of each Tab), kept in its own file and picked from the Schema dropdown at the top. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
 **Equipment Profile**: the losses, vessels and piping on one Tab of a brewery (for example the Hot Side, or Fermentation), made on the Equipment Profile tab of the ☰ Menu. Each Tab can have its own. Any Schema can use any profile on one of its Tabs: unique to one Tab, or shared by several Schemas. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
