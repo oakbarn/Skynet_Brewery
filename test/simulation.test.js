@@ -29,6 +29,7 @@ print "hot"
 sleep 5000
 print "done"
 `);
+fs.writeFileSync(path.join(scripts, 'Reach.txt'), 'wait "Mash_Temp" value > 500\nprint "reached"\n');
 fs.writeFileSync(path.join(scripts, 'Auto.txt'), 'print "a"\nsleep 1200000\nprint "b"\nwait "Mash_Temp" value > 500\nsleep 1200000\nprint "c"\n');
 const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.load();
 const engine = new Engine(store, scripts, { logNow() { } });
@@ -39,6 +40,7 @@ const tick = clock.stepper(); const timers = setInterval(() => store.tickTimers(
 
 // settings are cleaned
 const c = cleanSimulation({ on: 1, speed: 99999, jumps: [{ when: 'timer', name: 'tm_Mash', after: -3, jump: '50:00' }, { name: '' }] });
+assert.equal(c.reachWaits, true, 'waits on readings are pretended by default'); assert.equal(c.reachAfter, 60);
 assert.equal(c.speed, 1000); assert.equal(c.jumps.length, 1); assert.equal(c.jumps[0].jump, '00:50:00'); assert.equal(c.jumps[0].after, 0);
 
 // the Process timeline: when each step happens, without running anything
@@ -86,7 +88,7 @@ assert.ok(sim.upcoming()[0]?.what.includes('sleep'), 'the 5 s sleep is the next 
 assert.throws(() => sim.skipToNext(), /only/, 'too close to skip to');
 
 // Auto skip: each step runs "watch" seconds, then skips to just before the next; a wait on a reading is not skipped
-sim.save({ autoSkip: true, watch: 1 });
+sim.save({ autoSkip: true, watch: 1, reachWaits: false });
 const ap = []; engine.on('print', p => { if (p.script === 'Auto') ap.push(p.text); }); engine.start('Auto', 'test');
 await wait(4000);
 assert.deepEqual(ap, ['a', 'b'], 'auto skip passed the 20 minute sleep: ' + ap.join(' | '));
@@ -96,6 +98,17 @@ store.setProp('Mash_Temp', 'value', 600, 'ui');
 await wait(4000);
 assert.deepEqual(ap, ['a', 'b', 'c'], 'after the reading, auto skip carries on: ' + ap.join(' | '));
 sim.save({ autoSkip: false });
+
+// Pretend readings are reached (Fritz, 2026-10-27): a wait on a reading moves on by itself after reachAfter clock seconds
+store.setProp('Mash_Temp', 'value', 100, 'ui');
+sim.save({ reachWaits: true, reachAfter: 30 });
+const rp = []; engine.on('print', p => { if (p.script === 'Reach') rp.push(p.text); }); engine.start('Reach', 'test');
+await wait(300);
+assert.ok(sim.upcoming().some(e => e.what.includes('pretended reached')), 'skip to next event sees it: ' + JSON.stringify(sim.upcoming()));
+assert.deepEqual(rp, [], 'not reached yet');
+await wait(3500);      // 30 s at 10x
+assert.ok(rp.includes('reached'), 'the wait moved on by itself: ' + rp.join(' | '));
+assert.ok(rp.some(t => /pretended reached after 30 s/.test(t)), 'the output says so');
 
 // turning it off stops processes, turns outputs off and brings the real board back
 sim.save({ on: false });
