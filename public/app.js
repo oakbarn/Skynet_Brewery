@@ -1954,6 +1954,7 @@ $('#cloneDev').onclick = guard(async () => {
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
 // 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
+const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
 const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
 const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an analog pin
@@ -1981,6 +1982,11 @@ function portError(e, self) {
   if (b?.warn && !confirm(b.warn + `\n\nOK = use pin ${pin} anyway.  Cancel = go back and pick another pin.`)) return b.pin ? `Pick another pin, for example pin ${b.pin}.` : 'Pick another pin.';
   return null;
 }
+// Fritz, 2026-10-27: a name typed instead of the Suggested Name gets this warning first
+const OWN_NAME_WARNING = (name, sug) => `You typed your own Device name, "${name}", instead of the Suggested Name${sug ? ` (${sug})` : ''}.\n\n` +
+  'A plain word as a name (for example "Pump") becomes a reserved word in your Processes, and it can cause problems in the code: a Process line can no longer tell the Device from other things called Pump.\n\n' +
+  'The Device name is only used in Processes. It is never shown on a Tab (the Label is), so a unique, meaningful name like the Suggested Name is the better choice.\n\n' +
+  `OK = keep "${name}".  Cancel = go back and change it.`;
 async function newDeviceDialog(e, hint) {
   const devs = S.config.devices || [];
   const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
@@ -1988,7 +1994,7 @@ async function newDeviceDialog(e, hint) {
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
-  const fields = [['device', '1. Interface (board)', 'dev'],
+  const fields = [['device', '1. Interface (board)', 'dev', 'addnew'],
     ['typeCode', '2. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
     [port[0], '3. ' + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
     ['label', 'Label (shown on the tab, e.g. Fly Sparge; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'],
@@ -2007,11 +2013,18 @@ async function newDeviceDialog(e, hint) {
       fillFree(work);
       body.oninput = body.onchange = ev => {
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
+        if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
         const w = { ...work }; try { readFields(w, body); } catch { }
         fillFree(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
       };
-      if (await shown !== 'ok') return false;
+      const r = await shown;
+      if (r === 'addIface') {      // ➕ Add new Interface…: the Add Interface pop-up, then back here with the new Interface picked
+        try { readFields(work, body); } catch { }
+        work.device = (await addInterfaceDialog()) || undefined;
+        continue;
+      }
+      if (r !== 'ok') return false;
       try {
         readFields(work, body);
         const sug = deviceSuggestion(work), name = noSpaces(work.name || sug);
@@ -2019,6 +2032,7 @@ async function newDeviceDialog(e, hint) {
         const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
+        if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         e.name = name;
         if (name === sug) autoNamed.add(e);
@@ -2139,14 +2153,17 @@ async function newIntegratedDevice(tname) {
   const t = tplOf('vessel', tname); if (!t) return toast(`The Skynet Template ${tname} is missing`, true);
   const [what, lbl] = intWhat({ template: t.name, vesselType: t.vesselType });
   const w = { ...rimsWork(null), template: t.name, vesselType: t.vesselType, label: lbl };
-  const fields = o => [...rimsFields(o), ['label', `Label (shown on the tab, e.g. ${lbl})`, 'text'], ['labelVisible', 'Show label', 'yn', true]];
+  const fields = o => [...rimsFields(o).map(f => f[0] === 'iface' ? [...f.slice(0, 3), 'addnew'] : f), ['label', `Label (shown on the tab, e.g. ${lbl})`, 'text'], ['labelVisible', 'Show label', 'yn', true]];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), refresh = () => { const x = { ...w }; try { readFields(x, body); } catch { } rimsPinLists(x, null); };
+  const addIface = ev => { if (ev.target.dataset?.k === 'iface' && ev.target.value === ADD_IFACE) $('#dlg').close('addIface'); };
   for (const b of oks) b.textContent = 'Create';
-  body.addEventListener('change', refresh);
+  body.addEventListener('change', refresh); body.addEventListener('change', addIface);
   try {
     for (;;) {
       rimsPinLists(w, null);
-      if (await dialog(`New Device: ${what}`, fields, w, false, t.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle']) !== 'ok') return;
+      const r = await dialog(`New Device: ${what}`, fields, w, false, t.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle']);
+      if (r === 'addIface') { try { readFields(w, body); } catch { } w.iface = (await addInterfaceDialog()) || ''; for (const b of oks) b.textContent = 'Create'; continue; }
+      if (r !== 'ok') return;
       const g0 = draft.graphics.length;
       try {
         readFields(w, body);
@@ -2165,7 +2182,7 @@ async function newIntegratedDevice(tname) {
         toast(err.message, true);
       }
     }
-  } finally { body.removeEventListener('change', refresh); for (const b of oks) b.textContent = 'Save'; }
+  } finally { body.removeEventListener('change', refresh); body.removeEventListener('change', addIface); for (const b of oks) b.textContent = 'Save'; }
 }
 
 // Fritz, 2026-10-23: as in BruControl, several new things made at the same spot stack down and to the right instead of hiding each other
@@ -2959,7 +2976,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)));      // Fritz: the full Interface name first
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)),      // Fritz: the full Interface name first
+    ...(opts === 'addnew' && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'onsrc') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: '' }, 'None (a still picture)'),
     ...onSources(obj.name).filter(([, ns]) => ns.length || v).map(([g, ns]) => h('optgroup', { label: g }, ...ns.map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)))),
     ...(v && !onSources(obj.name).some(([, ns]) => ns.includes(v)) ? [h('option', { value: v, selected: true }, v + ' (not on / off)')] : []));
@@ -4245,7 +4263,7 @@ function renderDevices() {
       await api('PUT', '/ui/layout', { devices: S.config.devices.map(x => x.name === d.name ? (({ realType, ...rest }) => ({ ...rest, type: realType }))(x) : x) }); await load();
     }) }, 'Use real hardware') : '';
     const cfg = S.config.devices.find(x => x.name === d.name);
-    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...)',
+    const idBox = h('input', { class: 'ifaceId', value: cfg?.id ?? '', size: 6, maxlength: 7, disabled: !can('admin'), title: (can('admin') ? '' : 'Only an Admin can change the Interface ID. ') + 'Interface ID: 1 to 4 letters, unique. It starts the suggested name of each Device on this Interface (MB_25_...). Set it once and leave it.',
       onchange: guard(async ev => {
         const id = cleanInterfaceId(ev.target.value);
         if (S.config.devices.some(x => x.name !== d.name && String(x.id).toUpperCase() === id)) { ev.target.value = cfg?.id ?? ''; throw new Error(`Interface ID ${id} is used by another Interface`); }
@@ -4270,7 +4288,7 @@ function renderDevices() {
       }) });
     tb.append(h('tr', {}, h('td', {}, idBox, '_'), h('td', {}, d.name), h('td', {}, boardSel), h('td', {}, (TYPES[d.type] || d.type) + (d.simMode ? ` (simulation mode, real: ${TYPES[d.realType]})` : d.type === 'simulator' && d.realType ? ` (for ${TYPES[d.realType]})` : '')), rateCell, h('td', {}, lostBox, ' s'), h('td', {}, d.host ? `${d.host}:${d.port ?? 4100}` : d.port || ''),
       h('td', { style: `color:${d.status === 'connected' ? 'var(--ok)' : 'var(--bad)'}` }, d.status), h('td', {}, d.info || '', d.sdCard ? h('div', { style: 'color:var(--bad);font-weight:bold' }, '⚠ SD Card Not Supported. Remove the SD Card!') : ''),
-      h('td', {}, real, ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
+      h('td', {}, real, ' ', h('button', { class: 'admin-only', title: 'Change this Interface: its connection (USB, Ethernet, WiFi or Simulator), port or address, board and ID', onclick: guard(() => addInterfaceDialog({ name: d.name }, { edit: true })) }, '⚙ Change'), ' ', h('button', { class: 'danger admin-only', onclick: guard(async () => { if (!confirm(`Remove Interface ${d.name}?`)) return; await api('PUT', '/ui/layout', { devices: S.config.devices.filter(x => x.name !== d.name) }); await load(); }) }, 'Remove'))));
   }
   renderProbes();
 }
@@ -4332,6 +4350,74 @@ const showDevRating = () => { const r = rating({ board: $('#devBoard').value, ty
 $('#devBoard').onchange = showDevRating; $('#devType').addEventListener('change', showDevRating); $('#devHost').addEventListener('input', showDevRating); showDevRating();
 // the Interface ID box shows the ID a name would get (first letters of its first two words), until one is typed
 $('#devName').addEventListener('input', () => { $('#devId').placeholder = defaultInterfaceId($('#devName').value, S.config.devices.map(x => x.id)) || 'MB'; });
+
+// ---- The Interface pop-up (Fritz, 2026-10-27): Add Interface, from the ☰ Menu, the Devices page and "➕ Add new Interface…" in
+// the New Device box (any Tab). The same pop-up changes an Interface's connection (⚙ on the Devices page) and finishes the
+// New_Mega_2560_N a new empty Schema starts with. It explains the Interface ID: it starts every Suggested Device name.
+const LINK_CHOICES = [['serial', 'USB'], ['ethernet', 'Ethernet (wired)'], ['esp32', 'WiFi (a Mega: through an ESP32 bridge)'], ['simulator', 'Simulator (no board yet: pretend)']];
+const IFACE_ID_NOTES = [
+  'The Interface ID becomes part of the Suggested Name of every Device on this Interface: it is the start of the name, for example HS_25_Pump_Wort__HS for a pump on pin 25 of the Interface HS.',
+  'It must be unique: no two Interfaces may have the same ID.',
+  'Set it once, now, and do not change it. Devices made before a change keep the old ID in their names, so a change leaves a mix of names.'];
+const ifaceUsers = name => (draft || S.config).elements.filter(e => e.device === name).length;
+// start: an Interface to change (its name is kept), or settings to start a new one with. Returns the Interface's name, or null.
+async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {}) {
+  if (!can('admin')) { toast('Only an admin can add or change an Interface', true); return null; }
+  const old = edit ? S.config.devices.find(d => d.name === start.name) : null;
+  const renamable = !old || !ifaceUsers(old.name);      // a name nothing uses yet may still be changed here (a brand-new Interface)
+  const w = { name: '', id: '', board: 'mega', type: 'serial', port: '', host: '', ...clone(old || start) };
+  let ports = [];
+  try { const r = await api('GET', '/ui/ports'); ports = r.ports || []; } catch { /* no USB support on the server */ }
+  const fields = o => {
+    const rt = rating({ board: o.board, type: o.type });
+    return [
+      ...(intro ? [['_in', intro, 'note']] : []),
+      ['_a', 'An Interface is a board (PLC) your Devices are wired to: an Arduino Mega, an ESP32 and the like.', 'note'],
+      ...(renamable ? [['_nh', 'Give it a name that means something to you: Hot Side, Fermentation, your brewery name.', 'note'], ['name', 'Name', 'text']] : [['_nm', `Name: ${o.name} (Devices use it, so it stays)`, 'note']]),
+      ['id', 'Interface ID (1 to 4 letters)', 'text'],
+      ['_ide', 'Left empty, it is the first letters of the Name (Hot Side = HS).', 'note'],
+      ...IFACE_ID_NOTES.map((t, i) => ['_id' + i, '• ' + t, 'note']),
+      ['board', 'Board', 'sel', BOARDS, true],
+      ['type', 'Connection', 'sel', LINK_CHOICES, true],
+      ...(rt.text ? [['_rt', 'Connection rating: ' + rt.text, 'note']] : []),
+      ...(o.type === 'serial' ? [['port', 'USB port', 'text'], ['_pt', `For example COM3 (Windows) or /dev/ttyACM0 (Pi).${ports.length ? ' Found now: ' + ports.map(p => p.path).join(', ') : ''}`, 'note']] : []),
+      ...(['ethernet', 'esp32'].includes(o.type) ? [['host', 'Network address', 'text'], ['_ht', 'For example 192.168.1.60', 'note']] : []),
+      ...(S.sim?.on ? [['_sim', '🧪 The panel is in Simulator mode: every Interface is pretend until you switch to Real boards.', 'note']] : []),
+    ];
+  };
+  const oks = $$('#dlg button[value="ok"]'), was = oks.map(b => b.textContent);
+  for (const b of oks) b.textContent = old ? 'Save' : 'Add';
+  try {
+    for (;;) {
+      if (await dialog(title || (old ? `Interface ${old.name}` : 'Add Interface'), fields, w, false, ['interfaces']) !== 'ok') return null;
+      try {
+        readFields(w);
+        const name = String(w.name ?? '').trim();
+        if (!name) throw new Error('Give the Interface a Name');
+        if (S.config.devices.some(d => d !== old && d.name.toLowerCase() === name.toLowerCase())) throw new Error(`There is already an Interface called ${name}`);
+        const bad = elementNameError(name, 'Interface'); if (bad) throw new Error(bad);
+        const taken = S.config.devices.filter(d => d !== old).map(x => x.id), typed = String(w.id ?? '').trim();
+        const id = typed ? cleanInterfaceId(typed) : defaultInterfaceId(name, taken);
+        if (taken.some(t => String(t).toUpperCase() === id)) throw new Error(`Interface ID ${id} is used by another Interface. Interface IDs must be unique.`);
+        if (old?.id && id !== old.id && ifaceUsers(old.name) && !confirm(`Change the Interface ID from ${old.id}_ to ${id}_?\n\n${ifaceUsers(old.name)} Device(s) on this Interface keep ${old.id}_ in their names, so the names will be a mix. It is best to set the ID once and leave it.\n\nOK = change it anyway.  Cancel = keep ${old.id}_.`)) { w.id = old.id; continue; }
+        const d = { ...(old || {}), name, id, type: w.type, board: w.board };
+        delete d.port; delete d.host; delete d.baud; delete d.realType;
+        if (w.type === 'serial') { d.port = String(w.port ?? '').trim(); d.baud = old?.baud || 115200; if (!d.port) throw new Error('Type the USB port (Scan ports on the Devices page lists them)'); }
+        if (['esp32', 'ethernet'].includes(w.type)) { d.host = String(w.host ?? '').trim(); d.port = 4100; if (!d.host) throw new Error('Type the network address'); }
+        const devices = old ? S.config.devices.map(x => x === old ? d : x) : [...S.config.devices, d];
+        await api('PUT', '/ui/layout', { devices });
+        if (old && old.name !== name) {      // nothing uses it, but a Device made in this Edit layout may: follow the new name
+          for (const e of (draft || S.config).elements) if (e.device === old.name) e.device = name;
+        }
+        if (draft) draft.devices = clone(devices);
+        await load();
+        toast(old ? `Interface ${name} saved, ID ${id}_` : `Interface ${name} added, ID ${id}_`);
+        return name;
+      } catch (err) { toast(err.message, true); }
+    }
+  } finally { oks.forEach((b, i) => { b.textContent = was[i]; }); }
+}
+$('#addIfaceBtn').onclick = guard(() => addInterfaceDialog());
 
 // ---------------------------------------------------------------- import
 $('#importBtn').onclick = guard(async () => {
@@ -4624,7 +4710,9 @@ const fmtT = s => { s = Math.max(0, Math.round(s)); const p = n => String(n).pad
 const speedOpts = sel => { const cur = S.sim?.speed ?? 1; sel.innerHTML = ''; for (const x of S.simSpeeds || [1]) sel.append(h('option', { value: x, ...(x === cur ? { selected: true } : {}) }, x === 1 ? 'Normal (1×)' : x + '× faster')); if (!(S.simSpeeds || []).includes(cur)) sel.append(h('option', { value: cur, selected: true }, cur + '× faster')); };
 let simPoll = null;
 function renderSimBar() {
-  const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden');
+  const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden'), btn = $('#barSim');
+  btn.textContent = on ? '🧪 Simulator' : '🔌 Real'; btn.classList.toggle('sim', on); btn.setAttribute('aria-pressed', String(on));
+  btn.title = on ? 'Simulator mode: nothing real is switched. Press to switch the whole panel back to the Real boards' : 'Real boards are used. Press to switch the whole panel (every Interface) to the Simulator for testing';
   bar.classList.toggle('hidden', !on);
   if (on !== was && view === 'workspace') fitZoom();
   if (!on) { clearInterval(simPoll); simPoll = null; $('#simNextInfo').textContent = ''; return; }
@@ -4646,13 +4734,13 @@ for (const b of $$('#simBar [data-skip]')) b.onclick = guard(async () => { await
 $('#simNext').onclick = guard(async () => { const r = await api('POST', '/ui/sim/skip', { next: true }); toast(`Skipped ${fmtT(r.skipped / 1000)}, to just before ${r.next}`); simNextInfo(); });
 
 let simDraft = null, simDirty = false, tlRows = null;
-const simCfg = () => ({ on: false, speed: 1, lead: 5, autoSkip: false, watch: 5, jumps: [], ...(S.config.simulation || {}) });
+const simCfg = () => ({ on: false, speed: 1, lead: 5, autoSkip: false, watch: 5, reachWaits: true, reachAfter: 60, jumps: [], ...(S.config.simulation || {}) });
 function renderSimSettings() {
   if (!can('admin')) return;
   const c = simCfg();
   $('#simOn').checked = !!c.on;
   speedOpts($('#simSpeedSet')); $('#simSpeedSet').value = c.speed;
-  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; $('#simAuto').checked = !!c.autoSkip; $('#simWatch').value = c.watch; renderSimJumps(); }
+  if (!simDirty) { simDraft = clone(c.jumps); $('#simLead').value = c.lead; $('#simAuto').checked = !!c.autoSkip; $('#simWatch').value = c.watch; $('#simReach').checked = c.reachWaits !== false; $('#simReachAfter').value = c.reachAfter; renderSimJumps(); }
   const pick = $('#tlPick'), cur = pick.value; pick.innerHTML = '';
   for (const sc of S.scripts) pick.append(h('option', { value: sc.name, ...(sc.name === cur ? { selected: true } : {}) }, sc.name));
 }
@@ -4674,20 +4762,24 @@ function renderSimJumps() {
   });
   if (!simDraft.length) tb.append(h('tr', {}, h('td', { colspan: 7, class: 'muted' }, 'No time jumps yet.')));
 }
-for (const id of ['#simAuto', '#simWatch', '#simLead']) $(id).addEventListener('change', () => { simDirty = true; });
+for (const id of ['#simAuto', '#simWatch', '#simLead', '#simReach', '#simReachAfter']) $(id).addEventListener('change', () => { simDirty = true; });
 $('#simAddJump').onclick = () => { simDraft.push({ on: true, when: 'timer', name: '', after: 5, jump: '00:50:00', note: '' }); simDirty = true; renderSimJumps(); };
 $('#simSave').onclick = guard(async () => {
   for (const j of simDraft) if (!/^\d+:\d{1,2}(:\d{1,2})?$/.test(j.jump || '')) throw new Error(`"${j.jump}" is not a time. Write it as hh:mm:ss, for example 00:50:00`);
-  S.sim = await api('PUT', '/ui/sim', { speed: +$('#simSpeedSet').value, lead: +$('#simLead').value, autoSkip: $('#simAuto').checked, watch: +$('#simWatch').value, jumps: simDraft });
+  S.sim = await api('PUT', '/ui/sim', { speed: +$('#simSpeedSet').value, lead: +$('#simLead').value, autoSkip: $('#simAuto').checked, watch: +$('#simWatch').value, reachWaits: $('#simReach').checked, reachAfter: +$('#simReachAfter').value, jumps: simDraft });
   simDirty = false; await load(); toast('Simulation settings saved');
 });
-$('#simOn').onchange = guard(async ev => {
-  const on = ev.target.checked;
-  if (!confirm(on ? 'Turn on simulation mode?\n\nEvery process stops and every output turns off. Then the real boards are let go and the simulator takes their place, so nothing real is switched until you turn it off again.'
-    : 'Turn off simulation mode?\n\nEvery process stops and every output turns off, then the real boards are used again.')) { ev.target.checked = !on; return; }
+// Simulator or Real boards, for the whole panel (every Interface at once): the 🔌 Real / 🧪 Simulator button on the Tabs bar
+// (Fritz, 2026-10-27), the ☰ Menu and Settings > Simulation. Returns false when the admin said no.
+async function setSimulator(on) {
+  if (!confirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
+    : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.')) return false;
   S.sim = await api('PUT', '/ui/sim', { on });
-  await load(); toast(on ? 'Simulation mode is on: no real hardware is switched' : 'Simulation mode is off: real hardware is used');
-});
+  await load(); toast(on ? '🧪 Simulator mode: no real hardware is switched' : '🔌 Real boards: real hardware is used');
+  return true;
+}
+$('#simOn').onchange = guard(async ev => { const on = ev.target.checked; ev.target.checked = !on; if (await setSimulator(on)) ev.target.checked = on; });
+$('#barSim').onclick = guard(() => setSimulator(!S.sim?.on));
 
 $('#tlShow').onclick = guard(async () => {
   const name = $('#tlPick').value; if (!name) throw new Error('There are no Processes yet');
@@ -4757,6 +4849,21 @@ async function afterSchemaSwitch(msg) {
   if (['schema', 'about'].includes(keep)) openMenuTab(keep); else setView('workspace');
   toast(msg + '. Every output was switched off.');
 }
+// Fritz, 2026-10-27: a new empty Schema (not a copy) starts with one simulated Arduino Mega 2560, New_Mega_2560_N, and the
+// panel switches to Simulator mode. Tell the admin, then ask for a name that means something and the Interface ID.
+async function newSchemaInterface(iface, wasSim) {
+  await new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    d.append(h('div', { class: 'vdTitle' }, '🧪 You are now in Simulator mode'),
+      h('div', { class: 'vdNote' },
+        h('p', {}, wasSim ? 'The panel was already in Simulator mode and stays in it.' : 'The whole panel switched to the Simulator: nothing real is switched until you press 🔌 Real (beside ☰ Menu), or ☰ Menu > Switch to Real boards.'),
+        h('p', {}, 'Your new Schema has one Interface, ', h('b', {}, iface), ': a pretend Arduino Mega 2560. Next, give it a name that means something to you (Hot Side, Fermentation, your brewery name) and set its Interface ID.'),
+        h('p', {}, 'The Skynet Home Brewery, for example, has 3 Megas: Main_Brewery_HotSide, Valves and Fermentor.')),
+      h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => d.close() }, '✔ OK')));
+    d.onclose = () => res(); d.showModal();
+  });
+  if (iface && S.config.devices.some(d => d.name === iface)) await addInterfaceDialog({ name: iface }, { edit: true, title: `Your new Interface: ${iface}` });
+}
 const schemaPicked = guard(async ev => {
   const v = ev.target.value, act = S.schemas.active, back = () => renderSchemaPick();
   try {
@@ -4769,8 +4876,10 @@ const schemaPicked = guard(async ev => {
         ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
       readFields(w);
       if (!okToSwitch(w.name, 'Making and loading')) return;
-      await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
-      return afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
+      const r = await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
+      await afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
+      if (r.simulator) await newSchemaInterface(r.iface, r.wasSim);
+      return;
     }
     if (v === '__clone') return cloneSchema(act.id);
     if (v === '__ren') {
@@ -4903,6 +5012,12 @@ function renderMenu() {
 function menuItems(list, go) {
   const item = (label, fn, attrs = {}) => h('button', { type: 'button', role: 'menuitem', class: 'menuItem', ...attrs, onclick: fn ? go(fn) : null }, ...[label].flat());
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
+  // Fritz, 2026-10-27: the Interfaces (boards) are easy to find, add, and switch between simulator and real
+  list.append(item('🔌 Interfaces (boards)', () => { setView('devices'); showPart($('#sec-interfaces')); }, { title: 'The boards your Devices are wired to (Devices page)' }));
+  if (can('admin')) {
+    list.append(item('➕ Add Interface…', guard(() => addInterfaceDialog()), { title: 'Add a board: a Mega, an ESP32 ... by USB, Ethernet, WiFi, or a Simulator' }));
+    list.append(item(S.sim?.on ? '🔌 Switch to Real boards' : '🧪 Switch to Simulator', guard(() => setSimulator(!S.sim?.on)), { title: 'Every Interface at once: the simulator (nothing real is switched) or the real boards' }));
+  }
   list.append(h('hr'));
   if (editing) list.append(h('div', { class: 'menuNote muted' }, 'Save or exit Edit layout to open a Menu tab'));
   list.append(h('div', { class: 'menuNote muted' }, 'Menu tabs'));
