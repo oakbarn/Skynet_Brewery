@@ -34,7 +34,7 @@ Companion documents (look things up there, do not copy them here):
 | docs/Device_Library.md (project folder) | Every Device, its Type ID, ports, pins and settings |
 | docs/Widget_Library.md (project folder) | Every Widget, Template and their settings |
 | docs/Image_Library.md (project folder) | Every Skynet picture, its group and what uses it |
-| docs/BRUCONTROL_IMPORT_RULES.md (in the GitHub repo) | How a BruControl Schema should come into Skynet |
+| docs/Importing_Norms.md (project folder and GitHub repo) | Every change an import makes to bring things up to the Skynet way |
 | docs/Minimum_Equipment_and_Limitations.md (project folder) | What the boards can do today |
 
 ---
@@ -511,8 +511,9 @@ Widget setting or Skynet Template is added, add it there, with a Change log line
 
 13.3 **Image Library**: see Rule 7.7. Never add a picture unless Fritz says so. (2026-10-27)
 
-13.4 **BruControl Import Rules** (docs/BRUCONTROL_IMPORT_RULES.md in the GitHub repo): every new
-import rule Fritz gives goes there. The importer itself waits for his go. (2026-10-23, PR #96)
+13.4 **Importing Norms** (docs/Importing_Norms.md in the project folder and the GitHub repo): every
+new import rule Fritz gives goes there. The importer itself waits for his go. (2026-10-23, PR #96;
+2026-10-28: was docs/BRUCONTROL_IMPORT_RULES.md, now in Importing Norms)
 
 13.5 **This Rules document**: every new or changed Rule goes here the same day. (2026-10-27)
 
@@ -526,6 +527,16 @@ browser. The list of all documents is docs/README.md in the repo. (2026-10-27)
 only when Fritz says the program is set. (2026-10-26)
 
 14.2 **Compile check of firmware** inside the app: deferred. (2026-10-04)
+
+## 15. Importing
+
+15.1 **Importing always updates to the Skynet way.** When anything old comes in (a BruControl
+Schema, or an older Skynet Schema or Process), every attribute, name and line of Process code is
+changed to the current Skynet word or style, even where the old way still works. A Process line that
+cannot be changed safely stays as it was and is listed in the import report. Each change is listed
+in docs/Importing_Norms.md. First norm: `.xposition` / `.yposition` become `.x_hPosition` /
+`.y_vPosition` (Rule 1.15), on the item and in every Process. (2026-10-28, thread "Start the
+Importing Norms document")
 
 ---
 
@@ -595,3 +606,4 @@ only when Fritz says the program is set. (2026-10-26)
   clones. Help 80; next free Help number 81. (thread "Add hidden keys so names can change")
 - 2026-10-27: Changed Rule 3.5: a clone (Parent_Name_Clone_N) follows its parent's rename; each clone
   has its own hidden key but acts only through its parent's key. (Fritz's answer, thread "Add hidden keys so names can change")
+- 2026-10-28: Added Rule 15.1 (importing always updates to the Skynet way); Rule 13.4 now points to docs/Importing_Norms.md. (thread "Start the Importing Norms document")
