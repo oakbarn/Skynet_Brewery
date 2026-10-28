@@ -5022,12 +5022,25 @@ $('#saveMqtt').onclick = guard(async () => {
 // and Settings > Simulation (switch, speed, Time jumps table, Process timeline).
 const fmtT = s => { s = Math.max(0, Math.round(s)); const p = n => String(n).padStart(2, '0'); return `${p(Math.floor(s / 3600))}:${p(Math.floor(s % 3600 / 60))}:${p(s % 60)}`; };
 const speedOpts = sel => { const cur = S.sim?.speed ?? 1; sel.innerHTML = ''; for (const x of S.simSpeeds || [1]) sel.append(h('option', { value: x, ...(x === cur ? { selected: true } : {}) }, x === 1 ? 'Normal (1×)' : x + '× faster')); if (!(S.simSpeeds || []).includes(cur)) sel.append(h('option', { value: cur, selected: true }, cur + '× faster')); };
-let simPoll = null;
+let simPoll = null, simWasOff = false;
+// Hide / Show the Simulator bar (Fritz, 2026-10-28), kept per browser. Hiding changes no setting: the speed and
+// Auto skip stay as they are, and a thin 🧪 SIMULATION strip stays so nobody forgets nothing real is switched.
+function showSimBar(show, fit = true) {
+  $('#simBar').classList.toggle('collapsed', !show);
+  const b = $('#simHide'); b.textContent = show ? '▴ Hide' : '▾ Show Simulator bar'; b.setAttribute('aria-expanded', String(show));
+  b.title = show ? 'Hide the Simulator bar (only on this screen). The 🧪 SIMULATION strip stays so you always know nothing real is switched. Your speed and Auto skip are not changed' : 'Show the Simulator bar again: speed, skip buttons and Auto skip';
+  try { localStorage.setItem('bp.simBarHidden', show ? '0' : '1'); } catch { /* private window */ }
+  if (fit && view === 'workspace') fitZoom();
+}
+try { if (localStorage.getItem('bp.simBarHidden') === '1') showSimBar(false, false); } catch { }
+$('#simHide').onclick = () => showSimBar($('#simBar').classList.contains('collapsed'));
 function renderSimBar() {
   const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden'), btn = $('#barSim');
   btn.textContent = on ? '🧪 Simulator' : '🔌 Real'; btn.classList.toggle('sim', on); btn.setAttribute('aria-pressed', String(on));
   btn.title = on ? 'Simulator mode: nothing real is switched. Press to switch the whole panel back to the Real boards' : 'Real boards are used. Press to switch the whole panel (every Interface) to the Simulator for testing';
   bar.classList.toggle('hidden', !on);
+  if (on && simWasOff) showSimBar(true);   // switching the Simulator on opens the bar again
+  simWasOff = !on;
   if (on !== was && view === 'workspace') fitZoom();
   if (!on) { clearInterval(simPoll); simPoll = null; $('#simNextInfo').textContent = ''; return; }
   $('#simInfo').textContent = `Clock ${S.sim.speed === 1 ? 'at normal speed' : S.sim.speed + '× faster'}` + (S.sim.skipped ? `, ${fmtT(S.sim.skipped / 1000)} skipped` : '');
@@ -5048,7 +5061,7 @@ for (const b of $$('#simBar [data-skip]')) b.onclick = guard(async () => { await
 $('#simNext').onclick = guard(async () => { const r = await api('POST', '/ui/sim/skip', { next: true }); toast(`Skipped ${fmtT(r.skipped / 1000)}, to just before ${r.next}`); simNextInfo(); });
 
 let simDraft = null, simDirty = false, tlRows = null;
-const simCfg = () => ({ on: false, speed: 1, lead: 5, autoSkip: false, watch: 5, reachWaits: true, reachAfter: 60, jumps: [], ...(S.config.simulation || {}) });
+const simCfg = () => ({ on: false, speed: 25, lead: 5, autoSkip: true, watch: 5, reachWaits: true, reachAfter: 60, jumps: [], ...(S.config.simulation || {}) });
 function renderSimSettings() {
   if (!can('admin')) return;
   const c = simCfg();
@@ -5089,7 +5102,7 @@ async function setSimulator(on) {
   if (!confirm(on ? 'Switch the whole panel to the Simulator?\n\nEvery process stops and every output turns off. Then every real board is let go and the simulator takes its place, so nothing real is switched until you switch back to Real boards.\n\nTimers run as now (faster if you set a speed), and a Process that waits on a reading, like a temperature or the boil starting, moves on by itself after a while.'
     : 'Switch the whole panel to the Real boards?\n\nEvery process stops and every output turns off, then the real boards are used again. Heaters, pumps and valves will really switch.')) return false;
   S.sim = await api('PUT', '/ui/sim', { on });
-  await load(); toast(on ? '🧪 Simulator mode: no real hardware is switched' : '🔌 Real boards: real hardware is used');
+  await load(); toast(on ? '🧪 Simulator mode: no real hardware is switched. 25× speed and Auto skip are on' : '🔌 Real boards: real hardware is used');
   return true;
 }
 $('#simOn').onchange = guard(async ev => { const on = ev.target.checked; ev.target.checked = !on; if (await setSimulator(on)) ev.target.checked = on; });
@@ -5229,10 +5242,10 @@ const schemaPicked = guard(async ev => {
 });
 // Add a Sample Schema (Fritz, 2026-10-28): a copy of a ready-made sample comes in as a new Schema of its own and is loaded.
 // Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
-async function addSampleSchema(id) {
+async function addSampleSchema(id, name = '') {
   const sm = (samples || []).find(x => x.id === id); if (!sm) return toast('No such sample', true);
-  if (!okToSwitch(sm.name, 'Adding the Sample Schema')) return;
-  const r = await api('POST', `/ui/samples/${id}/load`);
+  if (!okToSwitch(name || sm.name, 'Adding the Sample Schema')) return;
+  const r = await api('POST', `/ui/samples/${id}/load`, name ? { name } : undefined);
   await afterSchemaSwitch(`Sample Schema "${r.schema?.name || sm.name}" added and loaded`);
   const bad = (r.problems || []).length;
   await new Promise(res => {
@@ -5252,14 +5265,20 @@ async function cloneSchema(id) {
   if (!can('admin')) return toast('Only an admin can clone a Schema', true);
   if (editing) return toast('Save or exit Edit layout first', true);
   const list = S.schemas.list, src = list.find(x => x.id === id) || list.find(x => x.active);
+  // the 1, 2 and 3 vessel Sample Schemas can be cloned to a User Schema too (Fritz, 2026-10-28); listed after yours
+  if (!samples) try { samples = await api('GET', '/ui/samples'); } catch { samples = []; }
+  const SMP = 'sample:', smps = (samples || []).map(x => [SMP + x.id, '🧪 Sample: ' + x.name]);
   const w = { id: src.id, name: '', load: false };
-  if (await dialog('Clone a Schema', [['id', 'Schema to clone', 'sel', list.map(x => [x.id, x.name + (x.active ? '  (loaded)' : '')])],
+  if (await dialog('Clone a Schema', [['id', 'Schema to clone', 'sel', [...list.map(x => [x.id, x.name + (x.active ? '  (loaded)' : '')]), ...smps]],
     ['name', 'Name of the clone (empty: "<name> copy")', 'text'], ['load', 'Load the clone now', 'bool'],
-    ['_n', 'The clone gets everything in the Schema: its Tabs, Devices, Widgets, pictures, pipes, probes, autostart list, Equipment Profile and saved values. It starts without a version of its own. The Schema you clone is not changed.', 'note']], w) !== 'ok') return;
+    ['_n', 'The clone gets everything in the Schema: its Tabs, Devices, Widgets, pictures, pipes, probes, autostart list, Equipment Profile and saved values. It starts without a version of its own. The Schema you clone is not changed.', 'note'],
+    ...(smps.length ? [['_s', 'A 🧪 Sample clone becomes a User Schema of your own, the same as any other, and is always loaded at once (its Processes are written then). Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.', 'note']] : [])], w) !== 'ok') return;
   readFields(w);
-  const from = list.find(x => x.id === w.id);
+  const smp = String(w.id).startsWith(SMP) ? samples.find(x => SMP + x.id === w.id) : null;
+  const from = smp || list.find(x => x.id === w.id);
   let name = String(w.name || '').trim();
   if (!name) { name = `${from.name} copy`; for (let i = 2; list.some(x => x.name.toLowerCase() === name.toLowerCase()); i++) name = `${from.name} copy ${i}`; }
+  if (smp) return addSampleSchema(smp.id, name);
   if (w.load && !okToSwitch(name, 'Loading the clone')) return;
   await api('POST', `/ui/schemas/${w.id}/clone`, { name, load: !!w.load });
   if (w.load) return afterSchemaSwitch(`Clone "${name}" made and loaded`);

@@ -58,7 +58,13 @@ assert.equal(store.getProp('msg', 'value'), '', 'the timeline changed nothing');
 assert.throws(() => sim.skip(1000), /simulation mode/);
 
 // simulation on: the board is replaced by the simulator
-sim.save({ on: true, speed: 10, jumps: [{ when: 'timer', name: 'tm_Mash', after: 0.2, jump: '00:09:00' }] });
+// switching it on starts at 25x with Auto skip on (Fritz, 2026-10-28); a speed sent with it wins
+sim.save({ on: true });
+assert.equal(sim.cfg.speed, 25); assert.equal(sim.cfg.autoSkip, true);
+sim.save({ speed: 5, autoSkip: false });
+assert.equal(sim.cfg.speed, 5, 'a later change is kept'); assert.equal(sim.cfg.autoSkip, false);
+sim.save({ on: false });
+sim.save({ on: true, speed: 10, autoSkip: false, jumps: [{ when: 'timer', name: 'tm_Mash', after: 0.2, jump: '00:09:00' }] });
 hw.start();
 const dev = hw.list()[0];
 assert.equal(dev.type, 'simulator'); assert.equal(dev.simMode, true); assert.equal(dev.realType, 'ethernet');
