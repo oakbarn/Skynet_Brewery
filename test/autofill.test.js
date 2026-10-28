@@ -120,3 +120,9 @@ assert.deepEqual(t('if vK_Tulip.visible = ', false), ['true', 'false', 'on', 'of
 assert.ok(!(t('if vK_Tulip.xposition = ', false)), 'a number: nothing to guess until a letter or Ctrl+Space');
 assert.deepEqual(compile('if vK_Tulip.visible = true\nendif').errors, [], 'the engine takes a single = in an if');
 console.log('name.attribute ok');
+
+// .x and .y (Fritz, 2026-10-28): x_hPosition, y_vPosition
+const pos = { elements: [{ name: 'Pump', type: 'digitalOut', main: 'state', attrs: attrsOf({ type: 'digitalOut' }) }] };
+assert.deepEqual(attrsAfterDot('Pump', pos).filter(a => a.toLowerCase().startsWith('x')), ['x_hPosition']);
+assert.deepEqual(attrsAfterDot('Pump', pos).filter(a => a.toLowerCase().startsWith('y')), ['y_vPosition']);
+console.log('x and y ok');
