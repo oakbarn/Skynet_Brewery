@@ -51,7 +51,7 @@ export function graphicTopic(g) {
     case 'ip':
       if (g.fitting === 'manualValve') return ['pipe-fittings-and-manual-valves', 'the-manual-valve-widget'];
       if (g.fitting && g.fitting !== 'point') return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
-      return ['pipes-and-hoses', 'ips-only-show-in-edit-layout'];
+      return ['ip-snap-and-valve-pictures', 'snap-to-align'];
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
     case 'clone': return ['cloned-devices', 'a-clone-s-properties'];

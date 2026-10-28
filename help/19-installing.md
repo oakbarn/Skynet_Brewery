@@ -13,6 +13,8 @@ The Skynet Brew Panel runs on **Windows, Mac, Linux or a Raspberry Pi**. Each re
 
 Every way needs **Node.js** (free, from <https://nodejs.org>). The installers get it for you, or tell you how. On Windows, `Skynet_Brewer.bat` and `Skynet_First_Install.bat` also install it by themselves when it is missing.
 
+**Where to get it:** <https://github.com/oakbarn/skynet_brewery/releases/latest> always has the newest version. Scroll to **Assets** and click a file to download it. No GitHub account is needed. Older versions are further down the [Releases](https://github.com/oakbarn/skynet_brewery/releases) list.
+
 | File in the release | What it is for |
 |---|---|
 | `Skynet_Brewer_Setup_<date>.exe` | Windows installer. The whole panel is inside it. |
@@ -21,6 +23,8 @@ Every way needs **Node.js** (free, from <https://nodejs.org>). The installers ge
 | `install-skynet-brewer.sh` | Linux and Raspberry Pi installer |
 | `Skynet_Brewer.bat` | Sample Windows start file |
 | `ReadMe.txt` | How to install |
+| `First_Install_ReadMes_<date>.zip` | The beginner ReadMes and first-install files for every platform |
+| `Minimum_Equipment_and_Limitations.txt` | What the boards can do today |
 
 The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewPanel`** in your home folder on a Mac, Linux or a Pi. Every installer puts a **Skynet Brewer** shortcut on the Desktop.
 
@@ -84,4 +88,4 @@ The panel asks you to create the **admin account**, then shows a **recovery code
 
 ## Making a release (for whoever builds the panel)
 
-On a Linux computer with NSIS (`sudo apt install nsis`) and zip, run `bash tools/build-release.sh` in the panel folder. It writes every file in the table above to `release/`.
+On a Linux computer with NSIS (`sudo apt install nsis`) and zip, run `bash tools/build-release.sh` in the panel folder. It writes every file in the table above to `release/`. You normally don't need to: on every merge GitHub builds them and attaches them to that version's Release by itself (`.github/workflows/panel-version.yml`).
