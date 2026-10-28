@@ -191,6 +191,7 @@ export function checkIds(list, what) {
 const pinKey = p => {
   const s = String(p ?? '').trim().toUpperCase(); if (!s) return '';
   let m = /^A(\d{1,2})$/.exec(s); if (m && +m[1] <= 15) return String(54 + +m[1]);
+  m = /^(?:GPIO|BCM)(\d+)$/.exec(s); if (m) return String(+m[1]);      // Raspberry Pi: GPIO17 = 17
   m = /^D?(\d+)$/.exec(s); return m ? String(+m[1]) : s;
 };
 export function portKeys(el) {
@@ -245,26 +246,30 @@ const pinsOn = e => portKeys(e).filter(k => !k.startsWith('OneWire|')).map(k => 
 // { error } when this Device takes a pin a bus on its Interface needs, { warn } when it takes a free bus pin, or null
 export function busCheck(el, elements, devices) {
   const others = (elements ?? []).filter(o => o !== el && o.name !== el.name);
-  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? ONEWIRE_PIN);
+  const P = profileOf(el, devices), SPI_PINS = P.spi, bus = SPI_PINS.join(', ');
+  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? P.onewire);
   const mine = el.device ? pinsOn(el) : [], iface = el.device;
+  if (P.board === 'pi' && el.device) {
+    const bad = piDeviceError(el, mine); if (bad) return { error: bad };
+  }
   if (mine.includes(ETHERNET_PIN) && ethernetMega((devices ?? []).find(d => d.name === iface))) return { error: `Pin D10 on ${iface} is used by its Ethernet shield. Pick another pin (Skynet Rule 6.10).` };
   const spiUsers = others.filter(o => usesSpi(o) && o.device === iface), owUsers = others.filter(o => isProbe(o) && (!o.device || o.device === iface));
   const onPin = pins => others.find(o => o.device === iface && !usesSpi(o) && pinsOn(o).some(p => pins.includes(p)));
   if (usesSpi(el)) {
     const rtd = rtdPinError(el, devices); if (rtd) return { error: rtd };
     const cs = mine.find(p => SPI_PINS.includes(p));
-    if (cs) return { error: `Pin ${cs} is part of the SPI bus (50, 51, 52) that every RTD and thermocouple board uses. Pick another pin for the board's chip-select (CS).` };
+    if (cs) return { error: `Pin ${cs} is part of the SPI bus (${bus}) that every RTD and thermocouple board uses. Pick another pin for the board's chip-select (CS).` };
     const o = onPin(SPI_PINS);
-    if (o) return { error: `RTD and thermocouple boards need pins 50, 51 and 52 on ${iface}, but ${o.name} uses pin ${pinsOn(o).find(p => SPI_PINS.includes(p))}. Move ${o.name} to another pin first.` };
+    if (o) return { error: `RTD and thermocouple boards need pins ${bus} on ${iface}, but ${o.name} uses pin ${pinsOn(o).find(p => SPI_PINS.includes(p))}. Move ${o.name} to another pin first.` };
   } else if (isProbe(el)) {
     const o = others.find(o => (!el.device || o.device === el.device) && pinsOn(o).includes(owPin));
     if (o) return { error: `DS18B20 probes need pin ${owPin} (the OneWire data pin) on ${o.device}, but ${o.name} uses it. Move ${o.name} to another pin first.` };
   } else {
     const spi = mine.find(p => SPI_PINS.includes(p));
-    if (spi && spiUsers.length) return { error: `Pin ${spi} on ${iface} is blocked: pins 50, 51 and 52 carry the RTD and thermocouple boards (${spiUsers.map(o => o.name).join(', ')}).` };
+    if (spi && spiUsers.length) return { error: `Pin ${spi} on ${iface} is blocked: pins ${bus} carry the RTD and thermocouple boards (${spiUsers.map(o => o.name).join(', ')}).` };
     if (mine.includes(owPin) && owUsers.length) return { error: `Pin ${owPin} on ${iface} is blocked: it is the OneWire data pin of the DS18B20 probes (${owUsers.map(o => o.name).join(', ')}).` };
   }
-  const adv = pinAdvice(el, mine, others, owPin, ethernetMega((devices ?? []).find(d => d.name === iface)));
+  const adv = pinAdvice(el, mine, others, owPin, ethernetMega((devices ?? []).find(d => d.name === iface)), P);
   // Fritz, 2026-10-27 (Skynet Rule 6.11): D4 is the SD card pin of the Ethernet shield. Allowed, with a warning
   if (mine.includes(SD_PIN) && iface && boardOf((devices ?? []).find(d => d.name === iface)) === 'mega') return { warn: SD_WARNING + (adv ? '\n\n' + adv.warn : ''), pin: adv?.pin };
   return adv;
@@ -276,10 +281,40 @@ export const COUNTER_PINS = ['2', '3', '18', '19', '20', '21'];
 const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0 and D1 are the USB link)
 const needsPwm = e => ['pwmOut', 'analogOut'].includes(e.type) || (e.type === 'pid' && e.pwm);
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
-const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins 50, 51, 52 that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
-// what a Mega pin is kept for, shown beside it in the pin picker (Fritz, 2026-10-23): "PWM", "Counter", "PWM + Counter" ...
-export function pinTag(p) {
+const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
+
+// Pin rules by board. ESP32 and other Arduino-type boards use the Mega's rules for now.
+// Raspberry Pi (firmware/Pi_GPIO, 2026-10-27): GPIO 2-27 by their GPIO (BCM) numbers. The Pi program makes PWM and counts pulses
+// on any pin, so no pin is kept for those. SPI (RTD and thermocouple boards) uses GPIO 7-11, DS18B20 probes GPIO 4, I2C (ADS1115)
+// GPIO 2 and 3. A Pi has no analog pins (use an ADS1115) and can't time stepper motors.
+const PI_PINS = Array.from({ length: 26 }, (_, i) => String(i + 2));
+const PROFILES = {
+  mega: { board: 'mega', pins: MEGA_PINS, pwm: PWM_PINS, counter: COUNTER_PINS, spi: SPI_PINS, onewire: ONEWIRE_PIN, i2c: [], analog: 16, label: p => `D${p}` },
+  pi: { board: 'pi', pins: PI_PINS, pwm: PI_PINS, counter: PI_PINS, spi: ['7', '8', '9', '10', '11'], onewire: '4', i2c: ['2', '3'], analog: 0, label: p => `GPIO${p}` },
+};
+export const pinProfile = board => PROFILES[board] || PROFILES.mega;
+const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => d.name === el.device)));
+// How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins
+export function pinLabel(p, board) {
   p = String(p);
+  if (/^A\d+$/.test(p)) return `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)`;
+  const t = pinTag(p, board);
+  return pinProfile(board).label(p) + (t ? `  (${t})` : '');
+}
+// The board of the Interface a Device is on ('mega', 'esp32', 'pi', 'other')
+export const boardOfDevice = (el, devices) => boardOf((devices ?? []).find(d => d.name === el?.device));
+// A plain message when a Device can't go on a Raspberry Pi's own pins, or null
+function piDeviceError(el, mine) {
+  if (el.type === 'stepper') return 'A Raspberry Pi can\'t time the steps of a stepper motor. Put the motor on a Mega or ESP32 Interface.';
+  if ((el.type === 'analogIn' && el.adc !== 'ads1115') || (el.type === 'temperature' && ['ntc', 'lm35', 'tmp36'].includes(el.sensor))) return 'A Raspberry Pi has no analog pins. Use an ADS1115 board on its I2C pins (GPIO 2 and 3), or put this sensor on a Mega.';
+  const off = mine.find(p => !PI_PINS.includes(p) && !/^ADS\d$/.test(p));      // ADS1115 channels are not pins
+  if (off !== undefined) return `GPIO${/^\d+$/.test(off) ? off : ' ' + off} is not a pin you can use on a Raspberry Pi. Use GPIO 2 to GPIO 27.`;
+  return null;
+}
+// what a Mega pin is kept for, shown beside it in the pin picker (Fritz, 2026-10-23): "PWM", "Counter", "PWM + Counter" ...
+export function pinTag(p, board) {
+  p = String(p);
+  if (board === 'pi') { const P = PROFILES.pi; return P.spi.includes(p) ? 'SPI, for RTD boards' : p === P.onewire ? 'OneWire probes' : P.i2c.includes(p) ? 'I2C, for an ADS1115' : ''; }
   const t = [PWM_PINS.includes(p) && 'PWM', COUNTER_PINS.includes(p) && 'Counter'].filter(Boolean).join(' + ');
   if (p === SD_PIN) return t + ', SD card pin';      // Skynet Rule 6.11
   return t || (SPI_PINS.includes(p) ? 'SPI, for RTD boards' : p === ONEWIRE_PIN ? 'OneWire probes' : p === '0' || p === '1' ? 'USB link' : '');
@@ -287,21 +322,23 @@ export function pinTag(p) {
 // Fritz, 2026-10-23: the free pins a new Device can take on its Interface, best fit first (a relay gets plain pins before PWM or
 // counter pins, a PWM output PWM pins, a flow meter counter pins, analog inputs A0-A15)
 export function freePins(el, elements, devices, analog) {
-  const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter'].filter(Boolean);
-  const pool = analog ? [...Array(16).keys()].map(i => 'A' + i) : isRtd(el) && onMega(el, devices) ? RTD_CS_PINS : need.includes('pwm') ? PWM_PINS : need.includes('counter') ? COUNTER_PINS : MEGA_PINS;
-  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? ONEWIRE_PIN);
-  const extras = p => [PWM_PINS.includes(p) && 'pwm', COUNTER_PINS.includes(p) && 'counter', (SPI_PINS.includes(p) || p === owPin) && 'bus'].filter(k => k && !need.includes(k)).length;
+  const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter'].filter(Boolean), P = profileOf(el, devices);
+  const pool = analog ? [...Array(P.analog).keys()].map(i => 'A' + i) : isRtd(el) && onMega(el, devices) ? RTD_CS_PINS : need.includes('pwm') ? P.pwm : need.includes('counter') ? P.counter : P.pins;
+  const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? P.onewire);
+  const special = (list, p) => list !== P.pins && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
+  const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || p === owPin || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
   return pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
     .map((p, i) => [p, extras(p), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
 }
-function pinAdvice(el, mine, others, owPin, eth) {
-  const kept = p => [PWM_PINS.includes(p) && 'pwm', COUNTER_PINS.includes(p) && 'counter', SPI_PINS.includes(p) && 'spi', p === owPin && 'onewire'].filter(Boolean);
+function pinAdvice(el, mine, others, owPin, eth, P = PROFILES.mega) {
+  const special = (list, p) => list !== P.pins && list.includes(p);
+  const kept = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', P.spi.includes(p) && 'spi', p === owPin && 'onewire'].filter(Boolean);
   const need = [needsPwm(el) && 'pwm', needsCounter(el) && 'counter', usesSpi(el) && 'spi', isProbe(el) && 'onewire'].filter(Boolean);
   const used = new Set(others.filter(o => o.device === el.device).flatMap(pinsOn));
   for (const p of mine) {
     const extra = kept(p).filter(k => !need.includes(k)); if (!extra.length) continue;
     const xs = q => kept(q).filter(k => !need.includes(k));
-    const better = MEGA_PINS.filter(q => !used.has(q) && !(eth && q === ETHERNET_PIN) && !mine.includes(q) && need.every(k => kept(q).includes(k)) && xs(q).length < extra.length && !xs(q).some(k => k === 'spi' || k === 'onewire'))
+    const better = P.pins.filter(q => !used.has(q) && !(eth && q === ETHERNET_PIN) && !mine.includes(q) && need.every(k => kept(q).includes(k)) && xs(q).length < extra.length && !xs(q).some(k => k === 'spi' || k === 'onewire'))
       .sort((a, b) => xs(a).length - xs(b).length)[0];
     if (!better) continue;
     const lose = extra.map(k => KEPT[k]).join(' and ');
