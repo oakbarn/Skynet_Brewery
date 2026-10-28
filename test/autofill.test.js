@@ -86,3 +86,18 @@ assert.ok(!boolAttrs({ name: 'T', type: 'temperature' }).includes(''), 'a temper
 assert.ok(boolAttrs({ name: 'B', type: 'vKonstant', kind: 'bool' }).includes(''));
 assert.ok(boolAttrs({ name: 'T', type: 'timer' }).includes('countdown'));
 console.log('autofill ok');
+
+// after a dot: the main value is in the list too, and typed letters narrow it (Fritz, 2026-10-28)
+import { mainProp, attrsOf } from '../lib/store.js';
+import { attrsAfterDot } from '../public/autofill.js';
+const pumpEl = { type: 'digitalOut' };
+const real = { elements: [{ name: 'Pump', type: 'digitalOut', main: mainProp(pumpEl), attrs: attrsOf(pumpEl) }], processes: ['sub_Fill'] };
+const dot = (n, typed) => attrsAfterDot(n, real).filter(a => a.startsWith(typed));
+assert.equal(attrsAfterDot('Pump', real)[0], 'state', 'the main value comes first');
+assert.deepEqual(dot('Pump', 'st'), ['state']);
+assert.deepEqual(dot('Pump', 'v'), ['visible']);
+assert.deepEqual(dot('Pump', 'h'), ['height', 'hidden']);
+assert.deepEqual(dot('Pump', 'he'), ['height']);
+assert.deepEqual(attrsAfterDot('sub_Fill', real), ['running']);
+assert.deepEqual(attrsAfterDot('n', real, new Set(['n'])), ['precision']);
+console.log('dot attributes ok');

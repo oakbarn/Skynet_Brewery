@@ -178,6 +178,15 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   return done();
 }
 
+// the attributes offered after a dot (Pump.st -> state): the main value first, then the others A to Z.
+// Typing after the dot narrows them by their first letters (.h -> hidden, height; .he -> height).
+export function attrsAfterDot(name, words, declared = new Set()) {
+  if (declared.has(name)) return ['precision'];
+  const el = words?.elements?.find(e => e.name === name);
+  if (el) return [...new Set([el.main, ...(el.attrs || [])].filter(Boolean))];
+  return words?.processes?.includes(name) ? PROCESS_ATTRS : null;
+}
+
 export function attachAutofill(ta, box, words) {
   let items = [], sel = 0, ctx = null, skip = null, busy = false;
   const ghost = document.createElement('div');
@@ -202,12 +211,7 @@ export function attachAutofill(ta, box, words) {
     } finally { busy = false; }
   }
 
-  function attrsFor(name) {
-    if (declared().has(name)) return ['precision'];
-    const el = words()?.elements?.find(e => e.name === name);
-    if (el) return el.attrs;
-    return words()?.processes?.includes(name) ? PROCESS_ATTRS : null;
-  }
+  const attrsFor = name => attrsAfterDot(name, words(), declared());
 
   // where the cursor is, in pixels inside the editor
   function caret() {
@@ -283,7 +287,9 @@ export function attachAutofill(ta, box, words) {
         skip = { pos: ta.selectionStart, rest: hits[0].slice(typed.length) + tail };
         return;
       }
-      return show(hits.map(a => ({ text: a + (atStart ? ' = ' : ''), label: a })), p - typed.length, 'attr');
+      const el = words()?.elements?.find(e => e.name === name);
+      const hint = a => a === el?.main ? 'the same as the name alone' : el?.bools?.includes(a) ? 'true or false' : '';
+      return show(hits.map(a => ({ text: a + (atStart ? ' = ' : ''), label: a, hint: hint(a) })), p - typed.length, 'attr');
     }
     const s = suggest(line, words(), ta.value.slice(0, p), ta.value, forced);
     if (!s) return close();

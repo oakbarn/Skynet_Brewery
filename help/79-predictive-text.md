@@ -19,6 +19,19 @@ The best pick is also shown in **gray after the cursor**. To take it:
 | **Esc** | Closes the list |
 | Click or tap | Takes that pick |
 
+## After a dot: attributes
+
+Type a name and a dot, and the list shows that item's attributes, with its main value first (`.state` for a pump, `.value` for a probe). Each letter you type narrows the list to the attributes that start with those letters:
+
+| You type | The list shows |
+|---|---|
+| `Pump.` | every attribute of Pump, `state` first |
+| `Pump.h` | `height`, `hidden` |
+| `Pump.he` | only `height`, so it is filled in by itself |
+| `Pump.st` | only `state`, filled in by itself |
+
+At the start of a line the pick also gets ` = ` after it (`Pump.state = `); inside an `if` or a `wait` you get just the attribute.
+
 ## Ctrl+Space or the Suggest button: what can go here
 
 Press **Ctrl+Space** (on a phone or tablet, tap **💡 Suggest** above the editor) to open the list even before you type a letter. It shows only what can go at that spot:
