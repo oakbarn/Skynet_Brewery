@@ -33,8 +33,8 @@ The words of a Process are colored by what they do:
 | Blue | Commands and their words | `if`, `wait`, `start`, `new value`, `true`, `now` |
 | Magenta | Devices (on a port of a PLC) | `Pump_Red`, `HLT_Temp` |
 | Teal | Widgets (only in the app) | `tm_Mash`, `alm_Hops` |
-| Purple | vKonstants | `vKV_Strike_Target` |
-| Red | vAPI | `vAV_HLT_Target` |
+| Purple | gKonstants | `gKV_Strike_Target` |
+| Red | gAPI | `gAV_HLT_Target` |
 | Black on white | Variables made in this Process | `new value count`, then `count` |
 | Olive | Names of Processes | `start sub_Fill` |
 | Orange | Operators | `=  +  -  *  /  <  >  ==  and  or  not` |
@@ -43,7 +43,7 @@ The words of a Process are colored by what they do:
 | Green | Comments | `// note` |
 | Gray | Labels and attributes | `[Mash]`, `goto Mash`, `tm_Mash.visible` |
 
-A name that is not a Device, Widget, vKonstant, vAPI, variable or Process stays plain. That is a quick way to spot a typo.
+A name that is not a Device, Widget, gKonstant, gAPI, variable or Process stays plain. That is a quick way to spot a typo.
 
 Press **Color key** to see the list on screen. The **Colors** switch turns the colors off and on for you only (other people keep their own choice). With the phone or PC in dark mode the colors are a little lighter so they are easy to read.
 
@@ -75,7 +75,7 @@ What is saved is what you see in the editor, even before you press **Save**.
 
 ## Colors in Notepad++
 
-**Notepad++ colors file** makes `Skynet_Process_Notepad++.xml` with the same colors as the panel and the names of your own Devices, Widgets, vKonstants, vAPI, variables and Processes. When you add new names, save the file again and import it again.
+**Notepad++ colors file** makes `Skynet_Process_Notepad++.xml` with the same colors as the panel and the names of your own Devices, Widgets, gKonstants, gAPI, variables and Processes. When you add new names, save the file again and import it again.
 
 To use it on a Windows PC:
 
@@ -85,7 +85,7 @@ To use it on a Windows PC:
 4. Close Notepad++ and open it again.
 5. Open a Process (a `.txt` file in the `scripts` folder), then click **Language** and pick **Skynet Process** near the bottom of the list.
 
-A general file that colors commands, comments, numbers, text, operators and names starting with `vK` (vKonstants) and `vA` (vAPI) is in the panel folder as `docs/Skynet_Process_Notepad++.xml`.
+A general file that colors commands, comments, numbers, text, operators and names starting with `gK` (gKonstants) and `gA` (gAPI), and the older `vK` and `vA` names too, is in the panel folder as `docs/Skynet_Process_Notepad++.xml`.
 
 ## Delete and the Recycle Bin
 

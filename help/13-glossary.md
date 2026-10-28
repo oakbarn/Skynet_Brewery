@@ -30,7 +30,7 @@
 
 **Hose**: a flexible pipe that bends in curves, with an IP (a coupling) at both ends. See [Pipes, hoses and reducers](24-pipes-and-hoses).
 
-**Global**: BruControl's variable class. The panel turns Globals into vKonstant or vAPI variables when they are imported.
+**Global**: BruControl's variable class. The panel turns Globals into gKonstant or gAPI variables when they are imported.
 
 **imagePath_1, _2, _3**: the three picture paths of an item. `background = 1, 2 or 3` picks one; `name.image = "path"` changes imagePath_1. See [Pictures on items](25-picture-paths).
 
@@ -62,9 +62,9 @@
 
 **Tailscale**: a free private network between your own devices, for using the panel away from home safely. See [Installing Tailscale on Windows](00-tailscale-windows).
 
-**vAPI**: a variable for processes, the screen, the API and the database. Names start with `vA`.
+**gAPI**: a variable for processes, the screen, the API and the database. Suggested names start with `gA_` (older names may start with `vA_`; they still work).
 
-**vKonstant**: a variable for processes and the screen only. Names start with `vK`.
+**gKonstant**: a variable for processes and the screen only. Suggested names start with `gK` (`gKV_`, `gKB_` ...; older names may start with `vK`; they still work).
 
 **Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
 

@@ -90,7 +90,7 @@ control.start();
 hw.onSimStep = t => control.tick(t);                         // a skip ahead runs the controls between simulator steps
 const timerDt = clock.stepper();
 setInterval(() => store.tickTimers(timerDt() / 1000), 100);   // timers follow the clock (faster in simulation mode)
-setInterval(() => store.pollFiles(), 1000);            // Long String vKonstants follow their text files
+setInterval(() => store.pollFiles(), 1000);            // Long String gKonstants follow their text files
 store.on('warn', m => engine.print('system', m));
 store.on('sdcard', m => { engine.print('system', m); broadcast('alert', { text: m }); });   // an SD card in an Ethernet Mega's shield (Skynet Rule 6.11)
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
@@ -131,7 +131,7 @@ store.on('change', (name, prop, v) => {
 });
 setInterval(flush, 150);
 
-// Push Buttons (vKonstant) are on only while a finger or mouse holds them. The browser repeats "down"
+// Push Buttons (gKonstant) are on only while a finger or mouse holds them. The browser repeats "down"
 // every 0.5 s while held; if it goes quiet (closed tab, lost WiFi) the button lets go by itself.
 const holds = new Map();
 function hold(name, down) {
@@ -260,7 +260,7 @@ function mqttView() {
   return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, label: e.label ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
 }
 
-// The API has vAPI variables only (never Shared or vKonstant)
+// The API has gAPI variables only (never Shared or gKonstant)
 const apiVars = () => store.list().filter(isApiVar).map(e => ({ name: e.name, type: e.dataType, class: e.type, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
 
 function csv(rows) {
@@ -355,7 +355,8 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown route');
   }
 
-  // ===== Public API: vAPI only (Shared and vKonstant variables are never exposed). /api/globals is the old address of /api/vapi =====
+  // ===== Public API: gAPI only (Shared and gKonstant variables are never exposed). /api/gapi is the address;
+  //       /api/vapi and /api/globals are its old addresses and still work =====
   // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
     if (!apiKeyOk(req, url)) {
@@ -364,20 +365,20 @@ async function route(req, res) {
         if (!roleAtLeast(me.role, m === 'GET' ? 'viewer' : 'operator')) return fail(res, 403, 'Your account is view only');
       } else if (!(m === 'GET' && isPrivateAddress(ip))) return fail(res, 401, 'Missing or wrong X-API-Key');
     }
-    if ((p === '/api/globals' || p === '/api/vapi') && m === 'GET') return ok(res, apiVars());
-    if ((p === '/api/globals' || p === '/api/vapi') && (m === 'POST' || m === 'PUT')) {
+    if (['/api/gapi', '/api/vapi', '/api/globals'].includes(p) && m === 'GET') return ok(res, apiVars());
+    if (['/api/gapi', '/api/vapi', '/api/globals'].includes(p) && (m === 'POST' || m === 'PUT')) {
       const body = await jsonBody(req); const done = [], errors = [];
       for (const [n, v] of Object.entries(body)) {
         const el = store.get(n);
-        if (!isApiVar(el)) { errors.push(`${n}: not a vAPI`); continue; }
+        if (!isApiVar(el)) { errors.push(`${n}: not a gAPI`); continue; }
         try { store.setProp(n, 'value', v, 'api'); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); }
       }
       return ok(res, { ok: !errors.length, set: done, errors });
     }
-    let g = /^\/api\/(?:globals|vapi)\/(.+)$/.exec(p);
+    let g = /^\/api\/(?:gapi|globals|vapi)\/(.+)$/.exec(p);
     if (g) {
       const n = cleanName(g[1]), el = store.get(n);
-      if (!isApiVar(el)) return fail(res, 404, `No vAPI named "${n}"`);
+      if (!isApiVar(el)) return fail(res, 404, `No gAPI named "${n}"`);
       if (m === 'GET') return ok(res, { name: n, type: el.dataType, class: el.type, value: plain(store.getProp(n, 'value')) });
       if (m === 'PUT' || m === 'POST') {
         const t = await readBody(req); let v = t;
@@ -433,7 +434,7 @@ async function route(req, res) {
   if (p === '/ui/hold' && m === 'POST') {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
-    // a Push Button vKonstant, or an output or switch set to "push button (on while held)" (an LED momentary button)
+    // a Push Button gKonstant, or an output or switch set to "push button (on while held)" (an LED momentary button)
     const push = el && ((el.type === 'vKonstant' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
     if (!push) return fail(res, 400, `"${name}" is not a Push Button`);
     hold(el.name, down);

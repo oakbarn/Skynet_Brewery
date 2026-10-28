@@ -3,8 +3,8 @@
 //   cmd   commands (if, wait, start, new value ...) and their words (true, false, now)   blue
 //   dev   Devices (tied to a port on a PLC)                                            magenta
 //   wid   Widgets (timers, alarms, labels ... app only)                                 teal
-//   vk    vKonstants                                                                    purple
-//   vapi  vAPI                                                                          red
+//   vk    gKonstants                                                                    purple
+//   vapi  gAPI                                                                          red
 //   var   variables made with "new value x" ...                                         black on white
 //   proc  names of Processes (start my_Process)                                         olive
 //   op    operators  = + - * / < > ! ^ ( ) , . ++ -- { } ;  and, or, not                 orange
@@ -22,7 +22,7 @@ export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait
   'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime'];
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
 export const LOGIC = ['and', 'or', 'not'];
-// element types that sit on a PLC port: Devices. Every other type (but vKonstant and vAPI) is a Widget.
+// element types that sit on a PLC port: Devices. Every other type (but gKonstant and gAPI) is a Widget.
 export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid'];
 const CMD = new Set(COMMANDS), CONST = new Set(CONSTANTS), LOG = new Set(LOGIC);
 
@@ -31,7 +31,7 @@ export const COLORS = {
   light: { cmd: '#0000FF', dev: '#D000D0', wid: '#00838F', vk: '#7B1FA2', vapi: '#E00000', var: '#000000', varBg: '#FFFFFF', proc: '#6B8E23', op: '#D35400',
     str: '#A0522D', num: '#9A6700', com: '#008000', lab: '#455A64', attr: '#607D8B', text: '#000000', bg: '#FFFFFF' },
 };
-export const LEGEND = [['cmd', 'Commands'], ['dev', 'Devices'], ['wid', 'Widgets'], ['vk', 'vKonstants'], ['vapi', 'vAPI'], ['var', 'Variables'], ['proc', 'Processes'],
+export const LEGEND = [['cmd', 'Commands'], ['dev', 'Devices'], ['wid', 'Widgets'], ['vk', 'gKonstants'], ['vapi', 'gAPI'], ['var', 'Variables'], ['proc', 'Processes'],
   ['op', 'Operators'], ['str', 'Text in quotes'], ['num', 'Numbers and times'], ['com', 'Comments'], ['lab', 'Labels'], ['attr', 'Attributes']];
 
 export function elementClass(type) {
@@ -169,8 +169,8 @@ ${css}
 
 
 // Notepad++ "User Defined Language" file: Language > User Defined Language > Define your language > Import.
-// Made from this brewery's names (Devices, Widgets, vKonstants, vAPI, Processes) and the variables made in its Processes.
-// Without words it is a general file: vKonstants by their vK prefix and vAPI by vA.
+// Made from this brewery's names (Devices, Widgets, gKonstants, gAPI, Processes) and the variables made in its Processes.
+// Without words it is a general file: gKonstants by their gK prefix and gAPI by gA (the older vK / vA names too).
 export function notepadPlusPlus(words, texts = []) {
   const k = COLORS.light, hex = c => c.replace('#', '');
   const ok = n => /^[A-Za-z_][A-Za-z0-9_]*$/.test(n);
@@ -180,8 +180,8 @@ export function notepadPlusPlus(words, texts = []) {
   const kw = [
     [...COMMANDS, ...CONSTANTS].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
     group('dev'),
-    general ? 'vK' : group('vk'),
-    general ? 'vA' : group('vapi'),
+    general ? 'gK vK' : group('vk'),
+    general ? 'gA vA' : group('vapi'),
     vars,
     group('wid'),
     (words?.processes ?? []).filter(ok).join(' '),

@@ -213,7 +213,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAV_Strike_Volume",
+   "name": "gAV_Strike_Volume",
    "type": "vAPI",
    "kind": "value",
    "x": 0,
@@ -227,7 +227,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAV_Mash_pH",
+   "name": "gAV_Mash_pH",
    "type": "vAPI",
    "kind": "value",
    "x": 175,
@@ -241,7 +241,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAV_PreBoil_Volume",
+   "name": "gAV_PreBoil_Volume",
    "type": "vAPI",
    "kind": "value",
    "x": 350,
@@ -255,7 +255,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAV_PreBoil_Gravity",
+   "name": "gAV_PreBoil_Gravity",
    "type": "vAPI",
    "kind": "value",
    "x": 0,
@@ -269,7 +269,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAV_PostBoil_Volume",
+   "name": "gAV_PostBoil_Volume",
    "type": "vAPI",
    "kind": "value",
    "x": 175,
@@ -283,7 +283,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAV_OG",
+   "name": "gAV_OG",
    "type": "vAPI",
    "kind": "value",
    "x": 350,
@@ -297,7 +297,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAV_Fermenter_Volume",
+   "name": "gAV_Fermenter_Volume",
    "type": "vAPI",
    "kind": "value",
    "x": 0,
@@ -311,7 +311,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "vAS_Brew_Notes",
+   "name": "gAS_Brew_Notes",
    "type": "vAPI",
    "kind": "string",
    "x": 175,

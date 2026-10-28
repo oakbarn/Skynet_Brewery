@@ -79,7 +79,7 @@
       "kind": "value"
     },
     {
-      "name": "vAV_Kettle_Temp",
+      "name": "gAV_Kettle_Temp",
       "type": "vAPI",
       "precision": 1,
       "units": "°F",
@@ -1057,7 +1057,7 @@
       "kind": "string"
     },
     {
-      "name": "vKSW_Testing",
+      "name": "gKSW_Testing",
       "type": "vKonstant",
       "kind": "switch",
       "label": "Testing mode",
@@ -1070,7 +1070,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKPB_Jog_Pump",
+      "name": "gKPB_Jog_Pump",
       "type": "vKonstant",
       "kind": "pushbutton",
       "label": "Jog pump (hold)",
@@ -1081,7 +1081,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKMB_Ping",
+      "name": "gKMB_Ping",
       "type": "vKonstant",
       "kind": "momentary",
       "label": "Ping",
@@ -1092,7 +1092,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKB_Ready",
+      "name": "gKB_Ready",
       "type": "vKonstant",
       "kind": "bool",
       "label": "Ready",
@@ -1103,7 +1103,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKV_Strike_Target",
+      "name": "gKV_Strike_Target",
       "type": "vKonstant",
       "kind": "value",
       "label": "Strike target",
@@ -1118,7 +1118,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKT_Mash_Rest",
+      "name": "gKT_Mash_Rest",
       "type": "vKonstant",
       "kind": "time",
       "label": "Mash rest",
@@ -1130,7 +1130,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKDT_Brew_Day",
+      "name": "gKDT_Brew_Day",
       "type": "vKonstant",
       "kind": "datetime",
       "label": "Brew day",
@@ -1141,7 +1141,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKS_Brewer",
+      "name": "gKS_Brewer",
       "type": "vKonstant",
       "kind": "string",
       "label": "Brewer",
@@ -1153,7 +1153,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vK_Burner_Pic",
+      "name": "gK_Burner_Pic",
       "type": "vKonstant",
       "kind": "graphic",
       "x": 40,
@@ -1165,7 +1165,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKL_Brew_Notes",
+      "name": "gKL_Brew_Notes",
       "type": "vKonstant",
       "kind": "longstring",
       "label": "Brew notes (media/notes/brew_notes.txt)",
@@ -1177,7 +1177,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAV_HLT_Target",
+      "name": "gAV_HLT_Target",
       "type": "vAPI",
       "kind": "value",
       "label": "HLT target",
@@ -1196,7 +1196,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAS_Batch_Status",
+      "name": "gAS_Batch_Status",
       "type": "vAPI",
       "kind": "string",
       "label": "Batch status",
@@ -1212,7 +1212,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAB_Pump_Lock",
+      "name": "gAB_Pump_Lock",
       "type": "vAPI",
       "kind": "bool",
       "label": "Pump lock",
@@ -1227,7 +1227,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAT_Boil_Left",
+      "name": "gAT_Boil_Left",
       "type": "vAPI",
       "kind": "time",
       "label": "Boil left",
@@ -1242,7 +1242,7 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vADT_Last_Brew",
+      "name": "gADT_Last_Brew",
       "type": "vAPI",
       "kind": "datetime",
       "label": "Last brew",
