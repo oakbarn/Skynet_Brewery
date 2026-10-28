@@ -73,6 +73,8 @@ A pipe fitting turned by hand and a pseudo Device (Rule 5.15, Help 87). Name Man
 
 In a Process: `ManualValve_1.state = true` (or `ManualValve_1 = true`) does not change it. It shows "✋ OPEN ... by hand, then click it on the ... Tab to confirm" at the top of every screen, the valve blinks, and the Process waits until it is clicked to that state. Reading it (`if ManualValve_1 == true`) works as for any Device.
 
+**Snap to align** (2026-10-28, Help 86): in Edit layout, anything with IPs that is dragged so one of its IPs comes within 10 px of another IP on the Tab jumps so the two sit exactly on each other (hold Alt to place it without the jump). On Skynet valve pictures (motorized ball, manual ball, butterfly, gas solenoid) the two IPs sit on the picture's pipe ends, not the middle of the box's sides.
+
 ### Pipe and Hose
 Drawn between IPs. When a pump or powered valve on it is on, flow runs from the source, through the pump, into the Pipe or Hose.
 
@@ -380,4 +382,5 @@ Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB
 ## Change log
 - 2026-10-27: First version.
 - 2026-10-27: Display Name became Label (`label`) with a Show label switch; Picture became the Picture Widget with Turns on with; imagePath_2 / _3 editable again; On overlay preferred (thread "Apply clean-up requests and standards").
+- 2026-10-28: IP Snap to align (10 px) and IPs on the pipe ends of Skynet valve pictures (thread "Lock Skynet Widget Templates and IPs", Help 86).
 - 2026-10-28: Pipe fitting Widgets (only X, Y, Width, Height and Autosize to pipe; no Clone) and the Manual Valve Widget (click-only .state, Process asks by hand, open overlay) (thread "Simplify pipe fittings and Manual Valves", Help 87).
