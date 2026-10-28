@@ -1,6 +1,6 @@
 # Switching and cloning Schemas
 
-A **Schema** is one whole brewery setup: its tabs, devices, elements, pictures, pipes, probes, autostart list, and the Equipment Profile of each Tab. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
+A **Schema** is one whole brewery setup: its tabs, Devices, Widgets, pictures, pipes, probes, autostart list, and the Equipment Profile of each Tab. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 
 ## Where to pick the Schema
 

@@ -14,7 +14,7 @@ A reference list of every Device the panel can make today, with its settings. Pa
 1. **Interface**: the board it is wired to.
 2. **Device Type**: picked from its Type ID list (section 3).
 3. **Available Ports / Pins**: only the free pins on that Interface that fit this Device, best fit first.
-4. **Label**: the Display Name shown on the Tab (for example "Fly Sparge").
+4. **Label**: the text shown on the Tab (for example "Fly Sparge"); it was called Display Name. A **Show label** switch hides it.
 5. **Suggested Name**: filled in for you. An Admin may type another.
 
 Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properties open. **Save Build** sends it to a Tab.
@@ -55,7 +55,7 @@ Example: `MB_25_E_L_Vlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID E_L_Vl
 - The pin list always offers plain pins first to a relay, PWM pins to a PWM output, Counter pins to a flow meter, A0-A15 to analog sensors.
 
 ### Settings every Device has (Properties)
-Name, Display name, Tab, X, Y, Width, Height, Lock position, Background picture (1, 2, 3 or none), imagePath_1/2/3, Visible, Hidden (locked), Hide name, Hide value, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and the text box settings (Fore/Back color, Alignment, Word wrap, Name font and size, Name/Value colors and backgrounds, Name/Value alignment, Border).
+Name, Label (`label`, was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1, 2, 3 or none), imagePath_1/2/3 (all editable, as in BruControl), Visible, Hidden (locked), Hide value, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and the text box settings (Fore/Back color, Alignment, Word wrap, Name font and size, Name/Value colors and backgrounds, Name/Value alignment, Border).
 
 Devices with on/off states also have **Picture when on / off**, an **On overlay** picture, and **Text when on / off**. New ones start with a green LED for on and a red LED for off (pumps and valves bring their own pictures).
 
@@ -368,4 +368,5 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-27: RTD (PT100 / PT1000) CS pins on a Mega limited to D14-D17, D22-D39, D41-D43, D47-D49, D53 (Skynet Rule 6.9).
 - 2026-10-27: D10 kept for the Ethernet shield on an Ethernet Mega; no USB to Ethernet change while D10 is used (Skynet Rule 6.10).
 - 2026-10-27: D4 warning and SD card check (Skynet Rule 6.11).
+- 2026-10-27: Display name became Label (`label`) with a Show label switch (it replaces Hide name); imagePath_2 / _3 editable again; PID, Hysteresis and Duty Cycle are On while Enabled (thread "Apply clean-up requests and standards").
 - 2026-10-28: Raspberry Pi GPIO pins built (Board Raspberry Pi, Help 78); removed from Reserved.

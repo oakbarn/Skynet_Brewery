@@ -128,7 +128,7 @@ Alexa, Google Home and Siri do not talk MQTT themselves. **Home Assistant** sits
    * **Running processes**, **Stop all processes**, and a **Start** button for each process you allowed,
    * read-only vAPI variables such as your message panel or *Process status*, and any vAPI variable you tick.
 
-Name things the way you will say them: the **Display name** of each element becomes its name in Home Assistant and on your speakers.
+Name things the way you will say them: the **Label** of each element becomes its name in Home Assistant and on your speakers.
 
 ### Alexa (start here)
 
