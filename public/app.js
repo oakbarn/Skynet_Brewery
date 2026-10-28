@@ -4,7 +4,7 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, RTD_CS_PINS } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel } from './templates.js';
@@ -1937,7 +1937,7 @@ async function newDeviceDialog(e, hint) {
       if (!touched) nameBox.value = last;
       // the Port list: only the free pins on this Interface that fit this Device Type, best first (Fritz, 2026-10-23)
       const free = h('datalist', { id: 'pins-free' }); body.append(free);
-      const fillFree = w => free.replaceChildren(...(w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : []).map(p => { const t = /^A/.test(p) ? `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)` : `D${p}` + (pinTag(p) ? `  (${pinTag(p)})` : ''); return h('option', { value: p, label: t }, t); }));
+      const fillFree = w => free.replaceChildren(...(w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : []).map(p => { const t = pinLabel(p, boardOfDevice(w, S.config.devices)); return h('option', { value: p, label: t }, t); }));
       fillFree(work);
       body.oninput = body.onchange = ev => {
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
@@ -2029,7 +2029,7 @@ function rimsPinLists(w, g) {
   lists.rimsTemp = lists.rimsTemp.filter(p => p !== String(w.heatPin ?? ''));
   for (const [k, pins] of Object.entries(lists)) {
     $('#pins-' + k)?.remove();
-    document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => { const t = /^A/.test(p) ? `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)` : `D${p}` + (pinTag(p) ? `  (${pinTag(p)})` : ''); return h('option', { value: p, label: t }, t); })));
+    document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: w.iface }, S.config.devices)); return h('option', { value: p, label: t }, t); })));
   }
 }
 // make the RIMS tube's (or kettle's) own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Label.
@@ -4174,7 +4174,7 @@ function renderDevices() {
     }) }, ...BOARDS.map(([v, t]) => h('option', { value: v, ...(v === boardOf(cfg || d) ? { selected: true } : {}) }, t)));
     const heaters = S.config.elements.filter(e => e.device === d.name && isHeating(e)).map(e => e.name);
     const rt = rating(cfg || d, heaters.length > 0);
-    const netHeat = heaters.length && ['ethernet', 'esp32'].includes(linkOf(cfg || d));
+    const netHeat = heaters.length && rt.level !== 'best' && ['ethernet', 'esp32'].includes(linkOf(cfg || d));
     const rateCell = h('td', { class: 'linkRating ' + rt.level, title: rt.text + (netHeat ? `\nHeating Devices on this network link: ${heaters.join(', ')}` : '') },
       rt.text ? (rt.level === 'poor' || netHeat ? '⚠ ' : '') + rt.text.split(':')[0] + (netHeat ? ` (heating: ${heaters.join(', ')})` : '') : '');
     // lost link delay: the board turns all outputs OFF when it hears nothing from the Brain this long
@@ -4245,8 +4245,8 @@ $('#addDev').onclick = guard(async () => {
   $('#devName').value = ''; $('#devId').value = ''; $('#devId').placeholder = 'MB';
 });
 // the connection rating for the board and Type being added
-const showDevRating = () => { const r = rating({ board: $('#devBoard').value, type: $('#devType').value }); $('#devRating').className = 'linkRating ' + r.level; $('#devRating').textContent = r.text; };
-$('#devBoard').onchange = showDevRating; $('#devType').addEventListener('change', showDevRating); showDevRating();
+const showDevRating = () => { const r = rating({ board: $('#devBoard').value, type: $('#devType').value, host: $('#devHost').value.trim() }); $('#devRating').className = 'linkRating ' + r.level; $('#devRating').textContent = r.text; };
+$('#devBoard').onchange = showDevRating; $('#devType').addEventListener('change', showDevRating); $('#devHost').addEventListener('input', showDevRating); showDevRating();
 // the Interface ID box shows the ID a name would get (first letters of its first two words), until one is typed
 $('#devName').addEventListener('input', () => { $('#devId').placeholder = defaultInterfaceId($('#devName').value, S.config.devices.map(x => x.id)) || 'MB'; });
 
