@@ -35,7 +35,7 @@ export function elementTopic(e) {
 }
 
 // a Skynet pipe fitting: a tee, elbow, U, reducer or End Cap and nothing else (the same test as isPlainUnit in app.js)
-const plainFit = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap'].includes(f.kind) && !f.thermowell));
+const plainFit = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check'].includes(f.kind) && !f.thermowell));
 // a graphic: equipment, an IP or fitting, a pipe or hose, a picture or a text
 export function graphicTopic(g) {
   if (!g) return null;

@@ -4,7 +4,7 @@ Fritz, 2026-10-28: pipe fittings are kept simple, and a Manual Valve is a Widget
 
 ## Pipe fittings
 
-A **tee is only a tee**, an elbow only an elbow, a reducer only a reducer. This covers the fittings from **Elbows, Tees …** on the Edit layout bar (tee, 90° and 45° elbow, cross, straight piece, coupling, cap) and the Skynet pipe fittings made from a Template (Tee, Instrument_Tee, Elbow_90, Elbow_45, U_Bend, Reducer, End_Cap).
+A **tee is only a tee**, an elbow only an elbow, a reducer only a reducer. This covers the fittings from **Elbows, Tees …** on the Edit layout bar (tee, 90° and 45° elbow, cross, straight piece, coupling, cap) and the Skynet pipe fittings made from a Template (Tee, Instrument_Tee, Elbow_90, Elbow_45, U_Bend, Reducer, End_Cap, Check_Valve).
 
 A pipe fitting has no settings but:
 
@@ -19,7 +19,8 @@ A pipe fitting has no settings but:
 - **Turn or flip it with the turn buttons** on the Edit layout bar (they show while it is picked). They are no longer in its Properties.
 - **Pipe fittings have no Clone**: not on the Tab, and not in the Template pop-up of a Skynet pipe fitting Template. Add another one instead.
 - An **End Cap** has X, Y, Width and Height but no Autosize (it sits on an opening, not on a pipe).
-- Fittings that do more than join pipes (a valve, a check valve, a flow meter, a tee with a thermowell) keep their own settings: see [Skynet fittings](60-skynet-fittings).
+- A **check valve** is a pipe fitting too: flow only goes one way, and its orientation (the arrow on its picture) shows which way. Turn or flip it to point the arrow.
+- A valve or flow meter in a fitting is a **Device**, and a tee with a thermowell (or a thermowell on a vessel IP) is a kind of **Temperature Probe**, so those keep their own settings for now: see [Skynet fittings](60-skynet-fittings).
 
 ## The Manual Valve Widget
 
