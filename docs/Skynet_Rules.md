@@ -522,10 +522,21 @@ Connection Simulator (its real connection is kept to switch to later), and the p
 Simulator mode and says so, so nothing real is switched. (2026-10-28, thread "Add sample Schemas to
 the Schema list", Help 83)
 
+10.7 **The Simulator bar** (yellow 🧪 SIMULATION bar) can be hidden and shown again with **▴ Hide /
+▾ Show** on the bar, per screen; a thin 🧪 SIMULATION strip always stays. Hiding changes no setting.
+**Each time the Simulator is switched on, the bar opens at 25× speed with Auto skip on**; after that
+the user's choices stay until the next switch on. (2026-10-28, thread "Improve the Simulator bar
+defaults", Help 85)
+
+10.8 **The 1, 2 and 3 vessel Sample Schemas can be cloned to a User Schema** (Clone a Schema lists
+them after the user's own Schemas, as 🧪 Sample). The clone is a normal User Schema, always loaded at
+once, on the simulator (Rule 10.6). The OakBarn Brewery sample is not offered for now. (2026-10-28,
+thread "Improve the Simulator bar defaults", Help 85)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **84**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **86**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -658,3 +669,6 @@ and vKonstant to gAPI and gKonstant")
   gKonstant List. Help 84; next free Help number 85. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Rule 1.16 now renames older vK_ / vA_ names; added Rule 15.2 (everything conforms to the latest
   standard, no backward compatibility). The OakBarn BruControl sample is out of the shipped samples for now.
+- 2026-10-28: Added Rules 10.7 (Simulator bar Hide / Show; starts at 25× with Auto skip on each time the Simulator is
+  switched on) and 10.8 (1, 2 and 3 vessel samples clone to a User Schema). Help 85; next free Help number 86.
+  (thread "Improve the Simulator bar defaults")

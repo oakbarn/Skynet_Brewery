@@ -555,8 +555,12 @@ async function route(req, res) {
   const smp = /^\/ui\/samples\/([\w-]+)\/load$/.exec(p);
   if (smp && m === 'POST') {
     const meta = listSamples(SAMPLES).find(x => x.id === smp[1]); if (!meta) return fail(res, 404, 'No such sample');
-    // a sample comes in as a new Schema; the pick on the very first start fills (and names) the one you have
-    if (!store.config.chooseSample) { hw.allOff?.(); schemas.startNew(meta.name); } else if (store.config.schema) store.config.schema.name = schemas.freeName(meta.name);
+    // a sample comes in as a new Schema; the pick on the very first start fills (and names) the one you have.
+    // Clone a Schema can name it (Fritz, 2026-10-28: the 1, 2 and 3 vessel samples clone to a User Schema like any other)
+    const b = await jsonBody(req).catch(() => ({})), want = String(b?.name ?? '').trim();
+    if (want && schemas.list().some(x => x.name.toLowerCase() === want.toLowerCase())) return fail(res, 400, `There is already a Schema called "${want}"`);
+    const sname = want || meta.name;
+    if (!store.config.chooseSample) { hw.allOff?.(); schemas.startNew(sname); } else if (store.config.schema) store.config.schema.name = schemas.freeName(sname);
     // its Interfaces are all simulated, and the whole panel goes to Simulator mode too, as for a new empty Schema (Rule 10.5)
     const wasSim = sim.cfg.on;
     if (!wasSim) sim.save({ on: true });

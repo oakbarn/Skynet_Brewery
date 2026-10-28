@@ -18,7 +18,7 @@ Turning it off does the same in reverse: every Process stops, every output turns
 
 ## Making time go faster
 
-**Speed** sets how fast the clock runs: normal, 2×, 5×, 10× and up to 120× faster. At 10×, a 60 minute mash takes 6 minutes. Process `sleep` lines, timers, PID and duty cycle outputs, and the simulator's heating and cooling all follow it. Change it in Settings or in the yellow bar.
+**Speed** sets how fast the clock runs: normal, 2×, 5×, 10×, 25× and up to 120× faster. Switching the Simulator on starts at 25× with Auto skip on (Help: [The Simulator bar](85-simulator-bar)). At 10×, a 60 minute mash takes 6 minutes. Process `sleep` lines, timers, PID and duty cycle outputs, and the simulator's heating and cooling all follow it. Change it in Settings or in the yellow bar.
 
 ## Skipping ahead
 
