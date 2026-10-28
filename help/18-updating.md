@@ -4,7 +4,7 @@
 
 | Folder | What is in it | On an update |
 |---|---|---|
-| `config` | Your tabs, elements, devices and settings (`brewery.json`) | **Kept.** Not in the zip. |
+| `config` | Your tabs, Devices, Widgets and settings (`brewery.json`) | **Kept.** Not in the zip. |
 | `data` | Brew log, saved values, users, passwords, sign-ins, the recovery code | **Kept.** Not in the zip. |
 | `media` | Your pictures and sounds | **Kept.** Not in the zip. |
 | `scripts` | Your processes | **Kept.** Not in the zip. |

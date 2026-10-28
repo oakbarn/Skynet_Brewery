@@ -1,7 +1,7 @@
 // node --no-warnings test/imagepaths.test.js
 // Picture paths (Fritz, 2026-10-05): imagePath_1, _2, _3 instead of a list of background pictures.
 // background = 1, 2 or 3 picks one (any other number: no picture), name.image = "path" sets imagePath_1 and background = 1,
-// a Process changes only imagePath_1, and after a BruControl import imagePath_2 and _3 are locked.
+// a Process may change imagePath_1, _2 and _3 (as in BruControl again, Fritz 2026-10-27).
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
 import { Store, attrsOf, toImagePaths } from '../lib/store.js'; import { Engine } from '../lib/engine.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpimg'));
@@ -52,10 +52,11 @@ await run('p1', 'my_widget.background = 3\nmy_widget.imagePath_1 = "Images/a.png
 assert.equal(store.getProp('my_widget', 'image'), 'Images/a.png'); assert.equal(String(store.getProp('my_widget', 'background')), '3');
 assert.deepEqual(failed(), []);
 
-// a Process cannot change imagePath_2 or _3: it is told the Skynet way
-await run('p2', 'my_widget.imagePath_2 = "Images/a.png"\n');
-assert.equal(failed().length, 1); assert.match(failed()[0], /^p2: .*only imagePath_1.*my_widget\.image = "path"/);
-assert.equal(store.getProp('my_widget', 'imagepath_2'), 'Images/b.png');
+// a Process may change imagePath_2 and _3 too, as in BruControl (Fritz, 2026-10-27); background picks which shows
+await run('p2', 'my_widget.imagePath_2 = "Images/a.png"\nmy_widget.imagepath_3 = "Images/c.png"\n');
+assert.deepEqual(failed(), []);
+assert.equal(store.getProp('my_widget', 'imagepath_2'), 'Images/a.png');
+assert.equal(store.getProp('my_widget', 'imagepath_3'), 'Images/c.png');
 
 // changes reach the screen
 const seen = [];

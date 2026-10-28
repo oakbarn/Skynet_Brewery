@@ -22,7 +22,7 @@ The table at the top shows each board, its connection rating and whether it is c
 
 ## Putting a device on a tab
 
-In **Tabs > ☰ Menu > Edit layout > Add element**, the list groups devices by kind:
+In **Tabs > ☰ Menu > Edit layout > Add Device / Widget**, the list groups devices by kind:
 
 - **Outputs**: on/off (relays), PWM %, analog 0-10 V or 4-20 mA. A **Pump** and a **Valve** are ready-made outputs with their pictures and flow points already set.
 - **Digital inputs**: switches, float and level switches, flow switches, interlocks, and buttons. A **push button** is ON only while it is held and OFF when released. A **toggle button** stays ON after one press and OFF after the next. A **pulse button** gives one short ON per press.
@@ -30,13 +30,13 @@ In **Tabs > ☰ Menu > Edit layout > Add element**, the list groups devices by k
 - **Analog sensors**: 0-5 V, 0-10 V, 4-20 mA, pressure, level, pH (with two-point calibration).
 - **Flow meters** (pulse) and **vessel scales** (HX711 load cells, with tare and calibration).
 
-A new Device first asks for its **Interface**, **Device Type**, **Port** (only free pins that fit are listed) and **Display name**, and gets a name like `MB_25_P_L_Vlv_Fly_Sparge__SP` ([Interface, Tab and Device names](46-interface-tab-device-names)). **Create** puts it on the Build Tab and opens its properties for the rest; **💾 Save Build ...** then puts it on a Tab. Only outputs of different Device Types can share a port. The properties show only the settings that kind needs, plus the live reading for calibration.
+A new Device first asks for its **Interface**, **Device Type**, **Port** (only free pins that fit are listed) and **Label** (with a **Show label** switch), and gets a name like `MB_25_P_L_Vlv_Fly_Sparge__SP` ([Interface, Tab and Device names](46-interface-tab-device-names)). **Create** puts it on the Build Tab and opens its properties for the rest; **💾 Save Build ...** then puts it on a Tab. Only outputs of different Device Types can share a port. The properties show only the settings that kind needs, plus the live reading for calibration.
 
 ## OneWire probes (DS18B20)
 
-Each probe gets a **number** in the **OneWire probe index**, and temperature elements use that number. Probes are recognised by their ROM id, not by where they sit on the wire.
+Each probe gets a **number** in the **OneWire probe index**, and temperature Devices use that number. Probes are recognised by their ROM id, not by where they sit on the wire.
 
-**To replace a probe:** plug in the new one, find it under **OneWire probes seen**, and pick its ROM id in the old probe's row. Every element using that number follows it; nothing else changes.
+**To replace a probe:** plug in the new one, find it under **OneWire probes seen**, and pick its ROM id in the old probe's row. Every Device using that number follows it; nothing else changes.
 
 ## Safety
 

@@ -75,7 +75,7 @@
     {
       "name": "gblVHop_Max",
       "type": "vKonstant",
-      "displayName": "Hop groups",
+      "label": "Hop groups",
       "kind": "value"
     },
     {
@@ -87,7 +87,7 @@
         "mode": "seconds",
         "every": 10
       },
-      "displayName": "Kettle temp (logged)",
+      "label": "Kettle temp (logged)",
       "kind": "value"
     },
     {
@@ -98,7 +98,7 @@
       "y": 60,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 1",
+      "label": "Hop 1",
       "kind": "string"
     },
     {
@@ -109,7 +109,7 @@
       "y": 60,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 1",
+      "label": "Oz 1",
       "precision": 2,
       "kind": "value"
     },
@@ -121,7 +121,7 @@
       "y": 60,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 1",
+      "label": "Alpha % 1",
       "precision": 1,
       "kind": "value"
     },
@@ -133,7 +133,7 @@
       "y": 60,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 1",
+      "label": "Minutes 1",
       "kind": "value"
     },
     {
@@ -144,7 +144,7 @@
       "y": 60,
       "w": 110,
       "h": 62,
-      "displayName": "Group 1",
+      "label": "Group 1",
       "kind": "value"
     },
     {
@@ -155,7 +155,7 @@
       "y": 132,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 2",
+      "label": "Hop 2",
       "kind": "string"
     },
     {
@@ -166,7 +166,7 @@
       "y": 132,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 2",
+      "label": "Oz 2",
       "precision": 2,
       "kind": "value"
     },
@@ -178,7 +178,7 @@
       "y": 132,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 2",
+      "label": "Alpha % 2",
       "precision": 1,
       "kind": "value"
     },
@@ -190,7 +190,7 @@
       "y": 132,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 2",
+      "label": "Minutes 2",
       "kind": "value"
     },
     {
@@ -201,7 +201,7 @@
       "y": 132,
       "w": 110,
       "h": 62,
-      "displayName": "Group 2",
+      "label": "Group 2",
       "kind": "value"
     },
     {
@@ -212,7 +212,7 @@
       "y": 204,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 3",
+      "label": "Hop 3",
       "kind": "string"
     },
     {
@@ -223,7 +223,7 @@
       "y": 204,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 3",
+      "label": "Oz 3",
       "precision": 2,
       "kind": "value"
     },
@@ -235,7 +235,7 @@
       "y": 204,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 3",
+      "label": "Alpha % 3",
       "precision": 1,
       "kind": "value"
     },
@@ -247,7 +247,7 @@
       "y": 204,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 3",
+      "label": "Minutes 3",
       "kind": "value"
     },
     {
@@ -258,7 +258,7 @@
       "y": 204,
       "w": 110,
       "h": 62,
-      "displayName": "Group 3",
+      "label": "Group 3",
       "kind": "value"
     },
     {
@@ -269,7 +269,7 @@
       "y": 276,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 4",
+      "label": "Hop 4",
       "kind": "string"
     },
     {
@@ -280,7 +280,7 @@
       "y": 276,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 4",
+      "label": "Oz 4",
       "precision": 2,
       "kind": "value"
     },
@@ -292,7 +292,7 @@
       "y": 276,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 4",
+      "label": "Alpha % 4",
       "precision": 1,
       "kind": "value"
     },
@@ -304,7 +304,7 @@
       "y": 276,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 4",
+      "label": "Minutes 4",
       "kind": "value"
     },
     {
@@ -315,7 +315,7 @@
       "y": 276,
       "w": 110,
       "h": 62,
-      "displayName": "Group 4",
+      "label": "Group 4",
       "kind": "value"
     },
     {
@@ -326,7 +326,7 @@
       "y": 348,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 5",
+      "label": "Hop 5",
       "kind": "string"
     },
     {
@@ -337,7 +337,7 @@
       "y": 348,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 5",
+      "label": "Oz 5",
       "precision": 2,
       "kind": "value"
     },
@@ -349,7 +349,7 @@
       "y": 348,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 5",
+      "label": "Alpha % 5",
       "precision": 1,
       "kind": "value"
     },
@@ -361,7 +361,7 @@
       "y": 348,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 5",
+      "label": "Minutes 5",
       "kind": "value"
     },
     {
@@ -372,7 +372,7 @@
       "y": 348,
       "w": 110,
       "h": 62,
-      "displayName": "Group 5",
+      "label": "Group 5",
       "kind": "value"
     },
     {
@@ -383,7 +383,7 @@
       "y": 420,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 6",
+      "label": "Hop 6",
       "kind": "string"
     },
     {
@@ -394,7 +394,7 @@
       "y": 420,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 6",
+      "label": "Oz 6",
       "precision": 2,
       "kind": "value"
     },
@@ -406,7 +406,7 @@
       "y": 420,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 6",
+      "label": "Alpha % 6",
       "precision": 1,
       "kind": "value"
     },
@@ -418,7 +418,7 @@
       "y": 420,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 6",
+      "label": "Minutes 6",
       "kind": "value"
     },
     {
@@ -429,7 +429,7 @@
       "y": 420,
       "w": 110,
       "h": 62,
-      "displayName": "Group 6",
+      "label": "Group 6",
       "kind": "value"
     },
     {
@@ -440,7 +440,7 @@
       "y": 492,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 7",
+      "label": "Hop 7",
       "kind": "string"
     },
     {
@@ -451,7 +451,7 @@
       "y": 492,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 7",
+      "label": "Oz 7",
       "precision": 2,
       "kind": "value"
     },
@@ -463,7 +463,7 @@
       "y": 492,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 7",
+      "label": "Alpha % 7",
       "precision": 1,
       "kind": "value"
     },
@@ -475,7 +475,7 @@
       "y": 492,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 7",
+      "label": "Minutes 7",
       "kind": "value"
     },
     {
@@ -486,7 +486,7 @@
       "y": 492,
       "w": 110,
       "h": 62,
-      "displayName": "Group 7",
+      "label": "Group 7",
       "kind": "value"
     },
     {
@@ -497,7 +497,7 @@
       "y": 564,
       "w": 260,
       "h": 62,
-      "displayName": "Hop 8",
+      "label": "Hop 8",
       "kind": "string"
     },
     {
@@ -508,7 +508,7 @@
       "y": 564,
       "w": 110,
       "h": 62,
-      "displayName": "Oz 8",
+      "label": "Oz 8",
       "precision": 2,
       "kind": "value"
     },
@@ -520,7 +520,7 @@
       "y": 564,
       "w": 110,
       "h": 62,
-      "displayName": "Alpha % 8",
+      "label": "Alpha % 8",
       "precision": 1,
       "kind": "value"
     },
@@ -532,7 +532,7 @@
       "y": 564,
       "w": 110,
       "h": 62,
-      "displayName": "Minutes 8",
+      "label": "Minutes 8",
       "kind": "value"
     },
     {
@@ -543,14 +543,14 @@
       "y": 564,
       "w": 110,
       "h": 62,
-      "displayName": "Group 8",
+      "label": "Group 8",
       "kind": "value"
     },
     {
       "name": "shr_Hop_Slot",
       "type": "shared",
       "dataType": "value",
-      "displayName": "Hop slot (scripts only)"
+      "label": "Hop slot (scripts only)"
     },
     {
       "name": "gblS_Top_Text",
@@ -590,7 +590,7 @@
       "y": 590,
       "w": 510,
       "h": 85,
-      "displayName": "New Brew",
+      "label": "New Brew",
       "look": "dark",
       "fontSize": 30,
       "tap": "script",
@@ -605,7 +605,7 @@
       "y": 680,
       "w": 510,
       "h": 85,
-      "displayName": "Close All Valves?",
+      "label": "Close All Valves?",
       "look": "dark",
       "fontSize": 30,
       "tap": "script",
@@ -692,7 +692,7 @@
       "y": 300,
       "w": 170,
       "h": 80,
-      "displayName": "Mash Tun Out",
+      "label": "Mash Tun Out",
       "look": "led",
       "precision": 1,
       "readOnly": true,
@@ -708,7 +708,7 @@
       "h": 55,
       "device": "SIM",
       "channel": 2,
-      "displayName": "HLT out",
+      "label": "HLT out",
       "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
       "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
       "hideName": true,
@@ -727,7 +727,7 @@
       "h": 55,
       "device": "SIM",
       "channel": 3,
-      "displayName": "MLT in",
+      "label": "MLT in",
       "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
       "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
       "hideName": true,
@@ -746,7 +746,7 @@
       "h": 55,
       "device": "SIM",
       "channel": 23,
-      "displayName": "Back manifold left",
+      "label": "Back manifold left",
       "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
       "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
       "hideName": true,
@@ -765,7 +765,7 @@
       "h": 55,
       "device": "SIM",
       "channel": 4,
-      "displayName": "MLT out",
+      "label": "MLT out",
       "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
       "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
       "hideName": true,
@@ -784,7 +784,7 @@
       "h": 55,
       "device": "SIM",
       "channel": 5,
-      "displayName": "BK in",
+      "label": "BK in",
       "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
       "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
       "hideName": true,
@@ -803,7 +803,7 @@
       "h": 48,
       "device": "SIM",
       "channel": 33,
-      "displayName": "Yellow Pump",
+      "label": "Yellow Pump",
       "look": "dark",
       "subtype": "pump"
     },
@@ -831,7 +831,7 @@
       "h": 48,
       "device": "SIM",
       "channel": 35,
-      "displayName": "Red Pump",
+      "label": "Red Pump",
       "look": "dark",
       "subtype": "pump"
     },
@@ -859,7 +859,7 @@
       "h": 48,
       "device": "SIM",
       "channel": 37,
-      "displayName": "Blue Pump",
+      "label": "Blue Pump",
       "look": "dark",
       "subtype": "pump"
     },
@@ -887,7 +887,7 @@
       "h": 48,
       "device": "SIM",
       "channel": 39,
-      "displayName": "Green Pump",
+      "label": "Green Pump",
       "look": "dark",
       "subtype": "pump"
     },
@@ -915,7 +915,7 @@
       "h": 48,
       "device": "SIM",
       "channel": 41,
-      "displayName": "White Pump",
+      "label": "White Pump",
       "look": "dark",
       "subtype": "pump"
     },
@@ -943,7 +943,7 @@
       "h": 56,
       "device": "SIM",
       "channel": 40,
-      "displayName": "HLT element",
+      "label": "HLT element",
       "imageOn": "Images/Skynet/Other_Equipment/BigMacRElementOn.png",
       "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.png",
       "hideValue": true
@@ -958,7 +958,7 @@
       "h": 100,
       "device": "SIM",
       "channel": 41,
-      "displayName": "Brew Kettle Burner",
+      "label": "Brew Kettle Burner",
       "imageOn": "Images/Skynet/Other_Equipment/BurnerFlame.png",
       "imageOff": "Images/Skynet/Other_Equipment/Burner No Flame.png",
       "hideValue": true,
@@ -974,7 +974,7 @@
       "h": 50,
       "device": "SIM",
       "channel": 42,
-      "displayName": "Cooling water",
+      "label": "Cooling water",
       "look": "dark"
     },
     {
@@ -986,7 +986,7 @@
       "w": 190,
       "h": 95,
       "timerType": "countdown",
-      "displayName": "Whirlpool timer",
+      "label": "Whirlpool timer",
       "look": "led"
     },
     {
@@ -999,7 +999,7 @@
       "h": 120,
       "sound": "sounds/alarm_beep.wav",
       "loop": true,
-      "displayName": "Hop alarm",
+      "label": "Hop alarm",
       "activeText": "",
       "imageOn": "Images/Skynet/Alarms/AlarmBitter.png",
       "hideName": true
@@ -1012,7 +1012,7 @@
       "y": 1080,
       "w": 170,
       "h": 50,
-      "displayName": "Testing",
+      "label": "Testing",
       "onText": "ON",
       "offText": "OFF"
     },
@@ -1024,7 +1024,7 @@
       "y": 40,
       "w": 470,
       "h": 60,
-      "displayName": "Beer",
+      "label": "Beer",
       "initial": "OakBarn Pale Ale",
       "fontSize": 22,
       "kind": "string"
@@ -1037,7 +1037,7 @@
       "y": 110,
       "w": 170,
       "h": 60,
-      "displayName": "Boil minutes",
+      "label": "Boil minutes",
       "initial": 60,
       "step": 5,
       "min": 0,
@@ -1052,7 +1052,7 @@
       "y": 1215,
       "w": 760,
       "h": 60,
-      "displayName": "Script status",
+      "label": "Script status",
       "readOnly": true,
       "kind": "string"
     },
@@ -1060,7 +1060,7 @@
       "name": "vKSW_Testing",
       "type": "vKonstant",
       "kind": "switch",
-      "displayName": "Testing mode",
+      "label": "Testing mode",
       "x": 40,
       "y": 60,
       "w": 130,
@@ -1073,7 +1073,7 @@
       "name": "vKPB_Jog_Pump",
       "type": "vKonstant",
       "kind": "pushbutton",
-      "displayName": "Jog pump (hold)",
+      "label": "Jog pump (hold)",
       "x": 200,
       "y": 60,
       "w": 130,
@@ -1084,7 +1084,7 @@
       "name": "vKMB_Ping",
       "type": "vKonstant",
       "kind": "momentary",
-      "displayName": "Ping",
+      "label": "Ping",
       "x": 360,
       "y": 60,
       "w": 130,
@@ -1095,7 +1095,7 @@
       "name": "vKB_Ready",
       "type": "vKonstant",
       "kind": "bool",
-      "displayName": "Ready",
+      "label": "Ready",
       "x": 520,
       "y": 60,
       "w": 130,
@@ -1106,7 +1106,7 @@
       "name": "vKV_Strike_Target",
       "type": "vKonstant",
       "kind": "value",
-      "displayName": "Strike target",
+      "label": "Strike target",
       "x": 680,
       "y": 60,
       "w": 170,
@@ -1121,7 +1121,7 @@
       "name": "vKT_Mash_Rest",
       "type": "vKonstant",
       "kind": "time",
-      "displayName": "Mash rest",
+      "label": "Mash rest",
       "x": 880,
       "y": 60,
       "w": 150,
@@ -1133,7 +1133,7 @@
       "name": "vKDT_Brew_Day",
       "type": "vKonstant",
       "kind": "datetime",
-      "displayName": "Brew day",
+      "label": "Brew day",
       "x": 1060,
       "y": 60,
       "w": 200,
@@ -1144,7 +1144,7 @@
       "name": "vKS_Brewer",
       "type": "vKonstant",
       "kind": "string",
-      "displayName": "Brewer",
+      "label": "Brewer",
       "x": 520,
       "y": 150,
       "w": 330,
@@ -1168,7 +1168,7 @@
       "name": "vKL_Brew_Notes",
       "type": "vKonstant",
       "kind": "longstring",
-      "displayName": "Brew notes (media/notes/brew_notes.txt)",
+      "label": "Brew notes (media/notes/brew_notes.txt)",
       "x": 200,
       "y": 230,
       "w": 480,
@@ -1180,7 +1180,7 @@
       "name": "vAV_HLT_Target",
       "type": "vAPI",
       "kind": "value",
-      "displayName": "HLT target",
+      "label": "HLT target",
       "x": 40,
       "y": 420,
       "w": 170,
@@ -1199,7 +1199,7 @@
       "name": "vAS_Batch_Status",
       "type": "vAPI",
       "kind": "string",
-      "displayName": "Batch status",
+      "label": "Batch status",
       "x": 230,
       "y": 420,
       "w": 330,
@@ -1215,7 +1215,7 @@
       "name": "vAB_Pump_Lock",
       "type": "vAPI",
       "kind": "bool",
-      "displayName": "Pump lock",
+      "label": "Pump lock",
       "x": 580,
       "y": 420,
       "w": 130,
@@ -1230,7 +1230,7 @@
       "name": "vAT_Boil_Left",
       "type": "vAPI",
       "kind": "time",
-      "displayName": "Boil left",
+      "label": "Boil left",
       "x": 730,
       "y": 420,
       "w": 150,
@@ -1245,7 +1245,7 @@
       "name": "vADT_Last_Brew",
       "type": "vAPI",
       "kind": "datetime",
-      "displayName": "Last brew",
+      "label": "Last brew",
       "x": 900,
       "y": 420,
       "w": 220,
