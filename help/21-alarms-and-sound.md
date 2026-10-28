@@ -14,7 +14,7 @@ Brew Flow is priority 2 because it beats a Pre-Hop Alarm. An alarm that had to w
 
 ## Add one
 
-**Tabs > ☰ Menu > Edit layout > Add Device / Widget > Widgets > Alarm**, then pick its **Kind** first. The settings below it change with the kind:
+**Tabs > ☰ Menu > Edit layout > Add Widget > On-screen controls > Alarm**, then pick its **Kind** first. The settings below it change with the kind:
 
 - **Hop Alarm**: pick a **timer** and the **time on that timer** for the hop drop, and it sounds by itself. For a boil count-down timer, that is the time left (a 15-minute hop: `00:15:00`). Leave the timer empty to turn it on only from a Process.
 - **Pre-Hop Alarm**: pick the **Hop Alarm** it goes with and **how long before** (empty = `00:10:00`).
@@ -48,7 +48,7 @@ play SoundPlayer
 stop SoundPlayer
 ```
 
-There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Sound Player on a tab (tap it to play or stop), use **Add Device / Widget > Widgets > Sound Player**.
+There is no pause command: it pauses by itself while an alarm sounds and goes on afterwards. To put a Sound Player on a tab (tap it to play or stop), use **Add Widget > On-screen controls > Sound Player**.
 
 Press **Enable sound** at the top once on each screen that should play sounds (browsers insist on that). To have sound on every time the panel opens, turn on **Turn Sound On when starting** on **☰ Menu > Default** (see [The Menu](33-menu)); you still tap or click the page once before the first sound, because browsers insist on that too.
 
