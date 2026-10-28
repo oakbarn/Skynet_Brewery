@@ -1,5 +1,5 @@
 // node --no-warnings test/displayname.test.js
-// displayname works the same on every element type (BruControl could not set it on a Global String), plus
+// label (BruControl's displayname) works the same on every element type (BruControl could not set it on a Global String), plus
 // file paths that are not on the Brain, and the old picture folder name oakbarn/ still finding Images/
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
 import { Store, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS } from '../lib/store.js'; import { Engine } from '../lib/engine.js';
@@ -43,14 +43,22 @@ assert.match(off[0].why, /another computer/);
 assert.equal(store.findMedia('oakbarn/Pump.png'), path.join(d, 'media', 'Images', 'Pump.png'));
 fs.renameSync(path.join(d, 'media', 'Images'), path.join(d, 'media', 'oakbarn'));
 assert.equal(store.findMedia('Images/Pump.png'), path.join(d, 'media', 'oakbarn', 'Pump.png'));
-// a Display name cleared in Properties (Fritz, 2026-10-22): the Tab shows the Name again, not the old Display name
-const heat = { name: 'MB_25_ElM_HLT_BH', type: 'digitalOut', displayName: 'HLT' };
-store.saveLayout({ elements: [...store.config.elements, heat] });
-assert.equal(store.getProp(heat.name, 'displayname'), 'HLT');
-const { displayName, ...cleared } = heat;
+// a Label cleared in Properties (Fritz, 2026-10-22): the Tab shows the Name again, not the old Label
+const heat = { name: 'MB_25_ElM_HLT_BH', type: 'digitalOut', label: 'HLT' };
+store.saveLayout({ elements: [...store.config.elements, { ...heat }] });
+assert.equal(store.getProp(heat.name, 'label'), 'HLT');
+assert.equal(store.getProp(heat.name, 'displayname'), 'HLT', 'BruControl\'s displayname still reads the Label');
+const { label, ...cleared } = heat;
 store.saveLayout({ elements: [...store.config.elements.filter(e => e.name !== heat.name), cleared] });
-assert.equal(store.getProp(heat.name, 'displayname'), heat.name);
-store.saveLayout({ elements: [...store.config.elements.filter(e => e.name !== heat.name), { ...heat, displayName: '' }] });
-assert.equal(store.getProp(heat.name, 'displayname'), heat.name, 'an empty Display name shows the Name');
-console.log('displayname and path tests: all passed');
+assert.equal(store.getProp(heat.name, 'label'), heat.name);
+store.saveLayout({ elements: [...store.config.elements.filter(e => e.name !== heat.name), { ...heat, label: '' }] });
+assert.equal(store.getProp(heat.name, 'label'), heat.name, 'an empty Label shows the Name');
+// displayname became label (Fritz, 2026-10-27): an old config moves over on load, and a Process may use either word
+const old = { name: 'Old_Pump', type: 'digitalOut', displayName: 'Red pump' };
+store.saveLayout({ elements: [...store.config.elements, old] });
+const moved = store.config.elements.find(e => e.name === 'Old_Pump');
+assert.equal(moved.label, 'Red pump'); assert.ok(!('displayName' in moved), 'displayName is gone from the config');
+store.setProp('Old_Pump', 'label', 'Blue pump'); assert.equal(store.getProp('Old_Pump', 'displayname'), 'Blue pump');
+store.setProp('Old_Pump', 'displayname', 'Green pump'); assert.equal(store.getProp('Old_Pump', 'label'), 'Green pump');
+console.log('label (displayname) and path tests: all passed');
 process.exit(0);

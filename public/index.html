@@ -9,7 +9,7 @@
 <body class="onWorkspace">
 <header id="top">
   <div class="brand"><span id="conn" class="dot" title="Connection"></span><span id="title">Skynet Brew Panel</span><span id="panelVer" class="panelVer" title="Panel version: made by GitHub when code is merged. ☰ Menu > About says if it is the latest."></span>
-    <label class="schemaPick" title="The Schema is your whole brewery setup: tabs, devices, elements, pipes and the Equipment Profile of each Tab. Pick one to load it.">Schema <select id="schemaPick" class="schemaSel"></select></label></div>
+    <label class="schemaPick" title="The Schema is your whole brewery setup: Tabs, Devices, Widgets, pipes and the Equipment Profile of each Tab. Pick one to load it.">Schema <select id="schemaPick" class="schemaSel"></select></label></div>
   <nav id="views">
     <button data-view="workspace" class="active">Tabs</button>
     <button data-view="scripts">Processes</button>
@@ -54,7 +54,7 @@
     </div>
     <div id="editBar" class="bar edit hidden">
       <select id="addType"></select>
-      <button id="addEl">Add element</button>
+      <button id="addEl">Add Device / Widget</button>
       <button id="cloneDev" title="Show a Device that is on another Tab on this Tab too. The Clone is the same Device: turning it on turns the parent and every Clone on.">⧉ Clone Device</button>
       <button id="addImg">Add graphic</button>
       <button id="addText">Add text</button>
@@ -108,6 +108,7 @@
           <button id="findBtn" title="Find (Ctrl+F) and Replace (Ctrl+H)">Find</button>
           <button id="findAllBtn" title="Find, and replace, in every Process">All Processes</button>
           <button id="goLine" title="Go to a line number (Ctrl+G)">Go to line</button>
+          <button id="suggestBtn" class="admin-only" title="Show what can be typed here (Ctrl+Space)">💡 Suggest</button>
           <button id="picPick" class="admin-only" title="Pick a picture or sound and put its path at the cursor (Alt+P)">Picture</button>
           <select id="saveAs" title="Save this Process, or the highlighted lines, to a file on this computer or phone">
             <option value="">Save to file...</option>
@@ -162,12 +163,12 @@
     <p id="cfgBackupNote" class="cfgNote"></p>
     <div class="editor"><pre id="cfgGutter"></pre><div class="codeWrap"><pre id="cfgCodeHl" aria-hidden="true"></pre><textarea id="cfgCode" spellcheck="false" wrap="off"></textarea></div></div>
     <ul id="cfgProblems" class="problems"></ul>
-    <p class="muted">This is the whole setup as one JSON file: tabs, elements, pipes, devices and settings. Save checks it first and will not save a file the panel cannot load. Saving stops running Processes and reconnects the boards.</p>
+    <p class="muted">This is the whole setup as one JSON file: Tabs, Devices, Widgets, pipes, Interfaces and settings. Save checks it first and will not save a file the panel cannot load. Saving stops running Processes and reconnects the boards.</p>
   </section>
 
   <!-- ===== Variables ===== -->
   <section id="view-globals" class="view">
-    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add element</em>. Every kind below can be read and changed by every process.</p>
+    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add Device / Widget</em>. Every kind below can be read and changed by every process.</p>
     <h3 id="sec-vapi">vAPI <span class="muted">(processes, API <code>/api/vapi</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="vapiBody"></tbody></table>
     <h3 id="sec-vkonstant">vKonstant <span class="muted">(processes and screen only: no API, no database)</span></h3>
@@ -226,7 +227,7 @@
       <button id="addDev" class="primary">Add</button>
     </div>
     <h3 id="sec-probeIndex">OneWire probe index</h3>
-    <p class="muted">Each DS18B20 probe gets a number here, and temperature elements use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every element that uses that number follows it, nothing else changes.</p>
+    <p class="muted">Each DS18B20 probe gets a number here, and temperature Devices use that number. To replace a probe, plug in the new one and pick its ROM id in the probe's row: every Device that uses that number follows it, nothing else changes.</p>
     <table class="grid"><thead><tr><th>#</th><th>Name</th><th>Probe ROM id</th><th>Reading</th><th>Used by</th><th></th></tr></thead><tbody id="slotBody"></tbody></table>
     <div class="form row admin-only"><button id="addSlot">Add probe number</button></div>
     <h3 id="sec-probesSeen">OneWire probes seen</h3>
@@ -245,10 +246,10 @@
 
     <div class="admin-only">
     <h3 id="sec-brucontrol">BruControl Schema</h3>
-    <p>Choose a BruControl Schema file (BruControl calls it a configuration file, <code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, device elements, tabs (BruControl workspaces), elements and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
+    <p>Choose a BruControl Schema file (BruControl calls it a configuration file, <code>.brucfg</code>, in <em>Documents\BruControl</em>). Its interfaces, Devices, tabs (BruControl workspaces), Widgets and processes (scripts) are brought in with their settings: pins, calibrations, PID / hysteresis / duty cycle settings, timers, alarm sounds, pictures, colors, fonts and positions.</p>
     <input type="file" id="bruFile" accept=".brucfg,.xml">
     <div class="import-opts">
-      <label>What to do <select id="bruMode"><option value="replace">Replace my tabs, elements and devices</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
+      <label>What to do <select id="bruMode"><option value="replace">Replace my Tabs, Devices and Widgets</option><option value="merge">Add to what I have (same names are updated)</option></select></label>
       <label class="toggle"><input type="checkbox" class="swc" id="bruSim" checked> Run the imported devices in the simulator (switch to real hardware later on the Devices page)</label>
       <label class="toggle"><input type="checkbox" class="swc" id="bruOverwrite" checked> Replace processes with the same name (old copy kept as .bak)</label>
       <label>Picture folder <input id="bruMedia" value="Images" style="width:9em" title="BruControl pictures in C:\BruControl\Media are looked for in this folder inside your media folder"></label>
@@ -489,7 +490,7 @@
       </div>
       <div class="checks"><label><input type="checkbox" class="swc" id="mqHa"> Announce to Home Assistant (needed for Alexa, Google Home and Siri)</label></div>
       <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop processes. They can change vAPI variables that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start processes that you tick below. Inputs from hardware are read only, and Shared variables are never shared.</p>
-      <table class="grid"><thead><tr><th>Element</th><th>Type</th><th>Voice can hear it</th><th>Can change it</th></tr></thead><tbody id="mqItems"></tbody></table>
+      <table class="grid"><thead><tr><th>Device or Widget</th><th>Type</th><th>Voice can hear it</th><th>Can change it</th></tr></thead><tbody id="mqItems"></tbody></table>
       <div>Voice and MQTT may <b>start</b> these processes:</div>
       <div id="mqScripts" class="checks"></div>
       <button id="saveMqtt" class="primary">Save MQTT and voice</button>

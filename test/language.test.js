@@ -118,7 +118,7 @@ assert.equal(noSpaces('strt_2__Reset'), 'strt_2__Reset');
   const r = removeSpacesOnDisk({ configPath: path.join(d2, 'c.json'), scriptsDir: path.join(d2, 's'), dataDir: path.join(d2, 'data') });
   const c = JSON.parse(fs.readFileSync(path.join(d2, 'c.json'), 'utf8'));
   assert.equal(c.elements[0].name, 'Test_Timer_2');
-  assert.equal(c.elements[0].displayName, 'Test Timer');
+  assert.equal(c.elements[0].label, 'Test Timer');
   assert.deepEqual(c.graphics[0].flowWhen, ['Test_Timer_2']);
   assert.equal(fs.readFileSync(path.join(d2, 's', 'p.txt'), 'utf8'), 'start "Test_Timer_2"\n');
   assert.equal(JSON.parse(fs.readFileSync(path.join(d2, 'data', 'state.json'), 'utf8')).Test_Timer_2, 5);

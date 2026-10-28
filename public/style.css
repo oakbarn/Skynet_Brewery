@@ -55,6 +55,7 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
 #pipes .pipe, #pipes .flow, #pipes .drawing, #pipes .reducer { pointer-events: none; }
 #pipes .drawing { fill: none; stroke: var(--accent); stroke-width: 5; stroke-dasharray: 10 5; filter: drop-shadow(0 0 1.5px #000); }
+#pipes .pipeLabel { pointer-events: none; paint-order: stroke; stroke: #000; stroke-width: 3px; stroke-linejoin: round; }
 @keyframes flow { to { stroke-dashoffset: -24; } }
 
 .el { position: absolute; border-radius: 7px; border: 1px solid var(--line); background: var(--panel2); display: flex; flex-direction: column; overflow: hidden; user-select: none; background-size: contain; background-repeat: no-repeat; background-position: center; }
@@ -135,6 +136,8 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #autofill li { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
 #autofill li.sel { background: var(--accent); color: #fff; }
 #autofill li.sel .muted { color: #eee; }
+/* predictive text: the rest of the best pick, in gray after the cursor (public/autofill.js) */
+.afGhost { position: absolute; z-index: 5; pointer-events: none; white-space: pre; color: var(--muted); opacity: .75; }
 .scriptList li.clsHead { cursor: pointer; font-weight: 600; background: var(--panel2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 #problems, #cfgProblems { list-style: none; padding: 0; margin: 6px 0; }
 #problems li, #cfgProblems li { color: var(--bad); cursor: pointer; padding: 2px 0; }
@@ -541,7 +544,7 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .alertBar + .alertBar { top: auto; bottom: 10px; }
 .alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
-#dlgBody .lockedPath { opacity: 0.65; cursor: help; background-image: none; }
+#dlgBody label.greyed, #dlgBody label.greyed + * { opacity: 0.45; }
 
 /* ===== Process editor: colors (public/colorize.js), tools row, color key, Recycle Bin ===== */
 :root { --hl-cmd: #5aa9ff; --hl-dev: #ff5ce1; --hl-wid: #4dd0e1; --hl-vk: #c58bff; --hl-vapi: #ff5c5c; --hl-proc: #a5c95a; --hl-op: #ffa040;
