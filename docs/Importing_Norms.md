@@ -95,13 +95,25 @@ The name alone is the item's main value; everything else is `name.attribute`.
 
 | BruControl Global | Skynet | Status |
 | --- | --- | --- |
-| `gbl...` | vKonstant of the same kind, same name | Built |
-| `glb...` (typo) | renamed `gbl...`, then a vKonstant | Built |
-| `RP_...` | vAPI, renamed `vA_...` everywhere (Schema and Processes) | Built |
-| `DX_gblV_...` | vAPI, renamed `vA_...` | Built |
+| `gbl...` | gKonstant of the same kind, same name | Built |
+| `glb...` (typo) | renamed `gbl...`, then a gKonstant | Built |
+| `RP_...` | gAPI, renamed `gA_...` everywhere (Schema and Processes; was `vA_...` before 2026-10-28) | Built |
+| `DX_gblV_...` | gAPI, renamed `gA_...` | Built |
 | `x...` | deleted; Processes and items still using one are listed with line numbers | Built |
 | `insp_...` | deleted like `x` | Built |
-| anything else | vAPI, same name, listed so it can be sorted later | Built |
+| anything else | gAPI, same name, listed so it can be sorted later | Built |
+
+## 6a. vKonstant and vAPI (older Skynet)
+
+(Fritz, 2026-10-28; Skynet Rule 1.16, Help 84)
+
+| Older Skynet | Skynet | Status |
+| --- | --- | --- |
+| vKonstant / vAPI (on screen, Help, docs) | gKonstant / gAPI | Built (on screen; the type inside Schema files stays `vKonstant` / `vAPI`) |
+| A BruControl Global | gKonstant or gAPI (section 6) | Built |
+| Names starting `vK..._` (`vKV_Strike`) | `gK..._` (`gKV_Strike`), on the item and in every Process; a taken name gets `_2` | Norm |
+| Names starting `vA..._` (`vAV_Mash_Temp`) | `gA..._` (`gAV_Mash_Temp`), on the item and in every Process | Norm |
+| API address `/api/vapi` | `/api/gapi` (the old address still works) | Built |
 
 ## 7. Alarms and stacked copies
 
@@ -141,3 +153,4 @@ The name alone is the item's main value; everything else is `name.attribute`.
 
 - 2026-10-28: First version. General Rule (importing always updates to the Skynet way), position
   attributes, and everything from BRUCONTROL_IMPORT_RULES.md and the current import code.
+- 2026-10-28: Globals now become gKonstant / gAPI (`RP_` -> `gA_`); added section 6a, vKonstant / vAPI -> gKonstant / gAPI. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
