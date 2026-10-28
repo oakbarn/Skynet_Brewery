@@ -24,7 +24,7 @@ A **PID** or **Hysteresis** heating element holds the temperature its own probe 
 
 ## Its Properties
 
-Double-click the kettle in Edit layout. Besides Name, Type, Display Name, Flip, Rotate and place, **Built-in Devices** has the Interface, the heating element control and Port, and the temperature probe type and Port. Change them and Save: both Devices follow.
+Double-click the kettle in Edit layout. Besides Name, Type, Label, Show label, Flip, Rotate and place, **Built-in Devices** has the Interface, the heating element control and Port, and the temperature probe type and Port. Change them and Save: both Devices follow.
 
 The two Devices can't be deleted by themselves. Deleting the kettle deletes them too.
 

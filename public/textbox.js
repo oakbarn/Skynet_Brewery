@@ -1,6 +1,6 @@
 // Text box attributes (Fritz, 2026-10-21). Every text box has the same attributes, and each one has a Default on the
 // ☰ Menu > Default tab. The text boxes are: the Name and the Value of every Device and Widget, a Label, a Text added with
-// "+ Text" in Edit layout, and the Display Name on vessels and other equipment.
+// "+ Text" in Edit layout, and the Label on vessels and other equipment.
 //   .visible     true / false (shown or hidden)
 //   .foreColor   the color of the text
 //   .backColor   the color behind the text

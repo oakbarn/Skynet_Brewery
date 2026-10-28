@@ -1,4 +1,4 @@
-// Codes inside text (Fritz, 2026-10-21). They work in any text a Process shows: string values on Tabs, display names,
+// Codes inside text (Fritz, 2026-10-21). They work in any text a Process shows: string values on Tabs, Labels,
 // print lines in the Process output, pop-ups (a manual valve's message) and text on a Tab.
 //   \n     a new line
 //   \b     bold on, the next \b turns it off
