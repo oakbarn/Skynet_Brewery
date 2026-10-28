@@ -15,7 +15,7 @@
       "y": 900,
       "w": 240,
       "h": 70,
-      "displayName": "Start Brew Day",
+      "label": "Start Brew Day",
       "look": "button",
       "background": "2",
       "fontSize": 20,
