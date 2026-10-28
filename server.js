@@ -38,6 +38,7 @@ import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
+import { gStandardOnDisk } from './lib/gstandard.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -57,6 +58,8 @@ if (seeded.length) console.log(`First start: copied the samples into ${seeded.jo
 const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 // Names have no spaces any more: an older configuration is changed once (backups in config/backups and *.before-no-spaces.bak)
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
+// vKonstant / vAPI became gKonstant / gAPI, vK_ / vA_ names gK_ / gA_: every Schema, saved value, the database and Processes, once
+const gnames = gStandardOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 useKeySecret(DATA);           // hidden keys: the browser only ever gets stand-ins for them (lib/keys.js)
 const store = new Store(CONFIG, DATA);
 store.load();
@@ -72,6 +75,7 @@ const visFixed = visibilityOnDisk(SCRIPTS, n => store.get(n));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
+store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gK / gA names
 const hw = new Hardware(store);
 const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
@@ -101,6 +105,7 @@ const help = new Help(HELP);                                        // Help tab:
 engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
+if (gnames) for (const l of gnames.lines) { console.log(l); engine.print('system', l); }
 if (visFixed.length) { const l = `Processes changed to .visible / .hidden: ${visFixed.join(', ')} (old copies saved as .before-hidden.bak).`; console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
@@ -355,8 +360,7 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown route');
   }
 
-  // ===== Public API: gAPI only (Shared and gKonstant variables are never exposed). /api/gapi is the address;
-  //       /api/vapi and /api/globals are its old addresses and still work =====
+  // ===== Public API: gAPI only (Shared and gKonstant variables are never exposed). /api/globals is the old address of /api/gapi =====
   // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
     if (!apiKeyOk(req, url)) {
@@ -365,8 +369,8 @@ async function route(req, res) {
         if (!roleAtLeast(me.role, m === 'GET' ? 'viewer' : 'operator')) return fail(res, 403, 'Your account is view only');
       } else if (!(m === 'GET' && isPrivateAddress(ip))) return fail(res, 401, 'Missing or wrong X-API-Key');
     }
-    if (['/api/gapi', '/api/vapi', '/api/globals'].includes(p) && m === 'GET') return ok(res, apiVars());
-    if (['/api/gapi', '/api/vapi', '/api/globals'].includes(p) && (m === 'POST' || m === 'PUT')) {
+    if ((p === '/api/globals' || p === '/api/gapi') && m === 'GET') return ok(res, apiVars());
+    if ((p === '/api/globals' || p === '/api/gapi') && (m === 'POST' || m === 'PUT')) {
       const body = await jsonBody(req); const done = [], errors = [];
       for (const [n, v] of Object.entries(body)) {
         const el = store.get(n);
@@ -375,7 +379,7 @@ async function route(req, res) {
       }
       return ok(res, { ok: !errors.length, set: done, errors });
     }
-    let g = /^\/api\/(?:gapi|globals|vapi)\/(.+)$/.exec(p);
+    let g = /^\/api\/(?:globals|gapi)\/(.+)$/.exec(p);
     if (g) {
       const n = cleanName(g[1]), el = store.get(n);
       if (!isApiVar(el)) return fail(res, 404, `No gAPI named "${n}"`);
@@ -435,7 +439,7 @@ async function route(req, res) {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
     // a Push Button gKonstant, or an output or switch set to "push button (on while held)" (an LED momentary button)
-    const push = el && ((el.type === 'vKonstant' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
+    const push = el && ((el.type === 'gKonstant' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
     if (!push) return fail(res, 400, `"${name}" is not a Push Button`);
     hold(el.name, down);
     return ok(res);

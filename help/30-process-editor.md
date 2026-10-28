@@ -85,7 +85,7 @@ To use it on a Windows PC:
 4. Close Notepad++ and open it again.
 5. Open a Process (a `.txt` file in the `scripts` folder), then click **Language** and pick **Skynet Process** near the bottom of the list.
 
-A general file that colors commands, comments, numbers, text, operators and names starting with `gK` (gKonstants) and `gA` (gAPI), and the older `vK` and `vA` names too, is in the panel folder as `docs/Skynet_Process_Notepad++.xml`.
+A general file that colors commands, comments, numbers, text, operators and names starting with `gK` (gKonstants) and `gA` (gAPI) is in the panel folder as `docs/Skynet_Process_Notepad++.xml`.
 
 ## Delete and the Recycle Bin
 

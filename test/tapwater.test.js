@@ -10,7 +10,7 @@ fs.writeFileSync(cfg, JSON.stringify({ elements: [
   { name: 'VGC_Tap', type: 'digitalOut', subtype: 'valve', tapwater: true },
   { name: 'VGC_HLT_Out', type: 'digitalOut', subtype: 'valve' },
   { name: 'Pump_Red', type: 'digitalOut', subtype: 'pump' },
-  { name: 'Done', type: 'vKonstant', kind: 'value' },
+  { name: 'Done', type: 'gKonstant', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 assert.equal(store.getProp('VGC_Tap', 'tapwater'), true, 'starts from the valve setting');

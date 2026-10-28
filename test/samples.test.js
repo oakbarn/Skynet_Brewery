@@ -10,7 +10,7 @@ import { listSamples, loadSample } from '../lib/samples.js';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
 const list = listSamples(SAMPLES);
-assert.deepEqual(list.map(s => s.id), ['oakbarn-brucontrol', 'two-vessel-one-pump', 'three-vessel-one-pump', 'brewzilla-brew-day']);
+assert.deepEqual(list.map(s => s.id), ['two-vessel-one-pump', 'three-vessel-one-pump', 'brewzilla-brew-day']);
 
 function scratch() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bps'));

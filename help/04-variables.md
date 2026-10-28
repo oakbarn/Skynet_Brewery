@@ -1,6 +1,6 @@
 # Variables
 
-Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. Add new ones in **Tabs > ☰ Menu > Edit layout > Select Widget Type > gKonstant variables** (or **gAPI variables**), then **Add Widget**. The name prefixes below are suggestions; any name works. gKonstant and gAPI were called vKonstant and vAPI before 2026-10-28, and names made then (`vKV_`, `vAV_` ...) keep working: see [gKonstant and gAPI (new names)](84-gkonstant-and-gapi).
+Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. Add new ones in **Tabs > ☰ Menu > Edit layout > Select Widget Type > gKonstant variables** (or **gAPI variables**), then **Add Widget**. The name prefixes below are suggestions; any name works. gKonstant and gAPI were called vKonstant and vAPI before 2026-10-28; older ones are renamed when the Brain starts: see [gKonstant and gAPI (new names)](84-gkonstant-and-gapi).
 
 ## Which kind to use
 

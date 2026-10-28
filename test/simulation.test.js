@@ -14,7 +14,7 @@ const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpsim'));
 fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
   devices: [{ name: 'MEGA1', type: 'ethernet', host: '127.0.0.1', port: 1 }],
   elements: [{ name: 'tm_Mash', type: 'timer', timerType: 'countup' }, { name: 'Pump', type: 'digitalOut', device: 'MEGA1', channel: 5 },
-    { name: 'Mash_Temp', type: 'temperature', device: 'MEGA1' }, { name: 'msg', type: 'vKonstant', kind: 'string' }],
+    { name: 'Mash_Temp', type: 'temperature', device: 'MEGA1' }, { name: 'msg', type: 'gKonstant', kind: 'string' }],
 }));
 const scripts = path.join(d, 'scripts'); fs.mkdirSync(scripts);
 fs.writeFileSync(path.join(scripts, 'Mash.txt'), `"tm_Mash" value = 00:00:00

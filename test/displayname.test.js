@@ -9,7 +9,7 @@ fs.mkdirSync(path.join(d, 'media', 'Images'), { recursive: true }); fs.mkdirSync
 fs.writeFileSync(path.join(d, 'media', 'Images', 'Pump.png'), 'x'); fs.writeFileSync(path.join(d, 'media', 'sounds', 'Bell.wav'), 'x');
 const els = [];
 for (const t of ELEMENT_TYPES) {
-  const kinds = t === 'vKonstant' ? Object.keys(VK_KINDS) : t === 'vAPI' ? Object.keys(VAPI_KINDS) : t === 'shared' ? ['value', 'string', 'time', 'bool'] : [null];
+  const kinds = t === 'gKonstant' ? Object.keys(VK_KINDS) : t === 'gAPI' ? Object.keys(VAPI_KINDS) : t === 'shared' ? ['value', 'string', 'time', 'bool'] : [null];
   for (const k of kinds) els.push(k === null ? { name: `x_${t}`, type: t } : t === 'shared' ? { name: `x_${t}_${k}`, type: t, dataType: k } : { name: `x_${t}_${k}`, type: t, kind: k });
 }
 const cfg = path.join(d, 'config', 'c.json');
@@ -34,7 +34,7 @@ const text = `//"C:\\BruControl\\Media\\ignored.wav" in a comment
 "x_alarm" sound = "sounds/Missing.wav"
 "x_alarm" sound = "sounds/bell.WAV"
 "x_alarm" sound = "/etc/hosts.txt"
-"x_vKonstant_string" = "a/b is not a file"
+"x_gKonstant_string" = "a/b is not a file"
 `;
 const off = eng.check(text).offBrain;
 assert.deepEqual(off.map(x => [x.line, x.path]), [[2, 'C:\\BruControl\\Media\\wave\\Hops.wav'], [5, 'sounds/Missing.wav'], [7, '/etc/hosts.txt']]);

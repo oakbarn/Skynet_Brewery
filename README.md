@@ -54,7 +54,6 @@ The first time the panel opens it offers four ready-made Schemas (a Schema is a 
 
 | Sample | What you get |
 |---|---|
-| **OakBarn BruControl** | Fritz's BruControl Schema, imported with every board on the simulator. |
 | **Two vessel, one pump** | Kettle and mash tun, one pump, five valves, pipes, two probes, a kettle heater and a chiller. |
 | **Three vessel, one pump** | HLT, mash tun and boil kettle, one pump, six valves, pipes, three probes and two heaters. |
 | **BrewZilla brew day** | No hardware. A brew day flow for a BrewZilla and DigiBoil with step timers, hop drop warnings and readings you type in. |
@@ -120,7 +119,7 @@ Add them in **Workspaces > Edit layout > Add element** (they are listed by kind 
 | Push Button | `gKPB_` | LED button that is ON only while held and goes OFF when released (it does not stay on like a toggle). If the screen holding it closes or loses WiFi, it lets go by itself within 1.5 seconds. |
 | Pulse Button | `gKMB_` | Tap (or a process sets it true): true for 100 ms, then off, however long it is held. `wait gKMB_Go == true` always catches it. |
 
-**gAPI**: processes, the API (`/api/gapi`; the old `/api/vapi` and `/api/globals` addresses still work) and the database. Kinds: String `gAS_`, Value `gAV_`, Time `gAT_`, Date Time `gADT_`, Boolean `gAB_`.
+**gAPI**: processes, the API (`/api/gapi`; the old `/api/globals` address still works) and the database. Kinds: String `gAS_`, Value `gAV_`, Time `gAT_`, Date Time `gADT_`, Boolean `gAB_`.
 
 **Database trigger** (Variables page > Change…, for gAPI):
 
@@ -207,7 +206,7 @@ The **Schema.json** page (it was called **Config**) shows the whole setup file (
 
 ## 4. API (for Node-RED or other programs)
 
-Only **gAPI** variables are in the API (the old `/api/vapi/...` and `/api/globals/...` addresses work the same as `/api/gapi/...`). Programs must send the API key from Settings in the header `X-API-Key: <key>` (or `?key=<key>`). Without a key, reading works only from your own network (home or Tailscale), and changes are refused. A signed-in browser can use the API too: viewers read, operators and admins also change.
+Only **gAPI** variables are in the API (the old `/api/globals/...` address works the same as `/api/gapi/...`). Programs must send the API key from Settings in the header `X-API-Key: <key>` (or `?key=<key>`). Without a key, reading works only from your own network (home or Tailscale), and changes are refused. A signed-in browser can use the API too: viewers read, operators and admins also change.
 
 | Request | Does |
 |---|---|

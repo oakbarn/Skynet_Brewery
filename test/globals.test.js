@@ -29,17 +29,17 @@ const scripts = [
 const r = retireGlobals(cfg, scripts);
 const el = n => r.cfg.elements.find(e => e.name === n);
 assert.equal(cfg.elements[0].type, 'global', 'input is not changed');
-assert.equal(el('gblV_Strike').type, 'vKonstant'); assert.equal(el('gblV_Strike').kind, 'value'); assert.equal(el('gblV_Strike').initial, 160);
+assert.equal(el('gblV_Strike').type, 'gKonstant'); assert.equal(el('gblV_Strike').kind, 'value'); assert.equal(el('gblV_Strike').initial, 160);
 assert.equal(el('gblV_Strike').dataType, undefined); assert.equal(el('gblV_Strike').log, undefined);
 assert.equal(el('gblS_Msg').kind, 'string');
 assert.equal(el('RP_v_Pitch_Temp'), undefined);
-assert.equal(el('gA_v_Pitch_Temp').type, 'vAPI'); assert.deepEqual(el('gA_v_Pitch_Temp').log, { mode: 'minutes', every: 5 });
+assert.equal(el('gA_v_Pitch_Temp').type, 'gAPI'); assert.deepEqual(el('gA_v_Pitch_Temp').log, { mode: 'minutes', every: 5 });
 assert.equal(el('gA_dt_BrewDate').kind, 'datetime');
 assert.equal(el('xgblT_Old'), undefined);
-assert.equal(el('glbV_Typo'), undefined); assert.equal(el('gblV_Typo').type, 'vKonstant');
-assert.equal(el('gA_Mash_Temp_DE').type, 'vAPI');
+assert.equal(el('glbV_Typo'), undefined); assert.equal(el('gblV_Typo').type, 'gKonstant');
+assert.equal(el('gA_Mash_Temp_DE').type, 'gAPI');
 assert.equal(el('insp_Pix_Pump'), undefined);
-assert.equal(el('Odd_Name').type, 'vAPI'); assert.equal(el('Odd_Name').kind, 'bool');
+assert.equal(el('Odd_Name').type, 'gAPI'); assert.equal(el('Odd_Name').kind, 'bool');
 assert.equal(r.scripts[2].text, 'v = "gblV_Typo" value\n"gA_Mash_Temp_DE" value = 150\n"insp_Pix_Pump" background = 2\nprint "xglbV_Typo"');
 assert.equal(el('Pitch_Show').follow, 'gA_v_Pitch_Temp'); assert.equal(el('Pitch_Show').note, 'RP_v_Pitch_Temp is shown');
 assert.deepEqual(r.cfg.graphics[0].flowWhen, ['gA_dt_BrewDate']);
@@ -53,8 +53,8 @@ assert.deepEqual(r.report.brokenItems, [{ name: 'xgblT_Old', where: 'elements > 
 assert.deepEqual(r.report.other, ['Odd_Name']); assert.deepEqual(r.report.lostLog, ['gblV_Strike']);
 assert.ok(reportLines(r.report)[0].startsWith('Globals retired: 2 gbl → gKonstant (same names), 2 RP_ → gAPI renamed gA_, 2 deleted (x and insp_)'));
 // a gA_ name that already exists is not overwritten
-const clash = retireGlobals({ elements: [{ name: 'RP_a', type: 'global' }, { name: 'gA_a', type: 'vAPI' }] });
-assert.deepEqual(clash.report.notRenamed, [{ name: 'RP_a', to: 'gA_a' }]); assert.equal(clash.cfg.elements[0].type, 'vAPI');
+const clash = retireGlobals({ elements: [{ name: 'RP_a', type: 'global' }, { name: 'gA_a', type: 'gAPI' }] });
+assert.deepEqual(clash.report.notRenamed, [{ name: 'RP_a', to: 'gA_a' }]); assert.equal(clash.cfg.elements[0].type, 'gAPI');
 
 // start-up: a saved setup is converted once, with backups, and saved values follow the renames
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpg'));

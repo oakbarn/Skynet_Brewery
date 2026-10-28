@@ -62,9 +62,9 @@
 
 **Tailscale**: a free private network between your own devices, for using the panel away from home safely. See [Installing Tailscale on Windows](00-tailscale-windows).
 
-**gAPI**: a variable for processes, the screen, the API and the database. Suggested names start with `gA_` (older names may start with `vA_`; they still work).
+**gAPI**: a variable for processes, the screen, the API and the database. Suggested names start with `gA` (`gAV_`, `gAB_` ...). It was called vAPI.
 
-**gKonstant**: a variable for processes and the screen only. Suggested names start with `gK` (`gKV_`, `gKB_` ...; older names may start with `vK`; they still work).
+**gKonstant**: a variable for processes and the screen only. Suggested names start with `gK` (`gKV_`, `gKB_` ...). It was called vKonstant.
 
 **Widget**: an item that lives only in the app, not tied to any board (pictures, labels, timers, IPs, fittings).
 
