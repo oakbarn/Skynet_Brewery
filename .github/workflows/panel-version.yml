@@ -4,6 +4,8 @@
 # Someone else's copy (a fork) says their user name, for example PR3_brewer42-v.yyyymmdd_hh_mm.
 # It writes version.json at the top of the panel (the panel shows it on the Menu Bar and in ☰ Menu > About),
 # commits it back to the branch, and makes a GitHub tag and Release with the same name.
+# The Release carries the Windows installer (Skynet_Brewer_Setup_<version>.exe), the panel zip and the install files,
+# built by tools/build-release.sh, so anyone can download them from the Releases page without touching the code.
 # Times are UTC. To use your own time zone, change TZ below (for example America/Chicago).
 # Never edit version.json by hand or in a pull request: this workflow owns it.
 name: Panel version
@@ -81,4 +83,29 @@ jobs:
           git push origin "HEAD:$GITHUB_REF_NAME"
           git tag "$VERSION"
           git push origin "$VERSION"
-          gh release create "$VERSION" --title "$VERSION" --generate-notes --latest
+
+      - name: Build the installer and zip
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq nsis zip
+          bash tools/build-release.sh "$VERSION"
+          # one zip for the first-install folders, so the Release page stays short
+          ( cd release && zip -qr "First_Install_ReadMes_$VERSION.zip" First_Install_* )
+
+      - name: Make the Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          cat > notes.md <<NOTES
+          **To install on Windows:** download \`Skynet_Brewer_Setup_$VERSION.exe\` below and double-click it. It makes \`C:\\Brewing\\BrewPanel\` and puts **Skynet Brewer** on the Desktop. Windows may say *Windows protected your PC*: click **More info**, then **Run anyway** (the installer isn't signed with a paid certificate).
+
+          **Mac, Linux, Raspberry Pi or by hand:** download \`Skynet_BrewPanel_$VERSION.zip\` and \`ReadMe.txt\`.
+
+          NOTES
+          gh release create "$VERSION" --title "$VERSION" --notes-file notes.md --generate-notes --latest \
+            release/Skynet_Brewer_Setup_*.exe release/Skynet_BrewPanel_*.zip release/ReadMe.txt \
+            "release/Install Skynet Brewer.command" release/install-skynet-brewer.sh release/Skynet_Brewer.bat \
+            release/First_Install_ReadMes_*.zip release/Minimum_Equipment_and_Limitations.txt

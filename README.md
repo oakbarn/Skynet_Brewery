@@ -12,6 +12,8 @@ The server runs the processes and talks to the hardware. Processes keep running 
 
 ## 1. Install and run
 
+**Download:** the newest version is always at **[Releases > Latest](https://github.com/oakbarn/skynet_brewery/releases/latest)**. On Windows download `Skynet_Brewer_Setup_<version>.exe` and double-click it. Every merge makes a new Release with the installer, the panel zip and the ReadMe attached; you don't need a GitHub account.
+
 **The easy way:** each release has installers. On Windows run `Skynet_Brewer_Setup_<date>.exe`; on a Mac open `Install Skynet Brewer.command`; on Linux or a Raspberry Pi run `bash install-skynet-brewer.sh`. They put the panel in `C:\Brewing\BrewPanel` (Windows) or `~/Brewing/BrewPanel`, get Node.js if needed, and add a **Skynet Brewer** shortcut to the Desktop. On a Pi the panel also starts by itself at boot (service `skynet-brewer`). **Updates:** a release zip has no `config/`, `data/`, `media/` or `scripts/` (their samples are in `defaults/`, copied in by `lib/seed.js` only into a folder that doesn't exist yet), so unzipping it over a panel or running an installer again never replaces them. On an update the installers ask whether to keep those folders (default: keep all). Full steps: `install/ReadMe.txt` and Help > Installing the panel. To build a release: `bash tools/build-release.sh` (needs NSIS for the Windows installer).
 
 **By hand:**
