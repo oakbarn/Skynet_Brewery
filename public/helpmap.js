@@ -69,6 +69,7 @@ const BAR = [
   ['#barHelp', ['help-window']],
   ['#barEdit', ['tabs', 'changing-the-layout-admins']],
   ['#simBar', ['simulation']],
+  ['#barSim', ['simulator-or-real-boards']],
   ['#soundBtn', ['alarms-and-sound']],
   ['#who', ['login']],
   ['#top', ['getting-started', 'finding-your-way']],
