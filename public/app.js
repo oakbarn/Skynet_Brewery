@@ -4532,7 +4532,7 @@ $('#bruImport').onclick = guard(async () => {
 
 // ---------------------------------------------------------------- settings
 // ---- sample Schemas: on first start, and under Settings
-let samples = null;
+let samples = null, samplesAsked = false;
 async function sampleCards(box, after) {
   samples ??= await api('GET', '/ui/samples');
   box.innerHTML = '';
@@ -4540,7 +4540,7 @@ async function sampleCards(box, after) {
     h('div', { class: 'sampleName' }, sm.name), h('div', { class: 'muted' }, sm.description || ''),
     sm.needs ? h('div', { class: 'sampleNeeds' }, sm.needs) : '',
     h('button', { class: 'primary', onclick: guard(async () => {
-      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your Tabs, Devices, Widgets and pipes and stops running processes. Your current Schema is saved in config/backups first.`)) return;
+      if (!confirm(`Add the sample "${sm.name}" as a new Schema and load it?\n\nYour own Schemas are kept just as they are. Running processes are stopped, and the panel goes to Simulator mode so nothing real is switched.`)) return;
       const r = await api('POST', `/ui/samples/${sm.id}/load`);
       after?.(); wsName = null; await load(); setView('workspace');
       const bad = (r.problems || []).length;
@@ -4900,6 +4900,10 @@ function fillSchemaSelect(s) {
     h('option', { value: '__ver' }, 'Save a new version now'),
     h('option', { value: '__bak' }, 'Back up this Schema now'), h('option', { value: '__res' }, 'Restore a backup or version ...'),
     h('option', { value: '__del' }, 'Delete a Schema ...')));
+  // Sample Schemas (Fritz, 2026-10-28): picking one adds a copy of that sample as a new Schema; yours are never written over
+  if (can('admin') && samples?.length) s.append(h('optgroup', { label: '── Add a Sample Schema ──' },
+    ...samples.map(x => h('option', { value: '__smp:' + x.id, title: x.description || '' }, '➕ ' + x.name))));
+  else if (can('admin') && !samples && !samplesAsked) { samplesAsked = true; api('GET', '/ui/samples').then(r => { samples = r; renderSchemaPick(); if (menuTab === 'schema') renderMenuPane(); }).catch(() => { }); }
   s.disabled = !can('admin') && sc.list.length < 2;
   s.title = can('admin') ? 'Pick a Schema to load it' : 'Only an admin can load another Schema';
   s.onchange = schemaPicked;
@@ -4955,6 +4959,7 @@ const schemaPicked = guard(async ev => {
       return;
     }
     if (v === '__clone') return cloneSchema(act.id);
+    if (v.startsWith('__smp:')) return addSampleSchema(v.slice(6));
     if (v === '__ren') {
       const n = await nameChange(act?.name || '', { title: 'Name Change: Schema', spaces: true, check: n => S.schemas.list.some(x => !x.active && x.name.toLowerCase() === n.toLowerCase()) ? `There is already a Schema called "${n}"` : null });
       if (!n) return;
@@ -4981,6 +4986,26 @@ const schemaPicked = guard(async ev => {
     await afterSchemaSwitch(`Schema "${to.name}" loaded`);
   } finally { back(); }
 });
+// Add a Sample Schema (Fritz, 2026-10-28): a copy of a ready-made sample comes in as a new Schema of its own and is loaded.
+// Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.
+async function addSampleSchema(id) {
+  const sm = (samples || []).find(x => x.id === id); if (!sm) return toast('No such sample', true);
+  if (!okToSwitch(sm.name, 'Adding the Sample Schema')) return;
+  const r = await api('POST', `/ui/samples/${id}/load`);
+  await afterSchemaSwitch(`Sample Schema "${r.schema?.name || sm.name}" added and loaded`);
+  const bad = (r.problems || []).length;
+  await new Promise(res => {
+    const d = $('#valDlg'); d.innerHTML = '';
+    d.append(h('div', { class: 'vdTitle' }, '🧪 Sample Schema added: Simulator mode'),
+      h('div', { class: 'vdNote' },
+        h('p', {}, 'The new Schema ', h('b', {}, r.schema?.name || sm.name), ' is a copy of the sample "', sm.name, '". Your own Schemas were not changed: pick one in the Schema list to go back.'),
+        h('p', {}, 'Every Interface in it has Connection Simulator, and ', r.wasSim ? 'the panel was already in Simulator mode and stays in it.' : 'the whole panel switched to Simulator mode.',
+          ' Nothing real is switched. To use your own boards, set each Interface to its real connection and press 🔌 Real (beside ☰ Menu).'),
+        bad ? h('p', {}, `⚠ ${bad} Process${bad > 1 ? 'es need' : ' needs'} a look on the Processes page.`) : ''),
+      h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => d.close() }, '✔ OK')));
+    d.onclose = () => res(); d.showModal();
+  });
+}
 // Clone a Schema (Fritz, 2026-10-21): a copy of any Schema, loaded or not, with its saved values. It is only loaded if you say so.
 async function cloneSchema(id) {
   if (!can('admin')) return toast('Only an admin can clone a Schema', true);
@@ -5086,6 +5111,9 @@ function renderMenu() {
 function menuItems(list, go) {
   const item = (label, fn, attrs = {}) => h('button', { type: 'button', role: 'menuitem', class: 'menuItem', ...attrs, onclick: fn ? go(fn) : null }, ...[label].flat());
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
+  // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
+  list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
+    { title: 'Pick the Schema to load; add, clone, rename, back up or restore one; add a Sample Schema' }));
   // Fritz, 2026-10-27: the Interfaces (boards) are easy to find, add, and switch between simulator and real
   list.append(item('🔌 Interfaces (boards)', () => { setView('devices'); showPart($('#sec-interfaces')); }, { title: 'The boards your Devices are wired to (Devices page)' }));
   if (can('admin')) {
@@ -5367,6 +5395,10 @@ function renderSchemaTab(box) {
     h('p', { class: 'muted' }, 'Loading another Schema switches every output off first (digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms), then its tabs, devices and Equipment Profiles take the place of the loaded one. The one you leave is kept as it is.'),
     h('h3', {}, 'Schemas on this Brain'),
     h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, ...['Name', 'Tabs', 'Equipment Profiles (Tab: profile)', 'Last saved', ''].map(t => h('th', {}, t)))), h('tbody', {}, ...rows)),
+    admin && samples?.length ? [h('h3', {}, 'Add a Sample Schema'),
+      h('p', { class: 'muted' }, 'A copy of a ready-made sample brewery comes in as a new Schema and is loaded. Your own Schemas are never written over. Every Interface in it is a simulator and the panel goes to Simulator mode, so nothing real is switched.'),
+      h('table', { class: 'grid' }, h('tbody', {}, ...samples.map(x => h('tr', {}, h('td', {}, h('b', {}, x.name)), h('td', { class: 'muted' }, x.description || ''),
+        h('td', {}, h('button', { onclick: guard(() => editing ? toast('Save or exit Edit layout first', true) : addSampleSchema(x.id)) }, '➕ Add')))))) ] : '',
     admin ? '' : h('p', { class: 'muted' }, 'Only an admin can load, clone or change a Schema.')));
 }
 
