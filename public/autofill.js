@@ -271,15 +271,19 @@ export function attachAutofill(ta, box, words, on = () => true) {
   }
 
   function update(forced = false) {
-    if (ta.readOnly || (!forced && !on())) return close();
+    if (ta.readOnly) return close();
     const line = lineBefore(), p = ta.selectionStart;
     if (/^\s*(\/\/|#|')/.test(line)) return close();
     // after a dot: attributes
-    const dot = /(?:"([^"\n]+)"|([A-Za-z_][\w~]*))\.([A-Za-z]*)$/.exec(line);
+    const dot = /(?:"([^"\n]+)"|([A-Za-z_][\w~]*))\.([A-Za-z_]*)$/.exec(line);
+    // with Predictive text off only .x and .y are filled in (x_hPosition, y_vPosition: Fritz, 2026-10-28)
+    const live = forced || on();
+    if (!live && !(dot && /^[xy]$/i.test(dot[3]))) return close();
     if (dot) {
       const name = dot[1] ?? dot[2], typed = dot[3].toLowerCase(), attrs = attrsFor(name);
       if (!attrs) return close();
-      const hits = attrs.filter(a => a.startsWith(typed));
+      const hits = attrs.filter(a => a.toLowerCase().startsWith(typed));
+      if (!live && !(typed && hits.length === 1)) return close();
       const atStart = attrs !== PROCESS_ATTRS && /^\s*$/.test(line.slice(0, dot.index));     // a Process's attributes are read only: no " = "
       // in an if or a wait the line goes on: if vK_Tulip.visible -> = == != ... -> true (lib/engine.js reads a single = there as ==)
       const inCond = /^\s*(if|elseif|else\s+if|wait)\b/i.test(line);
@@ -288,7 +292,7 @@ export function attachAutofill(ta, box, words, on = () => true) {
         close();
         insert(p - typed.length, hits[0] + tail);
         skip = { pos: ta.selectionStart, rest: hits[0].slice(typed.length) + tail };
-        if (inCond) update(true);                             // and show what can come next
+        if (inCond && live) update(true);                     // and show what can come next
         return;
       }
       const el = words()?.elements?.find(e => e.name === name);
