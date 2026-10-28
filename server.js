@@ -34,6 +34,7 @@ import { Help } from './lib/help.js';
 import { clock } from './lib/simclock.js';
 import { Simulation, SPEEDS, JUMP_WHEN } from './lib/simulation.js';
 import { timeline } from './lib/timeline.js';
+import { checkRun } from './lib/checkrun.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
@@ -642,6 +643,8 @@ async function route(req, res) {
   // scripts
   if (p === '/ui/scripts' && m === 'GET') return ok(res, engine.list());
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
+  // 🔍 Check: run the Process in the editor (saved or not) on a scratch copy, with no waiting and nothing switched (lib/checkrun.js)
+  if (p === '/ui/scripts/checkrun' && m === 'POST') { const b = await jsonBody(req); return ok(res, await checkRun(engine, b.name, b.text)); }
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
   if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
   s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order))?$/.exec(p);

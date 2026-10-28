@@ -4118,7 +4118,75 @@ $('#addSteps').onclick = guard(async () => {
   ta.value = t.text; dirty = true; updateGutter(); refreshFind(false); $('#scriptName').textContent = curScript + ' (not saved)';
   toast('Steps added: Save to number them');
 });
-$('#checkScript').onclick = guard(async () => { const r = await api('POST', '/ui/scripts/check', $('#code').value, true); problems = r.errors; renderProblems(); updateGutter(); });
+// 🔍 Check (Fritz, 2026-10-28): the Process in the editor (saved or not) is run in a checking mode on the Brain
+// (lib/checkrun.js): every wait takes no time and nothing is switched. Each problem opens in the Error dialog with
+// where it is, the code, a suggested fix and a box to rewrite it; Replace line / Insert above put it into the editor
+// (not saved until Save), and the check runs again by itself.
+let ck = { r: null, i: 0 };
+async function runCheck(keepAt) {
+  const r = await api('POST', '/ui/scripts/checkrun', { name: curScript || '', text: $('#code').value });
+  ck = { r, i: 0 };
+  if (keepAt) { const n = r.problems.findIndex(p => p.line >= keepAt); ck.i = n < 0 ? 0 : n; }
+  problems = r.problems.filter(p => p.kind === 'error').map(p => ({ line: p.line, msg: p.msg }));
+  renderProblems(); updateGutter();
+  showCheck();
+  if (!$('#checkDlg').open) $('#checkDlg').showModal();
+}
+function showCheck() {
+  const r = ck.r, list = r.problems, p = list[ck.i], has = !!p;
+  $('#ckProblem').hidden = !has; $('#ckDone').hidden = has;
+  $('#ckReplace').hidden = $('#ckInsert').hidden = !has;
+  $('#ckClose').textContent = has ? 'Close' : 'OK';
+  const errs = list.filter(x => x.kind === 'error').length, warns = list.length - errs;
+  $('#ckTitle').textContent = has ? `🔍 Check: ${[errs && `${errs} error${errs > 1 ? 's' : ''}`, warns && `${warns} warning${warns > 1 ? 's' : ''}`].filter(Boolean).join(' and ')}` : '🔍 Check: ✔ No problems found';
+  if (!has) {
+    const box = $('#ckDone'); box.innerHTML = '';
+    box.append(h('p', { class: 'ok' }, `✔ ${curScript || 'This Process'} ran from start to end in the checking mode with no problems.`));
+    const facts = [`${r.reached.length} of ${r.lines} lines ran.`];
+    if (r.time) facts.push(`On the real panel it would take at least ${fmtSecs(r.time)} (the waits below not counted).`);
+    if (r.unreached.length) facts.push(`Lines ${r.unreachedText} did not run: an if was false with today's values, so they were only checked for spelling and names.`);
+    if (r.stopped) facts.push(r.stopped);
+    box.append(h('ul', {}, ...facts.map(t => h('li', {}, t))));
+    if (r.notes.length) { box.append(h('strong', {}, 'Pretended in the check')); box.append(h('ul', {}, ...r.notes.map(n => h('li', {}, (n.line ? `Line ${n.line}: ` : '') + n.text)))); }
+    if (r.printed.length) { box.append(h('strong', {}, 'It would print')); box.append(h('pre', { class: 'ckCode' }, r.printed.join('\n'))); }
+    box.append(h('p', { class: 'muted' }, dirty ? 'Not saved yet: press Save to keep your changes.' : 'Nothing on the panel was switched or changed by the check.'));
+    return;
+  }
+  const w = $('#ckWhere');
+  w.className = 'ckWhere ' + p.kind;
+  w.textContent = `${p.kind === 'warning' ? '⚠ Warning' : '✖ Error'} ${ck.i + 1} of ${list.length}: line ${p.line}` + (p.when === 'spelling' ? ' (spelling and names)' : ' (found while running)');
+  $('#ckPrev').disabled = ck.i === 0; $('#ckNext').disabled = ck.i >= list.length - 1;
+  $('#ckMsg').textContent = p.msg;
+  $('#ckCode').textContent = p.code || '(empty line)';
+  $('#ckFix').textContent = p.fix?.text || '';
+  $('#ckEdit').value = p.fix?.code ?? p.code;
+  $('#ckLine').value = p.fix?.at ?? p.line;
+  $('#ckLine').max = $('#code').value.split('\n').length + 1;
+  $('#ckHint').textContent = p.fix?.mode === 'insert' ? 'The suggestion is to insert this as a new line.' : '';
+  $('#ckReplace').classList.toggle('primary', p.fix?.mode !== 'insert'); $('#ckInsert').classList.toggle('primary', p.fix?.mode === 'insert');
+  gotoLine(Math.min(p.line, $('#code').value.split('\n').length));
+}
+const fmtSecs = s => [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(n => String(n).padStart(2, '0')).join(':');
+// put the fixed code into the editor: in place of the line, or as new line(s) above it
+async function applyFix(insert) {
+  const ta = $('#code'), lines = ta.value.split('\n');
+  const at = Math.max(1, Math.min(Math.round(+$('#ckLine').value) || 1, lines.length + (insert ? 1 : 0)));
+  const add = $('#ckEdit').value === '' ? [] : $('#ckEdit').value.replace(/\r/g, '').split('\n');
+  if (insert && !add.length) return toast('Type the code to insert first', true);
+  if (!insert && at > lines.length) return toast(`There is no line ${at} to replace. Use ➕ Insert above to add it at the end.`, true);
+  if (!insert && !add.length && !confirm(`The box is empty: delete line ${at}?`)) return;
+  lines.splice(at - 1, insert ? 0 : 1, ...add);
+  ta.value = lines.join('\n');
+  ta.dispatchEvent(new Event('input'));
+  syncHl();
+  toast(insert ? `Inserted at line ${at} (not saved yet)` : `Line ${at} replaced (not saved yet)`);
+  await runCheck(at);
+}
+$('#checkScript').onclick = guard(() => runCheck());
+$('#ckPrev').onclick = () => { if (ck.i > 0) { ck.i--; showCheck(); } };
+$('#ckNext').onclick = () => { if (ck.i < ck.r.problems.length - 1) { ck.i++; showCheck(); } };
+$('#ckReplace').onclick = guard(() => applyFix(false));
+$('#ckInsert').onclick = guard(() => applyFix(true));
 $('#startScript').onclick = guard(async () => {
   if (!curScript) return;
   if (dirty) await saveScript();

@@ -101,7 +101,7 @@
           <select id="scriptClass" class="admin-only" title="Process class: decides how its steps are numbered"><option value="flow">Flow</option><option value="sub">Sub</option><option value="repeat">Repeat</option><option value="looper">Looper</option></select>
           <button id="addSteps" class="admin-only" title="Put a step line at the start and after every [label]">Add steps</button>
           <button id="saveScript" class="primary admin-only">Save</button>
-          <button id="checkScript" class="admin-only">Check</button>
+          <button id="checkScript" class="admin-only" title="🔍 Check: run this Process in a checking mode (no waiting, nothing switched) and show any mistakes with a suggested fix">🔍 Check</button>
           <button id="startScript" class="op-only">Start</button>
           <button id="stopScript" class="op-only">Stop</button>
           <button id="restartScript" class="op-only" title="Stop this Process, clear its memory and start it again from the saved file">Restart</button>
@@ -546,6 +546,23 @@
   <div id="binList" class="faList"></div>
   <pre id="binView" class="binView hidden"></pre>
   <div class="bar"><span class="spacer"></span><button value="cancel">Close</button></div>
+</form></dialog>
+<!-- 🔍 Check (Fritz, 2026-10-28): the Error dialog. Where, the code, a suggested fix, and a box to rewrite it -->
+<dialog id="checkDlg" class="findAllDlg checkDlg"><form method="dialog">
+  <h3 id="ckTitle">🔍 Check</h3>
+  <div id="ckProblem">
+    <div class="bar"><span id="ckWhere" class="ckWhere"></span><span class="spacer"></span><button type="button" id="ckPrev" title="The problem before this one">◀ Previous</button><button type="button" id="ckNext" title="The next problem">Next ▶</button></div>
+    <p id="ckMsg" class="ckMsg"></p>
+    <label class="ckLabel">The code on this line</label>
+    <pre id="ckCode" class="ckCode"></pre>
+    <label class="ckLabel">Suggested fix</label>
+    <p id="ckFix" class="ckFix"></p>
+    <label class="ckLabel" for="ckEdit">Fixed code (change it if you like)</label>
+    <textarea id="ckEdit" class="ckEdit" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" wrap="off"></textarea>
+    <div class="bar"><label for="ckLine">At line</label><input id="ckLine" type="number" min="1" step="1" class="ckLine"><span id="ckHint" class="muted"></span></div>
+  </div>
+  <div id="ckDone" hidden></div>
+  <div class="bar"><span class="spacer"></span><button type="button" id="ckReplace" class="primary" title="Put the fixed code in place of the line (an empty box deletes the line)">↺ Replace line</button><button type="button" id="ckInsert" title="Put the fixed code in as new line(s) above this line">➕ Insert above</button><button value="cancel" id="ckClose">Close</button></div>
 </form></dialog>
 <dialog id="keyDlg" data-nomenu><form method="dialog">
   <h3>Process colors</h3>
