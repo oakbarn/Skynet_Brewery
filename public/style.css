@@ -545,6 +545,16 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
 #dlgBody label.greyed, #dlgBody label.greyed + * { opacity: 0.45; }
+/* a locked name and its ✏ Change name button; the Name Change pop-up (Fritz, 2026-10-27) */
+.nameRow { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.nameRow input { flex: 1; min-width: 0; }
+.nameRow .nameBtn { flex: none; white-space: nowrap; }
+input.lockedName { opacity: 0.75; cursor: default; }
+dialog.nameDlg { width: min(420px, 94vw); }
+dialog.nameDlg label { display: block; margin: 10px 0 4px; color: var(--muted); }
+dialog.nameDlg input { width: 100%; box-sizing: border-box; }
+dialog.nameDlg .nameErr { color: var(--bad); min-height: 1.2em; margin: 6px 0 0; }
+dialog.nameDlg .muted { font-size: 0.85em; }
 
 /* ===== Process editor: colors (public/colorize.js), tools row, color key, Recycle Bin ===== */
 :root { --hl-cmd: #5aa9ff; --hl-dev: #ff5ce1; --hl-wid: #4dd0e1; --hl-vk: #c58bff; --hl-vapi: #ff5c5c; --hl-proc: #a5c95a; --hl-op: #ffa040;
