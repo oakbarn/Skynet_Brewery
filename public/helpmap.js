@@ -10,7 +10,7 @@ const VIEWS = {
 export const viewTopic = v => VIEWS[v] || null;      // Help for the page you are on (the Help button)
 const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 
-// a device or widget element (the things added with Add element)
+// a device or widget element (the things added with Add Device / Widget)
 export function elementTopic(e) {
   if (!e) return null;
   if (e.integratedIn) return ['skynet-integrated-devices'];
@@ -27,7 +27,7 @@ export function elementTopic(e) {
     case 'vKonstant': return e.kind === 'list' ? ['variables', 'vkonstant-list-a-dropdown-on-a-tab'] : ['variables', 'vkonstant-kinds'];
     case 'vAPI': return ['variables', 'vapi-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
-    case 'picture': return ['picture-paths'];
+    case 'picture': return ['picture-widget', 'turns-on-with'];
     case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];
     case 'temperature': return e.sensor === 'ds18b20' ? ['devices', 'onewire-probes-ds18b20'] : DEVICE;
     default: return DEVICE;      // the other devices on a board pin: outputs, inputs, probes, sensors, flow meters, scales

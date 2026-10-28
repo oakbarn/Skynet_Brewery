@@ -21,7 +21,9 @@ my_widget.image = "Images/RedPump.png"
 
 That puts the new path in **imagePath_1** and sets **background = 1** by itself, so the new picture shows at once. You can also write `my_widget.imagePath_1 = "Images/RedPump.png"`; that changes the path but leaves the background number as it is.
 
-A Process can only change imagePath_1. Trying to change imagePath_2 or imagePath_3 stops the Process with a message that says to use `.image`.
+**Any Device or Widget can have as many pictures as you like this way:** `.image` takes any path, as often as you like.
+
+A Process can also change imagePath_2 and imagePath_3, as in BruControl: `my_widget.imagePath_2 = "Images/BluePump.png"`.
 
 ## The BruControl way still works
 
@@ -36,10 +38,10 @@ my_widget.background = 4
 
 A number in **background** only ever picks a picture. A color name or code (`my_widget.background = "red"`) colors the item when it shows no picture.
 
-## After a BruControl import: imagePath_2 and imagePath_3 are locked
+## imagePath_2 and imagePath_3 work as in BruControl
 
-When a BruControl Schema is imported, each item keeps its three BruControl pictures so your imported Processes that say `background = 2` or `background = 3` still show the right picture. On those items **imagePath_2** and **imagePath_3** are locked (🔒) and can no longer be changed. Clicking one opens a short note that explains the Skynet way above.
+When a BruControl Schema is imported, each item keeps its three BruControl pictures, so imported Processes that say `background = 2` or `background = 3` still show the right picture. All three paths can be changed in the Properties and from a Process, just as in BruControl (Fritz, 2026-10-27; they were locked before).
 
-imagePath_1 stays open: change it in the properties dialog, or from a Process with `.image`.
+The first time you change imagePath_2 or imagePath_3 in the Properties, a **heads-up** pops up: in Skynet one picture path is enough, because `.image` can give any Device or Widget as many pictures as you like. Tick **Do not show this again** to stop it.
 
 > Items that were made from several stacked BruControl copies (see [Alarms and sound](21-alarms-and-sound)) can have more than three paths: imagePath_4, imagePath_5 and so on, for the pictures of the second and third copy. Their Processes were changed to the right numbers during the import.
