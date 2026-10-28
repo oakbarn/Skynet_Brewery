@@ -11,7 +11,7 @@ A double-click on a box, dropdown or button inside a row does that box's own job
 | List | Where | Double-click opens |
 | --- | --- | --- |
 | vAPI, vKonstant and shared variables | Variables page | the variable's Properties |
-| Elements for voice and Home Assistant | Settings, MQTT | the Device's or Widget's Properties |
+| Devices and Widgets for voice and Home Assistant | Settings, MQTT | the Device's or Widget's Properties |
 | Equipment list | ☰ Menu > Equipment Profile | the Tab_Vessel's or Tab_Fitting's Properties on its Tab |
 | Made on the Vessel tab | ☰ Menu > Equipment Profile | the vessel, open on the Vessel tab |
 | Tabs of the Schema | ☰ Menu > Tab Background Profile | that Tab's Tab settings |

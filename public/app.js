@@ -261,7 +261,7 @@ const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left',
   ['Top Left Branch', 0.087, 0], ['Bottom Branch', 0.54, 1]];         // the openings of the Skynet RIMS Device picture (Skynet_TC1_2_Rims_Device.svg)
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
-  // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Display Name is its only text
+  // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Label is its only text
   vessel: { title: 'Vessel', types: Object.keys(VESSEL_TYPES), image: 'Images/Skynet/Vessels/vessel_gray.svg', size: [220, 270], tab: 'Equipment',
     ports: {
       // 'Front Bottom Center', 'Front Center' and 'Right Side' are the three holes of Fritz's Skynet_BasicElectricBrewKettle.svg (2026-10-23)
@@ -746,9 +746,9 @@ function withLook(e, v) {
   if (v.valuetype) o.look = lookFor(v.valuetype, e);
   return o;
 }
-// The name shown on a Device or Widget: its Display name, or its Name when the Display name is empty. In Edit layout it follows
+// The name shown on a Device or Widget: its Label, or its Name when the Label is empty. In Edit layout it follows
 // the Properties you just changed (the live value from the Brain only catches up after Save).
-const shownName = (e, v) => editing ? (e.displayName || e.name) : (v.displayname || e.name);
+const shownName = (e, v) => editing ? (e.label || e.name) : (v.label || e.name);
 function fillEl(n, e0) {
   const v = S.values[e0.name] || {}, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
@@ -796,18 +796,18 @@ function fillEl(n, e0) {
       text = v.enabled === false ? (e.offText ?? 'OFF') : `${fmtVal(e, v.position)} ${u}${v.moving && v.run === 0 ? `  ▸ ${fmtVal(e, v.target)}` : v.run ? `  ${v.run > 0 ? '▶' : '◀'}` : ''}${e.homePin !== undefined && e.homePin !== '' && !v.homed ? '  (not homed)' : ''}`;
       on = !!v.moving; break;
     }
-    case 'dutyCycle': on = !!v.state; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
-    case 'hysteresis': on = !!v.state; text = v.enabled ? `${on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
-    case 'pid': on = !!v.enabled && v.value > 0; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
+    case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
+    case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
+    case 'pid': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic)); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
-    case 'label': text = shownName(e0, v); nm.classList.add('hidden'); break;
+    case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
-      if (e.follow) { on = isOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
+      if (e.follow) { on = turnsOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
       text = e.text ?? ''; break;
   }
   // outputs on while running above 0, timers while running, steppers while moving, flow meters while flowing, sound players while playing
@@ -938,10 +938,10 @@ async function doTap(e) {
     try { const r = await api('POST', `/ui/scripts/${encodeURIComponent(targetName)}/start`); if (!r.ok) toast(r.msg, true); else toast(`Started ${targetName}`); } catch (x) { toast(x.message, true); }
     return;
   }
-  const t = elByName(targetName); if (!t) return toast(`No element "${targetName}"`, true);
+  const t = elByName(targetName); if (!t) return toast(`No Device or Widget "${targetName}"`, true);
   if (act === 'toggle' && isBoolEl(t)) {
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
-    if (e.confirm) { const r = await choose(`${S.values[t.name]?.displayname ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
+    if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
     return setProp(t.name, boolProp(t), !cur);
   }
   return valueDialog(t);
@@ -1017,7 +1017,7 @@ function controlDialog(t) {
     await setProp(t.name, prop, x);
     if (en !== undefined) await setProp(t.name, 'enabled', en);
   };
-  d.append(h('div', { class: 'vdTitle' }, `${v.displayname ?? t.name} - ${label}` + (t.type === 'pid' ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
+  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - ${label}` + (t.type === 'pid' ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
     h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+')),
     h('div', { class: 'vdBtns' },
       h('button', { type: 'button', class: 'big onb' + (v.enabled ? ' cur' : ''), onclick: () => done(true) }, 'Set + ON'),
@@ -1045,7 +1045,7 @@ function fillManual(n, e, v) {
   n.classList.toggle('waiting', !!v.waiting);
 }
 async function manualDialog(t) {
-  const v = S.values[t.name] || {}, title = v.displayname ?? t.name;
+  const v = S.values[t.name] || {}, title = v.label ?? t.name;
   const r = await choose(v.waiting ? `${title}: ${v.message || 'confirm when done'}` : title,
     [...(v.waiting ? [['Done ✓', 'ok']] : []), ['Enter the temperature it shows', 'reading'], ['Enter the volume in it', 'volume']]);
   if (r === 'ok') { await setProp(t.name, 'confirmed', true); return setProp(t.name, 'waiting', false); }
@@ -1058,7 +1058,7 @@ async function manualDialog(t) {
 function valueDialog(t) {
   if (CONTROL_MAIN[t.type]) return controlDialog(t);
   const v = S.values[t.name] || {};
-  const title = v.displayname ?? t.name;
+  const title = v.label ?? t.name;
   if (t.type === 'scale') return scaleDialog(t, title);
   if (t.type === 'stepper') return stepperDialog(t, title);
   if (t.type === 'digitalIn') {   // latch / toggle: reset to off; counter: count back to 0
@@ -1119,7 +1119,7 @@ function timerSetDialog(t) {
     if (m) { const parts = m[3] === undefined ? [0, m[1], m[2]] : [m[1], m[2], m[3]]; ins.forEach((x, k) => { x.value = String(parts[k]).padStart(2, '0'); }); }
   });
   for (const i of ins) i.addEventListener('keydown', ke => { if (ke.key === 'Enter') { ke.preventDefault(); done(true); } });
-  d.append(h('div', { class: 'vdTitle' }, `${v.displayname ?? t.name} - set time`),
+  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - set time`),
     h('div', { class: 'vdRow tmRow' }, hh, h('b', {}, ':'), mm, h('b', {}, ':'), ss),
     h('div', { class: 'muted' }, v.running ? 'It keeps running from the new time.' : ((v.type ?? t.timerType) === 'countdown' ? 'Counts down from this time when started.' : 'Counts up from this time when started.')),
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => done(false) }, 'Cancel'), h('button', { type: 'button', class: 'big primary', onclick: () => done(true) }, 'Set')));
@@ -1153,6 +1153,22 @@ async function stepperDialog(t, title) {
 }
 
 // ---- pipes: drawn lines that show flow when all of their "flow when" elements are on
+// Heaters are on while Enabled (Fritz, 2026-10-27): a PID, Hysteresis or Duty Cycle counts as on from Enable to Disable,
+// not only while its output fires, for its own pictures and for a Picture Widget that turns on with it
+const HEAT_CTL_TYPES = ['pid', 'hysteresis', 'dutyCycle'];
+function turnsOn(name) {
+  const e = L().elements.find(x => x.name === name), v = S.values[name];
+  if (e && HEAT_CTL_TYPES.includes(e.type)) return !!v?.enabled;
+  if (e?.type === 'pwmOut') return !!v && v.enabled !== false && +v.value > 0;
+  return isOn(name);
+}
+// what a Picture Widget can turn on with: everything that is on or off, then the heaters (on while Enabled)
+const onSources = self => {
+  const els = (draft || S.config).elements.filter(e => e.name !== self);
+  const sorted = f => els.filter(f).map(e => e.name).sort();
+  return [['On / off Devices and Widgets', sorted(e => isBoolEl(e) || hasStateEl(e) || e.type === 'timer')],
+    ['Heaters: on while Enabled', sorted(e => HEAT_CTL_TYPES.includes(e.type) || e.type === 'pwmOut')]];
+};
 function isOn(name) {
   const v = S.values[name]; if (!v) return false;
   if ('state' in v) return !!v.state;
@@ -1340,6 +1356,10 @@ function renderPipes() {
     }
     g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
     g.append(line(p, { class: 'hit' }));
+    if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
+      const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
+      const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TD().foreColor || '#e6e6e6', 'font-size': TD().nameFontSize || 14 }); t.textContent = p.label; g.append(t);
+    }
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
       if (!ipPoint(p.to, p.workspace)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
@@ -1364,7 +1384,7 @@ function renderPipes() {
   }
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
-  $$('#ws .gfx.vessel').forEach(n => n.classList.toggle('heating', !!n.dataset.heater && isOn(n.dataset.heater)));
+  $$('#ws .gfx.vessel').forEach(n => n.classList.toggle('heating', !!n.dataset.heater && turnsOn(n.dataset.heater)));
 }
 
 // ---------------------------------------------------------------- edit mode
@@ -1879,7 +1899,7 @@ function portForName(e) {
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
-const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.displayName, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
@@ -1896,7 +1916,7 @@ function portError(e, self) {
 }
 async function newDeviceDialog(e, hint) {
   const devs = S.config.devices || [];
-  const work = { displayName: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
+  const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
   const port = isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
@@ -1904,7 +1924,7 @@ async function newDeviceDialog(e, hint) {
   const fields = [['device', '1. Interface (board)', 'dev'],
     ['typeCode', '2. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
     [port[0], '3. ' + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
-    ['displayName', 'Label (Display name shown on the tab, e.g. Fly Sparge)', 'text'],
+    ['label', 'Label (shown on the tab, e.g. Fly Sparge; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'],
     ['name', 'Suggested Name (you may type your own)', 'text']];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
   for (const b of oks) b.textContent = 'Create';
@@ -1932,7 +1952,7 @@ async function newDeviceDialog(e, hint) {
         const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
-        for (const k of ['displayName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         e.name = name;
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
@@ -2011,7 +2031,7 @@ function rimsPinLists(w, g) {
     document.body.append(h('datalist', { id: 'pins-' + k }, ...pins.map(p => { const t = /^A/.test(p) ? `A${p.slice(1)} = pin ${54 + +p.slice(1)} (BruControl)` : `D${p}` + (pinTag(p) ? `  (${pinTag(p)})` : ''); return h('option', { value: p, label: t }, t); })));
   }
 }
-// make the RIMS tube's (or kettle's) own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Display Name.
+// make the RIMS tube's (or kettle's) own Devices, or bring them up to date, from w (its Properties). tab: the Tab it is on; label: its Label.
 // Nothing changes when something is wrong (the error is thrown). No Interface and no Ports: it has no Devices yet.
 function applyRims(g, w, tab, label) {
   const { heat: h0, temp: t0 } = intEls(g), tk = tempKindOf(w.tempKind), ow = isOneWire({ type: 'temperature', ...tk });
@@ -2024,12 +2044,12 @@ function applyRims(g, w, tab, label) {
   const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
   if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
   for (const [k] of elSettings(heat.type)) if ('el_' + k in w) { const v = w['el_' + k]; if (v === undefined || v === '') delete heat[k]; else heat[k] = v; }
-  heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.displayName ??= base + ' Heat';
+  heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.label ??= base + ' Heat';
   const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
   for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
   Object.assign(temp, clone(tk));
   if (ow) { temp.probeIndex = +w.tempProbe; delete temp.channel; } else { temp.channel = w.tempPin; delete temp.probeIndex; }
-  temp.typeCode = t0 && tempKey(t0) === tempKey(temp) && t0.typeCode ? t0.typeCode : defaultCode(temp); temp.displayName ??= base + ' Temp';
+  temp.typeCode = t0 && tempKey(t0) === tempKey(temp) && t0.typeCode ? t0.typeCode : defaultCode(temp); temp.label ??= base + ' Temp';
   // a new one gets the suggested name; one that still has its suggested name follows it (a name typed by hand stays)
   const named = (e, old) => !old || old.name === deviceSuggestion(old, old) ? deviceSuggestion(e, old || e) : old.name;
   heat.name = named(heat, h0); temp.name = named(temp, t0);
@@ -2052,7 +2072,7 @@ async function newIntegratedDevice(tname) {
   const t = tplOf('vessel', tname); if (!t) return toast(`The Skynet Template ${tname} is missing`, true);
   const [what, lbl] = intWhat({ template: t.name, vesselType: t.vesselType });
   const w = { ...rimsWork(null), template: t.name, vesselType: t.vesselType, label: lbl };
-  const fields = o => [...rimsFields(o), ['label', `Label (Display Name shown on the tab, e.g. ${lbl})`, 'text']];
+  const fields = o => [...rimsFields(o), ['label', `Label (shown on the tab, e.g. ${lbl})`, 'text'], ['labelVisible', 'Show label', 'yn', true]];
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), refresh = () => { const x = { ...w }; try { readFields(x, body); } catch { } rimsPinLists(x, null); };
   for (const b of oks) b.textContent = 'Create';
   body.addEventListener('change', refresh);
@@ -2069,6 +2089,7 @@ async function newIntegratedDevice(tname) {
         let nm = noSpaces(w.label || lbl).replace(/[^\w-]/g, '') || lbl; for (let i = 2, b = nm; taken.some(x => String(x).toLowerCase() === nm.toLowerCase()); i++) nm = `${b}_${i}`;
         const g = placeTabVessel(t, wsName, nm);
         if (w.label) g.label = String(w.label).trim();
+        g.labelVisible = w.labelVisible !== false;
         Object.assign(g, applyRims(g, w, wsName, w.label || lbl));
         sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
         return;
@@ -2297,7 +2318,7 @@ function toBuild() {
 }
 $('#buildTab').onclick = () => toBuild();
 $('#saveBuild').onclick = guard(saveBuild);
-const BUILD_HINT = '🔨 Build Tab: build the new thing here (Add element, Add equipment, IPs, pipes). 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
+const BUILD_HINT = '🔨 Build Tab: build the new thing here (Add Device / Widget, Add equipment, IPs, pipes). 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
 function setPreview(on) {
   if (on && !toBuild()) return;
   previewing = !!on && !!buildWs(); sel = null; drag = null;
@@ -2545,10 +2566,10 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 'Center' ? 'ed' : '') + ' justified'])];
 // field: [key, label, kind, options]
 const F = {
-  common: [['name', 'Name', 'text'], ['displayName', 'Display name', 'text'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
+  common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
-    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideName', 'Hide name', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
-    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (element, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
+    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (Device, Widget, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
     ['wrap', 'Word wrap as needed (a long name goes onto more lines; off = one line, cut off with ...)', 'bool'],
@@ -2559,17 +2580,17 @@ const F = {
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
     ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool'], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT]] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  switch: [['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  switch: [['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
     ['pulse', 'Pulse: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds; empty = 3000)', 'num'],
     ['activeLow', 'Invert / active low (normally-closed contact)', 'bool'], ['pullup', 'Use the board\'s pull-up (switch wired to GND)', 'bool', true],
     ['debounce', 'Debounce on the board (ms, empty = 20)', 'num'], ['onDelay', 'On delay (seconds the input must stay on)', 'num'], ['offDelay', 'Off delay (seconds the input must stay off)', 'num'],
-    ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['units', 'Counter units (e.g. presses, gal)', 'gpick', 'units'], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   timer: [['timerType', 'Type', 'sel', ['countup', 'countdown']], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the server starts', 'bool']],
   soundPlayer: [['path', 'Sound file (a Process can change it: SoundPlayer path = "...")', 'gpick', 'sounds'], ['loop', 'Repeat sound', 'bool'],
     ['_snote', 'Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after. In a Process: play SoundPlayer, stop SoundPlayer.', 'note']],
-  alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Image when sounding', 'path'], ['imageOff', 'Image when quiet', 'path']],
+  alarm: [['sound', 'Sound file path (.wav / .mp3)', 'path'], ['sounds', 'Sound files 1-3 (JSON list; "fileindex" picks one)', 'json'], ['fileIndex', 'Sound file number', 'num'], ['soundMode', 'Sound', 'sel', ['custom', 'default', 'none']], ['loop', 'Repeat sound', 'bool'], ['activeText', 'Text when sounding', 'text'], ['imageOn', 'Picture when sounding', 'path'], ['imageOff', 'Picture when quiet', 'path']],
   manual: [['units', 'Temperature units', 'sel', ['°F', '°C']], ['volumeUnits', 'Volume units', 'sel', ['gal', 'L']], ['precision', 'Set point decimals', 'num'], ['setpoint', 'Set point at start', 'num'],
     ['noPump', 'Has no pump', 'bool'], ['imageOn', 'Picture when heating', 'path'], ['imageOff', 'Picture when not heating', 'path'],
     ['_mnote', 'Processes set: setpoint, heat, pump, timer, message, waiting. The brewer taps it to confirm (confirmed = true) or to enter what it reads (reading, volume).', 'note']],
@@ -2585,21 +2606,23 @@ const F = {
     ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
-  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
-  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor element)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
-  picture: [['follow', 'Follow element (on/off image follows it; empty = static)', 'elem'], ['imageOn', 'Image when on', 'path'], ['imageOff', 'Image when off', 'path'], ['text', 'Text on picture', 'text']],
+  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
+  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
+  // Picture Widget (Fritz, 2026-10-27): "Turns on with" picks what turns it on: an on/off Device or Widget, or a heater that is on while Enabled.
+  // None = a still picture: the On pictures are greyed out.
+  picture: [['follow', 'Turns on with (None = a still picture)', 'onsrc', null, true], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   text: [['text', 'Text (codes like \\b bold, \\L large, \\n new line work here)', 'area'], ['visible', 'Visible', 'bool', true], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on)', 'bool'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
     ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['wrap', 'Word wrap as needed (off = one line, cut off at the edge)', 'bool', true], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
-  propValve: [['imageOn', 'Image when open (above 0 %)', 'path'], ['imageOff', 'Image when closed (0 %)', 'path']],
+  propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'yn'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
-    ['label', 'Label', 'text'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
+    ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
     ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
     ...(it.size === 'custom' ? [['sizeCustom', `Custom size (${it.sizeUnits === 'mm' ? 'mm' : 'inches, e.g. 1.5'})`, 'num']] : []),
     ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'],
@@ -2608,10 +2631,10 @@ const F = {
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock']],
 };
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
-F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
-  ['_look', 'Display Name and place', 'note'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
+  ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
@@ -2707,10 +2730,17 @@ function alarmFields(item) {
 function fieldsFor(item) {
   let fs = fieldsOf(item);
   if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
-  // every item with on / off pictures can also have an On overlay, offered right below them (not the Manual vessel widget)
-  const at = fs.findIndex(f => f[0] === 'imageOff');
-  return at < 0 || item.type === 'manual' ? fs : [...fs.slice(0, at + 1), OVERLAY_PIC, ...fs.slice(at + 1)];
+  // every item with on / off pictures can also have an On overlay (not the Manual vessel widget). Fritz, 2026-10-27: one picture plus
+  // the On overlay is the preferred way, so the overlay comes right after the off picture and a second picture (when on) last.
+  const off = fs.find(f => f[0] === 'imageOff'), onp = fs.find(f => f[0] === 'imageOn');
+  if (!off || item.type === 'manual') return fs;
+  const rest = fs.filter(f => f !== off && f !== onp), at = fs.indexOf(off) - (onp && fs.indexOf(onp) < fs.indexOf(off) ? 1 : 0);
+  const pics = [['_ovn', 'Pictures: the preferred way is one picture plus an On overlay drawn on top while it is on. A second picture (when on) is still allowed.', 'note'],
+    off, OVERLAY_PIC, ...(onp ? [[onp[0], onp[1] + ' (a second picture, optional)', ...onp.slice(2)]] : [])];
+  return [...rest.slice(0, at), ...pics, ...rest.slice(at)];
 }
+// a Picture Widget that turns on with nothing (None) is a still picture: its On pictures are greyed out (Fritz, 2026-10-27)
+const greyedPic = (key, obj) => obj.type === 'picture' && !obj.follow && ['imageOn', 'imageOverlay'].includes(key);
 
 function fieldsOf(item) {
   if (item.type === 'stepper') return stepperFields(item);
@@ -2730,15 +2760,25 @@ function fieldsOf(item) {
   return kindFields(item.type, item);
 }
 
-function field([key, label, kind, opts, rerender], obj) {
+const PICK_TIP = 'Double-click to open the Properties of the one picked';
+function field(f, obj) {
+  const out = fieldOne(f, obj);
+  if (greyedPic(f[0], obj)) {
+    out[0].classList.add('greyed'); out[0].title = 'Pick what it turns on with first (Turns on with is None)';
+    for (const x of out[1].querySelectorAll?.('select, button, input') ?? []) x.disabled = true;
+    if (out[1].matches?.('select, input')) out[1].disabled = true;
+  }
+  return out;
+}
+function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && kind === 'text' && obj._ref && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const v = obj[key];
   let input;
-  if (kind === 'imgpath') {    // imagePath_1, _2, _3: after a BruControl import only imagePath_1 can be changed (the Skynet way)
-    if (opts === 1 || !obj.imagePathsLocked) return field([key, label, 'gpick', 'pictures'], obj);
-    input = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', readonly: true, class: 'lockedPath', placeholder: '(empty)', title: 'Locked after the BruControl import. Click to see why.', onclick: lockedPathHelp });
-    return [h('label', {}, label + ' 🔒'), input];
+  if (kind === 'imgpath') {    // imagePath_1, _2, _3 work as in BruControl (Fritz, 2026-10-27); changing _2 or _3 shows a heads-up once
+    const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
+    if (opts !== 1) out[1].querySelector('select[data-k]')?.addEventListener('change', imagePathHeadsUp);
+    return out;
   }
   if (kind === 'bgsel') {      // which picture shows: 1-3 (and more on folded items), or none
     const n = [1, 2, 3, ...slotsOf(obj).filter(x => x > 3)];
@@ -2772,6 +2812,9 @@ function field([key, label, kind, opts, rerender], obj) {
     const tg = h('label', { class: 'lktog' }, cb, ic);
     cb.addEventListener('change', show); show();
     input = tg;
+  }
+  else if (kind === 'show') {     // Show label (Skynet Standard, Fritz 2026-10-27): a switch that is on when the item's hide flag (e.g. hideName) is off
+    input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'show', ...(v ? {} : { checked: true }) }), h('span', { class: 'swk' }));
   }
   else if (kind === 'bool' || kind === 'yn') {     // a simple true / false is a switch (Fritz); choices with more options are dropdowns
     input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'bool', ...(v ?? opts ? { checked: true } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) }), h('span', { class: 'swk' }));
@@ -2837,16 +2880,19 @@ function field([key, label, kind, opts, rerender], obj) {
   else if (kind === 'sel') { const os = opts.map(o => Array.isArray(o) ? o : [o, o]); input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...os.map(([o, l]) => h('option', { value: o, ...(String(v ?? os[0][0]) === o ? { selected: true } : {}) }, l))); }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
-  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
+  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)));      // Fritz: the full Interface name first
-  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
-  else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
+  else if (kind === 'onsrc') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: '' }, 'None (a still picture)'),
+    ...onSources(obj.name).filter(([, ns]) => ns.length || v).map(([g, ns]) => h('optgroup', { label: g }, ...ns.map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)))),
+    ...(v && !onSources(obj.name).some(([, ns]) => ns.includes(v)) ? [h('option', { value: v, selected: true }, v + ' (not on / off)')] : []));
+  else if (kind === 'elem') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, h('option', { value: '' }, key === 'follow' ? '(none - static picture)' : '(none)'), ...(draft || S.config).elements.filter(e => e.type !== 'picture').map(e => e.name).sort().map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)));
+  else if (kind === 'vessel') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, h('option', { value: '' }, '(none)'), ...draft.graphics.filter(g => g.kind === 'vessel' && g.workspace === (obj.workspace || wsName)).map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.label || g.id)));
   else if (kind === 'fit') input = h('select', { 'data-k': key, 'data-kind': kind }, ...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k, ...((v || 'point') === k ? { selected: true } : {}) }, t)));
-  else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
+  else if (kind === 'ip') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, h('option', { value: '' }, '(none - free end)'), ...allIps(obj.workspace || wsName).map(q => h('option', { value: q.id, ...(q.id === v ? { selected: true } : {}) }, q.label)));
   else if (kind === 'area' || kind === 'json') input = h('textarea', { 'data-k': key, 'data-kind': kind, spellcheck: 'false' }, kind === 'json' ? (v ? JSON.stringify(v) : '') : (v ?? ''));
   else if (kind === 'multi') {
     const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(e.type) || isVarEl(e)).map(e => e.name).sort();
-    input = h('select', { 'data-k': key, 'data-kind': kind, multiple: true, size: 8 }, ...names.map(n => h('option', { value: n, ...((v || []).includes(n) ? { selected: true } : {}) }, n)));
+    input = h('select', { 'data-k': key, 'data-kind': kind, multiple: true, size: 8, title: 'Double-click a name to open its Properties' }, ...names.map(n => h('option', { value: n, ...((v || []).includes(n) ? { selected: true } : {}) }, n)));
   } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}) });
   const full = kind === 'multi' || kind === 'area';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
@@ -2878,22 +2924,22 @@ function stepperPick(key, list, v) {
   return s;
 }
 
-// A locked imagePath_2 / _3 was clicked: explain how pictures change in Skynet
-let lockedShown = 0;
-function lockedPathHelp(ev) {
-  ev?.target?.blur?.();
-  if (Date.now() - lockedShown < 800) return;       // click and focus fire together
-  lockedShown = Date.now();
-  let d = $('#lockedPathDlg');
+// imagePath_2 / _3 changed: a heads-up that one picture path is enough in Skynet (Fritz, 2026-10-27). They still work as in
+// BruControl; the heads-up can be turned off with its tick box.
+const HEADSUP_KEY = 'skynet.imagePathHeadsUpOff';
+function imagePathHeadsUp() {
+  try { if (localStorage.getItem(HEADSUP_KEY)) return; } catch { }
+  let d = $('#pathHeadsUpDlg');
   if (!d) {
-    d = h('dialog', { id: 'lockedPathDlg' }, h('h3', {}, '🔒 imagePath_2 and imagePath_3 are locked'),
-      h('p', {}, 'This item came from a BruControl import. BruControl kept 3 background pictures and a Process picked one with background = 1, 2 or 3. Those pictures were kept, so your imported Processes still work, but imagePath_2 and imagePath_3 can no longer be changed here.'),
-      h('p', {}, h('b', {}, 'The Skynet way:'), ' use one picture, imagePath_1, and let a Process change it:'),
+    const off = h('input', { type: 'checkbox' });
+    d = h('dialog', { id: 'pathHeadsUpDlg' }, h('h3', {}, 'Heads up: one picture path is all you need'),
+      h('p', {}, 'imagePath_2 and imagePath_3 work as in BruControl: a Process picks one with background = 1, 2 or 3, and a Process can change them too.'),
+      h('p', {}, h('b', {}, 'In Skynet, any Device or Widget can have as many pictures as you like'), ' with the .image attribute. It puts the new path in imagePath_1 and shows it at once:'),
       h('pre', { class: 'mono' }, 'my_widget.image = "Images/RedPump.png"'),
-      h('p', {}, 'That puts the new path in imagePath_1 and sets background = 1 by itself, so the picture shows at once. You can also change imagePath_1 right here in this dialog.'),
-      h('p', {}, 'Still works as in BruControl: my_widget.background = 1, 2 or 3 shows that picture; any other number (for example 4) shows no picture.'),
+      h('p', {}, 'For on / off, the preferred way is one picture plus an On overlay (see its Properties).'),
       h('p', { class: 'muted' }, 'More in Help > Pictures on items.'),
-      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: () => d.close() }, 'OK')));
+      h('label', { class: 'check' }, off, ' Do not show this again'),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: () => { if (off.checked) try { localStorage.setItem(HEADSUP_KEY, '1'); } catch { } d.close(); } }, '✔ OK')));
     document.body.append(d);
   }
   d.showModal();
@@ -2905,6 +2951,7 @@ function readFields(obj, root = $('#dlgBody')) {
     let v;
     if (kind === 'bool') v = inp.checked;
     else if (kind === 'vis') v = inp.checked ? undefined : 'hidden';
+    else if (kind === 'show') v = inp.checked ? undefined : true;
     else if (kind === 'vkitems') {
       v = [...inp.querySelectorAll('.vkrow')].map(tr => ({ value: tr.querySelector('.vkv').value.trim(), text: tr.querySelector('.vkt').value.trim() })).filter(r => r.value !== '' || r.text);
       for (const r of v) { if (r.value === '' || !Number.isFinite(+r.value)) throw new Error(`Choice "${r.text}": its Value must be a number`); r.value = +r.value; }
@@ -3029,7 +3076,7 @@ function dialog(title, fields, obj, canDelete, topic) {
     // Delete and Cancel are plain buttons so Enter in a field always means Save
     for (const b of $$('#dlg [data-close]')) b.onclick = () => d.close(b.dataset.close);
     d.onclose = () => res(d.returnValue);
-    d.returnValue = 'cancel'; d.showModal();
+    d.returnValue = 'cancel'; d.showModal(); d._snap = formSnap();
   });
 }
 
@@ -3128,6 +3175,37 @@ function cloneBundle(v) {
 }
 // Fritz (2026-10-26): in any list, double-click an entry to open its Properties. A Device, Widget or Tab_Vessel opens
 // in Edit layout on its Tab, the same dialog as a double-click on the Tab. A double-click on a box or button in the row does its own job.
+// Picker dropdowns (Skynet Standard, Fritz 2026-10-27): double-click a choice in a dropdown that lists things with a Skynet
+// dialog (a Tab, a Device or Widget, a vessel, an IP) and that thing's Properties open, e.g. the Tab list > Brewhouse opens the
+// Brewhouse Tab settings. Picture and sound pickers work as before. A closed dropdown swallows the second click in some browsers,
+// so two quick clicks on it count too, and so does a double-click on the field's name beside it.
+const PICK_OPEN = { ws: v => openTabProps(v), elem: v => openProps('el', v), multi: v => openProps('el', v), vessel: v => openProps('gfx', v),
+  ip: v => v.startsWith('dev:') ? openProps('el', v.split(':')[1]) : v.startsWith('eq:') ? openProps('gfx', v.split(':')[1]) : openProps('gfx', v) };
+const pickName = (kind, v) => kind === 'ws' ? `the ${v} Tab settings` : `the Properties of ${kind === 'elem' || kind === 'multi' ? v : (draft || S.config).graphics.find(g => g.id === v.replace(/^eq:([^:]+).*/, '$1'))?.label || 'that item'}`;
+function pickerOpen(inp, v) {
+  const kind = inp.dataset.kind, go = PICK_OPEN[kind];
+  if (!go || !v) return;
+  const d = $('#dlg'), inDlg = d.open && d.contains(inp);
+  if (inDlg && formSnap() !== (d._snap ?? formSnap()) && !confirm(`Leave these Properties without saving your changes, and open ${pickName(kind, v)}?`)) return;
+  if (inDlg) d.close('cancel');
+  setTimeout(() => go(v), 0);
+}
+function pickerDbl(root) {
+  if (root._pickerDbl) return; root._pickerDbl = true;
+  let last = { t: 0, el: null };
+  const target = el => el?.closest?.('select[data-kind]');
+  root.addEventListener('dblclick', ev => {
+    const opt = ev.target.closest('option'), sel = target(ev.target);
+    if (sel && PICK_OPEN[sel.dataset.kind]) { ev.preventDefault(); return pickerOpen(sel, opt?.value ?? sel.value); }
+    const lab = ev.target.closest('label'), next = lab?.nextElementSibling;     // the field's name
+    if (next?.matches?.('select[data-kind]') && PICK_OPEN[next.dataset.kind]) pickerOpen(next, next.value);
+  });
+  root.addEventListener('mousedown', ev => {
+    const sel = target(ev.target); if (!sel || sel.multiple || !PICK_OPEN[sel.dataset.kind]) return;
+    const now = Date.now(); if (last.el === sel && now - last.t < 450) { last = { t: 0, el: null }; pickerOpen(sel, sel.value); } else last = { t: now, el: sel };
+  });
+}
+pickerDbl(document);
 const rowDbl = open => ev => { if (ev.target.closest('input,select,button,textarea,a')) return; window.getSelection?.().removeAllRanges(); open(); };
 function openProps(kind, id) {
   if (!can('admin')) return toast('Only an admin can open Properties (they are changed in Edit layout)', true);
@@ -3147,6 +3225,9 @@ function openTabProps(name) {
   if (!editing) setEditing(true);
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
+// The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
+const TYPE_TITLE = { vKonstant: 'vKonstant', vAPI: 'vAPI', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
@@ -3172,7 +3253,7 @@ async function editItem(kind, id) {
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? `${type} element` : type === 'ip' ? 'IP widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  const r = await dialog(kind === 'el' ? elTitle(item) : type === 'ip' ? 'IP Widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -3252,7 +3333,7 @@ async function editItem(kind, id) {
     }
     if (kind === 'el') {
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
-      // a new Device keeps following the suggested name (Display name, Interface, port, type, tab) until a name of its own is typed
+      // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
       if (follow) work.name = deviceSuggestion(work, item) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
@@ -3494,7 +3575,9 @@ function askLine() {
 $('#goLine').onclick = askLine;
 $('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; refreshFind(false); });
 $('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; syncHl(); });
-attachAutofill($('#code'), $('#autofill'), () => S?.words);
+const predict = attachAutofill($('#code'), $('#autofill'), () => S?.words);
+$('#suggestBtn').onmousedown = ev => ev.preventDefault();     // the cursor stays where it is in the Process
+$('#suggestBtn').onclick = () => { if (curScript) predict.open(); };
 $('#code').addEventListener('keydown', ev => {
   if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '\t'); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }
@@ -4226,7 +4309,7 @@ $('#importBtn').onclick = guard(async () => {
 // BruControl Schema (.brucfg configuration file)
 function bruReport(r) {
   const t = r.summary.byType;
-  const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} elements, ${r.summary.scripts} processes`,
+  const lines = [`${r.preview ? 'In this file' : 'Imported'}: ${r.summary.devices} devices, ${r.summary.workspaces} workspaces, ${r.summary.elements} Devices and Widgets, ${r.summary.scripts} processes`,
     '  ' + Object.entries(t).map(([k, n]) => `${k} ${n}`).join(', ')];
   if (r.autostart.length) lines.push(`Processes started with the server: ${r.autostart.join(', ')}`);
   lines.push(r.missingMedia.length ? `\n${r.missingMedia.length} of ${r.mediaCount} pictures and sounds are not in your media folder yet. Copy them from C:\\BruControl\\Media:\n  ${r.missingMedia.join('\n  ')}` : `All ${r.mediaCount} pictures and sounds were found.`);
@@ -4245,7 +4328,7 @@ async function bruSend(preview) {
 }
 $('#bruPreview').onclick = guard(async () => { $('#bruResult').textContent = bruReport(await bruSend(true)); });
 $('#bruImport').onclick = guard(async () => {
-  const msg = $('#bruMode').value === 'replace' ? 'Replace your tabs, elements and devices with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old Schema.)' : 'Add this BruControl file to your Schema? Running processes are stopped.';
+  const msg = $('#bruMode').value === 'replace' ? 'Replace your Tabs, Devices and Widgets with the ones in this BruControl file? Running processes are stopped. (config/brewery.json.bak keeps the old Schema.)' : 'Add this BruControl file to your Schema? Running processes are stopped.';
   if (!confirm(msg)) return;
   const r = await bruSend(false);
   $('#bruResult').textContent = bruReport(r);
@@ -4262,7 +4345,7 @@ async function sampleCards(box, after) {
     h('div', { class: 'sampleName' }, sm.name), h('div', { class: 'muted' }, sm.description || ''),
     sm.needs ? h('div', { class: 'sampleNeeds' }, sm.needs) : '',
     h('button', { class: 'primary', onclick: guard(async () => {
-      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your tabs, elements, pipes and devices and stops running processes. Your current Schema is saved in config/backups first.`)) return;
+      if (!confirm(`Load the sample "${sm.name}"?\n\nIt replaces your Tabs, Devices, Widgets and pipes and stops running processes. Your current Schema is saved in config/backups first.`)) return;
       const r = await api('POST', `/ui/samples/${sm.id}/load`);
       after?.(); wsName = null; await load(); setView('workspace');
       const bad = (r.problems || []).length;
@@ -4478,7 +4561,7 @@ function renderMqtt() {
   const body = $('#mqItems'); body.innerHTML = '';
   for (const it of S.mqtt?.items || []) {
     const box = (k, dis) => h('input', { type: 'checkbox', 'data-name': it.name, 'data-k': k, ...(it[k] ? { checked: true } : {}), ...(dis ? { disabled: true, title: 'Inputs from hardware are read only' } : {}) });
-    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.displayName ? `${it.displayName} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
+    body.append(h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', it.name)) }, h('td', {}, it.label ? `${it.label} (${it.name})` : it.name), h('td', {}, TYPE_WORD[it.type] || it.type), h('td', {}, box('voice')), h('td', {}, box('control', it.fixed))));
   }
   const sb = $('#mqScripts'); sb.innerHTML = '';
   for (const s of S.scripts) sb.append(h('label', {}, h('input', { type: 'checkbox', value: s.name, ...((c.scripts || []).includes(s.name) ? { checked: true } : {}) }), s.name));
@@ -4627,7 +4710,7 @@ function okToSwitch(toName, what = 'Loading') {
   const off = 'Every output is switched off first: digital outs and valves, PWM and analog outs, duty cycle, hysteresis and PID controls, motors, timers and alarms.';
   if (run.length) return confirm(`⚠ The Schema "${act}" is active: ${run.length} Process${run.length > 1 ? 'es are' : ' is'} running:\n${run.slice(0, 12).map(x => '• ' + x.name).join('\n')}${run.length > 12 ? '\n• ...' : ''}\n\n` +
     `${what} "${toName}" stops ${run.length > 1 ? 'them' : 'it'}. ${off}\n\nIs it OK to proceed?`);
-  return confirm(`${what} "${toName}"?\n\n${off}\n\nIts tabs, devices, elements and Equipment Profile take the place of "${act}". "${act}" is kept just as it is: pick it in the Schema list to go back to it.`);
+  return confirm(`${what} "${toName}"?\n\n${off}\n\nIts Tabs, Devices, Widgets and Equipment Profile take the place of "${act}". "${act}" is kept just as it is: pick it in the Schema list to go back to it.`);
 }
 // after another Schema is loaded: start fresh on its first tab
 async function afterSchemaSwitch(msg) {
@@ -4688,7 +4771,7 @@ async function cloneSchema(id) {
   const w = { id: src.id, name: '', load: false };
   if (await dialog('Clone a Schema', [['id', 'Schema to clone', 'sel', list.map(x => [x.id, x.name + (x.active ? '  (loaded)' : '')])],
     ['name', 'Name of the clone (empty: "<name> copy")', 'text'], ['load', 'Load the clone now', 'bool'],
-    ['_n', 'The clone gets everything in the Schema: its tabs, devices, elements, pictures, pipes, probes, autostart list, Equipment Profile and saved values. It starts without a version of its own. The Schema you clone is not changed.', 'note']], w) !== 'ok') return;
+    ['_n', 'The clone gets everything in the Schema: its Tabs, Devices, Widgets, pictures, pipes, probes, autostart list, Equipment Profile and saved values. It starts without a version of its own. The Schema you clone is not changed.', 'note']], w) !== 'ok') return;
   readFields(w);
   const from = list.find(x => x.id === w.id);
   let name = String(w.name || '').trim();
@@ -4983,7 +5066,7 @@ function renderDefaultTab(box) {
     ['startZoom', 'Zoom', 'sel', [['', '(the last one used on this browser)'], ...ZOOMS]],
     ['startFullScreen', 'Full screen (starts with your first click or tap; not on iPhones)', 'bool'],
     ['_x', 'Text', 'head'],
-    ['_tbn', 'Every text box (the Name and Value of each Device and Widget, a Label, a Text, the Display Name on a vessel) starts from these. ' +
+    ['_tbn', 'Every text box (the Name and Value of each Device and Widget, a Label, a Text, the Label on a vessel) starts from these. ' +
       'An item left on Default follows the colors, alignment and name font here, so changing one here changes them all. ' +
       'Visible, Word wrap, the size and the place are copied into each new item when it is made.', 'note'],
     ['textVisible', 'Visible (new Devices, Widgets and Texts start shown)', 'bool'],
@@ -4991,7 +5074,7 @@ function renderDefaultTab(box) {
     ['textBackColor', 'Back color (behind the text)', 'color'],
     ['textAlign', 'Alignment', 'sel', [['', 'Default (as each kind of item has it)'], ...TB_ALIGN_CHOICES.slice(1)]],
     ['textWrap', 'Word wrap as needed', 'bool'],
-    ['nameFont', 'Name font (names, Display Names and Texts)', 'sel', FONTS.map(([v, t]) => [v, v ? t : 'Default (the panel\'s normal font)'])],
+    ['nameFont', 'Name font (names, Labels and Texts)', 'sel', FONTS.map(([v, t]) => [v, v ? t : 'Default (the panel\'s normal font)'])],
     ['nameFontSize', 'Name font size (px; empty = the panel\'s normal size)', 'num'],
     ['textWidth', 'Width of a new Text or Label (px; empty = 220)', 'num'],
     ['textHeight', 'Height of a new Text or Label (px; empty = 40)', 'num'],
@@ -5407,7 +5490,7 @@ function vesselFields(p) {
     return [['name', 'Name', 'text'],
       isV ? ['vtype', 'Type', 'sel', types, true] : ['vtype', 'Type', 'vlist', w.vesselType + '.types'],
       ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
-      ['label', 'Label (empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+      ['label', 'Label (empty = the Type)', 'text'], ['labelVisible', 'Show label', 'yn', true], ['image', 'Graphic (picture path)', 'path'],
       ['_s', 'Size', 'head'],
       ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
         : [['volume', `Size (${u})`, 'num'], ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
@@ -6012,7 +6095,7 @@ F.skynetVessel = it => {
   const probes = [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])];
   const electric = it.heatKind === 'electric' || it.ports?.element?.installed, well = it.ports?.thermowell?.installed;
   return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
-    ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Display Name (the only text on it; empty = the Name)', 'text'],
+    ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Name)', 'text'],
     ...(it.integrated === 'device' ? [['_d', 'Built in (Skynet_Integrated_Device: its IPs and its heating element can never be taken out of it)', 'head'], ...rimsFields(it)] : [
       // its picture starts as the Widget's and is edited like any other Widget's (Fritz, 2026-10-23)
       ['image', 'Graphic (picture path; its IPs stay on the openings of the Skynet picture)', 'path'],
@@ -6021,7 +6104,7 @@ F.skynetVessel = it => {
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
     ...looseField(it),
-    ['_look', 'Display Name and place', 'head'], ['labelVisible', 'Show the Display Name', 'yn', true], ['labelAlign', 'Display Name position', 'sel', LABEL_POS], ['labelColor', 'Display Name color', 'color'], ['labelBg', 'Display Name back color', 'color'], ['labelSize', 'Display Name size (px; empty = the Name font size on the Default tab)', 'num'],
+    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 };
 
@@ -6044,7 +6127,7 @@ async function placeEqItems(p, items) {
       g = { id: newId(), kind: 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: C.size[0], h: C.size[1], labelAlign: 'above', labelSize: 16, labelVisible: true, profileItem: it.id };
       draft.graphics.push(g); made++;
     } else updated++;
-    Object.assign(g, { vesselType: it.vesselType, name: it.name, vtype: it.vtype, label: it.label || it.vtype, image: it.image || C.image, ports: clone(it.ports || {}) });
+    Object.assign(g, { vesselType: it.vesselType, name: it.name, vtype: it.vtype, label: it.label || it.vtype, labelVisible: it.labelVisible !== false, image: it.image || C.image, ports: clone(it.ports || {}) });
     syncVesselPorts(g, old);
     if (it.bundled) g.bundled = true; else delete g.bundled;
     wsName = g.workspace;

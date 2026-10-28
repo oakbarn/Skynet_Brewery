@@ -6,7 +6,7 @@ On a phone or a tablet, **Edit layout does not move or resize anything.** A fing
 
 - **Tap** an item to pick it. **🔒 Lock** / **🔓 Unlock** works on the picked item.
 - **Hold a finger** on an item to open its properties. To move it a little, change **X** and **Y** there; to resize it, change **Width** and **Height**.
-- Draw pipes and hoses, add elements, graphics, text, equipment and IPs.
+- Draw pipes and hoses, add Devices, Widgets, graphics, text, equipment and IPs.
 - **⚙ Tab settings** (or hold a finger on an empty spot).
 
 The resize corners and the bend points of hoses are not shown on a phone or tablet.
