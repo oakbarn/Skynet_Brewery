@@ -11,8 +11,8 @@ The **Predictive text** switch is on the editor's tool row, next to **Colors**. 
 As soon as you type a letter, a list pops up under the cursor with what fits:
 
 - At the **start of a line**: the commands first (`if`, `wait`, `start`, `new value` ...), each with a short note of what it does, then the names you already used higher up in this Process.
-- **Anywhere else**: the names of your variables, timers, vAPI, vKonstants, Devices, Widgets and Processes.
-- Each letter you type **narrows the list**: `vV_` shows every name that starts with `vV_`, `vV_A` only those starting with `vV_A`. Inside an `if` the list only holds what an `if` can take, so commands never show up there. Each kind (variables, timers, vAPI, vKonstants, Devices, Widgets) is listed A to Z.
+- **Anywhere else**: the names of your variables, timers, gAPI, gKonstants, Devices, Widgets and Processes.
+- Each letter you type **narrows the list**: `vV_` shows every name that starts with `vV_`, `vV_A` only those starting with `vV_A`. Inside an `if` the list only holds what an `if` can take, so commands never show up there. Each kind (variables, timers, gAPI, gKonstants, Devices, Widgets) is listed A to Z.
 - A name also matches on **any part after a `_`**. Typing `Pump` finds `MB_06_Pump_Wort__HS`, so you don't need to remember the start of a long Device name.
 
 The best pick is also shown in **gray after the cursor**. To take it:
@@ -39,7 +39,7 @@ Typing **`.x`** always fills in **`.x_hPosition`** (across) and **`.y`** fills i
 
 At the start of a line the pick also gets ` = ` after it (`Pump.state = `). Inside an `if` or a `wait` it gets a space, and the next list opens with the compare signs, because the line goes on the way the panel reads it:
 
-`if` name`.`attribute `=` value, for example `if vK_Tulip.visible = true` or `if vK_Tulip.x_hPosition = 456`.
+`if` name`.`attribute `=` value, for example `if gK_Tulip.visible = true` or `if gK_Tulip.x_hPosition = 456`.
 
 In an `if` a single `=` asks "is it equal?", the same as `==`, so both are in the list. After the sign, an attribute that is true or false gets `true`, `false`, `on` and `off`; for a number, type it (or press **Ctrl+Space** to pick a variable instead).
 
@@ -48,7 +48,7 @@ In an `if` a single `=` asks "is it equal?", the same as `==`, so both are in th
 Press **Ctrl+Space** (on a phone or tablet, tap **💡 Suggest** above the editor) to open the list even before you type a letter. It shows only what can go at that spot:
 
 - On an **empty line**: the commands.
-- After **`if`**, **`wait`** or **`elseif`**: only what can be tested, in this order: variables made in this Process, timers, vAPI, vKonstants, Devices, Widgets, Processes, then `true`, `false`, `now` and `not`. No commands.
+- After **`if`**, **`wait`** or **`elseif`**: only what can be tested, in this order: variables made in this Process, timers, gAPI, gKonstants, Devices, Widgets, Processes, then `true`, `false`, `now` and `not`. No commands.
 - After a **name in an `if`** (`if MB_06_Pump_Wort__HS`): the compare signs (`==` is equal to, `!=` is not, `>` more than ...) and that item's own attributes, such as `.state` (the same as the name alone), `.visible` or `.enabled`.
 - After a **name at the start of a line**: `=` set it to, `+=`, `-=`, `++`, and its attributes, such as `.visible = `.
 - After **`==` or `=`** on something that is on or off (a pump, a valve, an alarm, a true/false variable): `true`, `false`, `on` and `off` come first.

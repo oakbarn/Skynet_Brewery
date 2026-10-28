@@ -1,43 +1,43 @@
 # Variables
 
-Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. Add new ones in **Tabs > ☰ Menu > Edit layout > Select Widget Type > vKonstant variables** (or **vAPI variables**), then **Add Widget**. The name prefixes below are suggestions; any name works.
+Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. Add new ones in **Tabs > ☰ Menu > Edit layout > Select Widget Type > gKonstant variables** (or **gAPI variables**), then **Add Widget**. The name prefixes below are suggestions; any name works. gKonstant and gAPI were called vKonstant and vAPI before 2026-10-28; older ones are renamed when the Brain starts: see [gKonstant and gAPI (new names)](84-gkonstant-and-gapi).
 
 ## Which kind to use
 
 | Kind | Processes | On screen | API (other programs) | Database |
 |---|---|---|---|---|
-| **vKonstant** | ✓ | ✓ | – | – |
-| **vAPI** | ✓ | ✓ | ✓ | ✓ |
+| **gKonstant** | ✓ | ✓ | – | – |
+| **gAPI** | ✓ | ✓ | ✓ | ✓ |
 | **Shared** | ✓ | – | – | – |
 
-- Use a **vKonstant** for settings and screen items that stay inside the panel.
-- Use a **vAPI** for readings you want logged or sent to other programs (pH, gravity, volumes).
+- Use a **gKonstant** for settings and screen items that stay inside the panel.
+- Use a **gAPI** for readings you want logged or sent to other programs (pH, gravity, volumes).
 - Use a **Shared** variable to pass a value from one process to another.
 
-The old **Global** class (from BruControl) is retired. When a BruControl file or an older Schema is loaded, each Global becomes a vKonstant or a vAPI by its name, and the list of what moved shows on the Processes page.
+The old **Global** class (from BruControl) is retired. When a BruControl file or an older Schema is loaded, each Global becomes a gKonstant or a gAPI by its name, and the list of what moved shows on the Processes page.
 
-## vKonstant kinds
+## gKonstant kinds
 
 | Kind | Prefix | Notes |
 |---|---|---|
-| Graphic | `vK_` | The value is a picture path. A process can swap the picture. |
-| String | `vKS_` | Text. |
-| Long String | `vKL_` | Linked to a text file in a media folder. Edit the file and the panel follows within a second. |
-| Value | `vKV_` | A number. |
-| Time | `vKT_` | `00:00:00` |
-| Date Time | `vKDT_` | |
-| Boolean | `vKB_` | True or false. |
-| Switch | `vKSW_` | A slider. It is a toggle: tap it ON and it stays ON, tap it again and it stays OFF. |
-| Push Button | `vKPB_` | ON only while held, OFF as soon as you let go. Lets go by itself if the screen loses WiFi. |
-| Pulse Button | `vKMB_` | A tap makes it true for a tenth of a second, however long you hold it. |
+| Graphic | `gK_` | The value is a picture path. A process can swap the picture. |
+| String | `gKS_` | Text. |
+| Long String | `gKL_` | Linked to a text file in a media folder. Edit the file and the panel follows within a second. |
+| Value | `gKV_` | A number. |
+| Time | `gKT_` | `00:00:00` |
+| Date Time | `gKDT_` | |
+| Boolean | `gKB_` | True or false. |
+| Switch | `gKSW_` | A slider. It is a toggle: tap it ON and it stays ON, tap it again and it stays OFF. |
+| Push Button | `gKPB_` | ON only while held, OFF as soon as you let go. Lets go by itself if the screen loses WiFi. |
+| Pulse Button | `gKMB_` | A tap makes it true for a tenth of a second, however long you hold it. |
 
-## vAPI kinds
+## gAPI kinds
 
-String `vAS_`, Value `vAV_`, Time `vAT_`, Date Time `vADT_`, Boolean `vAB_`.
+String `gAS_`, Value `gAV_`, Time `gAT_`, Date Time `gADT_`, Boolean `gAB_`.
 
 ## Database trigger
 
-For vAPI variables, press **Change…** on the Variables screen to choose when the value is written to the database:
+For gAPI variables, press **Change…** on the Variables screen to choose when the value is written to the database:
 
 - **Off**, **Manual** (a `log` line in a process, or Log now), or **Once**.
 - **On demand**: when a chosen process starts.
@@ -46,8 +46,8 @@ For vAPI variables, press **Change…** on the Variables screen to choose when t
 
 The written values appear on the [Log](06-log) screen.
 
-## vKonstant List (a dropdown on a tab)
+## gKonstant List (a dropdown on a tab)
 
-**Tabs > ☰ Menu > Edit layout > Add Widget > vKonstant variables > List (dropdown: Value + Text)** makes a dropdown. Its settings have a two-column table: **Value** (a number) and **Text**. **+ Add row** adds a choice and ✕ removes one.
+**Tabs > ☰ Menu > Edit layout > Add Widget > gKonstant variables > List (dropdown: Value + Text)** makes a dropdown. Its settings have a two-column table: **Value** (a number) and **Text**. **+ Add row** adds a choice and ✕ removes one.
 
-Example: `vKList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil and Chill. Picking Boil sets the value to 2, and that number is what Processes read (`if vKList_BrewStatus == 2`). A Process that sets it to 3 makes the dropdown show Chill.
+Example: `gKList_BrewStatus` with 1 = Mash, 2 = Boil, 3 = Chill. On the tab the dropdown shows Mash, Boil and Chill. Picking Boil sets the value to 2, and that number is what Processes read (`if gKList_BrewStatus == 2`). A Process that sets it to 3 makes the dropdown show Chill.

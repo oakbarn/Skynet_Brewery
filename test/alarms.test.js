@@ -18,7 +18,7 @@ fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({
     { name: 'alm_Note', type: 'alarm', kind: 'general', sound: 'sounds/note.wav' },
     { name: 'alm_Quiet', type: 'alarm', kind: 'hop', soundMode: 'none' },
     { name: 'tm_Boil', type: 'timer', timerType: 'countdown', initial: '00:30:00' },
-    { name: 'vB_Flag', type: 'vKonstant', kind: 'bool' },
+    { name: 'vB_Flag', type: 'gKonstant', kind: 'bool' },
   ],
 }));
 const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.load();
@@ -119,13 +119,13 @@ assert.equal(rewriteAlarmLines('"alm_A" active = true\nwait   "alm_A"  active ==
 
 // ---- importer: stacked look-alikes fold into one item with all their pictures
 const els = [
-  { name: 'gblS_Top_1', type: 'vKonstant', kind: 'string', workspace: 'B1', x: 0, y: 30, w: 520, h: 470, images: ['a1', 'a2', 'a3'], background: 2, visibility: 'hidden' },
-  { name: 'gblS_Top_2', type: 'vKonstant', kind: 'string', workspace: 'B1', x: 0, y: 0, w: 520, h: 460, images: ['b1', 'b2', 'b3'], background: 1, visibility: 'visible', initial: 'Hello' },
-  { name: 'gblS_Top_3', type: 'vKonstant', kind: 'string', workspace: 'B1', x: 0, y: 0, w: 520, h: 470, images: ['c1', 'c2', 'c3'], background: 1, visibility: 'hidden' },
+  { name: 'gblS_Top_1', type: 'gKonstant', kind: 'string', workspace: 'B1', x: 0, y: 30, w: 520, h: 470, images: ['a1', 'a2', 'a3'], background: 2, visibility: 'hidden' },
+  { name: 'gblS_Top_2', type: 'gKonstant', kind: 'string', workspace: 'B1', x: 0, y: 0, w: 520, h: 460, images: ['b1', 'b2', 'b3'], background: 1, visibility: 'visible', initial: 'Hello' },
+  { name: 'gblS_Top_3', type: 'gKonstant', kind: 'string', workspace: 'B1', x: 0, y: 0, w: 520, h: 470, images: ['c1', 'c2', 'c3'], background: 1, visibility: 'hidden' },
   { name: 'tm_Mash_1', type: 'timer', workspace: 'B1', x: 900, y: 0, w: 100, h: 60 },
   { name: 'tm_Mash_2', type: 'timer', workspace: 'B1', x: 900, y: 0, w: 100, h: 60 },
-  { name: 'gblV_Hop1', type: 'vKonstant', kind: 'value', workspace: 'B1', x: 0, y: 600, w: 100, h: 60 },
-  { name: 'gblV_Hop2', type: 'vKonstant', kind: 'value', workspace: 'B1', x: 300, y: 600, w: 100, h: 60 },
+  { name: 'gblV_Hop1', type: 'gKonstant', kind: 'value', workspace: 'B1', x: 0, y: 600, w: 100, h: 60 },
+  { name: 'gblV_Hop2', type: 'gKonstant', kind: 'value', workspace: 'B1', x: 300, y: 600, w: 100, h: 60 },
   { name: 'pic', type: 'picture', workspace: 'B1', x: 0, y: 0, w: 10, h: 10, follow: 'gblS_Top_3' },
 ];
 const script = [

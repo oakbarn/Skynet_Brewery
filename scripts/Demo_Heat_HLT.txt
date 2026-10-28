@@ -10,4 +10,4 @@ wait HLT_Temp >= vV_Target
 HLT_Element = false
 gblS_Inter_Script = "HLT at target"
 start "alm_Hops"
-log "vAV_Kettle_Temp"
+log "gAV_Kettle_Temp"

@@ -39,48 +39,48 @@
   "elements": [
     {
       "name": "gblS_Style_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "kind": "string"
     },
     {
       "name": "gblV_BatchSize_Gal",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "precision": 2,
       "kind": "value"
     },
     {
       "name": "gblV_BoilSize_Gal",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "precision": 2,
       "kind": "value"
     },
     {
       "name": "gblV_OG_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "precision": 3,
       "kind": "value"
     },
     {
       "name": "gblV_FG_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "precision": 3,
       "kind": "value"
     },
     {
       "name": "gblV_IBU_Recipe_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "precision": 1,
       "kind": "value"
     },
     {
       "name": "gblVHop_Max",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "label": "Hop groups",
       "kind": "value"
     },
     {
-      "name": "vAV_Kettle_Temp",
-      "type": "vAPI",
+      "name": "gAV_Kettle_Temp",
+      "type": "gAPI",
       "precision": 1,
       "units": "°F",
       "log": {
@@ -92,7 +92,7 @@
     },
     {
       "name": "gblS_Hop1_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 60,
@@ -103,7 +103,7 @@
     },
     {
       "name": "gblV_Hop1_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 60,
@@ -115,7 +115,7 @@
     },
     {
       "name": "gblV_Hop1_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 60,
@@ -127,7 +127,7 @@
     },
     {
       "name": "gblV_TimeHop1_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 60,
@@ -138,7 +138,7 @@
     },
     {
       "name": "gblV_Hop1_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 60,
@@ -149,7 +149,7 @@
     },
     {
       "name": "gblS_Hop2_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 132,
@@ -160,7 +160,7 @@
     },
     {
       "name": "gblV_Hop2_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 132,
@@ -172,7 +172,7 @@
     },
     {
       "name": "gblV_Hop2_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 132,
@@ -184,7 +184,7 @@
     },
     {
       "name": "gblV_TimeHop2_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 132,
@@ -195,7 +195,7 @@
     },
     {
       "name": "gblV_Hop2_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 132,
@@ -206,7 +206,7 @@
     },
     {
       "name": "gblS_Hop3_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 204,
@@ -217,7 +217,7 @@
     },
     {
       "name": "gblV_Hop3_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 204,
@@ -229,7 +229,7 @@
     },
     {
       "name": "gblV_Hop3_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 204,
@@ -241,7 +241,7 @@
     },
     {
       "name": "gblV_TimeHop3_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 204,
@@ -252,7 +252,7 @@
     },
     {
       "name": "gblV_Hop3_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 204,
@@ -263,7 +263,7 @@
     },
     {
       "name": "gblS_Hop4_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 276,
@@ -274,7 +274,7 @@
     },
     {
       "name": "gblV_Hop4_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 276,
@@ -286,7 +286,7 @@
     },
     {
       "name": "gblV_Hop4_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 276,
@@ -298,7 +298,7 @@
     },
     {
       "name": "gblV_TimeHop4_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 276,
@@ -309,7 +309,7 @@
     },
     {
       "name": "gblV_Hop4_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 276,
@@ -320,7 +320,7 @@
     },
     {
       "name": "gblS_Hop5_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 348,
@@ -331,7 +331,7 @@
     },
     {
       "name": "gblV_Hop5_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 348,
@@ -343,7 +343,7 @@
     },
     {
       "name": "gblV_Hop5_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 348,
@@ -355,7 +355,7 @@
     },
     {
       "name": "gblV_TimeHop5_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 348,
@@ -366,7 +366,7 @@
     },
     {
       "name": "gblV_Hop5_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 348,
@@ -377,7 +377,7 @@
     },
     {
       "name": "gblS_Hop6_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 420,
@@ -388,7 +388,7 @@
     },
     {
       "name": "gblV_Hop6_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 420,
@@ -400,7 +400,7 @@
     },
     {
       "name": "gblV_Hop6_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 420,
@@ -412,7 +412,7 @@
     },
     {
       "name": "gblV_TimeHop6_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 420,
@@ -423,7 +423,7 @@
     },
     {
       "name": "gblV_Hop6_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 420,
@@ -434,7 +434,7 @@
     },
     {
       "name": "gblS_Hop7_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 492,
@@ -445,7 +445,7 @@
     },
     {
       "name": "gblV_Hop7_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 492,
@@ -457,7 +457,7 @@
     },
     {
       "name": "gblV_Hop7_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 492,
@@ -469,7 +469,7 @@
     },
     {
       "name": "gblV_TimeHop7_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 492,
@@ -480,7 +480,7 @@
     },
     {
       "name": "gblV_Hop7_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 492,
@@ -491,7 +491,7 @@
     },
     {
       "name": "gblS_Hop8_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 40,
       "y": 564,
@@ -502,7 +502,7 @@
     },
     {
       "name": "gblV_Hop8_Oz_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 310,
       "y": 564,
@@ -514,7 +514,7 @@
     },
     {
       "name": "gblV_Hop8_Recipe_AAU_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 430,
       "y": 564,
@@ -526,7 +526,7 @@
     },
     {
       "name": "gblV_TimeHop8_Min_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 550,
       "y": 564,
@@ -537,7 +537,7 @@
     },
     {
       "name": "gblV_Hop8_Group_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Batch Hops",
       "x": 670,
       "y": 564,
@@ -554,7 +554,7 @@
     },
     {
       "name": "gblS_Top_Text",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Brewery",
       "x": 0,
       "y": 0,
@@ -614,7 +614,7 @@
     },
     {
       "name": "gblV_Delay_Seconds",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Brewery",
       "x": 0,
       "y": 770,
@@ -686,7 +686,7 @@
     },
     {
       "name": "MLT_Out_Temp",
-      "type": "vAPI",
+      "type": "gAPI",
       "workspace": "Brewery",
       "x": 1750,
       "y": 300,
@@ -1018,7 +1018,7 @@
     },
     {
       "name": "gblS_BeerName_R1",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Brewery",
       "x": 550,
       "y": 40,
@@ -1031,7 +1031,7 @@
     },
     {
       "name": "gblVBoilTime_Minutes",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Brewery",
       "x": 550,
       "y": 110,
@@ -1046,7 +1046,7 @@
     },
     {
       "name": "gblS_Inter_Script",
-      "type": "vKonstant",
+      "type": "gKonstant",
       "workspace": "Brewery",
       "x": 550,
       "y": 1215,
@@ -1057,8 +1057,8 @@
       "kind": "string"
     },
     {
-      "name": "vKSW_Testing",
-      "type": "vKonstant",
+      "name": "gKSW_Testing",
+      "type": "gKonstant",
       "kind": "switch",
       "label": "Testing mode",
       "x": 40,
@@ -1070,8 +1070,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKPB_Jog_Pump",
-      "type": "vKonstant",
+      "name": "gKPB_Jog_Pump",
+      "type": "gKonstant",
       "kind": "pushbutton",
       "label": "Jog pump (hold)",
       "x": 200,
@@ -1081,8 +1081,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKMB_Ping",
-      "type": "vKonstant",
+      "name": "gKMB_Ping",
+      "type": "gKonstant",
       "kind": "momentary",
       "label": "Ping",
       "x": 360,
@@ -1092,8 +1092,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKB_Ready",
-      "type": "vKonstant",
+      "name": "gKB_Ready",
+      "type": "gKonstant",
       "kind": "bool",
       "label": "Ready",
       "x": 520,
@@ -1103,8 +1103,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKV_Strike_Target",
-      "type": "vKonstant",
+      "name": "gKV_Strike_Target",
+      "type": "gKonstant",
       "kind": "value",
       "label": "Strike target",
       "x": 680,
@@ -1118,8 +1118,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKT_Mash_Rest",
-      "type": "vKonstant",
+      "name": "gKT_Mash_Rest",
+      "type": "gKonstant",
       "kind": "time",
       "label": "Mash rest",
       "x": 880,
@@ -1130,8 +1130,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKDT_Brew_Day",
-      "type": "vKonstant",
+      "name": "gKDT_Brew_Day",
+      "type": "gKonstant",
       "kind": "datetime",
       "label": "Brew day",
       "x": 1060,
@@ -1141,8 +1141,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKS_Brewer",
-      "type": "vKonstant",
+      "name": "gKS_Brewer",
+      "type": "gKonstant",
       "kind": "string",
       "label": "Brewer",
       "x": 520,
@@ -1153,8 +1153,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vK_Burner_Pic",
-      "type": "vKonstant",
+      "name": "gK_Burner_Pic",
+      "type": "gKonstant",
       "kind": "graphic",
       "x": 40,
       "y": 230,
@@ -1165,8 +1165,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vKL_Brew_Notes",
-      "type": "vKonstant",
+      "name": "gKL_Brew_Notes",
+      "type": "gKonstant",
       "kind": "longstring",
       "label": "Brew notes (media/notes/brew_notes.txt)",
       "x": 200,
@@ -1177,8 +1177,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAV_HLT_Target",
-      "type": "vAPI",
+      "name": "gAV_HLT_Target",
+      "type": "gAPI",
       "kind": "value",
       "label": "HLT target",
       "x": 40,
@@ -1196,8 +1196,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAS_Batch_Status",
-      "type": "vAPI",
+      "name": "gAS_Batch_Status",
+      "type": "gAPI",
       "kind": "string",
       "label": "Batch status",
       "x": 230,
@@ -1212,8 +1212,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAB_Pump_Lock",
-      "type": "vAPI",
+      "name": "gAB_Pump_Lock",
+      "type": "gAPI",
       "kind": "bool",
       "label": "Pump lock",
       "x": 580,
@@ -1227,8 +1227,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vAT_Boil_Left",
-      "type": "vAPI",
+      "name": "gAT_Boil_Left",
+      "type": "gAPI",
       "kind": "time",
       "label": "Boil left",
       "x": 730,
@@ -1242,8 +1242,8 @@
       "workspace": "Variables Demo"
     },
     {
-      "name": "vADT_Last_Brew",
-      "type": "vAPI",
+      "name": "gADT_Last_Brew",
+      "type": "gAPI",
       "kind": "datetime",
       "label": "Last brew",
       "x": 900,
@@ -1392,7 +1392,7 @@
       "y": 10,
       "w": 1200,
       "h": 40,
-      "text": "vKonstant: scripts and screen only.   vAPI: scripts, API and database.   Start the script Demo_Variables, then press Ping.",
+      "text": "gKonstant: scripts and screen only.   gAPI: scripts, API and database.   Start the script Demo_Variables, then press Ping.",
       "fontSize": 16
     },
     {

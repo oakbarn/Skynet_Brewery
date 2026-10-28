@@ -7,7 +7,7 @@ import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfig
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpc'));
 fs.mkdirSync(path.join(d, 'config'));
 const file = path.join(d, 'config', 'brewery.json'), data = path.join(d, 'data');
-const first = JSON.stringify({ title: 'one', elements: [{ name: 'vA_A', type: 'vAPI' }] }, null, 2);
+const first = JSON.stringify({ title: 'one', elements: [{ name: 'gA_A', type: 'gAPI' }] }, null, 2);
 fs.writeFileSync(file, first);
 const store = new Store(file, data); store.load();
 const loaded = fs.readFileSync(file, 'utf8');      // the first load gives every named item its hidden key (lib/keys.js) and writes it
@@ -34,10 +34,10 @@ assert.match(checkConfigText('{ "elements": {} }', data).msg, /must be a list/);
 const ctx = { store, engine: { stopAll() { } }, hw: { restart() { } }, dataDir: data };
 assert.throws(() => applyConfigText('{ nope', ctx));
 assert.equal(fs.readFileSync(file, 'utf8'), loaded);
-const second = JSON.stringify({ title: 'two', elements: [{ name: 'vA_A', type: 'vAPI' }, { name: 'vA_B', type: 'vAPI' }] }, null, 2);
+const second = JSON.stringify({ title: 'two', elements: [{ name: 'gA_A', type: 'gAPI' }, { name: 'gA_B', type: 'gAPI' }] }, null, 2);
 const r = applyConfigText(second, ctx);
-assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')).elements.map(e => e.name), ['vA_A', 'vA_B', 'SoundPlayer']);
-assert.equal(store.config.title, 'two'); assert.ok(store.els.has('vA_B'));
+assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')).elements.map(e => e.name), ['gA_A', 'gA_B', 'SoundPlayer']);
+assert.equal(store.config.title, 'two'); assert.ok(store.els.has('gA_B'));
 assert.equal(readBackup(store, r.backup), loaded);
 fs.rmSync(d, { recursive: true, force: true });
 console.log('config editor tests passed');
