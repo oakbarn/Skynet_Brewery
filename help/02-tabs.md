@@ -18,11 +18,14 @@ Press the **navy blue circle with the yellow tools** (a hammer and a pick crosse
 
 | Button | What it does |
 |---|---|
-| **Add Device / Widget** | Pick from the list (outputs, inputs, probes, variables, timers, alarms...) and press it. It is made on the **Build Tab** first. |
-| **Add graphic** | A picture from a media folder. It is made on the **Build Tab** first. |
-| **Add text** | A label. It is made on the **Build Tab** first. |
-| **Add equipment** | A vessel: electric or gas heated kettle, mash tun, cooling coil, plate chiller. It is made on the **Build Tab** first. |
-| **Add IP** | A flow point or pipe fitting (see below). It is made on the **Build Tab** first. |
+| **Select Device Type**, **Add Device** | Pick a kind of Device (On/Off, Pumps, Valves, Probe ...), then pick one in **Add Device**. It is made on the **Build Tab** first. See [Edit layout bar](82-edit-layout-bar). |
+| **Pumps**, **Valves**, **Probe**, **Heating Element**, **PWM** | Shortcuts: one click shows only that kind's list. |
+| **⧉ Clone Device** | Shows a Device from another Tab on this Tab too. See [Cloned Devices](71-cloned-devices). |
+| **Select Widget Type**, **Add Widget** | The same for Widgets: pictures and text, on-screen controls, vessels, equipment, fittings, variables. |
+| **Picture ➕**, **Text ➕**, **Manual Valve ➕** | One click each. It is made on the **Build Tab** first. |
+| **Vessel** | A Vessel Widget, an Integrated vessel or a manual vessel. |
+| **Add equipment ➕** | Chillers, coils, trub filter, RIMS tube and pipe fittings. |
+| **Elbows, Tees …** | A flow point or pipe fitting (see below), beside Draw pipe and Draw hose. |
 | **Draw pipe** | Click points on the tab; double-click or Enter to finish, Esc to cancel. On a phone use **Finish pipe**. |
 | **Draw hose** | Like a pipe, but it bends in smooth curves. Loose ends get a coupling. See [Pipes, hoses and reducers](24-pipes-and-hoses). |
 | **🔒 Lock** | Locks the selected item so it can't be dragged or resized. The button then says **🔓 Unlock**: press it to unlock. Every item's properties also have a small **Lock position** icon: 🔓 means unlocked, 🔒 means locked. Click it to switch, then Save. |

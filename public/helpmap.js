@@ -10,7 +10,7 @@ const VIEWS = {
 export const viewTopic = v => VIEWS[v] || null;      // Help for the page you are on (the Help button)
 const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 
-// a device or widget element (the things added with Add Device / Widget)
+// a device or widget element (the things added with Add Device / Add Widget)
 export function elementTopic(e) {
   if (!e) return null;
   if (e.integratedIn) return ['skynet-integrated-devices'];
@@ -62,8 +62,10 @@ const BAR = [
   ['#menuTabs', ['menu', 'menu-tabs']],
   ['.menuCopy', ['menu-everywhere']],
   ['.menuWrap', ['menu']],
-  ['#addBox', ['build-tab-add-button', 'the-add-button']],
-  ['#addType, #addEl', ['build-tab-add-button', 'the-add-element-list-relay-module-ssr']],
+  ['#devKind, #devAdd', ['edit-layout-bar', 'devices-select-device-type-and-add-device']],
+  ['#editBar select[data-dev]', ['edit-layout-bar', 'the-shortcuts-pumps-valves-probe-heating-element-pwm']],
+  ['#wgtKind, #wgtAdd, #addImg, #addText, #vesselPick, #addManualValve, #addVesselType', ['edit-layout-bar', 'widgets']],
+  ['#addIpType', ['edit-layout-bar', 'row-2-pipes-fittings-locks-and-tabs']],
   ['#turnBar', ['build-tab-add-button', 'turn-and-flip-a-fitting-or-vessel']],
   ['#cloneDev', ['cloned-devices', 'make-a-clone']],
   ['#buildTab, #saveBuild, #previewBuild, #wsTabs .buildTab', ['build-tab']],
