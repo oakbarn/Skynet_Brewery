@@ -58,7 +58,7 @@ assert.ok(ctrl('if (x > 3) ').includes('stop '), 'after a one-line if a command 
 // a whole line by picking: if -> name -> == or an attribute -> true -> and / or
 const n = get('if MB_06_Pump_Wort__HS ', '', '', true);
 assert.equal(n.typed, 0);
-assert.deepEqual(n.list.slice(0, 6).map(i => i.text), ['== ', '!= ', '> ', '< ', '>= ', '<= ']);
+assert.deepEqual(n.list.slice(0, 7).map(i => i.text), ['= ', '== ', '!= ', '> ', '< ', '>= ', '<= '], 'in an if a single = asks, the same as ==');
 const st = n.list.find(i => i.text === '.state ');
 assert.equal(st.back, 1, '.state takes the place of the space'); assert.match(st.hint, /name alone/);
 assert.ok(n.list.some(i => i.text === '.visible '));
@@ -68,7 +68,7 @@ assert.ok(texts('if alm_Hops == true an').includes('and '));
 assert.ok(!(texts('if a') ?? []).includes('and '), 'no and right after if');
 // right after the name with no space yet, Ctrl+Space puts the space in
 const tight = get('if MB_06_Pump_Wort__HS', '', '', true);
-assert.equal(tight.list[0].text, ' == '); assert.equal(tight.list.find(i => i.text === '.state ').back, 0);
+assert.equal(tight.list[0].text, ' = '); assert.equal(tight.list.find(i => i.text === '.state ').back, 0);
 // at the start of a line: set it
 assert.deepEqual(ctrl('MB_06_Pump_Wort__HS ').slice(0, 4), ['= ', '+= ', '-= ', '++']);
 assert.ok(ctrl('MB_06_Pump_Wort__HS ').includes('.visible = '));
@@ -110,3 +110,13 @@ assert.deepEqual(v('if vV_A'), ['vV_Alpha', 'vV_Amount']);
 assert.deepEqual(v('if vV_Am'), ['vV_Amount']);
 assert.ok(!(v('if w') ?? []).includes('wait'), 'no commands inside an if');
 console.log('name narrowing ok');
+
+// if name.attribute = value, the way lib/engine.js reads it (Fritz, 2026-10-28)
+import { compile } from '../lib/engine.js';
+const tulip = { elements: [{ name: 'vK_Tulip', type: 'picture', main: null, attrs: ['visible', 'xposition'], bools: ['visible'] }], processes: [] };
+const t = (l, f = true) => suggest(l, tulip, l, l, f)?.list.map(i => i.text.trim());
+assert.deepEqual(t('if vK_Tulip.visible ').slice(0, 2), ['=', '=='], 'after name.attribute: the compare signs');
+assert.deepEqual(t('if vK_Tulip.visible = ', false), ['true', 'false', 'on', 'off'], 'a true/false attribute: true and false');
+assert.ok(!(t('if vK_Tulip.xposition = ', false)), 'a number: nothing to guess until a letter or Ctrl+Space');
+assert.deepEqual(compile('if vK_Tulip.visible = true\nendif').errors, [], 'the engine takes a single = in an if');
+console.log('name.attribute ok');
