@@ -109,11 +109,11 @@ The name alone is the item's main value; everything else is `name.attribute`.
 
 | Older Skynet | Skynet | Status |
 | --- | --- | --- |
-| vKonstant / vAPI (on screen, Help, docs) | gKonstant / gAPI | Built (on screen; the type inside Schema files stays `vKonstant` / `vAPI`) |
+| vKonstant / vAPI (on screen, Help, docs and the type in Schema files) | gKonstant / gAPI | Built |
 | A BruControl Global | gKonstant or gAPI (section 6) | Built |
-| Names starting `vK..._` (`vKV_Strike`) | `gK..._` (`gKV_Strike`), on the item and in every Process; a taken name gets `_2` | Norm |
-| Names starting `vA..._` (`vAV_Mash_Temp`) | `gA..._` (`gAV_Mash_Temp`), on the item and in every Process | Norm |
-| API address `/api/vapi` | `/api/gapi` (the old address still works) | Built |
+| Names starting `vK..._` (`vKV_Strike`) | `gK..._` (`gKV_Strike`), on the item, in every Process, saved values and the database; a taken name gets `_2` | Built (when the Brain starts or the Schema loads) |
+| Names starting `vA..._` (`vAV_Mash_Temp`) | `gA..._` (`gAV_Mash_Temp`), the same way | Built |
+| API address `/api/vapi` | `/api/gapi` (`/api/vapi` is gone, Rule 15.2) | Built |
 
 ## 7. Alarms and stacked copies
 
@@ -154,3 +154,4 @@ The name alone is the item's main value; everything else is `name.attribute`.
 - 2026-10-28: First version. General Rule (importing always updates to the Skynet way), position
   attributes, and everything from BRUCONTROL_IMPORT_RULES.md and the current import code.
 - 2026-10-28: Globals now become gKonstant / gAPI (`RP_` -> `gA_`); added section 6a, vKonstant / vAPI -> gKonstant / gAPI. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
+- 2026-10-28: Section 6a built: older vK_ / vA_ names renamed, types changed in the files, no old words kept (Rule 15.2).

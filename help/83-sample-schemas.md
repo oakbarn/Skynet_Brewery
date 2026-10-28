@@ -2,7 +2,6 @@
 
 The Schema dropdown (on the Menu Bar, the ☰ Menu > Schema tab and the About tab) has a section at the bottom called **Add a Sample Schema**. It lists the ready-made sample breweries that come with Skynet, for example:
 
-- **OakBarn (my BruControl setup)**
 - **Two vessels, one pump**
 - **Three vessels, one pump**
 - **BrewZilla brew day (no board)**

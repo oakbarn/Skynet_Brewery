@@ -2,7 +2,7 @@
 
 The **Log** screen shows values that were written to the brew database (`data/brewlog.db` on the Brain), and turns them into CSV files for Excel, Google Sheets or LibreOffice.
 
-What gets written, and when, is set per variable with its **database trigger**: see [Variables](04-variables). Only vAPI variables can be logged.
+What gets written, and when, is set per variable with its **database trigger**: see [Variables](04-variables). Only gAPI variables can be logged.
 
 ## Download CSV
 

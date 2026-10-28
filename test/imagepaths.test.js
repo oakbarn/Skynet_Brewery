@@ -12,7 +12,7 @@ const cfg = path.join(d, 'config', 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ mediaRoots: ['./media'], elements: [
   { name: 'old_list', type: 'digitalOut', images: ['Images/a.png', 'Images/b.png', ''], background: 2 },   // an older BruControl import
   { name: 'old_one', type: 'picture', image: 'Images/c.png' },                                             // the old single "Image path"
-  { name: 'my_widget', type: 'vKonstant', kind: 'string', imagePath_1: 'Images/a.png', imagePath_2: 'Images/b.png', imagePath_3: 'Images/c.png', background: 1 },
+  { name: 'my_widget', type: 'gKonstant', kind: 'string', imagePath_1: 'Images/a.png', imagePath_2: 'Images/b.png', imagePath_3: 'Images/c.png', background: 1 },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 

@@ -327,26 +327,26 @@ These are added from the same list as Devices but need no board pin.
 | Label | Text box only (no own settings) |
 | Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading |
 
-### vKonstant variables (Processes and screen; never API or database)
+### gKonstant variables (Processes and screen; never API or database)
 Settings: Kind, then by kind: Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Text when on / off, Read only on screen, Keep value on restart.
 
 | Kind | Prefix (hint) | Extra |
 |---|---|---|
-| Graphic (image file path) | vK_ | Image path |
-| String | vKS_ | |
-| Long String (text file) | vKL_ | Text file path |
-| Value | vKV_ | |
-| Time | vKT_ | |
-| Date Time | vKDT_ | |
-| Boolean | vKB_ | |
-| Switch (tap ON, tap again OFF) | vKSW_ | |
-| Push Button (ON while held) | vKPB_ | |
-| Pulse Button (one 100 ms pulse per tap) | vKMB_ | On time in ms |
-| List (dropdown: Value + Text) | vKList_ | Choices (two columns: Value, Text), Starting choice |
-| Step (shows the Process step reached) | vKStep_ | Shows the steps of: Flow, Sub, Repeat, Looper, Any Process |
+| Graphic (image file path) | gK_ | Image path |
+| String | gKS_ | |
+| Long String (text file) | gKL_ | Text file path |
+| Value | gKV_ | |
+| Time | gKT_ | |
+| Date Time | gKDT_ | |
+| Boolean | gKB_ | |
+| Switch (tap ON, tap again OFF) | gKSW_ | |
+| Push Button (ON while held) | gKPB_ | |
+| Pulse Button (one 100 ms pulse per tap) | gKMB_ | On time in ms |
+| List (dropdown: Value + Text) | gKList_ | Choices (two columns: Value, Text), Starting choice |
+| Step (shows the Process step reached) | gKStep_ | Shows the steps of: Flow, Sub, Repeat, Looper, Any Process |
 
-### vAPI variables (Processes + API + database, with database triggers)
-Kinds: String (vAS_), Value (vAV_), Time (vAT_), Date Time (vADT_), Boolean (vAB_). Settings: Kind, Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Read only on screen, Keep value on restart. Database trigger is set on the Variables page.
+### gAPI variables (Processes + API + database, with database triggers)
+Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB_). Settings: Kind, Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Read only on screen, Keep value on restart. Database trigger is set on the Variables page.
 
 ---
 
