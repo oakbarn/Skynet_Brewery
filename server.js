@@ -452,6 +452,7 @@ async function route(req, res) {
       const now = new Set(body.elements.map(e => cleanName(e.name)));
       renames = new Map([...renameMap(body.renames)].filter(([from, to]) => store.has(from) && now.has(to)));
       for (const el of body.elements) renameElementRefs(el, renames);     // settings that point to a renamed one (follow, input ...)
+      for (const g of body.graphics ?? []) if (g.kind === 'clone' && renames.has(g.of)) g.of = renames.get(g.of);   // Cloned Devices keep their parent
     }
     store.saveLayout({ ...body, renames });
     if (body.devices) { store.config.devices = body.devices; store.writeConfig(); hw.restart(); }

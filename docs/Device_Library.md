@@ -59,6 +59,17 @@ Name, Label (`label`, was Display name), Show label, Tab, X, Y, Width, Height, L
 
 Devices with on/off states also have **Picture when on / off**, an **On overlay** picture, and **Text when on / off**. New ones start with a green LED for on and a red LED for off (pumps and valves bring their own pictures).
 
+### Cloned Devices (one Device on more than one Tab)
+A **Clone** shows a Device on another Tab too (Skynet Rule 4.4, Help 71). It is the same Device, not a new one: it has no
+Interface, port or settings of its own, so it never counts against "one Device per port".
+- **Made only with ⧉ Clone Device** (Edit layout bar), on any Tab, the Build Tab too. The list is grouped by type.
+- **Name:** made by Skynet, never typed: `<Parent_Name>_Clone_N`, e.g. `MB_06_Pump_Wort__HS_Clone_1`. It follows a parent rename.
+- **Its own settings:** Visible, Tab, X, Y, Lock position. **Not used in Processes.**
+- **Everything else is the parent's** (pictures, look, size, value). Tapping it taps the parent: an on/off Device or one with
+  Enabled (PID) turns on or off; a reading Device (1W) is only shown, in the parent's format.
+- A pump or valve Clone has its own IPs on its Tab, for pipes there.
+- Saved in the Schema as `{ kind: "clone", name, of: <parent name>, workspace, x, y, visibility }` in the graphics list.
+
 ---
 
 ## 2. Interfaces (the boards)
@@ -369,4 +380,6 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-27: D10 kept for the Ethernet shield on an Ethernet Mega; no USB to Ethernet change while D10 is used (Skynet Rule 6.10).
 - 2026-10-27: D4 warning and SD card check (Skynet Rule 6.11).
 - 2026-10-27: Display name became Label (`label`) with a Show label switch (it replaces Hide name); imagePath_2 / _3 editable again; PID, Hysteresis and Duty Cycle are On while Enabled (thread "Apply clean-up requests and standards").
+- 2026-10-27: Added Cloned Devices (Skynet Rule 4.4).
+- 2026-10-27: Cloned Devices updated: Clone button only, names <Parent_Name>_Clone_N, not used in Processes.
 - 2026-10-28: Raspberry Pi GPIO pins built (Board Raspberry Pi, Help 78); removed from Reserved.
