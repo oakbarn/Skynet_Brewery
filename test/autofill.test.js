@@ -58,7 +58,7 @@ assert.ok(ctrl('if (x > 3) ').includes('stop '), 'after a one-line if a command 
 // a whole line by picking: if -> name -> == or an attribute -> true -> and / or
 const n = get('if MB_06_Pump_Wort__HS ', '', '', true);
 assert.equal(n.typed, 0);
-assert.deepEqual(n.list.slice(0, 6).map(i => i.text), ['== ', '!= ', '> ', '< ', '>= ', '<= ']);
+assert.deepEqual(n.list.slice(0, 7).map(i => i.text), ['= ', '== ', '!= ', '> ', '< ', '>= ', '<= '], 'in an if a single = asks, the same as ==');
 const st = n.list.find(i => i.text === '.state ');
 assert.equal(st.back, 1, '.state takes the place of the space'); assert.match(st.hint, /name alone/);
 assert.ok(n.list.some(i => i.text === '.visible '));
@@ -68,7 +68,7 @@ assert.ok(texts('if alm_Hops == true an').includes('and '));
 assert.ok(!(texts('if a') ?? []).includes('and '), 'no and right after if');
 // right after the name with no space yet, Ctrl+Space puts the space in
 const tight = get('if MB_06_Pump_Wort__HS', '', '', true);
-assert.equal(tight.list[0].text, ' == '); assert.equal(tight.list.find(i => i.text === '.state ').back, 0);
+assert.equal(tight.list[0].text, ' = '); assert.equal(tight.list.find(i => i.text === '.state ').back, 0);
 // at the start of a line: set it
 assert.deepEqual(ctrl('MB_06_Pump_Wort__HS ').slice(0, 4), ['= ', '+= ', '-= ', '++']);
 assert.ok(ctrl('MB_06_Pump_Wort__HS ').includes('.visible = '));
@@ -86,3 +86,43 @@ assert.ok(!boolAttrs({ name: 'T', type: 'temperature' }).includes(''), 'a temper
 assert.ok(boolAttrs({ name: 'B', type: 'vKonstant', kind: 'bool' }).includes(''));
 assert.ok(boolAttrs({ name: 'T', type: 'timer' }).includes('countdown'));
 console.log('autofill ok');
+
+// after a dot: the main value is in the list too, and typed letters narrow it (Fritz, 2026-10-28)
+import { mainProp, attrsOf } from '../lib/store.js';
+import { attrsAfterDot } from '../public/autofill.js';
+const pumpEl = { type: 'digitalOut' };
+const real = { elements: [{ name: 'Pump', type: 'digitalOut', main: mainProp(pumpEl), attrs: attrsOf(pumpEl) }], processes: ['sub_Fill'] };
+const dot = (n, typed) => attrsAfterDot(n, real).filter(a => a.startsWith(typed));
+assert.equal(attrsAfterDot('Pump', real)[0], 'state', 'the main value comes first');
+assert.deepEqual(dot('Pump', 'st'), ['state']);
+assert.deepEqual(dot('Pump', 'v'), ['visible']);
+assert.deepEqual(dot('Pump', 'h'), ['height', 'hidden']);
+assert.deepEqual(dot('Pump', 'he'), ['height']);
+assert.deepEqual(attrsAfterDot('sub_Fill', real), ['running']);
+assert.deepEqual(attrsAfterDot('n', real, new Set(['n'])), ['precision']);
+console.log('dot attributes ok');
+
+// names narrow by their first letters, only among what an if can take, each kind A to Z (Fritz, 2026-10-28)
+const vars = { elements: ['vV_Boil', 'vV_Amount', 'vV_Alpha'].map(name => ({ name, type: 'shared', main: 'value', attrs: [], bools: [] })).concat([{ name: 'MB_07_Valve', type: 'digitalOut', main: 'state', attrs: [], bools: [''] }]), processes: [] };
+const v = l => suggest(l, vars, l, l)?.list.map(i => i.text.trim());
+assert.deepEqual(v('if vV_'), ['vV_Alpha', 'vV_Amount', 'vV_Boil']);
+assert.deepEqual(v('if vV_A'), ['vV_Alpha', 'vV_Amount']);
+assert.deepEqual(v('if vV_Am'), ['vV_Amount']);
+assert.ok(!(v('if w') ?? []).includes('wait'), 'no commands inside an if');
+console.log('name narrowing ok');
+
+// if name.attribute = value, the way lib/engine.js reads it (Fritz, 2026-10-28)
+import { compile } from '../lib/engine.js';
+const tulip = { elements: [{ name: 'vK_Tulip', type: 'picture', main: null, attrs: ['visible', 'xposition'], bools: ['visible'] }], processes: [] };
+const t = (l, f = true) => suggest(l, tulip, l, l, f)?.list.map(i => i.text.trim());
+assert.deepEqual(t('if vK_Tulip.visible ').slice(0, 2), ['=', '=='], 'after name.attribute: the compare signs');
+assert.deepEqual(t('if vK_Tulip.visible = ', false), ['true', 'false', 'on', 'off'], 'a true/false attribute: true and false');
+assert.ok(!(t('if vK_Tulip.xposition = ', false)), 'a number: nothing to guess until a letter or Ctrl+Space');
+assert.deepEqual(compile('if vK_Tulip.visible = true\nendif').errors, [], 'the engine takes a single = in an if');
+console.log('name.attribute ok');
+
+// .x and .y (Fritz, 2026-10-28): x_hPosition, y_vPosition
+const pos = { elements: [{ name: 'Pump', type: 'digitalOut', main: 'state', attrs: attrsOf({ type: 'digitalOut' }) }] };
+assert.deepEqual(attrsAfterDot('Pump', pos).filter(a => a.toLowerCase().startsWith('x')), ['x_hPosition']);
+assert.deepEqual(attrsAfterDot('Pump', pos).filter(a => a.toLowerCase().startsWith('y')), ['y_vPosition']);
+console.log('x and y ok');
