@@ -3530,7 +3530,9 @@ function askLine() {
 $('#goLine').onclick = askLine;
 $('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; refreshFind(false); });
 $('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; syncHl(); });
-attachAutofill($('#code'), $('#autofill'), () => S?.words);
+const predict = attachAutofill($('#code'), $('#autofill'), () => S?.words);
+$('#suggestBtn').onmousedown = ev => ev.preventDefault();     // the cursor stays where it is in the Process
+$('#suggestBtn').onclick = () => { if (curScript) predict.open(); };
 $('#code').addEventListener('keydown', ev => {
   if (ev.key === 'Tab') { ev.preventDefault(); document.execCommand('insertText', false, '\t'); }
   if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') { ev.preventDefault(); saveScript(); }

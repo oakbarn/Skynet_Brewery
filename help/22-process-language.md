@@ -170,6 +170,8 @@ Names of Devices, Widgets and Processes cannot have spaces any more. When you ty
 
 ## Autofill
 
+There is more on this, including **Ctrl+Space** and writing a line by picking, in [Predictive text](79-predictive-text).
+
 While you type in a Process, a list of names pops up. Names you already used higher up in that Process come first, then your Devices, Widgets and Processes. Use **Up** and **Down** to pick one, **Enter** or **Tab** to take it, and **Esc** to close the list.
 
 After a dot, the list shows that item's attributes. When the letters you typed fit only one attribute, it is filled in by itself: `my_Widget.b` becomes `my_Widget.background = `. At the start of a line you also get ` = `; inside an `if` or a `wait` you get just the attribute name. You can keep typing the whole word anyway, because letters that are already filled in are skipped.
