@@ -1,0 +1,18 @@
+{
+  "title": "Skynet Motorized Ball Valve Device (Master H: Horizontal)",
+  "type": "digitalOut",
+  "props": {
+    "subtype": "valve", "valveType": "electric", "service": "room", "typeCode": "E_L_Vlv", "orientation": "h",
+    "w": 90, "h": 77, "hideName": true, "hideValue": true, "look": "normal", "tap": "toggle",
+    "tapwater": false, "showOnOffText": false, "onText": "OPEN", "offText": "CLOSED"
+  },
+  "pics": {
+    "h": ["Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg", "Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg"],
+    "v": ["Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg", "Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg"]
+  },
+  "userFields": ["name", "label", "hideName", "workspace", "x", "y", "w", "h", "locked", "visibility", "hidden", "fontSize",
+    "foreColor", "backColor", "align", "wrap", "nameFontFamily", "nameFontSize", "nameColor", "nameBg", "valueColor", "valueBg", "nameFont", "valueFont", "nameAlign", "valueAlign", "border",
+    "typeCode", "device", "channel", "activeLow", "oneShot", "oneShotDirection",
+    "orientation", "flipH", "flipV", "tapwater", "tapSource", "showOnOffText", "onText", "offText"],
+  "notes": "A Skynet Template (Rule 5.17). Room Temperature Liquid. A High Temperature valve is its own Skynet Template."
+}
