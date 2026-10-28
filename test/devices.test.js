@@ -35,7 +35,7 @@ near(scaleFrom({ countsPerUnit: 100, weightUnits: 'kg', volumeUnits: 'L', tareRa
 near(scaleFrom({ countsPerUnit: 1000 }, 83454, 0).volume, 10, 1e-3, 'unset gravity falls back to water');
 
 // Mega pin names: A0-A15 and BruControl's 54-69 are the same pins
-assert.equal(pinNumber('A5'), 59); assert.equal(pinNumber('a15'), 69); assert.equal(pinNumber('D22'), 22); assert.equal(pinNumber(22), 22); assert.ok(Number.isNaN(pinNumber('GPIO5')));
+assert.equal(pinNumber('A5'), 59); assert.equal(pinNumber('a15'), 69); assert.equal(pinNumber('D22'), 22); assert.equal(pinNumber(22), 22); assert.equal(pinNumber('GPIO5'), 5, 'Raspberry Pi pin name'); assert.ok(Number.isNaN(pinNumber('X5')));
 assert.equal(analogIndex('A3'), 3); assert.equal(analogIndex(57), 3); assert.equal(analogIndex('3'), 3);
 
 // Outputs

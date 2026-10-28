@@ -25,7 +25,7 @@ When you add a Device (anything wired to a port), the **New Device** box asks fo
 1. **Interface (board)**, listed by its full name with its ID after it, for example *Main Brewery Mega USB (ID MB_)*.
 2. **Device Type** (see the list below)
 3. **Available Ports / Pins**. The list shows only the pins that are free on that Interface and fit that Device Type, best first: plain pins for a relay or switch, PWM pins for a PWM output, counter pins for a flow meter, A0-A15 for an analog input. Each pin in the list says what it is kept for: **PWM**, **Counter**, **PWM + Counter**, **SPI, for RTD boards** or **OneWire probes**; a plain pin has no tag. You can still type another pin. An output port can have more than one type, see below.
-4. **Label**, the Display name the tab shows, for example *Fly Sparge*.
+4. **Label**, the text the tab shows (its **Show label** switch hides it), for example *Fly Sparge*.
 5. **Suggested Name**, filled in for you from the boxes above (see below). You may type your own name instead; it must be unique.
 
 Press **Create**. The Device is always made on the **Build Tab** first, the same way as a new Widget or Template, and its **Properties** open right away so you can set everything else. If you make several in a row, each new one sits a little down and to the right of the last, so none hide each other. Then press **💾 Save Build ...** and pick the Tab: the Device moves there and the Tab ID is added to the end of its name.
@@ -111,7 +111,7 @@ An NTC thermistor is read on an analog pin with a series resistor, using its **o
 
 ## Devices you already have
 
-Devices made before this keep their names, so your Processes still work. Their old type codes (`PmP`, `VlV` ...) are changed to the new Device Type IDs by themselves. Their properties show the **Suggested Name**; you can type it into **Name** if you like. Your Processes are changed to the new name by themselves when you save the layout (see [Renaming Devices and Widgets](53-renaming)).
+Devices made before this keep their names, so your Processes still work. Their old type codes (`PmP`, `VlV` ...) are changed to the new Device Type IDs by themselves. Their properties show the **Suggested Name**; you can give it that name with **✏ Change name** beside the **Name** if you like. Your Processes are changed to the new name by themselves when you save the layout (see [Renaming Devices and Widgets](53-renaming)).
 
 Interfaces and tabs from before get an ID by themselves the first time the Schema opens. Changing an Interface ID or Tab ID later does not rename Devices that already exist.
 

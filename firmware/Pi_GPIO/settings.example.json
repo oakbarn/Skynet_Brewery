@@ -1,0 +1,13 @@
+{
+  "name": "BRAIN_PINS",
+  "listen": "0.0.0.0",
+  "port": 4100,
+  "relay_active_low": true,
+  "pwm_hz": 490,
+  "onewire_pin": 4,
+  "tc_chip": "max31856",
+  "ads1115": "auto",
+  "ads_channels": [0, 1, 2, 3],
+  "hx711": {},
+  "pins": []
+}

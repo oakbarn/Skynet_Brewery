@@ -55,6 +55,7 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
 #pipes .pipe, #pipes .flow, #pipes .drawing, #pipes .reducer { pointer-events: none; }
 #pipes .drawing { fill: none; stroke: var(--accent); stroke-width: 5; stroke-dasharray: 10 5; filter: drop-shadow(0 0 1.5px #000); }
+#pipes .pipeLabel { pointer-events: none; paint-order: stroke; stroke: #000; stroke-width: 3px; stroke-linejoin: round; }
 @keyframes flow { to { stroke-dashoffset: -24; } }
 
 .el { position: absolute; border-radius: 7px; border: 1px solid var(--line); background: var(--panel2); display: flex; flex-direction: column; overflow: hidden; user-select: none; background-size: contain; background-repeat: no-repeat; background-position: center; }
@@ -92,6 +93,10 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #ws.editing.nomove .rs, #ws.nomove circle.handle { display: none; }   /* phone or tablet: nothing to drag */
 .lock { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: rgba(255,255,255,.85); pointer-events: none; display: none; }
 #ws.editing .lock { display: block; }
+/* a Cloned Device (shown in Edit layout): the same Device as its parent on another Tab */
+.cloneMark { position: absolute; right: 1px; bottom: 1px; font-size: 13px; line-height: 1; padding: 1px 3px; border-radius: 4px; background: rgba(255,255,255,.85); color: #333; pointer-events: none; display: none; }
+#ws.editing .cloneMark { display: block; }
+#ws.editing .el.clone { outline: 1px dashed #4fb3ff; }
 #ws.editing .locked { cursor: default; outline: 2px dotted #fff; box-shadow: 0 0 0 2px #000; }
 #ws.editing .locked.sel { outline: 2px solid var(--accent); }
 
@@ -136,6 +141,8 @@ body.previewing #editBar > :not(#previewBuild):not(#saveBuild):not(#cancelLayout
 #autofill li { padding: 1px 10px; cursor: pointer; white-space: nowrap; }
 #autofill li.sel { background: var(--accent); color: #fff; }
 #autofill li.sel .muted { color: #eee; }
+/* predictive text: the rest of the best pick, in gray after the cursor (public/autofill.js) */
+.afGhost { position: absolute; z-index: 5; pointer-events: none; white-space: pre; color: var(--muted); opacity: .75; }
 .scriptList li.clsHead { cursor: pointer; font-weight: 600; background: var(--panel2); color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 #problems, #cfgProblems { list-style: none; padding: 0; margin: 6px 0; }
 #problems li, #cfgProblems li { color: var(--bad); cursor: pointer; padding: 2px 0; }
@@ -542,7 +549,17 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .alertBar + .alertBar { top: auto; bottom: 10px; }
 .alertBar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); padding: 2px 8px; flex: none; }
 .dlgHead { font-weight: 600; margin-top: .6em; padding-bottom: .15em; border-bottom: 1px solid rgba(128,128,128,.35); }
-#dlgBody .lockedPath { opacity: 0.65; cursor: help; background-image: none; }
+#dlgBody label.greyed, #dlgBody label.greyed + * { opacity: 0.45; }
+/* a locked name and its ✏ Change name button; the Name Change pop-up (Fritz, 2026-10-27) */
+.nameRow { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.nameRow input { flex: 1; min-width: 0; }
+.nameRow .nameBtn { flex: none; white-space: nowrap; }
+input.lockedName { opacity: 0.75; cursor: default; }
+dialog.nameDlg { width: min(420px, 94vw); }
+dialog.nameDlg label { display: block; margin: 10px 0 4px; color: var(--muted); }
+dialog.nameDlg input { width: 100%; box-sizing: border-box; }
+dialog.nameDlg .nameErr { color: var(--bad); min-height: 1.2em; margin: 6px 0 0; }
+dialog.nameDlg .muted { font-size: 0.85em; }
 
 /* ===== Process editor: colors (public/colorize.js), tools row, color key, Recycle Bin ===== */
 :root { --hl-cmd: #5aa9ff; --hl-dev: #ff5ce1; --hl-wid: #4dd0e1; --hl-vk: #c58bff; --hl-vapi: #ff5c5c; --hl-proc: #a5c95a; --hl-op: #ffa040;
@@ -679,6 +696,9 @@ button.barEdit { display: inline-flex; align-items: center; justify-content: cen
 button.barEdit:hover { background: #0b2f7a; }
 button.barEdit:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
 button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
+/* Simulator / Real switch for the whole panel (Fritz, 2026-10-27): green = real boards, yellow stripes = simulator */
+button.barSim { min-height: 0; height: 30px; padding: 0 10px; border-radius: 15px; font-weight: bold; white-space: nowrap; background: #2e7d32; color: #fff; border: 1px solid #1b5e20; }
+button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, #fbe36b 8px 16px); color: #000; border-color: #8a6d00; }
 /* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */
 .helpIcon.barHelp { width: 30px; height: 30px; margin: 0; font-size: 17px; }
 .helpIcon:hover, .helpIcon:focus-visible { background: #ffe24d; outline: 2px solid #000; outline-offset: 1px; }
@@ -757,3 +777,9 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .linkRating.best, .linkRating.good { color: var(--ok); }
 .linkRating.ok { color: #c98a00; }
 .linkRating.poor { color: var(--bad); font-weight: bold; }
+
+/* Add Interface pop-up: the Interface ID explanation */
+.ifaceIdNote { border-left: 4px solid #1f3a93; padding: 6px 10px; background: color-mix(in srgb, #1f3a93 8%, transparent); }
+.vdNote { max-width: 34em; margin: 0 auto 10px; text-align: left; line-height: 1.4; }
+/* Interface settings only an Admin may change (Rule 3.2): greyed out for everyone else */
+#devBody input:disabled, #devBody select:disabled { background: #e0e0e0; color: #777; border-color: #bbb; cursor: not-allowed; opacity: 1; }

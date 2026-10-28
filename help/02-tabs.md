@@ -18,7 +18,7 @@ Press the **navy blue circle with the yellow tools** (a hammer and a pick crosse
 
 | Button | What it does |
 |---|---|
-| **Add element** | Pick from the list (outputs, inputs, probes, variables, timers, alarms...) and press it. It is made on the **Build Tab** first. |
+| **Add Device / Widget** | Pick from the list (outputs, inputs, probes, variables, timers, alarms...) and press it. It is made on the **Build Tab** first. |
 | **Add graphic** | A picture from a media folder. It is made on the **Build Tab** first. |
 | **Add text** | A label. It is made on the **Build Tab** first. |
 | **Add equipment** | A vessel: electric or gas heated kettle, mash tun, cooling coil, plate chiller. It is made on the **Build Tab** first. |
@@ -45,7 +45,7 @@ Each tab has one background picture and a background color. Pick **☰ Menu > Ed
 
 A timer shows hh:mm:ss with four buttons: **▶** start, **■** stop, **↺** reset to 00:00:00, and **Set**. **Set** opens a box for hours : minutes : seconds (for example 01:30:00). You can also type the whole time, like `1:30:00`, into the first box. A running timer keeps running from the new time; a countdown timer counts down from it.
 
-> Every element can have a picture: **imagePath_1** to **imagePath_3**, and **Background picture** picks which one shows. A Process changes it with `my_widget.image = "Images/RedPump.png"`. See [Pictures on items](25-picture-paths). On/off items have a separate picture for on and for off.
+> Every Device and Widget can have a picture: **imagePath_1** to **imagePath_3**, and **Background picture** picks which one shows. A Process changes it with `my_widget.image = "Images/RedPump.png"`. See [Pictures on items](25-picture-paths). On/off items have a separate picture for on and for off.
 
 ## Pipes and flow
 

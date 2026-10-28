@@ -5,7 +5,7 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 - the **Name** and the **Value** of every Device and Widget (a pump, a temperature, a vKonstant ...)
 - a **Label** (Add > Label in Edit layout)
 - a **Text** (**+ Text** in Edit layout)
-- the **Display Name** on a vessel and on other equipment
+- the **Label** on a vessel and on other equipment
 
 ## The attributes
 
@@ -20,7 +20,7 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 
 - **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). On a Text, switching it off keeps the text on one line, cut off at the edge.
 - **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
-- **Name font** and **Name font size** set the font of the Names, the Display Names on vessels and the Texts.
+- **Name font** and **Name font size** set the font of the Names, the Labels on vessels and the Texts.
 
 On a Device or Widget, **Fore color**, **Back color** and **Alignment** are for all of its text. **Name color**, **Value color**, **Name alignment** and the others below them are still there, and win over Fore color for that one box.
 
@@ -57,8 +57,8 @@ endif
 - Alignment is `Left`, `Center` or `Right` (`"Left justified"` and `"Centered"` work too).
 - Width, Height, X and Y are whole numbers of pixels. Reading one (`if Text_1.width > 200`) gives the size or place it has now.
 - A size or place set by a Process shows on the Tab only outside Edit layout. In Edit layout you see and drag where its properties put it.
-- The Display Name on a vessel has no Process name. Change it in the vessel's properties.
+- The Label on a vessel has no Process name. Change it in the vessel's properties.
 
 ## Vessels
 
-A new vessel is a **plain gray tank** with no writing on it (the picture `Images/Skynet/Vessels/vessel_gray.svg`). Its **Display Name** is its only text: set it in the vessel's properties, with its position, color, back color and size. A vessel made before this keeps its picture; pick `Images/Skynet/Vessels/vessel_gray.svg` as its Graphic to make it plain gray.
+A new vessel is a **plain gray tank** with no writing on it (the picture `Images/Skynet/Vessels/vessel_gray.svg`). Its **Label** is its only text: set it in the vessel's properties, with its position, color, back color and size. A vessel made before this keeps its picture; pick `Images/Skynet/Vessels/vessel_gray.svg` as its Graphic to make it plain gray.
