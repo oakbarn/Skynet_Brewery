@@ -153,7 +153,7 @@ Process lines (the name alone is the main value, other attributes use a dot; Bru
 new value vVCount          new string vSMsg     new bool vB_Testing     new time vT     new datetime vDT
 vVCount = 3                vVCount += 1         vSMsg = "Temp " + BK_Temp
 V_BK_In = true             gblS_Msg = vSMsg     tm_Whirlpool = 00:20:00     alm_Hops = true
-my_Widget.visible = false  tm_Mash.countdown = true     tm_Mash.displayname = "Mash"
+my_Widget.visible = false  tm_Mash.countdown = true     tm_Mash.label = "Mash"
 if vVCount > 2 && Pump_Red == true
 elseif ...
 else

@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
-import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
@@ -213,11 +213,13 @@ function cleanDonation(d = {}) {
   };
 }
 
-// Autofill in the Process editor: every Device, Widget and Process name, each with its attributes
+// Predictive text in the Process editor: every Device, Widget and Process name, each with its attributes, and the Tab names.
+// Only names go out: never a hidden key (Rule 3.10). Clones are graphics, not elements, so they are never offered (Rule 4.4).
 function processWords() {
   return {
-    elements: store.list().map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el) })),
+    elements: store.list().map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
     processes: engine.names(),
+    tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
   };
 }
 
@@ -251,7 +253,7 @@ function browserConfig() {
   return { ...c, mqtt: { ...m, hasPassword: !!password } };
 }
 function mqttView() {
-  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, displayName: e.displayName ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
+  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, label: e.label ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
 }
 
 // The API has vAPI variables only (never Shared or vKonstant)
