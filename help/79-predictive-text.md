@@ -2,12 +2,17 @@
 
 The Process editor helps you write a Process by offering what can come next, the way a phone keyboard does. You can still type everything by hand; the list is only there to help. A beginner can write a whole Process just by picking from the list.
 
+## Turning it on and off
+
+The **Predictive text** switch is on the editor's tool row, next to **Colors**. It is on at first. Turned off, no list pops up by itself while you type, but **Ctrl+Space** and **💡 Suggest** still open the list when you ask for it. The switch is for you on this computer or phone only; other people keep their own choice.
+
 ## While you type
 
 As soon as you type a letter, a list pops up under the cursor with what fits:
 
 - At the **start of a line**: the commands first (`if`, `wait`, `start`, `new value` ...), each with a short note of what it does, then the names you already used higher up in this Process.
 - **Anywhere else**: the names of your variables, timers, vAPI, vKonstants, Devices, Widgets and Processes.
+- Each letter you type **narrows the list**: `vV_` shows every name that starts with `vV_`, `vV_A` only those starting with `vV_A`. Inside an `if` the list only holds what an `if` can take, so commands never show up there. Each kind (variables, timers, vAPI, vKonstants, Devices, Widgets) is listed A to Z.
 - A name also matches on **any part after a `_`**. Typing `Pump` finds `MB_06_Pump_Wort__HS`, so you don't need to remember the start of a long Device name.
 
 The best pick is also shown in **gray after the cursor**. To take it:
@@ -18,6 +23,25 @@ The best pick is also shown in **gray after the cursor**. To take it:
 | **Up** / **Down** | Moves through the list |
 | **Esc** | Closes the list |
 | Click or tap | Takes that pick |
+
+## After a dot: attributes
+
+Type a name and a dot, and the list shows that item's attributes, with its main value first (`.state` for a pump, `.value` for a probe). Each letter you type narrows the list to the attributes that start with those letters:
+
+| You type | The list shows |
+|---|---|
+| `Pump.` | every attribute of Pump, `state` first |
+| `Pump.h` | `height`, `hidden` |
+| `Pump.he` | only `height`, so it is filled in by itself |
+| `Pump.st` | only `state`, filled in by itself |
+
+Typing **`.x`** always fills in **`.x_hPosition`** (across) and **`.y`** fills in **`.y_vPosition`** (up and down), even with the Predictive text switch off. The old names `.xPosition` and `.yPosition` still work in a Process.
+
+At the start of a line the pick also gets ` = ` after it (`Pump.state = `). Inside an `if` or a `wait` it gets a space, and the next list opens with the compare signs, because the line goes on the way the panel reads it:
+
+`if` name`.`attribute `=` value, for example `if vK_Tulip.visible = true` or `if vK_Tulip.x_hPosition = 456`.
+
+In an `if` a single `=` asks "is it equal?", the same as `==`, so both are in the list. After the sign, an attribute that is true or false gets `true`, `false`, `on` and `off`; for a number, type it (or press **Ctrl+Space** to pick a variable instead).
 
 ## Ctrl+Space or the Suggest button: what can go here
 
