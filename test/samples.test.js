@@ -5,12 +5,16 @@ import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { Store } from '../lib/store.js'; import { Engine } from '../lib/engine.js'; import { Hardware } from '../lib/hardware.js'; import { Control } from '../lib/control.js';
-import { listSamples, loadSample } from '../lib/samples.js';
+import { listSamples, loadSample, simulated } from '../lib/samples.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
 const list = listSamples(SAMPLES);
 assert.deepEqual(list.map(s => s.id), ['two-vessel-one-pump', 'three-vessel-one-pump', 'brewzilla-brew-day']);
+
+// a sample's Interfaces always come in on the simulator, keeping the real connection to switch to later (Fritz, 2026-10-28)
+assert.deepEqual(simulated([{ name: 'M', type: 'serial', port: 'COM3' }, { name: 'S', type: 'simulator', realType: 'tcp' }]),
+  [{ name: 'M', type: 'simulator', realType: 'serial', port: 'COM3' }, { name: 'S', type: 'simulator', realType: 'tcp' }]);
 
 function scratch() {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bps'));
@@ -30,6 +34,7 @@ for (const sm of list) {
   assert.equal(c.sample, sm.id); assert.equal(c.chooseSample, false);
   assert.ok(fs.existsSync(path.join(d, r.backup)), 'old config backed up');
   assert.ok(!store.has('Old'));
+  assert.ok(c.devices.every(x => x.type === 'simulator'), 'nothing real is switched by a sample');
   // 897 imported, 2 x 3 stacked look-alikes folded into 2, plus the built-in SoundPlayer and the Start Brew Day button
   if (sm.brucontrol) {
     // the brew day starts from a button; scrStart0_0's call to a Process BruControl never had is now a comment

@@ -556,8 +556,11 @@ async function route(req, res) {
   if (smp && m === 'POST') {
     const meta = listSamples(SAMPLES).find(x => x.id === smp[1]); if (!meta) return fail(res, 404, 'No such sample');
     // a sample comes in as a new Schema; the pick on the very first start fills (and names) the one you have
-    if (!store.config.chooseSample) schemas.startNew(meta.name); else if (store.config.schema) store.config.schema.name = schemas.freeName(meta.name);
-    return ok(res, loadSample(SAMPLES, smp[1], { store, engine, hw }));
+    if (!store.config.chooseSample) { hw.allOff?.(); schemas.startNew(meta.name); } else if (store.config.schema) store.config.schema.name = schemas.freeName(meta.name);
+    // its Interfaces are all simulated, and the whole panel goes to Simulator mode too, as for a new empty Schema (Rule 10.5)
+    const wasSim = sim.cfg.on;
+    if (!wasSim) sim.save({ on: true });
+    return ok(res, { ...loadSample(SAMPLES, smp[1], { store, engine, hw }), schema: store.config.schema, wasSim });
   }
 
   // Schemas: everyone sees the list, admins load, add, rename and delete
