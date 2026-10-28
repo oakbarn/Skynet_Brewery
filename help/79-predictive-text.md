@@ -35,9 +35,11 @@ Type a name and a dot, and the list shows that item's attributes, with its main 
 | `Pump.he` | only `height`, so it is filled in by itself |
 | `Pump.st` | only `state`, filled in by itself |
 
+Typing **`.x`** always fills in **`.x_hPosition`** (across) and **`.y`** fills in **`.y_vPosition`** (up and down), even with the Predictive text switch off. The old names `.xPosition` and `.yPosition` still work in a Process.
+
 At the start of a line the pick also gets ` = ` after it (`Pump.state = `). Inside an `if` or a `wait` it gets a space, and the next list opens with the compare signs, because the line goes on the way the panel reads it:
 
-`if` name`.`attribute `=` value, for example `if vK_Tulip.visible = true` or `if vK_Tulip.xposition = 456`.
+`if` name`.`attribute `=` value, for example `if vK_Tulip.visible = true` or `if vK_Tulip.x_hPosition = 456`.
 
 In an `if` a single `=` asks "is it equal?", the same as `==`, so both are in the list. After the sign, an attribute that is true or false gets `true`, `false`, `on` and `off`; for a number, type it (or press **Ctrl+Space** to pick a variable instead).
 
