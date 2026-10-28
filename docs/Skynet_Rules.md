@@ -133,7 +133,7 @@ one-time **actions, not switches**, and work on the current Tab only. (2026-10-2
 finger opens Properties. A switch on ☰ Menu > Default can allow it. (2026-10-21, PR #59)
 
 2.14 **Edit layout button** (hammer and pick over a square) sits beside ☰ Menu on the Tabs bar, for
-Admins. (2026-10-22, PR #82 and PR #98)
+Admins. Its background is **navy blue**. (2026-10-22, PR #82 and PR #98; navy blue 2026-10-27)
 
 2.15 **No up and down scrolling** on a Tab: "Fit screen" is the default. (2026-10-04, PR #12)
 
@@ -156,6 +156,12 @@ Device / Widget, vessel and IP dropdowns and the pipe's "Only when" list. Pictur
 work differently (preview and 🖼 icon picker), and plain choice lists have no dialog. Unsaved
 changes in the open dialog are asked about first. Extends Rule 2.10. (2026-10-27, Help 73)
 
+2.20 **Resize grab points:** in Edit layout an unlocked item can be resized with the mouse from
+eight grab points: the four corners and the middle of each side. The picked item shows all eight,
+the others only the bottom right corner. A small box shows X, Y, Width and Height while moving or
+resizing. Locked items have none (Rule 2.12). Works on the Build Tab and every Tab. (2026-10-27,
+thread "Improve the Build Tab add and resize tools", Help 75)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -164,8 +170,10 @@ Full details (Type IDs, virtual ports, what happens to odd characters) are in th
 (2026-10-23, PR #97)
 *Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
 
-3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. An Admin
-can change either. (2026-10-21, PR #61)
+3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. **Only an
+Admin can change either**; for everyone else the box is greyed out. The panel explains that the
+Interface ID is best set once (it is part of every Suggested Device name) and warns before changing
+one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27, PR #118)
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
 
@@ -210,6 +218,18 @@ how the Graphic Picker handles a path. (2026-10-27)
 3.11 **Once an item is built, its Name is locked** (🔒). It is changed only with the **✏ Change
 name** button beside it, which opens the **Name Change** pop-up: the name now (read only), a box for
 the new name, ✖ Cancel and 💾 Save. The same pop-up renames Processes and Schemas. (2026-10-27)
+
+3.12 **Interfaces are easy to find and add.** ☰ Menu has **🔌 Interfaces (boards)** and **➕ Add
+Interface…**, and every Interface dropdown in a New Device box (any Tab, RIMS and kettle too) ends
+with **➕ Add new Interface…**, which opens the Add Interface pop-up and comes back with the new
+Interface picked. The pop-up explains the Interface ID: it becomes part of every Suggested Device
+name, must be unique, and should be set once and left. (2026-10-27, thread "Make Interfaces easy to
+add and simulate", Help 76)
+
+3.13 **Own Device names get a warning.** When a name is typed instead of the Suggested Name, the panel
+warns: a plain word like "Pump" becomes a reserved word in Processes and can cause problems in the
+code; the Device name is only used in Processes and never shown on a Tab, so a unique, meaningful
+name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 
 ## 4. Making things: the Build Tab
 
@@ -355,7 +375,7 @@ Interface's Devices use so small boards fit. (thread "Build firmware for non-Ard
 Pins are GPIO (BCM) numbers 2-27. GPIO 4 is kept for DS18B20 probes, GPIO 7-11 for SPI (RTD and
 thermocouple boards), GPIO 2-3 for I2C (ADS1115). No analog pins and no stepper motors on a Pi: the
 panel refuses them. On the Brain itself (address 127.0.0.1) the rating is Best. Same protocol and
-lost-link watchdog as every other board. (2026-10-28, Help 78)
+lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 
 ## 7. Pictures
 
@@ -434,6 +454,10 @@ is `PR<number>_Skynet-v.yyyymmdd_hh_mm`. (2026-10-21, PR #65; 2026-10-22, PR #86
 9.6 **Skynet pictures and Templates are built and kept editable** during the building phase; Fritz
 locks them before a production zip. (2026-10-21)
 
+9.7 *Replaced (2026-10-28):* "When Fritz closes a chat, rewrite docs/Unresolved_PRs.md" (2026-10-27).
+Fritz dropped it: open PRs are on GitHub and Claude doesn't forget them, so no Unresolved PRs
+document is kept.
+
 ## 10. Testing
 
 10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
@@ -445,6 +469,18 @@ hardware, so expect first real-hardware bug reports. (2026-10-20)
 
 10.3 **Simulation (test mode) touches no hardware.** Turning it on or off stops all Processes and
 turns outputs off. (2026-10-05, PR #22)
+
+10.4 **One switch for Simulator or Real boards**, for the whole panel (every Interface at once): the
+🔌 Real / 🧪 Simulator button beside ☰ Menu (Admins), ☰ Menu > Switch to Simulator / Real boards,
+and Settings > Simulation. Timers run as before. **A wait on a reading** (temperature, boil start,
+level, weight, flow) **is pretended reached** after a set time (60 clock seconds by default, Settings
+> Simulation, can be switched off); a wait on a button or switch never is. (2026-10-27, Help 77)
+
+10.5 **A new Schema that is not a copy starts with a pretend Mega**: one Interface, Connection
+Simulator, named **New_Mega_2560_N** (N = the next number not used in any Schema). The panel switches
+to Simulator mode and says so, then opens the Interface pop-up to give it a meaningful name (example:
+the Skynet Home Brewery's 3 Megas Main_Brewery_HotSide, Valves, Fermentor) and set its Interface ID.
+A copy of a Schema keeps its Interfaces. (2026-10-27, Help 76)
 
 ## 11. Help pages
 
@@ -519,25 +555,41 @@ only when Fritz says the program is set. (2026-10-26)
 
 ## Change log
 
-- 2026-10-27: Added Rule 0a: never read a Summary_N document without Fritz's permission.
-- 2026-10-27: Added Rule 0 at the top of "How Rules work": a new chat opens these Rules first and
-  follows them.
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
+- 2026-10-27: Added Rule 0 at the top of "How Rules work": a new chat opens these Rules first and
+  follows them.
+- 2026-10-27: Added Rule 0a: never read a Summary_N document without Fritz's permission.
+- 2026-10-27: Added Rule 9.7: when Fritz closes a chat, rewrite docs/Unresolved_PRs.md.
+- 2026-10-27: Added Rule 2.17 (one button style on every dialog), Rule 3.10 (hidden keys) and
+  Rule 3.11 (locked names, Name Change pop-up); Rule 3.6 now covers keys, running Processes and
+  clones. Help 80; next free Help number 81. (thread "Add hidden keys so names can change")
+- 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).
 - 2026-10-27: Added Rules 1.13 (Label, was Display Name), 1.14 (a Widget is never an "element"),
   2.18 (Show label), 2.19 (double-click a picker dropdown), 7.8 (On overlay preferred), 7.9 (heaters
   On while Enabled), 7.10 (imagePath_2 / _3 as in BruControl; replaces the lock) and 7.11 (Picture
   Widget Turns on with). Help 72-74; next free Help number 75. (thread "Apply clean-up requests and
   standards")
-- 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).
+- 2026-10-27: Rule 2.14 now says the Edit layout button is navy blue; added Rule 2.20 (eight resize
+  grab points, X / Y / W / H read-out) and Rule 4.5 (➕ Add box). Help 75; next free Help number 76.
+  (thread "Improve the Build Tab add and resize tools")
+- 2026-10-27: Added Rules 3.12 (Interfaces easy to find and add, Add new Interface in New Device),
+  3.13 (own Device name warning), 10.4 (one Simulator / Real switch; waits on readings pretended
+  reached) and 10.5 (a new Schema starts with a pretend New_Mega_2560_N in Simulator mode); open
+  question 13 (Interface ID set once vs Rule 3.2). Help 76-77; next free Help number 78. (thread
+  "Make Interfaces easy to add and simulate")
+- 2026-10-27: Open question 13 answered: Rule 3.2 stays (only an Admin changes an Interface or Tab
+  ID; greyed out for everyone else), with the set-once explanation and warning. (PR #118)
 - 2026-10-27: Rule 4.4 rewritten from Fritz's answers: Clone button only, any Tab incl. the Build Tab (exception noted under Rule 4.1), names <Parent_Name>_Clone_N, not used in Processes.
 - 2026-10-27: Rule 4.4: a Clone's Tab is its own too (Tab dropdown in its Properties).
 - 2026-10-27: Rule 4.4: a Clone's name is for reference only; it has its own hidden key and acts on its parent's key.
 - 2026-10-28: Added Rules 6.12 (firmware order, add-ons on every board, loading from Skynet) and 6.13
   (Raspberry Pi GPIO pins); firmware open question answered.
+- 2026-10-28: Help 79 = Predictive text in the Process editor (thread "Add predictive text to the Process editor"); next free Help number 80.
+- 2026-10-28: Rule 9.7 (Unresolved PRs document) Replaced: Fritz dropped it; PR #113 closed unmerged.
 - 2026-10-27: Added Rule 2.17 (one button style on every dialog), Rule 3.10 (hidden keys) and
   Rule 3.11 (locked names, Name Change pop-up); Rule 3.6 now covers keys, running Processes and
   clones. Help 80; next free Help number 81. (thread "Add hidden keys so names can change")

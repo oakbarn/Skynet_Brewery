@@ -691,6 +691,9 @@ button.barEdit { display: inline-flex; align-items: center; justify-content: cen
 button.barEdit:hover { background: #e53935; }
 button.barEdit:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
 button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
+/* Simulator / Real switch for the whole panel (Fritz, 2026-10-27): green = real boards, yellow stripes = simulator */
+button.barSim { min-height: 0; height: 30px; padding: 0 10px; border-radius: 15px; font-weight: bold; white-space: nowrap; background: #2e7d32; color: #fff; border: 1px solid #1b5e20; }
+button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, #fbe36b 8px 16px); color: #000; border-color: #8a6d00; }
 /* the ? beside ☰ Menu on the Tabs bar: as tall as the Menu button */
 .helpIcon.barHelp { width: 30px; height: 30px; margin: 0; font-size: 17px; }
 .helpIcon:hover, .helpIcon:focus-visible { background: #ffe24d; outline: 2px solid #000; outline-offset: 1px; }
@@ -762,3 +765,9 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .linkRating.best, .linkRating.good { color: var(--ok); }
 .linkRating.ok { color: #c98a00; }
 .linkRating.poor { color: var(--bad); font-weight: bold; }
+
+/* Add Interface pop-up: the Interface ID explanation */
+.ifaceIdNote { border-left: 4px solid #1f3a93; padding: 6px 10px; background: color-mix(in srgb, #1f3a93 8%, transparent); }
+.vdNote { max-width: 34em; margin: 0 auto 10px; text-align: left; line-height: 1.4; }
+/* Interface settings only an Admin may change (Rule 3.2): greyed out for everyone else */
+#devBody input:disabled, #devBody select:disabled { background: #e0e0e0; color: #777; border-color: #bbb; cursor: not-allowed; opacity: 1; }
