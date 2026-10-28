@@ -3615,7 +3615,29 @@ function renderScriptList(force) {
       ul.append(h('li', { class: s.name === curScript ? 'active' : '', title: s.error || s.state, onclick: () => openScript(s.name) }, n, h('span', { class: 'st ' + st }), s.name, s.modified ? ' *' : ''));
     }
   }
+  renderProcPick();
 }
+// Process list box at the top of the editor (Fritz, 2026-10-28): ➕ Add New Process first, then every Process by class
+function renderProcPick() {
+  const sel = $('#procPick'); if (!sel) return;
+  sel.innerHTML = '';
+  if (!curScript) sel.append(h('option', { value: '' }, 'Pick a Process...'));
+  if (can('admin')) sel.append(h('option', { value: '__new' }, '➕ Add New Process...'));
+  for (const [c, d] of Object.entries(S.processClasses || { sub: { label: 'Processes' } })) {
+    const list = S.scripts.filter(s => (s.cls || 'sub') === c).sort((a, b) => (a.order ?? 1e9) - (b.order ?? 1e9));
+    if (list.length) sel.append(h('optgroup', { label: d.label }, ...list.map(s => h('option', { value: s.name }, s.name))));
+  }
+  sel.value = curScript || '';
+}
+$('#procPick').onchange = guard(async () => {
+  const v = $('#procPick').value;
+  try {
+    if (v === '__new') await $('#newScript').onclick();
+    else if (v && v !== curScript) await openScript(v);
+  } finally { renderProcPick(); }
+});
+// 📝 Processes on the Edit layout bar opens the Process editor, the same way 🔨 Build Tab opens the Build Tab
+$('#procTab').onclick = () => setView('scripts');
 async function openScript(name) {
   if (dirty && !confirm('Discard unsaved changes?')) return;
   curScript = name; dirty = false; problems = [];

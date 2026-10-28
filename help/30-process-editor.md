@@ -8,6 +8,14 @@ Every line has its number down the left side. A red number is a line with a prob
 
 To jump to a line, press **Go to line** (or **Ctrl+G** on a PC), type the number and press **OK**. The line is highlighted and scrolled into view. Go to line works in the **Schema.json** editor too.
 
+## Opening the Process editor and picking a Process
+
+Open the Process editor from **☰ Menu > Processes**, or, while you are in **Edit layout**, with **📝 Processes** on the Edit layout bar (next to 🔨 Build Tab). Go back with **☰ Menu > Tabs**.
+
+Pick the Process to work on in the list box at the top of the editor. **➕ Add New Process...** is first in that list; then come your Processes, grouped by class (Flow, Sub, Repeat, Looper) in their Order. The list down the left side still works too, and is where you change the Order numbers.
+
+A Process has a hidden key, so **Rename** only changes its name: every other Process that starts or stops it is updated to the new name by itself. See the Help page Name change and hidden keys.
+
 ## Predictive text: Ctrl+Space
 
 While you type, a list offers the commands and names that fit; press **Ctrl+Space** or **💡 Suggest** to see what can go at the cursor. See [Predictive text](79-predictive-text).

@@ -72,6 +72,7 @@
       <button id="wsProps" title="Name, background color, background picture, size and pipe size of this tab. You can also double-click an empty spot on the tab.">⚙ Tab settings</button>
       <button id="addWs">New tab</button>
       <button id="buildTab" title="A clean Tab to build something new on (Devices, Widgets, vessels, fittings). It only shows while you build. Save Build ... puts it on a Tab or saves it as a Template.">🔨 Build Tab</button>
+      <button id="procTab" title="Open the Process editor: write and change Processes. Come back with ☰ Menu > Tabs">📝 Processes</button>
       <button id="previewBuild" class="hidden" title="See the Build Tab the way it looks on Brew Day, without the grid, outlines and handles. Press again to go back to building.">👁 Preview</button>
       <button id="saveBuild" class="primary hidden" title="Put what is on the Build Tab on a Tab, or save it as a Template">💾 Save Build ...</button>
       <span class="spacer"></span>
@@ -93,6 +94,7 @@
       </aside>
       <div class="editorPane">
         <div class="bar">
+          <select id="procPick" title="Pick a Process to open, or ➕ Add New Process"></select>
           <strong id="scriptName">-</strong>
           <span id="scriptState" class="muted"></span>
           <span class="spacer"></span>
