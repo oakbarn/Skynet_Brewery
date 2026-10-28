@@ -167,7 +167,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   // a name the line goes on after (if Pump ...) ends in a space and opens the next list; a value after = or == ends the line
   const isRhs = /(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre);
   const nsp = isRhs ? '' : ' ';
-  const ranked = [...els].sort((a, b) => GROUP(a)[0] - GROUP(b)[0]);
+  const ranked = [...els].sort((a, b) => GROUP(a)[0] - GROUP(b)[0] || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));     // each kind A to Z
   for (const e of ranked) add(e.name + nsp, `${GROUP(e)[1]} (${e.type})`, e.name);
   for (const n of W.processes || []) add(n + nsp, 'Process', n);
   // and / or only after a value (if Pump == true an...)

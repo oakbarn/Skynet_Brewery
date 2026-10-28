@@ -8,6 +8,7 @@ As soon as you type a letter, a list pops up under the cursor with what fits:
 
 - At the **start of a line**: the commands first (`if`, `wait`, `start`, `new value` ...), each with a short note of what it does, then the names you already used higher up in this Process.
 - **Anywhere else**: the names of your variables, timers, vAPI, vKonstants, Devices, Widgets and Processes.
+- Each letter you type **narrows the list**: `vV_` shows every name that starts with `vV_`, `vV_A` only those starting with `vV_A`. Inside an `if` the list only holds what an `if` can take, so commands never show up there. Each kind (variables, timers, vAPI, vKonstants, Devices, Widgets) is listed A to Z.
 - A name also matches on **any part after a `_`**. Typing `Pump` finds `MB_06_Pump_Wort__HS`, so you don't need to remember the start of a long Device name.
 
 The best pick is also shown in **gray after the cursor**. To take it:
