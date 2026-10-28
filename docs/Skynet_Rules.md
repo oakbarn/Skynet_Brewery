@@ -216,6 +216,8 @@ the new name, ✖ Cancel and 💾 Save. The same pop-up renames Processes and Sc
 4.1 **Every new Device, Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent
 to a Tab. (2026-10-23, PR #97 and PR #99)
 
+*Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
+
 4.2 **New Device order** (the BruControl way): 1 Interface, 2 Device Type, 3 Available Ports/Pins
 (only free ones that fit), then Label. Create puts it on the Build Tab and opens its Properties.
 (2026-10-23, PR #97)
@@ -223,6 +225,19 @@ to a Tab. (2026-10-23, PR #97 and PR #99)
 4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
 back where it came from?". Save to Tab places the build in the center of the chosen Tab.
 (2026-10-22, PR #88)
+
+4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
+a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar; it works on any Tab,
+**the Build Tab too** (an exception to Rule 4.1, Fritz 2026-10-27). Its list holds the Devices
+already placed on a Tab, grouped by type (Pumps, Valves ...). Its name is made by Skynet and can't
+be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). The name is only for reference in its
+Properties. **Each Clone has its own hidden key (Rule 3.10) but acts only on its parent's key**
+(the key link is built once PR #114 is in; until then a Clone points at its parent by name). Only **.visible, .x, .y and its Tab** (a
+Tab dropdown in its Properties; not in Processes) and its lock are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
+Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
+only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
+rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
+per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
 
 ## 5. Templates and Integrated items
 
@@ -327,6 +342,20 @@ the shield's SD card pin: it is NOT blocked, but picking D4 for a Device on a Me
 checks the slot every 10 seconds, and when a card is in, the panel shows "SD Card Not Supported.
 Remove the SD Card!" to everyone and on the Devices page. (2026-10-27, thread "Limit RTD CS pins on
 the Mega")
+
+6.12 **Firmware order and add-ons** (Fritz, 2026-10-27/28): 1 Raspberry Pi GPIO program, 2 board
+profiles with ready-made firmware for Uno, Nano, R4, GIGA, Opta and the others, loaded from inside
+Skynet (board on the Brain's USB, the Brain uploads, terminal-style box and serial monitor, Admin
+only), 3 Pi Pico. Every board is a daughter board (Interface) of the Brain like a Mega 2560; the Brain
+holds all logic. **Each add-on (OneWire, RTD, thermocouple, ADS1115, load cells, steppers, Ethernet)
+goes to every Arduino board**: one shared Skynet firmware, built with only the add-ons that
+Interface's Devices use so small boards fit. (thread "Build firmware for non-Arduino-IDE boards")
+
+6.13 **Raspberry Pi GPIO pins:** an Interface with Board "Raspberry Pi" runs `firmware/Pi_GPIO`.
+Pins are GPIO (BCM) numbers 2-27. GPIO 4 is kept for DS18B20 probes, GPIO 7-11 for SPI (RTD and
+thermocouple boards), GPIO 2-3 for I2C (ADS1115). No analog pins and no stepper motors on a Pi: the
+panel refuses them. On the Brain itself (address 127.0.0.1) the rating is Best. Same protocol and
+lost-link watchdog as every other board. (2026-10-28, Help 78)
 
 ## 7. Pictures
 
@@ -484,9 +513,7 @@ only when Fritz says the program is set. (2026-10-26)
 9. **Bundled Devices on a vessel:** the plan to list bundled Devices in vessel Properties with Edit
    buttons was OK'd but not built yet.
 10. **BruControl import:** keep the strict Process check, or allow BruControl-style lenient start?
-11. **Firmware:** which comes first: Pi GPIO agent, Pi Pico, or ready builds for Mega/ESP32
-    (recommended: Pi GPIO agent)? (2026-10-27)
-12. **Still undecided from the check-up:** phone layout, Pi GPIO pins, PID temperature control.
+11. **Still undecided from the check-up:** phone layout, PID temperature control.
 
 ---
 
@@ -505,6 +532,12 @@ only when Fritz says the program is set. (2026-10-26)
   On while Enabled), 7.10 (imagePath_2 / _3 as in BruControl; replaces the lock) and 7.11 (Picture
   Widget Turns on with). Help 72-74; next free Help number 75. (thread "Apply clean-up requests and
   standards")
+- 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).
+- 2026-10-27: Rule 4.4 rewritten from Fritz's answers: Clone button only, any Tab incl. the Build Tab (exception noted under Rule 4.1), names <Parent_Name>_Clone_N, not used in Processes.
+- 2026-10-27: Rule 4.4: a Clone's Tab is its own too (Tab dropdown in its Properties).
+- 2026-10-27: Rule 4.4: a Clone's name is for reference only; it has its own hidden key and acts on its parent's key.
+- 2026-10-28: Added Rules 6.12 (firmware order, add-ons on every board, loading from Skynet) and 6.13
+  (Raspberry Pi GPIO pins); firmware open question answered.
 - 2026-10-27: Added Rule 2.17 (one button style on every dialog), Rule 3.10 (hidden keys) and
   Rule 3.11 (locked names, Name Change pop-up); Rule 3.6 now covers keys, running Processes and
   clones. Help 80; next free Help number 81. (thread "Add hidden keys so names can change")

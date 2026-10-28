@@ -21,6 +21,7 @@ Connections are ranked by board (Help page 69, `public/links.js`). Arduino Mega:
 | `CFG DI <pin> <PULLUP\|NOPULL> <ms>` | Input pull-up on or off, and debounce: a new level must hold this many ms before the board reports it (default 20). |
 | `CFG RTD <cs> <2\|3\|4>` | PT100 / PT1000 probe wires on the MAX31865 board at chip-select pin `cs`. |
 | `CFG TC <cs> <K\|J\|T\|N\|E\|R\|S\|B>` | Thermocouple type on the MAX31856 board at chip-select pin `cs` (MAX31855 boards are K only). |
+| `CFG FLOW <pin> S` | Raspberry Pi only: count flow meter pulses on this pin (a Mega has its fixed `FLOW_PINS` list instead). |
 | `CFG STEP …`, `GO`, `RUN`, `STOP`, `ZERO`, `HOME`, `EN` | Stepper motors: see **Stepper motors** below. |
 
 After every reconnect the server sends the `CFG` lines and then the state of every output, so the hardware matches the screen and the panel's settings.
@@ -54,11 +55,24 @@ Every DS18B20 probe has a unique 64-bit ROM id, and the board reports each probe
 
 Older configs that put the ROM id on the element (`probe`) are moved into the index automatically.
 
+## Raspberry Pi GPIO
+
+`firmware/Pi_GPIO/skynet_pi_gpio.py` makes a Raspberry Pi's own pins an Interface (Board **Raspberry Pi**, Type **Ethernet**, address `127.0.0.1` on the Brain itself or the other Pi's address, TCP port 4100). It speaks this same protocol and answers `HELLO <name> pi-0.1`. Install it on the Pi with `sudo bash install.sh` from that folder (Help page 78).
+
+- **Pins** are GPIO (BCM) numbers 2-27 (`GPIO17` and `17` are the same pin). There are no pin lists to edit: a pin becomes an output, PWM / analog output, input or flow meter when the panel first uses it. Output pins are remembered (`pins.json`) and set OFF when the program starts.
+- **Lost link:** no word from the panel for the `CFG WD` delay turns every output OFF, the same as a Mega.
+- **Outputs:** `DO`, `PWM` and `AO` (PWM at 490 Hz on any pin, into a PWM-to-0-10 V module for `AO`). `relay_active_low` in `settings.json` (on by default, like the Mega) makes `DO 1` drive the pin LOW.
+- **Inputs:** `CFG DI` (pull-up or none, debounce), `CFG FLOW` (pulse counter, any pin).
+- **DS18B20** through the Linux 1-Wire driver on GPIO 4, reported by the same 16-hex-digit ROM id as a Mega.
+- **RTD (MAX31865) and thermocouple (MAX31856, or MAX31855 with `"tc_chip": "max31855"`)** boards on SPI (GPIO 9, 10, 11; GPIO 7 and 8 are kept by the SPI driver), chip-select on any free GPIO.
+- **ADS1115** on I2C (GPIO 2, 3), found by itself at address 0x48. **HX711** load cells: pairs of DT and SCK pins in `settings.json` (`"hx711": {"5": 6}`).
+- **Not on a Pi:** stepper motors (the Pi can't time steps exactly; put the motor on a Mega or ESP32) and analog pins (a Pi has none; use an ADS1115). The panel refuses these on a Pi Interface.
+
 ## Element settings that use the protocol
 
 ## Boards
 
-The "PLCs" are hobby boards: an **Arduino Mega** (USB, or Ethernet with a W5500 / W5100 shield), an **ESP32** bridge to a Mega (Ethernet or WiFi), and hobby modules wired to them (relay boards, SSRs, MOSFET modules, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115 analog board, PWM-to-0-10 V modules). Uno and Nano can run the same sketch with smaller pin lists. The Raspberry Pi runs the panel; using the Pi's own GPIO pins as Devices is not built yet.
+The "PLCs" are hobby boards: an **Arduino Mega** (USB, or Ethernet with a W5500 / W5100 shield), an **ESP32** bridge to a Mega (Ethernet or WiFi), and hobby modules wired to them (relay boards, SSRs, MOSFET modules, MAX31865 / MAX31855 / MAX31856 probe boards, ADS1115 analog board, PWM-to-0-10 V modules). Uno and Nano can run the same sketch with smaller pin lists. The Raspberry Pi runs the panel, and its own GPIO pins can be an Interface too: see **Raspberry Pi GPIO** above.
 
 ## Devices
 

@@ -55,6 +55,7 @@
     <div id="editBar" class="bar edit hidden">
       <select id="addType"></select>
       <button id="addEl">Add Device / Widget</button>
+      <button id="cloneDev" title="Show a Device that is on another Tab on this Tab too. The Clone is the same Device: turning it on turns the parent and every Clone on.">⧉ Clone Device</button>
       <button id="addImg">Add graphic</button>
       <button id="addText">Add text</button>
       <select id="addVesselType" title="Vessel and equipment widgets: heated vessels, mash tun, cooling coil, plate chiller"></select>
@@ -217,7 +218,7 @@
     <div class="form row admin-only">
       <label>Name <input id="devName" placeholder="Main Brewery Mega USB"></label>
       <label>Interface ID (1-4 letters, empty = first letters of the name) <input id="devId" placeholder="MB" maxlength="7" size="6"></label>
-      <label>Board <select id="devBoard"><option value="mega">Arduino Mega</option><option value="esp32">ESP32</option><option value="other">Other Arduino-type board</option></select></label>
+      <label>Board <select id="devBoard"><option value="mega">Arduino Mega</option><option value="esp32">ESP32</option><option value="other">Other Arduino-type board</option><option value="pi">Raspberry Pi (its own GPIO pins)</option></select></label>
       <label>Type <select id="devType"><option value="serial">USB</option><option value="ethernet">Ethernet (wired)</option><option value="esp32">WiFi (a Mega: through an ESP32 bridge)</option><option value="simulator">Simulator</option></select></label>
       <span id="devRating" class="linkRating"></span>
       <label>USB port <input id="devPort" placeholder="COM3 or /dev/ttyACM0" list="portList"><datalist id="portList"></datalist></label>
