@@ -9,7 +9,7 @@ const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ elements: [
   { name: 'VGC_Kettle_Out', type: 'digitalOut', subtype: 'valve', valveType: 'manual', label: 'Kettle outlet' },
   { name: 'VGC_HLT_Out', type: 'digitalOut', subtype: 'valve' },
-  { name: 'Done', type: 'vKonstant', kind: 'value' },
+  { name: 'Done', type: 'gKonstant', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });

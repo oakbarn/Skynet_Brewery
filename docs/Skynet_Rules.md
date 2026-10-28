@@ -87,9 +87,11 @@ is a real *heating element*. (2026-10-27, Help 74)
 
 1.16 **gKonstant and gAPI** are the two variable classes (they were vKonstant and vAPI). Suggested
 name prefixes: **gK** for gKonstant (`gK_`, `gKS_`, `gKV_`, `gKB_`, `gKList_` ...) and **gA** for gAPI
-(`gAS_`, `gAV_`, `gAT_`, `gADT_`, `gAB_`). Prefixes are hints, never required. Inside the Schema files
-the type stays `vKonstant` / `vAPI`, and older `vK..._` / `vA..._` names and the `/api/vapi` address
-keep working. (2026-10-28, thread "Rename vAPI and vKonstant to gAPI and gKonstant", Help 84)
+(`gAS_`, `gAV_`, `gAT_`, `gADT_`, `gAB_`). Prefixes are hints, never required. Older Schemas are changed
+when the Brain starts or the Schema loads: the types become gKonstant / gAPI, `vK..._` / `vA..._` names
+become `gK..._` / `gA..._` through the hidden-key rename (Processes, saved values and the database
+follow), and the web API is `/api/gapi`. (2026-10-28, thread "Rename vAPI and vKonstant to gAPI and
+gKonstant", Help 84)
 
 ## 2. Screen design and clicks
 
@@ -533,6 +535,13 @@ only when Fritz says the program is set. (2026-10-26)
 
 14.2 **Compile check of firmware** inside the app: deferred. (2026-10-04)
 
+## 15. Importing
+
+15.2 **Everything conforms to the latest standard. Backward compatibility is not needed.** When a
+standard changes, existing Schemas, Processes, names and files are changed to it (with backups),
+rather than keeping the old way working beside the new one. (Fritz, 2026-10-28, thread "Rename vAPI
+and vKonstant to gAPI and gKonstant")
+
 ---
 
 ## Open questions (not Rules yet)
@@ -603,3 +612,5 @@ only when Fritz says the program is set. (2026-10-26)
   has its own hidden key but acts only through its parent's key. (Fritz's answer, thread "Add hidden keys so names can change")
 - 2026-10-28: Added Rule 1.16 (vKonstant / vAPI renamed gKonstant / gAPI, prefixes gK / gA); Rule 2.6 says
   gKonstant List. Help 84; next free Help number 85. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
+- 2026-10-28: Rule 1.16 now renames older vK_ / vA_ names; added Rule 15.2 (everything conforms to the latest
+  standard, no backward compatibility). The OakBarn BruControl sample is out of the shipped samples for now.

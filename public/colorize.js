@@ -35,8 +35,8 @@ export const LEGEND = [['cmd', 'Commands'], ['dev', 'Devices'], ['wid', 'Widgets
   ['op', 'Operators'], ['str', 'Text in quotes'], ['num', 'Numbers and times'], ['com', 'Comments'], ['lab', 'Labels'], ['attr', 'Attributes']];
 
 export function elementClass(type) {
-  if (type === 'vKonstant') return 'vk';
-  if (type === 'vAPI') return 'vapi';
+  if (type === 'gKonstant') return 'vk';
+  if (type === 'gAPI') return 'vapi';
   return DEVICE_TYPES.includes(type) ? 'dev' : 'wid';
 }
 
@@ -170,7 +170,7 @@ ${css}
 
 // Notepad++ "User Defined Language" file: Language > User Defined Language > Define your language > Import.
 // Made from this brewery's names (Devices, Widgets, gKonstants, gAPI, Processes) and the variables made in its Processes.
-// Without words it is a general file: gKonstants by their gK prefix and gAPI by gA (the older vK / vA names too).
+// Without words it is a general file: gKonstants by their gK prefix and gAPI by gA.
 export function notepadPlusPlus(words, texts = []) {
   const k = COLORS.light, hex = c => c.replace('#', '');
   const ok = n => /^[A-Za-z_][A-Za-z0-9_]*$/.test(n);
@@ -180,8 +180,8 @@ export function notepadPlusPlus(words, texts = []) {
   const kw = [
     [...COMMANDS, ...CONSTANTS].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
     group('dev'),
-    general ? 'gK vK' : group('vk'),
-    general ? 'gA vA' : group('vapi'),
+    general ? 'gK' : group('vk'),
+    general ? 'gA' : group('vapi'),
     vars,
     group('wid'),
     (words?.processes ?? []).filter(ok).join(' '),

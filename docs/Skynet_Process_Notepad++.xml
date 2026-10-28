@@ -30,8 +30,8 @@
             <Keywords name="Folders in comment, close"></Keywords>
             <Keywords name="Keywords1">goto sleep wait start stop reset print clear show log new play step restart pause tab value string bool time datetime true false now on off</Keywords>
             <Keywords name="Keywords2"></Keywords>
-            <Keywords name="Keywords3">gK vK</Keywords>
-            <Keywords name="Keywords4">gA vA</Keywords>
+            <Keywords name="Keywords3">gK</Keywords>
+            <Keywords name="Keywords4">gA</Keywords>
             <Keywords name="Keywords5"></Keywords>
             <Keywords name="Keywords6"></Keywords>
             <Keywords name="Keywords7"></Keywords>

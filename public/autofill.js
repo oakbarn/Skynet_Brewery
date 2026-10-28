@@ -39,8 +39,8 @@ const PROCESS_ATTRS = ['running'];
 const TARGETS = { start: ['timer', 'alarm', 'soundPlayer'], stop: ['timer', 'alarm', 'soundPlayer', 'stepper'], reset: ['timer', 'stepper'], restart: [] };
 
 // the kind of each item, in the order a value list shows them
-const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'vAPI' ? [2, 'gAPI']
-  : e.type === 'vKonstant' ? [3, 'gKonstant'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
+const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'gAPI' ? [2, 'gAPI']
+  : e.type === 'gKonstant' ? [3, 'gKonstant'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
 
 // how well a name fits the letters typed: 0 = it starts with them, 1 = a part of it after a _ does, -1 = not at all
 export function fit(name, typed) {
@@ -168,7 +168,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   const isRhs = /(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre);
   const nsp = isRhs ? '' : ' ';
   const ranked = [...els].sort((a, b) => GROUP(a)[0] - GROUP(b)[0] || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));     // each kind A to Z
-  for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // gAPI, not gAPI (vAPI)
+  for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // gAPI, not gAPI (gAPI)
   for (const n of W.processes || []) add(n + nsp, 'Process', n);
   // and / or only after a value (if Pump == true an...)
   const afterValue = /\S\s+$/.test(pre) && !/(==|!=|<=|>=|<|>|=|\+|-|\*|\/|\(|\bif|\belseif|\bwait|\bnot|\band|\bor)\s*$/i.test(pre);

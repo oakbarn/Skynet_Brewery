@@ -536,13 +536,11 @@ function fillText(n, g) {
   n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden' || (v.hidden ?? g.hidden) === true);
 }
 
-// variable classes: shared, vKonstant, vAPI (the old Global class is retired: lib/globals.js)
-// On screen they are gKonstant and gAPI (Fritz, 2026-10-28); the type in the Schema files stays vKonstant / vAPI.
-const CLASS_WORD = { vKonstant: 'gKonstant', vAPI: 'gAPI' };
-const isVarEl = e => ['shared', 'vKonstant', 'vAPI'].includes(e?.type);
-const isApiEl = e => e?.type === 'vAPI';
-const vkKind = e => e?.type === 'vKonstant' ? (e.kind || 'value') : null;
-const kindsOf = type => type === 'vKonstant' ? S.vkKinds : type === 'vAPI' ? S.vapiKinds : null;
+// variable classes: shared, gKonstant, gAPI (were vKonstant / vAPI until 2026-10-28; the old Global class is retired: lib/globals.js)
+const isVarEl = e => ['shared', 'gKonstant', 'gAPI'].includes(e?.type);
+const isApiEl = e => e?.type === 'gAPI';
+const vkKind = e => e?.type === 'gKonstant' ? (e.kind || 'value') : null;
+const kindsOf = type => type === 'gKonstant' ? S.vkKinds : type === 'gAPI' ? S.vapiKinds : null;
 const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
 
 // IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
@@ -624,8 +622,8 @@ function elGeom(e) {
   return { x: cx - w * k / 2, y: cy - hh * k / 2, w: w * k, h: hh * k };
 }
 // A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
-// it can also be a vKonstant value holding the percent. It passes flow whenever it is above 0 % open.
-const PROP_TYPES = ['analogOut', 'pwmOut', 'vKonstant', 'vAPI', 'shared'];
+// it can also be a gKonstant value holding the percent. It passes flow whenever it is above 0 % open.
+const PROP_TYPES = ['analogOut', 'pwmOut', 'gKonstant', 'gAPI', 'shared'];
 // Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
 const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
 const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
@@ -705,7 +703,7 @@ function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : '') + (e.cloneId ? ' clone' : ''), 'data-name': e.name, ...(e.cloneId ? { 'data-clone': e.cloneOf, 'data-gid': e.cloneId, title: `Clone of ${e.cloneOf}` } : {}) }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
   if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
-  if (vkKind(e) === 'list') {        // vKonstant List: pick the Text, the element gets that choice's Value
+  if (vkKind(e) === 'list') {        // gKonstant List: pick the Text, the element gets that choice's Value
     const s = h('select', { class: 'vksel', ...(editing || e.readOnly ? { disabled: true } : {}) }, ...(e.items || []).map(i => h('option', { value: String(i.value) }, i.text || String(i.value))));
     s.addEventListener('click', ev => ev.stopPropagation());
     s.onchange = () => { const it = (e.items || []).find(i => String(i.value) === s.value); if (it) setProp(e.name, 'value', it.value); };
@@ -805,10 +803,10 @@ function fillEl(n, e0) {
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
   switch (e.type) {
-    case 'shared': case 'vAPI':
+    case 'shared': case 'gAPI':
       if (e.dataType === 'bool' || e.kind === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
       text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
-    case 'vKonstant':
+    case 'gKonstant':
       switch (vkKind(e)) {
         case 'graphic': img = v.value || img; text = ''; break;            // the value IS the picture path
         case 'list': {
@@ -951,8 +949,8 @@ function tapAction(e) {
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'soundPlayer': return 'toggle';
-    case 'shared': case 'vAPI': return e.readOnly ? 'none' : 'dialog';
-    case 'vKonstant':
+    case 'shared': case 'gAPI': return e.readOnly ? 'none' : 'dialog';
+    case 'gKonstant':
       if (e.readOnly) return 'none';
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
@@ -989,7 +987,7 @@ async function doTap(e) {
   return valueDialog(t);
 }
 
-// Push Button (vKonstant): ON while pressed, OFF when released. "down" repeats every 0.5 s so the server
+// Push Button (gKonstant): ON while pressed, OFF when released. "down" repeats every 0.5 s so the server
 // lets go by itself if this screen disappears while the button is held.
 let held = null;
 function release() {
@@ -1822,11 +1820,11 @@ $('#editMode').addEventListener('change', e => {
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
   pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
-  // analogOut when that output type is installed (its fields exist), otherwise a vKonstant value holding 0-100 %
+  // analogOut when that output type is installed (its fields exist), otherwise a gKonstant value holding 0-100 %
   get propValve() {
     const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg' };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
-      : { type: 'vKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
+      : { type: 'gKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
@@ -1978,7 +1976,7 @@ const WGT_TYPES = () => [
   ['vessels', 'Vessels', VESSEL_ROWS],
   ['equipment', 'Equipment (chillers, coils, filters)', EQUIP_ROWS()],
   ['fittings', 'Fittings and IPs (elbows, tees ...)', FIT_ROWS()],
-  ...['vKonstant', 'vAPI'].map(t => [t, `${CLASS_WORD[t]} variables`, amGroup(CLASS_WORD[t]).map(r => [r[0], () => addThing(r[1], r[2], r[3])])]),
+  ...['gKonstant', 'gAPI'].map(t => [t, `${t} variables`, amGroup(t).map(r => [r[0], () => addThing(r[1], r[2], r[3])])]),
 ];
 const VESSEL_ROWS = [['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
@@ -1996,8 +1994,8 @@ function pickRun(sel) {
   if (f) guard(f)();
 }
 function fillAddType() {
-  const vars = (type, ks) => [`${CLASS_WORD[type]} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
-  if (!ADD_MENU.some(([g]) => g.startsWith('gKonstant'))) ADD_MENU.push(vars('vKonstant', S.vkKinds), vars('vAPI', S.vapiKinds));
+  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
+  if (!ADD_MENU.some(([g]) => g.startsWith('gKonstant'))) ADD_MENU.push(vars('gKonstant', S.vkKinds), vars('gAPI', S.vapiKinds));
   const dev = DEV_TYPES(), wgt = WGT_TYPES();
   const types = (sel, head, list) => { const v = sel.value; sel.replaceChildren(h('option', { value: '' }, head), ...list.map(([k, t]) => h('option', { value: k }, t))); sel.value = v; };
   types($('#devKind'), 'Select Device Type', dev); types($('#wgtKind'), 'Select Widget Type', wgt);
@@ -2312,8 +2310,8 @@ async function useValveProfile(e) {
 }
 // Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Background Profile (only when it is made).
 // Something with an ON / OFF state can be an LED or Text; something with a value also a Gauge; with neither, only the colors.
-const hasStateEl = e => isBoolEl(e) || (['vKonstant'].includes(e.type) && ['switch', 'pushbutton', 'momentary', 'bool'].includes(e.kind));
-const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual'].includes(e.type) && !(e.type === 'vKonstant' && ['graphic', 'list', 'longstring'].includes(e.kind));
+const hasStateEl = e => isBoolEl(e) || (['gKonstant'].includes(e.type) && ['switch', 'pushbutton', 'momentary', 'bool'].includes(e.kind));
+const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual'].includes(e.type) && !(e.type === 'gKonstant' && ['graphic', 'list', 'longstring'].includes(e.kind));
 function useTabProfile(e) {
   const p = tabProfileOf(draft.workspaces.find(w => w.name === e.workspace)); if (!p) return;
   for (const k of ['nameColor', 'nameBg', 'nameAlign', 'valueColor', 'valueBg', 'valueAlign']) if (p[k]) e[k] = p[k];
@@ -2868,7 +2866,7 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
-F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vkKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+F.gKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vkKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
   ['items', 'Choices: Value (what Processes see and trigger on) and Text (what the dropdown shows)', 'vkitems', null, ['list']],
   ['initial', 'Starting choice (its Value)', 'text', null, ['list']],
   ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
@@ -2879,7 +2877,7 @@ F.vKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel',
   ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
   ['stepClass', 'Shows the steps of', 'sel', [['flow', 'Flow Processes'], ['sub', 'Sub Processes'], ['repeat', 'Repeat Processes'], ['looper', 'Looper Processes'], ['any', 'Any Process']], ['step']],
   ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', 'list', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', 'list', ...PLAINK]]];
-F.vAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+F.gAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
   ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num', null, NUMK],
   ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true],
   ['_logNote', 'Database trigger: set it on the Variables page', 'note']];
@@ -3459,7 +3457,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { ...CLASS_WORD, pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const TYPE_TITLE = { gKonstant: 'gKonstant', gAPI: 'gAPI', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -4140,7 +4138,7 @@ applyColors();
 const KEY_SAMPLES = { cmd: 'if  wait  start  true', dev: 'Pump_Red  HLT_Temp', wid: 'tm_Mash  alm_Hops', vk: 'gKV_Strike', vapi: 'gAV_Mash_Temp', var: 'new value x', proc: 'start sub_Fill',
   op: '=  +  -  <  and', str: '"Mash in"', num: '185.5  00:10:00', com: '// note  # note  /* note */', lab: '[Mash]  goto Mash', attr: 'tm_Mash.visible' };
 const KEY_WORDS = { elements: [{ name: 'Pump_Red', type: 'digitalOut' }, { name: 'HLT_Temp', type: 'temperature' }, { name: 'tm_Mash', type: 'timer' }, { name: 'alm_Hops', type: 'alarm' },
-  { name: 'gKV_Strike', type: 'vKonstant' }, { name: 'gAV_Mash_Temp', type: 'vAPI' }], processes: ['sub_Fill'] };
+  { name: 'gKV_Strike', type: 'gKonstant' }, { name: 'gAV_Mash_Temp', type: 'gAPI' }], processes: ['sub_Fill'] };
 $('#colorKey').onclick = () => {
   const box = $('#keyList'); box.innerHTML = '';
   for (const [c, label] of LEGEND) {
@@ -4317,7 +4315,7 @@ function renderConsole() {
 $('#consoleAll').onchange = renderConsole;
 $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 
-// ---------------------------------------------------------------- variables page: vAPI, vKonstant, shared
+// ---------------------------------------------------------------- variables page: gAPI, gKonstant, shared
 const LOG_LABEL = { none: 'Off', ondemand: 'Manual (log line / Log now)', script: 'On demand only (when a process starts)', once: 'Once',
   ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours', days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
@@ -4334,7 +4332,7 @@ function varRow(e, withLog) {
   if (k === 'pushbutton' || k === 'momentary') val = h('span', { 'data-g': e.name, class: 'muted' }, v.value ? 'ON' : 'OFF');
   else if (k === 'longstring') val = h('span', {}, h('button', { onclick: () => valueDialog(e) }, 'Edit text…'), ' ', h('span', { class: 'muted' }, v.file || '(no file: kept in memory)'));
   else val = h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, v.value), onchange: ev => setProp(e.name, 'value', ev.target.value) });
-  const kindText = e.type === 'vKonstant' || e.type === 'vAPI' ? kindsOf(e.type)[e.kind || 'value']?.label : e.dataType;
+  const kindText = e.type === 'gKonstant' || e.type === 'gAPI' ? kindsOf(e.type)[e.kind || 'value']?.label : e.dataType;
   const cells = [h('td', {}, e.name), h('td', {}, kindText), h('td', {}, val)];
   if (withLog) {
     const lg = e.log || { mode: 'none' };
@@ -4346,7 +4344,7 @@ function varRow(e, withLog) {
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
-  for (const [id, type, withLog] of [['#vapiBody', 'vAPI', true], ['#vkBody', 'vKonstant', false], ['#sharedBody', 'shared', false]]) {
+  for (const [id, type, withLog] of [['#vapiBody', 'gAPI', true], ['#vkBody', 'gKonstant', false], ['#sharedBody', 'shared', false]]) {
     const tb = $(id); tb.innerHTML = '';
     tb.append(...of(type).map(e => varRow(e, withLog)));
     tb.closest('table').classList.toggle('empty', !of(type).length);
@@ -4882,7 +4880,7 @@ $('#donSave').onclick = guard(async () => {
 $('#donPreview').onclick = () => showDonate(true);
 
 // ---------------------------------------------------------------- MQTT and voice
-const TYPE_WORD = { vAPI: 'gAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
+const TYPE_WORD = { gAPI: 'gAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
 function renderMqttStatus() {
   const st = S.mqtt?.status ?? { state: 'off', text: 'MQTT is off' };
   const box = $('#mqttStatus'); box.className = 'mqtt-status ' + st.state; box.textContent = st.text;

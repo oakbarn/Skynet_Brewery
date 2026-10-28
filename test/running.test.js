@@ -8,7 +8,7 @@ import { classify, CLASSES } from '../public/colorize.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'running'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ elements: [
-  { name: 'tm_Mash', type: 'timer' }, { name: 'Seen', type: 'vKonstant', kind: 'value' },
+  { name: 'tm_Mash', type: 'timer' }, { name: 'Seen', type: 'gKonstant', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });

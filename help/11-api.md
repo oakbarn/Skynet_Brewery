@@ -15,4 +15,4 @@ Programs send the **API key** from **Settings** in the header `X-API-Key: <key>`
 | `GET /api/log?name=&from=&to=&limit=` | Logged values |
 | `GET /api/log.csv?...` | The same as CSV |
 
-The old `/api/vapi/...` and `/api/globals/...` addresses still work and do the same.
+The old `/api/globals/...` addresses still work and do the same. (`/api/vapi` was renamed `/api/gapi` on 2026-10-28.)

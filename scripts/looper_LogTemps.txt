@@ -1,7 +1,7 @@
 //looper_LogTemps
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
-//Copies the kettle probe into a vAPI so the database can log it.
+//Copies the kettle probe into a gAPI so the database can log it.
 //gAV_Kettle_Temp is set to log every 10 seconds (Variables page).
 [Loop]
 gAV_Kettle_Temp = BK_Temp

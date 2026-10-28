@@ -7,7 +7,7 @@ import { Engine, compile } from '../lib/engine.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'restart'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ elements: [
-  { name: 'Count', type: 'vKonstant', kind: 'value' }, { name: 'alm_Stuck', type: 'alarm' },
+  { name: 'Count', type: 'gKonstant', kind: 'value' }, { name: 'alm_Stuck', type: 'alarm' },
 ], restartLimit: 3, restartAlarm: 'alm_Stuck' }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });

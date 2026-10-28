@@ -14,7 +14,7 @@ assert.ok(fs.existsSync(path.join(d, 'data', 'key-secret')), 'the stand-in secre
 // ---- an old Schema gets keys on load and they are written; they stay the same on the next load
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'Mega' }], workspaces: [{ name: 'Main' }], graphics: [{ id: 'g1', kind: 'text', name: 'Text_1', workspace: 'Main' }],
-  elements: [{ name: 'Pump_A', type: 'digitalOut' }, { name: 'Temp', type: 'vKonstant', kind: 'value' }] }));
+  elements: [{ name: 'Pump_A', type: 'digitalOut' }, { name: 'Temp', type: 'gKonstant', kind: 'value' }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const onDisk = JSON.parse(fs.readFileSync(cfg, 'utf8'));
 for (const list of ['devices', 'workspaces', 'graphics', 'elements']) for (const it of onDisk[list]) assert.match(it._key, /^k[0-9a-f]{16}$/, `${list} ${it.name} has a key`);

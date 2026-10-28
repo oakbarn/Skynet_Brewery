@@ -32,13 +32,18 @@ Prefixes are a hint, never required: any allowed name works.
 
 ## Your older Schemas and Processes
 
-- **Nothing breaks.** Variables you already made with `vK..._` or `vA..._` names keep their names and keep working in every Process, in the database log, in the API and over MQTT.
-- If you want the new prefix on an old variable, change it yourself with **✏ Change name** in its Properties (see [Name Change and hidden keys](80-name-change-and-hidden-keys)). Processes follow the new name.
+Everything is brought up to the new standard; the old words are not kept (Skynet Rule 15.2). The first time the Brain starts after this update:
+
+- Every vKonstant becomes a gKonstant and every vAPI a gAPI, in every Schema.
+- Every gKonstant or gAPI whose name starts `vK..._` or `vA..._` is renamed `gK..._` or `gA..._` (`vKV_Strike` becomes `gKV_Strike`). If that name is taken, `_2` is added.
+- It is the same item (its hidden key stays), so everything that uses it follows: **every Process**, other Devices and Widgets that point to it, saved values, the BeerXML mapping and the brew database history.
+- The old files are kept as `.before-gnames.bak` copies, and the list of what changed shows on the Processes page.
+- A Schema file from before this update is changed the same way when it is loaded.
 - The sample Schemas and demo Processes that come with Skynet already use the new names.
 
 ## The API
 
-The web API address is now **`/api/gapi`** (see [The API](11-api)). The older addresses `/api/vapi` and `/api/globals` still work and do the same.
+The web API address is now **`/api/gapi`** (see [The API](11-api)). `/api/vapi` is gone: a program that used it must change to `/api/gapi`. Programs that use a renamed variable's name (Node-RED, Home Assistant over MQTT) must use the new name too.
 
 ## Importing
 

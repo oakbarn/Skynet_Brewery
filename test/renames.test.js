@@ -23,14 +23,14 @@ assert.deepEqual(el, { name: 'Copy', displayName: 'HLT_Temp', follow: 'MB_OW1_Tm
 // ---- the scripts folder: changed Processes listed, backup kept, running ones flagged; the value stays with the renamed one
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'renames'));
 const cfg = path.join(d, 'c.json');
-fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Strike', type: 'vKonstant', kind: 'value' }, { name: 'Other', type: 'vKonstant', kind: 'value' }] }));
+fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Strike', type: 'gKonstant', kind: 'value' }, { name: 'Other', type: 'gKonstant', kind: 'value' }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
 store.rt.get('Strike').value = 165;
 eng.write('Uses_It', 'Strike = 170\nOther = Strike\n');
 eng.write('Does_Not', 'Other = 1\n');
 const r = renameMap({ Strike: 'Strike_Temp' });
-store.saveLayout({ elements: [{ name: 'Strike_Temp', type: 'vKonstant', kind: 'value' }, { name: 'Other', type: 'vKonstant', kind: 'value' }], renames: r });
+store.saveLayout({ elements: [{ name: 'Strike_Temp', type: 'gKonstant', kind: 'value' }, { name: 'Other', type: 'gKonstant', kind: 'value' }], renames: r });
 assert.equal(store.rt.get('Strike_Temp').value, 165, 'the value stays with the renamed one');
 const changed = renameInProcesses(eng, r);
 assert.deepEqual(changed, [{ name: 'Uses_It', lines: 2, running: false }]);
