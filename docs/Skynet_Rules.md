@@ -350,8 +350,10 @@ pop-up (2026-10-20, PR #44). A **Manual Valve Widget** waits for a click on it o
 an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their only settings are **.x, .y, .width and
 .height**, plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
 Width and Height are greyed out until it is switched off). No label, Type or Connection Standard; turning and
-flipping stay on the Edit layout bar's turn buttons (Rule 5.5). **Pipe fittings have no Clone.** Fittings that
-do more than join pipes (valves, check valves, flow meters, a tee with a thermowell) keep their settings.
+flipping stay on the Edit layout bar's turn buttons (Rule 5.5). **Pipe fittings have no Clone.** A **check valve
+is a pipe fitting too**: it is always one way, and its orientation shows the way. Valves and flow meters in a fitting
+are **Devices**; a tee with a thermowell, or a thermowell on a vessel IP, is a kind of **Temperature Probe**
+(Fritz, 2026-10-28).
 (2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
 
 5.15 **The Manual Valve is a special Widget class**: something of a pipe fitting (Autosize to pipe, .x .y .width
@@ -677,3 +679,5 @@ and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Added Rules 5.14 (pipe fittings: only .x .y .width .height and Autosize to pipe, no Clone) and 5.15
   (Manual Valve Widget: only a click changes .state; a Process asks for it by hand); Rule 5.13 covers both kinds of
   manual valve. Help 87; next free Help number 88. (thread "Simplify pipe fittings and Manual Valves")
+- 2026-10-28: Rule 5.14: a check valve is a plain pipe fitting; valves and flow meters are Devices; a tee with a
+  thermowell (or a thermowell on a vessel IP) is a kind of Temperature Probe. (thread "Simplify pipe fittings and Manual Valves")

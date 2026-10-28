@@ -572,7 +572,7 @@ const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point
 // settings but where they are (.x .y) and how big (.width .height), plus Autosize to pipe: on (the default) a fitting takes
 // the size of the pipes joined to its IPs, and Width and Height are greyed out until it is switched off. Turning and flipping
 // stay on the Edit layout bar's turn buttons. Pipe fittings have no Clone. A Manual Valve is not one: it is its own Widget.
-const PLAIN_FIT_KINDS = ['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap'];
+const PLAIN_FIT_KINDS = ['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check'];      // a check valve too: always one way, its orientation shows which (Fritz, 2026-10-28)
 const plainFittings = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (PLAIN_FIT_KINDS.includes(f.kind) && !f.thermowell));
 const isPlainUnit = g => isUnit(g) && plainFittings(g.fittings);
 const isIpFit = g => isFitting(g) && g.fitting !== 'manualValve';

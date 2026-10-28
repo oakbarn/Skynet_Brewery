@@ -48,7 +48,7 @@ Name prefixes Skynet gives: IP, Straight, Tee, Elbow, Elbow45, Cross, ManualValv
 A Manual valve Widget can be picked as the valve in a Bundled Fitting.
 The table above is now for an **IP point** only. Pipe fittings and the Manual Valve have their own settings (below, 2026-10-28).
 
-### Pipe fitting Widgets (tee, 90° and 45° elbow, cross, straight piece, coupling, cap; and the Skynet Tee, Instrument_Tee, Elbow_90, Elbow_45, U_Bend, Reducer, End_Cap)
+### Pipe fitting Widgets (tee, 90° and 45° elbow, cross, straight piece, coupling, cap; and the Skynet Tee, Instrument_Tee, Elbow_90, Elbow_45, U_Bend, Reducer, End_Cap, Check_Valve)
 A tee is only a tee: no Type, label or Connection Standard (Rule 5.14, Help 87). No Clone.
 
 | Setting | Notes |
@@ -59,7 +59,7 @@ A tee is only a tee: no Type, label or Connection Standard (Rule 5.14, Help 87).
 | Width, Height | Only when Autosize to pipe is off |
 | Lock position | |
 
-Turning and flipping: the turn buttons on the Edit layout bar.
+Turning and flipping: the turn buttons on the Edit layout bar. A check valve is one way; its orientation (arrow) shows the way. Valves and flow meters in a fitting are Devices; a tee with a thermowell (or a thermowell on a vessel IP) is a kind of Temperature Probe (Fritz, 2026-10-28).
 
 ### Manual Valve Widget (`kind: ip`, `fitting: manualValve`)
 A pipe fitting turned by hand and a pseudo Device (Rule 5.15, Help 87). Name ManualValve_1, ManualValve_2 ...
@@ -222,7 +222,7 @@ One unit: every opening has a two-way IP built in, nothing to set for the IPs. (
 |---|---|
 | Name, Label, Connection Standard | |
 | Valve / Flow meter / Probe pickers | Only the ones its fittings use |
-| (pipe fittings) | A Skynet Fitting that is only a tee, elbow, U, reducer or End Cap has just Name, Autosize to pipe, X, Y, Width, Height and Lock position (see Pipe fitting Widgets) |
+| (pipe fittings) | A Skynet Fitting that is only a tee, elbow, U, reducer, check valve or End Cap has just Name, Autosize to pipe, X, Y, Width, Height and Lock position (see Pipe fitting Widgets) |
 | Flip Horizontal, Flip Vertical, Rotate | Rotate in 45° steps |
 | Bundled | Same rule as the Skynet vessel |
 | Label look, Tab, X, Y, Width, Height, Lock position | When it sits on a vessel port it moves with the vessel instead |
