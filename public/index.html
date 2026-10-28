@@ -54,18 +54,29 @@
       <div class="menuWrap"><button id="menuBtn" class="menuBtn" title="Menu: Edit layout, profiles, recipes" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 4h14M3 8h14M3 12h14M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Menu</button><div id="menuList" class="menuList hidden" role="menu"></div></div>
     </div>
     <div id="editBar" class="bar edit hidden">
-      <button id="addBox" class="primary" title="Add a Valve, Pump, Element, Probe or Interface: one click each. It goes on the 🔨 Build Tab.">➕ Add</button>
-      <select id="addType" title="Every kind of Device and Widget there is. Pick one, then press Add element. It is not tied to any Device: it only says what Add element makes next."></select>
-      <button id="addEl">Add element</button>
-      <button id="cloneDev" title="Show a Device that is on another Tab on this Tab too. The Clone is the same Device: turning it on turns the parent and every Clone on.">⧉ Clone Device</button>
-      <button id="addImg">Add graphic</button>
-      <button id="addText">Add text</button>
-      <select id="addVesselType" title="Vessel and equipment widgets: heated vessels, mash tun, cooling coil, plate chiller"></select>
-      <button id="addVessel">Add equipment</button>
-      <select id="addIpType" title="IP widget type: a plain point, or a pipe fitting"></select>
-      <button id="addIp" title="IP (Initial Point) widget: marks where a flow starts or ends: a pump outlet, vessel port or drain. Pipes can start and end on IPs.">Add IP</button>
+      <div class="editRow">
+      <select id="devKind" title="Select Device Type: the major kinds of Device (tied to a board pin). Add Device then lists only that kind"></select>
+      <select id="devAdd" class="typePick" title="Add Device: pick one and it is made on the 🔨 Build Tab. Lists the kind picked in Select Device Type, or every Device"></select>
+      <select class="typePick" data-dev="pumps" data-head="Pumps" title="Pumps: a shortcut, the same as Select Device Type > Pumps, then Add Device"></select>
+      <select class="typePick" data-dev="valves" data-head="Valves" title="Valves: a shortcut, the same as Select Device Type > Valves, then Add Device"></select>
+      <select class="typePick" data-dev="probe" data-head="Probe" title="Temperature probes: a shortcut, the same as Select Device Type > Probe, then Add Device"></select>
+      <select class="typePick" data-dev="heat" data-head="Heating Element" title="Heating elements: a shortcut, the same as Select Device Type > Heating Element, then Add Device"></select>
+      <select class="typePick" data-dev="pwm" data-head="PWM" title="PWM and analog outputs: a shortcut, the same as Select Device Type > PWM / Analog out, then Add Device"></select>
+      <select id="cloneDev" class="typePick" title="Show a Device that is on another Tab on this Tab too. The Clone is the same Device: turning it on turns the parent and every Clone on."></select>
+      <span class="editGap"></span>
+      <select id="wgtKind" title="Select Widget Type: the major kinds of Widget (app only, no board pin). Add Widget then lists only that kind"></select>
+      <select id="wgtAdd" class="typePick" title="Add Widget: pick one and it is made on the 🔨 Build Tab. Lists the kind picked in Select Widget Type, or every Widget"></select>
+      <button id="addImg" title="A Picture on the 🔨 Build Tab">Picture <span class="plus">➕</span></button>
+      <button id="addText" title="A Text on the 🔨 Build Tab">Text <span class="plus">➕</span></button>
+      <select id="vesselPick" class="typePick" title="Add a Vessel (Kettle, HLT, MLT ...): a Widget you add everything to, or a ready-made Integrated one"></select>
+      <button id="addManualValve" title="Manual valve Widget: no board pin, turned by hand. Tap it on the Tab to show open or closed">Manual Valve <span class="plus">➕</span></button>
+      <span class="spacer"></span>
+      <select id="addVesselType" class="typePick" title="Equipment Widgets: chillers, coils, trub filter, RIMS tube, pipe fittings"></select>
+      </div>
+      <div class="editRow">
       <button id="drawPipe" title="Click points on the tab. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
       <button id="drawHose" title="A hose bends: click points for it to curve through. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling (an IP).">Draw hose</button>
+      <select id="addIpType" class="typePick" title="Fittings and IPs: an IP point, a tee, elbows, a cross, a coupling or a cap. Pick one and it is made on the 🔨 Build Tab"></select>
       <button id="finishPipe" class="primary hidden">Finish pipe</button>
       <span id="turnBar" class="turnBar hidden" title="Turn or flip the picked fitting or vessel. Its IPs and what is joined to it follow.">
         <button id="turnFlipH" class="flip" title="Flip Horizontal (mirror left and right)">⇆ Flip H</button>
@@ -83,11 +94,14 @@
       <button id="buildTab" title="A clean Tab to build something new on (Devices, Widgets, vessels, fittings). It only shows while you build. Save Build ... puts it on a Tab or saves it as a Template.">🔨 Build Tab</button>
       <button id="previewBuild" class="hidden" title="See the Build Tab the way it looks on Brew Day, without the grid, outlines and handles. Press again to go back to building.">👁 Preview</button>
       <button id="saveBuild" class="primary hidden" title="Put what is on the Build Tab on a Tab, or save it as a Template">💾 Save Build ...</button>
-      <span class="spacer"></span>
+      </div>
+      <div class="editRow">
       <span id="editHint" class="muted"></span>
+      <span class="spacer"></span>
       <label class="toggle" title="On: Save also gives this Schema a new version, <Schema name>_yyyymmdd_hh_mm, and keeps a copy under that file name (config/schemas/versions)"><span class="sw"><input type="checkbox" id="updateVersion"><span class="swk"></span></span> Update Version</label>
       <button id="saveLayout" class="primary">Save layout</button>
       <button id="cancelLayout" title="Leave Edit layout. If anything changed you can still pick Save or Exit without Saving.">Exit</button>
+      </div>
     </div>
     <div id="wsScroll"><div id="wsSizer"><div id="ws"><svg id="pipes"></svg></div></div></div>
     <div id="menuPane" class="menuPane hidden"></div>
@@ -178,7 +192,7 @@
 
   <!-- ===== Variables ===== -->
   <section id="view-globals" class="view">
-    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Add Device / Widget</em>. Every kind below can be read and changed by every process.</p>
+    <p class="muted">Add new variables in <em>Tabs &gt; Edit layout &gt; Select Widget Type &gt; vKonstant / vAPI variables</em>. Every kind below can be read and changed by every process.</p>
     <h3 id="sec-vapi">vAPI <span class="muted">(processes, API <code>/api/vapi</code> and database)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database trigger</th><th></th></tr></thead><tbody id="vapiBody"></tbody></table>
     <h3 id="sec-vkonstant">vKonstant <span class="muted">(processes and screen only: no API, no database)</span></h3>

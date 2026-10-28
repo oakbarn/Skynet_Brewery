@@ -1445,7 +1445,7 @@ function setEditing(on) {
   $('#barEdit').classList.toggle('on', on); $('#barEdit').setAttribute('aria-pressed', String(on));
   $('#barEdit').title = on ? 'Leave Edit layout (asks to Save if something changed)' : 'Edit layout (admins): move, add and change things on the Tabs. Press again to leave it';
   const lockedEq = S.profiles?.find(p => p.id === S.config.workspaces.find(w => w.name === wsName)?.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, drag a grab point (corners and side middles) to resize, double-click (or hold a finger) for properties. ➕ Add makes Valves, Pumps, Elements, Probes and Interfaces. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).';
+  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, drag a grab point (corners and side middles) to resize, double-click (or hold a finger) for properties. Add Device and Add Widget (or the Pumps, Valves, Probe, Heating Element and PWM shortcuts) make new things on the 🔨 Build Tab. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).';
   renderTabs(); renderWs();
 }
 
@@ -1912,19 +1912,8 @@ const ADD_MENU = [
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
 ];
-function fillAddType() {
-  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
-  if (!ADD_MENU.some(([g]) => g.startsWith('vKonstant'))) ADD_MENU.push(vars('vKonstant', S.vkKinds), vars('vAPI', S.vapiKinds));
-  $('#addType').innerHTML = '';
-  $('#addType').append(...ADD_MENU.map(([group, items], gi) => h('optgroup', { label: group }, ...items.map((it, ii) => h('option', { value: gi + ':' + ii }, it[0])))));
-}
-$('#addEl').onclick = guard(() => {
-  const [gi, ii] = $('#addType').value.split(':').map(Number);
-  const [, pick, prefix, extra] = ADD_MENU[gi][1][ii];
-  return addThing(pick, prefix, extra);
-});
-// make one new Device or Widget of the Add element list (or of the ➕ Add box) on the Build Tab and open its Properties
-async function addThing(pick, prefix, extra) {
+// make one new Device or Widget of a type list on the Edit layout bar on the Build Tab and open its Properties
+async function addThing(pick, prefix, extra, what) {      // what: the list line it was picked in (the Add Device box's title)
   toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   if (pick === 'integratedDevice') return newIntegratedDevice(extra.template);
   if (pick === 'thermowell') return newThermowell(extra.length);
@@ -1946,109 +1935,106 @@ async function addThing(pick, prefix, extra) {
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
-  if (isDevice(e) && !(await newDeviceDialog(e, prefix))) return;
+  if (isDevice(e)) {      // Fritz, 2026-10-28: a new Device is 150 x 150 unless its size is changed in the Add Device box
+    e.w = e.h = 150;
+    if (!(await newDeviceDialog(e, prefix, what))) return;
+  }
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
+  centerNew(e);
   stackNew(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
-// ➕ Add on the Edit layout bar (Fritz, 2026-10-27): the things added most, one click each, sorted the way a brewer thinks
-// of them: Valves, Pumps, Elements, Probes and Interfaces. Each goes on the 🔨 Build Tab first, its Properties open. Probe opens
-// a second box of its own (1-Wire, 10K NTC, RTD, Thermowell). The long Add element list keeps every other kind.
-const ADD_BOX = [
-  ['🚰 Valves', 'A Device is switched by a board pin. A Widget has no pin: you turn it by hand and tap it on the Tab to show open or closed.', [
-    ['Motorized valve (Device: a board pin opens and closes it)', 'valve', 'Valve'],
-    ['Proportional valve 0-100 % (Device: analog output)', 'propValve', 'PropValve'],
-    ['Manual valve (Widget: no pin, turned by hand)', 'ip:manualValve'],
-  ]],
-  ['⚙ Pumps', 'Pumps have an inlet and an outlet IP for pipes.', [
-    ['Pump, on / off (Device: relay or SSR on a board pin)', 'pump', 'Pump'],
-    ['Pump speed 0-100 % (Device: PWM output, e.g. a MOSFET module; set beside its Pump)', 'pwmOut', 'PWM', { units: '%' }],
-  ]],
-  ['🔥 Elements', 'Electric heating elements, and the Skynet items with an element built in.', [
-    ['Heating element, on / off (Device: relay, SSR or contactor)', 'element', 'DO'],
-    ['Heating element power 0-100 % (Device: PWM output)', 'pwmOut', 'PWM', { units: '%' }],
-    ['Holds a target temperature (PID)', 'pid', 'PID'],
-    ['On / off around a target (Hysteresis)', 'hysteresis', 'Hyst'],
-    ['On for a % of each cycle (Duty cycle)', 'dutyCycle', 'Duty'],
-    ['RIMS tube (Skynet_Integrated_Device: element and probe built in)', 'integratedDevice', 'RIMS', { template: 'RIMS_Tube' }],
-    ['Electric kettle, basic (Skynet_Integrated_Device: element and thermowell probe built in)', 'integratedDevice', 'Kettle', { template: 'Integrated_Electric_Kettle_Basic' }],
-  ]],
+// ---- The Edit layout bar's type lists (Fritz, 2026-10-28). Devices on the left, Widgets on the right:
+// Select Device Type (the major types) -> Add Device (only that type's Devices; every Device when no type is picked). Pumps,
+// Valves, Probe, Heating Element and PWM are shortcuts: one click shows only that type's list, the same as picking the type and
+// then Add Device. Picking a row makes it on the 🔨 Build Tab (Rule 4.1). A Pump, Valve or on / off heating element is also
+// On/Off, so it is in that list too. The Widgets side works the same way.
+const am = label => ADD_MENU.flatMap(([, items]) => items).find(it => it[0].startsWith(label));
+const amGroup = start => ADD_MENU.find(([g]) => g.startsWith(start))?.[1] || [];
+const PUMP = ['Pump, on / off (relay or SSR)', 'pump', 'Pump'];
+const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: 'Images/Skynet/Pumps/Pump_Sump_On.svg', imageOff: 'Images/Skynet/Pumps/Pump_Sump_Off.svg' }];
+const VALVE = ['Motorized valve, open / closed (relay)', 'valve', 'Valve'];
+const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
+const DEV_TYPES = () => [
+  ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, VALVE, ELEMENT]],
+  ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
+    ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
+  ['valves', 'Valves', [VALVE, am('Proportional valve')]],
+  ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
+    am('RIMS tube'), am('Electric kettle, basic')]],
+  ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
+  ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
+  ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => r[1] === 'thermowell')]],
+  ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
+  ['motors', 'Motors', amGroup('Devices: motors')],
+  ['weight', 'Weight', amGroup('Devices: weight')],
+].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], () => addThing(r[1], r[2], r[3], r[0])])]);
+const WGT_TYPES = () => [
+  ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
+  ['controls', 'On-screen controls', amGroup('Widgets').filter(r => !['picture', 'label', 'manual'].includes(r[1])).map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
+  ['vessels', 'Vessels', VESSEL_ROWS],
+  ['equipment', 'Equipment (chillers, coils, filters)', EQUIP_ROWS()],
+  ['fittings', 'Fittings and IPs (elbows, tees ...)', FIT_ROWS()],
+  ...['vKonstant', 'vAPI'].map(t => [t, `${t} variables`, amGroup(t).map(r => [r[0], () => addThing(r[1], r[2], r[3])])]),
 ];
-const PROBE_BOX = [
-  ['1-Wire', 'Many probes share one pin. Each probe is its own Device (virtual port 700-799).', [
-    ['DS18B20 (waterproof 1-Wire probe)', 'temperature', 'Temp', { sensor: 'ds18b20' }]]],
-  ['10K NTC', 'A thermistor on an analog pin. Pick the one that matches your probe; BruControl and BCS probes are Beta 3977.', [
-    ['10K NTC, Beta 3950', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3950, series: 10000 }],
-    ['10K NTC, Beta 3977 (BCS-462 / BruControl type)', 'temperature', 'Temp', { sensor: 'ntc', r0: 10000, beta: 3977, series: 10000 }]]],
-  ['RTD', 'A PT100 or PT1000 on a MAX31865 board (SPI pins 50-52 and a CS pin, see Rule 6.9).', [
-    ['PT100 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt100', wires: 3 }],
-    ['PT1000 RTD (MAX31865 board)', 'temperature', 'Temp', { sensor: 'pt1000', wires: 3 }]]],
-  ['Thermowell (a Temperature Device built in)', 'A Skynet TC 1.5 thermowell with its probe already in it. The next box asks which kind of probe is in it.', [
-    ['Thermowell, Short', 'thermowell', 'Temp', { length: 'Short' }],
-    ['Thermowell, Medium', 'thermowell', 'Temp', { length: 'Medium' }],
-    ['Thermowell, Long', 'thermowell', 'Temp', { length: 'Long' }]]],
-];
-// a box of groups of buttons; one click picks one. Resolves to the picked row, or undefined for Cancel.
-function pickAdd(title, groups, more = []) {
-  return new Promise(res => {
-    const d = h('dialog', { class: 'tplMini addBox' });
-    const close = v => { d.close(); d.remove(); res(v); };
-    d.append(h('h3', {}, title, ' ', helpIcon(['build-tab-add-button'], () => close(undefined))));
-    for (const [head, note, rows] of groups) d.append(h('b', {}, head), h('p', { class: 'muted' }, note),
-      h('div', { class: 'addBtns' }, ...rows.map(r => h('button', { type: 'button', onclick: () => close(r) }, r[0]))));
-    for (const [head, note, label, val] of more) d.append(h('b', {}, head), h('p', { class: 'muted' }, note),
-      h('div', { class: 'addBtns' }, h('button', { type: 'button', class: 'primary', onclick: () => close(val) }, label)));
-    d.append(h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => close(undefined) }, '✖ Cancel')));
-    d.oncancel = ev => { ev.preventDefault(); close(undefined); };
-    document.body.append(d); d.showModal();
-  });
+const VESSEL_ROWS = [['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
+  ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
+const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel').map(([k, t]) => [t, () => addEquipment(k)]);
+const FIT_ROWS = () => Object.entries(FITTINGS).map(([k, t]) => [t, () => addIpFit(k)]);
+// a dropdown whose first line is its name; picking a row runs it and the dropdown shows its name again
+function fillPick(sel, head, groups) {
+  const opt = (r, i) => h('option', { value: i }, r[0]);
+  const runs = []; const add = rows => rows.map(r => opt(r, runs.push(r[1]) - 1));
+  sel.replaceChildren(h('option', { value: '' }, head), ...(groups.length === 1 && !groups[0][0] ? add(groups[0][1]) : groups.map(([g, rows]) => h('optgroup', { label: g }, ...add(rows)))));
+  sel._runs = runs;
 }
-async function addBox() {
-  const r = await pickAdd('➕ Add (it goes on the 🔨 Build Tab)', ADD_BOX, [
-    ['🌡 Probe', 'Temperature probes: 1-Wire, 10K NTC, RTD, or a Thermowell with its probe built in.', '🌡 Probe ...', 'probe'],
-    ['🔌 Interface', 'A board (Mega, ESP32, Pi ...). Devices sit on its pins, so add the Interface first.', '🔌 Add an Interface ...', 'iface']]);
-  if (!r) return;
-  if (r === 'iface') return addInterfaceFromBuild();
-  const row = r === 'probe' ? await pickAdd('🌡 Probe: pick its kind', PROBE_BOX) : r;
-  if (!row) return;
-  if (row[1] === 'ip:manualValve') return addIpFit('manualValve');
-  return addThing(row[1], row[2], row[3]);
+function pickRun(sel) {
+  const f = sel.value === '' ? null : sel._runs?.[+sel.value]; sel.value = '';
+  if (f) guard(f)();
 }
-// the Add Interface pop-up when the panel has one; otherwise the Devices page, at Add Interface (the Edit layout draft is kept)
-async function addInterfaceFromBuild() {
-  if (typeof addInterfaceDialog === 'function') return addInterfaceDialog();      // made by the Interfaces work; until then, the Devices page
-  setView('devices'); const el = $('#sec-addInterface'); if (el) showPart(el);
-  toast('Add the Interface here, then go back to Tabs: your Edit layout is still open.');
+function fillAddType() {
+  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
+  if (!ADD_MENU.some(([g]) => g.startsWith('vKonstant'))) ADD_MENU.push(vars('vKonstant', S.vkKinds), vars('vAPI', S.vapiKinds));
+  const dev = DEV_TYPES(), wgt = WGT_TYPES();
+  const types = (sel, head, list) => { const v = sel.value; sel.replaceChildren(h('option', { value: '' }, head), ...list.map(([k, t]) => h('option', { value: k }, t))); sel.value = v; };
+  types($('#devKind'), 'Select Device Type', dev); types($('#wgtKind'), 'Select Widget Type', wgt);
+  const adds = (sel, head, list, k) => fillPick(sel, head, k ? [['', list.find(x => x[0] === k)?.[2] || []]] : list.map(([, t, rows]) => [t, rows]));
+  adds($('#devAdd'), 'Add Device', dev, $('#devKind').value); adds($('#wgtAdd'), 'Add Widget', wgt, $('#wgtKind').value);
+  for (const s of $$('#editBar select[data-dev]')) fillPick(s, s.dataset.head, [['', dev.find(x => x[0] === s.dataset.dev)[2]]]);
+  fillPick($('#vesselPick'), 'Vessel', [['', VESSEL_ROWS]]);
+  fillPick($('#addVesselType'), 'Add equipment ➕', [['', EQUIP_ROWS()]]);
+  fillPick($('#addIpType'), 'Elbows, Tees …', [['', FIT_ROWS()]]);
+  fillClones();
 }
-$('#addBox').onclick = guard(addBox);
+$('#devKind').onchange = $('#wgtKind').onchange = () => fillAddType();
+for (const s of $$('#editBar select.typePick')) s.addEventListener('change', () => pickRun(s));
+$('#addManualValve').onclick = () => addIpFit('manualValve');
 // ⧉ Clone Device (Fritz, 2026-10-27): the only way to make a Clone. It works on any Tab, the Build Tab too. The list holds the
-// Devices already placed on a Tab (not the ones on this Tab), grouped by type: Pumps, Valves ... The Clone goes on this Tab
-// with a name Skynet makes; its Visible, X and Y are its own.
+// Devices already placed on a Tab (not the ones on this Tab), grouped by type: Pumps, Valves ... Picking one puts its Clone on
+// this Tab with a name Skynet makes; its Visible, X and Y are its own. The list is filled each time it is opened.
 const CLONE_GROUPS = [['Pumps', e => e.subtype === 'pump'], ['Valves', e => e.subtype === 'valve' || e.subtype === 'propValve'],
   ['Heat (PID, Hysteresis, Duty Cycle)', e => ['pid', 'hysteresis', 'dutyCycle'].includes(e.type)], ['Temperature probes', e => e.type === 'temperature'],
   ['Other outputs', e => ['digitalOut', 'pwmOut', 'analogOut'].includes(e.type)], ['Motors', e => e.type === 'stepper'],
   ['Inputs and sensors', e => ['digitalIn', 'analogIn', 'flowMeter', 'scale'].includes(e.type)], ['Other Devices', () => true]];
-$('#cloneDev').onclick = guard(async () => {
-  const w = curWs(); if (!w) return;
+function fillClones() {
+  const sel = $('#cloneDev'), w = curWs(); if (!w || !draft) return fillPick(sel, '⧉ Clone Device', []);
   const here = new Set([...draft.elements.filter(e => e.workspace === w.name).map(e => e.name), ...draft.graphics.filter(g => isClone(g) && g.workspace === w.name).map(g => g.of)]);
-  const list = draft.elements.filter(e => isDevice(e) && realTab(e.workspace) && !here.has(e.name)).sort((a, b) => a.name.localeCompare(b.name));
-  if (!list.length) return toast('There is no Device on another Tab to clone here.', true);
-  const left = new Set(list), groups = [];
+  const left = new Set(draft.elements.filter(e => isDevice(e) && realTab(e.workspace) && !here.has(e.name)).sort((a, b) => a.name.localeCompare(b.name))), groups = [];
   for (const [group, fits] of CLONE_GROUPS) {
     const items = [...left].filter(fits); items.forEach(e => left.delete(e));
-    if (items.length) groups.push({ group, items: items.map(e => [e.name, `${e.name}   (Tab ${e.workspace})`]) });
+    if (items.length) groups.push([group, items.map(e => [`${e.name}   (Tab ${e.workspace})`, () => cloneHere(e.name)])]);
   }
-  const work = { of: groups[0].items[0][0] };
-  const r = await dialog('Clone Device', [['_c', `A Clone shows a Device from another Tab on this Tab (${w.name}) too. It is the same Device: tapping it is tapping the Device, and it shows what the Device shows. Only its Visible, X and Y are its own, and its name is made by Skynet. A Clone is not used in Processes.`, 'note'],
-    ['of', 'Device to clone (Devices already placed on a Tab)', 'sel', groups]], work, false, ['cloned-devices', 'make-a-clone']);
-  if (r !== 'ok') return;
-  readFields(work);
-  const p = draft.elements.find(e => e.name === work.of); if (!p) return;
+  fillPick(sel, '⧉ Clone Device', groups);
+  if (!groups.length) sel.append(h('option', { value: 'none', disabled: true }, '(no Device on another Tab to clone here)'));
+}
+function cloneHere(name) {
+  const w = curWs(), p = draft.elements.find(e => e.name === name); if (!w || !p) return;
   const g = makeClone(p, w.name);
   sel = { kind: 'gfx', id: g.id }; renderWs();
   toast(`${g.name} is a Clone of ${p.name}. Drag it into place.`);
-});
+}
+for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventListener(ev, () => { if (!$('#cloneDev').value) fillClones(); });
 // Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
 // 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
@@ -2086,24 +2072,34 @@ const OWN_NAME_WARNING = (name, sug) => `You typed your own Device name, "${name
   'A plain word as a name (for example "Pump") becomes a reserved word in your Processes, and it can cause problems in the code: a Process line can no longer tell the Device from other things called Pump.\n\n' +
   'The Device name is only used in Processes. It is never shown on a Tab (the Label is), so a unique, meaningful name like the Suggested Name is the better choice.\n\n' +
   `OK = keep "${name}".  Cancel = go back and change it.`;
-async function newDeviceDialog(e, hint) {
+async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
   const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
   const port = isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
-  const fields = [['device', '1. Interface (board)', 'dev', 'addnew'],
-    ['typeCode', '2. Device Type', 'sel', typeCodes(e).map(([c, l]) => [c, `${c}   ${l}`])],
-    [port[0], '3. ' + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
-    ['label', 'Label (shown on the tab, e.g. Fly Sparge; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'],
-    ['name', 'Suggested Name (you may type your own)', 'text']];
-  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]');
-  for (const b of oks) b.textContent = 'Create';
+  // Fritz, 2026-10-28: the Add Device box asks 1 Interface, 2 Available Pin, 3 Suggested Name, 4 Label (or Show label off), then
+  // its size (150 x 150 to start). The Device Type comes from the list it was picked in; it is only asked when that kind has
+  // more than one (Rule 4.2's order otherwise). ➕ Add Device works once the Label is typed or Show label is off; then the rest
+  // of its Properties open.
+  const codes = typeCodes(e), n = (i => () => ++i + '. ')(0);
+  const fields = [['device', n() + 'Interface (board)', 'dev', 'addnew'],
+    ...(codes.length > 1 ? [['typeCode', n() + 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
+    [port[0], n() + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
+    ['name', n() + 'Suggested Name (you may type your own)', 'text'],
+    ['label', n() + 'Label (shown on the tab, e.g. Fly Sparge)', 'text'], ['hideName', 'Show label (switch it off for no Label)', 'show'],
+    ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num']];
+  work.w = e.w; work.h = e.h;
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
+  for (const b of oks) b.textContent = '➕ Add Device';
+  for (const b of cancels) b.textContent = '✖ Cancel';
+  const gate = () => { const w = { ...work }; try { readFields(w, body); } catch { } const ok = !!String(w.label || '').trim() || !!w.hideName; for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : 'Type a Label first, or switch Show label off'; } };
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
-      const shown = dialog('New Device', fields, work, false);
+      const shown = dialog(`Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
+      gate();
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
       // the Port list: only the free pins on this Interface that fit this Device Type, best first (Fritz, 2026-10-23)
@@ -2111,6 +2107,7 @@ async function newDeviceDialog(e, hint) {
       const fillFree = w => free.replaceChildren(...(w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : []).map(p => { const t = pinLabel(p, boardOfDevice(w, S.config.devices)); return h('option', { value: p, label: t }, t); }));
       fillFree(work);
       body.oninput = body.onchange = ev => {
+        gate();
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
         const w = { ...work }; try { readFields(w, body); } catch { }
@@ -2133,6 +2130,8 @@ async function newDeviceDialog(e, hint) {
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        if (+work.w > 0) e.w = +work.w;
+        if (+work.h > 0) e.h = +work.h;
         e.name = name;
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
@@ -2142,7 +2141,7 @@ async function newDeviceDialog(e, hint) {
         return true;
       } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
     }
-  } finally { body.oninput = body.onchange = null; for (const b of oks) b.textContent = 'Save'; }
+  } finally { body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; } for (const b of cancels) b.textContent = was[1]; }
 }
 // ---- Thermowell (Fritz, 2026-10-23): a Temperature Device drawn as a TC 1.5 thermowell, Short, Medium or Long. After picking it
 // (step 2) a pop-up asks the type of Temperature Probe in it (2a), then the New Device box goes on as for any Device.
@@ -2285,6 +2284,13 @@ async function newIntegratedDevice(tname) {
 }
 
 // Fritz, 2026-10-23: as in BruControl, several new things made at the same spot stack down and to the right instead of hiding each other
+// Fritz, 2026-10-28: a new Device goes in the middle of the 🔨 Build Tab, unless ☰ Menu > Default tab sets where new things go (X, Y)
+function centerNew(e) {
+  const d = S.config.brewDefaults || {}, b = curWs();
+  if ((d.textX ?? '') !== '' || (d.textY ?? '') !== '' || !b?.build) return;
+  e.x = Math.max(0, Math.round(((+b.width || 1600) - e.w) / 2));
+  e.y = Math.max(0, Math.round(((+b.height || 900) - e.h) / 2));
+}
 function stackNew(e) {
   const at = (x, y) => draft.elements.some(o => o.workspace === e.workspace && o.x === x && o.y === y);
   for (let n = 0; n < 50 && at(e.x, e.y); n++) { e.x += 20; e.y += 20; }
@@ -2320,7 +2326,8 @@ const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'le
 // Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
 $('#addImg').onclick = () => { toBuild(); const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
 // a new Text starts with the Default tab's size, place, Visible and Word wrap (copied now; colors and alignment follow the Default)
-$('#addText').onclick = () => {
+$('#addText').onclick = () => addText();
+function addText() {
   toBuild();
   const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }), ...(D.wrap ? {} : { wrap: false }) };
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
@@ -2415,8 +2422,6 @@ $('#lockAll').onclick = () => lockTab(true);
 $('#unlockAll').onclick = () => lockTab(false);
 $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run straight across or up and down. Esc cancels.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
-$('#addIpType').append(...Object.entries(FITTINGS).map(([k, t]) => h('option', { value: k }, t)));
-$('#addVesselType').append(...Object.entries(VESSELS).map(([k, t]) => h('option', { value: k }, t)));
 // a new equipment widget (pipe fittings too): made on the Build Tab, then Save Build ... puts it on a Tab
 function addVesselWidget(c) {
   const C = EQ[c];
@@ -2428,11 +2433,12 @@ function addVesselWidget(c) {
     name: C.title + ' ' + i, vtype: C.types[0], label: C.types[0], image: C.image, labelAlign: 'above', labelSize: 16, labelVisible: true, ports: eqDefaultPorts(c), isNew: true };
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderTabs(); renderWs(); editItem('gfx', g.id);
 }
-$('#addVessel').onclick = () => {
-  if ($('#addVesselType').value === 'vessel') return guard(addVessel)();
-  if (EQ[$('#addVesselType').value]) return addVesselWidget($('#addVesselType').value);
+// Add equipment ➕ (a chiller, coil, filter, RIMS tube, pipe fitting ...): its Widget on the Build Tab
+function addEquipment(t) {
+  if (t === 'vessel') return addVessel();
+  if (EQ[t]) return addVesselWidget(t);
   toBuild();
-  const t = $('#addVesselType').value, base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' }[t];
+  const base = { electric: 'Electric vessel', gas: 'Gas vessel', mashTun: 'Mash tun', coil: 'Cooling coil', plateChiller: 'Plate chiller' }[t];
   let i = 1; while (draft.graphics.some(g => g.kind === 'vessel' && g.label === base + ' ' + i)) i++;
   const size = { coil: [160, 160], plateChiller: [90, 160] }[t] || [200, 260];
   const g = { id: newId(), kind: 'vessel', vesselType: t, workspace: wsName, x: 60, y: 60, w: size[0], h: size[1], image: '', label: base + ' ' + i, labelAlign: 'top', labelColor: '#ffffff', labelSize: 16, labelVisible: true };
@@ -2444,9 +2450,9 @@ $('#addVessel').onclick = () => {
 // Integrated: a Skynet Integrated Vessel (its Devices built in), or a User Bundled Template. A User Bundled vessel Template is
 // always built on a Skynet Vessel Widget: picked as a Widget, built and bundled on the Build Tab, then Save Build ... > As a
 // Template. There is no other way to make one. Everything new is made on the 🔨 Build Tab first.
-async function addVessel() {
+async function addVessel(how) {      // how: 'widget' or 'integrated' (the Vessel list on the Edit layout bar); asked when not given
   if (!TPL) await loadTemplates();
-  const how = await choose('Add a Vessel (Kettle, HLT, MLT ...): a Widget, or Integrated?',
+  how ||= await choose('Add a Vessel (Kettle, HLT, MLT ...): a Widget, or Integrated?',
     [['Widget (you add everything to it)', 'widget'], ['Integrated (ready-made)', 'integrated']]);
   if (!how) return;
   const icon = (t, note) => ({ key: t.name, label: t.name, img: tplIcon('vessel', t), title: note || t.notes || t.name });
@@ -2492,7 +2498,6 @@ function pickVessel(title, groups) {
     document.body.append(d); d.showModal();
   });
 }
-$('#addIp').onclick = () => addIpFit($('#addIpType').value);
 function addIpFit(fit) {
   toBuild();
   const base = { point: 'IP', pipe: 'Pipe', cap: 'Cap', coupling: 'Coupling' }[fit] || FITTINGS[fit];
@@ -2535,7 +2540,7 @@ function toBuild() {
 }
 $('#buildTab').onclick = () => toBuild();
 $('#saveBuild').onclick = guard(saveBuild);
-const BUILD_HINT = '🔨 Build Tab: build the new thing here (Add Device / Widget, Add equipment, IPs, pipes). 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
+const BUILD_HINT = '🔨 Build Tab: build the new thing here (Add Device, Add Widget, Add equipment, fittings, pipes). 👁 Preview shows how it looks on Brew Day. Then press 💾 Save Build ... to put it on a Tab or save it as a Template.';
 function setPreview(on) {
   if (on && !toBuild()) return;
   previewing = !!on && !!buildWs(); sel = null; drag = null;
