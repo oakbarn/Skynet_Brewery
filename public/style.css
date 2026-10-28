@@ -540,6 +540,11 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .simBar button, .simBar select { background: #fff6d6; color: #1b1305; border-color: #b8962a; }
 .simBar button.primary { background: #1b1305; color: #f0d25c; }
 .simBar .simCtl { display: inline-flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+/* Hide / Show the Simulator bar (Fritz, 2026-10-28): hidden leaves a thin strip with the warning and ▾ Show */
+.simBar .simHide { margin-left: auto; }
+.simBar.collapsed { padding-top: 2px; padding-bottom: 2px; }
+.simBar.collapsed > :not(strong):not(.simHide) { display: none; }
+.simBar.collapsed .simHide { padding: 1px 8px; }
 .simJumps input.tm { width: 7em; }
 .simJumps input.num { width: 5em; }
 .tlTable td.maybe { font-style: italic; }

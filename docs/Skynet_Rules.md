@@ -540,6 +540,17 @@ Connection Simulator (its real connection is kept to switch to later), and the p
 Simulator mode and says so, so nothing real is switched. (2026-10-28, thread "Add sample Schemas to
 the Schema list", Help 83)
 
+10.7 **The Simulator bar** (yellow 🧪 SIMULATION bar) can be hidden and shown again with **▴ Hide /
+▾ Show** on the bar, per screen; a thin 🧪 SIMULATION strip always stays. Hiding changes no setting.
+**Each time the Simulator is switched on, the bar opens at 25× speed with Auto skip on**; after that
+the user's choices stay until the next switch on. (2026-10-28, thread "Improve the Simulator bar
+defaults", Help 85)
+
+10.8 **The 1, 2 and 3 vessel Sample Schemas can be cloned to a User Schema** (Clone a Schema lists
+them after the user's own Schemas, as 🧪 Sample). The clone is a normal User Schema, always loaded at
+once, on the simulator (Rule 10.6). The OakBarn Brewery sample is not offered for now. (2026-10-28,
+thread "Improve the Simulator bar defaults", Help 85)
+
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
@@ -677,6 +688,9 @@ and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Rule 1.16 now renames older vK_ / vA_ names; added Rule 15.2 (everything conforms to the latest
   standard, no backward compatibility). The OakBarn BruControl sample is out of the shipped samples for now.
 - 2026-10-28: Help 86 = IPs line up by themselves (snap to align within 10 px; IPs on Skynet valve pipe ends). Next free Help number 87. (thread "Lock Skynet Widget Templates and IPs")
+- 2026-10-28: Added Rules 10.7 (Simulator bar Hide / Show; starts at 25× with Auto skip on each time the Simulator is
+  switched on) and 10.8 (1, 2 and 3 vessel samples clone to a User Schema). Help 85; next free Help number 86.
+  (thread "Improve the Simulator bar defaults")
 - 2026-10-28: Added Rules 5.14 (pipe fittings: only .x .y .width .height and Autosize to pipe, no Clone) and 5.15
   (Manual Valve Widget: only a click changes .state; a Process asks for it by hand); Rule 5.13 covers both kinds of
   manual valve. Help 87; next free Help number 88. (thread "Simplify pipe fittings and Manual Valves")

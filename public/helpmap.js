@@ -76,7 +76,7 @@ const BAR = [
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
   ['#barHelp', ['help-window']],
   ['#barEdit', ['tabs', 'changing-the-layout-admins']],
-  ['#simBar', ['simulation']],
+  ['#simBar', ['simulator-bar']],
   ['#barSim', ['simulator-or-real-boards']],
   ['#soundBtn', ['alarms-and-sound']],
   ['#who', ['login']],
