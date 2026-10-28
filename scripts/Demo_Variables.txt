@@ -1,4 +1,4 @@
-// Demo of the vKonstant and vAPI variables (Variables Demo workspace)
+// Demo of the gKonstant and gAPI variables (Variables Demo workspace)
 // Starting this script writes gAS_Batch_Status to the database ("On demand only").
 gAS_Batch_Status = "Demo running"
 gKDT_Brew_Day = now
