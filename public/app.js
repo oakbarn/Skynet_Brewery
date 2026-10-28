@@ -648,6 +648,23 @@ function sidePt(e, side) {
 // sides of its picture (left and right if it is wider than tall, else top and bottom). A pump keeps IN and OUT: a running pump
 // pushes from IN to OUT, and its head orientation is fixed, so the picture shows it rather than a setting.
 // (Older layouts may still carry ipIn / ipOut sides; those are honoured.)
+// Where the pipe meets a Skynet valve picture (Fritz, 2026-10-28: the IPs sit on the picture where the water flows, not in the
+// middle of the box's sides). Every Skynet valve drawing in Images/Skynet/Valves has its pipe at the same spot: across at 92 of
+// its 120 high (H), or turned to stand up with the pipe 28 (V_R, V_RC) or 92 (V_L, V_LC) in from the left of its 120 wide.
+const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] } };
+function picFlow(path) {
+  const m = String(path || '').match(/(?:^|\/)Valve_(?:Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid)_(?:Open|Closed)(H|V_L|V_R)C?\.svg$/);
+  return m ? { k: m[1], ...PIC_FLOW[m[1]] } : null;
+}
+// the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
+// picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
+function picEnds(e) {
+  const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
+  if (!f || o === 'l45' || o === 'r45' || (o && (o === 'h') !== (f.k === 'H'))) return null;
+  const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
+  const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
+  return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
+}
 const devIps = e => {
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   if (!v) return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
@@ -655,8 +672,9 @@ const devIps = e => {
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
   const tap = e.subtype === 'valve' && e.tapwater && tapOut(e) !== 'both' ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
-  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top')) },
-    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom')) }];
+  const pe = picEnds(e);
+  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top')) },
+    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom')) }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
@@ -1518,18 +1536,21 @@ $('#ws').addEventListener('pointermove', ev => {
   }
   drag.moved = true;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
+  let mx = 0, my = 0;
+  if (drag.mode === 'move') {
+    mx = snap(drag.orig.x + dx) - drag.orig.x; my = snap(drag.orig.y + dy) - drag.orig.y;
+    if (!ev.altKey) { const [ax, ay] = alignShift(drag, mx, my); mx += ax; my += ay; }    // hold Alt to place it without the jump
+  }
   if (drag.mode === 'move' && drag.ports) {   // a vessel carries its ports (IPs) with it
-    const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
     for (const q of drag.ports) { q.g.x = q.x + mx; q.g.y = q.y + my; const pn = $(`#ws .gfx[data-gid="${CSS.escape(q.g.id)}"]`); if (pn) place(pn, q.g); }
     placeEqIps(drag.item);
     renderPipes();
   }
   if (drag.mode === 'move' && drag.stubs?.length) {
-    const mx = snap(drag.orig.x + dx) - drag.orig.x, my = snap(drag.orig.y + dy) - drag.orig.y;
     for (const q of drag.stubs) { q.p.points = q.pts.map(c => [c[0] + mx, c[1] + my]); q.end.x = q.ex + mx; q.end.y = q.ey + my; const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.end.id)}"]`); if (n) place(n, q.end); }
   }
   if (drag.mode === 'move') {
-    drag.item.x = snap(drag.orig.x + dx); drag.item.y = snap(drag.orig.y + dy);
+    drag.item.x = drag.orig.x + mx; drag.item.y = drag.orig.y + my;
     const de = isClone(drag.item) ? cloneEl(drag.item) : drag.item;      // a clone is drawn as its parent, at its own place
     place(drag.node, de.kind ? de : elGeom(de)); if (hasIps(de)) placeDevIps(de); if (de.kind === 'ip' || hasIps(de)) renderPipes();
   }
@@ -1540,6 +1561,27 @@ $('#ws').addEventListener('pointermove', ev => {
   if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
+// Snap to align (Fritz, 2026-10-28): while something with IPs is moved, when one of its IPs comes within 10 px of an IP of
+// something else on the Tab (a pipe end, a fitting, a valve, a vessel port), it jumps so the two IPs sit exactly on each other.
+// Returns the extra [x, y] shift, or [0, 0] when nothing is that close.
+const ALIGN_PX = 10;
+function alignShift(d, mx, my) {
+  const it = d.item, ws = it.workspace, at = { x: d.orig.x + mx, y: d.orig.y + my };
+  const mid = (g, x, y) => [x + (g.w || 30) / 2, y + (g.h || 30) / 2];
+  let own = [];
+  if (it.kind === 'ip') own = [{ id: it.id, c: mid(it, at.x, at.y) }];
+  else if (it.kind === 'vessel') own = [...(d.ports || []).filter(q => q.g.kind === 'ip').map(q => ({ id: q.g.id, c: mid(q.g, q.x + mx, q.y + my) })), ...eqPorts({ ...it, ...at })];
+  else if (!it.kind || isClone(it)) { const de = isClone(it) ? cloneEl(it) : it; if (hasIps(de)) own = devIps({ ...de, ...at }); }
+  if (!own.length) return [0, 0];
+  const skip = new Set([...own.map(q => q.id), ...(d.stubs || []).map(q => q.end.id)]);
+  let best = null;
+  for (const q of allIps(ws)) {
+    if (skip.has(q.id)) continue;
+    const c = q.c || ipPoint(q.id, ws); if (!c) continue;
+    for (const o of own) { const dd = Math.hypot(c[0] - o.c[0], c[1] - o.c[1]); if (dd <= ALIGN_PX && (!best || dd < best.d)) best = { d: dd, x: c[0] - o.c[0], y: c[1] - o.c[1] }; }
+  }
+  return best ? [Math.round(best.x), Math.round(best.y)] : [0, 0];
+}
 // one grab point dragged: its sides move, the opposite sides stay where they are. A scaled Device is drawn k times its size
 // about its middle, so x and y move by what keeps the far side still on screen.
 function resizeBy(d, dx, dy, k) {
