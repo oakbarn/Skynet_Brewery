@@ -3676,7 +3676,11 @@ function askLine() {
 $('#goLine').onclick = askLine;
 $('#code').addEventListener('input', () => { dirty = true; updateGutter(); $('#scriptName').textContent = curScript + ' (not saved)'; refreshFind(false); });
 $('#code').addEventListener('scroll', () => { $('#gutter').scrollTop = $('#code').scrollTop; syncHl(); });
-const predict = attachAutofill($('#code'), $('#autofill'), () => S?.words);
+// Predictive text switch: for this person on this computer or phone, like Colors
+const PREDICT_KEY = 'skynet.predictiveText';
+try { $('#predictOn').checked = localStorage.getItem(PREDICT_KEY) !== 'off'; } catch { }
+$('#predictOn').onchange = () => { try { localStorage.setItem(PREDICT_KEY, $('#predictOn').checked ? 'on' : 'off'); } catch { } };
+const predict = attachAutofill($('#code'), $('#autofill'), () => S?.words, () => $('#predictOn').checked);
 $('#suggestBtn').onmousedown = ev => ev.preventDefault();     // the cursor stays where it is in the Process
 $('#suggestBtn').onclick = () => { if (curScript) predict.open(); };
 $('#code').addEventListener('keydown', ev => {

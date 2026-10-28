@@ -187,7 +187,8 @@ export function attrsAfterDot(name, words, declared = new Set()) {
   return words?.processes?.includes(name) ? PROCESS_ATTRS : null;
 }
 
-export function attachAutofill(ta, box, words) {
+// on() = the Predictive text switch: when it is off nothing pops up by itself, but Ctrl+Space and 💡 Suggest still work
+export function attachAutofill(ta, box, words, on = () => true) {
   let items = [], sel = 0, ctx = null, skip = null, busy = false;
   const ghost = document.createElement('div');
   ghost.className = 'afGhost hidden'; ghost.setAttribute('aria-hidden', 'true');
@@ -270,7 +271,7 @@ export function attachAutofill(ta, box, words) {
   }
 
   function update(forced = false) {
-    if (ta.readOnly) return close();
+    if (ta.readOnly || (!forced && !on())) return close();
     const line = lineBefore(), p = ta.selectionStart;
     if (/^\s*(\/\/|#|')/.test(line)) return close();
     // after a dot: attributes
