@@ -115,7 +115,7 @@ const MENU_TOPICS = {
   tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'give-a-tab-its-profile'], _: ['tab-and-valve-profiles', 'tab-background-profile'] },
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
   skynetpics: { _: ['get-skynet-pictures'] },
-  schema: { 'Schemas on this Brain': ['schema-switching-and-cloning', 'clone-a-schema'], _: ['schema-switching-and-cloning'] },
+  schema: { 'Schemas on this Brain': ['schema-switching-and-cloning', 'clone-a-schema'], 'Add a Sample Schema': ['sample-schemas'], _: ['schema-switching-and-cloning'] },
 };
 export function menuTopic(key, heading, main = true) {
   const m = MENU_TOPICS[key]; if (!m) return null;
