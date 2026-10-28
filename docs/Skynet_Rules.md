@@ -192,6 +192,8 @@ Skynet will be open source. (2026-10-22)
 4.1 **Every new Device, Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent
 to a Tab. (2026-10-23, PR #97 and PR #99)
 
+*Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
+
 4.2 **New Device order** (the BruControl way): 1 Interface, 2 Device Type, 3 Available Ports/Pins
 (only free ones that fit), then Label. Create puts it on the Build Tab and opens its Properties.
 (2026-10-23, PR #97)
@@ -199,6 +201,19 @@ to a Tab. (2026-10-23, PR #97 and PR #99)
 4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
 back where it came from?". Save to Tab places the build in the center of the chosen Tab.
 (2026-10-22, PR #88)
+
+4.4 **Cloned Devices: one Device can be shown on more than one Tab.** A Clone is the same Device, not
+a copy. **The only way to make one is ⧉ Clone Device** on the Edit layout bar; it works on any Tab,
+**the Build Tab too** (an exception to Rule 4.1, Fritz 2026-10-27). Its list holds the Devices
+already placed on a Tab, grouped by type (Pumps, Valves ...). Its name is made by Skynet and can't
+be typed: **`<Parent_Name>_Clone_N`** (`MB_06_Pump_Wort__HS_Clone_1`). The name is only for reference in its
+Properties. **Each Clone has its own hidden key (Rule 3.10) but acts only on its parent's key**
+(the key link is built once PR #114 is in; until then a Clone points at its parent by name). Only **.visible, .x, .y and its Tab** (a
+Tab dropdown in its Properties; not in Processes) and its lock are the Clone's own; every other property is the parent's. Tapping a Clone of an on/off
+Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a reading Device (1W)
+only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
+rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
+per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
 
 ## 5. Templates and Integrated items
 
@@ -493,5 +508,9 @@ only when Fritz says the program is set. (2026-10-26)
   On while Enabled), 7.10 (imagePath_2 / _3 as in BruControl; replaces the lock) and 7.11 (Picture
   Widget Turns on with). Help 72-74; next free Help number 75. (thread "Apply clean-up requests and
   standards")
+- 2026-10-27: Added Rule 4.4, Cloned Devices (one Device on more than one Tab).
+- 2026-10-27: Rule 4.4 rewritten from Fritz's answers: Clone button only, any Tab incl. the Build Tab (exception noted under Rule 4.1), names <Parent_Name>_Clone_N, not used in Processes.
+- 2026-10-27: Rule 4.4: a Clone's Tab is its own too (Tab dropdown in its Properties).
+- 2026-10-27: Rule 4.4: a Clone's name is for reference only; it has its own hidden key and acts on its parent's key.
 - 2026-10-28: Added Rules 6.12 (firmware order, add-ons on every board, loading from Skynet) and 6.13
   (Raspberry Pi GPIO pins); firmware open question answered.
