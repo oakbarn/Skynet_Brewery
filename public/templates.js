@@ -177,7 +177,7 @@ export function cleanDevice(b = {}) {
 export function resolveDevice(t, all = []) {
   const m = t?.master && all.find(x => x.name.toLowerCase() === t.master.toLowerCase() && !x.master);
   if (!m) return t;
-  return { ...t, type: t.type || m.type, props: { ...m.props, ...t.props }, pics: t.pics || m.pics, userFields: t.userFields || m.userFields };
+  return { ...t, type: t.type || m.type, props: { ...m.props, ...t.props }, ownProps: t.props, pics: t.pics || m.pics, userFields: t.userFields || m.userFields, ownUserFields: t.userFields };
 }
 // the attributes of a Template that are fixed on its User versions
 export const deviceFixed = t => new Set([...DEVICE_FIXED, ...Object.keys(t?.props || {})].filter(k => !(t?.userFields || []).includes(k)));
