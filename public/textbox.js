@@ -62,3 +62,13 @@ export function placeWith(g, v = {}) {
   const o = { x: n('xposition') ?? g.x, y: n('yposition') ?? g.y, w: n('width') ?? g.w, h: n('height') ?? g.h };
   return o.x === g.x && o.y === g.y && o.w === g.w && o.h === g.h ? g : { ...g, ...o };
 }
+
+// A font from a Process: its name in the list ("Arial", "courier new") or its CSS; '' = back to its properties; null = not a font
+export function tbFont(v) {
+  const t = String(v ?? '').trim().toLowerCase();
+  if (!t) return '';
+  const hit = FONTS.find(([css, n]) => css && (n.toLowerCase() === t || n.toLowerCase().replace(/\s*\(.*\)$/, '') === t || css.toLowerCase() === t));
+  return hit ? hit[1].replace(/\s*\(.*\)$/, '') : t === 'default' ? '' : null;
+}
+// the CSS of a font name from tbFont (or a CSS font from Properties)
+export const tbFontCss = n => FONTS.find(([css, x]) => css && (x.replace(/\s*\(.*\)$/, '') === n || css === n))?.[0] ?? '';

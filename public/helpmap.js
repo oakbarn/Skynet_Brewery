@@ -24,7 +24,7 @@ export function elementTopic(e) {
     case 'stepper': return ['stepper-motors'];
     case 'alarm': return ['alarms-and-sound'];
     case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
-    case 'timer': return ['tabs', 'timers'];
+    case 'timer': return ['timer-widget'];      // Timer Widget Properties (Fritz, 2026-10-29)
     case 'gKonstant': return e.kind === 'list' ? ['variables', 'gkonstant-list-a-dropdown-on-a-tab'] : ['variables', 'gkonstant-kinds'];
     case 'gAPI': return ['variables', 'gapi-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
@@ -56,7 +56,7 @@ export function graphicTopic(g) {
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
     case 'clone': return ['cloned-devices', 'a-clone-s-properties'];
-    default: return ['text-boxes'];      // a text
+    default: return ['text-widget'];      // a Text Widget (its Properties, Fritz 2026-10-29)
   }
 }
 

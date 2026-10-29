@@ -40,6 +40,7 @@ import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
 import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { gStandardOnDisk } from './lib/gstandard.js';
+import { cleanUserStyles } from './public/styles.js';
 import { safeNamesOnDisk, renameQuoted } from './lib/namechars.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
@@ -80,6 +81,8 @@ const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
 store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gK / gA names
+// the Schema loaded at start-up: Text_1 -> w_Text_1 (Rule 15.2) happened before the engine was up, so its Processes follow now
+{ const tr = renameInProcesses(engine, store.loadRenames ?? new Map()); if (tr.length) console.log(`Processes updated for the new Text Widget names: ${tr.map(x => x.name).join(', ')}`); }
 store.on('safeRenamed', map => {   // ... and its names with < > : " / \ | ? * (written in quotes in a Process)
   for (const name of engine.names()) {
     const text = engine.read(name), out = renameQuoted(text, map);
@@ -237,7 +240,7 @@ function cleanDonation(d = {}) {
 // Only names go out: never a hidden key (Rule 3.10). Clones are graphics, not elements, so they are never offered (Rule 4.4).
 function processWords() {
   return {
-    elements: [...store.list(), ...store.manualValves()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
+    elements: [...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
   };
@@ -504,6 +507,7 @@ async function route(req, res) {
     const tl = body.brewDefaults?.textLarge;         // \L large text in strings: bigger than normal text (18 px)
     if (tl !== undefined && tl !== null && !(+tl > 18 && +tl <= 200)) return fail(res, 400, 'Large text size must be more than 18 (normal text) and at most 200');
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm', 'brewDefaults', 'menuOrder']) if (k in body) store.config[k] = body[k];
+    if ('userStyles' in body) store.config.userStyles = cleanUserStyles(body.userStyles);     // a Skynet Style can never be changed (public/styles.js)
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     if ('passwordRules' in body) store.config.passwordRules = cleanPasswordRules(body.passwordRules);
     store.writeConfig(); broadcast('config', {});
