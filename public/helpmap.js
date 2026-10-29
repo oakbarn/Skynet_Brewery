@@ -56,7 +56,7 @@ export function graphicTopic(g) {
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
     case 'clone': return ['cloned-devices', 'a-clone-s-properties'];
-    default: return ['text-boxes'];      // a text
+    default: return ['text-widget'];      // a Text Widget (its Properties, Fritz 2026-10-29)
   }
 }
 
