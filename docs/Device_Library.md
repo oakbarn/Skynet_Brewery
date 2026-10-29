@@ -180,6 +180,20 @@ What each ID means:
   - Tap water valve (open = tap water flows, no pump needed): on / off; Tap water flows out of: which end
 - Valves have no inlet / outlet side. Starts as OPEN / CLOSED, tap = toggle.
 
+### 4.3a Skynet Motorized Ball Valve Device (Skynet Template, Rules 5.16 and 5.17)
+- **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: **Master H** (Horizontal), **Daughter VL** (Vertical),
+  **Daughter VR** (Vertical, Flip Horizontal on). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR).
+- **Type ID:** E_L_Vlv (set by the Template, so the Add Device box doesn't ask for it).
+- **Fixed by the Template** (not in its Properties; the Brain puts them back on every layout save): Kind = valve, Valve type =
+  Electro_Mechanical, Service = Room Temperature Liquid, pictures (Valve_Motor_Ball_*H for Horizontal, *V_LC for Vertical and 45),
+  Look normal, When tapped = toggle, Ask before changing, background / imagePath_1-3, overlay, Digits, Hide value.
+- **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
+  Interface, Pin, Invert, One-shot, **Orientation** (Horizontal, Vertical, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
+  **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
+  (horizontal, 45) and **Needs setting** after the Orientation or a Flip changes (no tap flow until set), **Text On/Off** (the On /
+  Off text shows only when on) with Text when on / off.
+- Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88.
+
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
 - **Type IDs:** PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED.
@@ -379,7 +393,8 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-27: RTD (PT100 / PT1000) CS pins on a Mega limited to D14-D17, D22-D39, D41-D43, D47-D49, D53 (Skynet Rule 6.9).
 - 2026-10-27: D10 kept for the Ethernet shield on an Ethernet Mega; no USB to Ethernet change while D10 is used (Skynet Rule 6.10).
 - 2026-10-27: D4 warning and SD card check (Skynet Rule 6.11).
-- 2026-10-27: Display name became Label (`label`) with a Show label switch (it replaces Hide name); imagePath_2 / _3 editable again; PID, Hysteresis and Duty Cycle are On while Enabled (thread "Apply clean-up requests and standards").
 - 2026-10-27: Added Cloned Devices (Skynet Rule 4.4).
+- 2026-10-27: Display name became Label (`label`) with a Show label switch (it replaces Hide name); imagePath_2 / _3 editable again; PID, Hysteresis and Duty Cycle are On while Enabled (thread "Apply clean-up requests and standards").
 - 2026-10-27: Cloned Devices updated: Clone button only, names <Parent_Name>_Clone_N, not used in Processes.
-- 2026-10-28: Raspberry Pi GPIO pins built (Board Raspberry Pi, Help 78); removed from Reserved.
+- 2026-10-28: Raspberry Pi GPIO pins built (Board Raspberry Pi, Help 78, PR #119 merged); removed from Reserved.
+- 2026-10-28: Added 4.3a Skynet Motorized Ball Valve Device (Master H, Daughters VL and VR; fixed and user settable attributes; thread "Lock Skynet Widget Templates and IPs", Help 88).

@@ -37,6 +37,7 @@ import { timeline } from './lib/timeline.js';
 import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
+import { applyDeviceTemplate } from './public/templates.js';
 import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { gStandardOnDisk } from './lib/gstandard.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
@@ -448,6 +449,8 @@ async function route(req, res) {
     const body = await jsonBody(req, true);
     // each item gets the hidden key of the item it stands for; a copy gets a new one and remembers its first item (lib/keys.js)
     for (const list of ['elements', 'graphics', 'workspaces', 'devices']) if (Array.isArray(body[list])) claimKeys(body[list], store.config[list]);
+    // a User version of a Skynet Device Template (Rule 5.16): its fixed attributes are put back to the Template's, whatever was sent
+    for (const el of body.elements ?? []) if (el?.template && el.templateCls === 'skynet') applyDeviceTemplate(el, templates.find('device', el.template));
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change
     if (body.workspaces) schemas.keepTabProfiles(body.workspaces);   // each Tab's profile is picked on the ☰ Menu only
     if (body.devices) checkIds(body.devices, 'interface');   // Interface IDs: 1-4 letters, unique (public/naming.js)
@@ -605,7 +608,7 @@ async function route(req, res) {
   }
   // Vessel and Bundled Fitting Templates: everyone sees them, admins make and change them (Skynet ones only while Skynet builds them)
   if (p === '/ui/templates' && m === 'GET') return ok(res, templates.view());
-  sc = /^\/ui\/templates\/(vessel|fitting)(?:\/([A-Za-z0-9_-]+))?$/.exec(p);
+  sc = /^\/ui\/templates\/(vessel|fitting|device)(?:\/([A-Za-z0-9_-]+))?$/.exec(p);
   if (sc) {
     if (!sc[2] && m === 'POST') { const b = await jsonBody(req); const made = templates.create(sc[1], b.name, { from: b.from, skynet: b.skynet }); return ok(res, { made: made.name, ...templates.view() }); }
     if (sc[2] && m === 'GET') return ok(res, templates.get(sc[1], sc[2]));

@@ -315,8 +315,11 @@ ended on 2026-10-26. For other Skynet fittings and vessels, see Open questions.
 can't be un-bundled, and End Caps where needed. Their Properties have no IP settings. Items a user
 builds still add IPs and bundle by hand. (2026-10-22, PR #91)
 
-5.5 **Every Skynet item gets the same turn and flip set:** Flip Vertical, Flip Horizontal,
-Rotate 90, Rotate 45, and the picture follows. (2026-10-22, PR #91; vessels 2026-10-23, PR #92)
+5.5 **Every Skynet item gets the same turn and flip set:** Flip Vertical, Flip Horizontal and
+Rotate 45, and the picture and its IPs follow. **Rotate 90 is retired**: the Flips do left and right; a
+quarter turn (a tee standing up) is two Rotate 45 steps. (2026-10-22, PR #91; vessels 2026-10-23, PR #92;
+Rotate 90 retired 2026-10-28, thread "Lock Skynet Widget Templates and IPs")
+*Replaced:* "Flip Vertical, Flip Horizontal, Rotate 90, Rotate 45" (2026-10-22).
 
 5.6 **A Skynet Template's picture is fixed.** A bottom-drain copy of a kettle changes only the
 picture. (2026-10-23)
@@ -325,8 +328,9 @@ picture. (2026-10-23)
 built-in IPs. **A User Bundled vessel Template must be built on a Skynet Vessel Widget**; there is
 no other way to make one. (2026-10-23, PR #102)
 
-5.8 **A Template sent to a Tab becomes a Tab item** (Tab_Vessel, Tab_Fitting) that can be edited and
-deleted, even when it came from Skynet. (2026-10-21)
+5.8 **A Template sent to a Tab becomes a Tab item** (Tab_Vessel, Tab_Fitting, a Device) that can be
+deleted. What can be edited on it follows Rule 5.16. (2026-10-21; changed 2026-10-28)
+*Replaced:* "... that can be edited and deleted, even when it came from Skynet." (2026-10-21)
 
 5.9 **Equipment:** valves have no inlet or outlet side; pumps have no orientation setting; BruControl
 VGC outputs are valves. Equipment types have Type, ports, Position and Standard lists that users can
@@ -362,6 +366,27 @@ Tab changes it**, at any time. A Process line `ManualValve_1.state = true` does 
 warning to open it by hand, the valve blinks on its Tab, and the Process waits until someone clicks it to the
 state asked for. While open it shows the open overlay (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg).
 (2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
+
+5.16 **Skynet Templates and Daughter Templates are set and can't be changed by a user.** A user makes
+a **User version** (a User item made from a Skynet Template) that inherits everything from the Template.
+Only some attributes are user settable, and only those show in its Properties; the rest are fixed and
+not shown. **Which ones depends on the Widget or Device type**: each type has its own list, set per
+Template (a "user can set" tick box on each attribute, Rule 5.18). A user's own Devices and Widgets (not
+made from a Skynet Template) keep the normal Properties. The Brain enforces it: a fixed attribute sent by
+any screen is put back to the Template's value. (2026-10-28, thread "Lock Skynet Widget Templates and IPs")
+
+5.17 **Master and Daughter Templates.** A Master Template can have Daughter Templates for common
+orientations; a Daughter inherits everything from its Master and sets only its orientation and flips.
+The **Skynet Motorized Ball Valve Device** (a Device, Rule 1.2: it has a pin) is one Template set:
+**Master H** (Horizontal), **Daughter VL** (Vertical) and **Daughter VR** (Vertical, Flip Horizontal on).
+Its picture, Kind, Valve type and Service are fixed (a High Temperature valve is a different Skynet
+Template, even if only the Service differs). (2026-10-28, thread "Lock Skynet Widget Templates and IPs")
+
+5.18 **Build Template Tab** (Admin only): where a Template is made or edited, with all its Properties and,
+on each attribute, a **"user can set"** tick box (shown on User versions, Rule 5.16). During the building
+phase every Template made there is a Skynet Template (or is deleted before Fritz switches them all to
+Skynet Templates); they are set (locked) only when Fritz says (Rule 9.6). The dialog is kept in production
+for User Bundled Templates. (2026-10-28, thread "Lock Skynet Widget Templates and IPs")
 
 ## 6. Devices, connections and safety
 
@@ -463,7 +488,8 @@ Picture Widget that turns on with it all follow Enabled. A PWM output is On abov
 (2026-10-27, Help 58, Help 74)
 
 7.10 **imagePath_2 and imagePath_3 work as in BruControl**, for compatibility: they can be changed
-in Properties and set by a Process; background = 1, 2 or 3 picks one. Changing one in Properties
+in Properties (except on a User version of a Skynet Template, where the pictures are fixed, Rule 5.16)
+and set by a Process; background = 1, 2 or 3 picks one. Changing one in Properties
 pops up a heads-up: any Device or Widget can have unlimited pictures with the `.image` attribute.
 (2026-10-27, Help 25)
 *Replaced:* after a BruControl import imagePath_2 and _3 were locked and a Process could only change
@@ -554,7 +580,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **88**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **89**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -691,6 +717,10 @@ and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Added Rules 10.7 (Simulator bar Hide / Show; starts at 25× with Auto skip on each time the Simulator is
   switched on) and 10.8 (1, 2 and 3 vessel samples clone to a User Schema). Help 85; next free Help number 86.
   (thread "Improve the Simulator bar defaults")
+- 2026-10-28: Rule 5.5 changed (Rotate 90 retired; Flips + Rotate 45), Rule 5.8 changed (editing follows 5.16), Rule 7.10
+  excepts User versions of Skynet Templates; added Rules 5.16 (Skynet Templates locked, User versions with per-type user
+  settable attributes), 5.17 (Master and Daughter Templates; Skynet Motorized Ball Valve Device H / VL / VR) and 5.18
+  (Build Template Tab). Help 88 taken; next free Help number 89. (thread "Lock Skynet Widget Templates and IPs")
 - 2026-10-28: Added Rules 5.14 (pipe fittings: only .x .y .width .height and Autosize to pipe, no Clone) and 5.15
   (Manual Valve Widget: only a click changes .state; a Process asks for it by hand); Rule 5.13 covers both kinds of
   manual valve. Help 87; next free Help number 88. (thread "Simplify pipe fittings and Manual Valves")

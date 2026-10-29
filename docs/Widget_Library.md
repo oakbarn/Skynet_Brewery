@@ -233,6 +233,11 @@ One unit: every opening has a two-way IP built in, nothing to set for the IPs. (
 
 ---
 
+### Skynet Device Templates (Rule 5.16)
+A Device made from a Skynet Device Template is its **User version**: it inherits everything and shows only the Template's user
+settable attributes. First one: the Skynet Motorized Ball Valve Device, Master H with Daughters VL and VR (see the Device Library,
+4.3a). The Build Template Tab (Rule 5.18) will give each attribute a "user can set" box.
+
 ## 5. Template attributes
 
 Templates live in a library, not on a Tab. **Skynet Templates** ship in templates/ (read only once locked, never deleted, clone only). **User Templates** live in config/templates (Admins make, change and delete them). Template Names: letters, digits, _ and - only, no spaces, 60 max, unique. A Template sent to a Tab is named bndl1_Name_TabId, bndl2_ ... Clones are Copy1_Name, Copy2_Name ...
@@ -383,4 +388,5 @@ Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB
 - 2026-10-27: First version.
 - 2026-10-27: Display Name became Label (`label`) with a Show label switch; Picture became the Picture Widget with Turns on with; imagePath_2 / _3 editable again; On overlay preferred (thread "Apply clean-up requests and standards").
 - 2026-10-28: IP Snap to align (10 px) and IPs on the pipe ends of Skynet valve pictures (thread "Lock Skynet Widget Templates and IPs", Help 86).
+- 2026-10-28: Skynet Device Templates and User versions (Rules 5.16-5.18), first one the Skynet Motorized Ball Valve Device (Help 88).
 - 2026-10-28: Pipe fitting Widgets (only X, Y, Width, Height and Autosize to pipe; no Clone) and the Manual Valve Widget (click-only .state, Process asks by hand, open overlay) (thread "Simplify pipe fittings and Manual Valves", Help 87).

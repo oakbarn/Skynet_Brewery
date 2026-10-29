@@ -27,7 +27,7 @@ export const THERMOWELL_POS = { short: 'Short', long: 'Long' };
 // the vessel ports that take a Bundled Fitting
 export const FITTING_PORTS = { outlet: 'Outlet', outlet2: 'Second Outlet', tangential: 'Tangential Inlet', steamSlayer: 'Steam Slayer', cip: 'CIP Inlet' };
 
-export const TEMPLATE_KINDS = { vessel: 'Vessel Template', fitting: 'Bundled Fitting Template' };
+export const TEMPLATE_KINDS = { vessel: 'Vessel Template', fitting: 'Bundled Fitting Template', device: 'Device Template' };
 // a Template Name: letters, digits, _ and -, no spaces, unique (any letter case) across Skynet and User Templates
 export const NAME_RE = /^[A-Za-z0-9_-]{1,60}$/;
 export function nameProblem(name) {
@@ -145,3 +145,53 @@ export function vesselBase(t, all = []) {
   return isVesselWidget(b) ? b.name : undefined;
 }
 export const isUserBundledVessel = (t, all) => t?.cls === 'user' && !!vesselBase(t, all);
+
+// Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17). A Skynet Template and its Daughter Templates are set: a user
+// makes a User version of it (a Device on a Tab with template = its name), which inherits everything. Only the attributes in
+// the Template's userFields can be set on the User version and only those show in its Properties; the rest are fixed. Which
+// ones depends on the type, so each Template lists its own (the Build Template Tab gives each attribute a "user can set" box).
+// A Master Template can have Daughters for common orientations: a Daughter names its master and sets only what differs.
+//   type      the Device type (digitalOut)
+//   props     its attributes (subtype, valveType, service, orientation, size, look, tap ...)
+//   pics      { h: [picture when on, picture when off], v: [...] }: the picture follows the orientation (45 degrees turns v)
+//   userFields  the attributes a user can set
+// Fixed always, even when a Template doesn't list them: the pictures, Kind, Valve type, Service, Look and tap behaviour.
+export const DEVICE_FIXED = ['type', 'subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'imageOverlay', 'background', 'imagePath_1', 'imagePath_2', 'imagePath_3',
+  'look', 'digits', 'tap', 'tapTarget', 'confirm', 'hideValue', 'ipIn', 'ipOut'];
+const KEY_RE = /^\w{1,40}$/;
+const jsonSafe = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+export function cleanDevice(b = {}) {
+  const t = { master: NAME_RE.test(text(b.master, 60)) ? text(b.master, 60) : undefined, title: text(b.title, 120) || undefined, notes: text(b.notes, 2000) || undefined };
+  if (['digitalOut'].includes(b.type)) t.type = b.type;
+  const props = {};
+  for (const [k, v] of Object.entries(b.props && typeof b.props === 'object' ? b.props : {})) if (KEY_RE.test(k) && v !== undefined) props[k] = jsonSafe(v);
+  t.props = props;
+  const pics = {};
+  for (const o of ['h', 'v']) { const p = b.pics?.[o]; if (Array.isArray(p) && p.length === 2) pics[o] = p.map(x => text(x, 300)); }
+  if (Object.keys(pics).length) t.pics = pics;
+  if (Array.isArray(b.userFields)) t.userFields = [...new Set(b.userFields.filter(k => typeof k === 'string' && KEY_RE.test(k) && !DEVICE_FIXED.includes(k)))];
+  for (const k of Object.keys(t)) if (t[k] === undefined) delete t[k];
+  return t;
+}
+// a Daughter Template with its Master's attributes filled in (a Master is itself). all = every Device Template.
+export function resolveDevice(t, all = []) {
+  const m = t?.master && all.find(x => x.name.toLowerCase() === t.master.toLowerCase() && !x.master);
+  if (!m) return t;
+  return { ...t, type: t.type || m.type, props: { ...m.props, ...t.props }, pics: t.pics || m.pics, userFields: t.userFields || m.userFields };
+}
+// the attributes of a Template that are fixed on its User versions
+export const deviceFixed = t => new Set([...DEVICE_FIXED, ...Object.keys(t?.props || {})].filter(k => !(t?.userFields || []).includes(k)));
+// which end tap water leaves by, from the end it comes in at (tapSource, the tap side): unset = "Needs setting", no tap flow
+export const tapOutFrom = src => ({ in: 'out', out: 'in' })[src] || 'none';
+// put a User version back to its Template: every fixed attribute takes the Template's value (the Brain does this on every
+// layout save, so no screen or request can change one), and its pictures follow its orientation
+export function applyDeviceTemplate(el, t) {
+  if (!t) return el;
+  const fixed = deviceFixed(t);
+  for (const k of fixed) { if (k in (t.props || {})) el[k] = jsonSafe(t.props[k]); else if (k !== 'type') delete el[k]; }
+  if (t.type) el.type = t.type;
+  const p = t.pics?.[el.orientation === 'h' ? 'h' : 'v'];
+  if (p) { el.imageOn = p[0]; el.imageOff = p[1]; }
+  if (el.subtype === 'valve') { if (el.tapwater) el.tapwaterOut = tapOutFrom(el.tapSource); else { delete el.tapwaterOut; delete el.tapSource; } }
+  return el;
+}
