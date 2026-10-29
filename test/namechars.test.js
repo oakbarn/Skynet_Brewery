@@ -53,4 +53,8 @@ store.load();
 assert.ok(store.has('Late~')); assert.ok(!store.has('Late*'));
 assert.equal(store.getProp('Late~', 'value'), 7, 'saved value kept');
 assert.deepEqual([...told], [['Late*', 'Late~']]);
+// Tabs too (every name is treated the same, Rule 3.14): what is on the Tab follows
+const t = { workspaces: [{ name: 'Hot/Side' }, { name: 'Cold' }], elements: [{ name: 'P1', type: 'digitalOut', workspace: 'Hot/Side' }], graphics: [{ kind: 'pipe', workspace: 'Hot/Side' }] };
+assert.deepEqual([...toSafeNames(t)], [['Hot/Side', 'Hot~Side']]);
+assert.equal(t.elements[0].workspace, 'Hot~Side'); assert.equal(t.graphics[0].workspace, 'Hot~Side');
 console.log('namechars tests passed');

@@ -2646,7 +2646,8 @@ function addIpFit(fit) {
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
 $('#addWs').onclick = () => {
-  const n = prompt('New tab name'); if (!n) return;
+  const n = prompt('New tab name')?.trim(); if (!n) return;
+  const bad = elementNameError(n, 'Tab'); if (bad) return toast(bad, true);      // the same name rules as every other name (Rule 3.11)
   if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
   const tp = S.config.brewDefaults?.tabProfile;
   const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
@@ -3410,7 +3411,10 @@ function nameCheck(n, obj) {
     const bad = elementNameError(n, isDevice(obj) ? 'Device' : 'Widget'); if (bad) return bad;
     if (all.elements.some(x => x._ref !== obj._ref && x.name.toLowerCase() === n.toLowerCase()) || all.graphics.some(g => g.kind === 'text' && g.name === n)) return `The name ${n} is already used. Names must be unique.`;
   } else if (all.workspaces.some(w => w === obj || w._ref === obj._ref)) {
+    const bad = elementNameError(n, 'Tab'); if (bad) return bad;
     if (all.workspaces.some(w => w._ref !== obj._ref && w.name.toLowerCase() === n.toLowerCase())) return `There is already a Tab called ${n}`;
+  } else {                                                         // every other name follows the same rules (Fritz, 2026-10-29, Rule 3.11)
+    const bad = elementNameError(n, 'item'); if (bad) return bad;
   }
   return null;
 }

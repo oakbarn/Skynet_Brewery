@@ -480,6 +480,11 @@ async function route(req, res) {
     }
     // a new or newly spelled Device or Widget name follows Fritz's rules (public/names.js); names that were there already stay as they are
     for (const el of body.elements ?? []) { const bad = !store.has(cleanName(el.name)) && elementNameError(el.name); if (bad) return fail(res, 400, bad); }
+    // ... and so does every other new or newly spelled name: Tabs, Texts, pipes, vessels ... (Fritz, 2026-10-29, Skynet Rule 3.11)
+    for (const [k, what] of [['workspaces', 'Tab'], ['graphics', 'item']]) {
+      const had = new Set((store.config[k] ?? []).map(x => x?.name));
+      for (const x of body[k] ?? []) { const bad = x?.name && !x.of && !had.has(x.name) && elementNameError(x.name, what); if (bad) return fail(res, 400, bad); }
+    }
     // an RTD on a Mega: chip-select (CS) pin only on D14-D17, D22-D39, D41-D43, D47-D49 or D53 (Skynet Rule 6.9, public/naming.js)
     for (const el of body.elements ?? []) { const bad = rtdPinError(el, body.devices ?? store.config.devices); if (bad) return fail(res, 400, bad); }
     // an Ethernet Mega: no Device on pin D10, its Ethernet shield's pin (Skynet Rule 6.10, public/naming.js)
