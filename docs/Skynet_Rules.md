@@ -193,11 +193,14 @@ one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27,
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
 
-3.4 **Allowed characters** in Device and Widget names: no control characters, no spaces at the
-start or end, no leading dot, no emoji, none of the Windows reserved names (CON, PRN, AUX, NUL,
-COM1-9, LPT1-9). **File and folder names** also refuse `< > : " / \ | ? *`, and a period only
-before the file ending (folders and Process names: no period). Only new or changed names are
-checked; old names are never refused. (2026-10-23, PR #95)
+3.4 **Allowed characters** in Device, Widget and Interface names: no control characters, no spaces at
+the start or end, no leading dot, no emoji, none of `< > : " / \ | ? *`, none of the Windows reserved
+names (CON, PRN, AUX, NUL, COM1-9, LPT1-9). **File and folder names** follow the same list, and a
+period only before the file ending (folders and Process names: no period). Only new or changed names
+are checked, except `< > : " / \ | ? *`: under Rule 15.2 an older name with one of them is changed
+once, each to a `~` (`Pump:1` becomes `Pump~1`, `_2` if taken); it keeps its hidden key, the old name
+becomes its Label, and Processes, settings, saved values and the brew log follow (backups
+`.before-safe-names.bak`). (2026-10-23, PR #95; `< > : " / \ | ? *` added by Fritz 2026-10-29, Help 63)
 
 3.5 **Never rename an existing item by itself**, with one exception: **a clone follows its parent.**
 A clone's name is always its parent's name plus `_Clone_N`; when the parent is renamed, the parent part
@@ -649,8 +652,9 @@ and vKonstant to gAPI and gKonstant")
 2. **Other Skynet fittings and vessels:** Fritz allowed Bundle / Unbundle on them "for now"
    (2026-10-23). Rule 5.2 says anything integrated can never be un-bundled. Is it time to make all
    Skynet fittings and vessels fully Integrated, like the RIMS (Rule 5.3)?
-3. **Device names:** should `< > : " / \ | ? *` also be blocked in Device names, like file names?
-   (Rule 3.4, asked 2026-10-23)
+3. *Answered 2026-10-29:* `< > : " / \ | ? *` are blocked in Device names too (Rule 3.4). Fritz
+   asked for a list of other characters that could interfere with code; sent in the thread "Block
+   unsafe characters in Device names", waiting for his pick.
 4. **Build Tab:** should Save layout keep the Build Tab as it is? (asked 2026-10-23)
 5. **RIMS readings:** drop the separate Heat / Temp boxes and show readings on the RIMS picture?
    (asked 2026-10-26)
@@ -729,3 +733,6 @@ and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Rule 5.14: a check valve is a plain pipe fitting; valves and flow meters are Devices; a tee with a
   thermowell (or a thermowell on a vessel IP) is a kind of Temperature Probe. (thread "Simplify pipe fittings and Manual Valves")
 - 2026-10-29: Rule 5.18 built as ☰ Menu > Build Template (Device Templates). Help 89; next free Help number 90. (thread "Lock Skynet Widget Templates and IPs")
+- 2026-10-29: Rule 3.4 changed: `< > : " / \ | ? *` are not allowed in Device, Widget and Interface names either;
+  older names are changed to `~` (Rule 15.2). Open question 3 answered. Help 63 updated. (thread "Block unsafe
+  characters in Device names")
