@@ -805,3 +805,22 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 .btTick { white-space: nowrap; }
 .btHead .full, .btGrid .full { grid-column: 1 / -1; }
 @media (max-width: 700px) { .btHead, .btGrid { grid-template-columns: 1fr; } }
+
+/* Text Widget Properties (Fritz, 2026-10-29): the pattern for Properties dialogs. Framed boxes of fields, main field names in
+   bold, COPY at the top, and the orange ? that opens a pop-up with the Properties and Attributes of that kind of Widget. */
+.gfx.txt { overflow-wrap: anywhere; }              /* word wrap is always on: even a long word goes onto the next line */
+.gfx.txt .tlabel { display: block; }
+#dlgBody .dlgBox { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 6px 10px; align-items: center; border: 2px solid var(--line, #888); border-radius: 12px; padding: 10px 12px; margin-top: 6px; }
+#dlgBody .dlgBox .full { grid-column: 1 / -1; }
+#dlgBody .dlgBox > select, #dlgBody .dlgBox > input { min-width: 0; max-width: 100%; }
+.dlgBoxTitle { font-weight: 700; font-size: 1.1em; }
+#dlgBody label.strong { font-weight: 700; }
+button.dlgCopy { background: var(--accent); color: #1b1305; border-color: var(--accent); font-weight: 800; letter-spacing: .03em; }
+.infoNote { line-height: 1.4; }
+.infoIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #a34e00; background: #f28c1b; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
+.infoIcon:hover, .infoIcon:focus-visible { background: #ffa640; outline: 2px solid #000; outline-offset: 1px; }
+dialog.infoDlg { max-width: min(640px, calc(100vw - 32px)); border: 2px solid var(--line, #888); border-radius: 14px; }
+dialog.infoDlg h3 { margin: 0; }
+dialog.infoDlg h4 { margin: .8em 0 .3em; }
+dialog.infoDlg ul { margin: .2em 0; padding-left: 1.4em; }
+dialog.infoDlg ul.attrList { columns: 2 14em; }

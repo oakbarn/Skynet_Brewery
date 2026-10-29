@@ -77,6 +77,8 @@ const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
 store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gK / gA names
+// the Schema loaded at start-up: Text_1 -> w_Text_1 (Rule 15.2) happened before the engine was up, so its Processes follow now
+{ const tr = renameInProcesses(engine, store.loadRenames ?? new Map()); if (tr.length) console.log(`Processes updated for the new Text Widget names: ${tr.map(x => x.name).join(', ')}`); }
 const hw = new Hardware(store);
 const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
@@ -227,7 +229,7 @@ function cleanDonation(d = {}) {
 // Only names go out: never a hidden key (Rule 3.10). Clones are graphics, not elements, so they are never offered (Rule 4.4).
 function processWords() {
   return {
-    elements: [...store.list(), ...store.manualValves()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
+    elements: [...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
   };
