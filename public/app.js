@@ -8,7 +8,7 @@ import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.j
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
-import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom } from './templates.js';
+import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -5326,6 +5326,7 @@ const MENU = [
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
   { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
+  { key: 'buildtemplate', title: 'Build Template', tip: 'Make and change Device Templates: every attribute, and a "user can set" box on each (Admins)', render: renderBuildTemplateTab, admin: true },
   { key: 'skynetpics', title: 'Get Skynet pictures', tip: 'Copy new and changed Skynet pictures from GitHub onto the Brain (into media/Images/Skynet)', render: renderSkynetPicsTab, admin: true },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
   { key: 'schema', title: 'Schema', tip: 'Pick the Schema to load, and clone, add, rename, back up or restore one', render: renderSchemaTab },
@@ -5659,6 +5660,75 @@ function renderSchemaTab(box) {
 // ---- About tab: who is signed in, Sign out, and the loaded Schema with its version
 // Get Skynet pictures (Fritz, 2026-10-22): ask GitHub which Skynet pictures this Brain is missing, show them, copy them over.
 // The Brain does the downloading, so it works the same on a Pi, Windows, Mac or Linux; no GitHub account is needed.
+// ---- Build Template Tab (Fritz, 2026-10-28, Rule 5.18): an Admin makes and changes Device Templates here. Every attribute of
+// the Device is listed with its value and a "user can set" box: ticked attributes show on the User versions made from it (Rule
+// 5.16); the others are fixed. During the building phase every Template is a Skynet Template; Fritz locks them when they are
+// done (then they are read only, and this tab is used for User Bundled Templates). A Daughter keeps only what differs from its Master.
+let btPick = null;
+// attributes that belong to each Device, not to its Template: the box is there, the value is set on each Device
+const BT_PER_DEVICE = ['name', 'label', 'workspace', 'x', 'y', 'device', 'channel', 'locked'];
+function btFields(t) {
+  const it = { type: t.type || 'digitalOut', ...(t.props || {}) };
+  const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...F.common.slice(3)];
+  const add = [['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['showOnOffText', 'Text On/Off (the On / Off text shows on the Tab)', 'bool'], ['tapSource', 'Tap water source (the tap end, set on each Device)', 'text']];
+  const out = [], seen = new Set();
+  for (const x of [...f, ...add]) { if (x[0].startsWith('_') || seen.has(x[0]) || ['typeCode', 'tapwaterOut'].includes(x[0])) continue; seen.add(x[0]); out.push(x); }
+  return [['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]], ...out];
+}
+function renderBuildTemplateTab(box) {
+  if (!TPL) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadTemplates().then(() => menuTab === 'buildtemplate' && renderMenuPane()).catch(e => toast(e.message, true)); return; }
+  const list = TPL.device || [];
+  if (!list.some(t => t.name === btPick)) btPick = list[0]?.name || null;
+  box.append(h('h3', {}, 'Build Template'),
+    h('p', { class: 'muted' }, TPL.locked ? 'The Skynet Templates are locked: they can only be cloned. Templates made here are User Bundled Templates.'
+      : 'Skynet is still building its Templates: every Template made or changed here is a Skynet Template. They are locked when Fritz says (Skynet Rules 5.16 and 5.18).'));
+  const pick = h('select', { title: 'The Template to see or change' }, ...list.map(t => h('option', { value: t.name, ...(t.name === btPick ? { selected: true } : {}) }, `${t.title || t.name}  (${t.name})`)));
+  pick.onchange = () => { btPick = pick.value; renderMenuPane(); };
+  const mk = async from => {
+    const name = prompt(from ? `Name of the copy of ${from} (letters, digits, _ and -, no spaces)` : 'Name of the new Device Template (letters, digits, _ and -, no spaces)', from ? copyName(from, list.map(t => t.name)) : '');
+    if (!name) return;
+    const r = await api('POST', '/ui/templates/device', { name, from });
+    setTPL(r); btPick = r.made; renderMenuPane(); toast(`Made ${r.made}`);
+  };
+  box.append(h('div', { class: 'bar' }, pick, h('button', { onclick: guard(() => mk(null)) }, '➕ New Template'), btPick ? h('button', { onclick: guard(() => mk(btPick)) }, '⧉ Clone') : ''));
+  const t = list.find(x => x.name === btPick);
+  if (!t) return box.append(h('p', { class: 'muted' }, 'No Device Templates yet.'));
+  const masters = list.filter(x => !x.master && x.name !== t.name);
+  const work = { title: t.title || '', master: t.master || '', notes: t.notes || '', picH0: t.pics?.h?.[0], picH1: t.pics?.h?.[1], picV0: t.pics?.v?.[0], picV1: t.pics?.v?.[1] };
+  const head = h('div', { class: 'btHead' });
+  bindForm(head, [['title', 'Title (shown in the Add Device lists)', 'text'],
+    ['master', 'Master Template (a Daughter keeps only what differs from it)', 'sel', [['', '(none: this is a Master)'], ...masters.map(m => [m.name, m.title || m.name])]],
+    ['_p', 'Pictures: the picture follows the Orientation (45 degrees turns the vertical one). Leave empty on a Daughter to use its Master\'s.', 'note'],
+    ['picH0', 'Horizontal, picture when on', 'gpick'], ['picH1', 'Horizontal, picture when off', 'gpick'], ['picV0', 'Vertical, picture when on', 'gpick'], ['picV1', 'Vertical, picture when off', 'gpick'],
+    ['notes', 'Notes', 'text']], work);
+  const props = clone(t.props || {}), user = new Set(t.userFields || []), master = t.master && list.find(x => x.name === t.master);
+  const grid = h('div', { class: 'btGrid' }, h('b', {}, 'Attribute'), h('b', {}, 'Value in the Template'), h('b', { title: 'Ticked: shows on, and can be changed on, the User versions made from this Template' }, 'User can set'));
+  for (const f of btFields(t)) {
+    const k = f[0], fixed = DEVICE_FIXED.includes(k), per = BT_PER_DEVICE.includes(k);
+    const [lab, inp] = per ? [h('label', {}, f[1]), h('span', { class: 'muted' }, '(set on each Device)')] : field(f, props);
+    const tick = h('input', { type: 'checkbox', 'data-user': k, ...(user.has(k) && !fixed ? { checked: true } : {}), ...(fixed ? { disabled: true, title: 'Always set by the Template (Rule 5.16)' } : {}) });
+    grid.append(lab, inp || h('span'), h('label', { class: 'btTick' }, tick, fixed ? ' fixed' : ''));
+  }
+  const base = clone(props); readFields(base, grid);       // what the form shows untouched: a default it fills in by itself is not kept
+  const save = h('button', { class: 'primary', disabled: !t.editable, title: t.editable ? '' : 'A locked Skynet Template can only be cloned' }, '💾 Save');
+  save.onclick = guard(async () => {
+    readFields(work, head); const all = clone(props); readFields(all, grid);
+    for (const k of Object.keys(all)) if (all[k] === undefined || all[k] === '' || BT_PER_DEVICE.includes(k) || (!(k in props) && JSON.stringify(all[k]) === JSON.stringify(base[k]))) delete all[k];
+    const m = work.master && list.find(x => x.name === work.master);
+    const own = m ? Object.fromEntries(Object.entries(all).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(m.props?.[k]))) : all;
+    const userFields = [...grid.querySelectorAll('[data-user]')].filter(c => c.checked).map(c => c.dataset.user);
+    const pics = {}; if (work.picH0 && work.picH1) pics.h = [work.picH0, work.picH1]; if (work.picV0 && work.picV1) pics.v = [work.picV0, work.picV1];
+    const sameUser = m && JSON.stringify([...userFields].sort()) === JSON.stringify([...(m.userFields || [])].sort());
+    const r = await api('PUT', '/ui/templates/device/' + encodeURIComponent(t.name), { title: work.title, master: work.master || undefined, notes: work.notes, type: t.type || m?.type || 'digitalOut',
+      props: own, pics: Object.keys(pics).length && !(m && JSON.stringify(pics) === JSON.stringify(m.pics)) ? pics : undefined, userFields: sameUser ? undefined : userFields });
+    setTPL(r); renderMenuPane(); fillAddType(); toast(`Saved ${t.name}`);
+  });
+  const del = h('button', { class: 'danger', disabled: !t.deletable, title: t.deletable ? '' : 'Shipped Skynet Templates are never deleted' }, '🗑 Delete');
+  del.onclick = guard(async () => { if (!confirm(`Delete the Template ${t.name}?`)) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
+  box.append(h('div', { class: 'bar' }, save, del, master ? h('span', { class: 'muted' }, `Daughter of ${master.title || master.name}: only what differs from it is kept.`) : ''), head,
+    h('h3', {}, 'Attributes'), grid, h('div', { class: 'bar' }, save.cloneNode(true)));
+  box.lastChild.firstChild.onclick = save.onclick;
+}
 function renderSkynetPicsTab(box) {
   const out = h('div', { class: 'spOut' }), go = h('button', { class: 'primary', disabled: true }, 'Get them');
   const check = h('button', {}, 'Check GitHub');
