@@ -368,7 +368,9 @@ Template, even if only the Service differs). (2026-10-28, thread "Lock Skynet Wi
 on each attribute, a **"user can set"** tick box (shown on User versions, Rule 5.16). During the building
 phase every Template made there is a Skynet Template (or is deleted before Fritz switches them all to
 Skynet Templates); they are set (locked) only when Fritz says (Rule 9.6). The dialog is kept in production
-for User Bundled Templates. (2026-10-28, thread "Lock Skynet Widget Templates and IPs")
+for User Bundled Templates. It is **☰ Menu > Build Template**; the always-fixed attributes (pictures, Kind,
+Valve type, Service, Look, tap behaviour) have a greyed-out box. (2026-10-28, thread "Lock Skynet Widget Templates
+and IPs"; built 2026-10-29, Help 89)
 
 ## 6. Devices, connections and safety
 
@@ -562,7 +564,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **89**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **90**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -703,3 +705,4 @@ and vKonstant to gAPI and gKonstant")
   excepts User versions of Skynet Templates; added Rules 5.16 (Skynet Templates locked, User versions with per-type user
   settable attributes), 5.17 (Master and Daughter Templates; Skynet Motorized Ball Valve Device H / VL / VR) and 5.18
   (Build Template Tab). Help 88 taken; next free Help number 89. (thread "Lock Skynet Widget Templates and IPs")
+- 2026-10-29: Rule 5.18 built as ☰ Menu > Build Template (Device Templates). Help 89; next free Help number 90. (thread "Lock Skynet Widget Templates and IPs")

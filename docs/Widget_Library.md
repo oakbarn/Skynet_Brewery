@@ -209,7 +209,7 @@ One unit: every opening has a two-way IP built in, nothing to set for the IPs. (
 ### Skynet Device Templates (Rule 5.16)
 A Device made from a Skynet Device Template is its **User version**: it inherits everything and shows only the Template's user
 settable attributes. First one: the Skynet Motorized Ball Valve Device, Master H with Daughters VL and VR (see the Device Library,
-4.3a). The Build Template Tab (Rule 5.18) will give each attribute a "user can set" box.
+4.3a). ☰ Menu > Build Template (Rule 5.18, Help 89) lists every attribute with its Template value and a "user can set" box.
 
 ## 5. Template attributes
 
