@@ -5,7 +5,7 @@ The **Edit layout** bar (press the navy blue Edit layout button beside **☰ Men
 | Row | What is on it |
 |---|---|
 | **1** | Devices on the left, Widgets on the right |
-| **2** | Draw pipe, Draw hose, Elbows, Tees …, the turn buttons, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 🔨 Build Tab, 👁 Preview, 💾 Save Build ... |
+| **2** | Draw pipe, Draw hose, Elbows, Tees …, the turn buttons, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 🔨 Build Tab, 🔨 To Build Tab, 👁 Preview, 💾 Save Build ... |
 | **3** | The hint, Update Version, Save layout, Exit |
 
 ## Devices: Select Device Type and Add Device

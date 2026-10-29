@@ -2477,6 +2477,7 @@ function updLockBtn() {
   const b = $('#lockItem'); if (!b) return;
   const item = editing && sel ? findItem(sel.kind, sel.id) : null;
   b.disabled = !item; b.textContent = item?.locked ? '🔓 Unlock' : '🔒 Lock';
+  const t = $('#itemToBuild'); if (t) t.disabled = !buildable(item);
   updTurnBar(item);
 }
 // Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
@@ -2807,18 +2808,18 @@ async function saveBuildTemplate({ name, skynet }) {
 async function saveBuild() {
   const b = buildWs(); if (!b) return true;
   // an item un-bundled to the Build Tab: back where it came from (same Tab, spot and size), or saved like a new build
-  for (const v of draft.graphics.filter(g => g.workspace === b.name && g.buildFrom)) {
-    const to = draft.workspaces.find(w => w.name === v.buildFrom.tab && !w.build);
-    if (to && confirm(`Put ${v.label || v.name} back where it came from?\n\nOK = Yes: back on the ${to.name} tab, in the same spot and at the same size, bundled again.\nCancel = No: save it like a new build. Pick a Tab and it goes there at the size it is now, in the middle of the Tab.`)) {
+  for (const v of buildItems(b).filter(g => g.buildFrom)) {
+    const to = draft.workspaces.find(w => w.name === v.buildFrom.tab && !w.build), bun = !('bundled' in v.buildFrom) || v.buildFrom.bundled;
+    if (to && confirm(`Put ${v.label || v.name} back where it came from?\n\nOK = Yes: back on the ${to.name} tab, in the same spot and at the same size${!isEl(v) && bun ? ', bundled again' : ''}.\nCancel = No: save it like a new build. Pick a Tab and it goes there at the size it is now, in the middle of the Tab.`)) {
       putBack(v, to); wsName = to.name;
-      toast(`${v.label || v.name} is back on the ${to.name} tab, bundled. Press Save layout to keep it.`, false, 8000);
+      toast(`${v.label || v.name} is back on the ${to.name} tab${!isEl(v) && bun ? ', bundled' : ''}. Press Save layout to keep it.`, false, 8000);
     }
   }
   if (!buildItems(b).length) { const back = wsName; dropBuild(); if (draft.workspaces.some(w => w.name === back)) wsName = back; renderTabs(); renderWs(); return true; }
   if (!TPL) await loadTemplates();
   const r = await saveBuildDialog(b); if (!r) return false;
   if (r.to === 'trash') {
-    const came = draft.graphics.filter(g => g.workspace === b.name && g.buildFrom).map(g => `${g.label || g.name} (from the ${g.buildFrom.tab} tab)`);
+    const came = buildItems(b).filter(g => g.buildFrom).map(g => `${g.label || g.name} (from the ${g.buildFrom.tab} tab)`);
     if (!confirm('Throw away everything on the Build Tab?' + (came.length ? `\n\nThis also deletes ${came.join(', ')}.` : ''))) return false;
     dropBuild(); toast('The Build Tab was thrown away');
   } else if (r.to === 'tab') {
@@ -3494,6 +3495,28 @@ async function editBundle(v) {
   }
   sel = { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
 }
+// 🔨 To Build Tab (Fritz, 2026-10-29): when editing a Tab, any item on it can be worked on on the Build Tab. It goes there
+// with its bundled parts, in the same spot; buildFrom remembers its Tab, spot, size and whether it was bundled, and
+// Save Build ... offers to put it back. Pipes and the parts of a bundle don't go by themselves.
+function isEl(x) { return !!draft?.elements.includes(x); }
+function buildHead(item) { return item && (isEl(item) ? item : bundleOf(item) || item); }
+function buildable(item) { const v = buildHead(item); return !!v && (isEl(v) || v.kind !== 'pipe') && !draft?.workspaces.find(w => w.name === v.workspace)?.build; };
+function itemToBuild() {
+  const v = buildHead(sel && findItem(sel.kind, sel.id)), el = isEl(v);
+  if (!v || !buildable(v)) return toast('Pick an item on a Tab first (not a pipe, and not one already on the Build Tab)', true);
+  const parts = el ? [] : bundleParts(v), locked = [v, ...parts].filter(x => x.locked);
+  if (locked.length) return toast(`🔒 ${lockName(locked[0])} is locked in place. Press 🔓 Unlock first: only unlocked items move.`, true);
+  const old = v.workspace;
+  v.buildFrom = { tab: old, x: v.x || 0, y: v.y || 0, w: v.w || 120, h: v.h || 60, bundled: !!v.bundled };
+  wsName = old;                                    // the Build Tab is the size of this Tab and offers it first
+  const b = toBuild(); if (!b) return;
+  const ids = el ? (hasIps(v) ? devIps(v).map(q => q.id) : []) : [...parts.map(g => g.id), ...eqPorts(v).map(q => q.id)];
+  for (const g of [v, ...parts]) g.workspace = b.name;
+  const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === old && (ids.includes(p.from) || ids.includes(p.to)));
+  sel = el ? { kind: 'el', id: v.name } : { kind: 'gfx', id: v.id }; renderTabs(); renderWs();
+  toast(`${v.label || v.name || 'It'} is on the Build Tab.` + (piped ? ` Its pipes stayed on ${old}.` : '') + ' Change it, then press 💾 Save Build ... to put it back.', false, 8000);
+}
+$('#itemToBuild').onclick = () => itemToBuild();
 // an un-bundled item goes to the Build Tab with its parts, in the same spot; buildFrom remembers where it came from
 function unbundleToBuild(v) {
   const old = v.workspace;
@@ -3509,6 +3532,7 @@ function unbundleToBuild(v) {
 // Save Build ... > Yes: back on the Tab it came from, in the same spot and at the same size, bundled again.
 // Its IPs keep their place on the picture; pipes drawn on the Build Tab between its own IPs go along.
 function putBack(v, to) {
+  if (isEl(v)) { Object.assign(v, { x: v.buildFrom.x, y: v.buildFrom.y, w: v.buildFrom.w, h: v.buildFrom.h, workspace: to.name }); delete v.buildFrom; return; }   // a Device or Widget
   const f = v.buildFrom, ox = v.x || 0, oy = v.y || 0, sx = f.w / (v.w || f.w), sy = f.h / (v.h || f.h);
   const parts = bundleParts(v), ids = new Set([...parts.map(g => g.id), ...eqPorts(v).map(q => q.id)]);
   for (const p of parts) {
@@ -3522,10 +3546,13 @@ function putBack(v, to) {
   Object.assign(v, { x: f.x, y: f.y, w: f.w, h: f.h, workspace: to.name });
   rebundle(v);
 }
-// Save (re-bundle): an item that came from a Tab is bundled again when it leaves the Build Tab
+// Save (re-bundle): an un-bundled item that came from a Tab is bundled again when it leaves the Build Tab; one sent with
+// 🔨 To Build Tab goes back the way it was
 function rebundle(v) {
-  delete v.buildFrom;
-  if (bundleParts(v).length) v.bundled = true;
+  const f = v.buildFrom; delete v.buildFrom;
+  if (isEl(v)) return;
+  if (f && 'bundled' in f) { if (f.bundled) v.bundled = true; else delete v.bundled; }
+  else if (bundleParts(v).length) v.bundled = true;
 }
 // Clone a Bundled item (Fritz, 2026-10-21): the vessel and every IP bundled with it, copied side by side under a new name.
 // Pipes are not copied (they belong where they are drawn); on a Tab with an Equipment Profile the copy joins its Equipment list when the layout is saved.
