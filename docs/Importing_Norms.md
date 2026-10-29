@@ -85,6 +85,7 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | BruControl | Skynet | Status |
 | --- | --- | --- |
 | A name with spaces: `Test Timer` | `Test_Timer`; the old name becomes the Label so the screen looks the same; Processes follow | Built |
+| A name with `< > : " / \ \| ? *` in it: `Pump:1` | `Pump~1` (each one becomes `~`, `_2` if taken); the old name becomes the Label; Processes follow (Rule 3.4) | Built |
 | The same name used twice | the second one gets `_2`, `_3` ... and a warning | Built |
 | Names, all of them | follow the Skynet naming Rules (3.3, 3.4); each item gets its hidden key (Rule 3.10) | Norm |
 | Device names | the Suggested Name `InterfaceID_Port_DeviceTypeID_Label__TabID` (Rule 3.1) is offered; a kept BruControl name gets the own-name warning (Rule 3.13) | To decide with Fritz when the importer starts |
@@ -135,6 +136,20 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | OneWire probe numbered by bus position | the probe has to be picked on the Devices page (Skynet uses each probe's ROM id) | Built (warning) |
 | Port types Skynet does not have yet | skipped, with a warning | Built |
 
+## 8a. Temperature gauges (BruControl "style")
+
+(Fritz, 2026-10-29)
+
+BruControl lets a Temp Probe (and other readings) be shown as a Circular, Linear or Digital gauge,
+each with a **style** (ShiningDark, GothicMat, and so on). Skynet will **not** have a style property.
+Skynet gauges will be our own SVG pictures with colors you can change (not built yet).
+
+| BruControl | Skynet | Status |
+| --- | --- | --- |
+| Gauge kind + style (Circular / Linear / Digital, ShiningDark, GothicMat ...) | no style property; the item gets the Skynet gauge Template (with its daughters) that looks most like it | Norm (waits on the Skynet gauge SVGs) |
+| The old kind and style | kept in the hidden `bru` note so the match can be made again later | Built (`bru.gauge`) |
+| Digital gauge today | LED or LCD look picked from the style name | Built (until the Skynet gauges replace it) |
+
 ## 9. Pictures and sounds
 
 | BruControl | Skynet | Status |
@@ -155,3 +170,5 @@ The name alone is the item's main value; everything else is `name.attribute`.
   attributes, and everything from BRUCONTROL_IMPORT_RULES.md and the current import code.
 - 2026-10-28: Globals now become gKonstant / gAPI (`RP_` -> `gA_`); added section 6a, vKonstant / vAPI -> gKonstant / gAPI. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Section 6a built: older vK_ / vA_ names renamed, types changed in the files, no old words kept (Rule 15.2).
+- 2026-10-29: Section 5: names with `< > : " / \ \| ? *` get a `~` for each (Rule 3.4, Rule 15.2). (thread "Block unsafe characters in Device names")
+- 2026-10-29: Section 8a: BruControl gauge style is not carried over; the closest Skynet gauge Template (with daughters) is used instead. (thread "Start the Importing Norms document")
