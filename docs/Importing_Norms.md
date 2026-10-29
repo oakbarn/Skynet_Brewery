@@ -85,6 +85,7 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | BruControl | Skynet | Status |
 | --- | --- | --- |
 | A name with spaces: `Test Timer` | `Test_Timer`; the old name becomes the Label so the screen looks the same; Processes follow | Built |
+| A name with `< > : " / \ \| ? *` in it: `Pump:1` | `Pump~1` (each one becomes `~`, `_2` if taken); the old name becomes the Label; Processes follow (Rule 3.4) | Built |
 | The same name used twice | the second one gets `_2`, `_3` ... and a warning | Built |
 | Names, all of them | follow the Skynet naming Rules (3.3, 3.4); each item gets its hidden key (Rule 3.10) | Norm |
 | Device names | the Suggested Name `InterfaceID_Port_DeviceTypeID_Label__TabID` (Rule 3.1) is offered; a kept BruControl name gets the own-name warning (Rule 3.13) | To decide with Fritz when the importer starts |
@@ -155,3 +156,4 @@ The name alone is the item's main value; everything else is `name.attribute`.
   attributes, and everything from BRUCONTROL_IMPORT_RULES.md and the current import code.
 - 2026-10-28: Globals now become gKonstant / gAPI (`RP_` -> `gA_`); added section 6a, vKonstant / vAPI -> gKonstant / gAPI. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Section 6a built: older vK_ / vA_ names renamed, types changed in the files, no old words kept (Rule 15.2).
+- 2026-10-29: Section 5: names with `< > : " / \ \| ? *` get a `~` for each (Rule 3.4, Rule 15.2). (thread "Block unsafe characters in Device names")
