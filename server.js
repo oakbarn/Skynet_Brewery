@@ -40,6 +40,7 @@ import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
 import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { gStandardOnDisk } from './lib/gstandard.js';
+import { safeNamesOnDisk, renameQuoted } from './lib/namechars.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -61,6 +62,8 @@ const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, d
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 // vKonstant / vAPI became gKonstant / gAPI, vK_ / vA_ names gK_ / gA_: every Schema, saved value, the database and Processes, once
 const gnames = gStandardOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
+// Names can't have < > : " / \ | ? * any more (Fritz, 2026-10-29): an older name gets a ~ for each, once, everywhere (lib/namechars.js)
+const safenames = safeNamesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 useKeySecret(DATA);           // hidden keys: the browser only ever gets stand-ins for them (lib/keys.js)
 const store = new Store(CONFIG, DATA);
 store.load();
@@ -77,6 +80,12 @@ const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
 store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gK / gA names
+store.on('safeRenamed', map => {   // ... and its names with < > : " / \ | ? * (written in quotes in a Process)
+  for (const name of engine.names()) {
+    const text = engine.read(name), out = renameQuoted(text, map);
+    if (out !== text) { engine.backup(name); engine.write(name, out); }
+  }
+});
 const hw = new Hardware(store);
 const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
@@ -107,6 +116,7 @@ engine.on('started', n => logger.scriptStarted(n));
 if (retired) for (const l of retired.lines) { console.log(l); engine.print('system', l); }
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
 if (gnames) for (const l of gnames.lines) { console.log(l); engine.print('system', l); }
+if (safenames) for (const l of safenames.lines) { console.log(l); engine.print('system', l); }
 if (visFixed.length) { const l = `Processes changed to .visible / .hidden: ${visFixed.join(', ')} (old copies saved as .before-hidden.bak).`; console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();

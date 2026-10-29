@@ -8,12 +8,15 @@ import { MediaFiles } from '../lib/mediafiles.js';
 import { FileMove } from '../lib/filemove.js';
 
 // ---- Device and Widget names ----
-for (const ok of ['MB_25_PWM_VlV_Fly_Sparge_SP', 'Kettle_SP', 'Temp_°F', 'Pump:1', 'CON_2', 'COM10', 'Brü_Kessel', 'a.b'])
+for (const ok of ['MB_25_PWM_VlV_Fly_Sparge_SP', 'Kettle_SP', 'Temp_°F', 'Hot~Cold', 'CON_2', 'COM10', 'Brü_Kessel', 'a.b'])
   assert.equal(elementNameError(ok), '', ok + ' is fine');
 for (const [bad, why] of [['', 'name'], [' Pump', 'space'], ['Pump ', 'space'], ['.Pump', 'dot'], ['Pump\u0007', 'control'], ['Pump\t1', 'control'],
   ['Beer🍺', 'emoji'], ['Hot✅', 'emoji'], ['Flag🇺🇸', 'emoji'], ['CON', 'Windows'], ['nul', 'Windows'], ['COM1', 'Windows'], ['LPT9', 'Windows']])
   assert.match(elementNameError(bad), new RegExp(why, 'i'), JSON.stringify(bad));
 assert.match(elementNameError('AUX', 'Device'), /Device name/, 'the message says what kind of name');
+// < > : " / \ | ? * are refused in Device, Widget and Interface names too (Fritz, 2026-10-29)
+for (const c of '<>:"/\\|?*') assert.match(elementNameError(`a${c}b`, 'Device'), /Device name .* can't have/, c + ' is not allowed');
+assert.match(elementNameError('Hot/Cold:1'), /can't have \/ : in it/, 'every bad character is named once');
 assert.ok(!hasEmoji('Copyright © ® ™'), 'old typewriter signs are not emoji');
 
 // ---- file and folder names ----
