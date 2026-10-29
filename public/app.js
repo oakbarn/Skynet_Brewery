@@ -3,7 +3,7 @@ import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
-import { setRich } from './richtext.js';
+import { setRich, NAMED_COLORS } from './richtext.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
@@ -476,8 +476,7 @@ function widgetLabel(g, defPos) {
 const TD = () => textDefaults(S.config.brewDefaults);
 // standard colors for the flow widgets' color dropdowns ('' = the default color)
 // Default = the item's normal color, None = no color at all (see-through)
-const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
-  ['Copper', '#d98a4a'], ['Brown', '#8b5a2b'], ['Steel grey', '#8a8f96'], ['Light grey', '#c9ced3'], ['White', '#ffffff'], ['Black', '#000000']];
+const COLORS = [['Default', ''], ['None', 'transparent'], ...NAMED_COLORS];
 const LABEL_POS = ['top', 'top-left', 'top-right', 'center', 'bottom', 'bottom-left', 'bottom-right', 'above', 'below'];
 function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
@@ -2928,7 +2927,7 @@ const F = {
   picture: [['follow', 'Turns on with (None = a still picture)', 'onsrc', null, true], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
-  text: [['text', 'Text (codes like \\b bold, \\L large, \\n new line work here)', 'area'], ['visible', 'Visible', 'bool', true], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on)', 'bool'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
+  text: [['text', 'Text (codes like \\b bold, \\i italic, \\L large, \\c{Red} color, \\F °F, \\n new line work here)', 'area'], ['visible', 'Visible', 'bool', true], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on)', 'bool'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
     ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['wrap', 'Word wrap as needed (off = one line, cut off at the edge)', 'bool', true], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],

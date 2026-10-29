@@ -19,7 +19,7 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 | X and Y position | its place in pixels from the left and top of the Tab: **x** is **h**orizontal (across), **y** is **v**ertical (up and down). The old names `.xPosition` and `.yPosition` still work. | `Text_1.x_hPosition = 400`, `Text_1.y_vPosition = 120` |
 
 - **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). On a Text, switching it off keeps the text on one line, cut off at the edge.
-- **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
+- **Codes inside text** work in every text box: `\b` bold, `\i` italic, `\c{Red}` color, `\L` large, `\n` a new line, `\F` °F and the others in [Rich Text Embedded Code](90-rich-text-embedded-code).
 - **Name font** and **Name font size** set the font of the Names, the Labels on vessels and the Texts.
 
 On a Device or Widget, **Fore color**, **Back color** and **Alignment** are for all of its text. **Name color**, **Value color**, **Name alignment** and the others below them are still there, and win over Fore color for that one box.
