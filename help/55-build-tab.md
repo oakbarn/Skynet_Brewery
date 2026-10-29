@@ -45,6 +45,20 @@ A new Device whose name still follows the suggested name gets the **Tab ID** of 
 
 If you press **Save layout** while something is still on the Build Tab, the Save Build pop-up opens first, so nothing is lost. **Exit without Saving** throws away the Build Tab with the rest of your changes.
 
+## Work on an item on the Build Tab
+
+When you edit a Tab, you can take any item on it to the clean Build Tab to work on it there. It is your choice: you can also change it right where it is.
+
+1. In **Edit layout**, click the item to pick it (a Device, a Widget, a picture, a text or a vessel).
+2. Press **🔨 To Build Tab** on the Edit layout bar. Skynet remembers its Tab, its spot and its size, and moves it to the Build Tab. A vessel takes its IPs and fittings along. Pipes drawn to it stay on its Tab.
+3. Change it on the Build Tab. **👁 Preview** shows how it will look.
+4. Press **💾 Save Build ...**. A pop-up asks **Put it back where it came from?**
+   - **OK (Yes)**: it goes back on the same Tab, in the same spot and at the same size. A bundled item is bundled again, and one that was not bundled stays that way.
+   - **Cancel (No)**: it is saved like a new build. The Save Build pop-up opens, and you can send it to any Tab or save it as a Template.
+5. Press **Save layout** to keep it.
+
+**🔨 To Build Tab** is greyed out when nothing is picked, when a pipe is picked, or when the item is already on the Build Tab. A locked item has to be unlocked first (only unlocked items move). New things are still always made on the Build Tab first.
+
 ## Change a bundled item on the Build Tab
 
 A bundled item (a vessel or Tab_Fitting with its IPs) can be taken off its Tab, changed on the Build Tab, and put back in the same place.
