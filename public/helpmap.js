@@ -72,7 +72,7 @@ const BAR = [
   ['#addIpType', ['edit-layout-bar', 'row-2-pipes-fittings-locks-and-tabs']],
   ['#turnBar', ['build-tab-add-button', 'turn-and-flip-a-fitting-or-vessel']],
   ['#cloneDev', ['cloned-devices', 'make-a-clone']],
-  ['#buildTab, #saveBuild, #previewBuild, #wsTabs .buildTab', ['build-tab']],
+  ['#buildTab, #saveBuild, #previewBuild, #itemToBuild, #wsTabs .buildTab', ['build-tab']],
   ['#wsTabs', ['tabs', 'using-a-tab-on-brew-day']],
   ['#editBar', ['tabs', 'changing-the-layout-admins']],
   ['#barHelp', ['help-window']],
