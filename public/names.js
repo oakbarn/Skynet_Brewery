@@ -1,14 +1,14 @@
 // What a Device, Widget, file or folder may be called (Fritz, 2026-10-23). Used by the browser (app.js) and the server.
 // Each check gives back '' when the name is fine, or a plain sentence that says what is wrong.
 //
-// Device and Widget names, not allowed: control characters, leading or trailing spaces, a leading dot, emoji,
-//   and the Windows names CON, PRN, AUX, NUL, COM1-COM9, LPT1-LPT9.
-// File and folder names: all of that, and also < > : " / \ | ? *  A period only before the file ending (Mash.txt),
+// Device, Widget and Interface names, not allowed: control characters, leading or trailing spaces, a leading dot, emoji,
+//   < > : " / \ | ? *  (Fritz, 2026-10-29) and the Windows names CON, PRN, AUX, NUL, COM1-COM9, LPT1-LPT9.
+// File and folder names: all of that, and a period only before the file ending (Mash.txt),
 //   so a folder or a Process name has no period at all.
-// Names that were already there are never changed or refused: only a new name, or a new spelling, is checked.
+// Older names with < > : " / \ | ? * in them are changed once to a ~ for each (lib/namechars.js, Skynet Rule 15.2).
 
 export const FILE_CHARS = '< > : " / \\ | ? *';
-const BAD_FILE_CHAR = /[<>:"/\\|?*]/;
+export const BAD_NAME_CHARS = /[<>:"/\\|?*]/;
 const CONTROL = /\p{Cc}/u;
 const RESERVED = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i;
 // Emoji: the colour pictures (😀 🍺 ✅), flags, skin tones and the joiners they are built with.
@@ -27,6 +27,8 @@ function common(n, what) {
   if (n !== n.trim()) return `The ${what} name "${n}" can't start or end with a space`;
   if (n.startsWith('.')) return `The ${what} name "${n}" can't start with a dot (.)`;
   if (hasEmoji(n)) return `The ${what} name "${n}" can't have emoji in it`;
+  const bad = [...new Set(n.match(new RegExp(BAD_NAME_CHARS.source, 'g')) ?? [])];
+  if (bad.length) return `The ${what} name "${n}" can't have ${bad.join(' ')} in it (not allowed: ${FILE_CHARS})`;
   return '';
 }
 const reservedMsg = (n, what) => `"${n}" is a name Windows keeps for itself (CON, PRN, AUX, NUL, COM1-COM9, LPT1-LPT9). Pick another ${what} name.`;
@@ -43,8 +45,6 @@ export function elementNameError(name, what = 'Device or Widget') {
 export function fileNameError(name, { ext = true, what = 'file' } = {}) {
   const n = String(name ?? '');
   const e = common(n, what); if (e) return e;
-  const bad = [...new Set(n.match(new RegExp(BAD_FILE_CHAR.source, 'g')) ?? [])];
-  if (bad.length) return `The ${what} name "${n}" can't have ${bad.join(' ')} in it (not allowed: ${FILE_CHARS})`;
   const dots = n.split('.').length - 1;
   if (!ext && dots) return `The ${what} name "${n}" can't have a period (.) in it`;
   if (ext && (dots > 1 || (dots === 1 && !/\.[^.]+$/.test(n)))) return `The ${what} name "${n}" can have a period (.) only before its file ending, like Mash.txt`;
