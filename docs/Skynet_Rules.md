@@ -193,14 +193,15 @@ one that Devices already use. (2026-10-21, PR #61; restated by Fritz 2026-10-27,
 
 3.3 **No spaces in Device or Process names.** Names must be unique. (2026-10-05, PR #25; 2026-10-21)
 
-3.4 **Allowed characters** in Device, Widget and Interface names: no control characters, no spaces at
-the start or end, no leading dot, no emoji, none of `< > : " / \ | ? *`, none of the Windows reserved
+3.4 **Allowed characters** in every name (Devices, Widgets, Interfaces, Tabs, Texts, pipes, vessels ...;
+all names are treated the same, Rule 3.11): no control characters, no spaces at the start or end, no leading dot, no emoji, none of `< > : " / \ | ? *`, none of the Windows reserved
 names (CON, PRN, AUX, NUL, COM1-9, LPT1-9). **File and folder names** follow the same list, and a
 period only before the file ending (folders and Process names: no period). Only new or changed names
 are checked, except `< > : " / \ | ? *`: under Rule 15.2 an older name with one of them is changed
 once, each to a `~` (`Pump:1` becomes `Pump~1`, `_2` if taken); it keeps its hidden key, the old name
 becomes its Label, and Processes, settings, saved values and the brew log follow (backups
-`.before-safe-names.bak`). (2026-10-23, PR #95; `< > : " / \ | ? *` added by Fritz 2026-10-29, Help 63)
+`.before-safe-names.bak`; for a Tab, everything on it follows). (2026-10-23, PR #95; `< > : " / \ | ? *` added by
+Fritz 2026-10-29, PR #134; every name 2026-10-29, Help 63)
 
 3.5 **Never rename an existing item by itself**, with one exception: **a clone follows its parent.**
 A clone's name is always its parent's name plus `_Clone_N`; when the parent is renamed, the parent part
@@ -736,3 +737,5 @@ and vKonstant to gAPI and gKonstant")
 - 2026-10-29: Rule 3.4 changed: `< > : " / \ | ? *` are not allowed in Device, Widget and Interface names either;
   older names are changed to `~` (Rule 15.2). Open question 3 answered. Help 63 updated. (thread "Block unsafe
   characters in Device names")
+- 2026-10-29: Rule 3.4 now covers every name (Tabs, Texts, pipes, vessels too), as Rule 3.11 treats all names the same.
+  User Template names are left alone. (thread "Block unsafe characters in Device names")
