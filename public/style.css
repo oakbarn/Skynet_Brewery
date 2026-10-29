@@ -725,6 +725,11 @@ button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, 
 /* codes in Process text (public/richtext.js): \b bold, \L large, \_ subscript, \^ superscript */
 .rt-b { font-weight: bolder; }
 .rt-L { font-size: max(var(--textLarge, 28px), 1.25em); line-height: 1.1; }
+.rt-i { font-style: italic; }
+.rt-u { text-decoration: underline; }
+.rt-s { text-decoration: line-through; }
+.rt-u.rt-s { text-decoration: underline line-through; }
+.rt-S { font-size: 0.75em; }
 /* Log page > Download CSV */
 .csvBox { margin-bottom: 14px; padding: 4px 12px 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
 .csvBox h3 { margin: 6px 0; }
