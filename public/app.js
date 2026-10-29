@@ -4,6 +4,7 @@ import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, D
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
+import { SKYNET_STYLES, STYLE_KEYS, styleOf, isSkynetStyle } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
@@ -835,6 +836,27 @@ function styleEl(n, e) {
   if (e.border === 'visible') n.classList.add('show-border');
 }
 
+// Seven-segment digits as SVG (the Timer look): 0-9, - and :, lit segments in var(--seg), the others faint
+const SEGS = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg', '-': 'g' };
+function sevenSeg(text) {
+  const W = 40, H = 70, t = 7, g = 1.5, out = [];
+  const hs = (x, y, l) => `${x},${y} ${x + t / 2},${y - t / 2} ${x + l - t / 2},${y - t / 2} ${x + l},${y} ${x + l - t / 2},${y + t / 2} ${x + t / 2},${y + t / 2}`;
+  const vs = (x, y, l) => `${x},${y} ${x + t / 2},${y + t / 2} ${x + t / 2},${y + l - t / 2} ${x},${y + l} ${x - t / 2},${y + l - t / 2} ${x - t / 2},${y + t / 2}`;
+  let x = 4;
+  for (const ch of String(text)) {
+    if (ch === ':' || ch === '.') {
+      out.push(`<circle cx="${x + 5}" cy="${H * 0.33}" r="3.6" class="on"/>`, ...(ch === ':' ? [`<circle cx="${x + 5}" cy="${H * 0.67}" r="3.6" class="on"/>`] : []));
+      x += 12; continue;
+    }
+    const lit = SEGS[ch] ?? '', x0 = x + t / 2, x1 = x + W - t / 2, y0 = t / 2, ym = H / 2, y1 = H - t / 2;
+    const P = { a: hs(x0 + g, y0, x1 - x0 - 2 * g), g: hs(x0 + g, ym, x1 - x0 - 2 * g), d: hs(x0 + g, y1, x1 - x0 - 2 * g),
+      f: vs(x0, y0 + g, ym - y0 - 2 * g), b: vs(x1, y0 + g, ym - y0 - 2 * g), e: vs(x0, ym + g, y1 - ym - 2 * g), c: vs(x1, ym + g, y1 - ym - 2 * g) };
+    if (ch !== ' ') for (const [k, pts] of Object.entries(P)) out.push(`<polygon points="${pts}" class="${lit.includes(k) ? 'on' : 'off'}"/>`);
+    x += W + 6;
+  }
+  return `<svg class="seg7" viewBox="0 -2 ${x} ${H + 4}" preserveAspectRatio="xMidYMid meet" aria-label="${String(text).replace(/[<&"]/g, '')}">${out.join('')}</svg>`;
+}
+
 function fmtVal(e, v) {
   if (v === undefined || v === null) return '';
   if (typeof v === 'number' && +e.digits > 0) {          // a Gauge: the whole number part padded to its digits (with figure spaces)
@@ -949,6 +971,19 @@ function fillEl(n, e0) {
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
   setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
+  // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
+  // A Timer's look is its Style (Skynet or User, public/styles.js); a Process's .fore / .back go over it
+  const ts = e.type === 'timer' ? styleOf('timer', e0, S.config.userStyles) : null, tmLook = ts?.look === 'timer';
+  n.classList.toggle('look-timer', tmLook);
+  if (ts) n.classList.toggle('look-led', ts.look === 'led');
+  if (tmLook) {
+    const panel = h('div', { class: 'tmPanel' }); panel.innerHTML = sevenSeg(text);
+    const pc = firstSet(v.backcolor, ts.panel); if (pc) panel.style.background = pc;
+    if (ts.bezel) panel.style.borderColor = ts.bezel;
+    panel.style.setProperty('--seg', firstSet(v.forecolor, ts.digits, '#ffffff'));
+    vl.replaceChildren(panel); vl.style.backgroundColor = '';
+    nm.style.color = e.nameColor || ts.titleFore || '#ffffff'; nm.style.backgroundColor = e.nameBg || ts.titleBack || '#000000';
+  }
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true);   // .hidden = true wins over .visible = true
   n.classList.toggle('fault', !!v.fault);
@@ -959,7 +994,7 @@ function fillEl(n, e0) {
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
   const stretch = stretchPic(e, v);
-  n.style.backgroundColor = img || missing ? '' : bg(v.background);
+  n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
   n.classList.toggle('turned', !!(turn || flip));
@@ -2031,7 +2066,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
   const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
-  const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : 130, h: type === 'timer' ? 80 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
+  const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (!D.visible) e.visibility = 'hidden';
   if (D.wrap) e.wrap = true;
   if (type === 'shared') e.dataType = 'value';
@@ -2496,6 +2531,20 @@ function copyGraphic(g) {
   toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
   editItem('gfx', c.id);
 }
+// COPY of a Device-less Widget (a Timer): the same, under the next free name (Timer_1 -> Timer_2), on the 🔨 Build Tab
+function copyElement(e) {
+  const tab = toBuild(); if (!tab) return;
+  const base = /\d+$/.test(e.name) ? e.name.replace(/\d+$/, '') : e.name + '_';
+  const taken = n => draft.elements.some(x => x.name.toLowerCase() === n.toLowerCase()) || draft.graphics.some(g => String(g.name ?? '').toLowerCase() === n.toLowerCase());
+  let i = 1; while (taken(base + i)) i++;
+  const c = { ...clone(e), name: base + i, workspace: tab.name, x: (+e.x || 0) + 20, y: (+e.y || 0) + 20 };
+  for (const k of ['_ref', 'locked']) delete c[k];
+  if (e.label && e.label === e.name) c.label = c.name;
+  draft.elements.push(c);
+  sel = { kind: 'el', id: c.name }; renderTabs(); renderWs();
+  toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
+  editItem('el', c.name);
+}
 $('#finishPipe').onclick = () => finishPipe();
 // Lock / Unlock the selected item so it cannot be dragged or resized by accident
 function updLockBtn() {
@@ -2956,8 +3005,9 @@ const F = {
     ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Tapping the Clone is tapping the parent: turning it on or off (or Enabled, for a PID) turns the parent and every Clone. A reading (a temperature probe) is shown the same way as the parent.`, 'note'],
     ['visibility', 'Visible (off = hidden on its Tab only)', 'vis'], ['workspace', 'Tab (the Tab this Clone is on)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
   common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
-    ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
-    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    // the Image block (Fritz, 2026-10-29): Background #, Back Colour, and Image Path 1-3, each with OPEN and a box to type a path in
+    ['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
+    ['imagePath_1', 'Image Path 1', 'imgopen', 1, false, 'b'], ['imagePath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['imagePath_3', 'Image Path 3', 'imgopen', 3, false, 'b'], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (Device, Widget, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
@@ -3011,6 +3061,16 @@ const F = {
     ['labelColor', 'Fore color', 'color'], ['labelBg', 'Back color', 'color'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
     ['_pb', 'Properties', 'box'], ['visible', 'Visible', 'bool', true, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'], ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
+  // Timer Widget Properties (Fritz, 2026-10-29): the Text Widget pattern; no pictures and no background. Its look is a Style
+  // (Skynet Styles can't be changed; ➕ Add new User Style… makes one). Label (the title bar), place, size and Tab.
+  timerWidget: [['name', 'Name', 'text', null, false, 'b'],
+    ['_nm', 'A Timer Widget counts up or down in hh:mm:ss. Its Name is how a Process uses it: name.attribute = Something.', 'infonote', 'timer'],
+    ['_tb', 'Timer', 'box'], ['timerType', 'Type', 'sel', [['countup', 'Count up'], ['countdown', 'Count down']], false, 'b'], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the Brain starts', 'bool'],
+    ['_lb', '', 'box'], ['label', 'Label (the title bar; empty = the Name)', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show', null, false, 'b'], ['nameFontSize', 'Font size', 'num'], ['nameFontFamily', 'Font', 'sel', FONTS],
+    ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'], ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]],
+    ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+    ['style', 'Style', 'stylesel', 'timer', false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
@@ -3188,6 +3248,47 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
     if (opts !== 1) out[1].querySelector('select[data-k]')?.addEventListener('change', imagePathHeadsUp);
     return out;
+  }
+  if (kind === 'stylesel') {   // a Style list (Fritz, 2026-10-29): Skynet Styles 🔒 (never changed), then User Styles, then ➕ Add new User Style…
+    const mine = () => S.config.userStyles?.[opts] ?? [];
+    const cur = styleOf(opts, obj, S.config.userStyles)?.id ?? '';
+    const s = h('select', { 'data-k': key, 'data-kind': 'sel' });
+    const fill = id => s.replaceChildren(
+      h('optgroup', { label: 'Skynet Styles (can\'t be changed)' }, ...SKYNET_STYLES[opts].map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, '🔒 ' + x.name))),
+      ...(mine().length ? [h('optgroup', { label: 'User Styles' }, ...mine().map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, x.name)))] : []),
+      h('option', { value: '__add__' }, '➕ Add new User Style…'));
+    fill(cur);
+    let prev = cur;
+    const edit = h('button', { type: 'button', class: 'nameBtn', title: 'Change this User Style (a Skynet Style can never be changed)' }, '✏ Edit');
+    const upd = () => { edit.disabled = isSkynetStyle(s.value); };
+    s.addEventListener('change', async ev => {
+      if (s.value !== '__add__') { prev = s.value; upd(); return; }
+      ev.stopPropagation();
+      const made = await styleEditor(opts, null, styleOf(opts, { style: prev }, S.config.userStyles));
+      fill(made ? made.id : prev); prev = s.value; upd();
+    });
+    edit.onclick = async () => { const st = mine().find(x => x.id === s.value); if (!st) return; const done = await styleEditor(opts, st); fill(done === false ? SKYNET_STYLES[opts][0].id : s.value); prev = s.value; upd(); };
+    upd();
+    return [h('label', {}, label), h('span', { class: 'nameRow' }, s, edit)];
+  }
+  if (kind === 'bgnum') {      // Background #: 1, 2 or 3 picks Image Path 1-3; any other number shows no picture (Fritz, 2026-10-29)
+    const inp = h('input', { 'data-k': key, 'data-kind': 'bgsel', type: 'text', inputmode: 'numeric', value: v ?? '', placeholder: '1', class: 'bgNum' });
+    return [h('label', {}, label), h('span', { class: 'nameRow' }, inp, h('span', { class: 'muted' }, '1, 2, 3   Any other background is blank'))];
+  }
+  if (kind === 'imgopen') {    // Image Path N: OPEN picks a picture in a pop-up; or type a path in the box (a path that is not found shows blank)
+    const inp = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', placeholder: '(none)', spellcheck: 'false', autocomplete: 'off' });
+    const warn = h('span', { class: 'pathWarn', role: 'status' });
+    const check = () => { const p = inp.value.trim(); warn.textContent = p && !picKnown(p) ? '⚠ Not found: it shows blank' : ''; };
+    inp.addEventListener('input', check);
+    if (opts !== 1) inp.addEventListener('change', imagePathHeadsUp);     // imagePath_2 / _3: the heads-up once (Rule 7.10)
+    const open = h('button', { type: 'button', class: 'openBtn', title: `Pick the picture for Image Path ${opts}`, onclick: async ev => {
+      ev.preventDefault();
+      const p = await openImagePath(opts, inp.value.trim()); if (p === null) return;
+      inp.value = p; check();
+      for (const t of ['input', 'change']) inp.dispatchEvent(new Event(t, { bubbles: true }));
+    } }, 'OPEN');
+    check();
+    return [h('label', {}, label), h('span', { class: 'nameRow imgRow' }, open, inp, warn)];
   }
   if (kind === 'bgsel') {      // which picture shows: 1-3 (and more on folded items), or none
     const n = [1, 2, 3, ...slotsOf(obj).filter(x => x > 3)];
@@ -3487,6 +3588,67 @@ function nameChange(current, { title = 'Name Change', check, spaces = false } = 
   });
 }
 
+// a picture path the panel knows (in media/Images, a Skynet picture, or one already used)
+const picKnown = p => vList('pictures').includes(p) || mediaPics.includes(p) || ONOFF_GRAPHICS.some(g => g[1] === p);
+// OPEN beside Image Path N (Fritz, 2026-10-29): a "Background Image N" pop-up with the picture lists (Skynet / My pictures, the
+// group, 🖼 icons) and the Image dropdown. 💾 Save gives the picked path back, ✖ Cancel null.
+function openImagePath(n, current) {
+  return new Promise(res => {
+    const work = { pick: current || '' };
+    const [, pick] = fieldOne(['pick', 'Image', 'gpick', 'pictures'], work);
+    const s = pick.querySelector('select[data-k]');
+    let out = null;
+    s.addEventListener('change', () => {          // Add new ...: type a picture name (it lands in media/Images)
+      if (s.value !== '__add__') return;
+      const t = (prompt('Picture in media/Images (for example MyValve_On.svg or Valves/MyValve_On.svg)') || '').trim();
+      if (!t) { s.value = work.pick; return; }
+      const p = imagesPath(t);
+      if (![...s.options].some(o => o.value === p)) s.insertBefore(h('option', { value: p }, p), s.lastChild);
+      s.value = p; s.dispatchEvent(new Event('change'));
+    });
+    const save = () => { out = s.value === '__add__' ? null : s.value; d.close(); };
+    const d = h('dialog', { class: 'imgOpenDlg', 'data-nomenu': true },
+      h('div', { class: 'bar' }, h('h3', {}, `Background Image ${n}`), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), h('button', { type: 'button', class: 'primary', onclick: save }, 'Save')),
+      h('div', { class: 'imgOpenBody' }, h('label', { class: 'strong' }, `Image Path ${n}`), pick));
+    d.addEventListener('close', () => { d.remove(); res(out); });
+    document.body.append(d); d.showModal();
+  });
+}
+
+// The User Style pop-up: a new one starts from the Style picked now; a Skynet Style is never opened here. 💾 Save keeps it in
+// the Schema (Settings) and gives it back; 🗑 Delete (an old one only) gives false; ✖ Cancel null.
+function styleEditor(kind, st, from) {
+  return new Promise(res => {
+    const isNew = !st, work = st ? clone(st) : { id: 'u_' + newId().replace(/[^A-Za-z0-9]/g, '').slice(0, 20), name: '', look: from?.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, from?.[k] || ''])) };
+    const body = h('div', { class: 'styleBody' });
+    bindForm(body, [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
+      ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']], work);
+    const err = h('p', { class: 'nameErr', role: 'alert' });
+    let out = null;
+    const save = async () => {
+      try { readFields(work, body); } catch (e) { err.textContent = e.message; return; }
+      const name = String(work.name ?? '').trim(), list = S.config.userStyles?.[kind] ?? [];
+      if (!name) { err.textContent = 'Give the Style a name.'; return; }
+      if (/^skynet\b/i.test(name)) { err.textContent = 'Only Skynet Styles start with "Skynet". Pick another name.'; return; }
+      if ([...SKYNET_STYLES[kind], ...list].some(x => x.id !== work.id && x.name.toLowerCase() === name.toLowerCase())) { err.textContent = `There is already a Style called ${name}.`; return; }
+      const item = { id: work.id, name, look: work.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, work[k] || ''])) };
+      const all = { ...(S.config.userStyles || {}), [kind]: isNew ? [...list, item] : list.map(x => x.id === item.id ? item : x) };
+      try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = item; d.close(); } catch (e) { err.textContent = e.message; }
+    };
+    const del = async () => {
+      if (!confirm(`Delete the User Style ${st.name}? Anything that uses it goes back to the first Skynet Style.`)) return;
+      const all = { ...(S.config.userStyles || {}), [kind]: (S.config.userStyles?.[kind] ?? []).filter(x => x.id !== st.id) };
+      try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = false; d.close(); } catch (e) { err.textContent = e.message; }
+    };
+    const bar = () => h('div', { class: 'bar' }, ...(isNew ? [] : [h('button', { type: 'button', class: 'danger', onclick: del }, 'Delete')]), h('span', { class: 'spacer' }),
+      h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), h('button', { type: 'button', class: 'primary', onclick: save }, 'Save'));
+    const d = h('dialog', { class: 'imgOpenDlg', 'data-nomenu': true }, h('h3', {}, isNew ? 'New User Style' : 'User Style'), bar(), body, err,
+      h('p', { class: 'muted' }, 'A Skynet Style can never be changed. A User Style is yours: change or delete it any time.'), bar());
+    d.addEventListener('close', () => { d.remove(); renderWs(); res(out); });
+    document.body.append(d); d.showModal();
+  });
+}
+
 // The orange ? (Fritz, 2026-10-29): not Help (that is the yellow ? by the title) but a pop-up with more about this kind of Widget:
 // its Properties and the Attributes a Process can use. ✖ Close at the top and the bottom. Each kind's list is in INFO.
 const INFO = {
@@ -3502,6 +3664,16 @@ const INFO = {
       ['.font'], ['.size'], ['.fore'], ['.back'], ['.bold'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'],
       ['.width'], ['.height'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
     example: 'w_Text_1.fore = "Red"' },
+  timer: { title: 'Timer Widget', properties: [
+    ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
+    ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
+    ['Style', ': its look, from a list. Skynet Styles come with Skynet and can never be changed; ➕ Add new User Style… makes your own (✏ changes it).'],
+    ['No pictures and no background', ' (Fritz, 2026-10-29).'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.'],
+    ['▶ ■ ↺ Set', ' buttons under the digits start, stop, reset and set it.']],
+    attributes: [['.value', 'the time, hh:mm:ss; the same as the name alone'], ['.running', 'true / false'], ['.countdown', 'true = counts down'], ['.resetvalue', 'hh:mm:ss'], ['.label'],
+      ['.fore', 'the digits, over its Style'], ['.back', 'the panel, over its Style'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'], ['.width'], ['.height']],
+    example: 'tm_Mash.running = true' },
 };
 function infoIcon(kind) {
   return h('button', { type: 'button', class: 'infoIcon', title: 'More about this (Properties and Attributes)', 'aria-label': 'More about this', onclick: ev => { ev.preventDefault(); infoPopup(kind); } }, '?');
@@ -3701,9 +3873,10 @@ async function editItem(kind, id) {
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
+    if (it.type === 'timer' && !skyDev(it)) return F.timerWidget;       // Timer Widget Properties (Fritz, 2026-10-29)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
-    if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
+    if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
@@ -3718,7 +3891,7 @@ async function editItem(kind, id) {
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
-  let r = await dialog(kind === 'el' ? elTitle(item) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -3788,6 +3961,10 @@ async function editItem(kind, id) {
       }
       work.name = (work.name || '').trim() || item.name;
       if (!item.template && (!work.label || work.label === item.vtype)) work.label = work.vtype;   // the label follows the Type until it is changed (a Tab_Vessel's empty label shows its Name)
+    }
+    if (type === 'timer' && !skyDev(work)) {      // its Style sets its look (LED digits keep the old look's own digit colors)
+      const st = styleOf('timer', work, S.config.userStyles); work.style = st.id; work.look = st.look === 'led' ? 'led' : 'normal';
+      for (const k of ['foreColor', 'backColor']) delete work[k];      // no Fore / Back of its own: the Style has them
     }
     if (type === 'text') {         // a Text Widget's name: Fritz's name rules, unique among Devices and Widgets (public/names.js)
       work.name = noSpaces(work.name || '') || item.name;
@@ -3877,7 +4054,7 @@ async function editItem(kind, id) {
     if (kind === 'el') sel = { kind, id: item.name };
     renderTabs(); renderWs();
     if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
-    if (copy) copyGraphic(item);
+    if (copy) (kind === 'el' ? copyElement(item) : copyGraphic(item));
   } catch (e) { toast(e.message, true); }
 }
 
