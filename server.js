@@ -227,7 +227,7 @@ function cleanDonation(d = {}) {
 // Only names go out: never a hidden key (Rule 3.10). Clones are graphics, not elements, so they are never offered (Rule 4.4).
 function processWords() {
   return {
-    elements: store.list().map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
+    elements: [...store.list(), ...store.manualValves()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
   };

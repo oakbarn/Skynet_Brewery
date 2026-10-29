@@ -347,7 +347,25 @@ PR #47; PR #91)
 5.12 **Kettle pictures are empty:** no wort or liquid drawn, and no heating element drawn on a plain
 kettle. Each kettle has a plain and an _Electric version. (2026-10-22, 2026-10-23)
 
-5.13 **Manual valves** make a running Process wait for a "Done" pop-up. (2026-10-20, PR #44)
+5.13 **Manual valves** make a running Process wait. A valve Device with Valve type Manual waits for a "Done"
+pop-up (2026-10-20, PR #44). A **Manual Valve Widget** waits for a click on it on its Tab (Rule 5.15).
+
+5.14 **Pipe fittings are only what they are.** A tee is only a tee (no Top Tee, Suction Tee or other Type),
+an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their only settings are **.x, .y, .width and
+.height**, plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
+Width and Height are greyed out until it is switched off). No label, Type or Connection Standard; turning and
+flipping stay on the Edit layout bar's turn buttons (Rule 5.5). **Pipe fittings have no Clone.** A **check valve
+is a pipe fitting too**: it is always one way, and its orientation shows the way. Valves and flow meters in a fitting
+are **Devices**; a tee with a thermowell, or a thermowell on a vessel IP, is a kind of **Temperature Probe**
+(Fritz, 2026-10-28).
+(2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
+
+5.15 **The Manual Valve is a special Widget class**: something of a pipe fitting (Autosize to pipe, .x .y .width
+.height) and a pseudo Device. Its **.state** is true (open) or false (closed) and **only a click on it on its
+Tab changes it**, at any time. A Process line `ManualValve_1.state = true` does **not** change it: it shows the
+warning to open it by hand, the valve blinks on its Tab, and the Process waits until someone clicks it to the
+state asked for. While open it shows the open overlay (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg).
+(2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
 
 5.16 **Skynet Templates and Daughter Templates are set and can't be changed by a user.** A user makes
 a **User version** (a User item made from a Skynet Template) that inherits everything from the Template.
@@ -705,4 +723,9 @@ and vKonstant to gAPI and gKonstant")
   excepts User versions of Skynet Templates; added Rules 5.16 (Skynet Templates locked, User versions with per-type user
   settable attributes), 5.17 (Master and Daughter Templates; Skynet Motorized Ball Valve Device H / VL / VR) and 5.18
   (Build Template Tab). Help 88 taken; next free Help number 89. (thread "Lock Skynet Widget Templates and IPs")
+- 2026-10-28: Added Rules 5.14 (pipe fittings: only .x .y .width .height and Autosize to pipe, no Clone) and 5.15
+  (Manual Valve Widget: only a click changes .state; a Process asks for it by hand); Rule 5.13 covers both kinds of
+  manual valve. Help 87; next free Help number 88. (thread "Simplify pipe fittings and Manual Valves")
+- 2026-10-28: Rule 5.14: a check valve is a plain pipe fitting; valves and flow meters are Devices; a tee with a
+  thermowell (or a thermowell on a vessel IP) is a kind of Temperature Probe. (thread "Simplify pipe fittings and Manual Valves")
 - 2026-10-29: Rule 5.18 built as ☰ Menu > Build Template (Device Templates). Help 89; next free Help number 90. (thread "Lock Skynet Widget Templates and IPs")

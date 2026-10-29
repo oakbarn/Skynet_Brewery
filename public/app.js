@@ -63,8 +63,14 @@ function alertBar(text) {
   const bar = h('div', { class: 'alertBar', role: 'alert' }, h('span', {}, '⚠ ' + text), h('button', { title: 'Close', onclick: () => bar.remove() }, '✕'));
   document.body.append(bar);
 }
-// Manual valves (Valve type Manual): a Process asked for one to be opened or closed by hand and waits for Done
-function renderValves(list = []) {
+// Manual valves (Valve type Manual): a Process asked for one to be opened or closed by hand and waits for Done.
+// A Manual Valve Widget is asked for on a bar at the top instead (not a pop-up that covers the Tab): the valve blinks on its
+// Tab, and clicking it there is the confirm. The Process goes on once it shows the way the Process asked for.
+const mvAsked = g => (S?.valves || []).some(a => a.widget && a.name === g.name);
+function renderValves(all = []) {
+  renderMvAsks(all.filter(a => a.widget));
+  const list = all.filter(a => !a.widget);
+  for (const n of $$('#ws .gfx.ip[data-fit="manualValve"]')) { const g = L().graphics.find(x => x.id === n.dataset.gid); n.classList.toggle('mvAsk', !!g && mvAsked(g)); }
   let d = $('#valveDlg');
   if (!list.length) { if (d?.open) d.close(); return; }
   if (!d) { d = h('dialog', { id: 'valveDlg', class: 'valveDlg', 'data-nomenu': true }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
@@ -76,6 +82,19 @@ function renderValves(list = []) {
       ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, `Done: it is ${a.open ? 'open' : 'closed'}`)
       : h('span', { class: 'muted' }, 'An operator or admin must press Done.')))));
   if (!d.open) d.showModal();
+}
+function renderMvAsks(list) {
+  let bar = $('#mvAskBar');
+  if (!list.length) { bar?.remove(); return; }
+  if (!bar) { bar = h('div', { id: 'mvAskBar', class: 'mvAskBar', role: 'alert' }); document.body.append(bar); }
+  bar.innerHTML = '';
+  for (const a of list) {
+    const g = S.config.graphics.find(x => isMv(x) && x.name === a.name), tab = g?.workspace;
+    bar.append(h('div', { class: 'mvAskRow' },
+      h('span', { class: 'valveDo' }, `✋ ${a.open ? 'OPEN' : 'CLOSE'} ${a.label} by hand`),
+      h('span', {}, ` then click it on the ${tab || ''} Tab to confirm. The Process ${a.process} waits until it shows ${a.open ? 'open' : 'closed'}.`),
+      tab && tab !== curWs()?.name ? h('button', { onclick: () => { wsName = tab; setView('workspace'); renderTabs(); renderWs(); renderValves(S.valves); } }, `Go to ${tab}`) : ''));
+  }
 }
 function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', ms || (bad ? 5000 : 2200)); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
@@ -115,7 +134,7 @@ function connect() {
   };
   es.addEventListener('values', e => {
     const ch = JSON.parse(e.data);
-    for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; updateEl(n); }
+    for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; if ('state' in props && S.config.graphics.some(g => isMv(g) && g.name === n)) setMvOpen(n, props.state); else updateEl(n); }
     renderPipes(); updateMeters(); updateAlarms(); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); if (menuTab === 'schema') renderMenuPane(); });
@@ -203,6 +222,7 @@ function drawWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
+  if (editing && draft) for (const g of draft.graphics.filter(g => g.workspace === w.name && isPlainUnit(g) && autoSized(g))) autoSizeUnit(g);
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
   for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));
@@ -246,6 +266,7 @@ function editDeco(n, o) {
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
   else if (o.cloneId) n.append(h('div', { class: 'cloneMark', title: `Clone of ${o.cloneOf}: it moves, its size is its parent's` }, '⧉'));
   else if (o.bundled && !isUnit(o) && !isSkyV(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
+  else if (autoSized(o)) return;       // a pipe fitting on Autosize to pipe: no grab points until Autosize is switched off
   else n.append(...RS_DIRS.map(d => h('div', { class: 'rs rs-' + d, 'data-rs': d, title: `Drag to make it bigger or smaller (${RS_TIP[d]})` })));
 }
 
@@ -500,7 +521,7 @@ function buildVessel(g) {
   }
   if (t === 'bfit' && (g.fittings || []).some(f => METERS.includes(f.kind) && f.meter)) n.append(h('div', { class: 'fmRead', 'data-gid': g.id }, meterText(g)));
   const lbl = g.label || (g.template ? g.name : '');       // a Tab_Vessel or Tab_Fitting: empty Label = its Name
-  if (g.labelVisible !== false && lbl) n.append(widgetLabel({ ...g, label: lbl }, 'top'));
+  if (g.labelVisible !== false && lbl && !isPlainUnit(g)) n.append(widgetLabel({ ...g, label: lbl }, 'top'));     // a pipe fitting has no label
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
@@ -547,6 +568,23 @@ const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
 // IP widget types. "point" is a plain start / end point; the others are pipe fittings that join pipes and pass flow through.
 const FITTINGS = { point: 'IP point', pipe: 'Pipe (straight)', tee: 'Pipe tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Pipe cross', manualValve: 'Manual valve', coupling: 'Coupling / hose end', cap: 'Pipe cap (no IP: dead end)' };
 const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point';
+// Pipe fittings (Fritz, 2026-10-28): a tee is only a tee, an elbow only an elbow, a reducer only a reducer. They have no
+// settings but where they are (.x .y) and how big (.width .height), plus Autosize to pipe: on (the default) a fitting takes
+// the size of the pipes joined to its IPs, and Width and Height are greyed out until it is switched off. Turning and flipping
+// stay on the Edit layout bar's turn buttons. Pipe fittings have no Clone. A Manual Valve is not one: it is its own Widget.
+const PLAIN_FIT_KINDS = ['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check'];      // a check valve too: always one way, its orientation shows which (Fritz, 2026-10-28)
+const plainFittings = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (PLAIN_FIT_KINDS.includes(f.kind) && !f.thermowell));
+const isPlainUnit = g => isUnit(g) && plainFittings(g.fittings);
+const isIpFit = g => isFitting(g) && g.fitting !== 'manualValve';
+const isPipeFit = g => isIpFit(g) || isPlainUnit(g);
+const autoSized = g => (isPipeFit(g) || isMv(g)) && !isCap(g) && g.autoSize !== false;
+const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of the pipes joined to it; switch it off to type Width and Height)', 'bool', true, true];
+// Manual Valve Widget (Fritz, 2026-10-28): a pipe fitting you turn by hand, and a pseudo Device. Its .state (true = open) only
+// changes with a click on it on its Tab, at any time. A Process line ManualValve_1.state = true does not change it: it puts up
+// "Open it by hand" on the Tab and waits until someone clicks the valve open. While open it shows the open overlay.
+const isMv = g => g?.kind === 'ip' && g.fitting === 'manualValve';
+const mvOpen = g => { const v = g?.name && S?.values?.[g.name]?.state; return v === undefined ? !!g?.open : !!v; };
+const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
 const FIT_SVG = {
   pipe: '<path d="M0 15H30"/>', cap: '<path d="M0 15H17M20 5V25"/>',
   tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
@@ -573,6 +611,7 @@ const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.wo
 // A fitting takes the size of the largest pipe or hose joined to it (the tab's 1/2" size when nothing is joined yet).
 // It is 5 x that pipe thickness, which makes its drawn arms exactly as thick as the pipe.
 function sizeFitting(g) {
+  if (!autoSized(g)) return;
   const S = 5 * Math.max(0, ...pipesOn(g.id, g.workspace).map(pipeWidth)) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
   g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
 }
@@ -594,16 +633,17 @@ function buildIp(g) {
   if (fit) sizeFitting(g);
   // a coupling on just one pipe end is an open end: it shows in Edit layout only; joining two pipes it shows as a collar
   const lonely = fit === 'coupling' && pipesOn(g.id, g.workspace).length < 2;
-  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? ipName(g) : g.label || FITTINGS[fit] || 'IP') + (fit === 'manualValve' ? (g.open ? ' (open)' : ' (closed)') : '') });
+  const open = isMv(g) && mvOpen(g), plain = isIpFit(g);
+  const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : '') + (isMv(g) && mvAsked(g) ? ' mvAsk' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? (plain ? g.name : ipName(g)) : g.label || FITTINGS[fit] || 'IP') + (isMv(g) ? (open ? ' (open: click to close it)' : ' (closed: click to open it)') : '') });
   if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(g.image)}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
   else if (fit) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
-    if (fit === 'manualValve') n.classList.add(g.open ? 'open' : 'closed');
   } else n.append(h('span', {}, g.text ?? 'IP'));
+  if (isMv(g)) { n.classList.add(open ? 'open' : 'closed'); if (open) n.append(h('div', { class: 'mvOver', style: `background-image:url("${media(MV_OVERLAY)}")` })); }
   place(n, g);
   n.style.setProperty('--ipc', g.color || '#e8a33a');
-  if (g.labelVisible && g.label) n.append(widgetLabel(g, 'below'));
-  if (editing) { if (g.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); } else if (!fit) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  if (g.labelVisible && g.label && !plain) n.append(widgetLabel(g, 'below'));       // a pipe fitting has no label
+  if (editing) { if (g.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); } else if (!fit || !autoSized(g)) n.append(h('div', { class: 'rs' })); if (g.label && !g.labelVisible && !plain) n.append(h('div', { class: 'iplbl' }, g.label)); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
 
@@ -1042,15 +1082,23 @@ $('#ws').addEventListener('click', ev => {
   const e = elByName(n.dataset.name); if (e) doTap(e);
 });
 
-// A manual valve is app-only (no PLC): tapping it asks Open / Closed and saves that in the layout so every screen sees it
+// A Manual Valve Widget is app-only (no PLC). One click on it opens or closes it (Fritz, 2026-10-28), at any time: it is the
+// only way its .state changes. The Brain keeps it in the layout, so every screen sees it.
 const toggleManualValve = guard(async id => {
   const g = S.config.graphics.find(x => x.id === id); if (!g) return;
-  const r = await choose(g.label || 'Manual valve', [['Open', true], ['Closed', false]], !!g.open);
-  if (r === undefined || r === !!g.open) return;
-  const graphics = clone(S.config.graphics); graphics.find(x => x.id === id).open = r;
-  await api('PUT', '/ui/layout', { graphics });
-  g.open = r; renderWs();
+  if (!can('operator')) throw new Error('Only an operator or an admin can open or close a valve');
+  if (!g.name) throw new Error('Save the layout once (Edit layout > Save layout) so this Manual Valve gets its name');
+  const open = !mvOpen(g);
+  await api('POST', '/ui/set', { name: g.name, prop: 'state', value: open });
+  setMvOpen(g.name, open); toast(`${g.label || g.name} is ${open ? 'open' : 'closed'}`);
 });
+// a Manual Valve opened or closed (here or on another screen): the layout, the edit copy and the Tab follow
+function setMvOpen(name, open) {
+  for (const gs of [S.config.graphics, draft?.graphics]) for (const g of gs || []) if (isMv(g) && g.name === name) g.open = !!open;
+  (S.values[name] ??= {}).state = !!open;
+  const g = L().graphics.find(x => isMv(x) && x.name === name);
+  if (g && g.workspace === curWs()?.name && view === 'workspace') { const n = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"]`); if (n) n.replaceWith(buildIp(g)); renderPipes(); }
+}
 
 // Big touch-friendly dialogs
 function choose(title, buttons, current) {
@@ -1297,7 +1345,7 @@ function ipNode(id, ws) {
     if (isBfit(v) && bfitClosed(v)) return { closed: true };       // a closed valve in a Tab_Fitting
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
-  if ((g?.fitting === 'manualValve' && !g.open) || g?.fitting === 'cap' || cappedIps().has(id)) return { closed: true };
+  if ((isMv(g) && !mvOpen(g)) || g?.fitting === 'cap' || cappedIps().has(id)) return { closed: true };
   // a coupling joining two or more pipes / hoses passes flow; a hose end with nothing else on it is an open end (flow pours out)
   if (g?.fitting === 'coupling' && pipesOn(id, ws).length < 2) return { key: id, end: true };
   return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
@@ -2593,7 +2641,8 @@ function addIpFit(fit) {
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
   const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
-  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+  if (isIpFit(g)) delete g.label;          // a pipe fitting has no label, only its Skynet name (Tee_1)
+  draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
 $('#addWs').onclick = () => {
   const n = prompt('New tab name'); if (!n) return;
@@ -2934,7 +2983,11 @@ const F = {
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
-  ip: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['open', 'Manual valve is open', 'yn'], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
+  // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
+  ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
+    : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
+      ['label', 'Label (shown in the "by hand" message; empty = the Name)', 'text'], ['labelVisible', 'Show label', 'yn'], ...FIT_PLACE(it)] : F.ipPoint,
+  ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
     ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
@@ -2945,6 +2998,9 @@ const F = {
     ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock']],
 };
+// where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
+const FIT_PLACE = it => [...(isCap(it) ? [] : [AUTOSIZE_FIELD]), ...(it.onVessel || it.capOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
+  ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
 F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
@@ -3078,6 +3134,10 @@ function fieldsOf(item) {
 const PICK_TIP = 'Double-click to open the Properties of the one picked';
 function field(f, obj) {
   const out = fieldOne(f, obj);
+  if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
+    out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
+    if (out[1].matches?.('select, input')) out[1].disabled = true;
+  }
   if (greyedPic(f[0], obj)) {
     out[0].classList.add('greyed'); out[0].title = 'Pick what it turns on with first (Turns on with is None)';
     for (const x of out[1].querySelectorAll?.('select, button, input') ?? []) x.disabled = true;
@@ -3408,7 +3468,7 @@ async function editBundle(v) {
   const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
     ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
-    ['clone', `Clone: put a copy of this ${what} and its IPs next to it`, 'bool']], work, false, graphicTopic(v));
+    ...(isBfit(v) && plainFittings(v.fittings) ? [] : [['clone', `Clone: put a copy of this ${what} and its IPs next to it`, 'bool']])], work, false, graphicTopic(v));     // pipe fittings have no Clone (Fritz, 2026-10-28)
   if (r !== 'ok') return;
   readFields(work);
   if (work.clone) return cloneBundle(v);
@@ -3574,7 +3634,7 @@ async function editItem(kind, id) {
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? elTitle(item) : type === 'ip' ? 'IP Widget (Initial Point)' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  const r = await dialog(kind === 'el' ? elTitle(item) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -6222,6 +6282,20 @@ function placeUnitParts(g) {
     for (const c of caps.filter(c => c.capOn === ip.id)) { capOnto(c, ip); const cn = $(`#ws .gfx[data-gid="${CSS.escape(c.id)}"]`); if (cn) place(cn, c); }
   }
 }
+// Autosize to pipe on a Skynet pipe fitting (Fritz, 2026-10-28): once a pipe is joined to one of its IPs, it is sized so its
+// body is as thick as the biggest pipe on it (the Skynet fitting pictures draw the body 28 % of the picture). Its Template's
+// shape is kept (an Instrument Tee stays wide and low) and it grows or shrinks about its middle. With no pipe on it, it keeps
+// its size.
+const FIT_BODY = 0.28;
+function autoSizeUnit(g) {
+  const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
+  const pw = Math.max(0, ...ips.flatMap(ip => pipesOn(ip.id, g.workspace)).map(pipeWidth)); if (!pw) return;
+  const [tw, th] = tplOf('fitting', g.template)?.size || [90, 90], w = Math.round(pw / FIT_BODY), hh = Math.round(w * th / tw);
+  if (w === g.w && hh === g.h) return;
+  const cx = (g.x || 0) + (g.w || 90) / 2, cy = (g.y || 0) + (g.h || 90) / 2;
+  Object.assign(g, { w, h: hh, x: Math.round(cx - w / 2), y: Math.round(cy - hh / 2) });
+  placeUnitParts(g);
+}
 // orientation as a 2x2 matrix [a, b, c, d] (flip first, then rotate, as unitTransform), and back
 function orientM(g) { const r = unitRot(g) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r), x = g.flipH ? -1 : 1, y = g.flipV ? -1 : 1; return [c * x, -s * y, s * x, c * y]; }
 const mMul = (m, n) => [m[0] * n[0] + m[1] * n[2], m[0] * n[1] + m[1] * n[3], m[2] * n[0] + m[3] * n[2], m[2] * n[1] + m[3] * n[3]];
@@ -6295,7 +6369,7 @@ function valveShut(name) {
   const e = L().elements.find(x => x.name === name);
   if (e) return e.subtype === 'propValve' ? !(propPct(e) > 0) : !isOn(name);
   const g = L().graphics.find(x => x.id === name && x.kind === 'ip');
-  return !!g && g.fitting === 'manualValve' && !g.open;
+  return isMv(g) && !mvOpen(g);
 }
 const bfitClosed = f => (f.fittings || []).some(x => x.kind === 'valve' && x.valve && valveShut(x.valve));
 // every part that moves with a vessel: its port IPs, the Tab_Fittings joined to it and their IPs
@@ -6549,7 +6623,7 @@ function openTemplate(kind, name) {
     });
     const btns = () => h('div', { class: 'bar' },
       t.deletable && admin ? h('button', { class: 'danger', onclick: del }, 'Delete') : '',
-      admin ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Save Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',
+      admin && !(kind === 'fitting' && plainFittings(t.fittings)) ? h('button', { title: 'A copy under a new name: it is made on the Build Tab first, then Save Build ... > As a Template', onclick: cloneIt }, 'Clone') : '',     // pipe fittings have no Clone
       admin ? h('button', { title: 'Put a copy on a Tab: it is made on the Build Tab first, then Save Build ... > To a Tab', onclick: toTab }, 'Add to Tab') : '',
       admin && kind === 'fitting' ? h('button', { title: 'Put it on a port of a Vessel Template', onclick: toVessel }, 'Add to Vessel') : '',
       h('span', { class: 'spacer' }), h('button', { onclick: close }, 'Cancel'), ed ? h('button', { class: 'primary', onclick: save }, 'Save') : '');
@@ -6656,6 +6730,9 @@ F.tabFitting = it => [['_t', `Tab_Fitting, made from the Bundled Fitting Templat
 // the Properties of a Skynet Fitting: no IP settings (every opening has its IP built in), and Flip / Rotate for its orientation
 F.skynetFitting = it => {
   const made = (it.fittings || []).filter(f => f.kind !== 'none').map(f => FITTING_KINDS[f.kind] + (f.thermowell ? ' with a thermowell' : '')).join(', ');
+  if (isPlainUnit(it)) return [['_t', isCapOnly(it) ? `Skynet End Cap: a pipe fitting. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
+      `Skynet pipe fitting ${it.template || ''}: a ${made}. Every opening has a two-way IP built in. It has no settings but its place and its size. Turn or flip it with the turn buttons on the Edit layout bar.`, 'note'],
+    ['name', 'Name', 'text'], ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : []), ...FIT_PLACE(it)];
   const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
   return [['_t', isCapOnly(it) ? `Skynet End Cap. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet Fitting ${it.template || ''}: ${made}. Every opening has a two-way IP built in, so there is nothing to set for them.`, 'note'],
