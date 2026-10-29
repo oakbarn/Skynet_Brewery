@@ -2526,7 +2526,6 @@ function copyGraphic(g) {
   const c = { ...clone(g), id: newId(), workspace: tab.name, x: (+g.x || 0) + 20, y: (+g.y || 0) + 20 };
   for (const k of ['_ref', 'name', 'locked']) delete c[k];
   draft.graphics.push(c); giveName(c, draft.graphics);
-  if (c.syncLabel) c.label = c.name;
   sel = { kind: 'gfx', id: c.id }; renderTabs(); renderWs();
   toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
   editItem('gfx', c.id);
@@ -3052,10 +3051,10 @@ const F = {
   picture: [['follow', 'Turns on with (None = a still picture)', 'onsrc', null, true], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
-  // Text Widget Properties (Fritz's design, 2026-10-29): Name, Update Names, Text, then a Label box and a Properties box. Word wrap is always on.
+  // Text Widget Properties (Fritz's design, 2026-10-29): Name, Text, then a Label box and a Properties box. Word wrap is always on.
+  // "Update Names" is the ✏ Change name method: a name a Process can use changes only that way, and the Processes follow it (Fritz, 2026-10-29).
   text: [['name', 'Name', 'text', null, false, 'b'],
     ['_nm', 'w_Text_N is a default name given when a user makes a Text Widget. This name can be used, or a new name can be given. name.attribute = Something is how you use it in the Process Editor.', 'infonote', 'text'],
-    ['syncLabel', 'Update Names', 'bool', null, false, 'b'],
     ['text', 'Text', 'text', null, false, 'b'], ['_rt', 'Rich Text Embedded Codes work in the Text and the Label: \\b bold, \\i italic, \\n new line, \\c{Red} color ... (Help > Rich Text Embedded Code)', 'note'],
     ['_lb', '', 'box'], ['label', 'Label', 'text', null, false, 'b'], ['labelVisible', 'Visible (Show label)', 'bool', null, false, 'b'], ['labelSize', 'Font size', 'num'], ['labelFont', 'Font', 'sel', FONTS], ['labelBold', 'Bold', 'bool'],
     ['labelColor', 'Fore color', 'color'], ['labelBg', 'Back color', 'color'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
@@ -3653,7 +3652,7 @@ function styleEditor(kind, st, from) {
 // its Properties and the Attributes a Process can use. ✖ Close at the top and the bottom. Each kind's list is in INFO.
 const INFO = {
   text: { title: 'Text Widget', properties: [
-    ['Name', ' with a Suggested Name (w_Text_N), but a user may change it with ✏ Change name.'],
+    ['Name', ' with a Suggested Name (w_Text_N). A user changes it only with ✏ Change name, and every Process that uses it is updated to the new name.'],
     ['Label', ' (Add > Label in Edit layout): a line above the Text, with its own Visible switch, font, size, bold, colors and alignment.'],
     ['Text', ' (+ Text in Edit layout), which is its value. Rich Text Embedded Codes work in the Label and the Text (\\b bold, \\n new line, \\c{Red} ...).'],
     ['Visible switch', ' for the Label and for the Widget; Hidden Locked keeps it hidden even when Visible is on.'],
@@ -3969,8 +3968,8 @@ async function editItem(kind, id) {
     if (type === 'text') {         // a Text Widget's name: Fritz's name rules, unique among Devices and Widgets (public/names.js)
       work.name = noSpaces(work.name || '') || item.name;
       if (work.name !== item.name) { const bad = nameCheck(work.name, item); if (bad) throw new Error(bad); }
-      if (work.syncLabel) work.label = work.name; else delete work.syncLabel;
-      if (work.label === work.name && !work.syncLabel) delete work.label;     // an empty Label shows the Name (Rule 1.13)
+      delete work.syncLabel;                                                    // the old Update Names switch: ✏ Change name does it (Fritz, 2026-10-29)
+      if (work.label === work.name) delete work.label;     // an empty Label shows the Name (Rule 1.13)
       delete work.wrap;                                                         // word wrap is always on
     }
     if (type === 'pipe') {
