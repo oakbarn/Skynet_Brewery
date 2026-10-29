@@ -4,21 +4,21 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 
 - the **Name** and the **Value** of every Device and Widget (a pump, a temperature, a gKonstant ...)
 - a **Label** (Add > Label in Edit layout)
-- a **Text** (**+ Text** in Edit layout)
+- a **Text Widget** (**+ Text** in Edit layout; its own page: [Text Widget](91-text-widget))
 - the **Label** on a vessel and on other equipment
 
 ## The attributes
 
 | Attribute | What it is | In a Process |
 |---|---|---|
-| Visible | shown or hidden (a switch) | `Text_1.visible = false` |
+| Visible | shown or hidden (a switch) | `w_Text_1.visible = false` |
 | Fore color | the color of the text | `Pump_1.foreColor = "Red"` |
 | Back color | the color behind the text | `Pump_1.backColor = "#000000"` |
-| Alignment | Left, Centered or Right justified | `Text_1.alignment = "Center"` |
-| Width, Height | its size in pixels | `Text_1.width = 300` |
-| X and Y position | its place in pixels from the left and top of the Tab: **x** is **h**orizontal (across), **y** is **v**ertical (up and down). The old names `.xPosition` and `.yPosition` still work. | `Text_1.x_hPosition = 400`, `Text_1.y_vPosition = 120` |
+| Alignment | Left, Centered or Right justified | `w_Text_1.alignment = "Center"` |
+| Width, Height | its size in pixels | `w_Text_1.width = 300` |
+| X and Y position | its place in pixels from the left and top of the Tab: **x** is **h**orizontal (across), **y** is **v**ertical (up and down). The old names `.xPosition` and `.yPosition` still work. | `w_Text_1.x_hPosition = 400`, `w_Text_1.y_vPosition = 120` |
 
-- **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). On a Text, switching it off keeps the text on one line, cut off at the edge.
+- **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). A Text Widget always wraps.
 - **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
 - **Name font** and **Name font size** set the font of the Names, the Labels on vessels and the Texts.
 
@@ -38,24 +38,24 @@ Every attribute has a **Default** on the ☰ Menu **Default** tab, under **Text*
 A Process changes a text box while it runs, and `""` puts back what its properties say:
 
 ```
-Text_1.visible = false
-Text_1 = "Mashing at 152\degF"
+w_Text_1.visible = false
+w_Text_1 = "Mashing at 152\degF"
 Pump_1.foreColor = "Red"
 Pump_1.backColor = "Black"
 BK_Temp.alignment = "Right"
-Text_1.x_hPosition = 400
-Text_1.y_vPosition = 120
-Text_1.width = 300
+w_Text_1.x_hPosition = 400
+w_Text_1.y_vPosition = 120
+w_Text_1.width = 300
 Pump_1.foreColor = ""
-if Text_1.visible == true
-   Text_1.visible = false
+if w_Text_1.visible == true
+   w_Text_1.visible = false
 endif
 ```
 
-- Each **Text** has a fixed name: `Text_1`, `Text_2` ... It is shown at the top of its properties. `Text_1 = "..."` (or `Text_1.text = "..."`) changes what it says.
+- Each **Text Widget** starts with the name `w_Text_1`, `w_Text_2` ... (it can be changed: see [Text Widget](91-text-widget)). `w_Text_1 = "..."` (or `w_Text_1.text = "..."`) changes what it says.
 - Colors are a name (Red, Black ...) or a code like `#ffffff`.
 - Alignment is `Left`, `Center` or `Right` (`"Left justified"` and `"Centered"` work too).
-- Width, Height, X and Y are whole numbers of pixels. Reading one (`if Text_1.width > 200`) gives the size or place it has now.
+- Width, Height, X and Y are whole numbers of pixels. Reading one (`if w_Text_1.width > 200`) gives the size or place it has now.
 - A size or place set by a Process shows on the Tab only outside Edit layout. In Edit layout you see and drag where its properties put it.
 - The Label on a vessel has no Process name. Change it in the vessel's properties.
 

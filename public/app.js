@@ -4,7 +4,8 @@ import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, D
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
-import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.js';
+import { SKYNET_STYLES, STYLE_KEYS, styleOf, isSkynetStyle } from './styles.js';
+import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
@@ -225,7 +226,7 @@ function drawWs() {
   if (editing && draft) for (const g of draft.graphics.filter(g => g.workspace === w.name && isPlainUnit(g) && autoSized(g))) autoSizeUnit(g);
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
-  for (const g of L().graphics.filter(g => g.workspace === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));
+  for (const g of L().graphics.filter(g => gTab(g) === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));     // a Process can move a Text Widget to another Tab (.tab)
   const clones = L().graphics.filter(g => g.workspace === w.name && isClone(g)).map(cloneEl).filter(Boolean);
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones]) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
@@ -540,20 +541,31 @@ function buildGfx(g) {
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
 }
-// A Text ("+ Text" in Edit layout) is a text box: a Process can change it (Text_1.visible = false, Text_1.foreColor = "Red",
-// Text_1 = "Mashing"). What a Process set comes first, then its own settings, then the ☰ Menu > Default tab.
+// A Text Widget ("+ Text" in Edit layout): a Label line on top (when Visible) and its Text. A Process can change it all
+// (w_Text_1.visible = false, w_Text_1.fore = "Red", w_Text_1 = "Mashing", w_Text_1.label_visible = true ...). What a Process set
+// comes first, then its own Properties, then the ☰ Menu > Default tab. Word wrap is always on (Fritz, 2026-10-29).
+const gTab = g => (!editing && g.kind === 'text' && g.name && S.values[g.name]?.tab) || g.workspace;
 function fillText(n, g) {
   const D = TD(), v = (!editing && g.name && S.values[g.name]) || {};
   place(n, editing ? g : placeWith(g, v));
-  setRich(n, v.text ?? g.text ?? '');
-  n.style.fontSize = (g.fontSize || 16) + 'px'; n.style.fontWeight = g.bold ? '700' : '';
-  n.style.fontFamily = firstSet(g.font, D.nameFont);
+  const fnt = (live, own) => tbFontCss(live) || firstSet(own);
+  const body = h('div', { class: 'tbody' }); setRich(body, v.text ?? g.text ?? '');
+  n.style.fontSize = (+firstSet(v.size, g.fontSize) || 16) + 'px'; n.style.fontWeight = firstSet(v.bold, g.bold) === true ? '700' : '';
+  n.style.fontFamily = fnt(v.font, g.font) || D.nameFont;
   n.style.color = firstSet(v.forecolor, g.color, D.foreColor);
   n.style.backgroundColor = firstSet(v.backcolor, g.backColor, D.backColor);
-  const al = firstSet(v.alignment, g.align, D.align);
-  n.style.textAlign = al.toLowerCase();
-  n.style.whiteSpace = g.wrap === false ? 'pre' : '';
-  n.style.overflow = g.wrap === false ? 'hidden' : '';
+  n.style.textAlign = firstSet(v.alignment, g.align, D.align).toLowerCase();
+  n.style.whiteSpace = ''; n.style.overflow = '';
+  const parts = [body];
+  if (firstSet(v.label_visible, g.labelVisible) === true) {
+    const lb = h('div', { class: 'tlabel' }); setRich(lb, firstSet(v.label, g.label, g.name));
+    lb.style.fontSize = (+firstSet(v.size_label, g.labelSize) || 14) + 'px'; lb.style.fontWeight = firstSet(v.bold_label, g.labelBold) === true ? '700' : '400';
+    lb.style.fontFamily = fnt(v.font_label, g.labelFont);
+    lb.style.color = firstSet(v.fore_label, g.labelColor); lb.style.backgroundColor = firstSet(v.back_label, g.labelBg);
+    lb.style.textAlign = firstSet(v.alignment_label, g.labelAlign).toLowerCase();
+    parts.unshift(lb);
+  }
+  n.replaceChildren(...parts);
   n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden' || (v.hidden ?? g.hidden) === true);
 }
 
@@ -617,11 +629,12 @@ function sizeFitting(g) {
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
 // its settings and in the IP lists but cannot be typed over; the Label stays free text. Vessels keep the names users give them.
-const NAME_PREFIX = { text: 'Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', cap: 'Cap' };
-const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : g.kind === 'text' ? 'Text' : null;
+const NAME_PREFIX = { text: 'w_Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', cap: 'Cap' };
+const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : g.kind === 'text' ? 'w_Text' : null;
 function giveName(g, all) {
-  const p = autoPrefix(g); if (!p || (g.name && g.name.startsWith(p + '_'))) return;
-  // a Text's name is used by Processes (Text_1.visible = false), so it can't be a Device's name either
+  // a Text Widget keeps the name it has: w_Text_N is only its first name, it can be changed (Fritz, 2026-10-29)
+  const p = autoPrefix(g); if (!p || (g.name && (g.kind === 'text' || g.name.startsWith(p + '_')))) return;
+  // a Text's name is used by Processes (w_Text_1.visible = false), so it can't be a Device's name either
   const used = new Set([...all.map(x => x.name), ...(g.kind === 'text' ? (draft || S.config).elements.map(e => e.name) : [])]); let n = 1; while (used.has(p + '_' + n)) n++;
   g.name = p + '_' + n;
 }
@@ -823,6 +836,27 @@ function styleEl(n, e) {
   if (e.border === 'visible') n.classList.add('show-border');
 }
 
+// Seven-segment digits as SVG (the Timer look): 0-9, - and :, lit segments in var(--seg), the others faint
+const SEGS = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg', '-': 'g' };
+function sevenSeg(text) {
+  const W = 40, H = 70, t = 7, g = 1.5, out = [];
+  const hs = (x, y, l) => `${x},${y} ${x + t / 2},${y - t / 2} ${x + l - t / 2},${y - t / 2} ${x + l},${y} ${x + l - t / 2},${y + t / 2} ${x + t / 2},${y + t / 2}`;
+  const vs = (x, y, l) => `${x},${y} ${x + t / 2},${y + t / 2} ${x + t / 2},${y + l - t / 2} ${x},${y + l} ${x - t / 2},${y + l - t / 2} ${x - t / 2},${y + t / 2}`;
+  let x = 4;
+  for (const ch of String(text)) {
+    if (ch === ':' || ch === '.') {
+      out.push(`<circle cx="${x + 5}" cy="${H * 0.33}" r="3.6" class="on"/>`, ...(ch === ':' ? [`<circle cx="${x + 5}" cy="${H * 0.67}" r="3.6" class="on"/>`] : []));
+      x += 12; continue;
+    }
+    const lit = SEGS[ch] ?? '', x0 = x + t / 2, x1 = x + W - t / 2, y0 = t / 2, ym = H / 2, y1 = H - t / 2;
+    const P = { a: hs(x0 + g, y0, x1 - x0 - 2 * g), g: hs(x0 + g, ym, x1 - x0 - 2 * g), d: hs(x0 + g, y1, x1 - x0 - 2 * g),
+      f: vs(x0, y0 + g, ym - y0 - 2 * g), b: vs(x1, y0 + g, ym - y0 - 2 * g), e: vs(x0, ym + g, y1 - ym - 2 * g), c: vs(x1, ym + g, y1 - ym - 2 * g) };
+    if (ch !== ' ') for (const [k, pts] of Object.entries(P)) out.push(`<polygon points="${pts}" class="${lit.includes(k) ? 'on' : 'off'}"/>`);
+    x += W + 6;
+  }
+  return `<svg class="seg7" viewBox="0 -2 ${x} ${H + 4}" preserveAspectRatio="xMidYMid meet" aria-label="${String(text).replace(/[<&"]/g, '')}">${out.join('')}</svg>`;
+}
+
 function fmtVal(e, v) {
   if (v === undefined || v === null) return '';
   if (typeof v === 'number' && +e.digits > 0) {          // a Gauge: the whole number part padded to its digits (with figure spaces)
@@ -937,6 +971,19 @@ function fillEl(n, e0) {
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
   setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
+  // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
+  // A Timer's look is its Style (Skynet or User, public/styles.js); a Process's .fore / .back go over it
+  const ts = e.type === 'timer' ? styleOf('timer', e0, S.config.userStyles) : null, tmLook = ts?.look === 'timer';
+  n.classList.toggle('look-timer', tmLook);
+  if (ts) n.classList.toggle('look-led', ts.look === 'led');
+  if (tmLook) {
+    const panel = h('div', { class: 'tmPanel' }); panel.innerHTML = sevenSeg(text);
+    const pc = firstSet(v.backcolor, ts.panel); if (pc) panel.style.background = pc;
+    if (ts.bezel) panel.style.borderColor = ts.bezel;
+    panel.style.setProperty('--seg', firstSet(v.forecolor, ts.digits, '#ffffff'));
+    vl.replaceChildren(panel); vl.style.backgroundColor = '';
+    nm.style.color = e.nameColor || ts.titleFore || '#ffffff'; nm.style.backgroundColor = e.nameBg || ts.titleBack || '#000000';
+  }
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true);   // .hidden = true wins over .visible = true
   n.classList.toggle('fault', !!v.fault);
@@ -947,7 +994,7 @@ function fillEl(n, e0) {
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
   const stretch = stretchPic(e, v);
-  n.style.backgroundColor = img || missing ? '' : bg(v.background);
+  n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
   n.classList.toggle('turned', !!(turn || flip));
@@ -994,8 +1041,9 @@ function updateEl(name) {
   const n = $(`#ws .el[data-name="${CSS.escape(name)}"]`);
   const e = elNamed(name);
   if (n && e) fillEl(n, e);
-  const tn = !e && $(`#ws .gfx.txt[data-tname="${CSS.escape(name)}"]`), t = tn && L().graphics.find(g => g.kind === 'text' && g.name === name);
-  if (t) fillText(tn, t);
+  const tn = !e && $(`#ws .gfx.txt[data-tname="${CSS.escape(name)}"]`), t = !e && L().graphics.find(g => g.kind === 'text' && g.name === name);
+  if (t && (gTab(t) === wsName) !== !!tn) renderWs();          // a Process moved it to or from this Tab (.tab)
+  else if (t && tn) fillText(tn, t);
   for (const cn of $$(`#ws .el[data-clone="${CSS.escape(name)}"]`)) { const ce = elNamed(cn.dataset.name); if (ce) fillEl(cn, ce); }     // its clones
   for (const p of L().elements) if (p.type === 'picture' && p.follow === name) { const pn = $(`#ws .el[data-name="${CSS.escape(p.name)}"]`); if (pn) fillEl(pn, p); }
 }
@@ -2018,7 +2066,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
   const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
-  const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : 130, h: type === 'timer' ? 80 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
+  const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (!D.visible) e.visibility = 'hidden';
   if (D.wrap) e.wrap = true;
   if (type === 'shared') e.dataType = 'value';
@@ -2464,13 +2512,38 @@ function useTabProfile(e) {
 const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : 'normal';
 // Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
 $('#addImg').onclick = () => { toBuild(); const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
-// a new Text starts with the Default tab's size, place, Visible and Word wrap (copied now; colors and alignment follow the Default)
+// a new Text Widget starts with the Default tab's size, place and Visible (copied now; colors and alignment follow the Default). Word wrap is always on.
 $('#addText').onclick = () => addText();
 function addText() {
   toBuild();
-  const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }), ...(D.wrap ? {} : { wrap: false }) };
+  const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }) };
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
+// COPY in a Widget's Properties (Fritz, 2026-10-29): a copy with everything the same but a new name (the next w_Text_N), made on
+// the 🔨 Build Tab like every new Widget (Rule 4.1), a little down and right of where the first one is; its Properties open.
+function copyGraphic(g) {
+  const tab = toBuild(); if (!tab) return;
+  const c = { ...clone(g), id: newId(), workspace: tab.name, x: (+g.x || 0) + 20, y: (+g.y || 0) + 20 };
+  for (const k of ['_ref', 'name', 'locked']) delete c[k];
+  draft.graphics.push(c); giveName(c, draft.graphics);
+  sel = { kind: 'gfx', id: c.id }; renderTabs(); renderWs();
+  toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
+  editItem('gfx', c.id);
+}
+// COPY of a Device-less Widget (a Timer): the same, under the next free name (Timer_1 -> Timer_2), on the 🔨 Build Tab
+function copyElement(e) {
+  const tab = toBuild(); if (!tab) return;
+  const base = /\d+$/.test(e.name) ? e.name.replace(/\d+$/, '') : e.name + '_';
+  const taken = n => draft.elements.some(x => x.name.toLowerCase() === n.toLowerCase()) || draft.graphics.some(g => String(g.name ?? '').toLowerCase() === n.toLowerCase());
+  let i = 1; while (taken(base + i)) i++;
+  const c = { ...clone(e), name: base + i, workspace: tab.name, x: (+e.x || 0) + 20, y: (+e.y || 0) + 20 };
+  for (const k of ['_ref', 'locked']) delete c[k];
+  if (e.label && e.label === e.name) c.label = c.name;
+  draft.elements.push(c);
+  sel = { kind: 'el', id: c.name }; renderTabs(); renderWs();
+  toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
+  editItem('el', c.name);
+}
 $('#finishPipe').onclick = () => finishPipe();
 // Lock / Unlock the selected item so it cannot be dragged or resized by accident
 function updLockBtn() {
@@ -2932,8 +3005,9 @@ const F = {
     ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Tapping the Clone is tapping the parent: turning it on or off (or Enabled, for a PID) turns the parent and every Clone. A reading (a temperature probe) is shown the same way as the parent.`, 'note'],
     ['visibility', 'Visible (off = hidden on its Tab only)', 'vis'], ['workspace', 'Tab (the Tab this Clone is on)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
   common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
-    ['background', 'Background picture (BruControl: background = 1, 2 or 3)', 'bgsel'], ['imagePath_1', 'imagePath_1 (a Process changes it: name.image = "path")', 'imgpath', 1],
-    ['imagePath_2', 'imagePath_2', 'imgpath', 2], ['imagePath_3', 'imagePath_3', 'imgpath', 3], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    // the Image block (Fritz, 2026-10-29): Background #, Back Colour, and Image Path 1-3, each with OPEN and a box to type a path in
+    ['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
+    ['imagePath_1', 'Image Path 1', 'imgopen', 1, false, 'b'], ['imagePath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['imagePath_3', 'Image Path 3', 'imgopen', 3, false, 'b'], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (Device, Widget, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
@@ -2978,8 +3052,26 @@ const F = {
   picture: [['follow', 'Turns on with (None = a still picture)', 'onsrc', null, true], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['text', 'Text on picture', 'text']],
   label: [],
   image: [['image', 'Image path', 'path'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
-  text: [['text', 'Text (codes like \\b bold, \\L large, \\n new line work here)', 'area'], ['visible', 'Visible', 'bool', true], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on)', 'bool'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
-    ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['wrap', 'Word wrap as needed (off = one line, cut off at the edge)', 'bool', true], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
+  // Text Widget Properties (Fritz's design, 2026-10-29): Name, Text, then a Label box and a Properties box. Word wrap is always on.
+  // "Update Names" is the ✏ Change name method: a name a Process can use changes only that way, and the Processes follow it (Fritz, 2026-10-29).
+  text: [['name', 'Name', 'text', null, false, 'b'],
+    ['_nm', 'w_Text_N is a default name given when a user makes a Text Widget. This name can be used, or a new name can be given. name.attribute = Something is how you use it in the Process Editor.', 'infonote', 'text'],
+    ['text', 'Text', 'text', null, false, 'b'], ['_rt', 'Rich Text Embedded Codes work in the Text and the Label: \\b bold, \\i italic, \\n new line, \\c{Red} color ... (Help > Rich Text Embedded Code)', 'note'],
+    ['_lb', '', 'box'], ['label', 'Label', 'text', null, false, 'b'], ['labelVisible', 'Visible (Show label)', 'bool', null, false, 'b'], ['labelSize', 'Font size', 'num'], ['labelFont', 'Font', 'sel', FONTS], ['labelBold', 'Bold', 'bool'],
+    ['labelColor', 'Fore color', 'color'], ['labelBg', 'Back color', 'color'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+    ['_pb', 'Properties', 'box'], ['visible', 'Visible', 'bool', true, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+    ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'], ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
+  // Timer Widget Properties (Fritz, 2026-10-29): the Text Widget pattern; no pictures and no background. Its look is a Style
+  // (Skynet Styles can't be changed; ➕ Add new User Style… makes one). Label (the title bar), place, size and Tab.
+  timerWidget: [['name', 'Name', 'text', null, false, 'b'],
+    ['_nm', 'A Timer Widget counts up or down in hh:mm:ss. Its Name is how a Process uses it: name.attribute = Something.', 'infonote', 'timer'],
+    ['_tb', 'Timer', 'box'], ['timerType', 'Type', 'sel', [['countup', 'Count up'], ['countdown', 'Count down']], false, 'b'], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the Brain starts', 'bool'],
+    ['_lb', '', 'box'], ['label', 'Label (the title bar; empty = the Name)', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show', null, false, 'b'], ['nameFontSize', 'Font size', 'num'], ['nameFontFamily', 'Font', 'sel', FONTS],
+    ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'], ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]],
+    ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+    ['style', 'Style', 'stylesel', 'timer', false, 'b'],
+    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
@@ -3135,6 +3227,7 @@ function fieldsOf(item) {
 const PICK_TIP = 'Double-click to open the Properties of the one picked';
 function field(f, obj) {
   const out = fieldOne(f, obj);
+  if (f[5] === 'b' && out[0]?.tagName === 'LABEL') out[0].classList.add('strong');      // a main field: its name in bold
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
     out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
     if (out[1].matches?.('select, input')) out[1].disabled = true;
@@ -3155,6 +3248,47 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
     if (opts !== 1) out[1].querySelector('select[data-k]')?.addEventListener('change', imagePathHeadsUp);
     return out;
+  }
+  if (kind === 'stylesel') {   // a Style list (Fritz, 2026-10-29): Skynet Styles 🔒 (never changed), then User Styles, then ➕ Add new User Style…
+    const mine = () => S.config.userStyles?.[opts] ?? [];
+    const cur = styleOf(opts, obj, S.config.userStyles)?.id ?? '';
+    const s = h('select', { 'data-k': key, 'data-kind': 'sel' });
+    const fill = id => s.replaceChildren(
+      h('optgroup', { label: 'Skynet Styles (can\'t be changed)' }, ...SKYNET_STYLES[opts].map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, '🔒 ' + x.name))),
+      ...(mine().length ? [h('optgroup', { label: 'User Styles' }, ...mine().map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, x.name)))] : []),
+      h('option', { value: '__add__' }, '➕ Add new User Style…'));
+    fill(cur);
+    let prev = cur;
+    const edit = h('button', { type: 'button', class: 'nameBtn', title: 'Change this User Style (a Skynet Style can never be changed)' }, '✏ Edit');
+    const upd = () => { edit.disabled = isSkynetStyle(s.value); };
+    s.addEventListener('change', async ev => {
+      if (s.value !== '__add__') { prev = s.value; upd(); return; }
+      ev.stopPropagation();
+      const made = await styleEditor(opts, null, styleOf(opts, { style: prev }, S.config.userStyles));
+      fill(made ? made.id : prev); prev = s.value; upd();
+    });
+    edit.onclick = async () => { const st = mine().find(x => x.id === s.value); if (!st) return; const done = await styleEditor(opts, st); fill(done === false ? SKYNET_STYLES[opts][0].id : s.value); prev = s.value; upd(); };
+    upd();
+    return [h('label', {}, label), h('span', { class: 'nameRow' }, s, edit)];
+  }
+  if (kind === 'bgnum') {      // Background #: 1, 2 or 3 picks Image Path 1-3; any other number shows no picture (Fritz, 2026-10-29)
+    const inp = h('input', { 'data-k': key, 'data-kind': 'bgsel', type: 'text', inputmode: 'numeric', value: v ?? '', placeholder: '1', class: 'bgNum' });
+    return [h('label', {}, label), h('span', { class: 'nameRow' }, inp, h('span', { class: 'muted' }, '1, 2, 3   Any other background is blank'))];
+  }
+  if (kind === 'imgopen') {    // Image Path N: OPEN picks a picture in a pop-up; or type a path in the box (a path that is not found shows blank)
+    const inp = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', placeholder: '(none)', spellcheck: 'false', autocomplete: 'off' });
+    const warn = h('span', { class: 'pathWarn', role: 'status' });
+    const check = () => { const p = inp.value.trim(); warn.textContent = p && !picKnown(p) ? '⚠ Not found: it shows blank' : ''; };
+    inp.addEventListener('input', check);
+    if (opts !== 1) inp.addEventListener('change', imagePathHeadsUp);     // imagePath_2 / _3: the heads-up once (Rule 7.10)
+    const open = h('button', { type: 'button', class: 'openBtn', title: `Pick the picture for Image Path ${opts}`, onclick: async ev => {
+      ev.preventDefault();
+      const p = await openImagePath(opts, inp.value.trim()); if (p === null) return;
+      inp.value = p; check();
+      for (const t of ['input', 'change']) inp.dispatchEvent(new Event(t, { bubbles: true }));
+    } }, 'OPEN');
+    check();
+    return [h('label', {}, label), h('span', { class: 'nameRow imgRow' }, open, inp, warn)];
   }
   if (kind === 'bgsel') {      // which picture shows: 1-3 (and more on folded items), or none
     const n = [1, 2, 3, ...slotsOf(obj).filter(x => x > 3)];
@@ -3259,6 +3393,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => o?.group ? h('optgroup', { label: o.group }, ...o.items.map(i => opt(pair(i)))) : opt(pair(o))));
   }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
+  else if (kind === 'infonote') return [h('div', { class: 'full infoNote' }, label, ' ', infoIcon(opts))];     // a note with the orange ? (more about it)
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)),      // Fritz: the full Interface name first
@@ -3365,7 +3500,16 @@ function fillPicPair(body, sel) {
   other.value = p; other.dispatchEvent(new Event('change'));      // shows its preview (does not bubble back here)
 }
 function bindForm(body, fields, obj, onChange) {
-  const build = () => { body.innerHTML = ''; for (const f of (typeof fields === 'function' ? fields(obj) : fields)) body.append(...field(f, obj)); menuHelpIcons(body); };
+  // a 'box' field starts a framed group (Fritz's Text Widget Properties, 2026-10-29): the fields after it go inside, up to the next box or 'boxend'
+  const build = () => {
+    body.innerHTML = ''; let to = body;
+    for (const f of (typeof fields === 'function' ? fields(obj) : fields)) {
+      if (f[2] === 'box') { to = h('div', { class: 'full dlgBox' }, ...(f[1] ? [h('div', { class: 'full dlgBoxTitle' }, f[1])] : [])); body.append(to); continue; }
+      if (f[2] === 'boxend') { to = body; continue; }
+      to.append(...field(f, obj));
+    }
+    menuHelpIcons(body);
+  };
   build();
   body.onchange = ev => {
     const t = ev.target;
@@ -3409,6 +3553,10 @@ function nameCheck(n, obj) {
   if (obj.type && (S.types || []).includes(obj.type)) {          // a Device or Widget element: Fritz's name rules, unique
     const bad = elementNameError(n, isDevice(obj) ? 'Device' : 'Widget'); if (bad) return bad;
     if (all.elements.some(x => x._ref !== obj._ref && x.name.toLowerCase() === n.toLowerCase()) || all.graphics.some(g => g.kind === 'text' && g.name === n)) return `The name ${n} is already used. Names must be unique.`;
+  } else if (obj.kind === 'text') {                              // a Text Widget: the same rules as a Widget's name
+    const bad = elementNameError(n, 'Widget'); if (bad) return bad;
+    const low = n.toLowerCase();
+    if (all.elements.some(x => x.name.toLowerCase() === low) || all.graphics.some(g => g.id !== obj.id && String(g.name ?? '').toLowerCase() === low)) return `The name ${n} is already used. Names must be unique.`;
   } else if (all.workspaces.some(w => w === obj || w._ref === obj._ref)) {
     if (all.workspaces.some(w => w._ref !== obj._ref && w.name.toLowerCase() === n.toLowerCase())) return `There is already a Tab called ${n}`;
   }
@@ -3440,8 +3588,112 @@ function nameChange(current, { title = 'Name Change', check, spaces = false } = 
   });
 }
 
+// a picture path the panel knows (in media/Images, a Skynet picture, or one already used)
+const picKnown = p => vList('pictures').includes(p) || mediaPics.includes(p) || ONOFF_GRAPHICS.some(g => g[1] === p);
+// OPEN beside Image Path N (Fritz, 2026-10-29): a "Background Image N" pop-up with the picture lists (Skynet / My pictures, the
+// group, 🖼 icons) and the Image dropdown. 💾 Save gives the picked path back, ✖ Cancel null.
+function openImagePath(n, current) {
+  return new Promise(res => {
+    const work = { pick: current || '' };
+    const [, pick] = fieldOne(['pick', 'Image', 'gpick', 'pictures'], work);
+    const s = pick.querySelector('select[data-k]');
+    let out = null;
+    s.addEventListener('change', () => {          // Add new ...: type a picture name (it lands in media/Images)
+      if (s.value !== '__add__') return;
+      const t = (prompt('Picture in media/Images (for example MyValve_On.svg or Valves/MyValve_On.svg)') || '').trim();
+      if (!t) { s.value = work.pick; return; }
+      const p = imagesPath(t);
+      if (![...s.options].some(o => o.value === p)) s.insertBefore(h('option', { value: p }, p), s.lastChild);
+      s.value = p; s.dispatchEvent(new Event('change'));
+    });
+    const save = () => { out = s.value === '__add__' ? null : s.value; d.close(); };
+    const d = h('dialog', { class: 'imgOpenDlg', 'data-nomenu': true },
+      h('div', { class: 'bar' }, h('h3', {}, `Background Image ${n}`), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), h('button', { type: 'button', class: 'primary', onclick: save }, 'Save')),
+      h('div', { class: 'imgOpenBody' }, h('label', { class: 'strong' }, `Image Path ${n}`), pick));
+    d.addEventListener('close', () => { d.remove(); res(out); });
+    document.body.append(d); d.showModal();
+  });
+}
+
+// The User Style pop-up: a new one starts from the Style picked now; a Skynet Style is never opened here. 💾 Save keeps it in
+// the Schema (Settings) and gives it back; 🗑 Delete (an old one only) gives false; ✖ Cancel null.
+function styleEditor(kind, st, from) {
+  return new Promise(res => {
+    const isNew = !st, work = st ? clone(st) : { id: 'u_' + newId().replace(/[^A-Za-z0-9]/g, '').slice(0, 20), name: '', look: from?.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, from?.[k] || ''])) };
+    const body = h('div', { class: 'styleBody' });
+    bindForm(body, [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
+      ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']], work);
+    const err = h('p', { class: 'nameErr', role: 'alert' });
+    let out = null;
+    const save = async () => {
+      try { readFields(work, body); } catch (e) { err.textContent = e.message; return; }
+      const name = String(work.name ?? '').trim(), list = S.config.userStyles?.[kind] ?? [];
+      if (!name) { err.textContent = 'Give the Style a name.'; return; }
+      if (/^skynet\b/i.test(name)) { err.textContent = 'Only Skynet Styles start with "Skynet". Pick another name.'; return; }
+      if ([...SKYNET_STYLES[kind], ...list].some(x => x.id !== work.id && x.name.toLowerCase() === name.toLowerCase())) { err.textContent = `There is already a Style called ${name}.`; return; }
+      const item = { id: work.id, name, look: work.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, work[k] || ''])) };
+      const all = { ...(S.config.userStyles || {}), [kind]: isNew ? [...list, item] : list.map(x => x.id === item.id ? item : x) };
+      try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = item; d.close(); } catch (e) { err.textContent = e.message; }
+    };
+    const del = async () => {
+      if (!confirm(`Delete the User Style ${st.name}? Anything that uses it goes back to the first Skynet Style.`)) return;
+      const all = { ...(S.config.userStyles || {}), [kind]: (S.config.userStyles?.[kind] ?? []).filter(x => x.id !== st.id) };
+      try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = false; d.close(); } catch (e) { err.textContent = e.message; }
+    };
+    const bar = () => h('div', { class: 'bar' }, ...(isNew ? [] : [h('button', { type: 'button', class: 'danger', onclick: del }, 'Delete')]), h('span', { class: 'spacer' }),
+      h('button', { type: 'button', onclick: () => d.close() }, 'Cancel'), h('button', { type: 'button', class: 'primary', onclick: save }, 'Save'));
+    const d = h('dialog', { class: 'imgOpenDlg', 'data-nomenu': true }, h('h3', {}, isNew ? 'New User Style' : 'User Style'), bar(), body, err,
+      h('p', { class: 'muted' }, 'A Skynet Style can never be changed. A User Style is yours: change or delete it any time.'), bar());
+    d.addEventListener('close', () => { d.remove(); renderWs(); res(out); });
+    document.body.append(d); d.showModal();
+  });
+}
+
+// The orange ? (Fritz, 2026-10-29): not Help (that is the yellow ? by the title) but a pop-up with more about this kind of Widget:
+// its Properties and the Attributes a Process can use. ✖ Close at the top and the bottom. Each kind's list is in INFO.
+const INFO = {
+  text: { title: 'Text Widget', properties: [
+    ['Name', ' with a Suggested Name (w_Text_N). A user changes it only with ✏ Change name, and every Process that uses it is updated to the new name.'],
+    ['Label', ' (Add > Label in Edit layout): a line above the Text, with its own Visible switch, font, size, bold, colors and alignment.'],
+    ['Text', ' (+ Text in Edit layout), which is its value. Rich Text Embedded Codes work in the Label and the Text (\\b bold, \\n new line, \\c{Red} ...).'],
+    ['Visible switch', ' for the Label and for the Widget; Hidden Locked keeps it hidden even when Visible is on.'],
+    ['Standard Rich Text properties', ' for the Label and the Text: font, size, bold, fore color, back color, alignment.'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.'],
+    ['Word wrap', ' (always on).']],
+    attributes: [['.label'], ['.text'], ['.value', 'only in a Process: the same as .text'], ['.label_visible'], ['.font_label'], ['.size_label'], ['.fore_label'], ['.back_label'], ['.bold_label'], ['.alignment_label'],
+      ['.font'], ['.size'], ['.fore'], ['.back'], ['.bold'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'],
+      ['.width'], ['.height'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
+    example: 'w_Text_1.fore = "Red"' },
+  timer: { title: 'Timer Widget', properties: [
+    ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
+    ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
+    ['Style', ': its look, from a list. Skynet Styles come with Skynet and can never be changed; ➕ Add new User Style… makes your own (✏ changes it).'],
+    ['No pictures and no background', ' (Fritz, 2026-10-29).'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.'],
+    ['▶ ■ ↺ Set', ' buttons under the digits start, stop, reset and set it.']],
+    attributes: [['.value', 'the time, hh:mm:ss; the same as the name alone'], ['.running', 'true / false'], ['.countdown', 'true = counts down'], ['.resetvalue', 'hh:mm:ss'], ['.label'],
+      ['.fore', 'the digits, over its Style'], ['.back', 'the panel, over its Style'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'], ['.width'], ['.height']],
+    example: 'tm_Mash.running = true' },
+};
+function infoIcon(kind) {
+  return h('button', { type: 'button', class: 'infoIcon', title: 'More about this (Properties and Attributes)', 'aria-label': 'More about this', onclick: ev => { ev.preventDefault(); infoPopup(kind); } }, '?');
+}
+function infoPopup(kind) {
+  const it = INFO[kind]; if (!it) return;
+  const close = () => h('button', { type: 'button', class: 'infoClose', onclick: () => d.close() }, 'Close');
+  const d = h('dialog', { class: 'infoDlg', 'data-nomenu': true },
+    h('div', { class: 'bar' }, h('h3', {}, it.title), h('span', { class: 'spacer' }), close()),
+    h('h4', {}, 'Properties'), h('ul', {}, ...it.properties.map(([b, t]) => h('li', {}, h('b', {}, b), t))),
+    h('h4', {}, 'Attributes'), h('p', { class: 'muted' }, 'A Process uses them as name.attribute, for example ', h('code', {}, it.example), '. "" puts back what its Properties say.'),
+    h('ul', { class: 'attrList' }, ...it.attributes.map(([a, t]) => h('li', {}, h('code', {}, a), t ? ` (${t})` : ''))),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), close()));
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); d.showModal();
+}
+
 // fields: a list, or a function of the item (the list changes when a [.., true] select changes, e.g. probe type)
-function dialog(title, fields, obj, canDelete, topic) {
+// canCopy: a COPY button at the top (Fritz's Text Widget Properties): the dialog closes with 'copy'
+function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
   return new Promise(res => {
     $('#dlgTitle').textContent = title;
     bindForm($('#dlgBody'), fields, obj);
@@ -3453,6 +3705,7 @@ function dialog(title, fields, obj, canDelete, topic) {
       }));
     }
     for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
+    for (const b of $$('#dlg .dlgCopy')) b.classList.toggle('hidden', !canCopy);
     const d = $('#dlg');
     // Delete and Cancel are plain buttons so Enter in a field always means Save
     for (const b of $$('#dlg [data-close]')) b.onclick = () => d.close(b.dataset.close);
@@ -3646,14 +3899,15 @@ async function editItem(kind, id) {
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
+    if (it.type === 'timer' && !skyDev(it)) return F.timerWidget;       // Timer Widget Properties (Fritz, 2026-10-29)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
-    if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'imagePath_' + n, 'imgpath', n]));
+    if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return skyDev(it) ? skyDevFields(it, f) : f;
-  } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item), bf = isBfit(item);
   if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
@@ -3661,7 +3915,9 @@ async function editItem(kind, id) {
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
-  const r = await dialog(kind === 'el' ? elTitle(item) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
+  if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -3686,6 +3942,7 @@ async function editItem(kind, id) {
       for (const g of draft.graphics) { if (gone.includes(g.from)) delete g.from; if (gone.includes(g.to)) delete g.to; }
       sel = null; renderWs(); return;
     }
+    const copy = r === 'copy'; if (copy) r = 'ok';           // COPY: save it, then make the copy
     if (r !== 'ok') {      // a new vessel closed with Cancel still gets its default ports
       if (isV && item.isNew) { delete item.isNew; vesselPopup(item, syncVesselPorts(item, null)); renderWs(); }
       return;
@@ -3730,6 +3987,17 @@ async function editItem(kind, id) {
       }
       work.name = (work.name || '').trim() || item.name;
       if (!item.template && (!work.label || work.label === item.vtype)) work.label = work.vtype;   // the label follows the Type until it is changed (a Tab_Vessel's empty label shows its Name)
+    }
+    if (type === 'timer' && !skyDev(work)) {      // its Style sets its look (LED digits keep the old look's own digit colors)
+      const st = styleOf('timer', work, S.config.userStyles); work.style = st.id; work.look = st.look === 'led' ? 'led' : 'normal';
+      for (const k of ['foreColor', 'backColor']) delete work[k];      // no Fore / Back of its own: the Style has them
+    }
+    if (type === 'text') {         // a Text Widget's name: Fritz's name rules, unique among Devices and Widgets (public/names.js)
+      work.name = noSpaces(work.name || '') || item.name;
+      if (work.name !== item.name) { const bad = nameCheck(work.name, item); if (bad) throw new Error(bad); }
+      delete work.syncLabel;                                                    // the old Update Names switch: ✏ Change name does it (Fritz, 2026-10-29)
+      if (work.label === work.name) delete work.label;     // an empty Label shows the Name (Rule 1.13)
+      delete work.wrap;                                                         // word wrap is always on
     }
     if (type === 'pipe') {
       if (work.from && work.from === work.to) throw new Error('A pipe needs two different IPs');
@@ -3812,6 +4080,7 @@ async function editItem(kind, id) {
     if (kind === 'el') sel = { kind, id: item.name };
     renderTabs(); renderWs();
     if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
+    if (copy) (kind === 'el' ? copyElement(item) : copyGraphic(item));
   } catch (e) { toast(e.message, true); }
 }
 
