@@ -1,0 +1,5 @@
+{
+  "title": "Skynet Motorized Ball Valve Device (Daughter VL: Vertical)",
+  "master": "Skynet_Motorized_Ball_Valve_H",
+  "props": { "orientation": "v", "w": 77, "h": 90 }
+}

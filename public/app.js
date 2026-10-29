@@ -8,7 +8,7 @@ import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith } from './textbox.j
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
-import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel } from './templates.js';
+import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom } from './templates.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -705,16 +705,22 @@ function picEnds(e) {
   const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
   return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
 }
+// a valve flipped (Flip Horizontal / Vertical): its IPs mirror about its middle, as its picture does
+const flipPt = e => {
+  if (!e.flipH && !e.flipV) return c => c;
+  const gm = elGeom(e), cx = (gm.x || 0) + (gm.w || 120) / 2, cy = (gm.y || 0) + (gm.h || 60) / 2;
+  return c => [e.flipH ? Math.round(2 * cx - c[0]) : c[0], e.flipV ? Math.round(2 * cy - c[1]) : c[1]];
+};
 const devIps = e => {
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   if (!v) return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
     { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: sidePt(e, e.ipOut || 'right') }];
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
-  const tap = e.subtype === 'valve' && e.tapwater && tapOut(e) !== 'both' ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
+  const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
-  const pe = picEnds(e);
-  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top')) },
-    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom')) }];
+  const pe = picEnds(e), fl = flipPt(e);
+  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
+    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
@@ -930,7 +936,7 @@ function fillEl(n, e0) {
   if (e.type === 'label') n.classList.add('text');
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
-  setRich(vl, e.hideValue ? '' : text);
+  setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   n.classList.toggle('on', on && e.type !== 'picture');
   n.classList.toggle('vhidden', v.visibility === 'hidden' || v.hidden === true);   // .hidden = true wins over .visible = true
   n.classList.toggle('fault', !!v.fault);
@@ -943,9 +949,9 @@ function fillEl(n, e0) {
   const stretch = stretchPic(e, v);
   n.style.backgroundColor = img || missing ? '' : bg(v.background);
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
-  const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] : 0;
-  n.classList.toggle('turned', !!turn);
-  if (turn) { n.style.backgroundImage = ''; n.style.setProperty('--pic', `url("${media(img)}")`); n.style.setProperty('--turn', turn + 'deg'); }
+  const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
+  n.classList.toggle('turned', !!(turn || flip));
+  if (turn || flip) { n.style.backgroundImage = ''; n.style.setProperty('--pic', `url("${media(img)}")`); n.style.setProperty('--turn', turn + 'deg'); n.style.setProperty('--sx', e.flipH ? -1 : 1); n.style.setProperty('--sy', e.flipV ? -1 : 1); }
   else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
@@ -1318,7 +1324,7 @@ function allIps(ws) {
 const tapWater = e => !!(editing ? e.tapwater : S.values[e.cloneOf || e.name]?.tapwater ?? e.tapwater);
 // which end tap water leaves by: 'out' (the second end, right or bottom), 'in' (the first end, left or top) or 'both'
 const TAP_OUT = [['out', 'The second end (right or bottom), one way'], ['in', 'The first end (left or top), one way'], ['both', 'Both ends']];
-const tapOut = e => TAP_OUT.some(([k]) => k === e.tapwaterOut) ? e.tapwaterOut : 'out';
+const tapOut = e => e.tapwaterOut === 'none' ? 'none' : TAP_OUT.some(([k]) => k === e.tapwaterOut) ? e.tapwaterOut : 'out';    // none: a Skynet valve's Tap water source Needs setting
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
 function ipNode(id, ws) {
   const q = eqOfIp(id) !== null && eqPort(id, ws);
@@ -2007,7 +2013,8 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   if (pick === 'integratedDevice') return newIntegratedDevice(extra.template);
   if (pick === 'thermowell') return newThermowell(extra.length);
-  const preset = PRESETS[pick], type = preset ? preset.type : pick, kind = extra?.kind;
+  if (pick === 'skyDevice') { const p = skyDevPreset(extra.template); if (!p) return toast(`No Skynet Template ${extra.template}`, true); pick = 'skyValve'; extra = p; }
+  const preset = PRESETS[pick], type = preset ? preset.type : pick === 'skyValve' ? extra.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
   while (draft.elements.some(e => e.name === base + i)) i++;
   const D = TD();      // the Default tab: where new things go, and a Label's size (it is a text box)
@@ -2026,7 +2033,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
   if (isDevice(e)) {      // Fritz, 2026-10-28: a new Device is 150 x 150 unless its size is changed in the Add Device box
-    e.w = e.h = 150;
+    if (pick === 'skyValve') { e.w = extra.w; e.h = extra.h; } else e.w = e.h = 150;      // a Skynet Template keeps its own size
     if (!(await newDeviceDialog(e, prefix, what))) return;
   }
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
@@ -2034,6 +2041,47 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   centerNew(e);
   stackNew(e);
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
+}
+// ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
+// version: template = the Template's name. Only the Template's userFields show in its Properties; the rest are set by it.
+const fromSkyTpl = e => !!(e?.template && e.templateCls === 'skynet' && !e.kind);
+const skyDev = e => fromSkyTpl(e) && !!devTemplate(e);
+const devTemplate = e => TPL?.device?.find(t => t.name === e.template) || null;
+const SKY_DEV_ROWS = () => (TPL?.device || []).filter(t => t.cls === 'skynet').map(t => [t.title || t.name, 'skyDevice', 'Valve', { template: t.name }]);
+// a new User version: the Template's attributes, then the Add Device box as for any Device
+function skyDevPreset(name) {
+  const t = TPL?.device?.find(x => x.name === name);
+  return t ? applyDeviceTemplate({ type: t.type || 'digitalOut', ...clone(t.props || {}), template: t.name, templateCls: 'skynet' }, t) : null;
+}
+// where the Tap water source can be: Top / Bottom on a vertical valve, Left / Right on a horizontal or 45 degree one
+const tapKey = e => `${e.orientation}|${!!e.flipH}|${!!e.flipV}`;
+function tapChoices(e) {
+  const [a, b] = devIps({ ...e, tapwater: false }), v = e.orientation === 'v', first = v ? a.c[1] <= b.c[1] : a.c[0] <= b.c[0];
+  const [lo, hi] = first ? ['in', 'out'] : ['out', 'in'];
+  return [['', 'Needs setting'], [lo, v ? 'Tap Water Source Top' : 'Tap Water Source Left'], [hi, v ? 'Tap Water Source Bottom' : 'Tap Water Source Right']];
+}
+function skyDevFields(it, f) {
+  const t = devTemplate(it), ok = new Set(t.userFields || []);
+  if (it._tapFor === undefined) it._tapFor = tapKey(it);
+  else if (it.tapwater && it._tapFor !== tapKey(it)) { it.tapSource = ''; it._tapFor = tapKey(it); }    // turned or flipped: the tap end Needs setting again
+  const own = {
+    orientation: [['orientation', 'Orientation (the picture and its IPs follow)', 'sel', [['h', 'Horizontal'], ['v', 'Vertical'], ['r45', '45 degrees']], true],
+      ['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
+    tapwater: [['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true],
+      ...(it.tapwater ? [['tapSource', 'Tap water flows out of (a tap water valve only; the other end is the tap): pick the tap end', 'sel', tapChoices(it)]] : [])],
+    onText: [['showOnOffText', 'Text On/Off (on = the On or Off text shows on the Tab)', 'bool', undefined, true],
+      ...(it.showOnOffText ? [['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']] : [])],
+  };
+  const out = [['_sky', `Made from the Skynet Template ${t.title || t.name}. Its picture, Kind, Valve type, Service and look are set by the Template and can't be changed here (Rule 5.16).`, 'note']];
+  for (const x of f) {
+    const k = x[0];
+    if (own[k]) { if (ok.has(k)) out.push(...own[k]); continue; }
+    if (['flipH', 'flipV', 'tapSource', 'tapwaterOut', 'showOnOffText', 'offText'].includes(k)) continue;
+    if (k === '_tb' || (k.startsWith('_') && !['_ovn', '_hint'].includes(k)) || ok.has(k)) out.push(x);
+  }
+  if (ok.has('tapwater') && !f.some(x => x[0] === 'tapwater')) out.push(...own.tapwater);
+  if (ok.has('showOnOffText') && !f.some(x => x[0] === 'onText')) out.push(...own.onText);
+  return out;
 }
 // ---- The Edit layout bar's type lists (Fritz, 2026-10-28). Devices on the left, Widgets on the right:
 // Select Device Type (the major types) -> Add Device (only that type's Devices; every Device when no type is picked). Pumps,
@@ -2047,10 +2095,10 @@ const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: '
 const VALVE = ['Motorized valve, open / closed (relay)', 'valve', 'Valve'];
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
 const DEV_TYPES = () => [
-  ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, VALVE, ELEMENT]],
+  ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, ...SKY_DEV_ROWS(), VALVE, ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
-  ['valves', 'Valves', [VALVE, am('Proportional valve')]],
+  ['valves', 'Valves', [...SKY_DEV_ROWS(), VALVE, am('Proportional valve')]],
   ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), am('Electric kettle, basic')]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
@@ -2084,6 +2132,7 @@ function pickRun(sel) {
   if (f) guard(f)();
 }
 function fillAddType() {
+  if (!TPL && !fillAddType.asked) { fillAddType.asked = true; loadTemplates().then(fillAddType).catch(() => { }); }     // the Skynet Device Templates go in the Valves lists
   const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
   if (!ADD_MENU.some(([g]) => g.startsWith('gKonstant'))) ADD_MENU.push(vars('gKonstant', S.vkKinds), vars('gAPI', S.vapiKinds));
   const dev = DEV_TYPES(), wgt = WGT_TYPES();
@@ -2175,7 +2224,7 @@ async function newDeviceDialog(e, hint, what) {
   // of its Properties open.
   const codes = typeCodes(e), n = (i => () => ++i + '. ')(0);
   const fields = [['device', n() + 'Interface (board)', 'dev', 'addnew'],
-    ...(codes.length > 1 ? [['typeCode', n() + 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
+    ...(codes.length > 1 && !(e.template && e.typeCode) ? [['typeCode', n() + 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
     [port[0], n() + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
     ['name', n() + 'Suggested Name (you may type your own)', 'text'],
     ['label', n() + 'Label (shown on the tab, e.g. Fly Sparge)', 'text'], ['hideName', 'Show label (switch it off for no Label)', 'show'],
@@ -2458,8 +2507,6 @@ function turnSel(op) {
 }
 $('#turnFlipH').onclick = () => turnSel('h');
 $('#turnFlipV').onclick = () => turnSel('v');
-$('#turnL90').onclick = () => turnSel(-90);
-$('#turnR90').onclick = () => turnSel(90);
 $('#turnL45').onclick = () => turnSel(-45);
 $('#turnR45').onclick = () => turnSel(45);
 // Lock holds in Edit layout too (Fritz, 2026-10-22): only unlocked items move. An unlocked item also stays put when moving it
@@ -3569,6 +3616,7 @@ async function editItem(kind, id) {
   if (bundle) return toast(`This ${item.kind === 'ip' ? 'IP' : 'Tab_Fitting'} is bundled with ${bundle.label || bundle.name}. Open the vessel and switch off Bundled to edit, move or delete it.`, true);
   if (item.kind === 'vessel' && item.bundled && !isUnit(item) && !isSkyV(item)) return editBundle(item);
   await loadMediaPictures();
+  if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
@@ -3577,7 +3625,7 @@ async function editItem(kind, id) {
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
-    return f;
+    return skyDev(it) ? skyDevFields(it, f) : f;
   } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
   const isV = !!eqClass(item), bf = isBfit(item);
@@ -3668,6 +3716,12 @@ async function editItem(kind, id) {
       }
     }
     if (kind === 'el') {
+      if (skyDev(work)) {        // a User version of a Skynet Template: its fixed attributes stay the Template's (the Brain checks it too)
+        if (work.tapwater && work._tapFor !== tapKey(work)) work.tapSource = '';
+        delete work._tapFor;
+        if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
+        applyDeviceTemplate(work, devTemplate(work));
+      }
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
@@ -6066,9 +6120,9 @@ function renderVesselTab(box) {
 // lib/templates.js) they can only be cloned; until then Skynet is still building them and they can be changed here.
 // User Templates are changed and deleted by Admins. Add to Tab puts a copy on a Tab: a Tab_Vessel (with a Tab_Fitting on
 // each port that has a Bundled Fitting) or a Tab_Fitting. The copy is fully editable; the Template does not change.
-let TPL = null;           // { locked, vessel: [...], fitting: [...] } from the Brain
-const loadTemplates = async () => { const r = await api('GET', '/ui/templates'); TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fitting }; return TPL; };
-const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fitting }; };
+let TPL = null;           // { locked, vessel: [...], fitting: [...], device: [...] } from the Brain
+const loadTemplates = async () => { const r = await api('GET', '/ui/templates'); setTPL(r); return TPL; };
+const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fitting, device: r.device || [] }; };
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
