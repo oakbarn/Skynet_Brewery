@@ -35,11 +35,14 @@ export function elementTopic(e) {
   }
 }
 
+// a Skynet pipe fitting: a tee, elbow, U, reducer or End Cap and nothing else (the same test as isPlainUnit in app.js)
+const plainFit = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check'].includes(f.kind) && !f.thermowell));
 // a graphic: equipment, an IP or fitting, a pipe or hose, a picture or a text
 export function graphicTopic(g) {
   if (!g) return null;
   switch (g.kind) {
     case 'vessel':
+      if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && plainFit(g.fittings)) return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet') return ['skynet-fittings'];
       if (g.integrated) return g.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle'];
       if (g.template && g.templateCls === 'skynet') return ['skynet-vessels'];
@@ -47,8 +50,8 @@ export function graphicTopic(g) {
       if (g.bundled) return ['equipment', 'bundle-a-vessel-with-its-ips'];
       return g.vesselType === 'vessel' ? ['vessel-tab'] : ['equipment', 'other-equipment'];
     case 'ip':
-      if (g.fitting === 'manualValve') return ['manual-valves'];
-      if (g.fitting && g.fitting !== 'point') return ['pipes-and-hoses', 'sizes'];
+      if (g.fitting === 'manualValve') return ['pipe-fittings-and-manual-valves', 'the-manual-valve-widget'];
+      if (g.fitting && g.fitting !== 'point') return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
       return ['ip-snap-and-valve-pictures', 'snap-to-align'];
     case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
     case 'image': return ['picture-paths'];
@@ -93,7 +96,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gAPI', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
   elementTopic({ type: 'gKonstant', kind: 'list' }), elementTopic({ type: 'gKonstant' }),
-  ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
+  ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'bfit', templateCls: 'skynet', fittings: [{ kind: 'tee' }] }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
   ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
   graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }), graphicTopic({ kind: 'clone' }),
