@@ -4,9 +4,9 @@ Some characters can't be used in names, because they break Processes, or because
 
 Only a **new** name, or a name you **change**, is checked. The one exception is the list of characters below: older names that have them are changed for you (see **Older names** further down).
 
-## Device, Widget and Interface names
+## Names of Devices, Widgets, Tabs and everything else
 
-A Device, Widget or Interface name can't have:
+Every name is treated the same: Devices, Widgets, Interfaces, Tabs, Texts, pipes, vessels and the rest. (User Template names are only for picking a Template, so they are left alone.) A name can't have:
 
 - any of these: `<` `>` `:` `"` `/` `\` `|` `?` `*`
 
@@ -22,11 +22,11 @@ Use `~` or `_` instead: `Hot~Cold` or `Hot_Cold`, not `Hot/Cold`. A Suggested De
 
 ### Older names
 
-When the panel starts, or a Schema is opened, a Device, Widget or Interface name that still has one of `<` `>` `:` `"` `/` `\` `|` `?` `*` is changed once: each of them becomes a `~` (`Pump:1` becomes `Pump~1`; if that name is taken, `Pump~1_2`). It is the same item (it keeps its hidden key), and:
+When the panel starts, or a Schema is opened, a name that still has one of `<` `>` `:` `"` `/` `\` `|` `?` `*` is changed once: each of them becomes a `~` (`Pump:1` becomes `Pump~1`; if that name is taken, `Pump~1_2`). It is the same item (it keeps its hidden key), and:
 
 - the screen still shows the old name (it becomes the Label, unless the item already had one)
 - every Process follows: `"Pump:1".visible` becomes `"Pump~1".visible`
-- settings that point to it, pipes, saved values and the brew log follow too
+- settings that point to it, pipes, saved values and the brew log follow too (for a Tab, everything on it moves with it)
 - the old files are kept: `brewery.before-safe-names.bak` in the config folder and `<Process>.txt.before-safe-names.bak` in the scripts folder
 
 The Process Log says what was renamed.
