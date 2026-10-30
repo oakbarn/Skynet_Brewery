@@ -44,3 +44,7 @@ Nothing has to be changed for a normal personal repository. If the **Panel versi
 - If you turn on branch protection or a ruleset for the main branch that blocks direct pushes, GitHub's own robot cannot save `version.json` either. Ask for the workflow to be changed before turning that on.
 
 You can also run it by hand: **Actions > Panel version > Run workflow**.
+
+## Small icon or text box (Fritz, 2026-10-30)
+
+On the Menu Bar the version is a small text box. **Click it** and it becomes a small 🏷 icon, so it takes little space. **Click the 🏷** and the text box with the version comes back. Each browser remembers which one you picked. Hover over the 🏷 to read the version without opening it.

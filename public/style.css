@@ -730,7 +730,8 @@ button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, 
 .csvBox h3 { margin: 6px 0; }
 .csvNames { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 8px; max-height: 14em; overflow: auto; }
 /* Panel version (version.json from GitHub) on the Menu Bar and in ☰ Menu > About */
-.panelVer { font-weight: 400; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.panelVer { font-weight: 400; font-size: 12px; color: var(--muted); white-space: nowrap; cursor: pointer; border: 1px solid var(--line, #ccc); border-radius: 4px; padding: 1px 6px; }
+.panelVer.small { border-color: transparent; padding: 0 2px; font-size: 14px; }
 .verState.ver-current { color: var(--ok); }
 .verState.ver-old { color: var(--warn); font-weight: 700; }
 .verState.ver-changed { color: var(--warn); }
