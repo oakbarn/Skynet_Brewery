@@ -4,7 +4,7 @@ import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } 
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
-import { SKYNET_STYLES, STYLE_KEYS, styleOf, isSkynetStyle } from './styles.js';
+import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
@@ -146,6 +146,7 @@ function connect() {
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
   es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
+  es.addEventListener('closing', e => { es.close(); showClosed(JSON.parse(e.data).by); });
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -486,16 +487,19 @@ function placeEqIps(g) { for (const q of eqPorts(g)) { const n = $(`#ws .devip[d
 // label shared by vessels, equipment and IP widgets: position, color, size, show / hide
 // It is a text box (public/textbox.js): what is not set here comes from the ☰ Menu > Default tab, and the text codes (\b \L \n) work.
 function widgetLabel(g, defPos) {
-  const D = TD(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
+  const D = TD(), T = TS(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
   setRich(lb, g.label);
-  lb.style.color = firstSet(g.labelColor, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, D.backColor);
-  lb.style.fontSize = (g.labelSize || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = D.nameFont;
+  lb.style.color = firstSet(g.labelColor, T.labelFore, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, T.labelBack, D.backColor);
+  lb.style.fontSize = (g.labelSize || fontPx(T.labelSize) || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = firstSet(T.labelFont, D.nameFont);
   lb.style.textAlign = (D.align || '').toLowerCase();
-  if (g.labelBg || D.backColor) lb.style.textShadow = 'none';
+  if (g.labelBg || T.labelBack || D.backColor) lb.style.textShadow = 'none';
   return lb;
 }
 // the Default tab's text box settings (colors, alignment, name font ...): public/textbox.js
 const TD = () => textDefaults(S.config.brewDefaults);
+// the Tab Style of the Tab shown (Fritz, 2026-10-30): what a Device or Widget has of its own wins, then the Tab Style, then the Default tab
+const TS = () => tabStyleOf(curWs(), S.config.brewDefaults, S.config.userStyles) || {};
+const fontPx = v => +v > 0 ? +v : 0;
 // standard colors for the flow widgets' color dropdowns ('' = the default color)
 // Default = the item's normal color, None = no color at all (see-through)
 const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
@@ -537,6 +541,7 @@ function attachIp(ip) {
 function buildGfx(g) {
   const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id, ...(g.name ? { 'data-tname': g.name } : {}) });
   if (g.kind === 'image') { place(n, g); n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : ''; }
+  else if (g.kind === 'override') fillOverride(n, g);
   else fillText(n, g);
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
@@ -546,28 +551,49 @@ function buildGfx(g) {
 // comes first, then its own Properties, then the ☰ Menu > Default tab. Word wrap is always on (Fritz, 2026-10-29).
 const gTab = g => (!editing && g.kind === 'text' && g.name && S.values[g.name]?.tab) || g.workspace;
 function fillText(n, g) {
-  const D = TD(), v = (!editing && g.name && S.values[g.name]) || {};
+  const D = TD(), T = TS(), v = (!editing && g.name && S.values[g.name]) || {};
   place(n, editing ? g : placeWith(g, v));
   const fnt = (live, own) => tbFontCss(live) || firstSet(own);
   const body = h('div', { class: 'tbody' }); setRich(body, v.text ?? g.text ?? '');
-  n.style.fontSize = (+firstSet(v.size, g.fontSize) || 16) + 'px'; n.style.fontWeight = firstSet(v.bold, g.bold) === true ? '700' : '';
-  n.style.fontFamily = fnt(v.font, g.font) || D.nameFont;
-  n.style.color = firstSet(v.forecolor, g.color, D.foreColor);
-  n.style.backgroundColor = firstSet(v.backcolor, g.backColor, D.backColor);
+  n.style.fontSize = (+firstSet(v.size, g.fontSize) || fontPx(T.size) || 16) + 'px'; n.style.fontWeight = firstSet(v.bold, g.bold) === true ? '700' : '';
+  n.style.fontFamily = fnt(v.font, g.font) || T.font || D.nameFont;
+  n.style.color = firstSet(v.forecolor, g.color, T.fore, D.foreColor);
+  n.style.backgroundColor = firstSet(v.backcolor, g.backColor, T.back, D.backColor);
   n.style.textAlign = firstSet(v.alignment, g.align, D.align).toLowerCase();
   n.style.whiteSpace = ''; n.style.overflow = '';
   const parts = [body];
   if (firstSet(v.label_visible, g.labelVisible) === true) {
     const lb = h('div', { class: 'tlabel' }); setRich(lb, firstSet(v.label, g.label, g.name));
-    lb.style.fontSize = (+firstSet(v.size_label, g.labelSize) || 14) + 'px'; lb.style.fontWeight = firstSet(v.bold_label, g.labelBold) === true ? '700' : '400';
-    lb.style.fontFamily = fnt(v.font_label, g.labelFont);
-    lb.style.color = firstSet(v.fore_label, g.labelColor); lb.style.backgroundColor = firstSet(v.back_label, g.labelBg);
+    lb.style.fontSize = (+firstSet(v.size_label, g.labelSize) || fontPx(T.labelSize) || 14) + 'px'; lb.style.fontWeight = firstSet(v.bold_label, g.labelBold) === true ? '700' : '400';
+    lb.style.fontFamily = fnt(v.font_label, g.labelFont) || T.labelFont;
+    lb.style.color = firstSet(v.fore_label, g.labelColor, T.labelFore); lb.style.backgroundColor = firstSet(v.back_label, g.labelBg, T.labelBack);
     lb.style.textAlign = firstSet(v.alignment_label, g.labelAlign).toLowerCase();
     parts.unshift(lb);
   }
   n.replaceChildren(...parts);
   n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden' || (v.hidden ?? g.hidden) === true);
 }
+
+// The Override button (Fritz, 2026-10-30): one press and every running Process moves on 100 ms later, past the wait, sleep or
+// loop that holds it. One per Tab; it can be on several Tabs, each with its own Label and look. Only the Label and its style
+// can be changed (font, size, bold, fore and back color, alignment), never a background picture.
+const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#ffffff', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
+const ovrHas = (tab, but) => (draft || S.config).graphics.some(x => x !== but && x.kind === 'override' && x.workspace === tab);
+function fillOverride(n, g) {
+  n.classList.add('ovr'); place(n, g);
+  const b = h('button', { type: 'button', class: 'ovrBtn', title: 'Override: every running Process moves on past the wait, sleep or loop that holds it' });
+  setRich(b, g.label || OVR.label);
+  b.style.fontSize = (+g.fontSize || OVR.fontSize) + 'px'; b.style.fontWeight = g.bold === false ? '400' : '700';
+  b.style.fontFamily = tbFontCss(g.font) || g.font || '';
+  b.style.color = g.color || OVR.color; b.style.backgroundColor = g.backColor || OVR.backColor;
+  const a = (g.align || OVR.align).toLowerCase(); b.style.justifyContent = a === 'left' ? 'flex-start' : a === 'right' ? 'flex-end' : 'center'; b.style.textAlign = a;
+  n.replaceChildren(b);
+}
+const pressOverride = guard(async () => {
+  if (!can('operator')) throw new Error('Only an operator or an admin can press Override');
+  const r = await api('POST', '/ui/override', {});
+  toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : 'Override: no Process is running');
+});
 
 // variable classes: shared and gGlobal (gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
 const isVarEl = e => ['shared', 'gGlobal'].includes(e?.type);
@@ -812,18 +838,21 @@ function fontCss(node, f) {
 // then the ☰ Menu > Default tab. The Default fore color leaves the LED and Gauge digits their own colors.
 const OWN_DIGITS = ['led', 'lcd', 'indicator'];
 function styleEl(n, e) {
-  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD();
-  const nc = firstSet(e.nameColor, e.foreColor, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : D.foreColor);
-  const nb = firstSet(e.nameBg, e.backColor, D.backColor), vb = firstSet(e.valueBg, e.backColor, D.backColor);
+  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD(), T = TS();
+  // its own colors win; a Tab Style only fills in what it has none of (Fritz, 2026-10-30)
+  const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.foreColor));
+  const nb = firstSet(e.nameBg, e.backColor, T.labelBack, D.backColor), vb = firstSet(e.valueBg, e.backColor, T.back, D.backColor);
   if (nc) nm.style.color = nc;
   if (nb) nm.style.backgroundColor = nb;
   if (vc) { vl.style.color = vc; vl.style.textShadow = 'none'; }
   if (vb) vl.style.backgroundColor = vb;
   fontCss(nm, e.nameFont); fontCss(vl, e.valueFont);
   // Name font and Name font size: its own, else the Default tab's (px; an imported BruControl font keeps its size)
-  const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : D.nameFont), size = +e.nameFontSize || (e.nameFont?.size ? 0 : D.nameFontSize);
+  const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : firstSet(T.labelFont, D.nameFont)), size = +e.nameFontSize || (e.nameFont?.size ? 0 : fontPx(T.labelSize) || D.nameFontSize);
   if (fam) nm.style.fontFamily = fam;
   if (size) nm.style.fontSize = size + 'px';
+  if (T.font && !e.valueFont?.family) vl.style.fontFamily = T.font;
+  if (fontPx(T.size) && !e.valueFont?.size && !e.fontSize && !e.valueEnlarge) vl.style.fontSize = fontPx(T.size) + 'px';
   if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
   const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, D.align);
   let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (al) nm.style.textAlign = al.toLowerCase();
@@ -1125,6 +1154,7 @@ $('#ws').addEventListener('click', ev => {
   if (editing) return;
   const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
   if (mv) return toggleManualValve(mv.dataset.gid);
+  if (ev.target.closest('.gfx.ovr')) return pressOverride();
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const e = elByName(n.dataset.name); if (e) doTap(e);
 });
@@ -2518,15 +2548,24 @@ function addText() {
   const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }) };
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
+// the Override button: one per Tab, made on the 🔨 Build Tab like every new Widget; its Properties open
+$('#addOverride').onclick = () => addOverride();
+function addOverride() {
+  const tab = toBuild(); if (!tab) return;
+  if (ovrHas(tab.name)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab. Save Build ... sends it to a Tab.', true);
+  const g = { id: newId(), kind: 'override', workspace: tab.name, x: 40, y: 40, w: 160, h: 60, ...OVR };
+  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+}
 // COPY in a Widget's Properties (Fritz, 2026-10-29): a copy with everything the same but a new name (the next w_Text_N), made on
 // the 🔨 Build Tab like every new Widget (Rule 4.1), a little down and right of where the first one is; its Properties open.
 function copyGraphic(g) {
   const tab = toBuild(); if (!tab) return;
+  if (g.kind === 'override' && ovrHas(tab.name, g)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab.', true);
   const c = { ...clone(g), id: newId(), workspace: tab.name, x: (+g.x || 0) + 20, y: (+g.y || 0) + 20 };
   for (const k of ['_ref', 'name', 'locked']) delete c[k];
   draft.graphics.push(c); giveName(c, draft.graphics);
   sel = { kind: 'gfx', id: c.id }; renderTabs(); renderWs();
-  toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
+  toast(`Copied: ${c.name || 'the ' + (g.kind === 'override' ? 'Override button' : 'copy')} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
   editItem('gfx', c.id);
 }
 // COPY of a Device-less Widget (a Timer): the same, under the next free name (Timer_1 -> Timer_2), on the 🔨 Build Tab
@@ -2778,6 +2817,7 @@ function moveBuildTo(tab) {
   const b = buildWs(), to = draft.workspaces.find(w => w.name === tab && !w.build);
   if (!to) throw new Error(`There is no Tab "${tab}"`);
   const items = buildItems(b);
+  if (items.some(x => x.kind === 'override') && ovrHas(to.name, items.find(x => x.kind === 'override'))) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
   centerOn(items, to);
   for (const x of items) x.workspace = to.name;
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
@@ -3072,6 +3112,11 @@ const F = {
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['style', 'Style', 'stylesel', 'timer', false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
+  // Override button Widget Properties (Fritz, 2026-10-30): the dialog pattern; only the Label and its look, no background picture
+  override: [['_nm', 'One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.', 'infonote', 'override'],
+    ['_lb', '', 'box'], ['label', 'Label (what the button says on this Tab)', 'text', null, false, 'b'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
+    ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES.filter(c => c[0])],
+    ['_pb', 'Properties', 'box'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
@@ -3247,23 +3292,27 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'stylesel') {   // a Style list (Fritz, 2026-10-29): Skynet Styles 🔒 (never changed), then User Styles, then ➕ Add new User Style…
     const mine = () => S.config.userStyles?.[opts] ?? [];
-    const cur = styleOf(opts, obj, S.config.userStyles)?.id ?? '';
+    // a Tab's own Style list starts with "(the Default tab's Style)"; the ☰ Menu > Default tab's own list does not
+    const blank = opts === 'tab' && key !== 'tabStyle';
+    const cur = blank ? obj[key] ?? '' : opts === 'tab' ? obj[key] || SKYNET_STYLES.tab[0].id : styleOf(opts, obj, S.config.userStyles)?.id ?? '';
     const s = h('select', { 'data-k': key, 'data-kind': 'sel' });
+    const dflt = () => tabStyleOf({}, S.config.brewDefaults, S.config.userStyles)?.name ?? '';
     const fill = id => s.replaceChildren(
+      ...(blank ? [h('option', { value: '', ...(id ? {} : { selected: true }) }, `(the Default tab's Style: ${dflt()})`)] : []),
       h('optgroup', { label: 'Skynet Styles (can\'t be changed)' }, ...SKYNET_STYLES[opts].map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, '🔒 ' + x.name))),
       ...(mine().length ? [h('optgroup', { label: 'User Styles' }, ...mine().map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, x.name)))] : []),
       h('option', { value: '__add__' }, '➕ Add new User Style…'));
     fill(cur);
     let prev = cur;
     const edit = h('button', { type: 'button', class: 'nameBtn', title: 'Change this User Style (a Skynet Style can never be changed)' }, '✏ Edit');
-    const upd = () => { edit.disabled = isSkynetStyle(s.value); };
+    const upd = () => { edit.disabled = !s.value || isSkynetStyle(s.value); };
     s.addEventListener('change', async ev => {
       if (s.value !== '__add__') { prev = s.value; upd(); return; }
       ev.stopPropagation();
       const made = await styleEditor(opts, null, styleOf(opts, { style: prev }, S.config.userStyles));
       fill(made ? made.id : prev); prev = s.value; upd();
     });
-    edit.onclick = async () => { const st = mine().find(x => x.id === s.value); if (!st) return; const done = await styleEditor(opts, st); fill(done === false ? SKYNET_STYLES[opts][0].id : s.value); prev = s.value; upd(); };
+    edit.onclick = async () => { const st = mine().find(x => x.id === s.value); if (!st) return; const done = await styleEditor(opts, st); fill(done === false ? (blank ? '' : SKYNET_STYLES[opts][0].id) : s.value); prev = s.value; upd(); };
     upd();
     return [h('label', {}, label), h('span', { class: 'nameRow' }, s, edit)];
   }
@@ -3618,10 +3667,15 @@ function openImagePath(n, current) {
 // the Schema (Settings) and gives it back; 🗑 Delete (an old one only) gives false; ✖ Cancel null.
 function styleEditor(kind, st, from) {
   return new Promise(res => {
-    const isNew = !st, work = st ? clone(st) : { id: 'u_' + newId().replace(/[^A-Za-z0-9]/g, '').slice(0, 20), name: '', look: from?.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, from?.[k] || ''])) };
+    const keys = KIND_KEYS[kind], timer = kind === 'timer';
+    const isNew = !st, work = st ? clone(st) : { id: 'u_' + newId().replace(/[^A-Za-z0-9]/g, '').slice(0, 20), name: '', ...(timer ? { look: from?.look || 'timer' } : {}), ...Object.fromEntries(keys.map(k => [k, from?.[k] || ''])) };
     const body = h('div', { class: 'styleBody' });
-    bindForm(body, [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
-      ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']], work);
+    bindForm(body, timer ? [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
+      ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
+      : [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'],
+        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'],
+        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'],
+        ['_nt', 'Default = as it is now. A Device or Widget that has its own color, font or size keeps it; the Style fills in only what it has none of.', 'note']], work);
     const err = h('p', { class: 'nameErr', role: 'alert' });
     let out = null;
     const save = async () => {
@@ -3630,7 +3684,7 @@ function styleEditor(kind, st, from) {
       if (!name) { err.textContent = 'Give the Style a name.'; return; }
       if (/^skynet\b/i.test(name)) { err.textContent = 'Only Skynet Styles start with "Skynet". Pick another name.'; return; }
       if ([...SKYNET_STYLES[kind], ...list].some(x => x.id !== work.id && x.name.toLowerCase() === name.toLowerCase())) { err.textContent = `There is already a Style called ${name}.`; return; }
-      const item = { id: work.id, name, look: work.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, work[k] || ''])) };
+      const item = { id: work.id, name, ...(timer ? { look: work.look || 'timer' } : {}), ...Object.fromEntries(keys.map(k => [k, String(work[k] ?? '')])) };
       const all = { ...(S.config.userStyles || {}), [kind]: isNew ? [...list, item] : list.map(x => x.id === item.id ? item : x) };
       try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = item; d.close(); } catch (e) { err.textContent = e.message; }
     };
@@ -3663,6 +3717,13 @@ const INFO = {
       ['.font'], ['.size'], ['.fore'], ['.back'], ['.bold'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'],
       ['.width'], ['.height'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
     example: 'w_Text_1.fore = "Red"' },
+  override: { title: 'Override Button Widget', properties: [
+    ['One press', ': every running Process moves on 100 ms later. A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
+    ['Only one on a Tab', '. It can be on several Tabs (COPY, then Save Build ... to another Tab); each has its own Label and look.'],
+    ['Label', ' (Override to start), with its font, size, bold, fore color, back color and alignment. Rich Text Embedded Codes work in it.'],
+    ['No name and no background picture', '. Manual valves still wait for their click or Done, and Looper Processes (background loops) are left alone.']],
+    attributes: [['none', 'a Process does not use it: a person presses it']],
+    example: 'wait Kettle_Temp >= 152' },
   timer: { title: 'Timer Widget', properties: [
     ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
     ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
@@ -3917,7 +3978,7 @@ async function editItem(kind, id) {
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -3999,6 +4060,11 @@ async function editItem(kind, id) {
       delete work.syncLabel;                                                    // the old Update Names switch: ✏ Change name does it (Fritz, 2026-10-29)
       if (work.label === work.name) delete work.label;     // an empty Label shows the Name (Rule 1.13)
       delete work.wrap;                                                         // word wrap is always on
+    }
+    if (type === 'override') {      // one on a Tab; an empty Label says Override
+      if (ovrHas(work.workspace, item)) throw new Error(`The ${work.workspace} Tab already has an Override button: only one is allowed on a Tab`);
+      if (!String(work.label ?? '').trim()) work.label = OVR.label;
+      for (const k of ['image', 'imagePath_1', 'imagePath_2', 'imagePath_3', 'background']) delete work[k];
     }
     if (type === 'pipe') {
       if (work.from && work.from === work.to) throw new Error('A pipe needs two different IPs');
@@ -4094,6 +4160,9 @@ async function editWorkspace() {
     ['_bgHead', 'Background', 'head'],
     ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
     ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
+    ['_stHead', 'Tab Style', 'head'],
+    ['style', 'Tab Style (Label and Device or Widget colors, fonts and sizes)', 'stylesel', 'tab'],
+    ['_stNote', 'Only a Device or Widget with no color, font or size of its own takes the Tab Style; one with its own keeps it. Skynet Styles 🔒 can never be changed; ➕ Add new User Style… makes your own.', 'note'],
     ['background', 'Background picture', 'gpick', 'backgrounds'],
     ['_bgPlace', 'The list shows the pictures in media/Images and its folders (Add new ... takes another picture name there; the File Move page copies pictures from your computer). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
@@ -5768,6 +5837,28 @@ function menuItems(list, go) {
     list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(here ? { class: 'menuItem cur' } : {}) }));
     for (const p of pageParts(v)) list.append(item('↳ ' + p.label, p.go, { class: 'menuItem menuSub' + (p.cur ? ' cur' : ''), title: p.tip || '' }));
   }
+  if (can('admin') && S.closable) list.append(h('hr'), item('⏻ Close Skynet Brewer', guard(closePanel), { title: 'Stop the panel and close its Command Prompt window on the Brain' }));
+}
+// Fritz, 2026-10-30: closing Skynet Brewer also closes the Command Prompt window it runs in. Closing a browser tab never
+// stops the panel (phones, other PCs and running Processes still use it), so it is closed from here, and the launcher
+// (Skynet_Brewer.bat) then closes its window. A panel running as a service on a Pi is not offered this (it starts again).
+async function closePanel() {
+  const running = (S.scripts || []).filter(s => s.state === 'running').length;
+  if (!confirm('Close Skynet Brewer?\n\nThe panel stops and its Command Prompt window closes. '
+    + (running ? `${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}. ` : '')
+    + 'Every phone and computer showing the panel loses it until Skynet Brewer is started again.')) return;
+  await api('POST', '/ui/close');
+  showClosed(S.me?.name);
+}
+function showClosed(by) {
+  if ($('.closedPage')) return;      // the page that closed it hears it twice: from its own click and from the Brain
+  // covers the whole page (the page itself stays, so nothing on it breaks while it closes)
+  for (const d of $$('dialog[open]')) d.close();
+  document.body.append(h('div', { class: 'closedPage' },
+    h('h2', {}, 'Skynet Brewer is closed'),
+    h('p', {}, by ? `${by} closed the panel.` : 'The panel was closed.'),
+    h('p', { class: 'muted' }, 'You can close this browser tab. To start again, double-click Skynet Brewer on the Brain\'s desktop, then reload this page.')));
+  window.close();      // works only when the panel opened this tab itself; otherwise the page above stays
 }
 // Fritz, 2026-10-26: "the ☰ Menu should fill out with any tab or sub tab you can navigate to" (he could not find the
 // Interfaces). Under each page the ☰ lists its parts: the screen Tabs, each part of a long page (it scrolls there and
@@ -5941,6 +6032,7 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
+    ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
     ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
     ['_m', 'Menu Bar', 'head'],
     ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool'],

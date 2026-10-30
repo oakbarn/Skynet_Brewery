@@ -164,6 +164,10 @@ Every text box also has `.foreColor`, `.backColor`, `.alignment` (Left, Center, 
 
 The change lasts until the panel restarts. To keep a look, set it in the item's properties, or start new items from a [Tab Background Profile](36-tab-and-valve-profiles).
 
+## Skynet Constants
+
+Fixed numbers for common conversions are built in, so a Process can write `gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb`. Every one starts with `skc_` and none can be changed. The full list is in [Skynet Constants](94-skynet-constants).
+
 ## Names have no spaces
 
 Names of Devices, Widgets and Processes cannot have spaces any more. When you type a space in a name it becomes `_`. Names that already had spaces were changed once, for example `Test Timer` became `Test_Timer`. The screen still shows the old name, because it became the **Label**. Every Process that used the old name was updated too, and a copy of each one was kept as `.before-no-spaces.bak`.
