@@ -1,0 +1,32 @@
+//Skynet_Boil
+//About: Heat to the boil, then run the boil timer for the Recipe's boil time (hop alerts run on the Boil timer).
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Up to the boil"
+@if Boil_Heater
+{{Boil_Heater}}.target = rcp_Boil_Start_Temp + 5
+{{Boil_Heater}}.enabled = true
+@else
+ask "Turn the boil kettle heat on full. Press Done when it is on."
+@end
+@if Boil_Probe
+wait {{Boil_Probe}} >= rcp_Boil_Start_Temp
+@end
+ask "Watch for the hot break and keep it from boiling over. Press Done when it is at a rolling boil."
+step "Boil"
+@if Boil_Timer
+{{Boil_Timer}}.countdown = true
+{{Boil_Timer}} = rcp_Boil_Time
+start {{Boil_Timer}}
+wait {{Boil_Timer}} <= 00:00:00
+stop {{Boil_Timer}}
+@else
+sleep rcp_Boil_Time * 1000
+@end
+step "Flame out"
+@if Boil_Heater
+{{Boil_Heater}}.enabled = false
+@else
+ask "Turn the boil kettle heat off. Press Done when it is off."
+@end
+print "Boil done"

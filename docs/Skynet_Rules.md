@@ -460,6 +460,12 @@ thermocouple boards), GPIO 2-3 for I2C (ADS1115). No analog pins and no stepper 
 panel refuses them. On the Brain itself (address 127.0.0.1) the rating is Best. Same protocol and
 lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 
+6.15 **Close all and Open all valve lists** (Fritz, 2026-10-30). Every valve a Process switches (Electro_Mechanical, such as a
+Motorized Ball Valve) has two switches, **On the Close all valves list** and **On the Open all valves list**, both **on to start**.
+`close_all_valves` and `open_all_valves` in a Process (and PreBrew's house cleaning) use them; `all_pumps_off` turns every pump off.
+**A tap water valve is always on Close all and never on Open all**, and its Properties show this with no switches (the Brain puts it
+back on every save). A Manual valve is on neither list. (thread "Build the Standard Skynet Brew Process", Help 100)
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -646,6 +652,28 @@ and vKonstant to gAPI and gKonstant")
 
 ---
 
+## 16. The Brew Process
+
+16.1 **The Standard Skynet Brew Process** (Fritz, 2026-10-30): a brew day is seven **major steps** in this order: **PreBrew,
+Heat Strike, Add Grain, Mash, Boil, Cool, Ferment**, each with its own minor steps (`step "..."`). The goal is a novice brewing,
+not coding. It is ☰ Menu > **Brew Process**. (thread "Build the Standard Skynet Brew Process", Help 100)
+
+16.2 **Process Templates:** each major step uses one. **Skynet Process Templates** (`Skynet_PreBrew` ...) come with Skynet and are
+never changed or deleted by a user (as Rule 5.16). **User Process Templates** are a user's own, usually a copy of a Skynet one
+(➕ Add new User Process Template…); their names never start with Skynet. **PreBrew is the same in every Schema.**
+
+16.3 **The user picks, Skynet writes the code.** The Brew Process asks only which Device does each job the picked Templates use
+(HLT heater and probe, mash heater, probe, pump and timer, boil heater, probe and timer, chiller pump, wort probe, fermenter
+control and probe). A job left on "(none)" becomes a pop-up asking the brewer to do it by hand. **Build the Brew Day** makes
+the Flow Processes `Brew_1_PreBrew` ... `Brew_7_Ferment`, each starting the next; building again keeps the old ones as .bak.
+
+16.4 **Recipe values are `rcp_` names, read only in a Process**, in the panel's units (`rcp_Strike_Temp`, `rcp_Boil_Time`,
+`rcp_Mash_Step_1_Temp` ...). They are read when the Process runs, so a new Recipe needs no new build. While no Recipe is loaded
+they come from the ☰ Menu > Default tab's Mash and Boil Profiles. **PreBrew starts with the Recipe**: load, clear and import,
+make, or review it.
+
+16.5 **`ask "text"`** in a Process shows a pop-up on every screen with ✔ Done and waits until an operator or Admin presses it.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -739,3 +767,6 @@ and vKonstant to gAPI and gKonstant")
   characters in Device names")
 - 2026-10-29: Rule 3.4 now covers every name (Tabs, Texts, pipes, vessels too), as Rule 3.11 treats all names the same.
   User Template names are left alone. (thread "Block unsafe characters in Device names")
+- 2026-10-30: Added Rule 6.15 (Close all / Open all valve lists; a tap water valve always on Close all, never on Open all) and
+  section 16 (the Standard Skynet Brew Process: seven major steps, Skynet and User Process Templates, rcp_ Recipe values, ask). Help 100.
+  (thread "Build the Standard Skynet Brew Process")

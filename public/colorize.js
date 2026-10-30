@@ -19,7 +19,7 @@ export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'o
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
 
 export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show', 'log', 'new', 'play',
-  'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime'];
+  'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off'];
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
 export const LOGIC = ['and', 'or', 'not'];
 // element types that sit on a PLC port: Devices. Every other type (but gKonstant and gAPI) is a Widget.

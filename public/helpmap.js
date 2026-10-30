@@ -120,6 +120,7 @@ const MENU_TOPICS = {
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
   skynetpics: { _: ['get-skynet-pictures'] },
   buildtemplate: { _: ['build-template-tab'] },
+  brewprocess: { 'Which Device': ['brew-process', 'which-device-does-each-job'], 'Recipe values': ['brew-process', 'recipe-values'], _: ['brew-process'] },
   schema: { 'Schemas on this Brain': ['schema-switching-and-cloning', 'clone-a-schema'], 'Add a Sample Schema': ['sample-schemas'], _: ['schema-switching-and-cloning'] },
 };
 export function menuTopic(key, heading, main = true) {

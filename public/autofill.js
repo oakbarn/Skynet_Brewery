@@ -26,6 +26,7 @@ const COMMANDS = [
   ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['log', 'write to the log'],
   ['new value', 'make a number'], ['new string', 'make a text'], ['new bool', 'make a true/false'], ['new time', 'make a time'], ['new datetime', 'make a date and time'],
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
+  ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'],
 ];
 // words that fit anywhere on a line, not only at its start
 const ANYWHERE = [['true', ''], ['false', ''], ['now', 'date and time'], ['and', ''], ['or', ''], ['not', '']];
