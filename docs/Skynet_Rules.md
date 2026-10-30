@@ -97,6 +97,15 @@ become `gK..._` / `gA..._` through the hidden-key rename (Processes, saved value
 follow), and the web API is `/api/gapi`. (2026-10-28, thread "Rename vAPI and vKonstant to gAPI and
 gKonstant", Help 84)
 
+1.18 **Skynet names: `skn_` and `sk_`.** **`skn_`** = a **Skynet internal Global**, set by Skynet and read only in a
+Process: `skn_Boil_Temp` (the temperature water boils at here and now, in the panel's units), `skn_Boil_Temp_C`,
+`skn_Boil_Temp_F`, `skn_Air_Pressure` (hPa). **`sk_`** = a **Skynet role** that holds one temperature probe (by its hidden
+key, so a rename keeps it): `sk_Boil_Probe_1-3`, `sk_Mash_Probe_1-3`, `sk_HLT_Probe_1-3`, `sk_Ferment_Probe_1-10`, set on
+☰ Menu > Default > Probe roles. In a Process a role works like its probe's name. One probe per role, one role per probe.
+**`wait_boil`** waits until `sk_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
+temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
+at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -177,6 +186,11 @@ thread "Improve the Build Tab add and resize tools", Help 75)
 
 2.21 **🗂 Schema is at the top of the ☰ Menu** (under Edit layout), one click to the Schema Menu
 tab. (2026-10-28, thread "Add sample Schemas to the Schema list")
+
+2.27 **User Profile** (☰ Menu > ⚙ User Profile, also Settings > User Profile): where the brewery is (country, zip or
+postal code, or city; optional airport, height and a typed air pressure). The Brain gets the air pressure from the nearest
+airport's report (or the weather service, or standard air with a warning when offline), every 30 minutes, and works out
+`skn_Boil_Temp` (Rule 1.18). One place for the Brain, the same for every user; Admins change it. (Fritz, 2026-10-30, Help 97)
 
 ## 3. Names and file names
 
@@ -586,7 +600,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **90**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **98**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -739,3 +753,6 @@ and vKonstant to gAPI and gKonstant")
   characters in Device names")
 - 2026-10-29: Rule 3.4 now covers every name (Tabs, Texts, pipes, vessels too), as Rule 3.11 treats all names the same.
   User Template names are left alone. (thread "Block unsafe characters in Device names")
+- 2026-10-30: Added Rules 1.18 (`skn_` Skynet internal Globals, `sk_` probe roles, `wait_boil`) and 2.27 (User Profile: where
+  the brewery is, air pressure from the nearest airport, `skn_Boil_Temp`). Help 97; next free Help number 98. (thread "Find
+  boil temperature from local pressure")
