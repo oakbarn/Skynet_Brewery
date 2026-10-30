@@ -795,7 +795,7 @@ button.buildTab.active { background: #e8a33a; color: #111; }
 
 /* Add Interface pop-up: the Interface ID explanation */
 .ifaceIdNote { border-left: 4px solid #1f3a93; padding: 6px 10px; background: color-mix(in srgb, #1f3a93 8%, transparent); }
-.vdNote { max-width: 34em; margin: 0 auto 10px; text-align: left; line-height: 1.4; }
+.vdNote { max-; margin: 0 auto 10px; text-align: left; line-height: 1.4; }
 /* Interface settings only an Admin may change (Rule 3.2): greyed out for everyone else */
 #devBody input:disabled, #devBody select:disabled { background: #e0e0e0; color: #777; border-color: #bbb; cursor: not-allowed; opacity: 1; }
 /* Build Template Tab (Rule 5.18): each attribute, its value in the Template, and its "user can set" box */
@@ -850,3 +850,5 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .styleBody { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 10px 0; }
 .styleBody .full { grid-column: 1 / -1; }
 .styleBody label.strong { font-weight: 700; }
+/* ☰ Menu > Close Skynet Brewer: what every open page shows once the panel is closed */
+.closedPage { position: fixed; inset: 0; z-index: 10000; background: var(--bg); color: var(--text); padding: 15vh 16px 0; text-align: center; overflow: auto; }

@@ -146,6 +146,7 @@ function connect() {
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
   es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
+  es.addEventListener('closing', e => { es.close(); showClosed(JSON.parse(e.data).by); });
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -5750,6 +5751,28 @@ function menuItems(list, go) {
     list.append(item(b.textContent, () => { if (v === 'workspace' && menuTab) leaveMenuTab(); setView(v); }, { title: b.title || '', ...(here ? { class: 'menuItem cur' } : {}) }));
     for (const p of pageParts(v)) list.append(item('↳ ' + p.label, p.go, { class: 'menuItem menuSub' + (p.cur ? ' cur' : ''), title: p.tip || '' }));
   }
+  if (can('admin') && S.closable) list.append(h('hr'), item('⏻ Close Skynet Brewer', guard(closePanel), { title: 'Stop the panel and close its Command Prompt window on the Brain' }));
+}
+// Fritz, 2026-10-30: closing Skynet Brewer also closes the Command Prompt window it runs in. Closing a browser tab never
+// stops the panel (phones, other PCs and running Processes still use it), so it is closed from here, and the launcher
+// (Skynet_Brewer.bat) then closes its window. A panel running as a service on a Pi is not offered this (it starts again).
+async function closePanel() {
+  const running = (S.scripts || []).filter(s => s.state === 'running').length;
+  if (!confirm('Close Skynet Brewer?\n\nThe panel stops and its Command Prompt window closes. '
+    + (running ? `${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}. ` : '')
+    + 'Every phone and computer showing the panel loses it until Skynet Brewer is started again.')) return;
+  await api('POST', '/ui/close');
+  showClosed(S.me?.name);
+}
+function showClosed(by) {
+  if ($('.closedPage')) return;      // the page that closed it hears it twice: from its own click and from the Brain
+  // covers the whole page (the page itself stays, so nothing on it breaks while it closes)
+  for (const d of $$('dialog[open]')) d.close();
+  document.body.append(h('div', { class: 'closedPage' },
+    h('h2', {}, 'Skynet Brewer is closed'),
+    h('p', {}, by ? `${by} closed the panel.` : 'The panel was closed.'),
+    h('p', { class: 'muted' }, 'You can close this browser tab. To start again, double-click Skynet Brewer on the Brain\'s desktop, then reload this page.')));
+  window.close();      // works only when the panel opened this tab itself; otherwise the page above stays
 }
 // Fritz, 2026-10-26: "the ☰ Menu should fill out with any tab or sub tab you can navigate to" (he could not find the
 // Interfaces). Under each page the ☰ lists its parts: the screen Tabs, each part of a long page (it scrolls there and
