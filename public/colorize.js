@@ -13,7 +13,8 @@
 //   com   comments: //, #, ' and /* ... */ (C, C++, C#, JavaScript, Node.js, Python, VB)  green
 //   lab   [labels] and the label after goto                                             slate
 //   attr  the attribute after a dot (my_Widget.visible)                                 gray
-// No imports, so node can load it too (tests, tools/notepadpp.js).
+// Skynet Constants (skc_Kg_To_Lb ...) are blue like true, false and now. Node loads it too (tests, tools/notepadpp.js).
+import { SKYNET_CONSTANTS } from './skconst.js';
 
 export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'op', 'str', 'num', 'com', 'lab', 'attr'];
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
@@ -24,7 +25,7 @@ export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
 export const LOGIC = ['and', 'or', 'not'];
 // element types that sit on a PLC port: Devices. Every other type (but gGlobal) is a Widget.
 export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid'];
-const CMD = new Set(COMMANDS), CONST = new Set(CONSTANTS), LOG = new Set(LOGIC);
+const CMD = new Set(COMMANDS), CONST = new Set([...CONSTANTS, ...SKYNET_CONSTANTS.map(c => c[0].toLowerCase())]), LOG = new Set(LOGIC);
 
 // The colors, for a light page (the files) and for the panel's dark look. Notepad++ uses the light ones.
 export const COLORS = {
@@ -177,7 +178,7 @@ export function notepadPlusPlus(words, texts = []) {
   const vars = [...new Set(texts.flatMap(t => [...String(t).matchAll(/^\s*new\s+\w+\s+([A-Za-z_]\w*)/gim)].map(m => m[1])))].sort().join(' ');
   const general = !words;
   const kw = [
-    [...COMMANDS, ...CONSTANTS].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
+    [...COMMANDS, ...CONSTANTS, ...SKYNET_CONSTANTS.map(c => c[0])].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
     group('dev'),
     general ? 'gG' : group('vk'),
     '',
