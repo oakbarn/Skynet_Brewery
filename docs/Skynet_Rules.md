@@ -207,11 +207,11 @@ launcher (Skynet_Brewer.bat) then closes its Command Prompt window; every open p
 Closing a browser tab never stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread
 "Close the command window on exit")
 
-2.25 **The Override button** (Fritz, 2026-10-30): one press lets every running Process move on, like the Simulator's skip
+2.26 **The Override button** (Fritz, 2026-10-30): one press lets every running Process move on, like the Simulator's skip
 with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it sits in (a goto back up, often in an if) is left; the
 next wait runs as normal. **Only one Override button on a Tab**; it can be on several Tabs, each with its own Label (default
 "Override") and look. A user changes only the Label and its style (font, size, bold, fore, back, alignment), **never a background
-picture**. Manual valves still wait for their click or Done; Looper Processes are left alone. (thread "Add an Override button", Help 94)
+picture**. Manual valves still wait for their click or Done; Looper Processes are left alone. (thread "Add an Override button", Help 96)
 
 ## 3. Names and file names
 
@@ -625,7 +625,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **95**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **97**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -788,5 +788,5 @@ and vKonstant to gAPI and gKonstant")
   (thread "Add Skynet unit conversion constants")
 - 2026-10-30: Added Rule 2.25 (☰ Menu > Close Skynet Brewer closes the Command Prompt window too). Help 95; next free Help number 96.
   (thread "Close the command window on exit")
-- 2026-10-30: Added Rule 2.25 (the Override button: one per Tab, per-Tab Label and style, passes a wait, sleep or loop 100 ms
-  after the press; Loopers and manual valves left alone). Help 94; next free Help number 95. (thread "Add an Override button")
+- 2026-10-30: Added Rule 2.26 (the Override button: one per Tab, per-Tab Label and style, passes a wait, sleep or loop 100 ms
+  after the press; Loopers and manual valves left alone). Help 96; next free Help number 97. (thread "Add an Override button")

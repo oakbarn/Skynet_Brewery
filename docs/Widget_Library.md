@@ -137,7 +137,7 @@ Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no ba
 | Properties box | Visible, Hidden Locked, **Style**, Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
 | Style | Skynet Styles 🔒 (never changed by a user): Skynet Orange Timer (seven-segment 00:00:00 on an orange-red panel, grey bezel; the default), Skynet Green LCD, Skynet Blue Timer, Skynet Red LED digits, Skynet Plain text. ➕ Add new User Style… / ✏ Edit for User Styles (Look, Digits, Panel, Bezel, Title bar colors) |
 
-### Override button Widget (`kind: override`, 2026-10-30, Help 94)
+### Override button Widget (`kind: override`, 2026-10-30, Help 96)
 One press: every running Process (not Loopers) moves on 100 ms later. A wait or sleep it is held in is passed, and the loop it sits in (the next goto back up) is left; the next wait runs as normal. Manual valves still wait. **Only one on a Tab**; it can be on several Tabs (COPY, Save Build ...), each with its own Label and look. No name, no background picture, no Process attributes. Operator or Admin to press.
 
 | Setting | Notes |
@@ -427,4 +427,4 @@ Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB
 - 2026-10-28: Skynet Device Templates and User versions (Rules 5.16-5.18), first one the Skynet Motorized Ball Valve Device (Help 88).
 - 2026-10-29: Text Widget Properties: new dialog pattern (boxes, COPY, orange ? info pop-up), w_Text_N names, Label line, word wrap always on, new Process attributes (thread "Redesign the Text Widget dialog", Help 91).
 - 2026-10-29: Timer Widget Properties with Styles (Skynet Styles locked, User Styles), no pictures; the Image block for dialogs with pictures (Help 92, 93).
-- 2026-10-30: Override button Widget (one per Tab, per-Tab Label and look; passes a wait, sleep or loop 100 ms after the press) (thread "Add an Override button", Help 94).
+- 2026-10-30: Override button Widget (one per Tab, per-Tab Label and look; passes a wait, sleep or loop 100 ms after the press) (thread "Add an Override button", Help 96).
