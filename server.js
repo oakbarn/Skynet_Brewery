@@ -679,9 +679,10 @@ async function route(req, res) {
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
   if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
-  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order))?$/.exec(p);
+  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order|version))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];
+    if (act === 'version' && m === 'POST') return ok(res, { version: engine.newVersion(name) });
     if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
     if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });

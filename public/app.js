@@ -4250,6 +4250,14 @@ $('#procPick').onchange = guard(async () => {
     else if (v && v !== curScript) await openScript(v);
   } finally { renderProcPick(); }
 });
+// Update Version (Fritz, 2026-10-30): the Process gets a new Version, YYMMDD_HH_MM_n (public/vername.js)
+$('#updVersion').onclick = guard(async () => {
+  if (!curScript) return;
+  if (dirty && !confirm('This Process has changes that are not saved. Give it a new Version anyway?')) return;
+  const { version } = await api('POST', '/ui/scripts/' + encodeURIComponent(curScript) + '/version');
+  const s = S.scripts.find(x => x.name === curScript); if (s) s.version = version;
+  updateScriptState(); toast(`${curScript} is now Version ${version}`);
+});
 // 📝 Processes on the Edit layout bar opens the Process editor, the same way 🔨 Build Tab opens the Build Tab
 $('#procTab').onclick = () => setView('scripts');
 async function openScript(name) {
@@ -4265,6 +4273,8 @@ async function openScript(name) {
 }
 function updateScriptState() {
   const s = S.scripts.find(x => x.name === curScript);
+  $('#scriptVersion').textContent = s ? 'Version ' + (s.version || '(none yet)') : '';
+  $('#updVersion').disabled = !s;
   const st = $('#scriptState');
   const sel = $('#scriptClass');
   sel.disabled = !s || !can('admin');
