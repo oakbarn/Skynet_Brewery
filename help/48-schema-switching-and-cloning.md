@@ -48,7 +48,7 @@ A clone is a copy of a Schema under a new name. Use it to try changes without to
 4. Turn on **Load the clone now** if you want to switch to it at once. Leave it off and the loaded Schema stays loaded.
 5. Press **Save**.
 
-The clone gets everything in the Schema, its saved values too (gKonstants, gAPI ...). Its Tabs use the same Equipment Profiles, so equipment and piping stay shared. It starts without a version of its own. The Schema you cloned is not changed.
+The clone gets everything in the Schema, its saved values too (gGlobals ...). Its Tabs use the same Equipment Profiles, so equipment and piping stay shared. It starts without a version of its own. The Schema you cloned is not changed.
 
 ## Clone a Bundled item
 

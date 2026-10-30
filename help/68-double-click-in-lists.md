@@ -10,7 +10,7 @@ A double-click on a box, dropdown or button inside a row does that box's own job
 
 | List | Where | Double-click opens |
 | --- | --- | --- |
-| gAPI, gKonstant and shared variables | Variables page | the variable's Properties |
+| gGlobal and shared variables | Variables page | the variable's Properties |
 | Devices and Widgets for voice and Home Assistant | Settings, MQTT | the Device's or Widget's Properties |
 | Equipment list | ☰ Menu > Equipment Profile | the Tab_Vessel's or Tab_Fitting's Properties on its Tab |
 | Made on the Vessel tab | ☰ Menu > Equipment Profile | the vessel, open on the Vessel tab |

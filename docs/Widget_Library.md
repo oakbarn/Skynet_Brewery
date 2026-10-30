@@ -18,6 +18,7 @@ A reference list of every Widget in the Skynet Brew Panel and all its settings (
 | X, Y | Position in pixels from the left and from the top. |
 | Width, Height | Size in pixels. |
 | Lock position | No drag or resize. (Lock icon in Properties.) |
+| Database and .API | Every Widget with a value (not pictures, Labels, manual vessels or the Manual Valve Widget). **Send to the database**: Off, On demand, On value change, When a Process starts, Once, At a date and time, Every N ms / seconds / minutes / hours / days, Every 00:00:00; **What to send** (main value or another attribute). **.API**: Off, Get only, Get and Put (Skynet Rule 6.14, Help 98). Always user settable. |
 
 Properties open with a double-click. Delete, Cancel, Save are at the top and bottom of every Properties dialog.
 
@@ -361,26 +362,23 @@ These are added from the same list as Devices but need no board pin.
 | Label | Text box only (no own settings) |
 | Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading |
 
-### gKonstant variables (Processes and screen; never API or database)
-Settings: Kind, then by kind: Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Text when on / off, Read only on screen, Keep value on restart.
+### gGlobal variables (Processes and screen; database and outside programs when its Database and .API box says so)
+gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, Help 98). Settings: Kind, then by kind: Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Text when on / off, Read only on screen, Keep value on restart, then the **Database and .API** box.
 
 | Kind | Prefix (hint) | Extra |
 |---|---|---|
-| Graphic (image file path) | gK_ | Image path |
-| String | gKS_ | |
-| Long String (text file) | gKL_ | Text file path |
-| Value | gKV_ | |
-| Time | gKT_ | |
-| Date Time | gKDT_ | |
-| Boolean | gKB_ | |
-| Switch (tap ON, tap again OFF) | gKSW_ | |
-| Push Button (ON while held) | gKPB_ | |
-| Pulse Button (one 100 ms pulse per tap) | gKMB_ | On time in ms |
-| List (dropdown: Value + Text) | gKList_ | Choices (two columns: Value, Text), Starting choice |
-| Step (shows the Process step reached) | gKStep_ | Shows the steps of: Flow, Sub, Repeat, Looper, Any Process |
-
-### gAPI variables (Processes + API + database, with database triggers)
-Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB_). Settings: Kind, Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Read only on screen, Keep value on restart. Database trigger is set on the Variables page.
+| Graphic (image file path) | gG_ | Image path |
+| String | gGS_ | |
+| Long String (text file) | gGL_ | Text file path |
+| Value | gGV_ | |
+| Time | gGT_ | |
+| Date Time | gGDT_ | |
+| Boolean | gGB_ | |
+| Switch (tap ON, tap again OFF) | gGSW_ | |
+| Push Button (ON while held) | gGPB_ | |
+| Pulse Button (one 100 ms pulse per tap) | gGMB_ | On time in ms |
+| List (dropdown: Value + Text) | gGList_ | Choices (two columns: Value, Text), Starting choice |
+| Step (shows the Process step reached) | gGStep_ | Shows the steps of: Flow, Sub, Repeat, Looper, Any Process |
 
 ---
 
@@ -390,3 +388,4 @@ Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB
 - 2026-10-28: IP Snap to align (10 px) and IPs on the pipe ends of Skynet valve pictures (thread "Lock Skynet Widget Templates and IPs", Help 86).
 - 2026-10-28: Skynet Device Templates and User versions (Rules 5.16-5.18), first one the Skynet Motorized Ball Valve Device (Help 88).
 - 2026-10-28: Pipe fitting Widgets (only X, Y, Width, Height and Autosize to pipe; no Clone) and the Manual Valve Widget (click-only .state, Process asks by hand, open overlay) (thread "Simplify pipe fittings and Manual Valves", Help 87).
+- 2026-10-30: Database and .API settings on every Widget with a value; gKonstant and gAPI variables became one class, gGlobal (prefixes gG). (thread "Send any Device or Widget to a database", Help 98)

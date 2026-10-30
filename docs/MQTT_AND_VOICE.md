@@ -1,6 +1,6 @@
 # MQTT and voice control
 
-The Brew Panel can share its gAPI variables and Devices over **MQTT**. MQTT is a small "message board" program (a *broker*) that many brewing and home gadgets understand: ESP32 boards, Tasmota smart plugs, Node-RED and Home Assistant.
+The Brew Panel can share its Devices, and the gGlobals whose **.API** is on, over **MQTT**. MQTT is a small "message board" program (a *broker*) that many brewing and home gadgets understand: ESP32 boards, Tasmota smart plugs, Node-RED and Home Assistant.
 
 Through **Home Assistant** you can then use your voice with **Alexa, Google Home and Siri** (Apple Home).
 
@@ -78,10 +78,10 @@ Everything uses the **Topic name** from Settings (default `brewpanel`).
 | Topic | What it is |
 |---|---|
 | `brewpanel/status` | `online` or `offline` (the broker sets offline if the panel stops) |
-| `brewpanel/state/<name>` | The value of a gAPI variable or Device. On/off things are `ON` / `OFF`. Timers are `hh:mm:ss`. |
+| `brewpanel/state/<name>` | The value of a gGlobal or Device. On/off things are `ON` / `OFF`. Timers are `hh:mm:ss`. |
 | `brewpanel/state/<timer>/running` | `ON` while a timer runs |
 | `brewpanel/scripts/running` | Names of the running processes, or `none` |
-| `brewpanel/set/<name>` | Send a value here to change a gAPI variable or Device (see the safety rules) |
+| `brewpanel/set/<name>` | Send a value here to change a gGlobal or Device (see the safety rules) |
 | `brewpanel/cmd/stopall` | Stops all processes |
 | `brewpanel/cmd/script/<script>/start` or `/stop` | Start or stop one process |
 | `brewpanel/cmd/timer/<timer>/start`, `/stop`, `/reset` | Control a timer |
@@ -106,7 +106,7 @@ Out of the box:
 
 | Always allowed | Allowed until you untick it | Not allowed until you tick it |
 |---|---|---|
-| Reading every shared value | Changing gAPI variables that are not read-only (same as the web API) | Turning outputs and switches on or off (heaters, burners, pumps, valves) |
+| Reading every shared value | Changing gGlobals whose .API is Get and Put and that are not read-only (same as the web API) | Turning outputs and switches on or off (heaters, burners, pumps, valves) |
 | Silencing an alarm | | Starting, stopping or resetting a timer |
 | Stopping processes | | Starting a process (list under the table) |
 
@@ -126,7 +126,7 @@ Alexa, Google Home and Siri do not talk MQTT themselves. **Home Assistant** sits
    * timers as sensors (plus Start / Stop / Reset buttons if allowed),
    * alarms as problem sensors plus a **Silence** button,
    * **Running processes**, **Stop all processes**, and a **Start** button for each process you allowed,
-   * read-only gAPI variables such as your message panel or *Process status*, and any gAPI variable you tick.
+   * read-only gGlobals (.API on) such as your message panel or *Process status*, and any gGlobal you tick.
 
 Name things the way you will say them: the **Label** of each element becomes its name in Home Assistant and on your speakers.
 
@@ -162,7 +162,7 @@ The same as Alexa: in **Home Assistant Cloud** turn on **Google Assistant**, the
 
 In Home Assistant add the **HomeKit Bridge** integration, choose the Brew Panel items, and scan the code it shows with the Home app on your iPhone. Then "Hey Siri, what is the HLT temperature?" works, on the iPhone, iPad, Apple Watch and HomePod.
 
-Siri Shortcuts can also call the panel's web API directly without Home Assistant: a Shortcut with **Get Contents of URL** `http://<pi address>:8080/api/globals/<name>` reads a gAPI variable, and **Speak Text** reads it out.
+Siri Shortcuts can also call the panel's web API directly without Home Assistant: a Shortcut with **Get Contents of URL** `http://<pi address>:8080/api/items/<name>` reads any Device or Widget whose .API is on, and **Speak Text** reads it out.
 
 ### What you can say
 

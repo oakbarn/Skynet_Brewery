@@ -3,8 +3,8 @@
 //   cmd   commands (if, wait, start, new value ...) and their words (true, false, now)   blue
 //   dev   Devices (tied to a port on a PLC)                                            magenta
 //   wid   Widgets (timers, alarms, labels ... app only)                                 teal
-//   vk    gKonstants                                                                    purple
-//   vapi  gAPI                                                                          red
+//   vk    gGlobals                                                                      purple
+//   (vapi was gAPI, red: gAPI and gKonstant are one class, gGlobal, since 2026-10-30, so nothing is red now)
 //   var   variables made with "new value x" ...                                         black on white
 //   proc  names of Processes (start my_Process)                                         olive
 //   op    operators  = + - * / < > ! ^ ( ) , . ++ -- { } ;  and, or, not                 orange
@@ -18,11 +18,11 @@
 export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'op', 'str', 'num', 'com', 'lab', 'attr'];
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
 
-export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show', 'log', 'new', 'play',
+export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show', 'send_db', 'new', 'play',
   'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime'];
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
 export const LOGIC = ['and', 'or', 'not'];
-// element types that sit on a PLC port: Devices. Every other type (but gKonstant and gAPI) is a Widget.
+// element types that sit on a PLC port: Devices. Every other type (but gGlobal) is a Widget.
 export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid'];
 const CMD = new Set(COMMANDS), CONST = new Set(CONSTANTS), LOG = new Set(LOGIC);
 
@@ -31,12 +31,11 @@ export const COLORS = {
   light: { cmd: '#0000FF', dev: '#D000D0', wid: '#00838F', vk: '#7B1FA2', vapi: '#E00000', var: '#000000', varBg: '#FFFFFF', proc: '#6B8E23', op: '#D35400',
     str: '#A0522D', num: '#9A6700', com: '#008000', lab: '#455A64', attr: '#607D8B', text: '#000000', bg: '#FFFFFF' },
 };
-export const LEGEND = [['cmd', 'Commands'], ['dev', 'Devices'], ['wid', 'Widgets'], ['vk', 'gKonstants'], ['vapi', 'gAPI'], ['var', 'Variables'], ['proc', 'Processes'],
+export const LEGEND = [['cmd', 'Commands'], ['dev', 'Devices'], ['wid', 'Widgets'], ['vk', 'gGlobals'], ['var', 'Variables'], ['proc', 'Processes'],
   ['op', 'Operators'], ['str', 'Text in quotes'], ['num', 'Numbers and times'], ['com', 'Comments'], ['lab', 'Labels'], ['attr', 'Attributes']];
 
 export function elementClass(type) {
-  if (type === 'gKonstant') return 'vk';
-  if (type === 'gAPI') return 'vapi';
+  if (type === 'gGlobal') return 'vk';
   return DEVICE_TYPES.includes(type) ? 'dev' : 'wid';
 }
 
@@ -169,8 +168,8 @@ ${css}
 
 
 // Notepad++ "User Defined Language" file: Language > User Defined Language > Define your language > Import.
-// Made from this brewery's names (Devices, Widgets, gKonstants, gAPI, Processes) and the variables made in its Processes.
-// Without words it is a general file: gKonstants by their gK prefix and gAPI by gA.
+// Made from this brewery's names (Devices, Widgets, gGlobals, Processes) and the variables made in its Processes.
+// Without words it is a general file: gGlobals by their gG prefix.
 export function notepadPlusPlus(words, texts = []) {
   const k = COLORS.light, hex = c => c.replace('#', '');
   const ok = n => /^[A-Za-z_][A-Za-z0-9_]*$/.test(n);
@@ -180,8 +179,8 @@ export function notepadPlusPlus(words, texts = []) {
   const kw = [
     [...COMMANDS, ...CONSTANTS].filter(w => !['if', 'elseif', 'else', 'endif'].includes(w)).join(' '),   // if ... endif are the fold words
     group('dev'),
-    general ? 'gK' : group('vk'),
-    general ? 'gA' : group('vapi'),
+    general ? 'gG' : group('vk'),
+    '',
     vars,
     group('wid'),
     (words?.processes ?? []).filter(ok).join(' '),
@@ -197,7 +196,7 @@ export function notepadPlusPlus(words, texts = []) {
     <UserLang name="Skynet Process" ext="sky" udlVersion="2.1">
         <Settings>
             <Global caseIgnored="yes" allowFoldOfComments="yes" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
-            <Prefix Keywords1="no" Keywords2="no" Keywords3="${general ? 'yes' : 'no'}" Keywords4="${general ? 'yes' : 'no'}" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
+            <Prefix Keywords1="no" Keywords2="no" Keywords3="${general ? 'yes' : 'no'}" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
         </Settings>
         <KeywordLists>
             <Keywords name="Comments">00// 00# 00' 01 02 03/* 04*/</Keywords>
