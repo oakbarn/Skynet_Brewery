@@ -447,6 +447,9 @@
       <h3 id="sec-testing">Testing mode</h3>
       <label class="toggle"><input type="checkbox" class="swc" id="setFresh"> Start fresh logins after each update</label>
       <p class="muted">While this is on, installing a new version of the panel removes every user and recovery code, so the next visit asks you to create the admin account again. Brew data, logs and settings are kept. Turn it off once you use the panel for real.</p>
+      <h3 id="sec-userProfile">User Profile</h3>
+      <p class="muted">Where the brewery is (a zip or postal code, or a city). The Brain gets the air pressure there from the nearest airport and works out the temperature water boils at (skn_Boil_Temp, wait_boil).</p>
+      <div class="bar"><button id="openUserProfile">⚙ Open the User Profile</button></div>
       <h3 id="simulation">Simulation (test mode)</h3>
       <p class="muted">Try out a brew without touching any hardware. While it is on, every board is replaced by the simulator: processes, timers, alarms and the screen work as on brew day, but heaters, pumps and valves are only pretend. Time can run faster, and can skip ahead so you do not wait out a 60 minute mash. Turning it on or off stops every process and turns every output off.</p>
       <div class="form row">

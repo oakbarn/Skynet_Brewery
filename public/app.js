@@ -10,6 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
+import { PROBE_ROLES, roleName, SKN_GLOBALS, hpaToInHg, toHpa, round as roundTo } from './skynetnames.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -146,6 +147,7 @@ function connect() {
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
   es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
+  es.addEventListener('boil', e => { S.boil = JSON.parse(e.data); if (menuTab === 'userprofile') renderBoilNow(); });
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -5673,7 +5675,8 @@ const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
   { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
-  { key: 'default', title: 'Default', tip: 'What new Recipes start with, and the order of the Menu', render: renderDefaultTab },
+  { key: 'default', title: 'Default', tip: 'What new Recipes start with, the probe roles (sk_Boil_Probe_1 ...), and the order of the Menu', render: renderDefaultTab },
+  { key: 'userprofile', title: 'User Profile', tip: 'Where the brewery is: its air pressure now and the temperature water boils at (skn_Boil_Temp)', render: renderUserProfileTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
@@ -5729,6 +5732,9 @@ function menuItems(list, go) {
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },
     { title: 'Pick the Schema to load; add, clone, rename, back up or restore one; add a Sample Schema' }));
+  // Fritz, 2026-10-30: the User Profile (where the brewery is, for the boil temperature) is one pick from the ☰ Menu too
+  list.append(item('⚙ User Profile', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('userprofile'); },
+    { title: 'Where the brewery is: the air pressure there and the temperature water boils at (skn_Boil_Temp)' }));
   // Fritz, 2026-10-27: the Interfaces (boards) are easy to find, add, and switch between simulator and real
   list.append(item('🔌 Interfaces (boards)', () => { setView('devices'); showPart($('#sec-interfaces')); }, { title: 'The boards your Devices are wired to (Devices page)' }));
   if (can('admin')) {
@@ -5763,7 +5769,7 @@ const PAGE_PARTS = {
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Testing mode', '#sec-testing'], ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Testing mode', '#sec-testing'], ['User Profile (boil temperature)', '#openUserProfile'], ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };
@@ -5785,6 +5791,7 @@ function showPart(el) {
     setTimeout(() => el.classList.remove('menuFlash'), 2000);
   });
 }
+$('#openUserProfile').onclick = () => openMenuTab('userprofile');      // Settings > User Profile
 const closeMenuList = () => { $('#menuList').classList.add('hidden'); $('#menuBtn').setAttribute('aria-expanded', 'false'); };
 $('#barEdit').onclick = guard(menuEditLayout);      // the navy blue button (crossed hammers over a square) beside ☰ Menu: Edit layout on and off (Fritz, 2026-10-22)
 $('#barHelp').onclick = () => openHelp(pageTopic());      // the ? beside ☰ Menu on the Tabs bar (Fritz, 2026-10-22)
@@ -5970,7 +5977,86 @@ function renderDefaultTab(box) {
       return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
     })));
   box.append(h('h3', {}, 'Default'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+    probeRolesBox(admin),
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
+}
+
+// ---- Probe roles (Fritz, 2026-10-30, "Option 2"): each role holds one temperature probe. A Process says the role and means
+// that probe: wait_boil waits on sk_Boil_Probe_1, and "if sk_Mash_Probe_1 > 152" works like the probe's own name. The role is
+// kept with the probe (by its hidden key), so a renamed probe keeps it. One probe per role, one role per probe.
+function probeRolesBox(admin) {
+  const temps = S.config.elements.filter(e => e.type === 'temperature').sort((a, b) => a.name.localeCompare(b.name));
+  const holder = r => temps.find(e => e.probeRole === r)?.name ?? '';
+  const reading = n => { const v = S.values[n]; return !n || !v ? '' : v.fault ? 'FAULT' : `${v.value ?? ''} ${temps.find(e => e.name === n)?.units ?? ''}`.trim(); };
+  const rows = PROBE_ROLES.flatMap(g => Array.from({ length: g.count }, (_, i) => {
+    const r = roleName(g.role, i + 1), now = holder(r);
+    const sel = h('select', { 'data-role': r, 'data-kind': 'elem', title: 'The temperature probe with this role. Double-click to open its Properties.', ...(admin ? {} : { disabled: true }) },
+      h('option', { value: '' }, '(none)'), ...temps.map(e => h('option', { value: e.name, ...(e.name === now ? { selected: true } : {}) }, e.label && e.label !== e.name ? `${e.name} (${e.label})` : e.name)));
+    return h('tr', {}, h('td', {}, h('code', {}, r)), h('td', {}, sel), h('td', { class: 'muted' }, reading(now)), h('td', { class: 'muted' }, i ? '' : g.tip));
+  }));
+  const table = h('table', { class: 'grid probeRoles' }, h('thead', {}, h('tr', {}, h('th', {}, 'Role'), h('th', {}, 'Temperature probe'), h('th', {}, 'Now'), h('th', {}, ''))), h('tbody', {}, ...rows));
+  const save = guard(async () => {
+    const roles = Object.fromEntries([...table.querySelectorAll('select[data-role]')].map(s => [s.dataset.role, s.value]));
+    const seen = new Map();
+    for (const [r, n] of Object.entries(roles)) { if (!n) continue; if (seen.has(n)) throw new Error(`"${n}" can have only one role (${seen.get(n)} and ${r})`); seen.set(n, r); }
+    await api('PUT', '/ui/proberoles', { roles });
+    for (const e of S.config.elements) if (e.type === 'temperature') { const r = Object.keys(roles).find(k => roles[k] === e.name); if (r) e.probeRole = r; else delete e.probeRole; }
+    toast('Probe roles saved');
+  });
+  return h('div', {}, h('h3', {}, 'Probe roles'),
+    h('p', { class: 'muted' }, 'Give a temperature probe a job. In a Process the role means that probe: ', h('code', {}, 'wait_boil'), ' waits until ', h('code', {}, 'sk_Boil_Probe_1'),
+      ' reaches the boil temperature here (', h('code', {}, 'skn_Boil_Temp'), ', from the ⚙ User Profile), and ', h('code', {}, 'if sk_Mash_Probe_1 > 152'), ' works like the probe\'s own name. ',
+      temps.length ? 'A probe can have only one role.' : 'This Schema has no temperature probes yet (Add Device > Probe).'),
+    table, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save probe roles')) : '');
+}
+
+// ---- User Profile tab (Fritz, 2026-10-30): where the brewery is. The Brain finds the place on the map, asks the nearest airport
+// for its air pressure (lib/boiltemp.js) and works out the temperature water boils at: skn_Boil_Temp for every Process.
+// The place is the Brain's (one brewery), so it is the same whoever signs in. Admins change it.
+function renderUserProfileTab(box) {
+  const admin = can('admin'), us = (S.config.brewDefaults?.units ?? 'US') !== 'Metric';
+  const p = S.boil?.profile ?? {}, d = { ...p };
+  if (p.elevationM !== undefined) d.elevation = us ? Math.round(p.elevationM * 3.28084) : p.elevationM;
+  if (p.pressureHpa !== undefined) d.pressure = us ? roundTo(hpaToInHg(p.pressureHpa), 2) : p.pressureHpa;
+  const fields = () => [['_w', 'Where the brewery is. A zip or postal code finds it best; a city works too.', 'note'],
+    ['name', 'Name (the brewery or brewer, optional)', 'text'],
+    ['country', 'Country (for example USA, Canada, Germany or a code like US, CA, DE)', 'text'],
+    ['postal', 'Zip or postal code', 'text'],
+    ['city', 'City (when there is no postal code)', 'text'],
+    ['_a', 'More (optional)', 'head'],
+    ['airport', 'Airport (4 letter ICAO code like KMKE; empty = the nearest airport)', 'text'],
+    ['elevation', `Height of the brewery above sea level (${us ? 'feet' : 'metres'}; empty = found from the place)`, 'num'],
+    ['pressure', `Air pressure to use instead (${us ? 'inHg, like 29.92' : 'hPa, like 1013'}; empty = from the airport)`, 'num'],
+    ['refreshMin', 'Get the air pressure every (minutes)', 'num']];
+  const f = paneForm(fields, d, () => { }, !admin);
+  const save = guard(async () => {
+    f.read();
+    const b = { name: d.name, country: d.country, postal: d.postal, city: d.city, airport: d.airport, refreshMin: d.refreshMin ?? 30 };
+    if (d.elevation !== undefined) b.elevationM = us ? d.elevation / 3.28084 : d.elevation;
+    if (d.pressure !== undefined) b.pressureHpa = us ? toHpa(d.pressure) : d.pressure;
+    S.boil = await api('PUT', '/ui/userprofile', b); renderBoilNow(); toast('User Profile saved');
+  });
+  const now = guard(async () => { S.boil = await api('POST', '/ui/userprofile/refresh'); renderBoilNow(); });
+  box.append(h('h3', {}, 'User Profile'), h('div', { id: 'boilNow', class: 'boilNow' }),
+    h('div', { class: 'bar op-only' }, h('button', { onclick: now }, '🔄 Get the air pressure now')),
+    h('div', { class: 'menuNarrow' }, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+    h('h3', {}, 'In a Process'),
+    h('table', { class: 'grid' }, h('tbody', {}, ...Object.entries(SKN_GLOBALS).map(([n, t]) => h('tr', {}, h('td', {}, h('code', {}, n)), h('td', { class: 'muted' }, t))),
+      h('tr', {}, h('td', {}, h('code', {}, 'wait_boil')), h('td', { class: 'muted' }, 'Waits until sk_Boil_Probe_1 (☰ Menu > Default > Probe roles) reaches skn_Boil_Temp. wait_boil = 99.8 (or 211) waits for that temperature instead, in the probe\'s own units.')))));
+  renderBoilNow();
+}
+function renderBoilNow() {
+  const el = $('#boilNow'); if (!el) return;
+  const b = S.boil; el.innerHTML = '';
+  if (!b) return el.append(h('p', { class: 'muted' }, 'Asking the Brain ...'));
+  const us = (S.config.brewDefaults?.units ?? 'US') !== 'Metric', c = b.boilC, f = roundTo(c * 9 / 5 + 32, 1);
+  const pr = us ? `${roundTo(hpaToInHg(b.hpa), 2)} inHg (${b.hpa} hPa)` : `${b.hpa} hPa`;
+  const from = { airport: `airport ${b.station?.id ?? ''}${b.station?.name ? ' ' + b.station.name : ''}${b.station?.distKm != null ? `, ${us ? Math.round(b.station.distKm * 0.621) + ' miles' : b.station.distKm + ' km'} away` : ''}`,
+    weather: 'the weather service (no airport answered)', manual: 'the air pressure typed below', standard: 'standard air (no report could be reached)' }[b.source] ?? b.source;
+  const elev = b.elevM != null ? (us ? `${Math.round(b.elevM * 3.28084)} ft` : `${Math.round(b.elevM)} m`) : null;
+  el.append(h('p', { class: 'boilBig' }, `Water boils at ${us ? f + ' °F' : roundTo(c, 1) + ' °C'} here now`, h('span', { class: 'muted' }, ` (${us ? roundTo(c, 1) + ' °C' : f + ' °F'})`)),
+    h('p', { class: 'muted' }, `Air pressure ${pr}, from ${from}.`, b.place ? ` Place: ${b.place}.` : '', elev ? ` Height: ${elev}.` : '', b.at ? ` Checked ${new Date(b.at).toLocaleString()}.` : ''),
+    b.note ? h('p', { class: b.source === 'standard' ? 'warn' : 'muted' }, b.note) : '');
 }
 
 // ---- Zoom tab: how big the tabs show, and Full screen. Picking one goes back to the tab, so you see it at once.
