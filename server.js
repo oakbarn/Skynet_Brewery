@@ -437,7 +437,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   if (p === '/ui/set' && m === 'POST') {
@@ -719,6 +719,15 @@ async function route(req, res) {
     if (!s[2] && m === 'DELETE') { engine.binPurge(id); return ok(res); }
   }
   if (p === '/ui/stopall' && m === 'POST') { engine.stopAll(); return ok(res); }
+  // ☰ Menu > Close Skynet Brewer (Fritz, 2026-10-30): stops the panel, and the launcher then closes its Command Prompt window.
+  // Every open page is told first, so a phone shows that the panel was closed, not just "lost connection".
+  if (p === '/ui/close' && m === 'POST') {
+    if (!CLOSABLE) return fail(res, 400, 'The panel runs as a service here (it starts by itself with the Brain), so it is not closed from the panel.');
+    console.log(`Closed from the panel by ${me?.name ?? 'an admin'}`);
+    broadcast('closing', { by: me?.name ?? '' });
+    ok(res); setTimeout(shutdown, 300);
+    return;
+  }
 
   // media files by path
   if (p === '/media' && m === 'GET') {
@@ -814,5 +823,8 @@ server.listen(PORT, () => {
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
 });
 
+// A panel started as a service (systemd sets INVOCATION_ID, for example on a Pi) restarts by itself, so only a panel started
+// from its window (Skynet_Brewer.bat, the Linux or Mac launcher, npm start) can be closed from ☰ Menu.
+const CLOSABLE = !process.env.INVOCATION_ID;
 function shutdown() { console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
 process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);

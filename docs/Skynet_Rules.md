@@ -178,6 +178,11 @@ thread "Improve the Build Tab add and resize tools", Help 75)
 2.21 **🗂 Schema is at the top of the ☰ Menu** (under Edit layout), one click to the Schema Menu
 tab. (2026-10-28, thread "Add sample Schemas to the Schema list")
 
+2.25 **Close Skynet Brewer** (Admins) is the last ☰ Menu choice. It stops the panel after asking, and the
+launcher (Skynet_Brewer.bat) then closes its Command Prompt window; every open page shows "Skynet Brewer is closed".
+Closing a browser tab never stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread
+"Close the command window on exit")
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -739,3 +744,5 @@ and vKonstant to gAPI and gKonstant")
   characters in Device names")
 - 2026-10-29: Rule 3.4 now covers every name (Tabs, Texts, pipes, vessels too), as Rule 3.11 treats all names the same.
   User Template names are left alone. (thread "Block unsafe characters in Device names")
+- 2026-10-30: Added Rule 2.25 (☰ Menu > Close Skynet Brewer closes the Command Prompt window too). Help 95; next free Help number 96.
+  (thread "Close the command window on exit")
