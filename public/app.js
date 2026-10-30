@@ -5712,9 +5712,9 @@ const MENU = [
   { key: 'about', title: 'About', tip: 'Who is signed in, Sign out, and the Schema and its version', render: renderAboutTab },
 ];
 // the Menu tabs in their order: numbered ones first, then the rest as listed above (new Menu tabs land at the end,
-// except Zoom, which is number 1 until the order is changed)
+// except Zoom, which is number 1 until the order is changed). About is always at the top (Fritz, 2026-10-30).
 function menuSorted() {
-  const o = S.config.menuOrder || {}, at = m => Number.isFinite(+o[m.key]) ? +o[m.key] : m.key === 'zoom' ? 0 : 1e6 + MENU.indexOf(m);
+  const o = S.config.menuOrder || {}, at = m => m.key === 'about' ? -1e9 : Number.isFinite(+o[m.key]) ? +o[m.key] : m.key === 'zoom' ? 0 : 1e6 + MENU.indexOf(m);
   return [...MENU].sort((a, b) => at(a) - at(b) || MENU.indexOf(a) - MENU.indexOf(b));
 }
 // move one Menu tab to place n; the others are numbered again 1, 2, 3 ... around it
@@ -6007,7 +6007,7 @@ function renderDefaultTab(box) {
     await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); renderWs(); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
-      const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin ? {} : { disabled: true }) });
+      const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });
       n.onchange = guard(() => setMenuOrder(m.key, +n.value));
       return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
     })));
