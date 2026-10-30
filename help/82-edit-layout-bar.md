@@ -48,7 +48,7 @@ When a kind has more than one Device Type (for example a low or high temperature
 A **Widget** lives only in the app, with no board pin.
 
 - **Select Widget Type** and **Add Widget** work like the Device pair: Pictures and text, On-screen controls (switch, timer, alarm, sound player, shared variable), Vessels, Equipment, Fittings and IPs, gKonstant variables, gAPI variables.
-- **Picture ➕** and **Text ➕**: one click each.
+- **Picture ➕** and **Text ➕**: one click each. **Override ➕** adds the [Override button](94-override-button) (one per Tab).
 - **Vessel**: a Vessel Widget (you add everything to it), an Integrated vessel (ready-made, see [Add a Vessel](66-add-a-vessel)) or a manual vessel (BrewZilla, DigiBoil).
 - **Manual Valve ➕**: a valve turned by hand. Tap it on the Tab to show open or closed.
 - **Add equipment ➕** (far right): chillers, coils, trub filter, RIMS tube and pipe fittings.

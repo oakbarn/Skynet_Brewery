@@ -537,6 +537,7 @@ function attachIp(ip) {
 function buildGfx(g) {
   const n = h('div', { class: 'gfx' + (g.kind === 'text' ? ' txt' : ''), 'data-gid': g.id, ...(g.name ? { 'data-tname': g.name } : {}) });
   if (g.kind === 'image') { place(n, g); n.style.backgroundImage = g.image ? `url("${media(g.image)}")` : ''; }
+  else if (g.kind === 'override') fillOverride(n, g);
   else fillText(n, g);
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
   return n;
@@ -568,6 +569,27 @@ function fillText(n, g) {
   n.replaceChildren(...parts);
   n.classList.toggle('vhidden', (v.visibility ?? (g.visible === false ? 'hidden' : 'visible')) === 'hidden' || (v.hidden ?? g.hidden) === true);
 }
+
+// The Override button (Fritz, 2026-10-30): one press and every running Process moves on 100 ms later, past the wait, sleep or
+// loop that holds it. One per Tab; it can be on several Tabs, each with its own Label and look. Only the Label and its style
+// can be changed (font, size, bold, fore and back color, alignment), never a background picture.
+const OVR = { label: 'Override', fontSize: 20, bold: true, color: '#ffffff', backColor: '#c0392b', align: 'Center' };     // starting look (Fritz will set it)
+const ovrHas = (tab, but) => (draft || S.config).graphics.some(x => x !== but && x.kind === 'override' && x.workspace === tab);
+function fillOverride(n, g) {
+  n.classList.add('ovr'); place(n, g);
+  const b = h('button', { type: 'button', class: 'ovrBtn', title: 'Override: every running Process moves on past the wait, sleep or loop that holds it' });
+  setRich(b, g.label || OVR.label);
+  b.style.fontSize = (+g.fontSize || OVR.fontSize) + 'px'; b.style.fontWeight = g.bold === false ? '400' : '700';
+  b.style.fontFamily = tbFontCss(g.font) || g.font || '';
+  b.style.color = g.color || OVR.color; b.style.backgroundColor = g.backColor || OVR.backColor;
+  const a = (g.align || OVR.align).toLowerCase(); b.style.justifyContent = a === 'left' ? 'flex-start' : a === 'right' ? 'flex-end' : 'center'; b.style.textAlign = a;
+  n.replaceChildren(b);
+}
+const pressOverride = guard(async () => {
+  if (!can('operator')) throw new Error('Only an operator or an admin can press Override');
+  const r = await api('POST', '/ui/override', {});
+  toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : 'Override: no Process is running');
+});
 
 // variable classes: shared, gKonstant, gAPI (were vKonstant / vAPI until 2026-10-28; the old Global class is retired: lib/globals.js)
 const isVarEl = e => ['shared', 'gKonstant', 'gAPI'].includes(e?.type);
@@ -1126,6 +1148,7 @@ $('#ws').addEventListener('click', ev => {
   if (editing) return;
   const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
   if (mv) return toggleManualValve(mv.dataset.gid);
+  if (ev.target.closest('.gfx.ovr')) return pressOverride();
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const e = elByName(n.dataset.name); if (e) doTap(e);
 });
@@ -2519,15 +2542,24 @@ function addText() {
   const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }) };
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
+// the Override button: one per Tab, made on the 🔨 Build Tab like every new Widget; its Properties open
+$('#addOverride').onclick = () => addOverride();
+function addOverride() {
+  const tab = toBuild(); if (!tab) return;
+  if (ovrHas(tab.name)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab. Save Build ... sends it to a Tab.', true);
+  const g = { id: newId(), kind: 'override', workspace: tab.name, x: 40, y: 40, w: 160, h: 60, ...OVR };
+  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+}
 // COPY in a Widget's Properties (Fritz, 2026-10-29): a copy with everything the same but a new name (the next w_Text_N), made on
 // the 🔨 Build Tab like every new Widget (Rule 4.1), a little down and right of where the first one is; its Properties open.
 function copyGraphic(g) {
   const tab = toBuild(); if (!tab) return;
+  if (g.kind === 'override' && ovrHas(tab.name, g)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab.', true);
   const c = { ...clone(g), id: newId(), workspace: tab.name, x: (+g.x || 0) + 20, y: (+g.y || 0) + 20 };
   for (const k of ['_ref', 'name', 'locked']) delete c[k];
   draft.graphics.push(c); giveName(c, draft.graphics);
   sel = { kind: 'gfx', id: c.id }; renderTabs(); renderWs();
-  toast(`Copied: ${c.name} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
+  toast(`Copied: ${c.name || 'the ' + (g.kind === 'override' ? 'Override button' : 'copy')} is on the 🔨 Build Tab. Save Build ... sends it to a Tab.`);
   editItem('gfx', c.id);
 }
 // COPY of a Device-less Widget (a Timer): the same, under the next free name (Timer_1 -> Timer_2), on the 🔨 Build Tab
@@ -2779,6 +2811,7 @@ function moveBuildTo(tab) {
   const b = buildWs(), to = draft.workspaces.find(w => w.name === tab && !w.build);
   if (!to) throw new Error(`There is no Tab "${tab}"`);
   const items = buildItems(b);
+  if (items.some(x => x.kind === 'override') && ovrHas(to.name, items.find(x => x.kind === 'override'))) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
   centerOn(items, to);
   for (const x of items) x.workspace = to.name;
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
@@ -3073,6 +3106,11 @@ const F = {
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['style', 'Style', 'stylesel', 'timer', false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
+  // Override button Widget Properties (Fritz, 2026-10-30): the dialog pattern; only the Label and its look, no background picture
+  override: [['_nm', 'One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.', 'infonote', 'override'],
+    ['_lb', '', 'box'], ['label', 'Label (what the button says on this Tab)', 'text', null, false, 'b'], ['fontSize', 'Font size', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
+    ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES.filter(c => c[0])],
+    ['_pb', 'Properties', 'box'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
@@ -3668,6 +3706,13 @@ const INFO = {
       ['.font'], ['.size'], ['.fore'], ['.back'], ['.bold'], ['.alignment'], ['.visible'], ['.hiddenlock'], ['.x', '.xh and .x_hPosition all work'], ['.y', '.yv and .y_vPosition all work'],
       ['.width'], ['.height'], ['.lock', 'read only'], ['.tab', 'moves it to another Tab while Processes run']],
     example: 'w_Text_1.fore = "Red"' },
+  override: { title: 'Override Button Widget', properties: [
+    ['One press', ': every running Process moves on 100 ms later. A wait or a sleep it is held in is passed, and the loop it sits in (a goto back up, often inside an if) is left, so it goes on below it. Like the Simulator\'s skip, on the real clock.'],
+    ['Only one on a Tab', '. It can be on several Tabs (COPY, then Save Build ... to another Tab); each has its own Label and look.'],
+    ['Label', ' (Override to start), with its font, size, bold, fore color, back color and alignment. Rich Text Embedded Codes work in it.'],
+    ['No name and no background picture', '. Manual valves still wait for their click or Done, and Looper Processes (background loops) are left alone.']],
+    attributes: [['none', 'a Process does not use it: a person presses it']],
+    example: 'wait Kettle_Temp >= 152' },
   timer: { title: 'Timer Widget', properties: [
     ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
     ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
@@ -3921,7 +3966,7 @@ async function editItem(kind, id) {
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -4002,6 +4047,11 @@ async function editItem(kind, id) {
       delete work.syncLabel;                                                    // the old Update Names switch: ✏ Change name does it (Fritz, 2026-10-29)
       if (work.label === work.name) delete work.label;     // an empty Label shows the Name (Rule 1.13)
       delete work.wrap;                                                         // word wrap is always on
+    }
+    if (type === 'override') {      // one on a Tab; an empty Label says Override
+      if (ovrHas(work.workspace, item)) throw new Error(`The ${work.workspace} Tab already has an Override button: only one is allowed on a Tab`);
+      if (!String(work.label ?? '').trim()) work.label = OVR.label;
+      for (const k of ['image', 'imagePath_1', 'imagePath_2', 'imagePath_3', 'background']) delete work[k];
     }
     if (type === 'pipe') {
       if (work.from && work.from === work.to) throw new Error('A pipe needs two different IPs');
