@@ -850,3 +850,9 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .styleBody { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 10px 0; }
 .styleBody .full { grid-column: 1 / -1; }
 .styleBody label.strong { font-weight: 700; }
+
+/* the Override button (Fritz, 2026-10-30): one press and running Processes move on */
+.gfx.ovr, #ws.editing .gfx.ovr { display: flex; }
+.gfx.ovr .ovrBtn { flex: 1; display: flex; align-items: center; padding: 0 8px; border: 2px solid rgba(0,0,0,.45); border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,.35); overflow: hidden; }
+.gfx.ovr .ovrBtn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+#ws.editing .gfx.ovr .ovrBtn { pointer-events: none; }
