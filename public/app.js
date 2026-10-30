@@ -113,7 +113,7 @@ async function load() {
   $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
-  $('#panelVer').textContent = panelVersionName();
+  showPanelVer();
   setTextLarge();
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
@@ -6207,6 +6207,15 @@ function renderAboutTab(box) {
     saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: signOut }, 'Sign out'))));
 }
 
+// The version on the Menu Bar (Fritz, 2026-10-30): click the text box to make it a small 🏷 icon, click the icon to see the
+// version again. Each browser remembers its own pick.
+let verSmall = false; try { verSmall = localStorage.getItem('bp.verSmall') === '1'; } catch { }
+function showPanelVer() {
+  const n = $('#panelVer'); n.classList.toggle('small', verSmall);
+  n.textContent = verSmall ? '🏷' : panelVersionName();
+  n.title = verSmall ? `Skynet Brewer version ${panelVersionName()}. Click to show it.` : 'Skynet Brewer version. Click to make it a small icon. ☰ Menu > About says if it is the latest.';
+}
+$('#panelVer').onclick = () => { verSmall = !verSmall; try { localStorage.setItem('bp.verSmall', verSmall ? '1' : '0'); } catch { } showPanelVer(); };
 const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + (v.changed ? ' + changes' : '') : '(not stamped)'; };
 // Panel version (version.json, stamped by GitHub on every merge) and whether GitHub has a newer one
 function panelVersionBox() {
