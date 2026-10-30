@@ -87,7 +87,8 @@ is a real *heating element*. (2026-10-27, Help 74)
 
 1.15 **Position attributes are `.x_hPosition` and `.y_vPosition`** (x = horizontal, y = vertical, so
 nobody has to remember which). Typing `.x` or `.y` in the Process editor fills in the whole name, even with
-Predictive text off. The old `.xPosition` / `.yPosition` still work. (2026-10-28, PR #121, Help 49, 79)
+Predictive text off. The old `.xPosition` / `.yPosition` still work. **Short forms** `.x` / `.xh` and `.y` / `.yv` work
+too (Fritz's Text Widget list, 2026-10-29). (2026-10-28, PR #121, Help 49, 79)
 
 1.16 **gKonstant and gAPI** are the two variable classes (they were vKonstant and vAPI). Suggested
 name prefixes: **gK** for gKonstant (`gK_`, `gKS_`, `gKV_`, `gKB_`, `gKList_` ...) and **gA** for gAPI
@@ -96,6 +97,12 @@ when the Brain starts or the Schema loads: the types become gKonstant / gAPI, `v
 become `gK..._` / `gA..._` through the hidden-key rename (Processes, saved values and the database
 follow), and the web API is `/api/gapi`. (2026-10-28, thread "Rename vAPI and vKonstant to gAPI and
 gKonstant", Help 84)
+
+1.17 **Skynet Constants** are fixed numbers built into Skynet for common conversions (weight, volume,
+pressure, temperature, brewing ratios, length, power, time). Each name starts **`skc_`** and says
+from_To_to: `skc_Kg_To_Lb`, `skc_PSI_To_kPa`. A Process uses one like a number
+(`gKV_Lb = gKV_Kg * skc_Kg_To_Lb`). Nobody can change them (Rule 3.11), and no Device, Widget or
+variable name can start `skc_`. (Fritz, 2026-10-30, thread "Add Skynet unit conversion constants", Help 94)
 
 ## 2. Screen design and clicks
 
@@ -178,6 +185,34 @@ thread "Improve the Build Tab add and resize tools", Help 75)
 2.21 **🗂 Schema is at the top of the ☰ Menu** (under Edit layout), one click to the Schema Menu
 tab. (2026-10-28, thread "Add sample Schemas to the Schema list")
 
+2.22 **Properties dialog pattern** (Fritz's Text Widget Properties, 2026-10-29; the pattern for the other dialogs):
+title "... Widget Properties" with the yellow Help ?; Delete, **COPY**, Cancel, Save at the top (Delete, Cancel, Save at the
+bottom too); Name with its default name and an explanation ending in an **orange ?**; the settings in framed boxes (a Label
+box, a Properties box). The **orange ?** is not Help: it opens a pop-up with that kind's **Properties** and **Attributes**,
+with Close at the top and the bottom. **COPY** saves, then makes a copy with the next default name on the Build Tab (Rule
+4.1). A Text Widget's word wrap is always on. (thread "Redesign the Text Widget dialog", Help 91)
+
+2.23 **Image block** (Fritz, 2026-10-29): every dialog with background pictures shows **Background #** (1, 2 or 3 picks Image
+Path 1-3; any other number = no picture), **Back Colour** (a color behind the picture), and **Image Path 1, 2, 3**, each with
+an **OPEN** button and a box to type a path in. OPEN pops up **Background Image N** (Skynet / My pictures, group, 🖼 icons,
+the Image list, Cancel and Save). A typed path that is not found shows blank, with a warning. (Help 93)
+
+2.24 **Styles** (Fritz, 2026-10-29): a Widget's look can be a **Style** picked from a list. **Skynet Styles** come with Skynet;
+**a user can never edit a Skynet picture or a Skynet Style**. A user makes a **User Style** (➕ Add new User Style… at the end
+of the list) and can change or delete only those. First used on the **Timer Widget**, which has **no pictures and no
+background**: its look is its Style. (Help 92)
+
+2.25 **Close Skynet Brewer** (Admins) is the last ☰ Menu choice. It stops the panel after asking, and the
+launcher (Skynet_Brewer.bat) then closes its Command Prompt window; every open page shows "Skynet Brewer is closed".
+Closing a browser tab never stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread
+"Close the command window on exit")
+
+2.26 **The Override button** (Fritz, 2026-10-30): one press lets every running Process move on, like the Simulator's skip
+with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it sits in (a goto back up, often in an if) is left; the
+next wait runs as normal. **Only one Override button on a Tab**; it can be on several Tabs, each with its own Label (default
+"Override") and look. A user changes only the Label and its style (font, size, bold, fore, back, alignment), **never a background
+picture**. Manual valves still wait for their click or Done; Looper Processes are left alone. (thread "Add an Override button", Help 96)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -238,6 +273,10 @@ how the Graphic Picker handles a path. (2026-10-27)
 3.11 **Once an item is built, its Name is locked** (🔒). It is changed only with the **✏ Change
 name** button beside it, which opens the **Name Change** pop-up: the name now (read only), a box for
 the new name, ✖ Cancel and 💾 Save. The same pop-up renames Processes and Schemas. (2026-10-27)
+**All names are treated the same** (Fritz, 2026-10-29): a name is only there to find the item on the screen and, in the Process
+Editor, to set its `.attribute`. **Skynet names are fixed** and are never changed (only while building Skynet). **Any name a Process
+could use changes only with ✏ Change name** (Rule 3.6: the Processes follow). Exceptions: **User Template names** (only for picking
+one; renaming changes nothing in a Process), and picture paths / graphic file names (handled later).
 
 3.12 **Interfaces are easy to find and add.** ☰ Menu has **🔌 Interfaces (boards)** and **➕ Add
 Interface…**, and every Interface dropdown in a New Device box (any Tab, RIMS and kettle too) ends
@@ -592,7 +631,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **90**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **97**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -748,25 +787,37 @@ make, or review it.
   gKonstant List. Help 84; next free Help number 85. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Rule 1.16 now renames older vK_ / vA_ names; added Rule 15.2 (everything conforms to the latest
   standard, no backward compatibility). The OakBarn BruControl sample is out of the shipped samples for now.
-- 2026-10-28: Help 86 = IPs line up by themselves (snap to align within 10 px; IPs on Skynet valve pipe ends). Next free Help number 87. (thread "Lock Skynet Widget Templates and IPs")
 - 2026-10-28: Added Rules 10.7 (Simulator bar Hide / Show; starts at 25× with Auto skip on each time the Simulator is
   switched on) and 10.8 (1, 2 and 3 vessel samples clone to a User Schema). Help 85; next free Help number 86.
   (thread "Improve the Simulator bar defaults")
-- 2026-10-28: Rule 5.5 changed (Rotate 90 retired; Flips + Rotate 45), Rule 5.8 changed (editing follows 5.16), Rule 7.10
-  excepts User versions of Skynet Templates; added Rules 5.16 (Skynet Templates locked, User versions with per-type user
-  settable attributes), 5.17 (Master and Daughter Templates; Skynet Motorized Ball Valve Device H / VL / VR) and 5.18
-  (Build Template Tab). Help 88 taken; next free Help number 89. (thread "Lock Skynet Widget Templates and IPs")
+- 2026-10-28: Help 86 = IPs line up by themselves (snap to align within 10 px; IPs on Skynet valve pipe ends). Next free Help number 87. (thread "Lock Skynet Widget Templates and IPs")
 - 2026-10-28: Added Rules 5.14 (pipe fittings: only .x .y .width .height and Autosize to pipe, no Clone) and 5.15
   (Manual Valve Widget: only a click changes .state; a Process asks for it by hand); Rule 5.13 covers both kinds of
   manual valve. Help 87; next free Help number 88. (thread "Simplify pipe fittings and Manual Valves")
 - 2026-10-28: Rule 5.14: a check valve is a plain pipe fitting; valves and flow meters are Devices; a tee with a
   thermowell (or a thermowell on a vessel IP) is a kind of Temperature Probe. (thread "Simplify pipe fittings and Manual Valves")
+- 2026-10-28: Rule 5.5 changed (Rotate 90 retired; Flips + Rotate 45), Rule 5.8 changed (editing follows 5.16), Rule 7.10
+  excepts User versions of Skynet Templates; added Rules 5.16 (Skynet Templates locked, User versions with per-type user
+  settable attributes), 5.17 (Master and Daughter Templates; Skynet Motorized Ball Valve Device H / VL / VR) and 5.18
+  (Build Template Tab). Help 88 taken; next free Help number 89. (thread "Lock Skynet Widget Templates and IPs")
 - 2026-10-29: Rule 5.18 built as ☰ Menu > Build Template (Device Templates). Help 89; next free Help number 90. (thread "Lock Skynet Widget Templates and IPs")
+- 2026-10-29: Help 90 = Rich Text Embedded Code (all the \codes: \b \i \u \s \L \S \_ \^ \c{Color} \n \t \deg \F \C \ohm \+- \\). Next free Help number 91. (thread "List text formatting codes")
 - 2026-10-29: Rule 3.4 changed: `< > : " / \ | ? *` are not allowed in Device, Widget and Interface names either;
   older names are changed to `~` (Rule 15.2). Open question 3 answered. Help 63 updated. (thread "Block unsafe
   characters in Device names")
+- 2026-10-29: Added Rule 2.22 (Properties dialog pattern: boxes, COPY, orange ? pop-up); Rule 1.15 adds the short forms .x / .xh /
+  .y / .yv. Text Widgets are named w_Text_N (older Text_N renamed under Rule 15.2). Help 91; next free Help number 92. (thread "Redesign the Text Widget dialog")
+- 2026-10-29: Added Rules 2.23 (Image block: Background #, Back Colour, Image Path 1-3 with OPEN) and 2.24 (Styles: Skynet Styles never
+  edited by a user, User Styles; Timer Widgets have no pictures or background). Help 92-93; next free Help number 94. (thread "Redesign the Text Widget dialog")
+- 2026-10-29: Rule 3.11: all names treated the same; Skynet names fixed; any name a Process could use changes only with ✏ Change name (User Template names and picture paths excepted). The Text Widget's "Update Names" switch is that method, so the switch was dropped. (thread "Redesign the Text Widget dialog")
 - 2026-10-29: Rule 3.4 now covers every name (Tabs, Texts, pipes, vessels too), as Rule 3.11 treats all names the same.
   User Template names are left alone. (thread "Block unsafe characters in Device names")
+- 2026-10-30: Added Rule 1.17 (Skynet Constants, `skc_` conversions, read only). Help 94; next free Help number 95.
+  (thread "Add Skynet unit conversion constants")
+- 2026-10-30: Added Rule 2.25 (☰ Menu > Close Skynet Brewer closes the Command Prompt window too). Help 95; next free Help number 96.
+  (thread "Close the command window on exit")
+- 2026-10-30: Added Rule 2.26 (the Override button: one per Tab, per-Tab Label and style, passes a wait, sleep or loop 100 ms
+  after the press; Loopers and manual valves left alone). Help 96; next free Help number 97. (thread "Add an Override button")
 - 2026-10-30: Added Rule 6.15 (Close all / Open all valve lists; a tap water valve always on Close all, never on Open all) and
   section 16 (the Standard Skynet Brew Process: seven major steps, Skynet and User Process Templates, rcp_ Recipe values, ask). Help 100.
   (thread "Build the Standard Skynet Brew Process")
