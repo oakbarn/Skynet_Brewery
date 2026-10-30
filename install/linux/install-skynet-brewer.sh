@@ -205,8 +205,8 @@ if systemctl is-active --quiet $SERVICE_NAME 2>/dev/null; then
   exit 0
 fi
 ( sleep 4; xdg-open http://localhost:$PORT >/dev/null 2>&1 ) &
-npm start
-read -r -p "The panel stopped. Press Enter to close this window. "
+# closed from the panel (Menu > Close Skynet Brewer): this window closes too; stopped by an error: it stays open
+npm start || read -r -p "The panel stopped because of an error (see above). Press Enter to close this window. "
 EOF
 chmod +x "$DEST/start-skynet-brewer.sh"
 

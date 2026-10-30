@@ -56,13 +56,16 @@ echo.
 :start
 :: 3. Opens the browser after 4 seconds, so the panel has time to start
 echo  KEEP THIS WINDOW OPEN while you brew. Closing it stops the panel.
+echo  To stop the panel and close this window, use  Menu ^> Close Skynet Brewer  in the panel.
 echo.
 start "" /min cmd /c "timeout /t 4 /nobreak >nul & start "" http://localhost:8080"
 call npm start
+:: Closed from the panel (Menu > Close Skynet Brewer): this window closes too. Stopped by an error: it stays open so you can read why.
+if not errorlevel 1 exit /b 0
 echo.
-echo  The panel has stopped.
+echo  The panel stopped because of an error. The lines above say why.
 pause
-exit /b 0
+exit /b 1
 
 :: Sets NODEOK when Node.js 22.13 or newer is here, else says why in NODEWHY
 :checknode
