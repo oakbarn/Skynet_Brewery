@@ -4,6 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 import { DONATE_LINK } from './lib/donation.js';
 import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
@@ -821,7 +822,18 @@ server.listen(PORT, () => {
   if (loginsCleared) console.log('New version installed: all logins were cleared (testing mode). Create the admin account again.');
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
+  minimizeWindow();
 });
+
+// Windows (Fritz, 2026-10-30): once the panel is up and the browser has opened it, Skynet_Brewer.bat's Command Prompt window
+// goes down to the task bar (the .bat sets SKYNET_MINIMIZE=1). PowerShell shares this console, so it minimizes this window.
+function minimizeWindow() {
+  if (process.platform !== 'win32' || process.env.SKYNET_MINIMIZE !== '1') return;
+  const ps = "Add-Type -Name W -Namespace S -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern System.IntPtr GetConsoleWindow(); [DllImport(\"user32.dll\")] public static extern bool ShowWindow(System.IntPtr h, int c);'; [void][S.W]::ShowWindow([S.W]::GetConsoleWindow(), 6)";
+  setTimeout(() => {
+    try { spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', ps], { stdio: 'ignore', windowsHide: false }).on('error', () => {}); } catch { /* the window just stays open */ }
+  }, 6000);
+}
 
 // A panel started as a service (systemd sets INVOCATION_ID, for example on a Pi) restarts by itself, so only a panel started
 // from its window (Skynet_Brewer.bat, the Linux or Mac launcher, npm start) can be closed from ☰ Menu.

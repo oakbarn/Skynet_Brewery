@@ -47,7 +47,7 @@ To remove it: **Settings > Apps > Skynet Brewer > Uninstall**. It asks before de
 2. Right-click the zip, choose **Extract All…**, and extract into `C:\Brewing`. It makes the sub folder `C:\Brewing\BrewPanel` by itself. (If Windows suggests `C:\Brewing\Skynet_BrewPanel_<date>`, change it to `C:\Brewing`.)
 3. Copy `Skynet_Brewer.bat` from the release (it is also in `C:\Brewing\BrewPanel\install\windows`) into `C:\Brewing`.
 4. Right-click the `.bat`, choose **Show more options > Send to > Desktop (create shortcut)**, and rename the shortcut to **Skynet Brewer**.
-5. Double-click it. Keep the black window open while you brew. The browser opens the panel a few seconds later. To stop the panel and close the window, use **☰ Menu > Close Skynet Brewer** (see [Closing Skynet Brewer](95-closing-skynet-brewer)).
+5. Double-click it. Keep the black window open while you brew. Once the panel is up and the browser has opened it, the window goes down to the task bar by itself (click it there to see it again). The browser opens the panel a few seconds later. To stop the panel and close the window, use **☰ Menu > Close Skynet Brewer** (see [Closing Skynet Brewer](95-closing-skynet-brewer)).
 
 **You don't need to install Node.js first.** Every time `Skynet_Brewer.bat` starts, it checks for Node.js. If it is missing or older than 22.13, it downloads the LTS version from nodejs.org and installs it, then carries on. This needs the internet and takes a few minutes; when Windows asks *"Do you want to allow this app to make changes to your device?"*, click **Yes**. It also gets the USB board support the first time. If that ever fails, the black window says so and opens the Node.js download page so you can install it by hand.
 
