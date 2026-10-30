@@ -4,7 +4,7 @@ import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, D
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
-import { SKYNET_STYLES, STYLE_KEYS, styleOf, isSkynetStyle } from './styles.js';
+import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
@@ -487,16 +487,19 @@ function placeEqIps(g) { for (const q of eqPorts(g)) { const n = $(`#ws .devip[d
 // label shared by vessels, equipment and IP widgets: position, color, size, show / hide
 // It is a text box (public/textbox.js): what is not set here comes from the ☰ Menu > Default tab, and the text codes (\b \L \n) work.
 function widgetLabel(g, defPos) {
-  const D = TD(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
+  const D = TD(), T = TS(), lb = h('div', { class: 'vlabel at-' + (LABEL_POS.includes(g.labelAlign) ? g.labelAlign : defPos) });
   setRich(lb, g.label);
-  lb.style.color = firstSet(g.labelColor, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, D.backColor);
-  lb.style.fontSize = (g.labelSize || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = D.nameFont;
+  lb.style.color = firstSet(g.labelColor, T.labelFore, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, T.labelBack, D.backColor);
+  lb.style.fontSize = (g.labelSize || fontPx(T.labelSize) || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = firstSet(T.labelFont, D.nameFont);
   lb.style.textAlign = (D.align || '').toLowerCase();
-  if (g.labelBg || D.backColor) lb.style.textShadow = 'none';
+  if (g.labelBg || T.labelBack || D.backColor) lb.style.textShadow = 'none';
   return lb;
 }
 // the Default tab's text box settings (colors, alignment, name font ...): public/textbox.js
 const TD = () => textDefaults(S.config.brewDefaults);
+// the Tab Style of the Tab shown (Fritz, 2026-10-30): what a Device or Widget has of its own wins, then the Tab Style, then the Default tab
+const TS = () => tabStyleOf(curWs(), S.config.brewDefaults, S.config.userStyles) || {};
+const fontPx = v => +v > 0 ? +v : 0;
 // standard colors for the flow widgets' color dropdowns ('' = the default color)
 // Default = the item's normal color, None = no color at all (see-through)
 const COLORS = [['Default', ''], ['None', 'transparent'], ['Red', '#e74c3c'], ['Green', '#3fbf6a'], ['Blue', '#4fb3ff'], ['Yellow', '#f1c40f'], ['Orange', '#e8a33a'], ['Purple', '#a87ee8'],
@@ -547,22 +550,22 @@ function buildGfx(g) {
 // comes first, then its own Properties, then the ☰ Menu > Default tab. Word wrap is always on (Fritz, 2026-10-29).
 const gTab = g => (!editing && g.kind === 'text' && g.name && S.values[g.name]?.tab) || g.workspace;
 function fillText(n, g) {
-  const D = TD(), v = (!editing && g.name && S.values[g.name]) || {};
+  const D = TD(), T = TS(), v = (!editing && g.name && S.values[g.name]) || {};
   place(n, editing ? g : placeWith(g, v));
   const fnt = (live, own) => tbFontCss(live) || firstSet(own);
   const body = h('div', { class: 'tbody' }); setRich(body, v.text ?? g.text ?? '');
-  n.style.fontSize = (+firstSet(v.size, g.fontSize) || 16) + 'px'; n.style.fontWeight = firstSet(v.bold, g.bold) === true ? '700' : '';
-  n.style.fontFamily = fnt(v.font, g.font) || D.nameFont;
-  n.style.color = firstSet(v.forecolor, g.color, D.foreColor);
-  n.style.backgroundColor = firstSet(v.backcolor, g.backColor, D.backColor);
+  n.style.fontSize = (+firstSet(v.size, g.fontSize) || fontPx(T.size) || 16) + 'px'; n.style.fontWeight = firstSet(v.bold, g.bold) === true ? '700' : '';
+  n.style.fontFamily = fnt(v.font, g.font) || T.font || D.nameFont;
+  n.style.color = firstSet(v.forecolor, g.color, T.fore, D.foreColor);
+  n.style.backgroundColor = firstSet(v.backcolor, g.backColor, T.back, D.backColor);
   n.style.textAlign = firstSet(v.alignment, g.align, D.align).toLowerCase();
   n.style.whiteSpace = ''; n.style.overflow = '';
   const parts = [body];
   if (firstSet(v.label_visible, g.labelVisible) === true) {
     const lb = h('div', { class: 'tlabel' }); setRich(lb, firstSet(v.label, g.label, g.name));
-    lb.style.fontSize = (+firstSet(v.size_label, g.labelSize) || 14) + 'px'; lb.style.fontWeight = firstSet(v.bold_label, g.labelBold) === true ? '700' : '400';
-    lb.style.fontFamily = fnt(v.font_label, g.labelFont);
-    lb.style.color = firstSet(v.fore_label, g.labelColor); lb.style.backgroundColor = firstSet(v.back_label, g.labelBg);
+    lb.style.fontSize = (+firstSet(v.size_label, g.labelSize) || fontPx(T.labelSize) || 14) + 'px'; lb.style.fontWeight = firstSet(v.bold_label, g.labelBold) === true ? '700' : '400';
+    lb.style.fontFamily = fnt(v.font_label, g.labelFont) || T.labelFont;
+    lb.style.color = firstSet(v.fore_label, g.labelColor, T.labelFore); lb.style.backgroundColor = firstSet(v.back_label, g.labelBg, T.labelBack);
     lb.style.textAlign = firstSet(v.alignment_label, g.labelAlign).toLowerCase();
     parts.unshift(lb);
   }
@@ -814,18 +817,21 @@ function fontCss(node, f) {
 // then the ☰ Menu > Default tab. The Default fore color leaves the LED and Gauge digits their own colors.
 const OWN_DIGITS = ['led', 'lcd', 'indicator'];
 function styleEl(n, e) {
-  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD();
-  const nc = firstSet(e.nameColor, e.foreColor, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : D.foreColor);
-  const nb = firstSet(e.nameBg, e.backColor, D.backColor), vb = firstSet(e.valueBg, e.backColor, D.backColor);
+  const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD(), T = TS();
+  // its own colors win; a Tab Style only fills in what it has none of (Fritz, 2026-10-30)
+  const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.foreColor));
+  const nb = firstSet(e.nameBg, e.backColor, T.labelBack, D.backColor), vb = firstSet(e.valueBg, e.backColor, T.back, D.backColor);
   if (nc) nm.style.color = nc;
   if (nb) nm.style.backgroundColor = nb;
   if (vc) { vl.style.color = vc; vl.style.textShadow = 'none'; }
   if (vb) vl.style.backgroundColor = vb;
   fontCss(nm, e.nameFont); fontCss(vl, e.valueFont);
   // Name font and Name font size: its own, else the Default tab's (px; an imported BruControl font keeps its size)
-  const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : D.nameFont), size = +e.nameFontSize || (e.nameFont?.size ? 0 : D.nameFontSize);
+  const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : firstSet(T.labelFont, D.nameFont)), size = +e.nameFontSize || (e.nameFont?.size ? 0 : fontPx(T.labelSize) || D.nameFontSize);
   if (fam) nm.style.fontFamily = fam;
   if (size) nm.style.fontSize = size + 'px';
+  if (T.font && !e.valueFont?.family) vl.style.fontFamily = T.font;
+  if (fontPx(T.size) && !e.valueFont?.size && !e.fontSize && !e.valueEnlarge) vl.style.fontSize = fontPx(T.size) + 'px';
   if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
   const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, D.align);
   let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (al) nm.style.textAlign = al.toLowerCase();
@@ -3253,23 +3259,27 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'stylesel') {   // a Style list (Fritz, 2026-10-29): Skynet Styles 🔒 (never changed), then User Styles, then ➕ Add new User Style…
     const mine = () => S.config.userStyles?.[opts] ?? [];
-    const cur = styleOf(opts, obj, S.config.userStyles)?.id ?? '';
+    // a Tab's own Style list starts with "(the Default tab's Style)"; the ☰ Menu > Default tab's own list does not
+    const blank = opts === 'tab' && key !== 'tabStyle';
+    const cur = blank ? obj[key] ?? '' : opts === 'tab' ? obj[key] || SKYNET_STYLES.tab[0].id : styleOf(opts, obj, S.config.userStyles)?.id ?? '';
     const s = h('select', { 'data-k': key, 'data-kind': 'sel' });
+    const dflt = () => tabStyleOf({}, S.config.brewDefaults, S.config.userStyles)?.name ?? '';
     const fill = id => s.replaceChildren(
+      ...(blank ? [h('option', { value: '', ...(id ? {} : { selected: true }) }, `(the Default tab's Style: ${dflt()})`)] : []),
       h('optgroup', { label: 'Skynet Styles (can\'t be changed)' }, ...SKYNET_STYLES[opts].map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, '🔒 ' + x.name))),
       ...(mine().length ? [h('optgroup', { label: 'User Styles' }, ...mine().map(x => h('option', { value: x.id, ...(x.id === id ? { selected: true } : {}) }, x.name)))] : []),
       h('option', { value: '__add__' }, '➕ Add new User Style…'));
     fill(cur);
     let prev = cur;
     const edit = h('button', { type: 'button', class: 'nameBtn', title: 'Change this User Style (a Skynet Style can never be changed)' }, '✏ Edit');
-    const upd = () => { edit.disabled = isSkynetStyle(s.value); };
+    const upd = () => { edit.disabled = !s.value || isSkynetStyle(s.value); };
     s.addEventListener('change', async ev => {
       if (s.value !== '__add__') { prev = s.value; upd(); return; }
       ev.stopPropagation();
       const made = await styleEditor(opts, null, styleOf(opts, { style: prev }, S.config.userStyles));
       fill(made ? made.id : prev); prev = s.value; upd();
     });
-    edit.onclick = async () => { const st = mine().find(x => x.id === s.value); if (!st) return; const done = await styleEditor(opts, st); fill(done === false ? SKYNET_STYLES[opts][0].id : s.value); prev = s.value; upd(); };
+    edit.onclick = async () => { const st = mine().find(x => x.id === s.value); if (!st) return; const done = await styleEditor(opts, st); fill(done === false ? (blank ? '' : SKYNET_STYLES[opts][0].id) : s.value); prev = s.value; upd(); };
     upd();
     return [h('label', {}, label), h('span', { class: 'nameRow' }, s, edit)];
   }
@@ -3624,10 +3634,15 @@ function openImagePath(n, current) {
 // the Schema (Settings) and gives it back; 🗑 Delete (an old one only) gives false; ✖ Cancel null.
 function styleEditor(kind, st, from) {
   return new Promise(res => {
-    const isNew = !st, work = st ? clone(st) : { id: 'u_' + newId().replace(/[^A-Za-z0-9]/g, '').slice(0, 20), name: '', look: from?.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, from?.[k] || ''])) };
+    const keys = KIND_KEYS[kind], timer = kind === 'timer';
+    const isNew = !st, work = st ? clone(st) : { id: 'u_' + newId().replace(/[^A-Za-z0-9]/g, '').slice(0, 20), name: '', ...(timer ? { look: from?.look || 'timer' } : {}), ...Object.fromEntries(keys.map(k => [k, from?.[k] || ''])) };
     const body = h('div', { class: 'styleBody' });
-    bindForm(body, [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
-      ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']], work);
+    bindForm(body, timer ? [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
+      ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
+      : [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'],
+        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'],
+        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'],
+        ['_nt', 'Default = as it is now. A Device or Widget that has its own color, font or size keeps it; the Style fills in only what it has none of.', 'note']], work);
     const err = h('p', { class: 'nameErr', role: 'alert' });
     let out = null;
     const save = async () => {
@@ -3636,7 +3651,7 @@ function styleEditor(kind, st, from) {
       if (!name) { err.textContent = 'Give the Style a name.'; return; }
       if (/^skynet\b/i.test(name)) { err.textContent = 'Only Skynet Styles start with "Skynet". Pick another name.'; return; }
       if ([...SKYNET_STYLES[kind], ...list].some(x => x.id !== work.id && x.name.toLowerCase() === name.toLowerCase())) { err.textContent = `There is already a Style called ${name}.`; return; }
-      const item = { id: work.id, name, look: work.look || 'timer', ...Object.fromEntries(STYLE_KEYS.map(k => [k, work[k] || ''])) };
+      const item = { id: work.id, name, ...(timer ? { look: work.look || 'timer' } : {}), ...Object.fromEntries(keys.map(k => [k, String(work[k] ?? '')])) };
       const all = { ...(S.config.userStyles || {}), [kind]: isNew ? [...list, item] : list.map(x => x.id === item.id ? item : x) };
       try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = item; d.close(); } catch (e) { err.textContent = e.message; }
     };
@@ -4098,6 +4113,9 @@ async function editWorkspace() {
     ['_bgHead', 'Background', 'head'],
     ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
     ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],
+    ['_stHead', 'Tab Style', 'head'],
+    ['style', 'Tab Style (Label and Device or Widget colors, fonts and sizes)', 'stylesel', 'tab'],
+    ['_stNote', 'Only a Device or Widget with no color, font or size of its own takes the Tab Style; one with its own keeps it. Skynet Styles 🔒 can never be changed; ➕ Add new User Style… makes your own.', 'note'],
     ['background', 'Background picture', 'gpick', 'backgrounds'],
     ['_bgPlace', 'The list shows the pictures in media/Images and its folders (Add new ... takes another picture name there; the File Move page copies pictures from your computer). The color shows wherever the picture does not cover. Leave the four boxes below empty to stretch the picture over the whole tab; fill them in to place it at a spot and size.', 'note'],
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
@@ -5946,6 +5964,7 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
+    ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
     ['valveProfile', 'Valve Profile picked first for a new valve', 'sel', pick(S.valveProfiles, '(none)')],
     ['_m', 'Menu Bar', 'head'],
     ['hideMenuBar', 'Hide the Menu Bar on Tabs (☰ Menu > Show Menu Bar brings it back)', 'bool'],

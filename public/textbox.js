@@ -21,7 +21,7 @@ export const TB_ATTRS = ['visible', 'hidden', 'forecolor', 'backcolor', 'alignme
 export const FONTS = [['', 'Default'], ['system-ui, sans-serif', 'System (the panel\'s normal font)'], ['Arial, Helvetica, sans-serif', 'Arial'],
   ['Verdana, Geneva, sans-serif', 'Verdana'], ['Tahoma, Verdana, sans-serif', 'Tahoma'], ['"Trebuchet MS", sans-serif', 'Trebuchet MS'],
   ['Georgia, serif', 'Georgia'], ['"Times New Roman", Times, serif', 'Times New Roman'], ['"Courier New", Courier, monospace', 'Courier New'],
-  ['Consolas, Menlo, monospace', 'Consolas (fixed width)'], ['Impact, "Arial Black", sans-serif', 'Impact']];
+  ['Consolas, Menlo, monospace', 'Consolas (fixed width)'], ['"Comic Sans MS", "Comic Sans", cursive', 'Comic Sans MS'], ['Impact, "Arial Black", sans-serif', 'Impact']];
 
 // "left justified", "Centered", "centre" ... -> Left / Center / Right; '' stays '' (back to its properties); anything else null
 export function tbAlign(v) {
