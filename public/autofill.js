@@ -26,6 +26,7 @@ const COMMANDS = [
   ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['log', 'write to the log'],
   ['new value', 'make a number'], ['new string', 'make a text'], ['new bool', 'make a true/false'], ['new time', 'make a time'], ['new datetime', 'make a date and time'],
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
+  ['wait_boil', 'until the Boil probe boils (skn_Boil_Temp)'],
 ];
 // words that fit anywhere on a line, not only at its start
 const ANYWHERE = [['true', ''], ['false', ''], ['now', 'date and time'], ['and', ''], ['or', ''], ['not', '']];
@@ -39,7 +40,7 @@ const PROCESS_ATTRS = ['running'];
 const TARGETS = { start: ['timer', 'alarm', 'soundPlayer'], stop: ['timer', 'alarm', 'soundPlayer', 'stepper'], reset: ['timer', 'stepper'], restart: [] };
 
 // the kind of each item, in the order a value list shows them
-const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'gAPI' ? [2, 'gAPI']
+const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'skynet' ? [3, 'Skynet Global'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'gAPI' ? [2, 'gAPI']
   : e.type === 'gKonstant' ? [3, 'gKonstant'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
 
 // how well a name fits the letters typed: 0 = it starts with them, 1 = a part of it after a _ does, -1 = not at all
@@ -64,7 +65,8 @@ const NEW_RE = /^\s*new\s+(\w+)\s+([A-Za-z_]\w*)/gim;
 //   Returns { list: [{ text, label?, hint, back? }], typed } (typed = the letters the picks replace; back = also the space
 //   before them, for .value after "if Pump "), or null. A pick that ends in a space opens the next list.
 export function suggest(line, words = {}, above = '', all = above, forced = false) {
-  const W = words || {}, els = W.elements || [];
+  // Skynet's own names (skn_Boil_Temp, the sk_ probe roles) are offered like the Devices and Widgets
+  const W = words || {}, els = [...(W.elements || []), ...(W.skynet || [])];
   const elOf = n => els.find(e => e.name === n);
   const isProc = n => (W.processes || []).includes(n);
   const declared = new Map([...all.matchAll(NEW_RE)].map(m => [m[2], m[1].toLowerCase()]));

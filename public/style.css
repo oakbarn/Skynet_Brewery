@@ -850,3 +850,8 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .styleBody { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 10px 0; }
 .styleBody .full { grid-column: 1 / -1; }
 .styleBody label.strong { font-weight: 700; }
+
+/* ☰ Menu > User Profile: the boil temperature here now (Fritz, 2026-10-30) */
+.boilNow .boilBig { font-size: 1.4em; font-weight: bold; margin: .3em 0; }
+.boilNow .warn { color: #b45309; }
+.probeRoles select { min-width: 16em; }

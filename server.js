@@ -5,7 +5,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
-import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
+import { Store, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf, boolAttrs, SKN_TYPE } from './lib/store.js';
+import { BoilTemp } from './lib/boiltemp.js';
+import { SKN_GLOBALS, ROLE_NAMES, isRoleName } from './public/skynetnames.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
@@ -99,7 +101,10 @@ const messaging = new Messaging(DATA);
 const PANEL_VERSION = readVersion(ROOT);
 const versionCheck = new VersionCheck(PANEL_VERSION);
 const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
-const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
+const sim = new Simulation({ store, engine, hw });
+// The boil temperature here and now (☰ Menu > User Profile): skn_Boil_Temp for every Process, and wait_boil (lib/boiltemp.js)
+const boil = new BoilTemp(DATA, { store });
+boil.start();          // Settings > Simulation: no real boards, faster time
 sim.apply();
 hw.start();
 const control = new Control(store);
@@ -167,6 +172,7 @@ store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
 pictures.on('changed', () => broadcast('config', {}));
 mqtt.on('status', () => broadcast('mqtt', mqtt.status()));
+boil.on('status', st => broadcast('boil', st));
 sim.on('status', () => { clearTimeout(sim._bt); sim._bt = setTimeout(() => broadcast('sim', sim.status()), 100); });
 function dropEndedSessions() { for (const [res, token] of clients) if (!auth.check(token)) { res.end(); clients.delete(res); } }
 setInterval(() => { dropEndedSessions(); for (const res of clients.keys()) res.write(': ping\n\n'); }, 20000);
@@ -242,6 +248,9 @@ function processWords() {
   return {
     elements: [...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
     processes: engine.names(),
+    // Skynet's own names: the internal Globals (read only) and the probe roles that have a probe (public/skynetnames.js)
+    skynet: [...Object.keys(SKN_GLOBALS).map(name => ({ name, type: SKN_TYPE, main: 'value', attrs: ['value'], bools: [] })),
+      ...ROLE_NAMES.map(n => store.roleProbe(n)).filter(Boolean).map(el => ({ name: el.probeRole, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el), probe: el.name }))],
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
   };
 }
@@ -249,6 +258,7 @@ function processWords() {
 function needRole(p, m) {
   if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
+  if (p === '/ui/userprofile/refresh') return 'operator';      // Get the air pressure now
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
@@ -437,7 +447,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), boil: boil.status(), logModes: LOG_MODES, sim: sim.status(), simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   if (p === '/ui/set' && m === 'POST') {
@@ -518,6 +528,29 @@ async function route(req, res) {
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
+  }
+  // User Profile (☰ Menu > User Profile): where the brewery is, for the air pressure and skn_Boil_Temp. Admins change it.
+  if (p === '/ui/userprofile' && m === 'GET') return ok(res, boil.status());
+  if (p === '/ui/userprofile' && m === 'PUT') return ok(res, await boil.setProfile(await jsonBody(req)));
+  if (p === '/ui/userprofile/refresh' && m === 'POST') return ok(res, await boil.refresh());
+  // Probe roles (☰ Menu > Default): { roles: { sk_Boil_Probe_1: "probe name" or "" } }. The role is kept on the probe, so it
+  // follows the probe by its hidden key when the probe is renamed; one probe per role, one role per probe.
+  if (p === '/ui/proberoles' && m === 'PUT') {
+    const want = (await jsonBody(req)).roles ?? {}, temps = store.list('temperature'), used = new Map();
+    for (const [role, name] of Object.entries(want)) {
+      if (!isRoleName(role)) return fail(res, 400, `"${role}" is not a probe role`);
+      if (!name) continue;
+      const el = temps.find(e => e.name === name);
+      if (!el) return fail(res, 400, `${role}: there is no temperature probe "${name}"`);
+      if (used.has(name)) return fail(res, 400, `"${name}" can have only one role (${used.get(name)} and ${role})`);
+      used.set(name, role);
+    }
+    for (const el of temps) {
+      const role = used.get(el.name) ?? (el.probeRole && !(el.probeRole in want) ? el.probeRole : null);   // a role not sent stays as it was
+      if (role) el.probeRole = role; else delete el.probeRole;
+    }
+    store.writeConfig(); store.emit('config');
+    return ok(res, { roles: Object.fromEntries(ROLE_NAMES.map(r => [r, store.roleProbe(r)?.name ?? ''])) });
   }
   // Simulation mode: everyone sees it, admins change it
   if (p === '/ui/sim' && m === 'GET') return ok(res, { ...sim.status(), upcoming: sim.upcoming() });
