@@ -202,6 +202,11 @@ the Image list, Cancel and Save). A typed path that is not found shows blank, wi
 of the list) and can change or delete only those. First used on the **Timer Widget**, which has **no pictures and no
 background**: its look is its Style. (Help 92)
 
+2.25 **Close Skynet Brewer** (Admins) is the last ☰ Menu choice. It stops the panel after asking, and the
+launcher (Skynet_Brewer.bat) then closes its Command Prompt window; every open page shows "Skynet Brewer is closed".
+Closing a browser tab never stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread
+"Close the command window on exit")
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -775,3 +780,5 @@ and vKonstant to gAPI and gKonstant")
   User Template names are left alone. (thread "Block unsafe characters in Device names")
 - 2026-10-30: Added Rule 1.17 (Skynet Constants, `skc_` conversions, read only). Help 94; next free Help number 95.
   (thread "Add Skynet unit conversion constants")
+- 2026-10-30: Added Rule 2.25 (☰ Menu > Close Skynet Brewer closes the Command Prompt window too). Help 95; next free Help number 96.
+  (thread "Close the command window on exit")
