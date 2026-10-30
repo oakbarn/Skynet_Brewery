@@ -1,0 +1,14 @@
+//Skynet_Add_Grain
+//About: Move the strike water into the mash tun, then add the grain (dough in).
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Strike water to the mash tun"
+ask "Move " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of strike water into the mash tun. Press Done when it is in."
+step "Dough in"
+ask "Add the grain (" + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ") a little at a time and stir out every dough ball. Press Done when it is all in."
+@if HLT_Heater
+{{HLT_Heater}}.target = rcp_Sparge_Temp
+@end
+@if Mash_Probe
+print "Mash temperature after dough in: " + {{Mash_Probe}} + rcp_Temp_Units
+@end

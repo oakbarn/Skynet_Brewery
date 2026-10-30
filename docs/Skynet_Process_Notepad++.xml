@@ -28,7 +28,7 @@
             <Keywords name="Folders in comment, open"></Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">goto sleep wait start stop reset print clear show log new play step restart pause tab value string bool time datetime true false now on off</Keywords>
+            <Keywords name="Keywords1">goto sleep wait start stop reset print clear show log new play step restart pause tab value string bool time datetime ask close_all_valves open_all_valves all_pumps_off true false now on off</Keywords>
             <Keywords name="Keywords2"></Keywords>
             <Keywords name="Keywords3">gK</Keywords>
             <Keywords name="Keywords4">gA</Keywords>

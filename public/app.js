@@ -76,7 +76,13 @@ function renderValves(all = []) {
   if (!list.length) { if (d?.open) d.close(); return; }
   if (!d) { d = h('dialog', { id: 'valveDlg', class: 'valveDlg', 'data-nomenu': true }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
   d.innerHTML = '';
-  d.append(h('h3', {}, '✋ Manual valve'), ...list.map(a => h('div', { class: 'valveAsk' },
+  d.append(h('h3', {}, list.every(a => a.ask) ? '📋 Brew Day' : '✋ Manual valve'), ...list.map(a => a.ask ? h('div', { class: 'valveAsk' },
+    // ask "..." in a Process (the Brew Process): what to do, and Done when it is done
+    (n => (setRich(n, a.label), n))(h('div', { class: 'valveDo', style: 'white-space: pre-line' })),
+    h('div', { class: 'muted' }, `The Process ${a.process} waits until you press Done.`),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), can('operator')
+      ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, '✔ Done')
+      : h('span', { class: 'muted' }, 'An operator or admin must press Done.'))) : h('div', { class: 'valveAsk' },
     h('div', { class: 'valveDo' }, `${a.open ? 'OPEN' : 'CLOSE'} ${a.label} by hand`),
     h('div', { class: 'muted' }, `The Process ${a.process} waits until you press Done.`),
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), can('operator')
@@ -2101,6 +2107,11 @@ function skyDevPreset(name) {
   const t = TPL?.device?.find(x => x.name === name);
   return t ? applyDeviceTemplate({ type: t.type || 'digitalOut', ...clone(t.props || {}), template: t.name, templateCls: 'skynet' }, t) : null;
 }
+// The Close all / Open all valve lists (Rule 6.15): close_all_valves and open_all_valves in a Process, and the Brew Process's
+// PreBrew. On both by default; a tap water valve is always on Close all and never on Open all; a Manual valve is on neither.
+const VALVE_LIST_FIELDS = it => it.valveType === 'manual' ? [['_vl', 'A Manual valve is not on the Close all or Open all valves lists: a Process asks for it by name.', 'note']]
+  : it.tapwater ? [['_vl', 'Close all valves list: always on. Open all valves list: never. (A tap water valve, Rule 6.15: these can\'t be changed.)', 'note']]
+    : [['closeAll', 'On the Close all valves list (close_all_valves in a Process, PreBrew house cleaning)', 'bool', true], ['openAll', 'On the Open all valves list (open_all_valves, e.g. after cleaning)', 'bool', true]];
 // where the Tap water source can be: Top / Bottom on a vertical valve, Left / Right on a horizontal or 45 degree one
 const tapKey = e => `${e.orientation}|${!!e.flipH}|${!!e.flipV}`;
 function tapChoices(e) {
@@ -2128,6 +2139,7 @@ function skyDevFields(it, f) {
     if (k === '_tb' || (k.startsWith('_') && !['_ovn', '_hint'].includes(k)) || ok.has(k)) out.push(x);
   }
   if (ok.has('tapwater') && !f.some(x => x[0] === 'tapwater')) out.push(...own.tapwater);
+  if (it.subtype === 'valve') out.push(...VALVE_LIST_FIELDS(it));      // every valve, Skynet Template or not (Rule 6.15)
   if (ok.has('showOnOffText') && !f.some(x => x[0] === 'onText')) out.push(...own.onText);
   return out;
 }
@@ -3019,7 +3031,7 @@ const F = {
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
-    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool'], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT]] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+    ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT], ...VALVE_LIST_FIELDS(it)] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   switch: [['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
@@ -5684,6 +5696,7 @@ const MENU = [
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
   { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
+  { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Ferment), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
   { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
   { key: 'buildtemplate', title: 'Build Template', tip: 'Make and change Device Templates: every attribute, and a "user can set" box on each (Admins)', render: renderBuildTemplateTab, admin: true },
@@ -6124,6 +6137,97 @@ function renderSkynetPicsTab(box) {
   check.click();
 }
 
+// ---- Brew Process (Fritz, 2026-10-30, lib/brewprocess.js): a Process Template for each major step, the Device for each job,
+// then Build the Brew Day makes the Flow Processes Brew_1_PreBrew ... Brew_7_Ferment, each starting the next. No coding.
+let BP = null, bpWork = null;
+async function loadBrewProcess() { BP = await api('GET', '/ui/brewprocess'); bpWork = clone(BP.setup); }
+function renderBrewProcessTab(box) {
+  if (!BP) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadBrewProcess().then(() => menuTab === 'brewprocess' && renderMenuPane()).catch(e => toast(e.message, true)); return; }
+  const admin = can('admin'), dis = admin ? {} : { disabled: true };
+  const tplOf = (step, name) => BP.templates.find(t => t.step === step && t.name === name);
+  box.append(h('h3', {}, 'Brew Process'),
+    h('p', { class: 'muted' }, 'A brew day in seven major steps. Each step uses a Process Template: a Skynet one (comes with Skynet, never changed) or a User one (your own copy). ' +
+      'Pick the Devices that do each job below; Skynet asks you to do a job by hand when none is picked. Then Build the Brew Day, and Start it.'));
+  const steps = h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, '#'), h('th', {}, 'Major step'), h('th', {}, 'Process Template'), h('th', {}, ''))));
+  const tb = h('tbody'); steps.append(tb);
+  BP.steps.forEach((st, i) => {
+    const cur = bpWork.templates[st.key], list = BP.templates.filter(t => t.step === st.key);
+    const sel = h('select', dis,
+      h('optgroup', { label: 'Skynet Process Templates' }, ...list.filter(t => t.cls === 'skynet').map(t => h('option', { value: t.name, ...(t.name === cur ? { selected: true } : {}) }, t.name))),
+      h('optgroup', { label: 'User Process Templates' }, ...list.filter(t => t.cls === 'user').map(t => h('option', { value: t.name, ...(t.name === cur ? { selected: true } : {}) }, t.name))),
+      h('option', { value: '__add__' }, '➕ Add new User Process Template…'));
+    sel.onchange = () => {
+      if (sel.value === '__add__') { sel.value = cur; return editProcessTemplate(st, cur, true); }
+      bpWork.templates[st.key] = sel.value; renderMenuPane();
+    };
+    const t = tplOf(st.key, cur);
+    tb.append(h('tr', {}, h('td', {}, String(i + 1)), h('td', { title: st.about }, h('b', {}, st.title), h('div', { class: 'muted' }, t?.about || st.about)),
+      h('td', {}, sel), h('td', {}, h('button', { onclick: () => editProcessTemplate(st, cur, false) }, t?.cls === 'user' && admin ? '✏ Edit' : '👁 View'))));
+  });
+  box.append(steps);
+  // the jobs the picked Templates use
+  const used = [...new Set(BP.steps.flatMap(st => tplOf(st.key, bpWork.templates[st.key])?.fields || []))];
+  const els = S.config.elements || [];
+  const fits = f => els.filter(e => BP.fields[f].types.includes(e.type) && (!BP.fields[f].subtype || e.subtype === BP.fields[f].subtype));
+  const ft = h('tbody');
+  for (const f of Object.keys(BP.fields).filter(k => used.includes(k))) {
+    const sel = h('select', dis, h('option', { value: '' }, '(none: Skynet asks you to do it by hand)'),
+      ...fits(f).map(e => h('option', { value: e.name, ...(e.name === bpWork.fields[f] ? { selected: true } : {}) }, (e.label && e.label !== e.name ? `${e.label}  (${e.name})` : e.name))));
+    if (bpWork.fields[f] && !fits(f).some(e => e.name === bpWork.fields[f])) sel.append(h('option', { value: bpWork.fields[f], selected: true }, `${bpWork.fields[f]} (not in this Schema)`));
+    sel.onchange = () => { bpWork.fields[f] = sel.value; };
+    ft.append(h('tr', {}, h('td', {}, BP.fields[f].title), h('td', {}, sel)));
+  }
+  box.append(h('h3', {}, 'Which Device does each job'), h('table', { class: 'grid' }, ft));
+  // Recipe values the Templates read (rcp_ names, read only)
+  const rv = BP.recipe;
+  box.append(h('h3', {}, 'Recipe values'),
+    h('p', { class: 'muted' }, rv.rcp_Loaded ? `From the loaded Recipe ${rv.rcp_Name}.` : 'No Recipe is loaded, so these come from the ☰ Menu > Default tab (its Mash Profile and Boil Profile). PreBrew asks for a Recipe first.'),
+    h('table', { class: 'grid' }, h('tbody', {}, ...Object.keys(BP.recipeFields).filter(k => !/Units$/.test(k)).map(k => h('tr', {}, h('td', {}, h('code', {}, k)), h('td', {}, String(rv[k])), h('td', { class: 'muted' }, BP.recipeFields[k]))),
+      ...Array.from({ length: rv.rcp_Mash_Steps }, (_, i) => h('tr', {}, h('td', {}, h('code', {}, `rcp_Mash_Step_${i + 1}_…`)), h('td', {}, `${rv[`rcp_Mash_Step_${i + 1}_Name`]}: ${rv[`rcp_Mash_Step_${i + 1}_Temp`]} for ${rv[`rcp_Mash_Step_${i + 1}_Time`]}`), h('td', { class: 'muted' }, 'Name, Temp and Time'))))));
+  const save = async () => { BP.setup = await api('PUT', '/ui/brewprocess', bpWork); bpWork = clone(BP.setup); };
+  const built = BP.processes.length === BP.steps.length;
+  box.append(saveBar(
+    admin ? h('button', { onclick: guard(async () => { await save(); toast('Brew Process saved'); }) }, '💾 Save') : '',
+    admin ? h('button', { class: 'primary', onclick: guard(async () => {
+      if (built && !confirm('Build the Brew Day again? Brew_1_PreBrew ... Brew_7_Ferment are made new from the Templates (the ones they replace are kept as .bak).')) return;
+      await save(); const r = await api('POST', '/ui/brewprocess/build'); await loadBrewProcess(); renderMenuPane(); toast('Built: ' + r.built.join(', '));
+    }) }, '🔨 Build the Brew Day') : '',
+    h('span', { class: 'spacer' }),
+    can('operator') ? h('button', { ...(built ? {} : { disabled: true, title: 'Build the Brew Day first' }), onclick: guard(async () => {
+      if (!confirm('Start the Brew Day now (Brew_1_PreBrew)?')) return;
+      await api('POST', '/ui/brewprocess/start'); toast('Brew Day started');
+    }) }, '▶ Start Brew Day') : ''));
+}
+// view a Process Template, or make / change a User one (Skynet ones are never changed: Rule 5.16)
+async function editProcessTemplate(st, name, copy) {
+  const t = await api('GET', `/ui/brewprocess/template/${st.key}/${name}`);
+  const mine = t.cls === 'user' && !copy, ro = !can('admin') || (!copy && t.cls === 'skynet');
+  const d = h('dialog', { class: 'dlg', 'data-nomenu': true });
+  const nm = h('input', { type: 'text', value: copy ? (t.name.replace(/^Skynet_/, 'My_')) : t.name, ...(copy ? {} : { readonly: true }) });
+  const ta = h('textarea', { rows: 24, cols: 90, spellcheck: 'false', style: 'font-family: monospace; width: 100%', ...(ro ? { readonly: true } : {}) }, t.text);
+  const close = () => { d.close(); d.remove(); };
+  const saveT = guard(async () => {
+    const n = noSpaces(nm.value);
+    await api('PUT', `/ui/brewprocess/template/${st.key}/${encodeURIComponent(n)}`, { text: ta.value });
+    if (copy) bpWork.templates[st.key] = n;
+    await api('PUT', '/ui/brewprocess', bpWork);
+    close(); await loadBrewProcess(); renderMenuPane(); toast('User Process Template saved');
+  });
+  const del = guard(async () => {
+    if (!confirm(`Delete the User Process Template ${t.name}?`)) return;
+    await api('DELETE', `/ui/brewprocess/template/${st.key}/${t.name}`);
+    if (bpWork.templates[st.key] === t.name) { bpWork.templates[st.key] = 'Skynet_' + st.key; await api('PUT', '/ui/brewprocess', bpWork); }
+    close(); await loadBrewProcess(); renderMenuPane();
+  });
+  const bar = () => h('div', { class: 'bar' }, mine && !ro ? h('button', { onclick: del }, '🗑 Delete') : '', h('span', { class: 'spacer' }),
+    h('button', { onclick: close }, ro ? '✖ Close' : '✖ Cancel'), ro ? '' : h('button', { class: 'primary', onclick: saveT }, '💾 Save'));
+  d.append(bar(), h('h3', {}, `${st.title}: ${copy ? 'new User Process Template' : (t.cls === 'skynet' ? 'Skynet' : 'User') + ' Process Template'}`),
+    h('label', {}, 'Name ', nm),
+    h('p', { class: 'muted' }, ro && t.cls === 'skynet' ? 'A Skynet Process Template is never changed. To change it, pick ➕ Add new User Process Template… and change your copy.' :
+      'A Process with build lines: {{HLT_Heater}} is the Device picked for that job; @if HLT_Heater … @else … @end uses lines only when one is picked (or not); @each_mash_step … @end repeats lines for each mash step ({{n}} = 1, 2, 3 …). rcp_ names are the Recipe\'s values. See Help: Brew Process.'),
+    ta, bar());
+  document.body.append(d); d.showModal();
+}
 function renderAboutTab(box) {
   const act = S.schemas?.active || S.config.schema || {}, row = S.schemas?.list.find(x => x.id === act.id);
   const item = (k, v) => [h('dt', {}, k), h('dd', {}, v)];
