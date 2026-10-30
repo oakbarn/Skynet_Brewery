@@ -170,12 +170,17 @@ function setView(v, here = false) {
 // ---------------------------------------------------------------- workspaces
 let previewing = false;
 const L = () => editing || previewing ? draft : S.config;          // layout being shown (a Build Tab Preview shows the draft too)
-const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspaces[0];
+// Hidden_ Special Tabs (Fritz, 2026-10-30): a Tab named Hidden_... holds things a Process uses but nobody needs on Brew Day
+// (a gV_ variable, a Widget only a Process sets). It shows only in Edit layout; the rest of the time it works in the background.
+const HIDDEN_TAB = 'Hidden_';
+const isHiddenTab = w => !!w && !w.build && String(w.name).startsWith(HIDDEN_TAB);
+const shownTabs = () => L().workspaces.filter(w => editing || !isHiddenTab(w));
+const curWs = () => shownTabs().find(w => w.name === wsName) || shownTabs()[0] || L().workspaces[0];
 
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
-  for (const w of L().workspaces) t.append(h('button', { class: (w.name === wsName && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : ''), onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : w.name));
+  for (const w of shownTabs()) t.append(h('button', { class: (w === curWs() && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : '') + (isHiddenTab(w) ? ' hiddenTab' : ''), onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
+    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `${isHiddenTab(w) ? 'Hidden Special Tab: shows only in Edit layout. ' : ''}Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : isHiddenTab(w) ? '👻 ' + w.name : w.name));
   $('#saveBuild').classList.toggle('hidden', !buildWs());
   $('#previewBuild').classList.toggle('hidden', !buildWs());
 }
@@ -1566,6 +1571,7 @@ function setEditing(on) {
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
+  if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
@@ -2735,6 +2741,14 @@ $('#addWs').onclick = () => {
   toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
 };
 $('#wsProps').onclick = () => editWorkspace();
+// 👻 Hidden tab: a new Hidden_ Special Tab, named Hidden_1, Hidden_2 ... (rename the part after Hidden_ in Tab settings)
+$('#addHiddenWs').onclick = () => {
+  if (!editing) return;
+  let i = 1; while (draft.workspaces.some(w => w.name === HIDDEN_TAB + i)) i++;
+  const n = HIDDEN_TAB + i, id = defaultTabId(n, draft.workspaces.map(w => w.id));
+  draft.workspaces.push({ name: n, id, width: 1600, height: 900 }); wsName = n; renderTabs(); renderWs();
+  toast(`Hidden Tab ${n} added. It shows only in Edit layout; the things on it still work in the background.`);
+};
 
 // ---- Build Tab (Fritz, 2026-10-22): something new is made first on a clean Tab, not on a busy one. The Build Tab is only in
 // the Edit layout draft (never saved) and shows only while you build. Every new Device, Widget, IP, picture, text, piece of
@@ -4134,6 +4148,8 @@ async function editWorkspace() {
       readFields(work);
       const others = draft.workspaces.filter(x => x !== w);
       if (!work.name?.trim()) throw new Error('The tab needs a name');
+      if (isHiddenTab(w) && !String(work.name).startsWith(HIDDEN_TAB)) work.name = HIDDEN_TAB + String(work.name).trim().replace(/^hidden_?/i, '');   // a Hidden_ Tab's name always starts with Hidden_
+      if (work.name === HIDDEN_TAB) throw new Error('Type a name after Hidden_');
       if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
       work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
       if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
@@ -5820,7 +5836,7 @@ const PAGE_PARTS = {
 };
 const roleOk = el => !(el.closest('.admin-only') && !can('admin')) && !(el.closest('.op-only') && !can('operator'));
 function pageParts(v) {
-  if (v === 'workspace') return L().workspaces.filter(w => !w.build || editing).map(w => ({ label: w.name, cur: view === 'workspace' && !menuTab && w.name === wsName,
+  if (v === 'workspace') return shownTabs().filter(w => !w.build || editing).map(w => ({ label: w.name, cur: view === 'workspace' && !menuTab && w.name === wsName,
     go: () => { if (menuTab) leaveMenuTab(); wsName = w.name; sel = null; setView('workspace'); renderTabs(); renderWs(); } }));
   return (PAGE_PARTS[v] || []).flatMap(([label, q]) => {
     const el = $(q);
