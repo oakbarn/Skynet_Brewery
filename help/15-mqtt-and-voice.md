@@ -13,7 +13,7 @@
 
 | Always allowed | Allowed by default | Off until you tick it |
 |---|---|---|
-| Reading values, silencing alarms, stopping Processes | Changing gAPI variables that are not read-only (same as the web API) | Switching outputs (heat, burners, pumps, valves), controlling timers, starting Processes |
+| Reading values, silencing alarms, stopping Processes | Changing gGlobals whose .API is Get and Put and that are not read-only (same as the web API) | Switching outputs (heat, burners, pumps, valves), controlling timers, starting Processes |
 
 Hardware inputs and temperatures are read only, and Shared variables are never shared. The table on the settings page has **Voice can hear it** and **Can change it** for each item, and a list of Processes that voice and MQTT may start.
 
