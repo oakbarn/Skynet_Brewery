@@ -7,6 +7,8 @@
 //   so a folder or a Process name has no period at all.
 // Older names with < > : " / \ | ? * in them are changed once to a ~ for each (lib/namechars.js, Skynet Rule 15.2).
 
+import { isSkynetConstantName } from './skconst.js';
+
 export const FILE_CHARS = '< > : " / \\ | ? *';
 export const BAD_NAME_CHARS = /[<>:"/\\|?*]/;
 const CONTROL = /\p{Cc}/u;
@@ -38,6 +40,7 @@ export function elementNameError(name, what = 'Device or Widget') {
   const n = String(name ?? '');
   const e = common(n, what); if (e) return e;
   if (RESERVED.test(n)) return reservedMsg(n, what);
+  if (isSkynetConstantName(n)) return `The ${what} name "${n}" can't start with skc_: those names are kept for Skynet Constants`;
   return '';
 }
 
