@@ -1,0 +1,13 @@
+//Skynet_Ferment
+//About: Pitch the yeast and hold the fermentation temperature.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Pitch the yeast"
+ask "Pitch the yeast " + rcp_Yeast_Name + " at " + rcp_Ferment_Temp + rcp_Temp_Units + ". Press Done when it is in."
+step "Hold the fermentation temperature"
+@if Ferment_Heater
+{{Ferment_Heater}}.target = rcp_Ferment_Temp
+{{Ferment_Heater}}.enabled = true
+@end
+unlock_Equipment
+print "Brew day done: " + rcp_Name + " is fermenting"
