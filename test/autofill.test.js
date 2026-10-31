@@ -8,8 +8,8 @@ const words = {
     { name: 'MB_06_Pump_Wort__HS', type: 'digitalOut', main: 'state', attrs: ['enabled', 'visible'], bools: ['', 'visible', 'enabled'] },
     { name: 'tm_Mash', type: 'timer', main: 'value', attrs: ['countdown', 'running', 'type'], bools: ['running', 'countdown'] },
     { name: 'alm_Hops', type: 'alarm', main: 'active', attrs: [], bools: [''] },
-    { name: 'gKV_Strike', type: 'gKonstant', main: 'value', attrs: [], bools: [] },
-    { name: 'gAV_HLT', type: 'gAPI', main: 'value', attrs: [], bools: [] },
+    { name: 'gGV_Strike', type: 'gGlobal', main: 'value', attrs: [], bools: [] },
+    { name: 'gGV_HLT', type: 'gGlobal', main: 'value', attrs: [], bools: [] },
     { name: 'Stir', type: 'stepper', main: 'value', attrs: [], bools: [] },
   ],
   processes: ['sub_Fill', 'scr_Mash'],
@@ -45,11 +45,11 @@ assert.deepEqual(texts('goto ', 'goto ', '[Mash]\nx = 1\n  [Boil]\ngoto '), ['Ma
 assert.deepEqual(texts('MB_06_Pump_Wort__HS = '), ['true', 'false', 'on', 'off']);
 assert.deepEqual(texts('if tm_Mash.countdown == f'), ['false'], 'a value ends the line: no space after it');
 assert.deepEqual(texts('if MB_06_Pump_Wort__HS.state == '), ['true', 'false', 'on', 'off'], '.state is the same as the name alone');
-assert.equal(texts('gKV_Strike = '), null, 'a number gets no list before a letter is typed');
+assert.equal(texts('gGV_Strike = '), null, 'a number gets no list before a letter is typed');
 
 // Ctrl+Space: after if only what can stand in a condition, in Fritz's order (no commands, no and / or yet)
 const afterIf = get('if ', 'new value count\nif ', 'new value count\nif ', true).list;
-assert.deepEqual(afterIf.map(i => i.text.trim()), ['count', 'tm_Mash', 'gAV_HLT', 'gKV_Strike', 'MB_06_Pump_Wort__HS', 'Stir', 'alm_Hops', 'sub_Fill', 'scr_Mash', 'true', 'false', 'now', 'not']);
+assert.deepEqual(afterIf.map(i => i.text.trim()), ['count', 'tm_Mash', 'gGV_HLT', 'gGV_Strike', 'MB_06_Pump_Wort__HS', 'Stir', 'alm_Hops', 'sub_Fill', 'scr_Mash', 'true', 'false', 'now', 'not']);
 assert.match(afterIf[0].hint, /variable/); assert.match(afterIf[4].hint, /Device/); assert.match(afterIf[6].hint, /Widget/);
 assert.equal(texts('if '), null, 'without Ctrl+Space nothing pops up before a letter');
 assert.equal(ctrl('')[0], 'if ', 'Ctrl+Space on an empty line: the commands');
@@ -83,7 +83,7 @@ assert.ok(ctrl('x = ').includes('tm_Mash'), 'a value after = ends the line');
 // the true/false list comes from the Store
 assert.deepEqual(boolAttrs({ name: 'P', type: 'digitalOut' }).slice(0, 1), ['']);
 assert.ok(!boolAttrs({ name: 'T', type: 'temperature' }).includes(''), 'a temperature is not on/off');
-assert.ok(boolAttrs({ name: 'B', type: 'gKonstant', kind: 'bool' }).includes(''));
+assert.ok(boolAttrs({ name: 'B', type: 'gGlobal', kind: 'bool' }).includes(''));
 assert.ok(boolAttrs({ name: 'T', type: 'timer' }).includes('countdown'));
 console.log('autofill ok');
 
@@ -113,12 +113,12 @@ console.log('name narrowing ok');
 
 // if name.attribute = value, the way lib/engine.js reads it (Fritz, 2026-10-28)
 import { compile } from '../lib/engine.js';
-const tulip = { elements: [{ name: 'gK_Tulip', type: 'picture', main: null, attrs: ['visible', 'xposition'], bools: ['visible'] }], processes: [] };
+const tulip = { elements: [{ name: 'gG_Tulip', type: 'picture', main: null, attrs: ['visible', 'xposition'], bools: ['visible'] }], processes: [] };
 const t = (l, f = true) => suggest(l, tulip, l, l, f)?.list.map(i => i.text.trim());
-assert.deepEqual(t('if gK_Tulip.visible ').slice(0, 2), ['=', '=='], 'after name.attribute: the compare signs');
-assert.deepEqual(t('if gK_Tulip.visible = ', false), ['true', 'false', 'on', 'off'], 'a true/false attribute: true and false');
-assert.ok(!(t('if gK_Tulip.xposition = ', false)), 'a number: nothing to guess until a letter or Ctrl+Space');
-assert.deepEqual(compile('if gK_Tulip.visible = true\nendif').errors, [], 'the engine takes a single = in an if');
+assert.deepEqual(t('if gG_Tulip.visible ').slice(0, 2), ['=', '=='], 'after name.attribute: the compare signs');
+assert.deepEqual(t('if gG_Tulip.visible = ', false), ['true', 'false', 'on', 'off'], 'a true/false attribute: true and false');
+assert.ok(!(t('if gG_Tulip.xposition = ', false)), 'a number: nothing to guess until a letter or Ctrl+Space');
+assert.deepEqual(compile('if gG_Tulip.visible = true\nendif').errors, [], 'the engine takes a single = in an if');
 console.log('name.attribute ok');
 
 // .x and .y (Fritz, 2026-10-28): x_hPosition, y_vPosition

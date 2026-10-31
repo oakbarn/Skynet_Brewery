@@ -25,8 +25,7 @@ export function elementTopic(e) {
     case 'alarm': return ['alarms-and-sound'];
     case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
     case 'timer': return ['timer-widget'];      // Timer Widget Properties (Fritz, 2026-10-29)
-    case 'gKonstant': return e.kind === 'list' ? ['variables', 'gkonstant-list-a-dropdown-on-a-tab'] : ['variables', 'gkonstant-kinds'];
-    case 'gAPI': return ['variables', 'gapi-kinds'];
+    case 'gGlobal': return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
     case 'picture': return ['picture-widget', 'turns-on-with'];
     case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];
@@ -91,12 +90,12 @@ export function barTopic(target) {
 }
 
 export const TAB_SPOT = ['tab-background'];      // an empty spot on a tab, and Tab settings: its background color and picture
-export const DB_TRIGGER = ['variables', 'database-trigger'];
+export const DB_TRIGGER = ['database-and-api', 'database'];
 export const RIGHT_CLICK_PAGE = ['right-click-help'];
 export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,
-  ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gAPI', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
+  ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gGlobal', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
-  elementTopic({ type: 'gKonstant', kind: 'list' }), elementTopic({ type: 'gKonstant' }),
+  elementTopic({ type: 'gGlobal', kind: 'list' }),
   ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'bfit', templateCls: 'skynet', fittings: [{ kind: 'tee' }] }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
   ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],

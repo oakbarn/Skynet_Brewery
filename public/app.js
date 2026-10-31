@@ -1,6 +1,6 @@
 import { addEyes } from './eye.js';
 import { watchButtons } from './buttons.js';
-import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT, DB_TRIGGER } from './helpmap.js';
+import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
@@ -601,11 +601,10 @@ const pressOverride = guard(async () => {
   toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : 'Override: no Process is running');
 });
 
-// variable classes: shared, gKonstant, gAPI (were vKonstant / vAPI until 2026-10-28; the old Global class is retired: lib/globals.js)
-const isVarEl = e => ['shared', 'gKonstant', 'gAPI'].includes(e?.type);
-const isApiEl = e => e?.type === 'gAPI';
-const vkKind = e => e?.type === 'gKonstant' ? (e.kind || 'value') : null;
-const kindsOf = type => type === 'gKonstant' ? S.vkKinds : type === 'gAPI' ? S.vapiKinds : null;
+// variable classes: shared and gGlobal (gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
+const isVarEl = e => ['shared', 'gGlobal'].includes(e?.type);
+const vkKind = e => e?.type === 'gGlobal' ? (e.kind || 'value') : null;
+const kindsOf = type => type === 'gGlobal' ? S.gKinds : null;
 const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
 
 // IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
@@ -707,8 +706,8 @@ function elGeom(e) {
   return { x: cx - w * k / 2, y: cy - hh * k / 2, w: w * k, h: hh * k };
 }
 // A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
-// it can also be a gKonstant value holding the percent. It passes flow whenever it is above 0 % open.
-const PROP_TYPES = ['analogOut', 'pwmOut', 'gKonstant', 'gAPI', 'shared'];
+// it can also be a gGlobal value holding the percent. It passes flow whenever it is above 0 % open.
+const PROP_TYPES = ['analogOut', 'pwmOut', 'gGlobal', 'shared'];
 // Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
 const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
 const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
@@ -812,7 +811,7 @@ function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : '') + (e.cloneId ? ' clone' : ''), 'data-name': e.name, ...(e.cloneId ? { 'data-clone': e.cloneOf, 'data-gid': e.cloneId, title: `Clone of ${e.cloneOf}` } : {}) }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
   if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
-  if (vkKind(e) === 'list') {        // gKonstant List: pick the Text, the element gets that choice's Value
+  if (vkKind(e) === 'list') {        // gGlobal List: pick the Text, the element gets that choice's Value
     const s = h('select', { class: 'vksel', ...(editing || e.readOnly ? { disabled: true } : {}) }, ...(e.items || []).map(i => h('option', { value: String(i.value) }, i.text || String(i.value))));
     s.addEventListener('click', ev => ev.stopPropagation());
     s.onchange = () => { const it = (e.items || []).find(i => String(i.value) === s.value); if (it) setProp(e.name, 'value', it.value); };
@@ -936,10 +935,10 @@ function fillEl(n, e0) {
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
   switch (e.type) {
-    case 'shared': case 'gAPI':
-      if (e.dataType === 'bool' || e.kind === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
+    case 'shared':
+      if (e.dataType === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
       text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
-    case 'gKonstant':
+    case 'gGlobal':
       switch (vkKind(e)) {
         case 'graphic': img = v.value || img; text = ''; break;            // the value IS the picture path
         case 'list': {
@@ -1096,8 +1095,8 @@ function tapAction(e) {
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'soundPlayer': return 'toggle';
-    case 'shared': case 'gAPI': return e.readOnly ? 'none' : 'dialog';
-    case 'gKonstant':
+    case 'shared': return e.readOnly ? 'none' : 'dialog';
+    case 'gGlobal':
       if (e.readOnly) return 'none';
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
@@ -1134,7 +1133,7 @@ async function doTap(e) {
   return valueDialog(t);
 }
 
-// Push Button (gKonstant): ON while pressed, OFF when released. "down" repeats every 0.5 s so the server
+// Push Button (gGlobal): ON while pressed, OFF when released. "down" repeats every 0.5 s so the server
 // lets go by itself if this screen disappears while the button is held.
 let held = null;
 function release() {
@@ -2000,11 +1999,11 @@ $('#editMode').addEventListener('change', e => {
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
   pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
-  // analogOut when that output type is installed (its fields exist), otherwise a gKonstant value holding 0-100 %
+  // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
     const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg' };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
-      : { type: 'gKonstant', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
+      : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
@@ -2204,7 +2203,7 @@ const WGT_TYPES = () => [
   ['vessels', 'Vessels', VESSEL_ROWS],
   ['equipment', 'Equipment (chillers, coils, filters)', EQUIP_ROWS()],
   ['fittings', 'Fittings and IPs (elbows, tees ...)', FIT_ROWS()],
-  ...['gKonstant', 'gAPI'].map(t => [t, `${t} variables`, amGroup(t).map(r => [r[0], () => addThing(r[1], r[2], r[3])])]),
+  ['gGlobal', 'gGlobal variables', amGroup('gGlobal').map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
 ];
 const VESSEL_ROWS = [['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
@@ -2224,7 +2223,7 @@ function pickRun(sel) {
 function fillAddType() {
   if (!TPL && !fillAddType.asked) { fillAddType.asked = true; loadTemplates().then(fillAddType).catch(() => { }); }     // the Skynet Device Templates go in the Valves lists
   const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
-  if (!ADD_MENU.some(([g]) => g.startsWith('gKonstant'))) ADD_MENU.push(vars('gKonstant', S.vkKinds), vars('gAPI', S.vapiKinds));
+  if (!ADD_MENU.some(([g]) => g.startsWith('gGlobal'))) ADD_MENU.push(vars('gGlobal', S.gKinds));
   const dev = DEV_TYPES(), wgt = WGT_TYPES();
   const types = (sel, head, list) => { const v = sel.value; sel.replaceChildren(h('option', { value: '' }, head), ...list.map(([k, t]) => h('option', { value: k }, t))); sel.value = v; };
   types($('#devKind'), 'Select Device Type', dev); types($('#wgtKind'), 'Select Widget Type', wgt);
@@ -2539,8 +2538,8 @@ async function useValveProfile(e) {
 }
 // Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Background Profile (only when it is made).
 // Something with an ON / OFF state can be an LED or Text; something with a value also a Gauge; with neither, only the colors.
-const hasStateEl = e => isBoolEl(e) || (['gKonstant'].includes(e.type) && ['switch', 'pushbutton', 'momentary', 'bool'].includes(e.kind));
-const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual'].includes(e.type) && !(e.type === 'gKonstant' && ['graphic', 'list', 'longstring'].includes(e.kind));
+const hasStateEl = e => isBoolEl(e) || (['gGlobal'].includes(e.type) && ['switch', 'pushbutton', 'momentary', 'bool'].includes(e.kind));
+const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual'].includes(e.type) && !(e.type === 'gGlobal' && ['graphic', 'list', 'longstring'].includes(e.kind));
 function useTabProfile(e) {
   const p = tabProfileOf(draft.workspaces.find(w => w.name === e.workspace)); if (!p) return;
   for (const k of ['nameColor', 'nameBg', 'nameAlign', 'valueColor', 'valueBg', 'valueAlign']) if (p[k]) e[k] = p[k];
@@ -3162,7 +3161,7 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
-F.gKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vkKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+F.gGlobal = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.gKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
   ['items', 'Choices: Value (what Processes see and trigger on) and Text (what the dropdown shows)', 'vkitems', null, ['list']],
   ['initial', 'Starting choice (its Value)', 'text', null, ['list']],
   ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
@@ -3173,10 +3172,6 @@ F.gKonstant = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel',
   ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
   ['stepClass', 'Shows the steps of', 'sel', [['flow', 'Flow Processes'], ['sub', 'Sub Processes'], ['repeat', 'Repeat Processes'], ['looper', 'Looper Processes'], ['any', 'Any Process']], ['step']],
   ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', 'list', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', 'list', ...PLAINK]]];
-F.gAPI = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.vapiKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
-  ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num', null, NUMK], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num', null, NUMK],
-  ['min', 'Lowest allowed', 'num', null, NUMK], ['max', 'Highest allowed', 'num', null, NUMK], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true],
-  ['_logNote', 'Database trigger: set it on the Variables page', 'note']];
 const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f(obj) : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
@@ -3963,7 +3958,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { gKonstant: 'gKonstant', gAPI: 'gAPI', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const TYPE_TITLE = { gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -3976,16 +3971,17 @@ async function editItem(kind, id) {
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
-    if (it.type === 'timer' && !skyDev(it)) return F.timerWidget;       // Timer Widget Properties (Fritz, 2026-10-29)
+    if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
-    return skyDev(it) ? skyDevFields(it, f) : f;
+    return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
   } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
+  if (kind === 'el') dbToWork(work);
   const isV = !!eqClass(item), bf = isBfit(item);
   if (bf) { fitToFields(work); work.joined = !!item.onVessel; }
   if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
@@ -4025,6 +4021,7 @@ async function editItem(kind, id) {
       return;
     }
     readFields(work);
+    if (kind === 'el') dbFromWork(work);
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);
       if (item.onVessel && !work.joined && !isUnit(item)) { delete work.onVessel; delete work.onPort; }
@@ -4672,10 +4669,10 @@ try { $('#colorsOn').checked = localStorage.getItem(COLORS_KEY) !== 'off'; } cat
 function applyColors() { $('#code').closest('.codeWrap').classList.toggle('colored', colorsOn()); paintFind(); }
 $('#colorsOn').onchange = () => { try { localStorage.setItem(COLORS_KEY, colorsOn() ? 'on' : 'off'); } catch { } applyColors(); };
 applyColors();
-const KEY_SAMPLES = { cmd: 'if  wait  start  true', dev: 'Pump_Red  HLT_Temp', wid: 'tm_Mash  alm_Hops', vk: 'gKV_Strike', vapi: 'gAV_Mash_Temp', var: 'new value x', proc: 'start sub_Fill',
+const KEY_SAMPLES = { cmd: 'if  wait  start  true', dev: 'Pump_Red  HLT_Temp', wid: 'tm_Mash  alm_Hops', vk: 'gGV_Strike  gGS_Note', var: 'new value x', proc: 'start sub_Fill',
   op: '=  +  -  <  and', str: '"Mash in"', num: '185.5  00:10:00', com: '// note  # note  /* note */', lab: '[Mash]  goto Mash', attr: 'tm_Mash.visible' };
 const KEY_WORDS = { elements: [{ name: 'Pump_Red', type: 'digitalOut' }, { name: 'HLT_Temp', type: 'temperature' }, { name: 'tm_Mash', type: 'timer' }, { name: 'alm_Hops', type: 'alarm' },
-  { name: 'gKV_Strike', type: 'gKonstant' }, { name: 'gAV_Mash_Temp', type: 'gAPI' }], processes: ['sub_Fill'] };
+  { name: 'gGV_Strike', type: 'gGlobal' }, { name: 'gGS_Note', type: 'gGlobal' }], processes: ['sub_Fill'] };
 $('#colorKey').onclick = () => {
   const box = $('#keyList'); box.innerHTML = '';
   for (const [c, label] of LEGEND) {
@@ -4852,42 +4849,90 @@ function renderConsole() {
 $('#consoleAll').onchange = renderConsole;
 $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 
-// ---------------------------------------------------------------- variables page: gAPI, gKonstant, shared
-const LOG_LABEL = { none: 'Off', ondemand: 'Manual (log line / Log now)', script: 'On demand only (when a process starts)', once: 'Once',
-  ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours', days: 'Every N days', hms: 'Every 00:00:00' };
+// ---------------------------------------------------------------- variables page: gGlobal, shared
+// .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
+const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', process: 'When a Process starts',
+  once: 'Once', datetime: 'At a date and time (once)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
+  days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
+// .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
+const API_LABEL = { off: 'Off', get: 'Get only (outside programs read it)', getput: 'Get and Put (outside programs read and change it)' };
 function logSummary(lg) {
-  lg = lg || { mode: 'none' };
-  if (lg.mode === 'script') return lg.script ? `When "${lg.script}" starts` : 'On demand only (no process picked)';
-  if (!TIME_MODES.includes(lg.mode)) return LOG_LABEL[lg.mode] || lg.mode;
-  const every = lg.mode === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[lg.mode]}`;
+  lg = lg || { frequency: 'none' };
+  const f = lg.frequency || 'none';
+  if (f === 'process') return lg.process ? `When "${lg.process}" starts` : 'When a Process starts (none picked)';
+  if (f === 'datetime') return `At ${lg.at || '?'}`;
+  if (!TIME_MODES.includes(f)) return LOG_LABEL[f] || f;
+  const every = f === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[f]}`;
   return every + (lg.at ? ` at ${lg.at}` : '');
 }
-function varRow(e, withLog) {
+// The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
+// dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
+const hasDbValue = e => !['picture', 'label', 'manual'].includes(e?.type);
+function dbFields(it) {
+  if (!hasDbValue(it)) return [];
+  const f = it.db_frequency || 'none', attrs = (S.words?.elements || []).find(x => x.name === it.name)?.attrs || [];
+  return [['', 'Database and .API', 'box'],
+    ['db_frequency', 'Send to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m]), true],
+    ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])]]] : []),
+    ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N (a whole number, 1 or more)', 'num']] : []),
+    ...(f === 'hms' ? [['db_interval', 'Every (00:00:00)', 'text']] : []),
+    ...(TIME_MODES.includes(f) ? [['db_at', 'At clock time (optional), e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
+    ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
+    ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]]] : []),
+    ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
+    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now.', 'note'],
+    ['', '', 'boxend']];
+}
+function dbToWork(work) {
+  const d = work.database || {};
+  work.db_frequency = d.frequency || 'none';
+  for (const k of ['every', 'interval', 'at', 'process', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  work.api = work.api || 'off';
+  delete work.database;
+}
+// db_ fields -> work.database (checked); throws a message for a setting that can't work
+function dbFromWork(work) {
+  const f = work.db_frequency || 'none', d = { frequency: f };
+  for (const k of ['every', 'interval', 'at', 'process', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
+  delete work.db_frequency;
+  if (!work.api || work.api === 'off') delete work.api;
+  if (f === 'none' || !f) { delete work.database; return; }
+  if (f === 'process' && !d.process) throw new Error('Database: pick the Process that sends this value');
+  if (f === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(d.interval || '')) throw new Error('Database: the interval must look like 00:05:00');
+  if (TIME_MODES.includes(f) && f !== 'hms' && d.every !== undefined && !(Number.isInteger(d.every) && d.every >= 1)) throw new Error('Database: N must be a whole number, 1 or more');
+  if (TIME_MODES.includes(f) && d.at && !validClock(d.at)) throw new Error('Database: clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30');
+  if (f === 'datetime' && !/^\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}(:\d{2})?$/.test(d.at || '')) throw new Error('Database: the date and time must look like 2026-11-01T06:00');
+  for (const k of Object.keys(d)) {
+    const keep = { frequency: true, attribute: true, process: f === 'process', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: TIME_MODES.includes(f) || f === 'datetime' }[k];
+    if (!keep) delete d[k];
+  }
+  work.database = d;
+}
+function varRow(e) {
   const v = S.values[e.name] || {}, k = vkKind(e);
   let val;
   if (k === 'pushbutton' || k === 'momentary') val = h('span', { 'data-g': e.name, class: 'muted' }, v.value ? 'ON' : 'OFF');
   else if (k === 'longstring') val = h('span', {}, h('button', { onclick: () => valueDialog(e) }, 'Edit text…'), ' ', h('span', { class: 'muted' }, v.file || '(no file: kept in memory)'));
   else val = h('input', { class: 'val', 'data-g': e.name, value: fmtVal(e, v.value), onchange: ev => setProp(e.name, 'value', ev.target.value) });
-  const kindText = e.type === 'gKonstant' || e.type === 'gAPI' ? kindsOf(e.type)[e.kind || 'value']?.label : e.dataType;
+  const kindText = e.type === 'gGlobal' ? kindsOf(e.type)[e.kind || 'value']?.label : e.dataType;
   const cells = [h('td', {}, e.name), h('td', {}, kindText), h('td', {}, val)];
-  if (withLog) {
-    const lg = e.log || { mode: 'none' };
-    cells.push(h('td', {}, logSummary(lg), ' ', h('button', { onclick: () => editLog(e) }, 'Change…')),
-      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Logged'); }) }, 'Log now'),
-        lg.mode === 'once' ? h('button', { title: 'Write one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
+  if (e.type === 'gGlobal') {
+    const lg = e.database || { frequency: 'none' };
+    cells.push(h('td', {}, logSummary(lg)), h('td', {}, API_LABEL[e.api || 'off'].replace(/ \(.*\)$/, '')),
+      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now'),
+        lg.frequency === 'once' ? h('button', { title: 'Send one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
   }
-  return h('tr', { title: 'Double-click for its Properties', ondblclick: rowDbl(() => openProps('el', e.name)) }, ...cells);
+  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(() => openProps('el', e.name)) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
-  for (const [id, type, withLog] of [['#vapiBody', 'gAPI', true], ['#vkBody', 'gKonstant', false], ['#sharedBody', 'shared', false]]) {
+  for (const [id, type] of [['#gBody', 'gGlobal'], ['#sharedBody', 'shared']]) {
     const tb = $(id); tb.innerHTML = '';
-    tb.append(...of(type).map(e => varRow(e, withLog)));
+    tb.append(...of(type).map(e => varRow(e)));
     tb.closest('table').classList.toggle('empty', !of(type).length);
   }
-  // database triggers are part of the layout (admin); values and "Log now" need an operator
-  if (!can('admin')) $$('#view-globals select, #view-globals input[type=number]:not(.val)').forEach(i => i.disabled = true);
+  // values and "Log now" need an operator
   if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); $$('#view-globals button').forEach(b => b.disabled = true); }
 }
 function refreshGlobalValues(ch) {
@@ -4897,39 +4942,12 @@ function refreshGlobalValues(ch) {
     if (inp.tagName === 'INPUT') inp.value = fmtVal(e, S.values[n].value); else inp.textContent = S.values[n].value ? 'ON' : 'OFF';
   }
 }
-async function editLog(e) {
-  const work = clone(e.log || { mode: 'none' });
-  const r = await dialog(`Database trigger: ${e.name}`, [
-    ['mode', 'Write to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m])],
-    ['script', 'Process (for "On demand only")', 'sel', [['', '(pick a process)'], ...S.scripts.map(x => [x.name, x.name])]],
-    ['every', 'N (whole number, for "Every N …")', 'num'],
-    ['interval', 'Interval 00:00:00 (for "Every 00:00:00")', 'text'],
-    ['at', 'At clock time (optional, for the "Every" choices), e.g. 12 AM, 6:30 PM or 18:30', 'text'],
-    ['_n', '"Every 1 days at 12 AM" writes at midnight every day. "Every 6 hours at 1 AM" writes at 1 AM, 7 AM, 1 PM and 7 PM. Without a clock time it counts from when the server starts. Fastest is 100 ms.', 'note'],
-  ], work, false, DB_TRIGGER);
-  if (r !== 'ok') return;
-  try { readFields(work); } catch (x) { return toast(x.message, true); }
-  if (work.mode === 'script' && !work.script) return toast('Pick the process that writes this value', true);
-  if (work.mode === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(work.interval || '')) return toast('Interval must look like 00:05:00', true);
-  if (TIME_MODES.includes(work.mode) && work.every !== undefined && !(Number.isInteger(work.every) && work.every >= 1)) return toast('N must be a whole number, 1 or more', true);
-  if (work.at && !validClock(work.at)) return toast('Clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30', true);
-  for (const k of ['script', 'every', 'interval', 'at']) {
-    const keep = { script: work.mode === 'script', every: TIME_MODES.includes(work.mode) && work.mode !== 'hms', interval: work.mode === 'hms', at: TIME_MODES.includes(work.mode) }[k];
-    if (!keep) delete work[k];
-  }
-  saveLog(e.name, work);
-}
 // same rules as the server's parseClock
 function validClock(t) {
   const m = /^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*([ap])?\.?\s*m?\.?$/i.exec(String(t).trim()); if (!m) return false;
   const hh = +m[1]; if (m[4]) return hh >= 1 && hh <= 12 && +(m[2] ?? 0) < 60 && +(m[3] ?? 0) < 60;
   return m[2] !== undefined && hh < 24 && +m[2] < 60 && +(m[3] ?? 0) < 60;
 }
-const saveLog = guard(async (name, log) => {
-  const els = clone(S.config.elements); els.find(e => e.name === name).log = log;
-  await api('PUT', '/ui/layout', { elements: els });
-  S.config.elements = els; renderGlobals(); toast('Saved');
-});
 
 // ---------------------------------------------------------------- log
 async function loadLogNames() {
@@ -4950,7 +4968,7 @@ function renderCsvBox(names = csvNames) {
   const count = Object.fromEntries(names.map(n => [n.name, n.count]));
   $('#csvNames').innerHTML = '';
   $('#csvNames').append(...all.map(n => h('label', { class: 'toggle' }, h('input', { type: 'checkbox', value: n, ...((set ? set.names.includes(n) : ticked.has(n)) ? { checked: true } : {}) }), `${n} (${count[n] ?? 0})`)));
-  if (!all.length) $('#csvNames').append(h('span', { class: 'muted' }, 'Nothing has been written to the brew database yet. Give a gAPI variable a database trigger (Variables page).'));
+  if (!all.length) $('#csvNames').append(h('span', { class: 'muted' }, 'Nothing has been written to the brew database yet. Give any Device or Widget a database setting (its Properties, Database and .API box).'));
   $('#csvDelSet').disabled = !set;
 }
 const csvTicked = () => $$('#csvNames input:checked').map(c => c.value);
@@ -5417,7 +5435,7 @@ $('#donSave').onclick = guard(async () => {
 $('#donPreview').onclick = () => showDonate(true);
 
 // ---------------------------------------------------------------- MQTT and voice
-const TYPE_WORD = { gAPI: 'gAPI', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
+const TYPE_WORD = { gGlobal: 'gGlobal', global: 'Global', digitalOut: 'Output', switch: 'Switch', digitalIn: 'Input', temperature: 'Temperature', analogIn: 'Analog input', timer: 'Timer', alarm: 'Alarm', soundPlayer: 'Sound player' };
 function renderMqttStatus() {
   const st = S.mqtt?.status ?? { state: 'off', text: 'MQTT is off' };
   const box = $('#mqttStatus'); box.className = 'mqtt-status ' + st.state; box.textContent = st.text;
@@ -5861,7 +5879,7 @@ function showClosed(by) {
 // for that role, the same as on the page.
 const PAGE_PARTS = {
   scripts: [['Find in all Processes', '#findAllBtn'], ['Recycle Bin (deleted Processes)', '#binBtn'], ['Color key', '#colorKey']],
-  globals: [['gAPI', '#sec-vapi'], ['gKonstant', '#sec-vkonstant'], ['Shared variables', '#sec-shared']],
+  globals: [['gGlobal', '#sec-gglobal'], ['Shared variables', '#sec-shared']],
   log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],

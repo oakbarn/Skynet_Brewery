@@ -4,7 +4,7 @@ A reference list of every Device the panel can make today, with its settings. Pa
 
 - **Read from:** the panel code on the default branch, version PR107_Skynet-v.20261026_23_23 (2026-10-27). PR #108 (connection ratings) was still open; its rules are in section 2 and marked "PR #108".
 - **Rule:** whenever a new unique Device is added to Skynet, this document gets a new entry.
-- **What counts as a Device:** a Device sits on a port (pin) of an Interface (a PLC board). Widgets (pictures, timers, alarms, switches on screen, pipes, IPs, vessels without Devices, gKonstants, gAPIs) are app-only and are not in this library.
+- **What counts as a Device:** a Device sits on a port (pin) of an Interface (a PLC board). Widgets (pictures, timers, alarms, switches on screen, pipes, IPs, vessels without Devices, gGlobals) are app-only and are not in this library.
 
 ---
 
@@ -56,6 +56,8 @@ Example: `MB_25_E_L_Vlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID E_L_Vl
 
 ### Settings every Device has (Properties)
 Name, Label (`label`, was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1, 2, 3 or none), imagePath_1/2/3 (all editable, as in BruControl), Visible, Hidden (locked), Hide value, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and the text box settings (Fore/Back color, Alignment, Word wrap, Name font and size, Name/Value colors and backgrounds, Name/Value alignment, Border).
+
+Every Device also has a **Database and .API** box at the end: **Send to the database** (Off, On demand, On value change, When a Process starts, Once, At a date and time, Every N ms / seconds / minutes / hours / days, Every 00:00:00), **What to send** (main value or another attribute) and **.API** (Off, Get only, Get and Put). Readings from the board (probes, inputs) can be read from outside but never changed. (Skynet Rule 6.14, Help 98)
 
 Devices with on/off states also have **Picture when on / off**, an **On overlay** picture, and **Text when on / off**. New ones start with a green LED for on and a red LED for off (pumps and valves bring their own pictures).
 
@@ -400,3 +402,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-27: Cloned Devices updated: Clone button only, names <Parent_Name>_Clone_N, not used in Processes.
 - 2026-10-28: Raspberry Pi GPIO pins built (Board Raspberry Pi, Help 78, PR #119 merged); removed from Reserved.
 - 2026-10-28: Added 4.3a Skynet Motorized Ball Valve Device (Master H, Daughters VL and VR; fixed and user settable attributes; thread "Lock Skynet Widget Templates and IPs", Help 88).
+- 2026-10-30: Database and .API settings on every Device (Rule 6.14, Help 98). (thread "Send any Device or Widget to a database")

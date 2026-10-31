@@ -7,9 +7,9 @@ Skynet Constants are fixed numbers built into Skynet for the conversions brewers
 Use a Skynet Constant anywhere a number can go. Multiply the amount by the constant whose name says **from**\_To\_**to**:
 
 ```
-gKV_Grain_Lb = gKV_Grain_Kg * skc_Kg_To_Lb        // 5 kg -> 11.02 lb
-gKV_Strike_L = gKV_Strike_Gal * skc_Gal_To_L
-gKV_Hops_G = gKV_Hops_Oz * skc_Oz_To_G
+gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb        // 5 kg -> 11.02 lb
+gGV_Strike_L = gGV_Strike_Gal * skc_Gal_To_L
+gGV_Hops_G = gGV_Hops_Oz * skc_Oz_To_G
 if Kettle_Pressure * skc_PSI_To_kPa > 70
 sleep 5 * skc_Min_To_Sec * 1000                  // sleep counts in milliseconds
 ```
@@ -21,11 +21,11 @@ Upper and lower case do not matter: `SKC_KG_TO_LB` is the same constant. The Pro
 A temperature needs one more step than the others, because 0 °C is not 0 °F:
 
 ```
-gKV_Temp_F = gKV_Temp_C * skc_F_Per_C + skc_F_Freeze
-gKV_Temp_C = (gKV_Temp_F - skc_F_Freeze) * skc_C_Per_F
+gGV_Temp_F = gGV_Temp_C * skc_F_Per_C + skc_F_Freeze
+gGV_Temp_C = (gGV_Temp_F - skc_F_Freeze) * skc_C_Per_F
 ```
 
-A temperature **change** (a 2 degree rise, a 10 degree drop) only needs the multiply: `gKV_Rise_F = gKV_Rise_C * skc_F_Per_C`.
+A temperature **change** (a 2 degree rise, a 10 degree drop) only needs the multiply: `gGV_Rise_F = gGV_Rise_C * skc_F_Per_C`.
 
 ## Predictive text
 
@@ -35,7 +35,7 @@ Where a value can go, start typing and the matching Skynet Constants are listed 
 
 - A Skynet Constant can't be changed: `skc_Kg_To_Lb = 2` is an error when the Process is checked or saved.
 - A Skynet Constant has no attributes: `skc_Kg_To_Lb.value` is an error. Use the name alone.
-- Names starting `skc_` are kept for Skynet Constants. No Device, Widget, gKonstant, gAPI or `new` variable can have one.
+- Names starting `skc_` are kept for Skynet Constants. No Device, Widget, gGlobal or `new` variable can have one.
 - A name that starts `skc_` but is not in the lists below is an error, so a typing mistake is found when you check the Process.
 
 ## The Skynet Constants

@@ -1,5 +1,5 @@
 // Skynet Constants (Fritz, 2026-10-30): fixed numbers for common conversions, built into Skynet.
-// A Process uses one like a number:  gKV_Grain_Lb = gKV_Grain_Kg * skc_Kg_To_Lb
+// A Process uses one like a number:  gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb
 // They are Skynet names (Skynet Rule 3.11): nobody can change them, and no Device, Widget or variable can take one.
 // Every one is a multiplier: the amount in the first unit times the constant gives the amount in the second.
 // Temperature is the only kind that needs more than one multiply (see the Help page Skynet Constants):

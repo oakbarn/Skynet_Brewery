@@ -11,9 +11,9 @@ const d = fs.mkdtempSync(path.join(os.tmpdir(), 'lang'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ elements: [
   { name: 'alm_Hops', type: 'alarm' }, { name: 'Pump_Red', type: 'digitalOut' }, { name: 'tm_Mash', type: 'timer' },
-  { name: 'Kettle_SP', type: 'gKonstant', kind: 'value' }, { name: 'Msg', type: 'gKonstant', kind: 'string' },
-  { name: 'gKB_Flag', type: 'gKonstant', kind: 'bool' }, { name: 'gKStep_Brew', type: 'gKonstant', kind: 'step' },
-  { name: 'odd (name)', type: 'gKonstant', kind: 'value' },
+  { name: 'Kettle_SP', type: 'gGlobal', kind: 'value' }, { name: 'Msg', type: 'gGlobal', kind: 'string' },
+  { name: 'gGB_Flag', type: 'gGlobal', kind: 'bool' }, { name: 'gGStep_Brew', type: 'gGlobal', kind: 'step' },
+  { name: 'odd (name)', type: 'gGlobal', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
@@ -49,7 +49,7 @@ endif
 tm_Mash.countdown = true
 print tm_Mash.type
 tm_Mash.displayname = "Mash " + Kettle_SP
-gKB_Flag = true
+gGB_Flag = true
 step "Done"
 `);
 assert.equal(store.getProp('Pump_Red', 'state'), true);
@@ -61,7 +61,7 @@ assert.equal(store.getProp('tm_Mash', 'type'), 'countdown');
 assert.equal(store.getProp('tm_Mash', 'displayname'), 'Mash 186.5');
 assert.deepEqual(prints.slice(0, 4), ['alarm on', '187', 'hidden', 'countdown']);
 // the Step widget shows the last step a Flow Process reached (proc_a is a Sub by its name, so it stays empty)
-assert.equal(store.getProp('gKStep_Brew', 'value'), '');
+assert.equal(store.getProp('gGStep_Brew', 'value'), '');
 
 // unknown bare names are reported in plain words
 assert.match(eng.check('Nope = 1').errors[0].msg, /Unknown name Nope/);
@@ -85,7 +85,7 @@ if "Pump_Red" state == true && "Kettle_SP" value > 3
 "tm_Mash" type = countdown
 vX precision = 0
 vS = "Msg" visibility
-wait "gKB_Flag" state == false
+wait "gGB_Flag" state == false
 "odd (name)" value = 1
 "Pump_Red" bogus = 1 +
 `;
@@ -99,7 +99,7 @@ Msg.visible = false
 tm_Mash.countdown = true
 vX.precision = 0
 vS = Msg.visibility
-wait gKB_Flag == false
+wait gGB_Flag == false
 "odd (name)".value = 1
 "Pump_Red" bogus = 1 +
 `);
@@ -156,7 +156,7 @@ eng.write('scrZ_Brew', 'step "Heat"\nstep "Mash"\n');
 eng.renumber();
 assert.equal(eng.read('scrZ_Brew'), 'step 1.00000 "Heat"\nstep 1.00001 "Mash"\n');
 await run('scrZ_Brew', eng.read('scrZ_Brew'));
-assert.equal(store.getProp('gKStep_Brew', 'value'), '1.00001  Mash');
+assert.equal(store.getProp('gGStep_Brew', 'value'), '1.00001  Mash');
 eng.setClass('scrZ_Brew', 'sub');
 assert.match(eng.read('scrZ_Brew'), /step S\d+\.00000 "Heat"/);
 
@@ -169,7 +169,7 @@ vN++;
 vN--;
 Kettle_SP = 10;
 Kettle_SP++;
-if (vN == 1 && !gKB_Flag == false) {
+if (vN == 1 && !gGB_Flag == false) {
   print "braces";
 } else if (vN == 2) {
   print "wrong";
