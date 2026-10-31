@@ -15,7 +15,7 @@ rm -rf "$OUT/stage"
 mkdir -p "$STAGE"
 
 # Only the files git knows about (tracked, or new and not ignored), so data/, node_modules and backups stay out
-git ls-files -z --cached --others --exclude-standard | grep -zEv '^(release/|\.github/|\.gitignore$)' | while IFS= read -r -d '' f; do
+git ls-files -z --cached --others --exclude-standard | grep -zEv '^(release/|Delete/|\.github/|\.gitignore$)' | while IFS= read -r -d '' f; do
   [ -e "$f" ] || continue
   mkdir -p "$STAGE/$(dirname "$f")"
   cp -p "$f" "$STAGE/$f"
