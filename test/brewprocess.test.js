@@ -34,8 +34,14 @@ const prof = { mash: [{ id: 'm1', name: 'Two step', steps: [{ name: 'Protein', t
 let rv = recipeValues({ brewDefaults: { units: 'US', mashProfile: 'm1', boilProfile: 'b1' } }, prof);
 assert.equal(rv.rcp_Loaded, false); assert.equal(rv.rcp_Mash_Steps, 2); assert.equal(rv.rcp_Mash_Step_2_Temp, 152);
 assert.equal(rv.rcp_Boil_Time.s, 5400, 'boil time is a time'); assert.equal(rv.rcp_Mash_Step_1_Time.s, 900);
-rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', totalGrainWeight: 12, mash: { steps: [{ temp: 152, time: 60 }] }, boilTime: 60 } }, prof);
-assert.equal(rv.rcp_Loaded, true); assert.equal(rv.rcp_Strike_Volume, 4.5, '12 lb x 1.5 qt/lb = 4.5 gal'); assert.equal(rv.rcp_Mash_Steps, 1);
+// the Skynet Recipe (lib/recipe.js) is kept in kg, L and °C; Processes read it in the panel's units
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', grainKg: 12 / 2.20462262, waterToGrain: 1.5 * 2.0864, ingredients: { fermentables: [{ type: 'grain', kg: 12 / 2.20462262 }], hops: [], yeasts: [{ name: 'US-05' }] },
+  mash: { steps: [{ name: 'Sacch', tempC: (152 - 32) * 5 / 9, min: 60 }] }, boilTime: 60, spargeType: 'fly', whirlpoolMinutes: 20 } }, prof);
+assert.equal(rv.rcp_Loaded, true); assert.equal(rv.rcp_Total_Grain_Weight, 12); assert.equal(rv.rcp_Strike_Volume, 4.5, '12 lb x 1.5 qt/lb = 4.5 gal');
+assert.equal(rv.rcp_Mash_Steps, 1); assert.equal(rv.rcp_Mash_Step_1_Temp, 152); assert.equal(rv.rcp_Yeast_Name, 'US-05');
+assert.equal(rv.rcp_Sparge_Type, 'fly', 'every Skynet_Field can be read'); assert.equal(rv.rcp_Whirlpool_Minutes, 20);
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', mashProfile: 'm1', boilTime: 60, ingredients: { fermentables: [] }, mash: { steps: [] } } }, prof);
+assert.equal(rv.rcp_Mash_Steps, 2, 'the Mash Profile picked on the Recipe wins'); assert.equal(rv.rcp_Mash_Out_Temp, 168);
 
 // ---- the Skynet Process Templates build into seven Flow Processes that compile
 const root = path.resolve('templates/process');

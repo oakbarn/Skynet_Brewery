@@ -1,17 +1,70 @@
 # The Recipe tab
 
-Press **☰ Menu** and pick **Recipe**. This is the Recipe for brew day. Bring it in from BeerSmith, or fill it in by hand. There is no limit on how many grains, hops, yeasts or misc items it has.
+Press **☰ Menu** and pick **Recipe**. This is the Recipe for brew day. Bring it in from BeerSmith, or start a new one and fill it in. There is no limit on how many grains, hops, yeasts or adjuncts it has.
 
 Along the top:
 
-- **New** clears the Recipe and starts one from the Defaults (☰ Menu > Default).
-- **⬆ Import .bsmx / .xml** brings in a recipe file (below).
-- **Recipe library** opens a saved Recipe, saves this one (💾), or deletes a saved one. Saved Recipes are on the Brain in `config/recipes`.
-- **Cancel** and **Save** are at the top and the bottom.
+- **IMPORT** brings in a recipe file (below).
+- **NEW** clears the Recipe and starts one from the Defaults (☰ Menu > Default).
+- **Library ...** opens a saved Recipe, saves this one (💾), or deletes a saved one. Saved Recipes are on the Brain in `config/recipes`.
+- **Cancel** and **Save**.
 
-The box under the buttons shows the **Total grain weight**, all fermentables, the hops, and the **strike water** and its temperature. They change as you type.
+## The boxes
+
+Each box has a colored top that says what kind it is:
+
+- **Black**: names (Beer Name, Style, Brew Length).
+- **Grey**: times and choices (Sparge Type, Sparge Minutes, Boil Minutes, Whirlpool Minutes, Grain Ratio).
+- **Blue**: volumes (Strike Volume, Sparge Volume, PreBoil Volume).
+- **Red**: temperatures (Strike, Grain and Sparge Temperature, Pitch At).
+- **Light grey**: worked out by Skynet, not typed: **Grain Wt.**, **1st Mash** and **IBU** come from the Grain, MASH and HOPs tabs.
+
+Most boxes can be changed. **Style** is a dropdown; **Add new ...** adds a style to it.
+
+Press **Calculate** to work out the Total Grain Weight, the Hop Drops, Warnings and Messages, the 1st Mash temperature, the IBU (from each hop's Actual AAU), and the Strike Volume and Temperature and the Sparge Volume and Temperature, from the Grain Temperature and Grain Ratio. Then press **Save**. An imported recipe comes in already worked out.
 
 The Recipe is kept in kilograms, liters and °C. It shows in the units you pick on the Default tab (see **Recipe defaults** below).
+
+## Skynet_Fields
+
+Every box on the Recipe tab and its Daughter Tabs is a **Skynet_Field**: it has a fixed Skynet name that starts with `rcp_`, shown when the mouse rests on the box. A Process reads them (they are read only there), for example `rcp_Strike_Temp`, `rcp_Boil_Minutes` or `rcp_Pitch_Temp`. The names never change.
+
+| Box | Skynet_Field |
+|---|---|
+| Beer Name | `rcp_Name` |
+| Style | `rcp_Style` |
+| Brew Length | `rcp_Batch_Volume` |
+| Grain Wt. | `rcp_Total_Grain_Weight` |
+| 1st Mash | `rcp_First_Mash_Temp` |
+| IBU | `rcp_IBU` |
+| Strike Volume | `rcp_Strike_Volume` |
+| Strike Temperature | `rcp_Strike_Temp` |
+| Grain Temperature | `rcp_Grain_Temp` |
+| Sparge Volume | `rcp_Sparge_Volume` |
+| Sparge Type | `rcp_Sparge_Type` |
+| Sparge Minutes | `rcp_Sparge_Minutes` |
+| Sparge Temperature | `rcp_Sparge_Temp` |
+| PreBoil Volume | `rcp_Boil_Volume` |
+| Boil Minutes | `rcp_Boil_Minutes` |
+| Whirlpool Minutes | `rcp_Whirlpool_Minutes` |
+| Pitch At | `rcp_Pitch_Temp` |
+| Grain Ratio | `rcp_Grain_Ratio` |
+| Waters: Water Profile | `rcp_Water_Profile` |
+| MASH: Mash Profile | `rcp_Mash_Profile` |
+
+## The Daughter Tabs
+
+The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab** (or **Recipe** in the title) comes back.
+
+- **HOPs**: add, edit or delete hops. The Actual AAU of the hops used in the brew MUST be updated; the amounts are adjusted from it to keep the IBUs.
+- **Drops**: the hop drop groups, the pre warning times and the alert texts, worked out from the hops (see **Hop schedule and alerts**).
+- **Grain**: add, edit or delete grains and fermentables. Their total weight is the Grain Wt.
+- **Yeast**: add, edit or delete yeasts and yeast starters.
+- **Adjuncts**: add, edit or delete adjuncts such as Whirlfloc or yeast nutrient (BeerSmith calls them Misc).
+- **Waters**: the Water Profile.
+- **MASH**: the Mash Profile.
+
+Their own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
 
 ## Importing a BeerSmith file
 
@@ -24,20 +77,9 @@ Note: inside a .bsmx file BeerSmith keeps its own US units: weights in **ounces*
 
 You can also import from the **Import** page, from Node-RED (POST the file to `/api/import/recipe?file=MyBeer.bsmx`), or from a Process (below).
 
-## The daughter tabs
-
-- **Recipe**: name, style, type, brewer and assistant, batch and boil size, boil time, efficiency, OG, FG, IBU and color, the **Mash Profile**, **Boil Profile** and **Water Profile**, the water to grain ratio, the grain temperature and notes.
-- **Grains**: every grain and other fermentable with its type, amount, color and yield. Grains and Adjuncts make the Total grain weight.
-- **Hops**: every hop with its use (Top of Mash, 1st Wort, Boil, Whirlpool / Aroma, Dry Hop), time, amount and alpha acid. Set **Alpha % (Actual)** to the alpha acid on the bag you brew with, and Skynet shows the **Amount to use** for the same bitterness (as the AAU columns did on the OakBarn Batch Tab).
-- **Misc**: Irish Moss, Whirlfloc, salts, spices ... each with its own unit. A Boil item gets its own alert.
-- **Yeast**: name, lab, product, packages, starter, attenuation and temperatures.
-- **Water**: the water in the recipe file, and the Water Profile you picked.
-- **Mash**: the mash steps from the recipe file, to review. When a Mash Profile is picked on the Recipe tab, brew day uses it.
-- **Hop Schedule**: the results Skynet works out (you cannot change them here).
-
 ## Mash Profile: Skynet or your own
 
-The Mash Profile dropdown lists your own Mash Profiles and the **Skynet** ones: Single Infusion (light, medium and full body, and no mash out), Step Mash with a Protein Rest, Step Mash Beta and Alpha, Hochkurz and BIAB. Skynet ones cannot be changed; on ☰ Menu > Mash Profile pick **Add new ...** and start from a copy of one to make your own.
+The Mash Profile dropdown (MASH tab) lists your own Mash Profiles and the **Skynet** ones: Single Infusion (light, medium and full body, and no mash out), Step Mash with a Protein Rest, Step Mash Beta and Alpha, Hochkurz and BIAB. Skynet ones cannot be changed; on ☰ Menu > Mash Profile pick **Add new ...** and start from a copy of one to make your own.
 
 ## Water Profile
 
@@ -54,15 +96,15 @@ Each boil Hop Group (and each Boil Misc item) gets:
 - a **warning** before it goes in (10 minutes unless changed on the Default tab), and
 - a **drop** alert when it goes in.
 
-When two alerts land at the same time, for example a drop and the next group's warning, Skynet makes **one alert that has both**. The Hop Schedule tab marks those with ⚠ and lists them under the alerts.
+When two alerts land at the same time, for example a drop and the next group's warning, Skynet makes **one alert that has both**. The Drops tab marks those with ⚠ and lists them under the alerts.
 
 On brew day each alert shows as a bar at the top of every screen (green for a warning, red for a drop) and stays until it is closed. With sound on, it plays the alert sound (if one is set on the Default tab) and then says the alert out loud.
 
-Start the alerts from a Process (below), or with **▶ Start hop alerts** on the Hop Schedule tab. They can run on Skynet's own clock from that moment, or follow a countdown **timer** such as the Boil timer, so a paused timer or the Simulator's time skips are followed too.
+Start the alerts from a Process (below), or with **▶ Start hop alerts** on the Drops tab. They can run on Skynet's own clock from that moment, or follow a countdown **timer** such as the Boil timer, so a paused timer or the Simulator's time skips are followed too.
 
 ## Voice and audio files
 
-Each alert can have its own voice file in `media/Audio/Hops`. The Hop Schedule tab shows its name. When the file is there, it plays; when not, the browser's own voice reads the alert (every common browser has one, on computers and phones, with no web site needed).
+Each alert can have its own voice file in `media/Audio/Hops`. The Drops tab shows its name. When the file is there, it plays; when not, the browser's own voice reads the alert (every common browser has one, on computers and phones, with no web site needed).
 
 To make a voice file:
 
