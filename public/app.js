@@ -10,7 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -7875,6 +7875,71 @@ function rcAdjuncts(pane, rc, changed) {
   pane.append(h('p', { class: 'muted' }, 'Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity.'));
 }
 
+// ---- The MASH tab (Fritz, 2026-10-31: "Mash Profile and Water Profiles can be built as well"). Pick a Mash Profile
+// (Skynet Template or your own), or use the Recipe's own mash (from the recipe file or typed here). A picked profile shows
+// read only; Copy into this Recipe makes it the Recipe's own mash to change. Lines: Step N, Temp, Time (rcp_Mash_Step_N_...).
+function rcMash(pane, rc, u, changed) {
+  const op = can('operator'), mp = rcMashProfile(rc), TT = TU(u.tempUnit), c = { onChange: changed };
+  rc.mash = rc.mash || { steps: [] }; rc.mash.steps = rc.mash.steps || [];
+  const tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ...c };
+  const pTemp = v => v === null || v === undefined || v === '' ? '' : rcRound(cTo(mp.units === 'Metric' ? +v : fToC(+v), u.tempUnit), 1);
+  const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
+  const pick = rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', 'The Recipe\'s own mash (below)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  const copy = guard(() => {
+    rc.mash = { ...rc.mash, profileName: mp.name, steps: [...mp.steps.map(s => ({ name: s.name, type: 'Infusion', tempC: mp.units === 'Metric' ? +s.temp : fToC(+s.temp), min: +s.time || 0 })),
+      ...(mp.mashOutTemp ? [{ name: 'Mash Out', type: 'Temperature', tempC: mp.units === 'Metric' ? +mp.mashOutTemp : fToC(+mp.mashOutTemp), min: 10 }] : [])] };
+    rc.spargeType = mp.sparge || 'batch'; if (mp.spargeTemp !== undefined && mp.spargeTemp !== null) rc.spargeTempC = mp.units === 'Metric' ? +mp.spargeTemp : fToC(+mp.spargeTemp);
+    rc.spargeMinutes = mp.sparge === 'batch' ? mp.batchRest ?? null : null; rc.mashProfile = '';
+    changed(); renderMenuPane(); toast(`"${mp.name}" copied into this Recipe. Press Save to keep it`);
+  });
+  const addStep = guard(() => { rc.mash.steps.push({ name: `Step ${rc.mash.steps.length + 1}`, type: 'Infusion', tempC: null, min: 0 }); changed(); renderMenuPane(); });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Mash'), op && !mp ? h('button', { class: 'hopAdd', onclick: addStep, title: 'Add a mash step at the bottom' }, 'Mash Step ', h('b', {}, '+')) : ''),
+    h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', pick, { wide: true, field: 'rcp_Mash_Profile', tip: 'A Skynet Template, one of your own (☰ Menu > Mash Profile), or the Recipe\'s own mash' }),
+      mp && op ? h('button', { onclick: copy, title: 'Make this profile the Recipe\'s own mash, to change it here' }, '⧉ Copy into this Recipe') : '',
+      mp?.notes ? h('span', { class: 'muted' }, mp.notes) : ''));
+  const steps = mp ? mp.steps : rc.mash.steps;
+  if (!steps.length) pane.append(h('p', { class: 'muted' }, 'No mash steps. Pick a Mash Profile, or press Mash Step +.'));
+  steps.forEach((s, i) => {
+    const n = i + 1, F = end => `rcp_Mash_Step_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    if (mp) line.append(rcBox('g', `Step ${n}`, ro(s.name), { wide: true, field: F('Name') }), rcBox('r', 'Temp', ro(pTemp(s.temp)), { unit: TT, field: F('Temp') }), rcBox('g', 'Time', ro(s.time), { unit: 'min', field: F('Time') }));
+    else {
+      line.append(rcBox('g', `Step ${n}`, rcInput(s, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }), rcBox('r', 'Temp', rcInput(s, 'tempC', tmp), { unit: TT, field: F('Temp') }),
+        rcBox('g', 'Time', rcInput(s, 'min', { d: 0, ...c }), { unit: 'min', field: F('Time') }));
+      if (op) line.append(h('button', { class: 'hopDel', onclick: guard(() => { if (!confirm(`Delete Step ${n} (${s.name})?`)) return; rc.mash.steps.splice(i, 1); changed(); renderMenuPane(); }) }, '🗑 Delete'));
+    }
+    pane.append(line);
+  });
+  // the sparge: the profile's (read only), or the Recipe's (the same boxes as on the Recipe tab)
+  pane.append(h('h3', {}, 'Sparge'), mp
+    ? h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', ro(SPARGE[mp.sparge] || mp.sparge)), rcBox('r', 'Sparge Temperature', ro(pTemp(mp.spargeTemp)), { unit: TT }),
+      ...(mp.sparge === 'batch' ? [rcBox('g', 'Batch Rest', ro(mp.batchRest), { unit: 'min' })] : []), rcBox('r', 'Mash Out', ro(pTemp(mp.mashOutTemp)), { unit: TT, tip: 'Empty = no mash out' }))
+    : h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'rcp_Sparge_Type' }),
+      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { unit: TT, field: 'rcp_Sparge_Temp' }),
+      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Sparge_Minutes' })));
+  pane.append(h('p', { class: 'muted' }, mp ? `${mp.skynet ? 'A Skynet Template is read only.' : 'Change your own Mash Profiles on ☰ Menu > Mash Profile.'} Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.`
+    : 'The Recipe\'s own mash. Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.'));
+}
+// ---- The Waters tab: the Water Profile picked and its minerals after the distilled or RO cut (rcp_Water_...). The profile
+// itself is changed on ☰ Menu > Water Profile. Below: the waters the recipe file listed.
+function rcWaters(pane, rc, u, changed) {
+  const wp = S.waterProfiles.find(x => x.id === rc.waterProfile), b = wp ? blendWater(wp) : {};
+  const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
+  const pick = rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Waters')),
+    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes ? h('span', { class: 'muted' }, wp.notes) : ''));
+  if (wp) {
+    const [ions, rest] = [WATER_FIELDS.slice(0, WATER_IONS.length), WATER_FIELDS.slice(WATER_IONS.length)];
+    pane.append(h('div', { class: 'rcRow' }, ...ions.map(([k, , key], i) => rcBox('c', WATER_IONS[i][1], ro(b[key]), { unit: 'ppm', field: k, tip: wp.distilledPct ? `${wp[key]} ppm in the water report, cut with ${wp.distilledPct}% distilled` : '' }))),
+      h('div', { class: 'rcRow' }, rcBox('c', '% Distilled / RO', ro(+wp.distilledPct || 0), { unit: '%', field: rest[0][0] }), rcBox('c', 'SO4 : Cl', ro(b.so4cl ?? ''), { field: rest[1][0], tip: 'Above 2: crisp and hoppy. Below 1: round and malty' }),
+        rcBox('c', 'pH', ro(wp.ph ?? ''), { field: rest[2][0] })),
+      h('p', { class: 'muted' }, `${wp.skynet ? 'A Skynet water is read only: ☰ Menu > Water Profile > Add new ... copies it to make your own.' : 'Change it on ☰ Menu > Water Profile.'} The minerals show after the distilled or RO cut.`));
+  }
+  const W = rc.ingredients.waters || [];
+  pane.append(h('h3', {}, 'Waters in the recipe file'), W.length ? '' : h('p', { class: 'muted' }, 'None.'),
+    ...W.map((w, i) => h('div', { class: 'rcRow hopLine' }, rcBox('g', `Water ${i + 1}`, ro(w.name), { wide: true }), rcBox('b', 'Amount', ro(rcRound(lTo(w.liters, u.volumeUnit))), { unit: u.volumeUnit }),
+      ...WATER_IONS.map(([k, l]) => rcBox('g', l.replace(/ \(.*/, ''), ro(w[k] ?? ''), { unit: 'ppm' })))));
+}
+
 // a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it
 function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const I = rc.ingredients;
@@ -7882,22 +7947,12 @@ function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
   if (k === 'hops') { rcHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'adjuncts') { rcAdjuncts(pane, rc, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'mash') { rcMash(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'waters') { rcWaters(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'grain' || k === 'fermentables') { rcFerms(pane, rc, u, changed, k === 'grain'); pane.append(h('div', { class: 'bar' }, back)); return; }
   pane.append(h('p', {}, h('b', {}, about)), h('p', { class: 'muted rcSoon' }, `The fields and layout of the ${t} tab come next. Until then, here is what the Recipe holds for it.`));
   if (k === 'drops') rcDrops(pane, rc);
   if (k === 'yeast') pane.append(list(I.yeasts.map(x => `${x.amount ?? 1} × ${x.name}${x.lab ? `, ${x.lab}` : ''}${x.productId ? ` ${x.productId}` : ''}${x.starterL ? `, starter ${rcRound(lTo(x.starterL, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No yeast in this Recipe.'));
-  if (k === 'waters') {
-    const wp = S.waterProfiles.find(x => x.id === rc.waterProfile);
-    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Water_Profile' })),
-      wp ? h('p', {}, `${WATER_IONS.map(([i, l]) => `${l.replace(/ \(.*/, '')} ${blendWater(wp)[i]}`).join(', ')} ppm${+wp.distilledPct ? ` (after ${wp.distilledPct}% distilled)` : ''}`) : '',
-      list(I.waters.map(x => `${x.name}${x.liters ? `, ${rcRound(lTo(x.liters, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No waters in the recipe file.'));
-  }
-  if (k === 'mash') {
-    const mp = rcMashProfile(rc);
-    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', rc.mash?.steps?.length ? '(the mash from the recipe file)' : '(none)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Mash_Profile' })),
-      mp ? list(mp.steps.map(s => `${s.name}: ${s.temp} ${tempUnit(mp.units)} for ${s.time} min`), '')
-        : list((rc.mash?.steps || []).map(s => `${s.name}: ${rcRound(cTo(s.tempC, u.tempUnit), 1)} ${TU(u.tempUnit)} for ${s.min} min`), 'No mash steps in this Recipe.'));
-  }
   pane.append(h('div', { class: 'bar' }, back));
 }
 // Drops: the results only. Skynet's hop order, every alert (merged when two land together) and their voice files

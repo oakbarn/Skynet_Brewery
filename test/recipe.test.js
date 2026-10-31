@@ -158,6 +158,11 @@ assert.throws(() => new HopAlerts({ store, send: () => { }, recipe: () => null }
 // Skynet Mash and Water Profiles are read only and listed with the user's own
 const mash = new ProfileStore(path.join(dir, 'mash'), 'mash');
 assert.ok(mash.list().some(p => p.id === 'skynet-single-medium' && p.skynet));
+// Fritz's two Mash Profile Templates (2026-10-31): Single Step Batch Sparge, and 3 Mash Steps with Fly Sparge
+const sb = mash.get('skynet-single-batch'), tf = mash.get('skynet-three-step-fly');
+assert.equal(sb.steps.length, 1); assert.equal(sb.sparge, 'batch'); assert.equal(sb.batchRest, 10);
+assert.equal(tf.steps.length, 3); assert.equal(tf.sparge, 'fly'); assert.equal(tf.batchRest, undefined);
+assert.equal(mash.create('My Fly', { from: 'skynet-three-step-fly' }).sparge ?? mash.get('my-fly').sparge, 'fly', 'a copy keeps the fly sparge');
 assert.throws(() => mash.save('skynet-single-medium', { name: 'x' }), /Skynet Template/);
 const mine = mash.create('My Mash', { from: 'skynet-step-protein' });
 assert.equal(mine.steps.length, 2); assert.equal(mine.skynet, undefined);

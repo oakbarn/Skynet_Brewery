@@ -138,7 +138,7 @@ const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dir
 // The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
 // in config/process_templates. rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
 const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
-engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list() });
+engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list() });
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
 // The Recipe (☰ Menu > Recipe): the one in use is config.recipe, saved ones are in config/recipes. Hop alerts run in the background.
 const recipes = new RecipeStore(path.join(path.dirname(CONFIG), 'recipes'));
@@ -568,7 +568,7 @@ async function route(req, res) {
   }
   // ---- The Brew Process (☰ Menu > Brew Process): everyone sees it, admins change it, operators start the Brew Day
   if (p === '/ui/brewprocess' && m === 'GET') {
-    const v = recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list() });
+    const v = recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list() });
     return ok(res, { steps: MAJOR_STEPS, fields: FIELDS, setup: brewSetup(store.config), templates: processTemplates.list(), recipeFields: RECIPE_FIELDS,
       recipe: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, plain(x)])), processes: MAJOR_STEPS.map((_, i) => processName(i)).filter(n => engine.exists(n)) });
   }
