@@ -81,7 +81,7 @@ gblS_Step_Text.background = 4
 sw_Advance_BrewStatus.visible = true
 wait gblV_Brew_Status == 105
 sw_Advance_BrewStatus.visible = false
-log "gAV_Strike_Volume"
+send_db "gGV_Strike_Volume"
 BrewZilla.setpoint = gblV_Desired_Strike
 BrewZilla.heat = true
 BrewZilla.pump = true
@@ -327,7 +327,7 @@ wait tm_Step <= 00:00:00
 stop "tm_Step"
 [Mash_Steps_Done]
 step 1.00014 "Mash Steps Done"
-log "gAV_Mash_pH"
+send_db "gGV_Mash_pH"
 if gblT_MashOut_Time > 00:00:00
 BrewZilla.setpoint = gblV_MashOut_Temp
 BrewZilla.heat = true
@@ -471,8 +471,8 @@ gblS_Step_Text.background = 4
 sw_Advance_BrewStatus.visible = true
 wait gblV_Brew_Status == 305
 sw_Advance_BrewStatus.visible = false
-log "gAV_PreBoil_Volume"
-log "gAV_PreBoil_Gravity"
+send_db "gGV_PreBoil_Volume"
+send_db "gGV_PreBoil_Gravity"
 BrewZilla.setpoint = 212
 BrewZilla.heat = true
 BrewZilla.pump = false
@@ -925,7 +925,7 @@ gblS_Step_Text.background = 4
 sw_Advance_BrewStatus.visible = true
 wait gblV_Brew_Status == 601
 sw_Advance_BrewStatus.visible = false
-log "gAV_PostBoil_Volume"
+send_db "gGV_PostBoil_Volume"
 BrewZilla.setpoint = 0
 BrewZilla.heat = false
 BrewZilla.pump = true
@@ -958,8 +958,8 @@ gblS_Step_Text.background = 4
 sw_Advance_BrewStatus.visible = true
 wait gblV_Brew_Status == 605
 sw_Advance_BrewStatus.visible = false
-log "gAV_OG"
-log "gAV_Fermenter_Volume"
+send_db "gGV_OG"
+send_db "gGV_Fermenter_Volume"
 BrewZilla.setpoint = 140
 BrewZilla.heat = true
 BrewZilla.pump = true
