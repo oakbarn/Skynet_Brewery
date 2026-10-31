@@ -10,7 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, gravityPoints, expectedGravity } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -7532,7 +7532,7 @@ const RC_DAUGHTERS = [
   ['grain', 'Grain', 'Add, Edit or Delete Grains. The Total weight of all Grains is used to calculate the Grain Weight for this Brew.'],
   ['fermentables', 'Fermentable', 'Add, Edit or Delete the other Fermentables: Adjuncts, Extracts, Sugars, Fruit and Juice.'],
   ['yeast', 'Yeast', 'Add, Edit or Delete Yeasts and Yeast Starters'],
-  ['adjuncts', 'Adjuncts', 'Add, Edit or Delete Adjuncts such as Whirlfloc or Yeast Nutrient.'],
+  ['adjuncts', 'Adjuncts', 'Add, Edit or Delete Adjuncts such as Whirlfloc, Yeast Nutrient or Gypsum.'],
   ['waters', 'Waters', 'Water Profile'],
   ['mash', 'MASH', 'Mash Profile'],
 ];
@@ -7849,17 +7849,43 @@ function rcFerms(pane, rc, u, changed, grainTab) {
     ` Expected Gravity (all grains and fermentables): `, eg, '.'));
 }
 
+// ---- The Adjuncts tab (Fritz, 2026-10-31: "in a like manner" as the Grain and Fermentable tabs). BeerSmith and BeerXML
+// call them Misc: Whirlfloc, yeast nutrient, gypsum, spices. Each line: Name, Amount, Measurement, Type, Use, Time and its
+// unit. The dropdowns are select only, with the BeerXML lists. A Boil adjunct gets hop-style alerts (the Drops tab).
+// Adjunct-type fermentables (flaked grains, they add sugar) stay on the Fermentable tab. Skynet_Fields rcp_Adjunct_N_...
+function rcAdjuncts(pane, rc, changed) {
+  const all = rc.ingredients.miscs, op = can('operator'), c = { onChange: changed };
+  const sel = (obj, key, list, rerender) => rcInput(obj, key, { kind: 'sel', list: [...list, ...(list.some(([v]) => v === obj[key]) || !obj[key] ? [] : [[obj[key], obj[key]]])], onChange: () => { changed(); if (rerender) renderMenuPane(); } });
+  const add = guard(() => { all.push({ name: '', type: 'Fining', use: 'boil', amount: null, unit: 'items', time: 15, timeUnit: 'min' }); changed(); renderMenuPane(); });
+  const del = (m, n) => guard(() => { if (!confirm(`Delete Adjunct ${n}${m.name ? ` (${m.name})` : ''}?`)) return; all.splice(all.indexOf(m), 1); changed(); renderMenuPane(); });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Adjuncts'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add an adjunct line at the bottom' }, 'Adjunct ', h('b', {}, '+')) : ''));
+  if (!all.length) pane.append(h('p', { class: 'muted' }, 'No adjuncts yet. Press Adjunct + for Whirlfloc, yeast nutrient, gypsum or a spice.'));
+  all.forEach((m, i) => {
+    const n = i + 1, F = end => `rcp_Adjunct_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    line.append(rcBox('g', `Adjunct ${n}`, rcInput(m, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }),
+      rcBox('g', 'Amount', rcInput(m, 'amount', { d: 2, ...c }), { field: F('Amount') }),
+      rcBox('g', 'Measurement', sel(m, 'unit', MISC_UNITS.map(x => [x, x])), { field: F('Measurement') }),
+      rcBox('g', 'Type', sel(m, 'type', MISC_TYPES.map(x => [x, x])), { field: F('Type') }),
+      rcBox('g', 'Use', sel(m, 'use', Object.entries(MISC_USES).filter(([k]) => k !== 'other'), true), { field: F('Use'), tip: 'When it goes in. A Boil adjunct gets an alert on brew day (the Drops tab)' }),
+      rcBox('g', m.use === 'boil' ? 'Boil Min' : 'Time', rcInput(m, 'time', { d: 0, ...c }), { field: F('Time'), tip: m.use === 'boil' ? 'Minutes left in the boil when it goes in' : 'How long' }),
+      rcBox('g', 'Time Unit', sel(m, 'timeUnit', Object.entries(MISC_TIME_UNITS)), { field: F('Time_Unit') }));
+    if (op) line.append(h('button', { class: 'hopDel', onclick: del(m, n), title: `Delete Adjunct ${n}` }, '🗑 Delete'));
+    pane.append(line);
+  });
+  pane.append(h('p', { class: 'muted' }, 'Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity.'));
+}
+
 // a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it
 function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const I = rc.ingredients;
   const list = (rows, empty) => rows.length ? h('ul', { class: 'rcList' }, ...rows.map(r => h('li', {}, r))) : h('p', { class: 'muted' }, empty);
   const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
   if (k === 'hops') { rcHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'adjuncts') { rcAdjuncts(pane, rc, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'grain' || k === 'fermentables') { rcFerms(pane, rc, u, changed, k === 'grain'); pane.append(h('div', { class: 'bar' }, back)); return; }
   pane.append(h('p', {}, h('b', {}, about)), h('p', { class: 'muted rcSoon' }, `The fields and layout of the ${t} tab come next. Until then, here is what the Recipe holds for it.`));
   if (k === 'drops') rcDrops(pane, rc);
   if (k === 'yeast') pane.append(list(I.yeasts.map(x => `${x.amount ?? 1} × ${x.name}${x.lab ? `, ${x.lab}` : ''}${x.productId ? ` ${x.productId}` : ''}${x.starterL ? `, starter ${rcRound(lTo(x.starterL, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No yeast in this Recipe.'));
-  if (k === 'adjuncts') pane.append(list(I.miscs.map(x => { const [a, un] = miscShow(x.amount, x.unit, u.miscUnit); return `${a} ${un} ${x.name}, ${MISC_USES[x.use] || x.use}${x.time ? ` ${x.time} ${x.timeUnit || 'min'}` : ''}`; }), 'No adjuncts in this Recipe.'));
   if (k === 'waters') {
     const wp = S.waterProfiles.find(x => x.id === rc.waterProfile);
     pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Water_Profile' })),

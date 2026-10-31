@@ -795,6 +795,14 @@ changes and by Calculate.
 Dry Extract, Sugar) are select-only dropdowns with the BeerXML standard's lists; each line keeps its own Measurement. A
 BeerSmith-only Type on an imported line (Fruit, Juice) stays in that line's list.
 
+17.9 **Adjuncts tab** (Fritz, 2026-10-31: "in a like manner", he checks it once built): the recipe's Misc items (Whirlfloc,
+yeast nutrient, gypsum, spices). Adjuncts, Adjunct +, then Adjunct N, Amount, **Measurement**, **Type**, **Use**, Time (Boil Min
+for a Boil adjunct), **Time Unit**, Delete. The dropdowns are select only, with the BeerXML lists (Measurement: mg, g, oz, lb, kg,
+ml, tsp, tbsp, cup, pt, qt, l, gal, items; Type: Spice, Fining, Water Agent, Herb, Flavor, Other; Use: Boil, Mash, Primary,
+Secondary, Bottling; Time Unit: min, hr, day, week). Adjunct-type fermentables (flaked grains) stay on the Fermentable tab
+because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skynet_Fields `rcp_Adjunct_N_...`,
+`rcp_Adjunct_Count`. (Help 99)
+
 ---
 
 ## Open questions (not Rules yet)
@@ -919,3 +927,4 @@ BeerSmith-only Type on an imported line (Fruit, Juice) stays in that line's list
   weight standard and its label set only on the Default tab, no After Boil on the Grain tab. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Rule 17.8 adds Fritz's Fermentable tab layout: Amount with its own Measurement, select-only BeerXML Measurement and
   Type lists. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-10-31: Added Rule 17.9 (the Adjuncts tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")

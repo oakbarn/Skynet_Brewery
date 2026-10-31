@@ -86,11 +86,11 @@ The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab
 - **Grain**: add, edit or delete grains. Their total weight is the Grain Wt.
 - **Fermentable**: add, edit or delete the other fermentables: adjuncts, extracts, sugars, fruit and juice.
 - **Yeast**: add, edit or delete yeasts and yeast starters.
-- **Adjuncts**: add, edit or delete adjuncts such as Whirlfloc or yeast nutrient (BeerSmith calls them Misc).
+- **Adjuncts**: add, edit or delete adjuncts such as Whirlfloc, yeast nutrient or gypsum (BeerSmith calls them Misc).
 - **Waters**: the Water Profile.
 - **MASH**: the Mash Profile.
 
-The Hops, Grain and Fermentable tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+The Hops, Grain, Fermentable and Adjuncts tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
 
 ## The Hops tab
 
@@ -108,6 +108,10 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 - **Secondary Hops** and **DRY Hops**: the date and the days.
 - **Whirlpool**: the temperature, the minutes, and **Hop Rocket** when the whirlpool runs through a Hop Rocket.
 
+**Order.** On **Calculate** and on **Save** the lines go in order: Boil Hops by drop time (a Start of Boil hop first, then by Minutes), then Mash, 1st WORT, Secondary, DRY and Whirlpool hops.
+
+**Calculate needs every Actual AAU above 0.** The recipe is based on the Recipe AAU, but the real IBUs of a brew come from the Actual AAU, the AAU on the hop package. When any Actual AAU is 0, nothing is calculated: Skynet switches to the Hops tab, highlights each Actual AAU that is 0 and shows a warning. Press **READ** to close it, fix the Actual AAUs and press Calculate again.
+
 ## The Grain and Fermentable tabs
 
 A recipe's fermentables are split over two tabs. **Grain** holds the ones of Type Grain (the Type is not shown). **Fermentable** holds every other Type, picked from the **Type** dropdown (the BeerXML list: Adjunct, Extract, Dry Extract, Sugar). Each Fermentable line also has a **Measurement** dropdown (Pounds, Ounces, Kilograms, Grams) for its own Amount. Both dropdowns are select only. **Add Grain +** or **Fermentable +** puts a new line at the bottom; **Delete** takes one away. There is no limit.
@@ -119,9 +123,15 @@ A recipe's fermentables are split over two tabs. **Grain** holds the ones of Typ
 
 Each tab shows its total weight. An import brings every grain field in (notes, protein, moisture and the rest too), ready for later.
 
-**Order.** On **Calculate** and on **Save** the lines go in order: Boil Hops by drop time (a Start of Boil hop first, then by Minutes), then Mash, 1st WORT, Secondary, DRY and Whirlpool hops.
+## The Adjuncts tab
 
-**Calculate needs every Actual AAU above 0.** The recipe is based on the Recipe AAU, but the real IBUs of a brew come from the Actual AAU, the AAU on the hop package. When any Actual AAU is 0, nothing is calculated: Skynet switches to the Hops tab, highlights each Actual AAU that is 0 and shows a warning. Press **READ** to close it, fix the Actual AAUs and press Calculate again.
+Whirlfloc, yeast nutrient, gypsum, spices: what BeerSmith and BeerXML call Misc. **Adjunct +** adds a line, **Delete** takes one away, no limit.
+
+- **Adjunct N** (the name), **Amount** and **Measurement** (mg, g, oz, lb, kg, ml, tsp, tbsp, cup, pt, qt, l, gal or items).
+- **Type**: Spice, Fining, Water Agent, Herb, Flavor or Other. **Use**: Boil, Mash, Primary, Secondary or Bottling.
+- **Time** and **Time Unit** (min, hr, day, week). For a Boil adjunct the box says **Boil Min**: minutes left in the boil when it goes in. A Boil adjunct gets a warning and a drop alert like a hop (the Drops tab).
+
+The dropdowns are select only, with the BeerXML lists. Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity. Skynet_Fields: `rcp_Adjunct_Count`, `rcp_Adjunct_N_Name`, `_Amount`, `_Measurement`, `_Type`, `_Use`, `_Time`, `_Time_Unit`.
 
 ## Importing a BeerSmith file
 
