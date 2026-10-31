@@ -4,6 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
@@ -727,9 +728,10 @@ async function route(req, res) {
   if (p === '/ui/scripts/check' && m === 'POST') return ok(res, engine.check(await readBody(req)));
   if (p === '/ui/scripts/words' && m === 'GET') return ok(res, processWords());
   if (p === '/ui/scripts/addsteps' && m === 'POST') return ok(res, { text: addSteps(await readBody(req)) });
-  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order))?$/.exec(p);
+  s = /^\/ui\/scripts\/([^/]+)(?:\/(start|stop|restart|rename|class|autorestart|order|version))?$/.exec(p);
   if (s) {
     const name = s[1], act = s[2];
+    if (act === 'version' && m === 'POST') return ok(res, { version: engine.newVersion(name) });
     if (act === 'class' && m === 'POST') { const { cls } = await jsonBody(req); engine.setClass(name, cls); return ok(res); }
     if (act === 'start' && m === 'POST') return ok(res, engine.start(name, 'user'));
     if (act === 'stop' && m === 'POST') return ok(res, { ok: engine.stop(name) });
@@ -870,7 +872,18 @@ server.listen(PORT, () => {
   if (loginsCleared) console.log('New version installed: all logins were cleared (testing mode). Create the admin account again.');
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
+  minimizeWindow();
 });
+
+// Windows (Fritz, 2026-10-30): once the panel is up and the browser has opened it, Skynet_Brewer.bat's Command Prompt window
+// goes down to the task bar (the .bat sets SKYNET_MINIMIZE=1). PowerShell shares this console, so it minimizes this window.
+function minimizeWindow() {
+  if (process.platform !== 'win32' || process.env.SKYNET_MINIMIZE !== '1') return;
+  const ps = "Add-Type -Name W -Namespace S -MemberDefinition '[DllImport(\"kernel32.dll\")] public static extern System.IntPtr GetConsoleWindow(); [DllImport(\"user32.dll\")] public static extern bool ShowWindow(System.IntPtr h, int c);'; [void][S.W]::ShowWindow([S.W]::GetConsoleWindow(), 6)";
+  setTimeout(() => {
+    try { spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', ps], { stdio: 'ignore', windowsHide: false }).on('error', () => {}); } catch { /* the window just stays open */ }
+  }, 6000);
+}
 
 // A panel started as a service (systemd sets INVOCATION_ID, for example on a Pi) restarts by itself, so only a panel started
 // from its window (Skynet_Brewer.bat, the Linux or Mac launcher, npm start) can be closed from ☰ Menu.

@@ -119,7 +119,7 @@ async function load() {
   $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
-  $('#panelVer').textContent = panelVersionName();
+  showPanelVer();
   setTextLarge();
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
@@ -176,12 +176,17 @@ function setView(v, here = false) {
 // ---------------------------------------------------------------- workspaces
 let previewing = false;
 const L = () => editing || previewing ? draft : S.config;          // layout being shown (a Build Tab Preview shows the draft too)
-const curWs = () => L().workspaces.find(w => w.name === wsName) || L().workspaces[0];
+// Hidden_ Special Tabs (Fritz, 2026-10-30): a Tab named Hidden_... holds things a Process uses but nobody needs on Brew Day
+// (a gV_ variable, a Widget only a Process sets). It shows only in Edit layout; the rest of the time it works in the background.
+const HIDDEN_TAB = 'Hidden_';
+const isHiddenTab = w => !!w && !w.build && String(w.name).startsWith(HIDDEN_TAB);
+const shownTabs = () => L().workspaces.filter(w => editing || !isHiddenTab(w));
+const curWs = () => shownTabs().find(w => w.name === wsName) || shownTabs()[0] || L().workspaces[0];
 
 function renderTabs() {
   const t = $('#wsTabs'); t.innerHTML = '';
-  for (const w of L().workspaces) t.append(h('button', { class: (w.name === wsName && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : ''), onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
-    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : w.name));
+  for (const w of shownTabs()) t.append(h('button', { class: (w === curWs() && !menuTab ? 'active' : '') + (w.build ? ' buildTab' : '') + (isHiddenTab(w) ? ' hiddenTab' : ''), onclick: () => { wsName = w.name; sel = null; leaveMenuTab(); renderTabs(); renderWs(); },
+    ondblclick: () => { if (editing) editWorkspace(); }, ...(editing ? { title: w.build ? 'Build Tab: build the new thing here, then press Save Build ...' : `${isHiddenTab(w) ? 'Hidden Special Tab: shows only in Edit layout. ' : ''}Tab ID ${w.id || '(given when saved)'}. Double-click for Tab settings` } : {}) }, w.build ? '🔨 ' + w.name : isHiddenTab(w) ? '👻 ' + w.name : w.name));
   $('#saveBuild').classList.toggle('hidden', !buildWs());
   $('#previewBuild').classList.toggle('hidden', !buildWs());
 }
@@ -497,7 +502,7 @@ function widgetLabel(g, defPos) {
   setRich(lb, g.label);
   lb.style.color = firstSet(g.labelColor, T.labelFore, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, T.labelBack, D.backColor);
   lb.style.fontSize = (g.labelSize || fontPx(T.labelSize) || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = firstSet(T.labelFont, D.nameFont);
-  lb.style.textAlign = (D.align || '').toLowerCase();
+  lb.style.textAlign = firstSet(T.labelAlign, D.align).toLowerCase();
   if (g.labelBg || T.labelBack || D.backColor) lb.style.textShadow = 'none';
   return lb;
 }
@@ -565,7 +570,7 @@ function fillText(n, g) {
   n.style.fontFamily = fnt(v.font, g.font) || T.font || D.nameFont;
   n.style.color = firstSet(v.forecolor, g.color, T.fore, D.foreColor);
   n.style.backgroundColor = firstSet(v.backcolor, g.backColor, T.back, D.backColor);
-  n.style.textAlign = firstSet(v.alignment, g.align, D.align).toLowerCase();
+  n.style.textAlign = firstSet(v.alignment, g.align, T.align, D.align).toLowerCase();
   n.style.whiteSpace = ''; n.style.overflow = '';
   const parts = [body];
   if (firstSet(v.label_visible, g.labelVisible) === true) {
@@ -573,7 +578,7 @@ function fillText(n, g) {
     lb.style.fontSize = (+firstSet(v.size_label, g.labelSize) || fontPx(T.labelSize) || 14) + 'px'; lb.style.fontWeight = firstSet(v.bold_label, g.labelBold) === true ? '700' : '400';
     lb.style.fontFamily = fnt(v.font_label, g.labelFont) || T.labelFont;
     lb.style.color = firstSet(v.fore_label, g.labelColor, T.labelFore); lb.style.backgroundColor = firstSet(v.back_label, g.labelBg, T.labelBack);
-    lb.style.textAlign = firstSet(v.alignment_label, g.labelAlign).toLowerCase();
+    lb.style.textAlign = firstSet(v.alignment_label, g.labelAlign, T.labelAlign).toLowerCase();
     parts.unshift(lb);
   }
   n.replaceChildren(...parts);
@@ -860,8 +865,8 @@ function styleEl(n, e) {
   if (T.font && !e.valueFont?.family) vl.style.fontFamily = T.font;
   if (fontPx(T.size) && !e.valueFont?.size && !e.fontSize && !e.valueEnlarge) vl.style.fontSize = fontPx(T.size) + 'px';
   if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
-  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, D.align);
-  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (al) nm.style.textAlign = al.toLowerCase();
+  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, T.align, D.align), nal = firstSet(e.align, T.labelAlign, D.align);
+  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (nal) nm.style.textAlign = nal.toLowerCase();
   m = a.exec(e.valueAlign ?? ''); if (m) { vl.style.alignItems = ALIGN[m[1]]; vl.style.justifyContent = ALIGN[m[2]]; vl.style.textAlign = m[2].toLowerCase(); }
   else if (al) { vl.style.justifyContent = ALIGN[al]; vl.style.textAlign = al.toLowerCase(); }
   // Word wrap on: a long name goes onto more lines (off: one line, cut off with ...). Values always wrap.
@@ -1594,6 +1599,7 @@ function setEditing(on) {
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
+  if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
   $('#editBar').classList.toggle('hidden', !on);
@@ -2778,6 +2784,14 @@ $('#addWs').onclick = () => {
   toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
 };
 $('#wsProps').onclick = () => editWorkspace();
+// 👻 Hidden tab: a new Hidden_ Special Tab, named Hidden_1, Hidden_2 ... (rename the part after Hidden_ in Tab settings)
+$('#addHiddenWs').onclick = () => {
+  if (!editing) return;
+  let i = 1; while (draft.workspaces.some(w => w.name === HIDDEN_TAB + i)) i++;
+  const n = HIDDEN_TAB + i, id = defaultTabId(n, draft.workspaces.map(w => w.id));
+  draft.workspaces.push({ name: n, id, width: 1600, height: 900 }); wsName = n; renderTabs(); renderWs();
+  toast(`Hidden Tab ${n} added. It shows only in Edit layout; the things on it still work in the background.`);
+};
 
 // ---- Build Tab (Fritz, 2026-10-22): something new is made first on a clean Tab, not on a busy one. The Build Tab is only in
 // the Edit layout draft (never saved) and shows only while you build. Every new Device, Widget, IP, picture, text, piece of
@@ -3685,9 +3699,9 @@ function styleEditor(kind, st, from) {
     bindForm(body, timer ? [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
       ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
       : [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'],
-        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'],
-        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'],
-        ['_nt', 'Default = as it is now. A Device or Widget that has its own color, font or size keeps it; the Style fills in only what it has none of.', 'note']], work);
+        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+        ['_nt', 'Default = as it is now. A Device or Widget that has its own color, font, size or alignment keeps it; the Style fills in only what it has none of.', 'note']], work);
     const err = h('p', { class: 'nameErr', role: 'alert' });
     let out = null;
     const save = async () => {
@@ -4193,6 +4207,8 @@ async function editWorkspace() {
       readFields(work);
       const others = draft.workspaces.filter(x => x !== w);
       if (!work.name?.trim()) throw new Error('The tab needs a name');
+      if (isHiddenTab(w) && !String(work.name).startsWith(HIDDEN_TAB)) work.name = HIDDEN_TAB + String(work.name).trim().replace(/^hidden_?/i, '');   // a Hidden_ Tab's name always starts with Hidden_
+      if (work.name === HIDDEN_TAB) throw new Error('Type a name after Hidden_');
       if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
       work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
       if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
@@ -4309,6 +4325,14 @@ $('#procPick').onchange = guard(async () => {
     else if (v && v !== curScript) await openScript(v);
   } finally { renderProcPick(); }
 });
+// Update Version (Fritz, 2026-10-30): the Process gets a new Version, YYMMDD_HH_MM_n (public/vername.js)
+$('#updVersion').onclick = guard(async () => {
+  if (!curScript) return;
+  if (dirty && !confirm('This Process has changes that are not saved. Give it a new Version anyway?')) return;
+  const { version } = await api('POST', '/ui/scripts/' + encodeURIComponent(curScript) + '/version');
+  const s = S.scripts.find(x => x.name === curScript); if (s) s.version = version;
+  updateScriptState(); toast(`${curScript} is now Version ${version}`);
+});
 // 📝 Processes on the Edit layout bar opens the Process editor, the same way 🔨 Build Tab opens the Build Tab
 $('#procTab').onclick = () => setView('scripts');
 async function openScript(name) {
@@ -4324,6 +4348,8 @@ async function openScript(name) {
 }
 function updateScriptState() {
   const s = S.scripts.find(x => x.name === curScript);
+  $('#scriptVersion').textContent = s ? 'Version ' + (s.version || '(none yet)') : '';
+  $('#updVersion').disabled = !s;
   const st = $('#scriptState');
   const sel = $('#scriptClass');
   sel.disabled = !s || !can('admin');
@@ -5793,9 +5819,9 @@ const MENU = [
   { key: 'about', title: 'About', tip: 'Who is signed in, Sign out, and the Schema and its version', render: renderAboutTab },
 ];
 // the Menu tabs in their order: numbered ones first, then the rest as listed above (new Menu tabs land at the end,
-// except Zoom, which is number 1 until the order is changed)
+// except Zoom, which is number 1 until the order is changed). About is always at the top (Fritz, 2026-10-30).
 function menuSorted() {
-  const o = S.config.menuOrder || {}, at = m => Number.isFinite(+o[m.key]) ? +o[m.key] : m.key === 'zoom' ? 0 : 1e6 + MENU.indexOf(m);
+  const o = S.config.menuOrder || {}, at = m => m.key === 'about' ? -1e9 : Number.isFinite(+o[m.key]) ? +o[m.key] : m.key === 'zoom' ? 0 : 1e6 + MENU.indexOf(m);
   return [...MENU].sort((a, b) => at(a) - at(b) || MENU.indexOf(a) - MENU.indexOf(b));
 }
 // move one Menu tab to place n; the others are numbered again 1, 2, 3 ... around it
@@ -5891,7 +5917,7 @@ const PAGE_PARTS = {
 };
 const roleOk = el => !(el.closest('.admin-only') && !can('admin')) && !(el.closest('.op-only') && !can('operator'));
 function pageParts(v) {
-  if (v === 'workspace') return L().workspaces.filter(w => !w.build || editing).map(w => ({ label: w.name, cur: view === 'workspace' && !menuTab && w.name === wsName,
+  if (v === 'workspace') return shownTabs().filter(w => !w.build || editing).map(w => ({ label: w.name, cur: view === 'workspace' && !menuTab && w.name === wsName,
     go: () => { if (menuTab) leaveMenuTab(); wsName = w.name; sel = null; setView('workspace'); renderTabs(); renderWs(); } }));
   return (PAGE_PARTS[v] || []).flatMap(([label, q]) => {
     const el = $(q);
@@ -6088,7 +6114,7 @@ function renderDefaultTab(box) {
     await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); renderWs(); toast('Defaults saved'); });
   const order = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Menu tab'), h('th', {}, ''))),
     h('tbody', {}, ...menuSorted().map((m, i) => {
-      const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin ? {} : { disabled: true }) });
+      const n = h('input', { type: 'number', min: 1, max: MENU.length, step: 1, value: i + 1, class: 'orderNum', ...(admin && m.key !== 'about' ? {} : { disabled: true }), ...(m.key === 'about' ? { title: 'About is always at the top' } : {}) });
       n.onchange = guard(() => setMenuOrder(m.key, +n.value));
       return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
     })));
@@ -6353,6 +6379,15 @@ function renderAboutTab(box) {
     saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: signOut }, 'Sign out'))));
 }
 
+// The version on the Menu Bar (Fritz, 2026-10-30): click the text box to make it a small 🏷 icon, click the icon to see the
+// version again. Each browser remembers its own pick.
+let verSmall = false; try { verSmall = localStorage.getItem('bp.verSmall') === '1'; } catch { }
+function showPanelVer() {
+  const n = $('#panelVer'); n.classList.toggle('small', verSmall);
+  n.textContent = verSmall ? '🏷' : panelVersionName();
+  n.title = verSmall ? `Skynet Brewer version ${panelVersionName()}. Click to show it.` : 'Skynet Brewer version. Click to make it a small icon. ☰ Menu > About says if it is the latest.';
+}
+$('#panelVer').onclick = () => { verSmall = !verSmall; try { localStorage.setItem('bp.verSmall', verSmall ? '1' : '0'); } catch { } showPanelVer(); };
 const panelVersionName = () => { const v = S.panelVersion || {}; return v.version ? v.version + (v.changed ? ' + changes' : '') : '(not stamped)'; };
 // Panel version (version.json, stamped by GitHub on every merge) and whether GitHub has a newer one
 function panelVersionBox() {

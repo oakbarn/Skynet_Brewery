@@ -2,8 +2,8 @@
 
 A **Tab Style** is the look of the Devices and Widgets on a Tab. It sets, as two separate groups:
 
-- **Label** (the title of a Device or Widget): **Fore color**, **Back color**, **Font** and **Font size**.
-- **The Device or Widget itself**: **Fore color**, **Back color**, **Font** and **Font size**.
+- **Label** (the title of a Device or Widget): **Fore color**, **Back color**, **Font**, **Font size** and **Alignment** (Left, Centered or Right justified).
+- **The Device or Widget itself**: **Fore color**, **Back color**, **Font**, **Font size** and **Alignment**.
 
 A box left on **Default** keeps the look as it is now (the ☰ Menu > Default tab, then the panel's normal look).
 
@@ -23,6 +23,6 @@ A Tab Style **never writes over** a color, font or size a Device or Widget alrea
 - **One Tab:** Edit layout > **Tab settings** > **Tab Style**. The first choice, **(the Default tab's Style)**, makes the Tab follow the Default tab.
 - **Every Tab with none of its own:** ☰ Menu > **Default** tab > **Tab Style**. It starts on Skynet Default.
 
-The **Recipe** Tab in each sample Schema uses **Tennyson**, so you can see it: pick a sample with ☰ Menu > Schema > Clone a Schema.
+The **Recipe** Tab in each sample Schema uses **Tennyson**. A Schema you already had gets Tennyson on its **Recipe** Tab once, the first time it loads with this version (only if that Tab had no Tab Style yet). After that, change it in Tab settings any time.
 
 The Text Widget and the labels on vessels and equipment follow the Tab Style the same way. See also [Text Widget](91-text-widget) and [Timer Widget](92-timer-widget).
