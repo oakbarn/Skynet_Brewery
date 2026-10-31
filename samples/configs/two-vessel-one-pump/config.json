@@ -136,7 +136,7 @@
    "label": "Hop alarm (tap = added)",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
-   "imageOn": "Images/Skynet/Alarms/AlarmBitter.png",
+   "imageOn": "Images/Skynet/Alarms/AlarmBitter.svg",
    "hideName": true,
    "activeText": ""
   },
@@ -1346,8 +1346,8 @@
    "type": "picture",
    "workspace": "Brewhouse",
    "follow": "Kettle_Heat",
-   "imageOn": "Images/Skynet/Other_Equipment/BigMacRElementOn.png",
-   "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.png",
+   "imageOn": "Images/Skynet/Other_Equipment/BigMacRElementOn.svg",
+   "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.svg",
    "x": 695,
    "y": 340,
    "w": 110,
@@ -1369,13 +1369,13 @@
    "h": 110,
    "ipIn": "left",
    "ipOut": "right",
-   "imageOn": "Images/Skynet/Pumps/Pump_Red_Rip_On.png",
-   "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.png",
+   "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.svg",
    "hideValue": true,
    "tap": "toggle",
    "confirm": true,
    "onText": "ON",
-   "offText": "OFF"
+   "offText": "OFF",
+   "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt_Corner.svg"
   },
   {
    "name": "Chiller_Water",
@@ -1397,111 +1397,146 @@
    "name": "V_Kettle_Out",
    "type": "digitalOut",
    "subtype": "valve",
+   "template": "Skynet_Motorized_Ball_Valve_VL",
+   "templateCls": "skynet",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
    "channel": 24,
    "label": "Kettle out",
-   "x": 718,
-   "y": 473,
-   "w": 64,
-   "h": 55,
-   "ipIn": "top",
-   "ipOut": "bottom",
-   "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png",
-   "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png",
+   "x": 691,
+   "y": 456,
+   "w": 77,
+   "h": 90,
+   "valveType": "electric",
+   "service": "room",
+   "typeCode": "E_L_Vlv",
+   "orientation": "v",
    "hideName": true,
    "hideValue": true,
+   "look": "normal",
    "tap": "toggle",
+   "tapwater": false,
+   "showOnOffText": false,
    "onText": "OPEN",
-   "offText": "CLOSED"
+   "offText": "CLOSED",
+   "imageOn": "Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg",
+   "imageOff": "Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg"
   },
   {
    "name": "V_MLT_Out",
    "type": "digitalOut",
    "subtype": "valve",
+   "template": "Skynet_Motorized_Ball_Valve_VL",
+   "templateCls": "skynet",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
    "channel": 25,
    "label": "Mash tun out",
-   "x": 1298,
-   "y": 473,
-   "w": 64,
-   "h": 55,
-   "ipIn": "top",
-   "ipOut": "bottom",
-   "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png",
-   "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png",
+   "x": 1271,
+   "y": 456,
+   "w": 77,
+   "h": 90,
+   "valveType": "electric",
+   "service": "room",
+   "typeCode": "E_L_Vlv",
+   "orientation": "v",
    "hideName": true,
    "hideValue": true,
+   "look": "normal",
    "tap": "toggle",
+   "tapwater": false,
+   "showOnOffText": false,
    "onText": "OPEN",
-   "offText": "CLOSED"
+   "offText": "CLOSED",
+   "imageOn": "Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg",
+   "imageOff": "Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg"
   },
   {
    "name": "V_To_MLT",
    "type": "digitalOut",
    "subtype": "valve",
+   "template": "Skynet_Motorized_Ball_Valve_VL",
+   "templateCls": "skynet",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
    "channel": 26,
    "label": "To mash tun",
-   "x": 1088,
-   "y": 443,
-   "w": 64,
-   "h": 55,
-   "ipIn": "top",
-   "ipOut": "bottom",
-   "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png",
-   "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png",
+   "x": 1061,
+   "y": 426,
+   "w": 77,
+   "h": 90,
+   "valveType": "electric",
+   "service": "room",
+   "typeCode": "E_L_Vlv",
+   "orientation": "v",
    "hideName": true,
    "hideValue": true,
+   "look": "normal",
    "tap": "toggle",
+   "tapwater": false,
+   "showOnOffText": false,
    "onText": "OPEN",
-   "offText": "CLOSED"
+   "offText": "CLOSED",
+   "imageOn": "Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg",
+   "imageOff": "Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg"
   },
   {
    "name": "V_To_Kettle",
    "type": "digitalOut",
    "subtype": "valve",
+   "template": "Skynet_Motorized_Ball_Valve_VL",
+   "templateCls": "skynet",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
    "channel": 27,
    "label": "To kettle",
-   "x": 948,
-   "y": 443,
-   "w": 64,
-   "h": 55,
-   "ipIn": "top",
-   "ipOut": "bottom",
-   "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png",
-   "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png",
+   "x": 921,
+   "y": 426,
+   "w": 77,
+   "h": 90,
+   "valveType": "electric",
+   "service": "room",
+   "typeCode": "E_L_Vlv",
+   "orientation": "v",
    "hideName": true,
    "hideValue": true,
+   "look": "normal",
    "tap": "toggle",
+   "tapwater": false,
+   "showOnOffText": false,
    "onText": "OPEN",
-   "offText": "CLOSED"
+   "offText": "CLOSED",
+   "imageOn": "Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg",
+   "imageOff": "Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg"
   },
   {
    "name": "V_To_Ferm",
    "type": "digitalOut",
    "subtype": "valve",
+   "template": "Skynet_Motorized_Ball_Valve_H",
+   "templateCls": "skynet",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
    "channel": 28,
    "label": "To fermenter",
-   "x": 1228,
-   "y": 773,
-   "w": 64,
-   "h": 55,
-   "ipIn": "left",
-   "ipOut": "right",
-   "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
-   "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
+   "x": 1215,
+   "y": 741,
+   "w": 90,
+   "h": 77,
+   "valveType": "electric",
+   "service": "room",
+   "typeCode": "E_L_Vlv",
+   "orientation": "h",
    "hideName": true,
    "hideValue": true,
+   "look": "normal",
    "tap": "toggle",
+   "tapwater": false,
+   "showOnOffText": false,
    "onText": "OPEN",
-   "offText": "CLOSED"
+   "offText": "CLOSED",
+   "imageOn": "Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg",
+   "imageOff": "Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg"
   }
  ],
  "graphics": [
@@ -1669,7 +1704,6 @@
    "id": "tee_s",
    "kind": "ip",
    "workspace": "Brewhouse",
-   "label": "Suction tee",
    "x": 805,
    "y": 640,
    "w": 30,
@@ -1683,7 +1717,6 @@
    "id": "tee_d",
    "kind": "ip",
    "workspace": "Brewhouse",
-   "label": "Pump out tee",
    "x": 1105,
    "y": 640,
    "w": 30,
@@ -1697,7 +1730,6 @@
    "id": "tee_d2",
    "kind": "ip",
    "workspace": "Brewhouse",
-   "label": "Top tee",
    "x": 1035,
    "y": 545,
    "w": 30,
@@ -1720,7 +1752,7 @@
     ],
     [
      750,
-     472
+     456
     ]
    ],
    "width": 10,
@@ -1736,7 +1768,7 @@
    "points": [
     [
      750,
-     527
+     546
     ],
     [
      750,
@@ -1764,7 +1796,7 @@
     ],
     [
      1330,
-     472
+     456
     ]
    ],
    "width": 10,
@@ -1780,7 +1812,7 @@
    "points": [
     [
      1330,
-     527
+     546
     ],
     [
      1330,
@@ -1852,7 +1884,7 @@
     ],
     [
      1120,
-     497
+     516
     ]
    ],
    "width": 10,
@@ -1868,7 +1900,7 @@
    "points": [
     [
      1120,
-     442
+     426
     ],
     [
      1120,
@@ -1928,7 +1960,7 @@
     ],
     [
      980,
-     497
+     516
     ]
    ],
    "width": 10,
@@ -1944,7 +1976,7 @@
    "points": [
     [
      980,
-     442
+     426
     ],
     [
      980,
@@ -1975,7 +2007,7 @@
      800
     ],
     [
-     1228,
+     1215,
      800
     ]
    ],
@@ -1991,7 +2023,7 @@
    "to": "ip_ferm",
    "points": [
     [
-     1292,
+     1305,
      800
     ],
     [

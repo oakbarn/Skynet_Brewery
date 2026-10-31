@@ -127,7 +127,7 @@
    "label": "Hop alarm (tap = added)",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
-   "imageOn": "Images/Skynet/Alarms/AlarmBitter.png",
+   "imageOn": "Images/Skynet/Alarms/AlarmBitter.svg",
    "hideName": true,
    "activeText": ""
   },

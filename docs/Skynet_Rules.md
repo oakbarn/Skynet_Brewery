@@ -107,6 +107,15 @@ from_To_to: `skc_Kg_To_Lb`, `skc_PSI_To_kPa`. A Process uses one like a number
 (`gGV_Lb = gGV_Kg * skc_Kg_To_Lb`). Nobody can change them (Rule 3.11), and no Device, Widget or
 variable name can start `skc_`. (Fritz, 2026-10-30, thread "Add Skynet unit conversion constants", Help 94)
 
+1.18 **Skynet names: `skn_` and `sk_`.** **`skn_`** = a **Skynet internal Global**, set by Skynet and read only in a
+Process: `skn_Boil_Temp` (the temperature water boils at here and now, in the panel's units), `skn_Boil_Temp_C`,
+`skn_Boil_Temp_F`, `skn_Air_Pressure` (hPa). **`sk_`** = a **Skynet role** that holds one temperature probe (by its hidden
+key, so a rename keeps it): `sk_Boil_Probe_1-3`, `sk_Mash_Probe_1-3`, `sk_HLT_Probe_1-3`, `sk_Ferment_Probe_1-10`, set on
+☰ Menu > Default > Probe roles. In a Process a role works like its probe's name. One probe per role, one role per probe.
+**`wait_boil`** waits until `sk_Boil_Probe_1` reaches `skn_Boil_Temp`; `wait_boil = 211` (or `99.8`) waits for that
+temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
+at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -215,6 +224,28 @@ with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it si
 next wait runs as normal. **Only one Override button on a Tab**; it can be on several Tabs, each with its own Label (default
 "Override") and look. A user changes only the Label and its style (font, size, bold, fore, back, alignment), **never a background
 picture**. Manual valves still wait for their click or Done; Looper Processes are left alone. (thread "Add an Override button", Help 96)
+
+2.27 **User Profile** (☰ Menu > ⚙ User Profile, also Settings > User Profile): where the brewery is (country, zip or
+postal code, or city; optional airport, height and a typed air pressure). The Brain gets the air pressure from the nearest
+airport's report (or the weather service, or standard air with a warning when offline), every 30 minutes, and works out
+`skn_Boil_Temp` (Rule 1.18). One place for the Brain, the same for every user; Admins change it. (Fritz, 2026-10-30, Help 97)
+
+2.28 **Tab Styles** (Fritz, 2026-10-30): a Tab's Style sets the look of the Devices and Widgets on it, as two separate groups:
+the **Label** (Fore, Back, Font, Font size, Alignment) and **the Device or Widget itself** (Fore, Back, Font, Font size, Alignment). Skynet Styles 🔒
+(**Skynet Default**, **Tennyson**) are never changed by a user; a user makes User Styles (Rule 2.24). A Tab with none of its own
+uses the ☰ Menu > Default tab's Tab Style. **A Tab Style never writes over an item's own look: only items with no Fore and
+Back of their own change.** Tennyson = Label black (0 0 0) on RGB 195 195 195, Comic Sans MS 16; the item itself as now. The
+sample Schemas' Recipe Tabs use Tennyson. (thread "Add Tab Styles and Version display", Help 101)
+
+2.29 **About is always at the top of the ☰ Menu**; it can't be moved in the Order list. On Windows the Command Prompt
+window goes down to the task bar once the panel is up. (Fritz, 2026-10-30)
+
+2.30 **Hidden Special Tabs** (Fritz, 2026-10-30): a Tab named **Hidden_...** shows only in Edit layout; the rest of the time
+it works in the background (Processes still use what is on it). Edit layout > 👻 Hidden tab makes Hidden_1, Hidden_2 ...; the
+part after Hidden_ is editable, Hidden_ always stays. (Help 103)
+
+2.31 **Process Version** (Fritz, 2026-10-30): every Process can have a Version, **YYMMDD_HH_MM_n** (Brain's clock; n counts up
+only within the same minute), shown on the Process editor bar with an **Update Version** button (Admins). (Help 102)
 
 ## 3. Names and file names
 
@@ -652,7 +683,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **97**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **98**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -709,6 +740,15 @@ Importing Norms document")
 standard changes, existing Schemas, Processes, names and files are changed to it (with backups),
 rather than keeping the old way working beside the new one. (Fritz, 2026-10-28, thread "Rename vAPI
 and vKonstant to gAPI and gKonstant")
+
+15.3 **Old style goes to the Delete folder.** When a new Rule, standard or Skynet Template replaces an old way, every
+sample Schema, the default Schema, the Skynet Templates and every other file Skynet ships are changed to the new way in
+the same change. The files that are no longer used are **moved to the `Delete/` folder** of the repo (same folder path
+inside it, with a line in `Delete/README.md` saying what replaced each one), **never deleted**; Fritz decides when a
+file there goes for good. `Delete/` is not used by the panel and is left out of the release zip and the installer.
+First use: the old Ball valve pictures (Valve_Ball_*) gave way to the Skynet Motorized Ball Valve Device Templates
+(Rule 5.17) in the 2 and 3 vessel samples and the default Schema. (Fritz, 2026-10-31, thread "Update samples to the
+new valve and Rules")
 
 ---
 
@@ -802,6 +842,16 @@ ml, tsp, tbsp, cup, pt, qt, l, gal, items; Type: Spice, Fining, Water Agent, Her
 Secondary, Bottling; Time Unit: min, hr, day, week). Adjunct-type fermentables (flaked grains) stay on the Fermentable tab
 because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skynet_Fields `rcp_Adjunct_N_...`,
 `rcp_Adjunct_Count`. (Help 99)
+
+17.10 **MASH tab and Waters tab** (Fritz, 2026-10-31: "Mash Profile and Water Profiles can be built as well"). MASH: the
+Mash Profile dropdown (Skynet Templates, the user's own, or the Recipe's own mash). A picked profile shows read only (Step N,
+Temp, Time, then Sparge Type, Sparge Temperature, Batch Rest, Mash Out); **Copy into this Recipe** makes it the Recipe's own
+mash, which is edited here (Mash Step +, Delete, the Recipe's sparge boxes). Waters: the Water Profile dropdown, the minerals
+after the distilled or RO cut, % distilled, SO4 : Cl and pH (read only; the profile is changed on ☰ Menu > Water Profile), then
+the waters the recipe file listed. Skynet_Fields `rcp_Mash_Step_N_Name/Temp/Time`, `rcp_Water_Ca`, `_Mg`, `_Na`, `_SO4`, `_Cl`,
+`_HCO3`, `rcp_Water_Distilled_Pct`, `rcp_Water_SO4_Cl`, `rcp_Water_PH`. Two more Skynet Mash Profile Templates (Fritz):
+**Skynet Single Step, Batch Sparge** (152 °F 60 min, mash out 168 °F, batch sparge, 10 min rest) and **Skynet 3 Mash Steps, Fly
+Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly sparge at 168 °F). (Help 99)
 
 ---
 
@@ -910,12 +960,19 @@ because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skyne
   (thread "Close the command window on exit")
 - 2026-10-30: Added Rule 2.26 (the Override button: one per Tab, per-Tab Label and style, passes a wait, sleep or loop 100 ms
   after the press; Loopers and manual valves left alone). Help 96; next free Help number 97. (thread "Add an Override button")
+- 2026-10-30: Added Rules 1.18 (`skn_` Skynet internal Globals, `sk_` probe roles, `wait_boil`) and 2.27 (User Profile: where
+  the brewery is, air pressure from the nearest airport, `skn_Boil_Temp`). Help 97; next free Help number 98. (thread "Find
+  boil temperature from local pressure")
 - 2026-10-30: Rule 1.16 rewritten (gKonstant and gAPI become one class, gGlobal, prefixes gG); Rule 2.6 says gGlobal
   List; added Rule 6.14 (Database and .API on every Device and Widget, readings kept by hidden key, API safeguards,
   `log` is `send_db`). Help 98 used; next free Help number 99. (thread "Send any Device or Widget to a database")
 - 2026-10-30: Added Rule 6.15 (Close all / Open all valve lists; a tap water valve always on Close all, never on Open all) and
   section 16 (the Standard Skynet Brew Process: seven major steps, Skynet and User Process Templates, rcp_ Recipe values, ask). Help 100.
   (thread "Build the Standard Skynet Brew Process")
+- 2026-10-30: Added Rule 2.28 (Tab Styles: Label and item groups, Skynet Default and Tennyson, Default tab's Tab Style, only items
+  with no look of their own change). Help 101. (thread "Add Tab Styles and Version display")
+- 2026-10-30: Added Rules 2.29 (About at the top of ☰ Menu; Command Prompt minimizes), 2.30 (Hidden_ Special Tabs, Help 103) and
+  2.31 (Process Version YYMMDD_HH_MM_n, Help 102). Next free Help number 104. (thread "Add Tab Styles and Version display")
 - 2026-10-31: Added section 17 Recipes (Rules 17.1 to 17.6: the Recipe tab layout, Skynet_Fields, .bsmx and BeerXML import with
   no limits, hop order and merged alerts, voice files, Skynet Mash and Water Profiles). Help 99. (thread "Build the Recipe Tab
   with BeerSmith import")
@@ -928,3 +985,7 @@ because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skyne
 - 2026-10-31: Rule 17.8 adds Fritz's Fermentable tab layout: Amount with its own Measurement, select-only BeerXML Measurement and
   Type lists. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Added Rule 17.9 (the Adjuncts tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-10-31: Added Rule 17.10 (MASH and Waters tabs; Skynet Mash Profile Templates Single Step Batch Sparge and 3 Mash Steps
+  Fly Sparge). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-10-31: Added Rule 15.3 (old style goes to the Delete folder: samples, the default Schema, Skynet Templates and shipped
+  files follow a new Rule or Template at once; retired files move to Delete/, never deleted). (thread "Update samples to the new valve and Rules")

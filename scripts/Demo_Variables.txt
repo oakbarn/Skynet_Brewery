@@ -3,7 +3,7 @@
 gGS_Batch_Status = "Demo running"
 gGDT_Brew_Day = now
 gGDT_Last_Brew = now
-gG_Burner_Pic = "Images/Skynet/Other_Equipment/Burner No Flame.png"
+gG_Burner_Pic = "Images/Skynet/Other_Equipment/Burner No Flame.svg"
 print "Brewer: " + gGS_Brewer
 print "Strike target: " + gGV_Strike_Target
 if gGSW_Testing == true
@@ -12,7 +12,7 @@ endif
 print "Press Ping (the momentary button) on the Variables Demo workspace"
 wait gGMB_Ping == true
 print "Ping seen - lighting the burner picture"
-gG_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.png"
+gG_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.svg"
 gGL_Brew_Notes = gGL_Brew_Notes + "\n- Ping pressed " + now
 gGS_Batch_Status = "Ping pressed"
 send_db "gGS_Batch_Status"

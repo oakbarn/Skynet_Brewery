@@ -142,14 +142,14 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 
 | Name | What it shows | Size | Used by |
 |---|---|---|---|
-| `Valve_Ball_ClosedH_1.png` | Original PNG (Valve Ball ClosedH 1). | 139x119 px | On/Off picture list "Ball valve closed (horizontal)"; sample Schema (config/brewery.json) |
-| `Valve_Ball_ClosedH_1.svg` | motorised ball valve, closed, horizontal pipe. Same size and pipe spot as Valve_Ball_ClosedH_1.png. | viewBox 0 0 139 119 (139x119) | not used yet |
-| `Valve_Ball_ClosedV-1x1.png` | Original PNG (Valve Ball ClosedV-1x1). | 119x141 px | On/Off picture list "Ball valve closed (vertical)" |
-| `Valve_Ball_ClosedV-1x1.svg` | motorised ball valve, closed, vertical pipe. Same size and pipe spot as Valve_Ball_ClosedV-1x1.png. | viewBox 0 0 119 141 (119x141) | not used yet |
-| `Valve_Ball_OpenH_1.png` | Original PNG (Valve Ball OpenH 1). | 139x119 px | On/Off picture list "Ball valve open (horizontal)"; Skynet Bundled Fitting picture choice; sample Schema (config/brewery.json) |
-| `Valve_Ball_OpenH_1.svg` | Auto-traced SVG of Valve_Ball_OpenH_1 (made by the panel; quality only fair). | viewBox 0 0 139 119 (139x119) | not used yet |
-| `Valve_Ball_OpenV-1x1.png` | Original PNG (Valve Ball OpenV-1x1). | 119x141 px | On/Off picture list "Ball valve open (vertical)"; Skynet Bundled Fitting picture choice |
-| `Valve_Ball_OpenV-1x1.svg` | Auto-traced SVG of Valve_Ball_OpenV-1x1 (made by the panel; quality only fair). | viewBox 0 0 119 141 (119x141) | not used yet |
+| `Valve_Ball_ClosedH_1.png` | Original PNG (Valve Ball ClosedH 1). | 139x119 px | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
+| `Valve_Ball_ClosedH_1.svg` | motorised ball valve, closed, horizontal pipe. Same size and pipe spot as Valve_Ball_ClosedH_1.png. | viewBox 0 0 139 119 (139x119) | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
+| `Valve_Ball_ClosedV-1x1.png` | Original PNG (Valve Ball ClosedV-1x1). | 119x141 px | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
+| `Valve_Ball_ClosedV-1x1.svg` | motorised ball valve, closed, vertical pipe. Same size and pipe spot as Valve_Ball_ClosedV-1x1.png. | viewBox 0 0 119 141 (119x141) | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
+| `Valve_Ball_OpenH_1.png` | Original PNG (Valve Ball OpenH 1). | 139x119 px | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
+| `Valve_Ball_OpenH_1.svg` | Auto-traced SVG of Valve_Ball_OpenH_1 (made by the panel; quality only fair). | viewBox 0 0 139 119 (139x119) | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
+| `Valve_Ball_OpenV-1x1.png` | Original PNG (Valve Ball OpenV-1x1). | 119x141 px | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
+| `Valve_Ball_OpenV-1x1.svg` | Auto-traced SVG of Valve_Ball_OpenV-1x1 (made by the panel; quality only fair). | viewBox 0 0 119 141 (119x141) | **Retired 2026-10-31: moved to Delete/ (Rule 15.3); replaced by the Skynet Motorized Ball Valve Device Templates** |
 | `Valve_Check.svg` | Skynet check valve: openings at the middle of the Left (flow in) and Right (flow out) edges. The arrow shows the only way liquid can go. | viewBox 0 0 100 100 (100x100) | Fitting Template Check_Valve; Skynet Bundled Fitting picture choice |
 | `Valve_Gas_Solenoid_ClosedH.svg` | Skynet solenoid gas valve, closed (ring; brass body, black coil with a flame), horizontal: pipe ends at the middle of the Left and Right edges, coil on top | viewBox 0 0 140 120 (140x120) | On/Off picture list "Solenoid gas valve closed (horizontal)" |
 | `Valve_Gas_Solenoid_ClosedV_L.svg` | Skynet solenoid gas valve, closed (ring; brass body, black coil with a flame), vertical: pipe ends at the middle of the Top and Bottom edges, coil on the left | viewBox 0 0 120 140 (120x140) | On/Off picture list "Solenoid gas valve closed (vertical, coil left)" |
