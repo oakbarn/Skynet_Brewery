@@ -105,7 +105,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
 // The yellow ? icons on the ☰ Menu tabs: a heading in a Menu tab goes to the Help part named for it ("_" = any other heading).
 // A heading matches when its text starts with the name (after a 🔒). Section headings inside a form only get an icon when named.
 const MENU_TOPICS = {
-  default: { Text: ['text-boxes', 'defaults'], _: ['menu', 'the-default-tab'] },
+  default: { Text: ['text-boxes', 'defaults'], 'How amounts show': ['recipe-tab', 'recipe-defaults'], 'Hop alerts': ['recipe-tab', 'recipe-defaults'], _: ['menu', 'the-default-tab'] },
   equipment: { 'Equipment Profile': ['schemas-and-equipment-profiles', 'give-each-tab-its-equipment-profile'],
     'Equipment list': ['schemas-and-equipment-profiles', 'build-the-equipment-list'], 'Made on the Vessel tab': ['vessel-tab'], _: ['schemas-and-equipment-profiles', 'what-is-in-an-equipment-profile'] },
   vessel: { Size: ['vessel-tab', 'size'], Heat: ['vessel-tab', 'heat'], Temperature: ['vessel-tab', 'temperature-probe'], Ports: ['vessel-tab', 'ports-and-build'],
@@ -116,6 +116,8 @@ const MENU_TOPICS = {
   layout: { _: ['schemas-and-equipment-profiles', 'the-default-layout'] },
   mash: { _: ['mash-and-boil-profiles', 'mash-profile'] },
   boil: { _: ['mash-and-boil-profiles', 'boil-profile'] },
+  recipe: { 'Hop order': ['recipe-tab', 'hop-schedule-and-alerts'], Alerts: ['recipe-tab', 'hop-schedule-and-alerts'], 'Hop alerts': ['recipe-tab', 'hop-schedule-and-alerts'], _: ['recipe-tab'] },
+  water: { _: ['recipe-tab', 'water-profile'] },
   tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'give-a-tab-its-profile'], _: ['tab-and-valve-profiles', 'tab-background-profile'] },
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
   skynetpics: { _: ['get-skynet-pictures'] },

@@ -10,6 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, RECIPE_FIELDS } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -122,8 +123,8 @@ async function load() {
   $('#panelVer').textContent = panelVersionName();
   setTextLarge();
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
-  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
-    ...['mash', 'boil', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
+  [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
+    ...['mash', 'boil', 'water', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
   fillAddType();
   document.body.classList.toggle('hideMenuBar', menuBarHides());
   renderAll();
@@ -147,6 +148,8 @@ function connect() {
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
+  es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
+  es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); });
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
@@ -5187,12 +5190,17 @@ async function addInterfaceDialog(start = {}, { title, edit = false, intro } = {
 $('#addIfaceBtn').onclick = guard(() => addInterfaceDialog());
 
 // ---------------------------------------------------------------- import
+// BeerSmith recipe: a .bsmx (BeerSmith 3 or 4) or BeerXML .xml file becomes the Skynet Recipe (☰ Menu > Recipe). An .xml file also
+// fills the Globals named in Settings > BeerXML mapping, when a mapping is set (the older way, kept as Fritz asked)
 $('#importBtn').onclick = guard(async () => {
-  const f = $('#xmlFile').files[0]; if (!f) throw new Error('Choose a BeerXML file first');
-  const r = await api('POST', '/ui/import/beerxml', await f.text(), true);
-  $('#importResult').textContent = `Recipe: ${r.recipe}\nHops in recipe: ${r.hops}\nVariables set: ${r.set}` +
-    (r.missing.length ? `\n\nThese variables do not exist (create them or change the mapping in Settings):\n  ${r.missing.join('\n  ')}` : '') +
-    (r.warnings.length ? `\n\n${r.warnings.join('\n')}` : '');
+  const f = $('#xmlFile').files[0]; if (!f) throw new Error('Choose a .bsmx or BeerXML .xml file first');
+  const buf = await f.arrayBuffer(), r = await api('POST', `/ui/recipe/import?file=${encodeURIComponent(f.name)}`, buf, true);
+  let out = `Recipe "${r.name}" is now the Recipe (☰ Menu > Recipe).` + (r.names.length > 1 ? `\nThe file has ${r.names.length} recipes; the first was used. Import it on ☰ Menu > Recipe to pick another.` : '');
+  if (/\.xml$/i.test(f.name) && S.config.beerxml && Object.keys(S.config.beerxml).length) {
+    const g = await api('POST', '/ui/import/beerxml', new TextDecoder().decode(buf), true);
+    out += `\n\nBeerXML mapping: ${g.set} Globals set` + (g.missing.length ? `\nThese Globals do not exist (create them or change the mapping in Settings):\n  ${g.missing.join('\n  ')}` : '') + (g.warnings.length ? `\n${g.warnings.join('\n')}` : '');
+  }
+  $('#importResult').textContent = out; rcView = null;
 });
 
 // BruControl Schema (.brucfg configuration file)
@@ -5764,7 +5772,7 @@ const eqTab = () => { const ws = S.config.workspaces, by = n => ws.find(w => w.n
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const usedOnText = p => (p.usedOn || []).map(u => `${u.schema} (Tab ${u.tab ?? '?'})`).join(', ');
 let vesselWork = null, vesselDirty = false;   // the piece of equipment open on the Vessel tab
-const profWork = { mash: null, boil: null, tab: null, valve: null }, profDirty = { mash: false, boil: false, tab: false, valve: false };   // the profile open on each profile tab
+const profWork = { mash: null, boil: null, water: null, tab: null, valve: null }, profDirty = { mash: false, boil: false, water: false, tab: false, valve: false, recipe: false };   // the profile open on each profile tab (recipe: the Recipe tab has changes not saved)
 let menuTab = null;                           // the Menu tab showing now (null: the screen tabs)
 const menuOpen = [];                          // Menu tabs picked and not closed yet
 const EQ_KINDS = ['vessel', 'pchiller', 'ccoil', 'herms', 'trub', 'rims'];
@@ -5784,7 +5792,8 @@ const MENU = [
   { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
   { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Ferment), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
-  { key: 'recipe', title: 'Recipe', coming: 'Coming in the next stage (BeerSmith import, scaling, SRM and IBU)' },
+  { key: 'recipe', title: 'Recipe', tip: 'The Recipe for brew day: import a BeerSmith .bsmx or BeerXML file, or fill it in. Grains, Hops, Misc, Yeast, Water, Mash and the Hop Schedule', render: renderRecipeTab },
+  { key: 'water', title: 'Water Profile', tip: 'Your water: its minerals, and how much distilled or RO water it is cut with', render: renderBrewProfileTab('water') },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
   { key: 'buildtemplate', title: 'Build Template', tip: 'Make and change Device Templates: every attribute, and a "user can set" box on each (Admins)', render: renderBuildTemplateTab, admin: true },
   { key: 'skynetpics', title: 'Get Skynet pictures', tip: 'Copy new and changed Skynet pictures from GitHub onto the Brain (into media/Images/Skynet)', render: renderSkynetPicsTab, admin: true },
@@ -6043,6 +6052,21 @@ function renderDefaultTab(box) {
     ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Tab\'s own)')],
     ['mashProfile', 'Mash Profile', 'sel', pick(S.mashProfiles, '(none)')],
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
+    ['waterProfile', 'Water Profile', 'sel', pick(S.waterProfiles, '(none)')],
+    ['boilTime', 'Boil time (minutes)', 'num'],
+    ['efficiency', 'Brewhouse efficiency (%)', 'num'],
+    ['_w2g', `Water to grain ratio (${displayUnits(w).ratioUnit})`, 'num'],
+    ['_grainT', `Grain temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'})`, 'num'],
+    ['_strikeOff', `Strike offset (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'} added to the strike temperature; empty = 0)`, 'num'],
+    ['_u', 'How amounts show (Recipe tab)', 'head'],
+    ...DISPLAY_UNITS.map(([k, l, ch]) => [k, l, 'sel', Object.entries(ch)]),
+    ['_un', 'A recipe is kept in kilograms, liters and °C, as BeerXML does, so changing these only changes how it shows. Units above picks the first choice of each when they are left alone.', 'note'],
+    ['_h', 'Hop alerts', 'head'],
+    ['hopWarnMinutes', `Warning before each hop drop (minutes; empty = ${RECIPE_DEFAULTS.hopWarnMinutes}, 0 = no warning)`, 'num'],
+    ['alertMergeMinutes', `Alerts this close together become one alert (minutes; empty = ${RECIPE_DEFAULTS.alertMergeMinutes})`, 'num'],
+    ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav; empty = none)', 'text'],
+    ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
+    ['voiceName', 'Browser voice (empty = the browser\'s usual voice)', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
     ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
@@ -6074,6 +6098,11 @@ function renderDefaultTab(box) {
     ['_p', 'Phones and tablets', 'head'],
     ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
     ['_pn', `This screen counts as ${touchOnly() ? 'a phone or tablet' : 'a computer (mouse)'}. Computers can always move things.`, 'note']];
+  // the recipe defaults are kept as L/kg and °C; the form shows them in the units picked
+  const du = displayUnits(d), offTo = c => du.tempUnit === 'F' ? c * 9 / 5 : c;
+  if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
+  if (d.grainTempC !== undefined) d._grainT = Math.round(cTo(d.grainTempC, du.tempUnit) * 10) / 10;
+  if (d.strikeOffsetC !== undefined) d._strikeOff = Math.round(offTo(d.strikeOffsetC) * 10) / 10;
   const f = paneForm(fields, d, () => { }, !admin);
   // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
   const now = h('input', { type: 'checkbox', class: 'soundNowSw', ...(soundOn ? { checked: true } : {}) });
@@ -6082,6 +6111,13 @@ function renderDefaultTab(box) {
   const save = guard(async () => {
     f.read();
     if (d.textLarge === '' || d.textLarge === null) delete d.textLarge;
+    const su = displayUnits(d);
+    for (const [k, from] of [['waterToGrain', () => toRatio(d._w2g, su.ratioUnit)], ['grainTempC', () => toC(d._grainT, su.tempUnit)], ['strikeOffsetC', () => su.tempUnit === 'F' ? d._strikeOff * 5 / 9 : d._strikeOff]]) {
+      const raw = { waterToGrain: d._w2g, grainTempC: d._grainT, strikeOffsetC: d._strikeOff }[k];
+      if (raw === undefined) delete d[k]; else d[k] = Math.round(from() * 1000) / 1000;
+    }
+    delete d._w2g; delete d._grainT; delete d._strikeOff;
+    for (const [k, t] of [['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     for (const [k, t, min] of [['nameFontSize', 'Name font size', 6], ['textWidth', 'Width', 10], ['textHeight', 'Height', 10], ['textX', 'X position', 0], ['textY', 'Y position', 0]])
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
@@ -7340,6 +7376,8 @@ const PK = { mash: { title: 'Mash Profile', list: () => S.mashProfiles, start: '
     about: 'Up to 4 mash steps, each with its temperature and time, then the sparge. A Recipe picks its Mash Profile from a dropdown.' },
   boil: { title: 'Boil Profile', list: () => S.boilProfiles, start: 'A 60 minute boil',
     about: 'The total boil time and how much boils off each hour. A Recipe picks its Boil Profile from a dropdown, and the volume check on the Equipment Profile tab uses it.' },
+  water: { title: 'Water Profile', list: () => S.waterProfiles, start: 'Distilled water (nothing in it)',
+    about: 'Your water as the water report gives it (ppm), and how much of it is cut with distilled or RO water. Skynet works out the water you brew with. A Recipe picks its Water Profile from a dropdown.' },
   tab: { title: 'Tab Background Profile', list: () => S.tabProfiles, start: 'Default colors, values as Text', noUnits: true,
     about: 'The background color of the tabs that use it, and the look a new device or widget on those tabs starts with. The look is copied only when the device or widget is made; after that, change it in its properties (or from a Process, for example Pump_1.valueColor = "Red").' },
   valve: { title: 'Valve Profile', list: () => S.valveProfiles, start: 'The vertical ball valve pictures', noUnits: true,
@@ -7362,6 +7400,13 @@ function profFields(kind) {
     if (kind === 'valve') return [['name', 'Name', 'text'], ['imageOpen', 'Graphic when open', 'gpick'], ['imageClosed', 'Graphic when closed', 'gpick'],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
       ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
+    if (kind === 'water') {
+      const b = blendWater(w);
+      return [['name', 'Name', 'text'], ['_i', 'Source water (ppm, from the water report)', 'head'], ...WATER_IONS.map(([k, l]) => [k, l, 'num']), ['ph', 'pH', 'num'],
+        ['_d', 'Cut with distilled or RO water', 'head'], ['distilledPct', 'Distilled or RO water (% of all the water; 50 = half and half)', 'num'],
+        ['_r', `The water you brew with: ${WATER_IONS.map(([k, l]) => `${l.replace(/ \(.*/, '')} ${b[k]}`).join(', ')}${b.so4cl !== null ? `. Sulfate to chloride ${b.so4cl}` : ''} (as last saved)`, 'note'],
+        ['notes', 'Notes', 'area']];
+    }
     if (kind === 'boil') return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
       ['boilTime', 'Total boil time (minutes)', 'num'], ['boilOffRate', `Boil off (${u} per hour)`, 'num'], ['notes', 'Notes', 'area']];
     return [['name', 'Name', 'text'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
@@ -7390,8 +7435,10 @@ function renderBrewProfileTab(kind) {
     box.append(h('h3', {}, K.title), h('p', { class: 'muted' }, K.about), h('div', { class: 'bar menuPick' }, h('span', {}, 'Open'), pick));
     const w = profWork[kind];
     if (!w) return box.append(h('p', { class: 'muted' }, admin ? 'Pick Add new ... to make one.' : 'None made yet.'));
-    const state = h('span', { class: 'muted' }, profDirty[kind] ? 'Not saved yet' : 'Saved');
-    const f = paneForm(profFields(kind), w, () => { profDirty[kind] = true; state.textContent = 'Not saved yet'; }, !admin);
+    // a Skynet Template is read only: Add new ... starts a copy of it to change
+    const sk = !!w.skynet, edit = admin && !sk;
+    const state = h('span', { class: 'muted' }, sk ? `Skynet Template: it cannot be changed. Pick Add new ... and start from a copy of "${w.name}" to make your own.` : profDirty[kind] ? 'Not saved yet' : 'Saved');
+    const f = paneForm(profFields(kind), w, () => { profDirty[kind] = true; state.textContent = 'Not saved yet'; }, !edit);
     const save = guard(async () => {
       f.read();
       const r = await api('PUT', `/ui/profiles/${kind}/${w.id}`, kind === 'mash' ? fieldsToSteps(w) : w);
@@ -7402,7 +7449,7 @@ function renderBrewProfileTab(kind) {
       const r = await api('DELETE', `/ui/profiles/${kind}/${w.id}`);
       S[kind + 'Profiles'] = r.list; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); toast(`"${w.name}" deleted`);
     });
-    const buttons = () => admin ? saveBar(h('button', { class: 'danger', onclick: del }, 'Delete'), h('span', { class: 'spacer' }),
+    const buttons = () => edit ? saveBar(h('button', { class: 'danger', onclick: del }, 'Delete'), h('span', { class: 'spacer' }),
       h('button', { onclick: () => { if (profDirty[kind] && !confirm('Leave the changes that are not saved?')) return; profWork[kind] = null; profDirty[kind] = false; renderMenuPane(); } }, 'Cancel'),
       h('button', { class: 'primary', onclick: save }, 'Save')) : '';
     box.append(h('div', {}, state), buttons(), f.box, buttons());
@@ -7434,6 +7481,227 @@ async function newBrewProfile(kind) {
   const r = await api('POST', `/ui/profiles/${kind}`, { name: w.name, from: w.from || undefined, units: w.units });
   S[kind + 'Profiles'] = r.list; profWork[kind] = stepsToFields(clone(r.list.find(x => x.id === r.made))); profDirty[kind] = false;
   renderMenuPane(); toast(`${K.title} "${w.name}" made`);
+}
+
+// ---- ☰ Menu > Recipe (Fritz, 2026-10-30; his layout 2026-10-31): the Recipe for brew day. IMPORT a BeerSmith .bsmx
+// (BeerSmith 3 and 4) or a BeerXML .xml file, or start a NEW one. The Recipe tab is boxes Fritz laid out, colored by kind
+// (black: names, grey: times and choices, blue: volumes, red: temperatures, light grey: worked out by Calculate). The
+// Daughter Tabs (Hops, Drops, Grain, Yeast, Adjuncts, Waters, Mash) open from their buttons; Fritz sends their fields later.
+// The Recipe is kept in kg, L and °C (lib/recipe.js) and shows in the units picked on the Default tab.
+let rcView = null, rcWork = null, rcSub = 'recipe';
+const RC_DAUGHTERS = [
+  ['hops', 'HOPs', 'Add, Edit or Delete Hops. All Hops details. The Actual AAU of the Hops that are used in the Brew MUST be updated. The Actual AAU varies from the Recipe AAU and to obtain the desired IBUs, they must be calculated from the Actual AAUs and the Hops Amounts are adjusted.'],
+  ['drops', 'Drops', 'Displays the Calculated Hops Drops Grouping, Pre Warnings Times and Texts. These are filled from the Hop Data once Calculated.'],
+  ['grain', 'Grain', 'Add, Edit or Delete Grains or Fermentables. The Total weight of all Grains is used to calculate the Grain Weight for this Brew.'],
+  ['yeast', 'Yeast', 'Add, Edit or Delete Yeasts and Yeast Starters'],
+  ['adjuncts', 'Adjuncts', 'Add, Edit or Delete Adjuncts such as Whirlfloc or Yeast Nutrient.'],
+  ['waters', 'Waters', 'Water Profile'],
+  ['mash', 'MASH', 'Mash Profile'],
+];
+const RC_STYLES = ['American Light Lager', 'American Lager', 'Cream Ale', 'American Wheat Beer', 'Blonde Ale', 'Kölsch', 'German Pils', 'Czech Premium Pale Lager', 'Munich Helles',
+  'Märzen', 'Vienna Lager', 'Munich Dunkel', 'Schwarzbier', 'Doppelbock', 'Weissbier', 'Witbier', 'Saison', 'Belgian Dubbel', 'Belgian Tripel', 'Belgian Dark Strong Ale',
+  'Ordinary Bitter', 'Best Bitter', 'Strong Bitter', 'English IPA', 'Irish Red Ale', 'Irish Stout', 'Oatmeal Stout', 'Sweet Stout', 'American Porter', 'English Porter',
+  'American Pale Ale', 'American Amber Ale', 'American Brown Ale', 'American IPA', 'Double IPA', 'Hazy IPA', 'American Stout', 'Imperial Stout', 'Scottish Export',
+  'Wee Heavy', 'English Barleywine', 'American Barleywine', 'Fruit Beer', 'Spice, Herb, or Vegetable Beer', 'Specialty Beer'];
+const rcUnits = () => displayUnits(S.config.brewDefaults || {});
+const rcRound = (v, d = 2) => v === null || v === undefined || v === '' || !Number.isFinite(+v) ? '' : (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
+const TU = u => u === 'F' ? '°F' : '°C';
+const rcFrom = rc => rc.sourceFormat === 'bsmx' ? `BeerSmith ${rc.sourceVersion ? rc.sourceVersion + ' ' : ''}.bsmx` : rc.sourceFormat === 'beerxml' ? 'BeerXML' : 'made here';
+const rcMashProfile = rc => S.mashProfiles.find(x => x.id === rc.mashProfile) || null;
+async function rcLoad() { rcView = await api('GET', '/ui/recipe'); rcWork = clone(rcView.recipe); profDirty.recipe = false; }
+function renderRecipeTab(box) {
+  if (!rcView) { box.append(h('h3', {}, 'Recipe'), h('p', { class: 'muted' }, 'Loading ...')); rcLoad().then(renderMenuPane).catch(e => toast(e.message, true)); return; }
+  const op = can('operator'), rc = rcWork, u = rcUnits();
+  const state = h('span', { class: 'muted rcState' }, profDirty.recipe ? 'Not saved yet' : rcView.has ? '' : 'No Recipe yet: IMPORT one or press NEW');
+  const changed = () => { profDirty.recipe = true; state.textContent = 'Not saved yet'; };
+  const save = guard(async () => { await api('PUT', '/ui/recipe', rcWork); await rcLoad(); renderMenuPane(); toast('Recipe saved'); });
+  const cancel = guard(async () => { if (profDirty.recipe && !confirm('Leave the changes that are not saved?')) return; await rcLoad(); renderMenuPane(); });
+  const fresh = guard(async () => {
+    if (!confirm('Clear the Recipe and start a NEW one?\n\nIt starts with the Defaults (☰ Menu > Default). Save it to the Recipe library first if you want to keep it.')) return;
+    await api('POST', '/ui/recipe/new'); await rcLoad(); rcSub = 'recipe'; renderMenuPane(); toast('New Recipe');
+  });
+  // IMPORT: a .bsmx or .xml file from this computer or phone. A file with many recipes asks which one.
+  const file = h('input', { type: 'file', accept: '.bsmx,.xml,text/xml', hidden: true });
+  file.onchange = guard(async () => {
+    const f = file.files[0]; file.value = ''; if (!f) return;
+    if (profDirty.recipe && !confirm('The Recipe has changes that are not saved. Import over them?')) return;
+    const buf = await f.arrayBuffer(), q = `/ui/recipe/import?file=${encodeURIComponent(f.name)}`;
+    let r = await api('POST', q, buf, true);
+    if (r.names.length > 1) {
+      const w = { pick: '0' };
+      if (await dialog('Which recipe?', [['_n', `${f.name} has ${r.names.length} recipes. The first one was imported. Pick the one you want.`, 'note'],
+        ['pick', 'Recipe', 'sel', r.names.map((n, i) => [String(i), n])]], w) === 'ok') { readFields(w); if (w.pick !== '0') r = await api('POST', q + '&pick=' + w.pick, buf, true); }
+    }
+    await rcLoad(); rcSub = 'recipe'; renderMenuPane(); toast(`Recipe "${r.name}" imported`);
+  });
+  // the Recipe library: saved Recipes in config/recipes on the Brain
+  const lib = h('select', { class: 'rcLib', title: 'Recipe library: saved Recipes (config/recipes on the Brain)' }, h('option', { value: '' }, 'Library ...'),
+    ...rcView.saved.map(x => h('option', { value: x.id }, x.name)), ...(op ? [h('option', { value: '__save__' }, '💾 Save this Recipe to the library'), ...(rcView.saved.length ? [h('option', { value: '__del__' }, '🗑 Delete a saved Recipe ...')] : [])] : []));
+  lib.onchange = guard(async () => {
+    const v = lib.value; lib.value = '';
+    if (v === '__save__') { if (profDirty.recipe) await api('PUT', '/ui/recipe', rcWork); const same = rcView.saved.find(x => x.name === rcWork.name); await api('POST', '/ui/recipe/save', { id: same?.id }); await rcLoad(); renderMenuPane(); return toast(`"${rcWork.name}" saved to the library`); }
+    if (v === '__del__') {
+      const w = { id: rcView.saved[0].id };
+      if (await dialog('Delete a saved Recipe', [['id', 'Recipe', 'sel', rcView.saved.map(x => [x.id, x.name])]], w) !== 'ok') return;
+      readFields(w); await api('DELETE', `/ui/recipes/${w.id}`); await rcLoad(); renderMenuPane(); return toast('Deleted');
+    }
+    if (!v) return;
+    if (profDirty.recipe && !confirm('The Recipe has changes that are not saved. Open the saved one anyway?')) return;
+    await api('POST', `/ui/recipes/${v}/open`); await rcLoad(); renderMenuPane(); toast('Recipe opened');
+  });
+  const right = op ? h('div', { class: 'rcRight' }, state, lib, h('button', { onclick: cancel }, 'Cancel'), h('button', { class: 'primary', onclick: save }, 'Save')) : h('div', { class: 'rcRight' }, state);
+  const sub = RC_DAUGHTERS.find(d => d[0] === rcSub);
+  const crumb = sub ? h('button', { class: 'rcCrumb', onclick: () => { rcSub = 'recipe'; renderMenuPane(); }, title: 'Back to the Recipe tab' }, 'Recipe') : h('span', {}, 'Recipe');
+  box.append(file, h('div', { class: 'rcHead' }, h('h3', {}, crumb, sub ? ` > ${sub[1]}` : ': Import >'),
+    op && !sub ? [h('button', { class: 'rcYellow', onclick: () => file.click(), title: 'A BeerSmith .bsmx file (BeerSmith 3 or 4) or a BeerXML .xml file' }, 'IMPORT'),
+      h('button', { class: 'rcYellow', onclick: fresh, title: 'Clear the Recipe and start a new one from the Defaults' }, 'NEW'), h('b', {}, 'Fields can be edited.')] : '',
+    h('span', { class: 'spacer' }), right));
+  const pane = h('fieldset', { class: 'menuSet rcPane', ...(op ? {} : { disabled: true }) });
+  box.append(pane);
+  if (sub) rcDaughter(pane, rc, u, changed, sub); else rcMain(pane, rc, u, changed);
+}
+// one box of Fritz's layout: a colored header and the value under it. kind: k black (names), g grey (times, choices),
+// b blue (volumes), r red (temperatures), c light grey (worked out by Calculate, not typed)
+// field: its Skynet_Field name (rcp_, public/recipecalc.js), shown when the mouse rests on the box
+function rcBox(kind, title, el, { wide, unit, tip, field } = {}) {
+  if (field && !RECIPE_FIELDS.some(f => f[0] === field)) console.warn('No Skynet_Field ' + field);
+  return h('div', { class: `rcBox rc-${kind}${wide ? ' rcWideBox' : ''}`, title: [tip, field ? `Skynet_Field ${field}` : ''].filter(Boolean).join('\n'), ...(field ? { 'data-field': field } : {}) }, h('div', { class: 'rcBoxHead' }, title), h('div', { class: 'rcBoxVal' }, el, unit ? h('span', { class: 'rcUnit' }, unit) : ''));
+}
+// one input that shows a value in display units and keeps it in the Recipe's own units
+function rcInput(obj, key, { kind = 'num', to = v => v, from = v => v, list, d = 2, ro, onChange } = {}) {
+  const val = obj[key];
+  let el;
+  if (kind === 'sel') el = h('select', {}, ...list.map(([v, t]) => h('option', { value: v, ...(String(v) === String(val ?? '') ? { selected: true } : {}) }, t)));
+  else el = h('input', { type: kind === 'num' ? 'number' : 'text', step: 'any', value: kind === 'num' ? rcRound(to(val), d) : (val ?? '') });
+  if (ro) { el.disabled = true; el.tabIndex = -1; }
+  el.onchange = () => { const v = el.value; obj[key] = kind === 'num' ? (v === '' ? null : from(+v)) : v; onChange?.(); };
+  return el;
+}
+function rcMain(pane, rc, u, changed) {
+  rc.volumes = rc.volumes || {};
+  const c = { onChange: changed }, vol = { to: v => lTo(v, u.volumeUnit), from: v => toL(v, u.volumeUnit), ...c }, tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ...c };
+  const V = { unit: u.volumeUnit }, T = { unit: TU(u.tempUnit) };
+  // Style: a dropdown with "Add new ..." (Rule: multi-way = dropdown)
+  const styles = [...new Set([...RC_STYLES, ...(S.config.vesselLists?.styles || []), ...(rc.style ? [rc.style] : [])])];
+  const style = rcInput(rc, 'style', { kind: 'sel', list: [['', ''], ...styles.map(s => [s, s]), ['__add__', 'Add new ...']], ...c });
+  style.addEventListener('change', guard(async () => {
+    if (style.value !== '__add__') return;
+    const s = (prompt('New style name') || '').trim();
+    rc.style = s || rcView.recipe.style || '';
+    if (s && !styles.includes(s)) { const lists = S.config.vesselLists = { ...(S.config.vesselLists || {}) }; lists.styles = [...(lists.styles || []), s]; await api('PUT', '/ui/settings', { vesselLists: lists }); }
+    renderMenuPane();
+  }));
+  const calcBox = (title, key, show, unit, tip, field) => rcBox('c', title, h('input', { type: 'text', value: show(rc[key]), disabled: true, tabIndex: -1 }), { unit, tip, field });
+  const calc = guard(() => {
+    const mp = rcMashProfile(rc), r = calculateRecipe(rc, S.config.brewDefaults || {}, mp);
+    Object.assign(rc, r); changed(); renderMenuPane();
+    toast('Calculated. Press Save to keep it');
+  });
+  pane.append(
+    h('div', { class: 'rcRow' },
+      rcBox('k', 'Beer Name', rcInput(rc, 'name', { kind: 'text', ...c }), { wide: true, field: 'rcp_Name' }),
+      rcBox('k', 'Style', style, { wide: true, field: 'rcp_Style' }),
+      rcBox('k', 'Brew Length', rcInput(rc.volumes, 'batchLiters', vol), { ...V, tip: 'The batch size, into the fermenter', field: 'rcp_Batch_Volume' }),
+      calcBox('Grain Wt.', 'grainKg', v => rcRound(kgTo(v, u.grainUnit), 2), u.grainUnit, 'The weight of all the grains (Grain tab). Calculate works it out', 'rcp_Total_Grain_Weight'),
+      calcBox('1st Mash', 'firstMashC', v => rcRound(cTo(v, u.tempUnit), 1), TU(u.tempUnit), 'The first mash step (MASH tab). Calculate works it out', 'rcp_First_Mash_Temp'),
+      calcBox('IBU', 'ibuCalc', v => rcRound(v, 0), '', 'Bitterness from the Hops tab (Tinseth), with the Actual AAU of each hop. Calculate works it out', 'rcp_IBU'),
+      rcBox('b', 'Strike Volume', rcInput(rc, 'strikeLiters', vol), { ...V, field: 'rcp_Strike_Volume' }),
+      rcBox('r', 'Strike Temperature', rcInput(rc, 'strikeTempC', tmp), { ...T, field: 'rcp_Strike_Temp' }),
+      rcBox('r', 'Grain Temperature', rcInput(rc, 'grainTempC', tmp), { ...T, field: 'rcp_Grain_Temp' })),
+    h('div', { class: 'rcRow' },
+      rcBox('b', 'Sparge Volume', rcInput(rc, 'spargeLiters', vol), { ...V, field: 'rcp_Sparge_Volume' }),
+      rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'rcp_Sparge_Type' }),
+      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Sparge_Minutes' }),
+      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { ...T, field: 'rcp_Sparge_Temp' }),
+      rcBox('b', 'PreBoil Volume', rcInput(rc.volumes, 'boilLiters', vol), { ...V, field: 'rcp_Boil_Volume' }),
+      rcBox('g', 'Boil Minutes', rcInput(rc, 'boilTime', { d: 0, ...c }), { unit: 'min', field: 'rcp_Boil_Minutes' }),
+      rcBox('g', 'Whirlpool Minutes', rcInput(rc, 'whirlpoolMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Whirlpool_Minutes' }),
+      rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'rcp_Pitch_Temp' }),
+      rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'rcp_Grain_Ratio' }),
+      can('operator') ? h('button', { class: 'rcCalcBtn', onclick: calc, title: 'Works out the Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature, IBU, and the Strike and Sparge Volume and Temperature' }, 'Calculate') : ''),
+    h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'), h('span', { class: 'rcMini' }, 'Grain Wt.'), h('span', { class: 'rcMini' }, '1st Mash'), h('span', { class: 'rcMini' }, 'IBU'),
+      h('b', {}, 'These three fields are calculated from the Other Tabs, Grain, Mash, and Hops.')),
+    h('div', { class: 'rcLower' },
+      h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.map(([k, t, about]) => h('div', { class: 'rcDRow' },
+        h('button', { class: 'rcTabBtn', onclick: () => { rcSub = k; renderMenuPane(); }, title: 'Opens the ' + t + ' tab' }, t), h('span', {}, about)))),
+      h('div', { class: 'rcLegend' }, h('div', { class: 'rcDRow' }, h('span', { class: 'rcTabBtn rcTabDemo' }, 'CLICK Here'), h('span', {}, 'opens the Tab')),
+        h('div', { class: 'rcDRow' }, h('span', { class: 'rcCalcBtn rcCalcMini' }, 'Calculate'),
+          h('b', {}, 'calculates Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature. It also calculates the Strike Volume and Temperature Grain Temperature and Grain Ratio.')))),
+    h('p', { class: 'muted' }, `${rc.name ? `"${rc.name}": ` : ''}${rcFrom(rc)}${rc.sourceFile ? `, ${rc.sourceFile}` : ''}${rc.importedAt ? `, imported ${new Date(rc.importedAt).toLocaleString()}` : ''}. Amounts show in the units picked on ☰ Menu > Default.`));
+}
+// a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it
+function rcDaughter(pane, rc, u, changed, [k, t, about]) {
+  const I = rc.ingredients;
+  const list = (rows, empty) => rows.length ? h('ul', { class: 'rcList' }, ...rows.map(r => h('li', {}, r))) : h('p', { class: 'muted' }, empty);
+  const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
+  pane.append(h('p', {}, h('b', {}, about)), h('p', { class: 'muted rcSoon' }, `The fields and layout of the ${t} tab come next. Until then, here is what the Recipe holds for it.`));
+  if (k === 'hops') pane.append(list(I.hops.map(x => `${fmtW(x.kg, u.hopUnit)} ${x.name}, ${HOP_USES[x.use] || x.use}${x.use === 'boil' ? ` ${x.time} min (${boilKind(+x.time || 0)})` : x.use === 'dry hop' && x.dryDays ? ` ${x.dryDays} days` : ''}, ${x.alpha ?? '?'}% AAU (Recipe), ${x.alphaActual ?? '?'}% (Actual): use ${fmtW(hopKgToUse(x), u.hopUnit)}`), 'No hops in this Recipe.'));
+  if (k === 'drops') rcDrops(pane, rc);
+  if (k === 'grain') pane.append(list(I.fermentables.map(x => `${fmtW(x.kg, u.grainUnit)} ${x.name} (${FERMENTABLE_TYPES[x.type] || x.type}${x.color !== null ? `, ${x.color} °L` : ''})`), 'No grains in this Recipe.'));
+  if (k === 'yeast') pane.append(list(I.yeasts.map(x => `${x.amount ?? 1} × ${x.name}${x.lab ? `, ${x.lab}` : ''}${x.productId ? ` ${x.productId}` : ''}${x.starterL ? `, starter ${rcRound(lTo(x.starterL, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No yeast in this Recipe.'));
+  if (k === 'adjuncts') pane.append(list(I.miscs.map(x => { const [a, un] = miscShow(x.amount, x.unit, u.miscUnit); return `${a} ${un} ${x.name}, ${MISC_USES[x.use] || x.use}${x.time ? ` ${x.time} ${x.timeUnit || 'min'}` : ''}`; }), 'No adjuncts in this Recipe.'));
+  if (k === 'waters') {
+    const wp = S.waterProfiles.find(x => x.id === rc.waterProfile);
+    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Water_Profile' })),
+      wp ? h('p', {}, `${WATER_IONS.map(([i, l]) => `${l.replace(/ \(.*/, '')} ${blendWater(wp)[i]}`).join(', ')} ppm${+wp.distilledPct ? ` (after ${wp.distilledPct}% distilled)` : ''}`) : '',
+      list(I.waters.map(x => `${x.name}${x.liters ? `, ${rcRound(lTo(x.liters, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No waters in the recipe file.'));
+  }
+  if (k === 'mash') {
+    const mp = rcMashProfile(rc);
+    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', rc.mash?.steps?.length ? '(the mash from the recipe file)' : '(none)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Mash_Profile' })),
+      mp ? list(mp.steps.map(s => `${s.name}: ${s.temp} ${tempUnit(mp.units)} for ${s.time} min`), '')
+        : list((rc.mash?.steps || []).map(s => `${s.name}: ${rcRound(cTo(s.tempC, u.tempUnit), 1)} ${TU(u.tempUnit)} for ${s.min} min`), 'No mash steps in this Recipe.'));
+  }
+  pane.append(h('div', { class: 'bar' }, back));
+}
+// Drops: the results only. Skynet's hop order, every alert (merged when two land together) and their voice files
+function rcDrops(pane, rc) {
+  const sch = hopSchedule(rc, S.config.brewDefaults || {}), saved = rcView.schedule, same = !profDirty.recipe;
+  const groups = h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'Hop Group'), h('th', {}, 'When'), h('th', {}, 'What goes in'))),
+    h('tbody', {}, ...sch.groups.map((g, i) => h('tr', {}, h('td', {}, i + 1), h('td', {}, g.group ?? ''), h('td', {}, g.label), h('td', {}, g.what)))));
+  const alerts = h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'Minutes into the boil'), h('th', {}, 'Minutes left'), h('th', {}, 'Alert'), h('th', {}, 'Voice file (media/Audio/Hops)'))),
+    h('tbody', {}, ...(same ? saved.alerts : sch.alerts).map(a => h('tr', { class: a.kind === 'drop' ? 'rcDrop' : '' }, h('td', {}, rcRound(a.at, 0)), h('td', {}, rcRound(a.left, 0)),
+      h('td', { style: 'white-space:pre-line' }, (a.parts.length > 1 ? '⚠ ' : '') + a.text), h('td', {}, same ? voiceCell(a) : h('span', { class: 'muted' }, 'Save first'))))));
+  const st = rcView.alerts || {}, run = { timer: '' };
+  const timers = S.config.elements.filter(e => e.type === 'timer').map(e => [e.name, e.name]);
+  pane.append(h('h3', {}, 'Hop order'), groups, h('h3', {}, `Alerts (${sch.alerts.length}) over a ${sch.boilTime} minute boil, ${sch.warnMinutes} minute warnings`), alerts,
+    sch.conflicts.length ? h('ul', { class: 'rcList' }, ...sch.conflicts.map(x => h('li', {}, x.text))) : h('p', { class: 'muted' }, 'No two alerts land at the same time.'),
+    h('h3', {}, 'Hop alerts on brew day'), h('p', { class: 'muted' }, 'A Process starts them with start_hop_alerts (or start_hop_alerts "Boil_Timer" to follow the Boil timer) and stops them with stop_hop_alerts. Or start them here.'),
+    h('div', { class: 'bar' }, h('span', {}, st.running ? `Running (${st.sent} of ${st.of} sent${st.timer ? `, following ${st.timer}` : ''})` : 'Not running'),
+      can('operator') ? [rcInput(run, 'timer', { kind: 'sel', list: [['', 'Skynet clock (from now)'], ...timers] }),
+        h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'start', timer: run.timer }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '▶ Start hop alerts'),
+        h('button', { onclick: guard(async () => { const r = await api('POST', '/ui/recipe/alerts', { action: 'stop' }); toast(r.text); await rcLoad(); renderMenuPane(); }) }, '■ Stop'),
+        h('button', { title: 'Show and say the first alert now, to check the sound', onclick: () => (same ? saved : sch).alerts[0] ? hopAlert((same ? saved : sch).alerts[0]) : toast('No alerts', true) }, '🔊 Test the first alert')] : ''));
+}
+// the voice file of one alert: found, or the steps to make it by hand (a free text to voice web site, then put the file here)
+function voiceCell(a) {
+  const name = a.audio.split('/').pop();
+  if (a.audioFound) return h('span', {}, '✔ ' + name);
+  const up = h('input', { type: 'file', accept: '.mp3,.wav,.ogg,.m4a,audio/*', hidden: true });
+  up.onchange = guard(async () => {
+    const f = up.files[0]; up.value = ''; if (!f) return;
+    await api('PUT', `/ui/recipe/audio?name=${encodeURIComponent(name)}`, f, true); await rcLoad(); renderMenuPane(); toast(`Voice file saved as media/Audio/Hops/${name}`);
+  });
+  return h('span', { class: 'rcVoice' }, h('span', { class: 'muted' }, 'None yet: the browser\'s own voice says it. '),
+    h('button', { type: 'button', title: 'Copy the words to paste into the voice web site', onclick: () => navigator.clipboard?.writeText(a.speak).then(() => toast('Words copied: paste them into the voice site'), () => prompt('Copy these words', a.speak)) }, '1 Copy words'),
+    h('a', { href: 'https://ttsmp3.com/', target: '_blank', rel: 'noopener', class: 'btnLink', title: 'A free text to voice web site: paste the words, pick a voice, press Download MP3' }, '2 Open voice site'),
+    can('operator') ? h('button', { type: 'button', title: `Pick the MP3 you downloaded. It is saved as ${name} in media/Audio/Hops`, onclick: () => up.click() }, '3 Put the file here') : '', up);
+}
+// a hop alert on brew day: a bar that stays until closed, the alert sound (Default tab), then its voice file or the browser's voice
+function hopAlert(a) {
+  const d = S.config.brewDefaults || {};
+  const bar = h('div', { class: 'alertBar hopAlertBar' + (a.kind === 'drop' ? ' drop' : ''), role: 'alert' }, h('span', { style: 'white-space:pre-line' }, (a.kind === 'drop' ? '🌿 ' : '⏰ ') + a.text),
+    h('button', { title: 'Close', onclick: () => bar.remove() }, '✕'));
+  document.body.append(bar);
+  if (!soundOn) return;
+  const speak = () => {
+    if (a.audio && a.audioFound) return new Audio(media(a.audio)).play().catch(() => { });
+    if (d.speakAlerts === false || !window.speechSynthesis) return;
+    const ut = new SpeechSynthesisUtterance(a.speak || a.text);
+    if (d.voiceName) { const v = speechSynthesis.getVoices().find(x => x.name === d.voiceName); if (v) ut.voice = v; }
+    speechSynthesis.speak(ut);
+  };
+  if (d.hopAlertSound) { const s = new Audio(media(d.hopAlertSound)); s.onended = speak; s.play().catch(speak); } else speak();
 }
 
 // ---------------------------------------------------------------- start

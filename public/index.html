@@ -265,11 +265,11 @@
   <!-- ===== Import ===== -->
   <section id="view-import" class="view">
     <h3 id="sec-beersmith">BeerSmith recipe</h3>
-    <p>In BeerSmith: <em>File &gt; Export &gt; BeerXML</em>, then choose the .xml file here. Values go into the variables named in Settings &gt; BeerXML mapping.</p>
-    <input type="file" id="xmlFile" accept=".xml,text/xml" class="op-only">
+    <p>Choose a BeerSmith <b>.bsmx</b> file (BeerSmith 3 or 4: the recipe file BeerSmith saves) or a <b>BeerXML .xml</b> file (BeerSmith: <em>File &gt; Export &gt; BeerXML</em>; most other recipe programs export it too). It becomes the Recipe on <em>☰ Menu &gt; Recipe</em>, with every grain, hop, yeast and misc item. An .xml file also fills the Globals named in Settings &gt; BeerXML mapping, when one is set.</p>
+    <input type="file" id="xmlFile" accept=".bsmx,.xml,text/xml" class="op-only">
     <button id="importBtn" class="primary op-only">Import</button>
     <pre id="importResult"></pre>
-    <p class="muted">Other programs (Node-RED etc.) can POST the XML to <code>/api/import/beerxml</code>.</p>
+    <p class="muted">Other programs (Node-RED etc.) can POST the .bsmx or .xml file to <code>/api/import/recipe?file=MyBeer.bsmx</code>, or a Process can use <code>import_recipe "Recipes/MyBeer.bsmx"</code>.</p>
 
     <div class="admin-only">
     <h3 id="sec-brucontrol">BruControl Schema</h3>
