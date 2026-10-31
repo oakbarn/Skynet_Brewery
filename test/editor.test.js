@@ -26,12 +26,12 @@ const r = renumber(new Map([['a', '/* step "old"\n*/\nstep "Start"']]), () => 's
 assert.equal(r, '/* step "old"\n*/\nstep S1.00000 "Start"');
 
 // ---- colors
-const words = { elements: [{ name: 'Pump', type: 'digitalOut' }, { name: 'tm_Mash', type: 'timer' }, { name: 'gKV_A', type: 'gKonstant' }, { name: 'gAV_B', type: 'gAPI' }], processes: ['sub_Fill'] };
-const text = 'new value x\nif Pump == true and x < 2 // c\n  gAV_B = gKV_A + 1.5\n  tm_Mash.visible = "hi"\nstart sub_Fill\n[L]\ngoto L\nstep S1.00002 "a"';
+const words = { elements: [{ name: 'Pump', type: 'digitalOut' }, { name: 'tm_Mash', type: 'timer' }, { name: 'gGV_A', type: 'gGlobal' }, { name: 'gGV_B', type: 'gGlobal' }], processes: ['sub_Fill'] };
+const text = 'new value x\nif Pump == true and x < 2 // c\n  gGV_B = gGV_A + 1.5\n  tm_Mash.visible = "hi"\nstart sub_Fill\n[L]\ngoto L\nstep S1.00002 "a"';
 const cls = classify(text, words);
 const at = (word, nth = 0) => { let i = -1; for (let k = 0; k <= nth; k++) i = text.indexOf(word, i + 1); return CLASSES[cls[i]]; };
 assert.equal(at('new'), 'cmd'); assert.equal(at('x'), 'var'); assert.equal(at('Pump'), 'dev'); assert.equal(at('=='), 'op'); assert.equal(at('true'), 'cmd');
-assert.equal(at('and'), 'op'); assert.equal(at('// c'), 'com'); assert.equal(at('gAV_B'), 'vapi'); assert.equal(at('gKV_A'), 'vk'); assert.equal(at('1.5'), 'num');
+assert.equal(at('and'), 'op'); assert.equal(at('// c'), 'com'); assert.equal(at('gGV_B'), 'vk'); assert.equal(at('gGV_A'), 'vk'); assert.equal(at('1.5'), 'num');
 assert.equal(at('tm_Mash'), 'wid'); assert.equal(at('visible'), 'attr'); assert.equal(at('"hi"'), 'str'); assert.equal(at('sub_Fill'), 'proc');
 assert.equal(at('[L]'), 'lab'); assert.equal(at('L', 1), 'lab'); assert.equal(at('S1.00002'), 'num');
 const blk = classify('/* a\nPump */ Pump', words);
@@ -54,7 +54,7 @@ const npp = notepadPlusPlus(words, [text]);
 assert.match(npp, /<Keywords name="Keywords2">Pump<\/Keywords>/);
 assert.match(npp, /<Keywords name="Keywords5">x<\/Keywords>/);
 assert.match(npp, /<Keywords name="Comments">00\/\/ 00# 00' 01 02 03\/\* 04\*\/<\/Keywords>/);
-assert.match(notepadPlusPlus(), /Keywords3="yes".*\n[\s\S]*<Keywords name="Keywords3">gK<\/Keywords>/);
+assert.match(notepadPlusPlus(), /Keywords3="yes".*\n[\s\S]*<Keywords name="Keywords3">gG<\/Keywords>/);
 assert.equal(fs.readFileSync(new URL('../docs/Skynet_Process_Notepad++.xml', import.meta.url), 'utf8'), notepadPlusPlus(), 'docs file is up to date (node tools/notepadpp.js)');
 
 // ---- Recycle Bin: delete moves, restore asks for a free name, purge erases

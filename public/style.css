@@ -217,7 +217,7 @@ textarea.vdInput { font-size: 18px; text-align: left; }
 .el.text.look-dark .vl, .el.text.look-button .vl { justify-content: center; align-items: center; text-align: center; }
 .el.alarm.img-alarm:not(.active) { background-color: transparent; border-color: transparent; }
 
-/* ===== gKonstant controls ===== */
+/* ===== gGlobal controls ===== */
 table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6px 8px; color: var(--muted); }
 .el.longtext .vl { font-size: 13px; font-weight: 400; justify-content: flex-start; align-items: flex-start; text-align: left; overflow: auto; }
 .el.k-graphic { border-color: transparent; background-color: transparent; }
@@ -462,7 +462,7 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .lktog.on { border-color: #d39e00; background: #fff3c4; }
 .lktog input { position: absolute; opacity: 0; width: 0; height: 0; }
 .lktog:has(input:focus-visible) { outline: 2px solid #4fb3ff; outline-offset: 2px; }
-/* gKonstant List: the Value / Text table in its settings, and the dropdown on screen */
+/* gGlobal List: the Value / Text table in its settings, and the dropdown on screen */
 .vkitems table { border-collapse: collapse; width: 100%; margin-bottom: 6px; }
 .vkitems th { text-align: left; font-weight: 600; padding: 2px 4px; }
 .vkitems td { padding: 2px 4px; }

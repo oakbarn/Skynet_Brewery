@@ -12,7 +12,7 @@ const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'schemas-'));
 const cfgPath = path.join(dir, 'config', 'brewery.json');
 fs.mkdirSync(path.dirname(cfgPath), { recursive: true });
 fs.writeFileSync(cfgPath, JSON.stringify({ title: 'Oak Barn', mqtt: { host: 'x' }, workspaces: [{ name: 'Main' }],
-  elements: [{ name: 'gKV_Setpoint', type: 'gKonstant', kind: 'value', initial: 150 }], graphics: [], devices: [{ name: 'Sim', type: 'simulator' }] }));
+  elements: [{ name: 'gGV_Setpoint', type: 'gGlobal', kind: 'value', initial: 150 }], graphics: [], devices: [{ name: 'Sim', type: 'simulator' }] }));
 const store = new Store(cfgPath, path.join(dir, 'data'));
 store.load();
 let started = [], restarts = 0;
@@ -27,7 +27,7 @@ const first = store.config.schema.id;
 assert.ok(fs.existsSync(path.join(dir, 'config', 'schemas', first + '.json')), 'own file');
 
 // every save is copied to the Schema's file
-store.setProp('gKV_Setpoint', 'value', 160, 'ui');
+store.setProp('gGV_Setpoint', 'value', 160, 'ui');
 store.config.workspaces.push({ name: 'Mash' }); store.writeConfig();
 assert.equal(JSON.parse(fs.readFileSync(schemas.file(first))).workspaces.length, store.config.workspaces.length);
 assert.equal(JSON.parse(fs.readFileSync(schemas.file(first))).mqtt, undefined, 'panel settings are not part of a Schema');
@@ -36,7 +36,7 @@ assert.equal(JSON.parse(fs.readFileSync(schemas.file(first))).mqtt, undefined, '
 schemas.create('BrewZilla', { empty: true });
 assert.equal(store.config.schema.name, 'BrewZilla');
 assert.equal(store.config.title, 'BrewZilla');
-assert.equal(store.get('gKV_Setpoint'), undefined, 'its own elements');
+assert.equal(store.get('gGV_Setpoint'), undefined, 'its own elements');
 assert.ok(store.get('SoundPlayer'), 'the built-in Sound Player is added');
 assert.equal(store.config.mqtt.host, 'x', 'panel settings stay');
 assert.deepEqual(store.config.devices.map(({ _key, ...d }) => d), [{ name: 'New_Mega_2560_1', id: 'NM', type: 'simulator', board: 'mega' }], 'a new empty Schema starts with a pretend Mega (Fritz, 2026-10-27)');
@@ -45,7 +45,7 @@ assert.throws(() => schemas.create('brewzilla'), /already a Schema/);
 // back to the first one: its elements and its saved values come back
 schemas.load(first);
 assert.equal(store.config.schema.name, 'Oak Barn');
-assert.equal(store.getProp('gKV_Setpoint', 'value'), 160, 'values kept per Schema');
+assert.equal(store.getProp('gGV_Setpoint', 'value'), 160, 'values kept per Schema');
 assert.equal(store.config.devices[0].name, 'Sim');
 assert.throws(() => schemas.remove(first), /loaded/);
 
@@ -220,7 +220,7 @@ assert.ok(fs.existsSync(schemas.statePath(made.id)), 'its saved values come too'
 assert.throws(() => schemas.clone(src.id, 'oak barn test'), /already a Schema/);
 schemas.clone(made.id, 'Oak Barn Test 2', { load: true });
 assert.equal(store.config.schema.name, 'Oak Barn Test 2', 'loaded when asked');
-assert.equal(store.getProp('gKV_Setpoint', 'value'), 160, 'with the values of the one it was cloned from');
+assert.equal(store.getProp('gGV_Setpoint', 'value'), 160, 'with the values of the one it was cloned from');
 
 // loading a Schema switches everything off first, and again once the new one is in
 let offs = 0; hw.allOff = () => { offs++; };
