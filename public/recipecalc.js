@@ -61,6 +61,10 @@ export function sortHops(r) {
 // the hops whose Actual AAU is not above zero (Hop lines numbered from 1). Calculate stops and warns while there are any.
 export const hopActualProblems = r => (r?.ingredients?.hops || []).map((h, i) => ({ line: i + 1, name: h.name || '(no name)', aa: h.alphaActual })).filter(x => !(n(x.aa) > 0));
 export const FERMENTABLE_TYPES = { grain: 'Grain', adjunct: 'Adjunct', extract: 'Extract', 'dry extract': 'Dry Extract', sugar: 'Sugar', fruit: 'Fruit', juice: 'Juice', other: 'Other' };
+// The Grain tab holds the fermentables of Type Grain; the Fermentable tab holds every other Type (Fritz, 2026-10-31).
+// After Boil is shown only for the Types a brewer adds during or after the boil.
+export const isGrain = f => !f.type || f.type === 'grain';
+export const AFTER_BOIL_TYPES = ['extract', 'dry extract', 'sugar', 'fruit', 'juice'];
 export const MISC_USES = { boil: 'Boil', mash: 'Mash', primary: 'Primary', secondary: 'Secondary', bottling: 'Bottling', other: 'Other' };
 export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Aroma';
 
@@ -259,11 +263,39 @@ export const HOP_FIELDS = [
   ['Hop_Rocket', 'Hop N: Whirlpool through the Hop Rocket (true or false)', (r, h) => h.use === 'whirlpool' && !!h.hopRocket],
 ];
 export const HOP_FIELD = /^rcp_Hop_(\d+)_([A-Za-z_]+)$/;
+// The Grain tab and the Fermentable tab: rcp_Grain_N_... and rcp_Fermentable_N_..., N = the line number on that tab
+export const GRAIN_FIELDS = [
+  ['Name', 'Grain N: the grain', f => f.name ?? ''],
+  ['Amount', 'Grain N: the amount (lb or kg)', (f, u) => kgTo(f.kg, u.grainUnit)],
+  ['Potential', 'Grain N: Potential (yield %)', f => f.yieldPct],
+  ['SRM', 'Grain N: color in SRM', f => f.color],
+];
+export const FERMENTABLE_FIELDS = [
+  ['Name', 'Fermentable N: the fermentable', f => f.name ?? ''],
+  ['Type', 'Fermentable N: Adjunct, Extract, Dry Extract, Sugar, Fruit, Juice or Other', f => f.type || 'other'],
+  ['Amount', 'Fermentable N: the amount (lb or kg)', (f, u) => kgTo(f.kg, u.grainUnit)],
+  ['Potential', 'Fermentable N: Potential (yield %)', f => f.yieldPct],
+  ['SRM', 'Fermentable N: color in SRM', f => f.color],
+  ['After_Boil', 'Fermentable N: added after the boil (true or false)', f => AFTER_BOIL_TYPES.includes(f.type) && !!f.addAfterBoil],
+];
+const LINE_FIELD = /^rcp_(Grain|Fermentable)_(\d+)_([A-Za-z_]+)$/;
+const GRAIN_COUNT = ['rcp_Grain_Count', 'Grain tab: how many grain lines', r => (r.ingredients?.fermentables || []).filter(isGrain).length];
+// a line field (any case) of the Hops, Grain or Fermentable tab: its empty value (a line past the Count reads as this), else undefined
+export function lineFieldEmpty(name) {
+  const s = String(name), h = new RegExp(HOP_FIELD.source, 'i').exec(s), g = new RegExp(LINE_FIELD.source, 'i').exec(s);
+  const end = h ? HOP_FIELDS.find(x => x[0].toLowerCase() === h[2].toLowerCase())?.[0]
+    : g ? (g[1].toLowerCase() === 'grain' ? GRAIN_FIELDS : FERMENTABLE_FIELDS).find(x => x[0].toLowerCase() === g[3].toLowerCase())?.[0] : undefined;
+  if (!end) return /^rcp_(Hop|Grain|Fermentable)_Count$/i.test(s) ? 0 : undefined;
+  return ['Name', 'Use', 'Date', 'Type'].includes(end) ? '' : ['Hop_Rocket', 'After_Boil'].includes(end) ? false : 0;
+}
+const FERM_COUNT = ['rcp_Fermentable_Count', 'Fermentable tab: how many lines', r => (r.ingredients?.fermentables || []).filter(f => !isGrain(f)).length];
 export const hopFieldName = (line, end) => `rcp_Hop_${line}_${end}`;
 const HOP_COUNT = ['rcp_Hop_Count', 'Hops tab: how many hop lines', r => (r.ingredients?.hops || []).length];
 // a Skynet_Field by its name: the Recipe tab's, rcp_Hop_Count, or one of a hop line (any line number)
 export const recipeField = name => {
-  if (name === HOP_COUNT[0]) return HOP_COUNT;
+  for (const c of [HOP_COUNT, GRAIN_COUNT, FERM_COUNT]) if (name === c[0]) return c;
+  const g = LINE_FIELD.exec(name), gf = g && (g[1] === 'Grain' ? GRAIN_FIELDS : FERMENTABLE_FIELDS).find(x => x[0] === g[3]);
+  if (gf) return [name, gf[1].replace(`${g[1]} N`, `${g[1]} ${g[2]}`), gf[2]];
   const m = HOP_FIELD.exec(name), f = m && HOP_FIELDS.find(x => x[0] === m[2]);
   return f ? [name, f[1].replace('Hop N', `Hop ${m[1]}`), f[2]] : RECIPE_FIELDS.find(x => x[0] === name);
 };
@@ -275,5 +307,9 @@ export function recipeFieldValues(r, d = {}) {
   put(HOP_COUNT[0], r ? HOP_COUNT[2](r) : 0);
   const hops = r?.ingredients?.hops || [], sch = hops.length ? hopSchedule(r, d) : null;
   hops.forEach((h, i) => { for (const [end, , get] of HOP_FIELDS) put(hopFieldName(i + 1, end), get(r, h, u, sch, i) ?? (end === 'Name' || end === 'Date' ? '' : 0)); });
+  const ferms = r?.ingredients?.fermentables || [];
+  put(GRAIN_COUNT[0], r ? GRAIN_COUNT[2](r) : 0); put(FERM_COUNT[0], r ? FERM_COUNT[2](r) : 0);
+  ferms.filter(isGrain).forEach((f, i) => { for (const [end, , get] of GRAIN_FIELDS) put(`rcp_Grain_${i + 1}_${end}`, get(f, u) ?? (end === 'Name' ? '' : 0)); });
+  ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`rcp_Fermentable_${i + 1}_${end}`, get(f, u) ?? (end === 'Name' ? '' : 0)); });
   return out;
 }

@@ -100,6 +100,7 @@ clearTimeout(store._persistTimer);
 assert.ok(isKnownRecipeName('rcp_Hop_3_IBU') && isKnownRecipeName('rcp_hop_count') && !isKnownRecipeName('rcp_Hop_3_Color'));
 const hv = recipeValues({ recipe: { name: 'H', boilTime: 60, ingredients: { hops: [{ name: 'Magnum', use: 'boil', time: 60, kg: 0.028, alpha: 12, alphaActual: 12 }] } }, brewDefaults: { units: 'US' } });
 assert.equal(recipeValue(hv, 'rcp_Hop_1_Name'), 'Magnum'); assert.equal(recipeValue(hv, 'rcp_Hop_Count'), 1);
-assert.equal(recipeValue(hv, 'rcp_Hop_5_Name'), ''); assert.equal(recipeValue(hv, 'rcp_Hop_5_Amount'), 0);
+assert.equal(recipeValue(hv, 'rcp_Hop_5_Name'), ''); assert.ok(isKnownRecipeName('rcp_Grain_2_SRM') && isKnownRecipeName('rcp_Fermentable_Count'));
+assert.equal(recipeValue(hv, 'rcp_Grain_3_Name'), ''); assert.equal(recipeValue(hv, 'rcp_Fermentable_1_After_Boil'), false); assert.equal(recipeValue(hv, 'rcp_Grain_Count'), 0); assert.equal(recipeValue(hv, 'rcp_Hop_5_Amount'), 0);
 console.log('brew process tests passed');
 process.exit(0);

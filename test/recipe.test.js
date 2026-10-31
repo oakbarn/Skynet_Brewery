@@ -64,6 +64,13 @@ const fx = readRecipeFile(`<RECIPES><RECIPE><NAME>F</NAME><FERMENTABLES><FERMENT
 <RECOMMEND_MASH>TRUE</RECOMMEND_MASH></FERMENTABLE><FERMENTABLE><NAME>Pale</NAME><AMOUNT>4</AMOUNT><TYPE>Grain</TYPE></FERMENTABLE></FERMENTABLES></RECIPE></RECIPES>`, 'f.xml').recipe;
 assert.equal(fx.ingredients.fermentables.length, 2, 'the grain after the typo is still there');
 assert.deepEqual(['protein', 'maxInBatch', 'moisture', 'coarseFineDiff', 'diastaticPower', 'recommendMash'].map(k => fx.ingredients.fermentables[0][k]), [13.2, 20, 9, 1.5, 0, true]);
+const gf = recipeFieldValues({ ingredients: { fermentables: [{ name: 'Pale', type: 'grain', kg: 4.5359237, yieldPct: 80, color: 2 }, { name: 'Honey', type: 'sugar', kg: 0.45359237, yieldPct: 75, color: 1, addAfterBoil: true },
+  { name: 'Flaked', type: 'adjunct', kg: 0.5, addAfterBoil: true }, { name: 'Munich', type: 'grain', kg: 1 }] } }, { units: 'US' });
+assert.equal(gf.rcp_Grain_Count, 2); assert.equal(gf.rcp_Fermentable_Count, 2);
+assert.equal(gf.rcp_Grain_1_Amount, 10); assert.equal(gf.rcp_Grain_1_Potential, 80); assert.equal(gf.rcp_Grain_2_Name, 'Munich');
+assert.equal(gf.rcp_Fermentable_1_Type, 'sugar'); assert.equal(gf.rcp_Fermentable_1_After_Boil, true); assert.equal(gf.rcp_Fermentable_2_After_Boil, false, 'an adjunct is not added after the boil');
+assert.equal(recipeField('rcp_Fermentable_7_SRM')[1], 'Fermentable 7: color in SRM');
+assert.equal(readRecipeFile('<RECIPES><RECIPE><NAME>A</NAME><FERMENTABLES><FERMENTABLE><NAME>DME</NAME><TYPE>Dry Extract</TYPE><AMOUNT>1</AMOUNT><ADD_AFTER_BOIL>TRUE</ADD_AFTER_BOIL></FERMENTABLE></FERMENTABLES></RECIPE></RECIPES>', 'a.xml').recipe.ingredients.fermentables[0].addAfterBoil, true);
 assert.equal(fx.ingredients.fermentables[0].notes, 'Adds body to porters and stouts, must be mashed'); assert.equal(fx.grainKg, 4.91);
 
 // Actual AAU: the same alpha acid units, so a stronger hop means less of it
