@@ -777,6 +777,12 @@ AAU that is 0, and shows Fritz's warning (set the Actual AAU to the AAU on the H
 a **READ** button to close it. (Fritz, 2026-10-31 12:15Z) Each line's
 boxes are Skynet_Fields `rcp_Hop_N_...` plus `rcp_Hop_Count` (Rule 17.2). (Help 99)
 
+17.8 **Grain tab and Fermentable tab** (Fritz, 2026-10-31): the Grain tab holds the fermentables of Type Grain (Type hidden);
+the Fermentable tab holds every other Type with a Type dropdown (Adjunct, Extract, Dry Extract, Sugar, Fruit, Juice, Other; a
+fixed list, the BeerXML types, so no Add new ...). Boxes: Name, amount, **Potential** (yield %), **SRM** (color), and **After
+Boil**, a switch shown only for Types added during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). No limit on
+lines. Skynet_Fields `rcp_Grain_N_...`, `rcp_Fermentable_N_...`, `rcp_Grain_Count`, `rcp_Fermentable_Count`. (Help 99)
+
 ---
 
 ## Open questions (not Rules yet)
@@ -895,3 +901,5 @@ boxes are Skynet_Fields `rcp_Hop_N_...` plus `rcp_Hop_Count` (Rule 17.2). (Help 
   with BeerSmith import")
 - 2026-10-31: Added Rule 17.7 (the Hops tab: hop lines with no limit, Outside of Boil dialog, line order, Actual AAU above
   zero before Calculate with a READ warning, rcp_Hop_N_ Skynet_Fields). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-10-31: Changed Rule 17.7 (Actual AAU starts at 0; a failed Calculate switches to Hops and highlights the 0s) and added
+  Rule 17.8 (Grain tab and Fermentable tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")

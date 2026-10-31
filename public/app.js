@@ -10,7 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -7527,7 +7527,8 @@ let rcView = null, rcWork = null, rcSub = 'recipe';
 const RC_DAUGHTERS = [
   ['hops', 'HOPs', 'Add, Edit or Delete Hops. All Hops details. The Actual AAU of the Hops that are used in the Brew MUST be updated. The Actual AAU varies from the Recipe AAU and to obtain the desired IBUs, they must be calculated from the Actual AAUs and the Hops Amounts are adjusted.'],
   ['drops', 'Drops', 'Displays the Calculated Hops Drops Grouping, Pre Warnings Times and Texts. These are filled from the Hop Data once Calculated.'],
-  ['grain', 'Grain', 'Add, Edit or Delete Grains or Fermentables. The Total weight of all Grains is used to calculate the Grain Weight for this Brew.'],
+  ['grain', 'Grain', 'Add, Edit or Delete Grains. The Total weight of all Grains is used to calculate the Grain Weight for this Brew.'],
+  ['fermentables', 'Fermentable', 'Add, Edit or Delete the other Fermentables: Adjuncts, Extracts, Sugars, Fruit and Juice.'],
   ['yeast', 'Yeast', 'Add, Edit or Delete Yeasts and Yeast Starters'],
   ['adjuncts', 'Adjuncts', 'Add, Edit or Delete Adjuncts such as Whirlfloc or Yeast Nutrient.'],
   ['waters', 'Waters', 'Water Profile'],
@@ -7792,15 +7793,46 @@ function rcHopDialog(hop, i, u, changed) {
   return box;
 }
 
+// ---- The Grain tab and the Fermentable tab (Fritz, 2026-10-31). One list in the Recipe (ingredients.fermentables): the
+// Grain tab shows the ones of Type Grain (the Type is hidden), the Fermentable tab every other Type, with a Type dropdown.
+// Boxes: name, amount, Potential (yield %), SRM (color), and After Boil, a switch shown only for the Types a brewer adds
+// during or after the boil. No limit on lines. Every box is a Skynet_Field (rcp_Grain_N_..., rcp_Fermentable_N_...).
+function rcFerms(pane, rc, u, changed, grainTab) {
+  const all = rc.ingredients.fermentables, op = can('operator'), c = { onChange: changed };
+  const mine = all.filter(f => isGrain(f) === grainTab), W = u.grainUnit, what = grainTab ? 'Grain' : 'Fermentable';
+  const types = Object.entries(FERMENTABLE_TYPES).filter(([k]) => k !== 'grain');
+  const total = h('b', {});
+  const sum = () => { total.textContent = `${rcRound(kgTo(mine.reduce((a, f) => a + (+f.kg || 0), 0), W), 2)} ${W}`; };
+  const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : 'adjunct', kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
+  const del = (f, n) => guard(() => { if (!confirm(`Delete ${what} ${n}${f.name ? ` (${f.name})` : ''}?`)) return; all.splice(all.indexOf(f), 1); changed(); renderMenuPane(); });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, grainTab ? 'Grain' : 'Fermentables'),
+    op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `Add ${what} `, h('b', {}, '+')) : ''));
+  if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.'));
+  mine.forEach((f, i) => {
+    const n = i + 1, F = end => `rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    line.append(rcBox('k', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
+    if (!grainTab) line.append(rcBox('g', 'Type', rcInput(f, 'type', { kind: 'sel', list: types, onChange: () => { changed(); renderMenuPane(); } }), { field: F('Type') }));
+    line.append(rcBox('g', W === 'lb' ? 'Pounds' : 'Kilograms', rcInput(f, 'kg', { to: v => kgTo(v, W), from: v => toKg(v, W), onChange: () => { changed(); sum(); } }), { field: F('Amount') }),
+      rcBox('g', 'Potential', rcInput(f, 'yieldPct', { d: 1, ...c }), { unit: '%', field: F('Potential'), tip: 'The yield: how much of its weight becomes sugar' }),
+      rcBox('g', 'SRM', rcInput(f, 'color', { d: 1, ...c }), { field: F('SRM'), tip: 'The color' }));
+    if (!grainTab && AFTER_BOIL_TYPES.includes(f.type)) line.append(h('div', { class: 'hopSw', 'data-field': F('After_Boil'), title: `Added after the boil (at flame out or in the fermenter)\nSkynet_Field ${F('After_Boil')}` },
+      h('b', {}, 'After Boil'), rcSwitch(!!f.addAfterBoil, on => { f.addAfterBoil = on; changed(); })));
+    if (op) line.append(h('button', { class: 'hopDel', onclick: del(f, n), title: `Delete ${what} ${n}` }, '🗑 Delete'));
+    pane.append(line);
+  });
+  sum();
+  pane.append(h('p', {}, `Total ${grainTab ? 'grain' : 'other fermentables'}: `, total, grainTab ? '. Calculate on the Recipe tab puts the Grain Wt. box together from the grains and adjuncts.' : ''));
+}
+
 // a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it
 function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const I = rc.ingredients;
   const list = (rows, empty) => rows.length ? h('ul', { class: 'rcList' }, ...rows.map(r => h('li', {}, r))) : h('p', { class: 'muted' }, empty);
   const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
   if (k === 'hops') { rcHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'grain' || k === 'fermentables') { rcFerms(pane, rc, u, changed, k === 'grain'); pane.append(h('div', { class: 'bar' }, back)); return; }
   pane.append(h('p', {}, h('b', {}, about)), h('p', { class: 'muted rcSoon' }, `The fields and layout of the ${t} tab come next. Until then, here is what the Recipe holds for it.`));
   if (k === 'drops') rcDrops(pane, rc);
-  if (k === 'grain') pane.append(list(I.fermentables.map(x => `${fmtW(x.kg, u.grainUnit)} ${x.name} (${FERMENTABLE_TYPES[x.type] || x.type}${x.color !== null ? `, ${x.color} °L` : ''})`), 'No grains in this Recipe.'));
   if (k === 'yeast') pane.append(list(I.yeasts.map(x => `${x.amount ?? 1} × ${x.name}${x.lab ? `, ${x.lab}` : ''}${x.productId ? ` ${x.productId}` : ''}${x.starterL ? `, starter ${rcRound(lTo(x.starterL, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No yeast in this Recipe.'));
   if (k === 'adjuncts') pane.append(list(I.miscs.map(x => { const [a, un] = miscShow(x.amount, x.unit, u.miscUnit); return `${a} ${un} ${x.name}, ${MISC_USES[x.use] || x.use}${x.time ? ` ${x.time} ${x.timeUnit || 'min'}` : ''}`; }), 'No adjuncts in this Recipe.'));
   if (k === 'waters') {

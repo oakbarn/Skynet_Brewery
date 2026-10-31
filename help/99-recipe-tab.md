@@ -74,19 +74,22 @@ Each line on the Hops tab has its own Skynet_Fields, N = the line number (1, 2, 
 
 For example `rcp_Hop_1_Name` is the first hop. A line the Recipe does not have reads as empty (or 0).
 
+The Grain and Fermentable tabs work the same way: `rcp_Grain_Count`, `rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, and `rcp_Fermentable_Count`, `rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_After_Boil`.
+
 ## The Daughter Tabs
 
 The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab** (or **Recipe** in the title) comes back.
 
 - **HOPs**: add, edit or delete hops. The Actual AAU of the hops used in the brew MUST be updated; the amounts are adjusted from it to keep the IBUs.
 - **Drops**: the hop drop groups, the pre warning times and the alert texts, worked out from the hops (see **Hop schedule and alerts**).
-- **Grain**: add, edit or delete grains and fermentables. Their total weight is the Grain Wt.
+- **Grain**: add, edit or delete grains. Their total weight is the Grain Wt.
+- **Fermentable**: add, edit or delete the other fermentables: adjuncts, extracts, sugars, fruit and juice.
 - **Yeast**: add, edit or delete yeasts and yeast starters.
 - **Adjuncts**: add, edit or delete adjuncts such as Whirlfloc or yeast nutrient (BeerSmith calls them Misc).
 - **Waters**: the Water Profile.
 - **MASH**: the Mash Profile.
 
-The Hops tab is built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+The Hops, Grain and Fermentable tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
 
 ## The Hops tab
 
@@ -103,6 +106,15 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 
 - **Secondary Hops** and **DRY Hops**: the date and the days.
 - **Whirlpool**: the temperature, the minutes, and **Hop Rocket** when the whirlpool runs through a Hop Rocket.
+
+## The Grain and Fermentable tabs
+
+A recipe's fermentables are split over two tabs. **Grain** holds the ones of Type Grain (the Type is not shown). **Fermentable** holds every other Type, picked from the **Type** dropdown: Adjunct, Extract, Dry Extract, Sugar, Fruit, Juice or Other. **Add Grain +** or **Add Fermentable +** puts a new line at the bottom; **Delete** takes one away. There is no limit.
+
+- **Name**, the amount (**Pounds** or **Kilograms**, as picked on the Default tab), **Potential** (the yield, %) and **SRM** (the color).
+- **After Boil**: a switch, shown only for the Types a brewer adds during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). On means it goes in after the boil.
+
+Each tab shows its total weight. An import brings every grain field in (notes, protein, moisture and the rest too), ready for later.
 
 **Order.** On **Calculate** and on **Save** the lines go in order: Boil Hops by drop time (a Start of Boil hop first, then by Minutes), then Mash, 1st WORT, Secondary, DRY and Whirlpool hops.
 
