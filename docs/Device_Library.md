@@ -171,6 +171,7 @@ What each ID means:
 - **Add menu:** Devices: outputs > Pump (relay output with inlet and outlet IPs for pipes).
 - **Type ID:** Pump (or P_Pump on a PWM / analog output for speed).
 - Same settings as 4.1 with Kind = pump. Turning it on makes flow run from its inlet IP to its outlet IP. Pumps have no orientation setting.
+- **Skynet pump pictures** (Pumps group, Help 104): March 809 and 815 (poly 90° inlet, poly center inlet, stainless center inlet), Chugger (stainless 90° inlet and center inlet), Blichmann Riptide (stainless, cover off), Topsflo TD5 and KegLand MKII (poly, plus MKII stainless). Drawn from the real pumps with no cover; with one of them the IN and OUT IPs sit on the tips of the real inlet and outlet ports.
 
 ### 4.3 Valve
 - **Add menu:** Devices: outputs > Valve (relay output with an IP at each end). A Valve Profile can be picked when it is made.
@@ -403,3 +404,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-28: Raspberry Pi GPIO pins built (Board Raspberry Pi, Help 78, PR #119 merged); removed from Reserved.
 - 2026-10-28: Added 4.3a Skynet Motorized Ball Valve Device (Master H, Daughters VL and VR; fixed and user settable attributes; thread "Lock Skynet Widget Templates and IPs", Help 88).
 - 2026-10-30: Database and .API settings on every Device (Rule 6.14, Help 98). (thread "Send any Device or Widget to a database")
+- 2026-10-31: 4.2 Pump: Skynet pump pictures with IPs on the real ports (12 drawings, Help 104). (thread "Draw SVGs for common brew pumps")

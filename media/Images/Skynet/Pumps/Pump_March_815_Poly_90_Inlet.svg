@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 57.0 58.6">
+  <!-- Skynet drawing: March 815-PL (polysulfone in-line head, side inlet at 90 to the outlet). Off, no cover. 10 units = 1 inch. Inlet IP at the tip of the right-hand port (0.989, 0.529), outlet IP at the tip of the top port (0.652, 0.0). -->
+  <g stroke-linejoin="round">
+    <rect x="1.8" y="51.0" width="45.6" height="7.0" rx="0.8" fill="#5a5a5a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="5.6" y="12.0" width="38.0" height="38.0" rx="17.1" fill="#808080" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="18.3" y="5.6" width="12.6" height="7.0" rx="1.0" fill="#6c6c6c" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="30.1" y="9.8" width="14.3" height="13.4" rx="0.6" fill="#d9a441" stroke="#2b2b2b" stroke-width="1.2"/>
+    <circle cx="24.6" cy="31.0" r="21.0" fill="#d9a441" stroke="#2b2b2b" stroke-width="1.2"/>
+    <path d="M10.7 22.6 A16.0 16.0 0 0 1 26.7 15.0" fill="none" stroke="#ecc777" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="24.6" cy="31.0" r="7.6" fill="#d9a441" stroke="#2b2b2b" stroke-width="0.8"/>
+    <circle cx="41.5" cy="36.2" r="0.7" fill="#9a9a9a" stroke="#2b2b2b" stroke-width="0.5"/>
+    <circle cx="28.5" cy="48.2" r="0.7" fill="#9a9a9a" stroke="#2b2b2b" stroke-width="0.5"/>
+    <circle cx="11.7" cy="43.0" r="0.7" fill="#9a9a9a" stroke="#2b2b2b" stroke-width="0.5"/>
+    <circle cx="7.7" cy="25.8" r="0.7" fill="#9a9a9a" stroke="#2b2b2b" stroke-width="0.5"/>
+    <circle cx="20.7" cy="13.8" r="0.7" fill="#9a9a9a" stroke="#2b2b2b" stroke-width="0.5"/>
+    <circle cx="37.5" cy="19.0" r="0.7" fill="#9a9a9a" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="37.2" y="24.3" width="9.2" height="13.4" rx="0.6" fill="#d9a441" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="46.4" y="26.8" width="10.0" height="8.4" rx="0.0" fill="#d9a441" stroke="#2b2b2b" stroke-width="1.2"/><path d="M48.0 26.8 L48.6 35.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M49.6 26.8 L50.2 35.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M51.2 26.8 L51.8 35.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M52.8 26.8 L53.4 35.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M54.4 26.8 L55.0 35.2" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="33.0" y="0.0" width="8.4" height="9.8" rx="0.0" fill="#d9a441" stroke="#2b2b2b" stroke-width="1.2"/><path d="M33.0 1.6 L41.4 1.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M33.0 3.2 L41.4 2.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M33.0 4.8 L41.4 4.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M33.0 6.4 L41.4 5.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M33.0 8.0 L41.4 7.4" stroke="#2b2b2b" stroke-width="0.5"/>
+  </g>
+</svg>
