@@ -8,7 +8,7 @@ The **☰ Menu** button is at the top right of the **Tabs** page, where the Edit
 - **File Move Utility** (Admins) opens the File Move page. See [File Move](32-file-move).
 - **Recipe** and **Fermentation** are greyed out. They are coming in the next stages.
 - **Schema**: the Schema dropdown (the same one as on the Menu Bar), every Schema on the Brain with **Load** and **Clone**. See [Switching and cloning Schemas](48-schema-switching-and-cloning).
-- **About** (last of the Menu tabs): who is signed in, **Sign out**, the Schema dropdown and the Schema version. See [About and Schema versions](42-about-and-schema-versions).
+- **About** (always at the top of the Menu, Fritz 2026-10-30; it can't be moved in the Order list): who is signed in, **Sign out**, the Schema dropdown and the Schema version. See [About and Schema versions](42-about-and-schema-versions).
 - **Pages** (at the end): every page of the Menu Bar, and under each page (marked ↳) its parts: your screen Tabs, Interfaces (boards), Users, MQTT and voice, Backups ... Pick one to go straight there. See [Every screen in the ☰ Menu](67-every-screen-in-the-menu).
 
 ## Menu tabs
