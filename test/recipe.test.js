@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { readRecipeFile, readBsmx, cleanRecipe, RecipeStore, HopAlerts } from '../lib/recipe.js';
-import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS } from '../public/recipecalc.js';
+import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS, gravityPoints, expectedGravity } from '../public/recipecalc.js';
 import { ProfileStore } from '../lib/profiles.js';
 
 // a small .bsmx as BeerSmith writes it: ounces, fluid ounces, °F; a folder of two recipes
@@ -69,6 +69,11 @@ const gf = recipeFieldValues({ ingredients: { fermentables: [{ name: 'Pale', typ
 assert.equal(gf.rcp_Grain_Count, 2); assert.equal(gf.rcp_Fermentable_Count, 2);
 assert.equal(gf.rcp_Grain_1_Amount, 10); assert.equal(gf.rcp_Grain_1_Potential, 80); assert.equal(gf.rcp_Grain_2_Name, 'Munich');
 assert.equal(gf.rcp_Fermentable_1_Type, 'sugar'); assert.equal(gf.rcp_Fermentable_1_After_Boil, true); assert.equal(gf.rcp_Fermentable_2_After_Boil, false, 'an adjunct is not added after the boil');
+// gravity points (PPG>SG) and the Expected Gravity: 10 lb at 80% Potential, 72% efficiency, 5 gal = 53.2 points; 1 lb of honey (75%, not mashed) = 6.9
+const gr = { efficiency: 72, volumes: { batchLiters: 5 / 0.264172052 }, ingredients: { fermentables: [{ type: 'grain', kg: 4.5359237, yieldPct: 80 }, { type: 'sugar', kg: 0.45359237, yieldPct: 75 }] } };
+assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[0], gr) * 10) / 10, 53.2); assert.equal(Math.round(gravityPoints(gr.ingredients.fermentables[1], gr) * 10) / 10, 6.9);
+assert.equal(expectedGravity(gr), 1.06); assert.equal(calculateRecipe(gr).expectedSG, 1.06); assert.equal(recipeFieldValues({ ...gr, expectedSG: 1.06 }).rcp_Expected_Gravity, 1.06);
+assert.equal(recipeFieldValues(gr).rcp_Grain_1_PPG_SG, 53.24); assert.equal(expectedGravity({ ingredients: { fermentables: [{ kg: 1, yieldPct: 80 }] } }), null, 'no Brew Length, no gravity');
 assert.equal(recipeField('rcp_Fermentable_7_SRM')[1], 'Fermentable 7: color in SRM');
 assert.equal(readRecipeFile('<RECIPES><RECIPE><NAME>A</NAME><FERMENTABLES><FERMENTABLE><NAME>DME</NAME><TYPE>Dry Extract</TYPE><AMOUNT>1</AMOUNT><ADD_AFTER_BOIL>TRUE</ADD_AFTER_BOIL></FERMENTABLE></FERMENTABLES></RECIPE></RECIPES>', 'a.xml').recipe.ingredients.fermentables[0].addAfterBoil, true);
 assert.equal(fx.ingredients.fermentables[0].notes, 'Adds body to porters and stouts, must be mashed'); assert.equal(fx.grainKg, 4.91);

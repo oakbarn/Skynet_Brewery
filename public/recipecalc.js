@@ -65,6 +65,19 @@ export const FERMENTABLE_TYPES = { grain: 'Grain', adjunct: 'Adjunct', extract: 
 // After Boil is shown only for the Types a brewer adds during or after the boil.
 export const isGrain = f => !f.type || f.type === 'grain';
 export const AFTER_BOIL_TYPES = ['extract', 'dry extract', 'sugar', 'fruit', 'juice'];
+// Gravity points (the PPG>SG box, Fritz's Grain tab 2026-10-31): Potential (yield %) x 46.214 (the points of 1 lb of pure
+// sugar in 1 gallon) = PPG; points = PPG x pounds x efficiency / gallons in the batch. Grains and adjuncts are mashed, so the
+// brewhouse efficiency counts; extracts, sugars, fruit and juice give all their sugar (100%). Expected Gravity = 1 + all points / 1000.
+export const PPG_SUGAR = 46.214;
+export function gravityPoints(f, r) {
+  const gal = n(r?.volumes?.batchLiters) * L_GAL; if (!gal || f?.yieldPct === null || f?.yieldPct === undefined || f?.yieldPct === '') return null;
+  const mashed = isGrain(f) || f.type === 'adjunct', eff = mashed ? (n(r?.efficiency) || RECIPE_DEFAULTS.efficiency) / 100 : 1;
+  return n(f.yieldPct) / 100 * PPG_SUGAR * n(f.kg) * KG_LB * eff / gal;
+}
+export function expectedGravity(r) {
+  const fs = r?.ingredients?.fermentables || []; if (!(n(r?.volumes?.batchLiters) > 0) || !fs.length) return null;
+  return round(1 + fs.reduce((a, f) => a + (gravityPoints(f, r) || 0), 0) / 1000, 3);
+}
 export const MISC_USES = { boil: 'Boil', mash: 'Mash', primary: 'Primary', secondary: 'Secondary', bottling: 'Bottling', other: 'Other' };
 export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Aroma';
 
@@ -76,7 +89,7 @@ export function blankRecipe(d = {}) {
     boilTime: D.boilTime, efficiency: D.efficiency, og: null, fg: null, ibu: null, color: null,
     waterToGrain: D.waterToGrain, grainTempC: D.grainTempC,
     // the boxes on the Recipe tab (Fritz's layout, 2026-10-31). Calculate fills grainKg, firstMashC, ibuCalc, strike and sparge.
-    grainKg: null, firstMashC: null, ibuCalc: null, strikeLiters: null, strikeTempC: null,
+    grainKg: null, firstMashC: null, ibuCalc: null, expectedSG: null, strikeLiters: null, strikeTempC: null,
     spargeType: 'batch', spargeLiters: null, spargeMinutes: null, spargeTempC: null, whirlpoolMinutes: null, pitchTempC: null,
     mashProfile: d.mashProfile || '', boilProfile: d.boilProfile || '', waterProfile: d.waterProfile || '',
     ingredients: { fermentables: [], hops: [], yeasts: [], miscs: [], waters: [] },
@@ -118,7 +131,7 @@ export function calculateRecipe(r, d = {}, mp = null, absorbLkg = 1.0) {
   const pre = n(r?.volumes?.boilLiters);
   const spargeL = pre && tt.strikeL ? Math.max(0, pre - (tt.strikeL - tt.grainKg * absorbLkg)) : null;
   const spargeC = r?.spargeTempC ?? (mp?.spargeTemp !== undefined ? (mp.units === 'Metric' ? n(mp.spargeTemp) : fToC(n(mp.spargeTemp))) : r?.mash?.spargeTempC ?? null);
-  return { grainKg: tt.grainKg, firstMashC: first ? round(n(first.tempC), 1) : null, ibuCalc: tinsethIbu(r), strikeLiters: tt.strikeL || null, strikeTempC: tt.strikeC,
+  return { expectedSG: expectedGravity(r), grainKg: tt.grainKg, firstMashC: first ? round(n(first.tempC), 1) : null, ibuCalc: tinsethIbu(r), strikeLiters: tt.strikeL || null, strikeTempC: tt.strikeC,
     spargeLiters: spargeL === null ? null : round(spargeL, 2), spargeTempC: spargeC === null ? null : round(spargeC, 1), spargeType: r?.spargeType || mp?.sparge || 'batch',
     spargeMinutes: r?.spargeMinutes ?? (mp?.batchRest ?? null) };
 }
@@ -228,6 +241,7 @@ export const RECIPE_FIELDS = [
   ['rcp_Total_Grain_Weight', 'Grain Wt. (calculated)', (r, u) => kgTo(r.grainKg, u.grainUnit)],
   ['rcp_First_Mash_Temp', '1st Mash (calculated)', (r, u) => cTo(r.firstMashC, u.tempUnit)],
   ['rcp_IBU', 'IBU (calculated)', r => r.ibuCalc],
+  ['rcp_Expected_Gravity', 'Expected Gravity (calculated: 1 + the gravity points of every grain and fermentable / 1000)', r => r.expectedSG],
   ['rcp_Strike_Volume', 'Strike Volume', (r, u) => lTo(r.strikeLiters, u.volumeUnit)],
   ['rcp_Strike_Temp', 'Strike Temperature', (r, u) => cTo(r.strikeTempC, u.tempUnit)],
   ['rcp_Grain_Temp', 'Grain Temperature', (r, u) => cTo(r.grainTempC, u.tempUnit)],
@@ -269,6 +283,7 @@ export const GRAIN_FIELDS = [
   ['Amount', 'Grain N: the amount (lb or kg)', (f, u) => kgTo(f.kg, u.grainUnit)],
   ['Potential', 'Grain N: Potential (yield %)', f => f.yieldPct],
   ['SRM', 'Grain N: color in SRM', f => f.color],
+  ['PPG_SG', 'Grain N: PPG>SG, its gravity points', (f, u, r) => gravityPoints(f, r)],
 ];
 export const FERMENTABLE_FIELDS = [
   ['Name', 'Fermentable N: the fermentable', f => f.name ?? ''],
@@ -276,6 +291,7 @@ export const FERMENTABLE_FIELDS = [
   ['Amount', 'Fermentable N: the amount (lb or kg)', (f, u) => kgTo(f.kg, u.grainUnit)],
   ['Potential', 'Fermentable N: Potential (yield %)', f => f.yieldPct],
   ['SRM', 'Fermentable N: color in SRM', f => f.color],
+  ['PPG_SG', 'Fermentable N: PPG>SG, its gravity points', (f, u, r) => gravityPoints(f, r)],
   ['After_Boil', 'Fermentable N: added after the boil (true or false)', f => AFTER_BOIL_TYPES.includes(f.type) && !!f.addAfterBoil],
 ];
 const LINE_FIELD = /^rcp_(Grain|Fermentable)_(\d+)_([A-Za-z_]+)$/;
@@ -309,7 +325,7 @@ export function recipeFieldValues(r, d = {}) {
   hops.forEach((h, i) => { for (const [end, , get] of HOP_FIELDS) put(hopFieldName(i + 1, end), get(r, h, u, sch, i) ?? (end === 'Name' || end === 'Date' ? '' : 0)); });
   const ferms = r?.ingredients?.fermentables || [];
   put(GRAIN_COUNT[0], r ? GRAIN_COUNT[2](r) : 0); put(FERM_COUNT[0], r ? FERM_COUNT[2](r) : 0);
-  ferms.filter(isGrain).forEach((f, i) => { for (const [end, , get] of GRAIN_FIELDS) put(`rcp_Grain_${i + 1}_${end}`, get(f, u) ?? (end === 'Name' ? '' : 0)); });
-  ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`rcp_Fermentable_${i + 1}_${end}`, get(f, u) ?? (end === 'Name' ? '' : 0)); });
+  ferms.filter(isGrain).forEach((f, i) => { for (const [end, , get] of GRAIN_FIELDS) put(`rcp_Grain_${i + 1}_${end}`, get(f, u, r) ?? (end === 'Name' ? '' : 0)); });
+  ferms.filter(f => !isGrain(f)).forEach((f, i) => { for (const [end, , get] of FERMENTABLE_FIELDS) put(`rcp_Fermentable_${i + 1}_${end}`, get(f, u, r) ?? (end === 'Name' ? '' : 0)); });
   return out;
 }
