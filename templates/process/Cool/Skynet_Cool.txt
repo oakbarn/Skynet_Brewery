@@ -1,0 +1,19 @@
+//Skynet_Cool
+//About: Chill the wort to pitching temperature, then move it to the fermenter.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Chill"
+ask "Hook up the chiller and open its cooling water. Press Done when the water runs."
+@if Chill_Pump
+{{Chill_Pump}} = true
+@end
+@if Wort_Probe
+wait {{Wort_Probe}} <= rcp_Ferment_Temp
+@else
+ask "Press Done when the wort is down to " + rcp_Ferment_Temp + rcp_Temp_Units + "."
+@end
+@if Chill_Pump
+{{Chill_Pump}} = false
+@end
+step "To the fermenter"
+ask "Move the wort into the sanitized fermenter (about " + rcp_Batch_Volume + " " + rcp_Volume_Units + "). Take a gravity reading. Press Done when it is in."

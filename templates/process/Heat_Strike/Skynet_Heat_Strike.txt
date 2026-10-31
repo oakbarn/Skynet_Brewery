@@ -1,0 +1,19 @@
+//Skynet_Heat_Strike
+//About: Fill the Hot Liquor Tank and heat the strike water to the Recipe's strike temperature.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Fill the HLT"
+ask "Fill the Hot Liquor Tank with at least " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of strike water (plus sparge water if it heats in the same tank). Press Done when it is full."
+step "Heat the strike water"
+@if HLT_Heater
+{{HLT_Heater}}.target = rcp_Strike_Temp
+{{HLT_Heater}}.enabled = true
+@else
+ask "Turn the Hot Liquor Tank heat on and set it to " + rcp_Strike_Temp + rcp_Temp_Units + ". Press Done when it is on."
+@end
+@if HLT_Probe
+wait {{HLT_Probe}} >= rcp_Strike_Temp
+@else
+ask "Press Done when the strike water reaches " + rcp_Strike_Temp + rcp_Temp_Units + "."
+@end
+print "Strike water at " + rcp_Strike_Temp + rcp_Temp_Units

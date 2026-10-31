@@ -5,7 +5,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
-import { Store, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
+import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
+import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
@@ -131,6 +132,10 @@ const schemas = new Schemas(store, { engine, hw, profiles });
 const brewProfiles = Object.fromEntries(Object.keys(PROFILE_KINDS).map(k => [k, new ProfileStore(path.join(path.dirname(CONFIG), 'profiles', k), k)]));
 // Vessel and Bundled Fitting Templates: Skynet ones ship in templates/, the ones made here live in config/templates
 const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dirname(CONFIG), 'templates'));
+// The Standard Skynet Brew Process (☰ Menu > Brew Process): Skynet Process Templates ship in templates/process, User ones live
+// in config/process_templates. rcp_ Recipe values use the Default tab's Mash and Boil Profiles while no Recipe is loaded.
+const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
+engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list() });
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
 const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
@@ -257,7 +262,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/override' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -470,6 +475,7 @@ async function route(req, res) {
     for (const list of ['elements', 'graphics', 'workspaces', 'devices']) if (Array.isArray(body[list])) claimKeys(body[list], store.config[list]);
     // a User version of a Skynet Device Template (Rule 5.16): its fixed attributes are put back to the Template's, whatever was sent
     for (const el of body.elements ?? []) if (el?.template && el.templateCls === 'skynet') applyDeviceTemplate(el, templates.find('device', el.template));
+    for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)
     for (const el of body.elements ?? []) cleanDatabase(el);     // .database and .API: only the known settings are kept (lib/itemapi.js)
     // only one Override button on each Tab (Fritz, 2026-10-30)
     { const seen = new Set(); for (const g of body.graphics ?? []) if (g?.kind === 'override') { if (seen.has(g.workspace)) return fail(res, 400, `The ${g.workspace} Tab has two Override buttons: only one is allowed on a Tab`); seen.add(g.workspace); } }
@@ -527,6 +533,40 @@ async function route(req, res) {
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
+  }
+  // ---- The Brew Process (☰ Menu > Brew Process): everyone sees it, admins change it, operators start the Brew Day
+  if (p === '/ui/brewprocess' && m === 'GET') {
+    const v = recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list() });
+    return ok(res, { steps: MAJOR_STEPS, fields: FIELDS, setup: brewSetup(store.config), templates: processTemplates.list(), recipeFields: RECIPE_FIELDS,
+      recipe: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, plain(x)])), processes: MAJOR_STEPS.map((_, i) => processName(i)).filter(n => engine.exists(n)) });
+  }
+  if (p === '/ui/brewprocess' && m === 'PUT') {
+    const b = await jsonBody(req), cur = brewSetup(store.config);
+    for (const s of MAJOR_STEPS) { const n = b.templates?.[s.key]; if (n !== undefined) { if (!processTemplates.find(s.key, n)) return fail(res, 400, `${s.title}: no Process Template "${n}"`); cur.templates[s.key] = n; } }
+    for (const f of Object.keys(FIELDS)) if (b.fields && f in b.fields) { if (b.fields[f]) cur.fields[f] = String(b.fields[f]); else delete cur.fields[f]; }
+    store.config.brewProcess = cur; store.writeConfig(); broadcast('config', {});
+    return ok(res, cur);
+  }
+  const bpt = /^\/ui\/brewprocess\/template\/([A-Za-z_]+)\/([A-Za-z0-9_-]+)$/.exec(p);
+  if (bpt && m === 'GET') { const t = processTemplates.find(bpt[1], bpt[2]); return t ? ok(res, t) : fail(res, 404, 'No Process Template ' + bpt[2]); }
+  if (bpt && m === 'PUT') { processTemplates.saveUser(bpt[1], bpt[2], (await jsonBody(req)).text ?? ''); return ok(res); }
+  if (bpt && m === 'DELETE') { processTemplates.deleteUser(bpt[1], bpt[2]); return ok(res); }
+  if (p === '/ui/brewprocess/build' && m === 'POST') {
+    const out = buildBrewDay(brewSetup(store.config), processTemplates, store.config.elements ?? []);
+    const busy = out.map(x => x.name).filter(n => engine.running.has(n));
+    if (busy.length) return fail(res, 409, `Stop ${busy.join(', ')} before building the Brew Day again`);
+    store.config.processClasses ??= {};
+    for (const { name, text } of out) {
+      if (engine.exists(name) && engine.read(name) !== text) engine.backup(name);      // the one it replaces is kept as .bak
+      store.config.processClasses[name] = 'flow';
+      engine.write(name, text);
+    }
+    store.writeConfig(); engine.renumber();
+    return ok(res, { built: out.map(x => x.name) });
+  }
+  if (p === '/ui/brewprocess/start' && m === 'POST') {
+    if (!engine.exists(processName(0))) return fail(res, 400, 'Build the Brew Day first (☰ Menu > Brew Process)');
+    engine.start(processName(0), me.name || 'user'); return ok(res);
   }
   // Simulation mode: everyone sees it, admins change it
   if (p === '/ui/sim' && m === 'GET') return ok(res, { ...sim.status(), upcoming: sim.upcoming() });

@@ -1,0 +1,19 @@
+//Skynet_PreBrew
+//About: Load or check the Recipe, pumps off and every valve closed, the equipment checked and locked. The same in every Schema.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Recipe"
+[Recipe_Check]
+if rcp_Loaded == false
+  ask "No Recipe is loaded.\nOpen ☰ Menu > Recipe: import a BeerSmith (.bsmx) or BeerXML (.xml) file, or make a new Recipe. Then press Done."
+  goto Recipe_Check
+endif
+ask "Check the Recipe \b" + rcp_Name + "\b on ☰ Menu > Recipe (clear it and import another if this is not today's beer).\nBatch " + rcp_Batch_Volume + " " + rcp_Volume_Units + ", grain " + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ", boil " + rcp_Boil_Time + ".\nPress Done when it is right."
+step "House cleaning: pumps off, valves closed"
+all_pumps_off
+sleep 1000
+close_all_valves
+step "Equipment check"
+ask "Walk the brewery:\n- hoses on and clamped, drains closed\n- vessels clean and sanitizer ready\n- power or gas on, chiller water ready\nPress Done when all is ready."
+lock_Equipment
+print "PreBrew done: " + rcp_Name

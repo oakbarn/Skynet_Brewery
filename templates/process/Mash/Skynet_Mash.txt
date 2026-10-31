@@ -1,0 +1,53 @@
+//Skynet_Mash
+//About: Every mash step of the Recipe (temperature, then its time), the mash out, and the sparge.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+@if Mash_Pump
+{{Mash_Pump}} = true
+@end
+@each_mash_step
+if rcp_Mash_Steps >= {{n}}
+  step "Mash step {{n}}"
+  print "Mash step {{n}}: " + rcp_Mash_Step_{{n}}_Name + " at " + rcp_Mash_Step_{{n}}_Temp + rcp_Temp_Units + " for " + rcp_Mash_Step_{{n}}_Time
+@if Mash_Heater
+  {{Mash_Heater}}.target = rcp_Mash_Step_{{n}}_Temp
+  {{Mash_Heater}}.enabled = true
+@end
+@if Mash_Probe
+  wait {{Mash_Probe}} >= rcp_Mash_Step_{{n}}_Temp - 1
+@else
+  ask "Bring the mash to " + rcp_Mash_Step_{{n}}_Temp + rcp_Temp_Units + " (" + rcp_Mash_Step_{{n}}_Name + "). Press Done when it is there."
+@end
+@if Mash_Timer
+  {{Mash_Timer}}.countdown = true
+  {{Mash_Timer}} = rcp_Mash_Step_{{n}}_Time
+  start {{Mash_Timer}}
+  wait {{Mash_Timer}} <= 00:00:00
+  stop {{Mash_Timer}}
+@else
+  sleep rcp_Mash_Step_{{n}}_Time * 1000
+@end
+endif
+@end
+step "Mash out"
+if rcp_Mash_Out_Temp > 0
+@if Mash_Heater
+  {{Mash_Heater}}.target = rcp_Mash_Out_Temp
+@end
+@if Mash_Probe
+  wait {{Mash_Probe}} >= rcp_Mash_Out_Temp - 1
+@else
+  ask "Bring the mash to " + rcp_Mash_Out_Temp + rcp_Temp_Units + " for the mash out. Press Done when it is there."
+@end
+endif
+@if Mash_Heater
+{{Mash_Heater}}.enabled = false
+@end
+@if Mash_Pump
+{{Mash_Pump}} = false
+@end
+step "Sparge"
+ask "Sparge with water at " + rcp_Sparge_Temp + rcp_Temp_Units + " and collect " + rcp_Boil_Volume + " " + rcp_Volume_Units + " of wort in the boil kettle. Press Done when the kettle has it all."
+@if HLT_Heater
+{{HLT_Heater}}.enabled = false
+@end
