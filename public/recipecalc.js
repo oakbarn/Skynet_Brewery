@@ -65,6 +65,10 @@ export const FERMENTABLE_TYPES = { grain: 'Grain', adjunct: 'Adjunct', extract: 
 // After Boil is shown only for the Types a brewer adds during or after the boil.
 export const isGrain = f => !f.type || f.type === 'grain';
 export const AFTER_BOIL_TYPES = ['extract', 'dry extract', 'sugar', 'fruit', 'juice'];
+// The Fermentable tab's dropdowns, select from the list only (Fritz's Fermentable tab, 2026-10-31): the BeerXML standard's
+// Types (Grain is on the Grain tab) and weights. Each line keeps its own Measurement; the amount is still kept in kg.
+export const BEERXML_FERM_TYPES = ['adjunct', 'extract', 'dry extract', 'sugar'];
+export const FERM_MEASURES = { lb: 'Pounds (lb)', oz: 'Ounces (oz)', kg: 'Kilograms (kg)', g: 'Grams (g)' };
 // Gravity points (the PPG>SG box, Fritz's Grain tab 2026-10-31): Potential (yield %) x 46.214 (the points of 1 lb of pure
 // sugar in 1 gallon) = PPG; points = PPG x pounds x efficiency / gallons in the batch. Grains and adjuncts are mashed, so the
 // brewhouse efficiency counts; extracts, sugars, fruit and juice give all their sugar (100%). Expected Gravity = 1 + all points / 1000.
@@ -288,7 +292,8 @@ export const GRAIN_FIELDS = [
 export const FERMENTABLE_FIELDS = [
   ['Name', 'Fermentable N: the fermentable', f => f.name ?? ''],
   ['Type', 'Fermentable N: Adjunct, Extract, Dry Extract, Sugar, Fruit, Juice or Other', f => f.type || 'other'],
-  ['Amount', 'Fermentable N: the amount (lb or kg)', (f, u) => kgTo(f.kg, u.grainUnit)],
+  ['Amount', 'Fermentable N: the amount, in its Measurement', (f, u) => kgTo(f.kg, FERM_MEASURES[f.unit] ? f.unit : u.grainUnit)],
+  ['Measurement', 'Fermentable N: lb, oz, kg or g', (f, u) => FERM_MEASURES[f.unit] ? f.unit : u.grainUnit],
   ['Potential', 'Fermentable N: Potential (yield %)', f => f.yieldPct],
   ['SRM', 'Fermentable N: color in SRM', f => f.color],
   ['PPG_SG', 'Fermentable N: PPG>SG, its gravity points', (f, u, r) => gravityPoints(f, r)],
@@ -302,7 +307,7 @@ export function lineFieldEmpty(name) {
   const end = h ? HOP_FIELDS.find(x => x[0].toLowerCase() === h[2].toLowerCase())?.[0]
     : g ? (g[1].toLowerCase() === 'grain' ? GRAIN_FIELDS : FERMENTABLE_FIELDS).find(x => x[0].toLowerCase() === g[3].toLowerCase())?.[0] : undefined;
   if (!end) return /^rcp_(Hop|Grain|Fermentable)_Count$/i.test(s) ? 0 : undefined;
-  return ['Name', 'Use', 'Date', 'Type'].includes(end) ? '' : ['Hop_Rocket', 'After_Boil'].includes(end) ? false : 0;
+  return ['Name', 'Use', 'Date', 'Type', 'Measurement'].includes(end) ? '' : ['Hop_Rocket', 'After_Boil'].includes(end) ? false : 0;
 }
 const FERM_COUNT = ['rcp_Fermentable_Count', 'Fermentable tab: how many lines', r => (r.ingredients?.fermentables || []).filter(f => !isGrain(f)).length];
 export const hopFieldName = (line, end) => `rcp_Hop_${line}_${end}`;

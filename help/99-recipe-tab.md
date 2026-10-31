@@ -110,7 +110,7 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 
 ## The Grain and Fermentable tabs
 
-A recipe's fermentables are split over two tabs. **Grain** holds the ones of Type Grain (the Type is not shown). **Fermentable** holds every other Type, picked from the **Type** dropdown: Adjunct, Extract, Dry Extract, Sugar, Fruit, Juice or Other. **Add Grain +** or **Add Fermentable +** puts a new line at the bottom; **Delete** takes one away. There is no limit.
+A recipe's fermentables are split over two tabs. **Grain** holds the ones of Type Grain (the Type is not shown). **Fermentable** holds every other Type, picked from the **Type** dropdown (the BeerXML list: Adjunct, Extract, Dry Extract, Sugar). Each Fermentable line also has a **Measurement** dropdown (Pounds, Ounces, Kilograms, Grams) for its own Amount. Both dropdowns are select only. **Add Grain +** or **Fermentable +** puts a new line at the bottom; **Delete** takes one away. There is no limit.
 
 - **Name**, the weight, **Potential** (the yield, %), **SRM** (the color) and **PPG>SG**, its gravity points (worked out).
 - The weight shows in the **grain weight standard** picked on ☰ Menu > Default (Pounds or Kg). An imported BeerSmith or BeerXML file is shown in it too. Its label, and the PPG>SG label, can be changed only on the Default tab.
