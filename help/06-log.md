@@ -2,7 +2,7 @@
 
 The **Log** screen shows values that were written to the brew database (`data/brewlog.db` on the Brain), and turns them into CSV files for Excel, Google Sheets or LibreOffice.
 
-What gets written, and when, is set per variable with its **database trigger**: see [Variables](04-variables). Only gAPI variables can be logged.
+What gets written, and when, is set in each Device or Widget's Properties, in the **Database and .API** box: see [Database and .API](98-database-and-api). Any Device or Widget with a value can be logged. Readings are kept by the item's hidden key, so a renamed item still shows all its readings under its name now.
 
 ## Download CSV
 
@@ -37,7 +37,7 @@ A CSV set is a saved list of values, so the values you always want together are 
 
 **Delete set** removes the set, never the readings. CSV sets belong to the Schema, so each Schema keeps its own. Brewers (operators) and admins can save and delete sets; view-only accounts can download.
 
-> A good Fermentor Profile: give `Ferm_Temp` (and the Tilt gravity, when you have one) a database trigger of every 15 minutes, then download with **Last 7 days** or **Last 30 days**.
+> A good Fermentor Profile: give `Ferm_Temp` (and the Tilt gravity, when you have one) **Send to the database: Every 15 minutes** in its Properties, then download with **Last 7 days** or **Last 30 days**.
 
 ## Look at the readings
 

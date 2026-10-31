@@ -6,11 +6,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
-import { Store, fixValveLists, cleanName, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS, isApiVar, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
+import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
+import { cleanDatabase, ApiGuard, apiList, apiItem, apiPut } from './lib/itemapi.js';
 import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
@@ -29,7 +30,7 @@ import { backupConfigFile, listBackups, readBackup, checkConfigText, applyConfig
 import { Pictures } from './lib/vectorize.js';
 import { MediaFiles } from './lib/mediafiles.js';
 import { FileMove, KINDS as MOVE_KINDS, missingMedia } from './lib/filemove.js';
-import { MqttBridge, SHARED_TYPES, itemRule, cleanItems } from './lib/mqtt.js';
+import { MqttBridge, isShared, itemRule, cleanItems } from './lib/mqtt.js';
 import { plain, toStr } from './lib/values.js';
 import { Help } from './lib/help.js';
 import { clock } from './lib/simclock.js';
@@ -62,7 +63,7 @@ if (seeded.length) console.log(`First start: copied the samples into ${seeded.jo
 const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 // Names have no spaces any more: an older configuration is changed once (backups in config/backups and *.before-no-spaces.bak)
 const unspaced = removeSpacesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
-// vKonstant / vAPI became gKonstant / gAPI, vK_ / vA_ names gK_ / gA_: every Schema, saved value, the database and Processes, once
+// gKonstant / gAPI became one class, gGlobal, gK_ / gA_ names gG_, and log lines send_db: every Schema, saved value, the database and Processes, once
 const gnames = gStandardOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
 // Names can't have < > : " / \ | ? * any more (Fritz, 2026-10-29): an older name gets a ~ for each, once, everywhere (lib/namechars.js)
 const safenames = safeNamesOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
@@ -81,7 +82,7 @@ const visFixed = visibilityOnDisk(SCRIPTS, n => store.get(n));
 const logger = new Logger(store, path.join(DATA, 'brewlog.db'));
 const engine = new Engine(store, SCRIPTS, logger);
 engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
-store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gK / gA names
+store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gG names
 // the Schema loaded at start-up: Text_1 -> w_Text_1 (Rule 15.2) happened before the engine was up, so its Processes follow now
 { const tr = renameInProcesses(engine, store.loadRenames ?? new Map()); if (tr.length) console.log(`Processes updated for the new Text Widget names: ${tr.map(x => x.name).join(', ')}`); }
 store.on('safeRenamed', map => {   // ... and its names with < > : " / \ | ? * (written in quotes in a Process)
@@ -108,7 +109,7 @@ control.start();
 hw.onSimStep = t => control.tick(t);                         // a skip ahead runs the controls between simulator steps
 const timerDt = clock.stepper();
 setInterval(() => store.tickTimers(timerDt() / 1000), 100);   // timers follow the clock (faster in simulation mode)
-setInterval(() => store.pollFiles(), 1000);            // Long String gKonstants follow their text files
+setInterval(() => store.pollFiles(), 1000);            // Long String gGlobals follow their text files
 store.on('warn', m => engine.print('system', m));
 store.on('sdcard', m => { engine.print('system', m); broadcast('alert', { text: m }); });   // an SD card in an Ethernet Mega's shield (Skynet Rule 6.11)
 const pictures = new Pictures(store, () => store.mediaRoots());     // PNG/JPG pictures get a sharp SVG copy (lib/vectorize.js)
@@ -155,7 +156,7 @@ store.on('change', (name, prop, v) => {
 });
 setInterval(flush, 150);
 
-// Push Buttons (gKonstant) are on only while a finger or mouse holds them. The browser repeats "down"
+// Push Buttons (gGlobal) are on only while a finger or mouse holds them. The browser repeats "down"
 // every 0.5 s while held; if it goes quiet (closed tab, lost WiFi) the button lets go by itself.
 const holds = new Map();
 function hold(name, down) {
@@ -228,6 +229,15 @@ function apiKeyOk(req, url) {
   const key = store.config.apiKey;
   return !!key && (req.headers['x-api-key'] === key || url.searchParams.get('key') === key);
 }
+// Keeps a bot from guessing the API key (Fritz, 2026-10-30: safeguards so a bot can't take over): too many wrong keys from one
+// address and it is shut out for a while (lib/itemapi.js)
+const apiGuard = new ApiGuard();
+// every change an outside program makes is written in the Processes console, so you can see what it did
+function apiSaid(r, ip) {
+  const what = r.set ? Object.entries(r.set).map(([a, v]) => `${r.name}.${a} = ${v}`).join(', ') : `${r.name}.${r.attribute} = ${r.value}`;
+  engine.print('system', `API (${ip}): ${what}`);
+  return r;
+}
 
 // ---------------- login ----------------
 // Who may do what. viewer < operator < admin. New routes default to viewer for GET and admin for changes.
@@ -281,11 +291,9 @@ function browserConfig() {
   return { ...c, mqtt: { ...m, hasPassword: !!password } };
 }
 function mqttView() {
-  return { status: mqtt.status(), items: store.list().filter(e => SHARED_TYPES.includes(e.type)).map(e => ({ name: e.name, type: e.type, label: e.label ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
+  return { status: mqtt.status(), items: store.list().filter(isShared).map(e => ({ name: e.name, type: e.type, label: e.label ?? '', ...itemRule(store, e), fixed: ['digitalIn', 'temperature', 'analogIn'].includes(e.type) })) };
 }
 
-// The API has gAPI variables only (never Shared or gKonstant)
-const apiVars = () => store.list().filter(isApiVar).map(e => ({ name: e.name, type: e.dataType, class: e.type, value: plain(store.getProp(e.name, 'value')), units: e.units ?? '' }));
 
 function csv(rows) {
   const q = s => `"${String(s ?? '').replaceAll('"', '""')}"`;
@@ -379,39 +387,35 @@ async function route(req, res) {
     return fail(res, 404, 'Unknown route');
   }
 
-  // ===== Public API: gAPI only (Shared and gKonstant variables are never exposed). /api/globals is the old address of /api/gapi =====
+  // ===== Public API (Fritz, 2026-10-30): any Device or Widget whose .API is Get only (read) or Get and Put (read and change) =====
   // Allowed with the API key, or when signed in. Reading without either only works from your own network.
   if (p.startsWith('/api/')) {
+    if (apiGuard.blocked(ip)) return fail(res, 429, 'Too many wrong API keys from this address. Try again later.');
+    const sentKey = req.headers['x-api-key'] ?? url.searchParams.get('key');
     if (!apiKeyOk(req, url)) {
+      if (sentKey) apiGuard.wrong(ip);                     // a wrong key counts, even when the caller is signed in
       if (me) {
         if (m !== 'GET' && !sameOrigin(req)) return fail(res, 403, 'Request came from another web site');
         if (!roleAtLeast(me.role, m === 'GET' ? 'viewer' : 'operator')) return fail(res, 403, 'Your account is view only');
       } else if (!(m === 'GET' && isPrivateAddress(ip))) return fail(res, 401, 'Missing or wrong X-API-Key');
     }
-    if ((p === '/api/globals' || p === '/api/gapi') && m === 'GET') return ok(res, apiVars());
-    if ((p === '/api/globals' || p === '/api/gapi') && (m === 'POST' || m === 'PUT')) {
+    if (p === '/api/items' && m === 'GET') return ok(res, apiList(store));
+    if (p === '/api/items' && (m === 'POST' || m === 'PUT')) {      // { name: value, ... }: several at once
       const body = await jsonBody(req); const done = [], errors = [];
-      for (const [n, v] of Object.entries(body)) {
-        const el = store.get(n);
-        if (!isApiVar(el)) { errors.push(`${n}: not a gAPI`); continue; }
-        try { store.setProp(n, 'value', v, 'api'); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); }
-      }
+      for (const [n, v] of Object.entries(body)) { try { apiSaid(apiPut(store, n, null, v), ip); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); } }
       return ok(res, { ok: !errors.length, set: done, errors });
     }
-    let g = /^\/api\/(?:globals|gapi)\/(.+)$/.exec(p);
+    let g = /^\/api\/items\/([^/]+)(?:\/([^/]+))?$/.exec(p);
     if (g) {
-      const n = cleanName(g[1]), el = store.get(n);
-      if (!isApiVar(el)) return fail(res, 404, `No gAPI named "${n}"`);
-      if (m === 'GET') return ok(res, { name: n, type: el.dataType, class: el.type, value: plain(store.getProp(n, 'value')) });
+      if (m === 'GET') { const r = apiItem(store, g[1], g[2]); return r ? ok(res, r) : fail(res, 404, `No item named "${cleanName(g[1])}" that outside programs may read`); }
       if (m === 'PUT' || m === 'POST') {
         const t = await readBody(req); let v = t;
-        try { const j = JSON.parse(t); v = (j && typeof j === 'object' && 'value' in j) ? j.value : j; } catch { }
-        store.setProp(n, 'value', v, 'api');
-        return ok(res, { name: n, value: plain(store.getProp(n, 'value')) });
+        try { const j = JSON.parse(t); v = (j && typeof j === 'object' && !Array.isArray(j) && !g[2]) ? j : (j && typeof j === 'object' && 'value' in j) ? j.value : j; } catch { }
+        try { return ok(res, apiSaid(apiPut(store, g[1], g[2], v), ip)); } catch (e) { return fail(res, e.status ?? 400, e.message); }
       }
     }
-    g = /^\/api\/log\/(.+)$/.exec(p);
-    if (g && m === 'POST') { logger.logNow(g[1], 'api'); return ok(res); }
+    g = /^\/api\/log\/(.+)$/.exec(p);         // send its reading to the database now
+    if (g && m === 'POST') { if (!apiItem(store, g[1])) return fail(res, 404, `No item named "${cleanName(g[1])}" that outside programs may read`); logger.logNow(g[1], 'api'); return ok(res); }
     if ((p === '/api/log' || p === '/api/log.csv') && m === 'GET') {
       const rows = logger.query(Object.fromEntries(url.searchParams));
       return p.endsWith('.csv') ? send(res, 200, csv(rows), 'text/csv; charset=utf-8') : ok(res, rows);
@@ -442,7 +446,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, vkKinds: VK_KINDS, vapiKinds: VAPI_KINDS, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   if (p === '/ui/set' && m === 'POST') {
@@ -459,8 +463,8 @@ async function route(req, res) {
   if (p === '/ui/hold' && m === 'POST') {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
-    // a Push Button gKonstant, or an output or switch set to "push button (on while held)" (an LED momentary button)
-    const push = el && ((el.type === 'gKonstant' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
+    // a Push Button gGlobal, or an output or switch set to "push button (on while held)" (an LED momentary button)
+    const push = el && ((el.type === 'gGlobal' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
     if (!push) return fail(res, 400, `"${name}" is not a Push Button`);
     hold(el.name, down);
     return ok(res);
@@ -472,6 +476,7 @@ async function route(req, res) {
     // a User version of a Skynet Device Template (Rule 5.16): its fixed attributes are put back to the Template's, whatever was sent
     for (const el of body.elements ?? []) if (el?.template && el.templateCls === 'skynet') applyDeviceTemplate(el, templates.find('device', el.template));
     for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)
+    for (const el of body.elements ?? []) cleanDatabase(el);     // .database and .API: only the known settings are kept (lib/itemapi.js)
     // only one Override button on each Tab (Fritz, 2026-10-30)
     { const seen = new Set(); for (const g of body.graphics ?? []) if (g?.kind === 'override') { if (seen.has(g.workspace)) return fail(res, 400, `The ${g.workspace} Tab has two Override buttons: only one is allowed on a Tab`); seen.add(g.workspace); } }
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change

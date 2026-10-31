@@ -26,7 +26,7 @@
   {
    "workspace": "Brewhouse",
    "name": "gblS_Step_Text",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "x": 0,
    "y": 0,
    "w": 520,
@@ -43,7 +43,7 @@
   {
    "workspace": "Brewhouse",
    "name": "gblS_Advance_Label",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "x": 0,
    "y": 310,
    "w": 380,
@@ -75,7 +75,7 @@
   {
    "workspace": "Brewhouse",
    "name": "gblV_Brew_Status",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "x": 400,
    "y": 700,
    "w": 120,
@@ -113,7 +113,7 @@
   {
    "workspace": "Brewhouse",
    "name": "gblS_Hop_Warning",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "x": 0,
    "y": 520,
    "w": 380,
@@ -214,8 +214,8 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAV_Strike_Volume",
-   "type": "gAPI",
+   "name": "gGV_Strike_Volume",
+   "type": "gGlobal",
    "kind": "value",
    "x": 0,
    "y": 800,
@@ -224,12 +224,13 @@
    "label": "Strike volume",
    "units": "gal",
    "precision": 2,
-   "initial": 0
+   "initial": 0,
+   "api": "getput"
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAV_Mash_pH",
-   "type": "gAPI",
+   "name": "gGV_Mash_pH",
+   "type": "gGlobal",
    "kind": "value",
    "x": 175,
    "y": 800,
@@ -238,12 +239,13 @@
    "label": "Mash pH",
    "units": "pH",
    "precision": 2,
-   "initial": 0
+   "initial": 0,
+   "api": "getput"
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAV_PreBoil_Volume",
-   "type": "gAPI",
+   "name": "gGV_PreBoil_Volume",
+   "type": "gGlobal",
    "kind": "value",
    "x": 350,
    "y": 800,
@@ -252,12 +254,13 @@
    "label": "Pre-boil volume",
    "units": "gal",
    "precision": 2,
-   "initial": 0
+   "initial": 0,
+   "api": "getput"
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAV_PreBoil_Gravity",
-   "type": "gAPI",
+   "name": "gGV_PreBoil_Gravity",
+   "type": "gGlobal",
    "kind": "value",
    "x": 0,
    "y": 866,
@@ -266,12 +269,13 @@
    "label": "Pre-boil gravity",
    "units": "",
    "precision": 3,
-   "initial": 0
+   "initial": 0,
+   "api": "getput"
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAV_PostBoil_Volume",
-   "type": "gAPI",
+   "name": "gGV_PostBoil_Volume",
+   "type": "gGlobal",
    "kind": "value",
    "x": 175,
    "y": 866,
@@ -280,12 +284,13 @@
    "label": "Post-boil volume",
    "units": "gal",
    "precision": 2,
-   "initial": 0
+   "initial": 0,
+   "api": "getput"
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAV_OG",
-   "type": "gAPI",
+   "name": "gGV_OG",
+   "type": "gGlobal",
    "kind": "value",
    "x": 350,
    "y": 866,
@@ -294,12 +299,13 @@
    "label": "Original gravity",
    "units": "",
    "precision": 3,
-   "initial": 0
+   "initial": 0,
+   "api": "getput"
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAV_Fermenter_Volume",
-   "type": "gAPI",
+   "name": "gGV_Fermenter_Volume",
+   "type": "gGlobal",
    "kind": "value",
    "x": 0,
    "y": 932,
@@ -308,23 +314,25 @@
    "label": "Into fermenter",
    "units": "gal",
    "precision": 2,
-   "initial": 0
+   "initial": 0,
+   "api": "getput"
   },
   {
    "workspace": "Brewhouse",
-   "name": "gAS_Brew_Notes",
-   "type": "gAPI",
+   "name": "gGS_Brew_Notes",
+   "type": "gGlobal",
    "kind": "string",
    "x": 175,
    "y": 932,
    "w": 345,
    "h": 60,
    "label": "Notes",
-   "initial": ""
+   "initial": "",
+   "api": "getput"
   },
   {
    "name": "gblS_BeerName_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 20,
    "y": 60,
@@ -337,7 +345,7 @@
   },
   {
    "name": "gblS_Style_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 390,
    "y": 60,
@@ -349,7 +357,7 @@
   },
   {
    "name": "gblV_OG_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 60,
@@ -363,7 +371,7 @@
   },
   {
    "name": "gblV_FG_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 780,
    "y": 60,
@@ -377,7 +385,7 @@
   },
   {
    "name": "gblV_IBU_Recipe_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 900,
    "y": 60,
@@ -390,7 +398,7 @@
   },
   {
    "name": "gblV_BatchSize_Gal",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1020,
    "y": 60,
@@ -404,7 +412,7 @@
   },
   {
    "name": "gblV_BoilSize_Gal",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1160,
    "y": 60,
@@ -418,7 +426,7 @@
   },
   {
    "name": "gblV_Desired_Strike",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 20,
    "y": 175,
@@ -433,7 +441,7 @@
   },
   {
    "name": "gblV_Sparge_Temp",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 175,
    "y": 175,
@@ -447,7 +455,7 @@
   },
   {
    "name": "gblV_Pitch_Temp",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 330,
    "y": 175,
@@ -461,7 +469,7 @@
   },
   {
    "name": "gblV_Whirlpool_Min",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 485,
    "y": 175,
@@ -475,7 +483,7 @@
   },
   {
    "name": "gblS_Mash_1_Name",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 20,
    "y": 250,
@@ -487,7 +495,7 @@
   },
   {
    "name": "gblV_Mash_1_Temp",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 290,
    "y": 250,
@@ -502,7 +510,7 @@
   },
   {
    "name": "gblT_1_Mash_Time_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 450,
    "y": 250,
@@ -514,7 +522,7 @@
   },
   {
    "name": "gblS_Mash_2_Name",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 20,
    "y": 320,
@@ -526,7 +534,7 @@
   },
   {
    "name": "gblV_Mash_2_Temp",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 290,
    "y": 320,
@@ -541,7 +549,7 @@
   },
   {
    "name": "gblT_2_Mash_Time_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 450,
    "y": 320,
@@ -553,7 +561,7 @@
   },
   {
    "name": "gblS_Mash_3_Name",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 20,
    "y": 390,
@@ -565,7 +573,7 @@
   },
   {
    "name": "gblV_Mash_3_Temp",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 290,
    "y": 390,
@@ -580,7 +588,7 @@
   },
   {
    "name": "gblT_3_Mash_Time_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 450,
    "y": 390,
@@ -592,7 +600,7 @@
   },
   {
    "name": "gblV_MashOut_Temp",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 290,
    "y": 460,
@@ -606,7 +614,7 @@
   },
   {
    "name": "gblT_MashOut_Time",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 450,
    "y": 460,
@@ -618,7 +626,7 @@
   },
   {
    "name": "gblVBoilTime_Minutes",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 760,
    "y": 140,
@@ -632,7 +640,7 @@
   },
   {
    "name": "gblS_Hop1_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 250,
@@ -644,7 +652,7 @@
   },
   {
    "name": "gblV_Hop1_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 250,
@@ -657,7 +665,7 @@
   },
   {
    "name": "gblV_Hop1_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 250,
@@ -670,7 +678,7 @@
   },
   {
    "name": "gblV_TimeHop1_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 250,
@@ -683,7 +691,7 @@
   },
   {
    "name": "gblV_Hop1_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 250,
@@ -696,7 +704,7 @@
   },
   {
    "name": "gblB_Hop1_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 250,
@@ -711,7 +719,7 @@
   },
   {
    "name": "gblS_Hop2_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 312,
@@ -723,7 +731,7 @@
   },
   {
    "name": "gblV_Hop2_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 312,
@@ -736,7 +744,7 @@
   },
   {
    "name": "gblV_Hop2_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 312,
@@ -749,7 +757,7 @@
   },
   {
    "name": "gblV_TimeHop2_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 312,
@@ -762,7 +770,7 @@
   },
   {
    "name": "gblV_Hop2_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 312,
@@ -775,7 +783,7 @@
   },
   {
    "name": "gblB_Hop2_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 312,
@@ -790,7 +798,7 @@
   },
   {
    "name": "gblS_Hop3_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 374,
@@ -802,7 +810,7 @@
   },
   {
    "name": "gblV_Hop3_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 374,
@@ -815,7 +823,7 @@
   },
   {
    "name": "gblV_Hop3_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 374,
@@ -828,7 +836,7 @@
   },
   {
    "name": "gblV_TimeHop3_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 374,
@@ -841,7 +849,7 @@
   },
   {
    "name": "gblV_Hop3_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 374,
@@ -854,7 +862,7 @@
   },
   {
    "name": "gblB_Hop3_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 374,
@@ -869,7 +877,7 @@
   },
   {
    "name": "gblS_Hop4_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 436,
@@ -881,7 +889,7 @@
   },
   {
    "name": "gblV_Hop4_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 436,
@@ -894,7 +902,7 @@
   },
   {
    "name": "gblV_Hop4_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 436,
@@ -907,7 +915,7 @@
   },
   {
    "name": "gblV_TimeHop4_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 436,
@@ -920,7 +928,7 @@
   },
   {
    "name": "gblV_Hop4_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 436,
@@ -933,7 +941,7 @@
   },
   {
    "name": "gblB_Hop4_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 436,
@@ -948,7 +956,7 @@
   },
   {
    "name": "gblS_Hop5_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 498,
@@ -960,7 +968,7 @@
   },
   {
    "name": "gblV_Hop5_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 498,
@@ -973,7 +981,7 @@
   },
   {
    "name": "gblV_Hop5_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 498,
@@ -986,7 +994,7 @@
   },
   {
    "name": "gblV_TimeHop5_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 498,
@@ -999,7 +1007,7 @@
   },
   {
    "name": "gblV_Hop5_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 498,
@@ -1012,7 +1020,7 @@
   },
   {
    "name": "gblB_Hop5_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 498,
@@ -1027,7 +1035,7 @@
   },
   {
    "name": "gblS_Hop6_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 560,
@@ -1039,7 +1047,7 @@
   },
   {
    "name": "gblV_Hop6_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 560,
@@ -1052,7 +1060,7 @@
   },
   {
    "name": "gblV_Hop6_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 560,
@@ -1065,7 +1073,7 @@
   },
   {
    "name": "gblV_TimeHop6_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 560,
@@ -1078,7 +1086,7 @@
   },
   {
    "name": "gblV_Hop6_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 560,
@@ -1091,7 +1099,7 @@
   },
   {
    "name": "gblB_Hop6_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 560,
@@ -1106,7 +1114,7 @@
   },
   {
    "name": "gblS_Hop7_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 622,
@@ -1118,7 +1126,7 @@
   },
   {
    "name": "gblV_Hop7_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 622,
@@ -1131,7 +1139,7 @@
   },
   {
    "name": "gblV_Hop7_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 622,
@@ -1144,7 +1152,7 @@
   },
   {
    "name": "gblV_TimeHop7_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 622,
@@ -1157,7 +1165,7 @@
   },
   {
    "name": "gblV_Hop7_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 622,
@@ -1170,7 +1178,7 @@
   },
   {
    "name": "gblB_Hop7_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 622,
@@ -1185,7 +1193,7 @@
   },
   {
    "name": "gblS_Hop8_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 660,
    "y": 684,
@@ -1197,7 +1205,7 @@
   },
   {
    "name": "gblV_Hop8_Oz_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 875,
    "y": 684,
@@ -1210,7 +1218,7 @@
   },
   {
    "name": "gblV_Hop8_Recipe_AAU_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 980,
    "y": 684,
@@ -1223,7 +1231,7 @@
   },
   {
    "name": "gblV_TimeHop8_Min_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1075,
    "y": 684,
@@ -1236,7 +1244,7 @@
   },
   {
    "name": "gblV_Hop8_Group_R1",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1180,
    "y": 684,
@@ -1249,7 +1257,7 @@
   },
   {
    "name": "gblB_Hop8_Added",
-   "type": "gKonstant",
+   "type": "gGlobal",
    "workspace": "Recipe",
    "x": 1285,
    "y": 684,

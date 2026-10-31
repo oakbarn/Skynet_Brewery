@@ -19,7 +19,7 @@ Only an **Admin** can load, add, rename, back up, restore or delete a Schema, or
 3. The panel asks if you want to load it, with a ⚠ warning if any Process is running. Press **OK**.
 4. Running Processes stop, every output is switched off, and the new Schema's tabs, Devices and Widgets take over. The one you left is kept just as it was. Pick it in the list to go back to it.
 
-Each Schema remembers its own variable values (gKonstants, gAPI), so they come back when you load it again.
+Each Schema remembers its own variable values (gGlobals), so they come back when you load it again.
 
 Processes, logins, MQTT, media folders and the lists behind the dropdowns belong to the panel. They stay the same whichever Schema is loaded.
 

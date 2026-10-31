@@ -2,14 +2,14 @@
 // label (BruControl's displayname) works the same on every element type (BruControl could not set it on a Global String), plus
 // file paths that are not on the Brain, and the old picture folder name oakbarn/ still finding Images/
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
-import { Store, ELEMENT_TYPES, VK_KINDS, VAPI_KINDS } from '../lib/store.js'; import { Engine } from '../lib/engine.js';
+import { Store, ELEMENT_TYPES, G_KINDS } from '../lib/store.js'; import { Engine } from '../lib/engine.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpdn'));
 fs.mkdirSync(path.join(d, 'config')); fs.mkdirSync(path.join(d, 'scripts'));
 fs.mkdirSync(path.join(d, 'media', 'Images'), { recursive: true }); fs.mkdirSync(path.join(d, 'media', 'sounds'));
 fs.writeFileSync(path.join(d, 'media', 'Images', 'Pump.png'), 'x'); fs.writeFileSync(path.join(d, 'media', 'sounds', 'Bell.wav'), 'x');
 const els = [];
 for (const t of ELEMENT_TYPES) {
-  const kinds = t === 'gKonstant' ? Object.keys(VK_KINDS) : t === 'gAPI' ? Object.keys(VAPI_KINDS) : t === 'shared' ? ['value', 'string', 'time', 'bool'] : [null];
+  const kinds = t === 'gGlobal' ? Object.keys(G_KINDS) : t === 'shared' ? ['value', 'string', 'time', 'bool'] : [null];
   for (const k of kinds) els.push(k === null ? { name: `x_${t}`, type: t } : t === 'shared' ? { name: `x_${t}_${k}`, type: t, dataType: k } : { name: `x_${t}_${k}`, type: t, kind: k });
 }
 const cfg = path.join(d, 'config', 'c.json');

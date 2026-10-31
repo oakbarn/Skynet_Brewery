@@ -96,13 +96,13 @@ The name alone is the item's main value; everything else is `name.attribute`.
 
 | BruControl Global | Skynet | Status |
 | --- | --- | --- |
-| `gbl...` | gKonstant of the same kind, same name | Built |
-| `glb...` (typo) | renamed `gbl...`, then a gKonstant | Built |
-| `RP_...` | gAPI, renamed `gA_...` everywhere (Schema and Processes; was `vA_...` before 2026-10-28) | Built |
-| `DX_gblV_...` | gAPI, renamed `gA_...` | Built |
+| `gbl...` | gGlobal of the same kind, same name, .API Off | Built |
+| `glb...` (typo) | renamed `gbl...`, then a gGlobal | Built |
+| `RP_...` | gGlobal, renamed `gG_...` everywhere (Schema and Processes), .API Get and Put, its database setting kept (was `gA_...` before 2026-10-30) | Built |
+| `DX_gblV_...` | gGlobal, renamed `gG_...`, .API Get and Put | Built |
 | `x...` | deleted; Processes and items still using one are listed with line numbers | Built |
 | `insp_...` | deleted like `x` | Built |
-| anything else | gAPI, same name, listed so it can be sorted later | Built |
+| anything else | gGlobal, same name, .API Get and Put, listed so it can be sorted later | Built |
 
 ## 6a. vKonstant and vAPI (older Skynet)
 
@@ -110,11 +110,25 @@ The name alone is the item's main value; everything else is `name.attribute`.
 
 | Older Skynet | Skynet | Status |
 | --- | --- | --- |
-| vKonstant / vAPI (on screen, Help, docs and the type in Schema files) | gKonstant / gAPI | Built |
-| A BruControl Global | gKonstant or gAPI (section 6) | Built |
-| Names starting `vK..._` (`vKV_Strike`) | `gK..._` (`gKV_Strike`), on the item, in every Process, saved values and the database; a taken name gets `_2` | Built (when the Brain starts or the Schema loads) |
-| Names starting `vA..._` (`vAV_Mash_Temp`) | `gA..._` (`gAV_Mash_Temp`), the same way | Built |
-| API address `/api/vapi` | `/api/gapi` (`/api/vapi` is gone, Rule 15.2) | Built |
+| vKonstant / vAPI (on screen, Help, docs and the type in Schema files) | gGlobal (section 6b) | Built |
+| A BruControl Global | gGlobal (section 6) | Built |
+| Names starting `vK..._` (`vKV_Strike`) | `gG..._` (`gGV_Strike`), on the item, in every Process, saved values and the database; a taken name gets `_2` | Built (when the Brain starts or the Schema loads) |
+| Names starting `vA..._` (`vAV_Mash_Temp`) | `gG..._` (`gGV_Mash_Temp`), the same way | Built |
+| API address `/api/vapi` | `/api/items` (section 6b) | Built |
+
+## 6b. gKonstant and gAPI become gGlobal
+
+(Fritz, 2026-10-30; Skynet Rules 1.16 and 6.14, Help 98)
+
+| Older Skynet | Skynet | Status |
+| --- | --- | --- |
+| gKonstant / gAPI (type in Schema files, on screen, Help, docs) | gGlobal | Built |
+| Names starting `gK..._` / `gA..._` (`gKV_Strike`, `gAS_Note`) | `gG..._` (`gGV_Strike`, `gGS_Note`) through the hidden-key rename (Processes, saved values, other items, BeerXML mapping, database follow); a taken name gets `_2` | Built (when the Brain starts or the Schema loads) |
+| A gAPI's database trigger (`log`) | its **Database** setting (`database`), with .API Get and Put | Built |
+| A gKonstant | Database Off, .API Off | Built |
+| `log Name` in a Process | `send_db Name` (a `log` line left in a Process is an error that says so) | Built |
+| API addresses `/api/gapi`, `/api/globals` | `/api/items` (the old ones are gone, Rule 15.2) | Built |
+| Old files | kept as `.before-gglobal.bak` | Built |
 
 ## 7. Alarms and stacked copies
 
@@ -157,3 +171,4 @@ The name alone is the item's main value; everything else is `name.attribute`.
 - 2026-10-28: Globals now become gKonstant / gAPI (`RP_` -> `gA_`); added section 6a, vKonstant / vAPI -> gKonstant / gAPI. (thread "Rename vAPI and vKonstant to gAPI and gKonstant")
 - 2026-10-28: Section 6a built: older vK_ / vA_ names renamed, types changed in the files, no old words kept (Rule 15.2).
 - 2026-10-29: Section 5: names with `< > : " / \ \| ? *` get a `~` for each (Rule 3.4, Rule 15.2). (thread "Block unsafe characters in Device names")
+- 2026-10-30: Section 6 Globals now become gGlobal (`RP_` -> `gG_`); added section 6b, gKonstant / gAPI -> gGlobal, `log` -> `send_db`, `/api/gapi` -> `/api/items`. (thread "Send any Device or Widget to a database")

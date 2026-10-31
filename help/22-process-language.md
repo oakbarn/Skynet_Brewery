@@ -19,7 +19,7 @@ The main value of each kind:
 - Digital Out, Switch, Digital In, Duty Cycle, Hysteresis: on or off (`true` / `false`)
 - Alarm: sounding or not (`true` / `false`)
 - Timer: its time
-- gKonstant and gAPI: their value
+- gGlobal: its value
 - Temperature, Analog In and Out, PWM, PID, Scale: their reading or value
 - Flow meter: its flow rate
 
@@ -166,7 +166,7 @@ The change lasts until the panel restarts. To keep a look, set it in the item's 
 
 ## Skynet Constants
 
-Fixed numbers for common conversions are built in, so a Process can write `gKV_Grain_Lb = gKV_Grain_Kg * skc_Kg_To_Lb`. Every one starts with `skc_` and none can be changed. The full list is in [Skynet Constants](94-skynet-constants).
+Fixed numbers for common conversions are built in, so a Process can write `gGV_Grain_Lb = gGV_Grain_Kg * skc_Kg_To_Lb`. Every one starts with `skc_` and none can be changed. The full list is in [Skynet Constants](94-skynet-constants).
 
 ## Names have no spaces
 
@@ -210,7 +210,7 @@ If you add a step in the middle, the numbers after it move up by themselves. Nev
 
 **Add steps** (next to Save) puts a step at the start of the Process and after every `[label]` that doesn't have one yet. Save afterwards to number them.
 
-While a Process runs, the Processes screen shows the step it is on. To show it on a tab, add a **gKonstant** with the kind **Step**. In its properties, **Shows the steps of** picks the class to follow (Flow unless you change it). It then shows, for example, `2.00003  Mash in`.
+While a Process runs, the Processes screen shows the step it is on. To show it on a tab, add a **gGlobal** with the kind **Step**. In its properties, **Shows the steps of** picks the class to follow (Flow unless you change it). It then shows, for example, `2.00003  Mash in`.
 
 ## Lock the Equipment Profile
 

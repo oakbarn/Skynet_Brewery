@@ -1,5 +1,7 @@
 # gKonstant and gAPI (new names)
 
+> **Replaced on 2026-10-30:** gKonstant and gAPI are now one class, **gGlobal** (`gG_` names), and the API is `/api/items`. See [Database and .API on every Device and Widget](98-database-and-api). This page tells the history.
+
 On 2026-10-28 Fritz renamed the two variable classes:
 
 | Was | Now | What it is |
