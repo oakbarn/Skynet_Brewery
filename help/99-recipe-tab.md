@@ -51,6 +51,28 @@ Every box on the Recipe tab and its Daughter Tabs is a **Skynet_Field**: it has 
 | Grain Ratio | `rcp_Grain_Ratio` |
 | Waters: Water Profile | `rcp_Water_Profile` |
 | MASH: Mash Profile | `rcp_Mash_Profile` |
+| Hops tab: how many hop lines | `rcp_Hop_Count` |
+
+Each line on the Hops tab has its own Skynet_Fields, N = the line number (1, 2, 3 ... with no limit):
+
+| Box on the Hops tab | Skynet_Field |
+|---|---|
+| Hop N (its name) | `rcp_Hop_N_Name` |
+| Ounces (or Grams) | `rcp_Hop_N_Amount` |
+| AAU % Recipe | `rcp_Hop_N_AA_Recipe` |
+| AAU % Actual | `rcp_Hop_N_AA_Actual` |
+| Calc oz | `rcp_Hop_N_Calc_Amount` |
+| Boil, Mash, 1st Wort, Secondary, Dry Hop or Whirlpool | `rcp_Hop_N_Use` |
+| Hop N Min | `rcp_Hop_N_Min` |
+| Hop N Drop | `rcp_Hop_N_Drop` |
+| Hop N IBU | `rcp_Hop_N_IBU` |
+| Hop N Boil Group | `rcp_Hop_N_Boil_Group` |
+| Secondary or Dry Hop Days | `rcp_Hop_N_Days` |
+| Secondary or Dry Hop Date | `rcp_Hop_N_Date` |
+| Whirlpool Temperature | `rcp_Hop_N_Whirlpool_Temp` |
+| Hop Rocket | `rcp_Hop_N_Hop_Rocket` |
+
+For example `rcp_Hop_1_Name` is the first hop. A line the Recipe does not have reads as empty (or 0).
 
 ## The Daughter Tabs
 
@@ -64,7 +86,27 @@ The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab
 - **Waters**: the Water Profile.
 - **MASH**: the Mash Profile.
 
-Their own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+The Hops tab is built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+
+## The Hops tab
+
+One line for each hop, with no limit. **Add Hop +** puts a new line at the bottom; **Delete** on a line takes it away.
+
+- **Hop N**: the hop's name.
+- **Ounces** (or Grams, as picked on the Default tab): the amount in the recipe.
+- **AAU % Recipe** and **Actual** (red): the alpha acid of the hop in the recipe, and of the hops you have (on the package). **Type the Actual for every hop.** An imported hop's Actual starts empty.
+- **Calc oz**: the amount to use with the Actual AAU, so the beer gets the IBUs of the recipe.
+- **Hop N Min**: boil minutes. Min = the Boil Time is a Start of Boil hop.
+- **Hop N Drop**: minutes into the boil when it goes in. **Hop N IBU**: its bitterness. **Hop N Boil Group**: hops that go in at the same time are one group (the Drops tab).
+
+**Outside of Boil Hops.** The square box on a line opens a dialog with switches: **Mash Hops, 1st WORT Hops, Secondary Hops, DRY Hops, Whirlpool**. Turn one on and press **Save**: the hop is no longer a Boil Hop, so the dialog stays on its line (in place of Min, Drop, IBU and Boil Group) until you turn the switch off and Save. With no switch on, **Cancel** or **Save** closes the dialog.
+
+- **Secondary Hops** and **DRY Hops**: the date and the days.
+- **Whirlpool**: the temperature, the minutes, and **Hop Rocket** when the whirlpool runs through a Hop Rocket.
+
+**Order.** On **Calculate** and on **Save** the lines go in order: Boil Hops by drop time (a Start of Boil hop first, then by Minutes), then Mash, 1st WORT, Secondary, DRY and Whirlpool hops.
+
+**Calculate needs every Actual AAU above zero.** When one is empty or 0, nothing is calculated and a warning says which hops to fix or delete. Press **READ** to close it.
 
 ## Importing a BeerSmith file
 

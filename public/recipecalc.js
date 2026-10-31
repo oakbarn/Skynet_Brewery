@@ -48,7 +48,18 @@ export function miscShow(amount, unit, how = 'recipe') {
 
 // What a hop is for, in the order the hops go in on brew day (Fritz's OakBarn Hop Grouping order):
 // Top of Mash, 1st Wort, Start of Boil, Bitter, Flavor, Aroma (during the boil), Whirlpool, Dry Hop
-export const HOP_USES = { mash: 'Top of Mash', 'first wort': '1st Wort', boil: 'Boil', whirlpool: 'Whirlpool / Aroma', 'dry hop': 'Dry Hop' };
+export const HOP_USES = { mash: 'Top of Mash', 'first wort': '1st Wort', boil: 'Boil', whirlpool: 'Whirlpool / Aroma', secondary: 'Secondary', 'dry hop': 'Dry Hop' };
+// The order of the hop lines on the Hops tab (Fritz's Hops tab, 2026-10-31): Boil hops grouped by drop time, a Start of Boil
+// hop (Min = Boil Time) first, then by Minutes; then the hops that are not Boil Hops: Mash, 1st Wort, Secondary, Dry, Whirlpool.
+const HOP_LINE_ORDER = { boil: 0, mash: 1, 'first wort': 2, secondary: 3, 'dry hop': 4, whirlpool: 5 };
+export function sortHops(r) {
+  const hops = r?.ingredients?.hops; if (!Array.isArray(hops)) return r;
+  const boil = n(r.boilTime) || RECIPE_DEFAULTS.boilTime, use = h => HOP_LINE_ORDER[h.use] ?? 0;
+  hops.sort((a, b) => use(a) - use(b) || (use(a) ? 0 : Math.min(n(b.time), boil) - Math.min(n(a.time), boil)));     // sort is stable: same time keeps its order
+  return r;
+}
+// the hops whose Actual AAU is not above zero (Hop lines numbered from 1). Calculate stops and warns while there are any.
+export const hopActualProblems = r => (r?.ingredients?.hops || []).map((h, i) => ({ line: i + 1, name: h.name || '(no name)', aa: h.alphaActual })).filter(x => !(n(x.aa) > 0));
 export const FERMENTABLE_TYPES = { grain: 'Grain', adjunct: 'Adjunct', extract: 'Extract', 'dry extract': 'Dry Extract', sugar: 'Sugar', fruit: 'Fruit', juice: 'Juice', other: 'Other' };
 export const MISC_USES = { boil: 'Boil', mash: 'Mash', primary: 'Primary', secondary: 'Secondary', bottling: 'Bottling', other: 'Other' };
 export const boilKind = min => min >= 30 ? 'Bitter' : min >= 10 ? 'Flavor' : 'Aroma';
@@ -86,13 +97,15 @@ export function tinsethIbu(r) {
   const liters = n(r?.volumes?.batchLiters); if (!liters) return null;
   const og = n(r?.og) > 1 ? n(r.og) : 1.05, boil = n(r?.boilTime) || 60, big = 1.65 * Math.pow(0.000125, og - 1);
   let ibu = 0;
-  for (const h of r?.ingredients?.hops || []) {
-    const t = h.use === 'boil' ? Math.min(n(h.time), boil) : h.use === 'first wort' ? boil : 0;
-    if (!t) continue;
-    const aa = n(h.alphaActual) || n(h.alpha), mg = hopKgToUse(h) * 1e6;
-    ibu += big * (1 - Math.exp(-0.04 * t)) / 4.15 * (aa / 100) * mg / liters;
-  }
+  for (const h of r?.ingredients?.hops || []) ibu += hopIbu(r, h, liters, boil, big);
   return round(ibu, 1);
+}
+// one hop's IBU (the Hop N IBU box on the Hops tab)
+export function hopIbu(r, h, liters = n(r?.volumes?.batchLiters), boil = n(r?.boilTime) || 60, big = 1.65 * Math.pow(0.000125, (n(r?.og) > 1 ? n(r.og) : 1.05) - 1)) {
+  const t = h.use === 'boil' || !HOP_USES[h.use] ? Math.min(n(h.time), boil) : h.use === 'first wort' ? boil : 0;
+  if (!t || !liters) return 0;
+  const aa = n(h.alphaActual) || n(h.alpha), mg = hopKgToUse(h) * 1e6;
+  return big * (1 - Math.exp(-0.04 * t)) / 4.15 * (aa / 100) * mg / liters;
 }
 // The Calculate button: Total Grain Weight, 1st Mash temperature, IBU, Strike Volume and Temperature and the Sparge Volume.
 // Grain absorption 1.0 L/kg (0.12 gal/lb) unless the Equipment Profile gives one (absorbLkg).
@@ -133,14 +146,15 @@ export function hopSchedule(r, d = {}) {
   const D = { ...RECIPE_DEFAULTS, ...pickNums(d) }, u = displayUnits(d);
   const boil = n(r?.boilTime) || D.boilTime, warn = Math.max(0, D.hopWarnMinutes), merge = Math.max(0, D.alertMergeMinutes);
   const hopText = h => `${fmtW(hopKgToUse(h), u.hopUnit)} ${h.name || 'hop'}`;
-  const groups = new Map();
-  const add = (key, g, what) => { if (!groups.has(key)) groups.set(key, { ...g, items: [] }); groups.get(key).items.push(what); };
+  const groups = new Map(), hopKey = [];
+  const add = (key, g, what) => { if (!groups.has(key)) groups.set(key, { ...g, items: [] }); groups.get(key).items.push(what); if (what.kind === 'hop') hopKey.push(key); };
   for (const h of r?.ingredients?.hops || []) {
     const use = HOP_USES[h.use] ? h.use : 'boil', t = n(h.time);
     if (use === 'mash') add('mash', { phase: 'mash', order: 1, label: 'Top of Mash' }, { kind: 'hop', text: hopText(h) });
     else if (use === 'first wort') add('fw', { phase: 'first wort', order: 2, label: '1st Wort' }, { kind: 'hop', text: hopText(h) });
-    else if (use === 'whirlpool') add('wp', { phase: 'whirlpool', order: 7, label: 'Whirlpool', at: boil, min: 0 }, { kind: 'hop', text: hopText(h) + (t ? ` (${t} min whirlpool)` : '') });
-    else if (use === 'dry hop') add('dry' + n(h.dryDays), { phase: 'dry hop', order: 8, label: `Dry Hop${n(h.dryDays) ? ` (${n(h.dryDays)} days)` : ''}`, days: n(h.dryDays) }, { kind: 'hop', text: hopText(h) });
+    else if (use === 'whirlpool') add('wp', { phase: 'whirlpool', order: 7, label: 'Whirlpool', at: boil, min: 0 }, { kind: 'hop', text: hopText(h) + (t ? ` (${t} min whirlpool${h.wpTempC != null && h.wpTempC !== '' ? ` at ${round(cTo(h.wpTempC, u.tempUnit), 0)} °${u.tempUnit}` : ''}${h.hopRocket ? ', Hop Rocket' : ''})` : h.hopRocket ? ' (Hop Rocket)' : '') });
+    else if (use === 'secondary') add('sec' + n(h.dryDays), { phase: 'secondary', order: 8, label: `Secondary${n(h.dryDays) ? ` (${n(h.dryDays)} days)` : ''}`, days: n(h.dryDays) }, { kind: 'hop', text: hopText(h) });
+    else if (use === 'dry hop') add('dry' + n(h.dryDays), { phase: 'dry hop', order: 9, label: `Dry Hop${n(h.dryDays) ? ` (${n(h.dryDays)} days)` : ''}`, days: n(h.dryDays) }, { kind: 'hop', text: hopText(h) });
     else {
       const min = Math.min(t, boil), sob = min >= boil;
       add('b' + min, { phase: 'boil', order: sob ? 3 : 4, label: sob ? 'Start of Boil' : `${min} min (${boilKind(min)})`, at: boil - min, min }, { kind: 'hop', text: hopText(h) });
@@ -175,7 +189,9 @@ export function hopSchedule(r, d = {}) {
     a.text = a.parts.map(p => p.text).join('\n'); a.speak = a.parts.map(p => p.text).join('. Also, ').replace(/\n/g, '. '); a.left = boil - a.at;
     a.audio = `Audio/Hops/${audioName(a.at, a.speak)}`;     // a voice file of its own words, when one is put there (media/Audio/Hops)
   }
-  return { boilTime: boil, warnMinutes: warn, groups: list, alerts, conflicts };
+  // each hop line's Boil Group (the Hop N Boil Group box): its group number, or null when it is not a Boil or Whirlpool hop
+  const hopGroups = hopKey.map(k => groups.get(k).group ?? null);
+  return { boilTime: boil, warnMinutes: warn, groups: list, alerts, conflicts, hopGroups };
 }
 // the voice file name of an alert: its minute and a short code of its words, so a changed alert needs a new file
 export function audioName(at, text) {
@@ -224,10 +240,40 @@ export const RECIPE_FIELDS = [
   ['rcp_Water_Profile', 'Waters: the Water Profile (its id)', r => r.waterProfile ?? ''],
   ['rcp_Mash_Profile', 'MASH: the Mash Profile (its id; empty = the mash from the recipe file)', r => r.mashProfile ?? ''],
 ];
-export const recipeField = name => RECIPE_FIELDS.find(f => f[0] === name);
+// The Hops tab: one set of Skynet_Fields for each hop line, N = the line number (rcp_Hop_1_Name, rcp_Hop_2_Name ...), so there
+// is no limit on the hops. [the end of the name, what it is, how to read it (r, hop, display units, the hop schedule, line index)]
+export const HOP_FIELDS = [
+  ['Name', 'Hop N: the hop', (r, h) => h.name ?? ''],
+  ['Amount', 'Hop N: the amount in the recipe (oz or g)', (r, h, u) => kgTo(h.kg, u.hopUnit)],
+  ['AA_Recipe', 'Hop N: AAU % of the recipe', (r, h) => h.alpha],
+  ['AA_Actual', 'Hop N: AAU % Actual, of the hops on hand (must be above 0)', (r, h) => h.alphaActual],
+  ['Calc_Amount', 'Hop N: Calc oz, the amount to use with the Actual AAU', (r, h, u) => kgTo(hopKgToUse(h), u.hopUnit)],
+  ['Use', 'Hop N: Boil, Mash, 1st Wort, Secondary, Dry Hop or Whirlpool', (r, h) => HOP_USES[h.use] ? h.use : 'boil'],
+  ['Min', 'Hop N Min: boil minutes (Whirlpool: whirlpool minutes)', (r, h) => h.use === 'boil' || h.use === 'whirlpool' || !HOP_USES[h.use] ? n(h.time) : 0],
+  ['Drop', 'Hop N Drop: minutes into the boil when it goes in', (r, h) => h.use === 'boil' || !HOP_USES[h.use] ? Math.max(0, (n(r.boilTime) || RECIPE_DEFAULTS.boilTime) - Math.min(n(h.time), n(r.boilTime) || RECIPE_DEFAULTS.boilTime)) : 0],
+  ['IBU', 'Hop N IBU', (r, h) => hopIbu(r, h)],
+  ['Boil_Group', 'Hop N Boil Group (0 = not a Boil Hop)', (r, h, u, sch, i) => sch.hopGroups[i] ?? 0],
+  ['Days', 'Hop N: Secondary or Dry Hop days', (r, h) => h.use === 'secondary' || h.use === 'dry hop' ? n(h.dryDays) : 0],
+  ['Date', 'Hop N: Secondary or Dry Hop date (YYYY-MM-DD)', (r, h) => h.use === 'secondary' || h.use === 'dry hop' ? h.date ?? '' : ''],
+  ['Whirlpool_Temp', 'Hop N: Whirlpool temperature', (r, h, u) => h.use === 'whirlpool' && h.wpTempC != null && h.wpTempC !== '' ? cTo(h.wpTempC, u.tempUnit) : 0],
+  ['Hop_Rocket', 'Hop N: Whirlpool through the Hop Rocket (true or false)', (r, h) => h.use === 'whirlpool' && !!h.hopRocket],
+];
+export const HOP_FIELD = /^rcp_Hop_(\d+)_([A-Za-z_]+)$/;
+export const hopFieldName = (line, end) => `rcp_Hop_${line}_${end}`;
+const HOP_COUNT = ['rcp_Hop_Count', 'Hops tab: how many hop lines', r => (r.ingredients?.hops || []).length];
+// a Skynet_Field by its name: the Recipe tab's, rcp_Hop_Count, or one of a hop line (any line number)
+export const recipeField = name => {
+  if (name === HOP_COUNT[0]) return HOP_COUNT;
+  const m = HOP_FIELD.exec(name), f = m && HOP_FIELDS.find(x => x[0] === m[2]);
+  return f ? [name, f[1].replace('Hop N', `Hop ${m[1]}`), f[2]] : RECIPE_FIELDS.find(x => x[0] === name);
+};
 // every Skynet_Field of a Recipe, in the units picked on the Default tab (numbers rounded to 2 decimals)
 export function recipeFieldValues(r, d = {}) {
   const u = displayUnits(d), out = {};
-  for (const [k, , get] of RECIPE_FIELDS) { const v = r ? get(r, u) : null; out[k] = typeof v === 'number' ? round(v, 2) : v ?? null; }
+  const put = (k, v) => { out[k] = typeof v === 'number' ? round(v, 2) : v ?? null; };
+  for (const [k, , get] of RECIPE_FIELDS) put(k, r ? get(r, u) : null);
+  put(HOP_COUNT[0], r ? HOP_COUNT[2](r) : 0);
+  const hops = r?.ingredients?.hops || [], sch = hops.length ? hopSchedule(r, d) : null;
+  hops.forEach((h, i) => { for (const [end, , get] of HOP_FIELDS) put(hopFieldName(i + 1, end), get(r, h, u, sch, i) ?? (end === 'Name' || end === 'Date' ? '' : 0)); });
   return out;
 }
