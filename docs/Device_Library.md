@@ -180,6 +180,8 @@ What each ID means:
   - Orientation: by its shape, Horizontal, Vertical, 45° Left, 45° Right
   - Service (what flows through it; a Gas valve can heat a vessel)
   - Tap water valve (open = tap water flows, no pump needed): on / off; Tap water flows out of: which end
+  - On the Close all valves list / On the Open all valves list (Rule 6.15): on / on to start. A tap water valve is always on
+    Close all and never on Open all (no switches shown); a Manual valve is on neither.
 - Valves have no inlet / outlet side. Starts as OPEN / CLOSED, tap = toggle.
 
 ### 4.3a Skynet Motorized Ball Valve Device (Skynet Template, Rules 5.16 and 5.17)
