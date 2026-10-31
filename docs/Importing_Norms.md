@@ -159,6 +159,20 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | The 3 background pictures | `imagePath_1`, `imagePath_2`, `imagePath_3`, all editable as in BruControl (Rule 7.10) | Built |
 | A Tab's background picture | the Tab's picture, with its width and height | Built |
 
+## 10. Recipes (BeerSmith .bsmx and BeerXML)
+
+- A **.bsmx** file (BeerSmith 3 and 4) and a **BeerXML .xml** file both become the Skynet Recipe (☰ Menu > Recipe, Rule 17.3).
+- **No limit**: every grain, hop, yeast, Misc item (Skynet calls them Adjuncts), water and mash step comes in. The BruControl
+  way stopped at 8 hops and left out the grains, yeasts and other items.
+- **Units**: inside a .bsmx BeerSmith keeps ounces (grains, hops), fluid ounces (volumes) and °F. A Misc item keeps its own
+  unit (BeerSmith's number in `F_M_UNITS`: 0 mg, 1 g, 2 oz, 3 lb, 4 kg, 5 ml, 6 tsp, 7 tbsp, 8 cup, 9 pt, 10 qt, 11 l, 12 gal,
+  13 items), or a text `AMOUNT_UNITS` when the file has one. BeerXML is in kg, L and °C. Skynet keeps every Recipe in kg, L
+  and °C.
+- **Hop use**: BeerSmith's `F_H_USE` 0 Boil, 1 Dry Hop (days in `F_H_DRY_HOP_TIME`), 2 Mash, 3 First Wort, 4 Aroma becomes
+  Whirlpool. BeerXML Aroma also becomes Whirlpool; its dry hop TIME is minutes and becomes days.
+- **Global mapping** (gblV_Hop1_Oz_R1 ...): kept for a BeerXML file only when Settings > BeerXML mapping names Globals.
+- The boxes on the Recipe tab start filled in, as **Calculate** does.
+
 ## Still to decide
 
 - Fritz's open question (Skynet Rules, Open questions 10): keep the strict Process check on import, or
@@ -172,3 +186,4 @@ The name alone is the item's main value; everything else is `name.attribute`.
 - 2026-10-28: Section 6a built: older vK_ / vA_ names renamed, types changed in the files, no old words kept (Rule 15.2).
 - 2026-10-29: Section 5: names with `< > : " / \ \| ? *` get a `~` for each (Rule 3.4, Rule 15.2). (thread "Block unsafe characters in Device names")
 - 2026-10-30: Section 6 Globals now become gGlobal (`RP_` -> `gG_`); added section 6b, gKonstant / gAPI -> gGlobal, `log` -> `send_db`, `/api/gapi` -> `/api/items`. (thread "Send any Device or Widget to a database")
+- 2026-10-31: Added section 10, Recipes: .bsmx and BeerXML, no limits, units, hop use. (thread "Build the Recipe Tab with BeerSmith import")

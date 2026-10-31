@@ -171,6 +171,7 @@ export function hopSchedule(r, d = {}) {
     } else alerts.push({ at: a.at, kind: a.kind, parts: [a] });
   }
   for (const a of alerts) {
+    a.parts.sort((x, y) => (x.kind === 'drop' ? 0 : 1) - (y.kind === 'drop' ? 0 : 1));     // what goes in now first, then what to get ready
     a.text = a.parts.map(p => p.text).join('\n'); a.speak = a.parts.map(p => p.text).join('. Also, ').replace(/\n/g, '. '); a.left = boil - a.at;
     a.audio = `Audio/Hops/${audioName(a.at, a.speak)}`;     // a voice file of its own words, when one is put there (media/Audio/Hops)
   }
