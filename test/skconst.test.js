@@ -33,27 +33,27 @@ for (const [n] of SKYNET_CONSTANTS) assert.ok(help.includes('`' + n + '`'), `Hel
 
 // Processes: read them, never change them, no skc_ variables, a wrong skc_ name is found by the check
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'skc'));
-fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({ elements: [{ name: 'gKV_N', type: 'gKonstant', kind: 'value' }] }));
+fs.writeFileSync(path.join(d, 'c.json'), JSON.stringify({ elements: [{ name: 'gGV_N', type: 'gGlobal', kind: 'value' }] }));
 const store = new Store(path.join(d, 'c.json'), path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() {} });
-assert.deepEqual(eng.check('new value a = 5 * skc_Kg_To_Lb\ngKV_N = a * SKC_LB_TO_KG\nif gKV_N > skc_C_Boil\nendif').errors, []);
+assert.deepEqual(eng.check('new value a = 5 * skc_Kg_To_Lb\ngGV_N = a * SKC_LB_TO_KG\nif gGV_N > skc_C_Boil\nendif').errors, []);
 const errs = eng.check('skc_Kg_To_Lb = 2\nnew value skc_Mine\nprint skc_Kg_To_Lb.value\nprint skc_Kg_To_Pb').errors;
 assert.deepEqual(errs.map(e => e.line), [1, 2, 3, 4], 'one error on each line');
 assert.match(errs[0].msg, /Skynet Constant: it can't be changed/);
 assert.match(errs[1].msg, /kept for Skynet Constants/);
 assert.match(errs[2].msg, /has no \.value/);
 assert.match(errs[3].msg, /no Skynet Constant by that name/);
-fs.writeFileSync(path.join(d, 'scripts', 'T.txt'), 'new value a = 5 * skc_Kg_To_Lb\ngKV_N = (212 - skc_F_Freeze) * skc_C_Per_F');
+fs.writeFileSync(path.join(d, 'scripts', 'T.txt'), 'new value a = 5 * skc_Kg_To_Lb\ngGV_N = (212 - skc_F_Freeze) * skc_C_Per_F');
 eng.start('T');
 await new Promise(r => setTimeout(r, 300));
-near(store.getProp('gKV_N', 'value'), 100, '212 °F is 100 °C');
+near(store.getProp('gGV_N', 'value'), 100, '212 °F is 100 °C');
 
 // names, editor colors and predictive text
 assert.match(elementNameError('skc_Pump'), /kept for Skynet Constants/);
 assert.equal(elementNameError('Pump_skc_1'), '');
 assert.equal(CLASSES[classify('a = skc_Kg_To_Lb', {})[6]], 'cmd', 'blue like true and now');
 assert.ok(notepadPlusPlus(null).includes('skc_Kg_To_Lb'), 'Notepad++ colors them too');
-const picks = suggest('gKV_N = 2 * Kg', { elements: [] }).list.map(p => p.text);
+const picks = suggest('gGV_N = 2 * Kg', { elements: [] }).list.map(p => p.text);
 assert.ok(picks.includes('skc_Kg_To_Lb') && picks.includes('skc_Lb_To_Kg'), 'typing a unit finds its constants');
 assert.ok(!suggest('skc', { elements: [] }), 'never at the start of a line');
 console.log('skconst tests passed');

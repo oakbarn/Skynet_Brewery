@@ -46,7 +46,7 @@ Help opens in a window of its own: see [Help in its own window](54-help-window).
 | Stepper motor | [Stepper motors](16-stepper-motors) |
 | Alarm, Sound Player | [Alarms and sound](21-alarms-and-sound) |
 | Timer | [Tabs: Timers](02-tabs) |
-| gKonstant, gKonstant List, gAPI, Shared variable | [Variables](04-variables) |
+| gGlobal, gGlobal List, Shared variable | [Variables](04-variables) |
 | Picture | [Pictures on items](25-picture-paths) |
 | Vessel | [The Vessel tab](34-vessel-tab) |
 | Chiller, coil, filter, equipment fitting, bundled vessel | [Equipment](14-equipment) |

@@ -2,7 +2,7 @@
 
 Every piece of text on a Tab is a **text box**, and every text box has the same attributes. The text boxes are:
 
-- the **Name** and the **Value** of every Device and Widget (a pump, a temperature, a gKonstant ...)
+- the **Name** and the **Value** of every Device and Widget (a pump, a temperature, a gGlobal ...)
 - a **Label** (Add > Label in Edit layout)
 - a **Text Widget** (**+ Text** in Edit layout; its own page: [Text Widget](91-text-widget))
 - the **Label** on a vessel and on other equipment

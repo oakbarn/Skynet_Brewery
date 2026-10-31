@@ -1,6 +1,6 @@
 # Restarting Processes
 
-A restart **stops a Process, clears it from memory and starts it again** from the top of its saved file. Its own variables (the ones made with `new`) start from scratch and it forgets which line it was on. Devices, Widgets, timers and gKonstants keep their values.
+A restart **stops a Process, clears it from memory and starts it again** from the top of its saved file. Its own variables (the ones made with `new`) start from scratch and it forgets which line it was on. Devices, Widgets, timers and gGlobals keep their values.
 
 In BruControl a thread could get corrupted and needed a restart, which is why old BruControl Processes have so many `start` lines. The Brew Panel does not corrupt Processes like that, but a Process can still stop on an error, for example a sensor that drops out. A restart cures that.
 

@@ -135,7 +135,7 @@ The least you need for each kind of device the panel supports, which Mega port i
 | Hydrometer | How it talks | What it would need | Status |
 |---|---|---|---|
 | Tilt | Bluetooth (sends a signal every few seconds) | The Raspberry Pi has Bluetooth built in, so it can read a Tilt directly with no extra board. An ESP32 (for example running TiltBridge) is only needed when the fermenter is out of the Pi's Bluetooth range (about 10-30 ft, less through a fridge or a steel conical). | Not supported yet |
-| iSpindel | WiFi, can send to an MQTT broker | The panel already has MQTT. A small Node-RED or Home Assistant link can copy its gravity into a gAPI variable today; built-in support is not there yet. | Possible today through MQTT, not built in |
+| iSpindel | WiFi, can send to an MQTT broker | The panel already has MQTT. A small Node-RED or Home Assistant link can copy its gravity into a gGlobal (with .API Get and Put) today; built-in support is not there yet. | Possible today through MQTT, not built in |
 | RAPT Pill | WiFi or Bluetooth | Bluetooth like a Tilt, or its own cloud | Not supported yet |
 
 So a Tilt does not strictly need an ESP32 when the Pi is the Brain, but an ESP32 is a good idea when the fermenters are far from the Pi. Adding Tilt support to the panel is a separate change.

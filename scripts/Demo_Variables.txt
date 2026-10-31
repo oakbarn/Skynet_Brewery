@@ -1,18 +1,18 @@
-// Demo of the gKonstant and gAPI variables (Variables Demo workspace)
-// Starting this script writes gAS_Batch_Status to the database ("On demand only").
-gAS_Batch_Status = "Demo running"
-gKDT_Brew_Day = now
-gADT_Last_Brew = now
-gK_Burner_Pic = "Images/Skynet/Other_Equipment/Burner No Flame.png"
-print "Brewer: " + gKS_Brewer
-print "Strike target: " + gKV_Strike_Target
-if gKSW_Testing == true
+// Demo of the gGlobal variables (Variables Demo workspace)
+// Starting this script writes gGS_Batch_Status to the database ("On demand only").
+gGS_Batch_Status = "Demo running"
+gGDT_Brew_Day = now
+gGDT_Last_Brew = now
+gG_Burner_Pic = "Images/Skynet/Other_Equipment/Burner No Flame.png"
+print "Brewer: " + gGS_Brewer
+print "Strike target: " + gGV_Strike_Target
+if gGSW_Testing == true
   print "Testing mode is on"
 endif
 print "Press Ping (the momentary button) on the Variables Demo workspace"
-wait gKMB_Ping == true
+wait gGMB_Ping == true
 print "Ping seen - lighting the burner picture"
-gK_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.png"
-gKL_Brew_Notes = gKL_Brew_Notes + "\n- Ping pressed " + now
-gAS_Batch_Status = "Ping pressed"
-log "gAS_Batch_Status"
+gG_Burner_Pic = "Images/Skynet/Other_Equipment/BurnerFlame.png"
+gGL_Brew_Notes = gGL_Brew_Notes + "\n- Ping pressed " + now
+gGS_Batch_Status = "Ping pressed"
+send_db "gGS_Batch_Status"
