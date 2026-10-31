@@ -91,6 +91,7 @@
       <button id="unlockAll" title="Unlock every item on this Tab. It is an action, not a switch.">🔓 Unlock All</button>
       <button id="wsProps" title="Name, background color, background picture, size and pipe size of this tab. You can also double-click an empty spot on the tab.">⚙ Tab settings</button>
       <button id="addWs">New tab</button>
+      <button id="addHiddenWs" title="A Hidden Special Tab (Hidden_1, Hidden_2 ...) for things a Process uses but nobody needs on Brew Day. It shows only in Edit layout.">👻 Hidden tab</button>
       <button id="buildTab" title="A clean Tab to build something new on (Devices, Widgets, vessels, fittings). It only shows while you build. Save Build ... puts it on a Tab or saves it as a Template.">🔨 Build Tab</button>
       <button id="itemToBuild" title="Take the selected item off this Tab and work on it on the clean Build Tab. Its Tab, spot and size are remembered, so Save Build ... can put it back in the same place." disabled>🔨 To Build Tab</button>
       <button id="procTab" title="Open the Process editor: write and change Processes. Come back with ☰ Menu > Tabs">📝 Processes</button>
@@ -120,6 +121,8 @@
         <div class="bar">
           <select id="procPick" title="Pick a Process to open, or ➕ Add New Process"></select>
           <strong id="scriptName">-</strong>
+          <span id="scriptVersion" class="muted" title="Process Version (YYMMDD_HH_MM_n)"></span>
+          <button id="updVersion" class="admin-only" title="Give this Process a new Version (YYMMDD_HH_MM_n, the date and time now)">Update Version</button>
           <span id="scriptState" class="muted"></span>
           <span class="spacer"></span>
           <select id="scriptClass" class="admin-only" title="Process class: decides how its steps are numbered"><option value="flow">Flow</option><option value="sub">Sub</option><option value="repeat">Repeat</option><option value="looper">Looper</option></select>
