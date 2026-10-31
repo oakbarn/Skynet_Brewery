@@ -69,6 +69,9 @@ const gf = recipeFieldValues({ ingredients: { fermentables: [{ name: 'Pale', typ
 assert.equal(recipeFieldValues({ ingredients: { fermentables: [{ name: 'DME', type: 'dry extract', kg: 0.45359237, unit: 'oz' }] } }, { units: 'US' }).rcp_Fermentable_1_Amount, 16, 'the amount shows in its own Measurement');
 assert.equal(recipeFieldValues({ ingredients: { fermentables: [{ name: 'DME', type: 'dry extract', kg: 1 }] } }, { units: 'US' }).rcp_Fermentable_1_Measurement, 'lb');
 assert.equal(cleanRecipe({ ingredients: { fermentables: [{ name: 'x', unit: 'stone' }, { name: 'y', unit: 'g' }] } }).ingredients.fermentables.map(f => f.unit).join(), ',g');
+const av = recipeFieldValues({ ingredients: { miscs: [{ name: 'Whirlfloc', type: 'Fining', use: 'boil', amount: 1, unit: 'items', time: 15, timeUnit: 'min' }] } });
+assert.equal(av.rcp_Adjunct_Count, 1); assert.equal(av.rcp_Adjunct_1_Name, 'Whirlfloc'); assert.equal(av.rcp_Adjunct_1_Time, 15); assert.equal(av.rcp_Adjunct_1_Measurement, 'items');
+assert.equal(recipeField('rcp_Adjunct_4_Use')[1], 'Adjunct 4: Boil, Mash, Primary, Secondary or Bottling');
 assert.equal(gf.rcp_Grain_Count, 2); assert.equal(gf.rcp_Fermentable_Count, 2);
 assert.equal(gf.rcp_Grain_1_Amount, 10); assert.equal(gf.rcp_Grain_1_Potential, 80); assert.equal(gf.rcp_Grain_2_Name, 'Munich');
 assert.equal(gf.rcp_Fermentable_1_Type, 'sugar'); assert.equal(gf.rcp_Fermentable_1_After_Boil, true); assert.equal(gf.rcp_Fermentable_2_After_Boil, false, 'an adjunct is not added after the boil');
