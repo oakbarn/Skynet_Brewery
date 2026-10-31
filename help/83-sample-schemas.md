@@ -33,3 +33,10 @@ To run a sample on your own boards later: open each Interface (☰ Menu > 🔌 I
 ## Also in Settings
 
 Settings > **Start from a sample Schema** shows the same samples as cards. Loading one there also adds it as a new Schema and goes to Simulator mode.
+
+## Built to the latest Rules
+
+The samples follow the newest Skynet standards. Their motorized valves are **Skynet Motorized Ball Valve Devices**
+(Master H for a pipe across, Daughter VL for a pipe up and down), with their IPs on the pipe ends, and every Skynet
+picture in them is an SVG. Pumps show the On overlay while running. When a new Rule or Template replaces an old way,
+the samples are changed to it, and the old files go to the Delete folder of the repo (Rule 15.3).
