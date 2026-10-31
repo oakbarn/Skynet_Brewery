@@ -496,7 +496,7 @@ function widgetLabel(g, defPos) {
   setRich(lb, g.label);
   lb.style.color = firstSet(g.labelColor, T.labelFore, D.foreColor); lb.style.backgroundColor = firstSet(g.labelBg, T.labelBack, D.backColor);
   lb.style.fontSize = (g.labelSize || fontPx(T.labelSize) || D.nameFontSize || 16) + 'px'; lb.style.fontFamily = firstSet(T.labelFont, D.nameFont);
-  lb.style.textAlign = (D.align || '').toLowerCase();
+  lb.style.textAlign = firstSet(T.labelAlign, D.align).toLowerCase();
   if (g.labelBg || T.labelBack || D.backColor) lb.style.textShadow = 'none';
   return lb;
 }
@@ -563,7 +563,7 @@ function fillText(n, g) {
   n.style.fontFamily = fnt(v.font, g.font) || T.font || D.nameFont;
   n.style.color = firstSet(v.forecolor, g.color, T.fore, D.foreColor);
   n.style.backgroundColor = firstSet(v.backcolor, g.backColor, T.back, D.backColor);
-  n.style.textAlign = firstSet(v.alignment, g.align, D.align).toLowerCase();
+  n.style.textAlign = firstSet(v.alignment, g.align, T.align, D.align).toLowerCase();
   n.style.whiteSpace = ''; n.style.overflow = '';
   const parts = [body];
   if (firstSet(v.label_visible, g.labelVisible) === true) {
@@ -571,7 +571,7 @@ function fillText(n, g) {
     lb.style.fontSize = (+firstSet(v.size_label, g.labelSize) || fontPx(T.labelSize) || 14) + 'px'; lb.style.fontWeight = firstSet(v.bold_label, g.labelBold) === true ? '700' : '400';
     lb.style.fontFamily = fnt(v.font_label, g.labelFont) || T.labelFont;
     lb.style.color = firstSet(v.fore_label, g.labelColor, T.labelFore); lb.style.backgroundColor = firstSet(v.back_label, g.labelBg, T.labelBack);
-    lb.style.textAlign = firstSet(v.alignment_label, g.labelAlign).toLowerCase();
+    lb.style.textAlign = firstSet(v.alignment_label, g.labelAlign, T.labelAlign).toLowerCase();
     parts.unshift(lb);
   }
   n.replaceChildren(...parts);
@@ -838,8 +838,8 @@ function styleEl(n, e) {
   if (T.font && !e.valueFont?.family) vl.style.fontFamily = T.font;
   if (fontPx(T.size) && !e.valueFont?.size && !e.fontSize && !e.valueEnlarge) vl.style.fontSize = fontPx(T.size) + 'px';
   if (e.valueEnlarge && !e.valueFont?.size) vl.style.fontSize = `calc(18px * ${1 + e.valueEnlarge / 100})`;
-  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, D.align);
-  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (al) nm.style.textAlign = al.toLowerCase();
+  const a = /^(Top|Middle|Bottom)(Left|Center|Right)$/, al = firstSet(e.align, T.align, D.align), nal = firstSet(e.align, T.labelAlign, D.align);
+  let m = a.exec(e.nameAlign ?? ''); if (m) nm.style.textAlign = m[2].toLowerCase(); else if (nal) nm.style.textAlign = nal.toLowerCase();
   m = a.exec(e.valueAlign ?? ''); if (m) { vl.style.alignItems = ALIGN[m[1]]; vl.style.justifyContent = ALIGN[m[2]]; vl.style.textAlign = m[2].toLowerCase(); }
   else if (al) { vl.style.justifyContent = ALIGN[al]; vl.style.textAlign = al.toLowerCase(); }
   // Word wrap on: a long name goes onto more lines (off: one line, cut off with ...). Values always wrap.
@@ -3654,9 +3654,9 @@ function styleEditor(kind, st, from) {
     bindForm(body, timer ? [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
       ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
       : [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'],
-        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'],
-        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'],
-        ['_nt', 'Default = as it is now. A Device or Widget that has its own color, font or size keeps it; the Style fills in only what it has none of.', 'note']], work);
+        ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+        ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+        ['_nt', 'Default = as it is now. A Device or Widget that has its own color, font, size or alignment keeps it; the Style fills in only what it has none of.', 'note']], work);
     const err = h('p', { class: 'nameErr', role: 'alert' });
     let out = null;
     const save = async () => {
