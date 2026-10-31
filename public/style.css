@@ -854,3 +854,9 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .styleBody label.strong { font-weight: 700; }
 /* ☰ Menu > Close Skynet Brewer: what every open page shows once the panel is closed */
 .closedPage { position: fixed; inset: 0; z-index: 10000; background: var(--bg); color: var(--text); padding: 15vh 16px 0; text-align: center; overflow: auto; }
+
+/* the Override button (Fritz, 2026-10-30): one press and running Processes move on */
+.gfx.ovr, #ws.editing .gfx.ovr { display: flex; }
+.gfx.ovr .ovrBtn { flex: 1; display: flex; align-items: center; padding: 0 8px; border: 2px solid rgba(0,0,0,.45); border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,.35); overflow: hidden; }
+.gfx.ovr .ovrBtn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+#ws.editing .gfx.ovr .ovrBtn { pointer-events: none; }

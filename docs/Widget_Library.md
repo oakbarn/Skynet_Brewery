@@ -13,7 +13,7 @@ A reference list of every Widget in the Skynet Brew Panel and all its settings (
 
 | Setting | What it does |
 |---|---|
-| Name | Unique name. Processes use it (for example `Text_1.visible = false`). Pipes, Hoses, IPs and Text get one from Skynet that can't be changed (Pipe_1, Hose_1, IP_1, Elbow_1, Text_1 ...). |
+| Name | Unique name. Processes use it (for example `w_Text_1.visible = false`). Pipes, Hoses and IPs get one from Skynet that can't be changed (Pipe_1, Hose_1, IP_1, Elbow_1 ...). A Text Widget starts as w_Text_1 and can be renamed. |
 | Tab | Which Tab it sits on. Pipes only join IPs on the same Tab. |
 | X, Y | Position in pixels from the left and from the top. |
 | Width, Height | Size in pixels. |
@@ -101,9 +101,21 @@ Two pipe sizes meeting on one IP get a reducer cone drawn by themselves.
 | Image path | A picture in the media folders |
 | Tab, X, Y, Width, Height, Lock position | |
 
-### Text — "Add text"
+### Text Widget — "+ Text" (Text Widget Properties, 2026-10-29, Help 91)
+The pattern for Properties dialogs: Delete, **COPY**, Cancel, Save at the top; framed Label and Properties boxes; an orange **?** that opens a pop-up with the Widget's Properties and Attributes (Close top and bottom).
+
 | Setting | Notes |
 |---|---|
+| Name | Starts as `w_Text_N` (older `Text_N` become `w_Text_N`, Rule 15.2); locked once saved, ✏ Change name (Rule 3.11) |
+| Text | Its value; Rich Text Embedded Codes work |
+| Label box | Label (empty = Name), Visible (Show label; on for a new one), Font size, Font, Bold, Fore color, Back color, Alignment |
+| Properties box | Visible, Hidden Locked, Font size, Font, Bold, Fore color, Back color, Alignment, Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
+| COPY | Saves, then makes a copy (next `w_Text_N`) on the Build Tab |
+| Word wrap | Always on (no switch) |
+
+Process attributes: `.text` (`.value` = `.text`), `.label`, `.label_visible`, `.font_label`, `.size_label`, `.fore_label`, `.back_label`, `.bold_label`, `.alignment_label`, `.font`, `.size`, `.fore`, `.back`, `.bold`, `.alignment`, `.visible`, `.hiddenlock`, `.x` (`.xh`, `.x_hPosition`), `.y` (`.yv`, `.y_vPosition`), `.width`, `.height`, `.lock` (read only), `.tab`.
+
+---|---|
 | Text | Codes like \b bold, \L large, \n new line work here |
 | Visible | on / off (a Process: `Text_1.visible = false`) |
 | Hidden, locked | On = stays hidden even when Visible is on |
@@ -112,6 +124,29 @@ Two pipe sizes meeting on one IP get a reducer cone drawn by themselves.
 | Alignment | Default, Left / Centered / Right justified ... |
 | Word wrap as needed | Off = one line, cut off at the edge |
 | Tab, X, Y, Width, Height, Lock position | Starts at the Default tab's size and place |
+
+---
+
+### Timer Widget (Timer Widget Properties, 2026-10-29, Help 92)
+Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no background.**
+
+| Setting | Notes |
+|---|---|
+| Timer box | Type (Count up / Count down), Reset value, Start value, Running when the Brain starts |
+| Label box | The black title bar: Label, Visible (Show label), Font size, Font, Fore / Back color, Alignment |
+| Properties box | Visible, Hidden Locked, **Style**, Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
+| Style | Skynet Styles 🔒 (never changed by a user): Skynet Orange Timer (seven-segment 00:00:00 on an orange-red panel, grey bezel; the default), Skynet Green LCD, Skynet Blue Timer, Skynet Red LED digits, Skynet Plain text. ➕ Add new User Style… / ✏ Edit for User Styles (Look, Digits, Panel, Bezel, Title bar colors) |
+
+### Override button Widget (`kind: override`, 2026-10-30, Help 96)
+One press: every running Process (not Loopers) moves on 100 ms later. A wait or sleep it is held in is passed, and the loop it sits in (the next goto back up) is left; the next wait runs as normal. Manual valves still wait. **Only one on a Tab**; it can be on several Tabs (COPY, Save Build ...), each with its own Label and look. No name, no background picture, no Process attributes. Operator or Admin to press.
+
+| Setting | Notes |
+|---|---|
+| Label box | Label (empty = Override), Font size, Font, Bold, Fore color, Back color, Alignment. Starting look (for now): bold white Override on red #c0392b, 20 px, centered, 160 x 60 |
+| Properties box | Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
+
+### Image block (every dialog with background pictures, 2026-10-29, Help 93)
+Background # (1, 2, 3; other = blank), Back Colour, Image Path 1-3 each with OPEN (Background Image N pop-up) and a typeable path (not found = blank + warning).
 
 ---
 
@@ -388,5 +423,8 @@ Kinds: String (gAS_), Value (gAV_), Time (gAT_), Date Time (gADT_), Boolean (gAB
 - 2026-10-27: First version.
 - 2026-10-27: Display Name became Label (`label`) with a Show label switch; Picture became the Picture Widget with Turns on with; imagePath_2 / _3 editable again; On overlay preferred (thread "Apply clean-up requests and standards").
 - 2026-10-28: IP Snap to align (10 px) and IPs on the pipe ends of Skynet valve pictures (thread "Lock Skynet Widget Templates and IPs", Help 86).
-- 2026-10-28: Skynet Device Templates and User versions (Rules 5.16-5.18), first one the Skynet Motorized Ball Valve Device (Help 88).
 - 2026-10-28: Pipe fitting Widgets (only X, Y, Width, Height and Autosize to pipe; no Clone) and the Manual Valve Widget (click-only .state, Process asks by hand, open overlay) (thread "Simplify pipe fittings and Manual Valves", Help 87).
+- 2026-10-28: Skynet Device Templates and User versions (Rules 5.16-5.18), first one the Skynet Motorized Ball Valve Device (Help 88).
+- 2026-10-29: Text Widget Properties: new dialog pattern (boxes, COPY, orange ? info pop-up), w_Text_N names, Label line, word wrap always on, new Process attributes (thread "Redesign the Text Widget dialog", Help 91).
+- 2026-10-29: Timer Widget Properties with Styles (Skynet Styles locked, User Styles), no pictures; the Image block for dialogs with pictures (Help 92, 93).
+- 2026-10-30: Override button Widget (one per Tab, per-Tab Label and look; passes a wait, sleep or loop 100 ms after the press) (thread "Add an Override button", Help 96).
