@@ -8,7 +8,7 @@ import { Engine, OVERRIDE_MS } from '../lib/engine.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'override'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ elements: [
-  { name: 'Step', type: 'gKonstant', kind: 'value' }, { name: 'Temp', type: 'gKonstant', kind: 'value' }, { name: 'Count', type: 'gKonstant', kind: 'value' },
+  { name: 'Step', type: 'gGlobal', kind: 'value' }, { name: 'Temp', type: 'gGlobal', kind: 'value' }, { name: 'Count', type: 'gGlobal', kind: 'value' },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });

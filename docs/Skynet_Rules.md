@@ -90,18 +90,21 @@ nobody has to remember which). Typing `.x` or `.y` in the Process editor fills i
 Predictive text off. The old `.xPosition` / `.yPosition` still work. **Short forms** `.x` / `.xh` and `.y` / `.yv` work
 too (Fritz's Text Widget list, 2026-10-29). (2026-10-28, PR #121, Help 49, 79)
 
-1.16 **gKonstant and gAPI** are the two variable classes (they were vKonstant and vAPI). Suggested
-name prefixes: **gK** for gKonstant (`gK_`, `gKS_`, `gKV_`, `gKB_`, `gKList_` ...) and **gA** for gAPI
-(`gAS_`, `gAV_`, `gAT_`, `gADT_`, `gAB_`). Prefixes are hints, never required. Older Schemas are changed
-when the Brain starts or the Schema loads: the types become gKonstant / gAPI, `vK..._` / `vA..._` names
-become `gK..._` / `gA..._` through the hidden-key rename (Processes, saved values and the database
-follow), and the web API is `/api/gapi`. (2026-10-28, thread "Rename vAPI and vKonstant to gAPI and
-gKonstant", Help 84)
+1.16 **gGlobal** is the one variable class (it was gKonstant and gAPI, and before that vKonstant and
+vAPI). Suggested name prefixes start **gG**: `gG_`, `gGS_`, `gGL_`, `gGV_`, `gGT_`, `gGDT_`, `gGB_`, `gGSW_`,
+`gGPB_`, `gGMB_`, `gGList_`, `gGStep_`. Prefixes are hints, never required. Going to the database and being
+reached by outside programs are settings every Device and Widget has (Rule 6.14), so no separate API class
+is needed. Older Schemas are changed when the Brain starts or the Schema loads (Rule 15.2): the types become
+gGlobal, `vK..._` / `vA..._` / `gK..._` / `gA..._` names become `gG..._` through the hidden-key rename
+(Processes, saved values and the database follow), a former gAPI keeps its database setting and gets .API
+Get and Put, `log Name` in a Process becomes `send_db Name`, and the web API is `/api/items`
+(`/api/gapi` is gone). (Fritz, 2026-10-30, thread "Send any Device or Widget to a database", Help 4, 98;
+was 2026-10-28, Help 84)
 
 1.17 **Skynet Constants** are fixed numbers built into Skynet for common conversions (weight, volume,
 pressure, temperature, brewing ratios, length, power, time). Each name starts **`skc_`** and says
 from_To_to: `skc_Kg_To_Lb`, `skc_PSI_To_kPa`. A Process uses one like a number
-(`gKV_Lb = gKV_Kg * skc_Kg_To_Lb`). Nobody can change them (Rule 3.11), and no Device, Widget or
+(`gGV_Lb = gGV_Kg * skc_Kg_To_Lb`). Nobody can change them (Rule 3.11), and no Device, Widget or
 variable name can start `skc_`. (Fritz, 2026-10-30, thread "Add Skynet unit conversion constants", Help 94)
 
 ## 2. Screen design and clicks
@@ -125,7 +128,7 @@ restated 2026-10-23, PR #94)
 day.
 
 2.6 **Choices with more than two answers are dropdowns.** A list that can grow ends with
-"Add new ...". Behind a dropdown sits a gKonstant List: the list shows text, Processes see the
+"Add new ...". Behind a dropdown sits a gGlobal List: the list shows text, Processes see the
 number (Value). (2026-10-04, PR #14)
 
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
@@ -499,6 +502,24 @@ thermocouple boards), GPIO 2-3 for I2C (ADS1115). No analog pins and no stepper 
 panel refuses them. On the Brain itself (address 127.0.0.1) the rating is Best. Same protocol and
 lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 
+6.14 **Database and .API on every Device and Widget** (Fritz, 2026-10-30, Help 98). Every Device and Widget
+with a value has a **Database and .API** box at the end of its Properties:
+- **Send to the database**: Off, On demand, On value change (at most 10 a second, the last change never lost),
+  When a Process starts, Once, At a date and time (once), Every N ms / seconds / minutes / hours / days (with an
+  optional clock time), Every 00:00:00. **What to send** is its main value unless another attribute is picked.
+  `send_db Name` in a Process sends it now, whatever the setting.
+- Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
+  all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
+  (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
+- **.API**: Off (the start), Get only, Get and Put. Only items with .API on are in `/api/items`, MQTT and Home
+  Assistant; only Get and Put can be changed from outside.
+- **Safeguards so a bot can't take over:** board readings (inputs, probes), names, Tabs, Interfaces, ports and
+  pictures are never changed from outside; a Manual Valve Widget has no .API (only a click turns it); ten wrong
+  API keys in 10 minutes shut that address out for 15 minutes; every outside change is written in the Processes
+  console.
+- These two settings are always user settable, also on a User version of a Skynet Template (an exception to
+  Rule 5.16).
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -790,3 +811,6 @@ and vKonstant to gAPI and gKonstant")
   (thread "Close the command window on exit")
 - 2026-10-30: Added Rule 2.26 (the Override button: one per Tab, per-Tab Label and style, passes a wait, sleep or loop 100 ms
   after the press; Loopers and manual valves left alone). Help 96; next free Help number 97. (thread "Add an Override button")
+- 2026-10-30: Rule 1.16 rewritten (gKonstant and gAPI become one class, gGlobal, prefixes gG); Rule 2.6 says gGlobal
+  List; added Rule 6.14 (Database and .API on every Device and Widget, readings kept by hidden key, API safeguards,
+  `log` is `send_db`). Help 98 used; next free Help number 99. (thread "Send any Device or Widget to a database")

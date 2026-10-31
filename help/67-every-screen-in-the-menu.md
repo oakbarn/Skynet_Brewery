@@ -14,7 +14,7 @@ Pick a page to go to its top. Pick a **↳** part to go straight to it: the page
 
 - **Tabs**: each of your screen Tabs (the one you are on is in bold).
 - **Processes**: Find in all Processes, Recycle Bin (deleted Processes), Color key.
-- **Variables**: gAPI, gKonstant, Shared variables.
+- **Variables**: gGlobal and Shared variables.
 - **Log**: Download CSV, Show readings.
 - **Devices**: **Interfaces (boards)** (the boards (PLCs) and their Interface IDs), Add Interface, OneWire probe index, OneWire probes seen.
 - **Import**: BeerSmith recipe, BruControl Schema.

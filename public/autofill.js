@@ -12,7 +12,7 @@
 //    play -> alarms and sound players, show tab -> Tab names, goto -> labels in this Process, new -> the kinds of variable.
 //  - After = or == on something that is on/off (Pump_Red =, tm_Mash.visible ==) it offers true, false, on and off.
 //  - Ctrl+Space (or the 💡 Suggest button, for phones) opens the list even before a letter is typed, with only what can
-//    stand there: after if, wait, = or and, the variables, timers, gAPI, gKonstants, Devices, Widgets and Processes.
+//    stand there: after if, wait, = or and, the variables, timers, gGlobals, Devices, Widgets and Processes.
 //  - Picking a command or a name opens the list of what can come next, so a whole line can be made by picking:
 //    if -> MB_06_Pump_Wort__HS -> == (or .state, .visible ...) -> true. The line ends there, so Enter makes a new line;
 //    Ctrl+Space then offers and / or to go on.
@@ -25,7 +25,7 @@ const COMMANDS = [
   ['if', 'test something'], ['elseif', 'another test'], ['else if', 'another test'], ['else', 'when no test fit'], ['endif', 'end of the if'],
   ['wait', 'until true, or a time'], ['sleep', 'pause, in ms'], ['goto', 'jump to a [label]'], ['step', 'start a step'],
   ['start', 'a Process or timer'], ['stop', 'a Process, timer or alarm'], ['restart', 'a Process from the top'], ['reset', 'a timer'],
-  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['log', 'write to the log'],
+  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'],
   ['new value', 'make a number'], ['new string', 'make a text'], ['new bool', 'make a true/false'], ['new time', 'make a time'], ['new datetime', 'make a date and time'],
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
 ];
@@ -41,8 +41,7 @@ const PROCESS_ATTRS = ['running'];
 const TARGETS = { start: ['timer', 'alarm', 'soundPlayer'], stop: ['timer', 'alarm', 'soundPlayer', 'stepper'], reset: ['timer', 'stepper'], restart: [] };
 
 // the kind of each item, in the order a value list shows them
-const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'gAPI' ? [2, 'gAPI']
-  : e.type === 'gKonstant' ? [3, 'gKonstant'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
+const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'gGlobal' ? [2, 'gGlobal'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
 
 // how well a name fits the letters typed: 0 = it starts with them, 1 = a part of it after a _ does, -1 = not at all
 export function fit(name, typed) {
@@ -52,7 +51,7 @@ export function fit(name, typed) {
 }
 
 // commands that take something after them: the pick ends in a space and the next list opens by itself
-const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'log',
+const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db',
   'new value', 'new string', 'new bool', 'new time', 'new datetime']);
 const COMPARE = [['= ', 'is equal to'], ['== ', 'is equal to (the same as =)'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
 const SET = [['= ', 'set it to'], ['+= ', 'add to it'], ['-= ', 'take from it'], ['++', 'add 1']];
@@ -163,14 +162,14 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     }
   } else {
     // a value: in an if, a wait, after = or an operator. Only what can stand there, in this order (Fritz, 2026-10-28):
-    // variables made in this Process, timers, gAPI, gKonstants, Devices, Widgets, Processes, then true / false / now / not
+    // variables made in this Process, timers, gGlobals, Devices, Widgets, Processes, then true / false / now / not
     for (const [n, k] of declared) add(n + (/(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre) ? '' : ' '), `variable (${k})`, n);
   }
   // a name the line goes on after (if Pump ...) ends in a space and opens the next list; a value after = or == ends the line
   const isRhs = /(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre);
   const nsp = isRhs ? '' : ' ';
   const ranked = [...els].sort((a, b) => GROUP(a)[0] - GROUP(b)[0] || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));     // each kind A to Z
-  for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // gAPI, not gAPI (gAPI)
+  for (const e of ranked) add(e.name + nsp, GROUP(e)[0] < 4 ? GROUP(e)[1] : `${GROUP(e)[1]} (${e.type})`, e.name);     // gGlobal, not gGlobal (gGlobal)
   for (const n of W.processes || []) add(n + nsp, 'Process', n);
   // Skynet Constants (skc_Kg_To_Lb ...) where a value goes, once a letter is typed (all of them would fill the list)
   if (!atStart && w) for (const [n, v, what] of SKYNET_CONSTANTS) add(n + nsp, `Skynet Constant ${showConstant(v)}, ${what}`, n);
@@ -289,7 +288,7 @@ export function attachAutofill(ta, box, words, on = () => true) {
       const hits = attrs.filter(a => a.toLowerCase().startsWith(typed));
       if (!live && !(typed && hits.length === 1)) return close();
       const atStart = attrs !== PROCESS_ATTRS && /^\s*$/.test(line.slice(0, dot.index));     // a Process's attributes are read only: no " = "
-      // in an if or a wait the line goes on: if gK_Tulip.visible -> = == != ... -> true (lib/engine.js reads a single = there as ==)
+      // in an if or a wait the line goes on: if gG_Tulip.visible -> = == != ... -> true (lib/engine.js reads a single = there as ==)
       const inCond = /^\s*(if|elseif|else\s+if|wait)\b/i.test(line);
       const tail = atStart ? ' = ' : inCond ? ' ' : '';
       if (typed && hits.length === 1) {                       // only one fits: fill it in now
