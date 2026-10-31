@@ -57,6 +57,15 @@ const x = readRecipeFile(xml, 'a.xml').recipe;
 assert.equal(x.sourceFormat, 'beerxml'); assert.equal(x.boilTime, 90); assert.equal(x.ingredients.hops[1].dryDays, 3); assert.equal(x.ingredients.miscs[0].unit, 'tsp');
 assert.equal(x.grainKg, 4); assert.equal(x.firstMashC, 66);
 
+// Fritz's FERMENTABLE sample (2026-10-31): every field comes in, and a misspelled closing tag (</DISASTATIC_POWER>) loses nothing
+const fx = readRecipeFile(`<RECIPES><RECIPE><NAME>F</NAME><FERMENTABLES><FERMENTABLE><NAME>Barley, Flaked</NAME><VERSION>1</VERSION><AMOUNT>0.91</AMOUNT><TYPE>Grain</TYPE>
+<YIELD>70.0</YIELD><COLOR>2.0</COLOR><ORIGIN>United Kingdom</ORIGIN><SUPPLIER>Fussybrewer Malting</SUPPLIER><NOTES>Adds body to porters and stouts, must be mashed</NOTES>
+<COARSE_FINE_DIFF>1.5</COARSE_FINE_DIFF><MOISTURE>9.0</MOISTURE><DIASTATIC_POWER>0.0</DISASTATIC_POWER><PROTEIN>13.2</PROTEIN><MAX_IN_BATCH>20.0</MAX_IN_BATCH>
+<RECOMMEND_MASH>TRUE</RECOMMEND_MASH></FERMENTABLE><FERMENTABLE><NAME>Pale</NAME><AMOUNT>4</AMOUNT><TYPE>Grain</TYPE></FERMENTABLE></FERMENTABLES></RECIPE></RECIPES>`, 'f.xml').recipe;
+assert.equal(fx.ingredients.fermentables.length, 2, 'the grain after the typo is still there');
+assert.deepEqual(['protein', 'maxInBatch', 'moisture', 'coarseFineDiff', 'diastaticPower', 'recommendMash'].map(k => fx.ingredients.fermentables[0][k]), [13.2, 20, 9, 1.5, 0, true]);
+assert.equal(fx.ingredients.fermentables[0].notes, 'Adds body to porters and stouts, must be mashed'); assert.equal(fx.grainKg, 4.91);
+
 // Actual AAU: the same alpha acid units, so a stronger hop means less of it
 assert.equal(hopKgToUse({ kg: 0.1, alpha: 10, alphaActual: 12.5 }), 0.08);
 
