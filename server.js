@@ -21,6 +21,8 @@ import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas } from './lib/schemas.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
+import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
+import { blankRecipe } from './public/recipecalc.js';
 import { Templates } from './lib/templates.js';
 import { retireGlobalsOnDisk } from './lib/globals.js';
 import { seedDefaults } from './lib/seed.js';
@@ -137,6 +139,30 @@ const templates = new Templates(path.join(ROOT, 'templates'), path.join(path.dir
 const processTemplates = new ProcessTemplates(path.join(ROOT, 'templates', 'process'), path.join(path.dirname(CONFIG), 'process_templates'));
 engine.recipe = () => recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list() });
 engine.onLock = (what, on, by) => schemas.lock(on, `Process ${by}`);      // lock_Equipment / unlock_Equipment
+// The Recipe (☰ Menu > Recipe): the one in use is config.recipe, saved ones are in config/recipes. Hop alerts run in the background.
+const recipes = new RecipeStore(path.join(path.dirname(CONFIG), 'recipes'));
+const currentRecipe = () => store.config.recipe ?? null;
+const hopAlerts = new HopAlerts({ store, clock: () => clock.now(), send: a => broadcast('hopAlert', a), defaults: () => store.config.brewDefaults ?? {}, recipe: currentRecipe });
+function useRecipe(rc) { store.config.recipe = cleanRecipe(rc); store.writeConfig(); broadcast('recipe', {}); return store.config.recipe; }
+// a recipe file on the Brain: a path inside the Brain's folder (or a media folder), .bsmx or .xml only
+function recipeFile(p) {
+  const rel = String(p ?? '').trim().replace(/\\/g, '/');
+  if (!/\.(bsmx|xml)$/i.test(rel)) throw new Error('The recipe file must be a .bsmx or .xml file');
+  const tries = [path.resolve(ROOT, rel), ...store.mediaRoots().map(r => path.resolve(r, rel))];
+  const f = tries.find(x => fs.existsSync(x) && fs.statSync(x).isFile());
+  if (!f) throw new Error(`No recipe file "${rel}" on the Brain (looked in ${[ROOT, ...store.mediaRoots()].join(', ')})`);
+  return f;
+}
+// import_recipe "Recipes/My IPA.bsmx"   import_recipe "Recipes/All.bsmx", "Zombie Dust"
+engine.onRecipe = (cmd, args, by) => {
+  if (cmd === 'import') {
+    const f = recipeFile(args[0]), got = readRecipeFile(fs.readFileSync(f), f, args[1]);
+    const rc = useRecipe(got.recipe);
+    return `Recipe "${rc.name}" imported from ${path.basename(f)} (${rc.ingredients.fermentables.length} fermentables, ${rc.ingredients.hops.length} hops, ${rc.ingredients.yeasts.length} yeasts, ${rc.ingredients.miscs.length} misc)`;
+  }
+  if (cmd === 'start') return hopAlerts.start(args[0], `Process ${by}`);
+  if (cmd === 'stop') return hopAlerts.stop() ? 'Hop alerts stopped' : 'Hop alerts were not running';
+};
 if (schemas.ensure()) console.log(`Your setup is now the Schema "${store.config.schema.name}" (config/schemas)`);
 const dailyBackups = () => { try { schemas.dailyBackups(); } catch (e) { console.log('Schema backup failed: ' + e.message); } };
 dailyBackups(); setInterval(dailyBackups, 3600 * 1000);       // every Schema gets one backup a day (config/schemas/backups)
@@ -191,11 +217,11 @@ function send(res, code, body, type = 'application/json') {
 }
 const ok = (res, body = { ok: true }) => send(res, 200, body);
 const fail = (res, code, msg) => send(res, code, { ok: false, error: msg });
-function readBody(req, limit = 10 * 1024 * 1024) {
+function readBody(req, limit = 10 * 1024 * 1024, raw = false) {      // raw: the bytes (a .bsmx file may not be UTF-8)
   return new Promise((resolve, reject) => {
     let size = 0; const chunks = [];
     req.on('data', c => { size += c.length; if (size > limit) { reject(new Error('Body too large')); req.destroy(); } else chunks.push(c); });
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('end', () => resolve(raw ? Buffer.concat(chunks) : Buffer.concat(chunks).toString('utf8')));
     req.on('error', reject);
   });
 }
@@ -262,7 +288,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -419,6 +445,11 @@ async function route(req, res) {
     if ((p === '/api/log' || p === '/api/log.csv') && m === 'GET') {
       const rows = logger.query(Object.fromEntries(url.searchParams));
       return p.endsWith('.csv') ? send(res, 200, csv(rows), 'text/csv; charset=utf-8') : ok(res, rows);
+    }
+    // Node-RED and other programs: POST a .bsmx or BeerXML file to /api/import/recipe?file=MyBeer.bsmx and it becomes the Recipe
+    if (p === '/api/import/recipe' && m === 'POST') {
+      const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
+      const rc = useRecipe(got.recipe); return ok(res, { ok: true, name: rc.name, names: got.names });
     }
     if (p === '/api/import/beerxml' && m === 'POST') {
       const xml = await readBody(req);
@@ -664,8 +695,38 @@ async function route(req, res) {
     if (!sc[2] && m === 'PUT') { schemas.rename(sc[1], (await jsonBody(req)).name); return ok(res, schemaView()); }
     if (!sc[2] && m === 'DELETE') { schemas.remove(sc[1]); return ok(res, schemaView()); }
   }
-  // Mash, Boil, Tab Background and Valve Profiles: everyone sees them, admins make and change them
-  sc = /^\/ui\/profiles\/(mash|boil|tab|valve)(?:\/([a-z0-9-]+))?$/.exec(p);
+  // The Recipe (☰ Menu > Recipe): everyone sees it, brewers (operators) import, change and save it
+  if (p === '/ui/recipe' && m === 'GET') {
+    const v = recipeView(currentRecipe() ?? blankRecipe(store.config.brewDefaults ?? {}), store.config.brewDefaults ?? {});
+    for (const a of v.schedule.alerts) { const f = store.resolveMedia(a.audio); a.audioFound = !!f && fs.existsSync(f); }
+    return ok(res, { ...v, has: !!currentRecipe(), saved: recipes.list(), alerts: hopAlerts.status() });
+  }
+  // a voice file for one hop alert, made on a text to voice web site and put here: media/Audio/Hops/<name>
+  if (p === '/ui/recipe/audio' && m === 'PUT') {
+    const name = url.searchParams.get('name') ?? '';
+    if (!/^[\w.-]+\.(mp3|wav|ogg|m4a)$/i.test(name)) return fail(res, 400, 'A voice file must be .mp3, .wav, .ogg or .m4a');
+    try { const r = await mediaFiles.upload(req, 0, 'Audio/Hops', name, true); return ok(res, { ok: true, ...r }); } catch (e) { return fail(res, 400, e.message); }
+  }
+  if (p === '/ui/recipe' && m === 'PUT') { useRecipe(await jsonBody(req)); return ok(res, recipeView(currentRecipe(), store.config.brewDefaults ?? {})); }
+  if (p === '/ui/recipe/new' && m === 'POST') { useRecipe(blankRecipe(store.config.brewDefaults ?? {})); return ok(res); }
+  if (p === '/ui/recipe/import' && m === 'POST') {
+    const got = readRecipeFile(await readBody(req, 32 * 1024 * 1024, true), url.searchParams.get('file') ?? '', url.searchParams.get('pick') ?? undefined);
+    useRecipe(got.recipe); return ok(res, { names: got.names, name: got.recipe.name });
+  }
+  if (p === '/ui/recipe/save' && m === 'POST') { const b = await jsonBody(req); const s = recipes.save(currentRecipe() ?? {}, b.id || undefined); return ok(res, { id: s.id, saved: recipes.list() }); }
+  if (p === '/ui/recipe/alerts' && m === 'POST') {
+    const b = await jsonBody(req);
+    const text = b.action === 'stop' ? (hopAlerts.stop(), 'Hop alerts stopped') : hopAlerts.start(b.timer || undefined, 'Recipe tab');
+    engine.print('system', text); return ok(res, { text, alerts: hopAlerts.status() });
+  }
+  sc = /^\/ui\/recipes\/([a-z0-9-]+)(?:\/(open))?$/.exec(p);
+  if (sc) {
+    if (!recipes.has(sc[1])) return fail(res, 404, 'No such saved Recipe');
+    if (sc[2] === 'open' && m === 'POST') { useRecipe(recipes.get(sc[1])); return ok(res); }
+    if (!sc[2] && m === 'DELETE') { recipes.remove(sc[1]); return ok(res, { saved: recipes.list() }); }
+  }
+  // Mash, Boil, Water, Tab Background and Valve Profiles: everyone sees them, admins make and change them
+  sc = /^\/ui\/profiles\/(mash|boil|water|tab|valve)(?:\/([a-z0-9-]+))?$/.exec(p);
   if (sc) {
     const ps = brewProfiles[sc[1]];
     if (!sc[2] && m === 'GET') return ok(res, ps.list());
