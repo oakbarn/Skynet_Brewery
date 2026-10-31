@@ -10,7 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, gravityPoints, expectedGravity } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, gravityPoints, expectedGravity } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -7803,7 +7803,6 @@ function rcHopDialog(hop, i, u, changed) {
 function rcFerms(pane, rc, u, changed, grainTab) {
   const all = rc.ingredients.fermentables, op = can('operator'), c = { onChange: changed };
   const mine = all.filter(f => isGrain(f) === grainTab), W = u.grainUnit, what = grainTab ? 'Grain' : 'Fermentable';
-  const types = Object.entries(FERMENTABLE_TYPES).filter(([k]) => k !== 'grain');
   // the labels come from the Default tab: the grain weight standard (skn_XML_Grain_WT_Standard) or its own label, and PPG>SG
   const D = S.config.brewDefaults || {};
   const wLabel = D.grainLabel || { lb: 'Pounds', kg: 'Kg', oz: 'Ounces', g: 'Grams' }[W], pLabel = D.ppgLabel || 'PPG>SG';
@@ -7819,14 +7818,24 @@ function rcFerms(pane, rc, u, changed, grainTab) {
   const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : 'adjunct', kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
   const del = (f, n) => guard(() => { if (!confirm(`Delete ${what} ${n}${f.name ? ` (${f.name})` : ''}?`)) return; all.splice(all.indexOf(f), 1); changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, grainTab ? 'Grains' : 'Fermentables'),
-    op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `Add ${what} `, h('b', {}, '+')) : ''));
+    op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `${grainTab ? 'Add ' : ''}${what} `, h('b', {}, '+')) : ''));
   if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.'));
   mine.forEach((f, i) => {
     const n = i + 1, F = end => `rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
     line.append(rcBox('g', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
-    if (!grainTab) line.append(rcBox('g', 'Type', rcInput(f, 'type', { kind: 'sel', list: types, onChange: () => { changed(); renderMenuPane(); } }), { field: F('Type') }));
     const pp = h('input', { type: 'text', disabled: true, tabIndex: -1 }); pts.push([f, pp]);
-    line.append(rcBox('g', wLabel, rcInput(f, 'kg', { to: v => kgTo(v, W), from: v => toKg(v, W), ...live }), { field: F('Amount'), tip: 'Amount, in the grain weight standard picked on ☰ Menu > Default' }),
+    if (grainTab) line.append(rcBox('g', wLabel, rcInput(f, 'kg', { to: v => kgTo(v, W), from: v => toKg(v, W), ...live }), { field: F('Amount'), tip: 'Amount, in the grain weight standard picked on ☰ Menu > Default' }));
+    else {
+      // Amount in the line's own Measurement; Measurement and Type are select-only lists from the BeerXML standard
+      const M = FERM_MEASURES[f.unit] ? f.unit : W;
+      const types = [...BEERXML_FERM_TYPES, ...(BEERXML_FERM_TYPES.includes(f.type) ? [] : [f.type])].map(k => [k, FERMENTABLE_TYPES[k] || k]);
+      line.append(rcBox('g', 'Amount', rcInput(f, 'kg', { to: v => kgTo(v, M), from: v => toKg(v, M), ...live }), { field: F('Amount') }),
+        rcBox('g', 'Measurement', rcInput({ unit: M }, 'unit', { kind: 'sel', list: Object.entries(FERM_MEASURES), onChange: () => {} }), { field: F('Measurement') }),
+        rcBox('g', 'Type', rcInput(f, 'type', { kind: 'sel', list: types, onChange: () => { changed(); renderMenuPane(); } }), { field: F('Type') }));
+      const ms = line.querySelector(`[data-field="${F('Measurement')}"] select`);
+      ms.onchange = () => { f.unit = ms.value; changed(); renderMenuPane(); };
+    }
+    line.append(
       rcBox('g', 'Potential', rcInput(f, 'yieldPct', { d: 1, ...live }), { unit: '%', field: F('Potential'), tip: 'The yield: how much of its weight becomes sugar' }),
       rcBox('s', 'SRM', rcInput(f, 'color', { d: 1, ...c }), { field: F('SRM'), tip: 'The color' }),
       rcBox('c', pLabel, pp, { field: F('PPG_SG'), tip: `Gravity points: Potential x ${46.214} x pounds${grainTab || f.type === 'adjunct' ? ' x brewhouse efficiency' : ''} / gallons in the batch. They add up to the Expected Gravity on the Recipe tab` }));
