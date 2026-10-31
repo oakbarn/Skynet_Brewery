@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { Store, onCloseAll, onOpenAll, fixValveLists } from '../lib/store.js';
 import { Engine, compile } from '../lib/engine.js';
-import { ProcessTemplates, MAJOR_STEPS, expand, usedFields, recipeValues, strikeTemp, brewSetup, buildBrewDay, processName } from '../lib/brewprocess.js';
+import { ProcessTemplates, MAJOR_STEPS, expand, usedFields, recipeValues, recipeValue, isKnownRecipeName, strikeTemp, brewSetup, buildBrewDay, processName } from '../lib/brewprocess.js';
 
 // ---- the valve lists
 const v = (o = {}) => ({ type: 'digitalOut', subtype: 'valve', ...o });
@@ -34,8 +34,14 @@ const prof = { mash: [{ id: 'm1', name: 'Two step', steps: [{ name: 'Protein', t
 let rv = recipeValues({ brewDefaults: { units: 'US', mashProfile: 'm1', boilProfile: 'b1' } }, prof);
 assert.equal(rv.rcp_Loaded, false); assert.equal(rv.rcp_Mash_Steps, 2); assert.equal(rv.rcp_Mash_Step_2_Temp, 152);
 assert.equal(rv.rcp_Boil_Time.s, 5400, 'boil time is a time'); assert.equal(rv.rcp_Mash_Step_1_Time.s, 900);
-rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', totalGrainWeight: 12, mash: { steps: [{ temp: 152, time: 60 }] }, boilTime: 60 } }, prof);
-assert.equal(rv.rcp_Loaded, true); assert.equal(rv.rcp_Strike_Volume, 4.5, '12 lb x 1.5 qt/lb = 4.5 gal'); assert.equal(rv.rcp_Mash_Steps, 1);
+// the Skynet Recipe (lib/recipe.js) is kept in kg, L and °C; Processes read it in the panel's units
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', grainKg: 12 / 2.20462262, waterToGrain: 1.5 * 2.0864, ingredients: { fermentables: [{ type: 'grain', kg: 12 / 2.20462262 }], hops: [], yeasts: [{ name: 'US-05' }] },
+  mash: { steps: [{ name: 'Sacch', tempC: (152 - 32) * 5 / 9, min: 60 }] }, boilTime: 60, spargeType: 'fly', whirlpoolMinutes: 20 } }, prof);
+assert.equal(rv.rcp_Loaded, true); assert.equal(rv.rcp_Total_Grain_Weight, 12); assert.equal(rv.rcp_Strike_Volume, 4.5, '12 lb x 1.5 qt/lb = 4.5 gal');
+assert.equal(rv.rcp_Mash_Steps, 1); assert.equal(rv.rcp_Mash_Step_1_Temp, 152); assert.equal(rv.rcp_Yeast_Name, 'US-05');
+assert.equal(rv.rcp_Sparge_Type, 'fly', 'every Skynet_Field can be read'); assert.equal(rv.rcp_Whirlpool_Minutes, 20);
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', mashProfile: 'm1', boilTime: 60, ingredients: { fermentables: [] }, mash: { steps: [] } } }, prof);
+assert.equal(rv.rcp_Mash_Steps, 2, 'the Mash Profile picked on the Recipe wins'); assert.equal(rv.rcp_Mash_Out_Temp, 168);
 
 // ---- the Skynet Process Templates build into seven Flow Processes that compile
 const root = path.resolve('templates/process');
@@ -90,5 +96,11 @@ assert.ok(await until(() => store.getProp('Out', 'value') === 'IPA 01:00:00'), '
 assert.ok(await until(() => store.getProp('V_HLT_Out', 'state') === true), 'open all');
 assert.equal(store.getProp('V_Tap', 'state'), false, 'the tap water valve never opens with open_all_valves');
 clearTimeout(store._persistTimer);
+// the Hops tab's Skynet_Fields can be read in a Process; a hop line past rcp_Hop_Count reads as empty
+assert.ok(isKnownRecipeName('rcp_Hop_3_IBU') && isKnownRecipeName('rcp_hop_count') && !isKnownRecipeName('rcp_Hop_3_Color'));
+const hv = recipeValues({ recipe: { name: 'H', boilTime: 60, ingredients: { hops: [{ name: 'Magnum', use: 'boil', time: 60, kg: 0.028, alpha: 12, alphaActual: 12 }] } }, brewDefaults: { units: 'US' } });
+assert.equal(recipeValue(hv, 'rcp_Hop_1_Name'), 'Magnum'); assert.equal(recipeValue(hv, 'rcp_Hop_Count'), 1);
+assert.equal(recipeValue(hv, 'rcp_Hop_5_Name'), ''); assert.ok(isKnownRecipeName('rcp_Grain_2_SRM') && isKnownRecipeName('rcp_Fermentable_Count'));
+assert.equal(recipeValue(hv, 'rcp_Grain_3_Name'), ''); assert.equal(recipeValue(hv, 'rcp_Fermentable_1_After_Boil'), false); assert.equal(recipeValue(hv, 'rcp_Grain_Count'), 0); assert.equal(recipeValue(hv, 'rcp_Adjunct_2_Name'), ''); assert.ok(isKnownRecipeName('rcp_Adjunct_1_Time_Unit')); assert.equal(recipeValue(hv, 'rcp_Hop_5_Amount'), 0);
 console.log('brew process tests passed');
 process.exit(0);
