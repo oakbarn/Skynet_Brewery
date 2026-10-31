@@ -913,6 +913,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .hopAAU { font-family: Georgia, serif; font-weight: 700; border: 3px solid #111; border-bottom: none; padding: 2px 30px; }
 .hopLine { align-items: center; }
 .hopLine .rcBox.rcWideBox { width: 15em; }
+.rcBox.rcWideBox[data-field="rcp_Mash_Profile"], .rcBox.rcWideBox[data-field="rcp_Water_Profile"] { width: 21em; }
 .hopSqBox { display: flex; align-items: center; }
 .hopSq { appearance: none; -webkit-appearance: none; width: 44px; height: 44px; border: 4px solid #111; border-radius: 8px; background: #ccc; cursor: pointer; margin: 0 4px; }
 .hopSq:checked { background: #3fbf6a; }
