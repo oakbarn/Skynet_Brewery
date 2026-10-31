@@ -2,8 +2,8 @@
 
 A **Tab Style** is the look of the Devices and Widgets on a Tab. It sets, as two separate groups:
 
-- **Label** (the title of a Device or Widget): **Fore color**, **Back color**, **Font** and **Font size**.
-- **The Device or Widget itself**: **Fore color**, **Back color**, **Font** and **Font size**.
+- **Label** (the title of a Device or Widget): **Fore color**, **Back color**, **Font**, **Font size** and **Alignment** (Left, Centered or Right justified).
+- **The Device or Widget itself**: **Fore color**, **Back color**, **Font**, **Font size** and **Alignment**.
 
 A box left on **Default** keeps the look as it is now (the ☰ Menu > Default tab, then the panel's normal look).
 

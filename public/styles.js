@@ -2,7 +2,8 @@
 // never be changed by a user; a user makes a User Style (➕ Add new User Style…) and can change or delete only those.
 // A Timer has no pictures: its look is only its Style (and its Label colors). No imports, so node can load it too.
 // Tab Styles (Fritz, 2026-10-30): a Tab's Style is the look of the Devices and Widgets on it that have none of their own:
-//   labelFore / labelBack / labelFont / labelSize: their Label (title)   fore / back / font / size: the Device or Widget itself
+//   labelFore / labelBack / labelFont / labelSize / labelAlign: their Label (title)   fore / back / font / size / align: the item itself
+//   (align = Left, Center or Right)
 //   '' = as it is now (the ☰ Menu > Default tab, then the panel's normal look). A Tab with no Style uses the Default tab's.
 //   look:   timer = seven-segment digits on a panel, led = LED digits, normal = plain text
 //   digits: the digit color   panel: the panel color ('' = the orange-red glow)   bezel: the frame round the panel
@@ -16,12 +17,12 @@ export const SKYNET_STYLES = {
     { id: 'sky_timer_plain', name: 'Skynet Plain text', look: 'normal', digits: '', panel: '', bezel: '', titleFore: '', titleBack: '' },
   ],
   tab: [
-    { id: 'sky_tab_default', name: 'Skynet Default', labelFore: '', labelBack: '', labelFont: '', labelSize: '', fore: '', back: '', font: '', size: '' },
-    { id: 'sky_tab_tennyson', name: 'Tennyson', labelFore: '#000000', labelBack: '#c3c3c3', labelFont: '"Comic Sans MS", "Comic Sans", cursive', labelSize: '16', fore: '', back: '', font: '', size: '' },
+    { id: 'sky_tab_default', name: 'Skynet Default', labelFore: '', labelBack: '', labelFont: '', labelSize: '', labelAlign: '', fore: '', back: '', font: '', size: '', align: '' },
+    { id: 'sky_tab_tennyson', name: 'Tennyson', labelFore: '#000000', labelBack: '#c3c3c3', labelFont: '"Comic Sans MS", "Comic Sans", cursive', labelSize: '16', labelAlign: '', fore: '', back: '', font: '', size: '', align: '' },
   ],
 };
 export const STYLE_KINDS = Object.keys(SKYNET_STYLES);
-export const KIND_KEYS = { timer: ['digits', 'panel', 'bezel', 'titleFore', 'titleBack'], tab: ['labelFore', 'labelBack', 'labelFont', 'labelSize', 'fore', 'back', 'font', 'size'] };
+export const KIND_KEYS = { timer: ['digits', 'panel', 'bezel', 'titleFore', 'titleBack'], tab: ['labelFore', 'labelBack', 'labelFont', 'labelSize', 'labelAlign', 'fore', 'back', 'font', 'size', 'align'] };
 export const STYLE_KEYS = KIND_KEYS.timer;
 export const isSkynetStyle = id => STYLE_KINDS.some(k => SKYNET_STYLES[k].some(s => s.id === id));
 
