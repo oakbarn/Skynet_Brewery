@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { readRecipeFile, readBsmx, cleanRecipe, RecipeStore, HopAlerts } from '../lib/recipe.js';
-import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ } from '../public/recipecalc.js';
+import { hopSchedule, calculateRecipe, recipeFieldValues, RECIPE_FIELDS, hopKgToUse, toKg, KG_OZ, sortHops, hopActualProblems, recipeField, HOP_FIELDS } from '../public/recipecalc.js';
 import { ProfileStore } from '../lib/profiles.js';
 
 // a small .bsmx as BeerSmith writes it: ounces, fluid ounces, °F; a folder of two recipes
@@ -82,6 +82,34 @@ const f = recipeFieldValues(r, { units: 'US' });
 assert.equal(f.rcp_Name, 'Test IPA'); assert.equal(f.rcp_Batch_Volume, 5.5); assert.equal(f.rcp_Total_Grain_Weight, 11); assert.equal(f.rcp_Pitch_Temp, 66);
 assert.equal(new Set(RECIPE_FIELDS.map(x => x[0])).size, RECIPE_FIELDS.length, 'every Skynet_Field name is used once');
 assert.ok(RECIPE_FIELDS.every(([k]) => /^rcp_[A-Z][A-Za-z_]+$/.test(k)));
+
+// the Hops tab: an import leaves the Actual AAU empty, Calculate needs it above zero, every hop line has its Skynet_Fields
+assert.equal(x.ingredients.hops[0].alphaActual, null, 'the Actual AAU of the hops on hand is typed in, not imported');
+assert.deepEqual(hopActualProblems(x).map(p => p.line), [1, 2]);
+assert.deepEqual(hopActualProblems({ ingredients: { hops: [{ alphaActual: 5 }, { name: 'B', alphaActual: 0 }] } }), [{ line: 2, name: 'B', aa: 0 }]);
+const hs = { boilTime: 60, volumes: { batchLiters: 20 }, ingredients: { hops: [
+  { name: 'WP', use: 'whirlpool', time: 20, wpTempC: 80, hopRocket: true, kg: 0.028, alpha: 5, alphaActual: 5 },
+  { name: 'Dry', use: 'dry hop', dryDays: 4, date: '2026-11-05', kg: 0.028, alpha: 5, alphaActual: 5 },
+  { name: 'Late', use: 'boil', time: 5, kg: 0.028, alpha: 5, alphaActual: 5 },
+  { name: 'Sec', use: 'secondary', dryDays: 7, kg: 0.028, alpha: 5, alphaActual: 5 },
+  { name: 'Magnum', use: 'boil', time: 60, kg: 0.028, alpha: 12, alphaActual: 11.7 },
+  { name: 'Mash', use: 'mash', kg: 0.028, alpha: 5, alphaActual: 5 },
+  { name: 'FW', use: 'first wort', kg: 0.028, alpha: 5, alphaActual: 5 },
+  { name: 'Mid', use: 'boil', time: 30, kg: 0.028, alpha: 5, alphaActual: 5 } ] } };
+sortHops(hs);
+assert.deepEqual(hs.ingredients.hops.map(h => h.name), ['Magnum', 'Mid', 'Late', 'Mash', 'FW', 'Sec', 'Dry', 'WP'], 'Start of Boil first, by minutes, then Mash, 1st Wort, Secondary, Dry, Whirlpool');
+const hf = recipeFieldValues(hs, { units: 'US' });
+assert.equal(hf.rcp_Hop_Count, 8);
+assert.equal(hf.rcp_Hop_1_Name, 'Magnum'); assert.equal(hf.rcp_Hop_1_AA_Actual, 11.7); assert.equal(hf.rcp_Hop_1_Calc_Amount, 1.01); assert.equal(hf.rcp_Hop_1_Boil_Group, 1); assert.equal(hf.rcp_Hop_1_Drop, 0);
+assert.equal(hf.rcp_Hop_3_Drop, 55); assert.ok(hf.rcp_Hop_1_IBU > hf.rcp_Hop_3_IBU && hf.rcp_Hop_3_IBU > 0);
+assert.equal(hf.rcp_Hop_4_Boil_Group, 0, 'a Mash hop is not a Boil Hop'); assert.equal(hf.rcp_Hop_4_IBU, 0);
+assert.equal(hf.rcp_Hop_6_Use, 'secondary'); assert.equal(hf.rcp_Hop_6_Days, 7); assert.equal(hf.rcp_Hop_7_Date, '2026-11-05');
+assert.equal(hf.rcp_Hop_8_Whirlpool_Temp, 176); assert.equal(hf.rcp_Hop_8_Hop_Rocket, true); assert.equal(hf.rcp_Hop_8_Min, 20); assert.equal(hf.rcp_Hop_8_Boil_Group, 4);
+assert.equal(recipeField('rcp_Hop_12_IBU')[1], 'Hop 12 IBU', 'any hop line number is a Skynet_Field'); assert.equal(recipeField('rcp_Hop_1_Nope'), undefined);
+assert.ok(HOP_FIELDS.every(([k]) => /^[A-Z][A-Za-z_]+$/.test(k)));
+assert.ok(hopSchedule(hs, { units: 'US' }).groups.some(g => g.label === 'Secondary (7 days)'));
+const cs = cleanRecipe({ ingredients: { hops: [{ name: 'a', use: 'dry hop', time: 0, date: 'bad' }, { name: 'b', use: 'boil', time: 60, hopRocket: 'yes', wpTempC: '80' }] } });
+assert.deepEqual(cs.ingredients.hops.map(h => h.name), ['b', 'a'], 'Save puts the hop lines in order'); assert.equal(cs.ingredients.hops[1].date, ''); assert.equal(cs.ingredients.hops[0].hopRocket, false);
 
 // clean keeps numbers and lists, and the library saves by name
 const cl = cleanRecipe({ name: 'X', boilTime: '75', ingredients: { hops: Array.from({ length: 30 }, (_, i) => ({ name: 'h' + i, kg: '0.01' })) } });

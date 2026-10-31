@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { Store, onCloseAll, onOpenAll, fixValveLists } from '../lib/store.js';
 import { Engine, compile } from '../lib/engine.js';
-import { ProcessTemplates, MAJOR_STEPS, expand, usedFields, recipeValues, strikeTemp, brewSetup, buildBrewDay, processName } from '../lib/brewprocess.js';
+import { ProcessTemplates, MAJOR_STEPS, expand, usedFields, recipeValues, recipeValue, isKnownRecipeName, strikeTemp, brewSetup, buildBrewDay, processName } from '../lib/brewprocess.js';
 
 // ---- the valve lists
 const v = (o = {}) => ({ type: 'digitalOut', subtype: 'valve', ...o });
@@ -96,5 +96,10 @@ assert.ok(await until(() => store.getProp('Out', 'value') === 'IPA 01:00:00'), '
 assert.ok(await until(() => store.getProp('V_HLT_Out', 'state') === true), 'open all');
 assert.equal(store.getProp('V_Tap', 'state'), false, 'the tap water valve never opens with open_all_valves');
 clearTimeout(store._persistTimer);
+// the Hops tab's Skynet_Fields can be read in a Process; a hop line past rcp_Hop_Count reads as empty
+assert.ok(isKnownRecipeName('rcp_Hop_3_IBU') && isKnownRecipeName('rcp_hop_count') && !isKnownRecipeName('rcp_Hop_3_Color'));
+const hv = recipeValues({ recipe: { name: 'H', boilTime: 60, ingredients: { hops: [{ name: 'Magnum', use: 'boil', time: 60, kg: 0.028, alpha: 12, alphaActual: 12 }] } }, brewDefaults: { units: 'US' } });
+assert.equal(recipeValue(hv, 'rcp_Hop_1_Name'), 'Magnum'); assert.equal(recipeValue(hv, 'rcp_Hop_Count'), 1);
+assert.equal(recipeValue(hv, 'rcp_Hop_5_Name'), ''); assert.equal(recipeValue(hv, 'rcp_Hop_5_Amount'), 0);
 console.log('brew process tests passed');
 process.exit(0);

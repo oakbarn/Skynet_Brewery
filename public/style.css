@@ -902,7 +902,27 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rcVoice .btnLink { padding: 2px 8px; border: 1px solid currentColor; border-radius: 4px; text-decoration: none; }
 .hopAlertBar { background: #1d5e2a; }
 .hopAlertBar.drop { background: #8f1d17; font-size: 1.15em; }
+/* the Hops tab (Fritz's layout, 2026-10-31) */
+.hopHead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px; margin: 0 0 10px; }
+.hopHead h2 { margin: 0; font-family: Georgia, serif; }
+.hopAdd { font-family: Georgia, serif; font-weight: 700; font-size: 1.3em; border: 4px solid #111; border-radius: 8px; padding: 4px 14px; background: #ddd; color: #111; }
+.hopAdd b { color: #1a8cff; font-size: 1.4em; line-height: 1; }
+.hopAAU { font-family: Georgia, serif; font-weight: 700; border: 3px solid #111; border-bottom: none; padding: 2px 30px; }
+.hopLine { align-items: center; }
+.hopLine .rcBox.rcWideBox { width: 15em; }
+.hopSqBox { display: flex; align-items: center; }
+.hopSq { appearance: none; -webkit-appearance: none; width: 44px; height: 44px; border: 4px solid #111; border-radius: 8px; background: #ccc; cursor: pointer; margin: 0 4px; }
+.hopSq:checked { background: #3fbf6a; }
+.hopDel { color: #e8141c; font-size: .85em; padding: 3px 8px; }
+.hopDlg { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; border: 4px solid #111; border-radius: 12px; padding: 8px 14px; flex: 1 1 520px; min-height: 64px; }
+.hopSw { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: Georgia, serif; }
+.hopDlgBtns { display: flex; gap: 6px; align-self: flex-start; }
+.hopDlg .spacer { flex: 1; }
+dialog.readWarn { max-width: 34em; border: 4px solid #e8141c; border-radius: 10px; }
+dialog.readWarn .bar { justify-content: center; }
+dialog.readWarn .bar button { min-width: 8em; font-weight: 800; }
 @media (max-width: 700px) {
+  .hopDlg { flex-basis: 100%; }
   .rcBox { flex: 1 1 40%; max-width: none; }
   .rcBox.rcWideBox { width: 100%; flex-basis: 100%; }
   .rcDRow { gap: 12px; }

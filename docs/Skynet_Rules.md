@@ -765,6 +765,16 @@ let programs in); the Drops tab gives the manual way: copy the words, open a fre
 17.6 **Skynet Mash and Water Profiles are Skynet Templates**: read only, listed with the user's own, copied with Add new ....
 The Water Profile has the source water report and how much is cut with distilled or RO water. (Fritz, 2026-10-30, Help 99)
 
+17.7 **The Hops tab follows Fritz's layout** (2026-10-31): one line per hop with no limit (**Add Hop +**, **Delete** on each
+line): Hop N name, amount, AAU % **Recipe** and **Actual**, **Calc oz** (the amount to use with the Actual AAU), then for a
+Boil Hop: Hop N Min, Drop, IBU, Boil Group. The square box opens the **Outside of Boil Hops** dialog (switches: Mash, 1st WORT,
+Secondary, DRY, Whirlpool; Cancel and Save). A hop with a switch on is not a Boil Hop: the dialog stays on its line in place of
+Min, Drop, IBU and Boil Group until the switch is off. Secondary and DRY have a Date and Days; Whirlpool has Temperature, Min
+and a Hop Rocket switch. Lines go in order on Calculate and Save: Boil Hops by drop time (Start of Boil first, then by
+Minutes), then Mash, 1st WORT, Secondary, DRY, Whirlpool. An imported hop's Actual AAU starts empty; **Calculate does nothing
+while any Actual AAU is not above zero** and a warning with a **READ** button says which hops to fix or delete. Each line's
+boxes are Skynet_Fields `rcp_Hop_N_...` plus `rcp_Hop_Count` (Rule 17.2). (Help 99)
+
 ---
 
 ## Open questions (not Rules yet)
@@ -881,3 +891,5 @@ The Water Profile has the source water report and how much is cut with distilled
 - 2026-10-31: Added section 17 Recipes (Rules 17.1 to 17.6: the Recipe tab layout, Skynet_Fields, .bsmx and BeerXML import with
   no limits, hop order and merged alerts, voice files, Skynet Mash and Water Profiles). Help 99. (thread "Build the Recipe Tab
   with BeerSmith import")
+- 2026-10-31: Added Rule 17.7 (the Hops tab: hop lines with no limit, Outside of Boil dialog, line order, Actual AAU above
+  zero before Calculate with a READ warning, rcp_Hop_N_ Skynet_Fields). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
