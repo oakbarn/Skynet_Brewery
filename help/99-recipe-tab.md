@@ -94,7 +94,7 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 
 - **Hop N**: the hop's name.
 - **Ounces** (or Grams, as picked on the Default tab): the amount in the recipe.
-- **AAU % Recipe** and **Actual** (red): the alpha acid of the hop in the recipe, and of the hops you have (on the package). **Type the Actual for every hop.** An imported hop's Actual starts empty.
+- **AAU % Recipe** and **Actual** (red): the alpha acid of the hop in the recipe, and of the hops you have (on the package). **Type the Actual for every hop.** It starts at 0, for an imported hop and for a new one.
 - **Calc oz**: the amount to use with the Actual AAU, so the beer gets the IBUs of the recipe.
 - **Hop N Min**: boil minutes. Min = the Boil Time is a Start of Boil hop.
 - **Hop N Drop**: minutes into the boil when it goes in. **Hop N IBU**: its bitterness. **Hop N Boil Group**: hops that go in at the same time are one group (the Drops tab).
@@ -106,7 +106,7 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 
 **Order.** On **Calculate** and on **Save** the lines go in order: Boil Hops by drop time (a Start of Boil hop first, then by Minutes), then Mash, 1st WORT, Secondary, DRY and Whirlpool hops.
 
-**Calculate needs every Actual AAU above zero.** When one is empty or 0, nothing is calculated and a warning says which hops to fix or delete. Press **READ** to close it.
+**Calculate needs every Actual AAU above 0.** The recipe is based on the Recipe AAU, but the real IBUs of a brew come from the Actual AAU, the AAU on the hop package. When any Actual AAU is 0, nothing is calculated: Skynet switches to the Hops tab, highlights each Actual AAU that is 0 and shows a warning. Press **READ** to close it, fix the Actual AAUs and press Calculate again.
 
 ## Importing a BeerSmith file
 

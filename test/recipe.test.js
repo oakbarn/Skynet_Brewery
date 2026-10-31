@@ -84,7 +84,7 @@ assert.equal(new Set(RECIPE_FIELDS.map(x => x[0])).size, RECIPE_FIELDS.length, '
 assert.ok(RECIPE_FIELDS.every(([k]) => /^rcp_[A-Z][A-Za-z_]+$/.test(k)));
 
 // the Hops tab: an import leaves the Actual AAU empty, Calculate needs it above zero, every hop line has its Skynet_Fields
-assert.equal(x.ingredients.hops[0].alphaActual, null, 'the Actual AAU of the hops on hand is typed in, not imported');
+assert.equal(x.ingredients.hops[0].alphaActual, 0, 'the Actual AAU starts at 0: the AAU on the package is typed in');
 assert.deepEqual(hopActualProblems(x).map(p => p.line), [1, 2]);
 assert.deepEqual(hopActualProblems({ ingredients: { hops: [{ alphaActual: 5 }, { name: 'B', alphaActual: 0 }] } }), [{ line: 2, name: 'B', aa: 0 }]);
 const hs = { boilTime: 60, volumes: { batchLiters: 20 }, ingredients: { hops: [
@@ -108,6 +108,7 @@ assert.equal(hf.rcp_Hop_8_Whirlpool_Temp, 176); assert.equal(hf.rcp_Hop_8_Hop_Ro
 assert.equal(recipeField('rcp_Hop_12_IBU')[1], 'Hop 12 IBU', 'any hop line number is a Skynet_Field'); assert.equal(recipeField('rcp_Hop_1_Nope'), undefined);
 assert.ok(HOP_FIELDS.every(([k]) => /^[A-Z][A-Za-z_]+$/.test(k)));
 assert.ok(hopSchedule(hs, { units: 'US' }).groups.some(g => g.label === 'Secondary (7 days)'));
+assert.equal(cleanRecipe({ ingredients: { hops: [{ name: 'n' }] } }).ingredients.hops[0].alphaActual, 0, 'a new hop starts at 0');
 const cs = cleanRecipe({ ingredients: { hops: [{ name: 'a', use: 'dry hop', time: 0, date: 'bad' }, { name: 'b', use: 'boil', time: 60, hopRocket: 'yes', wpTempC: '80' }] } });
 assert.deepEqual(cs.ingredients.hops.map(h => h.name), ['b', 'a'], 'Save puts the hop lines in order'); assert.equal(cs.ingredients.hops[1].date, ''); assert.equal(cs.ingredients.hops[0].hopRocket, false);
 

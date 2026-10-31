@@ -771,8 +771,10 @@ Boil Hop: Hop N Min, Drop, IBU, Boil Group. The square box opens the **Outside o
 Secondary, DRY, Whirlpool; Cancel and Save). A hop with a switch on is not a Boil Hop: the dialog stays on its line in place of
 Min, Drop, IBU and Boil Group until the switch is off. Secondary and DRY have a Date and Days; Whirlpool has Temperature, Min
 and a Hop Rocket switch. Lines go in order on Calculate and Save: Boil Hops by drop time (Start of Boil first, then by
-Minutes), then Mash, 1st WORT, Secondary, DRY, Whirlpool. An imported hop's Actual AAU starts empty; **Calculate does nothing
-while any Actual AAU is not above zero** and a warning with a **READ** button says which hops to fix or delete. Each line's
+Minutes), then Mash, 1st WORT, Secondary, DRY, Whirlpool. **Actual AAU starts at 0** (imported or new). **Calculate checks
+that every Actual AAU is above 0**; if any is 0, nothing is calculated, Skynet switches to the Hops tab, highlights each Actual
+AAU that is 0, and shows Fritz's warning (set the Actual AAU to the AAU on the Hop Package; the real IBUs come from it) with
+a **READ** button to close it. (Fritz, 2026-10-31 12:15Z) Each line's
 boxes are Skynet_Fields `rcp_Hop_N_...` plus `rcp_Hop_Count` (Rule 17.2). (Help 99)
 
 ---

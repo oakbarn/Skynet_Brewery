@@ -7662,10 +7662,15 @@ function rcMain(pane, rc, u, changed) {
 }
 // Calculate (the Recipe tab and the Hops tab): only when every hop has an Actual AAU above zero. Otherwise nothing is
 // changed and a warning says which hops to fix or delete (Fritz's Hops tab, 2026-10-31).
+// When one is 0, Skynet switches to the Hops tab, highlights the Actual AAU boxes that are 0 and shows Fritz's warning.
+let rcAAWarn = false;
 function rcCalculate(rc, changed) {
-  const bad = hopActualProblems(rc);
-  if (bad.length) return readWarning('Actual AAU of zero is not allowed', [`Nothing was calculated. ${bad.length === 1 ? 'This hop has' : 'These hops have'} no Actual AAU above zero:`,
-    ...bad.map(x => `Hop ${x.line}: ${x.name}`), 'Type the Actual AAU % of the hops on hand on the Hops tab, or delete the hop. Then press Calculate again.']);
+  if (hopActualProblems(rc).length) {
+    rcAAWarn = true; rcSub = 'hops'; renderMenuPane();
+    return readWarning('Actual AAU', ['Any Hop MUST have its Actual AAU set to the AAU on the Hop Package. The Recipe is based on a Recipe AAU, but the real IBUs of a Brew is calculated using the Actual AAU.',
+      'Fix any Actual AAUs that are Zero and try Calculate again.', 'Click the Read Button to exit this dialog.']);
+  }
+  rcAAWarn = false;
   sortHops(rc);
   Object.assign(rc, calculateRecipe(rc, S.config.brewDefaults || {}, rcMashProfile(rc))); changed(); renderMenuPane();
   toast('Calculated. Press Save to keep it');
@@ -7708,7 +7713,14 @@ function rcHops(pane, rc, u, changed) {
   const c = { onChange: () => { changed(); refresh(); } };
   const F = (i, end) => hopFieldName(i + 1, end);
   const calcIn = () => h('input', { type: 'text', disabled: true, tabIndex: -1 });
-  const add = guard(() => { hops.push({ name: '', kg: null, alpha: null, alphaActual: null, use: 'boil', time: null, dryDays: null, date: '', wpTempC: null, hopRocket: false }); changed(); renderMenuPane(); });
+  // Actual AAU: highlighted while it is 0 after a Calculate was tried
+  const actualBox = (hop, i) => {
+    const b = rcBox('r', 'Actual', rcInput(hop, 'alphaActual', { d: 1, onChange: () => { b.classList.toggle('hopZero', rcAAWarn && !(+hop.alphaActual > 0)); c.onChange(); } }),
+      { field: F(i, 'AA_Actual'), tip: 'The AAU % on the package of the hops on hand. It must be above 0 before Calculate' });
+    b.classList.toggle('hopZero', rcAAWarn && !(+hop.alphaActual > 0));
+    return b;
+  };
+  const add = guard(() => { hops.push({ name: '', kg: null, alpha: null, alphaActual: 0, use: 'boil', time: null, dryDays: null, date: '', wpTempC: null, hopRocket: false }); changed(); renderMenuPane(); });
   const del = i => guard(() => { if (!confirm(`Delete Hop ${i + 1}${hops[i].name ? ` (${hops[i].name})` : ''}?`)) return; hops.splice(i, 1); changed(); renderMenuPane(); });
   pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Hops'), op ? h('button', { class: 'hopAdd', onclick: add, title: 'Add a hop line at the bottom' }, 'Add Hop ', h('b', {}, '+')) : '',
     h('span', { class: 'hopAAU' }, 'AAU %'), h('span', { class: 'muted' }, 'The square box opens the Outside of Boil Hops dialog')));
@@ -7726,7 +7738,7 @@ function rcHops(pane, rc, u, changed) {
       rcBox('k', `Hop ${i + 1}`, rcInput(hop, 'name', { kind: 'text', ...c }), { wide: true, field: F(i, 'Name') }),
       rcBox('g', wName, rcInput(hop, 'kg', { to: v => kgTo(v, wt), from: v => toKg(v, wt), ...c }), { field: F(i, 'Amount'), tip: 'The amount in the recipe' }),
       rcBox('g', 'Recipe', rcInput(hop, 'alpha', { d: 1, ...c }), { field: F(i, 'AA_Recipe'), tip: 'AAU % of the hop in the recipe' }),
-      rcBox('r', 'Actual', rcInput(hop, 'alphaActual', { d: 1, ...c }), { field: F(i, 'AA_Actual'), tip: 'AAU % of the hops on hand (on the package). It must be above 0 before Calculate' }),
+      actualBox(hop, i),
       rcBox('c', `Calc ${wt === 'oz' ? 'Oz' : 'g'}`, r.calc, { field: F(i, 'Calc_Amount'), tip: 'The amount to use with the Actual AAU, to get the IBUs of the recipe' }),
       h('div', { class: 'hopSqBox' }, sq));
     if (boilHop && !work) {

@@ -915,6 +915,8 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .hopSqBox { display: flex; align-items: center; }
 .hopSq { appearance: none; -webkit-appearance: none; width: 44px; height: 44px; border: 4px solid #111; border-radius: 8px; background: #ccc; cursor: pointer; margin: 0 4px; }
 .hopSq:checked { background: #3fbf6a; }
+.hopZero { border-color: #e8141c; box-shadow: 0 0 0 4px #ffd400; }
+.hopZero .rcBoxVal { background: #fff3a8; }
 .hopDel { color: #e8141c; font-size: .85em; padding: 3px 8px; }
 .hopDlg { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; border: 4px solid #111; border-radius: 12px; padding: 8px 14px; flex: 1 1 520px; min-height: 64px; }
 .hopSw { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: Georgia, serif; }
