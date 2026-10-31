@@ -37,6 +37,7 @@ Every box on the Recipe tab and its Daughter Tabs is a **Skynet_Field**: it has 
 | Grain Wt. | `rcp_Total_Grain_Weight` |
 | 1st Mash | `rcp_First_Mash_Temp` |
 | IBU | `rcp_IBU` |
+| Expected Gravity | `rcp_Expected_Gravity` |
 | Strike Volume | `rcp_Strike_Volume` |
 | Strike Temperature | `rcp_Strike_Temp` |
 | Grain Temperature | `rcp_Grain_Temp` |
@@ -74,7 +75,7 @@ Each line on the Hops tab has its own Skynet_Fields, N = the line number (1, 2, 
 
 For example `rcp_Hop_1_Name` is the first hop. A line the Recipe does not have reads as empty (or 0).
 
-The Grain and Fermentable tabs work the same way: `rcp_Grain_Count`, `rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, and `rcp_Fermentable_Count`, `rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_After_Boil`.
+The Grain and Fermentable tabs work the same way: `rcp_Grain_Count`, `rcp_Grain_N_Name`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, and `rcp_Fermentable_Count`, `rcp_Fermentable_N_Name`, `_Type`, `_Amount`, `_Potential`, `_SRM`, `_PPG_SG`, `_After_Boil`.
 
 ## The Daughter Tabs
 
@@ -111,8 +112,10 @@ One line for each hop, with no limit. **Add Hop +** puts a new line at the botto
 
 A recipe's fermentables are split over two tabs. **Grain** holds the ones of Type Grain (the Type is not shown). **Fermentable** holds every other Type, picked from the **Type** dropdown: Adjunct, Extract, Dry Extract, Sugar, Fruit, Juice or Other. **Add Grain +** or **Add Fermentable +** puts a new line at the bottom; **Delete** takes one away. There is no limit.
 
-- **Name**, the amount (**Pounds** or **Kilograms**, as picked on the Default tab), **Potential** (the yield, %) and **SRM** (the color).
-- **After Boil**: a switch, shown only for the Types a brewer adds during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). On means it goes in after the boil.
+- **Name**, the weight, **Potential** (the yield, %), **SRM** (the color) and **PPG>SG**, its gravity points (worked out).
+- The weight shows in the **grain weight standard** picked on ☰ Menu > Default (Pounds or Kg). An imported BeerSmith or BeerXML file is shown in it too. Its label, and the PPG>SG label, can be changed only on the Default tab.
+- **Gravity points** = Potential × 46.214 × pounds × efficiency ÷ gallons in the batch. Grains and adjuncts use the brewhouse efficiency; extracts, sugars, fruit and juice give all their sugar. The points of every line add up to the **Expected Gravity** box on the Recipe tab (1 + points ÷ 1000), worked out whenever an amount changes, and by Calculate. It needs the Brew Length.
+- **After Boil** (Fermentable tab only): a switch, shown only for the Types a brewer adds during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). On means it goes in after the boil. Grain is never added after the boil, so the Grain tab has none.
 
 Each tab shows its total weight. An import brings every grain field in (notes, protein, moisture and the rest too), ready for later.
 

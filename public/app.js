@@ -10,7 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, gravityPoints, expectedGravity } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -6086,6 +6086,8 @@ function renderDefaultTab(box) {
     ['_strikeOff', `Strike offset (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'} added to the strike temperature; empty = 0)`, 'num'],
     ['_u', 'How amounts show (Recipe tab)', 'head'],
     ...DISPLAY_UNITS.map(([k, l, ch]) => [k, l, 'sel', Object.entries(ch)]),
+    ['grainLabel', 'Grain weight label on the Grain and Fermentable tabs (Skynet field skn_XML_Grain_WT_Standard_Label; empty = the standard above: Pounds, Kg ...). Only changed here', 'text'],
+    ['ppgLabel', 'Gravity points label on the Grain and Fermentable tabs (empty = PPG>SG). Only changed here', 'text'],
     ['_un', 'A recipe is kept in kilograms, liters and °C, as BeerXML does, so changing these only changes how it shows. Units above picks the first choice of each when they are left alone.', 'note'],
     ['_h', 'Hop alerts', 'head'],
     ['hopWarnMinutes', `Warning before each hop drop (minutes; empty = ${RECIPE_DEFAULTS.hopWarnMinutes}, 0 = no warning)`, 'num'],
@@ -7637,6 +7639,7 @@ function rcMain(pane, rc, u, changed) {
       calcBox('Grain Wt.', 'grainKg', v => rcRound(kgTo(v, u.grainUnit), 2), u.grainUnit, 'The weight of all the grains (Grain tab). Calculate works it out', 'rcp_Total_Grain_Weight'),
       calcBox('1st Mash', 'firstMashC', v => rcRound(cTo(v, u.tempUnit), 1), TU(u.tempUnit), 'The first mash step (MASH tab). Calculate works it out', 'rcp_First_Mash_Temp'),
       calcBox('IBU', 'ibuCalc', v => rcRound(v, 0), '', 'Bitterness from the Hops tab (Tinseth), with the Actual AAU of each hop. Calculate works it out', 'rcp_IBU'),
+      calcBox('Expected Gravity', 'expectedSG', v => rcRound(v, 3), '', 'The sum of the gravity points (PPG>SG) of every grain and fermentable. Worked out when an amount changes, and by Calculate', 'rcp_Expected_Gravity'),
       rcBox('b', 'Strike Volume', rcInput(rc, 'strikeLiters', vol), { ...V, field: 'rcp_Strike_Volume' }),
       rcBox('r', 'Strike Temperature', rcInput(rc, 'strikeTempC', tmp), { ...T, field: 'rcp_Strike_Temp' }),
       rcBox('r', 'Grain Temperature', rcInput(rc, 'grainTempC', tmp), { ...T, field: 'rcp_Grain_Temp' })),
@@ -7651,8 +7654,8 @@ function rcMain(pane, rc, u, changed) {
       rcBox('r', 'Pitch At', rcInput(rc, 'pitchTempC', { ...tmp, d: 0 }), { ...T, field: 'rcp_Pitch_Temp' }),
       rcBox('g', `Grain Ratio/${u.ratioUnit === 'qt/lb' ? 'Qt' : 'L'}`, rcInput(rc, 'waterToGrain', { to: v => ratioTo(v, u.ratioUnit), from: v => toRatio(v, u.ratioUnit), ...c }), { unit: u.ratioUnit, field: 'rcp_Grain_Ratio' }),
       can('operator') ? h('button', { class: 'rcCalcBtn', onclick: calc, title: 'Works out the Total Grain Weight, Hop Drops, Warnings and Messages, 1st Mash Temperature, IBU, and the Strike and Sparge Volume and Temperature' }, 'Calculate') : ''),
-    h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'), h('span', { class: 'rcMini' }, 'Grain Wt.'), h('span', { class: 'rcMini' }, '1st Mash'), h('span', { class: 'rcMini' }, 'IBU'),
-      h('b', {}, 'These three fields are calculated from the Other Tabs, Grain, Mash, and Hops.')),
+    h('div', { class: 'rcNote' }, h('b', {}, 'Most Fields can be edited.'), h('span', { class: 'rcMini' }, 'Grain Wt.'), h('span', { class: 'rcMini' }, '1st Mash'), h('span', { class: 'rcMini' }, 'IBU'), h('span', { class: 'rcMini' }, 'Expected Gravity'),
+      h('b', {}, 'These fields are calculated from the Other Tabs, Grain, Fermentable, Mash, and Hops.')),
     h('div', { class: 'rcLower' },
       h('div', { class: 'rcDaughters' }, ...RC_DAUGHTERS.map(([k, t, about]) => h('div', { class: 'rcDRow' },
         h('button', { class: 'rcTabBtn', onclick: () => { rcSub = k; renderMenuPane(); }, title: 'Opens the ' + t + ' tab' }, t), h('span', {}, about)))),
@@ -7801,27 +7804,40 @@ function rcFerms(pane, rc, u, changed, grainTab) {
   const all = rc.ingredients.fermentables, op = can('operator'), c = { onChange: changed };
   const mine = all.filter(f => isGrain(f) === grainTab), W = u.grainUnit, what = grainTab ? 'Grain' : 'Fermentable';
   const types = Object.entries(FERMENTABLE_TYPES).filter(([k]) => k !== 'grain');
-  const total = h('b', {});
-  const sum = () => { total.textContent = `${rcRound(kgTo(mine.reduce((a, f) => a + (+f.kg || 0), 0), W), 2)} ${W}`; };
+  // the labels come from the Default tab: the grain weight standard (skn_XML_Grain_WT_Standard) or its own label, and PPG>SG
+  const D = S.config.brewDefaults || {};
+  const wLabel = D.grainLabel || { lb: 'Pounds', kg: 'Kg', oz: 'Ounces', g: 'Grams' }[W], pLabel = D.ppgLabel || 'PPG>SG';
+  const total = h('b', {}), eg = h('b', {}), pts = [];
+  // a changed amount or Potential: the gravity points of each line, the total, and the Expected Gravity on the Recipe tab
+  const sum = () => {
+    total.textContent = `${rcRound(kgTo(mine.reduce((a, f) => a + (+f.kg || 0), 0), W), 2)} ${W}`;
+    for (const [f, el] of pts) el.value = rcRound(gravityPoints(f, rc), 1);
+    rc.expectedSG = expectedGravity(rc);
+    eg.textContent = rc.expectedSG ? rcRound(rc.expectedSG, 3) : '(needs the Brew Length on the Recipe tab)';
+  };
+  const live = { onChange: () => { changed(); sum(); } };
   const add = guard(() => { all.push({ name: '', type: grainTab ? 'grain' : 'adjunct', kg: null, yieldPct: null, color: null, addAfterBoil: false }); changed(); renderMenuPane(); });
   const del = (f, n) => guard(() => { if (!confirm(`Delete ${what} ${n}${f.name ? ` (${f.name})` : ''}?`)) return; all.splice(all.indexOf(f), 1); changed(); renderMenuPane(); });
-  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, grainTab ? 'Grain' : 'Fermentables'),
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, grainTab ? 'Grains' : 'Fermentables'),
     op ? h('button', { class: 'hopAdd', onclick: add, title: `Add a ${what.toLowerCase()} line at the bottom` }, `Add ${what} `, h('b', {}, '+')) : ''));
   if (!mine.length) pane.append(h('p', { class: 'muted' }, grainTab ? 'No grains yet. Press Add Grain, or IMPORT a recipe on the Recipe tab.' : 'No other fermentables. Press Add Fermentable for an adjunct, extract, sugar, fruit or juice.'));
   mine.forEach((f, i) => {
     const n = i + 1, F = end => `rcp_${what}_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
-    line.append(rcBox('k', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
+    line.append(rcBox('g', `${what} ${n}`, rcInput(f, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }));
     if (!grainTab) line.append(rcBox('g', 'Type', rcInput(f, 'type', { kind: 'sel', list: types, onChange: () => { changed(); renderMenuPane(); } }), { field: F('Type') }));
-    line.append(rcBox('g', W === 'lb' ? 'Pounds' : 'Kilograms', rcInput(f, 'kg', { to: v => kgTo(v, W), from: v => toKg(v, W), onChange: () => { changed(); sum(); } }), { field: F('Amount') }),
-      rcBox('g', 'Potential', rcInput(f, 'yieldPct', { d: 1, ...c }), { unit: '%', field: F('Potential'), tip: 'The yield: how much of its weight becomes sugar' }),
-      rcBox('g', 'SRM', rcInput(f, 'color', { d: 1, ...c }), { field: F('SRM'), tip: 'The color' }));
+    const pp = h('input', { type: 'text', disabled: true, tabIndex: -1 }); pts.push([f, pp]);
+    line.append(rcBox('g', wLabel, rcInput(f, 'kg', { to: v => kgTo(v, W), from: v => toKg(v, W), ...live }), { field: F('Amount'), tip: 'Amount, in the grain weight standard picked on ☰ Menu > Default' }),
+      rcBox('g', 'Potential', rcInput(f, 'yieldPct', { d: 1, ...live }), { unit: '%', field: F('Potential'), tip: 'The yield: how much of its weight becomes sugar' }),
+      rcBox('s', 'SRM', rcInput(f, 'color', { d: 1, ...c }), { field: F('SRM'), tip: 'The color' }),
+      rcBox('c', pLabel, pp, { field: F('PPG_SG'), tip: `Gravity points: Potential x ${46.214} x pounds${grainTab || f.type === 'adjunct' ? ' x brewhouse efficiency' : ''} / gallons in the batch. They add up to the Expected Gravity on the Recipe tab` }));
     if (!grainTab && AFTER_BOIL_TYPES.includes(f.type)) line.append(h('div', { class: 'hopSw', 'data-field': F('After_Boil'), title: `Added after the boil (at flame out or in the fermenter)\nSkynet_Field ${F('After_Boil')}` },
       h('b', {}, 'After Boil'), rcSwitch(!!f.addAfterBoil, on => { f.addAfterBoil = on; changed(); })));
     if (op) line.append(h('button', { class: 'hopDel', onclick: del(f, n), title: `Delete ${what} ${n}` }, '🗑 Delete'));
     pane.append(line);
   });
   sum();
-  pane.append(h('p', {}, `Total ${grainTab ? 'grain' : 'other fermentables'}: `, total, grainTab ? '. Calculate on the Recipe tab puts the Grain Wt. box together from the grains and adjuncts.' : ''));
+  pane.append(h('p', {}, `Total ${grainTab ? 'grain' : 'other fermentables'}: `, total, grainTab ? '. Calculate on the Recipe tab puts the Grain Wt. box together from the grains and adjuncts.' : '',
+    ` Expected Gravity (all grains and fermentables): `, eg, '.'));
 }
 
 // a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it

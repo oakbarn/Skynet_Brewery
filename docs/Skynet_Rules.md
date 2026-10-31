@@ -782,6 +782,14 @@ the Fermentable tab holds every other Type with a Type dropdown (Adjunct, Extrac
 fixed list, the BeerXML types, so no Add new ...). Boxes: Name, amount, **Potential** (yield %), **SRM** (color), and **After
 Boil**, a switch shown only for Types added during or after the boil (Extract, Dry Extract, Sugar, Fruit, Juice). No limit on
 lines. Skynet_Fields `rcp_Grain_N_...`, `rcp_Fermentable_N_...`, `rcp_Grain_Count`, `rcp_Fermentable_Count`. (Help 99)
+**Grain tab layout (Fritz's Grain_Tab.png, 2026-10-31):** Grains, Add Grain +, then Grain N, the weight, Potential, SRM (brown
+header), **PPG>SG** (gravity points, worked out), Delete. No After Boil on the Grain tab (grain is never added after the boil).
+The weight is shown in the **grain weight standard** picked on ☰ Menu > Default (Skynet field `skn_XML_Grain_WT_Standard`,
+Pounds or Kg; a .bsmx or BeerXML import is shown in it) under a label set only on the Default tab
+(`skn_XML_Grain_WT_Standard_Label`, empty = the standard's name). The PPG>SG label is set on the Default tab too. Gravity
+points = Potential x 46.214 x pounds x efficiency (grains and adjuncts; 100% for extracts, sugars, fruit, juice) / batch
+gallons; the Recipe tab's **Expected Gravity** (`rcp_Expected_Gravity`) = 1 + all points / 1000, worked out when an amount
+changes and by Calculate.
 
 ---
 
@@ -903,3 +911,5 @@ lines. Skynet_Fields `rcp_Grain_N_...`, `rcp_Fermentable_N_...`, `rcp_Grain_Coun
   zero before Calculate with a READ warning, rcp_Hop_N_ Skynet_Fields). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Changed Rule 17.7 (Actual AAU starts at 0; a failed Calculate switches to Hops and highlights the 0s) and added
   Rule 17.8 (Grain tab and Fermentable tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-10-31: Rule 17.8 adds Fritz's Grain tab layout: PPG>SG gravity points, Expected Gravity on the Recipe tab, the grain
+  weight standard and its label set only on the Default tab, no After Boil on the Grain tab. (thread "Build the Recipe Tab with BeerSmith import")

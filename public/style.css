@@ -879,6 +879,7 @@ dialog.imgOpenDlg h3 { margin: 0; }
 .rc-b .rcBoxHead { background: #3f48cc; }
 .rc-r .rcBoxHead { background: #e8141c; }
 .rc-c .rcBoxHead { background: #8c8c8c; color: #eee; }
+.rc-s .rcBoxHead { background: #b87a5a; color: #111; }
 .rcBoxVal { display: flex; align-items: center; gap: 4px; padding: 6px 8px; flex: 1; }
 .rcBoxVal input, .rcBoxVal select { width: 4.5em; flex: 1; min-width: 0; font-size: 1.25em; border: none; background: transparent; color: #111; padding: 2px 0; }
 .rcWideBox .rcBoxVal input { font-size: 1.45em; width: 100%; }
