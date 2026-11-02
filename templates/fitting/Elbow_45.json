@@ -1,7 +1,31 @@
 {
-  "std": { "type": "TC", "size": 1.5 },
-  "fittings": [{ "kind": "elbow45" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_45.svg",
-  "ipPos": { "start": "Left", "end": "Top Right 45" },
-  "notes": "A 45 degree elbow, for piping. Openings at the left and the top right corner."
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "elbow45"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg",
+  "size": [
+    100,
+    80
+  ],
+  "body": 0.28,
+  "ipPos": {
+    "start": "0.16,0.8",
+    "end": "1,0.3"
+  },
+  "notes": "A 45 degree elbow, for piping (Fritz's drawing, 2026-11-02). Openings at the bottom left (45 degrees) and the right; each IP is the center of its ferrule's outer face."
 }

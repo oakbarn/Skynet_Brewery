@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { DIRS, dirOf, onAngle, angledEnd, alongLine, fitFor } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -8,6 +9,7 @@ import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
+import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
@@ -302,6 +304,9 @@ const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 
 const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
 const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left', 0.22, 1], ['Bottom Right', 0.78, 1],
   ['Top Left Branch', 0.087, 0], ['Bottom Branch', 0.54, 1]];         // the openings of the Skynet RIMS Device picture (Skynet_TC1_2_Rims_Device.svg)
+// the 4 port tips of the Skynet Copper Counterflow Chiller picture (Chiller_Copper_Counterflow.svg, viewBox 225 x 245; Fritz, 2026-11-02):
+// the wort tube runs straight out through each tee, the water side leaves by the tee's branch; every tip faces left (Rule 5.19)
+const CF_COPPER = [['Coil Top End', 0, 0.1633], ['Coil Top Branch', 0.0889, 0.2694], ['Coil Bottom Branch', 0.0889, 0.8163], ['Coil Bottom End', 0, 0.9224]];
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Label is its only text
@@ -321,8 +326,8 @@ const EQ = {
     } },
   pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/Skynet/Chillers/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
-      wortIn: pt('Wort In', CORNERS, { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS, { on: true, def: 'Bottom Right', circuit: 'wort' }),
-      waterIn: pt('Water In', CORNERS, { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS, { on: true, def: 'Top Right', circuit: 'water' }),
+      wortIn: pt('Wort In', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Right', circuit: 'wort' }),
+      waterIn: pt('Water In', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Right', circuit: 'water' }),
       thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
     } },
   ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/Skynet/Chillers/chill_coil.svg', size: [180, 180], tab: 'Equipment',
@@ -648,6 +653,12 @@ const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of
 const isMv = g => g?.kind === 'ip' && g.fitting === 'manualValve';
 const mvOpen = g => { const v = g?.name && S?.values?.[g.name]?.state; return v === undefined ? !!g?.open : !!v; };
 const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
+// Fritz's Manual Ball Valve drawings (2026-11-02): pictures a Manual Valve can have. The closed one is kept; while open the Tab
+// shows its _Open twin (side view: the handle along the pipe; front views: the handle end on)
+const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Manual Ball Valve, side view'],
+  ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', 'Manual Ball Valve, front view (looking down the pipe)'],
+  ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow']];
+const mvPic = g => isMv(g) && g.image && mvOpen(g) ? g.image.replace(/_Closed\.svg$/, '_Open.svg') : g.image;
 const FIT_SVG = {
   pipe: '<path d="M0 15H30"/>', cap: '<path d="M0 15H17M20 5V25"/>',
   tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
@@ -699,7 +710,7 @@ function buildIp(g) {
   const lonely = fit === 'coupling' && pipesOn(g.id, g.workspace).length < 2;
   const open = isMv(g) && mvOpen(g), plain = isIpFit(g);
   const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : '') + (isMv(g) && mvAsked(g) ? ' mvAsk' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? (plain ? g.name : ipName(g)) : g.label || FITTINGS[fit] || 'IP') + (isMv(g) ? (open ? ' (open: click to close it)' : ' (closed: click to open it)') : '') });
-  if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(g.image)}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
+  if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(mvPic(g))}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
   else if (fit) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
   } else n.append(h('span', {}, g.text ?? 'IP'));
@@ -716,7 +727,7 @@ function buildIp(g) {
 const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e));
 // Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
 // "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
-const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)));
+const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)) || isProbeTee(e));
 // Devices with IPs (pumps, valves, proportional valves, inline sensors) are drawn in proportion to the tab's pipe size.
 // Their width / height are the size at pipe size 10; at any other pipe size they grow or shrink about their centre.
 function elGeom(e) {
@@ -755,7 +766,12 @@ function sidePt(e, side) {
 // Where the pipe meets a Skynet valve picture (Fritz, 2026-10-28: the IPs sit on the picture where the water flows, not in the
 // middle of the box's sides). Every Skynet valve drawing in Images/Skynet/Valves has its pipe at the same spot: across at 92 of
 // its 120 high (H), or turned to stand up with the pipe 28 (V_R, V_RC) or 92 (V_L, V_LC) in from the left of its 120 wide.
-const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] } };
+// Fritz's motorized butterfly valve (2026-11-02) is taller: 140 x 170 with its pipe at 135. A front view (looking down the pipe)
+// has both IPs at the center of its opening; a front elbow has one there and one at the center of its bottom ferrule (Rule 5.20).
+const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] },
+  BF_H: { o: 'h', w: 140, h: 170, ends: [[0, 135 / 170], [1, 135 / 170]] }, BF_V_R: { o: 'v', w: 170, h: 140, ends: [[35 / 170, 0], [35 / 170, 1]] }, BF_V_L: { o: 'v', w: 170, h: 140, ends: [[135 / 170, 0], [135 / 170, 1]] },
+  BF_Front: { o: 'f', w: 120, h: 170, ends: [[0.5, 130 / 170], [0.5, 130 / 170]] }, BF_Front_Elbow: { o: 'f', w: 120, h: 200, ends: [[0.5, 0.65], [0.5, 1]] },
+  BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] } };
 // Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
 // port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
 const PUMP_FLOW = {
@@ -772,17 +788,36 @@ const PUMP_FLOW = {
   Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
   Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
 };
+// Pump Cover Overlays (Fritz, 2026-11-02): a cover drawn over a Skynet pump drawing (the no-cover ones above), between the
+// picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
+// .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
+// is the outline and shading only; the panel fills the cover's shape (taken from the Red one) with the user's color.
+const PUMP_COVERS = ['Red', 'Yellow', 'Blue', 'Green', 'Purple', 'Orange'];
+const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'User cover (pick its color below)']];
+const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
+const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
+function coverOf(e, v) {
+  if (e.subtype !== 'pump') return null;
+  const pump = coverPump(v.imageoff || e.imageOff || v.imageon || e.imageOn);
+  const want = String(v.cover || e.cover || 'None').trim().toLowerCase();
+  if (!pump || want === 'none' || !want) return null;
+  if (want === 'user') return { file: `${COVER_DIR}${pump}_Cover_User.svg`, mask: `${COVER_DIR}${pump}_Cover_Red.svg`, color: v.covercolor || e.coverColor || '#808080' };
+  const c = PUMP_COVERS.find(x => x.toLowerCase() === want);
+  return c ? { file: `${COVER_DIR}${pump}_Cover_${c}.svg` } : null;
+}
 function picFlow(path) {
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
-  const m = String(path || '').match(/(?:^|\/)Valve_(?:Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid)_(?:Open|Closed)(H|V_L|V_R)C?\.svg$/);
-  return m ? { k: m[1], ...PIC_FLOW[m[1]] } : null;
+  const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
+  const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
+  return k && PIC_FLOW[k] ? { k, o: k.endsWith('H') ? 'h' : 'v', ...PIC_FLOW[k] } : null;
 }
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
   const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
-  if (!f || o === 'l45' || o === 'r45' || (o && f.k !== 'P' && (o === 'h') !== (f.k === 'H'))) return null;
+  if (!f || (f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
+  if (o && f.k !== 'P' && f.o !== 'f' && (o === 'h') !== (f.o === 'h')) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
   const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
   return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
@@ -794,6 +829,10 @@ const flipPt = e => {
   return c => [e.flipH ? Math.round(2 * cx - c[0]) : c[0], e.flipV ? Math.round(2 * cy - c[1]) : c[1]];
 };
 const devIps = e => {
+  if (isProbeTee(e)) {            // a tee with a Temperature Probe: an IP at the center of each open ferrule face, flow either way (Rule 5.20)
+    const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 170, hh = gm.h || 85, fl = flipPt(e);
+    return PROBE_TEES[e.probeTee].ends.map(([fx, fy], i) => ({ id: `dev:${e.name}:${i ? 'out' : 'in'}`, label: `${e.name} end ${i + 1}`, text: '', c: fl([Math.round(x + fx * w), Math.round(y + fy * hh)]) }));
+  }
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   if (!v) { const pp = e.subtype === 'pump' ? picEnds(e) : null, pf = flipPt(e);    // a Skynet pump drawing: IPs on its real ports
     return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : sidePt(e, e.ipIn || 'left') },
@@ -1068,6 +1107,18 @@ function fillEl(n, e0) {
     const pct = propPct(e); on = pct > 0;
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
     img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
+  }
+  // Pump cover: over the picture, under the On overlay, on and off (it mirrors with the picture's flips)
+  const cv = coverOf(e, v);
+  let co = n.querySelector(':scope > .coverov');
+  if (cv && !co) { co = h('div', { class: 'coverov' }); const o1 = n.querySelector(':scope > .onov'); if (o1) n.insertBefore(co, o1); else n.append(co); }
+  if (co) {
+    co.classList.toggle('hidden', !cv);
+    co.style.backgroundImage = cv ? `url("${media(cv.file)}")` : '';
+    co.style.backgroundColor = cv?.mask ? cv.color : '';
+    co.style.webkitMaskImage = co.style.maskImage = cv?.mask ? `url("${media(cv.mask)}")` : '';
+    co.style.transform = e.flipH || e.flipV ? `scale(${e.flipH ? -1 : 1}, ${e.flipV ? -1 : 1})` : '';
+    if (cv) fitOverlay(n, co, v.imageoff || e.imageOff || img, stretchPic(e, v));
   }
   // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
   const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay || e.imageOverlay);
@@ -1571,9 +1622,50 @@ function snapEnd(pts, i, j, c) {
 }
 function syncPipeEnds(p) {
   const pts = p.points; if (!pts || pts.length < 2) return;
+  if (p.straight && pts.length === 2) return syncStraight(p);
   const a = ipPoint(p.from, p.workspace), b = ipPoint(p.to, p.workspace), n = pts.length;
   if (a) snapEnd(pts, 0, n > 2 && !p.hose ? 1 : undefined, a);
   if (b) snapEnd(pts, n - 1, n > 2 && !p.hose ? n - 2 : undefined, b);
+}
+// A pipe is one straight piece, Horizontal, Vertical or 45 (Fritz, 2026-11-02, Rule 5.19), and it never bends to follow an IP.
+// When what its ends are on moves:
+//  - both ends still in line at an allowed angle (the whole thing moved, or one end moved along the pipe): it follows them;
+//  - one end is its own open end (a coupling only it uses): it moves along as one piece, the same length;
+//  - else it keeps its direction: the end on the IP that moved slides along the pipe's line, level with that IP. If the IP went
+//    off to the side, the end is no longer on it (a red ring shows it) and lets go of it when the drag ends (letGoBentEnds).
+function syncStraight(p) {
+  const pts = p.points, ws = p.workspace, a = ipPoint(p.from, ws), b = ipPoint(p.to, ws);
+  const movedA = a && (a[0] !== pts[0][0] || a[1] !== pts[0][1]), movedB = b && (b[0] !== pts[1][0] || b[1] !== pts[1][1]);
+  if (!movedA && !movedB) return;
+  if (a && b && onAngle(a, b, 0.5)) { p.points = [[...a], [...b]]; return; }
+  const d = dirOf(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]);
+  const own = k => editing && draft && p[k] ? ownCoupling(p[k], p) : null;
+  const carry = (from, to, k) => {     // the whole pipe goes along with the end that moved; its open end's coupling too
+    const mx = to[0] - from[0], my = to[1] - from[1];
+    p.points = pts.map(q => [q[0] + mx, q[1] + my]);
+    const g = own(k); if (g) { g.x = (g.x || 0) + mx; g.y = (g.y || 0) + my; const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(g.id)}"]`); if (n) place(n, g); }
+  };
+  if (movedA && (!b || own('to'))) return carry(pts[0], a, 'to');
+  if (movedB && (!a || own('from'))) return carry(pts[1], b, 'from');
+  // slide the free end along the line from the end that stays (never through it: then it keeps its old place)
+  const slide = (fixed, dir, target, old) => { const e = alongLine(fixed, dir, target), [ux, uy] = DIRS[dir]; return ux * (e[0] - fixed[0]) + uy * (e[1] - fixed[1]) > 0 ? e : [...old]; };
+  if (movedA && !movedB) { p.points = [slide(pts[1], (d + 4) % 8, a, pts[0]), [...pts[1]]]; return; }
+  const from = movedA ? [...a] : [...pts[0]];
+  p.points = [from, slide(from, d, b || pts[1], pts[1])];
+}
+// After a drag: a pipe end that is no longer on its IP (the IP went off the pipe's line) lets go of it. It gets an open end
+// (a coupling), and the toast says which pipes let go so they can be joined again with a fitting.
+function letGoBentEnds() {
+  if (!editing || !draft) return;
+  const gone = [];
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.straight && g.workspace === wsName && (g.points || []).length === 2)) {
+    for (const [k, i, j] of [['from', 0, 1], ['to', 1, 0]]) {
+      const c = ipPoint(p[k], p.workspace);
+      if (!c || Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) <= 1.5) continue;
+      p[k] = endCoupling(p.points, i, j); gone.push(p.name || 'a pipe');
+    }
+  }
+  if (gone.length) { renderWs(); toast(`${[...new Set(gone)].join(', ')} let go: pipes run only Horizontal, Vertical or 45 (Rule 5.19). Join it again in line, or with an elbow or tee.`, true); }
 }
 // A hose is a pipe that bends: a smooth curve through its points (Catmull-Rom spline drawn as Bezier curves)
 function hoseD(pts) {
@@ -1644,7 +1736,7 @@ function renderPipes() {
     }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
-      if (!p.locked && !p.straight) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
+      if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
     svg.append(g);
   }
@@ -1677,6 +1769,8 @@ function setEditing(on) {
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
+  if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
+  if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
@@ -1833,6 +1927,7 @@ window.addEventListener('pointerup', () => {
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
+  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds();     // Rule 5.19: a pipe never bends to follow
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
@@ -1944,20 +2039,13 @@ $('#ws').addEventListener('contextmenu', ev => { if (!editing && pointerKind !==
 
 // The joint Skynet put at a pipe end turns into the fitting the pipes on it need: one or two in line = coupling,
 // a corner = 90° elbow, three = tee, four = cross, each turned the right way. A joint with a hose on it stays a coupling.
-const ARMS = { coupling: null, elbow90: { W: 1, S: 1 }, tee: { W: 1, E: 1, S: 1 }, cross: { W: 1, E: 1, N: 1, S: 1 } };
-const turnArm = (d, k) => { const o = 'NESW'; return o[(o.indexOf(d) + k) % 4]; };
+// Pipes can also meet at 45 degrees: a 45 elbow joins two pipes 135 degrees apart (public/pipefit.js).
 function autoFit(g) {
   const ps = pipesOn(g.id, g.workspace), c = ipCenter(g);
   let fit = 'coupling', rot = g.rotate || '0';
   if (ps.length >= 2 && ps.every(p => p.straight)) {
-    const dirs = new Set(ps.map(p => {
-      const pts = p.points, far = p.from === g.id ? pts[1] : pts[pts.length - 2], dx = far[0] - c[0], dy = far[1] - c[1];
-      return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'E' : 'W') : (dy > 0 ? 'S' : 'N');
-    }));
-    const want = [...dirs].sort().join('');
-    fit = dirs.size === 2 && (want === 'EW' || want === 'NS') ? 'coupling' : dirs.size === 2 ? 'elbow90' : dirs.size === 3 ? 'tee' : dirs.size === 4 ? 'cross' : 'coupling';
-    if (fit === 'coupling') rot = want === 'NS' ? '90' : '0';
-    else for (const k of [0, 1, 2, 3]) if (Object.keys(ARMS[fit]).map(d => turnArm(d, k)).sort().join('') === want) { rot = String(k * 90); break; }
+    const f = fitFor(ps.map(p => { const pts = p.points, far = p.from === g.id ? pts[1] : pts[pts.length - 2]; return dirOf(far[0] - c[0], far[1] - c[1]); }));
+    fit = f.fitting; if (f.ok) rot = f.rotate;
   }
   if (g.fitting !== fit || String(g.rotate) !== rot) { g.fitting = fit; g.rotate = rot; giveName(g, draft.graphics); }
 }
@@ -1968,12 +2056,11 @@ function drawSnap(ev) {
   for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (c) { const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= r && (!best || d < best.d)) best = { d, c, id: q.id }; } }
   return best ? { c: [...best.c], id: best.id } : { c: [snap(p[0]), snap(p[1])], id: null };
 }
-// A straight pipe runs only across or up-and-down from its start. It ends on the IP picked only when that IP is in line with
-// the start; anywhere else the end goes on the line, level with the pointer.
+// A pipe runs only Horizontal, Vertical or at 45 degrees from its start (Fritz, 2026-11-02, Rule 5.19). It ends on the IP picked
+// only when that IP is on one of those lines from the start; anywhere else the end goes on the nearest line, level with the pointer.
 function straightEnd(a, c, id) {
-  const across = Math.abs(c[0] - a[0]) >= Math.abs(c[1] - a[1]), off = across ? Math.abs(c[1] - a[1]) : Math.abs(c[0] - a[0]);
-  if (id && off <= 2) return { c: across ? [c[0], a[1]] : [a[0], c[1]], id };
-  return { c: across ? [c[0], a[1]] : [a[0], c[1]], id: null };
+  const e = angledEnd(a, c);
+  return { c: e.c, id: id && Math.hypot(e.c[0] - c[0], e.c[1] - c[1]) <= 2 ? id : null };
 }
 // Fritz: double-click the start, move to the length wanted, double-click the end. The pipe is then one straight piece of fixed
 // length; turns are made with elbows and tees.
@@ -2148,6 +2235,11 @@ const ADD_MENU = [
     ['Thermowell, Short (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Short' }],
     ['Thermowell, Medium (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Medium' }],
     ['Thermowell, Long (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Long' }],
+    // Tees with a Temperature Probe in them (Fritz, 2026-11-02): Temperature Devices, not pipe Widgets
+    ['Instrument Tee with a Temperature Probe in its branch (TC 1.5, IPs left and right)', 'probeTee', 'Temp', { tee: 'Instrument_Branch' }],
+    ['Instrument Tee with a Temperature Probe in from the end (TC 1.5, IPs right and branch)', 'probeTee', 'Temp', { tee: 'Instrument_Run' }],
+    ['Long Tee with a Temperature Probe in its branch (TC 1.5, IPs left and right)', 'probeTee', 'Temp', { tee: 'Long_Branch' }],
+    ['Long Tee with a Temperature Probe in from the end (TC 1.5, IPs right and branch)', 'probeTee', 'Temp', { tee: 'Long_Run' }],
     ['RIMS tube (Skynet_Integrated_Device: heating element and temperature probe built in)', 'integratedDevice', 'RIMS', { template: 'RIMS_Tube' }],
     ['Electric kettle, basic (Skynet_Integrated_Device: Thermowell probe and heating element built in, outlet IP)', 'integratedDevice', 'Kettle', { template: 'Integrated_Electric_Kettle_Basic' }],
   ]],
@@ -2180,6 +2272,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   if (pick === 'integratedDevice') return newIntegratedDevice(extra.template);
   if (pick === 'thermowell') return newThermowell(extra.length);
+  if (pick === 'probeTee') return newProbeTee(extra.tee);
   if (pick === 'skyDevice') { const p = skyDevPreset(extra.template); if (!p) return toast(`No Skynet Template ${extra.template}`, true); pick = 'skyValve'; extra = p; }
   const preset = PRESETS[pick], type = preset ? preset.type : pick === 'skyValve' ? extra.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
@@ -2280,7 +2373,7 @@ const DEV_TYPES = () => [
     am('RIMS tube'), am('Electric kettle, basic')]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
-  ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => r[1] === 'thermowell')]],
+  ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => ['thermowell', 'probeTee'].includes(r[1]))]],
   ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
   ['motors', 'Motors', amGroup('Devices: motors')],
   ['weight', 'Weight', amGroup('Devices: weight')],
@@ -2310,7 +2403,8 @@ function pickRun(sel) {
 }
 function fillAddType() {
   if (!TPL && !fillAddType.asked) { fillAddType.asked = true; loadTemplates().then(fillAddType).catch(() => { }); }     // the Skynet Device Templates go in the Valves lists
-  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
+  // the gGlobal Kinds that are plain variables (gS_, gG_, gV_, gB_, gT_, gD_) are never put on a Tab: they are made on the gGlobal screen
+  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).filter(([, d]) => !d.variable).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
   if (!ADD_MENU.some(([g]) => g.startsWith('gGlobal'))) ADD_MENU.push(vars('gGlobal', S.gKinds));
   const dev = DEV_TYPES(), wgt = WGT_TYPES();
   const types = (sel, head, list) => { const v = sel.value; sel.replaceChildren(h('option', { value: '' }, head), ...list.map(([k, t]) => h('option', { value: k }, t))); sel.value = v; };
@@ -2467,6 +2561,26 @@ const TEMP_KEYS = ['sensor', 'tcType', 'r0', 'beta'];
 const tempKey = x => TEMP_KEYS.map(k => x?.[k] ?? '').join('|');
 const tempKinds = () => ADD_MENU.find(([g]) => g.startsWith('Devices: temperature'))[1].map(([l, , , x]) => [tempKey(x), l, x]);
 const tempKindOf = key => tempKinds().find(t => t[0] === key)?.[2] || { sensor: 'ds18b20' };
+// ---- Tees with a Temperature Probe (Fritz, 2026-11-02): Temperature Device subtypes drawn as a TC 1.5 Instrument Tee or Long
+// Tee with the probe (purple) in the branch or in from one end. The probe fills that opening, so the other two are its IPs, at
+// the center of each ferrule's outer face (Rule 5.20). Flow passes either way, like an inline sensor. Made like a Thermowell.
+const PROBE_TEES = {
+  Instrument_Branch: { label: 'Instrument Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Branch.svg', size: [170, 85], ends: [[0, 0.3], [1, 0.3]] },
+  Instrument_Run: { label: 'Instrument Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Run.svg', size: [170, 85], ends: [[1, 0.3], [0.5, 1]] },
+  Long_Branch: { label: 'Long Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Branch.svg', size: [170, 108], ends: [[0, 24 / 102], [1, 24 / 102]] },
+  Long_Run: { label: 'Long Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Run.svg', size: [170, 108], ends: [[1, 24 / 102], [0.5, 1]] },
+};
+function isProbeTee(e) { return e?.type === 'temperature' && e.subtype === 'probeTee' && !!PROBE_TEES[e.probeTee]; }
+async function newProbeTee(kind) {
+  const t = PROBE_TEES[kind]; if (!t) return;
+  const key = await choose(`2a. Type of Temperature Probe in the ${t.label}`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
+  if (key === undefined) return;
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°F', precision: 1, ...clone(tempKindOf(key)), imagePath_1: t.img };
+  if (!D.visible) e.visibility = 'hidden';
+  if (!(await newDeviceDialog(e, 'Temp'))) return;
+  useTabProfile(e); stackNew(e);
+  draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
+}
 async function newThermowell(length) {
   const [img, w] = THERMOWELLS[length] || THERMOWELLS.Short;
   const key = await choose(`2a. Type of Temperature Probe in the ${length} Thermowell`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
@@ -2694,15 +2808,18 @@ function updLockBtn() {
 // Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
 // Skynet Fitting or Skynet vessel is picked (all six: the picture, its IPs and what is joined to it follow, as in its
 // Properties), or an IP fitting (turn only: its shape is the same flipped).
-const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
+const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isSkyV(g) && isKettle(g) ? 'kettle' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
 function updTurnBar(item) {
   const k = editing && !previewing ? turnKind(item) : '';
   $('#turnBar').classList.toggle('hidden', !k);
   for (const b of $$('#turnBar .flip')) b.disabled = k !== 'all';
+  if (k === 'kettle') { $('#turnFlipH').disabled = false; for (const id of ['#turnFlipV', '#turnL45', '#turnR45']) $(id).disabled = true; }     // a kettle stays upright (Rule 5.5)
+  else for (const id of ['#turnL45', '#turnR45']) $(id).disabled = false;
 }
 function turnSel(op) {
   const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
   if (!k) return;
+  if (k === 'kettle' && op !== 'h') return toast('A kettle stays upright: it can Flip Horizontal, never Flip Vertical or turn (Rule 5.5).', true);
   if (lockedRiders(g).length) return toast(`${g.label || g.name} has a 🔒 locked part, so it can't turn.`, true);
   if (k === 'turn') { if (typeof op === 'number') g.rotate = String(((+g.rotate || 0) + op + 360) % 360); renderWs(); return; }
   const before = clone(g), r = (typeof op === 'number' ? op : 0) * Math.PI / 180;
@@ -2715,7 +2832,7 @@ function turnSel(op) {
     }
     turnVesselParts(g, before);
   }
-  placeUnitParts(g); renderWs();
+  placeUnitParts(g); renderWs(); letGoBentEnds();
 }
 $('#turnFlipH').onclick = () => turnSel('h');
 $('#turnFlipV').onclick = () => turnSel('v');
@@ -2769,7 +2886,7 @@ function lockTab(on) {
 }
 $('#lockAll').onclick = () => lockTab(true);
 $('#unlockAll').onclick = () => lockTab(false);
-$('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run straight across or up and down. Esc cancels.'; renderPipes(); };
+$('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run only Horizontal, Vertical or at 45 degrees; they turn only at a fitting (an elbow or tee joins them where two pipes meet). Esc cancels.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 // a new equipment widget (pipe fittings too): made on the Build Tab, then Save Build ... puts it on a Tab
 function addVesselWidget(c) {
@@ -3232,7 +3349,8 @@ const F = {
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
-      ['label', 'Label (shown in the "by hand" message; empty = the Name)', 'text'], ['labelVisible', 'Show label', 'yn'], ...FIT_PLACE(it)] : F.ipPoint,
+      ['label', 'Label (shown in the "by hand" message; empty = the Name)', 'text'], ['labelVisible', 'Show label', 'yn'],
+      ['image', 'Picture (Fritz\'s Manual Ball Valve drawings; its one IP is the middle of the picture)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
@@ -3257,7 +3375,8 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
-F.gGlobal = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.gKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+// the Kind is set when it is made and never changes (Fritz, 2026-11-02): a wrong Kind is deleted and made again
+F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.kind}  (set when it was made and can't be changed; a wrong Kind: Delete it and make a new one)`, 'note'],
   ['items', 'Choices: Value (what Processes see and trigger on) and Text (what the dropdown shows)', 'vkitems', null, ['list']],
   ['initial', 'Starting choice (its Value)', 'text', null, ['list']],
   ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
@@ -3340,6 +3459,10 @@ function alarmFields(item) {
     ...kindFields('alarm', item)];
 }
 
+// a pump's Cover (Fritz, 2026-11-02): between its picture and the On overlay; None is the default. Only the Skynet no-cover pump
+// drawings (Help 104) have covers; a Process changes it with Pump_1.cover = "Blue" and Pump_1.coverColor = "#20b2aa".
+const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under the On overlay; Skynet no-cover pump drawings only)', 'sel', COVER_CHOICES, true],
+  ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color']] : [])];
 // Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
 // ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
 const ALM_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show'], ['nameFontSize', 'Font size (px; empty = Default)', 'num'],
@@ -3378,7 +3501,7 @@ function fieldsFor(item) {
   if (!off || item.type === 'manual') return fs;
   const rest = fs.filter(f => f !== off && f !== onp), at = fs.indexOf(off) - (onp && fs.indexOf(onp) < fs.indexOf(off) ? 1 : 0);
   const pics = [['_ovn', 'Pictures: the preferred way is one picture plus an On overlay drawn on top while it is on. A second picture (when on) is still allowed.', 'note'],
-    off, OVERLAY_PIC, ...(onp ? [[onp[0], onp[1] + ' (a second picture, optional)', ...onp.slice(2)]] : [])];
+    off, ...(item.subtype === 'pump' ? COVER_FIELDS(item) : []), OVERLAY_PIC, ...(onp ? [[onp[0], onp[1] + ' (a second picture, optional)', ...onp.slice(2)]] : [])];
   return [...rest.slice(0, at), ...pics, ...rest.slice(at)];
 }
 // a Picture Widget that turns on with nothing (None) is a still picture: its On pictures are greyed out (Fritz, 2026-10-27)
@@ -3389,7 +3512,8 @@ function fieldsOf(item) {
   if (item.type === 'alarm') return alarmFields(item);
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
-    return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
+    return [...(isProbeTee(item) ? [['_pt', `${PROBE_TEES[item.probeTee].label}: a Temperature Device (Fritz's drawing). The probe fills one opening, so its IPs are the other two; flow goes either way.`, 'note'],
+      ['flipH', 'Flip Horizontal (the picture and its IPs follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IPs follow)', 'bool']] : []),['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
   }
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
@@ -3923,13 +4047,30 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
     for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
     for (const b of $$('#dlg .dlgCopy')) b.classList.toggle('hidden', !canCopy);
     const d = $('#dlg');
-    // Delete and Cancel are plain buttons so Enter in a field always means Save
-    for (const b of $$('#dlg [data-close]')) b.onclick = () => d.close(b.dataset.close);
+    // Delete and Cancel are plain buttons so Enter in a field always means Save.
+    // Cancel (or Esc) with changes made asks first: discard them, or go back to save (Rule 18.11, Fritz 2026-11-02)
+    const cancel = async () => { if (formSnap() === d._snap || await askDiscard()) d.close('cancel'); };
+    for (const b of $$('#dlg [data-close]')) b.onclick = () => b.dataset.close === 'cancel' ? cancel() : d.close(b.dataset.close);
+    d.oncancel = ev => { ev.preventDefault(); cancel(); };
     d.onclose = () => res(d.returnValue);
     d.returnValue = 'cancel'; d.showModal(); d._snap = formSnap();
   });
 }
 
+// Rule 18.11 (Fritz, 2026-11-02): ✖ Cancel in a dialog where something was changed asks before throwing the changes away.
+// Resolves true = discard them, false = go back to the dialog (to save).
+function askDiscard(what = 'this dialog') {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'askDiscard', 'data-nomenu': '' },
+      h('h3', {}, '⚠ Discard your changes?'),
+      h('p', {}, `You changed ${what}. Cancel throws those changes away.`),
+      h('div', { class: 'bar' }, h('button', { type: 'button', class: 'danger', onclick: () => d.close('discard') }, '🗑 Discard changes'),
+        h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', onclick: () => d.close('back') }, '↩ Go back to Save')));
+    d.oncancel = ev => { ev.preventDefault(); d.close('back'); };
+    d.onclose = () => { d.remove(); res(d.returnValue === 'discard'); };
+    document.body.append(d); d.showModal();
+  });
+}
 const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
@@ -4161,7 +4302,7 @@ async function editItem(kind, id) {
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
-    const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
+    const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
@@ -5134,7 +5275,8 @@ function varRow(e) {
       h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now'),
         lg.frequency === 'once' ? h('button', { title: 'Send one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
   }
-  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(() => openProps('el', e.name)) }, ...cells);
+  const open = e.type === 'gGlobal' && isVarKind(e.kind) ? () => guard(editGlobal)(e) : () => openProps('el', e.name);
+  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(open) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
@@ -5146,6 +5288,166 @@ function renderGlobals() {
   // values and "Log now" need an operator
   if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); $$('#view-globals button').forEach(b => b.disabled = true); }
 }
+// ---------------------------------------------------------------- gGlobal Kinds (Fritz, 2026-11-02)
+// A gGlobal is a variable with a global scope, not a Widget: it is never on a Tab. It is made here, on the gGlobal screen:
+// ➕ New gGlobal, its Name, pick its Kind from the dropdown, and that Kind's dialog opens to fill in; then ✖ Cancel or 💾 Save.
+// Once picked the Kind is fixed (the Brain refuses a change too: public/gkinds.js). A wrong Kind: Delete it and make a new one.
+// The dialog follows the General Dialog Rules (Rule 18): Name first (no icons, never blank), ⬆ String Entry on a String
+// .value, ⬢ Attribute Dialog icon for the extras (the Graphic Dialog, Database and .API). Cancel with changes asks (Rule 18.11).
+const G_HELP = ['gglobal-kinds'];
+const G_KIND_TEXT = {
+  string: '.value is a String (text).',
+  graphic: 'The standard background picture paths: Image Path 1 here, the rest in the Graphic Dialog ⬢. .value starts as the path of the picture Background # picks.',
+  value: '.value is a Value (a number).',
+  bool: '.value is a Boolean: true or false.',
+  time: '.value is a Time, like 01:30:00 (hours:minutes:seconds).',
+  datetime: '.value is a Date Time, like 2026-11-07 07:00:00.',
+};
+const gNoBlank = v => v === undefined || v === null || v === '' ? undefined : v;
+// ⬆ String Entry Dialog (Rule 18.1): a bigger box to type a String in, 2 or 30 lines, word wrap on. Resolves the text, or null.
+function stringEntry(title, text, lines = 2) {
+  return new Promise(res => {
+    const ta = h('textarea', { rows: lines, class: 'strEntry', spellcheck: 'true', wrap: 'soft' }); ta.value = text ?? '';
+    const d = h('dialog', { class: 'strEntryDlg', 'data-nomenu': '' }, h('h3', {}, title), ta,
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'),
+        h('button', { type: 'button', class: 'primary', onclick: () => { d.returnValue = 'ok'; d.close(); } }, '💾 Save')));
+    const cancel = async () => { if (ta.value === (text ?? '') || await askDiscard('the text')) { d.returnValue = 'cancel'; d.close(); } };
+    d.oncancel = ev => { ev.preventDefault(); cancel(); };
+    d.onclose = () => { d.remove(); res(d.returnValue === 'ok' ? ta.value : null); };
+    document.body.append(d); d.showModal(); ta.focus();
+  });
+}
+function gCheckBlocked() {
+  if (!can('admin')) throw new Error('Only an admin can make or change a gGlobal');
+  if (editing) throw new Error('Save or leave Edit layout first, then make or change gGlobals here');
+}
+async function newGlobal() { gCheckBlocked(); await globalDialog({ name: '', type: 'gGlobal', retain: true }, null); }
+async function editGlobal(e) { gCheckBlocked(); await globalDialog(clone(e), e); }
+async function saveElements(elements) { await api('PUT', '/ui/layout', { elements }); await load(); }
+async function addSampleGlobals() {
+  gCheckBlocked();
+  const add = samplesToAdd(S.config.elements, S.config.graphics);
+  if (!add.length) return toast('The sample gGlobals are here already');
+  await saveElements([...S.config.elements, ...add]);
+  toast(`Added the sample gGlobals: ${add.map(x => x.name).join(', ')}`);
+}
+// "2026-11-07T07:00:00" <-> the datetime-local box
+const gDateBox = v => { const t = Date.parse(v ?? ''); if (!Number.isFinite(t)) return ''; const d = new Date(t), p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
+async function globalDialog(work, orig) {
+  await loadMediaPictures();
+  const d = h('dialog', { class: 'gDlg', 'data-nomenu': '' }), title = h('h3', {}), body = h('div', { class: 'gBody' }), err = h('div', { class: 'gErr', role: 'alert' });
+  // a message shows inside the dialog (a toast would sit behind it)
+  const g = fn => async () => { err.textContent = ''; try { await fn(); } catch (e) { err.textContent = '⚠ ' + e.message; } };
+  const btn = (label, cls, fn) => h('button', { type: 'button', class: cls, onclick: g(fn) }, label);
+  const bar = top => h('div', { class: 'bar dlgBar' }, orig ? btn('🗑 Delete', 'danger', del) : '', h('span', { class: 'spacer' }),
+    btn('✖ Cancel', '', cancel), btn('💾 Save', 'primary', save));
+  d.append(title, bar(true), err, body, bar(false));
+  const snap = () => JSON.stringify(work);
+  let snap0 = snap(), done;
+  const finished = new Promise(r => done = r);
+  const close = () => { d.close(); d.remove(); done(); };
+  async function cancel() { if (snap() === snap0 || await askDiscard('this gGlobal')) close(); }
+  d.oncancel = ev => { ev.preventDefault(); cancel(); };
+  async function del() {
+    if (!confirm(`Delete ${orig.name}? A Process that uses it stops at that line until it is changed.`)) return;
+    await saveElements(S.config.elements.filter(x => x !== orig)); close(); toast(`${orig.name} deleted`);
+  }
+  async function save() {
+    work.name = noSpaces(work.name);
+    if (!work.name) throw new Error('Name: it can\'t be blank');
+    if (!work.kind) throw new Error('Kind: pick the Kind of this gGlobal');
+    if (!orig || work.name !== orig.name) {
+      const bad = elementNameError(work.name, 'gGlobal'); if (bad) throw new Error(bad);
+      const lc = work.name.toLowerCase();
+      if ([...S.config.elements.filter(x => x !== orig), ...S.config.graphics].some(x => String(x.name ?? '').toLowerCase() === lc)) throw new Error(`The name ${work.name} is already used. Names must be unique.`);
+    }
+    const v = work.initial;
+    if (work.kind === 'value') {
+      if (v !== undefined && !Number.isFinite(+v)) throw new Error('Value: it must be a number');
+      if (work.min !== undefined && work.max !== undefined && work.min > work.max) throw new Error('Lowest allowed is more than Highest allowed');
+    }
+    if (work.kind === 'time' && v !== undefined && !/^-?\d+:\d{1,2}(:\d{1,2})?$/.test(v)) throw new Error('Value: a Time looks like 01:30:00');
+    if (work.kind === 'datetime' && v !== undefined && !Number.isFinite(Date.parse(v))) throw new Error('Value: pick a date and time');
+    if (work.kind === 'graphic') work.initial = gNoBlank(work['imagePath_' + (+work.background || 1)] ?? work.imagePath_1);
+    for (const k of Object.keys(work)) if (work[k] === undefined) delete work[k];
+    await saveElements(orig ? S.config.elements.map(x => x === orig ? work : x) : [...S.config.elements, work]);
+    close(); toast(`${work.name} saved`);
+  }
+  const row = (label, ...kids) => h('div', { class: 'gRow' }, h('label', {}, label), h('span', { class: 'nameRow' }, ...kids));
+  const note = t => h('div', { class: 'muted gNote' }, t);
+  const attrIcon = (title, fn) => h('button', { type: 'button', class: 'attrIcon', title, 'aria-label': title, onclick: g(fn) }, '⬢');
+  const box = (k, attrs = {}, conv = x => gNoBlank(x)) => {
+    const inp = h('input', { type: 'text', spellcheck: 'false', autocomplete: 'off', ...attrs });
+    inp.value = work[k] ?? '';
+    inp.addEventListener('input', () => { work[k] = conv(inp.type === 'number' ? (inp.value === '' ? undefined : +inp.value) : inp.value); });
+    return inp;
+  };
+  const sw = (k, label) => { const c = h('input', { type: 'checkbox' }); c.checked = !!work[k]; c.onchange = () => { work[k] = c.checked; };
+    return h('label', { class: 'toggle' }, h('span', { class: 'sw' }, c, h('span', { class: 'swk' })), ' ' + label); };
+  function render() {
+    title.replaceChildren(work.kind ? `${VAR_KINDS[work.kind]} Properties` : 'New gGlobal', ' ', helpIcon(G_HELP, () => { if (snap() !== snap0 && !confirm('Leave without saving your changes, and open Help?')) return false; close(); }));
+    body.replaceChildren();
+    // Step 2: the Name (no ⬆ and no ⬢, never blank, unique: Rule 18.4)
+    body.append(row('Name', box('name', { placeholder: 'e.g. gV_Strike_Temp' }, x => x)),
+      note(`Can't be blank, no spaces, unique. A Process uses it by this Name: ${work.name || 'gV_Strike_Temp'}.value`));
+    // Step 3: the Kind. Once picked it is fixed.
+    if (!work.kind) {
+      const s = h('select', {}, h('option', { value: '' }, '(pick a Kind)'), ...Object.entries(VAR_KINDS).map(([k, n]) => h('option', { value: k }, n)));
+      s.onchange = () => { if (!s.value) return; work.kind = s.value; if (work.kind === 'bool') work.initial ??= 'false'; render(); };
+      body.append(row('Kind', s), note('Pick the Kind: its dialog opens below. Once picked, the Kind can\'t be changed (a wrong Kind: Delete it and make a new one).'));
+      return;
+    }
+    body.append(row('Kind', h('b', {}, '🔒 ' + VAR_KINDS[work.kind])), note(G_KIND_TEXT[work.kind] + ' The Kind can\'t be changed: a wrong Kind is deleted and made again.'));
+    // Step 4: the Kind's own fields
+    const k = work.kind;
+    if (k === 'string') {
+      const inp = box('initial', { placeholder: '(empty)' });
+      body.append(row('.value', inp, h('button', { type: 'button', class: 'upArrow', title: 'Type it in a bigger box (String Entry, 2 lines)', 'aria-label': 'String Entry',
+        onclick: async () => { const t = await stringEntry(`${work.name || 'gS_'}.value`, inp.value, 2); if (t !== null) { inp.value = t; work.initial = gNoBlank(t); } } }, '⬆')));
+    }
+    if (k === 'graphic') {
+      const list = 'gPics'; body.append(h('datalist', { id: list }, ...mediaPics.map(p => h('option', { value: p }))));
+      const inp = box('imagePath_1', { list, placeholder: '(none)' });
+      body.append(row('Image Path 1', inp, attrIcon('Graphic Dialog: Background #, Back Colour, Image Path 1, 2, 3', async () => {
+        const w2 = Object.fromEntries(['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3'].filter(x => work[x] !== undefined).map(x => [x, work[x]]));
+        const r = await dialog(`${work.name || 'gG_'}: Graphic Dialog`, [['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
+          ['imagePath_1', 'Image Path 1', 'imgopen', 1, false, 'b'], ['imagePath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['imagePath_3', 'Image Path 3', 'imgopen', 3, false, 'b']], w2, false, G_HELP);
+        if (r !== 'ok') return;
+        readFields(w2);
+        for (const x of ['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3']) work[x] = gNoBlank(w2[x]);
+        render();
+      })), note('Background # (1, 2 or 3) picks which Image Path .value starts as. The rest is in the Graphic Dialog ⬢.'));
+    }
+    if (k === 'value') body.append(row('.value', box('initial', { type: 'number', step: 'any' }, x => x === undefined ? undefined : String(x))),
+      row('Decimals', box('precision', { type: 'number', min: 0, max: 6 })), row('Units', box('units', { placeholder: 'e.g. °F, gal, %' })),
+      row('Lowest allowed', box('min', { type: 'number', step: 'any' })), row('Highest allowed', box('max', { type: 'number', step: 'any' })));
+    if (k === 'bool') {
+      const c = h('input', { type: 'checkbox' }); c.checked = String(work.initial) === 'true'; c.onchange = () => { work.initial = c.checked ? 'true' : 'false'; };
+      body.append(row('.value', h('label', { class: 'toggle' }, h('span', { class: 'sw' }, c, h('span', { class: 'swk' })), ' true (off = false)')));
+    }
+    if (k === 'time') body.append(row('.value', box('initial', { placeholder: '00:00:00', inputmode: 'numeric' })));
+    if (k === 'datetime') {
+      const inp = h('input', { type: 'datetime-local', step: 1 }); inp.value = gDateBox(work.initial);
+      inp.onchange = () => { work.initial = gNoBlank(inp.value.length === 16 ? inp.value + ':00' : inp.value); };
+      body.append(row('.value', inp));
+    }
+    body.append(row('', sw('retain', 'Keep .value when the Brain restarts (off = start from the .value above)')));
+    // Database and .API (Rule 6.14): the extras behind the ⬢ (Rule 18.9)
+    body.append(row('Database and .API', h('span', { class: 'muted' }, `${logSummary(work.database)}; .API ${API_LABEL[work.api || 'off'].replace(/ \(.*\)$/, '')}`),
+      attrIcon('Database and .API settings', async () => {
+        const w2 = { name: work.name, database: work.database, api: work.api }; dbToWork(w2);
+        const r = await dialog(`${work.name || 'gGlobal'}: Database and .API`, it => dbFields(it), w2, false, ['database-and-api']);
+        if (r !== 'ok') return;
+        readFields(w2); dbFromWork(w2);
+        work.database = w2.database; work.api = w2.api; render();
+      })));
+  }
+  render(); snap0 = snap();
+  document.body.append(d); d.showModal();
+  return finished;
+}
+
 function refreshGlobalValues(ch) {
   for (const n of Object.keys(ch)) {
     const inp = $(`#view-globals [data-g="${CSS.escape(n)}"]`); if (!inp || document.activeElement === inp) continue;
@@ -5184,6 +5486,8 @@ function renderCsvBox(names = csvNames) {
 }
 const csvTicked = () => $$('#csvNames input:checked').map(c => c.value);
 $('#csvSet').onchange = () => renderCsvBox();
+$('#gNew').onclick = guard(newGlobal);
+$('#gSamples').onclick = guard(addSampleGlobals);
 $('#csvAll').onclick = () => $$('#csvNames input').forEach(c => c.checked = true);
 $('#csvNone').onclick = () => { $$('#csvNames input').forEach(c => c.checked = false); $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
 $('#csvNames').onchange = () => { $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
@@ -6965,11 +7269,12 @@ const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fit
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
-const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
+const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_Front.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Eccentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Front.svg',
+  'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
   'Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
   'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
-  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
+  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
@@ -6987,12 +7292,17 @@ const TURN_STEP = { Left: 'Top', Top: 'Right', Right: 'Bottom', Bottom: 'Left', 
   'Top Left 45': 'Top Right 45', 'Top Right 45': 'Bottom Right 45', 'Bottom Right 45': 'Bottom Left 45', 'Bottom Left 45': 'Top Left 45' };
 const TURNS = [['0', 'Not turned'], ['90', '90 degrees clockwise'], ['180', '180 degrees'], ['270', '270 degrees clockwise (90 counter-clockwise)']];
 function turnPos(pos, deg) { for (let i = 0; i < (((+deg || 0) / 90) % 4 + 4) % 4; i++) pos = TURN_STEP[pos] || pos; return pos; }
+// A Template can also put an opening anywhere on its picture as "x,y" (fractions of its width and height): Fritz's 2026-11-02
+// drawings have their IP at the center of each ferrule's outer face, or at the center of a front-view opening (Rule 5.20)
+const FRAC_POS = /^\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*$/;
+const fracPos = v => { const m = FRAC_POS.exec(String(v ?? '')); return m ? [v, +m[1], +m[2]] : null; };
 function bfitClass(g) {
   const ports = {}, flat = g.flat;            // flat: the fitting runs left or right from its vessel port
-  const at = (k, def) => turnPos(g.ipPos?.[k] && BF_POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def, isUnit(g) ? 0 : g.turn);   // a Template can say where its openings are on its picture
+  const POS = BF_POS.concat(Object.values(g.ipPos || {}).map(fracPos).filter(Boolean));
+  const at = (k, def) => turnPos(g.ipPos?.[k] && POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def, isUnit(g) ? 0 : g.turn);   // a Template can say where its openings are on its picture
   const chk = hasCheck(g);         // with a check valve in it, the Start side and the far side are two circuits, joined one way
-  if (!g.onVessel && !isCapOnly(g)) ports.start = pt(chk ? 'Start (flow goes in here)' : 'Start (vessel side)', BF_POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: chk ? 'ci' : 'a' });
-  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: chk ? 'co' : 'a' }));
+  if (!g.onVessel && !isCapOnly(g)) ports.start = pt(chk ? 'Start (flow goes in here)' : 'Start (vessel side)', POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: chk ? 'ci' : 'a' });
+  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: chk ? 'co' : 'a' }));
   (g.fittings || []).forEach((f, i) => { if (f.kind === 'tee' && f.thermowell) ports['tw' + (i + 1)] = pt(`Thermowell ${i + 1} (${THERMOWELL_POS[f.thermowellPos] || 'Short'})`, BF_POS, { ip: false, def: flat ? 'Top' : 'Right' }); });
   return { title: 'Tab_Fitting', types: [], image: fitImage(g), size: [90, 90], ports };
 }
@@ -7025,6 +7335,21 @@ const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.in
 // Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
 // built in where the Template puts it; they can't be moved, set or unbundled. It has Flip Horizontal, Flip Vertical and Rotate
 // like a Skynet Fitting (Fritz, 2026-10-23). Vessels made from a User Template keep their port settings.
+// Kettles stay upright (Fritz, 2026-11-02, Rule 5.5): a kettle (a vessel of the Vessel kind: kettles, HLT, mash tun, fermenter)
+// may Flip Horizontal, never Flip Vertical, and is not turned (turned 180 is the same as upside down). Chillers, coils, the
+// RIMS tube and other equipment keep every turn and flip.
+const isKettle = g => g?.kind === 'vessel' && !isBfit(g) && (g.vesselType || 'vessel') === 'vessel';
+function uprightKettles(gs) {
+  const fixed = [];
+  for (const g of gs.filter(g => isKettle(g) && (g.flipV || unitRot(g)))) {
+    const before = clone(g), m = orientM(g), flipH = m[0] < -1e-9;     // set upright (an upside-down kettle is flipped back up); a mirror left to right stays
+    delete g.flipV; delete g.rot; delete g.turn; if (flipH) g.flipH = true; else delete g.flipH;
+    if (sideways(before)) { const w = before.w || 200, hh = before.h || 200; Object.assign(g, { w: hh, h: w, x: Math.round((before.x || 0) + (w - hh) / 2), y: Math.round((before.y || 0) + (hh - w) / 2) }); }
+    if (isSkyV(g)) turnVesselParts(g, before);
+    fixed.push(g.label || g.name);
+  }
+  return fixed;
+}
 function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet' && (!g.loose || !!g.integrated); }    // an Integrated Device is never loose (Fritz, 2026-10-26)
 const ROTATE = [0, 45, 90, 135, 180, 225, 270, 315].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
 function unitRot(g) { return ((Math.round((+(g.rot ?? g.turn) || 0) / 45) * 45) % 360 + 360) % 360; }    // an older Turn counts as a Rotate
@@ -7051,6 +7376,21 @@ function placeUnitParts(g) {
     for (const c of caps.filter(c => c.capOn === ip.id)) { capOnto(c, ip); const cn = $(`#ws .gfx[data-gid="${CSS.escape(c.id)}"]`); if (cn) place(cn, c); }
   }
 }
+// A Skynet pipe fitting follows its Template (Rules 5.6 and 15.2): one placed before Fritz's 2026-11-02 drawings takes its
+// Template's new picture, openings and shape when Edit layout opens, and its IPs move onto the new openings (kept with the
+// next Save layout). Returns how many changed.
+function refreshSkyFits() {
+  let n = 0;
+  for (const g of draft?.graphics || []) {
+    const t = isUnit(g) && tplOf('fitting', g.template);
+    if (!t || t.cls !== 'skynet' || !t.image || (g.image === t.image && JSON.stringify(g.ipPos || null) === JSON.stringify(t.ipPos || null))) continue;
+    g.image = t.image;
+    if (t.ipPos) g.ipPos = clone(t.ipPos); else delete g.ipPos;
+    if (t.size) { const cy = (g.y || 0) + (g.h || 90) / 2, hh = Math.round((g.w || 90) * t.size[1] / t.size[0]); g.h = hh; g.y = Math.round(cy - hh / 2); }
+    placeUnitParts(g); n++;
+  }
+  return n;
+}
 // Autosize to pipe on a Skynet pipe fitting (Fritz, 2026-10-28): once a pipe is joined to one of its IPs, it is sized so its
 // body is as thick as the biggest pipe on it (the Skynet fitting pictures draw the body 28 % of the picture). Its Template's
 // shape is kept (an Instrument Tee stays wide and low) and it grows or shrinks about its middle. With no pipe on it, it keeps
@@ -7059,7 +7399,7 @@ const FIT_BODY = 0.28;
 function autoSizeUnit(g) {
   const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
   const pw = Math.max(0, ...ips.flatMap(ip => pipesOn(ip.id, g.workspace)).map(pipeWidth)); if (!pw) return;
-  const [tw, th] = tplOf('fitting', g.template)?.size || [90, 90], w = Math.round(pw / FIT_BODY), hh = Math.round(w * th / tw);
+  const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90], w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
   if (w === g.w && hh === g.h) return;
   const cx = (g.x || 0) + (g.w || 90) / 2, cy = (g.y || 0) + (g.h || 90) / 2;
   Object.assign(g, { w, h: hh, x: Math.round(cx - w / 2), y: Math.round(cy - hh / 2) });
@@ -7528,7 +7868,8 @@ F.skynetVessel = it => {
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
       ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
-    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
+    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
+    ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...looseField(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];

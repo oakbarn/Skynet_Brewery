@@ -71,6 +71,7 @@ A pipe fitting turned by hand and a pseudo Device (Rule 5.15, Help 87). Name Man
 | Label, Show label | The Label is used in the "by hand" message |
 | Autosize to pipe, X, Y, Width, Height, Lock position | As a pipe fitting |
 | Open overlay | Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, drawn on top while open (fixed) |
+| Picture (`image`) | Plain (the drawn valve), or Fritz's Manual Ball Valve drawings (2026-11-02, Help 110): side view, front view, on a front elbow (Images/Skynet/Valves/Manual_Ball_Valve_*_Closed.svg; the Tab shows the _Open twin while open). Its one IP is the middle of the picture. |
 
 In a Process: `ManualValve_1.state = true` (or `ManualValve_1 = true`) does not change it. It shows "✋ OPEN ... by hand, then click it on the ... Tab to confirm" at the top of every screen, the valve blinks, and the Process waits until it is clicked to that state. Reading it (`if ManualValve_1 == true`) works as for any Device.
 
@@ -189,6 +190,7 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 ### Plate chiller
 - Picture: Images/Skynet/Chillers/plate_chiller.svg, 110 x 200. Types: Brazed plate 20, 30, 40, Counterflow.
 - Ports: Wort In (Top Left), Wort Out (Bottom Right), Water In (Bottom Left), Water Out (Top Right); any corner. Wort and water never mix. Thermowell (not an IP): Wort Out or Water Out.
+- Port tip positions of the Skynet Copper Counterflow Chiller picture (2026-11-02): Coil Top End, Coil Top Branch, Coil Bottom Branch, Coil Bottom End.
 
 ### Chilling coil
 - Picture: Images/Skynet/Chillers/chill_coil.svg, 180 x 180. Types: Immersion coil, Jacketed (glycol).
@@ -351,6 +353,7 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 | RIMS_Tube | Skynet_Integrated_Device | Wort In, Wort Out, Thermowell + probe and Element built in |
 | Plate_Chiller | Plate chiller, Brazed plate 30, MPT 1/2 | 4 ports |
 | Counterflow_Chiller / _Small | Plate chiller, Counterflow, MPT 1/2 | 4 ports |
+| Copper_Counterflow_Chiller | Plate chiller, Counterflow, MPT 1/2 (Fritz's Copper_CounterFlow drawing, 2026-11-02) | 4 IPs on the real port tips, all facing left: Wort In (top, straight through the tee), Water Out (top tee branch), Water In (bottom tee branch), Wort Out (bottom, straight through the tee) |
 | Immersion_Chiller | Chilling coil, 2 ports, MPT 1/2 | In, Out |
 | Chillzilla | Chilling coil, 4 ports, MPT 1/2 | In, Out, In 2, Out 2 |
 | HERMS_Coil | HERMS coil, Stainless 50 ft | Wort In, Wort Out |
@@ -360,14 +363,20 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 "_Electric" versions: pick the Heating Element Device and Temperature Probe on the Tab.
 
 ### Skynet Bundled Fitting Templates (TC 1.5 unless noted)
+Every IP is the center of a ferrule's outer face, or the center of the opening on a front view (Rule 5.20). Fritz's 2026-11-02 drawings give each Template its own shape (`size`), where its IPs sit as "x,y" fractions of the picture (`ipPos`), and how thick its pipe is drawn (`body`, used by Autosize to pipe). A Skynet pipe fitting already on a Tab takes its Template's new picture when Edit layout opens. Tees with a Temperature Probe in them are Temperature Devices (Device Library).
+
 | Name | Fittings | Openings |
 |---|---|---|
-| Elbow_90 | 90° elbow | Bottom, Right |
-| Elbow_45 | 45° elbow | Left, Top Right |
-| Tee | Tee | Left, Right, Top |
-| Instrument_Tee (90 x 50) | Tee with short narrow branch | Left, Right, Top |
+| Elbow_90 | 90° elbow (Fritz's drawing 2026-11-02) | Bottom, Right |
+| Elbow_45 | 45° elbow (Fritz's drawing) | Bottom Left (45°), Right |
+| Elbow_Front | 90° elbow seen from the front (Fritz's drawing) | center of the front opening, Bottom |
+| Tee | Long Tee (Fritz's drawing, 160 x 102) | Left, Right, Bottom (branch) |
+| Instrument_Tee (160 x 80) | Tee with a short branch (Fritz's drawing) | Left, Right, Bottom (branch) |
+| Reducer_2_1_Concentric (TC 2) | Reducer to 1, both ends on one center line | Left (big), Right (small) |
+| Reducer_2_1_Eccentric (TC 2) | Reducer to 1, flat along the bottom | Left (big), Right (small, low) |
+| Reducer_2_1_Front (TC 2) | Reducer to 1 seen from the front | both at the center of the opening |
 | U_Bend | U | both at the bottom |
-| Reducer (TC 2) | Reducer to 1.5 | Left (big), Right (small) |
+| Reducer (TC 2) | Reducer to 1.5 (drawn like the concentric one) | Left (big), Right (small) |
 | End_Cap | End Cap | none: closes an opening |
 | Check_Valve | Check valve (one way, Left to Right) | Left, Right |
 | Butterfly_Valve_1in | Reducer, 1 in valve, Reducer | Left, Right |
@@ -430,3 +439,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-10-30: Override button Widget (one per Tab, per-Tab Label and look; passes a wait, sleep or loop 100 ms after the press) (thread "Add an Override button", Help 96).
 - 2026-10-30: Database and .API settings on every Widget with a value; gKonstant and gAPI variables became one class, gGlobal (prefixes gG). (thread "Send any Device or Widget to a database", Help 98)
 - 2026-11-02: Alarm Widget with two subclasses, Basic Skynet Alarm (four layers: Back, Fore, Set Graphic, Active overlay) and User Alarm, picked when made and never changed; Alarm Widget Properties follow the General Dialog Rules. (thread "Make the Alarm Widget a Template", Help 107)
+- 2026-11-02: Skynet Copper Counterflow Chiller Template (Copper_Counterflow_Chiller, picture Chiller_Copper_Counterflow.svg redrawn from Fritz's file) with 4 IPs on the real port tips (thread "Add copper counterflow chiller Widget", Help 109).
+- 2026-11-02: Fritz's pipe drawings (Help 110, Rule 5.20): Elbow_90, Elbow_45, Tee (Long Tee) and Instrument_Tee redrawn; new Elbow_Front, Reducer_2_1_Concentric, Reducer_2_1_Eccentric and Reducer_2_1_Front; IPs on the ferrule faces; Manual Valve Widget Picture (Manual Ball Valve side, front, front elbow). (thread "Create pipe Widgets from Fritz's drawings")

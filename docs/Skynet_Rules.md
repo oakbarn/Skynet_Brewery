@@ -116,6 +116,21 @@ key, so a rename keeps it): `sk_Boil_Probe_1-3`, `sk_Mash_Probe_1-3`, `sk_HLT_Pr
 temperature, in the probe's units. Option 2 first; vessel roles in an order (`wait_boil_1`) wait until Fritz has looked
 at it. (Fritz, 2026-10-30, thread "Find boil temperature from local pressure", Help 97)
 
+1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
+**not a Widget and is never on a Tab** (a Text, Picture, Value, Time or DateTime Widget shows things on a Tab), and its
+properties and attributes are only those of a variable. Each gGlobal has one **Kind**, and joins that Kind's group:
+**gS_Global_String** (.value a String), **gG_Global_Graphic** (the standard background picture paths, in the Graphic
+Dialog), **gV_Global_Value** (.value a Value), **gB_Global_Boolean** (.value a Boolean), **gT_Global_Time** (.value a Time),
+**gD_Global_DateTime** (.value a DateTime). **Making one:** ➕ New gGlobal, its Name, pick the Kind from the dropdown, the Kind's
+dialog opens, fill it in, ✖ Cancel or 💾 Save (Rule 18.11 asks before discarding changes). **Once picked, the Kind is set and
+can't be changed**; a wrong Kind is deleted and made again. The Kind dialogs follow the General Dialog Rules (section 18).
+➕ Add the sample gGlobals adds one of each Kind. **New gGlobals are only variables with a global scope.** Switch, Push Button,
+Pulse Button, List, Step and Long String are **not gGlobals**: they go to the new Semi_Widgets_Devices class (they work as
+before until it is built). Older gGlobals that are not true global-scope variables become a Text Widget or a Graphic Widget,
+one at a time (the list is docs/ExistingGlobals.md). The Rule 1.16 prefix change is **on hold**. BruControl Globals:
+Importing Norms section 6c. (thread "Add gGlobal
+Kinds and BruControl import", Help 108)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -397,6 +412,10 @@ Rotate 45, and the picture and its IPs follow. **Rotate 90 is retired**: the Fli
 quarter turn (a tee standing up) is two Rotate 45 steps. (2026-10-22, PR #91; vessels 2026-10-23, PR #92;
 Rotate 90 retired 2026-10-28, thread "Lock Skynet Widget Templates and IPs")
 *Replaced:* "Flip Vertical, Flip Horizontal, Rotate 90, Rotate 45" (2026-10-22).
+**Exception, kettles stay upright** (Fritz, 2026-11-02: "Kettles can flip Horizontal but not vertical"): a kettle (a vessel of
+the Vessel kind: kettles, HLT, mash tun, fermenter) has **Flip Horizontal only**: no Flip Vertical and no Rotate (turned 180 is
+the same as upside down). An older kettle turned or upside down is set upright. Chillers, coils, the RIMS tube and fittings keep
+the full set. (thread "Limit pipes to horizontal, vertical, 45", Help 105)
 
 5.6 **A Skynet Template's picture is fixed.** A bottom-drain copy of a kettle changes only the
 picture. (2026-10-23)
@@ -466,6 +485,23 @@ Skynet Templates); they are set (locked) only when Fritz says (Rule 9.6). The di
 for User Bundled Templates. It is **☰ Menu > Build Template**; the always-fixed attributes (pictures, Kind,
 Valve type, Service, Look, tap behaviour) have a greyed-out box. (2026-10-28, thread "Lock Skynet Widget Templates
 and IPs"; built 2026-10-29, Help 89)
+
+5.19 **Pipes run only Horizontal, Vertical or 45 degrees** (Fritz, 2026-11-02). A pipe is one straight piece and **never
+bends**; it changes direction only at a TC pipe fitting Widget (a 90° elbow from Horizontal to Vertical, a 45° elbow, a tee, a
+cross), which Skynet puts where two pipes meet. **Pipe movement where a pipe end followed a moved item at any angle is retired**:
+a pipe with its own open end moves along as one piece; a pipe moves its end only along its own line; an item moved off to the
+side lets go of the pipe (the end gets an open-end coupling). Older pipes with bends are cut at each bend into straight pipes
+joined by elbows when a Schema loads (Rule 15.2); the samples and the default Schema are changed (Rule 15.3). Hoses still bend.
+(thread "Limit pipes to horizontal, vertical, 45", Help 105)
+
+5.20 **Where the IPs go** (Fritz, 2026-11-02, with two drawings): on every Device and Widget an IP sits at **the center of
+the opening**. On a TC pipe Widget (elbows, tees, reducers ...) and on any Device or Widget with TC ferrules, that is **the
+center of the ferrule's outer face** (the flat end the clamp goes on), one IP for each open end. On a **front view** (looking
+down the pipe) it is **the center of the opening**; a straight item seen from the front has both of its IPs there. Pipe
+Widgets have **no flow direction** (a check valve is still the only one-way fitting, Rule 5.14). A **tee with a Temperature
+Probe** in it is a **Temperature Device** subtype, not a pipe Widget: the probe fills one opening, so the other two are its
+IPs. The Manual Ball Valve drawings are pictures of the **Manual Valve Widget** (Rule 5.15), which keeps its click-only
+Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
 
 ## 6. Devices, connections and safety
 
@@ -683,7 +719,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **98**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **111**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -931,6 +967,8 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 11. **Still undecided from the check-up:** phone layout, PID temperature control.
 12. **Label cannot be blank (Rule 18.3)** disagrees with Rules 1.13 and 3.8 ("empty Label = the Name") and 4.2 (Add Device
     works once "Show label is off" with no Label). Change those Rules, or allow an exception? (asked 2026-11-02)
+13. *Answered 2026-11-02:* gGlobal prefixes: the Rule 1.16 change is on hold. Switch, Push Button, Pulse Button, List, Step and
+    Long String are not gGlobals (new Semi_Widgets_Devices class). See Rule 1.19.
 
 ---
 
@@ -1048,3 +1086,10 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
   pop-up, one dialog at a time on Fritz's command) and Open question 12. (thread "Add the New General Dialog Rules")
 - 2026-11-02: Added Rule 18.11 (Cancel warns when changes were made: discard or go back to save; every dialog with Cancel
   and Save). (thread "Add the New General Dialog Rules")
+- 2026-11-02: Added Rule 1.19 (gGlobal Kinds: gS_, gG_, gV_, gB_, gT_, gD_; a variable, never on a Tab; the Kind is set once
+  picked) and Open question 13 (prefixes, the on-screen kinds). Help 108; next free Help number 109. (thread "Add gGlobal Kinds and BruControl import")
+- 2026-11-02: Rule 1.19: new gGlobals are only global-scope variables; Switch, Push Button, Pulse Button, List, Step and Long String
+  are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
+- 2026-11-02: Added Rule 5.19 (pipes only Horizontal, Vertical or 45; turns only at a fitting; the old free pipe movement retired) and the kettle exception to Rule 5.5 (Flip Horizontal only, no Flip Vertical or Rotate). Help 105; next free Help number 111 (other open PRs hold 106-110). (thread "Limit pipes to horizontal, vertical, 45")
+- 2026-11-02: Added Rule 5.20 (where the IPs go: the center of a ferrule's outer face on TC pipe Widgets, the center of the
+  opening on a front view; tees with a Temperature Probe are Temperature Devices). Help 110. (thread "Create pipe Widgets from Fritz's drawings")
