@@ -52,7 +52,7 @@ export function graphicTopic(g) {
       if (g.fitting === 'manualValve') return ['pipe-fittings-and-manual-valves', 'the-manual-valve-widget'];
       if (g.fitting && g.fitting !== 'point') return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
       return ['ip-snap-and-valve-pictures', 'snap-to-align'];
-    case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
+    case 'pipe': return g.hose ? ['pipes-and-hoses', 'hoses'] : ['pipe-angles-and-upright-kettles', 'pipes-run-horizontal-vertical-or-45'];      // Rule 5.19
     case 'image': return ['picture-paths'];
     case 'clone': return ['cloned-devices', 'a-clone-s-properties'];
     case 'override': return ['override-button'];

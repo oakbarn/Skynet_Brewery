@@ -366,6 +366,10 @@ Rotate 45, and the picture and its IPs follow. **Rotate 90 is retired**: the Fli
 quarter turn (a tee standing up) is two Rotate 45 steps. (2026-10-22, PR #91; vessels 2026-10-23, PR #92;
 Rotate 90 retired 2026-10-28, thread "Lock Skynet Widget Templates and IPs")
 *Replaced:* "Flip Vertical, Flip Horizontal, Rotate 90, Rotate 45" (2026-10-22).
+**Exception, kettles stay upright** (Fritz, 2026-11-02: "Kettles can flip Horizontal but not vertical"): a kettle (a vessel of
+the Vessel kind: kettles, HLT, mash tun, fermenter) has **Flip Horizontal only**: no Flip Vertical and no Rotate (turned 180 is
+the same as upside down). An older kettle turned or upside down is set upright. Chillers, coils, the RIMS tube and fittings keep
+the full set. (thread "Limit pipes to horizontal, vertical, 45", Help 105)
 
 5.6 **A Skynet Template's picture is fixed.** A bottom-drain copy of a kettle changes only the
 picture. (2026-10-23)
@@ -435,6 +439,14 @@ Skynet Templates); they are set (locked) only when Fritz says (Rule 9.6). The di
 for User Bundled Templates. It is **☰ Menu > Build Template**; the always-fixed attributes (pictures, Kind,
 Valve type, Service, Look, tap behaviour) have a greyed-out box. (2026-10-28, thread "Lock Skynet Widget Templates
 and IPs"; built 2026-10-29, Help 89)
+
+5.19 **Pipes run only Horizontal, Vertical or 45 degrees** (Fritz, 2026-11-02). A pipe is one straight piece and **never
+bends**; it changes direction only at a TC pipe fitting Widget (a 90° elbow from Horizontal to Vertical, a 45° elbow, a tee, a
+cross), which Skynet puts where two pipes meet. **Pipe movement where a pipe end followed a moved item at any angle is retired**:
+a pipe with its own open end moves along as one piece; a pipe moves its end only along its own line; an item moved off to the
+side lets go of the pipe (the end gets an open-end coupling). Older pipes with bends are cut at each bend into straight pipes
+joined by elbows when a Schema loads (Rule 15.2); the samples and the default Schema are changed (Rule 15.3). Hoses still bend.
+(thread "Limit pipes to horizontal, vertical, 45", Help 105)
 
 ## 6. Devices, connections and safety
 
@@ -652,7 +664,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **97**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **106**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -928,3 +940,4 @@ because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skyne
 - 2026-10-31: Rule 17.8 adds Fritz's Fermentable tab layout: Amount with its own Measurement, select-only BeerXML Measurement and
   Type lists. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Added Rule 17.9 (the Adjuncts tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-11-02: Added Rule 5.19 (pipes only Horizontal, Vertical or 45; turns only at a fitting; the old free pipe movement retired) and the kettle exception to Rule 5.5 (Flip Horizontal only, no Flip Vertical or Rotate). Help 105; next free Help number 106. (thread "Limit pipes to horizontal, vertical, 45")
