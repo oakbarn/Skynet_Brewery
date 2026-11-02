@@ -28,7 +28,8 @@ export function elementTopic(e) {
     case 'gGlobal': return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
     case 'picture': return ['picture-widget', 'turns-on-with'];
-    case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];
+    case 'switch': case 'pushButton': case 'pulseButton': case 'led': return ['semi-widgets-devices'];     // Rule 1.20 (Fritz, 2026-11-02)
+    case 'label': case 'manual': return ['tabs', 'changing-the-layout-admins'];
     case 'temperature': return e.sensor === 'ds18b20' ? ['devices', 'onewire-probes-ds18b20'] : DEVICE;
     default: return DEVICE;      // the other devices on a board pin: outputs, inputs, probes, sensors, flow meters, scales
   }
@@ -97,6 +98,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   elementTopic({ type: 'alarm', alarmClass: 'basic' }),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
   elementTopic({ type: 'gGlobal', kind: 'list' }),
+  ...['switch', 'pushButton', 'pulseButton', 'led'].map(type => elementTopic({ type })),
   ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'bfit', templateCls: 'skynet', fittings: [{ kind: 'tee' }] }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
   ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
