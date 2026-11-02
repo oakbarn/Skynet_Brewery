@@ -1,6 +1,6 @@
 # Variables
 
-Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. Add new ones in **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, then **Add Widget**. The name prefixes below are suggestions; any name works.
+Variables hold values that processes and screens use. The **Variables** screen lists them all with their values. The six plain Kinds (String, Graphic, Value, Boolean, Time, Date Time) are made on the **gGlobal** screen with **➕ New gGlobal** and never sit on a Tab: see [gGlobal Kinds](105-gglobal-kinds). The on-screen kinds (Switch, Push Button, Pulse Button, List, Step, Long String) are still added in **Tabs > ☰ Menu > Edit layout > Select Widget Type > gGlobal variables**, then **Add Widget**. The name prefixes below are suggestions; any name works.
 
 gKonstant and gAPI became one class, **gGlobal**, on 2026-10-30 (Fritz). Sending readings to the database and letting outside programs reach an item are now settings that every Device and Widget has, so a separate API class was no longer needed. Older ones are changed when the Brain starts: see [Database and .API on every Device and Widget](98-database-and-api).
 
@@ -20,13 +20,13 @@ The old **Global** class (from BruControl) is retired. When a BruControl file or
 
 | Kind | Prefix | Notes |
 |---|---|---|
-| Graphic | `gG_` | The value is a picture path. A process can swap the picture. |
-| String | `gGS_` | Text. |
+| gG_Global_Graphic | `gG_` | The standard background picture paths. A process can swap the picture. [gGlobal Kinds](105-gglobal-kinds) |
+| gS_Global_String | `gGS_` | Text. [gGlobal Kinds](105-gglobal-kinds) |
 | Long String | `gGL_` | Linked to a text file in a media folder. Edit the file and the panel follows within a second. |
-| Value | `gGV_` | A number. |
-| Time | `gGT_` | `00:00:00` |
-| Date Time | `gGDT_` | |
-| Boolean | `gGB_` | True or false. |
+| gV_Global_Value | `gGV_` | A number. |
+| gT_Global_Time | `gGT_` | `00:00:00` |
+| gD_Global_DateTime | `gGDT_` | |
+| gB_Global_Boolean | `gGB_` | True or false. |
 | Switch | `gGSW_` | A slider. It is a toggle: tap it ON and it stays ON, tap it again and it stays OFF. |
 | Push Button | `gGPB_` | ON only while held, OFF as soon as you let go. Lets go by itself if the screen loses WiFi. |
 | Pulse Button | `gGMB_` | A tap makes it true for a tenth of a second, however long you hold it. |
