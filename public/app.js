@@ -5,6 +5,7 @@ import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } 
 import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
+import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
@@ -8095,6 +8096,8 @@ const RC_STYLES = ['American Light Lager', 'American Lager', 'Cream Ale', 'Ameri
   'American Pale Ale', 'American Amber Ale', 'American Brown Ale', 'American IPA', 'Double IPA', 'Hazy IPA', 'American Stout', 'Imperial Stout', 'Scottish Export',
   'Wee Heavy', 'English Barleywine', 'American Barleywine', 'Fruit Beer', 'Spice, Herb, or Vegetable Beer', 'Specialty Beer'];
 const rcUnits = () => displayUnits(S.config.brewDefaults || {});
+// Shortcut keys in every text box (Fritz, 2026-11-02, Help 113): Shift+Enter \n, Ctrl/⌘+B \b, Ctrl/⌘+Shift+D °F or °C, Ctrl/⌘+Y Redo
+installShortcutKeys(() => rcUnits().tempUnit);
 const rcRound = (v, d = 2) => v === null || v === undefined || v === '' || !Number.isFinite(+v) ? '' : (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
 const TU = u => u === 'F' ? '°F' : '°C';
 const rcFrom = rc => rc.sourceFormat === 'bsmx' ? `BeerSmith ${rc.sourceVersion ? rc.sourceVersion + ' ' : ''}.bsmx` : rc.sourceFormat === 'beerxml' ? 'BeerXML' : 'made here';
