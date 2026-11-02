@@ -785,7 +785,7 @@ made editable again." (2026-10-04, PR #18)
 12.3 **Patron payments are not Beer money.** They are split by percent between several PayPal accounts:
 every Patron payment goes to one collecting account and a Prime Developer runs a Pay Out by percent
 (Option A). The Patron accounts and percents are changed only by the Prime Developers as a group, on
-GitHub. Rule 12.2 covers Buy a Beer only. (Fritz, 2026-11-02, thread "Expand Buy a Beer and Patron support")
+GitHub, and **every** Prime Developer must approve (100%). Rule 12.2 covers Buy a Beer only. (Fritz, 2026-11-02, thread "Expand Buy a Beer and Patron support")
 
 ## 13. Libraries (reference documents)
 
@@ -1156,3 +1156,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Added Rule 2.32 (shortcut keys in every text box: Shift+Enter `\n`, Ctrl/⌘+B `\b`, Ctrl/⌘+Shift+D °F or °C; the common copy, paste, undo and redo keys always work). Help 113; next free Help number 114. (thread "Add shortcut keys for text entry")
 - 2026-11-02: Rule 12.2 changed (Fritz): Beer money can go to at most 2 PayPal accounts; locked now with only Fritz's, unlocked only when he gives the second, then locked again. (thread "Expand Buy a Beer and Patron support")
 - 2026-11-02: Added Rule 12.3 (Fritz): Patron payments are split by percent between several PayPal accounts (Option A, Pay Out); Rule 12.2 covers Buy a Beer only. (thread "Expand Buy a Beer and Patron support")
+- 2026-11-02: Rule 12.3: a Patron account or percent change needs every Prime Developer's approval (100%, Fritz). (thread "Expand Buy a Beer and Patron support")
