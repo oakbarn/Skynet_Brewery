@@ -189,6 +189,7 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 ### Plate chiller
 - Picture: Images/Skynet/Chillers/plate_chiller.svg, 110 x 200. Types: Brazed plate 20, 30, 40, Counterflow.
 - Ports: Wort In (Top Left), Wort Out (Bottom Right), Water In (Bottom Left), Water Out (Top Right); any corner. Wort and water never mix. Thermowell (not an IP): Wort Out or Water Out.
+- Port tip positions of the Skynet Copper Counterflow Chiller picture (2026-11-02): Coil Top End, Coil Top Branch, Coil Bottom Branch, Coil Bottom End.
 
 ### Chilling coil
 - Picture: Images/Skynet/Chillers/chill_coil.svg, 180 x 180. Types: Immersion coil, Jacketed (glycol).
@@ -351,6 +352,7 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 | RIMS_Tube | Skynet_Integrated_Device | Wort In, Wort Out, Thermowell + probe and Element built in |
 | Plate_Chiller | Plate chiller, Brazed plate 30, MPT 1/2 | 4 ports |
 | Counterflow_Chiller / _Small | Plate chiller, Counterflow, MPT 1/2 | 4 ports |
+| Copper_Counterflow_Chiller | Plate chiller, Counterflow, MPT 1/2 (Fritz's Copper_CounterFlow drawing, 2026-11-02) | 4 IPs on the real port tips, all facing left: Wort In (top, straight through the tee), Water Out (top tee branch), Water In (bottom tee branch), Wort Out (bottom, straight through the tee) |
 | Immersion_Chiller | Chilling coil, 2 ports, MPT 1/2 | In, Out |
 | Chillzilla | Chilling coil, 4 ports, MPT 1/2 | In, Out, In 2, Out 2 |
 | HERMS_Coil | HERMS coil, Stainless 50 ft | Wort In, Wort Out |
@@ -434,4 +436,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-10-30: Override button Widget (one per Tab, per-Tab Label and look; passes a wait, sleep or loop 100 ms after the press) (thread "Add an Override button", Help 96).
 - 2026-10-30: Database and .API settings on every Widget with a value; gKonstant and gAPI variables became one class, gGlobal (prefixes gG). (thread "Send any Device or Widget to a database", Help 98)
 - 2026-11-02: Alarm Widget with two subclasses, Basic Skynet Alarm (four layers: Back, Fore, Set Graphic, Active overlay) and User Alarm, picked when made and never changed; Alarm Widget Properties follow the General Dialog Rules. (thread "Make the Alarm Widget a Template", Help 107)
+- 2026-11-02: Skynet Copper Counterflow Chiller Template (Copper_Counterflow_Chiller, picture Chiller_Copper_Counterflow.svg redrawn from Fritz's file) with 4 IPs on the real port tips (thread "Add copper counterflow chiller Widget", Help 109).
 - 2026-11-02: Semi_Widgets_Devices class (Rule 1.20): Switch, Push Button, Pulse Button and LED Widgets with Device controlled (None to start, follows its Device both ways like a Clone), and the Manual Valve Widget. (thread "Create the Semi_Widgets_Devices class", Help 112)
