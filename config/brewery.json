@@ -1318,7 +1318,56 @@
         [
           1105,
           716
+        ]
+      ],
+      "width": 10,
+      "color": "#8a8f96",
+      "flowColor": "#ffb347",
+      "flowWhen": [
+        "V_HLT_Out",
+        "V_MLT_In",
+        "MB_36_do_RedPump_B1"
+      ],
+      "baseVisible": false,
+      "from": "ip_hlt_out",
+      "to": "p_hlt_mlt_j1",
+      "straight": true
+    },
+    {
+      "id": "p_hlt_mlt_2",
+      "kind": "pipe",
+      "workspace": "Brewery",
+      "label": "",
+      "points": [
+        [
+          1105,
+          716
         ],
+        [
+          1380,
+          716
+        ]
+      ],
+      "width": 10,
+      "color": "#8a8f96",
+      "flowColor": "#ffb347",
+      "flowWhen": [
+        "V_HLT_Out",
+        "V_MLT_In",
+        "MB_36_do_RedPump_B1"
+      ],
+      "baseVisible": false,
+      "from": "p_hlt_mlt_j1",
+      "to": "p_hlt_mlt_j2",
+      "straight": true,
+      "name": "Pipe_1"
+    },
+    {
+      "id": "p_hlt_mlt_3",
+      "kind": "pipe",
+      "workspace": "Brewery",
+      "label": "",
+      "points": [
         [
           1380,
           716
@@ -1337,8 +1386,40 @@
         "MB_36_do_RedPump_B1"
       ],
       "baseVisible": false,
-      "from": "ip_hlt_out",
-      "to": "ip_mlt_in"
+      "from": "p_hlt_mlt_j2",
+      "to": "ip_mlt_in",
+      "straight": true,
+      "name": "Pipe_2"
+    },
+    {
+      "id": "p_hlt_mlt_j1",
+      "kind": "ip",
+      "fitting": "elbow90",
+      "autoFit": true,
+      "workspace": "Brewery",
+      "x": 1090,
+      "y": 701,
+      "w": 30,
+      "h": 30,
+      "label": "",
+      "color": "#9aa0a6",
+      "rotate": "180",
+      "name": "Elbow_1"
+    },
+    {
+      "id": "p_hlt_mlt_j2",
+      "kind": "ip",
+      "fitting": "elbow90",
+      "autoFit": true,
+      "workspace": "Brewery",
+      "x": 1365,
+      "y": 701,
+      "w": 30,
+      "h": 30,
+      "label": "",
+      "color": "#9aa0a6",
+      "rotate": "90",
+      "name": "Elbow_2"
     },
     {
       "id": "p_mlt_bk",
@@ -1353,14 +1434,59 @@
         [
           1430,
           808
-        ],
+        ]
+      ],
+      "width": 10,
+      "color": "#8a8f96",
+      "flowColor": "#4fb3ff",
+      "flowWhen": [
+        "V_MLT_Out",
+        "V_BK_In",
+        "MB_36_do_RedPump_B1"
+      ],
+      "baseVisible": false,
+      "from": "ip_mlt_out",
+      "to": "p_mlt_bk_j1",
+      "straight": true
+    },
+    {
+      "id": "p_mlt_bk_2",
+      "kind": "pipe",
+      "workspace": "Brewery",
+      "label": "",
+      "points": [
         [
-          1748,
+          1430,
           808
         ],
         [
           1748,
-          716
+          808
+        ]
+      ],
+      "width": 10,
+      "color": "#8a8f96",
+      "flowColor": "#4fb3ff",
+      "flowWhen": [
+        "V_MLT_Out",
+        "V_BK_In",
+        "MB_36_do_RedPump_B1"
+      ],
+      "baseVisible": false,
+      "from": "p_mlt_bk_j1",
+      "to": "p_mlt_bk_j2",
+      "straight": true,
+      "name": "Pipe_3"
+    },
+    {
+      "id": "p_mlt_bk_3",
+      "kind": "pipe",
+      "workspace": "Brewery",
+      "label": "",
+      "points": [
+        [
+          1748,
+          808
         ],
         [
           1748,
@@ -1376,8 +1502,40 @@
         "MB_36_do_RedPump_B1"
       ],
       "baseVisible": false,
-      "from": "ip_mlt_out",
-      "to": "ip_bk_in"
+      "from": "p_mlt_bk_j2",
+      "to": "ip_bk_in",
+      "straight": true,
+      "name": "Pipe_4"
+    },
+    {
+      "id": "p_mlt_bk_j1",
+      "kind": "ip",
+      "fitting": "elbow90",
+      "autoFit": true,
+      "workspace": "Brewery",
+      "x": 1415,
+      "y": 793,
+      "w": 30,
+      "h": 30,
+      "label": "",
+      "color": "#9aa0a6",
+      "rotate": "180",
+      "name": "Elbow_3"
+    },
+    {
+      "id": "p_mlt_bk_j2",
+      "kind": "ip",
+      "fitting": "elbow90",
+      "autoFit": true,
+      "workspace": "Brewery",
+      "x": 1733,
+      "y": 793,
+      "w": 30,
+      "h": 30,
+      "label": "",
+      "color": "#9aa0a6",
+      "rotate": "90",
+      "name": "Elbow_4"
     },
     {
       "id": "t_title",
