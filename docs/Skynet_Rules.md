@@ -117,7 +117,7 @@ dialog opens, fill it in, ✖ Cancel or 💾 Save (Rule 18.11 asks before discar
 can't be changed**; a wrong Kind is deleted and made again. The Kind dialogs follow the General Dialog Rules (section 18).
 ➕ Add the sample gGlobals adds one of each Kind. The on-screen kinds (Switch, Push Button, Pulse Button, List, Step, Long String)
 stay as they are until Fritz decides (Open question 13). BruControl Globals: Importing Norms section 6c. (thread "Add gGlobal
-Kinds and BruControl import", Help 105)
+Kinds and BruControl import", Help 108)
 
 ## 2. Screen design and clicks
 
@@ -664,7 +664,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **106**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **109**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -944,4 +944,4 @@ because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skyne
   Type lists. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Added Rule 17.9 (the Adjuncts tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-11-02: Added Rule 1.19 (gGlobal Kinds: gS_, gG_, gV_, gB_, gT_, gD_; a variable, never on a Tab; the Kind is set once
-  picked) and Open question 13 (prefixes, the on-screen kinds). Help 105; next free Help number 106. (thread "Add gGlobal Kinds and BruControl import")
+  picked) and Open question 13 (prefixes, the on-screen kinds). Help 108; next free Help number 109. (thread "Add gGlobal Kinds and BruControl import")
