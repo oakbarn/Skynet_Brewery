@@ -28,7 +28,7 @@ Every attribute of the Device is listed with:
   time the layout is saved (Rule 5.16).
 
 Some attributes are **always fixed**: the pictures, Kind, Valve type, Service, Look, Digits, When tapped, Tap target, Ask before
-changing, background and imagePaths. Their box is greyed out.
+changing, background and background pictures (.backpath ...). Their box is greyed out.
 
 Attributes that belong to each Device (Name, Label, Tab, X, Y, Interface, Pin, Lock) have no Template value, only the box.
 

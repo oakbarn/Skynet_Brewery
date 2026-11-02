@@ -57,7 +57,7 @@ To copy a whole folder of pictures from your computer into a group, use **File M
 
 ## Picking a picture: Skynet, Mine or Both, and a group
 
-Every picture list in a Properties dialog (Picture when on / off, Graphic, Background picture, imagePath_1 ...) has two small lists beside it:
+Every picture list in a Properties dialog (Picture when on / off, Graphic, Background picture, Image Path 1 ...) has two small lists beside it:
 
 - **Skynet pictures**, **My pictures** or **Both**. It starts at Skynet pictures, since most brewers only use those.
 - A **group**: **All groups**, or one group.

@@ -148,7 +148,7 @@ One press: every running Process (not Loopers) moves on 100 ms later. A wait or 
 | Properties box | Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
 
 ### Image block (every dialog with background pictures, 2026-10-29, Help 93)
-Background # (1, 2, 3; other = blank), Back Colour, Image Path 1-3 each with OPEN (Background Image N pop-up) and a typeable path (not found = blank + warning).
+Background # (1, 2, 3; 0, blank or other = none), Back Colour, Image Path 1-3 (.backpath, .backpath_2, .backpath_3) each with OPEN (Background Image N pop-up) and a typeable path (not found = blank + warning).
 
 ---
 
@@ -393,7 +393,7 @@ Every IP is the center of a ferrule's outer face, or the center of the opening o
 
 These are added from the same list as Devices but need no board pin.
 
-**Settings they all share:** Name, Label (`label`; it was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1-3), imagePath_1-3 (all three editable and settable by a Process, as in BruControl; `name.image = "path"` gives unlimited pictures), Visible, Hidden locked, Hide value / text, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and Text box look (Fore / Back color, Alignment, Word wrap, Name font + size + color + background, Value color + background, Name / Value alignment, Border).
+**Settings they all share:** Name, Label (`label`; it was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1-3; 0, blank or over 3 = none), .backpath, .backpath_2, .backpath_3 (all three editable and settable by a Process, as in BruControl; `name.image = "path"` gives unlimited pictures), Visible, Hidden locked, Hide value / text, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and Text box look (Fore / Back color, Alignment, Word wrap, Name font + size + color + background, Value color + background, Name / Value alignment, Border).
 
 | Widget | Its own settings |
 |---|---|
@@ -446,3 +446,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-02: Skynet Copper Counterflow Chiller Template (Copper_Counterflow_Chiller, picture Chiller_Copper_Counterflow.svg redrawn from Fritz's file) with 4 IPs on the real port tips (thread "Add copper counterflow chiller Widget", Help 109).
 - 2026-11-02: Fritz's pipe drawings (Help 110, Rule 5.20): Elbow_90, Elbow_45, Tee (Long Tee) and Instrument_Tee redrawn; new Elbow_Front, Reducer_2_1_Concentric, Reducer_2_1_Eccentric and Reducer_2_1_Front; IPs on the ferrule faces; Manual Valve Widget Picture (Manual Ball Valve side, front, front elbow). (thread "Create pipe Widgets from Fritz's drawings")
 - 2026-11-02: Semi_Widgets_Devices class (Rule 1.20): Switch, Push Button, Pulse Button and LED Widgets with Device controlled (None to start, follows its Device both ways like a Clone), and the Manual Valve Widget. (thread "Create the Semi_Widgets_Devices class", Help 112)
+- 2026-11-02: Background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1-3); 0, blank or over 3 = no background (Rule 7.10). (thread "Rename image paths to backpath")

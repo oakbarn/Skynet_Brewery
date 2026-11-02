@@ -46,7 +46,7 @@ assert.deepEqual(chk.map(c => [c.ok, c.exists, c.same]), [[true, true, true], [t
 // what the loaded Schema uses but the Brain does not have
 const find = p => { const f = path.join(dirs.media, p); return fs.existsSync(f) ? f : f; };
 const miss = missingMedia({ workspaces: [{ name: 'B1', background: 'Images/System_Back_1.png' }],
-  elements: [{ name: 'p', imagePath_1: 'Images/Pumps/a.png', sounds: ['sounds/bell.wav', 'sounds/Hops.wav', ''], bru: { x: 'C:\\old.png' } }], graphics: [] }, find);
+  elements: [{ name: 'p', backpath: 'Images/Pumps/a.png', sounds: ['sounds/bell.wav', 'sounds/Hops.wav', ''], bru: { x: 'C:\\old.png' } }], graphics: [] }, find);
 assert.deepEqual(miss.map(m => [m.path, m.kind]), [['Images/System_Back_1.png', 'pictures'], ['sounds/Hops.wav', 'sounds']]);
 
 // old paths still work

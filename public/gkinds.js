@@ -40,7 +40,7 @@ export function kindChangeError(current, incoming, keyOf = el => el?._key) {
 // The sample: one gGlobal of each Kind, none of them on a Tab.
 export const SAMPLE_GLOBALS = [
   { name: 'gS_Brewer_Note', type: 'gGlobal', kind: 'string', initial: 'Add the yeast nutrient at 10 minutes' },
-  { name: 'gG_Brew_Day_Picture', type: 'gGlobal', kind: 'graphic', initial: 'Images/Skynet/Miscellaneous/brewery_main.png', imagePath_1: 'Images/Skynet/Miscellaneous/brewery_main.png', background: 1 },
+  { name: 'gG_Brew_Day_Picture', type: 'gGlobal', kind: 'graphic', initial: 'Images/Skynet/Miscellaneous/brewery_main.png', backpath: 'Images/Skynet/Miscellaneous/brewery_main.png', background: 1 },
   { name: 'gV_Strike_Temp', type: 'gGlobal', kind: 'value', initial: '163', precision: 1, units: '°F', min: 32, max: 212 },
   { name: 'gB_Grain_Added', type: 'gGlobal', kind: 'bool', initial: 'false' },
   { name: 'gT_Mash_Rest', type: 'gGlobal', kind: 'time', initial: '01:00:00' },

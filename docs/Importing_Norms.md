@@ -153,7 +153,7 @@ variable) is up to the brewer who built the config. **The import asks the user**
 | Value | **gV_Global_Value** | Built |
 | Boolean | **gB_Global_Boolean** | Built |
 | String, no Background picture, just text in the Value | **gS_Global_String** | Built (a String becomes a String) |
-| String with a Background picture and a blank Value | **gG_Global_Graphic** (the picture paths go to its Image Path 1-3) | Norm (waits for the importer go) |
+| String with a Background picture and a blank Value | **gG_Global_Graphic** (the picture paths go to its .backpath, .backpath_2, .backpath_3) | Norm (waits for the importer go) |
 | String with a Background picture **and** some text in the Value | **ask the user**: gS_Global_String or gG_Global_Graphic | Norm |
 
 The name rules of section 6 (`gbl`, `RP_`, `x` ...) still apply to the Name.
@@ -201,7 +201,7 @@ picture and text, the import shows the choices above, with the recommended one p
 | --- | --- | --- |
 | `C:\BruControl\Media\pump.png` | `media/Images/pump.png` | Built |
 | `C:\BruControl\Media\wave\x.wav` (any sound) | `media/sounds/x.wav` | Built |
-| The 3 background pictures | `imagePath_1`, `imagePath_2`, `imagePath_3`, all editable as in BruControl (Rule 7.10) | Built |
+| The 3 background pictures | `.backpath`, `.backpath_2`, `.backpath_3`, all editable; `.background` 1-3 picks one, 0 / blank / over 3 = none (Rule 7.10). A Process line with `imagepath_1` becomes `.backpath` | Built |
 | A Tab's background picture | the Tab's picture, with its width and height | Built |
 
 ## 10. Recipes (BeerSmith .bsmx and BeerXML)
@@ -233,3 +233,4 @@ picture and text, the import shows the choices above, with the recommended one p
 - 2026-10-30: Section 6 Globals now become gGlobal (`RP_` -> `gG_`); added section 6b, gKonstant / gAPI -> gGlobal, `log` -> `send_db`, `/api/gapi` -> `/api/items`. (thread "Send any Device or Widget to a database")
 - 2026-10-31: Added section 10, Recipes: .bsmx and BeerXML, no limits, units, hop use. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-11-02: Section 6c: BruControl Globals go to the gGlobal Kind of their Type (a String with a picture becomes gG_Global_Graphic, or the user is asked); a gGlobal is never on a Tab, so a Text, Picture, Value, Time or DateTime Widget takes the Global's spot; user input needed. (thread "Add gGlobal Kinds and BruControl import")
+- 2026-11-02: The 3 background pictures are .backpath, .backpath_2, .backpath_3 (Rule 7.10). (thread "Rename image paths to backpath")
