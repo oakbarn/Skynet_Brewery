@@ -18,4 +18,5 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Remote access](REMOTE_ACCESS.md) | Reaching the panel from outside the house. |
 | [MQTT and voice](MQTT_AND_VOICE.md) | MQTT and voice assistant hookups. |
 | [Device protocol](DEVICE_PROTOCOL.md) | The message language between the Brain and the boards. |
-| [Summary 1](Summary_1.md) | Summary of the project chat up to 2026-10-27: decisions, Rules, PRs, documents, open questions. |
+| [Summary 1](Summary_1.md) | History record of the project chat up to 2026-10-27. For what is true now, use the Skynet Rules. |
+| [Summary 2](Summary_2.md) | History record of the project chat from 2026-10-27 to 2026-11-02. For what is true now, use the Skynet Rules. |

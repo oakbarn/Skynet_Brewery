@@ -651,6 +651,29 @@ switch, input, alarm, sound player, timer, true/false variable) or a heater (on 
 **None** = a still picture, and its On pictures (Picture when on, On overlay) are greyed out. The
 pictures are picked from the Picture list. (2026-10-27, Help 74)
 
+7.12 **The Alarm Widget has two subclasses**, picked when it is made and never changed (Fritz, 2026-11-02, thread "Make the
+Alarm Widget a Template", Help 107):
+- **Basic Skynet Alarm:** a set Skynet bell picture that can't be changed, in three versions (Together, Back only, Fore only;
+  Images/Skynet/Alarms/Alarm_Basic*.svg; Fritz will send his own drawings to replace them). It is drawn in layers, bottom up:
+  **Layer 4 Back** (colored by **.back**), **Layer 3 Fore** (the bell, colored by **.fore**; never the text), **Layer 2 Set
+  Graphic** (a short list of Skynet pictures, **None first**), **Layer 1 Active overlay** (on top while **.active** is true,
+  None first). Back and Fore use the standard color list. Standard Label attributes and the standard Alarm attributes.
+- **User Alarm:** its own background picture (Image Path 1), a Set Graphic that is any picture (Layer 2), an Active overlay,
+  and **.backcolor** (.back) behind it. Standard Label and Alarm attributes.
+An Alarm made before 2026-11-02 keeps working as before.
+
+7.13 **Pump Cover Overlays** (Fritz, 2026-11-02, thread "Draw SVGs for common brew pumps", Help 111): a pump picture is drawn in
+layers, bottom up: the **pump picture** (a Skynet no-cover pump drawing), the **Cover overlay**, then the **On overlay**. The cover
+has a see-through background and shows on and off. Skynet covers come in **Red, Yellow, Blue, Green, Purple and Orange** for
+every Skynet no-cover pump drawing (Images/Skynet/Pumps/Covers/), and are Skynet items. The **User Cover** is one more choice
+whose cover color the user sets (standard color list). A Pump Device has **.cover** (None, Red, Yellow, Blue, Green, Purple,
+Orange, User; **None is the default**) and **.coverColor** (the User cover's color).
+
+7.14 **Every new Alarm meets the new Alarm standard** (Rule 7.12: a Basic Skynet Alarm or a User Alarm). **Old Alarms**
+(made before 2026-11-02, in the samples and Schemas) **are changed to the new Basic format one by one**, using Basic Alarm
+Widget formats Fritz will make; nothing is converted until then. The list of old Alarms is docs/ExistingAlarms.md (not
+the OakBarn Schema). (Fritz, 2026-11-02, thread "Build the Basic and User Alarm Widgets")
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -731,7 +754,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **111**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **113**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1098,11 +1121,18 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
   pop-up, one dialog at a time on Fritz's command) and Open question 12. (thread "Add the New General Dialog Rules")
 - 2026-11-02: Added Rule 18.11 (Cancel warns when changes were made: discard or go back to save; every dialog with Cancel
   and Save). (thread "Add the New General Dialog Rules")
+- 2026-11-02: Added Rule 5.19 (pipes only Horizontal, Vertical or 45; turns only at a fitting; the old free pipe movement retired) and the kettle exception to Rule 5.5 (Flip Horizontal only, no Flip Vertical or Rotate). Help 105; next free Help number 106. (thread "Limit pipes to horizontal, vertical, 45")
 - 2026-11-02: Added Rule 1.19 (gGlobal Kinds: gS_, gG_, gV_, gB_, gT_, gD_; a variable, never on a Tab; the Kind is set once
   picked) and Open question 13 (prefixes, the on-screen kinds). Help 108; next free Help number 109. (thread "Add gGlobal Kinds and BruControl import")
+- 2026-11-02: Added Rule 7.12 (the Alarm Widget's two subclasses: Basic Skynet Alarm in four layers, User Alarm). Help 107
+  (105 and 106 are taken by other threads); next free Help number 108. (thread "Make the Alarm Widget a Template")
+- 2026-11-02: Help 109 used by the Skynet Copper Counterflow Chiller (thread "Add copper counterflow chiller Widget"); next free Help number 110. No Rule changed.
+- 2026-11-02: Added Rule 5.20 (where the IPs go: the center of a ferrule's outer face on TC pipe Widgets, the center of the
+  opening on a front view; tees with a Temperature Probe are Temperature Devices). Help 110; next free Help number 111. (thread "Create pipe Widgets from Fritz's drawings")
+- 2026-11-02: Added Rule 7.13 (Pump Cover Overlays: picture, cover, On overlay; six Skynet colors plus a User cover; .cover with None
+  the default, .coverColor). Help 111; next free Help number 112. (thread "Draw SVGs for common brew pumps")
+- 2026-11-02: Added Rule 7.14 (new Alarms meet the new standard; old Alarms change to the new Basic format one by one;
+  docs/ExistingAlarms.md lists them). (thread "Build the Basic and User Alarm Widgets")
 - 2026-11-02: Rule 1.19: new gGlobals are only global-scope variables; Switch, Push Button, Pulse Button, List, Step and Long String
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
-- 2026-11-02: Added Rule 5.19 (pipes only Horizontal, Vertical or 45; turns only at a fitting; the old free pipe movement retired) and the kettle exception to Rule 5.5 (Flip Horizontal only, no Flip Vertical or Rotate). Help 105; next free Help number 111 (other open PRs hold 106-110). (thread "Limit pipes to horizontal, vertical, 45")
-- 2026-11-02: Added Rule 5.20 (where the IPs go: the center of a ferrule's outer face on TC pipe Widgets, the center of the
-  opening on a front view; tees with a Temperature Probe are Temperature Devices). Help 110. (thread "Create pipe Widgets from Fritz's drawings")
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
