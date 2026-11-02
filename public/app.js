@@ -34,7 +34,7 @@ const clone = o => JSON.parse(JSON.stringify(o));
 const bg = v => (v === '' || v === null || v === undefined || /^\s*-?\d+\s*$/.test(String(v))) ? '' : String(v);
 // Background pictures (Fritz, 2026-11-02, Rule 7.10): .background = 1, 2 or 3 shows .backpath, .backpath_2 or .backpath_3;
 // 0, blank, a color or any number over 3 shows no background picture. name.image = "path" in a Process sets .backpath and
-// background = 1. (Items folded from stacked BruControl copies also have backpath_4, _5 ...)
+// background = 1. Every item has at most 3 (Fritz, 2026-11-02).
 const IMG_SLOT = /^backpath(?:_(\d+))?$/;
 const slotKey = n => n === 1 ? 'backpath' : 'backpath_' + n;
 const slotsOf = e => Object.keys(e).filter(k => IMG_SLOT.test(k) && e[k]).map(k => +(IMG_SLOT.exec(k)[1] ?? 1)).sort((a, b) => a - b);
@@ -3634,8 +3634,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     check();
     return [h('label', {}, label), h('span', { class: 'nameRow imgRow' }, open, inp, warn)];
   }
-  if (kind === 'bgsel') {      // which picture shows: 1-3 (and more on folded items), or none
-    const n = [1, 2, 3, ...slotsOf(obj).filter(x => x > 3)];
+  if (kind === 'bgsel') {      // which picture shows: 1-3, or none
+    const n = [1, 2, 3];
     const os = [['0', 'None (0, blank or any number other than ' + n.join(', ') + ')'], ...n.map(x => [String(x), `${x} = ${slotKey(x)}`])];
     const cur = v === undefined || v === null || String(v).trim() === '' ? '0' : String(v);
     if (!os.some(o => o[0] === cur)) os.push([cur, /^-?\d+$/.test(cur) ? `${cur} = None (no picture)` : `${cur} (color, shown when there is no picture)`]);
@@ -4335,8 +4335,6 @@ async function editItem(kind, id) {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
-    const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have backpath_4, _5 ...
-    if (more.length) f.splice(f.findIndex(x => x[0] === 'backpath_3') + 1, 0, ...more.map(n => [slotKey(n), 'Image Path ' + n, 'imgopen', n, false, 'b']));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);

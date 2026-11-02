@@ -43,4 +43,4 @@ A color name or code in **.background** (`my_Widget.background = "red"`) shows n
 
 The first time you change Image Path 2 or 3 in the Properties, a **heads-up** pops up: in Skynet one picture path is enough, because `.image` can give any Device or Widget as many pictures as you like. Tick **Do not show this again** to stop it.
 
-> Items that were made from several stacked BruControl copies (see [Alarms and sound](21-alarms-and-sound)) can have more than three paths: .backpath_4, .backpath_5 and so on, for the pictures of the second and third copy, and `.background = 4`, `5` ... picks them. These folded items are the only exception to "4 or more = no background".
+> Every item has **at most 3** background pictures. An older item with a 4th picture or more (from stacked BruControl copies) keeps only the first 3; `.background = 4` or more shows no background.

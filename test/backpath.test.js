@@ -79,6 +79,10 @@ assert.deepEqual(seen, ['my_widget.backpath=Images/b.png', 'my_widget.image=Imag
 const el = toBackpaths({ name: 'x', images: ['', 'Images/b.png'] }, true);
 assert.deepEqual(el, { name: 'x', backpath_2: 'Images/b.png', backpathsImported: true, background: 1 });
 
+// only 3 background pictures: a 4th or more is dropped (Fritz, 2026-11-02)
+assert.deepEqual(toBackpaths({ name: 'f', imagePath_1: 'a', imagePath_4: 'd', backpath_5: 'e', background: 1 }), { name: 'f', backpath: 'a', background: 1 });
+assert.deepEqual(toBackpaths({ name: 'g', images: ['a', 'b', 'c', 'd'], background: 4 }), { name: 'g', backpath: 'a', backpath_2: 'b', backpath_3: 'c', background: 4, backpathsImported: true });
+
 // Processes written with the old names are brought up to date
 assert.equal(toBackpathText('my_widget.imagePath_1 = "a.png"\nif my_widget.imagepath_2 == "" {\n"x" imagepath_3 = "c.png"\ny.ImagePath_5 = "e.png"'),
   'my_widget.backpath = "a.png"\nif my_widget.backpath_2 == "" {\n"x" backpath_3 = "c.png"\ny.backpath_5 = "e.png"');

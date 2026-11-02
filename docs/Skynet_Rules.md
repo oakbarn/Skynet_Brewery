@@ -647,8 +647,9 @@ backpath", Help 25). Every Device and Widget with background pictures has three 
 version of a Skynet Template, Rule 5.16) and by a Process; changing 2 or 3 in Properties pops up the one-picture heads-up.
 Under Rule 15.2 the old names **imagePath_1, _2, _3** are changed everywhere (Schemas, Processes, samples, predictive text,
 the BruControl importer); an older item with a picture and a blank background gets .background = 1 so it still shows.
-**Exception:** items folded from stacked BruControl copies keep .backpath_4, _5 ... and .background 4, 5 ... picks them
-(waiting on Fritz's pick).
+**At most 3:** no item has more than 3 background pictures; an older item with a 4th or more keeps only the first 3
+(stacked BruControl copies with more than 3 are handled when the importer is built). **Not every item has a backpath:** most
+Widgets have none; the Graphic Widget is the one that normally does.
 *Replaced:* imagePath_2 and imagePath_3 worked as in BruControl and a blank background showed imagePath_1 (2026-10-27).
 Before that, after a BruControl import imagePath_2 and _3 were locked (2026-10-05).
 
@@ -1143,3 +1144,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
 - 2026-11-02: Rule 7.10 rewritten: background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1, _2, _3); .background 1-3 picks one, 0, blank or over 3 = none; old names changed everywhere (Rule 15.2). Help 25 rewritten. (thread "Rename image paths to backpath")
+- 2026-11-02: Rule 7.10: at most 3 background pictures on any item (a 4th or more is dropped); most Widgets have no backpath, the Graphic Widget does. (thread "Rename image paths to backpath")
