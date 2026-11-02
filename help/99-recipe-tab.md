@@ -90,7 +90,7 @@ The buttons under the boxes open the Daughter Tabs. **◀ Back to the Recipe tab
 - **Waters**: the Water Profile.
 - **MASH**: the Mash Profile.
 
-The Hops, Grain, Fermentable and Adjuncts tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
+The Hops, Grain, Fermentable, Adjuncts, MASH and Waters tabs are built (below). The other tabs' own boxes come next. Until then each shows what the Recipe holds for it, and Waters and MASH have the profile dropdowns.
 
 ## The Hops tab
 
@@ -132,6 +132,24 @@ Whirlfloc, yeast nutrient, gypsum, spices: what BeerSmith and BeerXML call Misc.
 - **Time** and **Time Unit** (min, hr, day, week). For a Boil adjunct the box says **Boil Min**: minutes left in the boil when it goes in. A Boil adjunct gets a warning and a drop alert like a hop (the Drops tab).
 
 The dropdowns are select only, with the BeerXML lists. Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity. Skynet_Fields: `rcp_Adjunct_Count`, `rcp_Adjunct_N_Name`, `_Amount`, `_Measurement`, `_Type`, `_Use`, `_Time`, `_Time_Unit`.
+
+## The MASH tab
+
+Pick the **Mash Profile**: a Skynet Template, one of your own (☰ Menu > Mash Profile), or **the Recipe's own mash** (the mash from the recipe file, or one you type here).
+
+- A picked profile shows read only: each **Step** with its **Temp** and **Time**, then the sparge (type, temperature, batch rest) and the mash out. **⧉ Copy into this Recipe** makes it the Recipe's own mash so you can change it here.
+- The Recipe's own mash: **Mash Step +** adds a step, **Delete** takes one away, and the sparge boxes are the same as on the Recipe tab.
+- Calculate on the Recipe tab uses the first step for the 1st Mash and the strike water.
+
+Two Skynet Templates were made for Fritz: **Skynet Single Step, Batch Sparge** (152 °F for 60 minutes, mash out at 168 °F, batch sparge with a 10 minute rest) and **Skynet 3 Mash Steps, Fly Sparge** (122 °F for 15, 146 °F for 30, 158 °F for 20 minutes, mash out at 168 °F, fly sparge with 168 °F water).
+
+Skynet_Fields: `rcp_Mash_Profile`, `rcp_Mash_Step_N_Name`, `rcp_Mash_Step_N_Temp`, `rcp_Mash_Step_N_Time`.
+
+## The Waters tab
+
+Pick the **Water Profile**. Its minerals show after the distilled or RO cut (Calcium, Magnesium, Sodium, Sulfate, Chloride, Bicarbonate, in ppm), with the **% Distilled / RO**, the **SO4 : Cl** ratio (above 2 crisp and hoppy, below 1 round and malty) and the **pH**. They are read only here; change the profile on ☰ Menu > Water Profile. Below them are the waters the recipe file listed.
+
+Skynet_Fields: `rcp_Water_Profile`, `rcp_Water_Ca`, `rcp_Water_Mg`, `rcp_Water_Na`, `rcp_Water_SO4`, `rcp_Water_Cl`, `rcp_Water_HCO3`, `rcp_Water_Distilled_Pct`, `rcp_Water_SO4_Cl`, `rcp_Water_PH`.
 
 ## Importing a BeerSmith file
 
