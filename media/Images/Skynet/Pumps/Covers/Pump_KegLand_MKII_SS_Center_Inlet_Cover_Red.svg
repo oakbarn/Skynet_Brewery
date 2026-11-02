@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62.2 42.6">
+  <!-- Skynet pump Cover Overlay: Red cover. Same box as Pump_KegLand_MKII_SS_Center_Inlet.svg, so it lies exactly over it; see-through around the cover. -->
+  <defs><clipPath id="in"><path d="M0.3 36.0 V16.6 Q0.3 9.0 7.9 9.0 H30.8 Q38.4 9.0 38.4 16.6 V36.0 Z"/></clipPath></defs>
+  <g stroke-linejoin="round">
+    <path d="M0.3 36.0 V16.6 Q0.3 9.0 7.9 9.0 H30.8 Q38.4 9.0 38.4 16.6 V36.0 Z" fill="#d32f2f"/>
+    <rect x="0.3" y="9.0" width="38.1" height="5.4" fill="#ffffff" fill-opacity="0.32" clip-path="url(#in)"/>
+    <rect x="0.3" y="31.1" width="38.1" height="4.9" fill="#000000" fill-opacity="0.22" clip-path="url(#in)"/>
+    <rect x="4.1" y="18.2" width="10.7" height="0.9" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="4.1" y="20.9" width="10.7" height="0.9" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="4.1" y="23.6" width="10.7" height="0.9" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="4.1" y="26.3" width="10.7" height="0.9" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <path d="M35.4 11.0 V35.0" stroke="#000000" stroke-opacity="0.35" stroke-width="0.8"/>
+    <path d="M0.3 36.0 V16.6 Q0.3 9.0 7.9 9.0 H30.8 Q38.4 9.0 38.4 16.6 V36.0 Z" fill="none" stroke="#2b2b2b" stroke-width="1.2"/>
+  </g>
+</svg>

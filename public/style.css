@@ -781,6 +781,7 @@ button.hiddenTab { border-style: dotted; opacity: .8; }
 .buildOpt label { display: block; margin: 6px 0; }
 /* On overlay: a see-through picture drawn on top of the item while it is on (Fritz, 2026-10-22) */
 .el > .onov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; }
+.el > .coverov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 .el > .onov.tint { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mix-blend-mode: color; }
 .mdReadOnly { margin: 6px 0; padding: 6px 10px; border: 1px solid #e8a33a; border-radius: 8px; background: #e8a33a22; }
 .mdPickBtn.off { opacity: .45; pointer-events: none; }
@@ -933,6 +934,24 @@ dialog.readWarn .bar button { min-width: 8em; font-weight: 800; }
   .rcBox.rcWideBox { width: 100%; flex-basis: 100%; }
   .rcDRow { gap: 12px; }
   .rcCalcBtn { margin-left: 0; }
+}
+
+/* gGlobal Kind dialog (Fritz, 2026-11-02): Name, Kind, the Kind's fields; ⬆ String Entry and ⬢ Attribute Dialog icons (Rule 18) */
+dialog.gDlg { width: min(600px, 94vw); }
+dialog.gDlg .gRow { display: grid; grid-template-columns: 11em 1fr; gap: 8px; align-items: center; margin: 8px 0 2px; }
+dialog.gDlg .gRow > label { color: var(--muted); }
+dialog.gDlg .gRow .nameRow { display: flex; gap: 6px; align-items: center; min-width: 0; }
+dialog.gDlg .gRow .nameRow > input:not([type=checkbox]), dialog.gDlg .gRow .nameRow > select { flex: 1 1 auto; min-width: 0; }
+dialog.gDlg .gNote { font-size: .85em; margin: 0 0 6px 11em; }
+dialog.gDlg .gErr { color: var(--bad); min-height: 1.2em; margin: 4px 0; }
+.upArrow, .attrIcon { flex: none; width: 2em; height: 2em; min-height: 0; padding: 0; border-radius: 6px; background: transparent; border: 1px solid var(--line); color: #d32f2f; font-size: 1.1em; line-height: 1; cursor: pointer; }
+.upArrow:hover, .attrIcon:hover { border-color: #d32f2f; }
+dialog.strEntryDlg { width: min(640px, 94vw); }
+dialog.strEntryDlg textarea.strEntry { width: 100%; box-sizing: border-box; white-space: pre-wrap; }
+dialog.askDiscard { width: min(420px, 94vw); }
+@media (max-width: 520px) {
+  dialog.gDlg .gRow { grid-template-columns: 1fr; gap: 2px; }
+  dialog.gDlg .gNote { margin-left: 0; }
 }
 
 /* ===== Alarm Widget (Fritz, 2026-11-02): Basic Skynet Alarm layers 4 (Back) and 3 (Fore) are the set Skynet picture as masks
