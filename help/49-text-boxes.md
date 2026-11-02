@@ -20,6 +20,7 @@ Every piece of text on a Tab is a **text box**, and every text box has the same 
 
 - **Word wrap as needed**: a long text goes onto more lines. On a Device or Widget it lets a long Name wrap (Values always wrap). A Text Widget always wraps.
 - **Codes inside text** work in every text box: `\b` bold, `\L` large, `\n` a new line, `\deg` a degree sign and the others in [Codes inside text](22-process-language).
+- **Shortcut keys** type the codes for you: Shift+Enter `\n`, Ctrl+B (⌘+B) `\b`, Ctrl+Shift+D (⌘+Shift+D) °F or °C. See [Shortcut keys](113-shortcut-keys).
 - **Name font** and **Name font size** set the font of the Names, the Labels on vessels and the Texts.
 
 On a Device or Widget, **Fore color**, **Back color** and **Alignment** are for all of its text. **Name color**, **Value color**, **Name alignment** and the others below them are still there, and win over Fore color for that one box.
