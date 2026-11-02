@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { DIRS, dirOf, onAngle, angledEnd, alongLine, fitFor } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -1575,9 +1576,50 @@ function snapEnd(pts, i, j, c) {
 }
 function syncPipeEnds(p) {
   const pts = p.points; if (!pts || pts.length < 2) return;
+  if (p.straight && pts.length === 2) return syncStraight(p);
   const a = ipPoint(p.from, p.workspace), b = ipPoint(p.to, p.workspace), n = pts.length;
   if (a) snapEnd(pts, 0, n > 2 && !p.hose ? 1 : undefined, a);
   if (b) snapEnd(pts, n - 1, n > 2 && !p.hose ? n - 2 : undefined, b);
+}
+// A pipe is one straight piece, Horizontal, Vertical or 45 (Fritz, 2026-11-02, Rule 5.19), and it never bends to follow an IP.
+// When what its ends are on moves:
+//  - both ends still in line at an allowed angle (the whole thing moved, or one end moved along the pipe): it follows them;
+//  - one end is its own open end (a coupling only it uses): it moves along as one piece, the same length;
+//  - else it keeps its direction: the end on the IP that moved slides along the pipe's line, level with that IP. If the IP went
+//    off to the side, the end is no longer on it (a red ring shows it) and lets go of it when the drag ends (letGoBentEnds).
+function syncStraight(p) {
+  const pts = p.points, ws = p.workspace, a = ipPoint(p.from, ws), b = ipPoint(p.to, ws);
+  const movedA = a && (a[0] !== pts[0][0] || a[1] !== pts[0][1]), movedB = b && (b[0] !== pts[1][0] || b[1] !== pts[1][1]);
+  if (!movedA && !movedB) return;
+  if (a && b && onAngle(a, b, 0.5)) { p.points = [[...a], [...b]]; return; }
+  const d = dirOf(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]);
+  const own = k => editing && draft && p[k] ? ownCoupling(p[k], p) : null;
+  const carry = (from, to, k) => {     // the whole pipe goes along with the end that moved; its open end's coupling too
+    const mx = to[0] - from[0], my = to[1] - from[1];
+    p.points = pts.map(q => [q[0] + mx, q[1] + my]);
+    const g = own(k); if (g) { g.x = (g.x || 0) + mx; g.y = (g.y || 0) + my; const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(g.id)}"]`); if (n) place(n, g); }
+  };
+  if (movedA && (!b || own('to'))) return carry(pts[0], a, 'to');
+  if (movedB && (!a || own('from'))) return carry(pts[1], b, 'from');
+  // slide the free end along the line from the end that stays (never through it: then it keeps its old place)
+  const slide = (fixed, dir, target, old) => { const e = alongLine(fixed, dir, target), [ux, uy] = DIRS[dir]; return ux * (e[0] - fixed[0]) + uy * (e[1] - fixed[1]) > 0 ? e : [...old]; };
+  if (movedA && !movedB) { p.points = [slide(pts[1], (d + 4) % 8, a, pts[0]), [...pts[1]]]; return; }
+  const from = movedA ? [...a] : [...pts[0]];
+  p.points = [from, slide(from, d, b || pts[1], pts[1])];
+}
+// After a drag: a pipe end that is no longer on its IP (the IP went off the pipe's line) lets go of it. It gets an open end
+// (a coupling), and the toast says which pipes let go so they can be joined again with a fitting.
+function letGoBentEnds() {
+  if (!editing || !draft) return;
+  const gone = [];
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.straight && g.workspace === wsName && (g.points || []).length === 2)) {
+    for (const [k, i, j] of [['from', 0, 1], ['to', 1, 0]]) {
+      const c = ipPoint(p[k], p.workspace);
+      if (!c || Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) <= 1.5) continue;
+      p[k] = endCoupling(p.points, i, j); gone.push(p.name || 'a pipe');
+    }
+  }
+  if (gone.length) { renderWs(); toast(`${[...new Set(gone)].join(', ')} let go: pipes run only Horizontal, Vertical or 45 (Rule 5.19). Join it again in line, or with an elbow or tee.`, true); }
 }
 // A hose is a pipe that bends: a smooth curve through its points (Catmull-Rom spline drawn as Bezier curves)
 function hoseD(pts) {
@@ -1648,7 +1690,7 @@ function renderPipes() {
     }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
-      if (!p.locked && !p.straight) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
+      if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
     svg.append(g);
   }
@@ -1681,6 +1723,7 @@ function setEditing(on) {
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
+  if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
@@ -1837,6 +1880,7 @@ window.addEventListener('pointerup', () => {
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
+  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds();     // Rule 5.19: a pipe never bends to follow
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
@@ -1948,20 +1992,13 @@ $('#ws').addEventListener('contextmenu', ev => { if (!editing && pointerKind !==
 
 // The joint Skynet put at a pipe end turns into the fitting the pipes on it need: one or two in line = coupling,
 // a corner = 90° elbow, three = tee, four = cross, each turned the right way. A joint with a hose on it stays a coupling.
-const ARMS = { coupling: null, elbow90: { W: 1, S: 1 }, tee: { W: 1, E: 1, S: 1 }, cross: { W: 1, E: 1, N: 1, S: 1 } };
-const turnArm = (d, k) => { const o = 'NESW'; return o[(o.indexOf(d) + k) % 4]; };
+// Pipes can also meet at 45 degrees: a 45 elbow joins two pipes 135 degrees apart (public/pipefit.js).
 function autoFit(g) {
   const ps = pipesOn(g.id, g.workspace), c = ipCenter(g);
   let fit = 'coupling', rot = g.rotate || '0';
   if (ps.length >= 2 && ps.every(p => p.straight)) {
-    const dirs = new Set(ps.map(p => {
-      const pts = p.points, far = p.from === g.id ? pts[1] : pts[pts.length - 2], dx = far[0] - c[0], dy = far[1] - c[1];
-      return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'E' : 'W') : (dy > 0 ? 'S' : 'N');
-    }));
-    const want = [...dirs].sort().join('');
-    fit = dirs.size === 2 && (want === 'EW' || want === 'NS') ? 'coupling' : dirs.size === 2 ? 'elbow90' : dirs.size === 3 ? 'tee' : dirs.size === 4 ? 'cross' : 'coupling';
-    if (fit === 'coupling') rot = want === 'NS' ? '90' : '0';
-    else for (const k of [0, 1, 2, 3]) if (Object.keys(ARMS[fit]).map(d => turnArm(d, k)).sort().join('') === want) { rot = String(k * 90); break; }
+    const f = fitFor(ps.map(p => { const pts = p.points, far = p.from === g.id ? pts[1] : pts[pts.length - 2]; return dirOf(far[0] - c[0], far[1] - c[1]); }));
+    fit = f.fitting; if (f.ok) rot = f.rotate;
   }
   if (g.fitting !== fit || String(g.rotate) !== rot) { g.fitting = fit; g.rotate = rot; giveName(g, draft.graphics); }
 }
@@ -1972,12 +2009,11 @@ function drawSnap(ev) {
   for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (c) { const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= r && (!best || d < best.d)) best = { d, c, id: q.id }; } }
   return best ? { c: [...best.c], id: best.id } : { c: [snap(p[0]), snap(p[1])], id: null };
 }
-// A straight pipe runs only across or up-and-down from its start. It ends on the IP picked only when that IP is in line with
-// the start; anywhere else the end goes on the line, level with the pointer.
+// A pipe runs only Horizontal, Vertical or at 45 degrees from its start (Fritz, 2026-11-02, Rule 5.19). It ends on the IP picked
+// only when that IP is on one of those lines from the start; anywhere else the end goes on the nearest line, level with the pointer.
 function straightEnd(a, c, id) {
-  const across = Math.abs(c[0] - a[0]) >= Math.abs(c[1] - a[1]), off = across ? Math.abs(c[1] - a[1]) : Math.abs(c[0] - a[0]);
-  if (id && off <= 2) return { c: across ? [c[0], a[1]] : [a[0], c[1]], id };
-  return { c: across ? [c[0], a[1]] : [a[0], c[1]], id: null };
+  const e = angledEnd(a, c);
+  return { c: e.c, id: id && Math.hypot(e.c[0] - c[0], e.c[1] - c[1]) <= 2 ? id : null };
 }
 // Fritz: double-click the start, move to the length wanted, double-click the end. The pipe is then one straight piece of fixed
 // length; turns are made with elbows and tees.
@@ -2699,15 +2735,18 @@ function updLockBtn() {
 // Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
 // Skynet Fitting or Skynet vessel is picked (all six: the picture, its IPs and what is joined to it follow, as in its
 // Properties), or an IP fitting (turn only: its shape is the same flipped).
-const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
+const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isSkyV(g) && isKettle(g) ? 'kettle' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
 function updTurnBar(item) {
   const k = editing && !previewing ? turnKind(item) : '';
   $('#turnBar').classList.toggle('hidden', !k);
   for (const b of $$('#turnBar .flip')) b.disabled = k !== 'all';
+  if (k === 'kettle') { $('#turnFlipH').disabled = false; for (const id of ['#turnFlipV', '#turnL45', '#turnR45']) $(id).disabled = true; }     // a kettle stays upright (Rule 5.5)
+  else for (const id of ['#turnL45', '#turnR45']) $(id).disabled = false;
 }
 function turnSel(op) {
   const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
   if (!k) return;
+  if (k === 'kettle' && op !== 'h') return toast('A kettle stays upright: it can Flip Horizontal, never Flip Vertical or turn (Rule 5.5).', true);
   if (lockedRiders(g).length) return toast(`${g.label || g.name} has a 🔒 locked part, so it can't turn.`, true);
   if (k === 'turn') { if (typeof op === 'number') g.rotate = String(((+g.rotate || 0) + op + 360) % 360); renderWs(); return; }
   const before = clone(g), r = (typeof op === 'number' ? op : 0) * Math.PI / 180;
@@ -2720,7 +2759,7 @@ function turnSel(op) {
     }
     turnVesselParts(g, before);
   }
-  placeUnitParts(g); renderWs();
+  placeUnitParts(g); renderWs(); letGoBentEnds();
 }
 $('#turnFlipH').onclick = () => turnSel('h');
 $('#turnFlipV').onclick = () => turnSel('v');
@@ -2774,7 +2813,7 @@ function lockTab(on) {
 }
 $('#lockAll').onclick = () => lockTab(true);
 $('#unlockAll').onclick = () => lockTab(false);
-$('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run straight across or up and down. Esc cancels.'; renderPipes(); };
+$('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run only Horizontal, Vertical or at 45 degrees; they turn only at a fitting (an elbow or tee joins them where two pipes meet). Esc cancels.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 // a new equipment widget (pipe fittings too): made on the Build Tab, then Save Build ... puts it on a Tab
 function addVesselWidget(c) {
@@ -7211,6 +7250,21 @@ const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.in
 // Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
 // built in where the Template puts it; they can't be moved, set or unbundled. It has Flip Horizontal, Flip Vertical and Rotate
 // like a Skynet Fitting (Fritz, 2026-10-23). Vessels made from a User Template keep their port settings.
+// Kettles stay upright (Fritz, 2026-11-02, Rule 5.5): a kettle (a vessel of the Vessel kind: kettles, HLT, mash tun, fermenter)
+// may Flip Horizontal, never Flip Vertical, and is not turned (turned 180 is the same as upside down). Chillers, coils, the
+// RIMS tube and other equipment keep every turn and flip.
+const isKettle = g => g?.kind === 'vessel' && !isBfit(g) && (g.vesselType || 'vessel') === 'vessel';
+function uprightKettles(gs) {
+  const fixed = [];
+  for (const g of gs.filter(g => isKettle(g) && (g.flipV || unitRot(g)))) {
+    const before = clone(g), m = orientM(g), flipH = m[0] < -1e-9;     // set upright (an upside-down kettle is flipped back up); a mirror left to right stays
+    delete g.flipV; delete g.rot; delete g.turn; if (flipH) g.flipH = true; else delete g.flipH;
+    if (sideways(before)) { const w = before.w || 200, hh = before.h || 200; Object.assign(g, { w: hh, h: w, x: Math.round((before.x || 0) + (w - hh) / 2), y: Math.round((before.y || 0) + (hh - w) / 2) }); }
+    if (isSkyV(g)) turnVesselParts(g, before);
+    fixed.push(g.label || g.name);
+  }
+  return fixed;
+}
 function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet' && (!g.loose || !!g.integrated); }    // an Integrated Device is never loose (Fritz, 2026-10-26)
 const ROTATE = [0, 45, 90, 135, 180, 225, 270, 315].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
 function unitRot(g) { return ((Math.round((+(g.rot ?? g.turn) || 0) / 45) * 45) % 360 + 360) % 360; }    // an older Turn counts as a Rotate
@@ -7714,7 +7768,8 @@ F.skynetVessel = it => {
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
       ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
-    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
+    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
+    ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...looseField(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];

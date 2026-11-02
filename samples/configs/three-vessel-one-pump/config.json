@@ -1857,7 +1857,8 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_2",
@@ -1877,7 +1878,8 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_3",
@@ -1897,19 +1899,37 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_4",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_HLT_Out:out",
-   "to": "tee_s1",
+   "to": "p_Brewhouse_4_j1",
    "points": [
     [
      710,
      527
     ],
+    [
+     710,
+     790
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_4_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_4_j1",
+   "to": "tee_s1",
+   "points": [
     [
      710,
      790
@@ -1921,7 +1941,25 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_1"
+  },
+  {
+   "id": "p_Brewhouse_4_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 695,
+   "y": 775,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "180",
+   "name": "Elbow_1"
   },
   {
    "id": "p_Brewhouse_5",
@@ -1941,14 +1979,15 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_6",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_BK_Out:out",
-   "to": "tee_s2",
+   "to": "p_Brewhouse_6_j1",
    "points": [
     [
      1430,
@@ -1957,11 +1996,66 @@
     [
      1430,
      580
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_6_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_6_j1",
+   "to": "p_Brewhouse_6_j2",
+   "points": [
+    [
+     1430,
+     580
     ],
     [
      1520,
      580
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_2"
+  },
+  {
+   "id": "p_Brewhouse_6_3",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_6_j2",
+   "to": "p_Brewhouse_6_j3",
+   "points": [
+    [
+     1520,
+     580
     ],
+    [
+     1520,
+     790
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_3"
+  },
+  {
+   "id": "p_Brewhouse_6_4",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_6_j3",
+   "to": "tee_s2",
+   "points": [
     [
      1520,
      790
@@ -1973,7 +2067,55 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_4"
+  },
+  {
+   "id": "p_Brewhouse_6_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 1415,
+   "y": 565,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "180",
+   "name": "Elbow_2"
+  },
+  {
+   "id": "p_Brewhouse_6_j2",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 1505,
+   "y": 565,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "0",
+   "name": "Elbow_3"
+  },
+  {
+   "id": "p_Brewhouse_6_j3",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 1505,
+   "y": 775,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "90",
+   "name": "Elbow_4"
   },
   {
    "id": "p_Brewhouse_7",
@@ -1993,19 +2135,37 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_8",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "tee_s1",
-   "to": "dev:Pump_1:in",
+   "to": "p_Brewhouse_8_j1",
    "points": [
     [
      860,
      790
     ],
+    [
+     860,
+     905
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_8_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_8_j1",
+   "to": "dev:Pump_1:in",
+   "points": [
     [
      860,
      905
@@ -2017,7 +2177,25 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_5"
+  },
+  {
+   "id": "p_Brewhouse_8_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 845,
+   "y": 890,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "180",
+   "name": "Elbow_5"
   },
   {
    "id": "p_Brewhouse_9",
@@ -2037,7 +2215,8 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_10",
@@ -2057,19 +2236,37 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_11",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_To_Ferm:out",
-   "to": "ip_ferm",
+   "to": "p_Brewhouse_11_j1",
    "points": [
     [
      1492,
      905
     ],
+    [
+     1660,
+     905
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_11_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_11_j1",
+   "to": "ip_ferm",
+   "points": [
     [
      1660,
      905
@@ -2081,7 +2278,25 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_6"
+  },
+  {
+   "id": "p_Brewhouse_11_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 1645,
+   "y": 890,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "0",
+   "name": "Elbow_6"
   },
   {
    "id": "p_Brewhouse_12",
@@ -2101,19 +2316,37 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true
   },
   {
    "id": "p_Brewhouse_13",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "tee_d2",
-   "to": "dev:V_To_MLT:out",
+   "to": "p_Brewhouse_13_j1",
    "points": [
     [
      1180,
      740
     ],
+    [
+     890,
+     740
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_13_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_13_j1",
+   "to": "dev:V_To_MLT:out",
+   "points": [
     [
      890,
      740
@@ -2125,19 +2358,54 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_7"
+  },
+  {
+   "id": "p_Brewhouse_13_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 875,
+   "y": 725,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "180",
+   "name": "Elbow_7"
   },
   {
    "id": "p_Brewhouse_14",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_To_MLT:in",
-   "to": "ip_m_in",
+   "to": "p_Brewhouse_14_j1",
    "points": [
     [
      890,
      613
     ],
+    [
+     890,
+     120
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_14_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_14_j1",
+   "to": "ip_m_in",
+   "points": [
     [
      890,
      120
@@ -2149,19 +2417,54 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_8"
+  },
+  {
+   "id": "p_Brewhouse_14_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 875,
+   "y": 105,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "270",
+   "name": "Elbow_8"
   },
   {
    "id": "p_Brewhouse_15",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "tee_d2",
-   "to": "dev:V_To_BK:out",
+   "to": "p_Brewhouse_15_j1",
    "points": [
     [
      1180,
      740
     ],
+    [
+     1260,
+     740
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_15_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_15_j1",
+   "to": "dev:V_To_BK:out",
+   "points": [
     [
      1260,
      740
@@ -2173,19 +2476,54 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_9"
+  },
+  {
+   "id": "p_Brewhouse_15_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 1245,
+   "y": 725,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "90",
+   "name": "Elbow_9"
   },
   {
    "id": "p_Brewhouse_16",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_To_BK:in",
-   "to": "ip_b_in",
+   "to": "p_Brewhouse_16_j1",
    "points": [
     [
      1260,
      613
     ],
+    [
+     1260,
+     120
+    ]
+   ],
+   "width": 10,
+   "color": "#8a8f96",
+   "flowColor": "#ffb347",
+   "straight": true
+  },
+  {
+   "id": "p_Brewhouse_16_2",
+   "kind": "pipe",
+   "workspace": "Brewhouse",
+   "from": "p_Brewhouse_16_j1",
+   "to": "ip_b_in",
+   "points": [
     [
      1260,
      120
@@ -2197,7 +2535,25 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347"
+   "flowColor": "#ffb347",
+   "straight": true,
+   "label": "",
+   "name": "Pipe_10"
+  },
+  {
+   "id": "p_Brewhouse_16_j1",
+   "kind": "ip",
+   "fitting": "elbow90",
+   "autoFit": true,
+   "workspace": "Brewhouse",
+   "x": 1245,
+   "y": 105,
+   "w": 30,
+   "h": 30,
+   "label": "",
+   "color": "#9aa0a6",
+   "rotate": "270",
+   "name": "Elbow_10"
   }
  ],
  "autostart": [],
