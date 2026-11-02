@@ -1,47 +1,46 @@
-# Pictures on items (imagePath_1 to 3)
+# Background pictures (.backpath, .backpath_2, .backpath_3)
 
-Every item on a tab (a Device or a Widget) can show a picture. It has three picture paths, the same three that BruControl had:
+Every item on a tab (a Device or a Widget) can show a background picture. It has three background picture paths, and **.background** picks which one shows (Fritz, 2026-11-02):
 
-| Field | What it holds |
+| Attribute | In Properties | What it holds |
+|---|---|---|
+| **.backpath** | Image Path 1 | Background picture 1. `.background = 1` shows it. |
+| **.backpath_2** | Image Path 2 | Background picture 2. `.background = 2` shows it. |
+| **.backpath_3** | Image Path 3 | Background picture 3. `.background = 3` shows it. |
+| **.background** | Background # | Which one shows. |
+
+## What .background does
+
+| .background | What shows |
 |---|---|
-| **imagePath_1** | The main picture. This is the one you change, in the properties dialog or from a Process. |
-| **imagePath_2** | A second picture (BruControl's background 2). |
-| **imagePath_3** | A third picture (BruControl's background 3). |
-| **Background picture** | Which one shows: **1**, **2** or **3**. **None** shows no picture. |
+| **1** | .backpath |
+| **2** | .backpath_2 |
+| **3** | .backpath_3 |
+| **0** | No background |
+| **4 or more** | No background |
+| **blank** | It is set to **0**: no background |
 
-Double-click an item in **Edit layout** (or hold a finger on it) to see these fields. A picture path is a file in one of your media folders, for example `Images/Skynet/Pumps/Pump_Red_Rip_On.png` (see [Media](07-media)).
+Double-click an item in **Edit layout** (or hold a finger on it) to see these fields. A picture path is a file in one of your media folders, for example `Images/Skynet/Pumps/Pump_Red_Rip_On.svg` (see [Media](07-media)).
 
-## Changing the picture from a Process: the Skynet way
-
-Use one picture, imagePath_1, and change its path:
-
-```
-my_widget.image = "Images/RedPump.png"
-```
-
-That puts the new path in **imagePath_1** and sets **background = 1** by itself, so the new picture shows at once. You can also write `my_widget.imagePath_1 = "Images/RedPump.png"`; that changes the path but leaves the background number as it is.
-
-**Any Device or Widget can have as many pictures as you like this way:** `.image` takes any path, as often as you like.
-
-A Process can also change imagePath_2 and imagePath_3, as in BruControl: `my_widget.imagePath_2 = "Images/BluePump.png"`.
-
-## The BruControl way still works
+## In a Process
 
 ```
-my_widget.background = 1
-my_widget.background = 2
-my_widget.background = 3
-my_widget.background = 4
+my_Widget.backpath = "Images/Skynet/Pumps/Pump_Red_Rip_On.svg"
+my_Widget.backpath_2 = "Images/Skynet/Pumps/Pump_Blue_Rip_On.svg"
+my_Widget.backpath_3 = "Images/Skynet/Pumps/Pump_Green_Rip_On.svg"
+my_Widget.background = 2
 ```
 
-1, 2 or 3 shows imagePath_1, imagePath_2 or imagePath_3. Any other whole number (4, 0, 99 ...) shows **no picture**, just as in BruControl. The old spelling `"my_widget" background = 2` works too.
+Setting a path does not change **.background**; the last line picks which picture shows.
 
-A number in **background** only ever picks a picture. A color name or code (`my_widget.background = "red"`) colors the item when it shows no picture.
+**The Skynet shortcut:** `my_Widget.image = "Images/RedPump.svg"` puts the path in **.backpath** and sets **.background = 1**, so the new picture shows at once. Any Device or Widget can have as many pictures as you like this way.
 
-## imagePath_2 and imagePath_3 work as in BruControl
+A color name or code in **.background** (`my_Widget.background = "red"`) shows no picture; it colors the item. **Back Colour** in the Properties is the color behind the picture.
 
-When a BruControl Schema is imported, each item keeps its three BruControl pictures, so imported Processes that say `background = 2` or `background = 3` still show the right picture. All three paths can be changed in the Properties and from a Process, just as in BruControl (Fritz, 2026-10-27; they were locked before).
+## The old names are gone
 
-The first time you change imagePath_2 or imagePath_3 in the Properties, a **heads-up** pops up: in Skynet one picture path is enough, because `.image` can give any Device or Widget as many pictures as you like. Tick **Do not show this again** to stop it.
+**.imagePath_1**, **.imagePath_2** and **.imagePath_3** are now **.backpath**, **.backpath_2** and **.backpath_3** (Skynet Rule 15.2: nothing old is kept). When the panel starts, every Schema and every Process is changed to the new names by itself, and a Process is backed up first. An older item that had a picture and a blank background gets **.background = 1**, so it still shows its picture. A BruControl import comes in with the new names too.
 
-> Items that were made from several stacked BruControl copies (see [Alarms and sound](21-alarms-and-sound)) can have more than three paths: imagePath_4, imagePath_5 and so on, for the pictures of the second and third copy. Their Processes were changed to the right numbers during the import.
+The first time you change Image Path 2 or 3 in the Properties, a **heads-up** pops up: in Skynet one picture path is enough, because `.image` can give any Device or Widget as many pictures as you like. Tick **Do not show this again** to stop it.
+
+> Items that were made from several stacked BruControl copies (see [Alarms and sound](21-alarms-and-sound)) can have more than three paths: .backpath_4, .backpath_5 and so on, for the pictures of the second and third copy, and `.background = 4`, `5` ... picks them. These folded items are the only exception to "4 or more = no background".

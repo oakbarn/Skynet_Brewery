@@ -55,7 +55,7 @@ Example: `MB_25_E_L_Vlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID E_L_Vl
 - The pin list always offers plain pins first to a relay, PWM pins to a PWM output, Counter pins to a flow meter, A0-A15 to analog sensors.
 
 ### Settings every Device has (Properties)
-Name, Label (`label`, was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1, 2, 3 or none), imagePath_1/2/3 (all editable, as in BruControl), Visible, Hidden (locked), Hide value, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and the text box settings (Fore/Back color, Alignment, Word wrap, Name font and size, Name/Value colors and backgrounds, Name/Value alignment, Border).
+Name, Label (`label`, was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1, 2, 3; 0, blank or over 3 = none), .backpath / .backpath_2 / .backpath_3 (Image Path 1-3, all editable), Visible, Hidden (locked), Hide value, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and the text box settings (Fore/Back color, Alignment, Word wrap, Name font and size, Name/Value colors and backgrounds, Name/Value alignment, Border).
 
 Every Device also has a **Database and .API** box at the end: **Send to the database** (Off, On demand, On value change, When a Process starts, Once, At a date and time, Every N ms / seconds / minutes / hours / days, Every 00:00:00), **What to send** (main value or another attribute) and **.API** (Off, Get only, Get and Put). Readings from the board (probes, inputs) can be read from outside but never changed. (Skynet Rule 6.14, Help 98)
 
@@ -192,7 +192,7 @@ What each ID means:
 - **Type ID:** E_L_Vlv (set by the Template, so the Add Device box doesn't ask for it).
 - **Fixed by the Template** (not in its Properties; the Brain puts them back on every layout save): Kind = valve, Valve type =
   Electro_Mechanical, Service = Room Temperature Liquid, pictures (Valve_Motor_Ball_*H for Horizontal, *V_LC for Vertical and 45),
-  Look normal, When tapped = toggle, Ask before changing, background / imagePath_1-3, overlay, Digits, Hide value.
+  Look normal, When tapped = toggle, Ask before changing, background / .backpath, _2, _3, overlay, Digits, Hide value.
 - **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
   Interface, Pin, Invert, One-shot, **Orientation** (Horizontal, Vertical, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
   **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
@@ -432,3 +432,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-31: 4.2 Pump: Skynet pump pictures with IPs on the real ports (12 drawings, Help 104). (thread "Draw SVGs for common brew pumps")
 - 2026-11-02: 4.2 Pump: Cover overlay, .cover and .coverColor (Rule 7.13, Help 111). (thread "Draw SVGs for common brew pumps")
 - 2026-11-02: Added 4.3b Skynet Motorized Butterfly Valve Device (Master H, VL, VR, Front, Front Elbow), the Motorized Ball Valve redrawn with a Front Daughter, and 4.12a Tees with a Temperature Probe; IPs on the ferrule faces (Rule 5.20, Help 110). (thread "Create pipe Widgets from Fritz's drawings")
+- 2026-11-02: Background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1-3); 0, blank or over 3 = no background (Rule 7.10). (thread "Rename image paths to backpath")
