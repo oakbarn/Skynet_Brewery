@@ -143,6 +143,17 @@ has no device_controlled** (only a click turns it, Rule 5.15). `.device_controll
 it back to None and a renamed one is followed. From outside (.API, Rule 6.14) one with a Device controlled can be changed only when
 that Device is Get and Put too. (thread "Create the Semi_Widgets_Devices class", Help 112)
 
+1.21 **Universal Properties** (Fritz, 2026-11-02): every Device, Widget and Semi_Widgets_Device has the same Properties and
+Process attributes: Name (Suggested Name, user may edit), Label, Show Label, Rich Text properties, Embedded Rich Text Codes,
+Position (`.x`, `.y`), Size (`.width`, `.height`), Visible, HiddenLock (hidden while the Tab Lock is on), Item Lock (`.lock`)
+and the hidden key. Label attributes `.label`, `.label_visible`, `.font_label`, `.size_label`, `.fore_label`, `.back_label`,
+`.bold_label`, `.alignment_label`; string attributes `.font`, `.font_size`, `.fore`, `.back`, `.bold`, `.backpath`,
+`.alignment`, `.visible`; item attributes `.hiddenlock`, `.x`, `.y`, `.width`, `.height`, `.lock`, `.tab`. **Item Lock** locks
+the position; a locked item can still be double-clicked and changed, except while the Tab Lock is on; Lock All and Unlock All go
+with it (Rule 2.12). A Clone has them all, but most are its parent's and not editable (Rule 4.4). The full list, who lacks
+which, and the plan to bring the panel up to it: [docs/Universal_Properties.md](Universal_Properties.md). (thread "Set
+universal properties standard", Help 114)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -754,7 +765,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **113**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **115**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1005,6 +1016,11 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 13. *Answered 2026-11-02:* gGlobal prefixes: the Rule 1.16 change is on hold. Switch, Push Button, Pulse Button, List, Step and
     Long String are not gGlobals (new Semi_Widgets_Devices class). See Rule 1.19.
 
+14. **Universal Properties** (Rule 1.21): `.x` / `.y` as the main names with `.xh`, `.x_hPosition`, `.yv`, `.y_vPosition` also
+    working goes against Rule 1.15 (main name `.x_hPosition`) and Rule 15.2 (no old way kept beside the new one): change Rule
+    1.15, or allow the aliases as an exception? And Rule 5.14 (pipe fittings only `.x`, `.y`, `.width`, `.height`): do fittings
+    get `.visible`, `.hiddenlock`, `.lock` and `.tab`? (asked 2026-11-02)
+
 ---
 
 ## Change log
@@ -1136,3 +1152,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Rule 1.19: new gGlobals are only global-scope variables; Switch, Push Button, Pulse Button, List, Step and Long String
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
+- 2026-11-02: Added Rule 1.21 (Universal Properties for every Device, Widget and Semi-Device; docs/Universal_Properties.md) and Open question 14 (Rules 1.15 / 15.2 position aliases, Rule 5.14 pipe fittings). Help 114; next free Help number 115. (thread "Set universal properties standard")
