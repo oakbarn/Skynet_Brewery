@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 67.2 46.6">
+  <!-- Skynet drawing: Topsflo TD5 (plastic head, center inlet). Off, no cover. 10 units = 1 inch. Inlet IP at the tip of the right-hand port (0.991, 0.536), outlet IP at the tip of the top port (0.763, 0.0). -->
+  <g stroke-linejoin="round">
+    <rect x="5.4" y="40.0" width="32.0" height="6.0" rx="0.8" fill="#5a5a5a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <path d="M1.6 33.0 q -0.5 6 3 9" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
+    <rect x="0.6" y="9.0" width="40.0" height="32.0" rx="5.8" fill="#808080" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="2.6" y="10.5" width="36.0" height="5.1" rx="1" fill="#9a9a9a"/>
+    <rect x="0.6" y="11.6" width="2.4" height="26.9" rx="1.0" fill="#6c6c6c" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="0.6" y="9.0" width="11.2" height="32.0" rx="5.8" fill="#3a3a3a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="40.1" y="13.5" width="3.5" height="23.0" rx="0.8" fill="#6c6c6c" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="43.6" y="9.0" width="14.0" height="32.0" rx="2.2" fill="#3a3a3a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="43.0" y="8.6" width="2.0" height="32.8" rx="0.6" fill="#3a3a3a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="57.6" y="20.8" width="9.0" height="8.4" rx="0.0" fill="#3a3a3a" stroke="#2b2b2b" stroke-width="1.2"/><path d="M59.2 20.8 L59.8 29.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M60.8 20.8 L61.4 29.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M62.4 20.8 L63.0 29.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M64.0 20.8 L64.6 29.2" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="47.1" y="0.0" width="8.4" height="9.0" rx="0.0" fill="#3a3a3a" stroke="#2b2b2b" stroke-width="1.2"/><path d="M47.1 1.6 L55.5 1.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M47.1 3.2 L55.5 2.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M47.1 4.8 L55.5 4.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M47.1 6.4 L55.5 5.8" stroke="#2b2b2b" stroke-width="0.5"/>
+  </g>
+</svg>

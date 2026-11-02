@@ -11,7 +11,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -368,6 +368,18 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
   ['Solenoid gas valve open (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_R.svg'],
   ['Solenoid gas valve open (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_L.svg'],
   ['Submersible sump pump on', 'Images/Skynet/Pumps/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/Skynet/Pumps/Pump_Sump_Off.svg'],
+  ['March 809-PL (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_90_Inlet.svg'],
+  ['March 809-PL-C (polysulfone head, center inlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_Center_Inlet.svg'],
+  ['March 809-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_809_SS_Center_Inlet.svg'],
+  ['March 815-PL (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_90_Inlet.svg'],
+  ['March 815-PL-C (polysulfone head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_Center_Inlet.svg'],
+  ['March 815-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_SS_Center_Inlet.svg'],
+  ['Chugger CPSS-IN (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_90_Inlet.svg'],
+  ['Chugger CPSS-CI (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_Center_Inlet.svg'],
+  ['Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet)', 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg'],
+  ['Topsflo TD5 (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_Topsflo_TD5_Poly_Center_Inlet.svg'],
+  ['KegLand MKII 12V/24V (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_Poly_Center_Inlet.svg'],
+  ['KegLand MKII with stainless head (center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_SS_Center_Inlet.svg'],
   ['Ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png']];
 // On overlay pictures (Fritz, 2026-10-22): drawn on top of the item's picture while it is on, the picture below stays visible.
@@ -745,7 +757,25 @@ function sidePt(e, side) {
 // middle of the box's sides). Every Skynet valve drawing in Images/Skynet/Valves has its pipe at the same spot: across at 92 of
 // its 120 high (H), or turned to stand up with the pipe 28 (V_R, V_RC) or 92 (V_L, V_LC) in from the left of its 120 wide.
 const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] } };
+// Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
+// port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
+const PUMP_FLOW = {
+  Pump_March_809_Poly_90_Inlet: { w: 50.9, h: 51.6, ends: [[0.988, 0.543], [0.636, 0.0]] },
+  Pump_March_809_Poly_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
+  Pump_March_809_SS_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
+  Pump_March_815_Poly_90_Inlet: { w: 57.0, h: 58.6, ends: [[0.989, 0.529], [0.652, 0.0]] },
+  Pump_March_815_Poly_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
+  Pump_March_815_SS_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
+  Pump_Chugger_SS_90_Inlet: { w: 60.1, h: 62.6, ends: [[0.99, 0.527], [0.646, 0.0]] },
+  Pump_Chugger_SS_Center_Inlet: { w: 106.2, h: 61.6, ends: [[0.994, 0.536], [0.806, 0.0]] },
+  Pump_Riptide_SS_Center_Inlet: { w: 100.2, h: 74.6, ends: [[0.994, 0.63], [0.804, 0.0]] },
+  Pump_Topsflo_TD5_Poly_Center_Inlet: { w: 67.2, h: 46.6, ends: [[0.991, 0.536], [0.763, 0.0]] },
+  Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
+  Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
+};
 function picFlow(path) {
+  const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
+  if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
   const m = String(path || '').match(/(?:^|\/)Valve_(?:Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid)_(?:Open|Closed)(H|V_L|V_R)C?\.svg$/);
   return m ? { k: m[1], ...PIC_FLOW[m[1]] } : null;
 }
@@ -753,7 +783,7 @@ function picFlow(path) {
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
   const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
-  if (!f || o === 'l45' || o === 'r45' || (o && (o === 'h') !== (f.k === 'H'))) return null;
+  if (!f || o === 'l45' || o === 'r45' || (o && f.k !== 'P' && (o === 'h') !== (f.k === 'H'))) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
   const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
   return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
@@ -766,8 +796,9 @@ const flipPt = e => {
 };
 const devIps = e => {
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
-  if (!v) return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
-    { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: sidePt(e, e.ipOut || 'right') }];
+  if (!v) { const pp = e.subtype === 'pump' ? picEnds(e) : null, pf = flipPt(e);    // a Skynet pump drawing: IPs on its real ports
+    return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : sidePt(e, e.ipIn || 'left') },
+      { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: pp ? pf(pp[1]) : sidePt(e, e.ipOut || 'right') }]; }
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
@@ -840,6 +871,44 @@ function buildEl(e) {
   return n;
 }
 
+// ---- The Alarm Widget (Fritz, 2026-11-02): two subclasses, set when it is made and never changed (alarmClass).
+// Basic Skynet Alarm ('basic'): a set Skynet picture in layers, bottom to top:
+//   Layer 4  Back only picture, colored with .back (Back color)      Alarm_Basic_Back.svg
+//   Layer 3  Fore only picture, colored with .fore (Fore color)      Alarm_Basic_Fore.svg (then its black lines, never colored)
+//   Layer 2  Set Graphic: one of the Skynet Alarm_Set_ pictures, or None
+//   Layer 1  Active overlay (imageOverlay): one of the Skynet Alarm_Active_ pictures, or None, on top while the alarm is active
+// User Alarm ('user'): its own background picture (Image Path 1), any picture as its Set Graphic (Layer 2), an Active overlay and
+// a Back color behind it. An Alarm made before the subclasses has no alarmClass and works as before.
+const ALM_DIR = 'Images/Skynet/Alarms/';
+const ALM_PICS = { back: ALM_DIR + 'Alarm_Basic_Back.svg', fore: ALM_DIR + 'Alarm_Basic_Fore.svg', lines: ALM_DIR + 'Alarm_Basic_Lines.svg', together: ALM_DIR + 'Alarm_Basic.svg' };
+const ALM_COLORS = { back: '#6ca538', fore: '#8bcf18' };      // Fritz's greens (his Alarm.svg)
+const ALM_SET_RE = /(^|\/)Skynet\/Alarms\/Alarm_Set_[^/]+\.svg$/i, ALM_ACTIVE_RE = /(^|\/)Skynet\/Alarms\/Alarm_Active_[^/]+\.svg$/i;
+const isAlmBasic = e => e?.type === 'alarm' && e.alarmClass === 'basic';
+const almName = p => String(p).split('/').pop().replace(/\.svg$/i, '').replace(/^Alarm_(Set|Active)_/, '').replace(/_/g, ' ');
+// the Skynet pictures a Basic Skynet Alarm can pick: None first (Fritz), then the Set Graphics or the Active overlays
+const almChoices = re => [['', 'None'], ...[...new Set([...mediaPics.filter(p => re.test(p)), ...(re === ALM_SET_RE ? [ALM_DIR + 'Alarm_Set_Hop.svg'] : [ALM_DIR + 'Alarm_Active_Red.svg'])])].sort().map(p => [p, almName(p)])];
+const cssUrl = p => `url("${media(p)}")`;
+function almLayers(n, e, v) {
+  let L = n.querySelector(':scope > .almLayers');
+  if (!e.alarmClass) { L?.remove(); n.classList.remove('almBasic'); return; }
+  if (!L) {
+    L = h('div', { class: 'almLayers' }, h('div', { class: 'almBack' }), h('div', { class: 'almFore' }), h('div', { class: 'almLines' }), h('div', { class: 'almSet' }));
+    L.children[0].style.webkitMaskImage = L.children[0].style.maskImage = cssUrl(ALM_PICS.back);
+    L.children[1].style.webkitMaskImage = L.children[1].style.maskImage = cssUrl(ALM_PICS.fore);
+    L.children[2].style.backgroundImage = cssUrl(ALM_PICS.lines);
+    n.prepend(L);
+  }
+  const basic = isAlmBasic(e);
+  n.classList.toggle('almBasic', basic);
+  for (const x of [...L.children].slice(0, 3)) x.classList.toggle('hidden', !basic);
+  if (basic) {
+    L.children[0].style.backgroundColor = firstSet(v.backcolor, e.backColor, ALM_COLORS.back);
+    L.children[1].style.backgroundColor = firstSet(v.forecolor, e.foreColor, ALM_COLORS.fore);
+  }
+  const set = e.setGraphic || '';
+  if (L._set !== set) { L._set = set; L.children[3].style.backgroundImage = set ? cssUrl(set) : ''; }
+}
+
 // Colors, fonts, alignment and border (imported from BruControl or set in the properties dialog)
 const ALIGN = { Top: 'flex-start', Middle: 'center', Bottom: 'flex-end', Left: 'flex-start', Center: 'center', Right: 'flex-end' };
 function fontCss(node, f) {
@@ -853,6 +922,7 @@ function fontCss(node, f) {
 // then the ☰ Menu > Default tab. The Default fore color leaves the LED and Gauge digits their own colors.
 const OWN_DIGITS = ['led', 'lcd', 'indicator'];
 function styleEl(n, e) {
+  if (isAlmBasic(e)) e = { ...e, foreColor: '', backColor: '' };      // a Basic Skynet Alarm's Fore and Back color its picture, not its text
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD(), T = TS();
   // its own colors win; a Tab Style only fills in what it has none of (Fritz, 2026-10-30)
   const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.foreColor));
@@ -861,7 +931,9 @@ function styleEl(n, e) {
   if (nb) nm.style.backgroundColor = nb;
   if (vc) { vl.style.color = vc; vl.style.textShadow = 'none'; }
   if (vb) vl.style.backgroundColor = vb;
+  if (isAlmBasic(e)) vl.style.backgroundColor = 'transparent';      // nothing covers its bell: it shows no value text
   fontCss(nm, e.nameFont); fontCss(vl, e.valueFont);
+  if (e.nameBold) nm.style.fontWeight = '700';
   // Name font and Name font size: its own, else the Default tab's (px; an imported BruControl font keeps its size)
   const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : firstSet(T.labelFont, D.nameFont)), size = +e.nameFontSize || (e.nameFont?.size ? 0 : fontPx(T.labelSize) || D.nameFontSize);
   if (fam) nm.style.fontFamily = fam;
@@ -980,7 +1052,9 @@ function fillEl(n, e0) {
     case 'pid': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
-      img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic)); break;
+      img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
+      if (isAlmBasic(e)) { img = ''; text = ''; }       // the Basic Skynet Alarm is its layers (almLayers), no text
+      almLayers(n, e, v); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
@@ -1038,6 +1112,7 @@ function fillEl(n, e0) {
   n.classList.toggle('img-missing', !!missing);
   const stretch = stretchPic(e, v);
   n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
+  if (e.alarmClass === 'user' && firstSet(v.backcolor, e.backColor)) n.style.backgroundColor = firstSet(v.backcolor, e.backColor);     // a User Alarm's .backcolor
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
   n.classList.toggle('turned', !!(turn || flip));
@@ -2132,7 +2207,7 @@ const ADD_MENU = [
   ]],
   ['Widgets (app only, no board pin)', [
     ['Picture', 'picture'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
-    ['Timer', 'timer'], ['Alarm', 'alarm', '', { kind: 'general' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
+    ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
 ];
@@ -2158,6 +2233,10 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (kind === 'list') { e.w = 200; e.h = 70; e.items = [{ value: 1, text: '' }, { value: 2, text: '' }, { value: 3, text: '' }]; e.initial = '1'; }
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
+  if (type === 'alarm' && e.alarmClass) {       // an Alarm Widget (Fritz, 2026-11-02): a Label from the start (never blank), the Name follows it
+    e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
+    if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
+  }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
   if (isDevice(e)) {      // Fritz, 2026-10-28: a new Device is 150 x 150 unless its size is changed in the Add Device box
@@ -3300,6 +3379,35 @@ function alarmFields(item) {
     ...kindFields('alarm', item)];
 }
 
+// Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
+// ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
+const ALM_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show'], ['nameFontSize', 'Font size (px; empty = Default)', 'num'],
+  ['nameFontFamily', 'Font', 'sel', FONTS], ['nameBold', 'Bold', 'bool'], ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'],
+  ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]]] };
+// the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
+const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
+  ['imagePath_2', 'Image Path 2', 'imgopen', 2], ['imagePath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+function alarmWidgetFields(it) {
+  const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
+  return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
+    ['name', 'Name', 'text', null, false, 'b'],
+    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'}.active = true sounds it.`, 'infonote', 'alarm'],
+    ['_ab', 'Alarm', 'box'], ['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true, 'b'],
+    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
+    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
+    A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop, ...(basic ? [] : [A.activeText]),
+    ['_gb', 'Graphic', 'box'],
+    ...(basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
+      ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
+      ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
+      : [['imagePath_1', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
+        ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['backColor', 'Back color (behind the pictures; a Process: .back)', 'color']]),
+    ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
+}
+// a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
+const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
+
 function fieldsFor(item) {
   let fs = fieldsOf(item);
   if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
@@ -3336,6 +3444,15 @@ function fieldsOf(item) {
 const PICK_TIP = 'Double-click to open the Properties of the one picked';
 function field(f, obj) {
   const out = fieldOne(f, obj);
+  // Rule 18 (General Dialog Rules, Fritz 2026-11-02): f[6] = { up: 2 or 30, attr: { title, fields } }. The red Up Arrow ⬆ opens the
+  // String Entry Dialog (2 or 30 lines); the red hexagon ⬢ opens the Attribute Pop Up Dialog for that field's attributes.
+  const x = f[6];
+  if (x && out[1]) {
+    const icons = [];
+    if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Type it in a bigger box (${x.up} lines)`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
+    if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
+    const wrap = h('div', { class: 'fldIcons' }, out[1], ...icons); out[1] = wrap;
+  }
   if (f[5] === 'b' && out[0]?.tagName === 'LABEL') out[0].classList.add('strong');      // a main field: its name in bold
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
     out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
@@ -3773,6 +3890,16 @@ function styleEditor(kind, st, from) {
 // The orange ? (Fritz, 2026-10-29): not Help (that is the yellow ? by the title) but a pop-up with more about this kind of Widget:
 // its Properties and the Attributes a Process can use. ✖ Close at the top and the bottom. Each kind's list is in INFO.
 const INFO = {
+  alarm: { title: 'Alarm Widget', properties: [
+    ['Two subclasses', ', picked when it is made and never changed: the Basic Skynet Alarm (the Skynet bell) and the User Alarm (your own pictures).'],
+    ['Basic Skynet Alarm layers', ', bottom to top: Layer 4 Back (colored by .back), Layer 3 Fore (the bell, colored by .fore), Layer 2 Set Graphic (a Skynet picture or None), Layer 1 Active overlay (on top while it is active, or None). The bell picture itself is set by Skynet.'],
+    ['User Alarm', ': a background picture (Image Path 1; the ⬢ Graphic Dialog has the others), any picture as its Set Graphic, an Active overlay, and a Back color behind them.'],
+    ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (alm_ + the Label).'],
+    ['Alarm settings', ': Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']],
+    attributes: [['.active', 'true = the alarm is on'], ['.back', 'Layer 4 on a Basic Skynet Alarm; the color behind a User Alarm'], ['.fore', 'Layer 3, the bell (Basic Skynet Alarm)'], ['.label'], ['.visible'], ['.hiddenlock'],
+      ['.x'], ['.y'], ['.width'], ['.height'], ['.sound'], ['.fileindex']],
+    example: 'alm_Hops.back = "Red"' },
   text: { title: 'Text Widget', properties: [
     ['Name', ' with a Suggested Name (w_Text_N). A user changes it only with ✏ Change name, and every Process that uses it is updated to the new name.'],
     ['Label', ' (Add > Label in Edit layout): a line above the Text, with its own Visible switch, font, size, bold, colors and alignment.'],
@@ -3843,6 +3970,50 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
 }
 
 const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
+// Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
+const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
+// a small dialog on top of the Properties (Rule 18 pop-ups): ✖ Cancel and 💾 Save at the top and the bottom; build(body) fills it
+function layerDialog(title, build) {
+  return new Promise(res => {
+    const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
+    const bar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'), h('button', { type: 'button', class: 'primary', onclick: () => done('ok') }, '💾 Save'));
+    d.append(h('h3', {}, title), bar(), body, bar());
+    document.body.append(d); build(body);
+    const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
+    const done = r => { d.close(); d.remove(); res(r); };
+    const cancel = () => { if (snap() !== before && !discardOk()) return; done('cancel'); };
+    d.addEventListener('cancel', ev => { ev.preventDefault(); cancel(); });
+    d.showModal();
+  });
+}
+// ⬆ String Entry Dialog (Rule 18.1): 2 or 30 lines, word wrap, Rich Text codes allowed. A one-line box keeps a new line as \n.
+async function upEntry(wrap, f, lines) {
+  const inp = wrap.querySelector('[data-k]'); if (!inp) return;
+  let ta;
+  const r = await layerDialog(f[1], body => {
+    ta = h('textarea', { rows: lines, class: 'strEntry', spellcheck: 'false' }); ta.style.whiteSpace = 'pre-wrap';
+    ta.value = inp.tagName === 'TEXTAREA' ? inp.value : inp.value.replace(/\\n/g, '\n');
+    body.append(ta, h('p', { class: 'muted' }, 'Rich Text Embedded Codes work here: \\b bold, \\i italic, \\c{Red} color ... (Help > Rich Text Embedded Code)'));
+    setTimeout(() => ta.focus(), 0);
+  });
+  if (r !== 'ok') return;
+  inp.value = inp.tagName === 'TEXTAREA' ? ta.value : ta.value.replace(/\r?\n/g, '\\n');
+  inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true }));
+}
+// ⬢ Attribute Pop Up Dialog (Rule 18.2): its fields are read into the item; a field that is on the Properties too follows it there
+async function attrEntry(attr, obj) {
+  try { readFields(obj); } catch { }
+  let body;
+  const r = await layerDialog(attr.title, b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); });
+  if (r !== 'ok') return;
+  readFields(obj, body);
+  for (const inp of $$('#dlgBody [data-k]')) {
+    const k = inp.dataset.k, kind = inp.dataset.kind;
+    if (!body.querySelector(`[data-k="${k}"]`)) continue;
+    if (kind === 'show') inp.checked = !obj[k]; else if (kind === 'vis') inp.checked = obj[k] !== 'hidden'; else if (inp.type === 'checkbox') inp.checked = !!obj[k]; else inp.value = obj[k] ?? '';
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
@@ -4028,6 +4199,7 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
+    if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
@@ -4046,7 +4218,16 @@ async function editItem(kind, id) {
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  // a new Alarm Widget: its Name follows its Label (Rule 18.3) until a name of its own is typed
+  const almNew = kind === 'el' && item.type === 'alarm' && item.alarmClass && !S.config.elements.some(x => x.name === item.name);
+  let almSug = almNew ? item.name : null;
+  const almFollow = ev => {
+    if (!almNew || ev.target?.dataset?.k !== 'label') return;
+    const nm = $('#dlgBody [data-k="name"]'); if (!nm || nm.value !== almSug) return;
+    nm.value = almSug = almSuggest(item, ev.target.value);
+  };
+  $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -4152,6 +4333,7 @@ async function editItem(kind, id) {
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
         applyDeviceTemplate(work, devTemplate(work));
       }
+      if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
@@ -7930,6 +8112,71 @@ function rcAdjuncts(pane, rc, changed) {
   pane.append(h('p', { class: 'muted' }, 'Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity.'));
 }
 
+// ---- The MASH tab (Fritz, 2026-10-31: "Mash Profile and Water Profiles can be built as well"). Pick a Mash Profile
+// (Skynet Template or your own), or use the Recipe's own mash (from the recipe file or typed here). A picked profile shows
+// read only; Copy into this Recipe makes it the Recipe's own mash to change. Lines: Step N, Temp, Time (rcp_Mash_Step_N_...).
+function rcMash(pane, rc, u, changed) {
+  const op = can('operator'), mp = rcMashProfile(rc), TT = TU(u.tempUnit), c = { onChange: changed };
+  rc.mash = rc.mash || { steps: [] }; rc.mash.steps = rc.mash.steps || [];
+  const tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ...c };
+  const pTemp = v => v === null || v === undefined || v === '' ? '' : rcRound(cTo(mp.units === 'Metric' ? +v : fToC(+v), u.tempUnit), 1);
+  const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
+  const pick = rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', 'The Recipe\'s own mash (below)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  const copy = guard(() => {
+    rc.mash = { ...rc.mash, profileName: mp.name, steps: [...mp.steps.map(s => ({ name: s.name, type: 'Infusion', tempC: mp.units === 'Metric' ? +s.temp : fToC(+s.temp), min: +s.time || 0 })),
+      ...(mp.mashOutTemp ? [{ name: 'Mash Out', type: 'Temperature', tempC: mp.units === 'Metric' ? +mp.mashOutTemp : fToC(+mp.mashOutTemp), min: 10 }] : [])] };
+    rc.spargeType = mp.sparge || 'batch'; if (mp.spargeTemp !== undefined && mp.spargeTemp !== null) rc.spargeTempC = mp.units === 'Metric' ? +mp.spargeTemp : fToC(+mp.spargeTemp);
+    rc.spargeMinutes = mp.sparge === 'batch' ? mp.batchRest ?? null : null; rc.mashProfile = '';
+    changed(); renderMenuPane(); toast(`"${mp.name}" copied into this Recipe. Press Save to keep it`);
+  });
+  const addStep = guard(() => { rc.mash.steps.push({ name: `Step ${rc.mash.steps.length + 1}`, type: 'Infusion', tempC: null, min: 0 }); changed(); renderMenuPane(); });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Mash'), op && !mp ? h('button', { class: 'hopAdd', onclick: addStep, title: 'Add a mash step at the bottom' }, 'Mash Step ', h('b', {}, '+')) : ''),
+    h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', pick, { wide: true, field: 'rcp_Mash_Profile', tip: 'A Skynet Template, one of your own (☰ Menu > Mash Profile), or the Recipe\'s own mash' }),
+      mp && op ? h('button', { onclick: copy, title: 'Make this profile the Recipe\'s own mash, to change it here' }, '⧉ Copy into this Recipe') : '',
+      mp?.notes ? h('span', { class: 'muted' }, mp.notes) : ''));
+  const steps = mp ? mp.steps : rc.mash.steps;
+  if (!steps.length) pane.append(h('p', { class: 'muted' }, 'No mash steps. Pick a Mash Profile, or press Mash Step +.'));
+  steps.forEach((s, i) => {
+    const n = i + 1, F = end => `rcp_Mash_Step_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    if (mp) line.append(rcBox('g', `Step ${n}`, ro(s.name), { wide: true, field: F('Name') }), rcBox('r', 'Temp', ro(pTemp(s.temp)), { unit: TT, field: F('Temp') }), rcBox('g', 'Time', ro(s.time), { unit: 'min', field: F('Time') }));
+    else {
+      line.append(rcBox('g', `Step ${n}`, rcInput(s, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }), rcBox('r', 'Temp', rcInput(s, 'tempC', tmp), { unit: TT, field: F('Temp') }),
+        rcBox('g', 'Time', rcInput(s, 'min', { d: 0, ...c }), { unit: 'min', field: F('Time') }));
+      if (op) line.append(h('button', { class: 'hopDel', onclick: guard(() => { if (!confirm(`Delete Step ${n} (${s.name})?`)) return; rc.mash.steps.splice(i, 1); changed(); renderMenuPane(); }) }, '🗑 Delete'));
+    }
+    pane.append(line);
+  });
+  // the sparge: the profile's (read only), or the Recipe's (the same boxes as on the Recipe tab)
+  pane.append(h('h3', {}, 'Sparge'), mp
+    ? h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', ro(SPARGE[mp.sparge] || mp.sparge)), rcBox('r', 'Sparge Temperature', ro(pTemp(mp.spargeTemp)), { unit: TT }),
+      ...(mp.sparge === 'batch' ? [rcBox('g', 'Batch Rest', ro(mp.batchRest), { unit: 'min' })] : []), rcBox('r', 'Mash Out', ro(pTemp(mp.mashOutTemp)), { unit: TT, tip: 'Empty = no mash out' }))
+    : h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'rcp_Sparge_Type' }),
+      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { unit: TT, field: 'rcp_Sparge_Temp' }),
+      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Sparge_Minutes' })));
+  pane.append(h('p', { class: 'muted' }, mp ? `${mp.skynet ? 'A Skynet Template is read only.' : 'Change your own Mash Profiles on ☰ Menu > Mash Profile.'} Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.`
+    : 'The Recipe\'s own mash. Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.'));
+}
+// ---- The Waters tab: the Water Profile picked and its minerals after the distilled or RO cut (rcp_Water_...). The profile
+// itself is changed on ☰ Menu > Water Profile. Below: the waters the recipe file listed.
+function rcWaters(pane, rc, u, changed) {
+  const wp = S.waterProfiles.find(x => x.id === rc.waterProfile), b = wp ? blendWater(wp) : {};
+  const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
+  const pick = rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Waters')),
+    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes ? h('span', { class: 'muted' }, wp.notes) : ''));
+  if (wp) {
+    const [ions, rest] = [WATER_FIELDS.slice(0, WATER_IONS.length), WATER_FIELDS.slice(WATER_IONS.length)];
+    pane.append(h('div', { class: 'rcRow' }, ...ions.map(([k, , key], i) => rcBox('c', WATER_IONS[i][1], ro(b[key]), { unit: 'ppm', field: k, tip: wp.distilledPct ? `${wp[key]} ppm in the water report, cut with ${wp.distilledPct}% distilled` : '' }))),
+      h('div', { class: 'rcRow' }, rcBox('c', '% Distilled / RO', ro(+wp.distilledPct || 0), { unit: '%', field: rest[0][0] }), rcBox('c', 'SO4 : Cl', ro(b.so4cl ?? ''), { field: rest[1][0], tip: 'Above 2: crisp and hoppy. Below 1: round and malty' }),
+        rcBox('c', 'pH', ro(wp.ph ?? ''), { field: rest[2][0] })),
+      h('p', { class: 'muted' }, `${wp.skynet ? 'A Skynet water is read only: ☰ Menu > Water Profile > Add new ... copies it to make your own.' : 'Change it on ☰ Menu > Water Profile.'} The minerals show after the distilled or RO cut.`));
+  }
+  const W = rc.ingredients.waters || [];
+  pane.append(h('h3', {}, 'Waters in the recipe file'), W.length ? '' : h('p', { class: 'muted' }, 'None.'),
+    ...W.map((w, i) => h('div', { class: 'rcRow hopLine' }, rcBox('g', `Water ${i + 1}`, ro(w.name), { wide: true }), rcBox('b', 'Amount', ro(rcRound(lTo(w.liters, u.volumeUnit))), { unit: u.volumeUnit }),
+      ...WATER_IONS.map(([k, l]) => rcBox('g', l.replace(/ \(.*/, ''), ro(w[k] ?? ''), { unit: 'ppm' })))));
+}
+
 // a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it
 function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const I = rc.ingredients;
@@ -7937,22 +8184,12 @@ function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
   if (k === 'hops') { rcHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'adjuncts') { rcAdjuncts(pane, rc, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'mash') { rcMash(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'waters') { rcWaters(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'grain' || k === 'fermentables') { rcFerms(pane, rc, u, changed, k === 'grain'); pane.append(h('div', { class: 'bar' }, back)); return; }
   pane.append(h('p', {}, h('b', {}, about)), h('p', { class: 'muted rcSoon' }, `The fields and layout of the ${t} tab come next. Until then, here is what the Recipe holds for it.`));
   if (k === 'drops') rcDrops(pane, rc);
   if (k === 'yeast') pane.append(list(I.yeasts.map(x => `${x.amount ?? 1} × ${x.name}${x.lab ? `, ${x.lab}` : ''}${x.productId ? ` ${x.productId}` : ''}${x.starterL ? `, starter ${rcRound(lTo(x.starterL, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No yeast in this Recipe.'));
-  if (k === 'waters') {
-    const wp = S.waterProfiles.find(x => x.id === rc.waterProfile);
-    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Water_Profile' })),
-      wp ? h('p', {}, `${WATER_IONS.map(([i, l]) => `${l.replace(/ \(.*/, '')} ${blendWater(wp)[i]}`).join(', ')} ppm${+wp.distilledPct ? ` (after ${wp.distilledPct}% distilled)` : ''}`) : '',
-      list(I.waters.map(x => `${x.name}${x.liters ? `, ${rcRound(lTo(x.liters, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No waters in the recipe file.'));
-  }
-  if (k === 'mash') {
-    const mp = rcMashProfile(rc);
-    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', rc.mash?.steps?.length ? '(the mash from the recipe file)' : '(none)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Mash_Profile' })),
-      mp ? list(mp.steps.map(s => `${s.name}: ${s.temp} ${tempUnit(mp.units)} for ${s.time} min`), '')
-        : list((rc.mash?.steps || []).map(s => `${s.name}: ${rcRound(cTo(s.tempC, u.tempUnit), 1)} ${TU(u.tempUnit)} for ${s.min} min`), 'No mash steps in this Recipe.'));
-  }
   pane.append(h('div', { class: 'bar' }, back));
 }
 // Drops: the results only. Skynet's hop order, every alert (merged when two land together) and their voice files
