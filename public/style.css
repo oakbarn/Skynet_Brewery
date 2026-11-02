@@ -934,3 +934,21 @@ dialog.readWarn .bar button { min-width: 8em; font-weight: 800; }
   .rcDRow { gap: 12px; }
   .rcCalcBtn { margin-left: 0; }
 }
+
+/* ===== Alarm Widget (Fritz, 2026-11-02): Basic Skynet Alarm layers 4 (Back) and 3 (Fore) are the set Skynet picture as masks
+   colored with .back and .fore, then its black lines, then Layer 2 (Set Graphic); Layer 1 (Active overlay) is the On overlay ===== */
+.el > .almLayers { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.el > .almLayers > div { position: absolute; inset: 0; background: center / contain no-repeat; -webkit-mask: center / contain no-repeat; mask: center / contain no-repeat; }
+.el > .almLayers > .almLines, .el > .almLayers > .almSet { -webkit-mask: none; mask: none; }
+.el.almBasic, .el.alarm.almBasic.active { background-color: transparent; border-color: transparent; animation: none; }
+.el.almBasic > .onov { background-size: contain; animation: almBlink 0.8s steps(2) infinite; }
+.el > .almLayers ~ .nm, .el > .almLayers ~ .vl { position: relative; z-index: 2; }
+@keyframes almBlink { 50% { opacity: 0.25; } }
+/* Rule 18 icons: the red Up Arrow (String Entry Dialog) and the red hexagon (Attribute Pop Up Dialog) beside a field */
+.fldIcons { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.fldIcons > :first-child { flex: 1; min-width: 0; }
+.fldIcon { flex: none; padding: 0 6px; min-width: 2em; color: #d62828; font-weight: 700; font-size: 16px; line-height: 1.6; }
+.miniDlg { max-width: min(640px, calc(100vw - 32px)); width: 100%; }
+.miniDlg .miniBody { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin: 8px 0; }
+.miniDlg .miniBody .full, .miniDlg .miniBody > textarea, .miniDlg .miniBody > p { grid-column: 1 / -1; }
+.miniDlg textarea.strEntry { width: 100%; box-sizing: border-box; font: inherit; resize: vertical; }
