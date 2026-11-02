@@ -88,15 +88,15 @@ Nobody can change it from inside the panel. Every change goes through GitHub:
 |---|---|
 | Beer and Patron **amounts** | Any Skynet Developer can propose, and a Prime Developer approves it. |
 | **Buy a Beer PayPal accounts** | Nobody. Locked by Rule 12.2; only Fritz adds the one possible second account. |
-| **Patron PayPal accounts and percents** | Prime Developers **as a group**: every Prime Developer, or a majority, Fritz's pick. |
+| **Patron PayPal accounts and percents** | Prime Developers **as a group**: every Prime Developer must approve (100%, Fritz 2026-11-02). |
 | **Add or remove a Skynet Developer** | Prime Developers only. |
-| **Add or remove a Prime Developer** | Prime Developers as a group. Fritz only for now. |
+| **Add or remove a Prime Developer** | Prime Developers as a group, every one must approve (100%). Fritz only for now. |
 
 **Recommended approach: GitHub owners file + required approvals, plus a signature.**
 
 - The owners file (CODEOWNERS) names the Prime Developers as owners of Skynet_Team.json, so a change
   cannot merge without their review.
-- A GitHub rule sets how many must approve.
+- A GitHub rule requires **every** Prime Developer to approve (100%, Fritz 2026-11-02).
 - When a change merges, the release step signs the file. The panel trusts a signed file only (see 1).
 
 One catch today: GitHub never lets you approve your own change. Fritz is the only Prime Developer, so the
@@ -142,6 +142,6 @@ This step goes into build step 2 (and the Patron part into step 3).
 1. ~~Rule 12.2~~ Answered 2026-11-02: new Rule 12.2 (at most 2 accounts, locked with Fritz's only).
 2. ~~Item 4: A or B?~~ Answered 2026-11-02: Option A, Patron payments only.
 6. Which PayPal account collects the Patron payments before the Pay Out? Suggested: Fritz's, upgraded to Business.
-3. Group approval (Patron accounts and percents, adding or removing a Prime Developer): every Prime Developer, or a majority?
+3. ~~Group approval: every Prime Developer, or a majority?~~ Answered 2026-11-02: every Prime Developer (100%).
 4. Amounts: Beer suggestion of $5 One Time and $5 for each repeat? Patron amount every 6 months?
 5. OK to add the license term?
