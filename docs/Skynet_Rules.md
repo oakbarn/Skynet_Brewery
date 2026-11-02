@@ -471,14 +471,15 @@ kettle. Each kettle has a plain and an _Electric version. (2026-10-22, 2026-10-2
 pop-up (2026-10-20, PR #44). A **Manual Valve Widget** waits for a click on it on its Tab (Rule 5.15).
 
 5.14 **Pipe fittings are only what they are.** A tee is only a tee (no Top Tee, Suction Tee or other Type),
-an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their only settings are **.x, .y, .width and
-.height**, plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
-Width and Height are greyed out until it is switched off). No label, Type or Connection Standard; turning and
+an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their settings are **.x, .y, .width,
+.height**, **.visible**, **.hiddenlock**, **.lock**, **.tab** and a **Label** (Rule 1.21; Fritz, 2026-11-02), plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
+Width and Height are greyed out until it is switched off). No Type or Connection Standard; turning and
 flipping stay on the Edit layout bar's turn buttons (Rule 5.5). **Pipe fittings have no Clone.** A **check valve
 is a pipe fitting too**: it is always one way, and its orientation shows the way. Valves and flow meters in a fitting
 are **Devices**; a tee with a thermowell, or a thermowell on a vessel IP, is a kind of **Temperature Probe**
 (Fritz, 2026-10-28).
 (2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
+*Replaced:* "Their only settings are .x, .y, .width and .height ... No label" (2026-10-28); changed by Fritz 2026-11-02.
 
 5.15 **The Manual Valve is a special Widget class**: something of a pipe fitting (Autosize to pipe, .x .y .width
 .height) and a pseudo Device. Its **.state** is true (open) or false (closed) and **only a click on it on its
@@ -1018,8 +1019,8 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
     Long String are not gGlobals (new Semi_Widgets_Devices class). See Rule 1.19.
 
 14. **Universal Properties** (Rule 1.21): *answered 2026-11-02:* `.x`, `.xh` and `.x_hPosition` are all the same attribute (Rule
-    1.15, exception to Rule 15.2). Still open: Rule 5.14 (pipe fittings only `.x`, `.y`, `.width`, `.height`): do fittings
-    get `.visible`, `.hiddenlock`, `.lock` and `.tab`? (asked 2026-11-02)
+    1.15, exception to Rule 15.2). Rule 5.14 changed: pipe fittings get `.visible`,
+    `.hiddenlock`, `.lock`, `.tab` and a Label. (asked and answered 2026-11-02)
 
 ---
 
@@ -1154,3 +1155,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
 - 2026-11-02: Added Rule 1.21 (Universal Properties for every Device, Widget and Semi-Device; docs/Universal_Properties.md) and Open question 14 (Rules 1.15 / 15.2 position aliases, Rule 5.14 pipe fittings). Help 114; next free Help number 115. (thread "Set universal properties standard")
 - 2026-11-02: Rule 1.15 rewritten: `.x`, `.xh`, `.x_hPosition` (and `.y`, `.yv`, `.y_vPosition`) are all Process attributes for the same thing, `.x` / `.y` the main names; an exception to Rule 15.2. (thread "Set universal properties standard")
+- 2026-11-02: Rule 5.14 changed (Fritz): pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label, besides `.x`, `.y`, `.width`, `.height` and Autosize to pipe. Open question 14 answered. (thread "Set universal properties standard")
