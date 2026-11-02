@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
+import { checkControlled } from './public/semi.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
@@ -496,8 +497,8 @@ async function route(req, res) {
   if (p === '/ui/hold' && m === 'POST') {
     const { name, down } = await jsonBody(req);
     const el = store.get(name);
-    // a Push Button gGlobal, or an output or switch set to "push button (on while held)" (an LED momentary button)
-    const push = el && ((el.type === 'gGlobal' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
+    // a Push Button (Semi_Widgets_Devices), a Push Button gGlobal, or an output or switch set to "push button (on while held)"
+    const push = el && (el.type === 'pushButton' || (el.type === 'gGlobal' && el.kind === 'pushbutton') || (['digitalOut', 'switch'].includes(el.type) && el.tap === 'hold'));
     if (!push) return fail(res, 400, `"${name}" is not a Push Button`);
     hold(el.name, down);
     return ok(res);
@@ -512,6 +513,8 @@ async function route(req, res) {
     { const bad = kindChangeError(store.config.elements, body.elements); if (bad) return fail(res, 400, bad); }
     for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)
     for (const el of body.elements ?? []) cleanDatabase(el);     // .database and .API: only the known settings are kept (lib/itemapi.js)
+    // device_controlled (Semi_Widgets_Devices, public/semi.js): only a Device with an ON / OFF state; a deleted one goes back to None
+    if (body.elements) { const { errors } = checkControlled(body.elements); if (errors.length) return fail(res, 400, errors[0]); }
     // only one Override button on each Tab (Fritz, 2026-10-30)
     { const seen = new Set(); for (const g of body.graphics ?? []) if (g?.kind === 'override') { if (seen.has(g.workspace)) return fail(res, 400, `The ${g.workspace} Tab has two Override buttons: only one is allowed on a Tab`); seen.add(g.workspace); } }
     schemas.checkLayout(body.graphics);                  // a locked Equipment Profile: the equipment and pipes on its Tab can't change

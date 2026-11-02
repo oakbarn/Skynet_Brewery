@@ -10,6 +10,7 @@ import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from '
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
+import { SEMI_KINDS, SEMI_CLASS, controllableNames } from './semi.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
@@ -629,6 +630,9 @@ const pressOverride = guard(async () => {
 // variable classes: shared and gGlobal (gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
 const isVarEl = e => ['shared', 'gGlobal'].includes(e?.type);
 const vkKind = e => e?.type === 'gGlobal' ? (e.kind || 'value') : null;
+// the button look of a Push Button or Pulse Button (Semi_Widgets_Devices, public/semi.js): the same as the gGlobal ones
+const semiLook = e => ['pushButton', 'pulseButton'].includes(e?.type) ? SEMI_KINDS[e.type].look : null;
+const btnKind = e => vkKind(e) || semiLook(e);
 const kindsOf = type => type === 'gGlobal' ? S.gKinds : null;
 const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
 
@@ -886,9 +890,9 @@ const realTab = name => !!name && L().workspaces.some(w => w.name === name && !w
 const refOf = n => n.dataset.clone ? ['gfx', n.dataset.gid] : n.dataset.name ? ['el', n.dataset.name] : ['gfx', n.dataset.gid];
 
 function buildEl(e) {
-  const n = h('div', { class: 'el ' + e.type + (vkKind(e) ? ' k-' + vkKind(e) : '') + (e.cloneId ? ' clone' : ''), 'data-name': e.name, ...(e.cloneId ? { 'data-clone': e.cloneOf, 'data-gid': e.cloneId, title: `Clone of ${e.cloneOf}` } : {}) }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
+  const n = h('div', { class: 'el ' + e.type + (btnKind(e) ? ' k-' + btnKind(e) : '') + (e.cloneId ? ' clone' : ''), 'data-name': e.name, ...(e.cloneId ? { 'data-clone': e.cloneOf, 'data-gid': e.cloneId, title: `Clone of ${e.cloneOf}` } : {}) }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
-  if (vkKind(e) === 'pushbutton' || vkKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
+  if (btnKind(e) === 'pushbutton' || btnKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
   if (vkKind(e) === 'list') {        // gGlobal List: pick the Text, the element gets that choice's Value
     const s = h('select', { class: 'vksel', ...(editing || e.readOnly ? { disabled: true } : {}) }, ...(e.items || []).map(i => h('option', { value: String(i.value) }, i.text || String(i.value))));
     s.addEventListener('click', ev => ev.stopPropagation());
@@ -1071,7 +1075,7 @@ function fillEl(n, e0) {
       }
       n.classList.toggle('longtext', vkKind(e) === 'longstring');
       break;
-    case 'digitalOut': case 'switch': case 'digitalIn':
+    case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
@@ -1156,7 +1160,7 @@ function fillEl(n, e0) {
   n.classList.toggle('fault', !!v.fault);
   // a picture that is not in the media folders (BruControl pictures not copied yet) would leave a see-through
   // button with white text: show the plain gray button with black text instead
-  const isButton = e.type === 'switch' || ['switch', 'pushbutton', 'momentary'].includes(vkKind(e)) || e.look === 'button';
+  const isButton = e.type === 'switch' || ['switch', 'pushbutton', 'momentary'].includes(btnKind(e)) || e.look === 'button';
   const missing = img && isButton && imgMissing(media(img), n);
   if (missing) img = '';
   n.classList.toggle('img-missing', !!missing);
@@ -1224,6 +1228,9 @@ function tapAction(e) {
   if (e.tap && e.tap !== 'default') return e.tap;
   switch (e.type) {
     case 'digitalOut': case 'switch': return 'toggle';
+    case 'pushButton': return 'hold';           // Semi_Widgets_Devices: ON only while held
+    case 'pulseButton': return 'pulse';         // one 100 ms ON per tap
+    case 'led': return 'none';                  // a light: a Process or its Device controlled sets it
     case 'digitalIn': return ['latch', 'toggle', 'counter'].includes(e.mode) || (e.mode === 'momentary' && simDev(e.device)) ? 'dialog' : simDev(e.device) ? 'toggle' : 'none';
     case 'pwmOut': case 'analogOut': case 'scale': case 'stepper': return 'dialog';
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
@@ -1242,7 +1249,7 @@ function tapAction(e) {
 // a tap on a clone is a tap on its parent
 const elByName = n => S.config.elements.find(x => x.name === n) ?? S.config.elements.find(x => x.name === S.config.graphics.find(g => isClone(g) && g.name === n)?.of);
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
-const isBoolEl = t => ['digitalOut', 'switch', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
+const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
 async function doTap(e) {
   const act = tapAction(e);
@@ -2261,8 +2268,13 @@ const ADD_MENU = [
   ['Devices: weight', [
     ['Vessel scale: load cells on an HX711 board (weight and volume)', 'scale', 'Scale', { weightUnits: 'lb', volumeUnits: 'gal', specificGravity: 1, autoTare: true, precision: 2 }],
   ]],
+  // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Widgets with an ON / OFF state that can switch a Device (device_controlled)
+  [`Semi_Widgets_Devices (a Widget with an ON / OFF state; it can switch a Device)`, [
+    ['Switch (slide ON, slide OFF)', 'switch', 'sw_'], ['Push Button (ON only while held)', 'pushButton', 'pb_'],
+    ['Pulse Button (one 100 ms ON per tap)', 'pulseButton', 'pl_'], ['LED (a light that shows ON or OFF)', 'led', 'led_', { look: 'indicator', hideName: false }],
+  ]],
   ['Widgets (app only, no board pin)', [
-    ['Picture', 'picture'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
+    ['Picture', 'picture'], ['Shared variable', 'shared'],
     ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
@@ -2284,6 +2296,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (type === 'shared') e.dataType = 'value';
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
+  if (SEMI_KINDS[type] && !kind) { e.w = SEMI_KINDS[type].w; e.h = SEMI_KINDS[type].h; }
   if (kind === 'pushbutton' || kind === 'momentary') { e.w = 100; e.h = 100; }
   if (kind === 'longstring') { e.w = 360; e.h = 200; }
   if (kind === 'graphic') { e.hideName = true; e.w = 140; e.h = 120; }
@@ -2380,6 +2393,9 @@ const DEV_TYPES = () => [
 ].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], () => addThing(r[1], r[2], r[3], r[0])])]);
 const WGT_TYPES = () => [
   ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
+  // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
+  ['semi', 'Semi_Widgets_Devices (Switch, buttons, LED, Manual Valve)', [...amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
+    ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')]]],
   ['controls', 'On-screen controls', amGroup('Widgets').filter(r => !['picture', 'label', 'manual'].includes(r[1])).map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
   ['vessels', 'Vessels', VESSEL_ROWS],
   ['equipment', 'Equipment (chillers, coils, filters)', EQUIP_ROWS()],
@@ -2746,6 +2762,7 @@ function useTabProfile(e) {
   const p = tabProfileOf(draft.workspaces.find(w => w.name === e.workspace)); if (!p) return;
   for (const k of ['nameColor', 'nameBg', 'nameAlign', 'valueColor', 'valueBg', 'valueAlign']) if (p[k]) e[k] = p[k];
   if (!p.valueType || hasIps(e) || isPropValve(e) || (!hasStateEl(e) && !hasValueEl(e))) return;    // pumps and valves show their pictures
+  if (['pushButton', 'pulseButton', 'led'].includes(e.type)) return;      // Semi_Widgets_Devices keep their own look (a button, a light)
   const type = p.valueType === 'gauge' && hasStateEl(e) ? 'text' : p.valueType;
   e.look = lookFor(type, e);
   if (type === 'led' && hasStateEl(e) && ['digitalOut', 'switch'].includes(e.type)) e.tap = p.ledMode === 'momentary' ? 'hold' : 'toggle';
@@ -3264,6 +3281,15 @@ window.addEventListener('resize', () => { if (view === 'workspace') fitZoom(); }
 // ---------------------------------------------------------------- properties dialog
 const TB_ALIGN_CHOICES = [['', 'Default'], ...TB_ALIGNS.map(a => [a, a + (a === 'Center' ? 'ed' : '') + ' justified'])];
 // field: [key, label, kind, options]
+const SEMI_TIP = {
+  switch: 'Sliding it ON turns the Device ON, and the Device turned OFF anywhere (its own Tab, a Process) slides it OFF.',
+  pushButton: 'Holding it turns the Device ON; letting go turns it OFF. The Device turned ON anywhere shows it pressed.',
+  pulseButton: 'A tap gives the Device one 100 ms ON. The Device turned ON anywhere shows it ON until the Device is OFF.',
+  led: 'It shows the Device ON or OFF. A Process that sets it switches the Device too. A tap does nothing.',
+};
+const SEMI_FIELDS = type => [['_semi', `${SEMI_KINDS[type].title}: one of the ${SEMI_CLASS} (a Widget with an ON / OFF state). With a Device controlled, it and the Device follow each other, like a Clone. ${SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are turned by hand or by their board, so they are not.`, 'note'],
+  ['deviceControlled', 'Device controlled', 'devctl'],
+  ...(type === 'led' ? [] : [['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path']]), ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']];
 const F = {
   // Cloned Devices: only Visible, Tab, X and Y are its own (and the lock); the rest is set in its parent's Properties
   clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
@@ -3284,7 +3310,8 @@ const F = {
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
     ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT], ...VALVE_LIST_FIELDS(it)] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
-  switch: [['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
+  // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Device controlled first (None = it only shows its own .state)
+  switch: SEMI_FIELDS('switch'), pushButton: SEMI_FIELDS('pushButton'), pulseButton: SEMI_FIELDS('pulseButton'), led: SEMI_FIELDS('led'),
   digitalIn: [['inline', 'Inline in a pipe, e.g. a flow switch (gets IN and OUT IPs)', 'bool'], ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 30, or A8 = 62)', 'pin', 'digital'],
     ['mode', 'Input type', 'sel', [['switch', 'Switch / push button (ON while closed or held)'], ['toggle', 'Toggle (press once: ON, press again: OFF)'], ['momentary', 'Pulse (one short ON per press)'], ['latch', 'Latch (ON until reset)'], ['counter', 'Counter (counts presses)']]],
     ['pulse', 'Pulse: ON time per press (ms, empty = 100)', 'num'], ['lockout', 'Pulse: lockout before the next press counts (ms, 3000 = 3 seconds; empty = 3000)', 'num'],
@@ -3713,6 +3740,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)),      // Fritz: the full Interface name first
     ...(opts === 'addnew' && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
+  else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
+    ...controllableNames((draft || S.config).elements).map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)),
+    ...(v && !controllableNames((draft || S.config).elements).includes(v) ? [h('option', { value: v, selected: true }, v + ' (no ON / OFF state: pick another)')] : []));
   else if (kind === 'onsrc') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: '' }, 'None (a still picture)'),
     ...onSources(obj.name).filter(([, ns]) => ns.length || v).map(([g, ns]) => h('optgroup', { label: g }, ...ns.map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)))),
     ...(v && !onSources(obj.name).some(([, ns]) => ns.includes(v)) ? [h('option', { value: v, selected: true }, v + ' (not on / off)')] : []));
