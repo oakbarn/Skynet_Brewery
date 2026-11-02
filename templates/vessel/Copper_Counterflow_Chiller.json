@@ -1,0 +1,32 @@
+{
+  "vesselType": "pchiller",
+  "vtype": "Counterflow",
+  "image": "Images/Skynet/Chillers/Chiller_Copper_Counterflow.svg",
+  "size": [
+    150,
+    163
+  ],
+  "std": {
+    "type": "MPT",
+    "size": 0.5
+  },
+  "ports": {
+    "wortIn": {
+      "installed": true,
+      "position": "Coil Top End"
+    },
+    "waterOut": {
+      "installed": true,
+      "position": "Coil Top Branch"
+    },
+    "waterIn": {
+      "installed": true,
+      "position": "Coil Bottom Branch"
+    },
+    "wortOut": {
+      "installed": true,
+      "position": "Coil Bottom End"
+    }
+  },
+  "notes": "Skynet Copper Counterflow Chiller (Fritz's Copper_CounterFlow.svg, 2026-11-02): a copper coil, wort inside, water outside, flowing opposite ways. 4 built-in IPs on the real port tips: Wort In (top, straight through the tee), Water Out (top tee branch), Water In (bottom tee branch), Wort Out (bottom, straight through the tee). All ports face left so pipes join them Horizontally (Rule 5.19). Wort and water never mix."
+}
