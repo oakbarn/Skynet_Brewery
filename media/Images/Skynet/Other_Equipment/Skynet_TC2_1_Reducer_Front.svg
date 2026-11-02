@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet TC 2 to 1 reducer seen from the front, looking down the pipe (Fritz's drawing, 2026-11-02): both IPs at the center of the opening (0.5, 0.5) -->
+  <circle cx="50" cy="50" r="47" fill="#c0c0c0" stroke="#000" stroke-width="2.5"/>
+  <g stroke="#000" stroke-width="1"><path d="M66.6 26.2 L77.0 11.5"/><path d="M66.6 73.8 L77.0 88.5"/><path d="M33.4 73.8 L23.0 88.5"/><path d="M33.4 26.2 L23.0 11.5"/></g>
+  <circle cx="50" cy="50" r="29" fill="#808080" stroke="#000" stroke-width="1"/>
+  <circle cx="50" cy="50" r="26.5" fill="none" stroke="#c0c0c0" stroke-width="1"/>
+  <circle cx="50" cy="50" r="24.5" fill="#000"/>
+</svg>

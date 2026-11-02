@@ -198,6 +198,18 @@ What each ID means:
   Off text shows only when on) with Text when on / off.
 - Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88.
 
+### 4.3b Skynet Motorized Butterfly Valve Device (Skynet Template, Rules 5.16, 5.17, 5.20)
+Fritz's drawing (2026-11-02, Help 110): a grey actuator on a butterfly valve. A Valve (digitalOut, subtype valve, Electric, Room Temperature Liquid), made from **Valves** on the Edit layout bar like the Motorized Ball Valve.
+
+| Template | Picture | IPs |
+|---|---|---|
+| Skynet_Motorized_Butterfly_Valve_H (Master H) | Valve_Motor_Butterfly_Open/ClosedH.svg (140 x 170, pipe at 135) | left and right ferrule faces |
+| ..._VL, ..._VR (Daughters, Vertical; VR has Flip Horizontal) | Valve_Motor_Butterfly_Open/ClosedV_L.svg | top and bottom ferrule faces |
+| ..._Front (Daughter) | Valve_Motor_Butterfly_Open/ClosedFront.svg: looking down the pipe | both at the center of the opening |
+| ..._Front_Elbow (Daughter) | Valve_Motor_Butterfly_Open/ClosedFront_Elbow.svg | center of the front opening, bottom ferrule face |
+
+The Front Daughters have no Orientation or Flip to set. The **Skynet Motorized Ball Valve** (4.3a) is redrawn after Fritz's blue actuator (same files, same IP spots) and has a **Front** Daughter too (Valve_Motor_Ball_Open/ClosedFront.svg, both IPs at the center of the opening). Closed = a ring on the body; open = a bar and red bolts.
+
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
 - **Type IDs:** PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED.
@@ -294,6 +306,18 @@ What each ID means:
 - A Temperature probe (4.11) drawn as a TC 1.5 thermowell. After picking the length, a pop-up (step 2a) asks which Temperature Probe type is in it; then the normal New Device box.
 - **Pictures:** Skynet_TC15_Thermowell_Short.svg (90 wide), _Medium.svg (138), _Long.svg (192), in Images/Skynet/Other_Equipment.
 - **Settings:** the same as its probe type, plus its length.
+
+### 4.12a Tee with a Temperature Probe (Skynet Device, Rule 5.20)
+Fritz (2026-11-02, Help 110): a Temperature Device (type temperature, `subtype: probeTee`), not a pipe Widget. Made from **Probe** on the Edit layout bar like a Thermowell: pick the probe type, then Interface and Port.
+
+| `probeTee` | Picture | IPs (center of the open ferrule faces) |
+|---|---|---|
+| Instrument_Branch | Skynet_TC15_Instrument_Tee_Probe_Branch.svg: probe (purple) in the branch | left, right |
+| Instrument_Run | Skynet_TC15_Instrument_Tee_Probe_Run.svg: probe in from the left end | right, branch |
+| Long_Branch | Skynet_TC15_Long_Tee_Probe_Branch.svg | left, right |
+| Long_Run | Skynet_TC15_Long_Tee_Probe_Run.svg | right, branch |
+
+Flow passes through either way (like an inline sensor). Flip Horizontal and Flip Vertical turn the picture and its IPs. It reads like any Temperature probe (4.11).
 
 ### 4.13 Analog input
 - **Add menu entries** (Devices: analog sensors):
@@ -403,3 +427,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-28: Raspberry Pi GPIO pins built (Board Raspberry Pi, Help 78, PR #119 merged); removed from Reserved.
 - 2026-10-28: Added 4.3a Skynet Motorized Ball Valve Device (Master H, Daughters VL and VR; fixed and user settable attributes; thread "Lock Skynet Widget Templates and IPs", Help 88).
 - 2026-10-30: Database and .API settings on every Device (Rule 6.14, Help 98). (thread "Send any Device or Widget to a database")
+- 2026-11-02: Added 4.3b Skynet Motorized Butterfly Valve Device (Master H, VL, VR, Front, Front Elbow), the Motorized Ball Valve redrawn with a Front Daughter, and 4.12a Tees with a Temperature Probe; IPs on the ferrule faces (Rule 5.20, Help 110). (thread "Create pipe Widgets from Fritz's drawings")

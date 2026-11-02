@@ -15,6 +15,7 @@ export function elementTopic(e) {
   if (!e) return null;
   if (e.integratedIn) return ['skynet-integrated-devices'];
   if (e.subtype === 'thermowell') return ['skynet-integrated-devices', 'thermowells'];
+  if (e.subtype === 'probeTee') return ['pipe-widgets-from-fritzs-drawings', 'tees-with-a-temperature-probe'];   // Fritz, 2026-11-02
   if (e.template && e.templateCls === 'skynet') return ['skynet-device-templates'];      // a User version of a Skynet Device Template
   switch (e.type) {
     case 'digitalOut':

@@ -436,6 +436,15 @@ for User Bundled Templates. It is **☰ Menu > Build Template**; the always-fixe
 Valve type, Service, Look, tap behaviour) have a greyed-out box. (2026-10-28, thread "Lock Skynet Widget Templates
 and IPs"; built 2026-10-29, Help 89)
 
+5.20 **Where the IPs go** (Fritz, 2026-11-02, with two drawings): on every Device and Widget an IP sits at **the center of
+the opening**. On a TC pipe Widget (elbows, tees, reducers ...) and on any Device or Widget with TC ferrules, that is **the
+center of the ferrule's outer face** (the flat end the clamp goes on), one IP for each open end. On a **front view** (looking
+down the pipe) it is **the center of the opening**; a straight item seen from the front has both of its IPs there. Pipe
+Widgets have **no flow direction** (a check valve is still the only one-way fitting, Rule 5.14). A **tee with a Temperature
+Probe** in it is a **Temperature Device** subtype, not a pipe Widget: the probe fills one opening, so the other two are its
+IPs. The Manual Ball Valve drawings are pictures of the **Manual Valve Widget** (Rule 5.15), which keeps its click-only
+Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
+
 ## 6. Devices, connections and safety
 
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
@@ -928,3 +937,5 @@ because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skyne
 - 2026-10-31: Rule 17.8 adds Fritz's Fermentable tab layout: Amount with its own Measurement, select-only BeerXML Measurement and
   Type lists. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Added Rule 17.9 (the Adjuncts tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-11-02: Added Rule 5.20 (where the IPs go: the center of a ferrule's outer face on TC pipe Widgets, the center of the
+  opening on a front view; tees with a Temperature Probe are Temperature Devices). Help 110. (thread "Create pipe Widgets from Fritz's drawings")

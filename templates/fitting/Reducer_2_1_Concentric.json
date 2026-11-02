@@ -1,0 +1,32 @@
+{
+  "std": {
+    "type": "TC",
+    "size": 2
+  },
+  "fittings": [
+    {
+      "kind": "reducer",
+      "toSize": "1"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg",
+  "size": [
+    120,
+    84
+  ],
+  "body": 0.55,
+  "ipPos": {
+    "start": "0,0.5",
+    "end": "1,0.5"
+  },
+  "notes": "A concentric reducer, TC 2 to TC 1 (Fritz's drawing, 2026-11-02): both ends on one center line. Big end at the left, small end at the right; each IP is the center of its ferrule's outer face."
+}
