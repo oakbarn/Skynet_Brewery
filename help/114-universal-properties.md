@@ -33,7 +33,7 @@ basic Properties, with the same names everywhere. Learn them once and they work 
 
 **Being built:** today the whole list works on the Text Widget (its font size is still `.size`). Other Devices and Widgets get the rest in a coming update; until then they use `.nameColor`, `.nameBg`, `.nameAlign` for the Label and `.valueColor`, `.valueBg`, `.valueAlign` for the value.
 
-Not every item has every one: pipe fittings have no Label, and most Widgets have no background picture.
+Pipe fittings (elbows, tees, reducers ...) have them too, Label included. Most Widgets have no background picture, so they have no `.backpath`.
 
 ## Clones
 

@@ -99,8 +99,8 @@ changes to match it.
 
 ## 4. Who does not have all of them
 
-- **Pipe fittings** (elbows, tees, reducers, U, cross, End Cap, check valve): Rule 5.14 says their only settings are `.x`,
-  `.y`, `.width`, `.height` and Autosize to pipe, with no Label. **Open question for Fritz** (see below).
+- **Pipe fittings** (elbows, tees, reducers, U, cross, End Cap, check valve) have `.x`, `.y`, `.width`, `.height`, `.visible`,
+  `.hiddenlock`, `.lock`, `.tab` and a Label, plus Autosize to pipe (Rule 5.14, changed by Fritz 2026-11-02). No Type or Clone.
 - **Items with no background picture** (most Widgets, the Timer Widget; Rules 2.24, 7.10) have no `.backpath`.
 - **The Override button** (Rule 2.26): a user changes only its Label and the Label's style.
 - **gGlobals** are variables, never on a Tab (Rule 1.19), so they have none of these.
@@ -138,7 +138,7 @@ says `.font_size`). Other Devices and Widgets do not yet:
 ## 6. Open questions for Fritz
 
 1. *Answered 2026-11-02:* `.x`, `.xh` and `.x_hPosition` are all Process attributes for the same thing (likewise `.y`, `.yv`, `.y_vPosition`). Rule 1.15 rewritten; an exception to Rule 15.2.
-2. **Rule 5.14:** do pipe fittings get `.visible`, `.hiddenlock`, `.lock` and `.tab` (still no Label)?
+2. *Answered 2026-11-02:* pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label (Rule 5.14 changed).
 3. **`.lock` in a Process:** read only (as on the Text Widget today), or can a Process lock and unlock an item?
 4. Still open from before: **Label never blank** (Rule 18.3) against Rules 1.13, 3.8 and 4.2 (Open question 12).
 
@@ -146,5 +146,6 @@ says `.font_size`). Other Devices and Widgets do not yet:
 
 ## Change log
 
+- 2026-11-02: Fritz: pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label (Rule 5.14).
 - 2026-11-02: Fritz: `.x`, `.xh`, `.x_hPosition` are all the same attribute (Rule 1.15).
 - 2026-11-02: First version, from Fritz's Universal Properties list (thread "Set universal properties standard").
