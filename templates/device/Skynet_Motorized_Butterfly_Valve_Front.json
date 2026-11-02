@@ -1,0 +1,56 @@
+{
+  "title": "Skynet Motorized Butterfly Valve Device (Daughter Front: looking down the pipe)",
+  "master": "Skynet_Motorized_Butterfly_Valve_H",
+  "props": {
+    "orientation": "h",
+    "w": 64,
+    "h": 90
+  },
+  "pics": {
+    "h": [
+      "Images/Skynet/Valves/Valve_Motor_Butterfly_OpenFront.svg",
+      "Images/Skynet/Valves/Valve_Motor_Butterfly_ClosedFront.svg"
+    ]
+  },
+  "userFields": [
+    "name",
+    "label",
+    "hideName",
+    "workspace",
+    "x",
+    "y",
+    "w",
+    "h",
+    "locked",
+    "visibility",
+    "hidden",
+    "fontSize",
+    "foreColor",
+    "backColor",
+    "align",
+    "wrap",
+    "nameFontFamily",
+    "nameFontSize",
+    "nameColor",
+    "nameBg",
+    "valueColor",
+    "valueBg",
+    "nameFont",
+    "valueFont",
+    "nameAlign",
+    "valueAlign",
+    "border",
+    "typeCode",
+    "device",
+    "channel",
+    "activeLow",
+    "oneShot",
+    "oneShotDirection",
+    "tapwater",
+    "tapSource",
+    "showOnOffText",
+    "onText",
+    "offText"
+  ],
+  "notes": "Seen from the front (Fritz's drawing, 2026-11-02): both IPs at the center of the opening (Rule 5.20). A front view has no orientation to set."
+}

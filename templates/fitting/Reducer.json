@@ -1,7 +1,32 @@
 {
-  "std": { "type": "TC", "size": 2 },
-  "fittings": [{ "kind": "reducer", "toSize": "1.5" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/Skynet/Other_Equipment/Fitting_Reducer.svg",
-  "ipPos": { "start": "Left", "end": "Right" },
-  "notes": "A reducer, TC 2 to TC 1.5. The big end is at the left, the small end at the right. Pipes of two sizes that meet on one IP get a reducer cone drawn by themselves; use this one where it should be on the Equipment list, or on a vessel port of another size."
+  "std": {
+    "type": "TC",
+    "size": 2
+  },
+  "fittings": [
+    {
+      "kind": "reducer",
+      "toSize": "1.5"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg",
+  "size": [
+    120,
+    84
+  ],
+  "body": 0.55,
+  "ipPos": {
+    "start": "0,0.5",
+    "end": "1,0.5"
+  },
+  "notes": "A reducer, TC 2 to TC 1.5. The big end is at the left, the small end at the right; each IP is the center of its ferrule's outer face. Pipes of two sizes that meet on one IP get a reducer cone drawn by themselves; use this one where it should be on the Equipment list, or on a vessel port of another size."
 }
