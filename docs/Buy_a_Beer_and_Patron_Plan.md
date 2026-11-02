@@ -86,6 +86,13 @@ The pop-up offers: **One Time, Monthly, Every 2 Months, Every Quarter, Every 6 M
 **Fritz picked Option A, for Patron payments only (2026-11-02).** Buy a Beer follows Rule 12.2: today it
 goes straight to Fritz's PayPal, and a second Beer account only comes if Fritz gives one.
 
+**One account collects both (Fritz, 2026-11-02).** Fritz's PayPal (upgraded to a free Business account)
+receives every Buy a Beer **and** every Patron payment. The Pay Out counts **only Patron payments**: each
+payment carries its PayPal Plan, and the Patron Plan is its own Plan, so the Pay Out report adds up just
+the Patron payments since the last Pay Out and splits that by percent. Beer money is never in it and stays
+with Fritz (Rule 12.2). Reading the payments needs a PayPal API key, kept only on a Prime Developer's own
+panel (never in the repo or the Skynet Team file).
+
 PayPal does not split one payment between several accounts for ordinary sellers. Its split tools are only
 for big approved marketplace partners. Two ways that work:
 
@@ -166,7 +173,7 @@ This step goes into build step 2 (and the Patron part into step 3).
 
 1. ~~Rule 12.2~~ Answered 2026-11-02: new Rule 12.2 (at most 2 accounts, locked with Fritz's only).
 2. ~~Item 4: A or B?~~ Answered 2026-11-02: Option A, Patron payments only.
-6. Which PayPal account collects the Patron payments before the Pay Out? Suggested: Fritz's, upgraded to Business.
+6. ~~Which account collects Patron payments?~~ Answered 2026-11-02: Fritz's one account collects both; Pay Out splits only the Patron part.
 3. ~~Group approval: every Prime Developer, or a majority?~~ Answered 2026-11-02: every Prime Developer (100%).
 4. ~~Amounts?~~ Answered 2026-11-02: Beer $1, Every Month picked; Patron $10 every 6 months; hint only for One Time / no Frequency, never Patrons.
 5. ~~License term?~~ Answered 2026-11-02: "Protect as we can": Skynet License (section 1).
