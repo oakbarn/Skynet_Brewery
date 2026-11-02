@@ -132,7 +132,7 @@ The name alone is the item's main value; everything else is `name.attribute`.
 
 ## 6c. BruControl Globals by Kind, and what goes on the Tab
 
-(Fritz, 2026-11-02, thread "Add gGlobal Kinds and BruControl import"; Skynet Rule 1.19, Help 105)
+(Fritz, 2026-11-02, thread "Add gGlobal Kinds and BruControl import"; Skynet Rule 1.19, Help 108)
 
 **What a Global was, and what a gGlobal is.** In BruControl a Global was simply a variable with a global scope that any
 script could use. It was also the API, and it could be put on a Workspace. Fritz used them to copy things like the Mash
