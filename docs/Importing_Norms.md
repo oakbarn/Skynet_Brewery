@@ -130,6 +130,51 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | API addresses `/api/gapi`, `/api/globals` | `/api/items` (the old ones are gone, Rule 15.2) | Built |
 | Old files | kept as `.before-gglobal.bak` | Built |
 
+## 6c. BruControl Globals by Kind, and what goes on the Tab
+
+(Fritz, 2026-11-02, thread "Add gGlobal Kinds and BruControl import"; Skynet Rule 1.19, Help 108)
+
+**What a Global was, and what a gGlobal is.** In BruControl a Global was simply a variable with a global scope that any
+script could use. It was also the API, and it could be put on a Workspace. Fritz used them to copy things like the Mash
+Temperature probe so he could build a CSV export, and as Text or Graphic widgets to show something on the Workspace. In
+Skynet none of that needs a Global: **any Device or Widget can be an API** (its Database and .API box, Rule 6.14). A
+**gGlobal is a variable**: it is **never on a Tab**, and its properties and attributes are only those of a variable; only
+its scope (global) is different.
+
+**Globals need the most work when importing**, because how each one was used (something useful on a screen, or only an API
+variable) is up to the brewer who built the config. **The import asks the user** whenever it can't tell.
+
+### The Kind comes from the BruControl Global's Type
+
+| BruControl Global Type | Skynet gGlobal Kind | Status |
+| --- | --- | --- |
+| Time | **gT_Global_Time** | Built (the kind follows the type, lib/globals.js) |
+| DateTime | **gD_Global_DateTime** | Built |
+| Value | **gV_Global_Value** | Built |
+| Boolean | **gB_Global_Boolean** | Built |
+| String, no Background picture, just text in the Value | **gS_Global_String** | Built (a String becomes a String) |
+| String with a Background picture and a blank Value | **gG_Global_Graphic** (the picture paths go to its Image Path 1-3) | Norm (waits for the importer go) |
+| String with a Background picture **and** some text in the Value | **ask the user**: gS_Global_String or gG_Global_Graphic | Norm |
+
+The name rules of section 6 (`gbl`, `RP_`, `x` ...) still apply to the Name.
+
+### What goes on the Tab in its place
+
+A gGlobal is not on a Tab. When the BruControl Global **was on a Workspace**, a Widget takes its spot on the Tab (same
+place and size), and the Widget shows the gGlobal:
+
+| BruControl Global on a Workspace | On the Skynet Tab | Status |
+| --- | --- | --- |
+| gS_Global_String kind (text) | a **Text Widget** | Norm |
+| gG_Global_Graphic kind, used to show a background picture | a **Graphic (Picture) Widget** | Norm |
+| gV_Global_Value kind, used to show a value. The most used case, often only there to have the API or as a global variable | a **Value Widget** | Norm (no Value Widget yet) |
+| gT_Global_Time kind, used to show a time. Often only there for the API or as a global variable | **the user decides**: a **Time Widget**, or only a gGlobal of Kind Time | Norm (no Time Widget yet) |
+| gD_Global_DateTime kind | a **DateTime Widget**, or only a gGlobal of Kind DateTime (the user decides, like Time) | Norm (no DateTime Widget yet) |
+| A Global that was only an API variable (not shown) | only the gGlobal; if the API mattered, its .API is set, or the user points the API at the Device it copied | Norm |
+
+**User input needed** when importing Globals from BruControl: for each Global that was on a Workspace, or a String with a
+picture and text, the import shows the choices above, with the recommended one picked.
+
 ## 7. Alarms and stacked copies
 
 (Fritz, 2026-10-05, PR #24; lib/fold.js)
@@ -187,3 +232,4 @@ The name alone is the item's main value; everything else is `name.attribute`.
 - 2026-10-29: Section 5: names with `< > : " / \ \| ? *` get a `~` for each (Rule 3.4, Rule 15.2). (thread "Block unsafe characters in Device names")
 - 2026-10-30: Section 6 Globals now become gGlobal (`RP_` -> `gG_`); added section 6b, gKonstant / gAPI -> gGlobal, `log` -> `send_db`, `/api/gapi` -> `/api/items`. (thread "Send any Device or Widget to a database")
 - 2026-10-31: Added section 10, Recipes: .bsmx and BeerXML, no limits, units, hop use. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-11-02: Section 6c: BruControl Globals go to the gGlobal Kind of their Type (a String with a picture becomes gG_Global_Graphic, or the user is asked); a gGlobal is never on a Tab, so a Text, Picture, Value, Time or DateTime Widget takes the Global's spot; user input needed. (thread "Add gGlobal Kinds and BruControl import")

@@ -48,6 +48,7 @@ import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/r
 import { gStandardOnDisk } from './lib/gstandard.js';
 import { cleanUserStyles } from './public/styles.js';
 import { safeNamesOnDisk, renameQuoted } from './lib/namechars.js';
+import { kindChangeError } from './public/gkinds.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
@@ -508,6 +509,8 @@ async function route(req, res) {
     for (const list of ['elements', 'graphics', 'workspaces', 'devices']) if (Array.isArray(body[list])) claimKeys(body[list], store.config[list]);
     // a User version of a Skynet Device Template (Rule 5.16): its fixed attributes are put back to the Template's, whatever was sent
     for (const el of body.elements ?? []) if (el?.template && el.templateCls === 'skynet') applyDeviceTemplate(el, templates.find('device', el.template));
+    // a gGlobal's Kind is set when it is made and never changes (Fritz, 2026-11-02, public/gkinds.js)
+    { const bad = kindChangeError(store.config.elements, body.elements); if (bad) return fail(res, 400, bad); }
     for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)
     for (const el of body.elements ?? []) cleanDatabase(el);     // .database and .API: only the known settings are kept (lib/itemapi.js)
     // device_controlled (Semi_Widgets_Devices, public/semi.js): only a Device with an ON / OFF state; a deleted one goes back to None
