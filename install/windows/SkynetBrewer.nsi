@@ -2,7 +2,8 @@
 ;
 ; Puts the Skynet Brew Panel in C:\Brewing\BrewPanel (changeable), writes Skynet_Brewer.bat there,
 ; and adds a "Skynet Brewer" shortcut to the Desktop and the Start menu.
-; On an update it keeps your config, data, media and scripts folders, unless you choose to replace one.
+; On an update it keeps your config, data, media and scripts folders, unless you choose to replace one, or choose
+; Start Fresh (deletes config, data and scripts after a second warning; media is kept).
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config, media and scripts samples are in its defaults\ folder)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
@@ -62,6 +63,7 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !insertmacro MUI_LANGUAGE "English"
 
 Var Upgrade
+Var Fresh
 Var OldPanel
 Var Stamp
 
@@ -152,6 +154,31 @@ Function AskReplaceFolders
   done:
 FunctionEnd
 
+; ---------------------------------------------------------------- Start Fresh on an existing install
+; Asks whether to delete all users, Schemas and Processes and start as if the panel was never installed. A second, red
+; warning comes before anything is deleted, with No (go back and keep everything) as the default. $Fresh = 1 when deleted.
+Function AskStartFresh
+  StrCpy $Fresh 0
+  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Skynet Brewer is already installed in $INSTDIR.$\r$\n$\r$\nDelete all users and Schemas and Start Fresh?$\r$\n$\r$\nNo (recommended): keep everything and just update.$\r$\nYes: a warning comes next, so you can still back out." /SD IDNO IDNO keep
+  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (scripts)$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: back out. Nothing is deleted." /SD IDNO IDYES wipe
+    DetailPrint "Start Fresh: backed out. Nothing was deleted."
+    Goto keep
+  wipe:
+    RMDir /r "$INSTDIR\config"
+    RMDir /r "$INSTDIR\data"
+    RMDir /r "$INSTDIR\scripts"
+    ${If} ${FileExists} "$INSTDIR\config\*.*"
+    ${OrIf} ${FileExists} "$INSTDIR\data\*.*"
+    ${OrIf} ${FileExists} "$INSTDIR\scripts\*.*"
+      MessageBox MB_OK|MB_ICONEXCLAMATION "Some files could not be deleted (a program still has them open). What is left is kept. Restart the computer and run the installer again to finish the Start Fresh." /SD IDOK
+      DetailPrint "Start Fresh: some files could not be deleted."
+    ${Else}
+      DetailPrint "Start Fresh: users, Schemas, settings, brew log and Processes deleted. The panel starts again from the samples."
+    ${EndIf}
+    StrCpy $Fresh 1
+  keep:
+FunctionEnd
+
 ; ---------------------------------------------------------------- Install
 Section "Skynet Brew Panel" SecMain
   SectionIn RO
@@ -166,8 +193,12 @@ Section "Skynet Brew Panel" SecMain
   StrCpy $Upgrade 0
   ${If} ${FileExists} "$INSTDIR\server.js"
     StrCpy $Upgrade 1
-    DetailPrint "Updating. Kept as they are: layout and settings (config), brew data, log, users and passwords (data), pictures and sounds (media), processes (scripts)."
-    ${If} ${FileExists} "$INSTDIR\config\brewery.json"
+    Call AskStartFresh
+    ${If} $Fresh == 0
+      DetailPrint "Updating. Kept as they are: layout and settings (config), brew data, log, users and passwords (data), pictures and sounds (media), processes (scripts)."
+    ${EndIf}
+    ${If} $Fresh == 0
+    ${AndIf} ${FileExists} "$INSTDIR\config\brewery.json"
       CreateDirectory "$INSTDIR\config\backups"
       CopyFiles /SILENT "$INSTDIR\config\brewery.json" "$INSTDIR\config\backups\brewery_before_update_$Stamp.json"
     ${EndIf}
@@ -177,7 +208,9 @@ Section "Skynet Brew Panel" SecMain
       CopyFiles /SILENT "$INSTDIR\help\*.md" "$INSTDIR\help\backups\before_update_$Stamp"
       DetailPrint "Old help pages copied to help\backups\before_update_$Stamp"
     ${EndIf}
-    Call AskReplaceFolders
+    ${If} $Fresh == 0
+      Call AskReplaceFolders
+    ${EndIf}
   ${Else}
     DetailPrint "Full install to $INSTDIR"
   ${EndIf}
