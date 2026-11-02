@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100.2 74.6">
+  <!-- Skynet drawing: Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet). Off, no cover. 10 units = 1 inch. Inlet IP at the tip of the right-hand port (0.994, 0.63), outlet IP at the tip of the top port (0.804, 0.0). -->
+  <g stroke-linejoin="round">
+    <rect x="8.0" y="66.0" width="49.6" height="8.0" rx="0.8" fill="#5a5a5a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <path d="M1.6 57.0 q -0.5 6 3 9" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
+    <rect x="0.6" y="27.0" width="62.0" height="40.0" rx="7.2" fill="#808080" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="2.6" y="28.5" width="58.0" height="6.4" rx="1" fill="#9a9a9a"/>
+    <path d="M15.2 29.0 L15.2 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M20.5 29.0 L20.5 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M25.8 29.0 L25.8 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M31.2 29.0 L31.2 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M36.5 29.0 L36.5 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <path d="M41.8 29.0 L41.8 65.0" stroke="#5f5f5f" stroke-width="0.8"/>
+    <rect x="0.6" y="30.2" width="2.4" height="33.6" rx="1.0" fill="#6c6c6c" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="62.1" y="32.6" width="9.5" height="28.8" rx="0.8" fill="#8f9296" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="71.6" y="26.0" width="18.0" height="42.0" rx="2.2" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="72.4" y="27.0" width="6.3" height="40.0" rx="1" fill="#d6d8db"/>
+    <rect x="71.0" y="25.6" width="2.2" height="42.8" rx="0.8" fill="#8f9296" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="89.6" y="42.8" width="10.0" height="8.4" rx="0.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/><path d="M91.2 42.8 L91.8 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M92.8 42.8 L93.4 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M94.4 42.8 L95.0 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M96.0 42.8 L96.6 51.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M97.6 42.8 L98.2 51.2" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="76.4" y="0.0" width="8.4" height="26.0" rx="0.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/><path d="M76.4 1.6 L84.8 1.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 3.2 L84.8 2.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 4.8 L84.8 4.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 6.4 L84.8 5.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 8.0 L84.8 7.4" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 9.6 L84.8 9.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 11.2 L84.8 10.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 12.8 L84.8 12.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 14.4 L84.8 13.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 16.0 L84.8 15.4" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 17.6 L84.8 17.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 19.2 L84.8 18.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 20.8 L84.8 20.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 22.4 L84.8 21.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 24.0 L84.8 23.4" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="72.6" y="14.2" width="16.0" height="6.0" rx="1.2" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="88.4" y="16.0" width="9.0" height="2.4" rx="1.0" fill="#c62828" stroke="#2b2b2b" stroke-width="0.8"/>
+  </g>
+</svg>

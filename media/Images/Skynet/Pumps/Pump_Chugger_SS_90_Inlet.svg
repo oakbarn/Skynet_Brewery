@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60.1 62.6">
+  <!-- Skynet drawing: Chugger CPSS-IN (stainless in-line head, side inlet at 90 to the outlet). Off, no cover. 10 units = 1 inch. Inlet IP at the tip of the right-hand port (0.99, 0.527), outlet IP at the tip of the top port (0.646, 0.0). -->
+  <g stroke-linejoin="round">
+    <rect x="0.4" y="54.0" width="50.4" height="8.0" rx="0.8" fill="#5a5a5a" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="4.6" y="12.0" width="42.0" height="42.0" rx="18.9" fill="#808080" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="18.6" y="3.6" width="14.0" height="9.0" rx="1.0" fill="#6c6c6c" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="31.7" y="10.8" width="14.3" height="14.1" rx="0.6" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+    <circle cx="25.6" cy="33.0" r="22.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+    <path d="M11.1 24.2 A16.7 16.7 0 0 1 27.8 16.3" fill="none" stroke="#d6d8db" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="25.6" cy="33.0" r="7.9" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="0.8"/>
+    <rect x="38.8" y="26.3" width="9.7" height="13.4" rx="0.6" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+    <rect x="48.5" y="28.8" width="11.0" height="8.4" rx="0.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/><path d="M50.1 28.8 L50.7 37.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M51.7 28.8 L52.3 37.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M53.3 28.8 L53.9 37.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M54.9 28.8 L55.5 37.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M56.5 28.8 L57.1 37.2" stroke="#2b2b2b" stroke-width="0.5"/>
+    <rect x="34.6" y="0.0" width="8.4" height="10.8" rx="0.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/><path d="M34.6 1.6 L43.0 1.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M34.6 3.2 L43.0 2.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M34.6 4.8 L43.0 4.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M34.6 6.4 L43.0 5.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M34.6 8.0 L43.0 7.4" stroke="#2b2b2b" stroke-width="0.5"/>
+  </g>
+</svg>
