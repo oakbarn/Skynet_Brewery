@@ -6,6 +6,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | Document | What it holds |
 |---|---|
 | [Skynet Rules](Skynet_Rules.md) | Every Skynet Rule. Read before building anything. |
+| [General Properties Dialog Format](General_Properties_Dialog_Format.png) | Fritz's drawing for the General Dialog Rules (Rule 18). |
 | [Device Library](Device_Library.md) | Every Device and all its attributes. |
 | [Widget Library](Widget_Library.md) | Every Widget, Widget setting and Skynet Template. |
 | [Image Library](Image_Library.md) | Every Skynet picture, by group. The pictures are in [media/Images/Skynet](../media/Images/Skynet/). |
