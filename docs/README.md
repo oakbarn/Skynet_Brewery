@@ -15,6 +15,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Existing Alarms](ExistingAlarms.md) | Every old-style Alarm in the sample Schemas (Name, Schema, Tab), to change to the new Basic format one by one. |
 | [Importing Norms](Importing_Norms.md) | Every change an import makes to bring a BruControl Schema (or anything old) up to the Skynet way. |
 | [Existing gGlobals](ExistingGlobals.md) | Every gGlobal in the default and sample Schemas (Name, Schema, Tab), to sort into true variables and Text or Graphic Widgets. |
+| [Buy a Beer and Patron plan](Buy_a_Beer_and_Patron_Plan.md) | Plan for Buy a Beer choices, Patrons, PayPal percents and the Skynet Team file (waiting for Fritz's go). |
 | [Remote access](REMOTE_ACCESS.md) | Reaching the panel from outside the house. |
 | [MQTT and voice](MQTT_AND_VOICE.md) | MQTT and voice assistant hookups. |
 | [Device protocol](DEVICE_PROTOCOL.md) | The message language between the Brain and the boards. |
