@@ -887,6 +887,44 @@ function buildEl(e) {
   return n;
 }
 
+// ---- The Alarm Widget (Fritz, 2026-11-02): two subclasses, set when it is made and never changed (alarmClass).
+// Basic Skynet Alarm ('basic'): a set Skynet picture in layers, bottom to top:
+//   Layer 4  Back only picture, colored with .back (Back color)      Alarm_Basic_Back.svg
+//   Layer 3  Fore only picture, colored with .fore (Fore color)      Alarm_Basic_Fore.svg (then its black lines, never colored)
+//   Layer 2  Set Graphic: one of the Skynet Alarm_Set_ pictures, or None
+//   Layer 1  Active overlay (imageOverlay): one of the Skynet Alarm_Active_ pictures, or None, on top while the alarm is active
+// User Alarm ('user'): its own background picture (Image Path 1), any picture as its Set Graphic (Layer 2), an Active overlay and
+// a Back color behind it. An Alarm made before the subclasses has no alarmClass and works as before.
+const ALM_DIR = 'Images/Skynet/Alarms/';
+const ALM_PICS = { back: ALM_DIR + 'Alarm_Basic_Back.svg', fore: ALM_DIR + 'Alarm_Basic_Fore.svg', lines: ALM_DIR + 'Alarm_Basic_Lines.svg', together: ALM_DIR + 'Alarm_Basic.svg' };
+const ALM_COLORS = { back: '#6ca538', fore: '#8bcf18' };      // Fritz's greens (his Alarm.svg)
+const ALM_SET_RE = /(^|\/)Skynet\/Alarms\/Alarm_Set_[^/]+\.svg$/i, ALM_ACTIVE_RE = /(^|\/)Skynet\/Alarms\/Alarm_Active_[^/]+\.svg$/i;
+const isAlmBasic = e => e?.type === 'alarm' && e.alarmClass === 'basic';
+const almName = p => String(p).split('/').pop().replace(/\.svg$/i, '').replace(/^Alarm_(Set|Active)_/, '').replace(/_/g, ' ');
+// the Skynet pictures a Basic Skynet Alarm can pick: None first (Fritz), then the Set Graphics or the Active overlays
+const almChoices = re => [['', 'None'], ...[...new Set([...mediaPics.filter(p => re.test(p)), ...(re === ALM_SET_RE ? [ALM_DIR + 'Alarm_Set_Hop.svg'] : [ALM_DIR + 'Alarm_Active_Red.svg'])])].sort().map(p => [p, almName(p)])];
+const cssUrl = p => `url("${media(p)}")`;
+function almLayers(n, e, v) {
+  let L = n.querySelector(':scope > .almLayers');
+  if (!e.alarmClass) { L?.remove(); n.classList.remove('almBasic'); return; }
+  if (!L) {
+    L = h('div', { class: 'almLayers' }, h('div', { class: 'almBack' }), h('div', { class: 'almFore' }), h('div', { class: 'almLines' }), h('div', { class: 'almSet' }));
+    L.children[0].style.webkitMaskImage = L.children[0].style.maskImage = cssUrl(ALM_PICS.back);
+    L.children[1].style.webkitMaskImage = L.children[1].style.maskImage = cssUrl(ALM_PICS.fore);
+    L.children[2].style.backgroundImage = cssUrl(ALM_PICS.lines);
+    n.prepend(L);
+  }
+  const basic = isAlmBasic(e);
+  n.classList.toggle('almBasic', basic);
+  for (const x of [...L.children].slice(0, 3)) x.classList.toggle('hidden', !basic);
+  if (basic) {
+    L.children[0].style.backgroundColor = firstSet(v.backcolor, e.backColor, ALM_COLORS.back);
+    L.children[1].style.backgroundColor = firstSet(v.forecolor, e.foreColor, ALM_COLORS.fore);
+  }
+  const set = e.setGraphic || '';
+  if (L._set !== set) { L._set = set; L.children[3].style.backgroundImage = set ? cssUrl(set) : ''; }
+}
+
 // Colors, fonts, alignment and border (imported from BruControl or set in the properties dialog)
 const ALIGN = { Top: 'flex-start', Middle: 'center', Bottom: 'flex-end', Left: 'flex-start', Center: 'center', Right: 'flex-end' };
 function fontCss(node, f) {
@@ -900,6 +938,7 @@ function fontCss(node, f) {
 // then the ☰ Menu > Default tab. The Default fore color leaves the LED and Gauge digits their own colors.
 const OWN_DIGITS = ['led', 'lcd', 'indicator'];
 function styleEl(n, e) {
+  if (isAlmBasic(e)) e = { ...e, foreColor: '', backColor: '' };      // a Basic Skynet Alarm's Fore and Back color its picture, not its text
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl'), D = TD(), T = TS();
   // its own colors win; a Tab Style only fills in what it has none of (Fritz, 2026-10-30)
   const nc = firstSet(e.nameColor, e.foreColor, T.labelFore, D.foreColor), vc = firstSet(e.valueColor, e.foreColor, OWN_DIGITS.includes(e.look) ? '' : firstSet(T.fore, D.foreColor));
@@ -908,7 +947,9 @@ function styleEl(n, e) {
   if (nb) nm.style.backgroundColor = nb;
   if (vc) { vl.style.color = vc; vl.style.textShadow = 'none'; }
   if (vb) vl.style.backgroundColor = vb;
+  if (isAlmBasic(e)) vl.style.backgroundColor = 'transparent';      // nothing covers its bell: it shows no value text
   fontCss(nm, e.nameFont); fontCss(vl, e.valueFont);
+  if (e.nameBold) nm.style.fontWeight = '700';
   // Name font and Name font size: its own, else the Default tab's (px; an imported BruControl font keeps its size)
   const fam = firstSet(e.nameFontFamily, e.nameFont?.family ? '' : firstSet(T.labelFont, D.nameFont)), size = +e.nameFontSize || (e.nameFont?.size ? 0 : fontPx(T.labelSize) || D.nameFontSize);
   if (fam) nm.style.fontFamily = fam;
@@ -1027,7 +1068,9 @@ function fillEl(n, e0) {
     case 'pid': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
-      img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic)); break;
+      img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
+      if (isAlmBasic(e)) { img = ''; text = ''; }       // the Basic Skynet Alarm is its layers (almLayers), no text
+      almLayers(n, e, v); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
@@ -1097,6 +1140,7 @@ function fillEl(n, e0) {
   n.classList.toggle('img-missing', !!missing);
   const stretch = stretchPic(e, v);
   n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
+  if (e.alarmClass === 'user' && firstSet(v.backcolor, e.backColor)) n.style.backgroundColor = firstSet(v.backcolor, e.backColor);     // a User Alarm's .backcolor
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
   const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
   n.classList.toggle('turned', !!(turn || flip));
@@ -2156,7 +2200,7 @@ const ADD_MENU = [
   ]],
   ['Widgets (app only, no board pin)', [
     ['Picture', 'picture'], ['Shared variable', 'shared'], ['Switch (on screen only)', 'switch'],
-    ['Timer', 'timer'], ['Alarm', 'alarm', '', { kind: 'general' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
+    ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
 ];
@@ -2182,6 +2226,10 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (kind === 'list') { e.w = 200; e.h = 70; e.items = [{ value: 1, text: '' }, { value: 2, text: '' }, { value: 3, text: '' }]; e.initial = '1'; }
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
+  if (type === 'alarm' && e.alarmClass) {       // an Alarm Widget (Fritz, 2026-11-02): a Label from the start (never blank), the Name follows it
+    e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
+    if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
+  }
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
   if (isDevice(e)) {      // Fritz, 2026-10-28: a new Device is 150 x 150 unless its size is changed in the Add Device box
@@ -3325,6 +3373,35 @@ function alarmFields(item) {
 // drawings (Help 104) have covers; a Process changes it with Pump_1.cover = "Blue" and Pump_1.coverColor = "#20b2aa".
 const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under the On overlay; Skynet no-cover pump drawings only)', 'sel', COVER_CHOICES, true],
   ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color']] : [])];
+// Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
+// ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
+const ALM_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show'], ['nameFontSize', 'Font size (px; empty = Default)', 'num'],
+  ['nameFontFamily', 'Font', 'sel', FONTS], ['nameBold', 'Bold', 'bool'], ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'],
+  ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]]] };
+// the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
+const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
+  ['imagePath_2', 'Image Path 2', 'imgopen', 2], ['imagePath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+function alarmWidgetFields(it) {
+  const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
+  return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
+    ['name', 'Name', 'text', null, false, 'b'],
+    ['_nm', `${basic ? 'A Basic Skynet Alarm: the Skynet bell picture with your Back and Fore colors.' : 'A User Alarm: your own pictures.'} The Name follows the Label until you type a name of your own. A Process uses it: ${it.name || 'alm_Name'}.active = true sounds it.`, 'infonote', 'alarm'],
+    ['_ab', 'Alarm', 'box'], ['kind', 'Kind of alarm', 'sel', ALARM_KIND_LIST, true, 'b'],
+    ...(k === 'hop' ? [['timer', 'Sound by itself on this timer (empty = only from a Process)', 'elem'], ['at', 'At this time on the timer (hh:mm:ss)', 'text']] : []),
+    ...(k === 'prehop' ? [['hopAlarm', 'Goes with this Hop Alarm', 'elem'], ['before', 'How long before it (hh:mm:ss, empty = 00:10:00)', 'text']] : []),
+    A.soundMode, A.sound, A.sounds, A.fileIndex, A.loop, ...(basic ? [] : [A.activeText]),
+    ['_gb', 'Graphic', 'box'],
+    ...(basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
+      ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
+      ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
+      : [['imagePath_1', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
+        ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['backColor', 'Back color (behind the pictures; a Process: .back)', 'color']]),
+    ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
+}
+// a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
+const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
+
 function fieldsFor(item) {
   let fs = fieldsOf(item);
   if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
@@ -3361,6 +3438,15 @@ function fieldsOf(item) {
 const PICK_TIP = 'Double-click to open the Properties of the one picked';
 function field(f, obj) {
   const out = fieldOne(f, obj);
+  // Rule 18 (General Dialog Rules, Fritz 2026-11-02): f[6] = { up: 2 or 30, attr: { title, fields } }. The red Up Arrow ⬆ opens the
+  // String Entry Dialog (2 or 30 lines); the red hexagon ⬢ opens the Attribute Pop Up Dialog for that field's attributes.
+  const x = f[6];
+  if (x && out[1]) {
+    const icons = [];
+    if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Type it in a bigger box (${x.up} lines)`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
+    if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
+    const wrap = h('div', { class: 'fldIcons' }, out[1], ...icons); out[1] = wrap;
+  }
   if (f[5] === 'b' && out[0]?.tagName === 'LABEL') out[0].classList.add('strong');      // a main field: its name in bold
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
     out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
@@ -3798,6 +3884,16 @@ function styleEditor(kind, st, from) {
 // The orange ? (Fritz, 2026-10-29): not Help (that is the yellow ? by the title) but a pop-up with more about this kind of Widget:
 // its Properties and the Attributes a Process can use. ✖ Close at the top and the bottom. Each kind's list is in INFO.
 const INFO = {
+  alarm: { title: 'Alarm Widget', properties: [
+    ['Two subclasses', ', picked when it is made and never changed: the Basic Skynet Alarm (the Skynet bell) and the User Alarm (your own pictures).'],
+    ['Basic Skynet Alarm layers', ', bottom to top: Layer 4 Back (colored by .back), Layer 3 Fore (the bell, colored by .fore), Layer 2 Set Graphic (a Skynet picture or None), Layer 1 Active overlay (on top while it is active, or None). The bell picture itself is set by Skynet.'],
+    ['User Alarm', ': a background picture (Image Path 1; the ⬢ Graphic Dialog has the others), any picture as its Set Graphic, an Active overlay, and a Back color behind them.'],
+    ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (alm_ + the Label).'],
+    ['Alarm settings', ': Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']],
+    attributes: [['.active', 'true = the alarm is on'], ['.back', 'Layer 4 on a Basic Skynet Alarm; the color behind a User Alarm'], ['.fore', 'Layer 3, the bell (Basic Skynet Alarm)'], ['.label'], ['.visible'], ['.hiddenlock'],
+      ['.x'], ['.y'], ['.width'], ['.height'], ['.sound'], ['.fileindex']],
+    example: 'alm_Hops.back = "Red"' },
   text: { title: 'Text Widget', properties: [
     ['Name', ' with a Suggested Name (w_Text_N). A user changes it only with ✏ Change name, and every Process that uses it is updated to the new name.'],
     ['Label', ' (Add > Label in Edit layout): a line above the Text, with its own Visible switch, font, size, bold, colors and alignment.'],
@@ -3868,6 +3964,50 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
 }
 
 const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
+// Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
+const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
+// a small dialog on top of the Properties (Rule 18 pop-ups): ✖ Cancel and 💾 Save at the top and the bottom; build(body) fills it
+function layerDialog(title, build) {
+  return new Promise(res => {
+    const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
+    const bar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'), h('button', { type: 'button', class: 'primary', onclick: () => done('ok') }, '💾 Save'));
+    d.append(h('h3', {}, title), bar(), body, bar());
+    document.body.append(d); build(body);
+    const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
+    const done = r => { d.close(); d.remove(); res(r); };
+    const cancel = () => { if (snap() !== before && !discardOk()) return; done('cancel'); };
+    d.addEventListener('cancel', ev => { ev.preventDefault(); cancel(); });
+    d.showModal();
+  });
+}
+// ⬆ String Entry Dialog (Rule 18.1): 2 or 30 lines, word wrap, Rich Text codes allowed. A one-line box keeps a new line as \n.
+async function upEntry(wrap, f, lines) {
+  const inp = wrap.querySelector('[data-k]'); if (!inp) return;
+  let ta;
+  const r = await layerDialog(f[1], body => {
+    ta = h('textarea', { rows: lines, class: 'strEntry', spellcheck: 'false' }); ta.style.whiteSpace = 'pre-wrap';
+    ta.value = inp.tagName === 'TEXTAREA' ? inp.value : inp.value.replace(/\\n/g, '\n');
+    body.append(ta, h('p', { class: 'muted' }, 'Rich Text Embedded Codes work here: \\b bold, \\i italic, \\c{Red} color ... (Help > Rich Text Embedded Code)'));
+    setTimeout(() => ta.focus(), 0);
+  });
+  if (r !== 'ok') return;
+  inp.value = inp.tagName === 'TEXTAREA' ? ta.value : ta.value.replace(/\r?\n/g, '\\n');
+  inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true }));
+}
+// ⬢ Attribute Pop Up Dialog (Rule 18.2): its fields are read into the item; a field that is on the Properties too follows it there
+async function attrEntry(attr, obj) {
+  try { readFields(obj); } catch { }
+  let body;
+  const r = await layerDialog(attr.title, b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); });
+  if (r !== 'ok') return;
+  readFields(obj, body);
+  for (const inp of $$('#dlgBody [data-k]')) {
+    const k = inp.dataset.k, kind = inp.dataset.kind;
+    if (!body.querySelector(`[data-k="${k}"]`)) continue;
+    if (kind === 'show') inp.checked = !obj[k]; else if (kind === 'vis') inp.checked = obj[k] !== 'hidden'; else if (inp.type === 'checkbox') inp.checked = !!obj[k]; else inp.value = obj[k] ?? '';
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
@@ -4053,6 +4193,7 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
+    if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
@@ -4071,7 +4212,16 @@ async function editItem(kind, id) {
   if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override').finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); });
+  // a new Alarm Widget: its Name follows its Label (Rule 18.3) until a name of its own is typed
+  const almNew = kind === 'el' && item.type === 'alarm' && item.alarmClass && !S.config.elements.some(x => x.name === item.name);
+  let almSug = almNew ? item.name : null;
+  const almFollow = ev => {
+    if (!almNew || ev.target?.dataset?.k !== 'label') return;
+    const nm = $('#dlgBody [data-k="name"]'); if (!nm || nm.value !== almSug) return;
+    nm.value = almSug = almSuggest(item, ev.target.value);
+  };
+  $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -4177,6 +4327,7 @@ async function editItem(kind, id) {
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
         applyDeviceTemplate(work, devTemplate(work));
       }
+      if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
