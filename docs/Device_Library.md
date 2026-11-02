@@ -172,6 +172,7 @@ What each ID means:
 - **Type ID:** Pump (or P_Pump on a PWM / analog output for speed).
 - Same settings as 4.1 with Kind = pump. Turning it on makes flow run from its inlet IP to its outlet IP. Pumps have no orientation setting.
 - **Skynet pump pictures** (Pumps group, Help 104): March 809 and 815 (poly 90° inlet, poly center inlet, stainless center inlet), Chugger (stainless 90° inlet and center inlet), Blichmann Riptide (stainless, cover off), Topsflo TD5 and KegLand MKII (poly, plus MKII stainless). Drawn from the real pumps with no cover; with one of them the IN and OUT IPs sit on the tips of the real inlet and outlet ports.
+- **Cover overlay** (Rule 7.13, Help 111): **.cover** = None (default), Red, Yellow, Blue, Green, Purple, Orange or User; **.coverColor** = the User cover's color. Drawn between the pump picture and the On overlay, on the Skynet no-cover pump drawings only.
 
 ### 4.3 Valve
 - **Add menu:** Devices: outputs > Valve (relay output with an IP at each end). A Valve Profile can be picked when it is made.
@@ -429,4 +430,5 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-28: Added 4.3a Skynet Motorized Ball Valve Device (Master H, Daughters VL and VR; fixed and user settable attributes; thread "Lock Skynet Widget Templates and IPs", Help 88).
 - 2026-10-30: Database and .API settings on every Device (Rule 6.14, Help 98). (thread "Send any Device or Widget to a database")
 - 2026-10-31: 4.2 Pump: Skynet pump pictures with IPs on the real ports (12 drawings, Help 104). (thread "Draw SVGs for common brew pumps")
+- 2026-11-02: 4.2 Pump: Cover overlay, .cover and .coverColor (Rule 7.13, Help 111). (thread "Draw SVGs for common brew pumps")
 - 2026-11-02: Added 4.3b Skynet Motorized Butterfly Valve Device (Master H, VL, VR, Front, Front Elbow), the Motorized Ball Valve redrawn with a Front Daughter, and 4.12a Tees with a Temperature Probe; IPs on the ferrule faces (Rule 5.20, Help 110). (thread "Create pipe Widgets from Fritz's drawings")

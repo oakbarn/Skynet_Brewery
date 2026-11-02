@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100.2 74.6">
+  <!-- Skynet pump Cover Overlay: Red cover. Same box as Pump_Riptide_SS_Center_Inlet.svg, so it lies exactly over it; see-through around the cover. -->
+  <defs><clipPath id="in"><path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z"/></clipPath></defs>
+  <g stroke-linejoin="round">
+    <path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z" fill="#d32f2f"/>
+    <rect x="0.3" y="25.0" width="64.3" height="8.2" fill="#ffffff" fill-opacity="0.32" clip-path="url(#in)"/>
+    <rect x="0.3" y="58.6" width="64.3" height="7.4" fill="#000000" fill-opacity="0.22" clip-path="url(#in)"/>
+    <rect x="6.7" y="38.9" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="43.0" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="47.1" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <rect x="6.7" y="51.2" width="18.0" height="1.4" rx="0.6" fill="#000000" fill-opacity="0.45"/>
+    <path d="M61.6 27.0 V65.0" stroke="#000000" stroke-opacity="0.35" stroke-width="0.8"/>
+    <path d="M0.3 66.0 V36.5 Q0.3 25.0 11.8 25.0 H53.1 Q64.6 25.0 64.6 36.5 V66.0 Z" fill="none" stroke="#2b2b2b" stroke-width="1.2"/>
+  </g>
+</svg>

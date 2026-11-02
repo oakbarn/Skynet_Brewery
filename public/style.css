@@ -781,6 +781,7 @@ button.hiddenTab { border-style: dotted; opacity: .8; }
 .buildOpt label { display: block; margin: 6px 0; }
 /* On overlay: a see-through picture drawn on top of the item while it is on (Fritz, 2026-10-22) */
 .el > .onov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; }
+.el > .coverov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 .el > .onov.tint { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mix-blend-mode: color; }
 .mdReadOnly { margin: 6px 0; padding: 6px 10px; border: 1px solid #e8a33a; border-radius: 8px; background: #e8a33a22; }
 .mdPickBtn.off { opacity: .45; pointer-events: none; }
