@@ -792,6 +792,23 @@ const PUMP_FLOW = {
   Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
   Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
 };
+// Pump Cover Overlays (Fritz, 2026-11-02): a cover drawn over a Skynet pump drawing (the no-cover ones above), between the
+// picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
+// .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
+// is the outline and shading only; the panel fills the cover's shape (taken from the Red one) with the user's color.
+const PUMP_COVERS = ['Red', 'Yellow', 'Blue', 'Green', 'Purple', 'Orange'];
+const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'User cover (pick its color below)']];
+const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
+const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
+function coverOf(e, v) {
+  if (e.subtype !== 'pump') return null;
+  const pump = coverPump(v.imageoff || e.imageOff || v.imageon || e.imageOn);
+  const want = String(v.cover || e.cover || 'None').trim().toLowerCase();
+  if (!pump || want === 'none' || !want) return null;
+  if (want === 'user') return { file: `${COVER_DIR}${pump}_Cover_User.svg`, mask: `${COVER_DIR}${pump}_Cover_Red.svg`, color: v.covercolor || e.coverColor || '#808080' };
+  const c = PUMP_COVERS.find(x => x.toLowerCase() === want);
+  return c ? { file: `${COVER_DIR}${pump}_Cover_${c}.svg` } : null;
+}
 function picFlow(path) {
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
@@ -1094,6 +1111,18 @@ function fillEl(n, e0) {
     const pct = propPct(e); on = pct > 0;
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
     img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
+  }
+  // Pump cover: over the picture, under the On overlay, on and off (it mirrors with the picture's flips)
+  const cv = coverOf(e, v);
+  let co = n.querySelector(':scope > .coverov');
+  if (cv && !co) { co = h('div', { class: 'coverov' }); const o1 = n.querySelector(':scope > .onov'); if (o1) n.insertBefore(co, o1); else n.append(co); }
+  if (co) {
+    co.classList.toggle('hidden', !cv);
+    co.style.backgroundImage = cv ? `url("${media(cv.file)}")` : '';
+    co.style.backgroundColor = cv?.mask ? cv.color : '';
+    co.style.webkitMaskImage = co.style.maskImage = cv?.mask ? `url("${media(cv.mask)}")` : '';
+    co.style.transform = e.flipH || e.flipV ? `scale(${e.flipH ? -1 : 1}, ${e.flipV ? -1 : 1})` : '';
+    if (cv) fitOverlay(n, co, v.imageoff || e.imageOff || img, stretchPic(e, v));
   }
   // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
   const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay || e.imageOverlay);
@@ -3457,6 +3486,10 @@ function alarmFields(item) {
     ...kindFields('alarm', item)];
 }
 
+// a pump's Cover (Fritz, 2026-11-02): between its picture and the On overlay; None is the default. Only the Skynet no-cover pump
+// drawings (Help 104) have covers; a Process changes it with Pump_1.cover = "Blue" and Pump_1.coverColor = "#20b2aa".
+const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under the On overlay; Skynet no-cover pump drawings only)', 'sel', COVER_CHOICES, true],
+  ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color']] : [])];
 // Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
 // ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
 const ALM_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show'], ['nameFontSize', 'Font size (px; empty = Default)', 'num'],
@@ -3495,7 +3528,7 @@ function fieldsFor(item) {
   if (!off || item.type === 'manual') return fs;
   const rest = fs.filter(f => f !== off && f !== onp), at = fs.indexOf(off) - (onp && fs.indexOf(onp) < fs.indexOf(off) ? 1 : 0);
   const pics = [['_ovn', 'Pictures: the preferred way is one picture plus an On overlay drawn on top while it is on. A second picture (when on) is still allowed.', 'note'],
-    off, OVERLAY_PIC, ...(onp ? [[onp[0], onp[1] + ' (a second picture, optional)', ...onp.slice(2)]] : [])];
+    off, ...(item.subtype === 'pump' ? COVER_FIELDS(item) : []), OVERLAY_PIC, ...(onp ? [[onp[0], onp[1] + ' (a second picture, optional)', ...onp.slice(2)]] : [])];
   return [...rest.slice(0, at), ...pics, ...rest.slice(at)];
 }
 // a Picture Widget that turns on with nothing (None) is a still picture: its On pictures are greyed out (Fritz, 2026-10-27)
