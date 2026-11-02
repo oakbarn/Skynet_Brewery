@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Skynet Manual Ball Valve, side view, open (Fritz's drawing, 2026-11-02): a Manual Valve Widget picture. The pipe runs through the middle (its one IP); the handle along the pipe means open -->
+  <g fill="#000" stroke="#000" stroke-width="4" stroke-linejoin="round">
+    <path d="M9 40 H38 A6 6 0 0 0 44 34 V31 H56 V34 A6 6 0 0 0 62 40 H91 V60 H9 Z"/>
+    <rect x="0" y="-15" width="8.5" height="30" rx="4" transform="translate(1.50 50.00) rotate(0.00)"/>
+    <rect x="0" y="-15" width="8.5" height="30" rx="4" transform="translate(98.50 50.00) rotate(180.00)"/>
+  </g>
+  <g fill="#808080">
+    <path d="M9 40 H38 A6 6 0 0 0 44 34 V31 H56 V34 A6 6 0 0 0 62 40 H91 V60 H9 Z"/>
+    <rect x="0" y="-15" width="8.5" height="30" rx="4" transform="translate(1.50 50.00) rotate(0.00)"/>
+    <rect x="0" y="-15" width="8.5" height="30" rx="4" transform="translate(98.50 50.00) rotate(180.00)"/>
+  </g>
+  <rect x="35" y="26" width="30" height="5" rx="2" fill="#a0a0a0" stroke="#000" stroke-width="1.5"/>
+  <rect x="46.5" y="22" width="7" height="4" fill="#808080" stroke="#000" stroke-width="1.5"/>
+  <rect x="44" y="15" width="52" height="8" rx="3" fill="#2a7f9e" stroke="#174a5e" stroke-width="2"/>
+  <circle cx="50" cy="19" r="2" fill="#ccc" stroke="#000" stroke-width="1"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 84">
+  <!-- Skynet TC 2 to 1 concentric reducer (Fritz's drawing 2_1__Reducer, 2026-11-02): IPs at the center of each ferrule face, big end (0, 0.5), small end (1, 0.5) -->
+  <path d="M12 9 L108 26 V58 L12 75 Z" fill="#c0c0c0" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/>
+  <g fill="#808080" stroke="#555" stroke-width="2.5">
+    <rect x="1.5" y="3" width="11.5" height="78" rx="5"/>
+    <rect x="107" y="22" width="11.5" height="40" rx="5"/>
+  </g>
+</svg>

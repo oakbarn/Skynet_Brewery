@@ -1,0 +1,56 @@
+{
+  "title": "Skynet Motorized Butterfly Valve Device (Daughter Front Elbow)",
+  "master": "Skynet_Motorized_Butterfly_Valve_H",
+  "props": {
+    "orientation": "h",
+    "w": 66,
+    "h": 110
+  },
+  "pics": {
+    "h": [
+      "Images/Skynet/Valves/Valve_Motor_Butterfly_OpenFront_Elbow.svg",
+      "Images/Skynet/Valves/Valve_Motor_Butterfly_ClosedFront_Elbow.svg"
+    ]
+  },
+  "userFields": [
+    "name",
+    "label",
+    "hideName",
+    "workspace",
+    "x",
+    "y",
+    "w",
+    "h",
+    "locked",
+    "visibility",
+    "hidden",
+    "fontSize",
+    "foreColor",
+    "backColor",
+    "align",
+    "wrap",
+    "nameFontFamily",
+    "nameFontSize",
+    "nameColor",
+    "nameBg",
+    "valueColor",
+    "valueBg",
+    "nameFont",
+    "valueFont",
+    "nameAlign",
+    "valueAlign",
+    "border",
+    "typeCode",
+    "device",
+    "channel",
+    "activeLow",
+    "oneShot",
+    "oneShotDirection",
+    "tapwater",
+    "tapSource",
+    "showOnOffText",
+    "onText",
+    "offText"
+  ],
+  "notes": "On a front elbow (Fritz's drawing, 2026-11-02): one IP at the center of the front opening, one at the center of the bottom ferrule's outer face (Rule 5.20)."
+}

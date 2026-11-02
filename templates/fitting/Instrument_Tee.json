@@ -1,8 +1,32 @@
 {
-  "std": { "type": "TC", "size": 1.5 },
-  "fittings": [{ "kind": "tee" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg",
-  "size": [90, 50],
-  "ipPos": { "start": "Left", "end": "Right", "branch1": "Top" },
-  "notes": "An instrument tee: a short tee with a short, narrow branch for a probe or a gauge. Openings at the left, the right and the top. Flow goes any way through it."
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "tee"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg",
+  "size": [
+    160,
+    80
+  ],
+  "body": 0.175,
+  "ipPos": {
+    "start": "0,0.3",
+    "end": "1,0.3",
+    "branch1": "0.5,1"
+  },
+  "notes": "An Instrument Tee: a tee with a short branch for a probe or a gauge (Fritz's drawing, 2026-11-02). Openings at the left, the right and the bottom; each IP is the center of its ferrule's outer face. Flow goes any way through it. A tee with a Temperature Probe in it is a Temperature Device (Add Device > Probe)."
 }
