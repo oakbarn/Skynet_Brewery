@@ -367,6 +367,18 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
   ['Solenoid gas valve open (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_R.svg'],
   ['Solenoid gas valve open (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_L.svg'],
   ['Submersible sump pump on', 'Images/Skynet/Pumps/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/Skynet/Pumps/Pump_Sump_Off.svg'],
+  ['March 809-PL (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_90_Inlet.svg'],
+  ['March 809-PL-C (polysulfone head, center inlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_Center_Inlet.svg'],
+  ['March 809-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_809_SS_Center_Inlet.svg'],
+  ['March 815-PL (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_90_Inlet.svg'],
+  ['March 815-PL-C (polysulfone head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_Center_Inlet.svg'],
+  ['March 815-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_SS_Center_Inlet.svg'],
+  ['Chugger CPSS-IN (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_90_Inlet.svg'],
+  ['Chugger CPSS-CI (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_Center_Inlet.svg'],
+  ['Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet)', 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg'],
+  ['Topsflo TD5 (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_Topsflo_TD5_Poly_Center_Inlet.svg'],
+  ['KegLand MKII 12V/24V (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_Poly_Center_Inlet.svg'],
+  ['KegLand MKII with stainless head (center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_SS_Center_Inlet.svg'],
   ['Ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png']];
 // On overlay pictures (Fritz, 2026-10-22): drawn on top of the item's picture while it is on, the picture below stays visible.
@@ -744,7 +756,25 @@ function sidePt(e, side) {
 // middle of the box's sides). Every Skynet valve drawing in Images/Skynet/Valves has its pipe at the same spot: across at 92 of
 // its 120 high (H), or turned to stand up with the pipe 28 (V_R, V_RC) or 92 (V_L, V_LC) in from the left of its 120 wide.
 const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] } };
+// Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
+// port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
+const PUMP_FLOW = {
+  Pump_March_809_Poly_90_Inlet: { w: 50.9, h: 51.6, ends: [[0.988, 0.543], [0.636, 0.0]] },
+  Pump_March_809_Poly_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
+  Pump_March_809_SS_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
+  Pump_March_815_Poly_90_Inlet: { w: 57.0, h: 58.6, ends: [[0.989, 0.529], [0.652, 0.0]] },
+  Pump_March_815_Poly_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
+  Pump_March_815_SS_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
+  Pump_Chugger_SS_90_Inlet: { w: 60.1, h: 62.6, ends: [[0.99, 0.527], [0.646, 0.0]] },
+  Pump_Chugger_SS_Center_Inlet: { w: 106.2, h: 61.6, ends: [[0.994, 0.536], [0.806, 0.0]] },
+  Pump_Riptide_SS_Center_Inlet: { w: 100.2, h: 74.6, ends: [[0.994, 0.63], [0.804, 0.0]] },
+  Pump_Topsflo_TD5_Poly_Center_Inlet: { w: 67.2, h: 46.6, ends: [[0.991, 0.536], [0.763, 0.0]] },
+  Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
+  Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
+};
 function picFlow(path) {
+  const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
+  if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
   const m = String(path || '').match(/(?:^|\/)Valve_(?:Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid)_(?:Open|Closed)(H|V_L|V_R)C?\.svg$/);
   return m ? { k: m[1], ...PIC_FLOW[m[1]] } : null;
 }
@@ -752,7 +782,7 @@ function picFlow(path) {
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
   const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
-  if (!f || o === 'l45' || o === 'r45' || (o && (o === 'h') !== (f.k === 'H'))) return null;
+  if (!f || o === 'l45' || o === 'r45' || (o && f.k !== 'P' && (o === 'h') !== (f.k === 'H'))) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
   const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
   return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
@@ -765,8 +795,9 @@ const flipPt = e => {
 };
 const devIps = e => {
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
-  if (!v) return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
-    { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: sidePt(e, e.ipOut || 'right') }];
+  if (!v) { const pp = e.subtype === 'pump' ? picEnds(e) : null, pf = flipPt(e);    // a Skynet pump drawing: IPs on its real ports
+    return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : sidePt(e, e.ipIn || 'left') },
+      { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: pp ? pf(pp[1]) : sidePt(e, e.ipOut || 'right') }]; }
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
