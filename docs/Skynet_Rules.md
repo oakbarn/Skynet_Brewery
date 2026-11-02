@@ -710,6 +710,14 @@ locks them before a production zip. (2026-10-21)
 Fritz dropped it: open PRs are on GitHub and Claude doesn't forget them, so no Unresolved PRs
 document is kept.
 
+9.8 **Start Fresh on an existing install** (Fritz, 2026-11-02): when an installer (the Windows Setup .exe, the Mac
+.command, the Linux / Pi .sh) finds the panel already installed, it first asks **"Delete all users and Schemas and Start
+Fresh?"** (No is the default). **Yes** shows a second warning that **all existing data will be deleted**, listing what goes,
+with **No (back out, nothing deleted)** as the default. Confirmed, it deletes `config` (Schemas, Tabs, Devices, settings),
+`data` (users, passwords, sign-ins, recovery code, brew log, saved values) and `scripts` (Processes) for good, with no
+backup, and the panel starts again from the samples with Admin setup. **Kept:** `media` (pictures and sounds, Rule 7.3) and
+the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
+
 ## 10. Testing
 
 10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
@@ -1136,3 +1144,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Rule 1.19: new gGlobals are only global-scope variables; Switch, Push Button, Pulse Button, List, Step and Long String
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
+- 2026-11-02: Added Rule 9.8 (Start Fresh on an existing install: the installers ask "Delete all users and Schemas and Start Fresh?", a second warning with back out; config, data and scripts deleted, media and backups kept). Help 18 updated; no new Help number used. (thread "Add Start Fresh option to installer")
