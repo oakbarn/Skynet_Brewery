@@ -8,8 +8,8 @@
 //   gB_Global_Boolean   .value is a Boolean (true / false)
 //   gT_Global_Time      .value is a Time (00:00:00)
 //   gD_Global_DateTime  .value is a Date Time
-// The other kinds G_KINDS still has (Switch, Push Button, Pulse Button, List, Step, Long String) are on-screen controls that
-// stay as they are until Fritz says what becomes of them.
+// The other kinds G_KINDS still has (Switch, Push Button, Pulse Button, List, Step, Long String) are not gGlobals (Fritz,
+// 2026-11-02): they go to the new Semi_Widgets_Devices class and work as before until it is built.
 
 // kind (as kept in the Schema file) -> Kind name
 export const VAR_KINDS = {

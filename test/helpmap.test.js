@@ -18,5 +18,7 @@ for (const [page, section] of ALL_TOPICS()) {
 }
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), ['manual-valves']);
 assert.deepEqual(elementTopic({ type: 'flowMeter' })[0], 'devices', 'unknown devices go to Devices');
+assert.deepEqual(elementTopic({ type: 'alarm', alarmClass: 'basic' }), ['alarm-widget'], 'the Alarm Widget subclasses have their own Help page');
+assert.deepEqual(elementTopic({ type: 'alarm' }), ['alarms-and-sound'], 'an older Alarm keeps Alarms and sound');
 assert.deepEqual(graphicTopic({ kind: 'pipe', hose: true }), ['pipes-and-hoses', 'hoses']);
 console.log('helpmap tests passed');

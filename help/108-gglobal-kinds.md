@@ -75,7 +75,9 @@ In every dialog with ✖ Cancel and 💾 Save, if you changed something and pres
 
 ## The other gGlobal kinds
 
-Switch, Push Button, Pulse Button, List, Step and Long String are on-screen controls. For now they are still added on a Tab in **Edit layout** and work as before: see [Variables](04-variables).
+Switch, Push Button, Pulse Button, List, Step and Long String are **not gGlobals** any more (Fritz, 2026-11-02): they have a state you see on a Tab, so they go to a new class, **Semi_Widgets_Devices**. Until that is built they are still added on a Tab in **Edit layout** and work as before: see [Variables](04-variables).
+
+Older gGlobals that are not true variables with a global scope will become a Text Widget or a Graphic Widget, one at a time. The list of every gGlobal in the shipped Schemas is in docs/ExistingGlobals.md.
 
 ## Coming in from BruControl
 
