@@ -101,6 +101,21 @@ Until then Fritz's own merge is the approval.
 Skynet_Team.json ships inside every Release zip, Setup .exe and GitHub download. It is not a user setting,
 so an update always replaces it (like the Skynet Styles). The panel reads it at start-up.
 
+## 8. A step in the new-install setup (Fritz, 2026-11-02)
+
+A new install already walks through: **1) make the admin and save the recovery code, 2) pick a sample
+Schema.** We add **3) Support Skynet**, a step shown once that the admin goes through:
+
+- A short "Skynet is free; here is how to help" note.
+- The Buy a Beer choices (One Time and the 5 repeats) with their amounts.
+- The Patron level: what it costs, the extras, and a box to paste a Patron code if you already have one.
+- Buttons: **Buy a Beer**, **Become a Patron**, **Not now**. "Not now" finishes setup; the regular Buy a
+  Beer pop-up then follows its usual timing.
+- Like the recovery code step, it cannot be skipped by clicking outside it, but "Not now" is always there,
+  so nobody is forced to pay.
+
+This step goes into build step 2 (and the Patron part into step 3).
+
 ## What Fritz needs to do (outside the program)
 
 1. Make, or upgrade to, a free PayPal Business account for Skynet.
@@ -111,8 +126,8 @@ so an update always replaces it (like the Skynet Styles). The panel reads it at 
 ## Build order (each a PR, each with a Help page)
 
 1. Skynet_Team.json + CODEOWNERS + signing, Rule 12.2 update, license term.
-2. Buy a Beer choices (One Time + 5 repeats).
-3. Patron: Patron code, Request a Feature, email to Developers.
+2. Buy a Beer choices (One Time + 5 repeats) + the Support Skynet setup step.
+3. Patron: Patron code, Request a Feature, email to Developers, Patron part of the setup step.
 4. Pay Out by percent (4A) or take turns (4B).
 
 ## Questions for Fritz
