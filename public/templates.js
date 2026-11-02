@@ -77,6 +77,8 @@ export function cleanFitting(b = {}) {
   for (const [k, v] of Object.entries(b.ipPos && typeof b.ipPos === 'object' ? b.ipPos : {})) if (/^\w{1,20}$/.test(k) && text(v, 40)) ipPos[k] = text(v, 40);
   const out = { std: cleanStd(b.std), fittings, image: text(b.image, 300) || undefined, ipPos: Object.keys(ipPos).length ? ipPos : undefined, notes: text(b.notes, 2000) || undefined };
   const size = cleanSize(b.size); if (size) out.size = size;       // a picture that is not square (Instrument_Tee: 90 x 50)
+  // how thick the pipe is drawn on its picture, as a part of its width (Autosize to pipe uses it; none = 0.28, the square TC 1.5 pictures)
+  if (Number.isFinite(+b.body) && +b.body >= 0.05 && +b.body <= 1 && b.body !== null && b.body !== '') out.body = +b.body;
   return out;
 }
 // the IPs a Bundled Fitting has: the far end of the chain (none when an End Cap closes it), plus the open side of every tee

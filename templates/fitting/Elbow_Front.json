@@ -1,0 +1,31 @@
+{
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "elbow90"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_Front.svg",
+  "size": [
+    80,
+    110
+  ],
+  "body": 0.46,
+  "ipPos": {
+    "start": "0.5,0.336",
+    "end": "0.5,1"
+  },
+  "notes": "A 90 degree elbow seen from the front (Fritz's drawing, 2026-11-02): one end faces you, the other goes down. IPs at the center of the front opening and the center of the bottom ferrule's outer face."
+}
