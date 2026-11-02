@@ -265,6 +265,17 @@ export const RECIPE_FIELDS = [
   ['rcp_Water_Profile', 'Waters: the Water Profile (its id)', r => r.waterProfile ?? ''],
   ['rcp_Mash_Profile', 'MASH: the Mash Profile (its id; empty = the mash from the recipe file)', r => r.mashProfile ?? ''],
 ];
+// Waters tab: the Water Profile's minerals after the distilled cut (ppm). The Brew Process fills them from the profile
+// (lib/brewprocess.js recipeValues); a Recipe alone does not hold them.
+export const WATER_FIELDS = [...WATER_IONS.map(([k, t]) => [`rcp_Water_${k === 'so4' ? 'SO4' : k === 'hco3' ? 'HCO3' : k[0].toUpperCase() + k.slice(1)}`, `Waters: ${t}, ppm after the distilled cut`, k]),
+  ['rcp_Water_Distilled_Pct', 'Waters: % distilled or RO water', 'distilledPct'], ['rcp_Water_SO4_Cl', 'Waters: sulfate to chloride ratio', 'so4cl'], ['rcp_Water_PH', 'Waters: pH', 'ph']];
+// the values of WATER_FIELDS from a Water Profile (null: none picked)
+export function waterFieldValues(wp) {
+  const b = wp ? { ...blendWater(wp), distilledPct: +wp.distilledPct || 0, ph: wp.ph ?? null } : {};
+  return Object.fromEntries(WATER_FIELDS.map(([k, , key]) => [k, wp ? b[key] ?? 0 : 0]));
+}
+// MASH tab lines: rcp_Mash_Step_N_Name, _Temp, _Time (filled by the Brew Process from the Mash Profile or the recipe's mash)
+const MASH_STEP_FIELD = /^rcp_Mash_Step_(\d+)_(Name|Temp|Time)$/;
 // The Hops tab: one set of Skynet_Fields for each hop line, N = the line number (rcp_Hop_1_Name, rcp_Hop_2_Name ...), so there
 // is no limit on the hops. [the end of the name, what it is, how to read it (r, hop, display units, the hop schedule, line index)]
 export const HOP_FIELDS = [
@@ -328,6 +339,8 @@ export const hopFieldName = (line, end) => `rcp_Hop_${line}_${end}`;
 const HOP_COUNT = ['rcp_Hop_Count', 'Hops tab: how many hop lines', r => (r.ingredients?.hops || []).length];
 // a Skynet_Field by its name: the Recipe tab's, rcp_Hop_Count, or one of a hop line (any line number)
 export const recipeField = name => {
+  const ms = MASH_STEP_FIELD.exec(name); if (ms) return [name, `MASH: step ${ms[1]} ${ms[2].toLowerCase()}`, () => null];
+  const wf = WATER_FIELDS.find(x => x[0] === name); if (wf) return [name, wf[1], () => null];
   for (const c of [HOP_COUNT, GRAIN_COUNT, FERM_COUNT, ADJ_COUNT]) if (name === c[0]) return c;
   const g = LINE_FIELD.exec(name), gf = g && LINE_LISTS[g[1].toLowerCase()]().find(x => x[0] === g[3]);
   if (gf) return [name, gf[1].replace(`${g[1]} N`, `${g[1]} ${g[2]}`), gf[2]];

@@ -10,7 +10,7 @@ import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort,
 import { elementNameError, fileNameError } from './names.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
-import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity } from './recipecalc.js';
+import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -367,6 +367,18 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
   ['Solenoid gas valve open (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_R.svg'],
   ['Solenoid gas valve open (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_L.svg'],
   ['Submersible sump pump on', 'Images/Skynet/Pumps/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/Skynet/Pumps/Pump_Sump_Off.svg'],
+  ['March 809-PL (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_90_Inlet.svg'],
+  ['March 809-PL-C (polysulfone head, center inlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_Center_Inlet.svg'],
+  ['March 809-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_809_SS_Center_Inlet.svg'],
+  ['March 815-PL (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_90_Inlet.svg'],
+  ['March 815-PL-C (polysulfone head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_Poly_Center_Inlet.svg'],
+  ['March 815-SS-C (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_March_815_SS_Center_Inlet.svg'],
+  ['Chugger CPSS-IN (stainless in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_90_Inlet.svg'],
+  ['Chugger CPSS-CI (stainless head, center inlet)', 'Images/Skynet/Pumps/Pump_Chugger_SS_Center_Inlet.svg'],
+  ['Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet)', 'Images/Skynet/Pumps/Pump_Riptide_SS_Center_Inlet.svg'],
+  ['Topsflo TD5 (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_Topsflo_TD5_Poly_Center_Inlet.svg'],
+  ['KegLand MKII 12V/24V (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_Poly_Center_Inlet.svg'],
+  ['KegLand MKII with stainless head (center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_SS_Center_Inlet.svg'],
   ['Ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Ball_ClosedH_1.png'],
   ['Ball valve open (vertical)', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png']];
 // On overlay pictures (Fritz, 2026-10-22): drawn on top of the item's picture while it is on, the picture below stays visible.
@@ -755,7 +767,25 @@ const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, 
   BF_H: { o: 'h', w: 140, h: 170, ends: [[0, 135 / 170], [1, 135 / 170]] }, BF_V_R: { o: 'v', w: 170, h: 140, ends: [[35 / 170, 0], [35 / 170, 1]] }, BF_V_L: { o: 'v', w: 170, h: 140, ends: [[135 / 170, 0], [135 / 170, 1]] },
   BF_Front: { o: 'f', w: 120, h: 170, ends: [[0.5, 130 / 170], [0.5, 130 / 170]] }, BF_Front_Elbow: { o: 'f', w: 120, h: 200, ends: [[0.5, 0.65], [0.5, 1]] },
   BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] } };
+// Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
+// port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
+const PUMP_FLOW = {
+  Pump_March_809_Poly_90_Inlet: { w: 50.9, h: 51.6, ends: [[0.988, 0.543], [0.636, 0.0]] },
+  Pump_March_809_Poly_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
+  Pump_March_809_SS_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
+  Pump_March_815_Poly_90_Inlet: { w: 57.0, h: 58.6, ends: [[0.989, 0.529], [0.652, 0.0]] },
+  Pump_March_815_Poly_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
+  Pump_March_815_SS_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
+  Pump_Chugger_SS_90_Inlet: { w: 60.1, h: 62.6, ends: [[0.99, 0.527], [0.646, 0.0]] },
+  Pump_Chugger_SS_Center_Inlet: { w: 106.2, h: 61.6, ends: [[0.994, 0.536], [0.806, 0.0]] },
+  Pump_Riptide_SS_Center_Inlet: { w: 100.2, h: 74.6, ends: [[0.994, 0.63], [0.804, 0.0]] },
+  Pump_Topsflo_TD5_Poly_Center_Inlet: { w: 67.2, h: 46.6, ends: [[0.991, 0.536], [0.763, 0.0]] },
+  Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
+  Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
+};
 function picFlow(path) {
+  const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
+  if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
   return k && PIC_FLOW[k] ? { k, o: k.endsWith('H') ? 'h' : 'v', ...PIC_FLOW[k] } : null;
@@ -764,7 +794,8 @@ function picFlow(path) {
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
   const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
-  if (!f || (f.o !== 'f' && (o === 'l45' || o === 'r45' || (o && (o === 'h') !== (f.o === 'h'))))) return null;     // a front view has no orientation
+  if (!f || (f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
+  if (o && f.k !== 'P' && f.o !== 'f' && (o === 'h') !== (f.o === 'h')) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
   const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
   return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
@@ -781,8 +812,9 @@ const devIps = e => {
     return PROBE_TEES[e.probeTee].ends.map(([fx, fy], i) => ({ id: `dev:${e.name}:${i ? 'out' : 'in'}`, label: `${e.name} end ${i + 1}`, text: '', c: fl([Math.round(x + fx * w), Math.round(y + fy * hh)]) }));
   }
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
-  if (!v) return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: sidePt(e, e.ipIn || 'left') },
-    { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: sidePt(e, e.ipOut || 'right') }];
+  if (!v) { const pp = e.subtype === 'pump' ? picEnds(e) : null, pf = flipPt(e);    // a Skynet pump drawing: IPs on its real ports
+    return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : sidePt(e, e.ipIn || 'left') },
+      { id: `dev:${e.name}:out`, label: `${e.name} outlet`, text: 'OUT', c: pp ? pf(pp[1]) : sidePt(e, e.ipOut || 'right') }]; }
   const wide = (e.w || 120) >= (e.h || 60), o = VALVE_ENDS[e.orientation];       // a Valve Profile's orientation sets the two ends
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
@@ -7941,6 +7973,71 @@ function rcAdjuncts(pane, rc, changed) {
   pane.append(h('p', { class: 'muted' }, 'Flaked grains and other adjuncts that add sugar are on the Fermentable tab, so they count in the Expected Gravity.'));
 }
 
+// ---- The MASH tab (Fritz, 2026-10-31: "Mash Profile and Water Profiles can be built as well"). Pick a Mash Profile
+// (Skynet Template or your own), or use the Recipe's own mash (from the recipe file or typed here). A picked profile shows
+// read only; Copy into this Recipe makes it the Recipe's own mash to change. Lines: Step N, Temp, Time (rcp_Mash_Step_N_...).
+function rcMash(pane, rc, u, changed) {
+  const op = can('operator'), mp = rcMashProfile(rc), TT = TU(u.tempUnit), c = { onChange: changed };
+  rc.mash = rc.mash || { steps: [] }; rc.mash.steps = rc.mash.steps || [];
+  const tmp = { d: 1, to: v => cTo(v, u.tempUnit), from: v => toC(v, u.tempUnit), ...c };
+  const pTemp = v => v === null || v === undefined || v === '' ? '' : rcRound(cTo(mp.units === 'Metric' ? +v : fToC(+v), u.tempUnit), 1);
+  const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
+  const pick = rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', 'The Recipe\'s own mash (below)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  const copy = guard(() => {
+    rc.mash = { ...rc.mash, profileName: mp.name, steps: [...mp.steps.map(s => ({ name: s.name, type: 'Infusion', tempC: mp.units === 'Metric' ? +s.temp : fToC(+s.temp), min: +s.time || 0 })),
+      ...(mp.mashOutTemp ? [{ name: 'Mash Out', type: 'Temperature', tempC: mp.units === 'Metric' ? +mp.mashOutTemp : fToC(+mp.mashOutTemp), min: 10 }] : [])] };
+    rc.spargeType = mp.sparge || 'batch'; if (mp.spargeTemp !== undefined && mp.spargeTemp !== null) rc.spargeTempC = mp.units === 'Metric' ? +mp.spargeTemp : fToC(+mp.spargeTemp);
+    rc.spargeMinutes = mp.sparge === 'batch' ? mp.batchRest ?? null : null; rc.mashProfile = '';
+    changed(); renderMenuPane(); toast(`"${mp.name}" copied into this Recipe. Press Save to keep it`);
+  });
+  const addStep = guard(() => { rc.mash.steps.push({ name: `Step ${rc.mash.steps.length + 1}`, type: 'Infusion', tempC: null, min: 0 }); changed(); renderMenuPane(); });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Mash'), op && !mp ? h('button', { class: 'hopAdd', onclick: addStep, title: 'Add a mash step at the bottom' }, 'Mash Step ', h('b', {}, '+')) : ''),
+    h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', pick, { wide: true, field: 'rcp_Mash_Profile', tip: 'A Skynet Template, one of your own (☰ Menu > Mash Profile), or the Recipe\'s own mash' }),
+      mp && op ? h('button', { onclick: copy, title: 'Make this profile the Recipe\'s own mash, to change it here' }, '⧉ Copy into this Recipe') : '',
+      mp?.notes ? h('span', { class: 'muted' }, mp.notes) : ''));
+  const steps = mp ? mp.steps : rc.mash.steps;
+  if (!steps.length) pane.append(h('p', { class: 'muted' }, 'No mash steps. Pick a Mash Profile, or press Mash Step +.'));
+  steps.forEach((s, i) => {
+    const n = i + 1, F = end => `rcp_Mash_Step_${n}_${end}`, line = h('div', { class: 'rcRow hopLine' });
+    if (mp) line.append(rcBox('g', `Step ${n}`, ro(s.name), { wide: true, field: F('Name') }), rcBox('r', 'Temp', ro(pTemp(s.temp)), { unit: TT, field: F('Temp') }), rcBox('g', 'Time', ro(s.time), { unit: 'min', field: F('Time') }));
+    else {
+      line.append(rcBox('g', `Step ${n}`, rcInput(s, 'name', { kind: 'text', ...c }), { wide: true, field: F('Name') }), rcBox('r', 'Temp', rcInput(s, 'tempC', tmp), { unit: TT, field: F('Temp') }),
+        rcBox('g', 'Time', rcInput(s, 'min', { d: 0, ...c }), { unit: 'min', field: F('Time') }));
+      if (op) line.append(h('button', { class: 'hopDel', onclick: guard(() => { if (!confirm(`Delete Step ${n} (${s.name})?`)) return; rc.mash.steps.splice(i, 1); changed(); renderMenuPane(); }) }, '🗑 Delete'));
+    }
+    pane.append(line);
+  });
+  // the sparge: the profile's (read only), or the Recipe's (the same boxes as on the Recipe tab)
+  pane.append(h('h3', {}, 'Sparge'), mp
+    ? h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', ro(SPARGE[mp.sparge] || mp.sparge)), rcBox('r', 'Sparge Temperature', ro(pTemp(mp.spargeTemp)), { unit: TT }),
+      ...(mp.sparge === 'batch' ? [rcBox('g', 'Batch Rest', ro(mp.batchRest), { unit: 'min' })] : []), rcBox('r', 'Mash Out', ro(pTemp(mp.mashOutTemp)), { unit: TT, tip: 'Empty = no mash out' }))
+    : h('div', { class: 'rcRow' }, rcBox('g', 'Sparge Type', rcInput(rc, 'spargeType', { kind: 'sel', list: [['batch', 'Batch'], ['fly', 'Fly'], ['none', 'No sparge']], ...c }), { field: 'rcp_Sparge_Type' }),
+      rcBox('r', 'Sparge Temperature', rcInput(rc, 'spargeTempC', tmp), { unit: TT, field: 'rcp_Sparge_Temp' }),
+      rcBox('g', 'Sparge Minutes', rcInput(rc, 'spargeMinutes', { d: 0, ...c }), { unit: 'min', field: 'rcp_Sparge_Minutes' })));
+  pane.append(h('p', { class: 'muted' }, mp ? `${mp.skynet ? 'A Skynet Template is read only.' : 'Change your own Mash Profiles on ☰ Menu > Mash Profile.'} Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.`
+    : 'The Recipe\'s own mash. Calculate on the Recipe tab uses its first step for the 1st Mash and the strike water.'));
+}
+// ---- The Waters tab: the Water Profile picked and its minerals after the distilled or RO cut (rcp_Water_...). The profile
+// itself is changed on ☰ Menu > Water Profile. Below: the waters the recipe file listed.
+function rcWaters(pane, rc, u, changed) {
+  const wp = S.waterProfiles.find(x => x.id === rc.waterProfile), b = wp ? blendWater(wp) : {};
+  const ro = v => h('input', { type: 'text', value: v ?? '', disabled: true, tabIndex: -1 });
+  const pick = rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } });
+  pane.append(h('div', { class: 'hopHead' }, h('h2', {}, 'Waters')),
+    h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', pick, { wide: true, field: 'rcp_Water_Profile', tip: 'A Skynet water, or your own water report (☰ Menu > Water Profile)' }), wp?.notes ? h('span', { class: 'muted' }, wp.notes) : ''));
+  if (wp) {
+    const [ions, rest] = [WATER_FIELDS.slice(0, WATER_IONS.length), WATER_FIELDS.slice(WATER_IONS.length)];
+    pane.append(h('div', { class: 'rcRow' }, ...ions.map(([k, , key], i) => rcBox('c', WATER_IONS[i][1], ro(b[key]), { unit: 'ppm', field: k, tip: wp.distilledPct ? `${wp[key]} ppm in the water report, cut with ${wp.distilledPct}% distilled` : '' }))),
+      h('div', { class: 'rcRow' }, rcBox('c', '% Distilled / RO', ro(+wp.distilledPct || 0), { unit: '%', field: rest[0][0] }), rcBox('c', 'SO4 : Cl', ro(b.so4cl ?? ''), { field: rest[1][0], tip: 'Above 2: crisp and hoppy. Below 1: round and malty' }),
+        rcBox('c', 'pH', ro(wp.ph ?? ''), { field: rest[2][0] })),
+      h('p', { class: 'muted' }, `${wp.skynet ? 'A Skynet water is read only: ☰ Menu > Water Profile > Add new ... copies it to make your own.' : 'Change it on ☰ Menu > Water Profile.'} The minerals show after the distilled or RO cut.`));
+  }
+  const W = rc.ingredients.waters || [];
+  pane.append(h('h3', {}, 'Waters in the recipe file'), W.length ? '' : h('p', { class: 'muted' }, 'None.'),
+    ...W.map((w, i) => h('div', { class: 'rcRow hopLine' }, rcBox('g', `Water ${i + 1}`, ro(w.name), { wide: true }), rcBox('b', 'Amount', ro(rcRound(lTo(w.liters, u.volumeUnit))), { unit: u.volumeUnit }),
+      ...WATER_IONS.map(([k, l]) => rcBox('g', l.replace(/ \(.*/, ''), ro(w[k] ?? ''), { unit: 'ppm' })))));
+}
+
 // a Daughter Tab. Fritz sends the fields and layout of each later; until then each shows what the Recipe holds for it
 function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const I = rc.ingredients;
@@ -7948,22 +8045,12 @@ function rcDaughter(pane, rc, u, changed, [k, t, about]) {
   const back = h('button', { onclick: () => { rcSub = 'recipe'; renderMenuPane(); } }, '◀ Back to the Recipe tab');
   if (k === 'hops') { rcHops(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'adjuncts') { rcAdjuncts(pane, rc, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'mash') { rcMash(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
+  if (k === 'waters') { rcWaters(pane, rc, u, changed); pane.append(h('div', { class: 'bar' }, back)); return; }
   if (k === 'grain' || k === 'fermentables') { rcFerms(pane, rc, u, changed, k === 'grain'); pane.append(h('div', { class: 'bar' }, back)); return; }
   pane.append(h('p', {}, h('b', {}, about)), h('p', { class: 'muted rcSoon' }, `The fields and layout of the ${t} tab come next. Until then, here is what the Recipe holds for it.`));
   if (k === 'drops') rcDrops(pane, rc);
   if (k === 'yeast') pane.append(list(I.yeasts.map(x => `${x.amount ?? 1} × ${x.name}${x.lab ? `, ${x.lab}` : ''}${x.productId ? ` ${x.productId}` : ''}${x.starterL ? `, starter ${rcRound(lTo(x.starterL, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No yeast in this Recipe.'));
-  if (k === 'waters') {
-    const wp = S.waterProfiles.find(x => x.id === rc.waterProfile);
-    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Water Profile', rcInput(rc, 'waterProfile', { kind: 'sel', list: [['', '(none)'], ...S.waterProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Water_Profile' })),
-      wp ? h('p', {}, `${WATER_IONS.map(([i, l]) => `${l.replace(/ \(.*/, '')} ${blendWater(wp)[i]}`).join(', ')} ppm${+wp.distilledPct ? ` (after ${wp.distilledPct}% distilled)` : ''}`) : '',
-      list(I.waters.map(x => `${x.name}${x.liters ? `, ${rcRound(lTo(x.liters, u.volumeUnit))} ${u.volumeUnit}` : ''}`), 'No waters in the recipe file.'));
-  }
-  if (k === 'mash') {
-    const mp = rcMashProfile(rc);
-    pane.append(h('div', { class: 'rcRow' }, rcBox('g', 'Mash Profile', rcInput(rc, 'mashProfile', { kind: 'sel', list: [['', rc.mash?.steps?.length ? '(the mash from the recipe file)' : '(none)'], ...S.mashProfiles.map(x => [x.id, x.name])], onChange: () => { changed(); renderMenuPane(); } }), { wide: true, field: 'rcp_Mash_Profile' })),
-      mp ? list(mp.steps.map(s => `${s.name}: ${s.temp} ${tempUnit(mp.units)} for ${s.time} min`), '')
-        : list((rc.mash?.steps || []).map(s => `${s.name}: ${rcRound(cTo(s.tempC, u.tempUnit), 1)} ${TU(u.tempUnit)} for ${s.min} min`), 'No mash steps in this Recipe.'));
-  }
   pane.append(h('div', { class: 'bar' }, back));
 }
 // Drops: the results only. Skynet's hop order, every alert (merged when two land together) and their voice files
