@@ -137,9 +137,7 @@ says `.font_size`). Other Devices and Widgets do not yet:
 
 ## 6. Open questions for Fritz
 
-1. **Rule 1.15 and Rule 15.2:** `.x` / `.y` become the main names, with `.xh`, `.x_hPosition`, `.yv`, `.y_vPosition` also
-   working. Rule 15.2 says no old way is kept working beside the new one. Change Rule 1.15, or allow the aliases as an
-   exception to Rule 15.2?
+1. *Answered 2026-11-02:* `.x`, `.xh` and `.x_hPosition` are all Process attributes for the same thing (likewise `.y`, `.yv`, `.y_vPosition`). Rule 1.15 rewritten; an exception to Rule 15.2.
 2. **Rule 5.14:** do pipe fittings get `.visible`, `.hiddenlock`, `.lock` and `.tab` (still no Label)?
 3. **`.lock` in a Process:** read only (as on the Text Widget today), or can a Process lock and unlock an item?
 4. Still open from before: **Label never blank** (Rule 18.3) against Rules 1.13, 3.8 and 4.2 (Open question 12).
@@ -148,4 +146,5 @@ says `.font_size`). Other Devices and Widgets do not yet:
 
 ## Change log
 
+- 2026-11-02: Fritz: `.x`, `.xh`, `.x_hPosition` are all the same attribute (Rule 1.15).
 - 2026-11-02: First version, from Fritz's Universal Properties list (thread "Set universal properties standard").
