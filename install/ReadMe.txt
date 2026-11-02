@@ -43,6 +43,10 @@ start, into a folder you don't have yet. On an update the installers ask "Keep a
 them as they are?". Yes keeps them; No asks about each one and moves any you replace
 to the "backups" folder. Stop the panel before you update. The Help pages are
 replaced by the new manual; the old ones go to help\backups.
+START FRESH: before that, the installers ask "Delete all users and Schemas and Start
+Fresh?". No (the default) keeps everything. Yes shows a warning that ALL EXISTING
+DATA WILL BE DELETED (config, data and scripts, with no backup; media is kept), and
+No there backs out with nothing deleted.
 Zips from before October 5, 2026 still had those folders inside. If you unzip one
 of those over your panel, choose "Skip these files".
 While Settings > Testing mode is on, a new version clears every sign-in, so you

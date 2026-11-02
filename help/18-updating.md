@@ -42,7 +42,27 @@ Run the same installer you used the first time, from the new release. It sees th
 - **Mac:** `Install Skynet Brewer.command` next to the new zip.
 - **Linux / Pi:** `bash install-skynet-brewer.sh` next to the new zip.
 
-It asks **Keep all of them as they are?** about your config, data, media and scripts folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
+It first asks **Delete all users and Schemas and Start Fresh?** (answer **No** to keep everything, see [Start Fresh](#start-fresh-delete-all-users-and-schemas) below). Then it asks **Keep all of them as they are?** about your config, data, media and scripts folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
+
+## Start Fresh: delete all users and Schemas
+
+Want the panel as if it had never been installed? Run the installer over it. Before anything else it asks:
+
+> **Delete all users and Schemas and Start Fresh?**
+
+- **No** (the normal answer, and the default) keeps everything and just updates.
+- **Yes** shows a second, red warning: **ALL EXISTING DATA WILL BE DELETED**. It lists what goes, for good and with no backup:
+  - every Schema, Tab, Device, Widget and setting (`config`)
+  - every user, password, sign-in and the recovery code, the brew log and saved values (`data`)
+  - every Process (`scripts`)
+
+  Your pictures and sounds (`media`) and the `backups` folder are **kept**.
+  - **No** on the warning backs out. Nothing is deleted, and the update carries on as normal.
+  - **Yes** deletes them. The panel then starts like a new install from the samples, and you make the admin account again (write down the new **recovery code**).
+
+The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and the Linux / Pi installer all ask it. If Windows can't delete a file because a program still has it open, the installer says so: restart the computer and run it again.
+
+> Only want one folder back to the samples? Answer **No** to Start Fresh, then **No** to "Keep all of them as they are?" (above). That moves a folder to `backups` instead of deleting it.
 
 ## Update by hand: unzip over the panel
 
