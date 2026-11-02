@@ -85,10 +85,11 @@ Widgets; stay away from the word Element. A Picture Widget's dialog is "Picture 
 "Picture Element"), and every Properties title says "... Device" or "... Widget". The only exception
 is a real *heating element*. (2026-10-27, Help 74)
 
-1.15 **Position attributes are `.x_hPosition` and `.y_vPosition`** (x = horizontal, y = vertical, so
-nobody has to remember which). Typing `.x` or `.y` in the Process editor fills in the whole name, even with
-Predictive text off. The old `.xPosition` / `.yPosition` still work. **Short forms** `.x` / `.xh` and `.y` / `.yv` work
-too (Fritz's Text Widget list, 2026-10-29). (2026-10-28, PR #121, Help 49, 79)
+1.15 **Position attributes: `.x`, `.xh` and `.x_hPosition` are all the same thing**, and so are `.y`, `.yv` and
+`.y_vPosition` (x = horizontal, y = vertical). `.x` / `.y` are the main names (Rule 1.21); all three spellings are Process
+attributes for the same thing (Fritz, 2026-11-02). **Exception to Rule 15.2:** these aliases are kept on purpose. The very old
+`.xPosition` / `.yPosition` are converted (Rule 15.1). (2026-10-28, PR #121, Help 49, 79; short forms 2026-10-29)
+*Replaced:* `.x_hPosition` / `.y_vPosition` were the main names, and typing `.x` filled in the whole name (2026-10-28).
 
 1.16 **gGlobal** is the one variable class (it was gKonstant and gAPI, and before that vKonstant and
 vAPI). Suggested name prefixes start **gG**: `gG_`, `gGS_`, `gGL_`, `gGV_`, `gGT_`, `gGDT_`, `gGB_`, `gGSW_`,
@@ -1016,9 +1017,8 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 13. *Answered 2026-11-02:* gGlobal prefixes: the Rule 1.16 change is on hold. Switch, Push Button, Pulse Button, List, Step and
     Long String are not gGlobals (new Semi_Widgets_Devices class). See Rule 1.19.
 
-14. **Universal Properties** (Rule 1.21): `.x` / `.y` as the main names with `.xh`, `.x_hPosition`, `.yv`, `.y_vPosition` also
-    working goes against Rule 1.15 (main name `.x_hPosition`) and Rule 15.2 (no old way kept beside the new one): change Rule
-    1.15, or allow the aliases as an exception? And Rule 5.14 (pipe fittings only `.x`, `.y`, `.width`, `.height`): do fittings
+14. **Universal Properties** (Rule 1.21): *answered 2026-11-02:* `.x`, `.xh` and `.x_hPosition` are all the same attribute (Rule
+    1.15, exception to Rule 15.2). Still open: Rule 5.14 (pipe fittings only `.x`, `.y`, `.width`, `.height`): do fittings
     get `.visible`, `.hiddenlock`, `.lock` and `.tab`? (asked 2026-11-02)
 
 ---
@@ -1153,3 +1153,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
 - 2026-11-02: Added Rule 1.21 (Universal Properties for every Device, Widget and Semi-Device; docs/Universal_Properties.md) and Open question 14 (Rules 1.15 / 15.2 position aliases, Rule 5.14 pipe fittings). Help 114; next free Help number 115. (thread "Set universal properties standard")
+- 2026-11-02: Rule 1.15 rewritten: `.x`, `.xh`, `.x_hPosition` (and `.y`, `.yv`, `.y_vPosition`) are all Process attributes for the same thing, `.x` / `.y` the main names; an exception to Rule 15.2. (thread "Set universal properties standard")
