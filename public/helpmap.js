@@ -25,7 +25,9 @@ export function elementTopic(e) {
     case 'alarm': return ['alarms-and-sound'];
     case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
     case 'timer': return ['timer-widget'];      // Timer Widget Properties (Fritz, 2026-10-29)
-    case 'gGlobal': return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
+    case 'gGlobal':       // the six variable Kinds have their own page (Fritz, 2026-11-02); the on-screen kinds stay on Variables
+      if (['string', 'graphic', 'value', 'bool', 'time', 'datetime'].includes(e.kind ?? 'value')) return ['gglobal-kinds'];
+      return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
     case 'picture': return ['picture-widget', 'turns-on-with'];
     case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];

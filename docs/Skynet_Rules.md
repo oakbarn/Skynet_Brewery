@@ -107,6 +107,18 @@ from_To_to: `skc_Kg_To_Lb`, `skc_PSI_To_kPa`. A Process uses one like a number
 (`gGV_Lb = gGV_Kg * skc_Kg_To_Lb`). Nobody can change them (Rule 3.11), and no Device, Widget or
 variable name can start `skc_`. (Fritz, 2026-10-30, thread "Add Skynet unit conversion constants", Help 94)
 
+1.19 **gGlobal Kinds** (Fritz, 2026-11-02). A gGlobal is a **variable with a global scope** that every Process can use. It is
+**not a Widget and is never on a Tab** (a Text, Picture, Value, Time or DateTime Widget shows things on a Tab), and its
+properties and attributes are only those of a variable. Each gGlobal has one **Kind**, and joins that Kind's group:
+**gS_Global_String** (.value a String), **gG_Global_Graphic** (the standard background picture paths, in the Graphic
+Dialog), **gV_Global_Value** (.value a Value), **gB_Global_Boolean** (.value a Boolean), **gT_Global_Time** (.value a Time),
+**gD_Global_DateTime** (.value a DateTime). **Making one:** ➕ New gGlobal, its Name, pick the Kind from the dropdown, the Kind's
+dialog opens, fill it in, ✖ Cancel or 💾 Save (Rule 18.11 asks before discarding changes). **Once picked, the Kind is set and
+can't be changed**; a wrong Kind is deleted and made again. The Kind dialogs follow the General Dialog Rules (section 18).
+➕ Add the sample gGlobals adds one of each Kind. The on-screen kinds (Switch, Push Button, Pulse Button, List, Step, Long String)
+stay as they are until Fritz decides (Open question 13). BruControl Globals: Importing Norms section 6c. (thread "Add gGlobal
+Kinds and BruControl import", Help 105)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -652,7 +664,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **97**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **106**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -827,6 +839,9 @@ because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skyne
    buttons was OK'd but not built yet.
 10. **BruControl import:** keep the strict Process check, or allow BruControl-style lenient start?
 11. **Still undecided from the check-up:** phone layout, PID temperature control.
+13. **gGlobal prefixes and the on-screen kinds** (asked 2026-11-02): Rule 1.16's prefixes start gG (`gGV_`, `gGS_` ...) but
+    the new Kinds are named gS_, gG_, gV_, gB_, gT_, gD_ (gG_ = Graphic). Change Rule 1.16 to the new prefixes? And do Switch,
+    Push Button, Pulse Button, List, Step and Long String stay as gGlobal kinds on Tabs for now, or become Widgets?
 
 ---
 
@@ -928,3 +943,5 @@ because they add sugar. A Boil adjunct gets alerts like a hop (Rule 17.4). Skyne
 - 2026-10-31: Rule 17.8 adds Fritz's Fermentable tab layout: Amount with its own Measurement, select-only BeerXML Measurement and
   Type lists. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Added Rule 17.9 (the Adjuncts tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
+- 2026-11-02: Added Rule 1.19 (gGlobal Kinds: gS_, gG_, gV_, gB_, gT_, gD_; a variable, never on a Tab; the Kind is set once
+  picked) and Open question 13 (prefixes, the on-screen kinds). Help 105; next free Help number 106. (thread "Add gGlobal Kinds and BruControl import")
