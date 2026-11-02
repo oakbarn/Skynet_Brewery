@@ -42,9 +42,22 @@ The pop-up offers: **One Time, Monthly, Every 2 Months, Every Quarter, Every 6 M
   is a "Plan" made once in the PayPal dashboard. Its Plan ID goes into the Skynet Team file.
 - The person who pays can cancel a subscription any time in their own PayPal account.
 
+**Defaults (Fritz, 2026-11-02):**
+- Amount **$1 per beer**. Frequency already picked: **Every Month**. The person can change both.
+- A repeating PayPal Plan has a fixed price, so each repeat Plan is **$1 a beer with a "how many beers"
+  number** (PayPal calls this quantity). 3 beers a month = $3 a month.
+
+**Who gets the Buy a Beer hint (the reminder pop-up):**
+- People who gave **One Time**, or who have **not set up a Frequency**, keep getting the hint on its usual timing.
+- People who set up a **Frequency** (a repeating beer) do not get the hint.
+- **Patrons never get the Buy a Beer hint.**
+- There is no Skynet server, so the panel cannot see PayPal. After paying, PayPal sends the person back to
+  the panel and the panel records the Frequency they picked. A **"I already have a repeating beer"**
+  button covers someone who set it up another way. Patrons are known by their Patron code (section 3).
+
 ## 3. Patron level
 
-- One fixed amount, charged **every 6 months** (a PayPal Subscription, as in 2).
+- **$10 every 6 months** (Fritz, 2026-11-02), a PayPal Subscription, as in 2.
 - **How the panel knows you are a Patron:** there is no Skynet server, so a Prime Developer sends the
   Patron a signed **Patron code** (name, email, end date). The user pastes it into Settings. The panel
   checks the signature and shows Patron extras until the end date.
@@ -143,5 +156,5 @@ This step goes into build step 2 (and the Patron part into step 3).
 2. ~~Item 4: A or B?~~ Answered 2026-11-02: Option A, Patron payments only.
 6. Which PayPal account collects the Patron payments before the Pay Out? Suggested: Fritz's, upgraded to Business.
 3. ~~Group approval: every Prime Developer, or a majority?~~ Answered 2026-11-02: every Prime Developer (100%).
-4. Amounts: Beer suggestion of $5 One Time and $5 for each repeat? Patron amount every 6 months?
+4. ~~Amounts?~~ Answered 2026-11-02: Beer $1, Every Month picked; Patron $10 every 6 months; hint only for One Time / no Frequency, never Patrons.
 5. OK to add the license term?
