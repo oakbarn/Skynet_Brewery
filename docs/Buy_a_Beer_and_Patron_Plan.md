@@ -10,6 +10,9 @@ locked now with only Fritz's PayPal account. It is unlocked only when Fritz give
 **not** in the Skynet Team file and nobody can add, change or delete them, from the panel or by the Prime
 Developers. They stay in lib/donation.js, owned by @oakbarn.
 
+**Rule 12.3 (new, Fritz 2026-11-02):** "Patron payments are not Beer money. They are split by percent
+between several PayPal accounts (Option A, section 4). Rule 12.2 covers Buy a Beer only."
+
 **Rule 12.1:** "Nothing is posted or announced anywhere without Fritz's word." Patron emails to the
 Developer Team are sent only once Fritz says the email setup is ready.
 
@@ -55,19 +58,18 @@ The pop-up offers: **One Time, Monthly, Every 2 Months, Every Quarter, Every 6 M
 
 ## 4. More than one PayPal account, by percent
 
-**On hold (Rule 12.2):** today every Beer and Patron payment goes straight to Fritz's PayPal, so there is
-nothing to split. This part is built only when Fritz gives the second account, and then only for those two.
-The notes below are kept for that day.
+**Fritz picked Option A, for Patron payments only (2026-11-02).** Buy a Beer follows Rule 12.2: today it
+goes straight to Fritz's PayPal, and a second Beer account only comes if Fritz gives one.
 
 PayPal does not split one payment between several accounts for ordinary sellers. Its split tools are only
 for big approved marketplace partners. Two ways that work:
 
-- **A (recommended): one Skynet account, paid out by percent.** Every Beer and Patron payment goes to one
+- **A (picked, Patrons only): one Skynet account, paid out by percent.** Every Patron payment goes to one
   Skynet PayPal Business account. Once a month a Prime Developer presses **Pay Out** in the panel. It
   uses PayPal Payouts to send each account its percent and shows a report first. Exact percents. Payouts
   needs PayPal to approve the Business account for it. Until then the same report tells a Prime Developer
   what to send by hand.
-- **B: take turns by percent.** Each One Time beer goes straight to one account, picked so that over many
+- **B (not used): take turns by percent.** Each One Time beer goes straight to one account, picked so that over many
   beers each account gets its percent. No middle account. Subscriptions stay with whichever account was
   picked, so B is only rough.
 
@@ -77,7 +79,7 @@ One file in the repo, **skynet/Skynet_Team.json**, holds:
 
 - **Prime Developers** (GitHub user names). Fritz only for now.
 - **Skynet Developers** (GitHub user names + email for Patron requests).
-- **The percent each of the 2 PayPal accounts gets**, only once a second account exists (Rule 12.2).
+- **Patron PayPal accounts and percents** (the percents must add up to 100; Rule 12.3). The Beer accounts are not here (Rule 12.2).
 - **Amounts and Plan IDs** (Beer choices and the Patron amount).
 
 Nobody can change it from inside the panel. Every change goes through GitHub:
@@ -85,8 +87,8 @@ Nobody can change it from inside the panel. Every change goes through GitHub:
 | Change | Who |
 |---|---|
 | Beer and Patron **amounts** | Any Skynet Developer can propose, and a Prime Developer approves it. |
-| **PayPal accounts** | Nobody. Locked by Rule 12.2; only Fritz adds the one possible second account. |
-| **The 2 accounts' percents** (once there are 2) | Prime Developers **as a group**: every Prime Developer, or a majority, Fritz's pick. |
+| **Buy a Beer PayPal accounts** | Nobody. Locked by Rule 12.2; only Fritz adds the one possible second account. |
+| **Patron PayPal accounts and percents** | Prime Developers **as a group**: every Prime Developer, or a majority, Fritz's pick. |
 | **Add or remove a Skynet Developer** | Prime Developers only. |
 | **Add or remove a Prime Developer** | Prime Developers as a group. Fritz only for now. |
 
@@ -126,19 +128,20 @@ This step goes into build step 2 (and the Patron part into step 3).
 1. Make, or upgrade to, a free PayPal Business account for Skynet.
 2. Make the Plans in the PayPal dashboard (5 Beer repeats + Patron), or tell us the amounts and we write
    step-by-step help.
-3. Only if a second account ever comes: ask PayPal to turn on Payouts (option 4A).
+3. Ask PayPal to turn on Payouts on the account that collects Patron payments (Option A). Until PayPal says yes, the Pay Out report tells a Prime Developer what to send by hand.
 
 ## Build order (each a PR, each with a Help page)
 
 1. Skynet_Team.json (Developers, Prime Developers, amounts) + CODEOWNERS + signing, license term.
 2. Buy a Beer choices (One Time + 5 repeats) + the Support Skynet setup step.
 3. Patron: Patron code, Request a Feature, email to Developers, Patron part of the setup step.
-4. On hold until a second PayPal account (Rule 12.2): Pay Out by percent (4A) or take turns (4B).
+4. Patron Pay Out by percent (Option A).
 
 ## Questions for Fritz
 
 1. ~~Rule 12.2~~ Answered 2026-11-02: new Rule 12.2 (at most 2 accounts, locked with Fritz's only).
-2. ~~Item 4: A or B?~~ On hold until a second account comes; decide then.
-3. Group approval (adding or removing a Prime Developer, and the 2 accounts' percents later): every Prime Developer, or a majority?
+2. ~~Item 4: A or B?~~ Answered 2026-11-02: Option A, Patron payments only.
+6. Which PayPal account collects the Patron payments before the Pay Out? Suggested: Fritz's, upgraded to Business.
+3. Group approval (Patron accounts and percents, adding or removing a Prime Developer): every Prime Developer, or a majority?
 4. Amounts: Beer suggestion of $5 One Time and $5 for each repeat? Patron amount every 6 months?
 5. OK to add the license term?
