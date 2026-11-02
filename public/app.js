@@ -8,6 +8,7 @@ import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
+import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
@@ -2313,7 +2314,8 @@ function pickRun(sel) {
 }
 function fillAddType() {
   if (!TPL && !fillAddType.asked) { fillAddType.asked = true; loadTemplates().then(fillAddType).catch(() => { }); }     // the Skynet Device Templates go in the Valves lists
-  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
+  // the gGlobal Kinds that are plain variables (gS_, gG_, gV_, gB_, gT_, gD_) are never put on a Tab: they are made on the gGlobal screen
+  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).filter(([, d]) => !d.variable).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
   if (!ADD_MENU.some(([g]) => g.startsWith('gGlobal'))) ADD_MENU.push(vars('gGlobal', S.gKinds));
   const dev = DEV_TYPES(), wgt = WGT_TYPES();
   const types = (sel, head, list) => { const v = sel.value; sel.replaceChildren(h('option', { value: '' }, head), ...list.map(([k, t]) => h('option', { value: k }, t))); sel.value = v; };
@@ -3260,7 +3262,8 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
-F.gGlobal = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.gKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+// the Kind is set when it is made and never changes (Fritz, 2026-11-02): a wrong Kind is deleted and made again
+F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.kind}  (set when it was made and can't be changed; a wrong Kind: Delete it and make a new one)`, 'note'],
   ['items', 'Choices: Value (what Processes see and trigger on) and Text (what the dropdown shows)', 'vkitems', null, ['list']],
   ['initial', 'Starting choice (its Value)', 'text', null, ['list']],
   ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
@@ -3926,13 +3929,30 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
     for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
     for (const b of $$('#dlg .dlgCopy')) b.classList.toggle('hidden', !canCopy);
     const d = $('#dlg');
-    // Delete and Cancel are plain buttons so Enter in a field always means Save
-    for (const b of $$('#dlg [data-close]')) b.onclick = () => d.close(b.dataset.close);
+    // Delete and Cancel are plain buttons so Enter in a field always means Save.
+    // Cancel (or Esc) with changes made asks first: discard them, or go back to save (Rule 18.11, Fritz 2026-11-02)
+    const cancel = async () => { if (formSnap() === d._snap || await askDiscard()) d.close('cancel'); };
+    for (const b of $$('#dlg [data-close]')) b.onclick = () => b.dataset.close === 'cancel' ? cancel() : d.close(b.dataset.close);
+    d.oncancel = ev => { ev.preventDefault(); cancel(); };
     d.onclose = () => res(d.returnValue);
     d.returnValue = 'cancel'; d.showModal(); d._snap = formSnap();
   });
 }
 
+// Rule 18.11 (Fritz, 2026-11-02): ✖ Cancel in a dialog where something was changed asks before throwing the changes away.
+// Resolves true = discard them, false = go back to the dialog (to save).
+function askDiscard(what = 'this dialog') {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'askDiscard', 'data-nomenu': '' },
+      h('h3', {}, '⚠ Discard your changes?'),
+      h('p', {}, `You changed ${what}. Cancel throws those changes away.`),
+      h('div', { class: 'bar' }, h('button', { type: 'button', class: 'danger', onclick: () => d.close('discard') }, '🗑 Discard changes'),
+        h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', onclick: () => d.close('back') }, '↩ Go back to Save')));
+    d.oncancel = ev => { ev.preventDefault(); d.close('back'); };
+    d.onclose = () => { d.remove(); res(d.returnValue === 'discard'); };
+    document.body.append(d); d.showModal();
+  });
+}
 const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
@@ -5137,7 +5157,8 @@ function varRow(e) {
       h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now'),
         lg.frequency === 'once' ? h('button', { title: 'Send one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
   }
-  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(() => openProps('el', e.name)) }, ...cells);
+  const open = e.type === 'gGlobal' && isVarKind(e.kind) ? () => guard(editGlobal)(e) : () => openProps('el', e.name);
+  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(open) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
@@ -5149,6 +5170,166 @@ function renderGlobals() {
   // values and "Log now" need an operator
   if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); $$('#view-globals button').forEach(b => b.disabled = true); }
 }
+// ---------------------------------------------------------------- gGlobal Kinds (Fritz, 2026-11-02)
+// A gGlobal is a variable with a global scope, not a Widget: it is never on a Tab. It is made here, on the gGlobal screen:
+// ➕ New gGlobal, its Name, pick its Kind from the dropdown, and that Kind's dialog opens to fill in; then ✖ Cancel or 💾 Save.
+// Once picked the Kind is fixed (the Brain refuses a change too: public/gkinds.js). A wrong Kind: Delete it and make a new one.
+// The dialog follows the General Dialog Rules (Rule 18): Name first (no icons, never blank), ⬆ String Entry on a String
+// .value, ⬢ Attribute Dialog icon for the extras (the Graphic Dialog, Database and .API). Cancel with changes asks (Rule 18.11).
+const G_HELP = ['gglobal-kinds'];
+const G_KIND_TEXT = {
+  string: '.value is a String (text).',
+  graphic: 'The standard background picture paths: Image Path 1 here, the rest in the Graphic Dialog ⬢. .value starts as the path of the picture Background # picks.',
+  value: '.value is a Value (a number).',
+  bool: '.value is a Boolean: true or false.',
+  time: '.value is a Time, like 01:30:00 (hours:minutes:seconds).',
+  datetime: '.value is a Date Time, like 2026-11-07 07:00:00.',
+};
+const gNoBlank = v => v === undefined || v === null || v === '' ? undefined : v;
+// ⬆ String Entry Dialog (Rule 18.1): a bigger box to type a String in, 2 or 30 lines, word wrap on. Resolves the text, or null.
+function stringEntry(title, text, lines = 2) {
+  return new Promise(res => {
+    const ta = h('textarea', { rows: lines, class: 'strEntry', spellcheck: 'true', wrap: 'soft' }); ta.value = text ?? '';
+    const d = h('dialog', { class: 'strEntryDlg', 'data-nomenu': '' }, h('h3', {}, title), ta,
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'),
+        h('button', { type: 'button', class: 'primary', onclick: () => { d.returnValue = 'ok'; d.close(); } }, '💾 Save')));
+    const cancel = async () => { if (ta.value === (text ?? '') || await askDiscard('the text')) { d.returnValue = 'cancel'; d.close(); } };
+    d.oncancel = ev => { ev.preventDefault(); cancel(); };
+    d.onclose = () => { d.remove(); res(d.returnValue === 'ok' ? ta.value : null); };
+    document.body.append(d); d.showModal(); ta.focus();
+  });
+}
+function gCheckBlocked() {
+  if (!can('admin')) throw new Error('Only an admin can make or change a gGlobal');
+  if (editing) throw new Error('Save or leave Edit layout first, then make or change gGlobals here');
+}
+async function newGlobal() { gCheckBlocked(); await globalDialog({ name: '', type: 'gGlobal', retain: true }, null); }
+async function editGlobal(e) { gCheckBlocked(); await globalDialog(clone(e), e); }
+async function saveElements(elements) { await api('PUT', '/ui/layout', { elements }); await load(); }
+async function addSampleGlobals() {
+  gCheckBlocked();
+  const add = samplesToAdd(S.config.elements, S.config.graphics);
+  if (!add.length) return toast('The sample gGlobals are here already');
+  await saveElements([...S.config.elements, ...add]);
+  toast(`Added the sample gGlobals: ${add.map(x => x.name).join(', ')}`);
+}
+// "2026-11-07T07:00:00" <-> the datetime-local box
+const gDateBox = v => { const t = Date.parse(v ?? ''); if (!Number.isFinite(t)) return ''; const d = new Date(t), p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
+async function globalDialog(work, orig) {
+  await loadMediaPictures();
+  const d = h('dialog', { class: 'gDlg', 'data-nomenu': '' }), title = h('h3', {}), body = h('div', { class: 'gBody' }), err = h('div', { class: 'gErr', role: 'alert' });
+  // a message shows inside the dialog (a toast would sit behind it)
+  const g = fn => async () => { err.textContent = ''; try { await fn(); } catch (e) { err.textContent = '⚠ ' + e.message; } };
+  const btn = (label, cls, fn) => h('button', { type: 'button', class: cls, onclick: g(fn) }, label);
+  const bar = top => h('div', { class: 'bar dlgBar' }, orig ? btn('🗑 Delete', 'danger', del) : '', h('span', { class: 'spacer' }),
+    btn('✖ Cancel', '', cancel), btn('💾 Save', 'primary', save));
+  d.append(title, bar(true), err, body, bar(false));
+  const snap = () => JSON.stringify(work);
+  let snap0 = snap(), done;
+  const finished = new Promise(r => done = r);
+  const close = () => { d.close(); d.remove(); done(); };
+  async function cancel() { if (snap() === snap0 || await askDiscard('this gGlobal')) close(); }
+  d.oncancel = ev => { ev.preventDefault(); cancel(); };
+  async function del() {
+    if (!confirm(`Delete ${orig.name}? A Process that uses it stops at that line until it is changed.`)) return;
+    await saveElements(S.config.elements.filter(x => x !== orig)); close(); toast(`${orig.name} deleted`);
+  }
+  async function save() {
+    work.name = noSpaces(work.name);
+    if (!work.name) throw new Error('Name: it can\'t be blank');
+    if (!work.kind) throw new Error('Kind: pick the Kind of this gGlobal');
+    if (!orig || work.name !== orig.name) {
+      const bad = elementNameError(work.name, 'gGlobal'); if (bad) throw new Error(bad);
+      const lc = work.name.toLowerCase();
+      if ([...S.config.elements.filter(x => x !== orig), ...S.config.graphics].some(x => String(x.name ?? '').toLowerCase() === lc)) throw new Error(`The name ${work.name} is already used. Names must be unique.`);
+    }
+    const v = work.initial;
+    if (work.kind === 'value') {
+      if (v !== undefined && !Number.isFinite(+v)) throw new Error('Value: it must be a number');
+      if (work.min !== undefined && work.max !== undefined && work.min > work.max) throw new Error('Lowest allowed is more than Highest allowed');
+    }
+    if (work.kind === 'time' && v !== undefined && !/^-?\d+:\d{1,2}(:\d{1,2})?$/.test(v)) throw new Error('Value: a Time looks like 01:30:00');
+    if (work.kind === 'datetime' && v !== undefined && !Number.isFinite(Date.parse(v))) throw new Error('Value: pick a date and time');
+    if (work.kind === 'graphic') work.initial = gNoBlank(work['imagePath_' + (+work.background || 1)] ?? work.imagePath_1);
+    for (const k of Object.keys(work)) if (work[k] === undefined) delete work[k];
+    await saveElements(orig ? S.config.elements.map(x => x === orig ? work : x) : [...S.config.elements, work]);
+    close(); toast(`${work.name} saved`);
+  }
+  const row = (label, ...kids) => h('div', { class: 'gRow' }, h('label', {}, label), h('span', { class: 'nameRow' }, ...kids));
+  const note = t => h('div', { class: 'muted gNote' }, t);
+  const attrIcon = (title, fn) => h('button', { type: 'button', class: 'attrIcon', title, 'aria-label': title, onclick: g(fn) }, '⬢');
+  const box = (k, attrs = {}, conv = x => gNoBlank(x)) => {
+    const inp = h('input', { type: 'text', spellcheck: 'false', autocomplete: 'off', ...attrs });
+    inp.value = work[k] ?? '';
+    inp.addEventListener('input', () => { work[k] = conv(inp.type === 'number' ? (inp.value === '' ? undefined : +inp.value) : inp.value); });
+    return inp;
+  };
+  const sw = (k, label) => { const c = h('input', { type: 'checkbox' }); c.checked = !!work[k]; c.onchange = () => { work[k] = c.checked; };
+    return h('label', { class: 'toggle' }, h('span', { class: 'sw' }, c, h('span', { class: 'swk' })), ' ' + label); };
+  function render() {
+    title.replaceChildren(work.kind ? `${VAR_KINDS[work.kind]} Properties` : 'New gGlobal', ' ', helpIcon(G_HELP, () => { if (snap() !== snap0 && !confirm('Leave without saving your changes, and open Help?')) return false; close(); }));
+    body.replaceChildren();
+    // Step 2: the Name (no ⬆ and no ⬢, never blank, unique: Rule 18.4)
+    body.append(row('Name', box('name', { placeholder: 'e.g. gV_Strike_Temp' }, x => x)),
+      note(`Can't be blank, no spaces, unique. A Process uses it by this Name: ${work.name || 'gV_Strike_Temp'}.value`));
+    // Step 3: the Kind. Once picked it is fixed.
+    if (!work.kind) {
+      const s = h('select', {}, h('option', { value: '' }, '(pick a Kind)'), ...Object.entries(VAR_KINDS).map(([k, n]) => h('option', { value: k }, n)));
+      s.onchange = () => { if (!s.value) return; work.kind = s.value; if (work.kind === 'bool') work.initial ??= 'false'; render(); };
+      body.append(row('Kind', s), note('Pick the Kind: its dialog opens below. Once picked, the Kind can\'t be changed (a wrong Kind: Delete it and make a new one).'));
+      return;
+    }
+    body.append(row('Kind', h('b', {}, '🔒 ' + VAR_KINDS[work.kind])), note(G_KIND_TEXT[work.kind] + ' The Kind can\'t be changed: a wrong Kind is deleted and made again.'));
+    // Step 4: the Kind's own fields
+    const k = work.kind;
+    if (k === 'string') {
+      const inp = box('initial', { placeholder: '(empty)' });
+      body.append(row('.value', inp, h('button', { type: 'button', class: 'upArrow', title: 'Type it in a bigger box (String Entry, 2 lines)', 'aria-label': 'String Entry',
+        onclick: async () => { const t = await stringEntry(`${work.name || 'gS_'}.value`, inp.value, 2); if (t !== null) { inp.value = t; work.initial = gNoBlank(t); } } }, '⬆')));
+    }
+    if (k === 'graphic') {
+      const list = 'gPics'; body.append(h('datalist', { id: list }, ...mediaPics.map(p => h('option', { value: p }))));
+      const inp = box('imagePath_1', { list, placeholder: '(none)' });
+      body.append(row('Image Path 1', inp, attrIcon('Graphic Dialog: Background #, Back Colour, Image Path 1, 2, 3', async () => {
+        const w2 = Object.fromEntries(['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3'].filter(x => work[x] !== undefined).map(x => [x, work[x]]));
+        const r = await dialog(`${work.name || 'gG_'}: Graphic Dialog`, [['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
+          ['imagePath_1', 'Image Path 1', 'imgopen', 1, false, 'b'], ['imagePath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['imagePath_3', 'Image Path 3', 'imgopen', 3, false, 'b']], w2, false, G_HELP);
+        if (r !== 'ok') return;
+        readFields(w2);
+        for (const x of ['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3']) work[x] = gNoBlank(w2[x]);
+        render();
+      })), note('Background # (1, 2 or 3) picks which Image Path .value starts as. The rest is in the Graphic Dialog ⬢.'));
+    }
+    if (k === 'value') body.append(row('.value', box('initial', { type: 'number', step: 'any' }, x => x === undefined ? undefined : String(x))),
+      row('Decimals', box('precision', { type: 'number', min: 0, max: 6 })), row('Units', box('units', { placeholder: 'e.g. °F, gal, %' })),
+      row('Lowest allowed', box('min', { type: 'number', step: 'any' })), row('Highest allowed', box('max', { type: 'number', step: 'any' })));
+    if (k === 'bool') {
+      const c = h('input', { type: 'checkbox' }); c.checked = String(work.initial) === 'true'; c.onchange = () => { work.initial = c.checked ? 'true' : 'false'; };
+      body.append(row('.value', h('label', { class: 'toggle' }, h('span', { class: 'sw' }, c, h('span', { class: 'swk' })), ' true (off = false)')));
+    }
+    if (k === 'time') body.append(row('.value', box('initial', { placeholder: '00:00:00', inputmode: 'numeric' })));
+    if (k === 'datetime') {
+      const inp = h('input', { type: 'datetime-local', step: 1 }); inp.value = gDateBox(work.initial);
+      inp.onchange = () => { work.initial = gNoBlank(inp.value.length === 16 ? inp.value + ':00' : inp.value); };
+      body.append(row('.value', inp));
+    }
+    body.append(row('', sw('retain', 'Keep .value when the Brain restarts (off = start from the .value above)')));
+    // Database and .API (Rule 6.14): the extras behind the ⬢ (Rule 18.9)
+    body.append(row('Database and .API', h('span', { class: 'muted' }, `${logSummary(work.database)}; .API ${API_LABEL[work.api || 'off'].replace(/ \(.*\)$/, '')}`),
+      attrIcon('Database and .API settings', async () => {
+        const w2 = { name: work.name, database: work.database, api: work.api }; dbToWork(w2);
+        const r = await dialog(`${work.name || 'gGlobal'}: Database and .API`, it => dbFields(it), w2, false, ['database-and-api']);
+        if (r !== 'ok') return;
+        readFields(w2); dbFromWork(w2);
+        work.database = w2.database; work.api = w2.api; render();
+      })));
+  }
+  render(); snap0 = snap();
+  document.body.append(d); d.showModal();
+  return finished;
+}
+
 function refreshGlobalValues(ch) {
   for (const n of Object.keys(ch)) {
     const inp = $(`#view-globals [data-g="${CSS.escape(n)}"]`); if (!inp || document.activeElement === inp) continue;
@@ -5187,6 +5368,8 @@ function renderCsvBox(names = csvNames) {
 }
 const csvTicked = () => $$('#csvNames input:checked').map(c => c.value);
 $('#csvSet').onchange = () => renderCsvBox();
+$('#gNew').onclick = guard(newGlobal);
+$('#gSamples').onclick = guard(addSampleGlobals);
 $('#csvAll').onclick = () => $$('#csvNames input').forEach(c => c.checked = true);
 $('#csvNone').onclick = () => { $$('#csvNames input').forEach(c => c.checked = false); $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
 $('#csvNames').onchange = () => { $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
