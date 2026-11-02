@@ -901,6 +901,10 @@ Height) can sit in a "... Properties" pop-up opened with the Attribute Dialog ic
 commands it**. Until a dialog is changed, it keeps its present layout (Rules 2.22 and 2.23 still describe those). When one
 is changed, it follows Rule 15.3 (the old way is changed everywhere Skynet ships it).
 
+18.11 **Cancel warns before throwing away changes.** In every dialog with ✖ Cancel and 💾 Save, if anything was changed and
+Cancel is pressed, a warning asks whether to really discard the changes or go back and save. With no changes, Cancel just
+closes (Rule 2.17). (Fritz, 2026-11-02)
+
 ---
 
 ## Open questions (not Rules yet)
@@ -1042,3 +1046,5 @@ is changed, it follows Rule 15.3 (the old way is changed everywhere Skynet ships
 - 2026-11-02: Added section 18, General Dialog Rules (Up Arrow String Entry Dialogs of 2 and 30 lines, Attribute Dialog
   icon, Label first and never blank, Suggested Name from the Label, Name never blank, Image Path 1 with the Graphic Dialog
   pop-up, one dialog at a time on Fritz's command) and Open question 12. (thread "Add the New General Dialog Rules")
+- 2026-11-02: Added Rule 18.11 (Cancel warns when changes were made: discard or go back to save; every dialog with Cancel
+  and Save). (thread "Add the New General Dialog Rules")
