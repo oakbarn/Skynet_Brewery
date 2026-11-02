@@ -43,6 +43,11 @@ In BruControl the lock was one lock for all Tabs. Fritz: "In Hierarchy Universal
 | **Tab Lock** | one Tab | none (🔒 Lock All / 🔓 Unlock All only set every Item Lock once, Rule 2.12) | A **Tab Lock** switch in Tab settings: on = nothing on that Tab moves or opens Properties, even in Edit layout |
 | **Item Lock** | one item | the 🔓 / 🔒 Lock (position only; Properties still open) | stays as it is |
 
+**In a Process** (Fritz: "may need Process command for Universal Lock and Tab Lock", proposed):
+`universal_lock = true` / `false` (on = nobody can open Edit layout; an open Edit layout is closed after a warning, nothing unsaved
+is lost), `tab_lock "Brewhouse" = true` / `false`, and `name.lock = true` / `false` for one item. Each can also be read
+(`if universal_lock == true`). Every change is written in the Processes console.
+
 
 ---
 
