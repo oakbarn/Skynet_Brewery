@@ -4,11 +4,11 @@ Plan only, 2026-11-02. Nothing is built until Fritz says go. Thread "Expand Buy 
 
 ## Rules this touches
 
-**Rule 12.2:** "The Beer money donation recipient is locked to Fritz's PayPal in one file and can never be
-made editable again." Asks 4 and 5 (several PayPal accounts, set by Prime Developers) break this Rule.
-Fritz picks: **change Rule 12.2** to "PayPal accounts, percents and amounts live in one Skynet Team file.
-Only the Prime Developers, as a group, can change it, on GitHub. It is never editable from the panel." or
-**allow this one exception**. The suggested change keeps the spirit of 12.2: nobody can change it from inside the panel.
+**Rule 12.2 (new, Fritz 2026-11-02):** "Beer money donations can go to at most 2 PayPal accounts. It is
+locked now with only Fritz's PayPal account. It is unlocked only when Fritz gives the second PayPal account
+(that may never happen); once that account is added it is locked again." So the PayPal accounts are
+**not** in the Skynet Team file and nobody can add, change or delete them, from the panel or by the Prime
+Developers. They stay in lib/donation.js, owned by @oakbarn.
 
 **Rule 12.1:** "Nothing is posted or announced anywhere without Fritz's word." Patron emails to the
 Developer Team are sent only once Fritz says the email setup is ready.
@@ -55,6 +55,10 @@ The pop-up offers: **One Time, Monthly, Every 2 Months, Every Quarter, Every 6 M
 
 ## 4. More than one PayPal account, by percent
 
+**On hold (Rule 12.2):** today every Beer and Patron payment goes straight to Fritz's PayPal, so there is
+nothing to split. This part is built only when Fritz gives the second account, and then only for those two.
+The notes below are kept for that day.
+
 PayPal does not split one payment between several accounts for ordinary sellers. Its split tools are only
 for big approved marketplace partners. Two ways that work:
 
@@ -73,7 +77,7 @@ One file in the repo, **skynet/Skynet_Team.json**, holds:
 
 - **Prime Developers** (GitHub user names). Fritz only for now.
 - **Skynet Developers** (GitHub user names + email for Patron requests).
-- **PayPal accounts and percents** (the percents must add up to 100).
+- **The percent each of the 2 PayPal accounts gets**, only once a second account exists (Rule 12.2).
 - **Amounts and Plan IDs** (Beer choices and the Patron amount).
 
 Nobody can change it from inside the panel. Every change goes through GitHub:
@@ -81,7 +85,8 @@ Nobody can change it from inside the panel. Every change goes through GitHub:
 | Change | Who |
 |---|---|
 | Beer and Patron **amounts** | Any Skynet Developer can propose, and a Prime Developer approves it. |
-| **PayPal accounts and percents** | Prime Developers **as a group**: GitHub needs approvals from every Prime Developer, or a majority, Fritz's pick. |
+| **PayPal accounts** | Nobody. Locked by Rule 12.2; only Fritz adds the one possible second account. |
+| **The 2 accounts' percents** (once there are 2) | Prime Developers **as a group**: every Prime Developer, or a majority, Fritz's pick. |
 | **Add or remove a Skynet Developer** | Prime Developers only. |
 | **Add or remove a Prime Developer** | Prime Developers as a group. Fritz only for now. |
 
@@ -121,19 +126,19 @@ This step goes into build step 2 (and the Patron part into step 3).
 1. Make, or upgrade to, a free PayPal Business account for Skynet.
 2. Make the Plans in the PayPal dashboard (5 Beer repeats + Patron), or tell us the amounts and we write
    step-by-step help.
-3. Later: ask PayPal to turn on Payouts (only for option 4A).
+3. Only if a second account ever comes: ask PayPal to turn on Payouts (option 4A).
 
 ## Build order (each a PR, each with a Help page)
 
-1. Skynet_Team.json + CODEOWNERS + signing, Rule 12.2 update, license term.
+1. Skynet_Team.json (Developers, Prime Developers, amounts) + CODEOWNERS + signing, license term.
 2. Buy a Beer choices (One Time + 5 repeats) + the Support Skynet setup step.
 3. Patron: Patron code, Request a Feature, email to Developers, Patron part of the setup step.
-4. Pay Out by percent (4A) or take turns (4B).
+4. On hold until a second PayPal account (Rule 12.2): Pay Out by percent (4A) or take turns (4B).
 
 ## Questions for Fritz
 
-1. Rule 12.2: change it (wording above) or allow an exception?
-2. Item 4: A (one Skynet account + monthly Pay Out) or B (take turns)?
-3. Group approval for PayPal changes: every Prime Developer, or a majority?
+1. ~~Rule 12.2~~ Answered 2026-11-02: new Rule 12.2 (at most 2 accounts, locked with Fritz's only).
+2. ~~Item 4: A or B?~~ On hold until a second account comes; decide then.
+3. Group approval (adding or removing a Prime Developer, and the 2 accounts' percents later): every Prime Developer, or a majority?
 4. Amounts: Beer suggestion of $5 One Time and $5 for each repeat? Patron amount every 6 months?
 5. OK to add the license term?
