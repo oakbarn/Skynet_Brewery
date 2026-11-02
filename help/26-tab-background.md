@@ -35,4 +35,4 @@ Put it on the Pi first with the [Media](07-media) screen (into the `Images` fold
 
 ## Pictures of single items
 
-This page is about the whole tab. A pump, valve or other item has its own pictures (**imagePath_1** to **imagePath_3**). See [Pictures on items](25-picture-paths).
+This page is about the whole tab. A pump, valve or other item has its own pictures (**.backpath**, **.backpath_2**, **.backpath_3**). See [Pictures on items](25-picture-paths).
