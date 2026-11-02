@@ -26,7 +26,9 @@ export function elementTopic(e) {
     case 'alarm': return e.alarmClass ? ['alarm-widget'] : ['alarms-and-sound'];      // the Alarm Widget subclasses (Fritz, 2026-11-02)
     case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
     case 'timer': return ['timer-widget'];      // Timer Widget Properties (Fritz, 2026-10-29)
-    case 'gGlobal': return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
+    case 'gGlobal':       // the six variable Kinds have their own page (Fritz, 2026-11-02); the on-screen kinds stay on Variables
+      if (['string', 'graphic', 'value', 'bool', 'time', 'datetime'].includes(e.kind ?? 'value')) return ['gglobal-kinds'];
+      return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
     case 'shared': return ['variables', 'which-kind-to-use'];
     case 'picture': return ['picture-widget', 'turns-on-with'];
     case 'label': case 'switch': case 'manual': return ['tabs', 'changing-the-layout-admins'];
@@ -53,7 +55,7 @@ export function graphicTopic(g) {
       if (g.fitting === 'manualValve') return ['pipe-fittings-and-manual-valves', 'the-manual-valve-widget'];
       if (g.fitting && g.fitting !== 'point') return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
       return ['ip-snap-and-valve-pictures', 'snap-to-align'];
-    case 'pipe': return ['pipes-and-hoses', g.hose ? 'hoses' : 'pipes'];
+    case 'pipe': return g.hose ? ['pipes-and-hoses', 'hoses'] : ['pipe-angles-and-upright-kettles', 'pipes-run-horizontal-vertical-or-45'];      // Rule 5.19
     case 'image': return ['picture-paths'];
     case 'clone': return ['cloned-devices', 'a-clone-s-properties'];
     case 'override': return ['override-button'];
