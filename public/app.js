@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { DIRS, dirOf, onAngle, angledEnd, alongLine, fitFor } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -8,6 +9,7 @@ import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
+import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
@@ -302,6 +304,9 @@ const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 
 const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
 const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left', 0.22, 1], ['Bottom Right', 0.78, 1],
   ['Top Left Branch', 0.087, 0], ['Bottom Branch', 0.54, 1]];         // the openings of the Skynet RIMS Device picture (Skynet_TC1_2_Rims_Device.svg)
+// the 4 port tips of the Skynet Copper Counterflow Chiller picture (Chiller_Copper_Counterflow.svg, viewBox 225 x 245; Fritz, 2026-11-02):
+// the wort tube runs straight out through each tee, the water side leaves by the tee's branch; every tip faces left (Rule 5.19)
+const CF_COPPER = [['Coil Top End', 0, 0.1633], ['Coil Top Branch', 0.0889, 0.2694], ['Coil Bottom Branch', 0.0889, 0.8163], ['Coil Bottom End', 0, 0.9224]];
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Label is its only text
@@ -321,8 +326,8 @@ const EQ = {
     } },
   pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/Skynet/Chillers/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
-      wortIn: pt('Wort In', CORNERS, { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS, { on: true, def: 'Bottom Right', circuit: 'wort' }),
-      waterIn: pt('Water In', CORNERS, { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS, { on: true, def: 'Top Right', circuit: 'water' }),
+      wortIn: pt('Wort In', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Right', circuit: 'wort' }),
+      waterIn: pt('Water In', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Right', circuit: 'water' }),
       thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
     } },
   ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/Skynet/Chillers/chill_coil.svg', size: [180, 180], tab: 'Equipment',
@@ -1588,9 +1593,50 @@ function snapEnd(pts, i, j, c) {
 }
 function syncPipeEnds(p) {
   const pts = p.points; if (!pts || pts.length < 2) return;
+  if (p.straight && pts.length === 2) return syncStraight(p);
   const a = ipPoint(p.from, p.workspace), b = ipPoint(p.to, p.workspace), n = pts.length;
   if (a) snapEnd(pts, 0, n > 2 && !p.hose ? 1 : undefined, a);
   if (b) snapEnd(pts, n - 1, n > 2 && !p.hose ? n - 2 : undefined, b);
+}
+// A pipe is one straight piece, Horizontal, Vertical or 45 (Fritz, 2026-11-02, Rule 5.19), and it never bends to follow an IP.
+// When what its ends are on moves:
+//  - both ends still in line at an allowed angle (the whole thing moved, or one end moved along the pipe): it follows them;
+//  - one end is its own open end (a coupling only it uses): it moves along as one piece, the same length;
+//  - else it keeps its direction: the end on the IP that moved slides along the pipe's line, level with that IP. If the IP went
+//    off to the side, the end is no longer on it (a red ring shows it) and lets go of it when the drag ends (letGoBentEnds).
+function syncStraight(p) {
+  const pts = p.points, ws = p.workspace, a = ipPoint(p.from, ws), b = ipPoint(p.to, ws);
+  const movedA = a && (a[0] !== pts[0][0] || a[1] !== pts[0][1]), movedB = b && (b[0] !== pts[1][0] || b[1] !== pts[1][1]);
+  if (!movedA && !movedB) return;
+  if (a && b && onAngle(a, b, 0.5)) { p.points = [[...a], [...b]]; return; }
+  const d = dirOf(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]);
+  const own = k => editing && draft && p[k] ? ownCoupling(p[k], p) : null;
+  const carry = (from, to, k) => {     // the whole pipe goes along with the end that moved; its open end's coupling too
+    const mx = to[0] - from[0], my = to[1] - from[1];
+    p.points = pts.map(q => [q[0] + mx, q[1] + my]);
+    const g = own(k); if (g) { g.x = (g.x || 0) + mx; g.y = (g.y || 0) + my; const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(g.id)}"]`); if (n) place(n, g); }
+  };
+  if (movedA && (!b || own('to'))) return carry(pts[0], a, 'to');
+  if (movedB && (!a || own('from'))) return carry(pts[1], b, 'from');
+  // slide the free end along the line from the end that stays (never through it: then it keeps its old place)
+  const slide = (fixed, dir, target, old) => { const e = alongLine(fixed, dir, target), [ux, uy] = DIRS[dir]; return ux * (e[0] - fixed[0]) + uy * (e[1] - fixed[1]) > 0 ? e : [...old]; };
+  if (movedA && !movedB) { p.points = [slide(pts[1], (d + 4) % 8, a, pts[0]), [...pts[1]]]; return; }
+  const from = movedA ? [...a] : [...pts[0]];
+  p.points = [from, slide(from, d, b || pts[1], pts[1])];
+}
+// After a drag: a pipe end that is no longer on its IP (the IP went off the pipe's line) lets go of it. It gets an open end
+// (a coupling), and the toast says which pipes let go so they can be joined again with a fitting.
+function letGoBentEnds() {
+  if (!editing || !draft) return;
+  const gone = [];
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.straight && g.workspace === wsName && (g.points || []).length === 2)) {
+    for (const [k, i, j] of [['from', 0, 1], ['to', 1, 0]]) {
+      const c = ipPoint(p[k], p.workspace);
+      if (!c || Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) <= 1.5) continue;
+      p[k] = endCoupling(p.points, i, j); gone.push(p.name || 'a pipe');
+    }
+  }
+  if (gone.length) { renderWs(); toast(`${[...new Set(gone)].join(', ')} let go: pipes run only Horizontal, Vertical or 45 (Rule 5.19). Join it again in line, or with an elbow or tee.`, true); }
 }
 // A hose is a pipe that bends: a smooth curve through its points (Catmull-Rom spline drawn as Bezier curves)
 function hoseD(pts) {
@@ -1661,7 +1707,7 @@ function renderPipes() {
     }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
-      if (!p.locked && !p.straight) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
+      if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
     svg.append(g);
   }
@@ -1694,6 +1740,7 @@ function setEditing(on) {
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
+  if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
@@ -1851,6 +1898,7 @@ window.addEventListener('pointerup', () => {
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
+  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds();     // Rule 5.19: a pipe never bends to follow
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
@@ -1962,20 +2010,13 @@ $('#ws').addEventListener('contextmenu', ev => { if (!editing && pointerKind !==
 
 // The joint Skynet put at a pipe end turns into the fitting the pipes on it need: one or two in line = coupling,
 // a corner = 90° elbow, three = tee, four = cross, each turned the right way. A joint with a hose on it stays a coupling.
-const ARMS = { coupling: null, elbow90: { W: 1, S: 1 }, tee: { W: 1, E: 1, S: 1 }, cross: { W: 1, E: 1, N: 1, S: 1 } };
-const turnArm = (d, k) => { const o = 'NESW'; return o[(o.indexOf(d) + k) % 4]; };
+// Pipes can also meet at 45 degrees: a 45 elbow joins two pipes 135 degrees apart (public/pipefit.js).
 function autoFit(g) {
   const ps = pipesOn(g.id, g.workspace), c = ipCenter(g);
   let fit = 'coupling', rot = g.rotate || '0';
   if (ps.length >= 2 && ps.every(p => p.straight)) {
-    const dirs = new Set(ps.map(p => {
-      const pts = p.points, far = p.from === g.id ? pts[1] : pts[pts.length - 2], dx = far[0] - c[0], dy = far[1] - c[1];
-      return Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 'E' : 'W') : (dy > 0 ? 'S' : 'N');
-    }));
-    const want = [...dirs].sort().join('');
-    fit = dirs.size === 2 && (want === 'EW' || want === 'NS') ? 'coupling' : dirs.size === 2 ? 'elbow90' : dirs.size === 3 ? 'tee' : dirs.size === 4 ? 'cross' : 'coupling';
-    if (fit === 'coupling') rot = want === 'NS' ? '90' : '0';
-    else for (const k of [0, 1, 2, 3]) if (Object.keys(ARMS[fit]).map(d => turnArm(d, k)).sort().join('') === want) { rot = String(k * 90); break; }
+    const f = fitFor(ps.map(p => { const pts = p.points, far = p.from === g.id ? pts[1] : pts[pts.length - 2]; return dirOf(far[0] - c[0], far[1] - c[1]); }));
+    fit = f.fitting; if (f.ok) rot = f.rotate;
   }
   if (g.fitting !== fit || String(g.rotate) !== rot) { g.fitting = fit; g.rotate = rot; giveName(g, draft.graphics); }
 }
@@ -1986,12 +2027,11 @@ function drawSnap(ev) {
   for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (c) { const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= r && (!best || d < best.d)) best = { d, c, id: q.id }; } }
   return best ? { c: [...best.c], id: best.id } : { c: [snap(p[0]), snap(p[1])], id: null };
 }
-// A straight pipe runs only across or up-and-down from its start. It ends on the IP picked only when that IP is in line with
-// the start; anywhere else the end goes on the line, level with the pointer.
+// A pipe runs only Horizontal, Vertical or at 45 degrees from its start (Fritz, 2026-11-02, Rule 5.19). It ends on the IP picked
+// only when that IP is on one of those lines from the start; anywhere else the end goes on the nearest line, level with the pointer.
 function straightEnd(a, c, id) {
-  const across = Math.abs(c[0] - a[0]) >= Math.abs(c[1] - a[1]), off = across ? Math.abs(c[1] - a[1]) : Math.abs(c[0] - a[0]);
-  if (id && off <= 2) return { c: across ? [c[0], a[1]] : [a[0], c[1]], id };
-  return { c: across ? [c[0], a[1]] : [a[0], c[1]], id: null };
+  const e = angledEnd(a, c);
+  return { c: e.c, id: id && Math.hypot(e.c[0] - c[0], e.c[1] - c[1]) <= 2 ? id : null };
 }
 // Fritz: double-click the start, move to the length wanted, double-click the end. The pipe is then one straight piece of fixed
 // length; turns are made with elbows and tees.
@@ -2334,7 +2374,8 @@ function pickRun(sel) {
 }
 function fillAddType() {
   if (!TPL && !fillAddType.asked) { fillAddType.asked = true; loadTemplates().then(fillAddType).catch(() => { }); }     // the Skynet Device Templates go in the Valves lists
-  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
+  // the gGlobal Kinds that are plain variables (gS_, gG_, gV_, gB_, gT_, gD_) are never put on a Tab: they are made on the gGlobal screen
+  const vars = (type, ks) => [`${type} variables (app only)`, Object.entries(ks).filter(([, d]) => !d.variable).map(([k, d]) => [`${d.label}  (${d.prefix})`, type, '', { kind: k }])];
   if (!ADD_MENU.some(([g]) => g.startsWith('gGlobal'))) ADD_MENU.push(vars('gGlobal', S.gKinds));
   const dev = DEV_TYPES(), wgt = WGT_TYPES();
   const types = (sel, head, list) => { const v = sel.value; sel.replaceChildren(h('option', { value: '' }, head), ...list.map(([k, t]) => h('option', { value: k }, t))); sel.value = v; };
@@ -2738,15 +2779,18 @@ function updLockBtn() {
 // Turn and flip buttons on the Edit layout bar (Fritz, 2026-10-27: "not apparent how to orient a Fitting"). They show while a
 // Skynet Fitting or Skynet vessel is picked (all six: the picture, its IPs and what is joined to it follow, as in its
 // Properties), or an IP fitting (turn only: its shape is the same flipped).
-const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
+const turnKind = g => !g || g.locked ? '' : isCap(g) ? '' : isSkyV(g) && isKettle(g) ? 'kettle' : isUnit(g) || isSkyV(g) ? 'all' : g.kind === 'ip' && g.fitting && !['point', 'coupling', 'cap'].includes(g.fitting) ? 'turn' : '';
 function updTurnBar(item) {
   const k = editing && !previewing ? turnKind(item) : '';
   $('#turnBar').classList.toggle('hidden', !k);
   for (const b of $$('#turnBar .flip')) b.disabled = k !== 'all';
+  if (k === 'kettle') { $('#turnFlipH').disabled = false; for (const id of ['#turnFlipV', '#turnL45', '#turnR45']) $(id).disabled = true; }     // a kettle stays upright (Rule 5.5)
+  else for (const id of ['#turnL45', '#turnR45']) $(id).disabled = false;
 }
 function turnSel(op) {
   const g = sel && findItem(sel.kind, sel.id), k = turnKind(g);
   if (!k) return;
+  if (k === 'kettle' && op !== 'h') return toast('A kettle stays upright: it can Flip Horizontal, never Flip Vertical or turn (Rule 5.5).', true);
   if (lockedRiders(g).length) return toast(`${g.label || g.name} has a 🔒 locked part, so it can't turn.`, true);
   if (k === 'turn') { if (typeof op === 'number') g.rotate = String(((+g.rotate || 0) + op + 360) % 360); renderWs(); return; }
   const before = clone(g), r = (typeof op === 'number' ? op : 0) * Math.PI / 180;
@@ -2759,7 +2803,7 @@ function turnSel(op) {
     }
     turnVesselParts(g, before);
   }
-  placeUnitParts(g); renderWs();
+  placeUnitParts(g); renderWs(); letGoBentEnds();
 }
 $('#turnFlipH').onclick = () => turnSel('h');
 $('#turnFlipV').onclick = () => turnSel('v');
@@ -2813,7 +2857,7 @@ function lockTab(on) {
 }
 $('#lockAll').onclick = () => lockTab(true);
 $('#unlockAll').onclick = () => lockTab(false);
-$('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run straight across or up and down. Esc cancels.'; renderPipes(); };
+$('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run only Horizontal, Vertical or at 45 degrees; they turn only at a fitting (an elbow or tee joins them where two pipes meet). Esc cancels.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 // a new equipment widget (pipe fittings too): made on the Build Tab, then Save Build ... puts it on a Tab
 function addVesselWidget(c) {
@@ -3302,7 +3346,8 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
-F.gGlobal = () => [['kind', 'Kind (OK and reopen to see its settings)', 'sel', Object.entries(S.gKinds).map(([k, d]) => [k, `${d.label}  (${d.prefix})`])],
+// the Kind is set when it is made and never changes (Fritz, 2026-11-02): a wrong Kind is deleted and made again
+F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.kind}  (set when it was made and can't be changed; a wrong Kind: Delete it and make a new one)`, 'note'],
   ['items', 'Choices: Value (what Processes see and trigger on) and Text (what the dropdown shows)', 'vkitems', null, ['list']],
   ['initial', 'Starting choice (its Value)', 'text', null, ['list']],
   ['initial', 'Image path (inside a media folder)', 'path', null, ['graphic']],
@@ -3969,13 +4014,30 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
     for (const b of $$('#dlg .dlgDelete')) b.classList.toggle('hidden', !canDelete);
     for (const b of $$('#dlg .dlgCopy')) b.classList.toggle('hidden', !canCopy);
     const d = $('#dlg');
-    // Delete and Cancel are plain buttons so Enter in a field always means Save
-    for (const b of $$('#dlg [data-close]')) b.onclick = () => d.close(b.dataset.close);
+    // Delete and Cancel are plain buttons so Enter in a field always means Save.
+    // Cancel (or Esc) with changes made asks first: discard them, or go back to save (Rule 18.11, Fritz 2026-11-02)
+    const cancel = async () => { if (formSnap() === d._snap || await askDiscard()) d.close('cancel'); };
+    for (const b of $$('#dlg [data-close]')) b.onclick = () => b.dataset.close === 'cancel' ? cancel() : d.close(b.dataset.close);
+    d.oncancel = ev => { ev.preventDefault(); cancel(); };
     d.onclose = () => res(d.returnValue);
     d.returnValue = 'cancel'; d.showModal(); d._snap = formSnap();
   });
 }
 
+// Rule 18.11 (Fritz, 2026-11-02): ✖ Cancel in a dialog where something was changed asks before throwing the changes away.
+// Resolves true = discard them, false = go back to the dialog (to save).
+function askDiscard(what = 'this dialog') {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'askDiscard', 'data-nomenu': '' },
+      h('h3', {}, '⚠ Discard your changes?'),
+      h('p', {}, `You changed ${what}. Cancel throws those changes away.`),
+      h('div', { class: 'bar' }, h('button', { type: 'button', class: 'danger', onclick: () => d.close('discard') }, '🗑 Discard changes'),
+        h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', onclick: () => d.close('back') }, '↩ Go back to Save')));
+    d.oncancel = ev => { ev.preventDefault(); d.close('back'); };
+    d.onclose = () => { d.remove(); res(d.returnValue === 'discard'); };
+    document.body.append(d); d.showModal();
+  });
+}
 const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
@@ -5180,7 +5242,8 @@ function varRow(e) {
       h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now'),
         lg.frequency === 'once' ? h('button', { title: 'Send one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
   }
-  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(() => openProps('el', e.name)) }, ...cells);
+  const open = e.type === 'gGlobal' && isVarKind(e.kind) ? () => guard(editGlobal)(e) : () => openProps('el', e.name);
+  return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(open) }, ...cells);
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
@@ -5192,6 +5255,166 @@ function renderGlobals() {
   // values and "Log now" need an operator
   if (!can('operator')) { $$('#view-globals input.val').forEach(i => i.disabled = true); $$('#view-globals button').forEach(b => b.disabled = true); }
 }
+// ---------------------------------------------------------------- gGlobal Kinds (Fritz, 2026-11-02)
+// A gGlobal is a variable with a global scope, not a Widget: it is never on a Tab. It is made here, on the gGlobal screen:
+// ➕ New gGlobal, its Name, pick its Kind from the dropdown, and that Kind's dialog opens to fill in; then ✖ Cancel or 💾 Save.
+// Once picked the Kind is fixed (the Brain refuses a change too: public/gkinds.js). A wrong Kind: Delete it and make a new one.
+// The dialog follows the General Dialog Rules (Rule 18): Name first (no icons, never blank), ⬆ String Entry on a String
+// .value, ⬢ Attribute Dialog icon for the extras (the Graphic Dialog, Database and .API). Cancel with changes asks (Rule 18.11).
+const G_HELP = ['gglobal-kinds'];
+const G_KIND_TEXT = {
+  string: '.value is a String (text).',
+  graphic: 'The standard background picture paths: Image Path 1 here, the rest in the Graphic Dialog ⬢. .value starts as the path of the picture Background # picks.',
+  value: '.value is a Value (a number).',
+  bool: '.value is a Boolean: true or false.',
+  time: '.value is a Time, like 01:30:00 (hours:minutes:seconds).',
+  datetime: '.value is a Date Time, like 2026-11-07 07:00:00.',
+};
+const gNoBlank = v => v === undefined || v === null || v === '' ? undefined : v;
+// ⬆ String Entry Dialog (Rule 18.1): a bigger box to type a String in, 2 or 30 lines, word wrap on. Resolves the text, or null.
+function stringEntry(title, text, lines = 2) {
+  return new Promise(res => {
+    const ta = h('textarea', { rows: lines, class: 'strEntry', spellcheck: 'true', wrap: 'soft' }); ta.value = text ?? '';
+    const d = h('dialog', { class: 'strEntryDlg', 'data-nomenu': '' }, h('h3', {}, title), ta,
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'),
+        h('button', { type: 'button', class: 'primary', onclick: () => { d.returnValue = 'ok'; d.close(); } }, '💾 Save')));
+    const cancel = async () => { if (ta.value === (text ?? '') || await askDiscard('the text')) { d.returnValue = 'cancel'; d.close(); } };
+    d.oncancel = ev => { ev.preventDefault(); cancel(); };
+    d.onclose = () => { d.remove(); res(d.returnValue === 'ok' ? ta.value : null); };
+    document.body.append(d); d.showModal(); ta.focus();
+  });
+}
+function gCheckBlocked() {
+  if (!can('admin')) throw new Error('Only an admin can make or change a gGlobal');
+  if (editing) throw new Error('Save or leave Edit layout first, then make or change gGlobals here');
+}
+async function newGlobal() { gCheckBlocked(); await globalDialog({ name: '', type: 'gGlobal', retain: true }, null); }
+async function editGlobal(e) { gCheckBlocked(); await globalDialog(clone(e), e); }
+async function saveElements(elements) { await api('PUT', '/ui/layout', { elements }); await load(); }
+async function addSampleGlobals() {
+  gCheckBlocked();
+  const add = samplesToAdd(S.config.elements, S.config.graphics);
+  if (!add.length) return toast('The sample gGlobals are here already');
+  await saveElements([...S.config.elements, ...add]);
+  toast(`Added the sample gGlobals: ${add.map(x => x.name).join(', ')}`);
+}
+// "2026-11-07T07:00:00" <-> the datetime-local box
+const gDateBox = v => { const t = Date.parse(v ?? ''); if (!Number.isFinite(t)) return ''; const d = new Date(t), p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; };
+async function globalDialog(work, orig) {
+  await loadMediaPictures();
+  const d = h('dialog', { class: 'gDlg', 'data-nomenu': '' }), title = h('h3', {}), body = h('div', { class: 'gBody' }), err = h('div', { class: 'gErr', role: 'alert' });
+  // a message shows inside the dialog (a toast would sit behind it)
+  const g = fn => async () => { err.textContent = ''; try { await fn(); } catch (e) { err.textContent = '⚠ ' + e.message; } };
+  const btn = (label, cls, fn) => h('button', { type: 'button', class: cls, onclick: g(fn) }, label);
+  const bar = top => h('div', { class: 'bar dlgBar' }, orig ? btn('🗑 Delete', 'danger', del) : '', h('span', { class: 'spacer' }),
+    btn('✖ Cancel', '', cancel), btn('💾 Save', 'primary', save));
+  d.append(title, bar(true), err, body, bar(false));
+  const snap = () => JSON.stringify(work);
+  let snap0 = snap(), done;
+  const finished = new Promise(r => done = r);
+  const close = () => { d.close(); d.remove(); done(); };
+  async function cancel() { if (snap() === snap0 || await askDiscard('this gGlobal')) close(); }
+  d.oncancel = ev => { ev.preventDefault(); cancel(); };
+  async function del() {
+    if (!confirm(`Delete ${orig.name}? A Process that uses it stops at that line until it is changed.`)) return;
+    await saveElements(S.config.elements.filter(x => x !== orig)); close(); toast(`${orig.name} deleted`);
+  }
+  async function save() {
+    work.name = noSpaces(work.name);
+    if (!work.name) throw new Error('Name: it can\'t be blank');
+    if (!work.kind) throw new Error('Kind: pick the Kind of this gGlobal');
+    if (!orig || work.name !== orig.name) {
+      const bad = elementNameError(work.name, 'gGlobal'); if (bad) throw new Error(bad);
+      const lc = work.name.toLowerCase();
+      if ([...S.config.elements.filter(x => x !== orig), ...S.config.graphics].some(x => String(x.name ?? '').toLowerCase() === lc)) throw new Error(`The name ${work.name} is already used. Names must be unique.`);
+    }
+    const v = work.initial;
+    if (work.kind === 'value') {
+      if (v !== undefined && !Number.isFinite(+v)) throw new Error('Value: it must be a number');
+      if (work.min !== undefined && work.max !== undefined && work.min > work.max) throw new Error('Lowest allowed is more than Highest allowed');
+    }
+    if (work.kind === 'time' && v !== undefined && !/^-?\d+:\d{1,2}(:\d{1,2})?$/.test(v)) throw new Error('Value: a Time looks like 01:30:00');
+    if (work.kind === 'datetime' && v !== undefined && !Number.isFinite(Date.parse(v))) throw new Error('Value: pick a date and time');
+    if (work.kind === 'graphic') work.initial = gNoBlank(work['imagePath_' + (+work.background || 1)] ?? work.imagePath_1);
+    for (const k of Object.keys(work)) if (work[k] === undefined) delete work[k];
+    await saveElements(orig ? S.config.elements.map(x => x === orig ? work : x) : [...S.config.elements, work]);
+    close(); toast(`${work.name} saved`);
+  }
+  const row = (label, ...kids) => h('div', { class: 'gRow' }, h('label', {}, label), h('span', { class: 'nameRow' }, ...kids));
+  const note = t => h('div', { class: 'muted gNote' }, t);
+  const attrIcon = (title, fn) => h('button', { type: 'button', class: 'attrIcon', title, 'aria-label': title, onclick: g(fn) }, '⬢');
+  const box = (k, attrs = {}, conv = x => gNoBlank(x)) => {
+    const inp = h('input', { type: 'text', spellcheck: 'false', autocomplete: 'off', ...attrs });
+    inp.value = work[k] ?? '';
+    inp.addEventListener('input', () => { work[k] = conv(inp.type === 'number' ? (inp.value === '' ? undefined : +inp.value) : inp.value); });
+    return inp;
+  };
+  const sw = (k, label) => { const c = h('input', { type: 'checkbox' }); c.checked = !!work[k]; c.onchange = () => { work[k] = c.checked; };
+    return h('label', { class: 'toggle' }, h('span', { class: 'sw' }, c, h('span', { class: 'swk' })), ' ' + label); };
+  function render() {
+    title.replaceChildren(work.kind ? `${VAR_KINDS[work.kind]} Properties` : 'New gGlobal', ' ', helpIcon(G_HELP, () => { if (snap() !== snap0 && !confirm('Leave without saving your changes, and open Help?')) return false; close(); }));
+    body.replaceChildren();
+    // Step 2: the Name (no ⬆ and no ⬢, never blank, unique: Rule 18.4)
+    body.append(row('Name', box('name', { placeholder: 'e.g. gV_Strike_Temp' }, x => x)),
+      note(`Can't be blank, no spaces, unique. A Process uses it by this Name: ${work.name || 'gV_Strike_Temp'}.value`));
+    // Step 3: the Kind. Once picked it is fixed.
+    if (!work.kind) {
+      const s = h('select', {}, h('option', { value: '' }, '(pick a Kind)'), ...Object.entries(VAR_KINDS).map(([k, n]) => h('option', { value: k }, n)));
+      s.onchange = () => { if (!s.value) return; work.kind = s.value; if (work.kind === 'bool') work.initial ??= 'false'; render(); };
+      body.append(row('Kind', s), note('Pick the Kind: its dialog opens below. Once picked, the Kind can\'t be changed (a wrong Kind: Delete it and make a new one).'));
+      return;
+    }
+    body.append(row('Kind', h('b', {}, '🔒 ' + VAR_KINDS[work.kind])), note(G_KIND_TEXT[work.kind] + ' The Kind can\'t be changed: a wrong Kind is deleted and made again.'));
+    // Step 4: the Kind's own fields
+    const k = work.kind;
+    if (k === 'string') {
+      const inp = box('initial', { placeholder: '(empty)' });
+      body.append(row('.value', inp, h('button', { type: 'button', class: 'upArrow', title: 'Type it in a bigger box (String Entry, 2 lines)', 'aria-label': 'String Entry',
+        onclick: async () => { const t = await stringEntry(`${work.name || 'gS_'}.value`, inp.value, 2); if (t !== null) { inp.value = t; work.initial = gNoBlank(t); } } }, '⬆')));
+    }
+    if (k === 'graphic') {
+      const list = 'gPics'; body.append(h('datalist', { id: list }, ...mediaPics.map(p => h('option', { value: p }))));
+      const inp = box('imagePath_1', { list, placeholder: '(none)' });
+      body.append(row('Image Path 1', inp, attrIcon('Graphic Dialog: Background #, Back Colour, Image Path 1, 2, 3', async () => {
+        const w2 = Object.fromEntries(['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3'].filter(x => work[x] !== undefined).map(x => [x, work[x]]));
+        const r = await dialog(`${work.name || 'gG_'}: Graphic Dialog`, [['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
+          ['imagePath_1', 'Image Path 1', 'imgopen', 1, false, 'b'], ['imagePath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['imagePath_3', 'Image Path 3', 'imgopen', 3, false, 'b']], w2, false, G_HELP);
+        if (r !== 'ok') return;
+        readFields(w2);
+        for (const x of ['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3']) work[x] = gNoBlank(w2[x]);
+        render();
+      })), note('Background # (1, 2 or 3) picks which Image Path .value starts as. The rest is in the Graphic Dialog ⬢.'));
+    }
+    if (k === 'value') body.append(row('.value', box('initial', { type: 'number', step: 'any' }, x => x === undefined ? undefined : String(x))),
+      row('Decimals', box('precision', { type: 'number', min: 0, max: 6 })), row('Units', box('units', { placeholder: 'e.g. °F, gal, %' })),
+      row('Lowest allowed', box('min', { type: 'number', step: 'any' })), row('Highest allowed', box('max', { type: 'number', step: 'any' })));
+    if (k === 'bool') {
+      const c = h('input', { type: 'checkbox' }); c.checked = String(work.initial) === 'true'; c.onchange = () => { work.initial = c.checked ? 'true' : 'false'; };
+      body.append(row('.value', h('label', { class: 'toggle' }, h('span', { class: 'sw' }, c, h('span', { class: 'swk' })), ' true (off = false)')));
+    }
+    if (k === 'time') body.append(row('.value', box('initial', { placeholder: '00:00:00', inputmode: 'numeric' })));
+    if (k === 'datetime') {
+      const inp = h('input', { type: 'datetime-local', step: 1 }); inp.value = gDateBox(work.initial);
+      inp.onchange = () => { work.initial = gNoBlank(inp.value.length === 16 ? inp.value + ':00' : inp.value); };
+      body.append(row('.value', inp));
+    }
+    body.append(row('', sw('retain', 'Keep .value when the Brain restarts (off = start from the .value above)')));
+    // Database and .API (Rule 6.14): the extras behind the ⬢ (Rule 18.9)
+    body.append(row('Database and .API', h('span', { class: 'muted' }, `${logSummary(work.database)}; .API ${API_LABEL[work.api || 'off'].replace(/ \(.*\)$/, '')}`),
+      attrIcon('Database and .API settings', async () => {
+        const w2 = { name: work.name, database: work.database, api: work.api }; dbToWork(w2);
+        const r = await dialog(`${work.name || 'gGlobal'}: Database and .API`, it => dbFields(it), w2, false, ['database-and-api']);
+        if (r !== 'ok') return;
+        readFields(w2); dbFromWork(w2);
+        work.database = w2.database; work.api = w2.api; render();
+      })));
+  }
+  render(); snap0 = snap();
+  document.body.append(d); d.showModal();
+  return finished;
+}
+
 function refreshGlobalValues(ch) {
   for (const n of Object.keys(ch)) {
     const inp = $(`#view-globals [data-g="${CSS.escape(n)}"]`); if (!inp || document.activeElement === inp) continue;
@@ -5230,6 +5453,8 @@ function renderCsvBox(names = csvNames) {
 }
 const csvTicked = () => $$('#csvNames input:checked').map(c => c.value);
 $('#csvSet').onchange = () => renderCsvBox();
+$('#gNew').onclick = guard(newGlobal);
+$('#gSamples').onclick = guard(addSampleGlobals);
 $('#csvAll').onclick = () => $$('#csvNames input').forEach(c => c.checked = true);
 $('#csvNone').onclick = () => { $$('#csvNames input').forEach(c => c.checked = false); $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
 $('#csvNames').onchange = () => { $('#csvSet').value = ''; $('#csvDelSet').disabled = true; };
@@ -7077,6 +7302,21 @@ const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.in
 // Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
 // built in where the Template puts it; they can't be moved, set or unbundled. It has Flip Horizontal, Flip Vertical and Rotate
 // like a Skynet Fitting (Fritz, 2026-10-23). Vessels made from a User Template keep their port settings.
+// Kettles stay upright (Fritz, 2026-11-02, Rule 5.5): a kettle (a vessel of the Vessel kind: kettles, HLT, mash tun, fermenter)
+// may Flip Horizontal, never Flip Vertical, and is not turned (turned 180 is the same as upside down). Chillers, coils, the
+// RIMS tube and other equipment keep every turn and flip.
+const isKettle = g => g?.kind === 'vessel' && !isBfit(g) && (g.vesselType || 'vessel') === 'vessel';
+function uprightKettles(gs) {
+  const fixed = [];
+  for (const g of gs.filter(g => isKettle(g) && (g.flipV || unitRot(g)))) {
+    const before = clone(g), m = orientM(g), flipH = m[0] < -1e-9;     // set upright (an upside-down kettle is flipped back up); a mirror left to right stays
+    delete g.flipV; delete g.rot; delete g.turn; if (flipH) g.flipH = true; else delete g.flipH;
+    if (sideways(before)) { const w = before.w || 200, hh = before.h || 200; Object.assign(g, { w: hh, h: w, x: Math.round((before.x || 0) + (w - hh) / 2), y: Math.round((before.y || 0) + (hh - w) / 2) }); }
+    if (isSkyV(g)) turnVesselParts(g, before);
+    fixed.push(g.label || g.name);
+  }
+  return fixed;
+}
 function isSkyV(g) { return g?.kind === 'vessel' && !isBfit(g) && !!g.template && g.templateCls === 'skynet' && (!g.loose || !!g.integrated); }    // an Integrated Device is never loose (Fritz, 2026-10-26)
 const ROTATE = [0, 45, 90, 135, 180, 225, 270, 315].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
 function unitRot(g) { return ((Math.round((+(g.rot ?? g.turn) || 0) / 45) * 45) % 360 + 360) % 360; }    // an older Turn counts as a Rotate
@@ -7595,7 +7835,8 @@ F.skynetVessel = it => {
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
       ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
-    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
+    ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
+    ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...looseField(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
