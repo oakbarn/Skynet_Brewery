@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <!-- Skynet Basic Alarm (Fritz, 2026-11-02). 600 x 600. Fore only (Layer 3): the panel colors it with .fore. -->
+  <g id="fore" fill="#8bcf18">
+    <circle cx="300" cy="192" r="26"/>
+    <path d="M 300 212 C 252 212 218 240 214 290 L 205 375 C 200 410 172 430 138 438 Q 128 440 128 452 L 128 464 Q 128 474 138 474 L 462 474 Q 472 474 472 464 L 472 452 Q 472 440 462 438 C 428 430 400 410 395 375 L 386 290 C 382 240 348 212 300 212 Z"/>
+    <path d="M 240 494 L 360 494 C 360 521 335 535 300 535 C 265 535 240 521 240 494 Z"/>
+  </g>
+</svg>
