@@ -664,7 +664,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **108**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **111**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -952,4 +952,4 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 - 2026-10-31: Added Rule 17.9 (the Adjuncts tab). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
 - 2026-10-31: Added Rule 17.10 (MASH and Waters tabs; Skynet Mash Profile Templates Single Step Batch Sparge and 3 Mash Steps
   Fly Sparge). Help 99. (thread "Build the Recipe Tab with BeerSmith import")
-- 2026-11-02: Added Rule 5.19 (pipes only Horizontal, Vertical or 45; turns only at a fitting; the old free pipe movement retired) and the kettle exception to Rule 5.5 (Flip Horizontal only, no Flip Vertical or Rotate). Help 105; next free Help number 108. (thread "Limit pipes to horizontal, vertical, 45")
+- 2026-11-02: Added Rule 5.19 (pipes only Horizontal, Vertical or 45; turns only at a fitting; the old free pipe movement retired) and the kettle exception to Rule 5.5 (Flip Horizontal only, no Flip Vertical or Rotate). Help 105; next free Help number 111 (other open PRs hold 106-110). (thread "Limit pipes to horizontal, vertical, 45")
