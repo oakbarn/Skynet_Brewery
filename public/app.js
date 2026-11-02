@@ -32,15 +32,17 @@ const noSpaces = n => String(n ?? '').trim().replace(/_*\s+_*/g, '_');
 const clone = o => JSON.parse(JSON.stringify(o));
 // a background that is not a number is a color ("red", "#3fa34d"); a number only ever picks a picture
 const bg = v => (v === '' || v === null || v === undefined || /^\s*-?\d+\s*$/.test(String(v))) ? '' : String(v);
-// Picture paths (as in BruControl): "background" = 1, 2 or 3 shows imagePath_1, _2 or _3, any other whole number shows
-// no picture. Empty (or a color) shows imagePath_1. name.image = "path" in a Process sets imagePath_1 and background = 1.
-const IMG_SLOT = /^imagePath_(\d+)$/;
-const slotsOf = e => Object.keys(e).filter(k => IMG_SLOT.test(k) && e[k]).map(k => +IMG_SLOT.exec(k)[1]).sort((a, b) => a - b);
+// Background pictures (Fritz, 2026-11-02, Rule 7.10): .background = 1, 2 or 3 shows .backpath, .backpath_2 or .backpath_3;
+// 0, blank, a color or any number over 3 shows no background picture. name.image = "path" in a Process sets .backpath and
+// background = 1. (Items folded from stacked BruControl copies also have backpath_4, _5 ...)
+const IMG_SLOT = /^backpath(?:_(\d+))?$/;
+const slotKey = n => n === 1 ? 'backpath' : 'backpath_' + n;
+const slotsOf = e => Object.keys(e).filter(k => IMG_SLOT.test(k) && e[k]).map(k => +(IMG_SLOT.exec(k)[1] ?? 1)).sort((a, b) => a - b);
 function slotImage(e, v) {
-  const b = String(v.background ?? '').trim(), n = /^-?\d+$/.test(b) ? +b : 1;
-  return n >= 1 ? (v['imagepath_' + n] ?? e['imagePath_' + n] ?? '') : '';
+  const b = String(v.background ?? '').trim(), n = /^-?\d+$/.test(b) ? +b : 0;
+  return n >= 1 ? (v[slotKey(n)] ?? e[slotKey(n)] ?? '') : '';
 }
-const hasPictures = (e, v) => !!(slotsOf(e).length || v.imagepath_1 || v.imagepath_2 || v.imagepath_3);
+const hasPictures = (e, v) => !!(slotsOf(e).length || v.backpath || v.backpath_2 || v.backpath_3);
 
 let S = null;                 // server state
 let view = 'workspace', wsName = null, zoom = 'fit';
@@ -404,7 +406,7 @@ const IMG_RE = /\.(png|jpe?g|gif|svg|webp|bmp)$/i, SND_RE = /\.(wav|mp3|ogg|m4a)
 // pictures and sounds already used anywhere in the layout
 function usedPaths(re) {
   const c = draft || S.config;
-  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.imageOverlay, o.image, o.background, o.sound, ...slotsOf(o).map(n => o['imagePath_' + n]), ...(o.sounds || [])])
+  return [...new Set([...c.elements, ...c.graphics, ...c.workspaces].flatMap(o => [o.imageOn, o.imageOff, o.imageOverlay, o.image, o.background, o.sound, ...slotsOf(o).map(n => o[slotKey(n)]), ...(o.sounds || [])])
     .filter(p => typeof p === 'string' && re.test(p)))].sort();
 }
 const HEAT_SOURCES = ['None', 'Electric element', 'Gas burner', 'Induction', 'Steam jacket', 'HERMS coil'];
@@ -1193,7 +1195,7 @@ function fitOverlay(n, ov, img, stretch) {
   if (!W || !H || !w || !hh) return full();
   Object.assign(ov.style, { inset: 'auto', left: (W - w) / 2 + 'px', top: (H - hh) / 2 + 'px', width: w + 'px', height: hh + 'px' });
 }
-const stretchPic = (e, v) => !!e.imagePathsLocked && hasPictures(e, v);     // imported BruControl pictures fill the item
+const stretchPic = (e, v) => !!e.backpathsImported && hasPictures(e, v);     // imported BruControl pictures fill the item
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
 const imgState = new Map();
 function imgMissing(url, node) {
@@ -2591,7 +2593,7 @@ async function newProbeTee(kind) {
   const t = PROBE_TEES[kind]; if (!t) return;
   const key = await choose(`2a. Type of Temperature Probe in the ${t.label}`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
   if (key === undefined) return;
-  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°F', precision: 1, ...clone(tempKindOf(key)), imagePath_1: t.img };
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: t.img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
   if (!(await newDeviceDialog(e, 'Temp'))) return;
   useTabProfile(e); stackNew(e);
@@ -2601,7 +2603,7 @@ async function newThermowell(length) {
   const [img, w] = THERMOWELLS[length] || THERMOWELLS.Short;
   const key = await choose(`2a. Type of Temperature Probe in the ${length} Thermowell`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
   if (key === undefined) return;
-  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°F', precision: 1, ...clone(tempKindOf(key)), imagePath_1: img };
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
   if (!(await newDeviceDialog(e, 'Temp'))) return;
   useTabProfile(e); stackNew(e);
@@ -3298,7 +3300,7 @@ const F = {
   common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     // the Image block (Fritz, 2026-10-29): Background #, Back Colour, and Image Path 1-3, each with OPEN and a box to type a path in
     ['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
-    ['imagePath_1', 'Image Path 1', 'imgopen', 1, false, 'b'], ['imagePath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['imagePath_3', 'Image Path 3', 'imgopen', 3, false, 'b'], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
+    ['backpath', 'Image Path 1', 'imgopen', 1, false, 'b'], ['backpath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['backpath_3', 'Image Path 3', 'imgopen', 3, false, 'b'], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held; outputs and switches)'], 'dialog', ['script', 'process'], ['workspace', 'tab']]], ['tapTarget', 'Tap target (Device, Widget, process or tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool'],
     ['_tb', 'Text boxes (its Name and its Value). Default = the ☰ Menu > Default tab.', 'head'],
     ['foreColor', 'Fore color (all its text)', 'color'], ['backColor', 'Back color (behind all its text)', 'color'], ['align', 'Alignment (all its text)', 'sel', TB_ALIGN_CHOICES],
@@ -3497,7 +3499,7 @@ const ALM_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', '
   ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]]] };
 // the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
-  ['imagePath_2', 'Image Path 2', 'imgopen', 2], ['imagePath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+  ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 function alarmWidgetFields(it) {
   const k = it.kind ??= 'general', basic = isAlmBasic(it), A = Object.fromEntries(F.alarm.map(f => [f[0], f]));
   return [['label', 'Label', 'text', null, false, 'b', { up: 2, attr: ALM_LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
@@ -3511,7 +3513,7 @@ function alarmWidgetFields(it) {
     ...(basic ? [['_bg', 'Background: the Skynet Basic Alarm bell. It is set and can\'t be changed; its Back and Fore are colored here.', 'note'],
       ['backColor', 'Back color (Layer 4; a Process: .back)', 'color', null, false, 'b'], ['foreColor', 'Fore color (Layer 3, the bell; a Process: .fore)', 'color', null, false, 'b'],
       ['setGraphic', 'Set Graphic (Layer 2, on the bell)', 'sel', almChoices(ALM_SET_RE), false, 'b'], ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'sel', almChoices(ALM_ACTIVE_RE), false, 'b']]
-      : [['imagePath_1', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
+      : [['backpath', 'Background picture (Image Path 1)', 'gpick', 'pictures', false, 'b', { attr: ALM_GRAPHIC_POP }], ['setGraphic', 'Set Graphic (Layer 2, any picture, on top of the background)', 'gpick', 'pictures', false, 'b'],
         ['imageOverlay', 'Active overlay (Layer 1, on top while it is active)', 'gpick', 'overlays'], ['backColor', 'Back color (behind the pictures; a Process: .back)', 'color']]),
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
@@ -3582,9 +3584,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
   const v = obj[key];
   let input;
-  if (kind === 'imgpath') {    // imagePath_1, _2, _3 work as in BruControl (Fritz, 2026-10-27); changing _2 or _3 shows a heads-up once
+  if (kind === 'imgpath') {    // .backpath, _2, _3 (Fritz, 2026-11-02); changing _2 or _3 shows a heads-up once
     const out = fieldOne([key, label, 'gpick', 'pictures'], obj);
-    if (opts !== 1) out[1].querySelector('select[data-k]')?.addEventListener('change', imagePathHeadsUp);
+    if (opts !== 1) out[1].querySelector('select[data-k]')?.addEventListener('change', backpathHeadsUp);
     return out;
   }
   if (kind === 'stylesel') {   // a Style list (Fritz, 2026-10-29): Skynet Styles 🔒 (never changed), then User Styles, then ➕ Add new User Style…
@@ -3613,19 +3615,19 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     upd();
     return [h('label', {}, label), h('span', { class: 'nameRow' }, s, edit)];
   }
-  if (kind === 'bgnum') {      // Background #: 1, 2 or 3 picks Image Path 1-3; any other number shows no picture (Fritz, 2026-10-29)
-    const inp = h('input', { 'data-k': key, 'data-kind': 'bgsel', type: 'text', inputmode: 'numeric', value: v ?? '', placeholder: '1', class: 'bgNum' });
-    return [h('label', {}, label), h('span', { class: 'nameRow' }, inp, h('span', { class: 'muted' }, '1, 2, 3   Any other background is blank'))];
+  if (kind === 'bgnum') {      // Background #: 1, 2 or 3 picks .backpath, _2, _3 (Image Path 1-3); 0, blank or over 3 = none (Fritz, 2026-11-02)
+    const inp = h('input', { 'data-k': key, 'data-kind': 'bgsel', type: 'text', inputmode: 'numeric', value: v ?? '', placeholder: '0', class: 'bgNum' });
+    return [h('label', {}, label), h('span', { class: 'nameRow' }, inp, h('span', { class: 'muted' }, '1, 2, 3   0, blank or over 3 = no background'))];
   }
   if (kind === 'imgopen') {    // Image Path N: OPEN picks a picture in a pop-up; or type a path in the box (a path that is not found shows blank)
     const inp = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', placeholder: '(none)', spellcheck: 'false', autocomplete: 'off' });
     const warn = h('span', { class: 'pathWarn', role: 'status' });
     const check = () => { const p = inp.value.trim(); warn.textContent = p && !picKnown(p) ? '⚠ Not found: it shows blank' : ''; };
     inp.addEventListener('input', check);
-    if (opts !== 1) inp.addEventListener('change', imagePathHeadsUp);     // imagePath_2 / _3: the heads-up once (Rule 7.10)
+    if (opts !== 1) inp.addEventListener('change', backpathHeadsUp);     // backpath_2 / _3: the heads-up once (Rule 7.10)
     const open = h('button', { type: 'button', class: 'openBtn', title: `Pick the picture for Image Path ${opts}`, onclick: async ev => {
       ev.preventDefault();
-      const p = await openImagePath(opts, inp.value.trim()); if (p === null) return;
+      const p = await openBackpath(opts, inp.value.trim()); if (p === null) return;
       inp.value = p; check();
       for (const t of ['input', 'change']) inp.dispatchEvent(new Event(t, { bubbles: true }));
     } }, 'OPEN');
@@ -3634,8 +3636,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'bgsel') {      // which picture shows: 1-3 (and more on folded items), or none
     const n = [1, 2, 3, ...slotsOf(obj).filter(x => x > 3)];
-    const os = [['', '(default) imagePath_1'], ...n.map(x => [String(x), `${x} = imagePath_${x}`]), ['0', 'None (0 or any number other than ' + n.join(', ') + ')']];
-    const cur = v === undefined || v === null ? '' : String(v);
+    const os = [['0', 'None (0, blank or any number other than ' + n.join(', ') + ')'], ...n.map(x => [String(x), `${x} = ${slotKey(x)}`])];
+    const cur = v === undefined || v === null || String(v).trim() === '' ? '0' : String(v);
     if (!os.some(o => o[0] === cur)) os.push([cur, /^-?\d+$/.test(cur) ? `${cur} = None (no picture)` : `${cur} (color, shown when there is no picture)`]);
     input = h('select', { 'data-k': key, 'data-kind': kind }, ...os.map(([o, l]) => h('option', { value: o, ...(o === cur ? { selected: true } : {}) }, l)));
     return [h('label', {}, label), input];
@@ -3785,17 +3787,17 @@ function stepperPick(key, list, v) {
   return s;
 }
 
-// imagePath_2 / _3 changed: a heads-up that one picture path is enough in Skynet (Fritz, 2026-10-27). They still work as in
-// BruControl; the heads-up can be turned off with its tick box.
-const HEADSUP_KEY = 'skynet.imagePathHeadsUpOff';
-function imagePathHeadsUp() {
+// backpath_2 / _3 changed: a heads-up that one picture path is enough in Skynet (Fritz, 2026-10-27; renamed 2026-11-02).
+// The heads-up can be turned off with its tick box.
+const HEADSUP_KEY = 'skynet.backpathHeadsUpOff';
+function backpathHeadsUp() {
   try { if (localStorage.getItem(HEADSUP_KEY)) return; } catch { }
   let d = $('#pathHeadsUpDlg');
   if (!d) {
     const off = h('input', { type: 'checkbox' });
     d = h('dialog', { id: 'pathHeadsUpDlg' }, h('h3', {}, 'Heads up: one picture path is all you need'),
-      h('p', {}, 'imagePath_2 and imagePath_3 work as in BruControl: a Process picks one with background = 1, 2 or 3, and a Process can change them too.'),
-      h('p', {}, h('b', {}, 'In Skynet, any Device or Widget can have as many pictures as you like'), ' with the .image attribute. It puts the new path in imagePath_1 and shows it at once:'),
+      h('p', {}, '.backpath_2 and .backpath_3 hold background pictures 2 and 3: .background = 1, 2 or 3 picks .backpath, .backpath_2 or .backpath_3 (0, blank or over 3 = no background), and a Process can change them too.'),
+      h('p', {}, h('b', {}, 'In Skynet, any Device or Widget can have as many pictures as you like'), ' with the .image attribute. It puts the new path in .backpath and shows it at once (.background = 1):'),
       h('pre', { class: 'mono' }, 'my_widget.image = "Images/RedPump.png"'),
       h('p', {}, 'For on / off, the preferred way is one picture plus an On overlay (see its Properties).'),
       h('p', { class: 'muted' }, 'More in Help > Pictures on items.'),
@@ -3940,7 +3942,7 @@ function nameChange(current, { title = 'Name Change', check, spaces = false } = 
 const picKnown = p => vList('pictures').includes(p) || mediaPics.includes(p) || ONOFF_GRAPHICS.some(g => g[1] === p);
 // OPEN beside Image Path N (Fritz, 2026-10-29): a "Background Image N" pop-up with the picture lists (Skynet / My pictures, the
 // group, 🖼 icons) and the Image dropdown. 💾 Save gives the picked path back, ✖ Cancel null.
-function openImagePath(n, current) {
+function openBackpath(n, current) {
   return new Promise(res => {
     const work = { pick: current || '' };
     const [, pick] = fieldOne(['pick', 'Image', 'gpick', 'pictures'], work);
@@ -4333,8 +4335,8 @@ async function editItem(kind, id) {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
-    const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
-    if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
+    const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have backpath_4, _5 ...
+    if (more.length) f.splice(f.findIndex(x => x[0] === 'backpath_3') + 1, 0, ...more.map(n => [slotKey(n), 'Image Path ' + n, 'imgopen', n, false, 'b']));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
@@ -4445,7 +4447,7 @@ async function editItem(kind, id) {
     if (type === 'override') {      // one on a Tab; an empty Label says Override
       if (ovrHas(work.workspace, item)) throw new Error(`The ${work.workspace} Tab already has an Override button: only one is allowed on a Tab`);
       if (!String(work.label ?? '').trim()) work.label = OVR.label;
-      for (const k of ['image', 'imagePath_1', 'imagePath_2', 'imagePath_3', 'background']) delete work[k];
+      for (const k of ['image', 'backpath', 'backpath_2', 'backpath_3', 'background']) delete work[k];
     }
     if (type === 'pipe') {
       if (work.from && work.from === work.to) throw new Error('A pipe needs two different IPs');
@@ -5399,7 +5401,7 @@ async function globalDialog(work, orig) {
     }
     if (work.kind === 'time' && v !== undefined && !/^-?\d+:\d{1,2}(:\d{1,2})?$/.test(v)) throw new Error('Value: a Time looks like 01:30:00');
     if (work.kind === 'datetime' && v !== undefined && !Number.isFinite(Date.parse(v))) throw new Error('Value: pick a date and time');
-    if (work.kind === 'graphic') work.initial = gNoBlank(work['imagePath_' + (+work.background || 1)] ?? work.imagePath_1);
+    if (work.kind === 'graphic') { const n = +work.background || 0; work.initial = n >= 1 && n <= 3 ? gNoBlank(work[slotKey(n)]) : undefined; }
     for (const k of Object.keys(work)) if (work[k] === undefined) delete work[k];
     await saveElements(orig ? S.config.elements.map(x => x === orig ? work : x) : [...S.config.elements, work]);
     close(); toast(`${work.name} saved`);
@@ -5438,14 +5440,14 @@ async function globalDialog(work, orig) {
     }
     if (k === 'graphic') {
       const list = 'gPics'; body.append(h('datalist', { id: list }, ...mediaPics.map(p => h('option', { value: p }))));
-      const inp = box('imagePath_1', { list, placeholder: '(none)' });
+      const inp = box('backpath', { list, placeholder: '(none)' });
       body.append(row('Image Path 1', inp, attrIcon('Graphic Dialog: Background #, Back Colour, Image Path 1, 2, 3', async () => {
-        const w2 = Object.fromEntries(['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3'].filter(x => work[x] !== undefined).map(x => [x, work[x]]));
+        const w2 = Object.fromEntries(['background', 'bgColor', 'backpath', 'backpath_2', 'backpath_3'].filter(x => work[x] !== undefined).map(x => [x, work[x]]));
         const r = await dialog(`${work.name || 'gG_'}: Graphic Dialog`, [['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
-          ['imagePath_1', 'Image Path 1', 'imgopen', 1, false, 'b'], ['imagePath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['imagePath_3', 'Image Path 3', 'imgopen', 3, false, 'b']], w2, false, G_HELP);
+          ['backpath', 'Image Path 1', 'imgopen', 1, false, 'b'], ['backpath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['backpath_3', 'Image Path 3', 'imgopen', 3, false, 'b']], w2, false, G_HELP);
         if (r !== 'ok') return;
         readFields(w2);
-        for (const x of ['background', 'bgColor', 'imagePath_1', 'imagePath_2', 'imagePath_3']) work[x] = gNoBlank(w2[x]);
+        for (const x of ['background', 'bgColor', 'backpath', 'backpath_2', 'backpath_3']) work[x] = gNoBlank(w2[x]);
         render();
       })), note('Background # (1, 2 or 3) picks which Image Path .value starts as. The rest is in the Graphic Dialog ⬢.'));
     }

@@ -8,7 +8,7 @@ import { spawn } from 'node:child_process';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
 import { checkControlled } from './public/semi.js';
-import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs } from './lib/store.js';
+import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs, toBackpathText } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
@@ -90,6 +90,15 @@ engine.giveKeys();            // every Process has its hidden key (lib/keys.js)
 store.on('gRenamed', map => renameInProcesses(engine, map));   // an older Schema loaded later: its Processes follow the gG names
 // the Schema loaded at start-up: Text_1 -> w_Text_1 (Rule 15.2) happened before the engine was up, so its Processes follow now
 { const tr = renameInProcesses(engine, store.loadRenames ?? new Map()); if (tr.length) console.log(`Processes updated for the new Text Widget names: ${tr.map(x => x.name).join(', ')}`); }
+// Background pictures (Fritz, 2026-11-02, Rule 15.2): .imagePath_1, _2, _3 in a Process become .backpath, .backpath_2, .backpath_3, once
+{
+  const fixed = [];
+  for (const name of engine.names()) {
+    const text = engine.read(name), out = toBackpathText(text);
+    if (out !== text) { engine.backup(name); engine.write(name, out); fixed.push(name); }
+  }
+  if (fixed.length) console.log(`Processes updated for .backpath (was .imagePath_1): ${fixed.join(', ')}`);
+}
 store.on('safeRenamed', map => {   // ... and its names with < > : " / \ | ? * (written in quotes in a Process)
   for (const name of engine.names()) {
     const text = engine.read(name), out = renameQuoted(text, map);

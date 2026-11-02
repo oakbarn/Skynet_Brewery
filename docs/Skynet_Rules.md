@@ -232,7 +232,7 @@ with Close at the top and the bottom. **COPY** saves, then makes a copy with the
 4.1). A Text Widget's word wrap is always on. (thread "Redesign the Text Widget dialog", Help 91)
 
 2.23 **Image block** (Fritz, 2026-10-29): every dialog with background pictures shows **Background #** (1, 2 or 3 picks Image
-Path 1-3; any other number = no picture), **Back Colour** (a color behind the picture), and **Image Path 1, 2, 3**, each with
+Path 1-3, which a Process calls .backpath, .backpath_2, .backpath_3; 0, blank or any other number = no picture, Rule 7.10), **Back Colour** (a color behind the picture), and **Image Path 1, 2, 3**, each with
 an **OPEN** button and a box to type a path in. OPEN pops up **Background Image N** (Skynet / My pictures, group, 🖼 icons,
 the Image list, Cancel and Save). A typed path that is not found shows blank, with a warning. (Help 93)
 
@@ -638,13 +638,19 @@ Disable (not only while its output fires): its overlay or On picture, a vessel's
 Picture Widget that turns on with it all follow Enabled. A PWM output is On above 0 %.
 (2026-10-27, Help 58, Help 74)
 
-7.10 **imagePath_2 and imagePath_3 work as in BruControl**, for compatibility: they can be changed
-in Properties (except on a User version of a Skynet Template, where the pictures are fixed, Rule 5.16)
-and set by a Process; background = 1, 2 or 3 picks one. Changing one in Properties
-pops up a heads-up: any Device or Widget can have unlimited pictures with the `.image` attribute.
-(2026-10-27, Help 25)
-*Replaced:* after a BruControl import imagePath_2 and _3 were locked and a Process could only change
-imagePath_1 (2026-10-05).
+7.10 **Background pictures are .backpath, .backpath_2 and .backpath_3** (Fritz, 2026-11-02, thread "Rename image paths to
+backpath", Help 25). Every Device and Widget with background pictures has three paths: **.backpath** (Image Path 1),
+**.backpath_2** (Image Path 2) and **.backpath_3** (Image Path 3), e.g. `my_Widget.backpath = "Images/Skynet/Pumps/xxx.svg"`.
+**.background** picks which one shows: **1** = .backpath, **2** = .backpath_2, **3** = .backpath_3; **0** or **any number over
+3** = no background; **blank** sets .background to **0**. Setting a path does not change .background; `my_Widget.image =
+"path"` is the shortcut that sets .backpath and .background = 1. All three can be changed in Properties (except on a User
+version of a Skynet Template, Rule 5.16) and by a Process; changing 2 or 3 in Properties pops up the one-picture heads-up.
+Under Rule 15.2 the old names **imagePath_1, _2, _3** are changed everywhere (Schemas, Processes, samples, predictive text,
+the BruControl importer); an older item with a picture and a blank background gets .background = 1 so it still shows.
+**Exception:** items folded from stacked BruControl copies keep .backpath_4, _5 ... and .background 4, 5 ... picks them
+(waiting on Fritz's pick).
+*Replaced:* imagePath_2 and imagePath_3 worked as in BruControl and a blank background showed imagePath_1 (2026-10-27).
+Before that, after a BruControl import imagePath_2 and _3 were locked (2026-10-05).
 
 7.11 **Picture Widget: Turns on with** picks what turns it on: any on/off Device or Widget (output,
 switch, input, alarm, sound player, timer, true/false variable) or a heater (on while Enabled).
@@ -1136,3 +1142,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Rule 1.19: new gGlobals are only global-scope variables; Switch, Push Button, Pulse Button, List, Step and Long String
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
+- 2026-11-02: Rule 7.10 rewritten: background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1, _2, _3); .background 1-3 picks one, 0, blank or over 3 = none; old names changed everywhere (Rule 15.2). Help 25 rewritten. (thread "Rename image paths to backpath")
