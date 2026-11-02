@@ -33,6 +33,17 @@ Rule 1.21 in the [Skynet Rules](Skynet_Rules.md) points here. Help page 114 expl
   not switches (Rule 2.12).
 - In Properties it is the small 🔓 / 🔒 icon (Rule 2.5).
 
+### Lock hierarchy (Fritz, 2026-11-02, proposed, not built)
+
+In BruControl the lock was one lock for all Tabs. Fritz: "In Hierarchy Universal Lock, Tab Lock, Item Lock." A higher lock wins.
+
+| Lock | Covers | Today | Proposal (waiting on Fritz) |
+|---|---|---|---|
+| **Universal Lock** | every Tab | Outside Edit layout nothing can move or be edited; that already works like BruControl's one lock | Universal Lock **on** = outside Edit layout. Edit layout turns it off (Admins). HiddenLock items hide while it is on |
+| **Tab Lock** | one Tab | none (🔒 Lock All / 🔓 Unlock All only set every Item Lock once, Rule 2.12) | A **Tab Lock** switch in Tab settings: on = nothing on that Tab moves or opens Properties, even in Edit layout |
+| **Item Lock** | one item | the 🔓 / 🔒 Lock (position only; Properties still open) | stays as it is |
+
+
 ---
 
 ## 2. Process attributes
@@ -146,6 +157,7 @@ says `.font_size`). Other Devices and Widgets do not yet:
 
 ## Change log
 
+- 2026-11-02: Fritz: lock hierarchy Universal Lock, Tab Lock, Item Lock (proposal written, not built).
 - 2026-11-02: Fritz: pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label (Rule 5.14).
 - 2026-11-02: Fritz: `.x`, `.xh`, `.x_hPosition` are all the same attribute (Rule 1.15).
 - 2026-11-02: First version, from Fritz's Universal Properties list (thread "Set universal properties standard").
