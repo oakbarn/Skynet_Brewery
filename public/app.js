@@ -653,6 +653,12 @@ const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of
 const isMv = g => g?.kind === 'ip' && g.fitting === 'manualValve';
 const mvOpen = g => { const v = g?.name && S?.values?.[g.name]?.state; return v === undefined ? !!g?.open : !!v; };
 const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
+// Fritz's Manual Ball Valve drawings (2026-11-02): pictures a Manual Valve can have. The closed one is kept; while open the Tab
+// shows its _Open twin (side view: the handle along the pipe; front views: the handle end on)
+const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Manual Ball Valve, side view'],
+  ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', 'Manual Ball Valve, front view (looking down the pipe)'],
+  ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow']];
+const mvPic = g => isMv(g) && g.image && mvOpen(g) ? g.image.replace(/_Closed\.svg$/, '_Open.svg') : g.image;
 const FIT_SVG = {
   pipe: '<path d="M0 15H30"/>', cap: '<path d="M0 15H17M20 5V25"/>',
   tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
@@ -704,7 +710,7 @@ function buildIp(g) {
   const lonely = fit === 'coupling' && pipesOn(g.id, g.workspace).length < 2;
   const open = isMv(g) && mvOpen(g), plain = isIpFit(g);
   const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : '') + (isMv(g) && mvAsked(g) ? ' mvAsk' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? (plain ? g.name : ipName(g)) : g.label || FITTINGS[fit] || 'IP') + (isMv(g) ? (open ? ' (open: click to close it)' : ' (closed: click to open it)') : '') });
-  if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(g.image)}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
+  if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(mvPic(g))}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
   else if (fit) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
   } else n.append(h('span', {}, g.text ?? 'IP'));
@@ -721,7 +727,7 @@ function buildIp(g) {
 const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e));
 // Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
 // "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
-const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)));
+const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)) || isProbeTee(e));
 // Devices with IPs (pumps, valves, proportional valves, inline sensors) are drawn in proportion to the tab's pipe size.
 // Their width / height are the size at pipe size 10; at any other pipe size they grow or shrink about their centre.
 function elGeom(e) {
@@ -760,7 +766,12 @@ function sidePt(e, side) {
 // Where the pipe meets a Skynet valve picture (Fritz, 2026-10-28: the IPs sit on the picture where the water flows, not in the
 // middle of the box's sides). Every Skynet valve drawing in Images/Skynet/Valves has its pipe at the same spot: across at 92 of
 // its 120 high (H), or turned to stand up with the pipe 28 (V_R, V_RC) or 92 (V_L, V_LC) in from the left of its 120 wide.
-const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] } };
+// Fritz's motorized butterfly valve (2026-11-02) is taller: 140 x 170 with its pipe at 135. A front view (looking down the pipe)
+// has both IPs at the center of its opening; a front elbow has one there and one at the center of its bottom ferrule (Rule 5.20).
+const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] },
+  BF_H: { o: 'h', w: 140, h: 170, ends: [[0, 135 / 170], [1, 135 / 170]] }, BF_V_R: { o: 'v', w: 170, h: 140, ends: [[35 / 170, 0], [35 / 170, 1]] }, BF_V_L: { o: 'v', w: 170, h: 140, ends: [[135 / 170, 0], [135 / 170, 1]] },
+  BF_Front: { o: 'f', w: 120, h: 170, ends: [[0.5, 130 / 170], [0.5, 130 / 170]] }, BF_Front_Elbow: { o: 'f', w: 120, h: 200, ends: [[0.5, 0.65], [0.5, 1]] },
+  BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] } };
 // Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
 // port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
 const PUMP_FLOW = {
@@ -780,14 +791,16 @@ const PUMP_FLOW = {
 function picFlow(path) {
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
-  const m = String(path || '').match(/(?:^|\/)Valve_(?:Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid)_(?:Open|Closed)(H|V_L|V_R)C?\.svg$/);
-  return m ? { k: m[1], ...PIC_FLOW[m[1]] } : null;
+  const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
+  const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
+  return k && PIC_FLOW[k] ? { k, o: k.endsWith('H') ? 'h' : 'v', ...PIC_FLOW[k] } : null;
 }
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
   const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
-  if (!f || o === 'l45' || o === 'r45' || (o && f.k !== 'P' && (o === 'h') !== (f.k === 'H'))) return null;
+  if (!f || (f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
+  if (o && f.k !== 'P' && f.o !== 'f' && (o === 'h') !== (f.o === 'h')) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
   const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
   return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
@@ -799,6 +812,10 @@ const flipPt = e => {
   return c => [e.flipH ? Math.round(2 * cx - c[0]) : c[0], e.flipV ? Math.round(2 * cy - c[1]) : c[1]];
 };
 const devIps = e => {
+  if (isProbeTee(e)) {            // a tee with a Temperature Probe: an IP at the center of each open ferrule face, flow either way (Rule 5.20)
+    const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 170, hh = gm.h || 85, fl = flipPt(e);
+    return PROBE_TEES[e.probeTee].ends.map(([fx, fy], i) => ({ id: `dev:${e.name}:${i ? 'out' : 'in'}`, label: `${e.name} end ${i + 1}`, text: '', c: fl([Math.round(x + fx * w), Math.round(y + fy * hh)]) }));
+  }
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   if (!v) { const pp = e.subtype === 'pump' ? picEnds(e) : null, pf = flipPt(e);    // a Skynet pump drawing: IPs on its real ports
     return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : sidePt(e, e.ipIn || 'left') },
@@ -1724,6 +1741,7 @@ function setEditing(on) {
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
+  if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
   $('#editMode').checked = on;
@@ -2188,6 +2206,11 @@ const ADD_MENU = [
     ['Thermowell, Short (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Short' }],
     ['Thermowell, Medium (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Medium' }],
     ['Thermowell, Long (TC 1.5, a Temperature Probe in it)', 'thermowell', 'Temp', { length: 'Long' }],
+    // Tees with a Temperature Probe in them (Fritz, 2026-11-02): Temperature Devices, not pipe Widgets
+    ['Instrument Tee with a Temperature Probe in its branch (TC 1.5, IPs left and right)', 'probeTee', 'Temp', { tee: 'Instrument_Branch' }],
+    ['Instrument Tee with a Temperature Probe in from the end (TC 1.5, IPs right and branch)', 'probeTee', 'Temp', { tee: 'Instrument_Run' }],
+    ['Long Tee with a Temperature Probe in its branch (TC 1.5, IPs left and right)', 'probeTee', 'Temp', { tee: 'Long_Branch' }],
+    ['Long Tee with a Temperature Probe in from the end (TC 1.5, IPs right and branch)', 'probeTee', 'Temp', { tee: 'Long_Run' }],
     ['RIMS tube (Skynet_Integrated_Device: heating element and temperature probe built in)', 'integratedDevice', 'RIMS', { template: 'RIMS_Tube' }],
     ['Electric kettle, basic (Skynet_Integrated_Device: Thermowell probe and heating element built in, outlet IP)', 'integratedDevice', 'Kettle', { template: 'Integrated_Electric_Kettle_Basic' }],
   ]],
@@ -2220,6 +2243,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   toBuild();          // Fritz, 2026-10-22: new things are made on the clean Build Tab first
   if (pick === 'integratedDevice') return newIntegratedDevice(extra.template);
   if (pick === 'thermowell') return newThermowell(extra.length);
+  if (pick === 'probeTee') return newProbeTee(extra.tee);
   if (pick === 'skyDevice') { const p = skyDevPreset(extra.template); if (!p) return toast(`No Skynet Template ${extra.template}`, true); pick = 'skyValve'; extra = p; }
   const preset = PRESETS[pick], type = preset ? preset.type : pick === 'skyValve' ? extra.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
@@ -2320,7 +2344,7 @@ const DEV_TYPES = () => [
     am('RIMS tube'), am('Electric kettle, basic')]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
-  ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => r[1] === 'thermowell')]],
+  ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => ['thermowell', 'probeTee'].includes(r[1]))]],
   ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
   ['motors', 'Motors', amGroup('Devices: motors')],
   ['weight', 'Weight', amGroup('Devices: weight')],
@@ -2508,6 +2532,26 @@ const TEMP_KEYS = ['sensor', 'tcType', 'r0', 'beta'];
 const tempKey = x => TEMP_KEYS.map(k => x?.[k] ?? '').join('|');
 const tempKinds = () => ADD_MENU.find(([g]) => g.startsWith('Devices: temperature'))[1].map(([l, , , x]) => [tempKey(x), l, x]);
 const tempKindOf = key => tempKinds().find(t => t[0] === key)?.[2] || { sensor: 'ds18b20' };
+// ---- Tees with a Temperature Probe (Fritz, 2026-11-02): Temperature Device subtypes drawn as a TC 1.5 Instrument Tee or Long
+// Tee with the probe (purple) in the branch or in from one end. The probe fills that opening, so the other two are its IPs, at
+// the center of each ferrule's outer face (Rule 5.20). Flow passes either way, like an inline sensor. Made like a Thermowell.
+const PROBE_TEES = {
+  Instrument_Branch: { label: 'Instrument Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Branch.svg', size: [170, 85], ends: [[0, 0.3], [1, 0.3]] },
+  Instrument_Run: { label: 'Instrument Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Run.svg', size: [170, 85], ends: [[1, 0.3], [0.5, 1]] },
+  Long_Branch: { label: 'Long Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Branch.svg', size: [170, 108], ends: [[0, 24 / 102], [1, 24 / 102]] },
+  Long_Run: { label: 'Long Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Run.svg', size: [170, 108], ends: [[1, 24 / 102], [0.5, 1]] },
+};
+function isProbeTee(e) { return e?.type === 'temperature' && e.subtype === 'probeTee' && !!PROBE_TEES[e.probeTee]; }
+async function newProbeTee(kind) {
+  const t = PROBE_TEES[kind]; if (!t) return;
+  const key = await choose(`2a. Type of Temperature Probe in the ${t.label}`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
+  if (key === undefined) return;
+  const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°F', precision: 1, ...clone(tempKindOf(key)), imagePath_1: t.img };
+  if (!D.visible) e.visibility = 'hidden';
+  if (!(await newDeviceDialog(e, 'Temp'))) return;
+  useTabProfile(e); stackNew(e);
+  draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
+}
 async function newThermowell(length) {
   const [img, w] = THERMOWELLS[length] || THERMOWELLS.Short;
   const key = await choose(`2a. Type of Temperature Probe in the ${length} Thermowell`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
@@ -3276,7 +3320,8 @@ const F = {
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
-      ['label', 'Label (shown in the "by hand" message; empty = the Name)', 'text'], ['labelVisible', 'Show label', 'yn'], ...FIT_PLACE(it)] : F.ipPoint,
+      ['label', 'Label (shown in the "by hand" message; empty = the Name)', 'text'], ['labelVisible', 'Show label', 'yn'],
+      ['image', 'Picture (Fritz\'s Manual Ball Valve drawings; its one IP is the middle of the picture)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
@@ -3434,7 +3479,8 @@ function fieldsOf(item) {
   if (item.type === 'alarm') return alarmFields(item);
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
-    return [['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
+    return [...(isProbeTee(item) ? [['_pt', `${PROBE_TEES[item.probeTee].label}: a Temperature Device (Fritz's drawing). The probe fills one opening, so its IPs are the other two; flow goes either way.`, 'note'],
+      ['flipH', 'Flip Horizontal (the picture and its IPs follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IPs follow)', 'bool']] : []),['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
   }
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
@@ -4223,7 +4269,7 @@ async function editItem(kind, id) {
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
-    const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) ? F.inlineSides : []), ...F.common.slice(3)];
+    const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     const more = slotsOf(it).filter(n => n > 3);     // items folded from stacked BruControl copies have imagePath_4, _5 ...
     if (more.length) f.splice(f.findIndex(x => x[0] === 'imagePath_3') + 1, 0, ...more.map(n => ['imagePath_' + n, 'Image Path ' + n, 'imgopen', n, false, 'b']));
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
@@ -7190,11 +7236,12 @@ const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fit
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
-const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
+const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_Front.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Eccentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Front.svg',
+  'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
   'Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
   'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
-  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
+  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
@@ -7212,12 +7259,17 @@ const TURN_STEP = { Left: 'Top', Top: 'Right', Right: 'Bottom', Bottom: 'Left', 
   'Top Left 45': 'Top Right 45', 'Top Right 45': 'Bottom Right 45', 'Bottom Right 45': 'Bottom Left 45', 'Bottom Left 45': 'Top Left 45' };
 const TURNS = [['0', 'Not turned'], ['90', '90 degrees clockwise'], ['180', '180 degrees'], ['270', '270 degrees clockwise (90 counter-clockwise)']];
 function turnPos(pos, deg) { for (let i = 0; i < (((+deg || 0) / 90) % 4 + 4) % 4; i++) pos = TURN_STEP[pos] || pos; return pos; }
+// A Template can also put an opening anywhere on its picture as "x,y" (fractions of its width and height): Fritz's 2026-11-02
+// drawings have their IP at the center of each ferrule's outer face, or at the center of a front-view opening (Rule 5.20)
+const FRAC_POS = /^\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*$/;
+const fracPos = v => { const m = FRAC_POS.exec(String(v ?? '')); return m ? [v, +m[1], +m[2]] : null; };
 function bfitClass(g) {
   const ports = {}, flat = g.flat;            // flat: the fitting runs left or right from its vessel port
-  const at = (k, def) => turnPos(g.ipPos?.[k] && BF_POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def, isUnit(g) ? 0 : g.turn);   // a Template can say where its openings are on its picture
+  const POS = BF_POS.concat(Object.values(g.ipPos || {}).map(fracPos).filter(Boolean));
+  const at = (k, def) => turnPos(g.ipPos?.[k] && POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def, isUnit(g) ? 0 : g.turn);   // a Template can say where its openings are on its picture
   const chk = hasCheck(g);         // with a check valve in it, the Start side and the far side are two circuits, joined one way
-  if (!g.onVessel && !isCapOnly(g)) ports.start = pt(chk ? 'Start (flow goes in here)' : 'Start (vessel side)', BF_POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: chk ? 'ci' : 'a' });
-  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, BF_POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: chk ? 'co' : 'a' }));
+  if (!g.onVessel && !isCapOnly(g)) ports.start = pt(chk ? 'Start (flow goes in here)' : 'Start (vessel side)', POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: chk ? 'ci' : 'a' });
+  fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: chk ? 'co' : 'a' }));
   (g.fittings || []).forEach((f, i) => { if (f.kind === 'tee' && f.thermowell) ports['tw' + (i + 1)] = pt(`Thermowell ${i + 1} (${THERMOWELL_POS[f.thermowellPos] || 'Short'})`, BF_POS, { ip: false, def: flat ? 'Top' : 'Right' }); });
   return { title: 'Tab_Fitting', types: [], image: fitImage(g), size: [90, 90], ports };
 }
@@ -7291,6 +7343,21 @@ function placeUnitParts(g) {
     for (const c of caps.filter(c => c.capOn === ip.id)) { capOnto(c, ip); const cn = $(`#ws .gfx[data-gid="${CSS.escape(c.id)}"]`); if (cn) place(cn, c); }
   }
 }
+// A Skynet pipe fitting follows its Template (Rules 5.6 and 15.2): one placed before Fritz's 2026-11-02 drawings takes its
+// Template's new picture, openings and shape when Edit layout opens, and its IPs move onto the new openings (kept with the
+// next Save layout). Returns how many changed.
+function refreshSkyFits() {
+  let n = 0;
+  for (const g of draft?.graphics || []) {
+    const t = isUnit(g) && tplOf('fitting', g.template);
+    if (!t || t.cls !== 'skynet' || !t.image || (g.image === t.image && JSON.stringify(g.ipPos || null) === JSON.stringify(t.ipPos || null))) continue;
+    g.image = t.image;
+    if (t.ipPos) g.ipPos = clone(t.ipPos); else delete g.ipPos;
+    if (t.size) { const cy = (g.y || 0) + (g.h || 90) / 2, hh = Math.round((g.w || 90) * t.size[1] / t.size[0]); g.h = hh; g.y = Math.round(cy - hh / 2); }
+    placeUnitParts(g); n++;
+  }
+  return n;
+}
 // Autosize to pipe on a Skynet pipe fitting (Fritz, 2026-10-28): once a pipe is joined to one of its IPs, it is sized so its
 // body is as thick as the biggest pipe on it (the Skynet fitting pictures draw the body 28 % of the picture). Its Template's
 // shape is kept (an Instrument Tee stays wide and low) and it grows or shrinks about its middle. With no pipe on it, it keeps
@@ -7299,7 +7366,7 @@ const FIT_BODY = 0.28;
 function autoSizeUnit(g) {
   const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
   const pw = Math.max(0, ...ips.flatMap(ip => pipesOn(ip.id, g.workspace)).map(pipeWidth)); if (!pw) return;
-  const [tw, th] = tplOf('fitting', g.template)?.size || [90, 90], w = Math.round(pw / FIT_BODY), hh = Math.round(w * th / tw);
+  const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90], w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
   if (w === g.w && hh === g.h) return;
   const cx = (g.x || 0) + (g.w || 90) / 2, cy = (g.y || 0) + (g.h || 90) / 2;
   Object.assign(g, { w, h: hh, x: Math.round(cx - w / 2), y: Math.round(cy - hh / 2) });

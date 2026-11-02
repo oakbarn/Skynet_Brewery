@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80">
+  <!-- Skynet TC 1.5 45 degree elbow (Fritz's drawing, 2026-11-02): IPs at the center of each ferrule face, right (1, 0.30) and bottom left (0.16, 0.80) -->
+  <g fill="#000" stroke="#000" stroke-width="3.2" stroke-linejoin="round">
+    <path d="M25.90 73.90 L61.80 38.00 L88.50 38.00 L88.50 10.00 L50.20 10.00 L6.10 54.10 Z"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(16.00 64.00) rotate(-45.00)"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(98.50 24.00) rotate(180.00)"/>
+  </g>
+  <g fill="#808080">
+    <path d="M25.90 73.90 L61.80 38.00 L88.50 38.00 L88.50 10.00 L50.20 10.00 L6.10 54.10 Z"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(16.00 64.00) rotate(-45.00)"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(98.50 24.00) rotate(180.00)"/>
+  </g>
+</svg>

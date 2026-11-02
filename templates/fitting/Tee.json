@@ -1,7 +1,32 @@
 {
-  "std": { "type": "TC", "size": 1.5 },
-  "fittings": [{ "kind": "tee" }, { "kind": "none" }, { "kind": "none" }, { "kind": "none" }],
-  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg",
-  "ipPos": { "start": "Left", "end": "Right", "branch1": "Top" },
-  "notes": "A tee, for piping. Openings at the left, the right and the top. Flow goes any way through it."
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "tee"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+  "size": [
+    160,
+    102
+  ],
+  "body": 0.175,
+  "ipPos": {
+    "start": "0,0.235",
+    "end": "1,0.235",
+    "branch1": "0.5,1"
+  },
+  "notes": "A Long Tee, for piping (Fritz's drawing, 2026-11-02). Openings at the left, the right and the bottom (the branch); each IP is the center of its ferrule's outer face. Flow goes any way through it."
 }

@@ -463,6 +463,15 @@ side lets go of the pipe (the end gets an open-end coupling). Older pipes with b
 joined by elbows when a Schema loads (Rule 15.2); the samples and the default Schema are changed (Rule 15.3). Hoses still bend.
 (thread "Limit pipes to horizontal, vertical, 45", Help 105)
 
+5.20 **Where the IPs go** (Fritz, 2026-11-02, with two drawings): on every Device and Widget an IP sits at **the center of
+the opening**. On a TC pipe Widget (elbows, tees, reducers ...) and on any Device or Widget with TC ferrules, that is **the
+center of the ferrule's outer face** (the flat end the clamp goes on), one IP for each open end. On a **front view** (looking
+down the pipe) it is **the center of the opening**; a straight item seen from the front has both of its IPs there. Pipe
+Widgets have **no flow direction** (a check valve is still the only one-way fitting, Rule 5.14). A **tee with a Temperature
+Probe** in it is a **Temperature Device** subtype, not a pipe Widget: the probe fills one opening, so the other two are its
+IPs. The Manual Ball Valve drawings are pictures of the **Manual Valve Widget** (Rule 5.15), which keeps its click-only
+Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
+
 ## 6. Devices, connections and safety
 
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
@@ -974,3 +983,5 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 - 2026-11-02: Rule 1.19: new gGlobals are only global-scope variables; Switch, Push Button, Pulse Button, List, Step and Long String
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: Added Rule 5.19 (pipes only Horizontal, Vertical or 45; turns only at a fitting; the old free pipe movement retired) and the kettle exception to Rule 5.5 (Flip Horizontal only, no Flip Vertical or Rotate). Help 105; next free Help number 111 (other open PRs hold 106-110). (thread "Limit pipes to horizontal, vertical, 45")
+- 2026-11-02: Added Rule 5.20 (where the IPs go: the center of a ferrule's outer face on TC pipe Widgets, the center of the
+  opening on a front view; tees with a Temperature Probe are Temperature Devices). Help 110. (thread "Create pipe Widgets from Fritz's drawings")
