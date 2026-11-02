@@ -432,3 +432,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-10-31: 4.2 Pump: Skynet pump pictures with IPs on the real ports (12 drawings, Help 104). (thread "Draw SVGs for common brew pumps")
 - 2026-11-02: 4.2 Pump: Cover overlay, .cover and .coverColor (Rule 7.13, Help 111). (thread "Draw SVGs for common brew pumps")
 - 2026-11-02: Added 4.3b Skynet Motorized Butterfly Valve Device (Master H, VL, VR, Front, Front Elbow), the Motorized Ball Valve redrawn with a Front Daughter, and 4.12a Tees with a Temperature Probe; IPs on the ferrule faces (Rule 5.20, Help 110). (thread "Create pipe Widgets from Fritz's drawings")
+- 2026-11-02: Universal Properties standard (Rule 1.21): every Device, Widget and Semi-Device gets the same Properties and attributes; see docs/Universal_Properties.md. (thread "Set universal properties standard", Help 114)
