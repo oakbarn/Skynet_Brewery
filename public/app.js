@@ -302,6 +302,9 @@ const SIDE4 = [['Left', 0, 0.5], ['Right', 1, 0.5], ['Top', 0.5, 0], ['Bottom', 
 const CORNERS = [['Top Left', 0, 0.15], ['Top Right', 1, 0.15], ['Bottom Left', 0, 0.85], ['Bottom Right', 1, 0.85]];
 const RIMS_POS = [['Top Left', 0.22, 0], ['Top Right', 0.78, 0], ['Bottom Left', 0.22, 1], ['Bottom Right', 0.78, 1],
   ['Top Left Branch', 0.087, 0], ['Bottom Branch', 0.54, 1]];         // the openings of the Skynet RIMS Device picture (Skynet_TC1_2_Rims_Device.svg)
+// the 4 port tips of the Skynet Copper Counterflow Chiller picture (Chiller_Copper_Counterflow.svg, viewBox 225 x 245; Fritz, 2026-11-02):
+// the wort tube runs straight out through each tee, the water side leaves by the tee's branch; every tip faces left (Rule 5.19)
+const CF_COPPER = [['Coil Top End', 0, 0.1633], ['Coil Top Branch', 0.0889, 0.2694], ['Coil Bottom Branch', 0.0889, 0.8163], ['Coil Bottom End', 0, 0.9224]];
 const pt = (name, pos, o = {}) => ({ name, ip: true, pos, ...o });
 const EQ = {
   // Fritz, 2026-10-21: a vessel is a plain gray tank with no text on it: the Label is its only text
@@ -321,8 +324,8 @@ const EQ = {
     } },
   pchiller: { title: 'Plate chiller', types: ['Brazed plate 20', 'Brazed plate 30', 'Brazed plate 40', 'Counterflow'], image: 'Images/Skynet/Chillers/plate_chiller.svg', size: [110, 200], tab: 'Equipment',
     ports: {
-      wortIn: pt('Wort In', CORNERS, { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS, { on: true, def: 'Bottom Right', circuit: 'wort' }),
-      waterIn: pt('Water In', CORNERS, { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS, { on: true, def: 'Top Right', circuit: 'water' }),
+      wortIn: pt('Wort In', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Left', circuit: 'wort' }), wortOut: pt('Wort Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Right', circuit: 'wort' }),
+      waterIn: pt('Water In', CORNERS.concat(CF_COPPER), { on: true, def: 'Bottom Left', circuit: 'water' }), waterOut: pt('Water Out', CORNERS.concat(CF_COPPER), { on: true, def: 'Top Right', circuit: 'water' }),
       thermowell: pt('Thermowell', [['Wort Out', 0.85, 0.75], ['Water Out', 0.85, 0.25]], { ip: false }),
     } },
   ccoil: { title: 'Chilling coil', types: ['Immersion coil', 'Jacketed (glycol)'], image: 'Images/Skynet/Chillers/chill_coil.svg', size: [180, 180], tab: 'Equipment',
