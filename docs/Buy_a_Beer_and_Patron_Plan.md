@@ -18,6 +18,18 @@ Developer Team are sent only once Fritz says the email setup is ready.
 
 ## 1. Can we lock Buy a Beer so nobody can remove it?
 
+**Fritz, 2026-11-02: "Protect as we can."** So we do all three items below. The license part:
+
+- Today the panel says **MIT** (in package.json) and there is no LICENSE file. MIT lets anyone remove
+  anything, so it is replaced by a **Skynet License**: MIT's wording plus two conditions.
+  1. Anyone who shares a copy (changed or not) must keep **Buy a Beer, Patron and the Skynet Team file
+     working and unchanged**.
+  2. The **Skynet name, logo and Skynet pictures** are not free to reuse: a copy that breaks condition 1
+     must drop them and use another name.
+- New LICENSE file in the repo, package.json and the About tab point to it, and every Release carries it.
+- Honest limits: versions already downloaded stay MIT. A license is a legal tool, not a lock, and this is
+  not legal advice. Because of condition 1 the panel is "source-available", not strictly "open source".
+
 Honest answer: **no**. The repo is public, so anyone can copy it and delete any part of it. That includes
 encrypted or hidden code, because the code that unlocks it has to ship too. Every open-source project
 has this problem. What we can do:
@@ -157,4 +169,4 @@ This step goes into build step 2 (and the Patron part into step 3).
 6. Which PayPal account collects the Patron payments before the Pay Out? Suggested: Fritz's, upgraded to Business.
 3. ~~Group approval: every Prime Developer, or a majority?~~ Answered 2026-11-02: every Prime Developer (100%).
 4. ~~Amounts?~~ Answered 2026-11-02: Beer $1, Every Month picked; Patron $10 every 6 months; hint only for One Time / no Frequency, never Patrons.
-5. OK to add the license term?
+5. ~~License term?~~ Answered 2026-11-02: "Protect as we can": Skynet License (section 1).
