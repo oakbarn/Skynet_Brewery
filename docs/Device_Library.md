@@ -201,6 +201,12 @@ What each ID means:
   Off text shows only when on) with Text when on / off.
 - Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88.
 
+### 4.3c User Defined Motorized Ball Valve (Fritz, 2026-11-03)
+The Valves list row under the Skynet valves (was "Motorized valve, open / closed (relay)"): digitalOut, subtype valve, the user's own
+picture (Picture when on / off, Image Path 1-3, Rule 7.10). **In IP across % / down %** and **Out IP across % / down %** (ipInX, ipInY,
+ipOutX, ipOutY: % of the item's Width and Height) place its two IPs; blank = Skynet places them. The Valves list also ends with
+**Manual Valve** (the Manual Valve Widget, no pin, Rule 1.2). Help 88.
+
 ### 4.3b Skynet Motorized Butterfly Valve Device (Skynet Template, Rules 5.16, 5.17, 5.20)
 Fritz's drawing (2026-11-02, Help 110): a grey actuator on a butterfly valve. A Valve (digitalOut, subtype valve, Electric, Room Temperature Liquid), made from **Valves** on the Edit layout bar like the Motorized Ball Valve.
 

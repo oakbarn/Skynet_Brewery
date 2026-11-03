@@ -835,6 +835,18 @@ const flipPt = e => {
   const gm = elGeom(e), cx = (gm.x || 0) + (gm.w || 120) / 2, cy = (gm.y || 0) + (gm.h || 60) / 2;
   return c => [e.flipH ? Math.round(2 * cx - c[0]) : c[0], e.flipV ? Math.round(2 * cy - c[1]) : c[1]];
 };
+// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): its In and Out IPs go where the user sets them on its picture, in % of
+// the item's width (across, from the left) and height (down, from the top). Both blank = Skynet finds them as before.
+const IP_AT_FIELDS = [['_ipat', 'In and Out IPs: where the two pipe ends are on the picture, in % of its Width (across, from the left) and Height (down, from the top). Leave them blank and Skynet finds them.', 'note'],
+  ['ipInX', 'In IP across % (0 = left edge, 100 = right edge)', 'num'], ['ipInY', 'In IP down % (0 = top, 100 = bottom)', 'num'],
+  ['ipOutX', 'Out IP across %', 'num'], ['ipOutY', 'Out IP down %', 'num']];
+const pctOk = v => v !== undefined && v !== null && v !== '' && Number.isFinite(+v);
+function ipAt(e, end) {
+  const x = e[end === 'in' ? 'ipInX' : 'ipOutX'], y = e[end === 'in' ? 'ipInY' : 'ipOutY'];
+  if (!pctOk(x) || !pctOk(y)) return null;
+  const gm = elGeom(e), cl = v => Math.max(0, Math.min(100, +v)) / 100;
+  return [Math.round((gm.x || 0) + cl(x) * (gm.w || 120)), Math.round((gm.y || 0) + cl(y) * (gm.h || 60))];
+}
 const devIps = e => {
   if (isProbeTee(e)) {            // a tee with a Temperature Probe: an IP at the center of each open ferrule face, flow either way (Rule 5.20)
     const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 170, hh = gm.h || 85, fl = flipPt(e);
@@ -848,8 +860,8 @@ const devIps = e => {
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
   const pe = picEnds(e), fl = flipPt(e);
-  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
-    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
+  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(ipAt(e, 'in') || pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
+    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(ipAt(e, 'out') || pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
@@ -2393,7 +2405,9 @@ function skyDevFields(it, f) {
   skyOrientSwitch(it);
   it._orient = orientPick(it);
   const t = devTemplate(it), ok = new Set(t.userFields || []), set = skySet(t);
-  const choices = set.flatMap(x => [[x.name, skyOrientLabel(x)], ...(!x.master && (x.userFields || []).includes('orientation') ? [[x.name + '|r45', '45 degrees']] : [])]);
+  const rank = x => { const i = ['H', 'VL', 'VR', 'Front', 'Front_Elbow'].indexOf(x.name.split('_Valve_')[1]); return i < 0 ? 9 : i; };
+  const sorted = [...set].sort((a, c) => rank(a) - rank(c)), main = set[0];
+  const choices = [...sorted.map(x => [x.name, skyOrientLabel(x)]), ...((main?.userFields || []).includes('orientation') ? [[main.name + '|r45', '45 degrees']] : [])];
   if (it._tapFor === undefined) it._tapFor = tapKey(it);
   else if (it.tapwater && it._tapFor !== tapKey(it)) { it.tapSource = ''; it._tapFor = tapKey(it); }    // turned or flipped: the tap end Needs setting again
   const own = {
@@ -2425,13 +2439,14 @@ const am = label => ADD_MENU.flatMap(([, items]) => items).find(it => it[0].star
 const amGroup = start => ADD_MENU.find(([g]) => g.startsWith(start))?.[1] || [];
 const PUMP = ['Pump, on / off (relay or SSR)', 'pump', 'Pump'];
 const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: 'Images/Skynet/Pumps/Pump_Sump_On.svg', imageOff: 'Images/Skynet/Pumps/Pump_Sump_Off.svg' }];
-const VALVE = ['Motorized valve, open / closed (relay)', 'valve', 'Valve'];
+const VALVE = ['User Defined Motorized Ball Valve, open / closed (relay): your own picture, you set its In and Out IPs', 'valve', 'Valve'];
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, ...SKY_DEV_ROWS(), VALVE, ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
-  ['valves', 'Valves', [...SKY_DEV_ROWS(), VALVE, am('Proportional valve')]],
+  // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
+  ['valves', 'Valves', [...SKY_DEV_ROWS(), VALVE, am('Proportional valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
   ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), am('Electric kettle, basic')]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
@@ -2440,7 +2455,7 @@ const DEV_TYPES = () => [
   ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
   ['motors', 'Motors', amGroup('Devices: motors')],
   ['weight', 'Weight', amGroup('Devices: weight')],
-].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], () => addThing(r[1], r[2], r[3], r[0])])]);
+].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], typeof r[1] === 'function' ? r[1] : () => addThing(r[1], r[2], r[3], r[0])])]);
 const WGT_TYPES = () => [
   ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
@@ -3359,6 +3374,7 @@ const F = {
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
+    ...IP_AT_FIELDS,
     ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT], ...VALVE_LIST_FIELDS(it)] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Device controlled first (None = it only shows its own .state)
   switch: SEMI_FIELDS('switch'), pushButton: SEMI_FIELDS('pushButton'), pulseButton: SEMI_FIELDS('pulseButton'), led: SEMI_FIELDS('led'),
