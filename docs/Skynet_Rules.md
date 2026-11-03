@@ -26,6 +26,9 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
 - When two Rules disagreed, only the latest one is kept here. The old wording is shown as
   "Replaced" so the history is not lost.
 - Questions Fritz has not answered yet are at the end, under **Open questions**. They are not Rules.
+- **Following the Rules is the standard** (Fritz, 2026-11-03). When Fritz asks for something that breaks a Rule, tell him the Rule
+  number and what it says; almost always he will say follow the Rule. **An exception is only for something no user would find useful**
+  (example: a pipe's Position and Size, Rule 5.21), never just a different way of doing it.
 
 Companion documents (look things up there, do not copy them here):
 
@@ -377,6 +380,9 @@ to a Tab. (2026-10-23, PR #97 and PR #99)
 
 *Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
 
+*Exception (Fritz, 2026-11-03):* a **Pipe or Hose** is drawn right on its Tab with Draw pipe or Draw hose; it is never made on the Build
+Tab first (Rule 5.21).
+
 4.2 **New Device order** (the **Add Device** box, Fritz 2026-10-28): 1 Interface, 2 Available Ports/Pins
 (only free ones that fit), 3 Suggested Name, 4 Label (or **Show label** off), then Width and Height
 (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the
@@ -536,6 +542,25 @@ Widgets have **no flow direction** (a check valve is still the only one-way fitt
 Probe** in it is a **Temperature Device** subtype, not a pipe Widget: the probe fills one opening, so the other two are its
 IPs. The Manual Ball Valve drawings are pictures of the **Manual Valve Widget** (Rule 5.15), which keeps its click-only
 Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
+
+5.21 **Pipe and Hose Widgets and Flow Colors** (Fritz, 2026-11-03, thread "Add flow colors to pipe and hose Widgets", Help 116):
+- A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose** on the
+  Edit layout bar (the Layout Menu), right on its Tab (see the exception under Rule 4.1).
+- **Flow Color** on a pipe or hose (`.flow_Color`, `.flow` the same), on a Tab (**tab.flow_Color**, Tab settings) and on a Vessel (**Out
+  flow color**). **None is the default** for each. The choices: None, **Tap** (Blue), **Strike** (Red), **Mash** (Brown), **Boil**
+  (Reddish Brown), **Whirlpool** (Brown), **Ferment** (Golden), the primary colors (Red, Yellow, Blue, Green), Brown, Orange, Purple,
+  Reddish Brown, Golden, and **RGB** (a color of your own).
+- **The Tab in tab.flow_Color is the Tab with the focus** (the one each screen shows). All pipes and hoses on a Tab use the Tab's Flow
+  Color, except: a pipe's own Flow Color (not None) overrides **Mash, Boil, Whirlpool and Ferment**; **flow from a Tap Water Valve is
+  always Blue**; and **flow that begins at a Vessel's outlet with an Out flow color takes that color, over all else**. Order: Vessel,
+  Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash, Boil, Whirlpool, Ferment); all None = the standard light blue.
+- **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`). What a Process
+  sets lasts until set to None, another Schema is loaded, or the panel restarts.
+- **A Pipe or Hose follows the general Rule for Labels** (Rule 1.21, 2.18): a user can add a Label, edit it and Show it (it sits in the
+  middle of the pipe). Its Name is given by Skynet (Pipe_1, Hose_1). **Exception: no Position or Size.** X, Y, Width and Height could never
+  be useful to a user (a pipe is where it is drawn), so they are **hidden** in its dialog. (Fritz changed this 2026-11-03: first he had
+  the Name and Label greyed out too.)
+- Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
 
 ## 6. Devices, connections and safety
 
@@ -791,7 +816,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **116**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **117**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1207,3 +1232,8 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-03: Added Rule 18.12 (the drill-down: Pump Device Properties is the first dialog changed to Rule 18 and the
   starting standard for every Device; Properties ⬢ pop-up with Delete, Label ⬆ ⬢, Pin, When tapped, Picture, Background and
   On / Off text pop-ups). Help 115; next free Help number 116. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-03: Added Rule 5.21 (Pipe and Hose Widgets: made only with Draw pipe / Draw hose, not in the Widget List; Flow Colors on the
+  Tab, the pipe and the Vessel, tap water always Blue, Vessel over all; .flow_Color the only Process attribute; Name, Label, Position and
+  Size greyed out) and the pipe exception under Rule 4.1. Help 116; next free Help number 117. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-03: Rule 5.21 changed (Fritz): pipes and hoses keep an editable Label and Show label (the general Rule); only Position and Size
+  are hidden. Added to How Rules work: following the Rules is the standard; an exception only for what no user would find useful.
