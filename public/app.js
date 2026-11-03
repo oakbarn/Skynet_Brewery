@@ -15,6 +15,7 @@ import { SEMI_KINDS, SEMI_CLASS, controllableNames } from './semi.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
+import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowcolor.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -157,6 +158,7 @@ function connect() {
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
   es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); });
+  es.addEventListener('flow', e => { S.flow = JSON.parse(e.data); if (view === 'workspace') renderPipes(); });     // flow colors a Process set (Rule 5.21)
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
@@ -1589,7 +1591,16 @@ function ipNode(id, ws) {
   if (g?.fitting === 'coupling' && pipesOn(id, ws).length < 2) return { key: id, end: true };
   return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
 }
-function computeFlow(ws) {
+// Where the flow in a pipe began (Rule 5.21): a Vessel with an Out flow color, or a Tap Water Valve (always Blue)
+function vesselFlowOf(ipId) {
+  const g = L().graphics.find(x => x.id === ipId && x.kind === 'ip'), v = g?.attachTo && L().graphics.find(x => x.id === g.attachTo);
+  return isKettle(v) ? flowKey(v.flowColor) || '' : '';
+}
+// the Flow Color of a Tab (Rule 5.21): tab.flow_Color set by a Process wins over the Tab settings one ("tab" is the Tab on the screen)
+const tabFlowOf = w => (!editing && S.flow?.tab) || flowKey(w?.flowColor) || '';
+const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowKey(p.flowColor) || '';
+const isTapNode = (key, n) => n?.push && devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve';
+function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here)
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
   const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
   const link = (a, b, p, oneWay) => {
@@ -1621,19 +1632,28 @@ function computeFlow(ws) {
     link(ci, co, { id: 'check:' + f.id }, true);
   }
   // breadth-first trace from a pump to every plain IP point (or other running pump) it reaches; mark the pipes on each route
+  // where flow began (Rule 5.21): a vessel with an Out flow color wins over a Tap Water Valve
+  const pumpSrc = new Map();                     // a running pump -> where the flow it pulls in began
+  const better = (a, b) => (b?.vessel && !a?.vessel) || (b?.tap && !a) ? b : a;
+  const originOf = key => { const n = nodes.get(key); if (isTapNode(key, n)) return { tap: true }; if (n?.push) return pumpSrc.get(devOfIp(key)) || null; const k = n?.end ? vesselFlowOf(key) : ''; return k ? { vessel: k } : null; };
   const trace = (start, outward) => {
     const prev = new Map([[start, null]]), queue = [start];
     while (queue.length) {
       const u = queue.shift();
       if (u !== start && !nodes.get(u).pass) {            // reached an end of the line: mark the route back to the start
         const n = nodes.get(u);
-        if (n.end || (outward ? n.pull : n.push)) for (let k = u; prev.get(k); k = prev.get(k).from) { const st = prev.get(k); dir.set(st.p.id, outward ? st.d : -st.d); }
+        if (n.end || (outward ? n.pull : n.push)) {
+          const o = outward ? originOf(start) : originOf(u);
+          if (!outward && o) pumpSrc.set(devOfIp(start), better(pumpSrc.get(devOfIp(start)), o));
+          for (let k = u; prev.get(k); k = prev.get(k).from) { const st = prev.get(k); dir.set(st.p.id, outward ? st.d : -st.d); if (o) src.set(st.p.id, better(src.get(st.p.id), o)); }
+        }
         continue;
       }
       for (const { v, p, d } of (outward ? adj : radj).get(u) || []) if (!prev.has(v)) { prev.set(v, { from: u, p, d }); queue.push(v); }
     }
   };
-  for (const [k, n] of nodes) { if (n.push) trace(k, true); if (n.pull) trace(k, false); }
+  for (const [k, n] of nodes) if (n.pull) trace(k, false);      // first what each pump pulls in, so its outlet knows where the flow began
+  for (const [k, n] of nodes) if (n.push) trace(k, true);
   return dir;
 }
 // Keep pipe ends on their IPs. The bend next to the end follows, so square corners stay square (a hose just bends).
@@ -1735,7 +1755,8 @@ function renderPipes() {
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
-  const flow = computeFlow(w.name), cones = reducers(pipes, w.name);
+  const srcs = new Map(), flow = computeFlow(w.name, srcs), cones = reducers(pipes, w.name);
+  const tabFlow = tabFlowOf(w);
   for (const p of pipes) {
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
@@ -1746,7 +1767,7 @@ function renderPipes() {
       for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color, opacity: op }));
       g.append(line(p, { class: 'pipe' + (p.hose ? ' hose' : ''), stroke: color, 'stroke-width': width, opacity: op }));
     }
-    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: p.flowColor || '#4fb3ff', 'stroke-width': Math.max(3, width * 0.55) }));
+    g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     g.append(line(p, { class: 'hit' }));
     if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
@@ -2130,7 +2151,7 @@ function finishPipe(to) {
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowColor: '#4fb3ff', flowWhen: [], baseVisible: true, size: '0.5' };
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowWhen: [], baseVisible: true, size: '0.5' };
   if (hose) g.hose = true; else g.straight = true;
   g.from = from || endCoupling(pts, 0, 1);
   g.to = typeof to === 'string' ? to : endCoupling(pts, pts.length - 1, pts.length - 2);
@@ -3447,21 +3468,39 @@ const F = {
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
-    ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'], ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
+    ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
+    ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
+    ['_flN', 'None = it follows the Tab Flow Color. Flow from a Tap Water Valve is always Blue, and flow that began at a Vessel with an Out flow color takes that color.', 'note'],
+    ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
     ['sizeUnits', 'Size units', 'sel', [['in', 'Inch (SAE)'], ['mm', 'Metric (mm)']], true], ['size', it.hose ? 'Hose size' : 'Pipe size', 'sel', sizeChoices(it), true],
     ...(it.size === 'custom' ? [['sizeCustom', `Custom size (${it.sizeUnits === 'mm' ? 'mm' : 'inches, e.g. 1.5'})`, 'num']] : []),
     ['flowWhen', 'Only when ALL of these are on (optional; pumps and valves on the pipe count by themselves; Ctrl or Cmd-click to pick several)', 'multi'], ['reverse', 'Reverse flow direction', 'bool'],
-    ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'], ['flowColor', 'Flow color', 'color'],
+    ['color', it.hose ? 'Hose color' : 'Pipe color', 'color'],
     ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
-    ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock']],
+    ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
 };
+// A pipe or hose has a Label like everything else (Rule 1.21), but no editable Position or Size (Fritz, 2026-11-03, Rule 5.21):
+// its place and size come from where it is drawn, so X, Y, Width and Height are hidden. Its Name is given by Skynet (Pipe_1, Hose_1).
+const PIPE_HIDE_FIXED = true;       // false: show X, Y, Width and Height greyed out instead of hiding them
+function pipeBox(p) {
+  const pts = p.points || [], xs = pts.map(q => q[0]), ys = pts.map(q => q[1]);
+  if (!pts.length) return {};
+  const x = Math.min(...xs), y = Math.min(...ys);
+  return { x: Math.round(x), y: Math.round(y), w: Math.round(Math.max(...xs) - x) || Math.round(pipeWidth(p)), h: Math.round(Math.max(...ys) - y) || Math.round(pipeWidth(p)) };
+}
+const PIPE_FIXED = it => { const b = pipeBox(it);
+  return [['_fx', 'Not editable', 'head'], ['name', 'Name (given by Skynet; a Process uses it, e.g. ' + (it.name || 'Pipe_1') + '.flow_Color = Mash)', 'ro'],
+    ...(PIPE_HIDE_FIXED ? [] : [['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']])]; };
 // where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
 const FIT_PLACE = it => [...(isCap(it) ? [] : [AUTOSIZE_FIELD]), ...(it.onVessel || it.capOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
   ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
+// a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
+const VESSEL_FLOW = it => isKettle(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
 F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
+  ...VESSEL_FLOW(it),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
@@ -3558,9 +3597,10 @@ const COVER_FIELDS = it => [['cover', 'Cover overlay (over the picture, under th
   ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color']] : [])];
 // Alarm Widget Properties (Fritz, 2026-11-02), to the General Dialog Rules (Rule 18): the Label first, with its Show switch, the
 // ⬆ String Entry Dialog (2 lines) and the ⬢ Label pop-up; then the Name; then the Alarm, Graphic and Properties boxes.
-const ALM_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show'], ['nameFontSize', 'Font size (px; empty = Default)', 'num'],
+const LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show'], ['nameFontSize', 'Font size (px; empty = Default)', 'num'],
   ['nameFontFamily', 'Font', 'sel', FONTS], ['nameBold', 'Bold', 'bool'], ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'],
   ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]]] };
+const ALM_LABEL_POP = LABEL_POP;
 // the Graphic Dialog (Rule 18.8): what is not on the opening dialog of a User Alarm's background picture
 const ALM_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
@@ -3582,6 +3622,38 @@ function alarmWidgetFields(it) {
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
 }
+// Pump Device Properties, the drill-down (Fritz's drawing, 2026-11-03, Rule 18.12): the standard for every Device. The most
+// used fields are on the opening dialog; each red hexagon ⬢ opens a pop-up with the rest, each red up arrow ⬆ a String Entry
+// Dialog. "Pump Properties ⬢" holds Visible, Hidden Locked, the lock, Tab, X, Y, Width, Height and Delete.
+const isPumpDev = e => e?.type === 'digitalOut' && e.subtype === 'pump' && !skyDev(e) && !e.kind;
+const DEV_PROPS_POP = what => ({ title: `${what} Properties`, canDelete: true, fields: [['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+  ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num']] });
+const DEV_PORT_POP = { title: 'Pin attributes', fields: [['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool']] };
+const DEV_PIC_POP = { title: 'Picture attributes', fields: [['imageOverlay', 'On overlay (on top while it is on)', 'gpick', 'overlays'], ['imageOn', 'Picture when on (a second picture, optional)', 'gpick']] };
+const DEV_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
+  ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue', 'Hide the On / Off text', 'bool'], ['fontSize', 'Font size (px; empty = Default)', 'num'], ['valueColor', 'Fore color', 'color'], ['valueBg', 'Back color', 'color'],
+  ['valueAlign', 'Alignment', 'sel', [['', 'Default'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']],
+  ['_all', 'All its text (the Label and the On / Off text)', 'head'], ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
+  ['wrap', 'Word wrap as needed', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]] };
+const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap target (Device, Widget, Process or Tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']] };
+function pumpDeviceFields(it, item) {
+  return [['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'], ['locked', 'Lock position (no drag or resize)', 'lock'],
+    ['_pp', 'Pump Properties', 'attrhead', null, false, 'b', { attr: DEV_PROPS_POP('Pump') }],
+    ['_lb', '', 'box'],
+    ['label', 'Label', 'text', null, false, 'b', { up: 2, attr: LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
+    ['name', 'Name', 'text', null, false, 'b'],
+    ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
+    ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]],
+    ['_pb', 'Pump', 'box'], ['device', 'Interface', 'dev', 'addnew', false, 'b'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital', false, 'b', { attr: DEV_PORT_POP }],
+    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held)'], 'dialog', ['script', 'process'], ['workspace', 'tab']], false, false, { attr: DEV_TAP_POP }],
+    ['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true],
+    ['_gb', 'Graphic', 'box'], ['imageOff', 'Picture', 'gpick', null, false, 'b', { attr: DEV_PIC_POP }], ...COVER_FIELDS(it).map(f => f[0] === 'cover' ? [f[0], 'Cover', ...f.slice(2)] : f),
+    ['backpath', 'Background picture (Image Path 1)', 'imgopen', 1, false, false, { attr: DEV_GRAPHIC_POP }],
+    ['_tb', 'On / Off text', 'box'], ['onText', 'Text when on', 'text', null, false, false, { up: 2, attr: DEV_TEXT_POP }], ['offText', 'Text when off', 'text', null, false, false, { up: 2 }],
+    ['_end', '', 'boxend']];
+}
+
 // a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
 const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
 
@@ -3625,6 +3697,8 @@ function field(f, obj) {
   // Rule 18 (General Dialog Rules, Fritz 2026-11-02): f[6] = { up: 2 or 30, attr: { title, fields } }. The red Up Arrow ⬆ opens the
   // String Entry Dialog (2 or 30 lines); the red hexagon ⬢ opens the Attribute Pop Up Dialog for that field's attributes.
   const x = f[6];
+  if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
+    h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x && out[1]) {
     const icons = [];
     if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Type it in a bigger box (${x.up} lines)`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
@@ -3748,6 +3822,22 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const add = h('button', { type: 'button', onclick: () => { const vs = [...tb.querySelectorAll('.vkv')].map(i => +i.value).filter(Number.isFinite); row({ value: vs.length ? Math.max(...vs) + 1 : 1 }); tb.lastChild.querySelector('.vkt').focus(); } }, '+ Add row');
     input = h('div', { class: 'vkitems', 'data-k': key, 'data-kind': kind }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Value'), h('th', {}, 'Text'), h('th'))), tb), add);
     return [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)];
+  }
+  else if (kind === 'flowc') {     // a Flow Color (Rule 5.21): None first, the brew stages, the colors, then RGB (a color of your own)
+    const cur = flowKey(v) ?? '', rgb = cur.startsWith('#');
+    const val = h('input', { type: 'hidden', 'data-k': key, 'data-kind': 'text', value: cur });
+    const sw = h('span', { class: 'cswatch' + (cur ? '' : ' dflt') }); sw.style.background = flowHex(cur) || '';
+    const pick = h('input', { type: 'color', class: rgb ? '' : 'hidden', value: rgb ? cur : '#a0452a', title: 'RGB: pick your own color' });
+    const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); };
+    const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fff'}` } : {}) }, n);
+    const s = h('select', {}, opt('', opts === 'tab' ? 'None (each pipe keeps its own Flow color)' : opts === 'vessel' ? 'None (the flow out of it is not colored by this vessel)' : 'None (it follows the Tab Flow Color)'),
+      ...FLOW_COLORS.map(([k, n]) => opt(k, n)), opt('rgb', 'RGB (pick your own color) ...'));
+    s.onchange = () => { pick.classList.toggle('hidden', s.value !== 'rgb'); set(s.value === 'rgb' ? pick.value : s.value); };
+    pick.oninput = () => set(pick.value);
+    input = h('div', { class: 'cpick' }, sw, s, pick, val);
+  }
+  else if (kind === 'ro') {        // greyed out: it is there (Rule 1.21) but can't be changed here; it is not saved from the dialog
+    return [h('label', { class: 'greyed', title: 'Not editable' }, label), h('input', { type: 'text', value: v ?? (typeof opts === 'function' ? opts(obj) : ''), disabled: true, class: 'greyed' })];
   }
   else if (kind === 'color') {     // standard colors by name with a swatch, or Custom with a color picker
     const cols = [...COLORS, ...vList('colors').filter(c => !COLORS.some(k => k[1] === c)).map(c => [c, c])];
@@ -4171,10 +4261,10 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:no
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
 // a small dialog on top of the Properties (Rule 18 pop-ups): ✖ Cancel and 💾 Save at the top and the bottom; build(body) fills it
-function layerDialog(title, build) {
+function layerDialog(title, build, canDelete = false) {
   return new Promise(res => {
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
-    const bar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'), h('button', { type: 'button', class: 'primary', onclick: () => done('ok') }, '💾 Save'));
+    const bar = () => h('div', { class: 'bar' }, ...(canDelete ? [h('button', { type: 'button', class: 'danger', title: 'Delete this item (asks first)', onclick: () => done('delete') }, '🗑 Delete')] : []), h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => cancel() }, '✖ Cancel'), h('button', { type: 'button', class: 'primary', onclick: () => done('ok') }, '💾 Save'));
     d.append(h('h3', {}, title), bar(), body, bar());
     document.body.append(d); build(body);
     const snap = () => JSON.stringify([...body.querySelectorAll('input, select:not(.gpickGroup), textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value)), before = snap();
@@ -4202,7 +4292,8 @@ async function upEntry(wrap, f, lines) {
 async function attrEntry(attr, obj) {
   try { readFields(obj); } catch { }
   let body;
-  const r = await layerDialog(attr.title, b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); });
+  const r = await layerDialog(attr.title, b => { body = b; b.classList.add('attrBody'); bindForm(b, attr.fields, obj); }, !!attr.canDelete);
+  if (r === 'delete') return $('#dlg').close('delete');      // the Properties pop-up's Delete is the dialog's Delete (it asks first)
   if (r !== 'ok') return;
   readFields(obj, body);
   for (const inp of $$('#dlgBody [data-k]')) {
@@ -4398,12 +4489,13 @@ async function editItem(kind, id) {
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
+    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ...dbFields(it)];      // Pump Device Properties, the drill-down (Fritz, 2026-11-03)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
-  } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
   if (kind === 'el') dbToWork(work);
   const isV = !!eqClass(item), bf = isBfit(item);
@@ -4423,7 +4515,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isPumpDev(item) ? 'Pump Device Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -4532,6 +4624,7 @@ async function editItem(kind, id) {
       }
       if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
+      if (isPumpDev(item) && !String(work.label ?? '').trim()) work.label = work.name || item.name;     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
       if (follow) work.name = deviceSuggestion(work, item) || work.name; else autoNamed.delete(item);
@@ -4615,7 +4708,10 @@ async function editWorkspace() {
     ['bgX', 'Picture left', 'num'], ['bgY', 'Picture top', 'num'], ['bgW', 'Picture width', 'num'], ['bgH', 'Picture height', 'num'],
     ['_sizeHead', 'Size', 'head'],
     ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
-    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num']], work, draft.workspaces.length > 1, TAB_SPOT);
+    ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num'],
+    ['_flHead', 'Flow Color', 'head'],
+    ['flowColor', 'Flow Color of every pipe and hose on this Tab (tab.flow_Color in a Process)', 'flowc', 'tab'],
+    ['_flNote', 'Mash, Boil, Whirlpool and Ferment: a pipe with its own Flow color keeps it. Tap, Strike and the plain colors: every pipe takes it. Always: flow from a Tap Water Valve is Blue, and flow that began at a Vessel with an Out flow color takes that color. A Process line tab.flow_Color = Mash sets it on the Tab the screen shows.', 'note']], work, draft.workspaces.length > 1, TAB_SPOT);
   if (r === 'delete') {
     if (!confirm(`Delete tab "${w.name}" and everything on it?`)) return;
     draft.workspaces = draft.workspaces.filter(x => x !== w);
@@ -7965,7 +8061,7 @@ F.skynetVessel = it => {
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
     ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
-    ...looseField(it),
+    ...looseField(it), ...VESSEL_FLOW(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 };

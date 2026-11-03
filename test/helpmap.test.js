@@ -21,5 +21,5 @@ assert.deepEqual(elementTopic({ type: 'temperature', subtype: 'probeTee' }), ['p
 assert.deepEqual(elementTopic({ type: 'flowMeter' })[0], 'devices', 'unknown devices go to Devices');
 assert.deepEqual(elementTopic({ type: 'alarm', alarmClass: 'basic' }), ['alarm-widget'], 'the Alarm Widget subclasses have their own Help page');
 assert.deepEqual(elementTopic({ type: 'alarm' }), ['alarms-and-sound'], 'an older Alarm keeps Alarms and sound');
-assert.deepEqual(graphicTopic({ kind: 'pipe', hose: true }), ['pipes-and-hoses', 'hoses']);
+assert.deepEqual(graphicTopic({ kind: 'pipe', hose: true }), ['pipe-and-hose-flow-colors'], 'Rule 5.21');
 console.log('helpmap tests passed');
