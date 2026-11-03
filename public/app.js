@@ -163,7 +163,7 @@ function connect() {
   es.addEventListener('config', () => { if (!editing) load(); });
   es.addEventListener('devices', e => { S.devices = JSON.parse(e.data); renderDevices(); });
   es.addEventListener('sim', e => { S.sim = JSON.parse(e.data); renderSimBar(); });
-  es.addEventListener('closing', e => { es.close(); showClosed(JSON.parse(e.data).by); });
+  es.addEventListener('closing', e => { es.close(); const d = JSON.parse(e.data); d.moving ? showMoving(d.service) : showClosed(d.by); });
   es.addEventListener('mqtt', e => { S.mqtt = { ...(S.mqtt || {}), status: JSON.parse(e.data) }; renderMqttStatus(); });
 }
 
@@ -6506,6 +6506,7 @@ const MENU = [
   { key: 'buildtemplate', title: 'Build Template', tip: 'Make and change Device Templates: every attribute, and a "user can set" box on each (Admins)', render: renderBuildTemplateTab, admin: true },
   { key: 'skynetpics', title: 'Get Skynet pictures', tip: 'Copy new and changed Skynet pictures from GitHub onto the Brain (into media/Images/Skynet)', render: renderSkynetPicsTab, admin: true },
   { key: 'filemove', title: 'File Move Utility', tip: 'Copy files and whole folders from this computer to the Brain (opens the File Move page)', view: 'filemove', admin: true },
+  { key: 'brainmove', title: 'Move Brain', tip: 'Move everything to a new Brain (a computer to a Raspberry Pi): make a Brain Move file here, bring it in on the new Brain, then fix the USB ports', render: renderBrainMoveTab, admin: true },
   { key: 'schema', title: 'Schema', tip: 'Pick the Schema to load, and clone, add, rename, back up or restore one', render: renderSchemaTab },
   { key: 'about', title: 'About', tip: 'Who is signed in, Sign out, and the Schema and its version', render: renderAboutTab },
 ];
@@ -6589,6 +6590,109 @@ function showClosed(by) {
     h('p', {}, by ? `${by} closed the panel.` : 'The panel was closed.'),
     h('p', { class: 'muted' }, 'You can close this browser tab. To start again, double-click Skynet Brewer on the Brain\'s desktop, then reload this page.')));
   window.close();      // works only when the panel opened this tab itself; otherwise the page above stays
+}
+// ---- Move Brain (Fritz, 2026-11-03, Rule 9.9, lib/brainmove.js): from a Windows, Linux or Mac computer Brain to a Raspberry Pi
+// (or any new Brain). 1 Make a Brain Move file on the old Brain, 2 bring it in on the new one, 3 fix the USB ports.
+let BM = null;
+async function loadBrainMove() { BM = await api('GET', '/ui/brainmove'); }
+function renderBrainMoveTab(box) {
+  if (!BM) { box.append(h('p', { class: 'muted' }, 'Loading ...')); loadBrainMove().then(() => menuTab === 'brainmove' && renderMenuPane()).catch(e => toast(e.message, true)); return; }
+  const mb = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+  const pw = (ph) => h('input', { type: 'password', autocomplete: 'new-password', placeholder: ph, minlength: BM.minPassword });
+  // 1. on the old Brain
+  const p1 = pw('Move password'), p2 = pw('Type it again'), out1 = h('div');
+  const make = h('button', { class: 'primary' }, '⬇ Make a Brain Move file');
+  make.onclick = guard(async () => {
+    if (p1.value.length < BM.minPassword) return toast(`The Move password needs at least ${BM.minPassword} characters`, true);
+    if (p1.value !== p2.value) return toast('The two Move passwords are not the same', true);
+    make.disabled = true; make.textContent = 'Making the file ...';
+    try {
+      const r = await fetch('/ui/brainmove/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: p1.value }) });
+      if (!r.ok) { let m = r.statusText; try { m = (await r.json()).error || m; } catch { } throw new Error(m); }
+      const name = /filename="([^"]+)"/.exec(r.headers.get('content-disposition') || '')?.[1] || 'Skynet_Brain_Move.skynetmove';
+      const blob = await r.blob(), url = URL.createObjectURL(blob);
+      const a = h('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+      out1.replaceChildren(h('p', {}, `✔ ${name} (${mb(blob.size)}) is in this computer's Downloads folder. Keep it and the Move password safe: the file holds your logins.`));
+      p1.value = p2.value = '';
+    } catch (e) { out1.replaceChildren(h('p', { class: 'bad' }, e.message)); }
+    finally { make.disabled = false; make.textContent = '⬇ Make a Brain Move file'; }
+  });
+  // 2. on the new Brain
+  const file = h('input', { type: 'file', accept: '.skynetmove' }), p3 = pw('Move password'), out2 = h('div');
+  const bring = h('button', {}, '⬆ Bring in the file');
+  const go = h('button', { class: 'primary' }, '🚚 Move in now'); go.disabled = !BM.checked;
+  bring.onclick = guard(async () => {
+    if (!file.files[0]) return toast('Pick the Brain Move file first', true);
+    bring.disabled = true; out2.replaceChildren(h('p', { class: 'muted' }, 'Sending and checking the file ...'));
+    try {
+      const r = await fetch('/ui/brainmove/import', { method: 'PUT', headers: { 'X-Move-Password': encodeURIComponent(p3.value) }, body: file.files[0] });
+      const d = await r.json(); if (!r.ok || d.ok === false) throw new Error(d.error || r.statusText);
+      out2.replaceChildren(h('p', {}, `✔ The file is good: made on ${d.from || 'the old Brain'} (${d.platform}) ${new Date(d.made).toLocaleString()}, ${d.files} files, ${mb(d.bytes)}.`),
+        d.interfaces.length ? h('p', {}, `${plural(d.interfaces.length, 'USB Interface')} will need its port checked after the move (step 3).`) : '',
+        d.notMoved.length ? h('p', { class: 'muted' }, `Not in the file (other media folders): ${d.notMoved.join(', ')}. Copy them with File Move later.`) : '');
+      go.disabled = false; p3.value = '';
+    } catch (e) { out2.replaceChildren(h('p', { class: 'bad' }, e.message)); go.disabled = true; }
+    finally { bring.disabled = false; }
+  });
+  go.onclick = guard(async () => {
+    const running = (S.scripts || []).filter(s => s.state === 'running').length;
+    if (!confirm('Move in now?\n\nEvery output turns off' + (running ? ` and ${plural(running, 'running Process')} stop${running === 1 ? 's' : ''}` : '')
+      + '. The panel stops, and as it starts again the old Brain\'s Schemas, settings, Processes, pictures, saved values, logins and brew log take the place of this Brain\'s.'
+      + '\n\nThis Brain\'s own files are not deleted: they are kept in backups/before_brain_move_<date>.'
+      + '\n\nAfter the move, sign in with your OLD Brain\'s user name and password.')) return;
+    const r = await api('POST', '/ui/brainmove/go');
+    showMoving(r.service);
+  });
+  // 3. USB ports, in every Schema at once
+  const portsBox = h('div');
+  const ifs = BM.interfaces, olds = [...new Set(ifs.map(x => x.port))], now = BM.ports.ports || [];
+  if (!olds.length) portsBox.append(h('p', { class: 'muted' }, 'No Interface is on USB in any Schema. Nothing to change.'));
+  else {
+    const picks = {}, seen = p => BM.last?.usbPorts?.find(x => x.path === p);
+    const tb = h('tbody');
+    for (const o of olds) {
+      const users = ifs.filter(x => x.port === o), was = seen(o), here = now.some(x => x.path === o);
+      const sel = h('select', {}, h('option', { value: '' }, here ? `Keep ${o}` : `Keep ${o} (not on this Brain)`),
+        ...now.filter(x => x.path !== o).map(x => h('option', { value: x.path }, x.path + (x.manufacturer ? ` (${x.manufacturer}${x.serialNumber ? ', serial ' + x.serialNumber : ''})` : ''))));
+      sel.value = BM.suggest[o] && BM.suggest[o] !== o ? BM.suggest[o] : '';
+      picks[o] = sel;
+      tb.append(h('tr', {}, h('td', {}, h('b', {}, o), was?.manufacturer ? h('div', { class: 'muted' }, `was ${was.manufacturer}${was.serialNumber ? ', serial ' + was.serialNumber : ''}`) : ''),
+        h('td', {}, users.map(u => `${u.interface} (${u.schema})`).join(', ')), h('td', {}, sel)));
+    }
+    const save = h('button', { class: 'primary' }, '💾 Save USB ports');
+    save.onclick = guard(async () => {
+      const map = Object.fromEntries(Object.entries(picks).map(([o, s]) => [o, s.value]).filter(([, v]) => v));
+      const r = await api('POST', '/ui/brainmove/ports', { map });
+      toast(r.changed ? `${plural(r.changed, 'Interface')} changed to the new USB port` : 'Nothing changed');
+      BM = null; renderMenuPane();
+    });
+    portsBox.append(
+      h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, 'USB port now'), h('th', {}, 'Interfaces (Schema)'), h('th', {}, 'Change to'))), tb),
+      !BM.ports.installed ? h('p', { class: 'bad' }, 'USB board support is not installed on this Brain yet, so it can\'t list its ports. Start Skynet Brewer once with the internet on.')
+        : !now.length ? h('p', { class: 'muted' }, 'No USB boards are plugged into this Brain right now. Plug them in, then click Look again.') : '',
+      saveBar(h('button', { onclick: () => { BM = null; renderMenuPane(); } }, '🔄 Look again'), save));
+  }
+  box.append(h('h3', {}, 'Move Brain'), h('div', { class: 'menuNarrow' },
+    h('p', {}, 'Moves everything from one Brain to another, for example from a Windows, Linux or Mac computer to a Raspberry Pi: every Schema, panel setting, Process, picture and sound, saved gGlobal values, logins and the brew log. Then the USB ports are changed to the new Brain\'s names (COM3 on Windows is /dev/ttyACM0 on a Pi).'),
+    BM.last ? h('p', { class: 'muted' }, `Last move in: from ${BM.last.from || 'the old Brain'} (${BM.last.platform}) on ${new Date(BM.last.movedIn).toLocaleString()}.`) : '',
+    h('h4', {}, '1. On the OLD Brain: make the Brain Move file'),
+    h('p', { class: 'muted' }, `Pick a Move password (at least ${BM.minPassword} characters). The file is locked with it, because it holds your logins. You type the same password on the new Brain.`),
+    h('div', { class: 'row' }, p1, p2), saveBar(make), out1,
+    h('h4', {}, '2. On the NEW Brain: bring in the file'),
+    h('p', { class: 'muted' }, 'Install Skynet on the new Brain first (Help: Installing), open ☰ Menu > Move Brain there, then pick the file and type the Move password. Copy the file over with a USB stick, or open this page on the new Brain from the computer that has the file.'),
+    h('div', { class: 'row' }, file, p3), saveBar(bring, go), out2,
+    h('h4', {}, '3. On the NEW Brain, after the move: USB ports'),
+    h('p', { class: 'muted' }, 'Plug the boards into the new Brain. Each Interface\'s old port is changed in every Schema at once. A board the old Brain saw is found by its serial number and picked for you. Ethernet and WiFi boards need nothing.'),
+    portsBox));
+}
+function showMoving(service) {
+  if ($('.closedPage')) return;
+  for (const d of $$('dialog[open]')) d.close();
+  document.body.append(h('div', { class: 'closedPage' },
+    h('h2', {}, '🚚 Moving in the old Brain'),
+    h('p', {}, 'The panel stopped to put the old Brain\'s files in place.'),
+    h('p', { class: 'muted' }, service ? 'It starts again by itself in a few seconds. Reload this page in about 15 seconds, sign in with the OLD Brain\'s user name and password, then open ☰ Menu > Move Brain > USB ports.'
+      : 'Start Skynet Brewer again on this Brain (double-click it), then reload this page, sign in with the OLD Brain\'s user name and password, and open ☰ Menu > Move Brain > USB ports.')));
 }
 // Fritz, 2026-10-26: "the ☰ Menu should fill out with any tab or sub tab you can navigate to" (he could not find the
 // Interfaces). Under each page the ☰ lists its parts: the screen Tabs, each part of a long page (it scrolls there and
