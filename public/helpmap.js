@@ -16,6 +16,7 @@ export function elementTopic(e) {
   if (e.integratedIn) return ['skynet-integrated-devices'];
   if (e.subtype === 'thermowell') return ['skynet-integrated-devices', 'thermowells'];
   if (e.subtype === 'probeTee') return ['pipe-widgets-from-fritzs-drawings', 'tees-with-a-temperature-probe'];   // Fritz, 2026-11-02
+  if (e.subtype === 'propValve') return ['proportional-valves'];      // Skynet KLD20T and the User Defined one (Fritz, 2026-11-03, Help 117)
   if (e.template && e.templateCls === 'skynet') return ['skynet-device-templates'];      // a User version of a Skynet Device Template
   switch (e.type) {
     case 'digitalOut':
@@ -101,7 +102,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gGlobal', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
   elementTopic({ type: 'alarm', alarmClass: 'basic' }),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
-  elementTopic({ type: 'gGlobal', kind: 'list' }),
+  elementTopic({ type: 'gGlobal', kind: 'list' }), elementTopic({ type: 'analogOut', subtype: 'propValve' }),
   ...['switch', 'pushButton', 'pulseButton', 'led'].map(type => elementTopic({ type })),
   ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'bfit', templateCls: 'skynet', fittings: [{ kind: 'tee' }] }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),

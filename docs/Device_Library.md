@@ -236,10 +236,26 @@ One entry in the Valves list; its Orientation picks the row above. The Front vie
 - **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals.
 - Board line `AO <pin> <0-1000>` (tenths of a percent of full scale).
 
-### 4.6 Proportional valve (0-100 %)
-- **Add menu:** Devices: outputs > Proportional valve 0-100 % (analog output).
+### 4.6 User Defined Proportional Valve (0-100 %)
+- **Add menu:** Valves > User Defined Proportional Valve 0-100 % (analog output), or Devices: outputs (was "Proportional valve
+  0-100 % (analog output)", renamed 2026-11-03).
+- Its own pictures (open above 0 % / closed at 0 %, Image Path 1-3, Rule 7.10) and **In / Out IP across % and down %** (ipInX,
+  ipInY, ipOutX, ipOutY), the same as the User Defined Motorized Ball Valve (4.3c). Help 117.
 - **Type IDs:** P_L_Vlv (default), P_H_Vlv.
 - An Analog output (4.5) set to 0-10 V, 0-100 %, with IN and OUT IPs and pictures for open (above 0 %) and closed (0 %).
+
+### 4.6a Skynet KLD20T Proportional Valve (Skynet Template, Rules 5.16, 5.17, 5.22)
+The first Skynet Proportional Valve (Fritz, 2026-11-03): the **KLD20T** sold by BruControl, a 1/2" NPT SS304 motorized ball
+valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
+- **Add menu:** Valves on the Edit layout bar (not On/Off: it is not an on / off valve). One entry; **Orientation** picks
+  Horizontal, Vertical Left, Vertical Right or 45 degrees.
+- **Templates:** templates/device/Skynet_KLD20T_Proportional_Valve_H (main), _VL, _VR (Flip Horizontal on).
+- **Type:** analogOut, subtype propValve. **Type ID:** P_L_Vlv.
+- **Fixed by the Template:** Kind, Service (Room Temperature Liquid), Signal 0-5V, 0 to 100 %, Decimals 0, pictures (the Skynet
+  Motorized Ball Valve's: Valve_Motor_Ball_*H, *V_LC, until Fritz sends a KLD20T drawing), look.
+- **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
+  Interface, Pin (a PWM pin feeding a PWM-to-0-5 V module), Orientation, Flip Horizontal, Flip Vertical.
+- IPs on the picture's pipe ends (Rule 5.20), following the Orientation and Flips. Help 117.
 
 ### 4.7 Duty Cycle (control output)
 - **Add menu:** Devices: control outputs > Duty cycle.
