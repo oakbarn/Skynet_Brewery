@@ -2,7 +2,8 @@
 // Shared by the Brain (lib/engine.js, lib/store.js) and the browser (public/app.js).
 //
 // What colors the flow in a pipe or hose, first match wins:
-//  1. flow that began at a Vessel whose Out flow color is not None: that color (it overrides all else)
+//  0. flow that began at an IP whose Flow Color is not None: that color (first of all, Fritz 2026-11-03)
+//  1. flow that began at a Vessel whose Out flow color is not None: that color
 //  2. flow from a Tap Water Valve: always Blue
 //  3. the Tab's Flow Color (tab.flow_Color) when it is Tap, Strike, a plain color or RGB
 //  4. the pipe's own Flow color (.flow_Color) when it is not None
@@ -62,7 +63,8 @@ export function flowName(k) {
 export const pipeWins = tabKey => !tabKey || !!BY_KEY.get(tabKey)?.[3];
 
 // The color a flowing pipe shows (the order at the top of this file)
-export function pipeFlowColor({ vessel = '', tap = false, tab = '', pipe = '' }) {
+export function pipeFlowColor({ ip = '', vessel = '', tap = false, tab = '', pipe = '' }) {
+  if (ip) return flowHex(ip);
   if (vessel) return flowHex(vessel);
   if (tap) return TAP_BLUE;
   if (tab && !pipeWins(tab)) return flowHex(tab);

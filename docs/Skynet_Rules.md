@@ -556,9 +556,12 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
   Reddish Brown, Golden, and **RGB** (a color of your own).
 - **The Tab in tab.flow_Color is the Tab with the focus** (the one each screen shows). All pipes and hoses on a Tab use the Tab's Flow
   Color, except: a pipe's own Flow Color (not None) overrides **Mash, Boil, Whirlpool and Ferment**; **flow from a Tap Water Valve is
-  always Blue**; and **flow that begins at a Vessel's outlet with an Out flow color takes that color, over all else**. Order: Vessel,
-  Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash, Boil, Whirlpool, Ferment); all None = the standard light blue.
-- **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`). What a Process
+  always Blue**; **flow that begins at a Vessel's outlet with an Out flow color takes that color**; and, **first of all, flow that begins
+  at an IP with a Flow Color takes that color** (Fritz, 2026-11-03: every IP point has `.flow_Color`, None to start; an HLT outlet IP set
+  to Red makes the flow leaving it Red). Order: IP, Vessel, Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash,
+  Boil, Whirlpool, Ferment); all None = the standard light blue.
+- **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`, and an IP's
+  `IP_1.flow_Color = Red`). What a Process
   sets lasts until set to None, another Schema is loaded, or the panel restarts.
 - **A Pipe or Hose follows the general Rule for Labels** (Rule 1.21, 2.18): a user can add a Label, edit it and Show it (it sits in the
   middle of the pipe). Its Name is given by Skynet (Pipe_1, Hose_1). **Exception: no Position or Size.** X, Y, Width and Height could never
@@ -1254,3 +1257,5 @@ until 💾 Save on the dialog. (Help 115)
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")
+- 2026-11-03: Rule 5.21: every IP point has a Flow Color (`.flow_Color`, None to start), first in the flow color order: flow that begins at it
+  takes that color. Help 116 updated. (thread "Add flow colors to pipe and hose Widgets")

@@ -1598,6 +1598,8 @@ function vesselFlowOf(ipId) {
 }
 // the Flow Color of a Tab (Rule 5.21): tab.flow_Color set by a Process wins over the Tab settings one ("tab" is the Tab on the screen)
 const tabFlowOf = w => (!editing && S.flow?.tab) || flowKey(w?.flowColor) || '';
+// an IP's own Flow Color (Fritz, 2026-11-03): first of all, flow that begins at that IP takes it (an HLT outlet IP set to Red)
+const ipFlowOf = id => { const g = L().graphics.find(x => x.id === id && x.kind === 'ip'); return g ? (!editing && g.name && S.flow?.ips?.[g.name]) || flowKey(g.flowColor) || '' : ''; };
 const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowKey(p.flowColor) || '';
 const isTapNode = (key, n) => n?.push && devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve';
 function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here)
@@ -1634,8 +1636,14 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
   // breadth-first trace from a pump to every plain IP point (or other running pump) it reaches; mark the pipes on each route
   // where flow began (Rule 5.21): a vessel with an Out flow color wins over a Tap Water Valve
   const pumpSrc = new Map();                     // a running pump -> where the flow it pulls in began
-  const better = (a, b) => (b?.vessel && !a?.vessel) || (b?.tap && !a) ? b : a;
-  const originOf = key => { const n = nodes.get(key); if (isTapNode(key, n)) return { tap: true }; if (n?.push) return pumpSrc.get(devOfIp(key)) || null; const k = n?.end ? vesselFlowOf(key) : ''; return k ? { vessel: k } : null; };
+  const rank = o => o?.ip ? 3 : o?.vessel ? 2 : o?.tap ? 1 : 0;       // an IP's color, then a Vessel's, then tap water
+  const better = (a, b) => rank(b) > rank(a) ? b : a;
+  const originOf = key => {
+    const n = nodes.get(key); if (isTapNode(key, n)) return { tap: true }; if (n?.push) return pumpSrc.get(devOfIp(key)) || null;
+    if (!n?.end) return null;
+    const i = ipFlowOf(key); if (i) return { ip: i };
+    const k = vesselFlowOf(key); return k ? { vessel: k } : null;
+  };
   const trace = (start, outward) => {
     const prev = new Map([[start, null]]), queue = [start];
     while (queue.length) {
@@ -3470,7 +3478,8 @@ const F = {
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
       ['label', 'Label (shown in the "by hand" message; empty = the Name)', 'text'], ['labelVisible', 'Show label', 'yn'],
       ['image', 'Picture (Fritz\'s Manual Ball Valve drawings; its one IP is the middle of the picture)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
-  ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
+  ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
+    ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
     ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
@@ -3835,7 +3844,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const pick = h('input', { type: 'color', class: rgb ? '' : 'hidden', value: rgb ? cur : '#a0452a', title: 'RGB: pick your own color' });
     const set = c => { val.value = c; sw.style.background = flowHex(c) || ''; sw.classList.toggle('dflt', !c); };
     const opt = (k, n) => h('option', { value: k, ...(k === (rgb ? 'rgb' : cur) ? { selected: true } : {}), ...(flowHex(k) ? { style: `background:${flowHex(k)};color:${['yellow', 'golden', 'ferment'].includes(k) ? '#000' : '#fff'}` } : {}) }, n);
-    const s = h('select', {}, opt('', opts === 'tab' ? 'None (each pipe keeps its own Flow color)' : opts === 'vessel' ? 'None (the flow out of it is not colored by this vessel)' : 'None (it follows the Tab Flow Color)'),
+    const s = h('select', {}, opt('', opts === 'tab' ? 'None (each pipe keeps its own Flow color)' : opts === 'vessel' || opts === 'ip' ? `None (the flow out of it is not colored by this ${opts === 'ip' ? 'IP' : 'vessel'})` : 'None (it follows the Tab Flow Color)'),
       ...FLOW_COLORS.map(([k, n]) => opt(k, n)), opt('rgb', 'RGB (pick your own color) ...'));
     s.onchange = () => { pick.classList.toggle('hidden', s.value !== 'rgb'); set(s.value === 'rgb' ? pick.value : s.value); };
     pick.oninput = () => set(pick.value);
