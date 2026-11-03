@@ -1788,9 +1788,31 @@ function setEditing(on) {
   $('#barEdit').classList.toggle('on', on); $('#barEdit').setAttribute('aria-pressed', String(on));
   $('#barEdit').title = on ? 'Leave Edit layout (asks to Save if something changed)' : 'Edit layout (admins): move, add and change things on the Tabs. Press again to leave it';
   const lockedEq = S.profiles?.find(p => p.id === S.config.workspaces.find(w => w.name === wsName)?.equipmentProfile && p.locked);
-  $('#editHint').textContent = !on ? '' : (lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed. ` : '') + (noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties. ' : 'Drag to move, drag a grab point (corners and side middles) to resize, double-click (or hold a finger) for properties. Add Device and Add Widget (or the Pumps, Valves, Probe, Heating Element and PWM shortcuts) make new things on the 🔨 Build Tab. ') + ' Double-click an empty spot for Tab settings (background color and picture). 🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).';
+  // the hint is in the orange ? pop-up next to 👻 Hidden Tab (Fritz, 2026-11-03); only the locked Equipment Profile warning stays on row 3
+  $('#editHint').textContent = on && lockedEq ? `🔒 Equipment Profile "${lockedEq.name}" of this Tab is locked: its equipment, IPs and pipes can't be changed.` : '';
   renderTabs(); renderWs();
 }
+
+// The orange ? on the Edit layout bar (Fritz, 2026-11-03): how Edit layout works, in a pop-up with Close at the top and bottom
+function editHintText() {
+  return [noMove() ? '📱 Phone or tablet: moving and resizing is off here, so nothing moves by accident (switch it on in ☰ Menu, Default). Tap to pick, hold a finger for properties.'
+    : 'Drag to move, drag a grab point (corners and side middles) to resize, double-click (or hold a finger) for properties.',
+  'Add Device and Add Widget (or the Pumps, Valves, Probe, Heating Element and PWM shortcuts) make new things on the 🔨 Build Tab.',
+  'Double-click an empty spot for Tab settings (background color and picture).',
+  '🔒 items are locked in place: only unlocked items move (🔒 Lock All, 🔓 Unlock All).',
+  '👻 Hidden Tab makes a Hidden_ Tab (Hidden_1, Hidden_2 ...) for things a Process uses but nobody needs on Brew Day. It shows only in Edit layout.',
+  'Update Schema Version on: Save layout also gives this Schema a new version and keeps a copy of it.'];
+}
+function editInfoPopup() {
+  const close = () => h('button', { type: 'button', class: 'infoClose', onclick: () => d.close() }, 'Close');
+  const d = h('dialog', { class: 'infoDlg', 'data-nomenu': true },
+    h('div', { class: 'bar' }, h('h3', {}, 'Edit layout'), h('span', { class: 'spacer' }), close()),
+    h('ul', {}, ...editHintText().map(t => h('li', {}, t))),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), close()));
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); d.showModal();
+}
+$('#editInfo').addEventListener('click', editInfoPopup);
 
 let drag = null, lastPipeTap = null, hitUnit = null;
 $('#ws').addEventListener('pointerdown', ev => {
@@ -2160,11 +2182,11 @@ function leaveLayoutDialog() {
     d.showModal();
   });
 }
-// a copy of the Update Version switch next to Save layout (both stay the same)
+// a copy of the Update Schema Version switch next to Save layout (both stay the same)
 function versionSwitch() {
   const box = h('input', { type: 'checkbox', ...($('#updateVersion').checked ? { checked: true } : {}) });
   box.onchange = () => { $('#updateVersion').checked = box.checked; $('#updateVersion').dispatchEvent(new Event('change')); };
-  return h('label', { class: 'toggle', title: $('#updateVersion').closest('label').title }, h('span', { class: 'sw' }, box, h('span', { class: 'swk' })), ' Update Version');
+  return h('label', { class: 'toggle', title: $('#updateVersion').closest('label').title }, h('span', { class: 'sw' }, box, h('span', { class: 'swk' })), ' Update Schema Version');
 }
 async function leaveLayout() {
   if (!layoutChanged()) return setEditing(false);
@@ -6968,7 +6990,7 @@ function renderAboutTab(box) {
       ...item('Schema', schemaSelect()),
       ...item('Schema version', act.version || 'No version yet'),
       ...(row?.updated ? item('Last saved', new Date(row.updated).toLocaleString()) : [])),
-    act.version ? '' : h('p', { class: 'muted' }, 'Turn on "Update Version" next to Save layout (or pick "Save a new version now" in the Schema list) to give the Schema a version.'),
+    act.version ? '' : h('p', { class: 'muted' }, 'Turn on "Update Schema Version" next to Save layout (or pick "Save a new version now" in the Schema list) to give the Schema a version.'),
     saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: signOut }, 'Sign out'))));
 }
 
