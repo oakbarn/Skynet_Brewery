@@ -208,3 +208,10 @@ console.log('templates ok');
   assert.match(app, /t\.cls === 'skynet' && !t\.master\)/, 'the add lists show only the main Template of each valve');
   assert.match(app, /\['_orient', 'Orientation \(the picture and its IPs follow\)'/, 'Orientation picks among the set');
 }
+// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): its In and Out IPs at the spots the user sets, in % of the item
+{
+  const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
+  for (const k of ['ipInX', 'ipInY', 'ipOutX', 'ipOutY']) assert.ok(app.includes(`['${k}', `), k + ' is in the valve Properties');
+  assert.match(app, /fl\(ipAt\(e, 'in'\) \|\| pe\?\.\[0\]/, 'a set In spot comes before the drawing\'s own');
+  assert.match(app, /'Manual Valve \(Widget, no pin/, 'the Manual Valve Widget is in the Valves list');
+}

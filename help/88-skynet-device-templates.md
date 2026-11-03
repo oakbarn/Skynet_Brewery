@@ -50,3 +50,21 @@ Rotate 90 is retired (Rule 5.5). Use the Flips for left and right, and 45 degree
 
 During the building phase an Admin makes and changes Templates on the **Build Template Tab** (coming next), with a **user can set**
 box on each attribute. They are locked when Fritz says.
+
+## The User Defined Motorized Ball Valve
+
+Under the Skynet valves in the **Valves** list is the **User Defined Motorized Ball Valve**, for a valve Skynet has no drawing of.
+It works like a Skynet valve (open / closed by its pin, Tap water, the Close all and Open all lists), but you pick its picture and
+say where its pipe ends are:
+
+- **Picture when on / off** and **Image Path 1, 2, 3** (Skynet Rule 7.10), the same as any Device.
+- **In IP across % / In IP down %** and **Out IP across % / Out IP down %**: where each IP sits on the item, in % of its Width
+  (0 = the left edge, 100 = the right edge) and Height (0 = the top, 100 = the bottom). For example In 0 / 50 and Out 100 / 50 put
+  them at the middle of the left and right edges. Leave them blank and Skynet places them for you as before.
+
+The IPs follow the item when you move it, size it or flip it.
+
+## Manual Valve in the Valves list
+
+The last row of the **Valves** list is the **Manual Valve**. It makes the same Manual Valve Widget as the **Manual Valve ➕** button
+on the Edit layout bar. It is still a Widget with no pin (Skynet Rule 1.2): only a click on the Tab opens or closes it.

@@ -1192,3 +1192,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-03: Rule 5.17: Master and Daughter are kept underneath but never shown; one entry per Skynet valve in the add lists,
   Orientation picks the Daughter and the picture and IPs follow; titles "valve: Orientation"; Build Template says Main Template. Help 88,
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
+- 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
