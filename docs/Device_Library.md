@@ -187,14 +187,15 @@ What each ID means:
 - Valves have no inlet / outlet side. Starts as OPEN / CLOSED, tap = toggle.
 
 ### 4.3a Skynet Motorized Ball Valve Device (Skynet Template, Rules 5.16 and 5.17)
-- **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: **Master H** (Horizontal), **Daughter VL** (Vertical),
-  **Daughter VR** (Vertical, Flip Horizontal on). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR).
+- **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: one entry, **Skynet Motorized Ball Valve** (starts
+  Horizontal). Its **Orientation** picks Horizontal, Vertical Left, Vertical Right, Front or 45 degrees (Rule 5.17: each is its own
+  Template, never shown as Master / Daughter). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR, _Front).
 - **Type ID:** E_L_Vlv (set by the Template, so the Add Device box doesn't ask for it).
 - **Fixed by the Template** (not in its Properties; the Brain puts them back on every layout save): Kind = valve, Valve type =
   Electro_Mechanical, Service = Room Temperature Liquid, pictures (Valve_Motor_Ball_*H for Horizontal, *V_LC for Vertical and 45),
   Look normal, When tapped = toggle, Ask before changing, background / .backpath, _2, _3, overlay, Digits, Hide value.
 - **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
-  Interface, Pin, Invert, One-shot, **Orientation** (Horizontal, Vertical, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
+  Interface, Pin, Invert, One-shot, **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
   **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
   (horizontal, 45) and **Needs setting** after the Orientation or a Flip changes (no tap flow until set), **Text On/Off** (the On /
   Off text shows only when on) with Text when on / off.
@@ -205,12 +206,12 @@ Fritz's drawing (2026-11-02, Help 110): a grey actuator on a butterfly valve. A 
 
 | Template | Picture | IPs |
 |---|---|---|
-| Skynet_Motorized_Butterfly_Valve_H (Master H) | Valve_Motor_Butterfly_Open/ClosedH.svg (140 x 170, pipe at 135) | left and right ferrule faces |
-| ..._VL, ..._VR (Daughters, Vertical; VR has Flip Horizontal) | Valve_Motor_Butterfly_Open/ClosedV_L.svg | top and bottom ferrule faces |
-| ..._Front (Daughter) | Valve_Motor_Butterfly_Open/ClosedFront.svg: looking down the pipe | both at the center of the opening |
-| ..._Front_Elbow (Daughter) | Valve_Motor_Butterfly_Open/ClosedFront_Elbow.svg | center of the front opening, bottom ferrule face |
+| Skynet_Motorized_Butterfly_Valve_H (Horizontal, the main Template) | Valve_Motor_Butterfly_Open/ClosedH.svg (140 x 170, pipe at 135) | left and right ferrule faces |
+| ..._VL, ..._VR (Vertical Left, Vertical Right: VR has Flip Horizontal) | Valve_Motor_Butterfly_Open/ClosedV_L.svg | top and bottom ferrule faces |
+| ..._Front (Front) | Valve_Motor_Butterfly_Open/ClosedFront.svg: looking down the pipe | both at the center of the opening |
+| ..._Front_Elbow (Front Elbow) | Valve_Motor_Butterfly_Open/ClosedFront_Elbow.svg | center of the front opening, bottom ferrule face |
 
-The Front Daughters have no Orientation or Flip to set. The **Skynet Motorized Ball Valve** (4.3a) is redrawn after Fritz's blue actuator (same files, same IP spots) and has a **Front** Daughter too (Valve_Motor_Ball_Open/ClosedFront.svg, both IPs at the center of the opening). Closed = a ring on the body; open = a bar and red bolts.
+One entry in the Valves list; its Orientation picks the row above. The Front views have no Flip to set. The **Skynet Motorized Ball Valve** (4.3a) is redrawn after Fritz's blue actuator (same files, same IP spots) and has a **Front** Orientation too (Valve_Motor_Ball_Open/ClosedFront.svg, both IPs at the center of the opening). Closed = a ring on the body; open = a bar and red bolts.
 
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
