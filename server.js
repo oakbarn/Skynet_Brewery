@@ -206,6 +206,7 @@ engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout((
 engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
 engine.on('alert', a => broadcast('alert', a));
+engine.on('flow', f => broadcast('flow', f));           // flow colors a Process set (Rule 5.21)
 engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
@@ -293,7 +294,10 @@ function cleanDonation(d = {}) {
 // Only names go out: never a hidden key (Rule 3.10). Clones are graphics, not elements, so they are never offered (Rule 4.4).
 function processWords() {
   return {
-    elements: [...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
+    elements: [...[...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
+      // pipes and hoses have one Process attribute, .flow_Color; tab.flow_Color is the Tab on the screen (Rule 5.21)
+      ...(store.config?.graphics ?? []).filter(g => g.kind === 'pipe' && g.name).map(g => ({ name: g.name, type: g.hose ? 'hose' : 'pipe', main: 'flow_Color', attrs: ['flow_Color'], bools: [] })),
+      { name: 'tab', type: 'tab', main: 'flow_Color', attrs: ['flow_Color'], bools: [] }],
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
   };
@@ -489,7 +493,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   if (p === '/ui/set' && m === 'POST') {
