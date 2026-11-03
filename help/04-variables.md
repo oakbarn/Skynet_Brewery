@@ -14,6 +14,8 @@ gKonstant and gAPI became one class, **gGlobal**, on 2026-10-30 (Fritz). Sending
 - Use a **gGlobal** for settings, screen items and readings (pH, gravity, volumes). To log one, or let another program read or change it, set its **Database and .API** box.
 - Use a **Shared** variable to pass a value from one process to another.
 
+Every gGlobal is **non-volatile**: starting a Process never clears it, and its value is saved on the Brain's disk and comes back when the Brain restarts. See [gGlobals keep their values](118-gglobals-keep-their-values).
+
 The old **Global** class (from BruControl) is retired. When a BruControl file or an older Schema is loaded, each Global becomes a gGlobal, and the list of what moved shows on the Processes page.
 
 ## gGlobal kinds
