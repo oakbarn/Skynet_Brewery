@@ -85,10 +85,11 @@ Widgets; stay away from the word Element. A Picture Widget's dialog is "Picture 
 "Picture Element"), and every Properties title says "... Device" or "... Widget". The only exception
 is a real *heating element*. (2026-10-27, Help 74)
 
-1.15 **Position attributes are `.x_hPosition` and `.y_vPosition`** (x = horizontal, y = vertical, so
-nobody has to remember which). Typing `.x` or `.y` in the Process editor fills in the whole name, even with
-Predictive text off. The old `.xPosition` / `.yPosition` still work. **Short forms** `.x` / `.xh` and `.y` / `.yv` work
-too (Fritz's Text Widget list, 2026-10-29). (2026-10-28, PR #121, Help 49, 79)
+1.15 **Position attributes: `.x`, `.xh` and `.x_hPosition` are all the same thing**, and so are `.y`, `.yv` and
+`.y_vPosition` (x = horizontal, y = vertical). `.x` / `.y` are the main names (Rule 1.21); all three spellings are Process
+attributes for the same thing (Fritz, 2026-11-02). **Exception to Rule 15.2:** these aliases are kept on purpose. The very old
+`.xPosition` / `.yPosition` are converted (Rule 15.1). (2026-10-28, PR #121, Help 49, 79; short forms 2026-10-29)
+*Replaced:* `.x_hPosition` / `.y_vPosition` were the main names, and typing `.x` filled in the whole name (2026-10-28).
 
 1.16 **gGlobal** is the one variable class (it was gKonstant and gAPI, and before that vKonstant and
 vAPI). Suggested name prefixes start **gG**: `gG_`, `gGS_`, `gGL_`, `gGV_`, `gGT_`, `gGDT_`, `gGB_`, `gGSW_`,
@@ -142,6 +143,17 @@ Button gives the Device one 100 ms ON; one that only follows its Device shows ON
 has no device_controlled** (only a click turns it, Rule 5.15). `.device_controlled` is read only in a Process; a deleted Device puts
 it back to None and a renamed one is followed. From outside (.API, Rule 6.14) one with a Device controlled can be changed only when
 that Device is Get and Put too. (thread "Create the Semi_Widgets_Devices class", Help 112)
+
+1.21 **Universal Properties** (Fritz, 2026-11-02): every Device, Widget and Semi_Widgets_Device has the same Properties and
+Process attributes: Name (Suggested Name, user may edit), Label, Show Label, Rich Text properties, Embedded Rich Text Codes,
+Position (`.x`, `.y`), Size (`.width`, `.height`), Visible, HiddenLock (hidden while the Tab Lock is on), Item Lock (`.lock`)
+and the hidden key. Label attributes `.label`, `.label_visible`, `.font_label`, `.size_label`, `.fore_label`, `.back_label`,
+`.bold_label`, `.alignment_label`; string attributes `.font`, `.font_size`, `.fore`, `.back`, `.bold`, `.backpath`,
+`.alignment`, `.visible`; item attributes `.hiddenlock`, `.x`, `.y`, `.width`, `.height`, `.lock`, `.tab`. **Item Lock** locks
+the position; a locked item can still be double-clicked and changed, except while the Tab Lock is on; Lock All and Unlock All go
+with it (Rule 2.12). A Clone has them all, but most are its parent's and not editable (Rule 4.4). The full list, who lacks
+which, and the plan to bring the panel up to it: [docs/Universal_Properties.md](Universal_Properties.md). (thread "Set
+universal properties standard", Help 114)
 
 ## 2. Screen design and clicks
 
@@ -468,14 +480,15 @@ kettle. Each kettle has a plain and an _Electric version. (2026-10-22, 2026-10-2
 pop-up (2026-10-20, PR #44). A **Manual Valve Widget** waits for a click on it on its Tab (Rule 5.15).
 
 5.14 **Pipe fittings are only what they are.** A tee is only a tee (no Top Tee, Suction Tee or other Type),
-an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their only settings are **.x, .y, .width and
-.height**, plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
-Width and Height are greyed out until it is switched off). No label, Type or Connection Standard; turning and
+an elbow only an elbow, likewise a reducer, U, cross and End Cap. Their settings are **.x, .y, .width,
+.height**, **.visible**, **.hiddenlock**, **.lock**, **.tab** and a **Label** (Rule 1.21; Fritz, 2026-11-02), plus **Autosize to pipe** (on by default: the fitting takes the size of the pipes joined to its IPs;
+Width and Height are greyed out until it is switched off). No Type or Connection Standard; turning and
 flipping stay on the Edit layout bar's turn buttons (Rule 5.5). **Pipe fittings have no Clone.** A **check valve
 is a pipe fitting too**: it is always one way, and its orientation shows the way. Valves and flow meters in a fitting
 are **Devices**; a tee with a thermowell, or a thermowell on a vessel IP, is a kind of **Temperature Probe**
 (Fritz, 2026-10-28).
 (2026-10-28, thread "Simplify pipe fittings and Manual Valves", Help 87)
+*Replaced:* "Their only settings are .x, .y, .width and .height ... No label" (2026-10-28); changed by Fritz 2026-11-02.
 
 5.15 **The Manual Valve is a special Widget class**: something of a pipe fitting (Autosize to pipe, .x .y .width
 .height) and a pseudo Device. Its **.state** is true (open) or false (closed) and **only a click on it on its
@@ -778,7 +791,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **114**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **115**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1029,6 +1042,10 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 13. *Answered 2026-11-02:* gGlobal prefixes: the Rule 1.16 change is on hold. Switch, Push Button, Pulse Button, List, Step and
     Long String are not gGlobals (new Semi_Widgets_Devices class). See Rule 1.19.
 
+14. **Universal Properties** (Rule 1.21): *answered 2026-11-02:* `.x`, `.xh` and `.x_hPosition` are all the same attribute (Rule
+    1.15, exception to Rule 15.2). Rule 5.14 changed: pipe fittings get `.visible`,
+    `.hiddenlock`, `.lock`, `.tab` and a Label. (asked and answered 2026-11-02)
+
 ---
 
 ## Change log
@@ -1164,4 +1181,7 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Added Rule 2.32 (shortcut keys in every text box: Shift+Enter `\n`, Ctrl/⌘+B `\b`, Ctrl/⌘+Shift+D °F or °C; the common copy, paste, undo and redo keys always work). Help 113; next free Help number 114. (thread "Add shortcut keys for text entry")
 - 2026-11-02: Rule 7.10 rewritten: background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1, _2, _3); .background 1-3 picks one, 0, blank or over 3 = none; old names changed everywhere (Rule 15.2). Help 25 rewritten. (thread "Rename image paths to backpath")
 - 2026-11-02: Rule 7.10: at most 3 background pictures on any item (a 4th or more is dropped); most Widgets have no backpath, the Graphic Widget does. (thread "Rename image paths to backpath")
+- 2026-11-02: Added Rule 1.21 (Universal Properties for every Device, Widget and Semi-Device; docs/Universal_Properties.md) and Open question 14 (Rules 1.15 / 15.2 position aliases, Rule 5.14 pipe fittings). Help 114; next free Help number 115. (thread "Set universal properties standard")
+- 2026-11-02: Rule 1.15 rewritten: `.x`, `.xh`, `.x_hPosition` (and `.y`, `.yv`, `.y_vPosition`) are all Process attributes for the same thing, `.x` / `.y` the main names; an exception to Rule 15.2. (thread "Set universal properties standard")
+- 2026-11-02: Rule 5.14 changed (Fritz): pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label, besides `.x`, `.y`, `.width`, `.height` and Autosize to pipe. Open question 14 answered. (thread "Set universal properties standard")
 - 2026-11-03: Rule 4.5 updated from Fritz's Edit layout bar picture ("Fix 1"): row 1 order Picture, Text, Manual Valve, Override, Add equipment, Vessel; 👻 Hidden Tab gets an orange ? pop-up holding the Edit layout hint (taken off row 3); the switch is now Update Schema Version. Help 82 updated; no new Help number used. (thread "Fix the Edit layout bar from screenshot")
