@@ -377,6 +377,9 @@ to a Tab. (2026-10-23, PR #97 and PR #99)
 
 *Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
 
+*Exception (Fritz, 2026-11-03):* a **Pipe or Hose** is drawn right on its Tab with Draw pipe or Draw hose; it is never made on the Build
+Tab first (Rule 5.21).
+
 4.2 **New Device order** (the **Add Device** box, Fritz 2026-10-28): 1 Interface, 2 Available Ports/Pins
 (only free ones that fit), 3 Suggested Name, 4 Label (or **Show label** off), then Width and Height
 (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the
@@ -534,6 +537,24 @@ Widgets have **no flow direction** (a check valve is still the only one-way fitt
 Probe** in it is a **Temperature Device** subtype, not a pipe Widget: the probe fills one opening, so the other two are its
 IPs. The Manual Ball Valve drawings are pictures of the **Manual Valve Widget** (Rule 5.15), which keeps its click-only
 Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
+
+5.21 **Pipe and Hose Widgets and Flow Colors** (Fritz, 2026-11-03, thread "Add flow colors to pipe and hose Widgets", Help 116):
+- A Pipe or Hose is a Widget, but it is **not in the Widget List**. The only way to make one is **Draw pipe** or **Draw hose** on the
+  Edit layout bar (the Layout Menu), right on its Tab (see the exception under Rule 4.1).
+- **Flow Color** on a pipe or hose (`.flow_Color`, `.flow` the same), on a Tab (**tab.flow_Color**, Tab settings) and on a Vessel (**Out
+  flow color**). **None is the default** for each. The choices: None, **Tap** (Blue), **Strike** (Red), **Mash** (Brown), **Boil**
+  (Reddish Brown), **Whirlpool** (Brown), **Ferment** (Golden), the primary colors (Red, Yellow, Blue, Green), Brown, Orange, Purple,
+  Reddish Brown, Golden, and **RGB** (a color of your own).
+- **The Tab in tab.flow_Color is the Tab with the focus** (the one each screen shows). All pipes and hoses on a Tab use the Tab's Flow
+  Color, except: a pipe's own Flow Color (not None) overrides **Mash, Boil, Whirlpool and Ferment**; **flow from a Tap Water Valve is
+  always Blue**; and **flow that begins at a Vessel's outlet with an Out flow color takes that color, over all else**. Order: Vessel,
+  Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash, Boil, Whirlpool, Ferment); all None = the standard light blue.
+- **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`). What a Process
+  sets lasts until set to None, another Schema is loaded, or the panel restarts.
+- **A Pipe or Hose has no editable Name, Label, Position or Size.** They are there (Rule 1.21) but **greyed out** in its dialog: the Name
+  Skynet gives it, the Label, Show label (pipes and hoses show no label on a Tab) and X, Y, Width, Height (worked out from where it is
+  drawn). Fritz allows hiding them instead; greyed out was built first.
+- Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
 
 ## 6. Devices, connections and safety
 
@@ -789,7 +810,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **115**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **117**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1182,3 +1203,6 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Added Rule 1.21 (Universal Properties for every Device, Widget and Semi-Device; docs/Universal_Properties.md) and Open question 14 (Rules 1.15 / 15.2 position aliases, Rule 5.14 pipe fittings). Help 114; next free Help number 115. (thread "Set universal properties standard")
 - 2026-11-02: Rule 1.15 rewritten: `.x`, `.xh`, `.x_hPosition` (and `.y`, `.yv`, `.y_vPosition`) are all Process attributes for the same thing, `.x` / `.y` the main names; an exception to Rule 15.2. (thread "Set universal properties standard")
 - 2026-11-02: Rule 5.14 changed (Fritz): pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label, besides `.x`, `.y`, `.width`, `.height` and Autosize to pipe. Open question 14 answered. (thread "Set universal properties standard")
+- 2026-11-03: Added Rule 5.21 (Pipe and Hose Widgets: made only with Draw pipe / Draw hose, not in the Widget List; Flow Colors on the
+  Tab, the pipe and the Vessel, tap water always Blue, Vessel over all; .flow_Color the only Process attribute; Name, Label, Position and
+  Size greyed out) and the pipe exception under Rule 4.1. Help 116; next free Help number 117. (thread "Add flow colors to pipe and hose Widgets")
