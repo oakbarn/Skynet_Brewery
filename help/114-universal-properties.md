@@ -7,7 +7,7 @@ basic Properties, with the same names everywhere. Learn them once and they work 
 
 - **Name**: starts as the Suggested Name; you may change it before the first save. After that it is locked 🔒 and changed only with **✏ Change name**.
 - **Label**: the text shown with the item, with a **Show Label** switch.
-- **Rich Text**: the font, size, bold, fore and back colors and alignment of the Label and of the item's own text. **Rich Text Embedded Codes** (`\b`, `\i`, `\n`, `\c{Red}` ...) work in any text (see [Rich Text Embedded Code](90-rich-text-embedded-code)).
+- **Rich Text**: the font, size, bold, fore and back colors and alignment of the Label and of the item's own text. **Rich Text Embedded Codes** (`\b`, `\i`, `\n`, `\c{Red}` ...) work in any text.
 - **Position** (X, Y) and **Size** (Width, Height), in pixels.
 - **Visible**, and **HiddenLock**: a HiddenLock item is hidden whenever the Tab is locked (outside Edit layout), even when Visible is on. In Edit layout you see it faded so you can still work on it.
 - **Lock** (Item Lock) 🔓 / 🔒: locks where the item sits, so it can't be moved or resized by accident. You can still double-click it and change its other Properties. **🔒 Lock All** and **🔓 Unlock All** on the Edit layout bar lock or unlock everything on the Tab at once.
