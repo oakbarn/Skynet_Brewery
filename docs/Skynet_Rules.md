@@ -268,7 +268,7 @@ sample Schemas' Recipe Tabs use Tennyson. (thread "Add Tab Styles and Version di
 window goes down to the task bar once the panel is up. (Fritz, 2026-10-30)
 
 2.30 **Hidden Special Tabs** (Fritz, 2026-10-30): a Tab named **Hidden_...** shows only in Edit layout; the rest of the time
-it works in the background (Processes still use what is on it). Edit layout > 👻 Hidden tab makes Hidden_1, Hidden_2 ...; the
+it works in the background (Processes still use what is on it). Edit layout > 👻 Hidden Tab makes Hidden_1, Hidden_2 ...; the
 part after Hidden_ is editable, Hidden_ always stays. (Help 103)
 
 2.31 **Process Version** (Fritz, 2026-10-30): every Process can have a Version, **YYMMDD_HH_MM_n** (Brain's clock; n counts up
@@ -397,11 +397,13 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   a Pump, Valve or on/off heating element is in On/Off too). Then the shortcuts **Pumps**, **Valves**,
   **Probe**, **Heating Element** and **PWM**: one click shows only that kind's list, the same as picking
   the kind and then Add Device. Then **⧉ Clone Device** (a list of the Devices on other Tabs).
-- **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕**, **Text ➕**, **Vessel**,
-  **Manual Valve ➕**, and **Add equipment ➕** at the far right.
+- **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕**, **Text ➕**, **Manual Valve ➕**,
+  **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
 - **Row 2:** Draw pipe, Draw hose, **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
-  All, Unlock All, Tab settings, New tab, Build Tab, Preview, Save Build.
-- **Row 3:** the hint, Update Version, Save layout, Exit.
+  All, Unlock All, Tab settings, New tab, **👻 Hidden Tab** and its **orange ?** (a pop-up with how Edit layout
+  works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Save Build.
+- **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
+  still shows on row 3.
 *Replaced:* the ➕ Add box of PR #117 (2026-10-27).
 
 ## 5. Templates and Integrated items
@@ -1162,3 +1164,4 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Added Rule 2.32 (shortcut keys in every text box: Shift+Enter `\n`, Ctrl/⌘+B `\b`, Ctrl/⌘+Shift+D °F or °C; the common copy, paste, undo and redo keys always work). Help 113; next free Help number 114. (thread "Add shortcut keys for text entry")
 - 2026-11-02: Rule 7.10 rewritten: background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1, _2, _3); .background 1-3 picks one, 0, blank or over 3 = none; old names changed everywhere (Rule 15.2). Help 25 rewritten. (thread "Rename image paths to backpath")
 - 2026-11-02: Rule 7.10: at most 3 background pictures on any item (a 4th or more is dropped); most Widgets have no backpath, the Graphic Widget does. (thread "Rename image paths to backpath")
+- 2026-11-03: Rule 4.5 updated from Fritz's Edit layout bar picture ("Fix 1"): row 1 order Picture, Text, Manual Valve, Override, Add equipment, Vessel; 👻 Hidden Tab gets an orange ? pop-up holding the Edit layout hint (taken off row 3); the switch is now Update Schema Version. Help 82 updated; no new Help number used. (thread "Fix the Edit layout bar from screenshot")
