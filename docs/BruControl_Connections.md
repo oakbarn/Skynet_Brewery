@@ -72,6 +72,7 @@ All three are on USB. No Ethernet or WiFi Interfaces are in use.
 | 8 | **Imported network Interfaces keep BruControl's TCP port** (5000 in Fritz's file). | A network board with Skynet firmware listens on 4100, so it would not connect. | The importer sets 4100 (an Importing Norm). | No |
 | 9 | **UniShield / UniFlex terminal names.** | A UniShield owner reads terminal names (like 2:3D), not pin numbers. | A UniShield board profile that shows the terminal next to the pin. | No |
 | 10 | **Where Duty Cycle, Hysteresis and PID run.** BruControl runs them on the board itself ("offloaded to interfaces for speed and communication failure tolerance", BruControl manual p. 5). Skynet runs them on the Brain and switches the pin with `DO` lines. | Same result while the link is up. If the link drops, BruControl's board keeps controlling; Skynet's board turns everything off after the lost link delay (safer, Rule 6.3). | Fritz's call: keep it on the Brain (as now), or move them into the board firmware. | Only if moved |
+| 11 | **No Deadband control Device.** BruControl offers Deadband on D and P ports. | A BruControl Schema with a Deadband port can't be brought over as is. | Add a Deadband control Device (Brain side, like Hysteresis). | No |
 
 Already the same as BruControl, nothing to do:
 
@@ -93,12 +94,29 @@ BruControl has two different kinds of pulsed output, and only one is true PWM:
   on any digital output pin (manual pp. 41-42). A **PID** on a pin without PWM becomes a Duty Cycle output (p. 45).
   These are the "extra" PWM-like ports.
 
+### Pin by pin: BruControl's wiring map (FW 46) against the boards' own hardware
+
+| Code on the wiring map | Mega 2560 pins | Grand Central M4 pins | The board's own hardware | True or made by the firmware? |
+|---|---|---|---|---|
+| **P** PWM Output | 2-13, 44-46 | 2-9, 11, 13-19, 22-45, 48, 50-53, A1, A2, A12, A15 | Mega: the 15 timer PWM pins are exactly 2-13 and 44-46. Grand Central: Adafruit lists PWM on "A1, A2, A12, A15, D2-D9, D11, D13-D45, D48, D50-D53". | **True hardware PWM.** The lists match pin for pin. The Grand Central simply has many more timer pins than a Mega. |
+| **C** Counter Input | 2, 3, 18, 19 | 2, 3, 18, 19 | Mega interrupt pins are 2, 3, 18, 19, 20, 21 (20 and 21 are kept for I2C). | **True hardware** interrupt pins. |
+| **A** Analog Input | A0-A15 (54-69) | A0-A15 (A8-A15 = 54-61, A0-A7 = 67-74) | The board's analog pins. | **True hardware.** Note the Grand Central's different numbering. |
+| **O** 1-Wire Input | 2-15 | 2-11, 12-15 | No board has 1-Wire hardware; the 1-Wire library times it on any pin. | **Made by the firmware** (as in every Arduino sketch, Skynet's too). One pin per board. |
+| **D** Digital In / Out | almost every pin | almost every pin | Every pin. | True hardware. |
+| **Duty Cycle, Hysteresis** | any **D** pin | any **D** pin | No hardware for this. | **Made by the firmware:** slow on / off timing. |
+| **PID, Deadband** | any **D** or **P** pin | any **D** or **P** pin | On a **P** pin it drives true PWM; on a **D** pin it becomes a Duty Cycle. | Mixed: control math in the firmware, output true PWM or timed on / off. |
+
+So the extra "PWM-like" uses are not fake PWM: every **P** pin is a real hardware PWM pin. What BruControl builds in
+software is the **control** that sits on a port (Duty Cycle, Hysteresis, PID, Deadband) and the 1-Wire bus. In Skynet
+these are the control Devices that sit on an output port (Rule 6.1: a PID and a Hysteresis may share one heater port).
+
 In Fritz's file the Mega's 4 PWM ports are on pins 5, 7, 8 and 9 (all real PWM pins), and the Duty Cycle, Hysteresis
-and PID ports are on 2, 5, 7 and 8. BruControl's firmware is closed, so how it times the Duty Cycle inside the board
-can't be read, but the manual's wording and the frequencies match the above.
+and PID ports are on 2, 5, 7 and 8.
 
 Skynet already does the same split: true PWM (`PWM` lines) on real PWM pins only, and Duty Cycle, Hysteresis and
-PID-without-PWM as slow on / off switching of any output pin, timed by the Brain (gap 10).
+PID-without-PWM as slow on / off switching of any output pin, timed by the Brain (gap 10). Skynet has no **Deadband**
+control yet; a BruControl Deadband port needs one (gap 11). The Grand Central board profile must use its own PWM and
+analog numbering from this table (gap 2).
 
 ## What Skynet will not do
 
@@ -118,6 +136,8 @@ PID-without-PWM as slow on / off switching of any output pin, timed by the Brain
 Sources: [BruControl Interface Firmware](https://brucontrol.com/download/firmware/),
 [Interface Wiring Maps](https://brucontrol.com/build/interface-wiring-maps/),
 [Quick Start](https://brucontrol.com/quick-start/),
+[Interface Wiring Maps v1.2 FW46A](https://brucontrol.com/wp-content/uploads/2022/10/BruControl-Interface-Wiring-Maps-v1.2-FW46A.pdf),
+[Adafruit Grand Central M4 guide](https://learn.adafruit.com/adafruit-grand-central),
 [BruControl Manual v1.0](https://brucontrol.com/wp-content/uploads/2017/03/BruControl-Manual-v1.0-12-8-2017.pdf),
 [UM-1 MEGA UniShield product note](https://brucontrol.com/wp-content/uploads/2020/01/BruControl%20Product%20Note%20-%20UM-1%20MEGA%20UniShield.pdf),
 and Fritz's BruControl file.
