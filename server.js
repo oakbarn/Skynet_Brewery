@@ -296,7 +296,7 @@ function processWords() {
   return {
     elements: [...[...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
       // pipes and hoses have one Process attribute, .flow_Color; tab.flow_Color is the Tab on the screen (Rule 5.21)
-      ...(store.config?.graphics ?? []).filter(g => g.kind === 'pipe' && g.name).map(g => ({ name: g.name, type: g.hose ? 'hose' : 'pipe', main: 'flow_Color', attrs: ['flow_Color'], bools: [] })),
+      ...(store.config?.graphics ?? []).filter(g => (g.kind === 'pipe' || (g.kind === 'ip' && (!g.fitting || g.fitting === 'point'))) && g.name).map(g => ({ name: g.name, type: g.kind === 'ip' ? 'ip' : g.hose ? 'hose' : 'pipe', main: 'flow_Color', attrs: ['flow_Color'], bools: [] })),
       { name: 'tab', type: 'tab', main: 'flow_Color', attrs: ['flow_Color'], bools: [] }],
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),
