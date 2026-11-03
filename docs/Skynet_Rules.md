@@ -786,8 +786,12 @@ the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
 
 ## 10. Testing
 
-10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
-Admin setup. It stays on until he is in real use. (2026-10-04)
+10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
+recovery code. They are removed only when the installer's Start Fresh question is answered Yes and the
+warning is confirmed (Rule 9.8). There is no Testing mode switch. (Fritz, 2026-11-03, thread "Keep logins
+after installing a new .exe")
+*Replaced:* "Testing mode is on: every newly merged version wipes all logins, so Fritz starts fresh with
+Admin setup. It stays on until he is in real use." (2026-10-04)
 
 10.2 **Fritz's test bench** (week of 2026-10-20): a Pi, a Mega, an ESP32, one Tilt, a couple of
 valves, a 12 V LED as a burner and another as an electric element. Firmware has never run on real
@@ -1254,3 +1258,4 @@ until 💾 Save on the dialog. (Help 115)
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")
+- 2026-11-03: Rule 10.1 replaced (Fritz): Testing mode retired; updates keep logins, only Start Fresh (Rule 9.8) removes them. Settings > Testing mode switch removed. Help 10, 18, 27, 39, 67 updated; no new Help number used. (thread "Keep logins after installing a new .exe")
