@@ -37,7 +37,6 @@
    "valueColor": "#ffffff",
    "background": "8",
    "readOnly": true,
-   "retain": false,
    "kind": "string"
   },
   {
@@ -54,7 +53,6 @@
    "valueColor": "#ffffff",
    "background": "8",
    "readOnly": true,
-   "retain": false,
    "kind": "string"
   },
   {
@@ -83,7 +81,6 @@
    "label": "Brew status",
    "initial": 0,
    "precision": 0,
-   "retain": false,
    "kind": "value"
   },
   {
@@ -122,7 +119,6 @@
    "initial": "",
    "fontSize": 17,
    "readOnly": true,
-   "retain": false,
    "kind": "string"
   },
   {
@@ -714,7 +710,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
@@ -793,7 +788,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
@@ -872,7 +866,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
@@ -951,7 +944,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
@@ -1030,7 +1022,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
@@ -1109,7 +1100,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
@@ -1188,7 +1178,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
@@ -1267,7 +1256,6 @@
    "onText": "ADDED",
    "offText": "-",
    "look": "indicator",
-   "retain": false,
    "kind": "bool"
   },
   {
