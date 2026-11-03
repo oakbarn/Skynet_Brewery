@@ -1438,7 +1438,6 @@
       ],
       "width": 10,
       "color": "#8a8f96",
-      "flowColor": "#4fb3ff",
       "flowWhen": [
         "V_MLT_Out",
         "V_BK_In",
@@ -1466,7 +1465,6 @@
       ],
       "width": 10,
       "color": "#8a8f96",
-      "flowColor": "#4fb3ff",
       "flowWhen": [
         "V_MLT_Out",
         "V_BK_In",
@@ -1495,7 +1493,6 @@
       ],
       "width": 10,
       "color": "#8a8f96",
-      "flowColor": "#4fb3ff",
       "flowWhen": [
         "V_MLT_Out",
         "V_BK_In",
