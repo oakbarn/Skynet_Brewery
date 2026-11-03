@@ -192,3 +192,19 @@ console.log('templates ok');
   // a Template can't make a fixed attribute user settable
   assert.ok(!cleanDevice({ userFields: ['service', 'flipH'] }).userFields.includes('service'));
 }
+
+// One entry per Skynet valve (Fritz, 2026-11-03): the words Master and Daughter are never shown. Each Template's title is
+// "<valve>: <Orientation>", and every other Orientation names the same valve as its main Template.
+{
+  const T = new Templates(path.join(ROOT, 'templates'), path.join(dir, 'own4'), { locked: false });
+  const ds = T.list('device');
+  for (const t of ds) assert.ok(!/master|daughter/i.test(t.title || ''), t.name + ': no Master/Daughter in the title');
+  for (const t of ds.filter(x => x.master)) {
+    const m = ds.find(x => x.name === t.master);
+    assert.equal(t.title.split(':')[0], m.title.split(':')[0], t.name + ': same valve as its main Template');
+  }
+  assert.deepEqual(ds.filter(t => !t.master).map(t => t.title).sort(), ['Skynet Motorized Ball Valve: Horizontal', 'Skynet Motorized Butterfly Valve: Horizontal']);
+  const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
+  assert.match(app, /t\.cls === 'skynet' && !t\.master\)/, 'the add lists show only the main Template of each valve');
+  assert.match(app, /\['_orient', 'Orientation \(the picture and its IPs follow\)'/, 'Orientation picks among the set');
+}

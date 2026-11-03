@@ -4,17 +4,18 @@
 
 ## Picking a Template
 
-The dropdown at the top lists every Device Template, for example the Skynet Motorized Ball Valve Device Master H and its
-Daughters VL and VR.
+The dropdown at the top lists every Device Template, for example Skynet Motorized Ball Valve: Horizontal, and its other
+Orientations: Vertical Left, Vertical Right and Front.
 
 - **➕ New Template** makes an empty one. Give it a name with letters, digits, _ and -, and no spaces.
 - **⧉ Clone** makes a copy of the one showing.
 
 ## The Template's settings
 
-- **Title** is what the Add Device lists show.
-- **Master Template** makes it a Daughter. A Daughter inherits everything from its Master and keeps only what differs (for
-  example VR: Orientation Vertical, Flip Horizontal on).
+- **Title** is "valve: Orientation", for example Skynet Motorized Ball Valve: Vertical Right. The Add Device lists show only the
+  part before the colon, once per valve; the part after it is a choice in the valve's Orientation.
+- **Main Template** makes it another Orientation of that valve. It inherits everything from the main Template and keeps only
+  what differs (for example Vertical Right: Orientation Vertical, Flip Horizontal on).
 - **Pictures**: one pair (when on, when off) for Horizontal and one for Vertical. The picture follows the Device's Orientation; at
   45 degrees the vertical picture is turned.
 

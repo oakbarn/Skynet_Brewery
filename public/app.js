@@ -2349,7 +2349,17 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
 const fromSkyTpl = e => !!(e?.template && e.templateCls === 'skynet' && !e.kind);
 const skyDev = e => fromSkyTpl(e) && !!devTemplate(e);
 const devTemplate = e => TPL?.device?.find(t => t.name === e.template) || null;
-const SKY_DEV_ROWS = () => (TPL?.device || []).filter(t => t.cls === 'skynet').map(t => [t.title || t.name, 'skyDevice', 'Valve', { template: t.name }]);
+// One row per Skynet valve (Fritz, 2026-11-03): the add lists show only the main Template (Rule 5.17's Master, never called that);
+// its other ways of standing (Rule 5.17's Daughters) are picked with Orientation in its Properties.
+const SKY_DEV_ROWS = () => (TPL?.device || []).filter(t => t.cls === 'skynet' && !t.master).map(t => [skyFamily(t), 'skyDevice', 'Valve', { template: t.name }]);
+const skyFamily = t => String(t.title || t.name).split(':')[0].trim();
+const ORIENT_WORDS = { H: 'Horizontal', VL: 'Vertical Left', VR: 'Vertical Right', Front: 'Front', Front_Elbow: 'Front Elbow' };
+const skyOrientLabel = t => String(t.title || '').includes(':') ? t.title.split(':').slice(1).join(':').trim() : ORIENT_WORDS[t.name.split('_Valve_')[1]] || t.name;
+// a Template's whole set: its main Template first, then the others in the order they ship
+function skySet(t) {
+  const main = t.master || t.name, all = TPL?.device || [];
+  return [all.find(x => x.name === main), ...all.filter(x => x.master === main)].filter(Boolean);
+}
 // a new User version: the Template's attributes, then the Add Device box as for any Device
 function skyDevPreset(name) {
   const t = TPL?.device?.find(x => x.name === name);
@@ -2367,19 +2377,34 @@ function tapChoices(e) {
   const [lo, hi] = first ? ['in', 'out'] : ['out', 'in'];
   return [['', 'Needs setting'], [lo, v ? 'Tap Water Source Top' : 'Tap Water Source Left'], [hi, v ? 'Tap Water Source Bottom' : 'Tap Water Source Right']];
 }
+// Orientation (Fritz, 2026-11-03): one pick for how the valve stands. Each choice is one Template of the set, so the picture and
+// its IPs follow; the main Template also turns 45 degrees (Rule 5.5).
+const orientPick = it => it.template + (it.orientation === 'r45' ? '|r45' : '');
+function skyOrientSwitch(it) {
+  if (it._orient === undefined || it._orient === orientPick(it)) return;
+  const [name, r45] = it._orient.split('|'), to = TPL?.device?.find(x => x.name === name);
+  if (!to) return;
+  it.template = name;
+  const p = to.props || {};
+  for (const k of ['orientation', 'flipH', 'flipV', 'w', 'h']) { if (p[k] !== undefined) it[k] = p[k]; else if (k === 'flipH' || k === 'flipV') delete it[k]; }
+  if (r45) it.orientation = 'r45';
+}
 function skyDevFields(it, f) {
-  const t = devTemplate(it), ok = new Set(t.userFields || []);
+  skyOrientSwitch(it);
+  it._orient = orientPick(it);
+  const t = devTemplate(it), ok = new Set(t.userFields || []), set = skySet(t);
+  const choices = set.flatMap(x => [[x.name, skyOrientLabel(x)], ...(!x.master && (x.userFields || []).includes('orientation') ? [[x.name + '|r45', '45 degrees']] : [])]);
   if (it._tapFor === undefined) it._tapFor = tapKey(it);
   else if (it.tapwater && it._tapFor !== tapKey(it)) { it.tapSource = ''; it._tapFor = tapKey(it); }    // turned or flipped: the tap end Needs setting again
   const own = {
-    orientation: [['orientation', 'Orientation (the picture and its IPs follow)', 'sel', [['h', 'Horizontal'], ['v', 'Vertical'], ['r45', '45 degrees']], true],
-      ['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
+    orientation: [['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
     tapwater: [['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true],
       ...(it.tapwater ? [['tapSource', 'Tap water flows out of (a tap water valve only; the other end is the tap): pick the tap end', 'sel', tapChoices(it)]] : [])],
     onText: [['showOnOffText', 'Text On/Off (on = the On or Off text shows on the Tab)', 'bool', undefined, true],
       ...(it.showOnOffText ? [['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']] : [])],
   };
-  const out = [['_sky', `Made from the Skynet Template ${t.title || t.name}. Its picture, Kind, Valve type, Service and look are set by the Template and can't be changed here (Rule 5.16).`, 'note']];
+  const out = [['_sky', `Made from the Skynet Template ${skyFamily(t)}. Its picture, Kind, Valve type, Service and look are set by the Template and can't be changed here (Rule 5.16).`, 'note'],
+    ...(choices.length > 1 ? [['_orient', 'Orientation (the picture and its IPs follow)', 'sel', choices, true]] : [])];
   for (const x of f) {
     const k = x[0];
     if (own[k]) { if (ok.has(k)) out.push(...own[k]); continue; }
@@ -4485,6 +4510,7 @@ async function editItem(kind, id) {
       if (skyDev(work)) {        // a User version of a Skynet Template: its fixed attributes stay the Template's (the Brain checks it too)
         if (work.tapwater && work._tapFor !== tapKey(work)) work.tapSource = '';
         delete work._tapFor;
+        skyOrientSwitch(work); delete work._orient;
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
         applyDeviceTemplate(work, devTemplate(work));
       }
@@ -6783,8 +6809,8 @@ function renderBuildTemplateTab(box) {
   const work = { title: t.title || '', master: t.master || '', notes: t.notes || '', picH0: t.pics?.h?.[0], picH1: t.pics?.h?.[1], picV0: t.pics?.v?.[0], picV1: t.pics?.v?.[1] };
   const head = h('div', { class: 'btHead' });
   bindForm(head, [['title', 'Title (shown in the Add Device lists)', 'text'],
-    ['master', 'Master Template (a Daughter keeps only what differs from it)', 'sel', [['', '(none: this is a Master)'], ...masters.map(m => [m.name, m.title || m.name])]],
-    ['_p', 'Pictures: the picture follows the Orientation (45 degrees turns the vertical one). Leave empty on a Daughter to use its Master\'s.', 'note'],
+    ['master', 'Main Template (set it when this Template is another Orientation of that valve: it keeps only what differs)', 'sel', [['', '(none: this is a main Template)'], ...masters.map(m => [m.name, m.title || m.name])]],
+    ['_p', 'Pictures: the picture follows the Orientation (45 degrees turns the vertical one). Leave empty on another Orientation to use its main Template\'s.', 'note'],
     ['picH0', 'Horizontal, picture when on', 'gpick'], ['picH1', 'Horizontal, picture when off', 'gpick'], ['picV0', 'Vertical, picture when on', 'gpick'], ['picV1', 'Vertical, picture when off', 'gpick'],
     ['notes', 'Notes', 'text']], work);
   const props = clone(t.props || {}), user = new Set(t.userFields || []), master = t.master && list.find(x => x.name === t.master);
@@ -6811,7 +6837,7 @@ function renderBuildTemplateTab(box) {
   });
   const del = h('button', { class: 'danger', disabled: !t.deletable, title: t.deletable ? '' : 'Shipped Skynet Templates are never deleted' }, '🗑 Delete');
   del.onclick = guard(async () => { if (!confirm(`Delete the Template ${t.name}?`)) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
-  box.append(h('div', { class: 'bar' }, save, del, master ? h('span', { class: 'muted' }, `Daughter of ${master.title || master.name}: only what differs from it is kept.`) : ''), head,
+  box.append(h('div', { class: 'bar' }, save, del, master ? h('span', { class: 'muted' }, `An Orientation of ${skyFamily(master)}: only what differs from it is kept.`) : ''), head,
     h('h3', {}, 'Attributes'), grid, h('div', { class: 'bar' }, save.cloneNode(true)));
   box.lastChild.firstChild.onclick = save.onclick;
 }
