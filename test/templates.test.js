@@ -192,3 +192,46 @@ console.log('templates ok');
   // a Template can't make a fixed attribute user settable
   assert.ok(!cleanDevice({ userFields: ['service', 'flipH'] }).userFields.includes('service'));
 }
+
+// One entry per Skynet valve (Fritz, 2026-11-03): the words Master and Daughter are never shown. Each Template's title is
+// "<valve>: <Orientation>", and every other Orientation names the same valve as its main Template.
+{
+  const T = new Templates(path.join(ROOT, 'templates'), path.join(dir, 'own4'), { locked: false });
+  const ds = T.list('device');
+  for (const t of ds) assert.ok(!/master|daughter/i.test(t.title || ''), t.name + ': no Master/Daughter in the title');
+  for (const t of ds.filter(x => x.master)) {
+    const m = ds.find(x => x.name === t.master);
+    assert.equal(t.title.split(':')[0], m.title.split(':')[0], t.name + ': same valve as its main Template');
+  }
+  assert.deepEqual(ds.filter(t => !t.master).map(t => t.title).sort(), ['Skynet KLD20T Proportional Valve: Horizontal', 'Skynet Motorized Ball Valve: Horizontal', 'Skynet Motorized Butterfly Valve: Horizontal']);
+  const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
+  assert.match(app, /t\.cls === 'skynet' && !t\.master &&/, 'the add lists show only the main Template of each valve');
+  assert.match(app, /\['_orient', 'Orientation \(the picture and its IPs follow\)'/, 'Orientation picks among the set');
+}
+// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): its In and Out IPs at the spots the user sets, in % of the item
+{
+  const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
+  for (const k of ['ipInX', 'ipInY', 'ipOutX', 'ipOutY']) assert.ok(app.includes(`['${k}', `), k + ' is in the valve Properties');
+  assert.match(app, /fl\(ipAt\(e, 'in'\) \|\| pe\?\.\[0\]/, 'a set In spot comes before the drawing\'s own');
+  assert.match(app, /'Manual Valve \(Widget, no pin/, 'the Manual Valve Widget is in the Valves list');
+}
+// The first Skynet Proportional Valve (Fritz, 2026-11-03): the BruControl KLD20T, an analogOut 0-5 V, 0-100 %, Valves list only.
+// The old "Proportional valve 0-100 %" row is the User Defined Proportional Valve, with In and Out IP spots like the motorized one.
+{
+  const T = new Templates(path.join(ROOT, 'templates'), path.join(dir, 'own5'), { locked: false });
+  const k = T.find('device', 'Skynet_KLD20T_Proportional_Valve_H');
+  assert.equal(k.type, 'analogOut');
+  assert.equal(k.props.subtype, 'propValve');
+  assert.equal(k.props.signal, '0-5V');
+  assert.ok(!k.userFields.includes('signal') && !k.userFields.includes('rangeHigh'), 'the KLD20T signal and range are fixed');
+  for (const o of ['VL', 'VR']) { const d = T.find('device', 'Skynet_KLD20T_Proportional_Valve_' + o); assert.equal(d.type, 'analogOut', o + ' is an analogOut too'); assert.equal(d.props.signal, '0-5V'); }
+  assert.equal(cleanDevice({ type: 'analogOut' }).type, 'analogOut', 'a Template can be an analogOut');
+  // a user can't change the signal: the Brain puts it back
+  const el = applyDeviceTemplate({ type: 'analogOut', template: k.name, signal: '0-10V', rangeHigh: 50, orientation: 'v' }, k);
+  assert.equal(el.signal, '0-5V'); assert.equal(el.rangeHigh, 100); assert.match(el.imageOn, /OpenV_LC/);
+  const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
+  assert.match(app, /SKY_DEV_ROWS\('digitalOut'\)/, 'the On/Off list has only the on / off Skynet valves');
+  assert.match(app, /'User Defined Proportional Valve 0-100 %/, 'the User Defined Proportional Valve row');
+  assert.ok(!app.includes("'Proportional valve 0-100 % (analog output)'"), 'the old row name is gone (Rule 15.2)');
+  assert.match(app, /propValve: \[\['imageOn'.*\.\.\.IP_AT_FIELDS\]/, 'the User Defined Proportional Valve sets its In and Out IPs');
+}

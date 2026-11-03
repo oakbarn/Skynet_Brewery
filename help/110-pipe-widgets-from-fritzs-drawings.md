@@ -51,14 +51,12 @@ As with a Thermowell, you pick the type of probe in it (DS18B20, PT100 ...), the
 
 ## Motorized valve Devices
 
-Two Skynet Device Templates, each a Master with Daughters (Rule 5.17). Pick them from **Valves** on the Edit layout bar.
+Two valves, one entry each in **Valves** on the Edit layout bar. Its **Orientation** (in its Properties) picks how it stands,
+and the picture and its IPs follow.
 
-| Template | What it is |
+| Valve | Orientations |
 |---|---|
-| **Skynet Motorized Butterfly Valve Device**: Master H, Daughter VL, Daughter VR | Fritz's grey actuator on a butterfly valve, horizontal or standing up |
-| **... Daughter Front** | seen from the front, looking down the pipe: both IPs at the center of the opening. The disc edge on means open, the disc facing you means closed |
-| **... Daughter Front Elbow** | on a front elbow: one IP at the center of the front opening, one at the bottom ferrule |
-| **Skynet Motorized Ball Valve Device**: Master H, Daughters VL and VR | the same Templates as before, now drawn after Fritz's blue actuator |
-| **... Daughter Front** | the ball valve seen from the front: both IPs at the center of the opening |
+| **Skynet Motorized Butterfly Valve** | Fritz's grey actuator on a butterfly valve: Horizontal, Vertical Left, Vertical Right, 45 degrees, **Front** (looking down the pipe: both IPs at the center of the opening; the disc edge on means open, the disc facing you means closed) and **Front Elbow** (one IP at the center of the front opening, one at the bottom ferrule) |
+| **Skynet Motorized Ball Valve** | drawn after Fritz's blue actuator: Horizontal, Vertical Left, Vertical Right, 45 degrees and **Front** (both IPs at the center of the opening) |
 
-As before, a closed valve shows a ring on its body and an open one a bar and red bolts. A front view has no Orientation to set.
+As before, a closed valve shows a ring on its body and an open one a bar and red bolts. A Front view has no Flip to set.

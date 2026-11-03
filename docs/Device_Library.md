@@ -190,30 +190,37 @@ What each ID means:
 - Valves have no inlet / outlet side. Starts as OPEN / CLOSED, tap = toggle.
 
 ### 4.3a Skynet Motorized Ball Valve Device (Skynet Template, Rules 5.16 and 5.17)
-- **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: **Master H** (Horizontal), **Daughter VL** (Vertical),
-  **Daughter VR** (Vertical, Flip Horizontal on). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR).
+- **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: one entry, **Skynet Motorized Ball Valve** (starts
+  Horizontal). Its **Orientation** picks Horizontal, Vertical Left, Vertical Right, Front or 45 degrees (Rule 5.17: each is its own
+  Template, never shown as Master / Daughter). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR, _Front).
 - **Type ID:** E_L_Vlv (set by the Template, so the Add Device box doesn't ask for it).
 - **Fixed by the Template** (not in its Properties; the Brain puts them back on every layout save): Kind = valve, Valve type =
   Electro_Mechanical, Service = Room Temperature Liquid, pictures (Valve_Motor_Ball_*H for Horizontal, *V_LC for Vertical and 45),
   Look normal, When tapped = toggle, Ask before changing, background / .backpath, _2, _3, overlay, Digits, Hide value.
 - **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
-  Interface, Pin, Invert, One-shot, **Orientation** (Horizontal, Vertical, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
+  Interface, Pin, Invert, One-shot, **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees), **Flip Horizontal**, **Flip Vertical**,
   **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
   (horizontal, 45) and **Needs setting** after the Orientation or a Flip changes (no tap flow until set), **Text On/Off** (the On /
   Off text shows only when on) with Text when on / off.
 - Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88.
+
+### 4.3c User Defined Motorized Ball Valve (Fritz, 2026-11-03)
+The Valves list row under the Skynet valves (was "Motorized valve, open / closed (relay)"): digitalOut, subtype valve, the user's own
+picture (Picture when on / off, Image Path 1-3, Rule 7.10). **In IP across % / down %** and **Out IP across % / down %** (ipInX, ipInY,
+ipOutX, ipOutY: % of the item's Width and Height) place its two IPs; blank = Skynet places them. The Valves list also ends with
+**Manual Valve** (the Manual Valve Widget, no pin, Rule 1.2). Help 88.
 
 ### 4.3b Skynet Motorized Butterfly Valve Device (Skynet Template, Rules 5.16, 5.17, 5.20)
 Fritz's drawing (2026-11-02, Help 110): a grey actuator on a butterfly valve. A Valve (digitalOut, subtype valve, Electric, Room Temperature Liquid), made from **Valves** on the Edit layout bar like the Motorized Ball Valve.
 
 | Template | Picture | IPs |
 |---|---|---|
-| Skynet_Motorized_Butterfly_Valve_H (Master H) | Valve_Motor_Butterfly_Open/ClosedH.svg (140 x 170, pipe at 135) | left and right ferrule faces |
-| ..._VL, ..._VR (Daughters, Vertical; VR has Flip Horizontal) | Valve_Motor_Butterfly_Open/ClosedV_L.svg | top and bottom ferrule faces |
-| ..._Front (Daughter) | Valve_Motor_Butterfly_Open/ClosedFront.svg: looking down the pipe | both at the center of the opening |
-| ..._Front_Elbow (Daughter) | Valve_Motor_Butterfly_Open/ClosedFront_Elbow.svg | center of the front opening, bottom ferrule face |
+| Skynet_Motorized_Butterfly_Valve_H (Horizontal, the main Template) | Valve_Motor_Butterfly_Open/ClosedH.svg (140 x 170, pipe at 135) | left and right ferrule faces |
+| ..._VL, ..._VR (Vertical Left, Vertical Right: VR has Flip Horizontal) | Valve_Motor_Butterfly_Open/ClosedV_L.svg | top and bottom ferrule faces |
+| ..._Front (Front) | Valve_Motor_Butterfly_Open/ClosedFront.svg: looking down the pipe | both at the center of the opening |
+| ..._Front_Elbow (Front Elbow) | Valve_Motor_Butterfly_Open/ClosedFront_Elbow.svg | center of the front opening, bottom ferrule face |
 
-The Front Daughters have no Orientation or Flip to set. The **Skynet Motorized Ball Valve** (4.3a) is redrawn after Fritz's blue actuator (same files, same IP spots) and has a **Front** Daughter too (Valve_Motor_Ball_Open/ClosedFront.svg, both IPs at the center of the opening). Closed = a ring on the body; open = a bar and red bolts.
+One entry in the Valves list; its Orientation picks the row above. The Front views have no Flip to set. The **Skynet Motorized Ball Valve** (4.3a) is redrawn after Fritz's blue actuator (same files, same IP spots) and has a **Front** Orientation too (Valve_Motor_Ball_Open/ClosedFront.svg, both IPs at the center of the opening). Closed = a ring on the body; open = a bar and red bolts.
 
 ### 4.4 PWM output
 - **Add menu:** Devices: outputs > PWM output (MOSFET module, pump speed, element %).
@@ -229,10 +236,26 @@ The Front Daughters have no Orientation or Flip to set. The **Skynet Motorized B
 - **Settings:** Interface, Pin, Signal (0-10V, 4-20mA, 0-5V), Value at lowest signal, Value at highest signal (default 0 to 100), Units (default %), Decimals.
 - Board line `AO <pin> <0-1000>` (tenths of a percent of full scale).
 
-### 4.6 Proportional valve (0-100 %)
-- **Add menu:** Devices: outputs > Proportional valve 0-100 % (analog output).
+### 4.6 User Defined Proportional Valve (0-100 %)
+- **Add menu:** Valves > User Defined Proportional Valve 0-100 % (analog output), or Devices: outputs (was "Proportional valve
+  0-100 % (analog output)", renamed 2026-11-03).
+- Its own pictures (open above 0 % / closed at 0 %, Image Path 1-3, Rule 7.10) and **In / Out IP across % and down %** (ipInX,
+  ipInY, ipOutX, ipOutY), the same as the User Defined Motorized Ball Valve (4.3c). Help 117.
 - **Type IDs:** P_L_Vlv (default), P_H_Vlv.
 - An Analog output (4.5) set to 0-10 V, 0-100 %, with IN and OUT IPs and pictures for open (above 0 %) and closed (0 %).
+
+### 4.6a Skynet KLD20T Proportional Valve (Skynet Template, Rules 5.16, 5.17, 5.22)
+The first Skynet Proportional Valve (Fritz, 2026-11-03): the **KLD20T** sold by BruControl, a 1/2" NPT SS304 motorized ball
+valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
+- **Add menu:** Valves on the Edit layout bar (not On/Off: it is not an on / off valve). One entry; **Orientation** picks
+  Horizontal, Vertical Left, Vertical Right or 45 degrees.
+- **Templates:** templates/device/Skynet_KLD20T_Proportional_Valve_H (main), _VL, _VR (Flip Horizontal on).
+- **Type:** analogOut, subtype propValve. **Type ID:** P_L_Vlv.
+- **Fixed by the Template:** Kind, Service (Room Temperature Liquid), Signal 0-5V, 0 to 100 %, Decimals 0, pictures (the Skynet
+  Motorized Ball Valve's: Valve_Motor_Ball_*H, *V_LC, until Fritz sends a KLD20T drawing), look.
+- **User settable:** Name, Label, Show label, Tab, X, Y, Width, Height, Lock, Visible, Hidden, text box settings, Device Type,
+  Interface, Pin (a PWM pin feeding a PWM-to-0-5 V module), Orientation, Flip Horizontal, Flip Vertical.
+- IPs on the picture's pipe ends (Rule 5.20), following the Orientation and Flips. Help 117.
 
 ### 4.7 Duty Cycle (control output)
 - **Add menu:** Devices: control outputs > Duty cycle.
@@ -438,3 +461,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-02: Background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1-3); 0, blank or over 3 = no background (Rule 7.10). (thread "Rename image paths to backpath")
 - 2026-11-02: Universal Properties standard (Rule 1.21): every Device, Widget and Semi-Device gets the same Properties and attributes; see docs/Universal_Properties.md. (thread "Set universal properties standard", Help 114)
 - 2026-11-03: 4.2 Pump: the drill-down Properties dialog, the standard for every Device (Rule 18.12, Help 115). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-03: 4.6 renamed User Defined Proportional Valve (In / Out IP spots); added 4.6a Skynet KLD20T Proportional Valve (Rule 5.22, Help 117). (thread "Add BruControl KLD20T proportional valve")
