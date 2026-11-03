@@ -121,7 +121,23 @@ if [ "$SRC" != "$DEST" ]; then
     echo "Updating the panel in $DEST"
     echo "Your own folders: config (layout, tabs, devices, settings), data (brew log, users, passwords, logins),"
     echo "media (pictures and sounds) and scripts (Processes)."
-    if ! ask "Keep all of them as they are? (No asks about each one)" Y; then
+    # Start Fresh: delete all users, Schemas and Processes, after a second warning (No, the default, backs out)
+    FRESH=no
+    if ask "Delete all users and Schemas and Start Fresh? (No keeps everything; a warning comes next if you say yes)" N; then
+      printf '\n\033[1;31m%s\033[0m\n' "WARNING: ALL EXISTING DATA WILL BE DELETED, for good, with no backup:"
+      echo "  - every Schema, Tab, Device, Widget and setting (config)"
+      echo "  - every user, password, sign-in and the recovery code, the brew log and saved values (data)"
+      echo "  - every Process (scripts)"
+      echo "Kept: your pictures and sounds (media) and the backups folder. You make the admin account again."
+      if ask "Really delete it all and Start Fresh? (No backs out; nothing is deleted)" N; then
+        rm -rf "$DEST/config" "$DEST/data" "$DEST/scripts"
+        FRESH=yes
+        echo "Start Fresh: users, Schemas, settings, brew log and Processes deleted. The panel starts again from the samples."
+      else
+        echo "Backed out. Nothing was deleted."
+      fi
+    fi
+    if [ "$FRESH" = no ] && ! ask "Keep all of them as they are? (No asks about each one)" Y; then
       for d in "config:the sample layout" "media:the sample pictures and sounds" "scripts:the sample Processes" "data:a fresh start (you create the admin account again)"; do
         name="${d%%:*}"
         [ -d "$DEST/$name" ] || continue

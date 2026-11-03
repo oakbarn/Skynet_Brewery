@@ -158,7 +158,7 @@ export const isUserBundledVessel = (t, all) => t?.cls === 'user' && !!vesselBase
 //   pics      { h: [picture when on, picture when off], v: [...] }: the picture follows the orientation (45 degrees turns v)
 //   userFields  the attributes a user can set
 // Fixed always, even when a Template doesn't list them: the pictures, Kind, Valve type, Service, Look and tap behaviour.
-export const DEVICE_FIXED = ['type', 'subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'imageOverlay', 'background', 'imagePath_1', 'imagePath_2', 'imagePath_3',
+export const DEVICE_FIXED = ['type', 'subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'imageOverlay', 'background', 'backpath', 'backpath_2', 'backpath_3',
   'look', 'digits', 'tap', 'tapTarget', 'confirm', 'hideValue', 'ipIn', 'ipOut'];
 const KEY_RE = /^\w{1,40}$/;
 const jsonSafe = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));

@@ -32,7 +32,7 @@
 
 **Global**: BruControl's variable class. The panel turns Globals into gGlobal variables when they are imported.
 
-**imagePath_1, _2, _3**: the three picture paths of an item. `background = 1, 2 or 3` picks one; `name.image = "path"` changes imagePath_1. See [Pictures on items](25-picture-paths).
+**.backpath, .backpath_2, .backpath_3**: the three background picture paths of an item (they were imagePath_1, _2, _3). `background = 1, 2 or 3` picks one; 0, blank or over 3 shows none; `name.image = "path"` changes .backpath. See [Pictures on items](25-picture-paths).
 
 **IP (Initial Point)**: a small round marker where a flow starts or ends (a pump outlet, a vessel port, a drain). Pipes start and end on IPs. IPs only show in Edit layout.
 
