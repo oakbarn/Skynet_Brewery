@@ -17,7 +17,7 @@ A **Device** is tied to a pin on a board (an Interface).
 1. **Select Device Type** lists the major kinds:
    - **On/Off**: relay, SSR or contactor, and the Pumps, Valves and heating elements that are switched on and off
    - **Pumps**: on / off, speed by PWM, speed by 0-10 V (a VFD), sump pump
-   - **Valves**: motorized valve, proportional valve 0-100 %
+   - **Valves**: the Skynet valves, the User Defined Motorized Ball Valve, the Skynet KLD20T Proportional Valve, the User Defined Proportional Valve, the Manual Valve
    - **Heating Element**: on / off, power by PWM, PID, Hysteresis, Duty cycle, RIMS tube, electric kettle
    - **PWM / Analog out**: PWM, 0-10 V, 4-20 mA
    - **Inputs**: switches, push, toggle and pulse buttons, latching inputs, counters, float, flow switch, interlock

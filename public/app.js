@@ -2263,7 +2263,8 @@ const ADD_MENU = [
     ['Analog output 4-20 mA (PWM-to-4-20mA module)', 'analogOut', 'AO', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: '%' }],
     ['Pump (relay output with inlet and outlet IPs for pipes)', 'pump', 'Pump'],
     ['Valve (relay output with an IP at each end)', 'valve', 'Valve'],
-    ['Proportional valve 0-100 % (analog output)', 'propValve', 'PropValve'],
+    // was "Proportional valve 0-100 % (analog output)" (Fritz, 2026-11-03): the user's own proportional valve, beside the Skynet ones
+    ['User Defined Proportional Valve 0-100 % (analog output): your own picture, you set its In and Out IPs', 'propValve', 'PropValve'],
   ]],
   ['Devices: control outputs (switch a pin by themselves)', [
     ['Duty cycle (on for a % of each cycle)', 'dutyCycle', 'Duty'],
@@ -2384,7 +2385,11 @@ const skyDev = e => fromSkyTpl(e) && !!devTemplate(e);
 const devTemplate = e => TPL?.device?.find(t => t.name === e.template) || null;
 // One row per Skynet valve (Fritz, 2026-11-03): the add lists show only the main Template (Rule 5.17's Master, never called that);
 // its other ways of standing (Rule 5.17's Daughters) are picked with Orientation in its Properties.
-const SKY_DEV_ROWS = () => (TPL?.device || []).filter(t => t.cls === 'skynet' && !t.master).map(t => [skyFamily(t), 'skyDevice', 'Valve', { template: t.name }]);
+// type: only that Device type (the On/Off list takes the on / off valves; a Skynet Proportional Valve is an analogOut, Valves list only).
+// The on / off valves come first, then the Proportional Valves.
+const SKY_DEV_ROWS = type => (TPL?.device || []).filter(t => t.cls === 'skynet' && !t.master && (!type || (t.type || 'digitalOut') === type))
+  .sort((a, c) => (a.type === 'analogOut') - (c.type === 'analogOut'))
+  .map(t => [skyFamily(t), 'skyDevice', t.type === 'analogOut' ? 'PropValve' : 'Valve', { template: t.name }]);
 const skyFamily = t => String(t.title || t.name).split(':')[0].trim();
 const ORIENT_WORDS = { H: 'Horizontal', VL: 'Vertical Left', VR: 'Vertical Right', Front: 'Front', Front_Elbow: 'Front Elbow' };
 const skyOrientLabel = t => String(t.title || '').includes(':') ? t.title.split(':').slice(1).join(':').trim() : ORIENT_WORDS[t.name.split('_Valve_')[1]] || t.name;
@@ -2443,7 +2448,7 @@ function skyDevFields(it, f) {
   for (const x of f) {
     const k = x[0];
     if (own[k]) { if (ok.has(k)) out.push(...own[k]); continue; }
-    if (['flipH', 'flipV', 'tapSource', 'tapwaterOut', 'showOnOffText', 'offText'].includes(k)) continue;
+    if (['flipH', 'flipV', 'tapSource', 'tapwaterOut', 'showOnOffText', 'offText', '_ipat'].includes(k)) continue;
     if (k === '_tb' || (k.startsWith('_') && !['_ovn', '_hint'].includes(k)) || ok.has(k)) out.push(x);
   }
   if (ok.has('tapwater') && !f.some(x => x[0] === 'tapwater')) out.push(...own.tapwater);
@@ -2463,11 +2468,11 @@ const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: '
 const VALVE = ['User Defined Motorized Ball Valve, open / closed (relay): your own picture, you set its In and Out IPs', 'valve', 'Valve'];
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
 const DEV_TYPES = () => [
-  ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, ...SKY_DEV_ROWS(), VALVE, ELEMENT]],
+  ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, ...SKY_DEV_ROWS('digitalOut'), VALVE, ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
-  ['valves', 'Valves', [...SKY_DEV_ROWS(), VALVE, am('Proportional valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
+  ['valves', 'Valves', [...SKY_DEV_ROWS(), VALVE, am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
   ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), am('Electric kettle, basic')]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
@@ -3457,7 +3462,7 @@ const F = {
     ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES.filter(c => c[0])],
     ['_pb', 'Properties', 'box'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
-  propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
+  propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path'], ...IP_AT_FIELDS],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it

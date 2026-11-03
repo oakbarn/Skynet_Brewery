@@ -566,6 +566,14 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
   the Name and Label greyed out too.)
 - Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
 
+5.22 **Proportional Valves** (Fritz, 2026-11-03, thread "Add BruControl KLD20T proportional valve", Help 117). The Valves list has
+**Skynet Proportional Valves** for valves on the market and one **User Defined Proportional Valve** for any other. The first
+Skynet one is the **BruControl KLD20T** (1/2" NPT, SS304, 24 VDC, 0-5 VDC signal): an Analog Output, 0-100 %, a Skynet Template
+set under Rules 5.16 and 5.17 (one entry, Orientation Horizontal / Vertical Left / Vertical Right / 45 degrees; its signal and
+range are fixed). The User Defined Proportional Valve replaces "Proportional valve 0-100 % (analog output)": its own pictures,
+signal and range, and In / Out IP spots like the User Defined Motorized Ball Valve. More Skynet Proportional Valves only when
+Fritz names them, and no new pictures without his word (Rule 13.3).
+
 ## 6. Devices, connections and safety
 
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
@@ -1245,3 +1253,4 @@ until 💾 Save on the dialog. (Help 115)
   Orientation picks the Daughter and the picture and IPs follow; titles "valve: Orientation"; Build Template says Main Template. Help 88,
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
+- 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")

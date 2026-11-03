@@ -164,7 +164,7 @@ const KEY_RE = /^\w{1,40}$/;
 const jsonSafe = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
 export function cleanDevice(b = {}) {
   const t = { master: NAME_RE.test(text(b.master, 60)) ? text(b.master, 60) : undefined, title: text(b.title, 120) || undefined, notes: text(b.notes, 2000) || undefined };
-  if (['digitalOut'].includes(b.type)) t.type = b.type;
+  if (['digitalOut', 'analogOut'].includes(b.type)) t.type = b.type;      // analogOut: a Skynet Proportional Valve
   const props = {};
   for (const [k, v] of Object.entries(b.props && typeof b.props === 'object' ? b.props : {})) if (KEY_RE.test(k) && v !== undefined) props[k] = jsonSafe(v);
   t.props = props;

@@ -1,0 +1,17 @@
+{
+  "title": "Skynet KLD20T Proportional Valve: Horizontal",
+  "type": "analogOut",
+  "props": {
+    "subtype": "propValve", "service": "room", "typeCode": "P_L_Vlv", "orientation": "h",
+    "signal": "0-5V", "rangeLow": 0, "rangeHigh": 100, "units": "%", "precision": 0,
+    "w": 90, "h": 77, "hideName": true, "look": "normal"
+  },
+  "pics": {
+    "h": ["Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg", "Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg"],
+    "v": ["Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg", "Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg"]
+  },
+  "userFields": ["name", "label", "hideName", "workspace", "x", "y", "w", "h", "locked", "visibility", "hidden", "fontSize",
+    "foreColor", "backColor", "align", "wrap", "nameFontFamily", "nameFontSize", "nameColor", "nameBg", "valueColor", "valueBg", "nameFont", "valueFont", "nameAlign", "valueAlign", "border",
+    "typeCode", "device", "channel", "orientation", "flipH", "flipV"],
+  "notes": "A Skynet Template (Rules 5.16, 5.17). The BruControl KLD20T: a 1/2 inch NPT stainless (SS304) motorized ball valve that opens 0-100 % from a 0-5 VDC control signal, powered by 24 VDC. Room Temperature Liquid. The picture is the Skynet Motorized Ball Valve's until Fritz sends a KLD20T drawing."
+}
