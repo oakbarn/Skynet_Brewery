@@ -173,6 +173,9 @@ What each ID means:
 - Same settings as 4.1 with Kind = pump. Turning it on makes flow run from its inlet IP to its outlet IP. Pumps have no orientation setting.
 - **Skynet pump pictures** (Pumps group, Help 104): March 809 and 815 (poly 90° inlet, poly center inlet, stainless center inlet), Chugger (stainless 90° inlet and center inlet), Blichmann Riptide (stainless, cover off), Topsflo TD5 and KegLand MKII (poly, plus MKII stainless). Drawn from the real pumps with no cover; with one of them the IN and OUT IPs sit on the tips of the real inlet and outlet ports.
 - **Cover overlay** (Rule 7.13, Help 111): **.cover** = None (default), Red, Yellow, Blue, Green, Purple, Orange or User; **.coverColor** = the User cover's color. Drawn between the pump picture and the On overlay, on the Skynet no-cover pump drawings only.
+- **Properties dialog: the drill-down** (Rule 18.12, Help 115, Fritz 2026-11-03): Visible, Hidden Locked and the lock at the top;
+  **Pump Properties ⬢** (Tab, X, Y, Width, Height, Delete); **Label ⬆ ⬢**, Show label, Name; Interface, **Pin ⬢**, **When tapped ⬢**,
+  Kind; **Picture ⬢**, Cover, **Background picture ⬢**; **Text when on ⬆ ⬢**, Text when off ⬆. The standard for every Device.
 
 ### 4.3 Valve
 - **Add menu:** Devices: outputs > Valve (relay output with an IP at each end). A Valve Profile can be picked when it is made.
@@ -433,3 +436,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-02: 4.2 Pump: Cover overlay, .cover and .coverColor (Rule 7.13, Help 111). (thread "Draw SVGs for common brew pumps")
 - 2026-11-02: Added 4.3b Skynet Motorized Butterfly Valve Device (Master H, VL, VR, Front, Front Elbow), the Motorized Ball Valve redrawn with a Front Daughter, and 4.12a Tees with a Temperature Probe; IPs on the ferrule faces (Rule 5.20, Help 110). (thread "Create pipe Widgets from Fritz's drawings")
 - 2026-11-02: Background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1-3); 0, blank or over 3 = no background (Rule 7.10). (thread "Rename image paths to backpath")
+- 2026-11-03: 4.2 Pump: the drill-down Properties dialog, the standard for every Device (Rule 18.12, Help 115). (thread "Set the drill-down dialog standard for Devices")
