@@ -62,9 +62,10 @@ tab.flow_Color = None
 - What a Process sets lasts until it is set to None, another Schema is loaded, or the panel restarts.
 - **Flow Color is the only Process attribute of a Pipe or Hose.**
 
-## What can't be changed on a Pipe or Hose
+## Label, Name, Position and Size
 
-A pipe needs no Name, Label, Position or Size of its own: it is where you drew it. To follow the Universal Properties
-(Rule 1.21) they are still there, but **greyed out** in the dialog: the Name Skynet gave it (Pipe_1, Hose_1 ...), its Label,
-Show label (pipes and hoses show no label on the Tab), and its X, Y, Width and Height (worked out from where it is drawn).
-Move or stretch a pipe on the Tab in Edit layout, as before.
+A Pipe or Hose has a **Label** like every other Widget: double-click it, type the Label and switch **Show label** on, and it shows
+in the middle of the pipe. Its **Name** is given by Skynet (Pipe_1, Hose_1 ...) and is what a Process uses.
+
+A pipe has **no Position or Size boxes**: it is where you drew it, so X, Y, Width and Height are hidden. Move or stretch a pipe on
+the Tab in Edit layout, as before.

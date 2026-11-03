@@ -26,6 +26,9 @@ wording, the date Fritz gave it, and where it came from (PR number or thread) wh
 - When two Rules disagreed, only the latest one is kept here. The old wording is shown as
   "Replaced" so the history is not lost.
 - Questions Fritz has not answered yet are at the end, under **Open questions**. They are not Rules.
+- **Following the Rules is the standard** (Fritz, 2026-11-03). When Fritz asks for something that breaks a Rule, tell him the Rule
+  number and what it says; almost always he will say follow the Rule. **An exception is only for something no user would find useful**
+  (example: a pipe's Position and Size, Rule 5.21), never just a different way of doing it.
 
 Companion documents (look things up there, do not copy them here):
 
@@ -553,9 +556,10 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
   Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash, Boil, Whirlpool, Ferment); all None = the standard light blue.
 - **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`). What a Process
   sets lasts until set to None, another Schema is loaded, or the panel restarts.
-- **A Pipe or Hose has no editable Name, Label, Position or Size.** They are there (Rule 1.21) but **greyed out** in its dialog: the Name
-  Skynet gives it, the Label, Show label (pipes and hoses show no label on a Tab) and X, Y, Width, Height (worked out from where it is
-  drawn). Fritz allows hiding them instead; greyed out was built first.
+- **A Pipe or Hose follows the general Rule for Labels** (Rule 1.21, 2.18): a user can add a Label, edit it and Show it (it sits in the
+  middle of the pipe). Its Name is given by Skynet (Pipe_1, Hose_1). **Exception: no Position or Size.** X, Y, Width and Height could never
+  be useful to a user (a pipe is where it is drawn), so they are **hidden** in its dialog. (Fritz changed this 2026-11-03: first he had
+  the Name and Label greyed out too.)
 - Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
 
 ## 6. Devices, connections and safety
@@ -1209,3 +1213,5 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-03: Added Rule 5.21 (Pipe and Hose Widgets: made only with Draw pipe / Draw hose, not in the Widget List; Flow Colors on the
   Tab, the pipe and the Vessel, tap water always Blue, Vessel over all; .flow_Color the only Process attribute; Name, Label, Position and
   Size greyed out) and the pipe exception under Rule 4.1. Help 116; next free Help number 117. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-03: Rule 5.21 changed (Fritz): pipes and hoses keep an editable Label and Show label (the general Rule); only Position and Size
+  are hidden. Added to How Rules work: following the Rules is the standard; an exception only for what no user would find useful.

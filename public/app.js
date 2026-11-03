@@ -1757,7 +1757,7 @@ function renderPipes() {
     }
     g.append(line(p, { class: 'flow' + (flowing ? '' : ' off') + (!!p.reverse !== backwards ? ' rev' : ''), stroke: pipeFlowColor({ ...srcs.get(p.id), tab: tabFlow, pipe: pipeFlowOf(p) }), 'stroke-width': Math.max(3, width * 0.55) }));
     g.append(line(p, { class: 'hit' }));
-    if (false) {     // pipes and hoses show no label (Fritz, 2026-11-03, Rule 5.21: its Name and Label are greyed out)
+    if (p.labelVisible && p.label && (p.points || []).length > 1) {     // Show label (Fritz, 2026-10-27): the label sits in the middle of the pipe
       const pts = p.points, m = pts.length >> 1, [x, y] = pts.length % 2 ? pts[m] : [(pts[m - 1][0] + pts[m][0]) / 2, (pts[m - 1][1] + pts[m][1]) / 2];
       const t = mk('text', { class: 'pipeLabel', x, y: y - width / 2 - 4, 'text-anchor': 'middle', fill: TD().foreColor || '#e6e6e6', 'font-size': TD().nameFontSize || 14 }); t.textContent = p.label; g.append(t);
     }
@@ -3427,6 +3427,7 @@ const F = {
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   pipe: it => [['_about', 'In Skynet Brewery you can easily add interactive Pipes, Hoses, Pumps and Valves. If they are electro-mechanical (a pump or a powered valve), turning them on makes flow run from a source, through the inlet side of a pump, and out into the Pipe or Hose on its outlet side.', 'note'],
+    ['label', 'Label', 'text'], ['labelVisible', 'Show label (in the middle of the pipe)', 'yn'],
     ['flowColor', 'Flow Color', 'flowc', 'pipe', false, 'b'],
     ['_flN', 'None = it follows the Tab Flow Color. Flow from a Tap Water Valve is always Blue, and flow that began at a Vessel with an Out flow color takes that color.', 'note'],
     ['from', 'Starts at IP (flow comes from here)', 'ip'], ['to', 'Ends at IP (flow goes to here)', 'ip'],
@@ -3437,19 +3438,18 @@ const F = {
     ['baseVisible', 'Show when nothing flows (off: the tab picture already shows it, so only the moving flow appears)', 'bool', true],
     ['workspace', 'Tab', 'ws'], ['locked', 'Lock position (no drag or resize)', 'lock'], ...PIPE_FIXED(it)],
 };
-// A pipe or hose needs no editable Name, Label, Position or Size (Fritz, 2026-11-03, Rule 5.21). They are kept, greyed out, so
-// it still has the Universal Properties (Rule 1.21). Its place and size come from where it is drawn.
-const PIPE_HIDE_FIXED = false;      // true: leave the greyed-out boxes out of the dialog altogether (Fritz's item 11)
+// A pipe or hose has a Label like everything else (Rule 1.21), but no editable Position or Size (Fritz, 2026-11-03, Rule 5.21):
+// its place and size come from where it is drawn, so X, Y, Width and Height are hidden. Its Name is given by Skynet (Pipe_1, Hose_1).
+const PIPE_HIDE_FIXED = true;       // false: show X, Y, Width and Height greyed out instead of hiding them
 function pipeBox(p) {
   const pts = p.points || [], xs = pts.map(q => q[0]), ys = pts.map(q => q[1]);
   if (!pts.length) return {};
   const x = Math.min(...xs), y = Math.min(...ys);
   return { x: Math.round(x), y: Math.round(y), w: Math.round(Math.max(...xs) - x) || Math.round(pipeWidth(p)), h: Math.round(Math.max(...ys) - y) || Math.round(pipeWidth(p)) };
 }
-const PIPE_FIXED = it => { if (PIPE_HIDE_FIXED) return []; const b = pipeBox(it);
-  return [['_fx', 'Not editable (kept for the Universal Properties, Rule 1.21; a Process can only set .flow_Color)', 'head'],
-    ['name', 'Name (given by Skynet)', 'ro'], ['_lab', 'Label', 'ro', () => it.label || ''], ['_lv', 'Show label', 'ro', () => 'Off (pipes and hoses show no label)'],
-    ['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']]; };
+const PIPE_FIXED = it => { const b = pipeBox(it);
+  return [['_fx', 'Not editable', 'head'], ['name', 'Name (given by Skynet; a Process uses it, e.g. ' + (it.name || 'Pipe_1') + '.flow_Color = Mash)', 'ro'],
+    ...(PIPE_HIDE_FIXED ? [] : [['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']])]; };
 // where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
 const FIT_PLACE = it => [...(isCap(it) ? [] : [AUTOSIZE_FIELD]), ...(it.onVessel || it.capOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
   ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];

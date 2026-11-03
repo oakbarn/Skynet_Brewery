@@ -94,7 +94,9 @@ When a pump or powered valve on it is on, flow runs from the source, through the
 | Pipe color / Hose color | Default pipe #8a8f96, hose #c9ced3 |
 | Show when nothing flows | Off = only the moving flow shows (the Tab picture already shows the pipe) |
 | Tab, Lock position | |
-| Name, Label, Show label, X, Y, Width, Height | **Greyed out**, not editable (Rule 5.21). The Name comes from Skynet (Pipe_1, Hose_1); no label shows on the Tab; the place and size come from where it is drawn |
+| Label, Show label | As every Widget (Rule 1.21): the Label sits in the middle of the pipe |
+| Name | Given by Skynet (Pipe_1, Hose_1), shown greyed out |
+| X, Y, Width, Height | **Hidden** (Rule 5.21 exception): the place and size come from where it is drawn |
 
 **Tab Flow Color** (Tab settings, `tab.flow_Color`, the Tab the screen shows) colors every pipe and hose on the Tab; a pipe's own Flow
 Color overrides only Mash, Boil, Whirlpool and Ferment. Flow from a **Tap Water Valve** is always Blue, and flow that begins at a
@@ -453,4 +455,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-02: Semi_Widgets_Devices class (Rule 1.20): Switch, Push Button, Pulse Button and LED Widgets with Device controlled (None to start, follows its Device both ways like a Clone), and the Manual Valve Widget. (thread "Create the Semi_Widgets_Devices class", Help 112)
 - 2026-11-02: Background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1-3); 0, blank or over 3 = no background (Rule 7.10). (thread "Rename image paths to backpath")
 - 2026-11-02: Universal Properties standard (Rule 1.21): every Device, Widget and Semi-Device gets the same Properties and attributes; see docs/Universal_Properties.md. (thread "Set universal properties standard", Help 114)
-- 2026-11-03: Pipe and Hose Flow Colors (Rule 5.21, Help 116): Flow Color None by default; Tab Flow Color (tab.flow_Color); Vessel Out flow color; tap water always Blue; Name, Label, X, Y, Width, Height greyed out on pipes and hoses. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-03: Pipe and Hose Flow Colors (Rule 5.21, Help 116): Flow Color None by default; Tab Flow Color (tab.flow_Color); Vessel Out flow color; tap water always Blue; pipes and hoses keep their Label; X, Y, Width, Height hidden. (thread "Add flow colors to pipe and hose Widgets")
