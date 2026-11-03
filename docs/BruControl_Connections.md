@@ -71,6 +71,7 @@ All three are on USB. No Ethernet or WiFi Interfaces are in use.
 | 7 | **One OneWire bus on a fixed pin (40).** BruControl allows a bus on any pin, and more than one. | UniShield owners have probes on pin 5 or 6. | OneWire on any pin the Brain names, several buses (part of gap 1). | Yes |
 | 8 | **Imported network Interfaces keep BruControl's TCP port** (5000 in Fritz's file). | A network board with Skynet firmware listens on 4100, so it would not connect. | The importer sets 4100 (an Importing Norm). | No |
 | 9 | **UniShield / UniFlex terminal names.** | A UniShield owner reads terminal names (like 2:3D), not pin numbers. | A UniShield board profile that shows the terminal next to the pin. | No |
+| 10 | **Where Duty Cycle, Hysteresis and PID run.** BruControl runs them on the board itself ("offloaded to interfaces for speed and communication failure tolerance", BruControl manual p. 5). Skynet runs them on the Brain and switches the pin with `DO` lines. | Same result while the link is up. If the link drops, BruControl's board keeps controlling; Skynet's board turns everything off after the lost link delay (safer, Rule 6.3). | Fritz's call: keep it on the Brain (as now), or move them into the board firmware. | Only if moved |
 
 Already the same as BruControl, nothing to do:
 
@@ -79,6 +80,25 @@ Already the same as BruControl, nothing to do:
 - Thermistor (Steinhart-Hart), PID, hysteresis, duty cycle, PWM, digital in and out all import and run.
 - Ethernet with a W5100 / W5500 shield on a Mega (Rules 6.10, 6.11).
 - Every Skynet board turns all outputs off if the Brain goes quiet (lost link watchdog, Rule 6.3).
+
+## PWM ports: true PWM or software timed? (Fritz, 2026-11-03)
+
+BruControl has two different kinds of pulsed output, and only one is true PWM:
+
+- **PWM Output** is true hardware PWM: "pulsed at a fixed high frequency ... ~500 Hz, ~1000 Hz, or similar, depending on
+  the interface and pin" (BruControl manual p. 40). Those are the Arduino's own timer frequencies (490 Hz and 980 Hz on a
+  Mega), and only pins marked **P** on the wiring map can do it (a Mega has 15: 2-13 and 44-46). A Grand Central M4 and an
+  ESP32 can do hardware PWM on almost every pin, which is why their lists look much longer.
+- **Duty Cycle Output** is slow and timed in software: on and off once per Cycle Time (default 1000 ms = once a second),
+  on any digital output pin (manual pp. 41-42). A **PID** on a pin without PWM becomes a Duty Cycle output (p. 45).
+  These are the "extra" PWM-like ports.
+
+In Fritz's file the Mega's 4 PWM ports are on pins 5, 7, 8 and 9 (all real PWM pins), and the Duty Cycle, Hysteresis
+and PID ports are on 2, 5, 7 and 8. BruControl's firmware is closed, so how it times the Duty Cycle inside the board
+can't be read, but the manual's wording and the frequencies match the above.
+
+Skynet already does the same split: true PWM (`PWM` lines) on real PWM pins only, and Duty Cycle, Hysteresis and
+PID-without-PWM as slow on / off switching of any output pin, timed by the Brain (gap 10).
 
 ## What Skynet will not do
 
@@ -98,5 +118,6 @@ Already the same as BruControl, nothing to do:
 Sources: [BruControl Interface Firmware](https://brucontrol.com/download/firmware/),
 [Interface Wiring Maps](https://brucontrol.com/build/interface-wiring-maps/),
 [Quick Start](https://brucontrol.com/quick-start/),
+[BruControl Manual v1.0](https://brucontrol.com/wp-content/uploads/2017/03/BruControl-Manual-v1.0-12-8-2017.pdf),
 [UM-1 MEGA UniShield product note](https://brucontrol.com/wp-content/uploads/2020/01/BruControl%20Product%20Note%20-%20UM-1%20MEGA%20UniShield.pdf),
 and Fritz's BruControl file.
