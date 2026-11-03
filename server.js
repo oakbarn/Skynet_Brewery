@@ -3,6 +3,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { DONATE_LINK } from './lib/donation.js';
@@ -51,6 +52,7 @@ import { safeNamesOnDisk, renameQuoted } from './lib/namechars.js';
 import { kindChangeError } from './public/gkinds.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
+import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -61,6 +63,12 @@ const PUBLIC = path.join(ROOT, 'public');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
 const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'));
 
+// Move Brain (Rule 9.9, lib/brainmove.js): a Brain Move file brought in from the old Brain is put in place first, before anything
+// is read. This Brain's own config, data, scripts and media go to backups/before_brain_move_<date>.
+const MOVE_DIRS = { config: path.dirname(CONFIG), data: DATA, scripts: SCRIPTS, media: path.join(path.dirname(CONFIG), '..', 'media') };
+let moved = null;
+try { moved = applyPendingMove(ROOT, MOVE_DIRS); } catch (e) { moved = { lines: [`Brain Move failed: ${e.message}`], failed: true }; }
+if (moved) for (const l of moved.lines) console.log(l);
 // A release has its samples in defaults/: a folder you don't have yet (first start) gets a copy; yours are never touched
 const seeded = seedDefaults(ROOT);
 if (seeded.length) console.log(`First start: copied the samples into ${seeded.join(', ')}`);
@@ -136,6 +144,7 @@ if (retired) for (const l of retired.lines) { console.log(l); engine.print('syst
 if (unspaced) for (const l of unspaced.lines) { console.log(l); engine.print('system', l); }
 if (gnames) for (const l of gnames.lines) { console.log(l); engine.print('system', l); }
 if (safenames) for (const l of safenames.lines) { console.log(l); engine.print('system', l); }
+if (moved) for (const l of moved.lines) engine.print('system', l);
 if (visFixed.length) { const l = `Processes changed to .visible / .hidden: ${visFixed.join(', ')} (old copies saved as .before-hidden.bak).`; console.log(l); engine.print('system', l); }
 const mqtt = new MqttBridge(store, engine);
 mqtt.start();
@@ -311,7 +320,8 @@ function needRole(p, m) {
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   if (/^\/ui\/schemas\/[a-z0-9-]+\/export$/.test(p)) return 'admin';   // Schema.json: Save as .json file
   if (p.startsWith('/ui/filemove/')) return 'admin';   // File Move: copies files onto the Brain
-  if (p.startsWith('/ui/skynetpics/')) return 'admin';   // Get Skynet pictures: copies pictures from GitHub onto the Brain
+  if (p.startsWith('/ui/skynetpics/')) return 'admin';
+  if (p.startsWith('/ui/brainmove')) return 'admin';   // Move Brain: every file, logins included, and the USB ports   // Get Skynet pictures: copies pictures from GitHub onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
 const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico']);
@@ -858,6 +868,61 @@ async function route(req, res) {
     broadcast('closing', { by: me?.name ?? '' });
     ok(res); setTimeout(shutdown, 300);
     return;
+  }
+
+  // ☰ Menu > Move Brain (Fritz, 2026-11-03, Rule 9.9, lib/brainmove.js): from a computer Brain to a Pi (or any new Brain)
+  if (p.startsWith('/ui/brainmove')) {
+    if (p === '/ui/brainmove' && m === 'GET') {
+      const now = await hw.listPorts(), last = lastMove(DATA), ifs = usbInterfaces(path.dirname(CONFIG), store.config);
+      const oldPorts = [...new Set(ifs.map(x => x.port))];
+      return ok(res, { interfaces: ifs, ports: now, suggest: suggestPorts(oldPorts, last?.usbPorts ?? [], now.ports), service: !CLOSABLE, platform: process.platform,
+        last: last && { from: last.from, made: last.made, movedIn: last.movedIn, platform: last.platform, usbPorts: last.usbPorts ?? [] },
+        checked: fs.existsSync(checkedFile(ROOT)), minPassword: MIN_MOVE_PASSWORD });
+    }
+    // 1. Make a Brain Move file (on the old Brain): everything saved first, then one locked file to download
+    if (p === '/ui/brainmove/export' && m === 'POST') {
+      const { password } = await jsonBody(req);
+      auth.flush(); store.persistNow();
+      const tmp = path.join(os.tmpdir(), `skynet-brewlog-${process.pid}-${Date.now()}.db`);
+      try {
+        try { logger.copyTo(tmp); } catch (e) { console.log('Brew log copy for the Brain Move file failed: ' + e.message); }
+        const r = makeMoveFile({ dirs: { ...MOVE_DIRS, media: store.mediaRoots()[0] }, password, brewlogCopy: tmp, ports: (await hw.listPorts()).ports,
+          version: PANEL_VERSION?.version ?? '', from: os.hostname(), mediaRoots: store.config.mediaRoots ?? [] });
+        console.log(`Brain Move file made by ${me?.name ?? 'an admin'}: ${r.manifest.files} files`);
+        res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': r.file.length, 'Cache-Control': 'no-store', 'Content-Disposition': `attachment; filename="${r.fileName}"` });
+        return res.end(r.file);
+      } catch (e) { return fail(res, 400, e.message); }
+      finally { fs.rmSync(tmp, { force: true }); }
+    }
+    // 2. Bring in a Brain Move file (on the new Brain): unlocked and checked, then it waits for "Move in now"
+    if (p === '/ui/brainmove/import' && m === 'PUT') {
+      try {
+        const buf = await readBody(req, MAX_MOVE, true);
+        const man = saveChecked(ROOT, unlock(buf, decodeURIComponent(req.headers['x-move-password'] ?? '')));
+        return ok(res, { ok: true, from: man.from, made: man.made, platform: man.platform, version: man.version, files: man.files, bytes: man.bytes, interfaces: man.interfaces ?? [], notMoved: man.notMoved ?? [] });
+      } catch (e) { return fail(res, 400, e.message); }
+    }
+    // "Move in now": the panel stops; as it starts again the old Brain's files go in place
+    if (p === '/ui/brainmove/go' && m === 'POST') {
+      try { stageMove(ROOT); } catch (e) { return fail(res, 400, e.message); }
+      console.log(`Brain Move started by ${me?.name ?? 'an admin'}: the panel stops and puts the old Brain's files in place when it starts again`);
+      broadcast('closing', { by: me?.name ?? '', moving: true, service: !CLOSABLE });
+      ok(res, { ok: true, service: !CLOSABLE }); setTimeout(shutdown, 300);
+      return;
+    }
+    // USB ports: each old port becomes the new one, in every Schema at once
+    if (p === '/ui/brainmove/ports' && m === 'POST') {
+      const { map } = await jsonBody(req), clean = {};
+      for (const [from, to] of Object.entries(map ?? {})) { const t = String(to ?? '').trim(); if (t && t !== from) clean[from] = t; }
+      if (!Object.keys(clean).length) return ok(res, { ok: true, changed: 0 });
+      const live = remapConfig(store.config, clean);
+      if (live) store.writeConfig();
+      const others = remapSchemaFiles(path.dirname(CONFIG), clean, store.config.schema?.id);
+      if (live) hw.restart();
+      store.emit('devices');
+      console.log(`USB ports changed by ${me?.name ?? 'an admin'}: ${Object.entries(clean).map(([a, b]) => `${a} -> ${b}`).join(', ')}`);
+      return ok(res, { ok: true, changed: live + others });
+    }
   }
 
   // media files by path

@@ -784,6 +784,22 @@ with **No (back out, nothing deleted)** as the default. Confirmed, it deletes `c
 backup, and the panel starts again from the samples with Admin setup. **Kept:** `media` (pictures and sounds, Rule 7.3) and
 the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
 
+9.9 **Move to a new Brain** (Fritz, 2026-11-03): someone who runs the Brain on a Windows, Linux or Mac computer can move it to a
+Raspberry Pi later (or any Brain to any other), with **☰ Menu > Move Brain** (Admins), in three steps:
+1. On the **old** Brain, **Make a Brain Move file**: one file, `Skynet_Brain_Move_<YYYYMMDDTHHMMSS>.skynetmove`, with every Schema
+   (and its saved gGlobal values), panel setting, Profile, Recipe, Template, Process, picture and sound in the media folder, the
+   logins and recovery code, and the brew log. It is **locked with a Move password** (typed twice, at least 6 characters), because
+   it holds the logins and the hidden keys (Rule 3.10). Making it changes nothing on the old Brain. Browser sign-ins and other media
+   folders are not in it.
+2. On the **new** Brain (a normal fresh install), **Bring in the file** with the same password: it is checked first (a wrong
+   password or a damaged file changes nothing), then **Move in now** stops the panel and, as it starts again, puts the old Brain's
+   files in place. The new Brain's own config, data, scripts and media are **kept** in `backups/before_brain_move_<date>`, never
+   deleted. Everyone signs in with the old Brain's user names and passwords.
+3. **USB ports**: each old USB port (COM3) is changed to the new Brain's (/dev/ttyACM0) in **every Schema at once**, Simulator
+   boards included. A board the old Brain saw is found by its serial number and picked for you. It can be used any time, not only
+   after a move. Ethernet and WiFi boards keep their address.
+(thread "Move a computer Brain to a Pi", Help 119)
+
 ## 10. Testing
 
 10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
@@ -828,7 +844,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **117**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **120**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1254,3 +1270,4 @@ until 💾 Save on the dialog. (Help 115)
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")
+- 2026-11-03: Added Rule 9.9 (Move Brain: a Brain Move file locked with a Move password on the old Brain, Bring in + Move in now on the new Brain with its own files kept in backups/, then USB ports changed in every Schema at once, matched by serial number). Help 119; next free Help number 120. (thread "Move a computer Brain to a Pi")
