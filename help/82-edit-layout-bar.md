@@ -5,8 +5,10 @@ The **Edit layout** bar (press the navy blue Edit layout button beside **☰ Men
 | Row | What is on it |
 |---|---|
 | **1** | Devices on the left, Widgets on the right |
-| **2** | Draw pipe, Draw hose, Elbows, Tees …, the turn buttons, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 🔨 Build Tab, 🔨 To Build Tab, 👁 Preview, 💾 Save Build ... |
-| **3** | The hint, Update Version, Save layout, Exit |
+| **2** | Draw pipe, Draw hose, Elbows, Tees …, the turn buttons, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 👻 Hidden Tab and its orange **?**, 🔨 Build Tab, 🔨 To Build Tab, 📝 Processes, 👁 Preview, 💾 Save Build ... |
+| **3** | Update Schema Version, Save layout, Exit |
+
+The **orange ?** beside 👻 Hidden Tab pops up how Edit layout works (drag, resize, double-click for properties, locks, Hidden Tabs, Update Schema Version). **Close** is at the top and the bottom.
 
 ## Devices: Select Device Type and Add Device
 
@@ -48,10 +50,11 @@ When a kind has more than one Device Type (for example a low or high temperature
 A **Widget** lives only in the app, with no board pin.
 
 - **Select Widget Type** and **Add Widget** work like the Device pair: Pictures and text, On-screen controls (switch, timer, alarm, sound player, shared variable), Vessels, Equipment, Fittings and IPs, gGlobal variables.
-- **Picture ➕** and **Text ➕**: one click each. **Override ➕** adds the [Override button](96-override-button) (one per Tab).
-- **Vessel**: a Vessel Widget (you add everything to it), an Integrated vessel (ready-made, see [Add a Vessel](66-add-a-vessel)) or a manual vessel (BrewZilla, DigiBoil).
+- **Picture ➕** and **Text ➕**: one click each.
 - **Manual Valve ➕**: a valve turned by hand. Tap it on the Tab to show open or closed.
+- **Override ➕** adds the [Override button](96-override-button) (one per Tab).
 - **Add equipment ➕** (far right): chillers, coils, trub filter, RIMS tube and pipe fittings.
+- **Vessel** (last): a Vessel Widget (you add everything to it), an Integrated vessel (ready-made, see [Add a Vessel](66-add-a-vessel)) or a manual vessel (BrewZilla, DigiBoil).
 
 ## Row 2: pipes, fittings, locks and Tabs
 

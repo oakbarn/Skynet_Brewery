@@ -19,7 +19,7 @@ A version is the Schema's name with the date and time it was saved, on the Brain
 
 ### Making a version
 
-- In **Edit layout**, switch on **Update Version** next to **Save layout**, then save. The same switch is in the "Leave Edit layout?" box. The switch stays the way you left it on this browser.
+- In **Edit layout**, switch on **Update Schema Version** next to **Save layout**, then save. The same switch is in the "Leave Edit layout?" box. The switch stays the way you left it on this browser.
 - Or pick **Save a new version now** in the **Schema** list on the Menu Bar (Admins).
 
 Each version is kept as its own file, named after the version, in `config/schemas/versions/<Schema>/` on the Brain (spaces in the name become `_`). Old versions are never removed.

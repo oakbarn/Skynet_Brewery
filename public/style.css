@@ -35,7 +35,8 @@ main { padding: 10px 14px; }
 .bar.edit { background: var(--panel); border: 1px dashed var(--accent); border-radius: 8px; padding: 6px 8px; }
 /* the Edit layout bar's three rows (Fritz, 2026-10-28): Devices and Widgets, then drawing and Tab tools, then hint and Save */
 #editBar .editRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1 1 100%; }
-#editBar .editGap { width: 28px; }
+#editBar .editGap { width: 4px; }
+#editBar .editRow:first-child { gap: 5px; }     /* row 1 is long: tighter, so Vessel stays on it on a wide screen (Fritz, 2026-11-03) */
 #editBar #editHint { flex: 1 1 20em; }
 #editBar select { width: auto; max-width: 12em; flex: 0 0 auto; field-sizing: content; }     /* as wide as its name (Chrome, Edge), at most 12em */
 #editBar .plus { color: #d21; font-weight: bold; }
