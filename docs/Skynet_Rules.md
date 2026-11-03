@@ -776,7 +776,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **114**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **116**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -949,8 +949,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). **No
-Device or Widget dialog has been changed yet** (Rule 18.10).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget and the **Pump Device** (Rule 18.12).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -997,6 +996,26 @@ is changed, it follows Rule 15.3 (the old way is changed everywhere Skynet ships
 18.11 **Cancel warns before throwing away changes.** In every dialog with ✖ Cancel and 💾 Save, if anything was changed and
 Cancel is pressed, a warning asks whether to really discard the changes or go back and save. With no changes, Cancel just
 closes (Rule 2.17). (Fritz, 2026-11-02)
+
+18.12 **The drill-down: Pump Device Properties is the standard for every Device** (Fritz, 2026-11-03, thread "Set the
+drill-down dialog standard for Devices"; his drawing [docs/Pump_Drill_Down_Format.png](Pump_Drill_Down_Format.png)). The Pump's
+dialog is the first one changed to Rule 18 (Rule 18.10) and is **the starting standard for all Devices added**; every other
+dialog will work the same way when Fritz commands it, one at a time. From the top:
+1. The title (**Pump Device Properties** and its **?**), then 🗑 Delete, ✖ Cancel, 💾 Save (top and bottom, Rule 2.17).
+2. **Visible**, **Hidden Locked** and the 🔓 lock.
+3. **Pump Properties ⬢**: the hexagon beside the heading opens the **Properties pop-up**: Visible, Hidden Locked, the lock, Tab,
+   X Horizontal, Y Vertical, Width, Height, and 🗑 Delete, with ✖ Cancel and 💾 Save.
+4. **Label ⬆ ⬢** (Rule 18.3): the arrow opens the 2 line String Entry Dialog, the hexagon the **Label pop-up** (Label, Visible,
+   Font size, Font, Bold, Fore color, Back color, Alignment). Then **Show label**. A blank Label becomes the Name on Save, so a
+   Label is never blank (Rules 1.13, 18.3).
+5. **Name** (Rule 18.4), the Suggested Name and the Device Type it is made from.
+6. The Device's own fields, the most used first, each extra in a pop-up: for the Pump, **Interface**, **Pin ⬢** (Invert,
+   One-shot time, One-shot pulses OFF), **When tapped ⬢** (Tap target, Ask before changing) and Kind; **Picture ⬢** (On
+   overlay, Picture when on), Cover, **Background picture (Image Path 1) ⬢** (the Graphic Dialog, Rule 18.8); **Text when
+   on ⬆ ⬢** (Hide the text, its font size, colors, alignment, Look, Border) and **Text when off ⬆**.
+7. Database and .API last (Rule 6.14).
+A field shown both on the dialog and in a pop-up is the same setting: saving the pop-up updates the dialog. Nothing is saved
+until 💾 Save on the dialog. (Help 115)
 
 ---
 
@@ -1162,3 +1181,6 @@ closes (Rule 2.17). (Fritz, 2026-11-02)
 - 2026-11-02: Added Rule 2.32 (shortcut keys in every text box: Shift+Enter `\n`, Ctrl/⌘+B `\b`, Ctrl/⌘+Shift+D °F or °C; the common copy, paste, undo and redo keys always work). Help 113; next free Help number 114. (thread "Add shortcut keys for text entry")
 - 2026-11-02: Rule 7.10 rewritten: background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1, _2, _3); .background 1-3 picks one, 0, blank or over 3 = none; old names changed everywhere (Rule 15.2). Help 25 rewritten. (thread "Rename image paths to backpath")
 - 2026-11-02: Rule 7.10: at most 3 background pictures on any item (a 4th or more is dropped); most Widgets have no backpath, the Graphic Widget does. (thread "Rename image paths to backpath")
+- 2026-11-03: Added Rule 18.12 (the drill-down: Pump Device Properties is the first dialog changed to Rule 18 and the
+  starting standard for every Device; Properties ⬢ pop-up with Delete, Label ⬆ ⬢, Pin, When tapped, Picture, Background and
+  On / Off text pop-ups). Help 115; next free Help number 116. (thread "Set the drill-down dialog standard for Devices")
