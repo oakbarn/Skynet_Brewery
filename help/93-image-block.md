@@ -20,4 +20,4 @@ Every Device or Widget dialog that has pictures shows them the same way (Fritz, 
 
 You can type a path straight into the box (for example `Images/Skynet/Pumps/Pump_Red_Rip_Off.svg`). A path the panel can't find shows **⚠ Not found: it shows blank**, and the item shows no picture for that number.
 
-Image Path 2 and 3 work as in BruControl. Changing one shows a heads-up once: any Device or Widget can have as many pictures as you like with `name.image = "path"` (see [Picture paths](25-picture-paths)).
+Image Path 1, 2 and 3 are **.backpath**, **.backpath_2** and **.backpath_3** in a Process; Background # 1, 2 or 3 picks one, and 0, blank or over 3 shows none. Changing one shows a heads-up once: any Device or Widget can have as many pictures as you like with `name.image = "path"` (see [Picture paths](25-picture-paths)).
