@@ -49,9 +49,8 @@ DATA WILL BE DELETED (config, data and scripts, with no backup; media is kept), 
 No there backs out with nothing deleted.
 Zips from before October 5, 2026 still had those folders inside. If you unzip one
 of those over your panel, choose "Skip these files".
-While Settings > Testing mode is on, a new version clears every sign-in, so you
-create the admin account again. That is on purpose while testing. Turn it off when
-you use the panel for real. In the panel, Help > "Updating to a new version" has
+An update keeps every user, password and sign-in. Only Start Fresh (Yes, then
+confirm the warning) removes them. In the panel, Help > "Updating to a new version" has
 the details.
 
 

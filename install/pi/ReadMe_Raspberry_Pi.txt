@@ -319,8 +319,8 @@ STEP 9. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
   [ ] Pick a sample Schema to start from (a Schema is a whole brewery: Tabs, Devices,
       pipes and settings; you can load another later in Settings).
 
-  While Settings > Testing mode is on, every new version clears the sign-ins and you
-  do this step again. That is on purpose while the panel is being tested.
+  Updates keep your users and passwords. You only do this step again if you answer
+  Yes to the installer's Start Fresh question.
 
 
 STEP 10. EVERY DAY
