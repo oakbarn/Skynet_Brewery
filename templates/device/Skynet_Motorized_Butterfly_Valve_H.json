@@ -1,5 +1,5 @@
 {
-  "title": "Skynet Motorized Butterfly Valve Device (Master H: Horizontal)",
+  "title": "Skynet Motorized Butterfly Valve: Horizontal",
   "type": "digitalOut",
   "props": {
     "subtype": "valve",

@@ -517,6 +517,10 @@ The **Skynet Motorized Ball Valve Device** (a Device, Rule 1.2: it has a pin) is
 **Master H** (Horizontal), **Daughter VL** (Vertical) and **Daughter VR** (Vertical, Flip Horizontal on).
 Its picture, Kind, Valve type and Service are fixed (a High Temperature valve is a different Skynet
 Template, even if only the Service differs). (2026-10-28, thread "Lock Skynet Widget Templates and IPs")
+**The words Master and Daughter are never shown** (Fritz, 2026-11-03: "follow the Rule with Master and Daughter, but don't label
+them as such"). The add lists show **one entry per valve** (its Master); its **Orientation** dropdown (Horizontal, Vertical Left,
+Vertical Right, Front, Front Elbow, 45 degrees) picks the Daughter, and the picture and its IPs follow. Titles read
+"valve: Orientation". On the Build Template Tab the Master is the **Main Template**. (thread "Explain Master and Daughter in Valve list")
 
 5.18 **Build Template Tab** (Admin only): where a Template is made or edited, with all its Properties and,
 on each attribute, a **"user can set"** tick box (shown on User versions, Rule 5.16). During the building
@@ -561,6 +565,14 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
   be useful to a user (a pipe is where it is drawn), so they are **hidden** in its dialog. (Fritz changed this 2026-11-03: first he had
   the Name and Label greyed out too.)
 - Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
+
+5.22 **Proportional Valves** (Fritz, 2026-11-03, thread "Add BruControl KLD20T proportional valve", Help 117). The Valves list has
+**Skynet Proportional Valves** for valves on the market and one **User Defined Proportional Valve** for any other. The first
+Skynet one is the **BruControl KLD20T** (1/2" NPT, SS304, 24 VDC, 0-5 VDC signal): an Analog Output, 0-100 %, a Skynet Template
+set under Rules 5.16 and 5.17 (one entry, Orientation Horizontal / Vertical Left / Vertical Right / 45 degrees; its signal and
+range are fixed). The User Defined Proportional Valve replaces "Proportional valve 0-100 % (analog output)": its own pictures,
+signal and range, and In / Out IP spots like the User Defined Motorized Ball Valve. More Skynet Proportional Valves only when
+Fritz names them, and no new pictures without his word (Rule 13.3).
 
 ## 6. Devices, connections and safety
 
@@ -1237,3 +1249,8 @@ until 💾 Save on the dialog. (Help 115)
   Size greyed out) and the pipe exception under Rule 4.1. Help 116; next free Help number 117. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-03: Rule 5.21 changed (Fritz): pipes and hoses keep an editable Label and Show label (the general Rule); only Position and Size
   are hidden. Added to How Rules work: following the Rules is the standard; an exception only for what no user would find useful.
+- 2026-11-03: Rule 5.17: Master and Daughter are kept underneath but never shown; one entry per Skynet valve in the add lists,
+  Orientation picks the Daughter and the picture and IPs follow; titles "valve: Orientation"; Build Template says Main Template. Help 88,
+  89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
+- 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
+- 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")

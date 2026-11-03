@@ -837,6 +837,18 @@ const flipPt = e => {
   const gm = elGeom(e), cx = (gm.x || 0) + (gm.w || 120) / 2, cy = (gm.y || 0) + (gm.h || 60) / 2;
   return c => [e.flipH ? Math.round(2 * cx - c[0]) : c[0], e.flipV ? Math.round(2 * cy - c[1]) : c[1]];
 };
+// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): its In and Out IPs go where the user sets them on its picture, in % of
+// the item's width (across, from the left) and height (down, from the top). Both blank = Skynet finds them as before.
+const IP_AT_FIELDS = [['_ipat', 'In and Out IPs: where the two pipe ends are on the picture, in % of its Width (across, from the left) and Height (down, from the top). Leave them blank and Skynet finds them.', 'note'],
+  ['ipInX', 'In IP across % (0 = left edge, 100 = right edge)', 'num'], ['ipInY', 'In IP down % (0 = top, 100 = bottom)', 'num'],
+  ['ipOutX', 'Out IP across %', 'num'], ['ipOutY', 'Out IP down %', 'num']];
+const pctOk = v => v !== undefined && v !== null && v !== '' && Number.isFinite(+v);
+function ipAt(e, end) {
+  const x = e[end === 'in' ? 'ipInX' : 'ipOutX'], y = e[end === 'in' ? 'ipInY' : 'ipOutY'];
+  if (!pctOk(x) || !pctOk(y)) return null;
+  const gm = elGeom(e), cl = v => Math.max(0, Math.min(100, +v)) / 100;
+  return [Math.round((gm.x || 0) + cl(x) * (gm.w || 120)), Math.round((gm.y || 0) + cl(y) * (gm.h || 60))];
+}
 const devIps = e => {
   if (isProbeTee(e)) {            // a tee with a Temperature Probe: an IP at the center of each open ferrule face, flow either way (Rule 5.20)
     const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 170, hh = gm.h || 85, fl = flipPt(e);
@@ -850,8 +862,8 @@ const devIps = e => {
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
   const pe = picEnds(e), fl = flipPt(e);
-  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
-    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
+  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(ipAt(e, 'in') || pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
+    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(ipAt(e, 'out') || pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
 };
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
@@ -2251,7 +2263,8 @@ const ADD_MENU = [
     ['Analog output 4-20 mA (PWM-to-4-20mA module)', 'analogOut', 'AO', { signal: '4-20mA', rangeLow: 0, rangeHigh: 100, units: '%' }],
     ['Pump (relay output with inlet and outlet IPs for pipes)', 'pump', 'Pump'],
     ['Valve (relay output with an IP at each end)', 'valve', 'Valve'],
-    ['Proportional valve 0-100 % (analog output)', 'propValve', 'PropValve'],
+    // was "Proportional valve 0-100 % (analog output)" (Fritz, 2026-11-03): the user's own proportional valve, beside the Skynet ones
+    ['User Defined Proportional Valve 0-100 % (analog output): your own picture, you set its In and Out IPs', 'propValve', 'PropValve'],
   ]],
   ['Devices: control outputs (switch a pin by themselves)', [
     ['Duty cycle (on for a % of each cycle)', 'dutyCycle', 'Duty'],
@@ -2370,7 +2383,21 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
 const fromSkyTpl = e => !!(e?.template && e.templateCls === 'skynet' && !e.kind);
 const skyDev = e => fromSkyTpl(e) && !!devTemplate(e);
 const devTemplate = e => TPL?.device?.find(t => t.name === e.template) || null;
-const SKY_DEV_ROWS = () => (TPL?.device || []).filter(t => t.cls === 'skynet').map(t => [t.title || t.name, 'skyDevice', 'Valve', { template: t.name }]);
+// One row per Skynet valve (Fritz, 2026-11-03): the add lists show only the main Template (Rule 5.17's Master, never called that);
+// its other ways of standing (Rule 5.17's Daughters) are picked with Orientation in its Properties.
+// type: only that Device type (the On/Off list takes the on / off valves; a Skynet Proportional Valve is an analogOut, Valves list only).
+// The on / off valves come first, then the Proportional Valves.
+const SKY_DEV_ROWS = type => (TPL?.device || []).filter(t => t.cls === 'skynet' && !t.master && (!type || (t.type || 'digitalOut') === type))
+  .sort((a, c) => (a.type === 'analogOut') - (c.type === 'analogOut'))
+  .map(t => [skyFamily(t), 'skyDevice', t.type === 'analogOut' ? 'PropValve' : 'Valve', { template: t.name }]);
+const skyFamily = t => String(t.title || t.name).split(':')[0].trim();
+const ORIENT_WORDS = { H: 'Horizontal', VL: 'Vertical Left', VR: 'Vertical Right', Front: 'Front', Front_Elbow: 'Front Elbow' };
+const skyOrientLabel = t => String(t.title || '').includes(':') ? t.title.split(':').slice(1).join(':').trim() : ORIENT_WORDS[t.name.split('_Valve_')[1]] || t.name;
+// a Template's whole set: its main Template first, then the others in the order they ship
+function skySet(t) {
+  const main = t.master || t.name, all = TPL?.device || [];
+  return [all.find(x => x.name === main), ...all.filter(x => x.master === main)].filter(Boolean);
+}
 // a new User version: the Template's attributes, then the Add Device box as for any Device
 function skyDevPreset(name) {
   const t = TPL?.device?.find(x => x.name === name);
@@ -2388,23 +2415,40 @@ function tapChoices(e) {
   const [lo, hi] = first ? ['in', 'out'] : ['out', 'in'];
   return [['', 'Needs setting'], [lo, v ? 'Tap Water Source Top' : 'Tap Water Source Left'], [hi, v ? 'Tap Water Source Bottom' : 'Tap Water Source Right']];
 }
+// Orientation (Fritz, 2026-11-03): one pick for how the valve stands. Each choice is one Template of the set, so the picture and
+// its IPs follow; the main Template also turns 45 degrees (Rule 5.5).
+const orientPick = it => it.template + (it.orientation === 'r45' ? '|r45' : '');
+function skyOrientSwitch(it) {
+  if (it._orient === undefined || it._orient === orientPick(it)) return;
+  const [name, r45] = it._orient.split('|'), to = TPL?.device?.find(x => x.name === name);
+  if (!to) return;
+  it.template = name;
+  const p = to.props || {};
+  for (const k of ['orientation', 'flipH', 'flipV', 'w', 'h']) { if (p[k] !== undefined) it[k] = p[k]; else if (k === 'flipH' || k === 'flipV') delete it[k]; }
+  if (r45) it.orientation = 'r45';
+}
 function skyDevFields(it, f) {
-  const t = devTemplate(it), ok = new Set(t.userFields || []);
+  skyOrientSwitch(it);
+  it._orient = orientPick(it);
+  const t = devTemplate(it), ok = new Set(t.userFields || []), set = skySet(t);
+  const rank = x => { const i = ['H', 'VL', 'VR', 'Front', 'Front_Elbow'].indexOf(x.name.split('_Valve_')[1]); return i < 0 ? 9 : i; };
+  const sorted = [...set].sort((a, c) => rank(a) - rank(c)), main = set[0];
+  const choices = [...sorted.map(x => [x.name, skyOrientLabel(x)]), ...((main?.userFields || []).includes('orientation') ? [[main.name + '|r45', '45 degrees']] : [])];
   if (it._tapFor === undefined) it._tapFor = tapKey(it);
   else if (it.tapwater && it._tapFor !== tapKey(it)) { it.tapSource = ''; it._tapFor = tapKey(it); }    // turned or flipped: the tap end Needs setting again
   const own = {
-    orientation: [['orientation', 'Orientation (the picture and its IPs follow)', 'sel', [['h', 'Horizontal'], ['v', 'Vertical'], ['r45', '45 degrees']], true],
-      ['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
+    orientation: [['flipH', 'Flip Horizontal (mirror left and right)', 'bool', undefined, true], ['flipV', 'Flip Vertical (mirror top and bottom)', 'bool', undefined, true]],
     tapwater: [['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true],
       ...(it.tapwater ? [['tapSource', 'Tap water flows out of (a tap water valve only; the other end is the tap): pick the tap end', 'sel', tapChoices(it)]] : [])],
     onText: [['showOnOffText', 'Text On/Off (on = the On or Off text shows on the Tab)', 'bool', undefined, true],
       ...(it.showOnOffText ? [['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']] : [])],
   };
-  const out = [['_sky', `Made from the Skynet Template ${t.title || t.name}. Its picture, Kind, Valve type, Service and look are set by the Template and can't be changed here (Rule 5.16).`, 'note']];
+  const out = [['_sky', `Made from the Skynet Template ${skyFamily(t)}. Its picture, Kind, Valve type, Service and look are set by the Template and can't be changed here (Rule 5.16).`, 'note'],
+    ...(choices.length > 1 ? [['_orient', 'Orientation (the picture and its IPs follow)', 'sel', choices, true]] : [])];
   for (const x of f) {
     const k = x[0];
     if (own[k]) { if (ok.has(k)) out.push(...own[k]); continue; }
-    if (['flipH', 'flipV', 'tapSource', 'tapwaterOut', 'showOnOffText', 'offText'].includes(k)) continue;
+    if (['flipH', 'flipV', 'tapSource', 'tapwaterOut', 'showOnOffText', 'offText', '_ipat'].includes(k)) continue;
     if (k === '_tb' || (k.startsWith('_') && !['_ovn', '_hint'].includes(k)) || ok.has(k)) out.push(x);
   }
   if (ok.has('tapwater') && !f.some(x => x[0] === 'tapwater')) out.push(...own.tapwater);
@@ -2421,13 +2465,14 @@ const am = label => ADD_MENU.flatMap(([, items]) => items).find(it => it[0].star
 const amGroup = start => ADD_MENU.find(([g]) => g.startsWith(start))?.[1] || [];
 const PUMP = ['Pump, on / off (relay or SSR)', 'pump', 'Pump'];
 const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: 'Images/Skynet/Pumps/Pump_Sump_On.svg', imageOff: 'Images/Skynet/Pumps/Pump_Sump_Off.svg' }];
-const VALVE = ['Motorized valve, open / closed (relay)', 'valve', 'Valve'];
+const VALVE = ['User Defined Motorized Ball Valve, open / closed (relay): your own picture, you set its In and Out IPs', 'valve', 'Valve'];
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
 const DEV_TYPES = () => [
-  ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, ...SKY_DEV_ROWS(), VALVE, ELEMENT]],
+  ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, ...SKY_DEV_ROWS('digitalOut'), VALVE, ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
-  ['valves', 'Valves', [...SKY_DEV_ROWS(), VALVE, am('Proportional valve')]],
+  // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
+  ['valves', 'Valves', [...SKY_DEV_ROWS(), VALVE, am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
   ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), am('Electric kettle, basic')]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
@@ -2436,7 +2481,7 @@ const DEV_TYPES = () => [
   ['sensors', 'Sensors (pressure, level, pH, flow)', amGroup('Devices: analog sensors')],
   ['motors', 'Motors', amGroup('Devices: motors')],
   ['weight', 'Weight', amGroup('Devices: weight')],
-].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], () => addThing(r[1], r[2], r[3], r[0])])]);
+].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], typeof r[1] === 'function' ? r[1] : () => addThing(r[1], r[2], r[3], r[0])])]);
 const WGT_TYPES = () => [
   ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
@@ -3355,6 +3400,7 @@ const F = {
   shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
+    ...IP_AT_FIELDS,
     ['service', 'Service (what flows through it; a Gas valve can heat a vessel)', 'sel', [['', '(not set)'], ...Object.entries(VALVE_SERVICE)]], ['tapwater', 'Tap water valve (open = tap water flows, no pump needed)', 'bool', undefined, true], ['tapwaterOut', 'Tap water flows out of (a tap water valve only; the other end is the tap)', 'sel', TAP_OUT], ...VALVE_LIST_FIELDS(it)] : []), ['device', 'Device', 'dev'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital'], ['activeLow', 'Invert (pin LOW = on)', 'bool'], ['oneShot', 'One-shot time in ms (0 = off)', 'num'], ['oneShotDirection', 'One-shot pulses OFF (off = pulses ON)', 'bool'], ['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick'], ['onText', 'Text when on', 'text'], ['offText', 'Text when off', 'text']],
   // Semi_Widgets_Devices (Fritz, 2026-11-02, Rule 1.20): Device controlled first (None = it only shows its own .state)
   switch: SEMI_FIELDS('switch'), pushButton: SEMI_FIELDS('pushButton'), pulseButton: SEMI_FIELDS('pulseButton'), led: SEMI_FIELDS('led'),
@@ -3416,7 +3462,7 @@ const F = {
     ['color', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES.filter(c => c[0])],
     ['_pb', 'Properties', 'box'], ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']],
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
-  propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path']],
+  propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path'], ...IP_AT_FIELDS],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
@@ -4577,6 +4623,7 @@ async function editItem(kind, id) {
       if (skyDev(work)) {        // a User version of a Skynet Template: its fixed attributes stay the Template's (the Brain checks it too)
         if (work.tapwater && work._tapFor !== tapKey(work)) work.tapSource = '';
         delete work._tapFor;
+        skyOrientSwitch(work); delete work._orient;
         if (!work.flipH) delete work.flipH; if (!work.flipV) delete work.flipV;
         applyDeviceTemplate(work, devTemplate(work));
       }
@@ -6879,8 +6926,8 @@ function renderBuildTemplateTab(box) {
   const work = { title: t.title || '', master: t.master || '', notes: t.notes || '', picH0: t.pics?.h?.[0], picH1: t.pics?.h?.[1], picV0: t.pics?.v?.[0], picV1: t.pics?.v?.[1] };
   const head = h('div', { class: 'btHead' });
   bindForm(head, [['title', 'Title (shown in the Add Device lists)', 'text'],
-    ['master', 'Master Template (a Daughter keeps only what differs from it)', 'sel', [['', '(none: this is a Master)'], ...masters.map(m => [m.name, m.title || m.name])]],
-    ['_p', 'Pictures: the picture follows the Orientation (45 degrees turns the vertical one). Leave empty on a Daughter to use its Master\'s.', 'note'],
+    ['master', 'Main Template (set it when this Template is another Orientation of that valve: it keeps only what differs)', 'sel', [['', '(none: this is a main Template)'], ...masters.map(m => [m.name, m.title || m.name])]],
+    ['_p', 'Pictures: the picture follows the Orientation (45 degrees turns the vertical one). Leave empty on another Orientation to use its main Template\'s.', 'note'],
     ['picH0', 'Horizontal, picture when on', 'gpick'], ['picH1', 'Horizontal, picture when off', 'gpick'], ['picV0', 'Vertical, picture when on', 'gpick'], ['picV1', 'Vertical, picture when off', 'gpick'],
     ['notes', 'Notes', 'text']], work);
   const props = clone(t.props || {}), user = new Set(t.userFields || []), master = t.master && list.find(x => x.name === t.master);
@@ -6907,7 +6954,7 @@ function renderBuildTemplateTab(box) {
   });
   const del = h('button', { class: 'danger', disabled: !t.deletable, title: t.deletable ? '' : 'Shipped Skynet Templates are never deleted' }, '🗑 Delete');
   del.onclick = guard(async () => { if (!confirm(`Delete the Template ${t.name}?`)) return; setTPL(await api('DELETE', '/ui/templates/device/' + encodeURIComponent(t.name))); btPick = null; renderMenuPane(); fillAddType(); });
-  box.append(h('div', { class: 'bar' }, save, del, master ? h('span', { class: 'muted' }, `Daughter of ${master.title || master.name}: only what differs from it is kept.`) : ''), head,
+  box.append(h('div', { class: 'bar' }, save, del, master ? h('span', { class: 'muted' }, `An Orientation of ${skyFamily(master)}: only what differs from it is kept.`) : ''), head,
     h('h3', {}, 'Attributes'), grid, h('div', { class: 'bar' }, save.cloneNode(true)));
   box.lastChild.firstChild.onclick = save.onclick;
 }
