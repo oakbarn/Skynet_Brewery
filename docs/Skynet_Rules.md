@@ -65,7 +65,7 @@ industrial PLCs. They connect by USB, and by Ethernet where the board has it. (2
 desktop or laptop). The Brain holds all text, picture and Schema files and every saved value (gGlobals, Rule 1.22) so the panel
 can be reached from anywhere, and everything works the same whichever kind of Brain it is. Arduinos and the other PLCs (Rule 1.6)
 connect to the Brain by USB or Ethernet. For a phone or a browser away from home to reach the panel, the Brain must be running,
-on Tailscale, and connected to the internet. (Fritz, 2026-11-03, thread "Keep gGlobal values after restart")
+on Tailscale, and connected to the internet; this is the same for a Pi Brain and a computer Brain. (Fritz, 2026-11-03, thread "Keep gGlobal values after restart")
 *Replaced:* "The Brain = the main computer: a Raspberry Pi 4 or newer, or a mini PC. The Brain holds all text, picture and
 Schema files so the panel can be reached from anywhere." (2026-10-26)
 
@@ -1270,4 +1270,4 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")
 - 2026-11-03: Added Rule 1.22 (gGlobals are non-volatile: never cleared when a Process starts, saved on the Brain's disk soon after each change, back after a restart; the Keep value on restart switch is gone). Help 118, Help 04 and 108 updated; next free Help number 119. Saving works the same on every Brain (Pi, Windows, Linux, Mac). (thread "Keep gGlobal values after restart")
-- 2026-11-03: Rule 1.7 changed (Fritz): the Brain can be a Raspberry Pi or a Windows, Linux or Mac computer, Arduinos on USB or Ethernet; remote browsers need the Brain running, on Tailscale, with internet. Rule 11.1 next free Help number is 119. (thread "Keep gGlobal values after restart")
+- 2026-11-03: Rule 1.7 changed (Fritz): the Brain can be a Raspberry Pi or a Windows, Linux or Mac computer, Arduinos on USB or Ethernet; remote browsers need the Brain running, on Tailscale, with internet (the same for a Pi or a computer). Rule 11.1 next free Help number is 119. (thread "Keep gGlobal values after restart")
