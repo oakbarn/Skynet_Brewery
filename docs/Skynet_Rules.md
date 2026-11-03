@@ -664,6 +664,16 @@ Motorized Ball Valve) has two switches, **On the Close all valves list** and **O
 **A tap water valve is always on Close all and never on Open all**, and its Properties show this with no switches (the Brain puts it
 back on every save). A Manual valve is on neither list. (thread "Build the Standard Skynet Brew Process", Help 100)
 
+6.16 **Moving from BruControl needs no new hardware (Windows Brain only)** (Fritz, 2026-11-03). Every way a BruControl
+Windows PC connects to its boards has an equal way in Skynet, so a brewer moving from BruControl keeps the same boards, shields,
+wiring and cables: the same board types (Arduino Mega 2560, Adafruit Grand Central M4, ESP32, ESP8266, Feather M0, Arduino Due, and
+the BruControl UniShield / UniFlex built on them), the same links (USB on the same COM port, Ethernet, WiFi), and the same pin
+numbers (BruControl numbering, Rule 6.2). Which pin does what is set from the Brain, never by editing firmware, so anything wired
+for BruControl works as it is. The only change allowed is **loading Skynet firmware onto the board once**, over its USB cable, from
+inside Skynet (no Arduino IDE), with WiFi or network settings set the same way. Skynet does not copy BruControl's private firmware
+language. This Rule is for a Windows Brain only, because BruControl runs only on Windows. Gaps and plan: docs/BruControl_Connections.md.
+(thread "Match BruControl's Arduino connections on Windows")
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -1254,3 +1264,4 @@ until 💾 Save on the dialog. (Help 115)
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")
+- 2026-11-03: Added Rule 6.16 (moving from BruControl on a Windows Brain needs no new hardware: same boards, links, COM ports, wiring and pin numbers; only a one-time Skynet firmware load from inside Skynet). Gap report docs/BruControl_Connections.md. No Help number used. (thread "Match BruControl's Arduino connections on Windows")
