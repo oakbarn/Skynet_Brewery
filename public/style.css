@@ -978,3 +978,16 @@ dialog.pumpPick { max-width: 560px; width: calc(100% - 32px); }
 .pumpPickRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; padding: 4px 10px; }
 .pumpPickRow img { width: 72px; height: 48px; object-fit: contain; flex: none; }
 input.roField { opacity: .6; }
+/* Rule 18.16 (Fritz, 2026-11-04): a short field name; hover or tap it for its tip */
+label.tipLbl { cursor: help; text-decoration: underline dotted rgba(127,127,127,.6); text-underline-offset: 3px; }
+dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
+.fldPair { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.fldPair > select:first-child { flex: 1; min-width: 0; }
+.fldPair .pairLbl { white-space: nowrap; font-size: .9em; opacity: .8; }
+.fldPair select.pinSel { flex: none; width: 110px; }
+/* the Graphic shown on a Device dialog with its Orientation (Rule 18.19) */
+.devPreviewWrap { display: flex; align-items: center; justify-content: flex-start; min-height: 60px; }
+.devPreview { position: relative; display: inline-block; line-height: 0; background: var(--panel2, transparent); border-radius: 6px; }
+.devPreview img { height: 120px; width: auto; max-width: 220px; display: block; }
+.devPreview .pvCover { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+button.waitStep { opacity: .55; }
