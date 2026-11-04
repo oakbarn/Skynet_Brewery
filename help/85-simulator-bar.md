@@ -4,8 +4,9 @@ While the panel is in **Simulator mode** (🧪 beside ☰ Menu), a yellow stripe
 
 ## Hide or Show it
 
-- Press **▴ Hide** at the right end of the bar to tuck it away. A thin **🧪 SIMULATION** strip stays, so everyone can still see that nothing real is switched.
-- Press **▾ Show Simulator bar** on that strip to get the whole bar back.
+- Press **▴ Hide** at the right end of the bar (or **☰ Menu > 🧪 Hide Simulator bar**). The bar is gone completely, so the Panel has the whole window.
+- While it is hidden, a small **🧪** shows on the **☰ Menu** button, so you can still see that nothing real is switched.
+- **☰ Menu > 🧪 Show Simulator bar** brings the whole bar back. It is in the ☰ Menu only in Simulator mode.
 - Hiding and showing **changes nothing**: the Speed and Auto skip stay as you set them.
 - It is remembered on this computer or phone only. Each screen can hide it or not.
 - Switching to the Simulator again always shows the bar.
