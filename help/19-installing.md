@@ -83,6 +83,9 @@ Use Raspberry Pi OS (64-bit recommended) on a Pi 4 or newer.
 | Start it again | `sudo systemctl start skynet-brewer` |
 | See its messages | `journalctl -u skynet-brewer -f` |
 
+**Moving from a computer Brain to a Pi?** Install the Pi like this, then use **☰ Menu > Move Brain** to bring everything over
+from the computer: Schemas, settings, Processes, pictures, saved values, logins and the brew log. See [Move Brain](119-move-brain).
+
 ## The first time
 
 The panel asks you to create the **admin account**, then shows a **recovery code**. Save it: it's how you get back in if you forget the password. See [Login, users and passwords](10-login). To reach the panel away from home, use Tailscale: see [Installing Tailscale on Windows](00-tailscale-windows). Never open a port on your router for it.
