@@ -272,9 +272,12 @@ of the list) and can change or delete only those. First used on the **Timer Widg
 background**: its look is its Style. (Help 92)
 
 2.25 **Close Skynet Brewer** (Admins) is the last ☰ Menu choice. It stops the panel after asking, and the
-launcher (Skynet_Brewer.bat) then closes its Command Prompt window; every open page shows "Skynet Brewer is closed".
-Closing a browser tab never stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread
-"Close the command window on exit")
+Command Prompt window that started it closes too, **whatever .bat started it** (Skynet_Brewer.bat, an older .bat in
+C:\Brewing, or npm start typed in a Command Prompt): the panel ends that Command Prompt itself as it stops (2026-11-04).
+Only the Command Prompt and npm under it are ended, never Windows Terminal or anything above it. Every open page shows
+"Skynet Brewer is closed". The window stays open when the panel stops because of an error. Closing a browser tab never
+stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread "Close the command window on
+exit"; 2026-11-04, thread "Close the Command Prompt with Skynet")
 
 2.26 **The Override button** (Fritz, 2026-10-30): one press lets every running Process move on, like the Simulator's skip
 with a 100 ms delay: a wait or sleep it is held in is passed, and the loop it sits in (a goto back up, often in an if) is left; the
@@ -1217,11 +1220,34 @@ so nothing conflicts, and the Suggested Name still uses the Type (Pump). General
 DUTY (Duty Cycle) and PID proposed, waiting on Fritz's OK. A type with no sub-type shows only its General Type.
 
 18.19 **A Device dialog shows its Graphic with its Orientation** (Fritz, 2026-11-04, the Pump first): the Add box and the
-Properties show the **Graphic** (the picture as it will be on the Tab, with its Cover) and an **Orientation** dropdown (Normal,
-Flip Horizontal, Flip Vertical, Flip both). Changing the Orientation flips the Graphic on the dialog and the Device on the Tab,
+Properties show the **Graphic** (the picture as it will be on the Tab, with its Cover) and an **Orientation** dropdown (a pump: **Right**, as
+drawn, or **Left**, mirrored; Fritz's screens 7-9). Changing the Orientation flips the Graphic on the dialog and the Device on the Tab,
 and its IPs follow (Rule 5.5). A **Skynet pump drawing's Graphic is set**: no path is offered (Rule 5.6), the Picture is shown
 greyed out with its pump name. A **User pump** (its own picture) has **one path only**, its Image Path (an exception to Rule
 7.10's three paths). Cover is for the Skynet pump drawings only (Rule 7.13). (Help 115)
+
+18.20 **Focus and the Enter key in a dialog** (Fritz, 2026-11-04, his Blichmann Pump Sequence 1-9,
+[docs/Blichmann_Pump_Sequence.png](Blichmann_Pump_Sequence.png)): the field with the focus has a **blue border**. Inside a dialog
+**Tab** moves field to field and **Enter jumps to the next field** (from the last field to the Save button); Enter no longer
+saves from a field. **Exception, a new Device:** until it is added, Enter (or picking from one of its dropdowns) jumps to the next
+field of its sequence: 1 Label, 2 Interface, 3 Available Ports, 4 Tab, then Orientation (a Pump), then the **➕ Add Device**
+button, where Enter adds it. The Name, Cover, X, Y, Width and Height are skipped by Enter (Tab or a click reaches them). The box
+opens with the focus on the first empty field of the sequence. Arrow keys change a dropdown without jumping on. (Help 82)
+
+18.21 **Pump Device Properties are Fritz's screen 9** (2026-11-04, [docs/Blichmann_Pump_Sequence.png](Blichmann_Pump_Sequence.png)):
+the title is the pump (e.g. **Blichmann Riptide** ?) with the 🔓 lock, **Visible** and **Hidden Locked** on the title line; 🗑 Delete,
+✖ Cancel, 💾 Save; **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface (board)** with **Available Ports** on the same line
+(greyed out with ✏ Change, Rule 18.13); **3. Tab**; **4. Name** and the Suggested Name; the **Graphic**; its **Path** (greyed out on a
+Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Cover** with **Toggle** (On/Off, Push
+button, None: what a tap does) on the same line; **X, Y, Width, Height**; the **Database and .API** box (Rule 6.14); the **Device
+Type** (DO: Pump) greyed out last. A User pump has the same Properties. **Only these** belong to a Pump: the old Hidden Locked row,
+Pump Properties ⬢, Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind, Picture ⬢, Background picture ⬢ and Text when on / off are gone
+from its dialog (what a Pump already has set is kept). The On / Off text is shown with an **Overlay** instead (Rule 7.13).
+*Replaced:* for the Pump, Rule 18.12's list of fields (2026-11-03).
+
+18.22 **Each Device and Widget has only its own Properties** (Fritz, 2026-11-04): besides the Universal Properties (Rule 1.21),
+a Device or Widget may have a limited set of attributes and Properties, only the ones that fit it (the Pump: Rule 18.21). Other
+dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 
 ---
 
@@ -1432,5 +1458,8 @@ greyed out with its pump name. A **User pump** (its own picture) has **one path 
 - 2026-11-04: Added Rule 18.19 (a Device dialog shows its Graphic with its Orientation; a Skynet pump's Graphic is set, a User pump has one path). Rule 7.10: exception, a User pump has one path. Rule 18.15: ➕ Add Device stays pressable and says what is still missing (Fritz: "Add Device button does not work"). Help 82 and 115 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Rule 5.9 changed (Fritz picked the recommended wording): pumps have an Orientation (Flip Horizontal / Vertical, Rule 18.19); the rest of 5.9 stays. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 5.23 (valves and pumps sit centered on their pipes: the valve or pump moves across onto the pipe's line, the pipes stay; the older ball valve pictures have their pipe spot) and Rule 7.15 (powered valves and pumps flash a red and yellow lightning bolt On overlay when On; once per Schema for those with no overlay). Help 121, Help 58 updated; next free Help number 122. (thread "Center pumps and valves on pipes")
+- 2026-11-04: Added Rule 18.20 (blue border on the field with the focus; Tab and Enter go field to field in a dialog; a new Device's Enter sequence Label, Interface, Ports, Tab, Orientation, Add Device). Help 82 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Added Rules 18.21 (Pump Device Properties = Fritz's screen 9; only those) and 18.22 (besides the Universal Properties each Device and Widget has only its own set). Rule 18.19: a pump's Orientation is Right / Left (Fritz's screens 7-9). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Rule 7.15 changed (Fritz): the default On overlay for powered valves and pumps is the steady red and yellow bolt (Overlay_Bolt.svg); the flashing bolt is only a choice. Schemas given the flashing bolt are changed once. Help 58 and 121 updated; no new Help number. (thread "Center pumps and valves on pipes")
 - 2026-11-04: Added Rule 2.34 (the selected choice in every dropdown has a Cyan background; not possible on iPhone Safari or older browsers). (thread "Make selected dropdown items cyan")
+- 2026-11-04: Changed Rule 2.25 (Close Skynet Brewer now closes the Command Prompt window itself, whatever .bat started the panel, not only the new Skynet_Brewer.bat). Help 95 updated; no new Help number. (thread "Close the Command Prompt with Skynet")
