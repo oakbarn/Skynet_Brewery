@@ -249,7 +249,8 @@ STEP 7. RUN THE FIRST TIME INSTALL FILE
   [ ] Windows Security may ask "Allow Node.js JavaScript Runtime on your networks?"
       Tick "Private networks" ONLY, then click "Allow". This lets your phone and
       other PCs at home reach the panel.
-  [ ] After a few seconds your browser opens  http://localhost:8080  with the panel.
+  [ ] After a few seconds the panel opens in its own clean window (Edge or Chrome,
+      no address bar or bookmarks). Your normal browser is not changed.
 
   The black window IS the panel. Keep it open the whole time you brew.
   Closing it, or pressing Ctrl+C in it, stops the panel.
@@ -301,7 +302,7 @@ STEP 8. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
 STEP 9. STARTING THE PANEL EVERY DAY
 ------------------------------------
   [ ] Double-click "Skynet Brewer" on the Desktop. The black window opens and the
-      browser shows the panel after a few seconds.
+      panel's own window opens after a few seconds.
   [ ] If the shortcut is not on the Desktop, make it: open C:\Brewing, right-click
       Skynet_Brewer.bat, choose "Show more options" > "Send to" >
       "Desktop (create shortcut)". Rename the shortcut to  Skynet Brewer
