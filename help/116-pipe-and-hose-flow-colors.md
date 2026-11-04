@@ -12,11 +12,11 @@ on the Edit layout bar, right on the Tab where it goes (not on the Build Tab fir
 
 The first one that fits wins:
 
-1. **An IP's Flow Color**, first of all. Flow that begins at an IP whose **Flow Color** is not None takes that color. Example:
+1. **A Tap Water Valve**, first of all. Flow from an open Tap Water Valve is always **Blue**, whatever else is set.
+2. **An IP's Flow Color.** Flow that begins at an IP whose **Flow Color** is not None takes that color. Example:
    set the IP on your HLT's outlet to Red, and the flow leaving it is Red, through the pump and on to wherever it goes.
-2. **A Vessel's Out flow color.** Flow that begins at a Vessel whose **Out flow color** is not None takes that color. Example: set your HLT's Out flow color to Red, and whenever flow starts from the HLT's outlet it is Red,
+3. **A Vessel's Out flow color.** Flow that begins at a Vessel whose **Out flow color** is not None takes that color. Example: set your HLT's Out flow color to Red, and whenever flow starts from the HLT's outlet it is Red,
    through the pump and on to wherever it goes.
-3. **A Tap Water Valve.** Flow from an open Tap Water Valve is always **Blue**.
 4. **The Tab's Flow Color**, when it is **Tap**, **Strike**, a plain color or RGB: every pipe and hose on the Tab takes it.
 5. **The pipe's own Flow Color**, when it is not None.
 6. **The Tab's Flow Color**, when it is **Mash**, **Boil**, **Whirlpool** or **Ferment** (a pipe with its own Flow Color

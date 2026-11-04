@@ -1701,9 +1701,9 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
     link(ci, co, { id: 'check:' + f.id }, true);
   }
   // breadth-first trace from a pump to every plain IP point (or other running pump) it reaches; mark the pipes on each route
-  // where flow began (Rule 5.21): a vessel with an Out flow color wins over a Tap Water Valve
+  // where flow began (Rule 5.21): a Tap Water Valve wins over all, then an IP, then a vessel with an Out flow color
   const pumpSrc = new Map();                     // a running pump -> where the flow it pulls in began
-  const rank = o => o?.ip ? 3 : o?.vessel ? 2 : o?.tap ? 1 : 0;       // an IP's color, then a Vessel's, then tap water
+  const rank = o => o?.tap ? 3 : o?.ip ? 2 : o?.vessel ? 1 : 0;       // tap water (always Blue, #1, Fritz 2026-11-04), then an IP's color, then a Vessel's
   const better = (a, b) => rank(b) > rank(a) ? b : a;
   const originOf = key => {
     const n = nodes.get(key); if (isTapNode(key, n)) return { tap: true }; if (n?.push) return pumpSrc.get(devOfIp(key)) || null;
