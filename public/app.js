@@ -2655,7 +2655,7 @@ async function newDeviceDialog(e, hint, what) {
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [[...COVER_FIELDS({})[0].slice(0, 1), 'Cover', 'sel', COVER_CHOICES, false, false, { tip: T.cover, ...after }], ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
-    ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro', null, false, false, { tip: T.type }]] : [])];
+    ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : '') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
@@ -3750,7 +3750,7 @@ function pumpDeviceFields(it, item) {
     ['label', 'Label', 'text', null, false, 'b', { up: 2, attr: LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
     ['name', 'Name', 'text', null, false, 'b'],
     ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
-    ['typeCode', 'Device Type', 'ro'],
+    ['typeCode', 'Device Type', 'ro', shownType(it)],
     ['_pb', 'Pump', 'box'], ['device', 'Interface (board)', 'dev', 'addnew', false, 'b', { set: true }], ['channel', 'Port (pin, e.g. 22, or A5 = 59)', 'pin', 'digital', false, 'b', { set: true, attr: DEV_PORT_POP }],
     ['workspace', 'Tab', 'ws', null, false, 'b'], ['x', 'X (Horizontal)', 'num'], ['y', 'Y (Vertical)', 'num'], ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held)'], 'dialog', ['script', 'process'], ['workspace', 'tab']], false, false, { attr: DEV_TAP_POP }],
@@ -3840,6 +3840,10 @@ function field(f, obj) {
   }
   return out;
 }
+// Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. Only shown; the Device
+// keeps its type (digitalOut ...) and Device Type ID (Pump) as they are saved.
+const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID' };
+const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || ''; return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
   const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', {}, text),
@@ -3855,7 +3859,7 @@ const DEVICE_TIPS = {
   port: 'Available Ports: only the free pins on this board that fit this Device (for example 22, or A5 = 59).',
   tab: 'The Tab this Device goes on. Its Tab ID ends the Suggested Name. ➕ Add new Tab… makes a new Tab and comes back here.',
   name: 'Made from the Label, Interface, Port, Device Type and Tab. You may type your own; it must be unique.',
-  type: 'Comes from the list it was picked in. It is part of the Suggested Name.',
+  type: 'Its General Type first (DO = Digital Out, PWM, HYS ...), then its Device Type, which comes from the list it was picked in and is part of the Suggested Name.',
   cover: 'A colored cover drawn over the pump picture (the Skynet pump drawings only). None to start.',
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
