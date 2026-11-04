@@ -1,6 +1,6 @@
 # Edit layout bar
 
-The **Edit layout** bar (press the navy blue Edit layout button beside **☰ Menu**) has three rows (Fritz, 2026-10-28). Everything new is made on the 🔨 [Build Tab](55-build-tab) first (Rule 4.1); **💾 Save Build ...** then puts it on a Tab.
+The **Edit layout** bar (press the navy blue Edit layout button beside **☰ Menu**) has three rows (Fritz, 2026-10-28). A new Device goes straight on the Tab picked in its Add Device box (Rule 4.1, Fritz 2026-11-04); other new things are made on the 🔨 [Build Tab](55-build-tab) first, and **💾 Save Build ...** then puts them on a Tab.
 
 | Row | What is on it |
 |---|---|
@@ -35,15 +35,15 @@ These are short cuts. Clicking **Pumps** shows only the pump list: the same as p
 
 Picking a Device opens the **Add Device** box. Fill it from the top:
 
-1. **Interface** (the board). The last line, **➕ Add new Interface…**, adds a board.
-2. **Available Ports / Pins**: only the free pins that fit this Device.
-3. **Suggested Name**: made from the Interface, pin, type and Label. You may type your own (the panel warns you, see [Interfaces](76-interfaces)).
-4. **Label**: the text shown on the Tab. Or switch **Show label** off for no Label.
-5. **Width** and **Height**: 150 x 150 to start. Change them now or later.
+1. **Label**: the text shown on the Tab. Or switch **Show label** off for no Label.
+2. **Interface** (the board). The last line, **➕ Add new Interface…**, adds a board.
+3. **Available Ports / Pins**: only the free pins that fit this Device.
+4. **Tab**: the Tab it goes on. It starts with the Tab you were on.
+5. **Suggested Name**: made from the Label, Interface, pin, type and Tab, in that naming order. It shows once 1-4 are done. You may type your own (the panel warns you, see [Interfaces](76-interfaces)).
 
-When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line is asked after the Interface.
+Then **Width** and **Height** (150 x 150 to start). When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line comes after the Interface.
 
-**➕ Add Device** (at the top and at the bottom) works once the Label is typed or Show label is off. **✖ Cancel** adds nothing. After Add Device the rest of its Properties open, and the Device sits in the middle of the Build Tab. If **☰ Menu > Default** sets where new things go (X and Y), it goes there instead.
+**➕ Add Device** (at the top and at the bottom) works once 1-4 are done. **✖ Cancel** adds nothing. After Add Device the Device is on the Tab you picked and the rest of its Properties open. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
 
 ## Widgets
 

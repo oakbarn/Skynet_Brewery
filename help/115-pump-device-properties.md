@@ -10,9 +10,9 @@ The idea: the things you set most are on the dialog itself. Everything else is o
 1. In Edit layout, click **Pumps > Pump, on / off (relay or SSR)**.
 2. **Pick the pump** from the list. Each one has its picture: March 809 and 815, Chugger, Blichmann Riptide, Topsflo TD5 and
    KegLand MKII. The picture you pick is the pump's Picture.
-3. The Add box opens with the pump's name as its title. Pick the **Interface (board)** and an **Available Port**, type the
-   **Label** (the ⬢ beside it sets its font and colors), and set **Label Visible**, the **Cover**, **X**, **Y**, **Width** and
-   **Height** if you like. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
+3. The Add box opens with the pump's name as its title. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font
+   and colors) and **Label Visible**, 2 the **Interface (board)**, 3 an **Available Port**, 4 the **Tab**. Then 5 the
+   **Suggested Name** shows, made from them. Set the **Cover**, **X**, **Y**, **Width** and **Height** if you like. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
 4. Press **➕ Add Device**. The Properties open. The **Interface** and **Port** are now greyed out and set; press **✏ Change**
    beside one to change it on purpose.
 
