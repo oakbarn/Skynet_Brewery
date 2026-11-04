@@ -466,3 +466,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-03: 4.6 renamed User Defined Proportional Valve (In / Out IP spots); added 4.6a Skynet KLD20T Proportional Valve (Rule 5.22, Help 117). (thread "Add BruControl KLD20T proportional valve")
 - 2026-11-04: 4.2 Pump: adding a Pump, pick the pump with its picture (Rule 18.13). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: 4.3a Skynet Motorized Ball Valve: IPs on the pipe ends at 45 degrees too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
+- 2026-11-04: 4.2 Pump: IPs on the inlet and outlet of every Skynet pump picture, the older Riptide-style ones and the sump pump too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")

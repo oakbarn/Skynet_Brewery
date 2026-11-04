@@ -637,7 +637,7 @@ hose just goes to the IP. The older ball valve pictures (Valve_Ball_..._H_1 and 
 too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides, or where the User Defined valve's In and
 Out IP spots put them.
 
-5.24 **Ball valves have two IPs, one at each pipe end, in every Orientation** (Fritz, 2026-11-04: "Ball Valve Devices and Widgets
+5.24 **Ball valves have two IPs, one at each pipe end, in every Orientation, and every Skynet Pump has IPs on its inlet and outlet** (Fritz, 2026-11-04: "Ball Valve Devices and Widgets
 should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123). Where they go is Rule 5.20.
 - **Skynet Motorized Ball Valve Device:** Horizontal, Vertical Left and Vertical Right on the ends of its pipe, Front both at the
   center of the opening, and **45 degrees on the ends of its pipe, turned with the picture** (before, a 45 degree valve put them on
@@ -649,6 +649,11 @@ should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123).
   (Rule 5.23).
 - Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve is joined to the nearer end (two pipes take one end each)
   when its Tab is shown and when Edit layout opens; Save layout keeps it.
+- **Every Skynet Pump has an IP on its inlet and its outlet** (Fritz, 2026-11-04: "All Skynet Pump should have IPs on the inlet Out
+  Let"), in both Orientations (Right, Left) and with any Cover: on the Skynet pump drawings (March, Chugger, Riptide, Topsflo, KegLand)
+  the tip of each port, as before; on the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, .svg or .png, every color and
+  No Cover) the outer face of the inlet union on the pump head and the top of the outlet pipe; on the sump pump the middle of its
+  screen (inlet) and the top of its riser (outlet). A pump picture of a user's own keeps them on the middle of its sides.
 
 ## 6. Devices, connections and safety
 
@@ -1494,3 +1499,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 2.35 (as a general Rule, phones and tablets are for running and watching the brewery, not for editing or building; a feature that does not work on a phone or tablet is fine under it; nothing is hidden or locked on phones until Fritz says). (thread "Add the phone and tablet editing Rule")
 - 2026-11-04: Rule 2.35: run mode on phones and tablets (Fritz): an admin works as an operator there; the Schema, Processes and Tab buttons work, no Edit layout or Properties; switch "Phones and tablets can edit" (off) on ☰ Menu > Default. Open question 8 answered. Help 45 updated; no new Help number. (thread "Add the phone and tablet editing Rule")
 - 2026-11-04: Added Rule 5.24 (ball valves have two IPs, one at each pipe end, in every Orientation: a 45 degree Skynet valve's IPs turn with its picture; the Manual Valve Widget has two IPs instead of one in its middle; older pipes on its middle join the nearer end). Help 123, Help 87 updated; next free Help number 124 (Help 122 is taken by PR #186). (thread "Add IPs to Ball Valve Devices and Widgets")
+- 2026-11-04: Rule 5.24: every Skynet Pump has IPs on its inlet and outlet (the older Riptide-style pictures and the sump pump now too; Right and Left, any Cover). Help 123 updated. (thread "Add IPs to Ball Valve Devices and Widgets")
