@@ -706,8 +706,9 @@ lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 6.14 **Database and .API on every Device and Widget** (Fritz, 2026-10-30, Help 98). Every Device and Widget
 with a value has a **Database and .API** box at the end of its Properties:
 - **Send to the database**: Off, On demand, On value change (at most 10 a second, the last change never lost),
-  When a Process starts, Once, At a date and time (once), Every N ms / seconds / minutes / hours / days (with an
-  optional clock time), Every 00:00:00. **What to send** is its main value unless another attribute is picked.
+  When a Process starts, Once, At a date and time (once), At clock time (every day at that time), Every N ms /
+  seconds / minutes / hours / days, Every 00:00:00. The **At clock time** box shows only when **At clock time** is
+  picked; the Every choices have no clock time (Fritz, 2026-11-04). **What to send** is its main value unless another attribute is picked.
   `send_db Name` in a Process sends it now, whatever the setting.
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
@@ -1480,3 +1481,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Changed Rule 10.7 (hiding the Simulator bar removes it completely, no strip; ☰ Menu > 🧪 Show / Hide Simulator bar in Simulator mode; small 🧪 on the ☰ Menu button while hidden). Help 85 updated. (thread "Move Show Simulator bar to the ☰ Menu")
 - 2026-11-04: Added Rule 2.35 (as a general Rule, phones and tablets are for running and watching the brewery, not for editing or building; a feature that does not work on a phone or tablet is fine under it; nothing is hidden or locked on phones until Fritz says). (thread "Add the phone and tablet editing Rule")
 - 2026-11-04: Rule 2.35: run mode on phones and tablets (Fritz): an admin works as an operator there; the Schema, Processes and Tab buttons work, no Edit layout or Properties; switch "Phones and tablets can edit" (off) on ☰ Menu > Default. Open question 8 answered. Help 45 updated; no new Help number. (thread "Add the phone and tablet editing Rule")
+- 2026-11-04: Changed Rule 6.14 (new Send to the database choice "At clock time" writes every day at a clock time; the At clock time box shows only for that choice; the Every choices no longer have a clock time, and an older "Every 1 day at 12 AM" becomes At clock time 12 AM). Help 98 updated; no new Help number. (thread "Add At clock time to Send to the database")

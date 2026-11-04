@@ -125,7 +125,7 @@ Add them in **Tabs > Edit layout > Select Widget Type > gGlobal variables** (lis
 
 **Database and .API** (the last box in the Properties of every Device and Widget with a value, gGlobals included):
 
-- **Send to the database**: Off, On demand (`send_db Name` in a process, Log now, or the API), On value change (at most 10 a second), When a Process starts, Once, At a date and time, Every N milliseconds / seconds / minutes / hours / days, or every 00:00:00 (optionally lined up with a clock time, e.g. every 1 day at `12 AM`). **What to send** is its main value or one of its attributes.
+- **Send to the database**: Off, On demand (`send_db Name` in a process, Log now, or the API), On value change (at most 10 a second), When a Process starts, Once, At a date and time, At clock time (every day at a time like `12 AM`), Every N milliseconds / seconds / minutes / hours / days, or every 00:00:00. **What to send** is its main value or one of its attributes.
 - Each reading is kept with its time and the item's hidden key, so a renamed item keeps its history.
 - **.API**: Off, Get only (outside programs read it) or Get and Put (they read and change it), through `/api/items`, MQTT and voice. Ten wrong API keys from one address shut it out for 15 minutes.
 

@@ -18,7 +18,7 @@ A reference list of every Widget in the Skynet Brew Panel and all its settings (
 | X, Y | Position in pixels from the left and from the top. |
 | Width, Height | Size in pixels. |
 | Lock position | No drag or resize. (Lock icon in Properties.) |
-| Database and .API | Every Widget with a value (not pictures, Labels, manual vessels or the Manual Valve Widget). **Send to the database**: Off, On demand, On value change, When a Process starts, Once, At a date and time, Every N ms / seconds / minutes / hours / days, Every 00:00:00; **What to send** (main value or another attribute). **.API**: Off, Get only, Get and Put (Skynet Rule 6.14, Help 98). Always user settable. |
+| Database and .API | Every Widget with a value (not pictures, Labels, manual vessels or the Manual Valve Widget). **Send to the database**: Off, On demand, On value change, When a Process starts, Once, At a date and time, At clock time, Every N ms / seconds / minutes / hours / days, Every 00:00:00; **What to send** (main value or another attribute). **.API**: Off, Get only, Get and Put (Skynet Rule 6.14, Help 98). Always user settable. |
 
 Properties open with a double-click. Delete, Cancel, Save are at the top and bottom of every Properties dialog.
 
