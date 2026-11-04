@@ -102,7 +102,17 @@ test('over an open end the pipe is made shorter; an end on a tee is left alone',
   const r = splitAt([0, 110], [350, 110], box, ports, { bOpen: true });
   assert.equal(r.ok, true); assert.equal(r.mode, 'end'); assert.equal(r.drop, 'B');
   assert.deepEqual(r.pieces, [{ from: 'A', to: 'in', pts: [[0, 110], [300, 110]] }]);
-  assert.equal(splitAt([0, 110], [350, 110], box, ports, { bOpen: false }), null);
+});
+
+test('over an end on a tee: it slides back clear of the tee and both IPs are joined (Fritz: "it needs both IPs")', () => {
+  const box = { x: 300, y: 80, w: 100, h: 60 }, valve = [{ id: 'l', c: [300, 110], f: [-1, 0] }, { id: 'r', c: [400, 110], f: [1, 0] }];
+  const r = splitAt([0, 110], [350, 110], box, valve, { bOpen: false });
+  assert.equal(r.ok, true); assert.equal(r.mode, 'end'); assert.equal(r.drop, null);
+  assert.deepEqual(r.shift, [-115, 0]);                   // its right IP is now 65 short of the tee
+  assert.deepEqual(r.pieces, [{ from: 'A', to: 'l', pts: [[0, 110], [185, 110]] }, { from: 'r', to: 'B', pts: [[285, 110], [350, 110]] }]);
+  const pump = splitAt([0, 110], [350, 110], box, [{ id: 'in', c: [300, 110], f: [-1, 0] }, { id: 'out', c: [380, 80], f: [0, -1] }], { bOpen: false });
+  assert.equal(pump.ok, true); assert.equal(pump.pieces.at(-1).to, 'B'); assert.deepEqual(pump.pieces.at(-1).pts[1], [350, 110]);
+  assert.equal(splitAt([250, 110], [350, 110], box, valve, { bOpen: false }).ok, false);     // too short to put it in
 });
 
 test('nothing is cut when the pipe passes by, is at 45, or there is no room to go round', () => {

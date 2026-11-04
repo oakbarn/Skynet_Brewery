@@ -53,13 +53,14 @@ export function fitFor(dirs) {
 //  - between the ends (both ends outside the item): the pipe is cut in two. Each piece runs on in line into an IP that faces
 //    along the pipe towards it. A port that faces across the pipe (a pump's outlet on top) gets its piece taken round with
 //    elbows: out of the port, across past the side of the item, and back onto the pipe's line (Rule 5.19: turns only at fittings).
-//  - over one end: the pipe is made shorter and joined to the IP that faces along it, but only when that end is an open end
-//    (its own coupling); an end on a tee, an elbow or another IP stays as it is.
+//  - over one end: the pipe is made shorter. An open end (its own coupling) goes away and the pipe joins one IP; an end on a
+//    tee, an elbow or another IP stays there: the item slides back along the pipe, clear of it, and is joined to both sides
+//    (Fritz, 2026-11-04: "it needs both IPs").
 // The item moves across the pipe (not along it) so the IP sits on the pipe's line (Rule 5.23).
 // Returns null when the pipe does not run through the item, { ok: false, why } when it does but can't be cut, else
 // { ok: true, mode, shift: [dx, dy], joints: [[x, y] ...], pieces: [{ from, to, pts }], drop } where from / to are 'A' or 'B'
 // (the pipe's old ends), a port id, or 'J0', 'J1' ... (the joints), and drop is the end ('A' or 'B') whose coupling goes away.
-export function splitAt(a, b, box, ports, { gap = 30, aOpen = false, bOpen = false } = {}) {
+export function splitAt(a, b, box, ports, { gap = 30, aOpen = false, bOpen = false, slid = false } = {}) {
   const ax = a[1] === b[1] && a[0] !== b[0] ? 0 : a[0] === b[0] && a[1] !== b[1] ? 1 : -1;
   if (ax < 0 || ports.length !== 2) return null;                        // only a Horizontal or Vertical pipe
   const pp = 1 - ax, line = a[pp], T = 3;
@@ -72,9 +73,17 @@ export function splitAt(a, b, box, ports, { gap = 30, aOpen = false, bOpen = fal
   const shiftFor = q => { const s = [0, 0]; s[pp] = Math.round(line - q.c[pp]); return s; };
   const at = (q, s) => [Math.round(q.c[0] + s[0]), Math.round(q.c[1] + s[1])];
   if (aIn && bIn) return null;                                          // the whole pipe is under it
+  if ((aIn || bIn) && slid) return { ok: false, why: 'the pipe is too short to put it in' };
   if (aIn || bIn) {                                                     // over one end: make the pipe shorter
     const [cov, open, far] = aIn ? ['A', aOpen, b] : ['B', bOpen, a];
-    if (!open) return null;                                             // that end is on a tee, an elbow or another IP
+    if (!open) {         // that end is on a tee, an elbow or another IP: slide it back along the pipe, clear of that end, and cut
+      const E = aIn ? a : b, sg = Math.sign(E[ax] - far[ax]), d = [0, 0];
+      d[ax] = Math.round(E[ax] - sg * (2 * gap + 5) - (sg > 0 ? hi[ax] : lo[ax]));
+      const nb = { ...box, x: box.x + d[0], y: box.y + d[1] }, np = ports.map(q => ({ ...q, c: [q.c[0] + d[0], q.c[1] + d[1]] }));
+      const r = splitAt(a, b, nb, np, { gap, aOpen, bOpen, slid: true });
+      if (!r) return { ok: false, why: 'the pipe is too short to put it in' };
+      return r.ok ? { ...r, mode: 'end', shift: [r.shift[0] + d[0], r.shift[1] + d[1]] } : r;
+    }
     const q = ports.find(p => faces(p, far));
     if (q) {
       const s = shiftFor(q), c = at(q, s);

@@ -977,8 +977,8 @@ function centerOnPipes(lay, ws) {
   return n;
 }
 // A pump or valve put on a pipe cuts it (Fritz, 2026-11-04, Rule 5.26; the geometry is splitAt in public/pipefit.js).
-// Dropped between a straight pipe's ends, the pipe becomes two pipes, one on each of its IPs; dropped over a pipe's open end, the
-// pipe is made shorter and joined to it (an end on a tee, an elbow or another IP is left alone). Only for an item none of whose
+// Dropped between a straight pipe's ends, the pipe becomes two pipes, one on each of its IPs; dropped over a pipe's end, the
+// pipe is made shorter and joined to it (an end on a tee, an elbow or another IP stays there and is joined to its other IP). Only for an item none of whose
 // IPs has a pipe yet, in Edit layout. Returns { ok, text }, or null when no pipe runs through it.
 const SPLIT_SUBS = ['pump', 'valve', 'propValve'];
 const FACES = [[-1, 0], [1, 0], [0, -1], [0, 1]];       // left, right, up, down: the way an opening faces
@@ -1032,7 +1032,7 @@ function splitPipeFor(it) {
     if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
   });
   const who = mv ? (it.name || 'the Manual Valve') : it.name;
-  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (${made.join(', ')} go round it)` : ''} (Rule 5.26).`
+  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (new: ${made.join(', ')})` : ''} (Rule 5.26).`
     : `${p.name} was cut in two at ${who}: ${[p.name, ...made].join(', ')} (Rule 5.26).` };
 }
 // Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve Widget (its one IP before Rule 5.24) is joined to the
