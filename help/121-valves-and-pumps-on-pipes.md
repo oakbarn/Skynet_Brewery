@@ -15,11 +15,11 @@ or the pump's port on one side and out the other, the same in every Orientation.
   Skynet valve and pump drawing know where their pipe is. A picture of your own keeps its IPs in the middle of its sides; on the
   **User Defined Motorized Ball Valve** you set the **In and Out IP** spots yourself.
 
-## A flashing bolt when On
+## A lightning bolt when On
 
-While a valve is **open**, a pump is **running** or a Proportional Valve is above **0 %**, a **lightning bolt flashes red and
-yellow** over the middle of its picture (Skynet Rule 7.15). It is the **On overlay** called **Lightning bolt, flashing red and
-yellow** (see Help 58).
+While a valve is **open**, a pump is **running** or a Proportional Valve is above **0 %**, a red **lightning bolt** with a yellow
+edge shows over the middle of its picture (Skynet Rule 7.15). It is the **On overlay** called **Lightning bolt, red and yellow**
+(see Help 58). It stays still. If you want it to flash, pick **Lightning bolt, flashing red and yellow** instead.
 
 - Every new motorized valve, Proportional Valve and Pump starts with it, and the Skynet valves always have it.
 - The first time the panel starts with this version, each valve, Proportional Valve and Pump that had **no** On overlay gets
@@ -27,4 +27,4 @@ yellow** (see Help 58).
 - A **Manual** valve has no power, so it has no bolt.
 - Don't want it on one? Open its Properties, set **On overlay** to **(none)** and Save. It stays off.
 
-From a Process: `my_Valve.imageOverlay = "Images/Skynet/On_Off/Overlay_Bolt_Flash.svg"`
+From a Process: `my_Valve.imageOverlay = "Images/Skynet/On_Off/Overlay_Bolt.svg"` (or `Overlay_Bolt_Flash.svg` for the flashing one)

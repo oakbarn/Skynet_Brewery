@@ -794,13 +794,17 @@ Orange, User; **None is the default**) and **.coverColor** (the User cover's col
 Widget formats Fritz will make; nothing is converted until then. The list of old Alarms is docs/ExistingAlarms.md (not
 the OakBarn Schema). (Fritz, 2026-11-02, thread "Build the Basic and User Alarm Widgets")
 
-7.15 **Powered valves and pumps flash a lightning bolt when On** (Fritz, 2026-11-04, with a drawing, thread "Center pumps and
-valves on pipes", Help 58 and 121). The Skynet On overlay **Lightning bolt, flashing red and yellow**
-(Images/Skynet/On_Off/Overlay_Bolt_Flash.svg) sits over the middle of the picture while it is On (a valve open, a pump running, a
-Proportional Valve above 0 %). Every new motorized valve, Proportional Valve and Pump Device starts with it, and the Skynet valve
-Templates have it set. Once per Schema, each one that had no On overlay gets it (Rule 15.2); one with an overlay already keeps it, and
-picking (none) afterwards stays none. A Manual valve has no power, so it has none. New pumps from the pump picker still start with
-the Green glow ring (Rule 18.13) unless Fritz says otherwise.
+7.15 **Powered valves and pumps show a lightning bolt when On** (Fritz, 2026-11-04, with a drawing, thread "Center pumps and
+valves on pipes", Help 58 and 121). The Skynet On overlay **Lightning bolt, red and yellow** (Images/Skynet/On_Off/Overlay_Bolt.svg,
+steady, not flashing) sits over the middle of the picture while it is On (a valve open, a pump running, a Proportional Valve above
+0 %). Every new motorized valve, Proportional Valve and Pump Device starts with it, and the Skynet valve Templates have it set.
+**Lightning bolt, flashing red and yellow** (Overlay_Bolt_Flash.svg) is a choice in the On overlay list, not the default (Fritz,
+2026-11-04: "the flashing Bolt is good, but the default should be the single bolt that is not flashing"). Once per Schema, each one
+that had no On overlay gets the steady bolt, and one that got the flashing bolt from the first version is changed to the steady one
+(Rule 15.2); one with another overlay keeps it, and picking (none) or the flashing bolt afterwards stays. A Manual valve has no power,
+so it has none. New pumps from the pump picker keep the Green glow ring (Rule 18.13; Fritz: leave it, the default may change later or
+go into Panel Defaults).
+*Replaced:* the flashing bolt was the default (2026-11-04, PR #179).
 
 ## 8. Sign-in and roles
 
@@ -1447,3 +1451,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 5.23 (valves and pumps sit centered on their pipes: the valve or pump moves across onto the pipe's line, the pipes stay; the older ball valve pictures have their pipe spot) and Rule 7.15 (powered valves and pumps flash a red and yellow lightning bolt On overlay when On; once per Schema for those with no overlay). Help 121, Help 58 updated; next free Help number 122. (thread "Center pumps and valves on pipes")
 - 2026-11-04: Added Rule 18.20 (blue border on the field with the focus; Tab and Enter go field to field in a dialog; a new Device's Enter sequence Label, Interface, Ports, Tab, Orientation, Add Device). Help 82 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rules 18.21 (Pump Device Properties = Fritz's screen 9; only those) and 18.22 (besides the Universal Properties each Device and Widget has only its own set). Rule 18.19: a pump's Orientation is Right / Left (Fritz's screens 7-9). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 7.15 changed (Fritz): the default On overlay for powered valves and pumps is the steady red and yellow bolt (Overlay_Bolt.svg); the flashing bolt is only a choice. Schemas given the flashing bolt are changed once. Help 58 and 121 updated; no new Help number. (thread "Center pumps and valves on pipes")
