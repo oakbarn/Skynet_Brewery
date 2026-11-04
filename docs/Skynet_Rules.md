@@ -396,22 +396,28 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 
 ## 4. Making things: the Build Tab
 
-4.1 **Every new Device, Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent
-to a Tab. (2026-10-23, PR #97 and PR #99)
+4.1 **Every new Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent to a Tab. **A new Device goes
+straight on the Tab picked in its Add Device box** (Rule 4.2; Fritz's Add Pump drawing, 2026-11-04). (2026-10-23, PR #97 and PR #99)
+**A new Tab from the Add Device box** (Fritz, 2026-11-04; the general Rule is 18.14): picking **➕ Add new Tab…** in its Tab list pauses the Add Device box
+and keeps what was entered (Label, Interface and Port) for now; the new Tab is named and built in Tab settings; once it is
+saved the Add Device box comes back with that information filled in, the Tab list refreshed and the new Tab picked, and the
+Suggested Name made with it. Cancel in Tab settings makes no Tab and goes back to the Add Device box as it was.
+*Replaced:* "Every new Device, Widget or copy of a Template is made on the 🔨 Build Tab first" (2026-10-23).
 
 *Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
 
 *Exception (Fritz, 2026-11-03):* a **Pipe or Hose** is drawn right on its Tab with Draw pipe or Draw hose; it is never made on the Build
 Tab first (Rule 5.21).
 
-4.2 **New Device order** (the **Add Device** box, Fritz 2026-10-28): 1 Interface, 2 Available Ports/Pins
-(only free ones that fit), 3 Suggested Name, 4 Label (or **Show label** off), then Width and Height
-(**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the
-Interface only when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and
-the bottom; Add Device works once the Label is typed or Show label is off. The Device goes in the
-**middle of the Build Tab** (unless ☰ Menu > Default sets X and Y), and the rest of its Properties open.
-(2026-10-23, PR #97; 2026-10-28, Help 82)
-*Replaced:* 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
+4.2 **New Device order** (the **Add Device** box, Fritz 2026-11-04, "to build a name that follows my naming conventions"):
+**1 Label** (or **Show label** off), **2 Interface**, **3 Port** (Available Ports/Pins: only free ones that fit), **4 Tab**,
+**5 Name** (the Suggested Name, made from them; it shows once 1-4 are done, and the user may type their own). Then Width and
+Height (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the Interface only
+when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and the bottom; Add Device works once 1-4
+are done. The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
+Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). (Help 82)
+*Replaced:* 1 Interface, 2 Available Ports/Pins, 3 Suggested Name, 4 Label, on the Build Tab (2026-10-28); before that
+1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
 4.3 **Un-bundling** a bundled item asks "Move it to the Build Tab?". Save Build then asks "Put it
 back where it came from?". Save to Tab places the build in the center of the chosen Tab.
@@ -882,7 +888,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **120**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **121**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1133,6 +1139,31 @@ dialog will work the same way when Fritz commands it, one at a time. From the to
 A field shown both on the dialog and in a pop-up is the same setting: saving the pop-up updates the dialog. Nothing is saved
 until 💾 Save on the dialog. (Help 115)
 
+18.13 **Adding a Pump** (Fritz's Add Pump drawing, 2026-11-04, [docs/Add_Pump_Format.png](Add_Pump_Format.png)):
+1. **Pumps > Pump, on / off (relay or SSR)**, then 2. **Pick the pump**: a list of the Skynet pump drawings (March 809 and 815,
+   Chugger, Blichmann Riptide, Topsflo TD5, KegLand MKII), each with its picture. The pick is the Pump's Picture, with the green
+   On overlay and Cover None to start.
+3. The Add box is titled with the pump (e.g. **Blichmann Riptide**). Besides Rule 4.2's fields it has the **Label ⬢** (Label
+   pop-up), **Label Visible**, **Cover**, **X (Horizontal)**, **Y (Vertical)**, Width and Height, and the **Device Type** greyed
+   out, read only (Pump: it comes from the list it was picked in). X and Y typed here are kept.
+4. Once ➕ Add Device is pressed, its Properties (Rule 18.12) show the **Interface (board)** and **Port** greyed out and set, each
+   with **✏ Change** to change it on purpose; **Tab, X, Y, Width and Height** on the dialog itself (they are in the Pump
+   Properties ⬢ pop-up too); the **Device Type** greyed out, read only; and the Name with ✏ Change name once built (Rule 3.11).
+The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name) and the pump goes on the picked Tab (Rule 4.1).
+(Help 115)
+
+18.14 **"Add new ..." in a dialog pauses it and comes back** (Fritz, 2026-11-04, a general Rule): when **➕ Add new ...** (a new
+Tab, Interface, Style, unit, picture ...) is picked in a dropdown of a dialog, the calling dialog **keeps what was entered so far
+as temporary data and pauses**; the new thing is made in its own dialog; once that is saved the calling dialog **comes back with
+the temporary data filled in again**, the dropdown **refreshed**, and **the new thing picked**. Cancel while making it makes
+nothing and goes back to the calling dialog as it was. The first one built this way: ➕ Add new Tab… in the Add Device box
+(Rule 4.1); ➕ Add new Interface… already works this way. Other dialogs are brought to it one at a time, when Fritz says (Rule 18.10).
+
+18.15 **The opening pattern of every new Device dialog** (Fritz, 2026-11-04): **1 Label, 2 Interface, 3 Port, 4 Tab**, then
+**5 the Suggested Name** made from them (Rule 4.2), before anything else. The Add Device box has it now. Every other dialog that
+makes a new Device (for now the RIMS tube and the Integrated Electric Kettle New Device box) gets it one at a time, when Fritz
+says (Rule 18.10).
+
 ---
 
 ## Open questions (not Rules yet)
@@ -1328,4 +1359,10 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-03: Added Rule 9.9 (Move Brain: a Brain Move file locked with a Move password on the old Brain, Bring in + Move in now on the new Brain with its own files kept in backups/, then USB ports changed in every Schema at once, matched by serial number). Help 119; next free Help number 120. (thread "Move a computer Brain to a Pi")
 - 2026-11-03: Rule 5.21: every IP point has a Flow Color (`.flow_Color`, None to start), first in the flow color order: flow that begins at it
   takes that color. Help 116 updated. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-04: Added Rule 18.13 (adding a Pump: pick the pump with its picture; the Add box titled with it, Label ⬢, Cover, X, Y, Device Type read only; Interface and Port greyed out with ✏ Change once added; Tab, X, Y, Width, Height on the Properties). Rules 4.1 / 4.2 parts of the drawing wait for Fritz. Help 115 updated; no new Help number. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 4.2 changed (Fritz): the Add Device order is 1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name, so the Suggested Name follows his naming convention; the Name shows once 1-4 are done. Rule 4.1 changed with it: a new Device goes straight on the Tab picked in its Add Device box (Widgets and Templates still start on the Build Tab). Rule 18.13 updated. Help 82 and 115 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 4.2: ➕ Add new Tab… in the Add Device box's Tab list keeps the Label, Interface and Port, builds the Tab in Tab settings, then comes back with it picked and the Suggested Name made (Fritz). Help 82 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 4.1 updated (Fritz): ➕ Add new Tab… in the Add Device box pauses it, keeps the Label, Interface and Port, builds the new Tab, then returns with them filled in and the new Tab picked. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 2.33 (one click turns a Pump on or off, no ON / OFF pop-up; Pumps in every Schema changed once; Ask before changing still there by hand). Help 120; next free Help number 121. (thread "Toggle pumps with one click")
+- 2026-11-04: Added Rule 18.14 (general: ➕ Add new ... in any dialog dropdown pauses the dialog, keeps its temporary data, makes the new thing, comes back with the data filled in, the dropdown refreshed and the new thing picked); Rule 4.1 points to it. Other dialogs follow one at a time (Rule 18.10). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Added Rule 18.15 (every new Device dialog opens with 1 Label, 2 Interface, 3 Port, 4 Tab, then the Suggested Name; the Add Device box has it, the RIMS / Integrated Kettle box waits for Fritz, one at a time). (thread "Set the drill-down dialog standard for Devices")
