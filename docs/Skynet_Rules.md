@@ -398,7 +398,7 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 
 4.1 **Every new Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent to a Tab. **A new Device goes
 straight on the Tab picked in its Add Device box** (Rule 4.2; Fritz's Add Pump drawing, 2026-11-04). (2026-10-23, PR #97 and PR #99)
-**A new Tab from the Add Device box** (Fritz, 2026-11-04): picking **➕ Add new Tab…** in its Tab list pauses the Add Device box
+**A new Tab from the Add Device box** (Fritz, 2026-11-04; the general Rule is 18.14): picking **➕ Add new Tab…** in its Tab list pauses the Add Device box
 and keeps what was entered (Label, Interface and Port) for now; the new Tab is named and built in Tab settings; once it is
 saved the Add Device box comes back with that information filled in, the Tab list refreshed and the new Tab picked, and the
 Suggested Name made with it. Cancel in Tab settings makes no Tab and goes back to the Add Device box as it was.
@@ -1152,6 +1152,13 @@ until 💾 Save on the dialog. (Help 115)
 The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name) and the pump goes on the picked Tab (Rule 4.1).
 (Help 115)
 
+18.14 **"Add new ..." in a dialog pauses it and comes back** (Fritz, 2026-11-04, a general Rule): when **➕ Add new ...** (a new
+Tab, Interface, Style, unit, picture ...) is picked in a dropdown of a dialog, the calling dialog **keeps what was entered so far
+as temporary data and pauses**; the new thing is made in its own dialog; once that is saved the calling dialog **comes back with
+the temporary data filled in again**, the dropdown **refreshed**, and **the new thing picked**. Cancel while making it makes
+nothing and goes back to the calling dialog as it was. The first one built this way: ➕ Add new Tab… in the Add Device box
+(Rule 4.1); ➕ Add new Interface… already works this way. Other dialogs are brought to it one at a time, when Fritz says (Rule 18.10).
+
 ---
 
 ## Open questions (not Rules yet)
@@ -1352,3 +1359,4 @@ The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Nam
 - 2026-11-04: Rule 4.2: ➕ Add new Tab… in the Add Device box's Tab list keeps the Label, Interface and Port, builds the Tab in Tab settings, then comes back with it picked and the Suggested Name made (Fritz). Help 82 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Rule 4.1 updated (Fritz): ➕ Add new Tab… in the Add Device box pauses it, keeps the Label, Interface and Port, builds the new Tab, then returns with them filled in and the new Tab picked. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 2.33 (one click turns a Pump on or off, no ON / OFF pop-up; Pumps in every Schema changed once; Ask before changing still there by hand). Help 120; next free Help number 121. (thread "Toggle pumps with one click")
+- 2026-11-04: Added Rule 18.14 (general: ➕ Add new ... in any dialog dropdown pauses the dialog, keeps its temporary data, makes the new thing, comes back with the data filled in, the dropdown refreshed and the new thing picked); Rule 4.1 points to it. Other dialogs follow one at a time (Rule 18.10). (thread "Set the drill-down dialog standard for Devices")
