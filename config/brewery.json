@@ -1368,8 +1368,7 @@
       "units": "°F",
       "workspace": "Variables Demo",
       "database": {
-        "frequency": "days",
-        "every": 1,
+        "frequency": "clock",
         "at": "12 AM"
       },
       "api": "getput",
