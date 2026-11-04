@@ -30,6 +30,7 @@ assert.equal(pipeFlowColor({ tab: 'strike', pipe: 'orange' }), flowHex('strike')
 assert.equal(pipeFlowColor({ tab: 'tap', pipe: 'orange' }), flowHex('tap'));
 assert.equal(pipeFlowColor({ tab: 'mash', pipe: 'orange', tap: true }), TAP_BLUE, 'tap water is always Blue');
 assert.equal(pipeFlowColor({ tab: 'strike', tap: true, vessel: 'red' }), flowHex('red'), 'a vessel color overrides all else');
+assert.equal(pipeFlowColor({ ip: 'golden', vessel: 'red', tap: true, tab: 'strike', pipe: 'orange' }), flowHex('golden'), 'an IP color is first of all');
 assert.ok(pipeWins('') && pipeWins('boil') && !pipeWins('purple'));
 
 // older Schemas: the old start color #4fb3ff becomes None, other colors are kept
@@ -41,7 +42,8 @@ assert.ok(!('flowColor' in gs[0])); assert.equal(gs[1].flowColor, '#e74c3c'); as
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'flowcolor'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ elements: [{ name: 'Done', type: 'gKonstant', kind: 'value' }, { name: 'Seen', type: 'gKonstant', kind: 'string' }],
-  graphics: [{ id: 'p1', kind: 'pipe', name: 'Pipe_1', workspace: 'Main', points: [[0, 0], [100, 0]], flowColor: '#4fb3ff' }, { id: 'h1', kind: 'pipe', hose: true, name: 'Hose_1', workspace: 'Main', points: [[0, 0], [50, 50]] }] }));
+  graphics: [{ id: 'p1', kind: 'pipe', name: 'Pipe_1', workspace: 'Main', points: [[0, 0], [100, 0]], flowColor: '#4fb3ff' }, { id: 'h1', kind: 'pipe', hose: true, name: 'Hose_1', workspace: 'Main', points: [[0, 0], [50, 50]] },
+    { id: 'i1', kind: 'ip', name: 'IP_1', workspace: 'Main', x: 0, y: 0 }, { id: 'f1', kind: 'ip', fitting: 'tee', name: 'Tee_1', workspace: 'Main', x: 0, y: 0 }] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
 assert.ok(!('flowColor' in store.config.graphics[0]), 'the old start color is None after loading');
 const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
@@ -52,15 +54,20 @@ assert.deepEqual(eng.check(src).errors, [], 'the Check finds nothing wrong');
 assert.ok(eng.check('tab.flow_Color = Plaid\n').errors.length, 'an unknown color is caught');
 assert.ok(eng.check('tab.visible = false\n').errors.length, 'tab has only .flow_Color');
 assert.ok(eng.check('Pipe_9.flow_Color = Red\n').errors.length, 'no such pipe');
+assert.deepEqual(eng.check('IP_1.flow_Color = Red\n').errors, [], 'an IP has .flow_Color');
+assert.ok(eng.check('Tee_1.flow_Color = Red\n').errors.length, 'a pipe fitting has none');
 eng.write('colors', src); eng.start('colors');
 assert.ok(await until(() => store.getProp('Done', 'value') === 1), 'the Process runs to the end');
-assert.deepEqual(eng.flowView(), { tab: 'mash', pipes: { Pipe_1: 'orange', Hose_1: '#a0452a' } });
+assert.deepEqual(eng.flowView(), { tab: 'mash', pipes: { Pipe_1: 'orange', Hose_1: '#a0452a' }, ips: {} });
 assert.equal(store.getProp('Seen', 'value'), 'Mash');
 assert.ok(sent.length >= 3, 'screens are told');
 eng.write('none', 'Pipe_1.flow_Color = None\nDone = 2\n'); eng.start('none');
 assert.ok(await until(() => store.getProp('Done', 'value') === 2));
 assert.deepEqual(eng.flowView().pipes, { Hose_1: '#a0452a' });
-eng.resetFlow(); assert.deepEqual(eng.flowView(), { tab: '', pipes: {} });
+eng.write('ip', 'IP_1.flow_Color = Red\nDone = 3\n'); eng.start('ip');
+assert.ok(await until(() => store.getProp('Done', 'value') === 3));
+assert.deepEqual(eng.flowView().ips, { IP_1: 'red' });
+eng.resetFlow(); assert.deepEqual(eng.flowView(), { tab: '', pipes: {}, ips: {} });
 assert.ok(compile('tab.flow_Color = Reddish_Brown\n').errors.length === 0);
 clearTimeout(store._persistTimer);
 console.log('flow color tests passed');
