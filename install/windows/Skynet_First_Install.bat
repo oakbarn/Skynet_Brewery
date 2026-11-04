@@ -107,13 +107,12 @@ if errorlevel 1 (
   echo [4/5] Put "Skynet Brewer" on your Desktop.
 )
 
-:: 5. Start the panel and open the browser
-echo [5/5] Starting the panel. Your browser opens it in a few seconds.
+:: 5. Start the panel. It opens itself in its own clean window (Rule 2.36)
+echo [5/5] Starting the panel. It opens in its own window in a few seconds.
 echo.
 echo  If Windows asks "Allow Node.js on your networks?": tick Private networks and click Allow.
 echo  KEEP THIS WINDOW OPEN while you brew. Closing it stops the panel.
 echo.
-start "" /min cmd /c "timeout /t 5 /nobreak >nul & start "" http://localhost:8080"
 call npm start
 echo.
 echo The panel has stopped.

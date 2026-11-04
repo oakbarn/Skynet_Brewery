@@ -275,7 +275,7 @@ background**: its look is its Style. (Help 92)
 Command Prompt window that started it closes too, **whatever .bat started it** (Skynet_Brewer.bat, an older .bat in
 C:\Brewing, or npm start typed in a Command Prompt): the panel ends that Command Prompt itself as it stops (2026-11-04).
 Only the Command Prompt and npm under it are ended, never Windows Terminal or anything above it. Every open page shows
-"Skynet Brewer is closed". The window stays open when the panel stops because of an error. Closing a browser tab never
+"Skynet Brewer is closed", and Skynet's own clean window (Rule 2.36) closes. The window stays open when the panel stops because of an error. Closing a browser tab never
 stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread "Close the command window on
 exit"; 2026-11-04, thread "Close the Command Prompt with Skynet")
 
@@ -336,6 +336,17 @@ Processes and the buttons on the Tabs work; there is no Edit layout and no Prope
 screens). A short note says so when the panel starts, and ☰ Menu > About shows "run mode". ☰ Menu > Default > Phones and
 tablets has a switch, **Phones and tablets can edit** (off), set from a computer, to allow editing anyway; with it on,
 Rule 2.13 still holds. The login and the Brain are not changed. (thread "Add the phone and tablet editing Rule", Help 45)
+
+2.36 **Skynet opens in its own clean window** (Fritz, 2026-11-04): on Windows the panel opens in a window of its own, with **no
+address bar, no bookmarks bar and no tabs**: Microsoft Edge (or Google Chrome when there is no Edge) in "app" mode, filling the
+screen. It uses **its own small browser profile** (in `%LOCALAPPDATA%\SkynetBrewer\AppWindow`), so **the normal browser is never
+changed**: its bookmarks bar, settings, tabs and sign-ins look exactly as before once Skynet closes ("restore on close"). The panel
+opens the window itself once it is up, **whatever .bat started it** (an older .bat that opens the browser has that browser tab
+stopped, so only the clean window opens). No Edge or Chrome: the normal browser opens the panel, as before. The window closes
+when the panel stops (☰ Menu > Close Skynet Brewer, Rule 2.25, or the black window's X); closing the clean window with its X
+never stops the panel (Rule 2.25), and double-clicking **Skynet Brewer** again opens it again. The first time, sign in once in the
+clean window (it keeps its own sign-in). Phones, tablets and other computers open the panel in their browser as before.
+(thread "Open Skynet in its own clean window", Help 122)
 
 ## 3. Names and file names
 
@@ -606,11 +617,11 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
   (Reddish Brown), **Whirlpool** (Brown), **Ferment** (Golden), the primary colors (Red, Yellow, Blue, Green), Brown, Orange, Purple,
   Reddish Brown, Golden, and **RGB** (a color of your own).
 - **The Tab in tab.flow_Color is the Tab with the focus** (the one each screen shows). All pipes and hoses on a Tab use the Tab's Flow
-  Color, except: a pipe's own Flow Color (not None) overrides **Mash, Boil, Whirlpool and Ferment**; **flow from a Tap Water Valve is
-  always Blue**; **flow that begins at a Vessel's outlet with an Out flow color takes that color**; and, **first of all, flow that begins
-  at an IP with a Flow Color takes that color** (Fritz, 2026-11-03: every IP point has `.flow_Color`, None to start; an HLT outlet IP set
-  to Red makes the flow leaving it Red). Order: IP, Vessel, Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash,
-  Boil, Whirlpool, Ferment); all None = the standard light blue.
+  Color, except: a pipe's own Flow Color (not None) overrides **Mash, Boil, Whirlpool and Ferment**; **flow that begins at a Vessel's
+  outlet with an Out flow color takes that color**; **flow that begins at an IP with a Flow Color takes that color** (Fritz, 2026-11-03:
+  every IP point has `.flow_Color`, None to start; an HLT outlet IP set to Red makes the flow leaving it Red); and, **first of all
+  (#1), flow from a Tap Water Valve is always Blue** and overrides every other flow (Fritz, 2026-11-04). Order: Tap Water Valve, IP,
+  Vessel, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash, Boil, Whirlpool, Ferment); all None = the standard light blue.
 - **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`, and an IP's
   `IP_1.flow_Color = Red`). What a Process
   sets lasts until set to None, another Schema is loaded, or the panel restarts.
@@ -619,6 +630,8 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
   be useful to a user (a pipe is where it is drawn), so they are **hidden** in its dialog. (Fritz changed this 2026-11-03: first he had
   the Name and Label greyed out too.)
 - Older Schemas (Rule 15.2): a pipe's old start Flow color (#4fb3ff) becomes None; any other color it had is kept as an RGB color.
+- **Pipes and hoses start at None and follow the Tab Flow Color** (Fritz, 2026-11-04). The orange (#ffb347) every pipe in the
+  sample Schemas had becomes None once in each Schema; a color picked after that is kept.
 
 5.22 **Proportional Valves** (Fritz, 2026-11-03, thread "Add BruControl KLD20T proportional valve", Help 117). The Valves list has
 **Skynet Proportional Valves** for valves on the market and one **User Defined Proportional Valve** for any other. The first
@@ -1498,5 +1511,8 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Changed Rule 10.7 (hiding the Simulator bar removes it completely, no strip; ☰ Menu > 🧪 Show / Hide Simulator bar in Simulator mode; small 🧪 on the ☰ Menu button while hidden). Help 85 updated. (thread "Move Show Simulator bar to the ☰ Menu")
 - 2026-11-04: Added Rule 2.35 (as a general Rule, phones and tablets are for running and watching the brewery, not for editing or building; a feature that does not work on a phone or tablet is fine under it; nothing is hidden or locked on phones until Fritz says). (thread "Add the phone and tablet editing Rule")
 - 2026-11-04: Rule 2.35: run mode on phones and tablets (Fritz): an admin works as an operator there; the Schema, Processes and Tab buttons work, no Edit layout or Properties; switch "Phones and tablets can edit" (off) on ☰ Menu > Default. Open question 8 answered. Help 45 updated; no new Help number. (thread "Add the phone and tablet editing Rule")
+- 2026-11-04: Added Rule 2.36 (on Windows Skynet opens in its own clean window, Edge or Chrome app mode with its own profile, no address or bookmarks bar; the normal browser is never changed; the window closes with the panel). Rule 2.25: Close Skynet Brewer closes that window too. Help 122, Help 95 updated; next free Help number 123. (thread "Open Skynet in its own clean window")
+- 2026-11-04: Rule 5.21: pipes and hoses start at Flow Color None and follow the Tab Flow Color; the orange every sample pipe had becomes None once in each Schema (Fritz). Help 116 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-04: Rule 5.21 changed (Fritz): flow from a Tap Water Valve is always Blue and is #1, over every other flow color (was third, after an IP and a Vessel). Order: Tap Water Valve, IP, Vessel, Tab, pipe, Tab (Mash, Boil, Whirlpool, Ferment). Help 116 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-04: Added Rule 5.24 (ball valves have two IPs, one at each pipe end, in every Orientation: a 45 degree Skynet valve's IPs turn with its picture; the Manual Valve Widget has two IPs instead of one in its middle; older pipes on its middle join the nearer end). Help 123, Help 87 updated; next free Help number 124 (Help 122 is taken by PR #186). (thread "Add IPs to Ball Valve Devices and Widgets")
 - 2026-11-04: Rule 5.24: every Skynet Pump has IPs on its inlet and outlet (the older Riptide-style pictures and the sump pump now too; Right and Left, any Cover). Help 123 updated. (thread "Add IPs to Ball Valve Devices and Widgets")

@@ -13,13 +13,13 @@
   {
    "name": "Brewhouse",
    "width": 1720,
-   "height": 1010
+   "height": 745
   },
   {
    "name": "Recipe",
    "style": "sky_tab_tennyson",
-   "width": 1420,
-   "height": 800
+   "width": 1800,
+   "height": 785
   }
  ],
  "elements": [
@@ -30,7 +30,7 @@
    "x": 0,
    "y": 0,
    "w": 520,
-   "h": 300,
+   "h": 140,
    "hideName": true,
    "initial": "Click Start Brew Day to begin. Testing mode runs every minute as one second.",
    "fontSize": 22,
@@ -44,9 +44,9 @@
    "name": "gblS_Advance_Label",
    "type": "gGlobal",
    "x": 0,
-   "y": 310,
+   "y": 148,
    "w": 380,
-   "h": 80,
+   "h": 60,
    "hideName": true,
    "initial": "Not running",
    "fontSize": 22,
@@ -60,9 +60,9 @@
    "name": "sw_Advance_BrewStatus",
    "type": "switch",
    "x": 390,
-   "y": 310,
+   "y": 148,
    "w": 130,
-   "h": 80,
+   "h": 60,
    "label": "Advance",
    "onText": "GO",
    "offText": "▶ CLICK",
@@ -75,9 +75,9 @@
    "name": "gblV_Brew_Status",
    "type": "gGlobal",
    "x": 400,
-   "y": 700,
+   "y": 480,
    "w": 120,
-   "h": 64,
+   "h": 56,
    "label": "Brew status",
    "initial": 0,
    "precision": 0,
@@ -88,9 +88,9 @@
    "name": "tm_Step",
    "type": "timer",
    "x": 0,
-   "y": 400,
+   "y": 216,
    "w": 250,
-   "h": 110,
+   "h": 104,
    "label": "Step timer",
    "timerType": "countdown",
    "look": "led"
@@ -100,9 +100,9 @@
    "name": "tm_BrewDay",
    "type": "timer",
    "x": 265,
-   "y": 400,
+   "y": 216,
    "w": 255,
-   "h": 110,
+   "h": 104,
    "label": "Brew day",
    "timerType": "countup",
    "look": "led"
@@ -112,9 +112,9 @@
    "name": "gblS_Hop_Warning",
    "type": "gGlobal",
    "x": 0,
-   "y": 520,
+   "y": 328,
    "w": 380,
-   "h": 80,
+   "h": 64,
    "label": "Next hop",
    "initial": "",
    "fontSize": 17,
@@ -126,9 +126,9 @@
    "name": "alm_Hops",
    "type": "alarm",
    "x": 390,
-   "y": 520,
+   "y": 328,
    "w": 130,
-   "h": 170,
+   "h": 144,
    "label": "Hop alarm (tap = added)",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
@@ -141,9 +141,9 @@
    "name": "alm_Step",
    "type": "alarm",
    "x": 260,
-   "y": 610,
+   "y": 400,
    "w": 120,
-   "h": 80,
+   "h": 72,
    "label": "Step alarm",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
@@ -154,9 +154,9 @@
    "name": "alm_Warning",
    "type": "alarm",
    "x": 130,
-   "y": 610,
+   "y": 400,
    "w": 120,
-   "h": 80,
+   "h": 72,
    "label": "Warning",
    "sound": "sounds/alarm_beep.wav",
    "loop": false,
@@ -167,9 +167,9 @@
    "name": "sw_Status_Testing",
    "type": "switch",
    "x": 0,
-   "y": 610,
+   "y": 400,
    "w": 120,
-   "h": 80,
+   "h": 72,
    "label": "Testing",
    "onText": "TESTING",
    "offText": "REAL",
@@ -181,9 +181,9 @@
    "name": "btn_Start_Brew_Day",
    "type": "label",
    "x": 0,
-   "y": 700,
+   "y": 480,
    "w": 200,
-   "h": 64,
+   "h": 56,
    "label": "Start Brew Day",
    "look": "button",
    "background": "2",
@@ -197,9 +197,9 @@
    "name": "btn_Stop_Brew_Day",
    "type": "label",
    "x": 210,
-   "y": 700,
+   "y": 480,
    "w": 180,
-   "h": 64,
+   "h": 56,
    "label": "Stop (all off)",
    "look": "button",
    "background": "4",
@@ -214,9 +214,9 @@
    "type": "gGlobal",
    "kind": "value",
    "x": 0,
-   "y": 800,
+   "y": 570,
    "w": 170,
-   "h": 60,
+   "h": 52,
    "label": "Strike volume",
    "units": "gal",
    "precision": 2,
@@ -229,9 +229,9 @@
    "type": "gGlobal",
    "kind": "value",
    "x": 175,
-   "y": 800,
+   "y": 570,
    "w": 170,
-   "h": 60,
+   "h": 52,
    "label": "Mash pH",
    "units": "pH",
    "precision": 2,
@@ -244,9 +244,9 @@
    "type": "gGlobal",
    "kind": "value",
    "x": 350,
-   "y": 800,
+   "y": 570,
    "w": 170,
-   "h": 60,
+   "h": 52,
    "label": "Pre-boil volume",
    "units": "gal",
    "precision": 2,
@@ -259,9 +259,9 @@
    "type": "gGlobal",
    "kind": "value",
    "x": 0,
-   "y": 866,
+   "y": 628,
    "w": 170,
-   "h": 60,
+   "h": 52,
    "label": "Pre-boil gravity",
    "units": "",
    "precision": 3,
@@ -274,9 +274,9 @@
    "type": "gGlobal",
    "kind": "value",
    "x": 175,
-   "y": 866,
+   "y": 628,
    "w": 170,
-   "h": 60,
+   "h": 52,
    "label": "Post-boil volume",
    "units": "gal",
    "precision": 2,
@@ -289,9 +289,9 @@
    "type": "gGlobal",
    "kind": "value",
    "x": 350,
-   "y": 866,
+   "y": 628,
    "w": 170,
-   "h": 60,
+   "h": 52,
    "label": "Original gravity",
    "units": "",
    "precision": 3,
@@ -304,9 +304,9 @@
    "type": "gGlobal",
    "kind": "value",
    "x": 0,
-   "y": 932,
+   "y": 686,
    "w": 170,
-   "h": 60,
+   "h": 52,
    "label": "Into fermenter",
    "units": "gal",
    "precision": 2,
@@ -319,9 +319,9 @@
    "type": "gGlobal",
    "kind": "string",
    "x": 175,
-   "y": 932,
+   "y": 686,
    "w": 345,
-   "h": 60,
+   "h": 52,
    "label": "Notes",
    "initial": "",
    "api": "getput"
@@ -1267,7 +1267,7 @@
    "probeIndex": 1,
    "label": "HLT",
    "x": 625,
-   "y": 190,
+   "y": 145,
    "w": 170,
    "h": 74,
    "units": "°F",
@@ -1289,7 +1289,7 @@
    "probeIndex": 2,
    "label": "Mash",
    "x": 985,
-   "y": 190,
+   "y": 145,
    "w": 170,
    "h": 74,
    "units": "°F",
@@ -1316,7 +1316,7 @@
    "probeIndex": 3,
    "label": "Kettle",
    "x": 1345,
-   "y": 190,
+   "y": 145,
    "w": 170,
    "h": 74,
    "units": "°F",
@@ -1351,7 +1351,7 @@
    "onOffset": 1,
    "enabled": false,
    "x": 625,
-   "y": 275,
+   "y": 230,
    "w": 170,
    "h": 60,
    "onText": "HEAT",
@@ -1366,7 +1366,7 @@
    "imageOn": "Images/Skynet/Other_Equipment/BigMacRElementOn.png",
    "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.png",
    "x": 655,
-   "y": 340,
+   "y": 295,
    "w": 110,
    "h": 52,
    "hideName": true,
@@ -1384,7 +1384,7 @@
    "onOffset": 1,
    "enabled": false,
    "x": 1345,
-   "y": 275,
+   "y": 230,
    "w": 170,
    "h": 60,
    "onText": "HEAT",
@@ -1399,7 +1399,7 @@
    "imageOn": "Images/Skynet/Other_Equipment/BigMacRElementOn.png",
    "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.png",
    "x": 1375,
-   "y": 340,
+   "y": 295,
    "w": 110,
    "h": 52,
    "hideName": true,
@@ -1414,7 +1414,7 @@
    "channel": 22,
    "label": "Pump",
    "x": 940,
-   "y": 850,
+   "y": 625,
    "w": 140,
    "h": 110,
    "ipIn": "left",
@@ -1433,8 +1433,8 @@
    "device": "Brewery Mega",
    "channel": 30,
    "label": "Chiller water",
-   "x": 1540,
-   "y": 640,
+   "x": 1545,
+   "y": 520,
    "w": 170,
    "h": 60,
    "look": "dark",
@@ -1451,7 +1451,7 @@
    "channel": 24,
    "label": "HLT out",
    "x": 678,
-   "y": 473,
+   "y": 410,
    "w": 64,
    "h": 55,
    "ipIn": "top",
@@ -1473,7 +1473,7 @@
    "channel": 25,
    "label": "Mash tun out",
    "x": 1038,
-   "y": 473,
+   "y": 410,
    "w": 64,
    "h": 55,
    "ipIn": "top",
@@ -1495,7 +1495,7 @@
    "channel": 26,
    "label": "Kettle out",
    "x": 1398,
-   "y": 473,
+   "y": 410,
    "w": 64,
    "h": 55,
    "ipIn": "top",
@@ -1517,7 +1517,7 @@
    "channel": 27,
    "label": "To mash tun",
    "x": 858,
-   "y": 613,
+   "y": 450,
    "w": 64,
    "h": 55,
    "ipIn": "top",
@@ -1539,7 +1539,7 @@
    "channel": 28,
    "label": "To kettle",
    "x": 1228,
-   "y": 613,
+   "y": 450,
    "w": 64,
    "h": 55,
    "ipIn": "top",
@@ -1561,7 +1561,7 @@
    "channel": 29,
    "label": "To fermenter",
    "x": 1428,
-   "y": 878,
+   "y": 653,
    "w": 64,
    "h": 55,
    "ipIn": "left",
@@ -1581,9 +1581,9 @@
    "kind": "text",
    "workspace": "Brewhouse",
    "x": 0,
-   "y": 772,
+   "y": 542,
    "w": 520,
-   "h": 26,
+   "h": 24,
    "text": "Readings (tap to enter; they go to the database)",
    "fontSize": 15,
    "bold": true
@@ -1641,7 +1641,7 @@
    "workspace": "Brewhouse",
    "image": "Images/Skynet/Vessels/hlt.svg",
    "x": 580,
-   "y": 90,
+   "y": 45,
    "w": 260,
    "h": 320,
    "locked": true
@@ -1652,7 +1652,7 @@
    "workspace": "Brewhouse",
    "image": "Images/Skynet/Vessels/mash_tun.svg",
    "x": 940,
-   "y": 90,
+   "y": 45,
    "w": 260,
    "h": 320,
    "locked": true
@@ -1663,7 +1663,7 @@
    "workspace": "Brewhouse",
    "image": "Images/Skynet/Vessels/boil_kettle.svg",
    "x": 1300,
-   "y": 90,
+   "y": 45,
    "w": 260,
    "h": 320,
    "locked": true
@@ -1674,7 +1674,7 @@
    "workspace": "Brewhouse",
    "text": "Hot liquor tank",
    "x": 620,
-   "y": 50,
+   "y": 10,
    "w": 220,
    "h": 32,
    "fontSize": 18,
@@ -1686,7 +1686,7 @@
    "workspace": "Brewhouse",
    "text": "Mash tun",
    "x": 1010,
-   "y": 50,
+   "y": 10,
    "w": 200,
    "h": 32,
    "fontSize": 18,
@@ -1698,7 +1698,7 @@
    "workspace": "Brewhouse",
    "text": "Boil kettle",
    "x": 1360,
-   "y": 50,
+   "y": 10,
    "w": 200,
    "h": 32,
    "fontSize": 18,
@@ -1710,7 +1710,7 @@
    "workspace": "Brewhouse",
    "label": "HLT out",
    "x": 697,
-   "y": 412,
+   "y": 367,
    "w": 26,
    "h": 26,
    "color": "#e8a33a"
@@ -1721,7 +1721,7 @@
    "workspace": "Brewhouse",
    "label": "Mash tun out",
    "x": 1057,
-   "y": 412,
+   "y": 367,
    "w": 26,
    "h": 26,
    "color": "#e8a33a"
@@ -1732,7 +1732,7 @@
    "workspace": "Brewhouse",
    "label": "Kettle out",
    "x": 1417,
-   "y": 412,
+   "y": 367,
    "w": 26,
    "h": 26,
    "color": "#e8a33a"
@@ -1743,7 +1743,7 @@
    "workspace": "Brewhouse",
    "label": "Mash tun in (top)",
    "x": 917,
-   "y": 107,
+   "y": 62,
    "w": 26,
    "h": 26,
    "color": "#e8a33a"
@@ -1754,7 +1754,7 @@
    "workspace": "Brewhouse",
    "label": "Kettle in (top)",
    "x": 1277,
-   "y": 107,
+   "y": 62,
    "w": 26,
    "h": 26,
    "color": "#e8a33a"
@@ -1765,7 +1765,7 @@
    "workspace": "Brewhouse",
    "label": "To fermenter (through the chiller)",
    "x": 1647,
-   "y": 947,
+   "y": 712,
    "w": 26,
    "h": 26,
    "color": "#3fbf6a"
@@ -1776,7 +1776,7 @@
    "workspace": "Brewhouse",
    "label": "Suction tee 1",
    "x": 845,
-   "y": 775,
+   "y": 575,
    "w": 30,
    "h": 30,
    "color": "#c0c6cc",
@@ -1790,7 +1790,7 @@
    "workspace": "Brewhouse",
    "label": "Suction tee 2",
    "x": 1055,
-   "y": 775,
+   "y": 575,
    "w": 30,
    "h": 30,
    "color": "#c0c6cc",
@@ -1804,7 +1804,7 @@
    "workspace": "Brewhouse",
    "label": "Pump out tee",
    "x": 1165,
-   "y": 890,
+   "y": 665,
    "w": 30,
    "h": 30,
    "color": "#c0c6cc",
@@ -1818,7 +1818,7 @@
    "workspace": "Brewhouse",
    "label": "Top tee",
    "x": 1165,
-   "y": 725,
+   "y": 525,
    "w": 30,
    "h": 30,
    "color": "#c0c6cc",
@@ -1835,16 +1835,15 @@
    "points": [
     [
      710,
-     425
+     393
     ],
     [
      710,
-     472
+     410
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1856,16 +1855,15 @@
    "points": [
     [
      1070,
-     425
+     393
     ],
     [
      1070,
-     472
+     410
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1877,16 +1875,15 @@
    "points": [
     [
      1430,
-     425
+     393
     ],
     [
      1430,
-     472
+     410
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1898,16 +1895,15 @@
    "points": [
     [
      710,
-     527
+     465
     ],
     [
      710,
-     790
+     590
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1919,16 +1915,15 @@
    "points": [
     [
      710,
-     790
+     590
     ],
     [
      860,
-     790
+     590
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_1"
@@ -1940,7 +1935,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 695,
-   "y": 775,
+   "y": 575,
    "w": 30,
    "h": 30,
    "label": "",
@@ -1957,16 +1952,15 @@
    "points": [
     [
      1070,
-     527
+     465
     ],
     [
      1070,
-     790
+     590
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1978,16 +1972,15 @@
    "points": [
     [
      1430,
-     527
+     465
     ],
     [
      1430,
-     580
+     500
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1999,16 +1992,15 @@
    "points": [
     [
      1430,
-     580
+     500
     ],
     [
      1520,
-     580
+     500
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_2"
@@ -2022,16 +2014,15 @@
    "points": [
     [
      1520,
-     580
+     500
     ],
     [
      1520,
-     790
+     590
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_3"
@@ -2045,16 +2036,15 @@
    "points": [
     [
      1520,
-     790
+     590
     ],
     [
      1070,
-     790
+     590
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_4"
@@ -2066,7 +2056,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 1415,
-   "y": 565,
+   "y": 485,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2081,7 +2071,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 1505,
-   "y": 565,
+   "y": 485,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2096,7 +2086,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 1505,
-   "y": 775,
+   "y": 575,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2113,16 +2103,15 @@
    "points": [
     [
      1070,
-     790
+     590
     ],
     [
      860,
-     790
+     590
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2134,16 +2123,15 @@
    "points": [
     [
      860,
-     790
+     590
     ],
     [
      860,
-     905
+     680
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2155,16 +2143,15 @@
    "points": [
     [
      860,
-     905
+     680
     ],
     [
      940,
-     905
+     680
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_5"
@@ -2176,7 +2163,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 845,
-   "y": 890,
+   "y": 665,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2193,16 +2180,15 @@
    "points": [
     [
      1080,
-     905
+     680
     ],
     [
      1180,
-     905
+     680
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2214,16 +2200,15 @@
    "points": [
     [
      1180,
-     905
+     680
     ],
     [
      1428,
-     905
+     680
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2235,16 +2220,15 @@
    "points": [
     [
      1492,
-     905
+     680
     ],
     [
      1660,
-     905
+     680
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2256,16 +2240,15 @@
    "points": [
     [
      1660,
-     905
+     680
     ],
     [
      1660,
-     960
+     725
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_6"
@@ -2277,7 +2260,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 1645,
-   "y": 890,
+   "y": 665,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2294,16 +2277,15 @@
    "points": [
     [
      1180,
-     905
+     680
     ],
     [
      1180,
-     740
+     540
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2315,16 +2297,15 @@
    "points": [
     [
      1180,
-     740
+     540
     ],
     [
      890,
-     740
+     540
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2336,16 +2317,15 @@
    "points": [
     [
      890,
-     740
+     540
     ],
     [
      890,
-     667
+     505
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_7"
@@ -2357,7 +2337,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 875,
-   "y": 725,
+   "y": 525,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2374,16 +2354,15 @@
    "points": [
     [
      890,
-     613
+     450
     ],
     [
      890,
-     120
+     75
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2395,16 +2374,15 @@
    "points": [
     [
      890,
-     120
+     75
     ],
     [
      930,
-     120
+     75
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_8"
@@ -2416,7 +2394,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 875,
-   "y": 105,
+   "y": 60,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2433,16 +2411,15 @@
    "points": [
     [
      1180,
-     740
+     540
     ],
     [
      1260,
-     740
+     540
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2454,16 +2431,15 @@
    "points": [
     [
      1260,
-     740
+     540
     ],
     [
      1260,
-     667
+     505
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_9"
@@ -2475,7 +2451,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 1245,
-   "y": 725,
+   "y": 525,
    "w": 30,
    "h": 30,
    "label": "",
@@ -2492,16 +2468,15 @@
    "points": [
     [
      1260,
-     613
+     450
     ],
     [
      1260,
-     120
+     75
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2513,16 +2488,15 @@
    "points": [
     [
      1260,
-     120
+     75
     ],
     [
      1290,
-     120
+     75
     ]
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_10"
@@ -2534,7 +2508,7 @@
    "autoFit": true,
    "workspace": "Brewhouse",
    "x": 1245,
-   "y": 105,
+   "y": 60,
    "w": 30,
    "h": 30,
    "label": "",
