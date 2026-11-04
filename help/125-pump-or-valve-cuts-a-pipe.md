@@ -20,14 +20,19 @@ The pipe is **cut into separate pipes**, one joined to each IP of the pump or va
 
 ## Dropped over the end of a pipe
 
-If the end of the pipe is an **open end**, the pipe is made **shorter** and joined to the pump or valve. If that end is already
-joined to a **tee, an elbow, a vessel port or another IP**, it is left as it is.
+The pipe is made **shorter** and the pump or valve is joined in with **both of its IPs**.
+
+- **An open end** (nothing joined to it): the open end goes away, the pipe joins one IP, and the other IP is now the end of the
+  line, ready for the next pipe.
+- **An end on a tee, an elbow, a vessel port or another IP:** that end stays where it is. The pump or valve slides back along
+  the pipe so it is clear of it; one IP joins the shortened pipe and the other is joined by a short new pipe to the tee (or
+  whatever the end was on).
 
 ## When nothing is cut
 
 - The pump or valve is already joined to a pipe, or it is Locked.
 - The pipe is a hose, or runs at 45 degrees; the valve is turned 45 degrees or is a front view.
-- There is not enough pipe left past the pump to go round it. Move it further along the pipe and drop it again.
+- There is not enough pipe left to go round the pump or to put it in. Move it further along the pipe, or draw a longer pipe.
 
 A message at the bottom of the screen says what was done (or why not). Press **Save layout** to keep it, or **Exit** without
 saving to put everything back.
