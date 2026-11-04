@@ -2657,6 +2657,7 @@ async function newDeviceDialog(e, hint, what) {
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
     ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro', null, false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
+  work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (isPumpDev(e) && !work.typeCode) work.typeCode = 'Pump';      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });

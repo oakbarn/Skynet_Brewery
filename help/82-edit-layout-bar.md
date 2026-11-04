@@ -35,7 +35,7 @@ These are short cuts. Clicking **Pumps** shows only the pump list: the same as p
 
 Picking a Device opens the **Add Device** box. Fill it from the top:
 
-1. **Label**: the text shown on the Tab, and **Label Visible** (switch it off for no Label).
+1. **Label**: the text shown on the Tab, and **Label Visible** (it starts at No: switch it on to show the Label).
 2. **Interface (board)**, and on the same line **Available Ports**: only the free pins on that board that fit this Device. The last line of the Interface list, **➕ Add new Interface…**, adds a board.
 3. **Tab**: the Tab it goes on. It starts with the Tab you were on. The last line, **➕ Add new Tab…**, makes a new Tab: type its name, set it up in Tab settings and press Save. You come back to the Add Device box with what you typed kept and the new Tab picked.
 4. **Name**: once 1-3 are done, the Name shows, filled in with the **Suggested Name** made from the Label, Interface, Port, Device Type and Tab. You may edit it (the panel warns you, see [Interfaces](76-interfaces)).
