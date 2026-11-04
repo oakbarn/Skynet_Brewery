@@ -604,6 +604,15 @@ range are fixed). The User Defined Proportional Valve replaces "Proportional val
 signal and range, and In / Out IP spots like the User Defined Motorized Ball Valve. More Skynet Proportional Valves only when
 Fritz names them, and no new pictures without his word (Rule 13.3).
 
+5.23 **Valves and pumps sit centered on their pipes** (Fritz, 2026-11-04, with a drawing, thread "Center pumps and valves on pipes",
+Help 121). A pipe joined to a valve or pump runs straight on through it: the IPs sit on the picture's own pipe or port (Rule 5.20),
+and the valve or pump is moved across (left or right on an up-and-down pipe, up or down on a level one) until each IP is on its pipe's
+line. **The pipes stay where they are; the valve or pump moves.** This is done for every Tab as it is shown and once when Edit layout
+opens, so Save layout keeps it. Two pipes that would move it different ways (drawn out of line) leave it as it is. Hoses bend, so a
+hose just goes to the IP. The older ball valve pictures (Valve_Ball_..._H_1 and ...V-1x1, from BruControl) have their pipe spot set
+too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides, or where the User Defined valve's In and
+Out IP spots put them.
+
 ## 6. Devices, connections and safety
 
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
@@ -780,6 +789,14 @@ Orange, User; **None is the default**) and **.coverColor** (the User cover's col
 Widget formats Fritz will make; nothing is converted until then. The list of old Alarms is docs/ExistingAlarms.md (not
 the OakBarn Schema). (Fritz, 2026-11-02, thread "Build the Basic and User Alarm Widgets")
 
+7.15 **Powered valves and pumps flash a lightning bolt when On** (Fritz, 2026-11-04, with a drawing, thread "Center pumps and
+valves on pipes", Help 58 and 121). The Skynet On overlay **Lightning bolt, flashing red and yellow**
+(Images/Skynet/On_Off/Overlay_Bolt_Flash.svg) sits over the middle of the picture while it is On (a valve open, a pump running, a
+Proportional Valve above 0 %). Every new motorized valve, Proportional Valve and Pump Device starts with it, and the Skynet valve
+Templates have it set. Once per Schema, each one that had no On overlay gets it (Rule 15.2); one with an overlay already keeps it, and
+picking (none) afterwards stays none. A Manual valve has no power, so it has none. New pumps from the pump picker still start with
+the Green glow ring (Rule 18.13) unless Fritz says otherwise.
+
 ## 8. Sign-in and roles
 
 8.1 **Roles:** viewer, operator, admin. Any new screen that changes things is Admin-only or
@@ -888,7 +905,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **121**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **122**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1366,3 +1383,4 @@ says (Rule 18.10).
 - 2026-11-04: Added Rule 2.33 (one click turns a Pump on or off, no ON / OFF pop-up; Pumps in every Schema changed once; Ask before changing still there by hand). Help 120; next free Help number 121. (thread "Toggle pumps with one click")
 - 2026-11-04: Added Rule 18.14 (general: ➕ Add new ... in any dialog dropdown pauses the dialog, keeps its temporary data, makes the new thing, comes back with the data filled in, the dropdown refreshed and the new thing picked); Rule 4.1 points to it. Other dialogs follow one at a time (Rule 18.10). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 18.15 (every new Device dialog opens with 1 Label, 2 Interface, 3 Port, 4 Tab, then the Suggested Name; the Add Device box has it, the RIMS / Integrated Kettle box waits for Fritz, one at a time). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Added Rule 5.23 (valves and pumps sit centered on their pipes: the valve or pump moves across onto the pipe's line, the pipes stay; the older ball valve pictures have their pipe spot) and Rule 7.15 (powered valves and pumps flash a red and yellow lightning bolt On overlay when On; once per Schema for those with no overlay). Help 121, Help 58 updated; next free Help number 122. (thread "Center pumps and valves on pipes")

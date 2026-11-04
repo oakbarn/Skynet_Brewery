@@ -2,7 +2,7 @@
   "title": "Skynet KLD20T Proportional Valve: Horizontal",
   "type": "analogOut",
   "props": {
-    "subtype": "propValve", "service": "room", "typeCode": "P_L_Vlv", "orientation": "h",
+    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt_Flash.svg", "subtype": "propValve", "service": "room", "typeCode": "P_L_Vlv", "orientation": "h",
     "signal": "0-5V", "rangeLow": 0, "rangeHigh": 100, "units": "%", "precision": 0,
     "w": 90, "h": 77, "hideName": true, "look": "normal"
   },

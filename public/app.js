@@ -250,6 +250,7 @@ function drawWs() {
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
   for (const g of L().graphics.filter(g => gTab(g) === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));     // a Process can move a Text Widget to another Tab (.tab)
+  if (!editing) centerOnPipes(L(), w.name);      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
   const clones = L().graphics.filter(g => g.workspace === w.name && isClone(g)).map(cloneEl).filter(Boolean);
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones]) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
@@ -401,7 +402,9 @@ const TINTS = { red: ['Glow red (colors the picture itself; heating elements)', 
   blue: ['Glow blue (colors the picture itself; cooling)', 'rgb(0,120,255)'] };
 const isTint = p => /^tint:/.test(p || '');
 const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
-const OVERLAY_GRAPHICS = [['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
+// the flashing bolt (Fritz, 2026-11-04, Rule 7.15): red and yellow, the On overlay every powered valve and pump starts with
+const BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
+const OVERLAY_GRAPHICS = [['Lightning bolt, flashing red and yellow (valves and pumps)', BOLT_FLASH], ['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
   ['Green glow ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
@@ -780,7 +783,10 @@ function sidePt(e, side) {
 const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] },
   BF_H: { o: 'h', w: 140, h: 170, ends: [[0, 135 / 170], [1, 135 / 170]] }, BF_V_R: { o: 'v', w: 170, h: 140, ends: [[35 / 170, 0], [35 / 170, 1]] }, BF_V_L: { o: 'v', w: 170, h: 140, ends: [[135 / 170, 0], [135 / 170, 1]] },
   BF_Front: { o: 'f', w: 120, h: 170, ends: [[0.5, 130 / 170], [0.5, 130 / 170]] }, BF_Front_Elbow: { o: 'f', w: 120, h: 200, ends: [[0.5, 0.65], [0.5, 1]] },
-  BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] } };
+  BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] },
+  // the older motorized ball valve pictures (Valve_Ball_..._H_1 and ...V-1x1, .png or .svg, from BruControl's media): the pipe runs
+  // across 97.5 of its 119 high, or stands up 22 in from the left of its 119 wide (Fritz, 2026-11-04: valves sit on the pipe)
+  OLD_H: { o: 'h', w: 139, h: 119, ends: [[0, 97.5 / 119], [1, 97.5 / 119]] }, OLD_V: { o: 'v', w: 119, h: 141, ends: [[22 / 119, 0], [22 / 119, 1]] } };
 // Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
 // port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
 const PUMP_FLOW = {
@@ -839,6 +845,8 @@ function pickPump() {
 function picFlow(path) {
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
+  const om = String(path || '').match(/(?:^|\/)Valve_Ball_(?:Open|Closed)(H_1|V-1x1)\.(?:png|svg)$/i);
+  if (om) return { k: om[1] === 'H_1' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'H_1' ? 'OLD_H' : 'OLD_V'] };
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
   return k && PIC_FLOW[k] ? { k, o: k.endsWith('H') ? 'h' : 'v', ...PIC_FLOW[k] } : null;
@@ -887,6 +895,34 @@ const devIps = e => {
   return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(ipAt(e, 'in') || pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
     { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(ipAt(e, 'out') || pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
 };
+// A valve or pump sits centered on its pipes (Fritz, 2026-11-04, Rule 5.23): each straight pipe joined to one of its IPs runs on
+// through the IP, so the picture's own pipe (or port) is in line with it. Where an IP is off a pipe's line, the valve or pump moves
+// across (left or right for an up-and-down pipe, up or down for a level one) until it is on it; the pipes stay where they are.
+// Two pipes that want it moved different ways (drawn out of line) leave it alone. Hoses bend, so they just go to the IP.
+// Done on each Tab as it is drawn and once when Edit layout opens (kept with the next Save layout). Returns how many moved.
+const CENTER_SUBS = ['valve', 'propValve', 'pump'];
+function centerOnPipes(lay, ws) {
+  let n = 0;
+  for (const e of lay?.elements || []) {
+    if (!CENTER_SUBS.includes(e.subtype) || !hasIps(e) || (ws && e.workspace !== ws)) continue;
+    const need = { x: [], y: [] };
+    for (const q of devIps(e)) {
+      for (const p of lay.graphics.filter(g => g.kind === 'pipe' && !g.hose && g.workspace === e.workspace && (g.from === q.id || g.to === q.id))) {
+        const pts = p.points || []; if (pts.length < 2) continue;
+        const [a, b] = p.from === q.id ? [pts[0], pts[1]] : [pts[pts.length - 1], pts[pts.length - 2]];
+        const dx = b[0] - a[0], dy = b[1] - a[1];
+        if (Math.abs(dx) < 0.5 && Math.abs(dy) >= 0.5) need.x.push(a[0] - q.c[0]);          // an up-and-down pipe: line up across
+        else if (Math.abs(dy) < 0.5 && Math.abs(dx) >= 0.5) need.y.push(a[1] - q.c[1]);     // a level pipe: line up up and down
+      }
+    }
+    const gm = elGeom(e), most = Math.max(gm.w || 120, gm.h || 60) / 2;
+    const pick = list => list.length && list.every(v => Math.abs(v - list[0]) <= 1.5) && Math.abs(list[0]) > 1 && Math.abs(list[0]) <= most ? Math.round(list[0]) : 0;
+    const mx = pick(need.x), my = pick(need.y);
+    if (!mx && !my) continue;
+    e.x = (e.x || 0) + mx; e.y = (e.y || 0) + my; n++;
+  }
+  return n;
+}
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
@@ -1843,6 +1879,7 @@ function setEditing(on) {
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
+  if (on) centerOnPipes(draft);              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
@@ -2264,16 +2301,16 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT_FLASH, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg' };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT_FLASH };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT_FLASH, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
