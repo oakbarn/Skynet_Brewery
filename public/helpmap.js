@@ -47,7 +47,7 @@ export function graphicTopic(g) {
   if (!g) return null;
   switch (g.kind) {
     case 'vessel':
-      if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && plainFit(g.fittings)) return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
+      if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && plainFit(g.fittings)) return ['tc-pipe-fittings'];      // TC Pipe Fittings (Rule 5.25, Help 124)
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet') return ['skynet-fittings'];
       if (g.integrated) return g.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle'];
       if (g.template && g.templateCls === 'skynet') return ['skynet-vessels'];
@@ -56,6 +56,7 @@ export function graphicTopic(g) {
       return g.vesselType === 'vessel' ? ['vessel-tab'] : ['equipment', 'other-equipment'];
     case 'ip':
       if (g.fitting === 'manualValve') return ['pipe-fittings-and-manual-valves', 'the-manual-valve-widget'];
+      if (['elbow90', 'elbow45', 'tee', 'cross'].includes(g.fitting)) return ['tc-pipe-fittings'];
       if (g.fitting && g.fitting !== 'point') return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
       return ['ip-snap-and-valve-pictures', 'snap-to-align'];
     case 'pipe': return ['pipe-and-hose-flow-colors'];      // Rule 5.21 (Rule 5.19's pipe angles: Help 105)
