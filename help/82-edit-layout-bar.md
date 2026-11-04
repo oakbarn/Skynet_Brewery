@@ -38,7 +38,7 @@ Picking a Device opens the **Add Device** box. Fill it from the top:
 1. **Label**: the text shown on the Tab. Or switch **Show label** off for no Label.
 2. **Interface** (the board). The last line, **➕ Add new Interface…**, adds a board.
 3. **Available Ports / Pins**: only the free pins that fit this Device.
-4. **Tab**: the Tab it goes on. It starts with the Tab you were on.
+4. **Tab**: the Tab it goes on. It starts with the Tab you were on. The last line, **➕ Add new Tab…**, makes a new Tab: type its name, set it up in Tab settings and press Save. You come back to the Add Device box with what you typed kept and the new Tab picked.
 5. **Suggested Name**: made from the Label, Interface, pin, type and Tab, in that naming order. It shows once 1-4 are done. You may type your own (the panel warns you, see [Interfaces](76-interfaces)).
 
 Then **Width** and **Height** (150 x 150 to start). When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line comes after the Interface.
