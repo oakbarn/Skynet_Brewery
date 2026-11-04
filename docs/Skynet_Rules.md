@@ -311,6 +311,12 @@ from the ☰ Menu > Default tab **Temperatures** unit. The common keys always wo
 (Ctrl+Shift+V / ⌘+Shift+V), Undo, and Redo with **Ctrl+Shift+Z or Ctrl+Y** (⌘+Shift+Z or ⌘+Y). A new key must never take
 one of these. (thread "Add shortcut keys for text entry", Help 113)
 
+2.33 **One click turns a Pump on or off** (Fritz, 2026-11-04): on a Tab (not in Edit layout) a single click or tap on a Pump
+Device, or on a Picture Widget that follows one, switches it ON or OFF at once, the same as a valve. No ON / OFF pop-up asks
+first. A new Pump starts that way, and every Schema's Pumps are changed once when the panel starts. **Ask before changing**
+(When tapped ⬢ in the Pump's Properties) can still be turned on by hand for a Pump that should ask. Double-click still opens
+Properties (Rule 2.9). Heating elements still ask first. (thread "Toggle pumps with one click", Help 120)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -889,8 +895,18 @@ a few BruControl friends. (2026-10-04)
 *Replaced in part:* "never make the repo public" (2026-10-04). On 2026-10-22 Fritz said "Public is
 fine" for the GitHub repo, which the Get Skynet pictures feature needs.
 
-12.2 **The Beer money donation recipient is locked** to Fritz's PayPal in one file and can never be
-made editable again. (2026-10-04, PR #18)
+12.2 **Beer money donations can go to at most 2 PayPal accounts.** It is **locked now with only Fritz's
+PayPal account**, in one file (lib/donation.js, owned by @oakbarn). It is unlocked only when Fritz gives the
+second PayPal account (that may never happen); once that account is added it is locked again. Nobody can
+add, change or delete a PayPal account from the panel, and the Prime Developers cannot either. (Fritz,
+2026-11-02, thread "Expand Buy a Beer and Patron support")
+*Replaced:* "The Beer money donation recipient is locked to Fritz's PayPal in one file and can never be
+made editable again." (2026-10-04, PR #18)
+
+12.3 **Patron payments are not Beer money.** They are split by percent between several PayPal accounts:
+every Patron payment goes to one collecting account and a Prime Developer runs a Pay Out by percent
+(Option A). The Patron accounts and percents are changed only by the Prime Developers as a group, on
+GitHub, and **every** Prime Developer must approve (100%). Rule 12.2 covers Buy a Beer only. (Fritz, 2026-11-02, thread "Expand Buy a Beer and Patron support")
 
 ## 13. Libraries (reference documents)
 
@@ -1281,13 +1297,16 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-02: Rule 1.19: new gGlobals are only global-scope variables; Switch, Push Button, Pulse Button, List, Step and Long String
   are not gGlobals (Semi_Widgets_Devices); the Rule 1.16 prefix change is on hold; Open question 13 answered. docs/ExistingGlobals.md. (thread "Add gGlobal Kinds and BruControl import")
 - 2026-11-02: Added Rule 1.20 (Semi_Widgets_Devices: Manual Valve Widget, Switch, Push Button, Pulse Button, LED; device_controlled, None to start, follows its Device both ways like a Clone; only Devices with an ON / OFF state). Help 112; next free Help number 113. (thread "Create the Semi_Widgets_Devices class")
-- 2026-11-02: Added Rule 9.8 (Start Fresh on an existing install: the installers ask "Delete all users and Schemas and Start Fresh?", a second warning with back out; config, data and scripts deleted, media and backups kept). Help 18 updated; no new Help number used. (thread "Add Start Fresh option to installer")
 - 2026-11-02: Added Rule 2.32 (shortcut keys in every text box: Shift+Enter `\n`, Ctrl/⌘+B `\b`, Ctrl/⌘+Shift+D °F or °C; the common copy, paste, undo and redo keys always work). Help 113; next free Help number 114. (thread "Add shortcut keys for text entry")
 - 2026-11-02: Rule 7.10 rewritten: background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1, _2, _3); .background 1-3 picks one, 0, blank or over 3 = none; old names changed everywhere (Rule 15.2). Help 25 rewritten. (thread "Rename image paths to backpath")
 - 2026-11-02: Rule 7.10: at most 3 background pictures on any item (a 4th or more is dropped); most Widgets have no backpath, the Graphic Widget does. (thread "Rename image paths to backpath")
+- 2026-11-02: Added Rule 9.8 (Start Fresh on an existing install: the installers ask "Delete all users and Schemas and Start Fresh?", a second warning with back out; config, data and scripts deleted, media and backups kept). Help 18 updated; no new Help number used. (thread "Add Start Fresh option to installer")
 - 2026-11-02: Added Rule 1.21 (Universal Properties for every Device, Widget and Semi-Device; docs/Universal_Properties.md) and Open question 14 (Rules 1.15 / 15.2 position aliases, Rule 5.14 pipe fittings). Help 114; next free Help number 115. (thread "Set universal properties standard")
 - 2026-11-02: Rule 1.15 rewritten: `.x`, `.xh`, `.x_hPosition` (and `.y`, `.yv`, `.y_vPosition`) are all Process attributes for the same thing, `.x` / `.y` the main names; an exception to Rule 15.2. (thread "Set universal properties standard")
 - 2026-11-02: Rule 5.14 changed (Fritz): pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label, besides `.x`, `.y`, `.width`, `.height` and Autosize to pipe. Open question 14 answered. (thread "Set universal properties standard")
+- 2026-11-02: Rule 12.2 changed (Fritz): Beer money can go to at most 2 PayPal accounts; locked now with only Fritz's, unlocked only when he gives the second, then locked again. (thread "Expand Buy a Beer and Patron support")
+- 2026-11-02: Added Rule 12.3 (Fritz): Patron payments are split by percent between several PayPal accounts (Option A, Pay Out); Rule 12.2 covers Buy a Beer only. (thread "Expand Buy a Beer and Patron support")
+- 2026-11-02: Rule 12.3: a Patron account or percent change needs every Prime Developer's approval (100%, Fritz). (thread "Expand Buy a Beer and Patron support")
 - 2026-11-03: Rule 4.5 updated from Fritz's Edit layout bar picture ("Fix 1"): row 1 order Picture, Text, Manual Valve, Override, Add equipment, Vessel; 👻 Hidden Tab gets an orange ? pop-up holding the Edit layout hint (taken off row 3); the switch is now Update Schema Version. Help 82 updated; no new Help number used. (thread "Fix the Edit layout bar from screenshot")
 - 2026-11-03: Added Rule 18.12 (the drill-down: Pump Device Properties is the first dialog changed to Rule 18 and the
   starting standard for every Device; Properties ⬢ pop-up with Delete, Label ⬆ ⬢, Pin, When tapped, Picture, Background and
@@ -1295,12 +1314,12 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-03: Added Rule 5.21 (Pipe and Hose Widgets: made only with Draw pipe / Draw hose, not in the Widget List; Flow Colors on the
   Tab, the pipe and the Vessel, tap water always Blue, Vessel over all; .flow_Color the only Process attribute; Name, Label, Position and
   Size greyed out) and the pipe exception under Rule 4.1. Help 116; next free Help number 117. (thread "Add flow colors to pipe and hose Widgets")
-- 2026-11-03: Rule 5.21 changed (Fritz): pipes and hoses keep an editable Label and Show label (the general Rule); only Position and Size
-  are hidden. Added to How Rules work: following the Rules is the standard; an exception only for what no user would find useful.
 - 2026-11-03: Rule 5.17: Master and Daughter are kept underneath but never shown; one entry per Skynet valve in the add lists,
   Orientation picks the Daughter and the picture and IPs follow; titles "valve: Orientation"; Build Template says Main Template. Help 88,
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
+- 2026-11-03: Rule 5.21 changed (Fritz): pipes and hoses keep an editable Label and Show label (the general Rule); only Position and Size
+  are hidden. Added to How Rules work: following the Rules is the standard; an exception only for what no user would find useful.
 - 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")
 - 2026-11-03: Rule 10.1 replaced (Fritz): Testing mode retired; updates keep logins, only Start Fresh (Rule 9.8) removes them. Settings > Testing mode switch removed. Help 10, 18, 27, 39, 67 updated; no new Help number used. (thread "Keep logins after installing a new .exe")
 - 2026-11-03: Added Rule 1.22 (gGlobals are non-volatile: never cleared when a Process starts, saved on the Brain's disk soon after each change, back after a restart; the Keep value on restart switch is gone). Help 118, Help 04 and 108 updated; next free Help number 119. Saving works the same on every Brain (Pi, Windows, Linux, Mac). (thread "Keep gGlobal values after restart")
@@ -1309,3 +1328,4 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-03: Added Rule 9.9 (Move Brain: a Brain Move file locked with a Move password on the old Brain, Bring in + Move in now on the new Brain with its own files kept in backups/, then USB ports changed in every Schema at once, matched by serial number). Help 119; next free Help number 120. (thread "Move a computer Brain to a Pi")
 - 2026-11-03: Rule 5.21: every IP point has a Flow Color (`.flow_Color`, None to start), first in the flow color order: flow that begins at it
   takes that color. Help 116 updated. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-04: Added Rule 2.33 (one click turns a Pump on or off, no ON / OFF pop-up; Pumps in every Schema changed once; Ask before changing still there by hand). Help 120; next free Help number 121. (thread "Toggle pumps with one click")

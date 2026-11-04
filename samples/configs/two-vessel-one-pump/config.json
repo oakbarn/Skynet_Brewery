@@ -1361,7 +1361,6 @@
    "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.png",
    "hideValue": true,
    "tap": "toggle",
-   "confirm": true,
    "onText": "ON",
    "offText": "OFF"
   },
