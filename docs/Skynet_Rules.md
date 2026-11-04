@@ -571,9 +571,12 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
   Reddish Brown, Golden, and **RGB** (a color of your own).
 - **The Tab in tab.flow_Color is the Tab with the focus** (the one each screen shows). All pipes and hoses on a Tab use the Tab's Flow
   Color, except: a pipe's own Flow Color (not None) overrides **Mash, Boil, Whirlpool and Ferment**; **flow from a Tap Water Valve is
-  always Blue**; and **flow that begins at a Vessel's outlet with an Out flow color takes that color, over all else**. Order: Vessel,
-  Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash, Boil, Whirlpool, Ferment); all None = the standard light blue.
-- **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`). What a Process
+  always Blue**; **flow that begins at a Vessel's outlet with an Out flow color takes that color**; and, **first of all, flow that begins
+  at an IP with a Flow Color takes that color** (Fritz, 2026-11-03: every IP point has `.flow_Color`, None to start; an HLT outlet IP set
+  to Red makes the flow leaving it Red). Order: IP, Vessel, Tap Water Valve, Tab (Tap, Strike, plain colors, RGB), the pipe, Tab (Mash,
+  Boil, Whirlpool, Ferment); all None = the standard light blue.
+- **Flow Color is the only Process attribute of a Pipe or Hose** (`Pipe_1.flow_Color = Orange`, `tab.flow_Color = Mash`, and an IP's
+  `IP_1.flow_Color = Red`). What a Process
   sets lasts until set to None, another Schema is loaded, or the panel restarts.
 - **A Pipe or Hose follows the general Rule for Labels** (Rule 1.21, 2.18): a user can add a Label, edit it and Show it (it sits in the
   middle of the pipe). Its Name is given by Skynet (Pipe_1, Hose_1). **Exception: no Position or Size.** X, Y, Width and Height could never
@@ -1304,3 +1307,5 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-03: Rule 1.7 changed (Fritz): the Brain can be a Raspberry Pi or a Windows, Linux or Mac computer, Arduinos on USB or Ethernet; remote browsers need the Brain running, on Tailscale, with internet (the same for a Pi or a computer). Rule 11.1 next free Help number is 119. (thread "Keep gGlobal values after restart")
 - 2026-11-03: Added Rule 6.16 (moving from BruControl on a Windows Brain needs no new hardware: same boards, links, COM ports, wiring and pin numbers; only a one-time Skynet firmware load from inside Skynet). Gap report docs/BruControl_Connections.md. No Help number used. (thread "Match BruControl's Arduino connections on Windows")
 - 2026-11-03: Added Rule 9.9 (Move Brain: a Brain Move file locked with a Move password on the old Brain, Bring in + Move in now on the new Brain with its own files kept in backups/, then USB ports changed in every Schema at once, matched by serial number). Help 119; next free Help number 120. (thread "Move a computer Brain to a Pi")
+- 2026-11-03: Rule 5.21: every IP point has a Flow Color (`.flow_Color`, None to start), first in the flow color order: flow that begins at it
+  takes that color. Help 116 updated. (thread "Add flow colors to pipe and hose Widgets")

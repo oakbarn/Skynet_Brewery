@@ -36,6 +36,7 @@ Marks where flow starts or ends (a pump outlet, a vessel port, a drain). Pipes a
 | Manual valve is open | Yes / No (Manual valve type only). A closed manual valve stops flow. |
 | Port on vessel | Set by dropping the IP on a vessel; it then moves with the vessel. |
 | Name / label | For example "Red pump out", "MLT in", "Drain" |
+| Flow Color (`.flow_Color`) | IP point only. None to start. Flow that begins at this IP takes this color, first of all (Rule 5.21, Help 116) |
 | Show label on screen | on / off |
 | Label position | below, above, top, center, bottom, top-left, top-right, bottom-left, bottom-right |
 | Label color, Label back color, Label size | |
@@ -456,3 +457,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-02: Background pictures are .backpath, .backpath_2, .backpath_3 (were imagePath_1-3); 0, blank or over 3 = no background (Rule 7.10). (thread "Rename image paths to backpath")
 - 2026-11-02: Universal Properties standard (Rule 1.21): every Device, Widget and Semi-Device gets the same Properties and attributes; see docs/Universal_Properties.md. (thread "Set universal properties standard", Help 114)
 - 2026-11-03: Pipe and Hose Flow Colors (Rule 5.21, Help 116): Flow Color None by default; Tab Flow Color (tab.flow_Color); Vessel Out flow color; tap water always Blue; pipes and hoses keep their Label; X, Y, Width, Height hidden. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-03: IP points get a Flow Color (`.flow_Color`), first in the flow color order (Rule 5.21, Help 116). (thread "Add flow colors to pipe and hose Widgets")
