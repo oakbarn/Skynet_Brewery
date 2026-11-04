@@ -1117,6 +1117,19 @@ dialog will work the same way when Fritz commands it, one at a time. From the to
 A field shown both on the dialog and in a pop-up is the same setting: saving the pop-up updates the dialog. Nothing is saved
 until 💾 Save on the dialog. (Help 115)
 
+18.13 **Adding a Pump** (Fritz's Add Pump drawing, 2026-11-04, [docs/Add_Pump_Format.png](Add_Pump_Format.png)):
+1. **Pumps > Pump, on / off (relay or SSR)**, then 2. **Pick the pump**: a list of the Skynet pump drawings (March 809 and 815,
+   Chugger, Blichmann Riptide, Topsflo TD5, KegLand MKII), each with its picture. The pick is the Pump's Picture, with the green
+   On overlay and Cover None to start.
+3. The Add box is titled with the pump (e.g. **Blichmann Riptide**). Besides Rule 4.2's fields it has the **Label ⬢** (Label
+   pop-up), **Label Visible**, **Cover**, **X (Horizontal)**, **Y (Vertical)**, Width and Height, and the **Device Type** greyed
+   out, read only (Pump: it comes from the list it was picked in). X and Y typed here are kept.
+4. Once ➕ Add Device is pressed, its Properties (Rule 18.12) show the **Interface (board)** and **Port** greyed out and set, each
+   with **✏ Change** to change it on purpose; **Tab, X, Y, Width and Height** on the dialog itself (they are in the Pump
+   Properties ⬢ pop-up too); the **Device Type** greyed out, read only; and the Name with ✏ Change name once built (Rule 3.11).
+*Waiting on Fritz:* the drawing's order (1 Label, 2 Interface and Ports, 3 Tab, 4 Name shown only once 1-3 are done) and the Tab
+picked in the Add box disagree with Rules 4.2 and 4.1; they are not built until he picks. (Help 115)
+
 ---
 
 ## Open questions (not Rules yet)
@@ -1309,3 +1322,4 @@ until 💾 Save on the dialog. (Help 115)
 - 2026-11-03: Added Rule 9.9 (Move Brain: a Brain Move file locked with a Move password on the old Brain, Bring in + Move in now on the new Brain with its own files kept in backups/, then USB ports changed in every Schema at once, matched by serial number). Help 119; next free Help number 120. (thread "Move a computer Brain to a Pi")
 - 2026-11-03: Rule 5.21: every IP point has a Flow Color (`.flow_Color`, None to start), first in the flow color order: flow that begins at it
   takes that color. Help 116 updated. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-04: Added Rule 18.13 (adding a Pump: pick the pump with its picture; the Add box titled with it, Label ⬢, Cover, X, Y, Device Type read only; Interface and Port greyed out with ✏ Change once added; Tab, X, Y, Width, Height on the Properties). Rules 4.1 / 4.2 parts of the drawing wait for Fritz. Help 115 updated; no new Help number. (thread "Set the drill-down dialog standard for Devices")
