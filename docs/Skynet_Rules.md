@@ -326,6 +326,17 @@ mouse or keyboard is a lighter Cyan. This works in **Chrome and Edge** (version 
 Android) and in **Firefox**. **iPhone / iPad (Safari)** and older browsers draw their own dropdown (on the iPhone the spinning
 wheel) and do not let a web page change its colours, so there it looks as before. (thread "Make selected dropdown items cyan")
 
+2.35 **Phones and tablets are for running the brewery, not for editing or building** (Fritz, 2026-11-04): as a
+general Rule, a phone or a tablet is not suitable to edit or build on. Phones and tablets (Fritz's iPhone over Tailscale) are
+for running and watching the brewery. Editing and building are done on a computer (Windows, Mac or Linux) with a mouse and
+keyboard. A feature that does not work, or looks plainer, on a phone or tablet (example: the Cyan dropdown choice of Rule 2.34
+on iPhone Safari) is fine under this Rule, as long as running and watching still work there.
+**Run mode** (Fritz, 2026-11-04): on a phone or tablet an admin works as an operator. **Changing the Schema, Start / Stop of
+Processes and the buttons on the Tabs work; there is no Edit layout and no Properties** (nor Tab settings or the admin
+screens). A short note says so when the panel starts, and ☰ Menu > About shows "run mode". ☰ Menu > Default > Phones and
+tablets has a switch, **Phones and tablets can edit** (off), set from a computer, to allow editing anyway; with it on,
+Rule 2.13 still holds. The login and the Brain are not changed. (thread "Add the phone and tablet editing Rule", Help 45)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -1270,8 +1281,8 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 6. **RIMS file name "TC1_2":** 1/2 inch or 2 inch TC? The Template still says TC 1.5.
 7. **Equipment Profile:** one per Tab (Hot Side, Fermentation; Fritz 2026-10-21) or one per Schema
    (PR #44)? Still open in the Brewing rewrite.
-8. **Phones in Edit layout:** add a warning and an "Allow Edit layout on phones" switch (off)?
-   (asked 2026-10-26)
+8. ~~**Phones in Edit layout:** add a warning and an "Allow Edit layout on phones" switch (off)?~~
+   Answered 2026-11-04: Rule 2.35 run mode.
 9. **Bundled Devices on a vessel:** the plan to list bundled Devices in vessel Properties with Edit
    buttons was OK'd but not built yet.
 10. **BruControl import:** keep the strict Process check, or allow BruControl-style lenient start?
@@ -1467,3 +1478,5 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 2.34 (the selected choice in every dropdown has a Cyan background; not possible on iPhone Safari or older browsers). (thread "Make selected dropdown items cyan")
 - 2026-11-04: Changed Rule 2.25 (Close Skynet Brewer now closes the Command Prompt window itself, whatever .bat started the panel, not only the new Skynet_Brewer.bat). Help 95 updated; no new Help number. (thread "Close the Command Prompt with Skynet")
 - 2026-11-04: Changed Rule 10.7 (hiding the Simulator bar removes it completely, no strip; ☰ Menu > 🧪 Show / Hide Simulator bar in Simulator mode; small 🧪 on the ☰ Menu button while hidden). Help 85 updated. (thread "Move Show Simulator bar to the ☰ Menu")
+- 2026-11-04: Added Rule 2.35 (as a general Rule, phones and tablets are for running and watching the brewery, not for editing or building; a feature that does not work on a phone or tablet is fine under it; nothing is hidden or locked on phones until Fritz says). (thread "Add the phone and tablet editing Rule")
+- 2026-11-04: Rule 2.35: run mode on phones and tablets (Fritz): an admin works as an operator there; the Schema, Processes and Tab buttons work, no Edit layout or Properties; switch "Phones and tablets can edit" (off) on ☰ Menu > Default. Open question 8 answered. Help 45 updated; no new Help number. (thread "Add the phone and tablet editing Rule")
