@@ -28,8 +28,8 @@ They are checked every time a password is **made or changed**: the first admin s
 
 Passwords made before you change the rules keep working. A user only meets the new rules the next time their password is changed.
 
-## Testing mode
+## Start Fresh
 
-While **Testing mode** is on, each new version wipes all logins (see [Login, users and passwords](10-login)), but the password rules are kept, because they are a setting, not a login.
+If you answer **Yes** to the installer's **Start Fresh** question, every login is deleted along with the settings, so the password rules go back to the defaults. A normal update keeps both the logins and the password rules.
 
 The emergency tool `node tools/reset-password.js` on the Brain always uses the default rules, so you can get back in even if the rules were set too strict.

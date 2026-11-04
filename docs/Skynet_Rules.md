@@ -61,8 +61,13 @@ the program.) (2026-10-04, PR #17)
 1.6 **PLC** means hobby boards: Arduino-compatible, Raspberry Pi, ESP32 and similar. Not
 industrial PLCs. They connect by USB, and by Ethernet where the board has it. (2026-10-03)
 
-1.7 **The Brain** = the main computer: a Raspberry Pi 4 or newer, **or** a mini PC. The Brain holds
-all text, picture and Schema files so the panel can be reached from anywhere. (2026-10-26)
+1.7 **The Brain** = the main computer: a Raspberry Pi 4 or newer, **or** a Windows, Linux or Mac computer (a mini PC,
+desktop or laptop). The Brain holds all text, picture and Schema files and every saved value (gGlobals, Rule 1.22) so the panel
+can be reached from anywhere, and everything works the same whichever kind of Brain it is. Arduinos and the other PLCs (Rule 1.6)
+connect to the Brain by USB or Ethernet. For a phone or a browser away from home to reach the panel, the Brain must be running,
+on Tailscale, and connected to the internet; this is the same for a Pi Brain and a computer Brain. (Fritz, 2026-11-03, thread "Keep gGlobal values after restart")
+*Replaced:* "The Brain = the main computer: a Raspberry Pi 4 or newer, or a mini PC. The Brain holds all text, picture and
+Schema files so the panel can be reached from anywhere." (2026-10-26)
 
 1.8 **Menu Bar** = the top line of the page (panel name "Skynet Brewery Panel", Schema dropdown,
 Tabs, Processes and so on). (2026-10-21)
@@ -157,6 +162,16 @@ the position; a locked item can still be double-clicked and changed, except whil
 with it (Rule 2.12). A Clone has them all, but most are its parent's and not editable (Rule 4.4). The full list, who lacks
 which, and the plan to bring the panel up to it: [docs/Universal_Properties.md](Universal_Properties.md). (thread "Set
 universal properties standard", Help 114)
+
+1.22 **gGlobals are non-volatile** (Fritz, 2026-11-03). Besides having a global scope (Rule 1.19), **every gGlobal keeps its
+value**, unlike a normal Process variable, which is cleared every time a Process starts. A gGlobal is **never cleared when a
+Process starts, stops or restarts**. Its value is **saved on the Brain's disk** soon after it changes (within about a second, even
+while a Process keeps changing it, and again when the panel closes), written safely so a power cut leaves the last good copy, and
+it **comes back when the Brain or the panel is restarted**. There is no "Keep value on restart" switch: every gGlobal keeps its
+value (an older Schema's switch is dropped when it loads, Rule 15.2). The .value typed in its dialog is only its first value. Each
+Schema keeps its own saved values. Updates keep them; only the installer's Start Fresh (Rule 9.8) deletes them. Push Button and
+Pulse Button gGlobals always start let go, and a Long String with a text file takes its value from the file. (thread "Keep gGlobal
+values after restart", Help 118)
 
 ## 2. Screen design and clicks
 
@@ -796,8 +811,12 @@ the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
 
 ## 10. Testing
 
-10.1 **Testing mode is on:** every newly merged version wipes all logins, so Fritz starts fresh with
-Admin setup. It stays on until he is in real use. (2026-10-04)
+10.1 **Updates keep logins.** Installing a new version never removes users, passwords, sign-ins or the
+recovery code. They are removed only when the installer's Start Fresh question is answered Yes and the
+warning is confirmed (Rule 9.8). There is no Testing mode switch. (Fritz, 2026-11-03, thread "Keep logins
+after installing a new .exe")
+*Replaced:* "Testing mode is on: every newly merged version wipes all logins, so Fritz starts fresh with
+Admin setup. It stays on until he is in real use." (2026-10-04)
 
 10.2 **Fritz's test bench** (week of 2026-10-20): a Pi, a Mega, an ESP32, one Tilt, a couple of
 valves, a 12 V LED as a burner and another as an electric element. Firmware has never run on real
@@ -838,7 +857,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **117**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **119**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1264,4 +1283,7 @@ until 💾 Save on the dialog. (Help 115)
   89, 110 updated; no new Help number used. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Valves list: the plain Motorized valve is now the User Defined Motorized Ball Valve (own picture, Image Path 1-3 kept per Rule 7.10 at Fritz's word "Follow the rule", In and Out IP spots in % of the item); Manual Valve (Widget) added to the Valves list, its bar button kept. Help 88. (thread "Explain Master and Daughter in Valve list")
 - 2026-11-03: Added Rule 5.22 (Proportional Valves: the BruControl KLD20T is the first Skynet Proportional Valve; "Proportional valve 0-100 %" is now the User Defined Proportional Valve with In and Out IP spots). Help 117; next free Help number 118. (thread "Add BruControl KLD20T proportional valve")
+- 2026-11-03: Rule 10.1 replaced (Fritz): Testing mode retired; updates keep logins, only Start Fresh (Rule 9.8) removes them. Settings > Testing mode switch removed. Help 10, 18, 27, 39, 67 updated; no new Help number used. (thread "Keep logins after installing a new .exe")
+- 2026-11-03: Added Rule 1.22 (gGlobals are non-volatile: never cleared when a Process starts, saved on the Brain's disk soon after each change, back after a restart; the Keep value on restart switch is gone). Help 118, Help 04 and 108 updated; next free Help number 119. Saving works the same on every Brain (Pi, Windows, Linux, Mac). (thread "Keep gGlobal values after restart")
+- 2026-11-03: Rule 1.7 changed (Fritz): the Brain can be a Raspberry Pi or a Windows, Linux or Mac computer, Arduinos on USB or Ethernet; remote browsers need the Brain running, on Tailscale, with internet (the same for a Pi or a computer). Rule 11.1 next free Help number is 119. (thread "Keep gGlobal values after restart")
 - 2026-11-03: Added Rule 6.16 (moving from BruControl on a Windows Brain needs no new hardware: same boards, links, COM ports, wiring and pin numbers; only a one-time Skynet firmware load from inside Skynet). Gap report docs/BruControl_Connections.md. No Help number used. (thread "Match BruControl's Arduino connections on Windows")

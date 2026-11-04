@@ -49,5 +49,5 @@ export const SAMPLE_GLOBALS = [
 // the samples whose names are not used yet, so adding them twice does nothing
 export function samplesToAdd(elements, graphics = []) {
   const taken = new Set([...(elements ?? []), ...(graphics ?? [])].map(x => String(x?.name ?? '').toLowerCase()));
-  return SAMPLE_GLOBALS.filter(s => !taken.has(s.name.toLowerCase())).map(s => ({ ...s, retain: true }));
+  return SAMPLE_GLOBALS.filter(s => !taken.has(s.name.toLowerCase())).map(s => ({ ...s }));
 }
