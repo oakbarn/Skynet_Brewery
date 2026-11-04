@@ -27,7 +27,7 @@ The server runs the processes and talks to the hardware. Processes keep running 
 4. **Open the panel.** On the same computer go to `http://localhost:8080`. From a tablet or phone, use `http://<computer's IP address>:8080`.
 5. **Create the admin account.** The first time, the panel asks for a user name and password. Then it shows a **recovery code**: save it (copy, download or print), because it is how you get back in if you forget the password. After that everyone signs in. To use the panel away from home, follow [docs/REMOTE_ACCESS.md](docs/REMOTE_ACCESS.md) (login, user roles and Tailscale).
 
-   **Testing mode (on for now):** each time a new version of the panel is installed, all users, sign-ins and the recovery code are removed, so you start again at step 5. Brew data, logs and settings are kept. Once you use the panel for real, turn it off in **Settings > Testing mode** (or put `"resetLoginsOnUpdate": false` in `config/brewery.json`).
+   **Updates keep your logins.** Installing a new version keeps every user, password and the recovery code. They are only removed if you answer **Yes** to the installer's **Start Fresh** question (and confirm the warning).
 
 Nothing else needs to be installed for the simulator, processes, API and database.
 
