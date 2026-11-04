@@ -20,7 +20,7 @@ assert.equal(flowName('reddishbrown'), 'Reddish Brown');
 assert.equal(flowName('mash'), 'Mash');
 assert.equal(flowName(''), 'None');
 
-// the order: Vessel > Tap Water Valve > Tab (Tap, Strike, plain colors) > pipe > Tab (Mash, Boil, Whirlpool, Ferment) > standard
+// the order: Tap Water Valve > IP > Vessel > Tab (Tap, Strike, plain colors) > pipe > Tab (Mash, Boil, Whirlpool, Ferment) > standard
 assert.equal(pipeFlowColor({}), FLOW_DEFAULT, 'everything None: the standard flow color');
 assert.equal(pipeFlowColor({ pipe: 'orange' }), flowHex('orange'));
 assert.equal(pipeFlowColor({ tab: 'mash' }), flowHex('mash'));
@@ -29,8 +29,10 @@ assert.equal(pipeFlowColor({ tab: 'ferment', pipe: 'orange' }), flowHex('orange'
 assert.equal(pipeFlowColor({ tab: 'strike', pipe: 'orange' }), flowHex('strike'), 'Strike: every pipe');
 assert.equal(pipeFlowColor({ tab: 'tap', pipe: 'orange' }), flowHex('tap'));
 assert.equal(pipeFlowColor({ tab: 'mash', pipe: 'orange', tap: true }), TAP_BLUE, 'tap water is always Blue');
-assert.equal(pipeFlowColor({ tab: 'strike', tap: true, vessel: 'red' }), flowHex('red'), 'a vessel color overrides all else');
-assert.equal(pipeFlowColor({ ip: 'golden', vessel: 'red', tap: true, tab: 'strike', pipe: 'orange' }), flowHex('golden'), 'an IP color is first of all');
+assert.equal(pipeFlowColor({ tab: 'strike', vessel: 'red' }), flowHex('red'), 'a vessel color overrides the Tab');
+assert.equal(pipeFlowColor({ tab: 'strike', tap: true, vessel: 'red' }), TAP_BLUE, 'tap water overrides a vessel');
+assert.equal(pipeFlowColor({ ip: 'golden', vessel: 'red', tab: 'strike', pipe: 'orange' }), flowHex('golden'), 'an IP color comes before a vessel');
+assert.equal(pipeFlowColor({ ip: 'golden', vessel: 'red', tap: true, tab: 'strike', pipe: 'orange' }), TAP_BLUE, 'tap water is #1 (Fritz 2026-11-04)');
 assert.ok(pipeWins('') && pipeWins('boil') && !pipeWins('purple'));
 
 // older Schemas: the old start color #4fb3ff becomes None, other colors are kept
