@@ -57,7 +57,7 @@ Example: `MB_25_E_L_Vlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID E_L_Vl
 ### Settings every Device has (Properties)
 Name, Label (`label`, was Display name), Show label, Tab, X, Y, Width, Height, Lock position, Background picture (1, 2, 3; 0, blank or over 3 = none), .backpath / .backpath_2 / .backpath_3 (Image Path 1-3, all editable), Visible, Hidden (locked), Hide value, Look (normal, led, lcd, dark, button, indicator), Digits shown, Value font size, When tapped (default, none, toggle, push button, dialog, process, tab), Tap target, Ask before changing, and the text box settings (Fore/Back color, Alignment, Word wrap, Name font and size, Name/Value colors and backgrounds, Name/Value alignment, Border).
 
-Every Device also has a **Database and .API** box at the end: **Send to the database** (Off, On demand, On value change, When a Process starts, Once, At a date and time, Every N ms / seconds / minutes / hours / days, Every 00:00:00), **What to send** (main value or another attribute) and **.API** (Off, Get only, Get and Put). Readings from the board (probes, inputs) can be read from outside but never changed. (Skynet Rule 6.14, Help 98)
+Every Device also has a **Database and .API** box at the end: **Send to the database** (Off, On demand, On value change, When a Process starts, Once, At a date and time, At clock time, Every N ms / seconds / minutes / hours / days, Every 00:00:00), **What to send** (main value or another attribute) and **.API** (Off, Get only, Get and Put). Readings from the board (probes, inputs) can be read from outside but never changed. (Skynet Rule 6.14, Help 98)
 
 Devices with on/off states also have **Picture when on / off**, an **On overlay** picture, and **Text when on / off**. New ones start with a green LED for on and a red LED for off (pumps and valves bring their own pictures).
 
@@ -203,7 +203,8 @@ What each ID means:
   **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
   (horizontal, 45) and **Needs setting** after the Orientation or a Flip changes (no tap flow until set), **Text On/Off** (the On /
   Off text shows only when on) with Text when on / off.
-- Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88.
+- Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88. At **45 degrees** they turn with the picture and stay on
+  the pipe ends (Rule 5.24, 2026-11-04, Help 123; before, they were on the corners of its box).
 
 ### 4.3c User Defined Motorized Ball Valve (Fritz, 2026-11-03)
 The Valves list row under the Skynet valves (was "Motorized valve, open / closed (relay)"): digitalOut, subtype valve, the user's own
@@ -464,3 +465,5 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-03: 4.2 Pump: the drill-down Properties dialog, the standard for every Device (Rule 18.12, Help 115). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-03: 4.6 renamed User Defined Proportional Valve (In / Out IP spots); added 4.6a Skynet KLD20T Proportional Valve (Rule 5.22, Help 117). (thread "Add BruControl KLD20T proportional valve")
 - 2026-11-04: 4.2 Pump: adding a Pump, pick the pump with its picture (Rule 18.13). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: 4.3a Skynet Motorized Ball Valve: IPs on the pipe ends at 45 degrees too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
+- 2026-11-04: 4.2 Pump: IPs on the inlet and outlet of every Skynet pump picture, the older Riptide-style ones and the sump pump too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
