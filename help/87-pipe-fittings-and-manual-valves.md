@@ -29,6 +29,7 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
 - Its **.state** is true (open) or false (closed). A closed Manual Valve stops flow in the pipes on it; an open one lets it pass the way it was going.
 - **One click on it on its Tab opens or closes it, at any time.** That is the only way its .state changes. Operators and Admins can click it; Viewers can't. Every screen shows the change.
 - While it is open, the **open overlay** (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, a green ring and a tick) is drawn on top of it.
+- It has **two IPs**, one at each pipe end, so a pipe joins each side of it (Skynet Rule 5.24, Help 123).
 - Its Properties: a note with its name and state, **Label** (used in the "by hand" message) and **Show label**, then **Autosize to pipe**, **X**, **Y**, **Width**, **Height** and 🔒 Lock.
 
 ### A Manual Valve in a Process

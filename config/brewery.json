@@ -9,7 +9,9 @@
     {
       "name": "SIM",
       "type": "simulator",
-      "ambient": 68
+      "ambient": 68,
+      "id": "SI",
+      "_key": "k5c5fdee1807e5556"
     }
   ],
   "workspaces": [
@@ -22,61 +24,88 @@
       "bgX": 520,
       "bgY": 0,
       "bgW": 2000,
-      "bgH": 1302
+      "bgH": 1302,
+      "id": "BR",
+      "_key": "k9cd4a2ef818bec4e"
     },
     {
       "name": "Batch Hops",
       "color": "",
       "width": 1100,
-      "height": 700
+      "height": 700,
+      "id": "BH",
+      "_key": "kec29c2b5b41d7cf3"
     },
     {
       "name": "Variables Demo",
       "width": 1300,
-      "height": 760
+      "height": 760,
+      "id": "VD",
+      "_key": "k9a846f9df2046143"
+    },
+    {
+      "name": "Equipment",
+      "width": 1600,
+      "height": 900,
+      "id": "EQ",
+      "_key": "k6f2ddce8c2f87731"
     }
   ],
   "elements": [
     {
       "name": "gblS_Style_R1",
       "type": "gGlobal",
-      "kind": "string"
+      "kind": "string",
+      "_key": "ke09f51af93922a0a",
+      "dataType": "string"
     },
     {
       "name": "gblV_BatchSize_Gal",
       "type": "gGlobal",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "kc9d41819c3548183",
+      "dataType": "value"
     },
     {
       "name": "gblV_BoilSize_Gal",
       "type": "gGlobal",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k6d489942b6afbe93",
+      "dataType": "value"
     },
     {
       "name": "gblV_OG_R1",
       "type": "gGlobal",
       "precision": 3,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k89d9652400e0c868",
+      "dataType": "value"
     },
     {
       "name": "gblV_FG_R1",
       "type": "gGlobal",
       "precision": 3,
-      "kind": "value"
+      "kind": "value",
+      "_key": "kaba9eafb3ac5b958",
+      "dataType": "value"
     },
     {
       "name": "gblV_IBU_Recipe_R1",
       "type": "gGlobal",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "ke2ea2b66b2862755",
+      "dataType": "value"
     },
     {
       "name": "gblVHop_Max",
       "type": "gGlobal",
       "label": "Hop groups",
-      "kind": "value"
+      "kind": "value",
+      "_key": "kbe6cfd15b8b56c35",
+      "dataType": "value"
     },
     {
       "name": "gGV_Kettle_Temp",
@@ -89,7 +118,9 @@
         "frequency": "seconds",
         "every": 10
       },
-      "api": "getput"
+      "api": "getput",
+      "_key": "k102b9c8423c164eb",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop1_R1",
@@ -100,7 +131,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 1",
-      "kind": "string"
+      "kind": "string",
+      "_key": "k14364a8863290545",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop1_Oz_R1",
@@ -112,7 +145,9 @@
       "h": 62,
       "label": "Oz 1",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "kf69bece77be6c97e",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop1_Recipe_AAU_R1",
@@ -124,7 +159,9 @@
       "h": 62,
       "label": "Alpha % 1",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "kc2a106ec53d1d194",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop1_Min_R1",
@@ -135,7 +172,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 1",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k72a44b7c518f4f04",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop1_Group_R1",
@@ -146,7 +185,9 @@
       "w": 110,
       "h": 62,
       "label": "Group 1",
-      "kind": "value"
+      "kind": "value",
+      "_key": "kc97da8739490ef09",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop2_R1",
@@ -157,7 +198,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 2",
-      "kind": "string"
+      "kind": "string",
+      "_key": "kcd7222de1732e6d8",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop2_Oz_R1",
@@ -169,7 +212,9 @@
       "h": 62,
       "label": "Oz 2",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k578aa6f12af95e16",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop2_Recipe_AAU_R1",
@@ -181,7 +226,9 @@
       "h": 62,
       "label": "Alpha % 2",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k4bd36a84c958217e",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop2_Min_R1",
@@ -192,7 +239,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 2",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k5badc83fcc2a848d",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop2_Group_R1",
@@ -203,7 +252,9 @@
       "w": 110,
       "h": 62,
       "label": "Group 2",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k56e1726af49fc4c7",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop3_R1",
@@ -214,7 +265,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 3",
-      "kind": "string"
+      "kind": "string",
+      "_key": "k743be73c8560c647",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop3_Oz_R1",
@@ -226,7 +279,9 @@
       "h": 62,
       "label": "Oz 3",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k9f928fbe64636ba1",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop3_Recipe_AAU_R1",
@@ -238,7 +293,9 @@
       "h": 62,
       "label": "Alpha % 3",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k23cbe6ff79408ffe",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop3_Min_R1",
@@ -249,7 +306,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 3",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k14e4ddfe20b7402a",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop3_Group_R1",
@@ -260,7 +319,9 @@
       "w": 110,
       "h": 62,
       "label": "Group 3",
-      "kind": "value"
+      "kind": "value",
+      "_key": "kc0216e073125f8d4",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop4_R1",
@@ -271,7 +332,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 4",
-      "kind": "string"
+      "kind": "string",
+      "_key": "k8b3245aead60c86c",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop4_Oz_R1",
@@ -283,7 +346,9 @@
       "h": 62,
       "label": "Oz 4",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k1eab50b96ab810d0",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop4_Recipe_AAU_R1",
@@ -295,7 +360,9 @@
       "h": 62,
       "label": "Alpha % 4",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "kd7ef7054d904a775",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop4_Min_R1",
@@ -306,7 +373,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 4",
-      "kind": "value"
+      "kind": "value",
+      "_key": "ka94687a3e1617fe0",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop4_Group_R1",
@@ -317,7 +386,9 @@
       "w": 110,
       "h": 62,
       "label": "Group 4",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k1514f0620b806ca9",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop5_R1",
@@ -328,7 +399,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 5",
-      "kind": "string"
+      "kind": "string",
+      "_key": "k530968d52b7d9d44",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop5_Oz_R1",
@@ -340,7 +413,9 @@
       "h": 62,
       "label": "Oz 5",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k555b702a3d3756bf",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop5_Recipe_AAU_R1",
@@ -352,7 +427,9 @@
       "h": 62,
       "label": "Alpha % 5",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k18324b1e9acbf782",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop5_Min_R1",
@@ -363,7 +440,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 5",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k88ed0ae20f1135ab",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop5_Group_R1",
@@ -374,7 +453,9 @@
       "w": 110,
       "h": 62,
       "label": "Group 5",
-      "kind": "value"
+      "kind": "value",
+      "_key": "kd4fa86120603a7fc",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop6_R1",
@@ -385,7 +466,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 6",
-      "kind": "string"
+      "kind": "string",
+      "_key": "kd20e244b522fa172",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop6_Oz_R1",
@@ -397,7 +480,9 @@
       "h": 62,
       "label": "Oz 6",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k5226acbec7be6894",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop6_Recipe_AAU_R1",
@@ -409,7 +494,9 @@
       "h": 62,
       "label": "Alpha % 6",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k94d41952f0cdd39d",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop6_Min_R1",
@@ -420,7 +507,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 6",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k551bf562025353b5",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop6_Group_R1",
@@ -431,7 +520,9 @@
       "w": 110,
       "h": 62,
       "label": "Group 6",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k70a278219995fd4b",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop7_R1",
@@ -442,7 +533,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 7",
-      "kind": "string"
+      "kind": "string",
+      "_key": "k3f91794a689fceb8",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop7_Oz_R1",
@@ -454,7 +547,9 @@
       "h": 62,
       "label": "Oz 7",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "kcb23daff012883f0",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop7_Recipe_AAU_R1",
@@ -466,7 +561,9 @@
       "h": 62,
       "label": "Alpha % 7",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k7aeb3702f4c3c03b",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop7_Min_R1",
@@ -477,7 +574,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 7",
-      "kind": "value"
+      "kind": "value",
+      "_key": "k034623f43e23f668",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop7_Group_R1",
@@ -488,7 +587,9 @@
       "w": 110,
       "h": 62,
       "label": "Group 7",
-      "kind": "value"
+      "kind": "value",
+      "_key": "kd181cd74655dda5d",
+      "dataType": "value"
     },
     {
       "name": "gblS_Hop8_R1",
@@ -499,7 +600,9 @@
       "w": 260,
       "h": 62,
       "label": "Hop 8",
-      "kind": "string"
+      "kind": "string",
+      "_key": "k23a9b9b64438cacd",
+      "dataType": "string"
     },
     {
       "name": "gblV_Hop8_Oz_R1",
@@ -511,7 +614,9 @@
       "h": 62,
       "label": "Oz 8",
       "precision": 2,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k714219d8c6990911",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop8_Recipe_AAU_R1",
@@ -523,7 +628,9 @@
       "h": 62,
       "label": "Alpha % 8",
       "precision": 1,
-      "kind": "value"
+      "kind": "value",
+      "_key": "ke3b317f81e88e80d",
+      "dataType": "value"
     },
     {
       "name": "gblV_TimeHop8_Min_R1",
@@ -534,7 +641,9 @@
       "w": 110,
       "h": 62,
       "label": "Minutes 8",
-      "kind": "value"
+      "kind": "value",
+      "_key": "kdf8f7c889f7971b4",
+      "dataType": "value"
     },
     {
       "name": "gblV_Hop8_Group_R1",
@@ -545,13 +654,16 @@
       "w": 110,
       "h": 62,
       "label": "Group 8",
-      "kind": "value"
+      "kind": "value",
+      "_key": "kde10364aba37a20a",
+      "dataType": "value"
     },
     {
       "name": "shr_Hop_Slot",
       "type": "shared",
       "dataType": "value",
-      "label": "Hop slot (scripts only)"
+      "label": "Hop slot (scripts only)",
+      "_key": "kc1b12587298a32b7"
     },
     {
       "name": "gblS_Top_Text",
@@ -566,7 +678,9 @@
       "fontSize": 28,
       "readOnly": true,
       "initial": "You can either go through Door #1 or Door #2.  Door #1 Closes all Valves, Door #2 just starts the Brew Process with the valves in the position they are.  Make a choice!",
-      "kind": "string"
+      "kind": "string",
+      "_key": "kb27212e6d712a6ed",
+      "dataType": "string"
     },
     {
       "name": "sw_Make_Choice",
@@ -581,7 +695,8 @@
       "background": "4",
       "fontSize": 30,
       "onText": "Choice made",
-      "offText": "Make A Choice"
+      "offText": "Make A Choice",
+      "_key": "ka422fe7babaa5383"
     },
     {
       "name": "btn_New_Brew",
@@ -596,7 +711,8 @@
       "fontSize": 30,
       "tap": "script",
       "tapTarget": "Demo_Heat_HLT",
-      "confirm": true
+      "confirm": true,
+      "_key": "kfd9bf77537a2e8b2"
     },
     {
       "name": "btn_Close_Valves",
@@ -611,7 +727,8 @@
       "fontSize": 30,
       "tap": "script",
       "tapTarget": "Close_All_Valves",
-      "confirm": true
+      "confirm": true,
+      "_key": "k259473b980e1741b"
     },
     {
       "name": "gblV_Delay_Seconds",
@@ -628,7 +745,9 @@
       "step": 5,
       "min": 0,
       "max": 600,
-      "kind": "value"
+      "kind": "value",
+      "_key": "k9f2740be431d8343",
+      "dataType": "value"
     },
     {
       "name": "HLT_Temp",
@@ -646,7 +765,8 @@
         "start": 68,
         "heater": "HLT_Element",
         "heatRate": 1.5
-      }
+      },
+      "_key": "kc31e3ffc52bd124c"
     },
     {
       "name": "MLT_Temp",
@@ -662,7 +782,8 @@
       "look": "lcd",
       "sim": {
         "start": 68
-      }
+      },
+      "_key": "k884f3fb926e8dce6"
     },
     {
       "name": "BK_Temp",
@@ -683,7 +804,8 @@
         "cooler": "Cooling_Water",
         "coolRate": 6,
         "coolTo": 58
-      }
+      },
+      "_key": "k216761da0ae549cc"
     },
     {
       "name": "MLT_Out_Temp",
@@ -698,7 +820,9 @@
       "precision": 1,
       "readOnly": true,
       "kind": "value",
-      "api": "getput"
+      "api": "getput",
+      "_key": "k39677976eee9e8d1",
+      "dataType": "value"
     },
     {
       "name": "V_HLT_Out",
@@ -717,7 +841,9 @@
       "hideValue": true,
       "subtype": "valve",
       "ipIn": "top",
-      "ipOut": "bottom"
+      "ipOut": "bottom",
+      "_key": "k8d1fb1baf0a6cf6c",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "V_MLT_In",
@@ -736,7 +862,9 @@
       "hideValue": true,
       "subtype": "valve",
       "ipIn": "top",
-      "ipOut": "bottom"
+      "ipOut": "bottom",
+      "_key": "k2896697cbf3be248",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "VGC_23_do_BackManifold_Left_On_B1",
@@ -755,7 +883,9 @@
       "hideValue": true,
       "subtype": "valve",
       "ipIn": "top",
-      "ipOut": "bottom"
+      "ipOut": "bottom",
+      "_key": "kb92d66d2df65535c",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "V_MLT_Out",
@@ -774,7 +904,9 @@
       "hideValue": true,
       "subtype": "valve",
       "ipIn": "top",
-      "ipOut": "bottom"
+      "ipOut": "bottom",
+      "_key": "kf5afe97f09bb7ba5",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "V_BK_In",
@@ -793,7 +925,9 @@
       "hideValue": true,
       "subtype": "valve",
       "ipIn": "top",
-      "ipOut": "bottom"
+      "ipOut": "bottom",
+      "_key": "k08a2cbf3249b2f04",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "MB_35_do_YellowPump_B1",
@@ -807,7 +941,9 @@
       "channel": 33,
       "label": "Yellow Pump",
       "look": "dark",
-      "subtype": "pump"
+      "subtype": "pump",
+      "_key": "k60bb7be9002b5aac",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "insp_Pix_Yellow_Pump_B1",
@@ -821,7 +957,7 @@
       "imageOn": "Images/Skynet/Pumps/Pump_Yellow_Rip_On.png",
       "imageOff": "Images/Skynet/Pumps/Pump_Yellow_Rip_Off.png",
       "hideName": true,
-      "confirm": true
+      "_key": "ke7ba4e14bf50285d"
     },
     {
       "name": "MB_36_do_RedPump_B1",
@@ -835,7 +971,9 @@
       "channel": 35,
       "label": "Red Pump",
       "look": "dark",
-      "subtype": "pump"
+      "subtype": "pump",
+      "_key": "k12225c49c27ef2e2",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "insp_Pix_Red_Pump_B1",
@@ -849,7 +987,7 @@
       "imageOn": "Images/Skynet/Pumps/Pump_Red_Rip_On.png",
       "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.png",
       "hideName": true,
-      "confirm": true
+      "_key": "ke126b54323991278"
     },
     {
       "name": "MB_37_do_BluePump_B1",
@@ -863,7 +1001,9 @@
       "channel": 37,
       "label": "Blue Pump",
       "look": "dark",
-      "subtype": "pump"
+      "subtype": "pump",
+      "_key": "kc242ed39c01fd401",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "insp_Pix_Blue_Pump_B1",
@@ -877,7 +1017,7 @@
       "imageOn": "Images/Skynet/Pumps/Pump_Blue_Rip_On.png",
       "imageOff": "Images/Skynet/Pumps/Pump_Blue_Rip_Off.png",
       "hideName": true,
-      "confirm": true
+      "_key": "kbf29ded59e524e35"
     },
     {
       "name": "MB_38_do_GreenPump_B1",
@@ -891,7 +1031,9 @@
       "channel": 39,
       "label": "Green Pump",
       "look": "dark",
-      "subtype": "pump"
+      "subtype": "pump",
+      "_key": "ke12c3874713d7e86",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "insp_Pix_Green_Pump_B1",
@@ -905,7 +1047,7 @@
       "imageOn": "Images/Skynet/Pumps/Pump_Green_Rip_On.png",
       "imageOff": "Images/Skynet/Pumps/Pump_Green_Rip_Off.png",
       "hideName": true,
-      "confirm": true
+      "_key": "ke6e5c87988ddd595"
     },
     {
       "name": "MB_39_do_WhitePump_B1",
@@ -919,7 +1061,9 @@
       "channel": 41,
       "label": "White Pump",
       "look": "dark",
-      "subtype": "pump"
+      "subtype": "pump",
+      "_key": "kbf069e7ad3d44368",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "insp_Pix_White_Pump_B1",
@@ -933,7 +1077,7 @@
       "imageOn": "Images/Skynet/Pumps/Pump_Whute_Rip_On.png",
       "imageOff": "Images/Skynet/Pumps/Pump_White_Rip_Off.png",
       "hideName": true,
-      "confirm": true
+      "_key": "k171429b6060cf336"
     },
     {
       "name": "HLT_Element",
@@ -948,7 +1092,8 @@
       "label": "HLT element",
       "imageOn": "Images/Skynet/Other_Equipment/BigMacRElementOn.png",
       "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.png",
-      "hideValue": true
+      "hideValue": true,
+      "_key": "ka56348eaef95e334"
     },
     {
       "name": "BK_Burner",
@@ -964,7 +1109,8 @@
       "imageOn": "Images/Skynet/Other_Equipment/BurnerFlame.png",
       "imageOff": "Images/Skynet/Other_Equipment/Burner No Flame.png",
       "hideValue": true,
-      "confirm": true
+      "confirm": true,
+      "_key": "k18f12a8fe4e21222"
     },
     {
       "name": "Cooling_Water",
@@ -977,7 +1123,8 @@
       "device": "SIM",
       "channel": 42,
       "label": "Cooling water",
-      "look": "dark"
+      "look": "dark",
+      "_key": "k333044a0ba7d6a91"
     },
     {
       "name": "tm_Whirlpool",
@@ -989,7 +1136,8 @@
       "h": 95,
       "timerType": "countdown",
       "label": "Whirlpool timer",
-      "look": "led"
+      "look": "led",
+      "_key": "k9dfb96893818e40d"
     },
     {
       "name": "alm_Hops",
@@ -1004,7 +1152,8 @@
       "label": "Hop alarm",
       "activeText": "",
       "imageOn": "Images/Skynet/Alarms/AlarmBitter.png",
-      "hideName": true
+      "hideName": true,
+      "_key": "k8334270eaf1572cc"
     },
     {
       "name": "sw_Status_Testing",
@@ -1016,7 +1165,8 @@
       "h": 50,
       "label": "Testing",
       "onText": "ON",
-      "offText": "OFF"
+      "offText": "OFF",
+      "_key": "k650e04c9138fb445"
     },
     {
       "name": "gblS_BeerName_R1",
@@ -1029,7 +1179,9 @@
       "label": "Beer",
       "initial": "OakBarn Pale Ale",
       "fontSize": 22,
-      "kind": "string"
+      "kind": "string",
+      "_key": "k578609d9bca89c1f",
+      "dataType": "string"
     },
     {
       "name": "gblVBoilTime_Minutes",
@@ -1044,7 +1196,9 @@
       "step": 5,
       "min": 0,
       "max": 180,
-      "kind": "value"
+      "kind": "value",
+      "_key": "kc7af13af5a719d24",
+      "dataType": "value"
     },
     {
       "name": "gblS_Inter_Script",
@@ -1056,7 +1210,9 @@
       "h": 60,
       "label": "Script status",
       "readOnly": true,
-      "kind": "string"
+      "kind": "string",
+      "_key": "k83256161bf5bd06d",
+      "dataType": "string"
     },
     {
       "name": "gGSW_Testing",
@@ -1069,7 +1225,9 @@
       "h": 90,
       "onText": "TESTING",
       "offText": "LIVE",
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "kab9bcd695bb009f6",
+      "dataType": "bool"
     },
     {
       "name": "gGPB_Jog_Pump",
@@ -1080,7 +1238,9 @@
       "y": 60,
       "w": 130,
       "h": 140,
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "k3b863f0c2a279e87",
+      "dataType": "bool"
     },
     {
       "name": "gGMB_Ping",
@@ -1091,7 +1251,9 @@
       "y": 60,
       "w": 130,
       "h": 140,
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "k04eca0d4a809748a",
+      "dataType": "bool"
     },
     {
       "name": "gGB_Ready",
@@ -1102,7 +1264,9 @@
       "y": 60,
       "w": 130,
       "h": 70,
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "k81cdc003cf350a73",
+      "dataType": "bool"
     },
     {
       "name": "gGV_Strike_Target",
@@ -1117,7 +1281,9 @@
       "precision": 1,
       "units": "°F",
       "step": 0.5,
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "k33dc459c4e01f770",
+      "dataType": "value"
     },
     {
       "name": "gGT_Mash_Rest",
@@ -1129,7 +1295,9 @@
       "w": 150,
       "h": 70,
       "initial": "01:00:00",
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "kcaefb6dcef7c6f26",
+      "dataType": "time"
     },
     {
       "name": "gGDT_Brew_Day",
@@ -1140,7 +1308,9 @@
       "y": 60,
       "w": 200,
       "h": 70,
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "kbddec09ff155bb2c",
+      "dataType": "datetime"
     },
     {
       "name": "gGS_Brewer",
@@ -1152,7 +1322,9 @@
       "w": 330,
       "h": 60,
       "initial": "Fritz",
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "k9664b741d7d40953",
+      "dataType": "string"
     },
     {
       "name": "gG_Burner_Pic",
@@ -1164,7 +1336,9 @@
       "h": 160,
       "hideName": true,
       "initial": "Images/Skynet/Other_Equipment/Burner No Flame.png",
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "k2d9bf79d88f13d0b",
+      "dataType": "string"
     },
     {
       "name": "gGL_Brew_Notes",
@@ -1176,7 +1350,9 @@
       "w": 480,
       "h": 160,
       "file": "notes/brew_notes.txt",
-      "workspace": "Variables Demo"
+      "workspace": "Variables Demo",
+      "_key": "k34f3ae6177350723",
+      "dataType": "string"
     },
     {
       "name": "gGV_HLT_Target",
@@ -1192,11 +1368,12 @@
       "units": "°F",
       "workspace": "Variables Demo",
       "database": {
-        "frequency": "days",
-        "every": 1,
+        "frequency": "clock",
         "at": "12 AM"
       },
-      "api": "getput"
+      "api": "getput",
+      "_key": "k5e8a216846848e52",
+      "dataType": "value"
     },
     {
       "name": "gGS_Batch_Status",
@@ -1213,7 +1390,9 @@
         "frequency": "process",
         "process": "Demo_Variables"
       },
-      "api": "getput"
+      "api": "getput",
+      "_key": "kb65ac5c0c58c83f1",
+      "dataType": "string"
     },
     {
       "name": "gGB_Pump_Lock",
@@ -1229,7 +1408,9 @@
         "frequency": "minutes",
         "every": 5
       },
-      "api": "getput"
+      "api": "getput",
+      "_key": "k3261a84ca6323944",
+      "dataType": "bool"
     },
     {
       "name": "gGT_Boil_Left",
@@ -1245,7 +1426,9 @@
         "frequency": "hms",
         "interval": "00:00:30"
       },
-      "api": "getput"
+      "api": "getput",
+      "_key": "k555b20d04fb51384",
+      "dataType": "time"
     },
     {
       "name": "gGDT_Last_Brew",
@@ -1257,7 +1440,15 @@
       "w": 220,
       "h": 70,
       "workspace": "Variables Demo",
-      "api": "getput"
+      "api": "getput",
+      "_key": "k16a8ed30e37a872b",
+      "dataType": "datetime"
+    },
+    {
+      "name": "SoundPlayer",
+      "type": "soundPlayer",
+      "builtIn": true,
+      "_key": "kf761f8a3b62d6db9"
     }
   ],
   "graphics": [
@@ -1270,7 +1461,8 @@
       "y": 550,
       "w": 30,
       "h": 30,
-      "color": "#e8a33a"
+      "color": "#e8a33a",
+      "_key": "k29d4cd04660fb9c6"
     },
     {
       "id": "ip_mlt_in",
@@ -1281,7 +1473,8 @@
       "y": 550,
       "w": 30,
       "h": 30,
-      "color": "#e8a33a"
+      "color": "#e8a33a",
+      "_key": "k76e922c6ff865877"
     },
     {
       "id": "ip_mlt_out",
@@ -1292,7 +1485,8 @@
       "y": 710,
       "w": 30,
       "h": 30,
-      "color": "#e8a33a"
+      "color": "#e8a33a",
+      "_key": "kabe77a49f9c5c61a"
     },
     {
       "id": "ip_bk_in",
@@ -1303,7 +1497,8 @@
       "y": 545,
       "w": 30,
       "h": 30,
-      "color": "#e8a33a"
+      "color": "#e8a33a",
+      "_key": "k97739f96305cdde7"
     },
     {
       "id": "p_hlt_mlt",
@@ -1322,7 +1517,6 @@
       ],
       "width": 10,
       "color": "#8a8f96",
-      "flowColor": "#ffb347",
       "flowWhen": [
         "V_HLT_Out",
         "V_MLT_In",
@@ -1331,7 +1525,8 @@
       "baseVisible": false,
       "from": "ip_hlt_out",
       "to": "p_hlt_mlt_j1",
-      "straight": true
+      "straight": true,
+      "_key": "k16ab3384972e17a5"
     },
     {
       "id": "p_hlt_mlt_2",
@@ -1350,7 +1545,6 @@
       ],
       "width": 10,
       "color": "#8a8f96",
-      "flowColor": "#ffb347",
       "flowWhen": [
         "V_HLT_Out",
         "V_MLT_In",
@@ -1360,7 +1554,8 @@
       "from": "p_hlt_mlt_j1",
       "to": "p_hlt_mlt_j2",
       "straight": true,
-      "name": "Pipe_1"
+      "name": "Pipe_1",
+      "_key": "kd9092f05ef9894b1"
     },
     {
       "id": "p_hlt_mlt_3",
@@ -1379,7 +1574,6 @@
       ],
       "width": 10,
       "color": "#8a8f96",
-      "flowColor": "#ffb347",
       "flowWhen": [
         "V_HLT_Out",
         "V_MLT_In",
@@ -1389,7 +1583,8 @@
       "from": "p_hlt_mlt_j2",
       "to": "ip_mlt_in",
       "straight": true,
-      "name": "Pipe_2"
+      "name": "Pipe_2",
+      "_key": "kb9dabc54cf3938bd"
     },
     {
       "id": "p_hlt_mlt_j1",
@@ -1404,7 +1599,8 @@
       "label": "",
       "color": "#9aa0a6",
       "rotate": "180",
-      "name": "Elbow_1"
+      "name": "Elbow_1",
+      "_key": "kde5462b69cd9e38c"
     },
     {
       "id": "p_hlt_mlt_j2",
@@ -1419,7 +1615,8 @@
       "label": "",
       "color": "#9aa0a6",
       "rotate": "90",
-      "name": "Elbow_2"
+      "name": "Elbow_2",
+      "_key": "ke13c7045ec26e5b2"
     },
     {
       "id": "p_mlt_bk",
@@ -1446,7 +1643,8 @@
       "baseVisible": false,
       "from": "ip_mlt_out",
       "to": "p_mlt_bk_j1",
-      "straight": true
+      "straight": true,
+      "_key": "ka103977e204ce9ee"
     },
     {
       "id": "p_mlt_bk_2",
@@ -1474,7 +1672,8 @@
       "from": "p_mlt_bk_j1",
       "to": "p_mlt_bk_j2",
       "straight": true,
-      "name": "Pipe_3"
+      "name": "Pipe_3",
+      "_key": "k23f5756b83981a26"
     },
     {
       "id": "p_mlt_bk_3",
@@ -1502,7 +1701,8 @@
       "from": "p_mlt_bk_j2",
       "to": "ip_bk_in",
       "straight": true,
-      "name": "Pipe_4"
+      "name": "Pipe_4",
+      "_key": "k15f6941753f8021b"
     },
     {
       "id": "p_mlt_bk_j1",
@@ -1517,7 +1717,8 @@
       "label": "",
       "color": "#9aa0a6",
       "rotate": "180",
-      "name": "Elbow_3"
+      "name": "Elbow_3",
+      "_key": "kc7fab89109ee5779"
     },
     {
       "id": "p_mlt_bk_j2",
@@ -1532,7 +1733,8 @@
       "label": "",
       "color": "#9aa0a6",
       "rotate": "90",
-      "name": "Elbow_4"
+      "name": "Elbow_4",
+      "_key": "k50d19061336208a3"
     },
     {
       "id": "t_title",
@@ -1544,7 +1746,9 @@
       "h": 40,
       "text": "Batch hops (filled by BeerXML import)",
       "fontSize": 22,
-      "bold": true
+      "bold": true,
+      "_key": "kda358c2594b7c501",
+      "name": "w_Text_1"
     },
     {
       "id": "gvdemo1",
@@ -1555,7 +1759,9 @@
       "w": 1200,
       "h": 40,
       "text": "gKonstant: scripts and screen only.   gAPI: scripts, API and database.   Start the script Demo_Variables, then press Ping.",
-      "fontSize": 16
+      "fontSize": 16,
+      "_key": "ka4f06ff38af66231",
+      "name": "w_Text_2"
     },
     {
       "id": "gvdemo2",
@@ -1566,7 +1772,9 @@
       "w": 1200,
       "h": 120,
       "text": "HLT target is written to the database every day at 12 AM.  Batch status is written only when Demo_Variables starts.\nPump lock every 5 minutes.  Boil left every 00:00:30.  See the Variables page to change these.",
-      "fontSize": 15
+      "fontSize": 15,
+      "_key": "k7989f19f04a29507",
+      "name": "w_Text_3"
     }
   ],
   "autostart": [
@@ -1602,5 +1810,14 @@
       "unused": 0
     }
   },
-  "chooseSample": true
+  "chooseSample": true,
+  "probes": [],
+  "recipeTennyson": true,
+  "pumpOneClick": true,
+  "boltOverlay": true,
+  "boltSteady": true,
+  "schema": {
+    "id": "skynet-brew-panel",
+    "name": "Skynet Brew Panel"
+  }
 }

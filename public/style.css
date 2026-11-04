@@ -1017,3 +1017,4 @@ dialog :is(input, select, textarea):focus, dialog button:focus-visible { outline
 /* Fritz's screen 9 (Rule 18.21): the lock, Visible and Hidden Locked in a dialog's title line */
 #dlgTitle .ttlExtra { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; font-size: .78em; font-weight: 600; vertical-align: middle; }
 #dlgTitle .ttlExtra .sw { margin: 0; }
+#dlgBody .dbPopLbl { font-weight: 700; color: var(--fg, inherit); margin-left: 14px; }

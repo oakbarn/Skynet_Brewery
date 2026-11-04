@@ -16,10 +16,11 @@ Pictures, Labels and manual vessels have no value, so they have no box.
 | **When a Process starts** | Each time the Process you pick starts |
 | **Once** | One time after the Brain starts (**Once again** on the Variables screen arms it again) |
 | **At a date and time (once)** | One time, at the date and time you type, like `2026-11-01T06:00` |
+| **At clock time (every day)** | Every day at the clock time you type, like `12 AM`, `6:30 PM` or `18:30` |
 | **Every N milliseconds / seconds / minutes / hours / days** | Every N of them (fastest is 100 ms) |
 | **Every 00:00:00** | Every interval you type, like `00:05:00` |
 
-The **Every** choices can have a clock time: **Every 1 days at 12 AM** writes at midnight every day; **Every 6 hours at 1 AM** writes at 1 AM, 7 AM, 1 PM and 7 PM.
+The **At clock time** box shows only when **At clock time** is picked (Fritz, 2026-11-04). **At clock time 12 AM** writes at midnight every day. The **Every** choices have no clock time; a setting saved before as "Every 1 day at 12 AM" becomes **At clock time 12 AM** by itself.
 
 **What to send** is its main value (a probe's temperature, an output's on/off, a timer's time ...) unless you pick one of its other attributes, like a PID's `.target`.
 
