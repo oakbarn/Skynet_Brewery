@@ -650,6 +650,24 @@ hose just goes to the IP. The older ball valve pictures (Valve_Ball_..._H_1 and 
 too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides, or where the User Defined valve's In and
 Out IP spots put them.
 
+5.24 **Ball valves have two IPs, one at each pipe end, in every Orientation, and every Skynet Pump has IPs on its inlet and outlet** (Fritz, 2026-11-04: "Ball Valve Devices and Widgets
+should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123). Where they go is Rule 5.20.
+- **Skynet Motorized Ball Valve Device:** Horizontal, Vertical Left and Vertical Right on the ends of its pipe, Front both at the
+  center of the opening, and **45 degrees on the ends of its pipe, turned with the picture** (before, a 45 degree valve put them on
+  the corners of its box). The 45 degree turn works the same for every Skynet valve drawing.
+- **Manual Valve Widget** (the hand-turned ball valve, Rule 5.15): **two IPs instead of one in its middle.** Plain drawn valve:
+  its left and right ends; side view: the outer face of each ferrule; front view: both at the center of the opening; front elbow:
+  the center of the opening and the bottom ferrule's outer face; a user's own picture: the middle of its left and right sides.
+  They turn with Rotate 45 (Rule 5.5). A closed Manual Valve blocks both ends. It sits centered on its pipes like other valves
+  (Rule 5.23).
+- Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve is joined to the nearer end (two pipes take one end each)
+  when its Tab is shown and when Edit layout opens; Save layout keeps it.
+- **Every Skynet Pump has an IP on its inlet and its outlet** (Fritz, 2026-11-04: "All Skynet Pump should have IPs on the inlet Out
+  Let"), in both Orientations (Right, Left) and with any Cover: on the Skynet pump drawings (March, Chugger, Riptide, Topsflo, KegLand)
+  the tip of each port, as before; on the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, .svg or .png, every color and
+  No Cover) the outer face of the inlet union on the pump head and the top of the outlet pipe; on the sump pump the middle of its
+  screen (inlet) and the top of its riser (outlet). A pump picture of a user's own keeps them on the middle of its sides.
+
 ## 6. Devices, connections and safety
 
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
@@ -1496,3 +1514,5 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 2.36 (on Windows Skynet opens in its own clean window, Edge or Chrome app mode with its own profile, no address or bookmarks bar; the normal browser is never changed; the window closes with the panel). Rule 2.25: Close Skynet Brewer closes that window too. Help 122, Help 95 updated; next free Help number 123. (thread "Open Skynet in its own clean window")
 - 2026-11-04: Rule 5.21: pipes and hoses start at Flow Color None and follow the Tab Flow Color; the orange every sample pipe had becomes None once in each Schema (Fritz). Help 116 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-04: Rule 5.21 changed (Fritz): flow from a Tap Water Valve is always Blue and is #1, over every other flow color (was third, after an IP and a Vessel). Order: Tap Water Valve, IP, Vessel, Tab, pipe, Tab (Mash, Boil, Whirlpool, Ferment). Help 116 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-04: Added Rule 5.24 (ball valves have two IPs, one at each pipe end, in every Orientation: a 45 degree Skynet valve's IPs turn with its picture; the Manual Valve Widget has two IPs instead of one in its middle; older pipes on its middle join the nearer end). Help 123, Help 87 updated; next free Help number 124 (Help 122 is taken by PR #186). (thread "Add IPs to Ball Valve Devices and Widgets")
+- 2026-11-04: Rule 5.24: every Skynet Pump has IPs on its inlet and outlet (the older Riptide-style pictures and the sump pump now too; Right and Left, any Cover). Help 123 updated. (thread "Add IPs to Ball Valve Devices and Widgets")
