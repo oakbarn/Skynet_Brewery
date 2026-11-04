@@ -6,7 +6,7 @@ To stop the panel **and** close that window in one go (Fritz, 2026-10-30):
 
 1. Open **☰ Menu**. At the bottom, pick **⏻ Close Skynet Brewer** (Admins only).
 2. The panel asks first, and says how many Processes are running. They stop.
-3. The panel stops and the Command Prompt window closes by itself, whatever .bat you started it with (your own .bat in C:\Brewing works too). Every phone and computer showing the panel says **Skynet Brewer is closed**.
+3. The panel stops and the Command Prompt window closes by itself, whatever .bat you started it with (your own .bat in C:\Brewing works too). Every phone and computer showing the panel says **Skynet Brewer is closed**. The panel's own clean window closes too (see [Skynet in its own clean window](122-own-clean-window)).
 
 To start it again, double-click **Skynet Brewer** on the Desktop.
 
