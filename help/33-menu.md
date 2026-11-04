@@ -45,5 +45,6 @@ Browsers (Chrome, Edge, Safari, iPhone and Android) do not let a page play any s
 - **Default Layout**: the vessels and pipes a Tab gets with its Equipment Profile. See [Schemas and Equipment Profiles](28-schemas-and-equipment-profiles).
 - **Mash Profile** and **Boil Profile**: see [Mash and Boil Profiles](35-mash-and-boil-profiles).
 - **Tab Background Profile** and **Valve Profile**: see [Tab Background and Valve Profiles](36-tab-and-valve-profiles).
+- **Move Brain** (Admins): move everything to a new Brain, for example from a computer to a Raspberry Pi, then fix the USB ports. See [Move Brain](119-move-brain).
 - **Schema**: see [Switching and cloning Schemas](48-schema-switching-and-cloning).
 - **About**: see [About and Schema versions](42-about-and-schema-versions).

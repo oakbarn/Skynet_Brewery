@@ -129,6 +129,7 @@ const MENU_TOPICS = {
   tab: { 'Tabs of the Schema': ['tab-and-valve-profiles', 'give-a-tab-its-profile'], _: ['tab-and-valve-profiles', 'tab-background-profile'] },
   valve: { _: ['tab-and-valve-profiles', 'valve-profile'] },
   skynetpics: { _: ['get-skynet-pictures'] },
+  brainmove: { '1. On the OLD Brain': ['move-brain', 'make-the-brain-move-file'], '2. On the NEW Brain': ['move-brain', 'bring-it-in-on-the-new-brain'], '3. On the NEW Brain': ['move-brain', 'usb-ports'], _: ['move-brain'] },
   buildtemplate: { _: ['build-template-tab'] },
   brewprocess: { 'Which Device': ['brew-process', 'which-device-does-each-job'], 'Recipe values': ['brew-process', 'recipe-values'], _: ['brew-process'] },
   schema: { 'Schemas on this Brain': ['schema-switching-and-cloning', 'clone-a-schema'], 'Add a Sample Schema': ['sample-schemas'], _: ['schema-switching-and-cloning'] },
