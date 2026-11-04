@@ -21,6 +21,7 @@ Now the item shows its picture all the time, and the overlay appears on top of i
 
 The **On overlay** dropdown has:
 
+- **Lightning bolt, flashing red and yellow**: a bolt over the middle that flashes red and yellow. Valves you can switch, Proportional Valves and Pumps start with it (Skynet Rule 7.15, see Help 121).
 - **Lightning bolt (corner badge)**: a small yellow bolt in the top right corner.
 - **Lightning bolt (big, see-through)**: a large half see-through bolt over the middle.
 - **Green glow ring**: a green glow around the picture.
@@ -28,7 +29,7 @@ The **On overlay** dropdown has:
 - Your own overlays from the **On Off** picture group (`media/Images/On_Off`), listed next.
 - Then every other picture in `media/Images`, and **Add new ...** to type the name of your own.
 
-Pick **(none)** to turn the overlay off. The three built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
+Pick **(none)** to turn the overlay off. The built-in overlay pictures are in `media/Images/Skynet/On_Off` (read only).
 
 ## Your own overlay picture
 
