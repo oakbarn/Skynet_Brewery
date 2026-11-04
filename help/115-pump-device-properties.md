@@ -12,7 +12,7 @@ The idea: the things you set most are on the dialog itself. Everything else is o
    KegLand MKII. The picture you pick is the pump's Picture.
 3. The Add box opens with the pump's name as its title. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font
    and colors) and **Label Visible**, 2 the **Interface (board)**, 3 an **Available Port**, 4 the **Tab**. Then 5 the
-   **Suggested Name** shows, made from them. Set the **Cover**, **X**, **Y**, **Width** and **Height** if you like. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
+   **Suggested Name** shows, made from them. The **Graphic** shows the pump; set its **Orientation**, **Cover**, **X**, **Y**, **Width** and **Height** if you like. If **➕ Add Device** looks faded, press it: it tells you what is still missing. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
 4. Press **➕ Add Device**. The Properties open. The **Interface** and **Port** are now greyed out and set; press **✏ Change**
    beside one to change it on purpose.
 
@@ -40,8 +40,11 @@ nothing is really saved until you press **💾 Save** on the dialog. Cancel with
 6. **Pump**: **Interface (board)** and **Port** (greyed out once it is added: **✏ Change** to change one; the Port's ⬢ has
    Invert, One-shot time and One-shot pulses OFF), then **Tab**, **X**, **Y**, **Width**, **Height**, **When tapped ⬢** (Tap
    target and Ask before changing) and Kind. The **Device Type** is shown greyed out under the Name.
-7. **Graphic**: **Picture ⬢** (the hexagon has the On overlay and an optional second picture for when it is on), **Cover**
-   (Help 111), and **Background picture (Image Path 1) ⬢** (the Graphic Dialog: Background #, Image Path 2 and 3, Back Colour).
+7. **Graphic**: the pump's picture as it shows on the Tab, and its **Orientation** (Normal, Flip Horizontal, Flip Vertical,
+   Flip both). Change the Orientation and the picture here and the pump on the Tab flip, and its IPs follow. A Skynet pump
+   drawing's **Picture** is set (shown greyed out with the pump's name); a User pump has one **Image Path**. The **⬢** beside
+   it has the On overlay, an optional second picture for when it is on, and the Back Colour. **Cover** (Help 111) is for the
+   Skynet pump drawings.
 8. **On / Off text**: **Text when on ⬆ ⬢** (the hexagon has Hide the text, its size, colors and alignment, plus the Look and
    Border of the whole item) and **Text when off ⬆**.
 9. **Database and .API**, as on every Device.
