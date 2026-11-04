@@ -900,8 +900,11 @@ Connection Simulator (its real connection is kept to switch to later), and the p
 Simulator mode and says so, so nothing real is switched. (2026-10-28, thread "Add sample Schemas to
 the Schema list", Help 83)
 
-10.7 **The Simulator bar** (yellow 🧪 SIMULATION bar) can be hidden and shown again with **▴ Hide /
-▾ Show** on the bar, per screen; a thin 🧪 SIMULATION strip always stays. Hiding changes no setting.
+10.7 **The Simulator bar** (yellow 🧪 SIMULATION bar) can be hidden with **▴ Hide** on the bar or ☰ Menu >
+🧪 Hide Simulator bar, per screen. **Hidden, the bar is gone completely** (no strip), so the browser window is free for
+the Panel; a small 🧪 on the ☰ Menu button says it is still Simulation. In Simulator mode **☰ Menu > 🧪 Show Simulator
+bar** brings it back (changed 2026-11-04, Fritz: "keep the browser window as free as possible for the Panel"; it was a
+thin 🧪 SIMULATION strip that always stayed). Hiding changes no setting.
 **Each time the Simulator is switched on, the bar opens at 25× speed with Auto skip on**; after that
 the user's choices stay until the next switch on. (2026-10-28, thread "Improve the Simulator bar
 defaults", Help 85)
@@ -1452,3 +1455,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 18.20 (blue border on the field with the focus; Tab and Enter go field to field in a dialog; a new Device's Enter sequence Label, Interface, Ports, Tab, Orientation, Add Device). Help 82 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rules 18.21 (Pump Device Properties = Fritz's screen 9; only those) and 18.22 (besides the Universal Properties each Device and Widget has only its own set). Rule 18.19: a pump's Orientation is Right / Left (Fritz's screens 7-9). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Rule 7.15 changed (Fritz): the default On overlay for powered valves and pumps is the steady red and yellow bolt (Overlay_Bolt.svg); the flashing bolt is only a choice. Schemas given the flashing bolt are changed once. Help 58 and 121 updated; no new Help number. (thread "Center pumps and valves on pipes")
+- 2026-11-04: Changed Rule 10.7 (hiding the Simulator bar removes it completely, no strip; ☰ Menu > 🧪 Show / Hide Simulator bar in Simulator mode; small 🧪 on the ☰ Menu button while hidden). Help 85 updated. (thread "Move Show Simulator bar to the ☰ Menu")
