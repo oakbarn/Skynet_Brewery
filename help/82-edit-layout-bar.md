@@ -35,15 +35,16 @@ These are short cuts. Clicking **Pumps** shows only the pump list: the same as p
 
 Picking a Device opens the **Add Device** box. Fill it from the top:
 
-1. **Label**: the text shown on the Tab. Or switch **Show label** off for no Label.
-2. **Interface** (the board). The last line, **➕ Add new Interface…**, adds a board.
-3. **Available Ports / Pins**: only the free pins that fit this Device.
-4. **Tab**: the Tab it goes on. It starts with the Tab you were on. The last line, **➕ Add new Tab…**, makes a new Tab: type its name, set it up in Tab settings and press Save. You come back to the Add Device box with what you typed kept and the new Tab picked.
-5. **Suggested Name**: made from the Label, Interface, pin, type and Tab, in that naming order. It shows once 1-4 are done. You may type your own (the panel warns you, see [Interfaces](76-interfaces)).
+1. **Label**: the text shown on the Tab, and **Label Visible** (it starts at No: switch it on to show the Label).
+2. **Interface (board)**, and on the same line **Available Ports**: only the free pins on that board that fit this Device. The last line of the Interface list, **➕ Add new Interface…**, adds a board.
+3. **Tab**: the Tab it goes on. It starts with the Tab you were on. The last line, **➕ Add new Tab…**, makes a new Tab: type its name, set it up in Tab settings and press Save. You come back to the Add Device box with what you typed kept and the new Tab picked.
+4. **Name**: once 1-3 are done, the Name shows, filled in with the **Suggested Name** made from the Label, Interface, Port, Device Type and Tab. You may edit it (the panel warns you, see [Interfaces](76-interfaces)). If **➕ Add Device** looks faded, press it anyway: it tells you which of 1-3 is still missing. The **Device Type** reads its General Type first, for example **DO: Pump**. A pump also shows its **Graphic** and **Orientation** (see [Pump Device Properties](115-pump-device-properties)).
 
-Then **Width** and **Height** (150 x 150 to start). When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line comes after the Interface.
+Interfaces and Tabs are listed as **ID: Name**, for example `BM: Brewery Mega` and `BH: Brewhouse`. The field names are short: hover a name (or tap it) to read more about it.
 
-**➕ Add Device** (at the top and at the bottom) works once 1-4 are done. **✖ Cancel** adds nothing. After Add Device the Device is on the Tab you picked and the rest of its Properties open. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
+With the Name come **Width** and **Height** (150 x 150 to start; a Pump also has **Cover**, **X** and **Y**). When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line comes after the Interface.
+
+Nothing else shows until the Label, Interface, Port and Tab are filled in (the Label must be typed). **➕ Add Device** (at the top and at the bottom) works once they are. **✖ Cancel** adds nothing. After Add Device the Device is on the Tab you picked and the rest of its Properties open. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
 
 ## Widgets
 

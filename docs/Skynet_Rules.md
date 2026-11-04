@@ -410,12 +410,14 @@ Suggested Name made with it. Cancel in Tab settings makes no Tab and goes back t
 Tab first (Rule 5.21).
 
 4.2 **New Device order** (the **Add Device** box, Fritz 2026-11-04, "to build a name that follows my naming conventions"):
-**1 Label** (or **Show label** off), **2 Interface**, **3 Port** (Available Ports/Pins: only free ones that fit), **4 Tab**,
+**1 Label** (typed; Fritz 2026-11-04), **2 Interface**, **3 Port** (Available Ports/Pins: only free ones that fit), **4 Tab**,
 **5 Name** (the Suggested Name, made from them; it shows once 1-4 are done, and the user may type their own). Then Width and
 Height (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the Interface only
 when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and the bottom; Add Device works once 1-4
-are done. The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
-Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). (Help 82)
+are done (the Label typed, Rule 18.15). The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
+Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). The **Add Device box** (Fritz's Pump example, 2026-11-04): 1 Label (⬢) and Label Visible, 2 Interface (board) with
+**Available Ports** (a dropdown of the free pins) on the same line, 3 Tab; until they are done only the greyed out Device Type
+shows below them. Then 4 the **Name** (the Suggested Name, which may be edited) shows, with Cover (a pump), X, Y, Width and Height. (Help 82)
 *Replaced:* 1 Interface, 2 Available Ports/Pins, 3 Suggested Name, 4 Label, on the Build Tab (2026-10-28); before that
 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
@@ -494,9 +496,11 @@ no other way to make one. (2026-10-23, PR #102)
 deleted. What can be edited on it follows Rule 5.16. (2026-10-21; changed 2026-10-28)
 *Replaced:* "... that can be edited and deleted, even when it came from Skynet." (2026-10-21)
 
-5.9 **Equipment:** valves have no inlet or outlet side; pumps have no orientation setting; BruControl
+5.9 **Equipment:** valves have no inlet or outlet side; a pump's only orientation is its **Orientation** (Flip Horizontal /
+Flip Vertical, Rule 18.19; Fritz, 2026-11-04); BruControl
 VGC outputs are valves. Equipment types have Type, ports, Position and Standard lists that users can
 add to. (2026-10-04, PR #14)
+*Replaced:* "pumps have no orientation setting" (2026-10-04).
 
 5.10 **Flow rules:** flow only runs on pipes joined IP to IP, traced from running pumps. An OFF pump
 lets flow pass either way. Valves must be open. Dead ends show nothing. A check valve passes one way
@@ -746,7 +750,8 @@ backpath", Help 25). Every Device and Widget with background pictures has three 
 version of a Skynet Template, Rule 5.16) and by a Process; changing 2 or 3 in Properties pops up the one-picture heads-up.
 Under Rule 15.2 the old names **imagePath_1, _2, _3** are changed everywhere (Schemas, Processes, samples, predictive text,
 the BruControl importer); an older item with a picture and a blank background gets .background = 1 so it still shows.
-**At most 3:** no item has more than 3 background pictures; an older item with a 4th or more keeps only the first 3
+**Exception, a User pump** (Fritz, 2026-11-04, Rule 18.19): one path only, its Image Path; a Skynet pump drawing has none
+(its Graphic is set). **At most 3:** no item has more than 3 background pictures; an older item with a 4th or more keeps only the first 3
 (stacked BruControl copies with more than 3 are handled when the importer is built). **Not every item has a backpath:** most
 Widgets have none; the Graphic Widget is the one that normally does.
 *Replaced:* imagePath_2 and imagePath_3 worked as in BruControl and a blank background showed imagePath_1 (2026-10-27).
@@ -1160,9 +1165,36 @@ nothing and goes back to the calling dialog as it was. The first one built this 
 (Rule 4.1); ➕ Add new Interface… already works this way. Other dialogs are brought to it one at a time, when Fritz says (Rule 18.10).
 
 18.15 **The opening pattern of every new Device dialog** (Fritz, 2026-11-04): **1 Label, 2 Interface, 3 Port, 4 Tab**, then
-**5 the Suggested Name** made from them (Rule 4.2), before anything else. The Add Device box has it now. Every other dialog that
+**5 the Suggested Name** made from them (Rule 4.2), before anything else. **Label Visible starts at No** (Fritz, 2026-11-04: the standard for every new Device dialog).
+   **The standard for every new Device dialog** (Fritz, 2026-11-04): the **Label, Interface, Port and Tab are filled in first**;
+   no other property shows until all four are done (only the greyed out Device Type). **➕ Add Device** can always be pressed:
+   until all four are done it looks faded and pressing it says what is still missing (Fritz, 2026-11-04: "Add Device button
+   does not work"; a greyed out button gave no reason on a phone). Then the hidden properties appear, with
+   the **Name** (the Suggested Name) on top of them, then the rest (Cover for a pump, X, Y, Width, Height ...). The Label must be
+   typed (Label Visible off does not skip it). The Add Device box has it now. Every other dialog that
 makes a new Device (for now the RIMS tube and the Integrated Electric Kettle New Device box) gets it one at a time, when Fritz
 says (Rule 18.10).
+
+18.16 **Short field names, the rest in a tip** (Fritz, 2026-11-04, his Pump example): a field's name is short ("Label",
+"Interface (board)"); the longer explanation is in its **tip**: hover the name (dotted underline) to see it, or tap it for a
+small pop-up with Close. The Add Device box has it now; other dialogs get it one at a time (Rule 18.10).
+
+18.17 **Dropdowns of Interfaces and Tabs read "ID: Name"** (Fritz, 2026-11-04): an Interface as `BM: Brewery Mega`, a Tab as
+`BH: Brewhouse`, everywhere they are picked.
+*Replaced:* the Interface list showed the full name first, `Brewery Mega   (ID BM_)` (Fritz, 2026-10-27).
+
+18.18 **Device Type shows its General Type first** (Fritz, 2026-11-04): where a Device Type is shown, it reads
+`General Type: Type`, for example an On/Off Pump as `DO: Pump`. The saved type stays as it was (digitalOut, typeCode Pump)
+so nothing conflicts, and the Suggested Name still uses the Type (Pump). General Types: **DO** (Digital Out), **PWM**,
+**HYS** (Hysteresis) from Fritz; AO (Analog Out), DI (Digital In), AI (Analog In), TEMP, FLOW, SCALE, STEP (Stepper),
+DUTY (Duty Cycle) and PID proposed, waiting on Fritz's OK. A type with no sub-type shows only its General Type.
+
+18.19 **A Device dialog shows its Graphic with its Orientation** (Fritz, 2026-11-04, the Pump first): the Add box and the
+Properties show the **Graphic** (the picture as it will be on the Tab, with its Cover) and an **Orientation** dropdown (Normal,
+Flip Horizontal, Flip Vertical, Flip both). Changing the Orientation flips the Graphic on the dialog and the Device on the Tab,
+and its IPs follow (Rule 5.5). A **Skynet pump drawing's Graphic is set**: no path is offered (Rule 5.6), the Picture is shown
+greyed out with its pump name. A **User pump** (its own picture) has **one path only**, its Image Path (an exception to Rule
+7.10's three paths). Cover is for the Skynet pump drawings only (Rule 7.13). (Help 115)
 
 ---
 
@@ -1366,3 +1398,9 @@ says (Rule 18.10).
 - 2026-11-04: Added Rule 2.33 (one click turns a Pump on or off, no ON / OFF pop-up; Pumps in every Schema changed once; Ask before changing still there by hand). Help 120; next free Help number 121. (thread "Toggle pumps with one click")
 - 2026-11-04: Added Rule 18.14 (general: ➕ Add new ... in any dialog dropdown pauses the dialog, keeps its temporary data, makes the new thing, comes back with the data filled in, the dropdown refreshed and the new thing picked); Rule 4.1 points to it. Other dialogs follow one at a time (Rule 18.10). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 18.15 (every new Device dialog opens with 1 Label, 2 Interface, 3 Port, 4 Tab, then the Suggested Name; the Add Device box has it, the RIMS / Integrated Kettle box waits for Fritz, one at a time). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Added Rules 18.16 (short field names, the rest in a hover / tap tip) and 18.17 (Interface and Tab dropdowns read ID: Name); Rule 4.2: the Add Device box layout from Fritz's Pump example (Interface and Available Ports on one line; Name, Cover, X, Y, Width, Height show once Label, Interface, Port and Tab are done). Help 82 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 18.15: Label Visible starts at No in every new Device dialog (Fritz). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 18.15: the standard for every new Device dialog: Label, Interface, Port and Tab first, nothing else shows until they are done (only the greyed Device Type), then the Name on top of the other properties. The Label must be typed (Show label off no longer skips it); Rule 4.2 changed to match. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Added Rule 18.18 (Device Type shows its General Type first, e.g. DO: Pump; the saved type is unchanged). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Added Rule 18.19 (a Device dialog shows its Graphic with its Orientation; a Skynet pump's Graphic is set, a User pump has one path). Rule 7.10: exception, a User pump has one path. Rule 18.15: ➕ Add Device stays pressable and says what is still missing (Fritz: "Add Device button does not work"). Help 82 and 115 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 5.9 changed (Fritz picked the recommended wording): pumps have an Orientation (Flip Horizontal / Vertical, Rule 18.19); the rest of 5.9 stays. (thread "Set the drill-down dialog standard for Devices")
