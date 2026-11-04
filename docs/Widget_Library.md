@@ -376,10 +376,10 @@ Every IP is the center of a ferrule's outer face, or the center of the opening o
 
 | Name | Fittings | Openings |
 |---|---|---|
-| Elbow_90 | 90° elbow (Fritz's drawing 2026-11-02) | Bottom, Right |
+| Elbow_90 | 90° elbow (Fritz's drawing 2026-11-04) | Bottom, Right |
 | Elbow_45 | 45° elbow (Fritz's drawing) | Bottom Left (45°), Right |
 | Elbow_Front | 90° elbow seen from the front (Fritz's drawing) | center of the front opening, Bottom |
-| Tee | Long Tee (Fritz's drawing, 160 x 102) | Left, Right, Bottom (branch) |
+| Tee | Normal Tee (Fritz's drawing 2026-11-04, 160 x 102) | Left, Right, Bottom (branch) |
 | Instrument_Tee (160 x 80) | Tee with a short branch (Fritz's drawing) | Left, Right, Bottom (branch) |
 | Reducer_2_1_Concentric (TC 2) | Reducer to 1, both ends on one center line | Left (big), Right (small) |
 | Reducer_2_1_Eccentric (TC 2) | Reducer to 1, flat along the bottom | Left (big), Right (small, low) |
@@ -459,4 +459,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-02: Universal Properties standard (Rule 1.21): every Device, Widget and Semi-Device gets the same Properties and attributes; see docs/Universal_Properties.md. (thread "Set universal properties standard", Help 114)
 - 2026-11-03: Pipe and Hose Flow Colors (Rule 5.21, Help 116): Flow Color None by default; Tab Flow Color (tab.flow_Color); Vessel Out flow color; tap water always Blue; pipes and hoses keep their Label; X, Y, Width, Height hidden. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-03: IP points get a Flow Color (`.flow_Color`), first in the flow color order (Rule 5.21, Help 116). (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-04: Fritz's new drawings for Elbow_90 and Tee (thicker pipe, grey outline, IPs on the ferrule faces, Rule 5.20); the Three Vessel sample uses them for all its elbows and tees. (thread "Make Fritz's 90 elbow into an SVG Widget")
 - 2026-11-04: Manual Valve Widget has two IPs, one at each pipe end, in every Orientation (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
