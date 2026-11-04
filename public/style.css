@@ -991,3 +991,5 @@ dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .devPreview img { height: 120px; width: auto; max-width: 220px; display: block; }
 .devPreview .pvCover { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 button.waitStep { opacity: .55; }
+/* Rule 18.20 (Fritz, 2026-11-04): the field with the focus in a dialog has a blue border */
+dialog :is(input, select, textarea):focus, dialog button:focus-visible { outline: 2px solid #1f5fff; outline-offset: 1px; border-color: #1f5fff; }
