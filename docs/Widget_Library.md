@@ -372,15 +372,18 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 "_Electric" versions: pick the Heating Element Device and Temperature Probe on the Tab.
 
 ### Skynet Bundled Fitting Templates (TC 1.5 unless noted)
+**TC Pipe Fittings** (Rule 5.25, Help 124): the plain ones here (elbows, tees, cross, U, reducers, check valve, End Cap) are a Widget subclass. Skynet puts the elbow, tee or cross the pipes need where they meet (a pipe drawn to an elbow's bend makes it a tee), and they are added by hand from Elbows, Tees … or Add Widget > TC Pipe Fittings. Elbows, tees and the cross also have a `bend` (where the pipes' center lines meet on the picture).
+
 Every IP is the center of a ferrule's outer face, or the center of the opening on a front view (Rule 5.20). Fritz's 2026-11-02 drawings give each Template its own shape (`size`), where its IPs sit as "x,y" fractions of the picture (`ipPos`), and how thick its pipe is drawn (`body`, used by Autosize to pipe). A Skynet pipe fitting already on a Tab takes its Template's new picture when Edit layout opens. Tees with a Temperature Probe in them are Temperature Devices (Device Library).
 
 | Name | Fittings | Openings |
 |---|---|---|
 | Elbow_90 | 90° elbow (Fritz's drawing 2026-11-04) | Bottom, Right |
-| Elbow_45 | 45° elbow (Fritz's drawing) | Bottom Left (45°), Right |
+| Elbow_45 | 45° elbow (redrawn 2026-11-04 in the style of Fritz's new Elbow) | Bottom Left (45°), Right |
 | Elbow_Front | 90° elbow seen from the front (Fritz's drawing) | center of the front opening, Bottom |
 | Tee | Normal Tee (Fritz's drawing 2026-11-04, 160 x 102) | Left, Right, Bottom (branch) |
-| Instrument_Tee (160 x 80) | Tee with a short branch (Fritz's drawing) | Left, Right, Bottom (branch) |
+| Instrument_Tee (160 x 69) | Tee with a short branch (redrawn 2026-11-04 in the style of Fritz's new Tee) | Left, Right, Bottom (branch) |
+| Cross (100 x 100) | Cross, two tees in one (new 2026-11-04) | Left, Right, Bottom, Top |
 | Reducer_2_1_Concentric (TC 2) | Reducer to 1, both ends on one center line | Left (big), Right (small) |
 | Reducer_2_1_Eccentric (TC 2) | Reducer to 1, flat along the bottom | Left (big), Right (small, low) |
 | Reducer_2_1_Front (TC 2) | Reducer to 1 seen from the front | both at the center of the opening |
@@ -460,4 +463,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-03: Pipe and Hose Flow Colors (Rule 5.21, Help 116): Flow Color None by default; Tab Flow Color (tab.flow_Color); Vessel Out flow color; tap water always Blue; pipes and hoses keep their Label; X, Y, Width, Height hidden. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-03: IP points get a Flow Color (`.flow_Color`), first in the flow color order (Rule 5.21, Help 116). (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-04: Fritz's new drawings for Elbow_90 and Tee (thicker pipe, grey outline, IPs on the ferrule faces, Rule 5.20); the Three Vessel sample uses them for all its elbows and tees. (thread "Make Fritz's 90 elbow into an SVG Widget")
+- 2026-11-04: TC Pipe Fittings Widget subclass (Rule 5.25, Help 124): new Cross; Elbow_45 and Instrument_Tee redrawn; joints where pipes meet become TC Pipe Fittings; the old equipment Pipe tee / elbows / cross left the Add lists. (thread "Make Fritz's elbow and tee into SVG Widgets")
 - 2026-11-04: Manual Valve Widget has two IPs, one at each pipe end, in every Orientation (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")

@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { DIRS, dirOf, onAngle, angledEnd, alongLine, fitFor } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -255,6 +255,7 @@ function drawWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
+  if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) for (const g of draft.graphics.filter(g => g.workspace === w.name && isPlainUnit(g) && autoSized(g))) autoSizeUnit(g);
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
@@ -2258,11 +2259,100 @@ function autoFit(g) {
   }
   if (g.fitting !== fit || String(g.rotate) !== rot) { g.fitting = fit; g.rotate = rot; giveName(g, draft.graphics); }
 }
+// ---- TC Pipe Fittings (Fritz, 2026-11-04, Rule 5.25): a Widget subclass. Every elbow, tee and cross is a Skynet TC Pipe
+// Fittings Widget, with an IP on the ferrule face of each open end (Rule 5.20). Where pipes meet, Skynet puts the joint in (as
+// above) and the joint becomes the TC Pipe Fittings Widget it needs, turned the right way, its bend on the joint and the pipes
+// ended on its IPs. A pipe drawn to the bend of one (where its pipes' center lines meet) turns it back into a joint, so an elbow
+// can become a tee. They are also added by hand (Add Widget > TC Pipe Fittings, and Elbows, Tees ... on the Edit layout bar).
+const TC_FIT_TPL = { elbow90: 'Elbow_90', elbow45: 'Elbow_45', tee: 'Tee', cross: 'Cross' };
+const TC_FIT_ADD = ['Elbow_90', 'Elbow_45', 'Tee', 'Instrument_Tee', 'Cross', 'U_Bend', 'Reducer', 'Reducer_2_1_Concentric', 'Reducer_2_1_Eccentric', 'Check_Valve', 'End_Cap', 'Elbow_Front', 'Reducer_2_1_Front'];
+const isTcFit = g => isPlainUnit(g);
+const tcBend = (g, t = tplOf('fitting', g.template)) => { const q = fracPos(t?.bend); return q ? unitPoint(g, q[1], q[2]) : null; };
+const tcName = (t, all) => { const k = (t.fittings || []).map(f => f.kind).find(k => k !== 'none'); const p = (t.name === 'Cross' ? 'Cross' : NAME_PREFIX[k]) || t.name;
+  const used = new Set(all.map(x => x.name)); let n = 1; while (used.has(p + '_' + n)) n++; return p + '_' + n; };
+// the unit IP that leaves its bend in direction v (unit vector), if any
+function tcArm(u, v) {
+  const t = tplOf('fitting', u.template), b = tcBend(u, t); if (!b) return null;
+  for (const [k, pos] of Object.entries(t.ipPos || {})) {
+    const q = fracPos(pos); if (!q) continue;
+    const c = unitPoint(u, q[1], q[2]), dx = c[0] - b[0], dy = c[1] - b[1], l = Math.hypot(dx, dy);
+    if (l && (dx * v[0] + dy * v[1]) / l > 0.99) return draft.graphics.find(x => x.kind === 'ip' && x.attachTo === u.id && x.port === k) || null;
+  }
+  return null;
+}
+// a joint IP (an IP elbow, tee or cross) -> the TC Pipe Fittings Widget, in its place. Returns the new Widget, or null.
+function jointToUnit(g) {
+  const t = tplOf('fitting', TC_FIT_TPL[g.fitting]); if (!t || !fracPos(t.bend)) return null;
+  const ps = pipesOn(g.id, g.workspace); if (ps.some(p => !p.straight || (p.points || []).length !== 2)) return null;
+  const c = ipCenter(g), want = ARMS[g.fitting].map(a => DIRS[(a + Math.round((+g.rotate || 0) / 45)) % 8]).map(([x, y]) => { const l = Math.hypot(x, y); return [x / l, y / l]; });
+  const pipeDir = p => { const q = p.from === g.id ? p.points[1] : p.points[0], dx = q[0] - c[0], dy = q[1] - c[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+  const pw = ps.length ? Math.max(...ps.map(pipeWidth)) : 0;
+  const all = draft.graphics.filter(x => x !== g);
+  const u = { id: newId(), kind: 'vessel', vesselType: 'bfit', workspace: g.workspace, name: g.name && !/^(Elbow45|Elbow|Tee|Cross)_\d+$/.test(g.name) ? g.name : tcName(t, all), template: t.name, templateCls: t.cls,
+    fittings: clone(t.fittings), image: t.image, labelAlign: 'below', labelSize: 12, labelVisible: false, ports: {}, bundled: true, x: 0, y: 0 };
+  if (g.label) u.label = g.label;
+  if (t.std) u.std = clone(t.std);
+  if (t.ipPos) u.ipPos = clone(t.ipPos);
+  const [tw, th] = t.size || [90, 90]; u.w = pw ? Math.round(pw / (t.body || FIT_BODY)) : tw; u.h = Math.round(u.w * th / tw);
+  // the orientation whose arms are the joint's arms
+  let ok = false;
+  for (const flip of [false, true]) { for (const rot of [0, 90, 180, 270, 45, 135, 225, 315]) {
+    if (flip) u.flipH = true; else delete u.flipH; if (rot) u.rot = rot; else delete u.rot;
+    const b = tcBend(u, t), arms = Object.values(u.ipPos).map(fracPos).filter(Boolean).map(q => { const e = unitPoint(u, q[1], q[2]), dx = e[0] - b[0], dy = e[1] - b[1], l = Math.hypot(dx, dy); return [dx / l, dy / l]; });
+    if (arms.length === want.length && want.every(w => arms.some(a => a[0] * w[0] + a[1] * w[1] > 0.99))) { ok = true; break; }
+  } if (ok) break; }
+  if (!ok) return null;
+  const b = tcBend(u, t); u.x = +(u.x + c[0] - b[0]).toFixed(2); u.y = +(u.y + c[1] - b[1]).toFixed(2);     // not rounded: its bend sits exactly on the joint
+  const C = bfitClass(u);
+  for (const [k, d] of Object.entries(C.ports)) u.ports[k] = { installed: true, position: portDefPos(d), standard: d.ip ? stdShort(fittingPortStd(u, k)) : '' };
+  draft.graphics = all; draft.graphics.push(u); syncVesselPorts(u, null); placeUnitParts(u);
+  for (const p of ps) {
+    const ip = tcArm(u, pipeDir(p)); if (!ip) continue;
+    const e = ipCenter(ip).map(Math.round), i = p.from === g.id ? 0 : 1;
+    if (i === 0) p.from = ip.id; else p.to = ip.id;
+    p.points[i] = e;
+  }
+  return u;
+}
+// a TC Pipe Fittings Widget -> a joint IP at its bend (a pipe was drawn to its bend). Returns the joint's id.
+function unitToJoint(u) {
+  const b = tcBend(u); if (!b) return null;
+  const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === u.id), ids = new Set(ips.map(x => x.id));
+  const j = { id: newId(), kind: 'ip', workspace: u.workspace, x: Math.round(b[0]) - 15, y: Math.round(b[1]) - 15, w: 30, h: 30, label: '', color: '#9aa0a6', fitting: 'coupling', autoFit: true, rotate: '0' };
+  if (u.label) j.label = u.label;
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && (ids.has(p.from) || ids.has(p.to)))) {
+    if (ids.has(p.from)) { p.from = j.id; p.points[0] = [Math.round(b[0]), Math.round(b[1])]; }
+    if (ids.has(p.to)) { p.to = j.id; p.points[p.points.length - 1] = [Math.round(b[0]), Math.round(b[1])]; }
+  }
+  draft.graphics = draft.graphics.filter(x => x !== u && !ids.has(x.id)); draft.graphics.push(j);
+  autoFit(j); return j.id;
+}
+// every IP elbow, tee and cross on a Tab becomes its TC Pipe Fittings Widget (also the ones in older Schemas, Rule 15.2)
+function tcFitJoints(ws) {
+  if (!editing || !draft || !TPL) return 0;
+  let n = 0;
+  for (const g of draft.graphics.filter(g => g.workspace === ws && g.kind === 'ip' && TC_FIT_TPL[g.fitting] && !(drawPts && g.id === drawFrom))) {     // not the joint a pipe is being drawn from
+    if (g.autoFit) autoFit(g);
+    if (TC_FIT_TPL[g.fitting] && jointToUnit(g)) n++;
+  }
+  return n;
+}
+// Add Widget > TC Pipe Fittings: the fitting on the Build Tab (like every new item, Rule 4.1)
+function addTcFit(name) {
+  const t = tplOf('fitting', name); if (!t) return toast(`No ${name} Template`, true);
+  toBuild();
+  const g = placeTabFitting(t, wsName, tcName(t, draft.graphics), null); g.labelVisible = false;
+  sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+}
+const TC_FIT_ROWS = () => TC_FIT_ADD.map(n => tplOf('fitting', n)).filter(Boolean).map(t => [`${t.name.replace(/_/g, ' ')}`, () => addTcFit(t.name)]);
 // Drawing: the pointer snaps onto an IP when it is close to one, else to the 5 px grid
 function drawSnap(ev) {
   const p = canvasPt(ev), r = 16 / Z();
   let best = null;
   for (const q of allIps(wsName)) { const c = ipPoint(q.id, wsName); if (c) { const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= r && (!best || d < best.d)) best = { d, c, id: q.id }; } }
+  if (!drawHose) for (const u of draft.graphics.filter(g => g.workspace === wsName && isTcFit(g) && TC_FIT_TPL[(g.fittings || [])[0]?.kind])) {     // the bend of a TC Pipe Fitting (Rule 5.25)
+    const c = tcBend(u); if (c) { const d = Math.hypot(c[0] - p[0], c[1] - p[1]); if (d <= r && (!best || d < best.d)) best = { d, c: c.map(Math.round), id: 'bend:' + u.id }; }
+  }
   return best ? { c: [...best.c], id: best.id } : { c: [snap(p[0]), snap(p[1])], id: null };
 }
 // A pipe runs only Horizontal, Vertical or at 45 degrees from its start (Fritz, 2026-11-02, Rule 5.19). It ends on the IP picked
@@ -2273,8 +2363,10 @@ function straightEnd(a, c, id) {
 }
 // Fritz: double-click the start, move to the length wanted, double-click the end. The pipe is then one straight piece of fixed
 // length; turns are made with elbows and tees.
+// a pipe drawn to the bend of a TC Pipe Fitting: the fitting turns back into a joint, which then becomes the fitting the pipes need
+function bendJoint(id) { if (!id?.startsWith('bend:')) return id; const u = draft.graphics.find(g => g.id === id.slice(5)); return u ? unitToJoint(u) : null; }
 function drawStraight(ev) {
-  const { c, id } = drawSnap(ev);
+  const s0 = drawSnap(ev), c = s0.c, id = bendJoint(s0.id);
   if (!drawPts.length) { drawPts.push(c); drawFrom = id; $('#editHint').textContent = 'Start set. Move to the length you want and double-click (or tap) the end. Esc cancels.'; renderPipes(); return; }
   const a = drawPts[0], e = straightEnd(a, c, id);
   if (e.c[0] === a[0] && e.c[1] === a[1]) return;
@@ -2641,13 +2733,14 @@ const WGT_TYPES = () => [
   ['controls', 'On-screen controls', amGroup('Widgets').filter(r => !['picture', 'label', 'manual'].includes(r[1])).map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
   ['vessels', 'Vessels', VESSEL_ROWS],
   ['equipment', 'Equipment (chillers, coils, filters)', EQUIP_ROWS()],
-  ['fittings', 'Fittings and IPs (elbows, tees ...)', FIT_ROWS()],
+  ['tcfit', 'TC Pipe Fittings (elbows, tees, crosses, reducers ...)', TC_FIT_ROWS()],
+  ['fittings', 'IPs, couplings and caps', FIT_ROWS()],
   ['gGlobal', 'gGlobal variables', amGroup('gGlobal').map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
 ];
 const VESSEL_ROWS = [['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
-const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel').map(([k, t]) => [t, () => addEquipment(k)]);
-const FIT_ROWS = () => Object.entries(FITTINGS).map(([k, t]) => [t, () => addIpFit(k)]);
+const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel' && !['eqTee', 'eqElbow90', 'eqElbow45', 'eqCross'].includes(k))     // pipe fittings are TC Pipe Fittings now (Rule 5.25).map(([k, t]) => [t, () => addEquipment(k)]);
+const FIT_ROWS = () => Object.entries(FITTINGS).filter(([k]) => !TC_FIT_TPL[k] && k !== 'manualValve').map(([k, t]) => [t, () => addIpFit(k)]);     // elbows, tees and crosses are TC Pipe Fittings (Rule 5.25)
 // a dropdown whose first line is its name; picking a row runs it and the dropdown shows its name again
 function fillPick(sel, head, groups) {
   const opt = (r, i) => h('option', { value: i }, r[0]);
@@ -2672,7 +2765,7 @@ function fillAddType() {
   for (const s of $$('#editBar select[data-dev]')) fillPick(s, s.dataset.head, [['', dev.find(x => x[0] === s.dataset.dev)[2]]]);
   fillPick($('#vesselPick'), 'Vessel', [['', VESSEL_ROWS]]);
   fillPick($('#addVesselType'), 'Add equipment ➕', [['', EQUIP_ROWS()]]);
-  fillPick($('#addIpType'), 'Elbows, Tees …', [['', FIT_ROWS()]]);
+  fillPick($('#addIpType'), 'Elbows, Tees …', [['TC Pipe Fittings', TC_FIT_ROWS()], ['IPs, couplings and caps', FIT_ROWS()]]);
   fillClones();
 }
 $('#devKind').onchange = $('#wgtKind').onchange = () => fillAddType();
@@ -2903,10 +2996,10 @@ const tempKindOf = key => tempKinds().find(t => t[0] === key)?.[2] || { sensor: 
 // Tee with the probe (purple) in the branch or in from one end. The probe fills that opening, so the other two are its IPs, at
 // the center of each ferrule's outer face (Rule 5.20). Flow passes either way, like an inline sensor. Made like a Thermowell.
 const PROBE_TEES = {
-  Instrument_Branch: { label: 'Instrument Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Branch.svg', size: [170, 85], ends: [[0, 0.3], [1, 0.3]] },
-  Instrument_Run: { label: 'Instrument Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Run.svg', size: [170, 85], ends: [[1, 0.3], [0.5, 1]] },
+  Instrument_Branch: { label: 'Instrument Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Branch.svg', size: [170, 74], ends: [[0, 29 / 91.2], [1, 29 / 91.2]] },     // redrawn 2026-11-04
+  Instrument_Run: { label: 'Instrument Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Run.svg', size: [170, 74], ends: [[1, 29 / 91.2], [0.5, 1]] },
   Long_Branch: { label: 'Long Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Branch.svg', size: [170, 108], ends: [[0, 29 / 134], [1, 29 / 134]] },     // Fritz's drawing 2026-11-04
-  Long_Run: { label: 'Long Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Run.svg', size: [170, 108], ends: [[1, 24 / 102], [0.5, 1]] },
+  Long_Run: { label: 'Long Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Run.svg', size: [170, 108], ends: [[1, 29 / 134], [0.5, 1]] },
 };
 function isProbeTee(e) { return e?.type === 'temperature' && e.subtype === 'probeTee' && !!PROBE_TEES[e.probeTee]; }
 async function newProbeTee(kind) {
@@ -4891,7 +4984,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isPumpDev(item) ? (pumpModelOf(item) || 'Pump Device Properties') : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isPumpDev(item) ? (pumpModelOf(item) || 'Pump Device Properties') : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -7948,7 +8041,7 @@ const setTPL = r => { TPL = { locked: r.locked, vessel: r.vessel, fitting: r.fit
 const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === String(name || '').toLowerCase());
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
-const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_Front.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Eccentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Front.svg',
+const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Cross.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_Front.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Eccentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Front.svg',
   'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
   'Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
   'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'];
@@ -8080,8 +8173,10 @@ function autoSizeUnit(g) {
   const pw = Math.max(0, ...ips.flatMap(ip => pipesOn(ip.id, g.workspace)).map(pipeWidth)); if (!pw) return;
   const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90], w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
   if (w === g.w && hh === g.h) return;
+  const b0 = tcBend(g, t);         // a TC Pipe Fitting grows about its bend, so its IPs stay on their pipes' lines (Rule 5.25)
   const cx = (g.x || 0) + (g.w || 90) / 2, cy = (g.y || 0) + (g.h || 90) / 2;
   Object.assign(g, { w, h: hh, x: Math.round(cx - w / 2), y: Math.round(cy - hh / 2) });
+  if (b0) { const b1 = tcBend(g, t); g.x = +(g.x + b0[0] - b1[0]).toFixed(2); g.y = +(g.y + b0[1] - b1[1]).toFixed(2); }
   placeUnitParts(g);
 }
 // orientation as a 2x2 matrix [a, b, c, d] (flip first, then rotate, as unitTransform), and back
@@ -8519,7 +8614,7 @@ F.tabFitting = it => [['_t', `Tab_Fitting, made from the Bundled Fitting Templat
 F.skynetFitting = it => {
   const made = (it.fittings || []).filter(f => f.kind !== 'none').map(f => FITTING_KINDS[f.kind] + (f.thermowell ? ' with a thermowell' : '')).join(', ');
   if (isPlainUnit(it)) return [['_t', isCapOnly(it) ? `Skynet End Cap: a pipe fitting. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
-      `Skynet pipe fitting ${it.template || ''}: a ${made}. Every opening has a two-way IP built in. It has no settings but its place and its size. Turn or flip it with the turn buttons on the Edit layout bar.`, 'note'],
+      `Skynet TC Pipe Fittings Widget ${it.template || ''}: a ${made}. Every opening has a two-way IP built in. It has no settings but its place and its size. Turn or flip it with the turn buttons on the Edit layout bar.`, 'note'],
     ['name', 'Name', 'text'], ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : []), ...FIT_PLACE(it)];
   const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
   return [['_t', isCapOnly(it) ? `Skynet End Cap. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :

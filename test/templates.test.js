@@ -76,15 +76,15 @@ assert.equal(cleanVessel({ vesselType: 'vessel', liquidPorts: 4 }).liquidPorts, 
 
 // the standard piping fittings (Fritz, 2026-10-22): one fitting each, a Skynet SVG picture, and where its IPs sit on it
 // Fritz's 2026-11-02 drawings: each IP is the center of a ferrule's outer face (Rule 5.20), given as "x,y" fractions of the picture
-for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: '0.29,1', end: '1,0.29' }], ['Elbow_45', 'elbow45', { start: '0.16,0.8', end: '1,0.3' }], ['Tee', 'tee', { start: '0,0.216', end: '1,0.216', branch1: '0.5,1' }],
+for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: '0.29,1', end: '1,0.29' }], ['Elbow_45', 'elbow45', { start: '0.194,0.756', end: '0.991,0.341' }], ['Tee', 'tee', { start: '0,0.216', end: '1,0.216', branch1: '0.5,1' }],
   ['Reducer', 'reducer', { start: '0,0.5', end: '1,0.5' }], ['Reducer_2_1_Concentric', 'reducer', { start: '0,0.5', end: '1,0.5' }], ['Reducer_2_1_Eccentric', 'reducer', { start: '0,0.5', end: '1,0.702' }],
-  ['Reducer_2_1_Front', 'reducer', { start: '0.5,0.5', end: '0.5,0.5' }], ['Elbow_Front', 'elbow90', { start: '0.5,0.336', end: '0.5,1' }], ['Instrument_Tee', 'tee', { start: '0,0.3', end: '1,0.3', branch1: '0.5,1' }]]) {
+  ['Reducer_2_1_Front', 'reducer', { start: '0.5,0.5', end: '0.5,0.5' }], ['Elbow_Front', 'elbow90', { start: '0.5,0.336', end: '0.5,1' }], ['Instrument_Tee', 'tee', { start: '0,0.318', end: '1,0.318', branch1: '0.5,1' }], ['Cross', 'tee', { start: '0,0.5', end: '1,0.5', branch1: '0.5,1', branch2: '0.5,0' }]]) {
   const t = S.get('fitting', n);
   assert.equal(t.fittings[0].kind, k); assert.deepEqual(t.ipPos, ip, n);
   assert.match(t.image, /^Images\/Skynet\/Other_Equipment\/Skynet_TC(15|2_1)_.+\.svg$/);
   assert.ok(t.size && t.body > 0, `${n}: its shape and how thick its pipe is drawn`);
   assert.ok(fs.existsSync(path.join(ROOT, 'media', t.image)), `${n}: picture ${t.image} is missing`);
-  assert.deepEqual(fittingEnds(t).map(e => e.key), k === 'tee' ? ['end', 'branch1'] : ['end']);
+  assert.deepEqual(fittingEnds(t).map(e => e.key), n === 'Cross' ? ['end', 'branch1', 'branch2'] : k === 'tee' ? ['end', 'branch1'] : ['end']);
 }
 assert.equal(S.get('vessel', 'RIMS_Tube').vesselType, 'rims');
 assert.deepEqual(S.get('vessel', 'Kettle_Big_Fatty').size, [250, 248], 'a Template can keep its picture\'s shape');
@@ -112,7 +112,9 @@ fs.rmSync(dir, { recursive: true, force: true });
 // Fritz's TC 1.5 drawings (2026-10-23): the fittings use them; the Instrument_Tee is not square; the RIMS tube is a Skynet_Integrated_Device
 for (const [n, pic] of [['Elbow_90', 'Skynet_TC15_Elbow_90'], ['Elbow_45', 'Skynet_TC15_Elbow_45'], ['Tee', 'Skynet_TC15_Long_Tee'], ['End_Cap', 'Skynet_TC15_EndCap'], ['Instrument_Tee', 'Skynet_TC15_Instrument_Tee']])
   assert.equal(S.get('fitting', n).image, `Images/Skynet/Other_Equipment/${pic}.svg`, n);
-assert.deepEqual(S.get('fitting', 'Instrument_Tee').size, [160, 80]);
+assert.deepEqual(S.get('fitting', 'Instrument_Tee').size, [160, 69]);
+// TC Pipe Fittings (Rule 5.25): the elbows, tees and the cross say where their pipes' center lines meet (the bend)
+for (const [n, b] of [['Elbow_90', '0.29,0.29'], ['Elbow_45', '0.524,0.341'], ['Tee', '0.5,0.216'], ['Cross', '0.5,0.5']]) assert.equal(S.get('fitting', n).bend, b, n);
 assert.equal(cleanFitting({ body: 0.55 }).body, 0.55, 'a fitting keeps how thick its pipe is drawn');
 assert.equal(cleanFitting({ body: 3 }).body, undefined, 'a part of its width, 1 at most');
 // Fritz's motorized butterfly valve (2026-11-02): a Master H with its Daughters; front views have no orientation to set

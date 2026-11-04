@@ -342,10 +342,10 @@ Fritz (2026-11-02, Help 110): a Temperature Device (type temperature, `subtype: 
 
 | `probeTee` | Picture | IPs (center of the open ferrule faces) |
 |---|---|---|
-| Instrument_Branch | Skynet_TC15_Instrument_Tee_Probe_Branch.svg: probe (purple) in the branch | left, right |
-| Instrument_Run | Skynet_TC15_Instrument_Tee_Probe_Run.svg: probe in from the left end | right, branch |
+| Instrument_Branch | Skynet_TC15_Instrument_Tee_Probe_Branch.svg (redrawn 2026-11-04): probe (purple) in the branch | left, right |
+| Instrument_Run | Skynet_TC15_Instrument_Tee_Probe_Run.svg (redrawn 2026-11-04): probe in from the left end | right, branch |
 | Long_Branch | Skynet_TC15_Long_Tee_Probe_Branch.svg (Fritz's drawing 2026-11-04) | left, right |
-| Long_Run | Skynet_TC15_Long_Tee_Probe_Run.svg | right, branch |
+| Long_Run | Skynet_TC15_Long_Tee_Probe_Run.svg (redrawn 2026-11-04) | right, branch |
 
 Flow passes through either way (like an inline sensor). Flip Horizontal and Flip Vertical turn the picture and its IPs. It reads like any Temperature probe (4.11).
 

@@ -27,5 +27,6 @@
     "start": "0.29,1",
     "end": "1,0.29"
   },
-  "notes": "A 90 degree elbow, for piping (Fritz's drawing, 2026-11-04). Openings at the bottom and the right; each IP is the center of its ferrule's outer face. The Edit layout bar's turn buttons give the other orientations."
+  "notes": "A 90 degree elbow, for piping (Fritz's drawing, 2026-11-04). Openings at the bottom and the right; each IP is the center of its ferrule's outer face. The Edit layout bar's turn buttons give the other orientations.",
+  "bend": "0.29,0.29"
 }
