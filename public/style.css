@@ -543,9 +543,9 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .simBar .simCtl { display: inline-flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 /* Hide / Show the Simulator bar (Fritz, 2026-10-28): hidden leaves a thin strip with the warning and ▾ Show */
 .simBar .simHide { margin-left: auto; }
-.simBar.collapsed { padding-top: 2px; padding-bottom: 2px; }
-.simBar.collapsed > :not(strong):not(.simHide) { display: none; }
-.simBar.collapsed .simHide { padding: 1px 8px; }
+/* Rule 10.7 (2026-11-04): hidden means gone; a small 🧪 on every ☰ Menu button says it is still Simulation */
+.simBar.collapsed { display: none; }
+body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; margin-left: 2px; }
 .simJumps input.tm { width: 7em; }
 .simJumps input.num { width: 5em; }
 .tlTable td.maybe { font-style: italic; }
@@ -991,3 +991,29 @@ dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .devPreview img { height: 120px; width: auto; max-width: 220px; display: block; }
 .devPreview .pvCover { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 button.waitStep { opacity: .55; }
+
+/* Rule 2.34 (Fritz, 2026-11-04): in every dropdown list (DDLB) the selected choice has a Cyan background.
+   1) option:checked works in Firefox and in list boxes (a select that shows several rows).
+   2) Chrome and Edge (135 and newer) only let a page colour the open dropdown when the dropdown is a
+      "customizable select" (appearance: base-select), so we switch plain dropdowns to that there.
+      Older browsers and phones (iPhone, Android) keep their own dropdown look. */
+select option:checked { background: cyan linear-gradient(cyan, cyan); color: #000; }
+@supports (appearance: base-select) {
+  select:not([multiple]):not([size]), select:not([multiple]):not([size])::picker(select) { appearance: base-select; }
+  select:not([multiple]):not([size]) { display: inline-flex; align-items: center; gap: 4px; field-sizing: fixed; }
+  select:not([multiple]):not([size])::picker-icon { font-size: .8em; color: var(--muted); }
+  select:not([multiple]):not([size])::picker(select) {
+    background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+    padding: 2px 0; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); max-height: 60vh;
+  }
+  select:not([multiple]):not([size]) option { padding: 3px 10px; }
+  select:not([multiple]):not([size]) option::checkmark { display: none; }
+  select:not([multiple]):not([size]) option:hover, select:not([multiple]):not([size]) option:focus-visible { background: #b5f5f5; color: #000; outline: none; }
+  select:not([multiple]):not([size]) option:checked { background: cyan; color: #000; }
+  select:not([multiple]):not([size]) option:disabled { color: var(--muted); background: none; }
+}
+/* Rule 18.20 (Fritz, 2026-11-04): the field with the focus in a dialog has a blue border */
+dialog :is(input, select, textarea):focus, dialog button:focus-visible { outline: 2px solid #1f5fff; outline-offset: 1px; border-color: #1f5fff; }
+/* Fritz's screen 9 (Rule 18.21): the lock, Visible and Hidden Locked in a dialog's title line */
+#dlgTitle .ttlExtra { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; font-size: .78em; font-weight: 600; vertical-align: middle; }
+#dlgTitle .ttlExtra .sw { margin: 0; }
