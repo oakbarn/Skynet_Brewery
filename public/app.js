@@ -2716,14 +2716,14 @@ async function newDeviceDialog(e, hint, what) {
     ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
-    ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
+    ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(after), ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
     ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : '') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (isPumpDev(e) && !work.typeCode) work.typeCode = 'Pump';      // the list it was picked in (Rule 4.2): shown greyed out, read only
-  if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
+  if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
@@ -2807,7 +2807,7 @@ async function newDeviceDialog(e, hint, what) {
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
-        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(isPumpDev(e) ? ['cover', 'tap', 'imageOff', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(isPumpDev(e) ? ['cover', 'tap', 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (+work.w > 0) e.w = +work.w;
         if (+work.h > 0) e.h = +work.h;
         if (isPumpDev(e) && (+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
@@ -3840,6 +3840,8 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
   return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color', null, false, false, x]] : [])]
     : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
 };
+// the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.15)
+const PUMP_OVERLAY = (x = {}) => [['imageOverlay', 'Overlay', 'gpick', 'overlays', false, false, { tip: DEVICE_TIPS.overlay, ...x }]];
 // Pump Device Properties (Fritz's screen 9, 2026-11-04, Rule 18.21): only these, besides the Universal Properties (Rule 1.21).
 // The lock, Visible and Hidden Locked are in the title line.
 function pumpDeviceFields(it, item) {
@@ -3850,7 +3852,7 @@ function pumpDeviceFields(it, item) {
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
-    ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it),
+    ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
@@ -3967,6 +3969,7 @@ const DEVICE_TIPS = {
   orient: 'Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow.',
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
+  overlay: 'Drawn on top of the pump while it is On: the steady red and yellow lightning bolt to start; the flashing bolt and others are choices, (none) for no overlay.',
   toggle: 'What a tap on the pump does: On/Off turns it on or off with one click; Push button is on only while held.',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {

@@ -45,6 +45,8 @@ Only these belong to a Pump (a Skynet pump drawing or your own User pump):
    follow.
 8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line: On/Off (one click turns it on or off), Push
    button (on only while held) or None.
+   Just below them, **Overlay**: what is drawn on top while the pump is On (the steady lightning bolt, the flashing bolt,
+   the Green glow ring, or (none)).
 9. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height**.
 10. **Database and .API** (Help 98), then the **Device Type** (DO: Pump) greyed out.
 
