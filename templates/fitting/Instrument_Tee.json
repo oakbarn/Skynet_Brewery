@@ -20,13 +20,14 @@
   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg",
   "size": [
     160,
-    80
+    69
   ],
-  "body": 0.175,
+  "body": 0.183,
   "ipPos": {
-    "start": "0,0.3",
-    "end": "1,0.3",
+    "start": "0,0.318",
+    "end": "1,0.318",
     "branch1": "0.5,1"
   },
-  "notes": "An Instrument Tee: a tee with a short branch for a probe or a gauge (Fritz's drawing, 2026-11-02). Openings at the left, the right and the bottom; each IP is the center of its ferrule's outer face. Flow goes any way through it. A tee with a Temperature Probe in it is a Temperature Device (Add Device > Probe)."
+  "notes": "An Instrument Tee (short branch), for piping (2026-11-04, in the style of Fritz's new Tee). Openings at the left, the right and the bottom (the branch); each IP is the center of its ferrule's outer face. A TC Pipe Fittings Widget.",
+  "bend": "0.5,0.318"
 }

@@ -1653,48 +1653,6 @@
    "color": "#3fbf6a"
   },
   {
-   "id": "tee_s",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "Suction tee",
-   "x": 805,
-   "y": 640,
-   "w": 30,
-   "h": 30,
-   "color": "#c0c6cc",
-   "fitting": "tee",
-   "rotate": "0",
-   "hideRun": false
-  },
-  {
-   "id": "tee_d",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "Pump out tee",
-   "x": 1105,
-   "y": 640,
-   "w": 30,
-   "h": 30,
-   "color": "#c0c6cc",
-   "fitting": "tee",
-   "rotate": "180",
-   "hideRun": false
-  },
-  {
-   "id": "tee_d2",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "Top tee",
-   "x": 1035,
-   "y": 545,
-   "w": 30,
-   "h": 30,
-   "color": "#c0c6cc",
-   "fitting": "tee",
-   "rotate": "0",
-   "hideRun": false
-  },
-  {
    "id": "p_Brewhouse_1",
    "kind": "pipe",
    "workspace": "Brewhouse",
@@ -1707,7 +1665,7 @@
     ],
     [
      750,
-     472
+     473
     ]
    ],
    "width": 10,
@@ -1719,15 +1677,15 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_Kettle_Out:out",
-   "to": "p_Brewhouse_2_j1",
+   "to": "gmw2o0c93b8r",
    "points": [
     [
      750,
-     527
+     528
     ],
     [
      750,
-     655
+     637
     ]
    ],
    "width": 10,
@@ -1738,15 +1696,15 @@
    "id": "p_Brewhouse_2_2",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_2_j1",
-   "to": "tee_s",
+   "from": "gmw2o0c93k8k",
+   "to": "gmw2o0c8z40n",
    "points": [
     [
-     750,
+     768,
      655
     ],
     [
-     820,
+     793,
      655
     ]
    ],
@@ -1755,21 +1713,6 @@
    "straight": true,
    "label": "",
    "name": "Pipe_1"
-  },
-  {
-   "id": "p_Brewhouse_2_j1",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 735,
-   "y": 640,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "180",
-   "name": "Elbow_1"
   },
   {
    "id": "p_Brewhouse_3",
@@ -1784,7 +1727,7 @@
     ],
     [
      1330,
-     472
+     473
     ]
    ],
    "width": 10,
@@ -1796,15 +1739,15 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_MLT_Out:out",
-   "to": "p_Brewhouse_4_j1",
+   "to": "gmw2o0c939yl",
    "points": [
     [
      1330,
-     527
+     528
     ],
     [
      1330,
-     760
+     742
     ]
    ],
    "width": 10,
@@ -1815,15 +1758,15 @@
    "id": "p_Brewhouse_4_2",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_4_j1",
-   "to": "p_Brewhouse_4_j2",
+   "from": "gmw2o0c93q86",
+   "to": "gmw2o0c93w0n",
    "points": [
     [
-     1330,
+     1312,
      760
     ],
     [
-     820,
+     838,
      760
     ]
    ],
@@ -1837,16 +1780,16 @@
    "id": "p_Brewhouse_4_3",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_4_j2",
-   "to": "tee_s",
+   "from": "gmw2o0c932al",
+   "to": "gmw2o0c90t6j",
    "points": [
     [
      820,
-     760
+     742
     ],
     [
      820,
-     655
+     682
     ]
    ],
    "width": 10,
@@ -1856,48 +1799,18 @@
    "name": "Pipe_3"
   },
   {
-   "id": "p_Brewhouse_4_j1",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 1315,
-   "y": 745,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "90",
-   "name": "Elbow_2"
-  },
-  {
-   "id": "p_Brewhouse_4_j2",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 805,
-   "y": 745,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "180",
-   "name": "Elbow_3"
-  },
-  {
    "id": "p_Brewhouse_5",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "tee_s",
+   "from": "gmw2o0c90phl",
    "to": "dev:Pump_1:in",
    "points": [
     [
-     820,
+     848,
      655
     ],
     [
-     900,
+     1034,
      655
     ]
    ],
@@ -1910,14 +1823,14 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:Pump_1:out",
-   "to": "tee_d",
+   "to": "gmw2o0c916nt",
    "points": [
     [
-     1040,
+     1016,
      655
     ],
     [
-     1120,
+     1093,
      655
     ]
    ],
@@ -1929,16 +1842,16 @@
    "id": "p_Brewhouse_7",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "tee_d",
+   "from": "gmw2o0c91gpq",
    "to": "dev:V_To_MLT:out",
    "points": [
     [
      1120,
-     655
+     628
     ],
     [
      1120,
-     497
+     498
     ]
    ],
    "width": 10,
@@ -1950,15 +1863,15 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_To_MLT:in",
-   "to": "p_Brewhouse_8_j1",
+   "to": "gmw2o0c94cwg",
    "points": [
     [
      1120,
-     442
+     443
     ],
     [
      1120,
-     120
+     138
     ]
    ],
    "width": 10,
@@ -1969,11 +1882,11 @@
    "id": "p_Brewhouse_8_2",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_8_j1",
+   "from": "gmw2o0c94v2q",
    "to": "ip_m_in",
    "points": [
     [
-     1120,
+     1138,
      120
     ],
     [
@@ -1988,33 +1901,18 @@
    "name": "Pipe_4"
   },
   {
-   "id": "p_Brewhouse_8_j1",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 1105,
-   "y": 105,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "270",
-   "name": "Elbow_4"
-  },
-  {
    "id": "p_Brewhouse_9",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "tee_d",
-   "to": "p_Brewhouse_9_j1",
+   "from": "gmw2o0c91ha7",
+   "to": "gmw2o0c94y9v",
    "points": [
     [
-     1120,
+     1148,
      655
     ],
     [
-     1160,
+     1142,
      655
     ]
    ],
@@ -2026,16 +1924,16 @@
    "id": "p_Brewhouse_9_2",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_9_j1",
-   "to": "p_Brewhouse_9_j2",
+   "from": "gmw2o0c94n5l",
+   "to": "gmw2o0c95uio",
    "points": [
     [
      1160,
-     655
+     637
     ],
     [
      1160,
-     560
+     578
     ]
    ],
    "width": 10,
@@ -2048,15 +1946,15 @@
    "id": "p_Brewhouse_9_3",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_9_j2",
-   "to": "tee_d2",
+   "from": "gmw2o0c9524m",
+   "to": "gmw2o0c92c0p",
    "points": [
     [
-     1160,
+     1142,
      560
     ],
     [
-     1050,
+     1078,
      560
     ]
    ],
@@ -2067,48 +1965,18 @@
    "name": "Pipe_6"
   },
   {
-   "id": "p_Brewhouse_9_j1",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 1145,
-   "y": 640,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "90",
-   "name": "Elbow_5"
-  },
-  {
-   "id": "p_Brewhouse_9_j2",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 1145,
-   "y": 545,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "0",
-   "name": "Elbow_6"
-  },
-  {
    "id": "p_Brewhouse_10",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "tee_d2",
-   "to": "p_Brewhouse_10_j1",
+   "from": "gmw2o0c91mwx",
+   "to": "gmw2o0c95omv",
    "points": [
     [
-     1050,
+     1023,
      560
     ],
     [
-     980,
+     998,
      560
     ]
    ],
@@ -2120,16 +1988,16 @@
    "id": "p_Brewhouse_10_2",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_10_j1",
+   "from": "gmw2o0c956f3",
    "to": "dev:V_To_Kettle:out",
    "points": [
     [
      980,
-     560
+     542
     ],
     [
      980,
-     497
+     498
     ]
    ],
    "width": 10,
@@ -2139,34 +2007,19 @@
    "name": "Pipe_7"
   },
   {
-   "id": "p_Brewhouse_10_j1",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 965,
-   "y": 545,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "180",
-   "name": "Elbow_7"
-  },
-  {
    "id": "p_Brewhouse_11",
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "dev:V_To_Kettle:in",
-   "to": "p_Brewhouse_11_j1",
+   "to": "gmw2o0c951t6",
    "points": [
     [
      980,
-     442
+     443
     ],
     [
      980,
-     120
+     138
     ]
    ],
    "width": 10,
@@ -2177,11 +2030,11 @@
    "id": "p_Brewhouse_11_2",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_11_j1",
+   "from": "gmw2o0c95ks6",
    "to": "ip_k_in",
    "points": [
     [
-     980,
+     962,
      120
     ],
     [
@@ -2196,34 +2049,19 @@
    "name": "Pipe_8"
   },
   {
-   "id": "p_Brewhouse_11_j1",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 965,
-   "y": 105,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "0",
-   "name": "Elbow_8"
-  },
-  {
    "id": "p_Brewhouse_12",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "tee_d2",
-   "to": "p_Brewhouse_12_j1",
+   "from": "gmw2o0c92lab",
+   "to": "gmw2o0c96q47",
    "points": [
     [
      1050,
-     560
+     587
     ],
     [
      1050,
-     800
+     782
     ]
    ],
    "width": 10,
@@ -2234,11 +2072,11 @@
    "id": "p_Brewhouse_12_2",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "p_Brewhouse_12_j1",
+   "from": "gmw2o0c966s7",
    "to": "dev:V_To_Ferm:in",
    "points": [
     [
-     1050,
+     1068,
      800
     ],
     [
@@ -2251,21 +2089,6 @@
    "straight": true,
    "label": "",
    "name": "Pipe_9"
-  },
-  {
-   "id": "p_Brewhouse_12_j1",
-   "kind": "ip",
-   "fitting": "elbow90",
-   "autoFit": true,
-   "workspace": "Brewhouse",
-   "x": 1035,
-   "y": 785,
-   "w": 30,
-   "h": 30,
-   "label": "",
-   "color": "#9aa0a6",
-   "rotate": "180",
-   "name": "Elbow_9"
   },
   {
    "id": "p_Brewhouse_13",
@@ -2286,6 +2109,1092 @@
    "width": 10,
    "color": "#8a8f96",
    "straight": true
+  },
+  {
+   "id": "gmw2o0c8ysy2",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Tee_1",
+   "template": "Tee",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "tee"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0,0.216",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.216",
+     "standard": "TC 1.5"
+    },
+    "branch1": {
+     "installed": true,
+     "position": "0.5,1",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 792.5,
+   "y": 647.44,
+   "label": "Suction tee",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0,0.216",
+    "end": "1,0.216",
+    "branch1": "0.5,1"
+   },
+   "w": 55,
+   "h": 35
+  },
+  {
+   "id": "gmw2o0c8z40n",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c8ysy2",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 778,
+   "y": 640,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c90phl",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c8ysy2",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 833,
+   "y": 640,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c90t6j",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c8ysy2",
+   "port": "branch1",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 805,
+   "y": 667,
+   "label": "Tee 1 branch (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c91ne0",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Tee_2",
+   "template": "Tee",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "tee"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0,0.216",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.216",
+     "standard": "TC 1.5"
+    },
+    "branch1": {
+     "installed": true,
+     "position": "0.5,1",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1092.5,
+   "y": 627.56,
+   "label": "Pump out tee",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0,0.216",
+    "end": "1,0.216",
+    "branch1": "0.5,1"
+   },
+   "w": 55,
+   "h": 35,
+   "rot": 180
+  },
+  {
+   "id": "gmw2o0c91ha7",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c91ne0",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1133,
+   "y": 640,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c916nt",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c91ne0",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1078,
+   "y": 640,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c91gpq",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c91ne0",
+   "port": "branch1",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1105,
+   "y": 613,
+   "label": "Tee 1 branch (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c91m4q",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Tee_3",
+   "template": "Tee",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "tee"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0,0.216",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.216",
+     "standard": "TC 1.5"
+    },
+    "branch1": {
+     "installed": true,
+     "position": "0.5,1",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1022.5,
+   "y": 552.44,
+   "label": "Top tee",
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0,0.216",
+    "end": "1,0.216",
+    "branch1": "0.5,1"
+   },
+   "w": 55,
+   "h": 35
+  },
+  {
+   "id": "gmw2o0c91mwx",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c91m4q",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1008,
+   "y": 545,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c92c0p",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c91m4q",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1063,
+   "y": 545,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c92lab",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c91m4q",
+   "port": "branch1",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1035,
+   "y": 572,
+   "label": "Tee 1 branch (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c92ynp",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_1",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 742.46,
+   "y": 636.54,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 270
+  },
+  {
+   "id": "gmw2o0c93k8k",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c92ynp",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 753,
+   "y": 640,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c93b8r",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c92ynp",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 735,
+   "y": 622,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c93lbl",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_2",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1311.54,
+   "y": 741.54,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 180
+  },
+  {
+   "id": "gmw2o0c939yl",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c93lbl",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1315,
+   "y": 727,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c93q86",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c93lbl",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1297,
+   "y": 745,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c93glz",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_3",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 812.46,
+   "y": 741.54,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 270
+  },
+  {
+   "id": "gmw2o0c93w0n",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c93glz",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 823,
+   "y": 745,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c932al",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c93glz",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 805,
+   "y": 727,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c94xrw",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_4",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1112.46,
+   "y": 112.46,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26
+  },
+  {
+   "id": "gmw2o0c94cwg",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c94xrw",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1105,
+   "y": 123,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c94v2q",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c94xrw",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1123,
+   "y": 105,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c944lh",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_5",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1141.54,
+   "y": 636.54,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 180
+  },
+  {
+   "id": "gmw2o0c94n5l",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c944lh",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1145,
+   "y": 622,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c94y9v",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c944lh",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1127,
+   "y": 640,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c95o8u",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_6",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1141.54,
+   "y": 552.46,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 90
+  },
+  {
+   "id": "gmw2o0c9524m",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c95o8u",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1127,
+   "y": 545,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c95uio",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c95o8u",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1145,
+   "y": 563,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c95mf0",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_7",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 972.46,
+   "y": 541.54,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 270
+  },
+  {
+   "id": "gmw2o0c95omv",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c95mf0",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 983,
+   "y": 545,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c956f3",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c95mf0",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 965,
+   "y": 527,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c9589p",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_8",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 961.54,
+   "y": 112.46,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 90
+  },
+  {
+   "id": "gmw2o0c95ks6",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c9589p",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 947,
+   "y": 105,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c951t6",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c9589p",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 965,
+   "y": 123,
+   "label": "End (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c95syq",
+   "kind": "vessel",
+   "vesselType": "bfit",
+   "workspace": "Brewhouse",
+   "name": "Elbow_9",
+   "template": "Elbow_90",
+   "templateCls": "skynet",
+   "fittings": [
+    {
+     "kind": "elbow90"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    },
+    {
+     "kind": "none"
+    }
+   ],
+   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg",
+   "labelAlign": "below",
+   "labelSize": 12,
+   "labelVisible": false,
+   "ports": {
+    "start": {
+     "installed": true,
+     "position": "0.29,1",
+     "standard": "TC 1.5"
+    },
+    "end": {
+     "installed": true,
+     "position": "1,0.29",
+     "standard": "TC 1.5"
+    }
+   },
+   "bundled": true,
+   "x": 1042.46,
+   "y": 781.54,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "ipPos": {
+    "start": "0.29,1",
+    "end": "1,0.29"
+   },
+   "w": 26,
+   "h": 26,
+   "rot": 270
+  },
+  {
+   "id": "gmw2o0c966s7",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c95syq",
+   "port": "start",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1053,
+   "y": 785,
+   "label": "Start (vessel side) (TC 1.5)"
+  },
+  {
+   "id": "gmw2o0c96q47",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "gmw2o0c95syq",
+   "port": "end",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1035,
+   "y": 767,
+   "label": "End (TC 1.5)"
   }
  ],
  "autostart": [],
