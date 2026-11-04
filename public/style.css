@@ -1012,3 +1012,8 @@ select option:checked { background: cyan linear-gradient(cyan, cyan); color: #00
   select:not([multiple]):not([size]) option:checked { background: cyan; color: #000; }
   select:not([multiple]):not([size]) option:disabled { color: var(--muted); background: none; }
 }
+/* Rule 18.20 (Fritz, 2026-11-04): the field with the focus in a dialog has a blue border */
+dialog :is(input, select, textarea):focus, dialog button:focus-visible { outline: 2px solid #1f5fff; outline-offset: 1px; border-color: #1f5fff; }
+/* Fritz's screen 9 (Rule 18.21): the lock, Visible and Hidden Locked in a dialog's title line */
+#dlgTitle .ttlExtra { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; font-size: .78em; font-weight: 600; vertical-align: middle; }
+#dlgTitle .ttlExtra .sw { margin: 0; }

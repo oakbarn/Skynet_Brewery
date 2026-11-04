@@ -2665,6 +2665,22 @@ const OWN_NAME_WARNING = (name, sug) => `You typed your own Device name, "${name
   'A plain word as a name (for example "Pump") becomes a reserved word in your Processes, and it can cause problems in the code: a Process line can no longer tell the Device from other things called Pump.\n\n' +
   'The Device name is only used in Processes. It is never shown on a Tab (the Label is), so a unique, meaningful name like the Suggested Name is the better choice.\n\n' +
   `OK = keep "${name}".  Cancel = go back and change it.`;
+// Rule 18.20 (Fritz, 2026-11-04): inside a dialog Tab moves field to field and Enter jumps to the next field (the last one goes to
+// Save); a new Device's box sets dlgEnterSeq so Enter follows its sequence until it is added. Arrow keys change a dropdown without
+// jumping on.
+let dlgEnterSeq = null, dlgArrowKey = false;
+document.addEventListener('keydown', ev => {
+  dlgArrowKey = /^Arrow/.test(ev.key);
+  if (ev.key !== 'Enter' || ev.shiftKey || ev.altKey || ev.ctrlKey || ev.metaKey || ev.isComposing) return;
+  const t = ev.target, d = t?.closest?.('#dlg');
+  if (!d || !t.matches('input, select') || ['button', 'submit', 'reset', 'file'].includes(t.type) || !t.closest('#dlgBody')) return;
+  ev.preventDefault();
+  if (dlgEnterSeq?.(t)) return;
+  const all = [...d.querySelectorAll('#dlgBody input, #dlgBody select, #dlgBody textarea')].filter(x => !x.disabled && x.type !== 'hidden' && x.offsetParent !== null);
+  const i = all.indexOf(t), ok = [...d.querySelectorAll('button[value="ok"]')].pop();
+  (all[i + 1] || ok)?.focus();
+}, true);
+document.addEventListener('pointerdown', () => { dlgArrowKey = false; }, true);
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
   const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
@@ -2691,15 +2707,14 @@ async function newDeviceDialog(e, hint, what) {
     ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
-    ...(isPumpDev(e) ? [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic, ...after }], ['_or', 'Orientation', 'orient', null, false, false, { tip: T.orient, ...after }],
-      ...(pumpModelOf(e) ? [[...COVER_FIELDS({})[0].slice(0, 1), 'Cover', 'sel', COVER_CHOICES, false, false, { tip: T.cover, ...after }]] : []), ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
+    ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
     ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : '') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (isPumpDev(e) && !work.typeCode) work.typeCode = 'Pump';      // the list it was picked in (Rule 4.2): shown greyed out, read only
-  if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
+  if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
@@ -2735,8 +2750,17 @@ async function newDeviceDialog(e, hint, what) {
         portSel.value = cur;
       };
       fillFree(work); gate();
+      // Fritz's Blichmann Pump Sequence (2026-11-04, Rule 18.20): Enter goes 1 Label, 2 Interface, 3 Available Ports, 4 Tab,
+      // then Orientation (a Pump) and last the ➕ Add Device button; picking from a dropdown of the sequence goes on to the next one.
+      const seq = () => [body.querySelector('[data-k="label"]'), body.querySelector('[data-k="device"]'), body.querySelector(`[data-k="${port[0]}"]`),
+        body.querySelector('select[data-k="typeCode"]'), body.querySelector('[data-k="workspace"]'), body.querySelector('select.orientSel')]
+        .filter(x => x && !x.disabled && x.offsetParent !== null);
+      const seqNext = t => { const l = seq(), i = l.indexOf(t); (i >= 0 && l[i + 1] || oks.filter(b => b.offsetParent !== null).pop())?.focus(); };
+      dlgEnterSeq = t => { if (seq().includes(t)) { seqNext(t); return true; } return false; };
+      { const l = seq(); (l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }        // the first one still empty has the focus
       body.oninput = body.onchange = ev => {
         gate();
+        if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)) { const t = ev.target; setTimeout(() => seqNext(t), 0); }
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
         if (ev.type === 'change' && ev.target.dataset?.k === 'workspace' && ev.target.value === ADD_TAB) return $('#dlg').close('addTab');
@@ -2752,6 +2776,7 @@ async function newDeviceDialog(e, hint, what) {
         body.oninput = body.onchange = null;          // Tab settings uses the same dialog: its own buttons and handlers while it is open
         for (const b of oks) { b.textContent = labels0[0]; b.disabled = false; b.title = ''; }
         for (const b of cancels) b.textContent = labels0[1];
+        dlgEnterSeq = null;                           // Tab settings: Enter goes field to field there (Rule 18.20)
         work.workspace = (await addTabForDevice()) || was;
         for (const b of oks) b.textContent = '➕ Add Device';
         for (const b of cancels) b.textContent = '✖ Cancel';
@@ -2773,7 +2798,7 @@ async function newDeviceDialog(e, hint, what) {
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
-        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(isPumpDev(e) ? ['cover', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(isPumpDev(e) ? ['cover', 'tap', 'imageOff', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (+work.w > 0) e.w = +work.w;
         if (+work.h > 0) e.h = +work.h;
         if (isPumpDev(e) && (+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
@@ -2786,7 +2811,7 @@ async function newDeviceDialog(e, hint, what) {
         return true;
       } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
     }
-  } finally { body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
+  } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
 }
 // ---- Thermowell (Fritz, 2026-10-23): a Temperature Device drawn as a TC 1.5 thermowell, Short, Medium or Long. After picking it
 // (step 2) a pop-up asks the type of Temperature Probe in it (2a), then the New Device box goes on as for any Device.
@@ -3793,26 +3818,32 @@ const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap ta
 // Fritz, 2026-11-04 (Rule 18.19): the pump's Graphic shown on the dialog with its Orientation; changing the Orientation flips the
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
 // its Picture (an exception to Rule 7.10's three paths).
-const PUMP_ORIENT = [['', 'Normal'], ['h', 'Flip Horizontal'], ['v', 'Flip Vertical'], ['hv', 'Flip both (turned around)']];
-const PUMP_GRAPHIC_FIELDS = it => [['_pv', 'Graphic', 'devpic', null, false, 'b', { tip: DEVICE_TIPS.graphic }], ['_or', 'Orientation', 'orient', null, false, 'b', { tip: DEVICE_TIPS.orient }],
-  pumpModelOf(it) ? ['imageOff', 'Picture', 'ro', pumpModelOf(it) + ' (set, Skynet drawing)', false, false, { attr: DEV_PIC_POP }]
-    : ['imageOff', 'Image Path', 'gpick', null, false, 'b', { attr: DEV_PIC_POP, tip: DEVICE_TIPS.path }]];
+const PUMP_ORIENT = [['', 'Right'], ['h', 'Left']];      // Fritz's screens 7-9: Right = as drawn (the pump head on the right), Left = mirrored
+const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push button'], ['none', 'None'], ...(v && !['toggle', 'hold', 'none'].includes(v) ? [[v, v]] : [])];
+// the Graphic, its Path (set on a Skynet pump drawing, Rule 5.6; one path a User pump may edit, an exception to Rule 7.10) and Orientation
+const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic, ...x }],
+  pumpModelOf(it) ? ['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pathSet, ...x }]
+    : ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.path, ...x }],
+  ['_or', 'Orientation', 'orient', null, false, false, { tip: DEVICE_TIPS.orient, ...x }]];
+// Cover and Toggle on one line (Toggle = what a tap does; a User pump has no Cover)
+const PUMP_COVER_TOGGLE = (it, x = {}) => {
+  const tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap)];
+  return pumpModelOf(it) ? [['cover', 'Cover', 'sel', COVER_CHOICES, true, false, { tip: DEVICE_TIPS.cover, with: tog, ...x }], ...(String(it.cover || '').toLowerCase() === 'user' ? [['coverColor', 'User cover color', 'color', null, false, false, x]] : [])]
+    : [[...tog, false, false, { tip: DEVICE_TIPS.toggle, ...x }]];
+};
+// Pump Device Properties (Fritz's screen 9, 2026-11-04, Rule 18.21): only these, besides the Universal Properties (Rule 1.21).
+// The lock, Visible and Hidden Locked are in the title line.
 function pumpDeviceFields(it, item) {
-  return [['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'], ['locked', 'Lock position (no drag or resize)', 'lock'],
-    ['_pp', 'Pump Properties', 'attrhead', null, false, 'b', { attr: DEV_PROPS_POP('Pump') }],
-    ['_lb', '', 'box'],
-    ['label', 'Label', 'text', null, false, 'b', { up: 2, attr: LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
-    ['name', 'Name', 'text', null, false, 'b'],
-    ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
-    ['typeCode', 'Device Type', 'ro', shownType(it)],
-    ['_pb', 'Pump', 'box'], ['device', 'Interface (board)', 'dev', 'addnew', false, 'b', { set: true }], ['channel', 'Port (pin, e.g. 22, or A5 = 59)', 'pin', 'digital', false, 'b', { set: true, attr: DEV_PORT_POP }],
-    ['workspace', 'Tab', 'ws', null, false, 'b'], ['x', 'X (Horizontal)', 'num'], ['y', 'Y (Vertical)', 'num'], ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num'],
-    ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held)'], 'dialog', ['script', 'process'], ['workspace', 'tab']], false, false, { attr: DEV_TAP_POP }],
-    ['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true],
-    ['_gb', 'Graphic', 'box'], ...PUMP_GRAPHIC_FIELDS(it),
-    ...(pumpModelOf(it) ? COVER_FIELDS(it).map(f => f[0] === 'cover' ? [f[0], 'Cover', ...f.slice(2)] : f) : []),
-    ['_tb', 'On / Off text', 'box'], ['onText', 'Text when on', 'text', null, false, false, { up: 2, attr: DEV_TEXT_POP }], ['offText', 'Text when off', 'text', null, false, false, { up: 2 }],
-    ['_end', '', 'boxend']];
+  const T = DEVICE_TIPS;
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
+    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
+    ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it),
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
 
 // a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
@@ -3861,8 +3892,14 @@ function field(f, obj) {
   if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface (board) and its Available Ports)
-    const o2 = fieldOne(x.with, obj);
-    out[1] = h('div', { class: 'fldPair' }, out[1], h('span', { class: 'pairLbl' }, x.with[1]), o2[1]);
+    const o2 = fieldOne(x.with, obj), first = out[1];
+    if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
+    out[1] = h('div', { class: 'fldPair' }, first, h('span', { class: 'pairLbl' }, x.with[1]), o2[1]);
+  }
+  if (x?.inTitle) {              // Fritz's screen 9: the lock, Visible and Hidden Locked sit in the title line of the dialog
+    const t = h('span', { class: 'ttlExtra' }, ...(out[0]?.textContent ? [h('span', { class: 'ttlLbl' }, out[0].textContent)] : []), out[1]);
+    setTimeout(() => { const ttl = $('#dlgTitle'); for (const o of ttl.querySelectorAll(`.ttlExtra[data-for="${f[0]}"]`)) o.remove(); t.dataset.for = f[0]; ttl.append(t); }, 0);
+    return [];
   }
   if (x?.tip && out[0]) {        // Rule 18.16: the name stays short; hover it (or tap it) for more
     out[0].classList.add('tipLbl'); out[0].title = x.tip;
@@ -3918,8 +3955,10 @@ const DEVICE_TIPS = {
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels. 150 x 150 to start.',
   graphic: 'The picture of this Device as it will show on the Tab, with its Cover and Orientation.',
-  orient: 'Flips the picture: the Graphic here and the Device on the Tab turn with it, and its IPs follow.',
-  path: 'The picture file of a User pump: one path only.',
+  orient: 'Right (as drawn) or Left (mirrored): the Graphic here and the pump on the Tab turn with it, and its IPs follow.',
+  path: 'The picture file of a User pump: one path only, and you may change it.',
+  pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
+  toggle: 'What a tap on the pump does: On/Off turns it on or off with one click; Push button is on only while held.',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && kind === 'text' && obj._ref && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
@@ -4100,9 +4139,9 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'orient') {      // Orientation (Rule 18.19): one pick that sets Flip Horizontal and Flip Vertical
     const fh = h('input', { type: 'checkbox', class: 'hidden', 'data-k': 'flipH', 'data-kind': 'bool' }), fv = h('input', { type: 'checkbox', class: 'hidden', 'data-k': 'flipV', 'data-kind': 'bool' });
     fh.checked = !!obj.flipH; fv.checked = !!obj.flipV;
-    const cur = (obj.flipH ? 'h' : '') + (obj.flipV ? 'v' : '');
+    const cur = obj.flipH ? 'h' : '';
     const sel = h('select', { class: 'orientSel' }, ...PUMP_ORIENT.map(([k, t]) => h('option', { value: k, ...(k === cur ? { selected: true } : {}) }, t)));
-    sel.addEventListener('change', () => { fh.checked = sel.value.includes('h'); fv.checked = sel.value.includes('v'); });
+    sel.addEventListener('change', () => { fh.checked = sel.value.includes('h'); });
     return [h('label', {}, label), h('div', { class: 'orientBox' }, sel, fh, fv)];
   }
   else if (kind === 'devpic') {      // the Graphic shown on the dialog (Rule 18.19): its picture, Cover and Orientation, kept up to date
@@ -4124,7 +4163,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       cov.style.webkitMaskImage = cov.style.maskImage = cv?.mask ? `url("${media(cv.mask)}")` : '';
       box.style.transform = w.flipH || w.flipV ? `scale(${w.flipH ? -1 : 1}, ${w.flipV ? -1 : 1})` : '';
     };
-    const on = () => { if (!box.isConnected) { document.removeEventListener('change', on, true); document.removeEventListener('input', on, true); return; } draw(); };
+    const on = () => { if (!box.isConnected) { document.removeEventListener('change', on, true); document.removeEventListener('input', on, true); return; } setTimeout(draw, 0); };
     document.addEventListener('change', on, true); document.addEventListener('input', on, true);
     setTimeout(draw, 0);
     return [h('label', {}, label), h('div', { class: 'devPreviewWrap' }, box)];
@@ -4132,7 +4171,17 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       // a section heading inside a dialog
   else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.filter(w => !String(opts).startsWith('addnew') || !w.build).map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.id ? `${w.id}: ${w.name}` : w.name)),      // Fritz, 2026-11-04: "Tab ID: Tab Name", e.g. BH: Brewhouse
     ...(String(opts).startsWith('addnew') ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []));
-  else if (kind === 'pinsel') input = h('select', { 'data-k': key, 'data-kind': 'pin', class: 'pinSel' }, h('option', { value: v ?? '' }, v ?? '(pick)'));      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
+  else if (kind === 'pinsel') {      // Available Ports: the free pins on the Interface that fit this Device, and its own pin
+    input = h('select', { 'data-k': key, 'data-kind': 'pin', class: 'pinSel' });
+    input._fill = dev => {
+      const w = { ...obj, device: dev, name: '\0new' }, ps = dev ? freePins(w, (draft || S.config).elements.filter(x => x.name !== obj.name), S.config.devices, opts === 'analog') : [];
+      const cur = input.value || String(v ?? ''), b = boardOfDevice(w, S.config.devices);
+      input.replaceChildren(h('option', { value: '' }, !dev ? '(Interface first)' : ps.length ? '(pick)' : '(no free Port)'), ...ps.map(p => { const t = pinLabel(p, b); return h('option', { value: p, label: t }, t); }),
+        ...(cur && !ps.map(String).includes(cur) ? [h('option', { value: cur }, cur)] : []));
+      input.value = cur;
+    };
+    input._fill(obj.device);
+  }      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
     ...(String(opts).startsWith('addnew') && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
@@ -4202,7 +4251,7 @@ function backpathHeadsUp() {
 }
 
 function readFields(obj, root = $('#dlgBody')) {
-  for (const inp of root.querySelectorAll('[data-k]')) {
+  for (const inp of [...root.querySelectorAll('[data-k]'), ...(root.id === 'dlgBody' ? $$('#dlgTitle [data-k]') : [])]) {
     const k = inp.dataset.k, kind = inp.dataset.kind;
     let v;
     if (kind === 'bool') v = inp.checked;
@@ -4496,7 +4545,7 @@ function askDiscard(what = 'this dialog') {
     document.body.append(d); d.showModal();
   });
 }
-const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea')].map(i => i.type === 'checkbox' ? i.checked : i.value));
+const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:not(.gpickGroup), #dlgBody textarea, #dlgTitle input')].map(i => i.type === 'checkbox' ? i.checked : i.value));
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
 // a small dialog on top of the Properties (Rule 18 pop-ups): ✖ Cancel and 💾 Save at the top and the bottom; build(body) fills it
@@ -4728,7 +4777,7 @@ async function editItem(kind, id) {
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
-    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ...dbFields(it)];      // Pump Device Properties, the drill-down (Fritz, 2026-11-03)
+    if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ...dbFields(it), ['_dbe', '', 'boxend'], ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
@@ -4754,7 +4803,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isPumpDev(item) ? 'Pump Device Properties' : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isPumpDev(item) ? (pumpModelOf(item) || 'Pump Device Properties') : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? 'Pipe fitting Widget' : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
