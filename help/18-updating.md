@@ -14,7 +14,7 @@
 
 **Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, media, scripts, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `media` to `media_old`). The panel copies the samples into a fresh `media` the next time it starts.
 
-> **Testing mode and sign-ins.** Your users and passwords stay on disk. But while **Settings > Testing mode** is on, a new version clears every sign-in when it starts, so you create the admin account again and get a new **recovery code**. That is on purpose while testing. Turn Testing mode off when you use the panel for real, and updates keep your logins too. See [Login, users and passwords](10-login).
+> **Sign-ins are kept.** A new version keeps every user, password and the **recovery code**. The only time an update removes them is when you answer **Yes** to the installer's **Start Fresh** question and confirm the warning. See [Login, users and passwords](10-login).
 
 ## Every update: stop the panel first
 

@@ -6027,7 +6027,6 @@ async function renderUsers() {
 }
 async function renderRecovery() {
   if (!can('admin')) return;
-  $('#setFresh').checked = S.config.resetLoginsOnUpdate !== false;
   const r = await api('GET', '/auth/recovery');
   $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
   $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
@@ -6079,11 +6078,6 @@ $('#setWarnPaths').onchange = guard(async ev => {
   await api('PUT', '/ui/settings', { warnOffBrainPaths: ev.target.checked });
   S.config.warnOffBrainPaths = ev.target.checked;
   toast(ev.target.checked ? 'You will be warned about files that are not on the Brain' : 'Path warnings are off');
-});
-$('#setFresh').onchange = guard(async ev => {
-  await api('PUT', '/ui/settings', { resetLoginsOnUpdate: ev.target.checked });
-  S.config.resetLoginsOnUpdate = ev.target.checked;
-  toast(ev.target.checked ? 'Logins will start fresh after each update' : 'Logins are kept after updates');
 });
 $('#recNew').onclick = guard(async () => {
   if ($('#recInfo').textContent.startsWith('Made') && !confirm('Make a new recovery code? The old one stops working.')) return;
@@ -6602,7 +6596,7 @@ const PAGE_PARTS = {
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Testing mode', '#sec-testing'], ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };
