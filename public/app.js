@@ -2412,6 +2412,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   useTabProfile(e);
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
   delete e._keepXY;
+  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box (Fritz, 2026-11-04)
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
@@ -2637,22 +2638,32 @@ async function newDeviceDialog(e, hint, what) {
   // more than one (Rule 4.2's order otherwise). ➕ Add Device works once the Label is typed or Show label is off; then the rest
   // of its Properties open.
   const codes = typeCodes(e), n = (i => () => ++i + '. ')(0);
-  const fields = [['device', n() + 'Interface (board)', 'dev', 'addnew'],
-    ...(codes.length > 1 && !(e.template && e.typeCode) && !isPumpDev(e) ? [['typeCode', n() + 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
+  // Fritz, 2026-11-04 (Rule 4.2): 1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name, so the Suggested Name is built from them in his
+  // naming order. The Name shows once 1-4 are done. The Device Type, when its kind has more than one, comes after the Interface.
+  const fields = [['label', n() + 'Label (shown on the tab, e.g. Fly Sparge)', 'text', null, false, false, ...(isPumpDev(e) ? [{ attr: LABEL_POP }] : [])], ['hideName', isPumpDev(e) ? 'Label Visible' : 'Show label (switch it off for no Label)', 'show'],
+    ['device', n() + 'Interface (board)', 'dev', 'addnew'],
+    ...(codes.length > 1 && !(e.template && e.typeCode) && !isPumpDev(e) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
     [port[0], n() + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
+    ['workspace', n() + 'Tab', 'ws'],
     ['name', n() + 'Suggested Name (you may type your own)', 'text'],
-    ['label', n() + 'Label (shown on the tab, e.g. Fly Sparge)', 'text', null, false, false, ...(isPumpDev(e) ? [{ attr: LABEL_POP }] : [])], ['hideName', isPumpDev(e) ? 'Label Visible' : 'Show label (switch it off for no Label)', 'show'],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too, and its Device Type shown greyed out
     ...(isPumpDev(e) ? [COVER_FIELDS({})[0].map((x, i) => i === 1 ? 'Cover' : i === 4 ? false : x), ['x', 'X (Horizontal)', 'num'], ['y', 'Y (Vertical)', 'num']] : []),
     ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num'],
     ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro']] : [])];
   work.w = e.w; work.h = e.h;
+  { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (isPumpDev(e) && !work.typeCode) work.typeCode = 'Pump';      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
-  const gate = () => { const w = { ...work }; try { readFields(w, body); } catch { } const ok = !!String(w.label || '').trim() || !!w.hideName; for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : 'Type a Label first, or switch Show label off'; } };
+  // ➕ Add Device and the Name wait for 1-4 (Fritz, 2026-11-04): a Label (or Show label off), the Interface, the Port and the Tab
+  const gate = () => {
+    const w = { ...work }; try { readFields(w, body); } catch { }
+    const lab = !!String(w.label || '').trim() || !!w.hideName, rest = !!w.device && w[port[0]] !== undefined && String(w[port[0]]).trim() !== '' && !!w.workspace, ok = lab && rest;
+    for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : !lab ? 'Type a Label first, or switch Show label off' : 'Pick the Interface, the Port and the Tab first'; }
+    const nb = body.querySelector('[data-k="name"]'); if (nb) for (const x of [nb, nb.previousElementSibling]) x?.classList.toggle('hidden', !ok);
+  };
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
@@ -2687,7 +2698,7 @@ async function newDeviceDialog(e, hint, what) {
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
-        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', ...(isPumpDev(e) ? ['cover', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(isPumpDev(e) ? ['cover', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (+work.w > 0) e.w = +work.w;
         if (+work.h > 0) e.h = +work.h;
         if (isPumpDev(e) && (+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
@@ -2728,6 +2739,7 @@ async function newProbeTee(kind) {
   if (!D.visible) e.visibility = 'hidden';
   if (!(await newDeviceDialog(e, 'Temp'))) return;
   useTabProfile(e); stackNew(e);
+  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 async function newThermowell(length) {
@@ -2738,6 +2750,7 @@ async function newThermowell(length) {
   if (!D.visible) e.visibility = 'hidden';
   if (!(await newDeviceDialog(e, 'Temp'))) return;
   useTabProfile(e); stackNew(e);
+  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 
