@@ -275,7 +275,7 @@ background**: its look is its Style. (Help 92)
 Command Prompt window that started it closes too, **whatever .bat started it** (Skynet_Brewer.bat, an older .bat in
 C:\Brewing, or npm start typed in a Command Prompt): the panel ends that Command Prompt itself as it stops (2026-11-04).
 Only the Command Prompt and npm under it are ended, never Windows Terminal or anything above it. Every open page shows
-"Skynet Brewer is closed". The window stays open when the panel stops because of an error. Closing a browser tab never
+"Skynet Brewer is closed", and Skynet's own clean window (Rule 2.36) closes. The window stays open when the panel stops because of an error. Closing a browser tab never
 stops the panel. Not offered when the panel runs as a service (Pi). (2026-10-30, thread "Close the command window on
 exit"; 2026-11-04, thread "Close the Command Prompt with Skynet")
 
@@ -325,6 +325,17 @@ when a dropdown list (DDLB) is open, the choice that is selected now is shown on
 mouse or keyboard is a lighter Cyan. This works in **Chrome and Edge** (version 135 and newer, on Windows, Mac, Linux and
 Android) and in **Firefox**. **iPhone / iPad (Safari)** and older browsers draw their own dropdown (on the iPhone the spinning
 wheel) and do not let a web page change its colours, so there it looks as before. (thread "Make selected dropdown items cyan")
+
+2.36 **Skynet opens in its own clean window** (Fritz, 2026-11-04): on Windows the panel opens in a window of its own, with **no
+address bar, no bookmarks bar and no tabs**: Microsoft Edge (or Google Chrome when there is no Edge) in "app" mode, filling the
+screen. It uses **its own small browser profile** (in `%LOCALAPPDATA%\SkynetBrewer\AppWindow`), so **the normal browser is never
+changed**: its bookmarks bar, settings, tabs and sign-ins look exactly as before once Skynet closes ("restore on close"). The panel
+opens the window itself once it is up, **whatever .bat started it** (an older .bat that opens the browser has that browser tab
+stopped, so only the clean window opens). No Edge or Chrome: the normal browser opens the panel, as before. The window closes
+when the panel stops (☰ Menu > Close Skynet Brewer, Rule 2.25, or the black window's X); closing the clean window with its X
+never stops the panel (Rule 2.25), and double-clicking **Skynet Brewer** again opens it again. The first time, sign in once in the
+clean window (it keeps its own sign-in). Phones, tablets and other computers open the panel in their browser as before.
+(thread "Open Skynet in its own clean window", Help 122)
 
 ## 3. Names and file names
 
@@ -1467,3 +1478,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 2.34 (the selected choice in every dropdown has a Cyan background; not possible on iPhone Safari or older browsers). (thread "Make selected dropdown items cyan")
 - 2026-11-04: Changed Rule 2.25 (Close Skynet Brewer now closes the Command Prompt window itself, whatever .bat started the panel, not only the new Skynet_Brewer.bat). Help 95 updated; no new Help number. (thread "Close the Command Prompt with Skynet")
 - 2026-11-04: Changed Rule 10.7 (hiding the Simulator bar removes it completely, no strip; ☰ Menu > 🧪 Show / Hide Simulator bar in Simulator mode; small 🧪 on the ☰ Menu button while hidden). Help 85 updated. (thread "Move Show Simulator bar to the ☰ Menu")
+- 2026-11-04: Added Rule 2.36 (on Windows Skynet opens in its own clean window, Edge or Chrome app mode with its own profile, no address or bookmarks bar; the normal browser is never changed; the window closes with the panel). Rule 2.25: Close Skynet Brewer closes that window too. Help 122, Help 95 updated; next free Help number 123. (thread "Open Skynet in its own clean window")
