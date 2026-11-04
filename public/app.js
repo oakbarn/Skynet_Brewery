@@ -828,6 +828,10 @@ const PUMP_FLOW = {
   Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
   Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
 };
+// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones are 434 x 292 with the inlet on the outer face of the union
+// on the right of the pump head (415, 138) and the outlet at the top of the pipe going up (361, 0); the submersible sump pump is
+// 120 x 140 and draws in through the middle of its screen at the bottom (60, 117), out the top of the riser on its right (110, 12).
+const OLD_PUMP_FLOW = { Rip: { w: 434, h: 292, ends: [[415 / 434, 138 / 292], [361 / 434, 0]] }, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
 // Pump Cover Overlays (Fritz, 2026-11-02): a cover drawn over a Skynet pump drawing (the no-cover ones above), between the
 // picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
 // .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
@@ -870,6 +874,10 @@ function pickPump() {
 function picFlow(path) {
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
+  // the older Riptide-style pump pictures (Pump_<color>_Rip_Off / _On, .svg or .png, every cover color) and the sump pump
+  // (Fritz, 2026-11-04: every Skynet pump has IPs on its inlet and outlet, Rule 5.24)
+  if (/(?:^|\/)Pump_[A-Za-z]+_Rip_(?:Off|On)\.(?:svg|png)$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Rip };
+  if (/(?:^|\/)Pump_Sump_(?:Off|On)\.svg$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Sump };
   const om = String(path || '').match(/(?:^|\/)Valve_Ball_(?:Open|Closed)(H_1|V-1x1)\.(?:png|svg)$/i);
   if (om) return { k: om[1] === 'H_1' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'H_1' ? 'OLD_H' : 'OLD_V'] };
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
