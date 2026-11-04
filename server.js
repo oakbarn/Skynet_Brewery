@@ -118,11 +118,9 @@ const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
 const passwordRulesView = () => ({ ...auth.rules(), text: describePasswordRules(auth.rules()), choices: Object.fromEntries(Object.entries(PW_CHARSETS).map(([k, v]) => [k, v.text])), limits: PW_LIMITS });
 const messaging = new Messaging(DATA);
-// Testing mode (Settings > "Start fresh logins after each update", on unless turned off)
 // Panel version (version.json, stamped by GitHub on every merge): Menu Bar and ☰ Menu > About
 const PANEL_VERSION = readVersion(ROOT);
 const versionCheck = new VersionCheck(PANEL_VERSION);
-const loginsCleared = auth.resetIfNewVersion(codeFingerprint(ROOT), store.config.resetLoginsOnUpdate !== false);
 const sim = new Simulation({ store, engine, hw });          // Settings > Simulation: no real boards, faster time
 sim.apply();
 hw.start();
@@ -587,7 +585,7 @@ async function route(req, res) {
     const body = await jsonBody(req);
     const tl = body.brewDefaults?.textLarge;         // \L large text in strings: bigger than normal text (18 px)
     if (tl !== undefined && tl !== null && !(+tl > 18 && +tl <= 200)) return fail(res, 400, 'Large text size must be more than 18 (normal text) and at most 200');
-    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'resetLoginsOnUpdate', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm', 'brewDefaults', 'menuOrder']) if (k in body) store.config[k] = body[k];
+    for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm', 'brewDefaults', 'menuOrder']) if (k in body) store.config[k] = body[k];
     if ('userStyles' in body) store.config.userStyles = cleanUserStyles(body.userStyles);     // a Skynet Style can never be changed (public/styles.js)
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     if ('passwordRules' in body) store.config.passwordRules = cleanPasswordRules(body.passwordRules);
@@ -1014,7 +1012,6 @@ server.listen(PORT, () => {
   console.log(`Skynet Brew Panel running:  http://localhost:${PORT}`);
   console.log(`Config:  ${CONFIG}\nProcesses: ${SCRIPTS}\nData:    ${DATA}`);
   pictures.start();
-  if (loginsCleared) console.log('New version installed: all logins were cleared (testing mode). Create the admin account again.');
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
   minimizeWindow();

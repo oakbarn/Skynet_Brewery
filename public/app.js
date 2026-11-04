@@ -2239,7 +2239,7 @@ const PRESETS = {
   get propValve() {
     const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg' };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
-      : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, retain: true, ...look };
+      : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
@@ -3397,7 +3397,7 @@ const F = {
     ['nameFontFamily', 'Name font', 'sel', FONTS], ['nameFontSize', 'Name font size (px; empty = Default)', 'num'],
     ['nameColor', 'Name color (over Fore color)', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color (over Fore color)', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font, more (JSON, e.g. {"bold":true,"italic":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
-  shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool'], ['retain', 'Keep value on restart', 'bool', true]],
+  shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool']],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
     ...IP_AT_FIELDS,
@@ -3523,7 +3523,7 @@ F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.
   ['onText', 'Text when on', 'text', null, BOOLK], ['offText', 'Text when off', 'text', null, BOOLK],
   ['pulseMs', 'On time in ms (default 100)', 'num', null, ['momentary']],
   ['stepClass', 'Shows the steps of', 'sel', [['flow', 'Flow Processes'], ['sub', 'Sub Processes'], ['repeat', 'Repeat Processes'], ['looper', 'Looper Processes'], ['any', 'Any Process']], ['step']],
-  ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', 'list', ...PLAINK]], ['retain', 'Keep value on restart', 'bool', true, ['graphic', 'longstring', 'list', ...PLAINK]]];
+  ['readOnly', 'Read only on screen', 'bool', null, ['graphic', 'longstring', 'list', ...PLAINK]]];
 const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f(obj) : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
@@ -5517,7 +5517,7 @@ function gCheckBlocked() {
   if (!can('admin')) throw new Error('Only an admin can make or change a gGlobal');
   if (editing) throw new Error('Save or leave Edit layout first, then make or change gGlobals here');
 }
-async function newGlobal() { gCheckBlocked(); await globalDialog({ name: '', type: 'gGlobal', retain: true }, null); }
+async function newGlobal() { gCheckBlocked(); await globalDialog({ name: '', type: 'gGlobal' }, null); }
 async function editGlobal(e) { gCheckBlocked(); await globalDialog(clone(e), e); }
 async function saveElements(elements) { await api('PUT', '/ui/layout', { elements }); await load(); }
 async function addSampleGlobals() {
@@ -5628,7 +5628,7 @@ async function globalDialog(work, orig) {
       inp.onchange = () => { work.initial = gNoBlank(inp.value.length === 16 ? inp.value + ':00' : inp.value); };
       body.append(row('.value', inp));
     }
-    body.append(row('', sw('retain', 'Keep .value when the Brain restarts (off = start from the .value above)')));
+    // no Keep-value switch: every gGlobal keeps its .value when the Brain restarts (Rule 1.22); .value above is its first value
     // Database and .API (Rule 6.14): the extras behind the ⬢ (Rule 18.9)
     body.append(row('Database and .API', h('span', { class: 'muted' }, `${logSummary(work.database)}; .API ${API_LABEL[work.api || 'off'].replace(/ \(.*\)$/, '')}`),
       attrIcon('Database and .API settings', async () => {
@@ -6027,7 +6027,6 @@ async function renderUsers() {
 }
 async function renderRecovery() {
   if (!can('admin')) return;
-  $('#setFresh').checked = S.config.resetLoginsOnUpdate !== false;
   const r = await api('GET', '/auth/recovery');
   $('#recInfo').textContent = r.exists ? `Made ${new Date(r.created).toLocaleString()}.` : 'There is no recovery code yet.';
   $('#recNew').textContent = r.exists ? 'Make a new recovery code' : 'Make a recovery code';
@@ -6079,11 +6078,6 @@ $('#setWarnPaths').onchange = guard(async ev => {
   await api('PUT', '/ui/settings', { warnOffBrainPaths: ev.target.checked });
   S.config.warnOffBrainPaths = ev.target.checked;
   toast(ev.target.checked ? 'You will be warned about files that are not on the Brain' : 'Path warnings are off');
-});
-$('#setFresh').onchange = guard(async ev => {
-  await api('PUT', '/ui/settings', { resetLoginsOnUpdate: ev.target.checked });
-  S.config.resetLoginsOnUpdate = ev.target.checked;
-  toast(ev.target.checked ? 'Logins will start fresh after each update' : 'Logins are kept after updates');
 });
 $('#recNew').onclick = guard(async () => {
   if ($('#recInfo').textContent.startsWith('Made') && !confirm('Make a new recovery code? The old one stops working.')) return;
@@ -6706,7 +6700,7 @@ const PAGE_PARTS = {
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],
   settings: [['Start from a sample Schema', '#sec-samples'], ['My account (password)', '#sec-account'], ['Sign-in codes by email or text', '#sec-signinCodes'],
     ['Users', '#sec-users'], ['Password rules', '#sec-pwRules'], ['Recovery code', '#sec-recovery'], ['Sending codes (email and text)', '#sec-sending'],
-    ['Testing mode', '#sec-testing'], ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
+    ['Simulation (test mode)', '#simulation'], ['Panel settings', '#sec-panel'], ['Beer money pop-up', '#sec-beerMoney'],
     ['Pictures (PNG / JPG to SVG)', '#sec-pictures'], ['MQTT and voice', '#mqtt']],
   config: [['Backups', '#cfgBackups']],
 };

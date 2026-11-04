@@ -25,7 +25,7 @@ assert.deepEqual(SAMPLE_GLOBALS.map(s => s.kind).sort(), Object.keys(VAR_KINDS).
 assert.ok(SAMPLE_GLOBALS.every(s => !s.workspace && s.type === 'gGlobal'));
 assert.equal(samplesToAdd([]).length, 6);
 assert.equal(samplesToAdd([{ name: 'gv_strike_temp' }]).length, 5, 'a name already used (any case) is skipped');
-assert.ok(samplesToAdd([]).every(s => s.retain === true));
+assert.ok(samplesToAdd([]).every(s => !('retain' in s)));      // no switch: every gGlobal keeps its value (Rule 1.22)
 
 assert.deepEqual(elementTopic({ type: 'gGlobal', kind: 'time' }), ['gglobal-kinds']);
 assert.deepEqual(elementTopic({ type: 'gGlobal', kind: 'list' })[0], 'variables');
