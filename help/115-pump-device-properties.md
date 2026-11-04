@@ -28,23 +28,24 @@ nothing is really saved until you press **💾 Save** on the dialog. Cancel with
 
 ## From the top
 
-1. **Delete**, **Cancel** and **Save**.
-2. **Visible**, **Hidden Locked** and the **🔓 lock** (locks its place: no drag or resize).
-3. **Pump Properties ⬢**: the hexagon opens the Properties pop-up with Visible, Hidden Locked, the lock, **Tab**,
-   **X Horizontal**, **Y Vertical**, **Width**, **Height** and **🗑 Delete**.
-4. **Label ⬆ ⬢**: what shows on the Tab. The arrow opens a 2 line box; the hexagon opens the Label pop-up: Label, Visible,
+Only these belong to a Pump (a Skynet pump drawing or your own User pump):
+
+1. The title is the pump, for example **Blichmann Riptide**, with the **🔓 lock** (locks its place: no drag or resize),
+   **Visible** and **Hidden Locked** beside it. Then **Delete**, **Cancel** and **Save**.
+2. **1. Label ⬆ ⬢**: what shows on the Tab. The arrow opens a 2 line box; the hexagon opens the Label pop-up: Label, Visible,
    Font size, Font, Bold, Fore color, Back color and Alignment. A Label is never blank: leave it empty and it becomes the Name.
-   **Show label** switches it on or off.
-5. **Name**: starts as the Suggested Name (from the Label, Interface, pin and Device Type); you may type your own. It must be
-   unique. A Process uses it: `Pump_Name.state = true`.
-6. **Pump**: **Interface (board)** and **Port** (greyed out once it is added: **✏ Change** to change one; the Port's ⬢ has
-   Invert, One-shot time and One-shot pulses OFF), then **Tab**, **X**, **Y**, **Width**, **Height**, **When tapped ⬢** (Tap
-   target and Ask before changing) and Kind. The **Device Type** is shown greyed out under the Name.
-7. **Graphic**: the pump's picture as it shows on the Tab, and its **Orientation** (Normal, Flip Horizontal, Flip Vertical,
-   Flip both). Change the Orientation and the picture here and the pump on the Tab flip, and its IPs follow. A Skynet pump
-   drawing's **Picture** is set (shown greyed out with the pump's name); a User pump has one **Image Path**. The **⬢** beside
-   it has the On overlay, an optional second picture for when it is on, and the Back Colour. **Cover** (Help 111) is for the
-   Skynet pump drawings.
-8. **On / Off text**: **Text when on ⬆ ⬢** (the hexagon has Hide the text, its size, colors and alignment, plus the Look and
-   Border of the whole item) and **Text when off ⬆**.
-9. **Database and .API**, as on every Device.
+   **Label Visible** switches it on or off.
+3. **2. Interface (board)** and **Available Ports** on one line: greyed out once it is added; **✏ Change** to change them.
+4. **3. Tab**: the Tab it is on.
+5. **4. Name**: starts as the Suggested Name (from the Label, Interface, Port, Device Type and Tab); you may type your own. It
+   must be unique. A Process uses it: `Pump_Name.state = true`.
+6. **Graphic**: the pump's picture as it shows on the Tab. **Path**: greyed out on a Skynet pump drawing (it is set); a User
+   pump's one Path can be changed.
+7. **Orientation**: **Right** (as drawn) or **Left** (mirrored). The Graphic here and the pump on the Tab turn, and its IPs
+   follow.
+8. **Cover** (Help 111, Skynet pump drawings only) and **Toggle** on one line: On/Off (one click turns it on or off), Push
+   button (on only while held) or None.
+9. **X (Horizontal)**, **Y (Vertical)**, **Width** and **Height**.
+10. **Database and .API** (Help 98), then the **Device Type** (DO: Pump) greyed out.
+
+The On / Off text is shown with an Overlay (the green On overlay of the Skynet pump drawings).
