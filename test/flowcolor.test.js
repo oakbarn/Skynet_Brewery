@@ -37,6 +37,12 @@ assert.ok(pipeWins('') && pipeWins('boil') && !pipeWins('purple'));
 const gs = [{ kind: 'pipe', flowColor: '#4fb3ff' }, { kind: 'pipe', flowColor: '#E74C3C' }, { kind: 'pipe', hose: true, flowColor: 'transparent' }, { kind: 'pipe' }];
 assert.equal(flowStandard(gs), 3);
 assert.ok(!('flowColor' in gs[0])); assert.equal(gs[1].flowColor, '#e74c3c'); assert.ok(!('flowColor' in gs[2]));
+// Pipes default to None (Fritz, 2026-11-04): the samples' orange becomes None once per Schema; picked again later, it stays
+const sc = { graphics: [{ kind: 'pipe', flowColor: '#ffb347' }, { kind: 'pipe', flowColor: 'red' }] };
+flowStandard(sc.graphics, sc);
+assert.ok(!('flowColor' in sc.graphics[0])); assert.equal(sc.graphics[1].flowColor, 'red'); assert.equal(sc.pipeFlowNone, true);
+sc.graphics[0].flowColor = '#ffb347'; flowStandard(sc.graphics, sc);
+assert.equal(sc.graphics[0].flowColor, '#ffb347', 'only once');
 
 // Processes
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'flowcolor'));
