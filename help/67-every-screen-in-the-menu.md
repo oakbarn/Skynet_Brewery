@@ -18,7 +18,7 @@ Pick a page to go to its top. Pick a **↳** part to go straight to it: the page
 - **Log**: Download CSV, Show readings.
 - **Devices**: **Interfaces (boards)** (the boards (PLCs) and their Interface IDs), Add Interface, OneWire probe index, OneWire probes seen.
 - **Import**: BeerSmith recipe, BruControl Schema.
-- **Settings**: Start from a sample Schema, My account (password), Sign-in codes by email or text, Users, Password rules, Recovery code, Sending codes, Testing mode, Simulation, Panel settings, Beer money pop-up, Pictures (PNG / JPG to SVG), MQTT and voice.
+- **Settings**: Start from a sample Schema, My account (password), Sign-in codes by email or text, Users, Password rules, Recovery code, Sending codes, Simulation, Panel settings, Beer money pop-up, Pictures (PNG / JPG to SVG), MQTT and voice.
 - **Schema.json**: Backups.
 - **Media**, **File Move** and **Help** have no parts: the whole page is one screen.
 
