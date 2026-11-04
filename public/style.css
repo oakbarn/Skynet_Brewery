@@ -991,3 +991,24 @@ dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .devPreview img { height: 120px; width: auto; max-width: 220px; display: block; }
 .devPreview .pvCover { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 button.waitStep { opacity: .55; }
+
+/* Rule 2.34 (Fritz, 2026-11-04): in every dropdown list (DDLB) the selected choice has a Cyan background.
+   1) option:checked works in Firefox and in list boxes (a select that shows several rows).
+   2) Chrome and Edge (135 and newer) only let a page colour the open dropdown when the dropdown is a
+      "customizable select" (appearance: base-select), so we switch plain dropdowns to that there.
+      Older browsers and phones (iPhone, Android) keep their own dropdown look. */
+select option:checked { background: cyan linear-gradient(cyan, cyan); color: #000; }
+@supports (appearance: base-select) {
+  select:not([multiple]):not([size]), select:not([multiple]):not([size])::picker(select) { appearance: base-select; }
+  select:not([multiple]):not([size]) { display: inline-flex; align-items: center; gap: 4px; field-sizing: fixed; }
+  select:not([multiple]):not([size])::picker-icon { font-size: .8em; color: var(--muted); }
+  select:not([multiple]):not([size])::picker(select) {
+    background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+    padding: 2px 0; box-shadow: 0 4px 14px rgba(0, 0, 0, .35); max-height: 60vh;
+  }
+  select:not([multiple]):not([size]) option { padding: 3px 10px; }
+  select:not([multiple]):not([size]) option::checkmark { display: none; }
+  select:not([multiple]):not([size]) option:hover, select:not([multiple]):not([size]) option:focus-visible { background: #b5f5f5; color: #000; outline: none; }
+  select:not([multiple]):not([size]) option:checked { background: cyan; color: #000; }
+  select:not([multiple]):not([size]) option:disabled { color: var(--muted); background: none; }
+}
