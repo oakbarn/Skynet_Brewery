@@ -1,6 +1,6 @@
 :: MIT License Granted
 :: Copyright (c) OakBarn Brewery 2026
-:: Starts the Skynet Brew Panel and opens it in your browser.
+:: Starts the Skynet Brew Panel and opens it in its own clean window (no address bar or bookmarks bar).
 :: If Node.js is missing or too old, it installs it first (Windows asks for permission).
 :: If the USB board support is missing, it gets it (needs the internet once).
 :: Change the PANEL line if your panel is not in C:\Brewing\BrewPanel.
@@ -54,12 +54,12 @@ if not exist "node_modules\serialport" echo  Could not get the USB board support
 echo.
 
 :start
-:: 3. Opens the browser after 4 seconds, so the panel has time to start
+:: 3. Starts the panel. Once it is up it opens itself in its own clean window (Edge or Chrome, no address bar or
+::    bookmarks; your normal browser is not changed). No Edge or Chrome: your normal browser opens it. Rule 2.36
 echo  KEEP THIS WINDOW OPEN while you brew. Closing it stops the panel. It goes down to the task bar once the panel is up.
 echo  To stop the panel and close this window, use  Menu ^> Close Skynet Brewer  in the panel.
 echo.
-start "" /min cmd /c "timeout /t 4 /nobreak >nul & start "" http://localhost:8080"
-:: After the browser opens, the panel puts this window down on the task bar (click it there to see it again)
+:: After its window opens, the panel puts this window down on the task bar (click it there to see it again)
 set "SKYNET_MINIMIZE=1"
 call npm start
 :: Closed from the panel (Menu > Close Skynet Brewer): this window closes too. Stopped by an error: it stays open so you can read why.
