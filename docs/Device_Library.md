@@ -203,7 +203,8 @@ What each ID means:
   **Tap water valve** (off by default) with **Tap water flows out of**: Tap Water Source Top / Bottom (vertical) or Left / Right
   (horizontal, 45) and **Needs setting** after the Orientation or a Flip changes (no tap flow until set), **Text On/Off** (the On /
   Off text shows only when on) with Text when on / off.
-- Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88.
+- Its IPs sit on the picture's pipe ends and mirror with the Flips. Help 88. At **45 degrees** they turn with the picture and stay on
+  the pipe ends (Rule 5.24, 2026-11-04, Help 123; before, they were on the corners of its box).
 
 ### 4.3c User Defined Motorized Ball Valve (Fritz, 2026-11-03)
 The Valves list row under the Skynet valves (was "Motorized valve, open / closed (relay)"): digitalOut, subtype valve, the user's own
@@ -464,3 +465,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-03: 4.2 Pump: the drill-down Properties dialog, the standard for every Device (Rule 18.12, Help 115). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-03: 4.6 renamed User Defined Proportional Valve (In / Out IP spots); added 4.6a Skynet KLD20T Proportional Valve (Rule 5.22, Help 117). (thread "Add BruControl KLD20T proportional valve")
 - 2026-11-04: 4.2 Pump: adding a Pump, pick the pump with its picture (Rule 18.13). (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: 4.3a Skynet Motorized Ball Valve: IPs on the pipe ends at 45 degrees too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
