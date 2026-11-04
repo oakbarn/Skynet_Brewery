@@ -44,7 +44,7 @@ All of them follow the General Dialog Rules: Name first, ✖ Cancel and 💾 Sav
 | gT_Global_Time | **.value** like `01:30:00` |
 | gD_Global_DateTime | **.value** from a date and time picker |
 
-Every Kind also has **Keep .value when the Brain restarts** and **Database and .API** with a ⬢ for its settings.
+Every Kind also has **Database and .API** with a ⬢ for its settings. Every gGlobal keeps its .value when a Process starts and when the Brain restarts: see [gGlobals keep their values](118-gglobals-keep-their-values). The .value you type is its first value.
 
 ## Sample
 
