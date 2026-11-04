@@ -113,7 +113,13 @@ function renderMvAsks(list) {
 }
 function toast(msg, bad, ms) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(t._t); t._t = setTimeout(() => t.className = '', ms || (bad ? 5000 : 2200)); }
 const RANK = { viewer: 0, operator: 1, admin: 2 };
-const can = need => RANK[S?.me?.role] >= RANK[need];
+// Rule 2.35 (Fritz, 2026-11-04): a phone or tablet is for running the brewery, not for editing or building. On one, an admin
+// works as an operator: the Schema, Processes (Start / Stop) and the buttons on the Tabs work; Edit layout, Properties and the
+// admin screens are gone. ☰ Menu > Default "Phones and tablets can edit" (set from a computer) turns this off.
+function touchOnly() { return matchMedia('(hover: none) and (pointer: coarse)').matches || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1); }
+const touchRun = () => touchOnly() && !S?.config?.brewDefaults?.touchEdit;
+const myRole = () => S?.me?.role === 'admin' && touchRun() ? 'operator' : S?.me?.role;
+const can = need => RANK[myRole()] >= RANK[need];
 const guard = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
 
 // ---------------------------------------------------------------- load + live
@@ -123,7 +129,10 @@ const setTextLarge = () => document.documentElement.style.setProperty('--textLar
 async function load() {
   S = await api('GET', '/ui/state');
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
-  document.body.classList.add('role-' + S.me.role);
+  document.body.classList.add('role-' + myRole());
+  document.body.classList.toggle('touchRun', S.me.role === 'admin' && touchRun());
+  if (S.me.role === 'admin' && touchRun() && !load.told) { load.told = true; toast('📱 Phone or tablet: run mode. Editing and building are done on a computer (Rule 2.35)', false, 5000); }
+  if (S.me.role === 'admin' && !touchRun()) load.told = false;
   $('#code').readOnly = !can('admin');
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
@@ -264,7 +273,6 @@ function drawWs() {
 
 // Phones and tablets (Fritz): in Edit layout a finger only picks things, so nothing is moved or resized by accident.
 // A finger screen has no pointer that hovers; an iPad can say it is a Mac, so its touch points count too.
-const touchOnly = () => matchMedia('(hover: none) and (pointer: coarse)').matches || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 const noMove = () => editing && touchOnly() && !S.config.brewDefaults?.touchMove;   // the Default tab switch lets them move again
 
 const tabProfileOf = w => w?.tabProfile ? (S.tabProfiles || []).find(p => p.id === w.tabProfile) : null;
@@ -1874,6 +1882,7 @@ function findItem(kind, id) { return kind === 'el' ? draft.elements.find(e => e.
 const newId = () => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
 function setEditing(on) {
+  if (on && touchRun()) { toast('📱 Edit layout is not on phones and tablets: editing and building are done on a computer (Rule 2.35)', true); return; }
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
@@ -6558,8 +6567,9 @@ function fillSchemaSelect(s) {
   if (can('admin') && samples?.length) s.append(h('optgroup', { label: '── Add a Sample Schema ──' },
     ...samples.map(x => h('option', { value: '__smp:' + x.id, title: x.description || '' }, '➕ ' + x.name))));
   else if (can('admin') && !samples && !samplesAsked) { samplesAsked = true; api('GET', '/ui/samples').then(r => { samples = r; renderSchemaPick(); if (menuTab === 'schema') renderMenuPane(); }).catch(() => { }); }
-  s.disabled = !can('admin') && sc.list.length < 2;
-  s.title = can('admin') ? 'Pick a Schema to load it' : 'Only an admin can load another Schema';
+  const loads = can('admin') || S.me?.role === 'admin';      // run mode on a phone or tablet (Rule 2.35): an admin still loads a Schema
+  s.disabled = !loads || (!can('admin') && sc.list.length < 2);
+  s.title = loads ? 'Pick a Schema to load it' : 'Only an admin can load another Schema';
   s.onchange = schemaPicked;
 }
 // Processes running now: switching the Schema stops them, so you are warned first (Fritz, 2026-10-21)
@@ -6598,7 +6608,7 @@ async function newSchemaInterface(iface, wasSim) {
 const schemaPicked = guard(async ev => {
   const v = ev.target.value, act = S.schemas.active, back = () => renderSchemaPick();
   try {
-    if (!can('admin')) return toast('Only an admin can load another Schema', true);
+    if (!can('admin') && !(S.me?.role === 'admin' && !v.startsWith('__'))) return toast('Only an admin can load another Schema', true);   // run mode (Rule 2.35): load only
     if (editing) return toast('Save or exit Edit layout first', true);
     if (v === '__new') {
       const w = { name: '', start: 'copy' };
@@ -7141,6 +7151,7 @@ function renderDefaultTab(box) {
     ['textY', 'Y position of new items (px from the top of the Tab; empty = 40)', 'num'],
     ['textLarge', `Large text size (px) for \\L in Process text. Bigger than normal text (${TEXT_NORMAL} px); empty = ${TEXT_LARGE}`, 'num'],
     ['_p', 'Phones and tablets', 'head'],
+    ['touchEdit', 'Phones and tablets can edit (off: a phone or tablet only runs the brewery: Schema, Processes and the buttons on the Tabs; no Edit layout or Properties, Rule 2.35)', 'bool'],
     ['touchMove', 'Phones and tablets can move and resize things in Edit layout (off: a finger only picks them, so nothing moves by accident)', 'bool'],
     ['_pn', `This screen counts as ${touchOnly() ? 'a phone or tablet' : 'a computer (mouse)'}. Computers can always move things.`, 'note']];
   // the recipe defaults are kept as L/kg and °C; the form shows them in the units picked
@@ -7426,7 +7437,7 @@ function renderAboutTab(box) {
     h('dl', { class: 'aboutGrid' },
       ...item('Panel', S.config.title || 'Skynet Brew Panel'),
       ...item('Panel version', panelVersionBox()),
-      ...item('Signed in as', `${S.me.name} (${S.me.role})`),
+      ...item('Signed in as', `${S.me.name} (${S.me.role})${S.me.role === 'admin' && touchRun() ? ', run mode on this phone or tablet (Rule 2.35)' : ''}`),
       ...item('Schema', schemaSelect()),
       ...item('Schema version', act.version || 'No version yet'),
       ...(row?.updated ? item('Last saved', new Date(row.updated).toLocaleString()) : [])),
