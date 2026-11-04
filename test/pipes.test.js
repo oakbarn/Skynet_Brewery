@@ -74,3 +74,39 @@ test('the shipped sample Schemas and the default Schema follow the rule', async 
     assert.deepEqual(straightenPipes(c), [], f);
   }
 });
+
+// Rule 5.26 (Fritz, 2026-11-04): a pump or valve put on a pipe cuts it
+import { splitAt } from '../public/pipefit.js';
+const BOX = { x: 100, y: 80, w: 100, h: 60 };
+const PUMP = [{ id: 'in', c: [200, 112], f: [1, 0] }, { id: 'out', c: [180, 80], f: [0, -1] }];     // inlet faces right, outlet up
+const VALVE = [{ id: 'l', c: [100, 112], f: [-1, 0] }, { id: 'r', c: [200, 112], f: [1, 0] }];
+
+test('a valve between the ends cuts the pipe into two straight pipes', () => {
+  const r = splitAt([0, 110], [400, 110], BOX, VALVE);
+  assert.equal(r.ok, true); assert.deepEqual(r.shift, [0, -2]); assert.deepEqual(r.joints, []);
+  assert.deepEqual(r.pieces, [{ from: 'A', to: 'l', pts: [[0, 110], [100, 110]] }, { from: 'r', to: 'B', pts: [[200, 110], [400, 110]] }]);
+});
+
+test('a pump between the ends: one piece straight in, the other round with elbows', () => {
+  const r = splitAt([0, 110], [400, 110], BOX, PUMP);
+  assert.equal(r.ok, true); assert.equal(r.mode, 'mid'); assert.equal(r.joints.length, 3);
+  assert.deepEqual(r.pieces[0], { from: 'in', to: 'B', pts: [[200, 110], [400, 110]] });
+  for (const p of r.pieces) assert.ok(onAngle(p.pts[0], p.pts[1]) && (p.pts[0][0] === p.pts[1][0] || p.pts[0][1] === p.pts[1][1]), 'every piece is level or up and down');
+  assert.equal(r.pieces.at(-1).from, 'A'); assert.deepEqual(r.pieces.at(-1).pts[1], r.joints[2]);
+  assert.equal(r.joints[2][1], 110);                     // back on the pipe's line
+  assert.ok(r.joints[1][0] < BOX.x);                      // past the side of the pump
+});
+
+test('over an open end the pipe is made shorter; an end on a tee is left alone', () => {
+  const box = { x: 300, y: 80, w: 100, h: 60 }, ports = [{ id: 'in', c: [300, 110], f: [-1, 0] }, { id: 'out', c: [380, 80], f: [0, -1] }];
+  const r = splitAt([0, 110], [350, 110], box, ports, { bOpen: true });
+  assert.equal(r.ok, true); assert.equal(r.mode, 'end'); assert.equal(r.drop, 'B');
+  assert.deepEqual(r.pieces, [{ from: 'A', to: 'in', pts: [[0, 110], [300, 110]] }]);
+  assert.equal(splitAt([0, 110], [350, 110], box, ports, { bOpen: false }), null);
+});
+
+test('nothing is cut when the pipe passes by, is at 45, or there is no room to go round', () => {
+  assert.equal(splitAt([0, 300], [400, 300], BOX, PUMP), null);
+  assert.equal(splitAt([0, 0], [300, 300], BOX, PUMP), null);
+  assert.equal(splitAt([90, 110], [400, 110], BOX, PUMP).ok, false);
+});

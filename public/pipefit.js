@@ -46,3 +46,75 @@ export function fitFor(dirs) {
   }
   return { fitting: 'coupling', rotate: '0', ok: false };
 }
+
+// A pump or valve put on a straight pipe cuts it (Fritz, 2026-11-04, Rule 5.26). a, b: the pipe's two ends. box: the item's
+// { x, y, w, h }. ports: its two IPs { id, c: [x, y], f: [ux, uy] } where f is the way the opening faces (out of the item).
+// Two ways it can sit on the pipe:
+//  - between the ends (both ends outside the item): the pipe is cut in two. Each piece runs on in line into an IP that faces
+//    along the pipe towards it. A port that faces across the pipe (a pump's outlet on top) gets its piece taken round with
+//    elbows: out of the port, across past the side of the item, and back onto the pipe's line (Rule 5.19: turns only at fittings).
+//  - over one end: the pipe is made shorter and joined to the IP that faces along it, but only when that end is an open end
+//    (its own coupling); an end on a tee, an elbow or another IP stays as it is.
+// The item moves across the pipe (not along it) so the IP sits on the pipe's line (Rule 5.23).
+// Returns null when the pipe does not run through the item, { ok: false, why } when it does but can't be cut, else
+// { ok: true, mode, shift: [dx, dy], joints: [[x, y] ...], pieces: [{ from, to, pts }], drop } where from / to are 'A' or 'B'
+// (the pipe's old ends), a port id, or 'J0', 'J1' ... (the joints), and drop is the end ('A' or 'B') whose coupling goes away.
+export function splitAt(a, b, box, ports, { gap = 30, aOpen = false, bOpen = false } = {}) {
+  const ax = a[1] === b[1] && a[0] !== b[0] ? 0 : a[0] === b[0] && a[1] !== b[1] ? 1 : -1;
+  if (ax < 0 || ports.length !== 2) return null;                        // only a Horizontal or Vertical pipe
+  const pp = 1 - ax, line = a[pp], T = 3;
+  const lo = [box.x, box.y], hi = [box.x + box.w, box.y + box.h];
+  if (line < lo[pp] - T || line > hi[pp] + T) return null;            // the pipe passes by
+  const inside = q => q[ax] >= lo[ax] - T && q[ax] <= hi[ax] + T;
+  const aIn = inside(a), bIn = inside(b);
+  const along = q => q.f && !q.f[pp] && q.f[ax];
+  const faces = (q, end) => along(q) && (end[ax] - q.c[ax]) * q.f[ax] > 0;
+  const shiftFor = q => { const s = [0, 0]; s[pp] = Math.round(line - q.c[pp]); return s; };
+  const at = (q, s) => [Math.round(q.c[0] + s[0]), Math.round(q.c[1] + s[1])];
+  if (aIn && bIn) return null;                                          // the whole pipe is under it
+  if (aIn || bIn) {                                                     // over one end: make the pipe shorter
+    const [cov, open, far] = aIn ? ['A', aOpen, b] : ['B', bOpen, a];
+    if (!open) return null;                                             // that end is on a tee, an elbow or another IP
+    const q = ports.find(p => faces(p, far));
+    if (q) {
+      const s = shiftFor(q), c = at(q, s);
+      return { ok: true, mode: 'end', shift: s, joints: [], drop: cov, pieces: [cov === 'B' ? { from: 'A', to: q.id, pts: [[...a], c] } : { from: q.id, to: 'B', pts: [c, [...b]] }] };
+    }
+    // no IP faces the pipe: the one that opens across it is taken round with elbows to the shorter pipe (it does not move)
+    const p2 = ports.find(p => p.f && !p.f[ax] && p.f[pp]);
+    if (!p2) return { ok: false, why: 'none of its IPs faces along the pipe' };
+    const r = roundTo(p2, p2.c.map(Math.round), far, [0, 0]);
+    if (!r) return { ok: false, why: 'there is not enough pipe to go round it' };
+    const keep = cov === 'B' ? 'A' : 'B';
+    return { ok: true, mode: 'end', shift: [0, 0], joints: r.joints, drop: cov, pieces: [...r.pieces, keep === 'B' ? { from: 'J2', to: 'B', pts: [r.joints[2], [...b]] } : { from: 'A', to: 'J2', pts: [[...a], r.joints[2]] }] };
+  }
+  if (!(Math.min(a[ax], b[ax]) < lo[ax] && Math.max(a[ax], b[ax]) > hi[ax])) return null;
+  const qa = ports.find(p => faces(p, a)), qb = ports.find(p => p !== qa && faces(p, b));
+  if (qa && qb) {                                                       // both IPs on the pipe's line (a valve): two straight pieces
+    const s = shiftFor(qa), ca = at(qa, s), cb = at(qb, s);
+    if (Math.abs(cb[pp] - line) > 1.5) return { ok: false, why: 'its two IPs are not in line' };
+    return { ok: true, mode: 'mid', shift: s, joints: [], drop: null, pieces: [{ from: 'A', to: qa.id, pts: [[...a], ca] }, { from: qb.id, to: 'B', pts: [cb, [...b]] }] };
+  }
+  const p1 = qa || qb;
+  if (!p1) return { ok: false, why: 'none of its IPs faces along the pipe' };
+  const p2 = ports.find(p => p !== p1);
+  if (!p2.f || p2.f[ax] || !p2.f[pp]) return { ok: false, why: 'its other IP faces the wrong way' };
+  const s = shiftFor(p1), c1 = at(p1, s), X = qa ? 'A' : 'B', y = qa ? b : a;
+  const r = roundTo(p2, at(p2, s), y, s);
+  if (!r) return { ok: false, why: 'there is not enough pipe on that side to go round it' };
+  const J = r.joints[2];
+  const first = X === 'A' ? { from: 'A', to: p1.id, pts: [[...a], c1] } : { from: p1.id, to: 'B', pts: [c1, [...b]] };
+  return { ok: true, mode: 'mid', shift: s, joints: r.joints, drop: null, pieces: [first, ...r.pieces,
+    X === 'A' ? { from: 'J2', to: 'B', pts: [J, [...b]] } : { from: 'A', to: 'J2', pts: [[...a], J] }] };
+  // the way round for a port opening across the pipe: out of it (past the item), across past the item's side towards end y,
+  // and back onto the pipe's line. Three joints (they become 90 degree elbows) and three pipes; null when y is too close.
+  function roundTo(q, c2, y, s) {
+    const sg = Math.sign(y[ax] - c2[ax]), u = q.f[pp], slo = lo[pp] + s[pp], shi = hi[pp] + s[pp];
+    const E = [0, 0], K = [0, 0], J = [0, 0];
+    E[ax] = c2[ax]; E[pp] = Math.round(u < 0 ? Math.min(c2[pp] - gap, slo - gap / 2) : Math.max(c2[pp] + gap, shi + gap / 2));
+    K[pp] = E[pp]; K[ax] = Math.round((sg > 0 ? hi[ax] : lo[ax]) + sg * gap);
+    J[ax] = K[ax]; J[pp] = line;
+    if (!sg || (y[ax] - J[ax]) * sg <= T) return null;
+    return { joints: [E, K, J], pieces: [{ from: q.id, to: 'J0', pts: [c2, E] }, { from: 'J0', to: 'J1', pts: [E, K] }, { from: 'J1', to: 'J2', pts: [K, J] }] };
+  }
+}
