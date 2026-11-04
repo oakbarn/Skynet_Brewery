@@ -2836,7 +2836,7 @@ const tempKindOf = key => tempKinds().find(t => t[0] === key)?.[2] || { sensor: 
 const PROBE_TEES = {
   Instrument_Branch: { label: 'Instrument Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Branch.svg', size: [170, 85], ends: [[0, 0.3], [1, 0.3]] },
   Instrument_Run: { label: 'Instrument Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Run.svg', size: [170, 85], ends: [[1, 0.3], [0.5, 1]] },
-  Long_Branch: { label: 'Long Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Branch.svg', size: [170, 108], ends: [[0, 24 / 102], [1, 24 / 102]] },
+  Long_Branch: { label: 'Long Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Branch.svg', size: [170, 108], ends: [[0, 29 / 134], [1, 29 / 134]] },     // Fritz's drawing 2026-11-04
   Long_Run: { label: 'Long Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Run.svg', size: [170, 108], ends: [[1, 24 / 102], [0.5, 1]] },
 };
 function isProbeTee(e) { return e?.type === 'temperature' && e.subtype === 'probeTee' && !!PROBE_TEES[e.probeTee]; }
