@@ -6473,21 +6473,24 @@ const fmtT = s => { s = Math.max(0, Math.round(s)); const p = n => String(n).pad
 const speedOpts = sel => { const cur = S.sim?.speed ?? 1; sel.innerHTML = ''; for (const x of S.simSpeeds || [1]) sel.append(h('option', { value: x, ...(x === cur ? { selected: true } : {}) }, x === 1 ? 'Normal (1×)' : x + '× faster')); if (!(S.simSpeeds || []).includes(cur)) sel.append(h('option', { value: cur, selected: true }, cur + '× faster')); };
 let simPoll = null, simWasOff = false;
 // Hide / Show the Simulator bar (Fritz, 2026-10-28), kept per browser. Hiding changes no setting: the speed and
-// Auto skip stay as they are, and a thin 🧪 SIMULATION strip stays so nobody forgets nothing real is switched.
+// Auto skip stay as they are. Rule 10.7 (Fritz, 2026-11-04): hidden, the bar is gone completely, so the window is free
+// for the Panel; ☰ Menu > Show Simulator bar brings it back, and a small 🧪 on every ☰ Menu button says it is Simulation.
+const simBarHidden = () => $('#simBar').classList.contains('collapsed');
 function showSimBar(show, fit = true) {
   $('#simBar').classList.toggle('collapsed', !show);
-  const b = $('#simHide'); b.textContent = show ? '▴ Hide' : '▾ Show Simulator bar'; b.setAttribute('aria-expanded', String(show));
-  b.title = show ? 'Hide the Simulator bar (only on this screen). The 🧪 SIMULATION strip stays so you always know nothing real is switched. Your speed and Auto skip are not changed' : 'Show the Simulator bar again: speed, skip buttons and Auto skip';
+  document.body.classList.toggle('simBarHidden', !show);
+  const b = $('#simHide'); b.setAttribute('aria-expanded', String(show));
   try { localStorage.setItem('bp.simBarHidden', show ? '0' : '1'); } catch { /* private window */ }
   if (fit && view === 'workspace') fitZoom();
 }
 try { if (localStorage.getItem('bp.simBarHidden') === '1') showSimBar(false, false); } catch { }
-$('#simHide').onclick = () => showSimBar($('#simBar').classList.contains('collapsed'));
+$('#simHide').onclick = () => showSimBar(false);
 function renderSimBar() {
   const on = !!S.sim?.on, bar = $('#simBar'), was = !bar.classList.contains('hidden'), btn = $('#barSim');
   btn.textContent = on ? '🧪 Simulator' : '🔌 Real'; btn.classList.toggle('sim', on); btn.setAttribute('aria-pressed', String(on));
   btn.title = on ? 'Simulator mode: nothing real is switched. Press to switch the whole panel back to the Real boards' : 'Real boards are used. Press to switch the whole panel (every Interface) to the Simulator for testing';
   bar.classList.toggle('hidden', !on);
+  document.body.classList.toggle('simOn', on);
   if (on && simWasOff) showSimBar(true);   // switching the Simulator on opens the bar again
   simWasOff = !on;
   if (on !== was && view === 'workspace') fitZoom();
@@ -6823,6 +6826,9 @@ function renderMenu() {
 // choice (it closes the list first, and in a dialog it closes the dialog).
 function menuItems(list, go) {
   const item = (label, fn, attrs = {}) => h('button', { type: 'button', role: 'menuitem', class: 'menuItem', ...attrs, onclick: fn ? go(fn) : null }, ...[label].flat());
+  // Rule 10.7 (Fritz, 2026-11-04): in Simulation the Simulator bar is shown or hidden from here
+  if (S.sim?.on) list.append(item(simBarHidden() ? '🧪 Show Simulator bar' : '🧪 Hide Simulator bar', () => showSimBar(simBarHidden()),
+    { title: simBarHidden() ? 'Show the yellow Simulator bar again: speed, skip buttons and Auto skip' : 'Hide the yellow Simulator bar so the Panel has the whole window. Your speed and Auto skip are not changed' }));
   if (can('admin')) list.append(item(editing ? '✎ Exit Edit layout' : '✎ Edit layout', guard(menuEditLayout)));
   // Fritz, 2026-10-28: the Schema is at the top of the ☰ Menu: pick, add, clone, and add a Sample Schema
   list.append(item('🗂 Schema', () => { if (editing) return toast('Save or exit Edit layout first', true); openMenuTab('schema'); },

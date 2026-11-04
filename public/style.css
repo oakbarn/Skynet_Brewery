@@ -543,9 +543,9 @@ input[type=checkbox].swc:disabled { opacity: .5; cursor: default; }
 .simBar .simCtl { display: inline-flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 /* Hide / Show the Simulator bar (Fritz, 2026-10-28): hidden leaves a thin strip with the warning and ▾ Show */
 .simBar .simHide { margin-left: auto; }
-.simBar.collapsed { padding-top: 2px; padding-bottom: 2px; }
-.simBar.collapsed > :not(strong):not(.simHide) { display: none; }
-.simBar.collapsed .simHide { padding: 1px 8px; }
+/* Rule 10.7 (2026-11-04): hidden means gone; a small 🧪 on every ☰ Menu button says it is still Simulation */
+.simBar.collapsed { display: none; }
+body.simOn.simBarHidden .menuBtn::after { content: '🧪'; font-size: .85em; margin-left: 2px; }
 .simJumps input.tm { width: 7em; }
 .simJumps input.num { width: 5em; }
 .tlTable td.maybe { font-style: italic; }
