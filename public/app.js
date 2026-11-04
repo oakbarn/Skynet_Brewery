@@ -2664,6 +2664,22 @@ const OWN_NAME_WARNING = (name, sug) => `You typed your own Device name, "${name
   'A plain word as a name (for example "Pump") becomes a reserved word in your Processes, and it can cause problems in the code: a Process line can no longer tell the Device from other things called Pump.\n\n' +
   'The Device name is only used in Processes. It is never shown on a Tab (the Label is), so a unique, meaningful name like the Suggested Name is the better choice.\n\n' +
   `OK = keep "${name}".  Cancel = go back and change it.`;
+// Rule 18.20 (Fritz, 2026-11-04): inside a dialog Tab moves field to field and Enter jumps to the next field (the last one goes to
+// Save); a new Device's box sets dlgEnterSeq so Enter follows its sequence until it is added. Arrow keys change a dropdown without
+// jumping on.
+let dlgEnterSeq = null, dlgArrowKey = false;
+document.addEventListener('keydown', ev => {
+  dlgArrowKey = /^Arrow/.test(ev.key);
+  if (ev.key !== 'Enter' || ev.shiftKey || ev.altKey || ev.ctrlKey || ev.metaKey || ev.isComposing) return;
+  const t = ev.target, d = t?.closest?.('#dlg');
+  if (!d || !t.matches('input, select') || ['button', 'submit', 'reset', 'file'].includes(t.type) || !t.closest('#dlgBody')) return;
+  ev.preventDefault();
+  if (dlgEnterSeq?.(t)) return;
+  const all = [...d.querySelectorAll('#dlgBody input, #dlgBody select, #dlgBody textarea')].filter(x => !x.disabled && x.type !== 'hidden' && x.offsetParent !== null);
+  const i = all.indexOf(t), ok = [...d.querySelectorAll('button[value="ok"]')].pop();
+  (all[i + 1] || ok)?.focus();
+}, true);
+document.addEventListener('pointerdown', () => { dlgArrowKey = false; }, true);
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
   const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
@@ -2734,8 +2750,17 @@ async function newDeviceDialog(e, hint, what) {
         portSel.value = cur;
       };
       fillFree(work); gate();
+      // Fritz's Blichmann Pump Sequence (2026-11-04, Rule 18.20): Enter goes 1 Label, 2 Interface, 3 Available Ports, 4 Tab,
+      // then Orientation (a Pump) and last the ➕ Add Device button; picking from a dropdown of the sequence goes on to the next one.
+      const seq = () => [body.querySelector('[data-k="label"]'), body.querySelector('[data-k="device"]'), body.querySelector(`[data-k="${port[0]}"]`),
+        body.querySelector('select[data-k="typeCode"]'), body.querySelector('[data-k="workspace"]'), body.querySelector('select.orientSel')]
+        .filter(x => x && !x.disabled && x.offsetParent !== null);
+      const seqNext = t => { const l = seq(), i = l.indexOf(t); (i >= 0 && l[i + 1] || oks.filter(b => b.offsetParent !== null).pop())?.focus(); };
+      dlgEnterSeq = t => { if (seq().includes(t)) { seqNext(t); return true; } return false; };
+      { const l = seq(); (l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }        // the first one still empty has the focus
       body.oninput = body.onchange = ev => {
         gate();
+        if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)) { const t = ev.target; setTimeout(() => seqNext(t), 0); }
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
         if (ev.type === 'change' && ev.target.dataset?.k === 'workspace' && ev.target.value === ADD_TAB) return $('#dlg').close('addTab');
@@ -2751,6 +2776,7 @@ async function newDeviceDialog(e, hint, what) {
         body.oninput = body.onchange = null;          // Tab settings uses the same dialog: its own buttons and handlers while it is open
         for (const b of oks) { b.textContent = labels0[0]; b.disabled = false; b.title = ''; }
         for (const b of cancels) b.textContent = labels0[1];
+        dlgEnterSeq = null;                           // Tab settings: Enter goes field to field there (Rule 18.20)
         work.workspace = (await addTabForDevice()) || was;
         for (const b of oks) b.textContent = '➕ Add Device';
         for (const b of cancels) b.textContent = '✖ Cancel';
@@ -2785,7 +2811,7 @@ async function newDeviceDialog(e, hint, what) {
         return true;
       } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
     }
-  } finally { body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
+  } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
 }
 // ---- Thermowell (Fritz, 2026-10-23): a Temperature Device drawn as a TC 1.5 thermowell, Short, Medium or Long. After picking it
 // (step 2) a pop-up asks the type of Temperature Probe in it (2a), then the New Device box goes on as for any Device.
