@@ -6,6 +6,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { closeLauncherWindow } from './lib/closewindow.js';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
 import { checkControlled } from './public/semi.js';
@@ -864,7 +865,7 @@ async function route(req, res) {
     if (!CLOSABLE) return fail(res, 400, 'The panel runs as a service here (it starts by itself with the Brain), so it is not closed from the panel.');
     console.log(`Closed from the panel by ${me?.name ?? 'an admin'}`);
     broadcast('closing', { by: me?.name ?? '' });
-    ok(res); setTimeout(shutdown, 300);
+    ok(res); setTimeout(() => shutdown({ closeWindow: true }), 300);
     return;
   }
 
@@ -905,7 +906,7 @@ async function route(req, res) {
       try { stageMove(ROOT); } catch (e) { return fail(res, 400, e.message); }
       console.log(`Brain Move started by ${me?.name ?? 'an admin'}: the panel stops and puts the old Brain's files in place when it starts again`);
       broadcast('closing', { by: me?.name ?? '', moving: true, service: !CLOSABLE });
-      ok(res, { ok: true, service: !CLOSABLE }); setTimeout(shutdown, 300);
+      ok(res, { ok: true, service: !CLOSABLE }); setTimeout(() => shutdown({ closeWindow: CLOSABLE }), 300);
       return;
     }
     // USB ports: each old port becomes the new one, in every Schema at once
@@ -1030,5 +1031,10 @@ function minimizeWindow() {
 // A panel started as a service (systemd sets INVOCATION_ID, for example on a Pi) restarts by itself, so only a panel started
 // from its window (Skynet_Brewer.bat, the Linux or Mac launcher, npm start) can be closed from ☰ Menu.
 const CLOSABLE = !process.env.INVOCATION_ID;
-function shutdown() { console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close(); process.exit(0); }
-process.on('SIGINT', shutdown); process.on('SIGTERM', shutdown);
+// closeWindow: closed from ☰ Menu, so on Windows its Command Prompt window closes too, whatever .bat started it (Rule 2.25)
+function shutdown({ closeWindow = false } = {}) {
+  console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close();
+  if (closeWindow) closeLauncherWindow();
+  process.exit(0);
+}
+process.on('SIGINT', () => shutdown()); process.on('SIGTERM', () => shutdown());
