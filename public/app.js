@@ -2593,6 +2593,7 @@ for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventLis
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
 // 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
+const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
 const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
@@ -2644,7 +2645,7 @@ async function newDeviceDialog(e, hint, what) {
     ['device', n() + 'Interface (board)', 'dev', 'addnew'],
     ...(codes.length > 1 && !(e.template && e.typeCode) && !isPumpDev(e) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
     [port[0], n() + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
-    ['workspace', n() + 'Tab', 'ws'],
+    ['workspace', n() + 'Tab', 'ws', 'addnew'],
     ['name', n() + 'Suggested Name (you may type your own)', 'text'],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too, and its Device Type shown greyed out
     ...(isPumpDev(e) ? [COVER_FIELDS({})[0].map((x, i) => i === 1 ? 'Cover' : i === 4 ? false : x), ['x', 'X (Horizontal)', 'num'], ['y', 'Y (Vertical)', 'num']] : []),
@@ -2654,7 +2655,7 @@ async function newDeviceDialog(e, hint, what) {
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (isPumpDev(e) && !work.typeCode) work.typeCode = 'Pump';      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
-  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
   // ➕ Add Device and the Name wait for 1-4 (Fritz, 2026-11-04): a Label (or Show label off), the Interface, the Port and the Tab
@@ -2679,11 +2680,24 @@ async function newDeviceDialog(e, hint, what) {
         gate();
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
+        if (ev.type === 'change' && ev.target.dataset?.k === 'workspace' && ev.target.value === ADD_TAB) return $('#dlg').close('addTab');
         const w = { ...work }; try { readFields(w, body); } catch { }
         fillFree(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
       };
       const r = await shown;
+      if (r === 'addTab') {       // ➕ Add new Tab…: keep what is typed, build the Tab, then back here with it picked
+        const was = work.workspace;
+        try { readFields(work, body); } catch { }
+        if (!touched) delete work.name;               // a Name not typed by hand is made again with the new Tab
+        body.oninput = body.onchange = null;          // Tab settings uses the same dialog: its own buttons and handlers while it is open
+        for (const b of oks) { b.textContent = labels0[0]; b.disabled = false; b.title = ''; }
+        for (const b of cancels) b.textContent = labels0[1];
+        work.workspace = (await addTabForDevice()) || was;
+        for (const b of oks) b.textContent = '➕ Add Device';
+        for (const b of cancels) b.textContent = '✖ Cancel';
+        continue;
+      }
       if (r === 'addIface') {      // ➕ Add new Interface…: the Add Interface pop-up, then back here with the new Interface picked
         try { readFields(work, body); } catch { }
         work.device = (await addInterfaceDialog()) || undefined;
@@ -3136,15 +3150,32 @@ function addIpFit(fit) {
   if (isIpFit(g)) delete g.label;          // a pipe fitting has no label, only its Skynet name (Tee_1)
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
-$('#addWs').onclick = () => {
-  const n = prompt('New tab name')?.trim(); if (!n) return;
-  const bad = elementNameError(n, 'Tab'); if (bad) return toast(bad, true);      // the same name rules as every other name (Rule 3.11)
-  if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
+// a new Tab (New tab, and ➕ Add new Tab… in the Add Device box): its name checked, a unique 2 letter Tab ID. Returns it, or null.
+function makeTab() {
+  const n = prompt('New tab name')?.trim(); if (!n) return null;
+  const bad = elementNameError(n, 'Tab'); if (bad) { toast(bad, true); return null; }      // the same name rules as every other name (Rule 3.11)
+  if (draft.workspaces.some(w => w.name === n)) { toast('That name is used', true); return null; }
   const tp = S.config.brewDefaults?.tabProfile;
   const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
-  draft.workspaces.push({ name: n, id, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) }); wsName = n; renderTabs(); renderWs();
-  toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
+  const w = { name: n, id, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
+  draft.workspaces.push(w); return w;
+}
+$('#addWs').onclick = () => {
+  const w = makeTab(); if (!w) return;
+  wsName = w.name; renderTabs(); renderWs();
+  toast(`Tab ${w.name} added, Tab ID ${w.id} (change it in Tab settings)`);
 };
+// ➕ Add new Tab… in the Add Device box's Tab list (Fritz, 2026-11-04): the Label, Interface and Port are kept while the new Tab is
+// built in Tab settings; once it is saved the Add Device box comes back with it picked. Returns its name, or undefined (nothing made).
+async function addTabForDevice() {
+  const w = makeTab(); if (!w) return undefined;
+  const keep = wsName; wsName = w.name;
+  const done = await editWorkspace();
+  if (!done) draft.workspaces = draft.workspaces.filter(x => x !== w);       // Cancel in Tab settings: no new Tab
+  wsName = draft.workspaces.some(x => x.name === keep) ? keep : wsName;
+  renderTabs(); renderWs();
+  return done ? w.name : undefined;
+}
 $('#wsProps').onclick = () => editWorkspace();
 // 👻 Hidden tab: a new Hidden_ Special Tab, named Hidden_1, Hidden_2 ... (rename the part after Hidden_ in Tab settings)
 $('#addHiddenWs').onclick = () => {
@@ -3963,7 +3994,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'infonote') return [h('div', { class: 'full infoNote' }, label, ' ', infoIcon(opts))];     // a note with the orange ? (more about it)
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];
   else if (kind === 'ro') return [h('label', { class: 'greyed' }, label), h('input', { type: 'text', value: (opts ?? v) || '(none)', readonly: true, disabled: true, class: 'roField', title: 'Read only' })];      // shown, never saved (no data-k)      // a section heading inside a dialog
-  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
+  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.filter(w => opts !== 'addnew' || !w.build).map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)),
+    ...(opts === 'addnew' ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []));      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)),      // Fritz: the full Interface name first
     ...(opts === 'addnew' && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
@@ -4799,11 +4831,14 @@ async function editWorkspace() {
       if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
       work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
       if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
-    } catch (e) { return toast(e.message, true); }
+    } catch (e) { toast(e.message, true); return null; }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
     Object.keys(w).forEach(k => delete w[k]); Object.assign(w, work);     // a cleared box (picture "(none)", color Default) must remove the old value
+    renderTabs(); renderWs();
+    return w.name;           // saved: its name (➕ Add new Tab… in the Add Device box uses it)
   }
   renderTabs(); renderWs();
+  return null;
 }
 
 // ---------------------------------------------------------------- alarms / sound

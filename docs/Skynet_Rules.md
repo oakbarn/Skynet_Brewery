@@ -392,6 +392,10 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 
 4.1 **Every new Widget or copy of a Template is made on the 🔨 Build Tab first**, then sent to a Tab. **A new Device goes
 straight on the Tab picked in its Add Device box** (Rule 4.2; Fritz's Add Pump drawing, 2026-11-04). (2026-10-23, PR #97 and PR #99)
+**A new Tab from the Add Device box** (Fritz, 2026-11-04): picking **➕ Add new Tab…** in its Tab list pauses the Add Device box
+and keeps what was entered (Label, Interface and Port) for now; the new Tab is named and built in Tab settings; once it is
+saved the Add Device box comes back with that information filled in, the Tab list refreshed and the new Tab picked, and the
+Suggested Name made with it. Cancel in Tab settings makes no Tab and goes back to the Add Device box as it was.
 *Replaced:* "Every new Device, Widget or copy of a Template is made on the 🔨 Build Tab first" (2026-10-23).
 
 *Exception:* a Clone (Rule 4.4) may be made on any Tab, the Build Tab too. (2026-10-27)
@@ -405,7 +409,7 @@ Tab first (Rule 5.21).
 Height (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the Interface only
 when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and the bottom; Add Device works once 1-4
 are done. The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
-Properties open. (Help 82)
+Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). (Help 82)
 *Replaced:* 1 Interface, 2 Available Ports/Pins, 3 Suggested Name, 4 Label, on the Build Tab (2026-10-28); before that
 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
@@ -1326,3 +1330,5 @@ The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Nam
   takes that color. Help 116 updated. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-04: Added Rule 18.13 (adding a Pump: pick the pump with its picture; the Add box titled with it, Label ⬢, Cover, X, Y, Device Type read only; Interface and Port greyed out with ✏ Change once added; Tab, X, Y, Width, Height on the Properties). Rules 4.1 / 4.2 parts of the drawing wait for Fritz. Help 115 updated; no new Help number. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Rule 4.2 changed (Fritz): the Add Device order is 1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name, so the Suggested Name follows his naming convention; the Name shows once 1-4 are done. Rule 4.1 changed with it: a new Device goes straight on the Tab picked in its Add Device box (Widgets and Templates still start on the Build Tab). Rule 18.13 updated. Help 82 and 115 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 4.2: ➕ Add new Tab… in the Add Device box's Tab list keeps the Label, Interface and Port, builds the Tab in Tab settings, then comes back with it picked and the Suggested Name made (Fritz). Help 82 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 4.1 updated (Fritz): ➕ Add new Tab… in the Add Device box pauses it, keeps the Label, Interface and Port, builds the new Tab, then returns with them filled in and the new Tab picked. (thread "Set the drill-down dialog standard for Devices")
