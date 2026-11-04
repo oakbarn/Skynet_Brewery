@@ -317,6 +317,12 @@ first. A new Pump starts that way, and every Schema's Pumps are changed once whe
 (When tapped ⬢ in the Pump's Properties) can still be turned on by hand for a Pump that should ask. Double-click still opens
 Properties (Rule 2.9). Heating elements still ask first. (thread "Toggle pumps with one click", Help 120)
 
+2.34 **The selected choice in every dropdown has a Cyan background** (Fritz, 2026-11-04, a standard for the whole app):
+when a dropdown list (DDLB) is open, the choice that is selected now is shown on **Cyan** with black text; the choice under the
+mouse or keyboard is a lighter Cyan. This works in **Chrome and Edge** (version 135 and newer, on Windows, Mac, Linux and
+Android) and in **Firefox**. **iPhone / iPad (Safari)** and older browsers draw their own dropdown (on the iPhone the spinning
+wheel) and do not let a web page change its colours, so there it looks as before. (thread "Make selected dropdown items cyan")
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
@@ -1427,3 +1433,4 @@ greyed out with its pump name. A **User pump** (its own picture) has **one path 
 - 2026-11-04: Rule 5.9 changed (Fritz picked the recommended wording): pumps have an Orientation (Flip Horizontal / Vertical, Rule 18.19); the rest of 5.9 stays. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 5.23 (valves and pumps sit centered on their pipes: the valve or pump moves across onto the pipe's line, the pipes stay; the older ball valve pictures have their pipe spot) and Rule 7.15 (powered valves and pumps flash a red and yellow lightning bolt On overlay when On; once per Schema for those with no overlay). Help 121, Help 58 updated; next free Help number 122. (thread "Center pumps and valves on pipes")
 - 2026-11-04: Rule 7.15 changed (Fritz): the default On overlay for powered valves and pumps is the steady red and yellow bolt (Overlay_Bolt.svg); the flashing bolt is only a choice. Schemas given the flashing bolt are changed once. Help 58 and 121 updated; no new Help number. (thread "Center pumps and valves on pipes")
+- 2026-11-04: Added Rule 2.34 (the selected choice in every dropdown has a Cyan background; not possible on iPhone Safari or older browsers). (thread "Make selected dropdown items cyan")
