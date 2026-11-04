@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { DIRS, dirOf, onAngle, angledEnd, alongLine, fitFor } from './pipefit.js';
+import { DIRS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -975,6 +975,65 @@ function centerOnPipes(lay, ws) {
     g.x = (g.x || 0) + mx; g.y = (g.y || 0) + my; n++;
   }
   return n;
+}
+// A pump or valve put on a pipe cuts it (Fritz, 2026-11-04, Rule 5.26; the geometry is splitAt in public/pipefit.js).
+// Dropped between a straight pipe's ends, the pipe becomes two pipes, one on each of its IPs; dropped over a pipe's open end, the
+// pipe is made shorter and joined to it (an end on a tee, an elbow or another IP is left alone). Only for an item none of whose
+// IPs has a pipe yet, in Edit layout. Returns { ok, text }, or null when no pipe runs through it.
+const SPLIT_SUBS = ['pump', 'valve', 'propValve'];
+const FACES = [[-1, 0], [1, 0], [0, -1], [0, 1]];       // left, right, up, down: the way an opening faces
+const nearFace = (fx, fy) => FACES[[fx, 1 - fx, fy, 1 - fy].reduce((m, v, i, a) => v < a[m] ? i : m, 0)];
+function splitPorts(it) {
+  if (isMv(it)) {          // a Manual Valve: each end faces away from its middle (none for a front view)
+    const [cx, cy] = ipCenter(it);
+    return eqPorts(it).map(q => { const dx = q.c[0] - cx, dy = q.c[1] - cy; return { id: q.id, c: q.c, f: Math.abs(dx) > 2 * Math.abs(dy) ? [Math.sign(dx), 0] : Math.abs(dy) > 2 * Math.abs(dx) ? [0, Math.sign(dy)] : null }; });
+  }
+  const f = picFlow(it.imageOff || it.imageOn), pe = picEnds(it), gm = elGeom(it);
+  const turned = it.subtype === 'valve' && ['l45', 'r45'].includes(it.orientation);
+  return devIps(it).map((q, i) => {
+    let face = null;
+    if (turned || (f && f.o === 'f')) face = null;          // a 45 degree valve, or a front view (both IPs on its opening)
+    else if (pe && !ipAt(it, i ? 'out' : 'in')) { const [fx, fy] = f.ends[i]; face = nearFace(fx, fy); if (it.flipH) face = [-face[0], face[1]]; if (it.flipV) face = [face[0], -face[1]]; }
+    else face = nearFace((q.c[0] - (gm.x || 0)) / (gm.w || 120), (q.c[1] - (gm.y || 0)) / (gm.h || 60));
+    return { id: q.id, c: q.c, f: face };
+  });
+}
+function splitPipeFor(it) {
+  if (!editing || !draft || !it || it.locked) return null;
+  const mv = isMv(it);
+  if (!mv && (it.kind || !SPLIT_SUBS.includes(it.subtype) || !hasIps(it))) return null;
+  const ws = it.workspace, ports = splitPorts(it);
+  if (ports.length !== 2 || ports.some(q => pipesOn(q.id, ws).length) || (mv && pipesOn(it.id, ws).length)) return null;   // already on its pipes
+  const gm = mv ? it : elGeom(it), box = { x: gm.x || 0, y: gm.y || 0, w: gm.w || (mv ? 30 : 120), h: gm.h || (mv ? 30 : 60) };
+  const mid = [box.x + box.w / 2, box.y + box.h / 2];
+  let best = null, why = null;
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked)) {
+    const gap = Math.max(30, Math.ceil(6 * pipeWidth(p) / 5) * 5);
+    const plan = splitAt(p.points[0], p.points[1], box, ports, { gap, aOpen: !!ownCoupling(p.from, p), bOpen: !!ownCoupling(p.to, p) });
+    if (!plan) continue;
+    if (!plan.ok) { why = why || { ok: false, text: `${p.name || 'The pipe'} was not cut: ${plan.why}. Flip it or move it and drop it again (Rule 5.26).` }; continue; }
+    const d = p.points[0][1] === p.points[1][1] ? Math.abs(p.points[0][1] - mid[1]) : Math.abs(p.points[0][0] - mid[0]);
+    if (!best || d < best.d) best = { p, plan, d };
+  }
+  if (!best) return why;
+  const { p, plan } = best, ends = { A: p.from, B: p.to };
+  it.x = (it.x || 0) + plan.shift[0]; it.y = (it.y || 0) + plan.shift[1];
+  if (plan.drop) { const own = ownCoupling(ends[plan.drop], p); if (own) draft.graphics = draft.graphics.filter(g => g !== own); }
+  const joints = plan.joints.map(c => {
+    const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: ws, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: '0' };
+    draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
+  });
+  const idOf = k => k === 'A' || k === 'B' ? ends[k] : /^J\d$/.test(k) ? joints[+k[1]] : k;
+  const made = [];
+  plan.pieces.forEach((pc, i) => {
+    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
+    if (i) { delete q.name; delete q.label; delete q.labelVisible; }
+    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
+    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
+  });
+  const who = mv ? (it.name || 'the Manual Valve') : it.name;
+  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (${made.join(', ')} go round it)` : ''} (Rule 5.26).`
+    : `${p.name} was cut in two at ${who}: ${[p.name, ...made].join(', ')} (Rule 5.26).` };
 }
 // Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve Widget (its one IP before Rule 5.24) is joined to the
 // nearer of its two ends instead (two pipes take one end each). Done as a Tab is drawn and once when Edit layout opens, so Save
@@ -2135,6 +2194,7 @@ window.addEventListener('pointerup', () => {
     if (isCap(drag.item)) { snapCap(drag.item); renderWs(); }
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
+  if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds();     // Rule 5.19: a pipe never bends to follow
   drag = null;
@@ -2527,7 +2587,9 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
   delete e._keepXY;
   if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box (Fritz, 2026-11-04)
-  draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
+  draft.elements.push(e); sel = { kind: 'el', id: e.name };
+  const cut = splitPipeFor(e); if (cut?.ok) toast(cut.text, false, 6000);      // added right on a pipe (Rule 5.26)
+  renderWs(); editItem('el', e.name);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
 // version: template = the Template's name. Only the Template's userFields show in its Properties; the rest are set by it.
