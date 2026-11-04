@@ -63,7 +63,7 @@ start "" /min cmd /c "timeout /t 4 /nobreak >nul & start "" http://localhost:808
 set "SKYNET_MINIMIZE=1"
 call npm start
 :: Closed from the panel (Menu > Close Skynet Brewer): this window closes too. Stopped by an error: it stays open so you can read why.
-if not errorlevel 1 exit /b 0
+if not errorlevel 1 exit 0
 echo.
 echo  The panel stopped because of an error. The lines above say why.
 pause
