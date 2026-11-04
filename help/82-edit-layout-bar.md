@@ -44,7 +44,7 @@ Interfaces and Tabs are listed as **ID: Name**, for example `BM: Brewery Mega` a
 
 With the Name come **Width** and **Height** (150 x 150 to start; a Pump also has **Cover**, **X** and **Y**). When a kind has more than one Device Type (for example a low or high temperature valve), a **Device Type** line comes after the Interface.
 
-**➕ Add Device** (at the top and at the bottom) works once 1-4 are done. **✖ Cancel** adds nothing. After Add Device the Device is on the Tab you picked and the rest of its Properties open. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
+Nothing else shows until the Label, Interface, Port and Tab are filled in (the Label must be typed). **➕ Add Device** (at the top and at the bottom) works once they are. **✖ Cancel** adds nothing. After Add Device the Device is on the Tab you picked and the rest of its Properties open. If **☰ Menu > Default** sets where new things go (X and Y), it goes there.
 
 ## Widgets
 

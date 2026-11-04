@@ -2667,8 +2667,8 @@ async function newDeviceDialog(e, hint, what) {
   // ➕ Add Device and the Name wait for 1-4 (Fritz, 2026-11-04): a Label (or Show label off), the Interface, the Port and the Tab
   const gate = () => {
     const w = { ...work }; try { readFields(w, body); } catch { }
-    const lab = !!String(w.label || '').trim() || !!w.hideName, rest = !!w.device && w[port[0]] !== undefined && String(w[port[0]]).trim() !== '' && !!w.workspace, ok = lab && rest;
-    for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : !lab ? 'Type a Label first, or switch Show label off' : 'Pick the Interface, the Port and the Tab first'; }
+    const lab = !!String(w.label || '').trim(), rest = !!w.device && w[port[0]] !== undefined && String(w[port[0]]).trim() !== '' && !!w.workspace, ok = lab && rest;
+    for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : !lab ? 'Type a Label first' : 'Pick the Interface, the Port and the Tab first'; }
     for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !ok);
   };
   try {
