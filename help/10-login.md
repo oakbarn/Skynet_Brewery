@@ -34,9 +34,9 @@ Each user can set their own email and number. Codes are limited to one a minute 
 
 A helper forgot theirs? An admin sets a new one in **Settings > Users**.
 
-## Testing mode
+## Updates keep your logins
 
-While the panel is being built, **Testing mode** is on: each time a new version is installed, all users, sign-ins and the recovery code are removed and the panel asks you to create the admin account again. Brew data, logs and settings are kept. When you start using the panel for real, turn it off in **Settings > Testing mode**.
+Installing a new version keeps every user, password, sign-in and the recovery code. They are removed only when you answer **Yes** to the installer's **Start Fresh** question and confirm its warning. Then the panel asks you to create the admin account again. (The old Testing mode switch, which cleared logins on every new version, was retired on 2026-11-03.)
 
 ## No recovery code and no admin can sign in?
 
