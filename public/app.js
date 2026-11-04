@@ -5695,7 +5695,7 @@ $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 // ---------------------------------------------------------------- variables page: gGlobal, shared
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
 const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', process: 'When a Process starts',
-  once: 'Once', datetime: 'At a date and time (once)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
+  once: 'Once', datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
   days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
@@ -5705,9 +5705,10 @@ function logSummary(lg) {
   const f = lg.frequency || 'none';
   if (f === 'process') return lg.process ? `When "${lg.process}" starts` : 'When a Process starts (none picked)';
   if (f === 'datetime') return `At ${lg.at || '?'}`;
+  if (f === 'clock') return `Every day at ${lg.at || '?'}`;
   if (!TIME_MODES.includes(f)) return LOG_LABEL[f] || f;
   const every = f === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[f]}`;
-  return every + (lg.at ? ` at ${lg.at}` : '');
+  return every;
 }
 // The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
 // dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
@@ -5720,7 +5721,7 @@ function dbFields(it) {
     ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])]]] : []),
     ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N (a whole number, 1 or more)', 'num']] : []),
     ...(f === 'hms' ? [['db_interval', 'Every (00:00:00)', 'text']] : []),
-    ...(TIME_MODES.includes(f) ? [['db_at', 'At clock time (optional), e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
+    ...(f === 'clock' ? [['db_at', 'At clock time, e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
     ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]]] : []),
     ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
@@ -5731,6 +5732,8 @@ function dbToWork(work) {
   const d = work.database || {};
   work.db_frequency = d.frequency || 'none';
   for (const k of ['every', 'interval', 'at', 'process', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  // an older "Every 1 day at 12 AM" opens as At clock time 12 AM (the Every choices have no clock time now)
+  if (d.at && work.db_frequency === 'days' && (d.every === undefined || +d.every === 1)) { work.db_frequency = 'clock'; delete work.db_every; }
   work.api = work.api || 'off';
   delete work.database;
 }
@@ -5744,10 +5747,10 @@ function dbFromWork(work) {
   if (f === 'process' && !d.process) throw new Error('Database: pick the Process that sends this value');
   if (f === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(d.interval || '')) throw new Error('Database: the interval must look like 00:05:00');
   if (TIME_MODES.includes(f) && f !== 'hms' && d.every !== undefined && !(Number.isInteger(d.every) && d.every >= 1)) throw new Error('Database: N must be a whole number, 1 or more');
-  if (TIME_MODES.includes(f) && d.at && !validClock(d.at)) throw new Error('Database: clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30');
+  if (f === 'clock' && !validClock(d.at || '')) throw new Error('Database: clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30');
   if (f === 'datetime' && !/^\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}(:\d{2})?$/.test(d.at || '')) throw new Error('Database: the date and time must look like 2026-11-01T06:00');
   for (const k of Object.keys(d)) {
-    const keep = { frequency: true, attribute: true, process: f === 'process', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: TIME_MODES.includes(f) || f === 'datetime' }[k];
+    const keep = { frequency: true, attribute: true, process: f === 'process', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
     if (!keep) delete d[k];
   }
   work.database = d;

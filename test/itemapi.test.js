@@ -23,7 +23,8 @@ const logger = new Logger(store, path.join(d, 'data', 'brewlog.db'));
 
 // ---- cleanDatabase: only known settings, Off is left out
 const el = cleanDatabase({ name: 'x', api: 'everything', database: { frequency: 'minutes', every: '5', at: ' 12 AM ', junk: 1, attribute: 'Target' } });
-assert.equal(el.api, undefined); assert.deepEqual(el.database, { frequency: 'minutes', every: 5, at: '12 AM', attribute: 'target' });
+assert.equal(el.api, undefined); assert.deepEqual(el.database, { frequency: 'minutes', every: 5, attribute: 'target' });   // Every choices have no clock time (2026-11-04)
+assert.deepEqual(cleanDatabase({ database: { frequency: 'clock', at: ' 6:30 PM ' } }).database, { frequency: 'clock', at: '6:30 PM' });
 assert.equal(cleanDatabase({ database: { frequency: 'none' }, api: 'off' }).database, undefined);
 assert.equal(cleanDatabase({ database: { frequency: 'bogus' } }).database, undefined);
 assert.equal(dateTimeMs('2026-11-01T06:00'), new Date(2026, 10, 1, 6, 0).getTime()); assert.equal(dateTimeMs('soon'), null);

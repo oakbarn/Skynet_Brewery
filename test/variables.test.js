@@ -1,6 +1,6 @@
 // node --no-warnings test/variables.test.js
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import assert from 'node:assert/strict';
-import { Store } from '../lib/store.js'; import { nextAt, intervalMs } from '../lib/logger.js'; import { parseClock } from '../lib/values.js';
+import { Store, clockTimeOnly } from '../lib/store.js'; import { nextAt, intervalMs } from '../lib/logger.js'; import { parseClock } from '../lib/values.js';
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bpv'));
 fs.mkdirSync(path.join(d, 'media')); fs.writeFileSync(path.join(d, 'media', 'n.txt'), 'hello');
 fs.mkdirSync(path.join(d, 'config')); const cfg = path.join(d, 'config', 'c.json');
@@ -18,5 +18,11 @@ assert.equal(parseClock('12 AM'), 0); assert.equal(parseClock('6:30 PM'), 66600)
 const now = new Date(2026, 9, 3, 14, 20).getTime();
 assert.equal(nextAt({ frequency: 'days', every: 1, at: '12 AM' }, now), new Date(2026, 9, 4, 0, 0).getTime());
 assert.equal(nextAt({ frequency: 'hours', every: 6, at: '1 AM' }, now), new Date(2026, 9, 3, 19, 0).getTime());
+// At clock time (Fritz, 2026-11-04): every day at that time; the Every choices have no clock time
+assert.equal(nextAt({ frequency: 'clock', at: '6:30 PM' }, now), new Date(2026, 9, 3, 18, 30).getTime());
+assert.equal(nextAt({ frequency: 'clock', at: '1 AM' }, now), new Date(2026, 9, 4, 1, 0).getTime());
+assert.deepEqual(clockTimeOnly({ frequency: 'days', every: 1, at: '12 AM' }), { frequency: 'clock', at: '12 AM' });
+assert.deepEqual(clockTimeOnly({ frequency: 'hours', every: 6, at: '1 AM' }), { frequency: 'hours', every: 6 });
+assert.deepEqual(clockTimeOnly({ frequency: 'datetime', at: '2026-11-01T06:00' }), { frequency: 'datetime', at: '2026-11-01T06:00' });
 assert.equal(intervalMs({ frequency: 'hms', interval: '00:01:30' }), 90000); assert.equal(intervalMs({ frequency: 'ms', every: 5 }), 100);
 setTimeout(() => { assert.equal(s.getProp('gGMB_Go', 'value'), false); clearTimeout(s._persistTimer); console.log('variables test: all passed'); }, 200);
