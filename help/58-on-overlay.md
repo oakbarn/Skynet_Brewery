@@ -21,7 +21,8 @@ Now the item shows its picture all the time, and the overlay appears on top of i
 
 The **On overlay** dropdown has:
 
-- **Lightning bolt, flashing red and yellow**: a bolt over the middle that flashes red and yellow. Valves you can switch, Proportional Valves and Pumps start with it (Skynet Rule 7.15, see Help 121).
+- **Lightning bolt, red and yellow**: a red bolt with a yellow edge over the middle. Valves you can switch, Proportional Valves and Pumps start with it (Skynet Rule 7.15, see Help 121).
+- **Lightning bolt, flashing red and yellow**: the same bolt, flashing.
 - **Lightning bolt (corner badge)**: a small yellow bolt in the top right corner.
 - **Lightning bolt (big, see-through)**: a large half see-through bolt over the middle.
 - **Green glow ring**: a green glow around the picture.

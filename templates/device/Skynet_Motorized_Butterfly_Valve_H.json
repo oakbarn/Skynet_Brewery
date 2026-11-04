@@ -2,7 +2,7 @@
   "title": "Skynet Motorized Butterfly Valve: Horizontal",
   "type": "digitalOut",
   "props": {
-    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt_Flash.svg", "subtype": "valve",
+    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg", "subtype": "valve",
     "valveType": "electric",
     "service": "room",
     "typeCode": "E_L_Vlv",

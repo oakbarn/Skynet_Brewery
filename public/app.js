@@ -402,9 +402,10 @@ const TINTS = { red: ['Glow red (colors the picture itself; heating elements)', 
   blue: ['Glow blue (colors the picture itself; cooling)', 'rgb(0,120,255)'] };
 const isTint = p => /^tint:/.test(p || '');
 const onOffPic = p => /^Images\/(Skynet\/)?On_Off\//i.test(p);
-// the flashing bolt (Fritz, 2026-11-04, Rule 7.15): red and yellow, the On overlay every powered valve and pump starts with
-const BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
-const OVERLAY_GRAPHICS = [['Lightning bolt, flashing red and yellow (valves and pumps)', BOLT_FLASH], ['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
+// the red and yellow bolt (Fritz, 2026-11-04, Rule 7.15): the steady one is the On overlay every powered valve and pump starts
+// with; the flashing one is a choice
+const BOLT = 'Images/Skynet/On_Off/Overlay_Bolt.svg', BOLT_FLASH = 'Images/Skynet/On_Off/Overlay_Bolt_Flash.svg';
+const OVERLAY_GRAPHICS = [['Lightning bolt, red and yellow (valves and pumps)', BOLT], ['Lightning bolt, flashing red and yellow', BOLT_FLASH], ['Lightning bolt (corner badge)', 'Images/Skynet/On_Off/Overlay_Bolt_Corner.svg'], ['Lightning bolt (big, see-through)', 'Images/Skynet/On_Off/Overlay_Bolt_Center.svg'],
   ['Green glow ring', 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'], ...Object.entries(TINTS).map(([k, t]) => [t[0], 'tint:' + k])];
 // lists behind the dropdowns. Every list can be added to ("Add new ..."); additions are kept in the settings (vesselLists).
 const UNITS = ['°F', '°C', '%', 'psi', 'bar', 'kPa', 'gal', 'L', 'qt', 'oz', 'lb', 'kg', 'g', 'SG', '°P', 'pH', 'gal/min', 'L/min', 'V', 'mA', 's', 'min'];
@@ -2301,16 +2302,16 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT_FLASH, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT_FLASH };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT_FLASH, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
