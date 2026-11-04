@@ -7,6 +7,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import { closeLauncherWindow } from './lib/closewindow.js';
+import { openAppWindow, closeAppWindow } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
 import { checkControlled } from './public/semi.js';
@@ -1015,7 +1016,19 @@ server.listen(PORT, () => {
   pictures.start();
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
+  // Windows: the panel opens in its own clean window, whatever .bat started it (Rule 2.36, lib/appwindow.js)
+  if (CLOSABLE) { const how = openAppWindow(`http://localhost:${PORT}`, { port: PORT }); if (how !== 'none') console.log(how === 'app' ? 'Opened the panel in its own window.' : 'Opened the panel in your browser (no Edge or Chrome found).'); }
   minimizeWindow();
+});
+// Skynet Brewer double-clicked while the panel is already running (its window was closed with its X): open the window again
+server.on('error', e => {
+  if (e.code === 'EADDRINUSE' && CLOSABLE && process.platform === 'win32') {
+    console.log(`The panel is already running on port ${PORT}. Opening its window again.`);
+    openAppWindow(`http://localhost:${PORT}`, { port: PORT, list: () => [] });
+    setTimeout(() => process.exit(0), 1500);
+    return;
+  }
+  throw e;
 });
 
 // Windows (Fritz, 2026-10-30): once the panel is up and the browser has opened it, Skynet_Brewer.bat's Command Prompt window
@@ -1034,7 +1047,9 @@ const CLOSABLE = !process.env.INVOCATION_ID;
 // closeWindow: closed from ☰ Menu, so on Windows its Command Prompt window closes too, whatever .bat started it (Rule 2.25)
 function shutdown({ closeWindow = false } = {}) {
   console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close();
+  closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched
   if (closeWindow) closeLauncherWindow();
   process.exit(0);
 }
-process.on('SIGINT', () => shutdown()); process.on('SIGTERM', () => shutdown());
+// SIGHUP: the black window was closed with its X (Windows gives the panel a few seconds to stop)
+process.on('SIGINT', () => shutdown()); process.on('SIGTERM', () => shutdown()); process.on('SIGHUP', () => shutdown());

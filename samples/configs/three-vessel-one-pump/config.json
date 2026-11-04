@@ -1844,7 +1844,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1865,7 +1864,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1886,7 +1884,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1907,7 +1904,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1928,7 +1924,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_1"
@@ -1966,7 +1961,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -1987,7 +1981,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2008,7 +2001,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_2"
@@ -2031,7 +2023,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_3"
@@ -2054,7 +2045,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_4"
@@ -2122,7 +2112,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2143,7 +2132,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2164,7 +2152,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_5"
@@ -2202,7 +2189,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2223,7 +2209,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2244,7 +2229,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2265,7 +2249,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_6"
@@ -2303,7 +2286,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2324,7 +2306,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2345,7 +2326,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_7"
@@ -2383,7 +2363,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2404,7 +2383,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_8"
@@ -2442,7 +2420,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2463,7 +2440,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_9"
@@ -2501,7 +2477,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true
   },
   {
@@ -2522,7 +2497,6 @@
    ],
    "width": 10,
    "color": "#8a8f96",
-   "flowColor": "#ffb347",
    "straight": true,
    "label": "",
    "name": "Pipe_10"

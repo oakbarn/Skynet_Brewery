@@ -72,7 +72,8 @@ A pipe fitting turned by hand and a pseudo Device (Rule 5.15, Help 87). Name Man
 | Label, Show label | The Label is used in the "by hand" message |
 | Autosize to pipe, X, Y, Width, Height, Lock position | As a pipe fitting |
 | Open overlay | Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, drawn on top while open (fixed) |
-| Picture (`image`) | Plain (the drawn valve), or Fritz's Manual Ball Valve drawings (2026-11-02, Help 110): side view, front view, on a front elbow (Images/Skynet/Valves/Manual_Ball_Valve_*_Closed.svg; the Tab shows the _Open twin while open). Its one IP is the middle of the picture. |
+| Picture (`image`) | Plain (the drawn valve), or Fritz's Manual Ball Valve drawings (2026-11-02, Help 110): side view, front view, on a front elbow (Images/Skynet/Valves/Manual_Ball_Valve_*_Closed.svg; the Tab shows the _Open twin while open). |
+| IPs (Rule 5.24, Help 123) | **Two**, one at each pipe end (`eq:<id>:in`, `eq:<id>:out`): plain valve left and right ends; side view the outer face of each ferrule; front view both at the center of the opening; front elbow the center of the opening and the bottom ferrule face; a user's picture the middle of its left and right sides. They turn with Rotate 45; a closed valve blocks both. (Before 2026-11-04 it had one IP in its middle.) |
 
 In a Process: `ManualValve_1.state = true` (or `ManualValve_1 = true`) does not change it. It shows "✋ OPEN ... by hand, then click it on the ... Tab to confirm" at the top of every screen, the valve blinks, and the Process waits until it is clicked to that state. Reading it (`if ManualValve_1 == true`) works as for any Device.
 
@@ -458,3 +459,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-02: Universal Properties standard (Rule 1.21): every Device, Widget and Semi-Device gets the same Properties and attributes; see docs/Universal_Properties.md. (thread "Set universal properties standard", Help 114)
 - 2026-11-03: Pipe and Hose Flow Colors (Rule 5.21, Help 116): Flow Color None by default; Tab Flow Color (tab.flow_Color); Vessel Out flow color; tap water always Blue; pipes and hoses keep their Label; X, Y, Width, Height hidden. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-03: IP points get a Flow Color (`.flow_Color`), first in the flow color order (Rule 5.21, Help 116). (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-04: Manual Valve Widget has two IPs, one at each pipe end, in every Orientation (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
