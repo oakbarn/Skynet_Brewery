@@ -1284,7 +1284,9 @@ the title is the pump (e.g. **Blichmann Riptide** ?) with the 🔓 lock, **Visib
 ✖ Cancel, 💾 Save; **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface (board)** with **Available Ports** on the same line
 (greyed out with ✏ Change, Rule 18.13); **3. Tab**; **4. Name** and the Suggested Name; the **Graphic**; its **Path** (greyed out on a
 Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Cover** with **Toggle** (On/Off, Push
-button, None: what a tap does) on the same line; **X, Y, Width, Height**; the **Database and .API** box (Rule 6.14); the **Device
+button, None: what a tap does) on the same line; just below it the **Overlay** (the On overlay, Rule 7.15; Fritz,
+2026-11-04: "add an Overlay DDLB just below the Cover DDLB", in the Add box too), and on its line **Database and .API ⬢**:
+the hexagon opens the Database and .API settings in a pop-up, in the Add box and the Properties (Fritz's screen 7); **X, Y, Width, Height**; the **Device
 Type** (DO: Pump) greyed out last. A User pump has the same Properties. **Only these** belong to a Pump: the old Hidden Locked row,
 Pump Properties ⬢, Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind, Picture ⬢, Background picture ⬢ and Text when on / off are gone
 from its dialog (what a Pump already has set is kept). The On / Off text is shown with an **Overlay** instead (Rule 7.13).
@@ -1516,3 +1518,5 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Rule 5.21 changed (Fritz): flow from a Tap Water Valve is always Blue and is #1, over every other flow color (was third, after an IP and a Vessel). Order: Tap Water Valve, IP, Vessel, Tab, pipe, Tab (Mash, Boil, Whirlpool, Ferment). Help 116 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-04: Added Rule 5.24 (ball valves have two IPs, one at each pipe end, in every Orientation: a 45 degree Skynet valve's IPs turn with its picture; the Manual Valve Widget has two IPs instead of one in its middle; older pipes on its middle join the nearer end). Help 123, Help 87 updated; next free Help number 124 (Help 122 is taken by PR #186). (thread "Add IPs to Ball Valve Devices and Widgets")
 - 2026-11-04: Rule 5.24: every Skynet Pump has IPs on its inlet and outlet (the older Riptide-style pictures and the sump pump now too; Right and Left, any Cover). Help 123 updated. (thread "Add IPs to Ball Valve Devices and Widgets")
+- 2026-11-04: Rule 18.21: an Overlay dropdown (the On overlay) just below the Cover on the Pump dialogs, Add box and Properties (Fritz). Help 115 updated. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 18.21: Database and .API is on the Overlay line as a ⬢ pop-up (no box) on the Pump's Add box and Properties (Fritz's screen 7). Help 115 updated. (thread "Set the drill-down dialog standard for Devices")
