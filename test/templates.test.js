@@ -76,7 +76,7 @@ assert.equal(cleanVessel({ vesselType: 'vessel', liquidPorts: 4 }).liquidPorts, 
 
 // the standard piping fittings (Fritz, 2026-10-22): one fitting each, a Skynet SVG picture, and where its IPs sit on it
 // Fritz's 2026-11-02 drawings: each IP is the center of a ferrule's outer face (Rule 5.20), given as "x,y" fractions of the picture
-for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: '0.32,1', end: '1,0.32' }], ['Elbow_45', 'elbow45', { start: '0.16,0.8', end: '1,0.3' }], ['Tee', 'tee', { start: '0,0.235', end: '1,0.235', branch1: '0.5,1' }],
+for (const [n, k, ip] of [['Elbow_90', 'elbow90', { start: '0.29,1', end: '1,0.29' }], ['Elbow_45', 'elbow45', { start: '0.16,0.8', end: '1,0.3' }], ['Tee', 'tee', { start: '0,0.216', end: '1,0.216', branch1: '0.5,1' }],
   ['Reducer', 'reducer', { start: '0,0.5', end: '1,0.5' }], ['Reducer_2_1_Concentric', 'reducer', { start: '0,0.5', end: '1,0.5' }], ['Reducer_2_1_Eccentric', 'reducer', { start: '0,0.5', end: '1,0.702' }],
   ['Reducer_2_1_Front', 'reducer', { start: '0.5,0.5', end: '0.5,0.5' }], ['Elbow_Front', 'elbow90', { start: '0.5,0.336', end: '0.5,1' }], ['Instrument_Tee', 'tee', { start: '0,0.3', end: '1,0.3', branch1: '0.5,1' }]]) {
   const t = S.get('fitting', n);
