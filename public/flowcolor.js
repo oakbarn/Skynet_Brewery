@@ -75,14 +75,20 @@ export function pipeFlowColor({ ip = '', vessel = '', tap = false, tab = '', pip
 
 // Older Schemas (Rule 15.2): a pipe or hose's Flow color was '#4fb3ff' to start (it is None now) and could be any color.
 // The old start color becomes None; any other color is kept as an RGB color. Returns how many were changed.
-export function flowStandard(graphics = []) {
+// Pipes default to None (Fritz, 2026-11-04): once per Schema (c.pipeFlowNone), the orange '#ffb347' every sample pipe had
+// becomes None too, so the pipes follow the Tab Flow Color.
+export const OLD_SAMPLE_ORANGE = '#ffb347';
+export function flowStandard(graphics = [], c = null) {
   let n = 0;
+  const once = c && !c.pipeFlowNone;
   for (const g of graphics) {
     if (g?.kind !== 'pipe' || !('flowColor' in g)) continue;
-    const k = String(g.flowColor ?? '').toLowerCase() === FLOW_DEFAULT ? '' : flowKey(g.flowColor);
+    const old = String(g.flowColor ?? '').toLowerCase();
+    const k = old === FLOW_DEFAULT || (once && old === OLD_SAMPLE_ORANGE) ? '' : flowKey(g.flowColor);
     if (k === g.flowColor) continue;
     if (k) g.flowColor = k; else delete g.flowColor;
     n++;
   }
+  if (c) c.pipeFlowNone = true;
   return n;
 }

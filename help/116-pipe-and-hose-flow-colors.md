@@ -25,6 +25,9 @@ The first one that fits wins:
 
 **None is the default** for every pipe, hose, IP, Tab and Vessel.
 
+A pipe or hose with Flow Color None follows the Tab's Flow Color. The pipes in the sample Schemas used to be orange;
+they are None now (changed once in each Schema), so pick a color again on any pipe you want to stand out.
+
 ## The color choices
 
 | Choice | Color |
