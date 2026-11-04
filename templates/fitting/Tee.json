@@ -22,11 +22,11 @@
     160,
     102
   ],
-  "body": 0.175,
+  "body": 0.183,
   "ipPos": {
-    "start": "0,0.235",
-    "end": "1,0.235",
+    "start": "0,0.216",
+    "end": "1,0.216",
     "branch1": "0.5,1"
   },
-  "notes": "A Long Tee, for piping (Fritz's drawing, 2026-11-02). Openings at the left, the right and the bottom (the branch); each IP is the center of its ferrule's outer face. Flow goes any way through it."
+  "notes": "The normal Tee, for piping (Fritz's drawing, 2026-11-04). Openings at the left, the right and the bottom (the branch); each IP is the center of its ferrule's outer face. Flow goes any way through it. The Edit layout bar's turn buttons give the other orientations."
 }
