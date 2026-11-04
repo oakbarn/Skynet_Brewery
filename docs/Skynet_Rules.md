@@ -637,6 +637,19 @@ hose just goes to the IP. The older ball valve pictures (Valve_Ball_..._H_1 and 
 too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides, or where the User Defined valve's In and
 Out IP spots put them.
 
+5.24 **Ball valves have two IPs, one at each pipe end, in every Orientation** (Fritz, 2026-11-04: "Ball Valve Devices and Widgets
+should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123). Where they go is Rule 5.20.
+- **Skynet Motorized Ball Valve Device:** Horizontal, Vertical Left and Vertical Right on the ends of its pipe, Front both at the
+  center of the opening, and **45 degrees on the ends of its pipe, turned with the picture** (before, a 45 degree valve put them on
+  the corners of its box). The 45 degree turn works the same for every Skynet valve drawing.
+- **Manual Valve Widget** (the hand-turned ball valve, Rule 5.15): **two IPs instead of one in its middle.** Plain drawn valve:
+  its left and right ends; side view: the outer face of each ferrule; front view: both at the center of the opening; front elbow:
+  the center of the opening and the bottom ferrule's outer face; a user's own picture: the middle of its left and right sides.
+  They turn with Rotate 45 (Rule 5.5). A closed Manual Valve blocks both ends. It sits centered on its pipes like other valves
+  (Rule 5.23).
+- Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve is joined to the nearer end (two pipes take one end each)
+  when its Tab is shown and when Edit layout opens; Save layout keeps it.
+
 ## 6. Devices, connections and safety
 
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
@@ -1480,3 +1493,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Changed Rule 10.7 (hiding the Simulator bar removes it completely, no strip; ☰ Menu > 🧪 Show / Hide Simulator bar in Simulator mode; small 🧪 on the ☰ Menu button while hidden). Help 85 updated. (thread "Move Show Simulator bar to the ☰ Menu")
 - 2026-11-04: Added Rule 2.35 (as a general Rule, phones and tablets are for running and watching the brewery, not for editing or building; a feature that does not work on a phone or tablet is fine under it; nothing is hidden or locked on phones until Fritz says). (thread "Add the phone and tablet editing Rule")
 - 2026-11-04: Rule 2.35: run mode on phones and tablets (Fritz): an admin works as an operator there; the Schema, Processes and Tab buttons work, no Edit layout or Properties; switch "Phones and tablets can edit" (off) on ☰ Menu > Default. Open question 8 answered. Help 45 updated; no new Help number. (thread "Add the phone and tablet editing Rule")
+- 2026-11-04: Added Rule 5.24 (ball valves have two IPs, one at each pipe end, in every Orientation: a 45 degree Skynet valve's IPs turn with its picture; the Manual Valve Widget has two IPs instead of one in its middle; older pipes on its middle join the nearer end). Help 123, Help 87 updated; next free Help number 124 (Help 122 is taken by PR #186). (thread "Add IPs to Ball Valve Devices and Widgets")

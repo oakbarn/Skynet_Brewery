@@ -259,7 +259,7 @@ function drawWs() {
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
   for (const g of L().graphics.filter(g => gTab(g) === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));     // a Process can move a Text Widget to another Tab (.tab)
-  if (!editing) centerOnPipes(L(), w.name);      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
+  if (!editing) { mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
   const clones = L().graphics.filter(g => g.workspace === w.name && isClone(g)).map(cloneEl).filter(Boolean);
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones]) ws.append(buildEl(e));
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
@@ -518,6 +518,7 @@ function vesselPopup(g, placed) {
 // Cooling coils and plate chillers have IPs built in. Flow passes through each circuit: the coil has one (in -> out),
 // the plate chiller has two that never mix (wort in -> wort out, water in -> water out).
 function eqPorts(g) {
+  if (isMv(g)) return mvEnds(g);
   if (g.kind !== 'vessel') return [];
   const x = g.x || 0, y = g.y || 0, w = g.w || 200, hh = g.h || 260, L_ = g.label || VESSELS[g.vesselType];
   const port = (k, text, circuit, cx, cy) => ({ id: `eq:${g.id}:${k}`, label: `${L_} ${text.toLowerCase()}`, text, circuit, c: [Math.round(cx), Math.round(cy)] });
@@ -529,7 +530,7 @@ function eqPorts(g) {
 function buildEqIp(g, q) {
   const n = h('div', { class: 'gfx ip devip eqip', 'data-ipid': q.id, 'data-eq': g.id, title: q.label }, h('span', {}, q.text.replace('WORT ', 'W').replace('WATER ', 'C')));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
-  n.style.setProperty('--ipc', q.circuit === 'water' ? '#4fb3ff' : '#e8a33a');
+  n.style.setProperty('--ipc', q.mv ? '#4fb3ff' : q.circuit === 'water' ? '#4fb3ff' : '#e8a33a');
   return n;
 }
 function placeEqIps(g) { for (const q of eqPorts(g)) { const n = $(`#ws .devip[data-ipid="${CSS.escape(q.id)}"]`); if (n) place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 }); } }
@@ -680,6 +681,20 @@ const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', 'Manual Ball Valve, front view (looking down the pipe)'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow']];
 const mvPic = g => isMv(g) && g.image && mvOpen(g) ? g.image.replace(/_Closed\.svg$/, '_Open.svg') : g.image;
+// A Manual Valve Widget has two IPs, one at each pipe end (Fritz, 2026-11-04, Rule 5.24; where they go is Rule 5.20): the center
+// of each ferrule's outer face on the side view, the left and right ends of the plain drawn valve, both at the center of the
+// opening on a front view, and the center of the opening plus the center of the bottom ferrule on a front elbow. A picture
+// Skynet doesn't know (a user's own) has them in the middle of its left and right sides. They turn with the valve (Rotate 45).
+// ends = [end 1, end 2] as parts of the picture's box (the picture fills the box).
+const MV_ENDS = { plain: [[0, 0.5], [1, 0.5]], Side: [[0.015, 0.5], [0.985, 0.5]], Front: [[0.5, 0.5], [0.5, 0.5]], Front_Elbow: [[0.5, 0.5], [0.5, 0.99]] };
+function mvEnds(g) {
+  const m = String(g.image || '').match(/Manual_Ball_Valve_(Side|Front_Elbow|Front)_(?:Open|Closed)\.svg$/);
+  const ends = !g.image ? MV_ENDS.plain : m ? MV_ENDS[m[1]] : MV_ENDS.plain;
+  const x = g.x || 0, y = g.y || 0, w = g.w || 30, hh = g.h || 30, cx = x + w / 2, cy = y + hh / 2, r = (+g.rotate || 0) * Math.PI / 180;
+  const at = ([fx, fy]) => { const dx = x + fx * w - cx, dy = y + fy * hh - cy; return [Math.round(cx + dx * Math.cos(r) - dy * Math.sin(r)), Math.round(cy + dx * Math.sin(r) + dy * Math.cos(r))]; };
+  const nm = g.name || g.label || 'Manual valve';
+  return ends.map((e, i) => ({ id: `eq:${g.id}:${i ? 'out' : 'in'}`, label: `${nm} end ${i + 1}`, text: '', circuit: 'a', mv: true, c: at(e) }));
+}
 const FIT_SVG = {
   pipe: '<path d="M0 15H30"/>', cap: '<path d="M0 15H17M20 5V25"/>',
   tee: '<path d="M0 15H30M15 15V30"/>', cross: '<path d="M0 15H30M15 0V30"/>',
@@ -707,7 +722,8 @@ const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.wo
 // It is 5 x that pipe thickness, which makes its drawn arms exactly as thick as the pipe.
 function sizeFitting(g) {
   if (!autoSized(g)) return;
-  const S = 5 * Math.max(0, ...pipesOn(g.id, g.workspace).map(pipeWidth)) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
+  const on = [g.id, ...(isMv(g) ? eqPorts(g).map(q => q.id) : [])].flatMap(id => pipesOn(id, g.workspace));     // a Manual Valve: the pipes on its two ends
+  const S = 5 * Math.max(0, ...on.map(pipeWidth)) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
   g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
@@ -864,11 +880,16 @@ function picFlow(path) {
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
   const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
-  if (!f || (f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
-  if (o && f.k !== 'P' && f.o !== 'f' && (o === 'h') !== (f.o === 'h')) return null;
+  // a valve at 45 degrees shows its picture turned about its middle (Rule 5.5), so its two IPs turn with it (Rule 5.24)
+  const turn = f && f.k !== 'P' && f.o !== 'f' && e.subtype === 'valve' ? { l45: -45, r45: 45 }[o] || 0 : 0;
+  if (!f || (!turn && f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
+  if (!turn && o && f.k !== 'P' && f.o !== 'f' && (o === 'h') !== (f.o === 'h')) return null;
   const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 120, hh = gm.h || 60, fill = stretchPic(e, S.values[e.cloneOf || e.name] || {});
   const sx = fill ? w / f.w : Math.min(w / f.w, hh / f.h), sy = fill ? hh / f.h : sx, ox = x + (w - f.w * sx) / 2, oy = y + (hh - f.h * sy) / 2;
-  return f.ends.map(([fx, fy]) => [Math.round(ox + fx * f.w * sx), Math.round(oy + fy * f.h * sy)]);
+  const pts = f.ends.map(([fx, fy]) => [ox + fx * f.w * sx, oy + fy * f.h * sy]);
+  const r = turn * Math.PI / 180, cx = x + w / 2, cy = y + hh / 2;
+  return pts.map(([px, py]) => !turn ? [Math.round(px), Math.round(py)]
+    : [Math.round(cx + (px - cx) * Math.cos(r) - (py - cy) * Math.sin(r)), Math.round(cy + (px - cx) * Math.sin(r) + (py - cy) * Math.cos(r))]);
 }
 // a valve flipped (Flip Horizontal / Vertical): its IPs mirror about its middle, as its picture does
 const flipPt = e => {
@@ -929,6 +950,42 @@ function centerOnPipes(lay, ws) {
     const mx = pick(need.x), my = pick(need.y);
     if (!mx && !my) continue;
     e.x = (e.x || 0) + mx; e.y = (e.y || 0) + my; n++;
+  }
+  // a Manual Valve Widget is a valve too: it moves onto its pipes the same way (its two IPs, Rule 5.24)
+  for (const g of (lay?.graphics || []).filter(g => isMv(g) && (!ws || g.workspace === ws) && !g.locked)) {
+    const need = { x: [], y: [] };
+    for (const q of eqPorts(g)) for (const p of lay.graphics.filter(p => p.kind === 'pipe' && !p.hose && p.workspace === g.workspace && (p.from === q.id || p.to === q.id))) {
+      const pts = p.points || []; if (pts.length < 2) continue;
+      const [a, b] = p.from === q.id ? [pts[0], pts[1]] : [pts[pts.length - 1], pts[pts.length - 2]];
+      if (Math.abs(b[0] - a[0]) < 0.5 && Math.abs(b[1] - a[1]) >= 0.5) need.x.push(a[0] - q.c[0]);
+      else if (Math.abs(b[1] - a[1]) < 0.5 && Math.abs(b[0] - a[0]) >= 0.5) need.y.push(a[1] - q.c[1]);
+    }
+    const most = Math.max(g.w || 30, g.h || 30) / 2;
+    const pick = list => list.length && list.every(v => Math.abs(v - list[0]) <= 1.5) && Math.abs(list[0]) > 1 && Math.abs(list[0]) <= most ? Math.round(list[0]) : 0;
+    const mx = pick(need.x), my = pick(need.y);
+    if (!mx && !my) continue;
+    g.x = (g.x || 0) + mx; g.y = (g.y || 0) + my; n++;
+  }
+  return n;
+}
+// Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve Widget (its one IP before Rule 5.24) is joined to the
+// nearer of its two ends instead (two pipes take one end each). Done as a Tab is drawn and once when Edit layout opens, so Save
+// layout keeps it. Returns how many pipe ends moved.
+function mvJoinEnds(lay, ws) {
+  let n = 0;
+  const far = (p, k) => { const pts = p.points || []; return k === 'from' ? pts[1] || pts[0] : pts[pts.length - 2] || pts[pts.length - 1]; };
+  for (const g of (lay?.graphics || []).filter(g => isMv(g) && (!ws || g.workspace === ws))) {
+    const ends = eqPorts(g), pipes = lay.graphics.filter(p => p.kind === 'pipe' && p.workspace === g.workspace);
+    if (!pipes.some(p => p.from === g.id || p.to === g.id)) continue;
+    const taken = new Set(pipes.flatMap(p => [p.from, p.to]).filter(id => ends.some(q => q.id === id)));
+    for (const p of pipes) for (const k of ['from', 'to']) {
+      if (p[k] !== g.id) continue;
+      const c = far(p, k), d = q => c ? Math.hypot(q.c[0] - c[0], q.c[1] - c[1]) : 0;
+      const q = [...ends].sort((a, b) => (taken.has(a.id) - taken.has(b.id)) || d(a) - d(b))[0];
+      p[k] = q.id; taken.add(q.id); n++;
+      const pts = p.points || [], i = k === 'from' ? 0 : pts.length - 1;
+      if (pts[i]) pts[i] = [...q.c];
+    }
   }
   return n;
 }
@@ -1613,7 +1670,7 @@ function ipPoint(id, ws) {
 function allIps(ws) {
   const vn = id => { const v = L().graphics.find(x => x.id === id); return v ? (v.name || v.label || '') + ' ' : ''; };
   const capped = cappedIps();
-  return [...L().graphics.filter(g => g.kind === 'ip' && g.workspace === ws && !capped.has(g.id)).map(g => ({ id: g.id, label: (g.port ? vn(g.attachTo) + (g.label || g.id) : ipName(g)) })),
+  return [...L().graphics.filter(g => g.kind === 'ip' && !isMv(g) && g.workspace === ws && !capped.has(g.id)).map(g => ({ id: g.id, label: (g.port ? vn(g.attachTo) + (g.label || g.id) : ipName(g)) })),
     ...[...L().elements, ...L().graphics.filter(isClone).map(cloneEl).filter(Boolean)].filter(e => hasIps(e) && e.workspace === ws).flatMap(e => devIps(e)),
     ...L().graphics.filter(g => g.workspace === ws).flatMap(eqPorts)];
 }
@@ -1636,6 +1693,7 @@ const tapOut = e => e.tapwaterOut === 'none' ? 'none' : TAP_OUT.some(([k]) => k 
 const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.workspace));
 function ipNode(id, ws) {
   const q = eqOfIp(id) !== null && eqPort(id, ws);
+  if (q?.mv && !mvOpen(L().graphics.find(x => x.id === eqOfIp(id)))) return { closed: true };     // a closed Manual Valve blocks both ends
   if (q) return { key: `eq:${eqOfIp(id)}:${q.circuit}`, pass: true };
   const dn = devOfIp(id);
   if (dn !== null) {
@@ -1889,7 +1947,7 @@ function setEditing(on) {
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
-  if (on) centerOnPipes(draft);              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
+  if (on) { mvJoinEnds(draft); centerOnPipes(draft); }              // valves and pumps on their pipes (Rule 5.23), kept with the next Save layout
   if (on) (TPL ? Promise.resolve(TPL) : loadTemplates()).then(() => { if (draft && refreshSkyFits()) renderWs(); }).catch(() => {});
   if (!on) wsName = curWs()?.name;          // leaving Edit layout on a Hidden_ Tab goes to the first Tab you can see
   $('#ws').classList.remove('drawing');
@@ -1974,7 +2032,7 @@ $('#ws').addEventListener('pointerdown', ev => {
   drag = { mode: !pip && !bundle && (!item.bundled || isUnit(item) || isSkyV(item)) && ev.target.classList.contains('rs') ? 'resize' : 'move', dir: ev.target.dataset?.rs || 'se', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
-  if (item.kind === 'ip') drag.stubs = pipesOn(item.id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === item.id ? pp.to : pp.from, pp) })).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
+  if (item.kind === 'ip') drag.stubs = [item.id, ...eqPorts(item).map(q => q.id)].flatMap(id => pipesOn(id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === id ? pp.to : pp.from, pp) }))).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
   node.setPointerCapture?.(ev.pointerId);
   ev.preventDefault();
 });
@@ -2009,7 +2067,7 @@ $('#ws').addEventListener('pointermove', ev => {
   if (drag.mode === 'move') {
     drag.item.x = drag.orig.x + mx; drag.item.y = drag.orig.y + my;
     const de = isClone(drag.item) ? cloneEl(drag.item) : drag.item;      // a clone is drawn as its parent, at its own place
-    place(drag.node, de.kind ? de : elGeom(de)); if (hasIps(de)) placeDevIps(de); if (de.kind === 'ip' || hasIps(de)) renderPipes();
+    place(drag.node, de.kind ? de : elGeom(de)); if (hasIps(de)) placeDevIps(de); if (isMv(de)) placeEqIps(de); if (de.kind === 'ip' || hasIps(de)) renderPipes();
   }
   else if (drag.mode === 'resize') {
     const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
@@ -2026,7 +2084,8 @@ function alignShift(d, mx, my) {
   const it = d.item, ws = it.workspace, at = { x: d.orig.x + mx, y: d.orig.y + my };
   const mid = (g, x, y) => [x + (g.w || 30) / 2, y + (g.h || 30) / 2];
   let own = [];
-  if (it.kind === 'ip') own = [{ id: it.id, c: mid(it, at.x, at.y) }];
+  if (isMv(it)) own = eqPorts({ ...it, ...at });
+  else if (it.kind === 'ip') own = [{ id: it.id, c: mid(it, at.x, at.y) }];
   else if (it.kind === 'vessel') own = [...(d.ports || []).filter(q => q.g.kind === 'ip').map(q => ({ id: q.g.id, c: mid(q.g, q.x + mx, q.y + my) })), ...eqPorts({ ...it, ...at })];
   else if (!it.kind || isClone(it)) { const de = isClone(it) ? cloneEl(it) : it; if (hasIps(de)) own = devIps({ ...de, ...at }); }
   if (!own.length) return [0, 0];
@@ -4820,7 +4879,7 @@ async function editItem(kind, id) {
       const kids = kind === 'el' ? clonesOf(item.name, draft.graphics) : [];       // a Device's clones go with it
       if (!confirm(kids.length ? `Delete ${item.name}? Its ${kids.length === 1 ? 'Clone' : kids.length + ' Clones'} (${kids.map(g => g.name).join(', ')}) go too.` : 'Delete this item?')) return;
       if (kind === 'el') draft.elements = draft.elements.filter(e => e !== item); else draft.graphics = draft.graphics.filter(g => g !== item);
-      const gone = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
+      const gone = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : isClone(item) ? [`dev:${item.name}:in`, `dev:${item.name}:out`] : eqPorts(item).map(q => q.id);
       for (const g of kids) gone.push(`dev:${g.name}:in`, `dev:${g.name}:out`);
       draft.graphics = draft.graphics.filter(g => !kids.includes(g));
       if (type === 'vessel') {       // its own port IPs go with it; IPs that were only dropped on it stay
@@ -4956,7 +5015,7 @@ async function editItem(kind, id) {
     if (item.workspace && item.workspace !== oldTab) {   // moved to another tab: go there with it, so it does not seem to vanish
       for (const g of draft.graphics) if (g.attachTo === (item.id ?? item.name) && !g.port && g.kind === 'ip') g.workspace = item.workspace;   // IPs dropped on it go along
       wsName = item.workspace;
-      const ips = type === 'ip' ? [item.id] : hasIps(item) ? devIps(item).map(q => q.id) : eqPorts(item).map(q => q.id);
+      const ips = type === 'ip' ? [item.id, ...eqPorts(item).map(q => q.id)] : hasIps(item) ? devIps(item).map(q => q.id) : eqPorts(item).map(q => q.id);
       const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === oldTab && (ips.includes(p.from) || ips.includes(p.to)));
       toast(`Moved to the ${item.workspace} tab.` + (piped ? ` Its pipes stayed on ${oldTab}; draw new ones here.` : ''));
     }
