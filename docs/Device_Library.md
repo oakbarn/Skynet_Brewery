@@ -176,6 +176,7 @@ What each ID means:
 - **Properties dialog: the drill-down** (Rule 18.12, Help 115, Fritz 2026-11-03): Visible, Hidden Locked and the lock at the top;
   **Pump Properties ⬢** (Tab, X, Y, Width, Height, Delete); **Label ⬆ ⬢**, Show label, Name; Interface, **Pin ⬢**, **When tapped ⬢**,
   Kind; **Picture ⬢**, Cover, **Background picture ⬢**; **Text when on ⬆ ⬢**, Text when off ⬆. The standard for every Device.
+- **Adding a Pump** (Rule 18.13, Fritz 2026-11-04): Pumps > Pump, on / off, then pick the pump from the list with pictures; the Add box is titled with it and has the Label ⬢, Cover, X, Y and the Device Type (Pump) read only. Once added, Interface and Port are greyed out with ✏ Change.
 
 ### 4.3 Valve
 - **Add menu:** Devices: outputs > Valve (relay output with an IP at each end). A Valve Profile can be picked when it is made.
@@ -462,3 +463,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-02: Universal Properties standard (Rule 1.21): every Device, Widget and Semi-Device gets the same Properties and attributes; see docs/Universal_Properties.md. (thread "Set universal properties standard", Help 114)
 - 2026-11-03: 4.2 Pump: the drill-down Properties dialog, the standard for every Device (Rule 18.12, Help 115). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-03: 4.6 renamed User Defined Proportional Valve (In / Out IP spots); added 4.6a Skynet KLD20T Proportional Valve (Rule 5.22, Help 117). (thread "Add BruControl KLD20T proportional valve")
+- 2026-11-04: 4.2 Pump: adding a Pump, pick the pump with its picture (Rule 18.13). (thread "Set the drill-down dialog standard for Devices")

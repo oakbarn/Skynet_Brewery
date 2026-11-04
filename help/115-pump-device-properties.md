@@ -5,6 +5,17 @@ Dialog Rules (Skynet Rules section 18), and it is **the standard for every Devic
 
 The idea: the things you set most are on the dialog itself. Everything else is one click away in a small pop-up.
 
+## Adding a pump
+
+1. In Edit layout, click **Pumps > Pump, on / off (relay or SSR)**.
+2. **Pick the pump** from the list. Each one has its picture: March 809 and 815, Chugger, Blichmann Riptide, Topsflo TD5 and
+   KegLand MKII. The picture you pick is the pump's Picture.
+3. The Add box opens with the pump's name as its title. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font
+   and colors) and **Label Visible**, 2 the **Interface (board)**, 3 an **Available Port**, 4 the **Tab**. Then 5 the
+   **Suggested Name** shows, made from them. Set the **Cover**, **X**, **Y**, **Width** and **Height** if you like. The **Device Type** (Pump) is shown greyed out: it comes from the list you picked.
+4. Press **➕ Add Device**. The Properties open. The **Interface** and **Port** are now greyed out and set; press **✏ Change**
+   beside one to change it on purpose.
+
 ## The two icons
 
 | Icon | What it does |
@@ -26,8 +37,9 @@ nothing is really saved until you press **💾 Save** on the dialog. Cancel with
    **Show label** switches it on or off.
 5. **Name**: starts as the Suggested Name (from the Label, Interface, pin and Device Type); you may type your own. It must be
    unique. A Process uses it: `Pump_Name.state = true`.
-6. **Pump**: **Interface**, **Pin ⬢** (the hexagon has Invert, One-shot time and One-shot pulses OFF), **When tapped ⬢**
-   (Tap target and Ask before changing) and Kind.
+6. **Pump**: **Interface (board)** and **Port** (greyed out once it is added: **✏ Change** to change one; the Port's ⬢ has
+   Invert, One-shot time and One-shot pulses OFF), then **Tab**, **X**, **Y**, **Width**, **Height**, **When tapped ⬢** (Tap
+   target and Ask before changing) and Kind. The **Device Type** is shown greyed out under the Name.
 7. **Graphic**: **Picture ⬢** (the hexagon has the On overlay and an optional second picture for when it is on), **Cover**
    (Help 111), and **Background picture (Image Path 1) ⬢** (the Graphic Dialog: Background #, Image Path 2 and 3, Back Colour).
 8. **On / Off text**: **Text when on ⬆ ⬢** (the hexagon has Hide the text, its size, colors and alignment, plus the Look and

@@ -814,6 +814,28 @@ function coverOf(e, v) {
   const c = PUMP_COVERS.find(x => x.toLowerCase() === want);
   return c ? { file: `${COVER_DIR}${pump}_Cover_${c}.svg` } : null;
 }
+// Add Pump step 2 (Fritz's drawing, 2026-11-04): pick the pump. Each row has its picture; the pick is the Pump's Picture
+// (one of the Skynet brew pump drawings above, Help 104) and the Add box's title.
+const PUMP_MODELS = [['March 809: poly 90° inlet', 'Pump_March_809_Poly_90_Inlet'], ['March 809: poly center inlet', 'Pump_March_809_Poly_Center_Inlet'],
+  ['March 809: stainless center inlet', 'Pump_March_809_SS_Center_Inlet'], ['March 815: poly 90° inlet', 'Pump_March_815_Poly_90_Inlet'],
+  ['March 815: poly center inlet', 'Pump_March_815_Poly_Center_Inlet'], ['March 815: stainless center inlet', 'Pump_March_815_SS_Center_Inlet'],
+  ['Chugger: 90° inlet (CPSS-IN)', 'Pump_Chugger_SS_90_Inlet'], ['Chugger: center inlet (CPSS-CI)', 'Pump_Chugger_SS_Center_Inlet'],
+  ['Blichmann Riptide', 'Pump_Riptide_SS_Center_Inlet'], ['Topsflo TD5', 'Pump_Topsflo_TD5_Poly_Center_Inlet'],
+  ['KegLand MKII: poly head', 'Pump_KegLand_MKII_Poly_Center_Inlet'], ['KegLand MKII: stainless head', 'Pump_KegLand_MKII_SS_Center_Inlet']];
+const pumpPic = k => `Images/Skynet/Pumps/${k}.svg`;
+const pumpModelOf = e => PUMP_MODELS.find(([, k]) => k === coverPump(e?.imageOff))?.[0] || null;
+function pickPump() {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'pumpPick', 'data-nomenu': '' });
+    const close = v => { d.close(); d.remove(); res(v); };
+    d.append(h('h3', {}, '2. Pick the pump'),
+      h('div', { class: 'pumpPickList' }, ...PUMP_MODELS.map(([t, k]) => h('button', { type: 'button', class: 'pumpPickRow', title: t, onclick: () => close(k) },
+        h('span', {}, t), h('img', { src: media(pumpPic(k)), alt: '' })))),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => close(undefined) }, '✖ Cancel')));
+    d.oncancel = ev => { ev.preventDefault(); close(undefined); };
+    document.body.append(d); d.showModal();
+  });
+}
 function picFlow(path) {
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
@@ -2378,12 +2400,19 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
   if (isDevice(e)) {      // Fritz, 2026-10-28: a new Device is 150 x 150 unless its size is changed in the Add Device box
     if (pick === 'skyValve') { e.w = extra.w; e.h = extra.h; } else e.w = e.h = 150;      // a Skynet Template keeps its own size
+    if (pick === 'pump' && !extra?.imageOff) {      // Add Pump step 2 (Fritz, 2026-11-04): which pump; its drawing is the Picture
+      const k = await pickPump(); if (!k) return;
+      e.imageOff = pumpPic(k); delete e.imageOn; e.imageOverlay = 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg'; e.cover = 'None';
+      what = PUMP_MODELS.find(m => m[1] === k)[0];
+      centerNew(e);       // so the Add box shows where it will go
+    }
     if (!(await newDeviceDialog(e, prefix, what))) return;
   }
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
-  centerNew(e);
-  stackNew(e);
+  if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
+  delete e._keepXY;
+  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box (Fritz, 2026-11-04)
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
@@ -2564,6 +2593,7 @@ for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventLis
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
 // 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
+const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
 const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
@@ -2609,21 +2639,36 @@ async function newDeviceDialog(e, hint, what) {
   // more than one (Rule 4.2's order otherwise). ➕ Add Device works once the Label is typed or Show label is off; then the rest
   // of its Properties open.
   const codes = typeCodes(e), n = (i => () => ++i + '. ')(0);
-  const fields = [['device', n() + 'Interface (board)', 'dev', 'addnew'],
-    ...(codes.length > 1 && !(e.template && e.typeCode) ? [['typeCode', n() + 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
+  // Fritz, 2026-11-04 (Rule 4.2): 1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name, so the Suggested Name is built from them in his
+  // naming order. The Name shows once 1-4 are done. The Device Type, when its kind has more than one, comes after the Interface.
+  const fields = [['label', n() + 'Label (shown on the tab, e.g. Fly Sparge)', 'text', null, false, false, ...(isPumpDev(e) ? [{ attr: LABEL_POP }] : [])], ['hideName', isPumpDev(e) ? 'Label Visible' : 'Show label (switch it off for no Label)', 'show'],
+    ['device', n() + 'Interface (board)', 'dev', 'addnew'],
+    ...(codes.length > 1 && !(e.template && e.typeCode) && !isPumpDev(e) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
     [port[0], n() + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
+    ['workspace', n() + 'Tab', 'ws', 'addnew'],
     ['name', n() + 'Suggested Name (you may type your own)', 'text'],
-    ['label', n() + 'Label (shown on the tab, e.g. Fly Sparge)', 'text'], ['hideName', 'Show label (switch it off for no Label)', 'show'],
-    ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num']];
+    // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too, and its Device Type shown greyed out
+    ...(isPumpDev(e) ? [COVER_FIELDS({})[0].map((x, i) => i === 1 ? 'Cover' : i === 4 ? false : x), ['x', 'X (Horizontal)', 'num'], ['y', 'Y (Vertical)', 'num']] : []),
+    ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num'],
+    ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro']] : [])];
   work.w = e.w; work.h = e.h;
-  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
+  { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
+  if (isPumpDev(e) && !work.typeCode) work.typeCode = 'Pump';      // the list it was picked in (Rule 4.2): shown greyed out, read only
+  if (isPumpDev(e)) Object.assign(work, { x: e.x, y: e.y, cover: e.cover || 'None', imageOff: e.imageOff, subtype: e.subtype, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
-  const gate = () => { const w = { ...work }; try { readFields(w, body); } catch { } const ok = !!String(w.label || '').trim() || !!w.hideName; for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : 'Type a Label first, or switch Show label off'; } };
+  // ➕ Add Device and the Name wait for 1-4 (Fritz, 2026-11-04): a Label (or Show label off), the Interface, the Port and the Tab
+  const gate = () => {
+    const w = { ...work }; try { readFields(w, body); } catch { }
+    const lab = !!String(w.label || '').trim() || !!w.hideName, rest = !!w.device && w[port[0]] !== undefined && String(w[port[0]]).trim() !== '' && !!w.workspace, ok = lab && rest;
+    for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : !lab ? 'Type a Label first, or switch Show label off' : 'Pick the Interface, the Port and the Tab first'; }
+    const nb = body.querySelector('[data-k="name"]'); if (nb) for (const x of [nb, nb.previousElementSibling]) x?.classList.toggle('hidden', !ok);
+  };
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
-      const shown = dialog(`Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
+      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
       gate();
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
@@ -2635,11 +2680,24 @@ async function newDeviceDialog(e, hint, what) {
         gate();
         if (ev.target === nameBox) { touched = nameBox.value.trim() !== '' && nameBox.value !== last; return; }
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
+        if (ev.type === 'change' && ev.target.dataset?.k === 'workspace' && ev.target.value === ADD_TAB) return $('#dlg').close('addTab');
         const w = { ...work }; try { readFields(w, body); } catch { }
         fillFree(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
       };
       const r = await shown;
+      if (r === 'addTab') {       // ➕ Add new Tab…: keep what is typed, build the Tab, then back here with it picked
+        const was = work.workspace;
+        try { readFields(work, body); } catch { }
+        if (!touched) delete work.name;               // a Name not typed by hand is made again with the new Tab
+        body.oninput = body.onchange = null;          // Tab settings uses the same dialog: its own buttons and handlers while it is open
+        for (const b of oks) { b.textContent = labels0[0]; b.disabled = false; b.title = ''; }
+        for (const b of cancels) b.textContent = labels0[1];
+        work.workspace = (await addTabForDevice()) || was;
+        for (const b of oks) b.textContent = '➕ Add Device';
+        for (const b of cancels) b.textContent = '✖ Cancel';
+        continue;
+      }
       if (r === 'addIface') {      // ➕ Add new Interface…: the Add Interface pop-up, then back here with the new Interface picked
         try { readFields(work, body); } catch { }
         work.device = (await addInterfaceDialog()) || undefined;
@@ -2654,9 +2712,10 @@ async function newDeviceDialog(e, hint, what) {
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
-        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode']) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(isPumpDev(e) ? ['cover', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (+work.w > 0) e.w = +work.w;
         if (+work.h > 0) e.h = +work.h;
+        if (isPumpDev(e) && (+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
         e.name = name;
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
@@ -2694,6 +2753,7 @@ async function newProbeTee(kind) {
   if (!D.visible) e.visibility = 'hidden';
   if (!(await newDeviceDialog(e, 'Temp'))) return;
   useTabProfile(e); stackNew(e);
+  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 async function newThermowell(length) {
@@ -2704,6 +2764,7 @@ async function newThermowell(length) {
   if (!D.visible) e.visibility = 'hidden';
   if (!(await newDeviceDialog(e, 'Temp'))) return;
   useTabProfile(e); stackNew(e);
+  if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
 
@@ -3089,15 +3150,32 @@ function addIpFit(fit) {
   if (isIpFit(g)) delete g.label;          // a pipe fitting has no label, only its Skynet name (Tee_1)
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
-$('#addWs').onclick = () => {
-  const n = prompt('New tab name')?.trim(); if (!n) return;
-  const bad = elementNameError(n, 'Tab'); if (bad) return toast(bad, true);      // the same name rules as every other name (Rule 3.11)
-  if (draft.workspaces.some(w => w.name === n)) return toast('That name is used', true);
+// a new Tab (New tab, and ➕ Add new Tab… in the Add Device box): its name checked, a unique 2 letter Tab ID. Returns it, or null.
+function makeTab() {
+  const n = prompt('New tab name')?.trim(); if (!n) return null;
+  const bad = elementNameError(n, 'Tab'); if (bad) { toast(bad, true); return null; }      // the same name rules as every other name (Rule 3.11)
+  if (draft.workspaces.some(w => w.name === n)) { toast('That name is used', true); return null; }
   const tp = S.config.brewDefaults?.tabProfile;
   const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
-  draft.workspaces.push({ name: n, id, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) }); wsName = n; renderTabs(); renderWs();
-  toast(`Tab ${n} added, Tab ID ${id} (change it in Tab settings)`);
+  const w = { name: n, id, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
+  draft.workspaces.push(w); return w;
+}
+$('#addWs').onclick = () => {
+  const w = makeTab(); if (!w) return;
+  wsName = w.name; renderTabs(); renderWs();
+  toast(`Tab ${w.name} added, Tab ID ${w.id} (change it in Tab settings)`);
 };
+// ➕ Add new Tab… in the Add Device box's Tab list (Fritz, 2026-11-04): the Label, Interface and Port are kept while the new Tab is
+// built in Tab settings; once it is saved the Add Device box comes back with it picked. Returns its name, or undefined (nothing made).
+async function addTabForDevice() {
+  const w = makeTab(); if (!w) return undefined;
+  const keep = wsName; wsName = w.name;
+  const done = await editWorkspace();
+  if (!done) draft.workspaces = draft.workspaces.filter(x => x !== w);       // Cancel in Tab settings: no new Tab
+  wsName = draft.workspaces.some(x => x.name === keep) ? keep : wsName;
+  renderTabs(); renderWs();
+  return done ? w.name : undefined;
+}
 $('#wsProps').onclick = () => editWorkspace();
 // 👻 Hidden tab: a new Hidden_ Special Tab, named Hidden_1, Hidden_2 ... (rename the part after Hidden_ in Tab settings)
 $('#addHiddenWs').onclick = () => {
@@ -3658,8 +3736,9 @@ function pumpDeviceFields(it, item) {
     ['label', 'Label', 'text', null, false, 'b', { up: 2, attr: LABEL_POP }], ['hideName', 'Show label', 'show', null, false, 'b'],
     ['name', 'Name', 'text', null, false, 'b'],
     ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
-    ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]],
-    ['_pb', 'Pump', 'box'], ['device', 'Interface', 'dev', 'addnew', false, 'b'], ['channel', 'Pin (e.g. 22, or A5 = 59)', 'pin', 'digital', false, 'b', { attr: DEV_PORT_POP }],
+    ['typeCode', 'Device Type', 'ro'],
+    ['_pb', 'Pump', 'box'], ['device', 'Interface (board)', 'dev', 'addnew', false, 'b', { set: true }], ['channel', 'Port (pin, e.g. 22, or A5 = 59)', 'pin', 'digital', false, 'b', { set: true, attr: DEV_PORT_POP }],
+    ['workspace', 'Tab', 'ws', null, false, 'b'], ['x', 'X (Horizontal)', 'num'], ['y', 'Y (Vertical)', 'num'], ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num'],
     ['tap', 'When tapped', 'sel', ['default', 'none', 'toggle', ['hold', 'push button (ON only while held)'], 'dialog', ['script', 'process'], ['workspace', 'tab']], false, false, { attr: DEV_TAP_POP }],
     ['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true],
     ['_gb', 'Graphic', 'box'], ['imageOff', 'Picture', 'gpick', null, false, 'b', { attr: DEV_PIC_POP }], ...COVER_FIELDS(it).map(f => f[0] === 'cover' ? [f[0], 'Cover', ...f.slice(2)] : f),
@@ -3713,6 +3792,13 @@ function field(f, obj) {
   const x = f[6];
   if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
+  if (x?.set && out[1]) {      // set once it is added (Fritz's Add Pump drawing, 2026-11-04): greyed out until ✏ Change
+    const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
+    for (const i of ins()) i.disabled = true;
+    out[0].classList.add('greyed');
+    const chg = h('button', { type: 'button', class: 'nameBtn', title: 'Change it (a Process that uses this Device is not changed)', onclick: ev => { ev.preventDefault(); for (const i of ins()) i.disabled = false; out[0].classList.remove('greyed'); chg.remove(); } }, '✏ Change');
+    out[1] = h('div', { class: 'fldIcons' }, box, chg);
+  }
   if (x && out[1]) {
     const icons = [];
     if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Type it in a bigger box (${x.up} lines)`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
@@ -3906,8 +3992,10 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
   else if (kind === 'infonote') return [h('div', { class: 'full infoNote' }, label, ' ', infoIcon(opts))];     // a note with the orange ? (more about it)
-  else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];      // a section heading inside a dialog
-  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)));
+  else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];
+  else if (kind === 'ro') return [h('label', { class: 'greyed' }, label), h('input', { type: 'text', value: (opts ?? v) || '(none)', readonly: true, disabled: true, class: 'roField', title: 'Read only' })];      // shown, never saved (no data-k)      // a section heading inside a dialog
+  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.filter(w => opts !== 'addnew' || !w.build).map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)),
+    ...(opts === 'addnew' ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []));      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
   else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)),      // Fritz: the full Interface name first
     ...(opts === 'addnew' && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
@@ -4743,11 +4831,14 @@ async function editWorkspace() {
       if (others.some(x => x.name === work.name)) throw new Error('That tab name is used');
       work.id = work.id ? cleanTabId(work.id) : defaultTabId(work.name, others.map(x => x.id));
       if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
-    } catch (e) { return toast(e.message, true); }
+    } catch (e) { toast(e.message, true); return null; }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
     Object.keys(w).forEach(k => delete w[k]); Object.assign(w, work);     // a cleared box (picture "(none)", color Default) must remove the old value
+    renderTabs(); renderWs();
+    return w.name;           // saved: its name (➕ Add new Tab… in the Add Device box uses it)
   }
   renderTabs(); renderWs();
+  return null;
 }
 
 // ---------------------------------------------------------------- alarms / sound
