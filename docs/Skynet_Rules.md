@@ -496,9 +496,11 @@ no other way to make one. (2026-10-23, PR #102)
 deleted. What can be edited on it follows Rule 5.16. (2026-10-21; changed 2026-10-28)
 *Replaced:* "... that can be edited and deleted, even when it came from Skynet." (2026-10-21)
 
-5.9 **Deleted** (Fritz, 2026-11-04: "Delete Rule 5.9"). A pump's Orientation is in Rule 18.19.
-*Was:* "Equipment: valves have no inlet or outlet side; pumps have no orientation setting; BruControl VGC outputs are valves.
-Equipment types have Type, ports, Position and Standard lists that users can add to." (2026-10-04, PR #14)
+5.9 **Equipment:** valves have no inlet or outlet side; a pump's only orientation is its **Orientation** (Flip Horizontal /
+Flip Vertical, Rule 18.19; Fritz, 2026-11-04); BruControl
+VGC outputs are valves. Equipment types have Type, ports, Position and Standard lists that users can
+add to. (2026-10-04, PR #14)
+*Replaced:* "pumps have no orientation setting" (2026-10-04).
 
 5.10 **Flow rules:** flow only runs on pipes joined IP to IP, traced from running pumps. An OFF pump
 lets flow pass either way. Valves must be open. Dead ends show nothing. A check valve passes one way
@@ -1401,4 +1403,4 @@ greyed out with its pump name. A **User pump** (its own picture) has **one path 
 - 2026-11-04: Rule 18.15: the standard for every new Device dialog: Label, Interface, Port and Tab first, nothing else shows until they are done (only the greyed Device Type), then the Name on top of the other properties. The Label must be typed (Show label off no longer skips it); Rule 4.2 changed to match. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 18.18 (Device Type shows its General Type first, e.g. DO: Pump; the saved type is unchanged). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Added Rule 18.19 (a Device dialog shows its Graphic with its Orientation; a Skynet pump's Graphic is set, a User pump has one path). Rule 7.10: exception, a User pump has one path. Rule 18.15: ➕ Add Device stays pressable and says what is still missing (Fritz: "Add Device button does not work"). Help 82 and 115 updated. (thread "Set the drill-down dialog standard for Devices")
-- 2026-11-04: Rule 5.9 deleted (Fritz); its text kept under the number as *Was*. (thread "Set the drill-down dialog standard for Devices")
+- 2026-11-04: Rule 5.9 changed (Fritz picked the recommended wording): pumps have an Orientation (Flip Horizontal / Vertical, Rule 18.19); the rest of 5.9 stays. (thread "Set the drill-down dialog standard for Devices")
