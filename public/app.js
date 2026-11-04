@@ -2641,16 +2641,21 @@ async function newDeviceDialog(e, hint, what) {
   const codes = typeCodes(e), n = (i => () => ++i + '. ')(0);
   // Fritz, 2026-11-04 (Rule 4.2): 1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name, so the Suggested Name is built from them in his
   // naming order. The Name shows once 1-4 are done. The Device Type, when its kind has more than one, comes after the Interface.
-  const fields = [['label', n() + 'Label (shown on the tab, e.g. Fly Sparge)', 'text', null, false, false, ...(isPumpDev(e) ? [{ attr: LABEL_POP }] : [])], ['hideName', isPumpDev(e) ? 'Label Visible' : 'Show label (switch it off for no Label)', 'show'],
-    ['device', n() + 'Interface (board)', 'dev', 'addnew'],
-    ...(codes.length > 1 && !(e.template && e.typeCode) && !isPumpDev(e) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`])]] : []),
-    [port[0], n() + (port[2] === 'pin' && e.type !== 'stepper' ? 'Available Ports / Pins' : port[1]), ...port.slice(2, 3), ...(port[2] === 'pin' ? ['free'] : port.slice(3))],
-    ['workspace', n() + 'Tab', 'ws', 'addnew'],
-    ['name', n() + 'Suggested Name (you may type your own)', 'text'],
-    // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too, and its Device Type shown greyed out
-    ...(isPumpDev(e) ? [COVER_FIELDS({})[0].map((x, i) => i === 1 ? 'Cover' : i === 4 ? false : x), ['x', 'X (Horizontal)', 'num'], ['y', 'Y (Vertical)', 'num']] : []),
-    ['w', 'Width (pixels)', 'num'], ['h', 'Height (pixels)', 'num'],
-    ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro']] : [])];
+  // Fritz, 2026-11-04 (his Pump example): short field names, the rest of the explanation in the tip of each name (Rule 18.16);
+  // the Interface and its Available Ports on one line; the Name, Cover, X, Y, Width and Height show once 1-3 are done.
+  const pinPort = port[2] === 'pin', portF = [port[0], pinPort ? 'Available Ports' : port[1], pinPort ? 'pinsel' : port[2], ...port.slice(3)];
+  const T = DEVICE_TIPS, after = { after: true };
+  const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(isPumpDev(e) ? { attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['device', n() + 'Interface (board)', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + T.port : ''), ...(pinPort ? { with: portF } : {}) }],
+    ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
+    ...(codes.length > 1 && !(e.template && e.typeCode) && !isPumpDev(e) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
+    ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
+    ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
+    ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
+    // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
+    ...(isPumpDev(e) ? [[...COVER_FIELDS({})[0].slice(0, 1), 'Cover', 'sel', COVER_CHOICES, false, false, { tip: T.cover, ...after }], ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
+    ...(isPumpDev(e) ? [['typeCode', 'Device Type', 'ro', null, false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (isPumpDev(e) && !work.typeCode) work.typeCode = 'Pump';      // the list it was picked in (Rule 4.2): shown greyed out, read only
@@ -2663,7 +2668,7 @@ async function newDeviceDialog(e, hint, what) {
     const w = { ...work }; try { readFields(w, body); } catch { }
     const lab = !!String(w.label || '').trim() || !!w.hideName, rest = !!w.device && w[port[0]] !== undefined && String(w[port[0]]).trim() !== '' && !!w.workspace, ok = lab && rest;
     for (const b of oks) { b.disabled = !ok; b.title = ok ? '' : !lab ? 'Type a Label first, or switch Show label off' : 'Pick the Interface, the Port and the Tab first'; }
-    const nb = body.querySelector('[data-k="name"]'); if (nb) for (const x of [nb, nb.previousElementSibling]) x?.classList.toggle('hidden', !ok);
+    for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !ok);
   };
   try {
     for (;;) {
@@ -2674,7 +2679,15 @@ async function newDeviceDialog(e, hint, what) {
       if (!touched) nameBox.value = last;
       // the Port list: only the free pins on this Interface that fit this Device Type, best first (Fritz, 2026-10-23)
       const free = h('datalist', { id: 'pins-free' }); body.append(free);
-      const fillFree = w => free.replaceChildren(...(w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : []).map(p => { const t = pinLabel(p, boardOfDevice(w, S.config.devices)); return h('option', { value: p, label: t }, t); }));
+      const portSel = body.querySelector(`select[data-k="${port[0]}"]`);
+      const fillFree = w => {
+        const ps = w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : [];
+        const opt = p => { const t = pinLabel(p, boardOfDevice(w, S.config.devices)); return h('option', { value: p, label: t }, t); };
+        if (!portSel) return free.replaceChildren(...ps.map(opt));
+        const cur = portSel.value || String(w[port[0]] ?? '');
+        portSel.replaceChildren(h('option', { value: '' }, w.device ? '(pick)' : '(Interface first)'), ...ps.map(opt), ...(cur && !ps.map(String).includes(cur) ? [h('option', { value: cur }, cur)] : []));
+        portSel.value = cur;
+      };
       fillFree(work);
       body.oninput = body.onchange = ev => {
         gate();
@@ -3792,6 +3805,15 @@ function field(f, obj) {
   const x = f[6];
   if (f[2] === 'attrhead' && x?.attr) return [h('div', { class: 'full dlgHead attrHead' }, f[1], ' ',
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
+  if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface (board) and its Available Ports)
+    const o2 = fieldOne(x.with, obj);
+    out[1] = h('div', { class: 'fldPair' }, out[1], h('span', { class: 'pairLbl' }, x.with[1]), o2[1]);
+  }
+  if (x?.tip && out[0]) {        // Rule 18.16: the name stays short; hover it (or tap it) for more
+    out[0].classList.add('tipLbl'); out[0].title = x.tip;
+    out[0].addEventListener('click', ev => { if (ev.target === out[0]) { ev.preventDefault(); fieldTip(out[0].textContent, x.tip); } });
+  }
+  if (x?.after) for (const o of out) o?.classList?.add('afterStep', 'hidden');
   if (x?.set && out[1]) {      // set once it is added (Fritz's Add Pump drawing, 2026-11-04): greyed out until ✏ Change
     const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
     for (const i of ins()) i.disabled = true;
@@ -3800,10 +3822,10 @@ function field(f, obj) {
     out[1] = h('div', { class: 'fldIcons' }, box, chg);
   }
   if (x && out[1]) {
-    const icons = [];
+    const icons = []; let wrap;
     if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Type it in a bigger box (${x.up} lines)`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
     if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
-    const wrap = h('div', { class: 'fldIcons' }, out[1], ...icons); out[1] = wrap;
+    if (icons.length) { wrap = h('div', { class: 'fldIcons' }, out[1], ...icons); out[1] = wrap; }
   }
   if (f[5] === 'b' && out[0]?.tagName === 'LABEL') out[0].classList.add('strong');      // a main field: its name in bold
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
@@ -3817,6 +3839,26 @@ function field(f, obj) {
   }
   return out;
 }
+// the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
+function fieldTip(name, text) {
+  const d = h('dialog', { class: 'tipDlg', 'data-nomenu': '' }, h('h4', {}, String(name).replace(/^\d+\.\s*/, '')), h('p', {}, text),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => d.close() }, 'Close')));
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); d.showModal();
+}
+// the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
+const DEVICE_TIPS = {
+  label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
+  labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
+  iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
+  port: 'Available Ports: only the free pins on this board that fit this Device (for example 22, or A5 = 59).',
+  tab: 'The Tab this Device goes on. Its Tab ID ends the Suggested Name. ➕ Add new Tab… makes a new Tab and comes back here.',
+  name: 'Made from the Label, Interface, Port, Device Type and Tab. You may type your own; it must be unique.',
+  type: 'Comes from the list it was picked in. It is part of the Suggested Name.',
+  cover: 'A colored cover drawn over the pump picture (the Skynet pump drawings only). None to start.',
+  xy: 'Where it goes on the Tab, in pixels from the top left corner.',
+  size: 'Its size on the Tab in pixels. 150 x 150 to start.',
+};
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && kind === 'text' && obj._ref && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
   if (kind === 'path') { opts = /sound/i.test(key) ? 'sounds' : 'pictures'; kind = 'gpick'; }   // every picture / sound path is a dropdown with Add new
@@ -3994,10 +4036,11 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'infonote') return [h('div', { class: 'full infoNote' }, label, ' ', infoIcon(opts))];     // a note with the orange ? (more about it)
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];
   else if (kind === 'ro') return [h('label', { class: 'greyed' }, label), h('input', { type: 'text', value: (opts ?? v) || '(none)', readonly: true, disabled: true, class: 'roField', title: 'Read only' })];      // shown, never saved (no data-k)      // a section heading inside a dialog
-  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.filter(w => opts !== 'addnew' || !w.build).map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.name)),
-    ...(opts === 'addnew' ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []));      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.name}   (ID ${d.id}_)` : d.name)),      // Fritz: the full Interface name first
-    ...(opts === 'addnew' && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
+  else if (kind === 'ws') input = h('select', { 'data-k': key, 'data-kind': kind, title: PICK_TIP }, ...draft.workspaces.filter(w => !String(opts).startsWith('addnew') || !w.build).map(w => h('option', { value: w.name, ...(w.name === v ? { selected: true } : {}) }, w.id ? `${w.id}: ${w.name}` : w.name)),      // Fritz, 2026-11-04: "Tab ID: Tab Name", e.g. BH: Brewhouse
+    ...(String(opts).startsWith('addnew') ? [h('option', { value: ADD_TAB }, '➕ Add new Tab…')] : []));
+  else if (kind === 'pinsel') input = h('select', { 'data-k': key, 'data-kind': 'pin', class: 'pinSel' }, h('option', { value: v ?? '' }, v ?? '(pick)'));      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
+    ...(String(opts).startsWith('addnew') && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
     ...controllableNames((draft || S.config).elements).map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)),
     ...(v && !controllableNames((draft || S.config).elements).includes(v) ? [h('option', { value: v, selected: true }, v + ' (no ON / OFF state: pick another)')] : []));
