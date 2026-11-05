@@ -50,7 +50,9 @@
     "tapSource",
     "showOnOffText",
     "onText",
-    "offText"
+    "offText",
+    "tap",
+    "imageOverlay"
   ],
   "notes": "Seen from the front (Fritz's drawing, 2026-11-02): both IPs at the center of the opening (Rule 5.20). A front view has no orientation to set."
 }
