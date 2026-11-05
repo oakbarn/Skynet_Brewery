@@ -1001,6 +1001,7 @@ dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .fldPair > select:first-child { flex: 1; min-width: 0; }
 .fldPair .pairLbl { white-space: nowrap; font-size: .9em; opacity: .8; }
 .fldPair select.pinSel { flex: none; width: 110px; }
+.fldPair > input:not([type="checkbox"]) { flex: 1; min-width: 0; width: auto; }      /* two number or text boxes on one line (a PWM: Start value and Decimals) */
 /* the Graphic shown on a Device dialog with its Orientation (Rule 18.19) */
 .devPreviewWrap { display: flex; align-items: center; justify-content: flex-start; min-height: 60px; }
 .devPreview { position: relative; display: inline-block; line-height: 0; background: var(--panel2, transparent); border-radius: 6px; }
