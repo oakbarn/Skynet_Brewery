@@ -56,10 +56,11 @@ export function graphicTopic(g) {
       return g.vesselType === 'vessel' ? ['vessel-tab'] : ['equipment', 'other-equipment'];
     case 'ip':
       if (g.fitting === 'manualValve') return ['pipe-fittings-and-manual-valves', 'the-manual-valve-widget'];
+      if (g.fitting === 'qd') return ['quick-disconnects-and-qd-hoses', 'the-quick-disconnect-widget'];      // Rule 5.28, Help 127
       if (['elbow90', 'elbow45', 'tee', 'cross'].includes(g.fitting)) return ['tc-pipe-fittings'];
       if (g.fitting && g.fitting !== 'point') return ['pipe-fittings-and-manual-valves', 'pipe-fittings'];
       return ['ip-snap-and-valve-pictures', 'snap-to-align'];
-    case 'pipe': return ['pipe-and-hose-flow-colors'];      // Rule 5.21 (Rule 5.19's pipe angles: Help 105)
+    case 'pipe': return g.qd ? ['quick-disconnects-and-qd-hoses', 'the-quick-disconnect-hose'] : ['pipe-and-hose-flow-colors'];      // Rule 5.21; a QD hose Rule 5.28      // Rule 5.21 (Rule 5.19's pipe angles: Help 105)
     case 'image': return ['picture-paths'];
     case 'clone': return ['cloned-devices', 'a-clone-s-properties'];
     case 'override': return ['override-button'];
@@ -108,7 +109,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'bfit', templateCls: 'skynet', fittings: [{ kind: 'tee' }] }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
   ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
   ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
-  graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }), graphicTopic({ kind: 'clone' }), graphicTopic({ kind: 'override' }),
+  graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'pipe', hose: true, qd: true }), graphicTopic({ kind: 'ip', fitting: 'qd' }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }), graphicTopic({ kind: 'clone' }), graphicTopic({ kind: 'override' }),
   ...BAR.map(b => b[1])];
 
 // The yellow ? icons on the ☰ Menu tabs: a heading in a Menu tab goes to the Help part named for it ("_" = any other heading).

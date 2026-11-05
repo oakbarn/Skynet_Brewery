@@ -60,6 +60,11 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 #pipes .hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; pointer-events: none; }
 #ws.editing #pipes .hit { pointer-events: stroke; }
 #pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
+/* the free end of a Quick Disconnect hose (Rule 5.28): grabbed outside Edit layout with the right mouse button or a finger */
+#ws > .qdEnd { position: absolute; z-index: 50; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,.15); border: 3px dashed #ffd24a; cursor: grab; touch-action: none; }
+#ws > .qdEnd:hover { background: rgba(255,210,74,.35); }
+#ws .gfx.ip.qd { background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 3; filter: drop-shadow(0 0 2px #000); }
+#pipes .qdTarget { fill: none; stroke: #3ddc84; stroke-width: 4; pointer-events: none; filter: drop-shadow(0 0 2px #000); }
 #pipes .pipe, #pipes .flow, #pipes .drawing, #pipes .reducer { pointer-events: none; }
 #pipes .drawing { fill: none; stroke: var(--accent); stroke-width: 5; stroke-dasharray: 10 5; filter: drop-shadow(0 0 1.5px #000); }
 #pipes .pipeLabel { pointer-events: none; paint-order: stroke; stroke: #000; stroke-width: 3px; stroke-linejoin: round; }
