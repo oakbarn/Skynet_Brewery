@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -41,8 +41,10 @@ const IMG_SLOT = /^backpath(?:_(\d+))?$/;
 const slotKey = n => n === 1 ? 'backpath' : 'backpath_' + n;
 const slotsOf = e => Object.keys(e).filter(k => IMG_SLOT.test(k) && e[k]).map(k => +(IMG_SLOT.exec(k)[1] ?? 1)).sort((a, b) => a - b);
 function slotImage(e, v) {
-  const b = String(v.background ?? '').trim(), n = /^-?\d+$/.test(b) ? +b : 0;
-  return n >= 1 ? (v[slotKey(n)] ?? e[slotKey(n)] ?? '') : '';
+  // in Edit layout the layout being edited wins (a new item has no value yet; a thermowell put on a front IP changes its picture, Rule 5.30)
+  const pick = k => editing ? (e[k] ?? v[k]) : (v[k] ?? e[k]);
+  const b = String(pick('background') ?? '').trim(), n = /^-?\d+$/.test(b) ? +b : 0;
+  return n >= 1 ? (pick(slotKey(n)) ?? '') : '';
 }
 const hasPictures = (e, v) => !!(slotsOf(e).length || v.backpath || v.backpath_2 || v.backpath_3);
 
@@ -766,7 +768,7 @@ function buildIp(g) {
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e));
+const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
 // Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
 // "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
 const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)) || isProbeTee(e));
@@ -949,10 +951,11 @@ function ipAt(e, end) {
   return [Math.round((gm.x || 0) + cl(x) * (gm.w || 120)), Math.round((gm.y || 0) + cl(y) * (gm.h || 60))];
 }
 const devIps = e => {
-  if (isProbeTee(e)) {            // a tee with a Temperature Probe: an IP at the center of each open ferrule face, flow either way (Rule 5.20)
-    const gm = elGeom(e), x = gm.x || 0, y = gm.y || 0, w = gm.w || 170, hh = gm.h || 85, fl = flipPt(e);
-    return PROBE_TEES[e.probeTee].ends.map(([fx, fy], i) => ({ id: `dev:${e.name}:${i ? 'out' : 'in'}`, label: `${e.name} end ${i + 1}`, text: '', c: fl([Math.round(x + fx * w), Math.round(y + fy * hh)]) }));
-  }
+  if (isProbeTee(e))            // a tee with a Temperature Probe: an IP at the center of each open ferrule face, flow either way (Rule 5.20),
+    // on the same spots as the TC Pipe Fittings Widget tee of the same shape (Rule 5.30), turned and flipped with its picture
+    return PROBE_TEES[e.probeTee].ends.map(([fx, fy], i) => ({ id: `dev:${e.name}:${i ? 'out' : 'in'}`, label: `${e.name} end ${i + 1}`, text: '', c: elPicPt(e, fx, fy).map(Math.round) }));
+  if (isThermowell(e))          // a Thermowell: one IP on the outer face of its TC cap; seen from the front, the middle (Rule 5.30)
+    return [{ id: `dev:${e.name}:in`, label: `${e.name} thermowell`, text: '', c: elPicPt(e, ...(e.front ? [0.5, 0.5] : [0, 0.5])).map(Math.round) }];
   const v = !isInline(e) && (e.subtype === 'valve' || e.subtype === 'propValve');
   if (!v) { const pp = e.subtype === 'pump' ? picEnds(e) : null, pf = flipPt(e);    // a Skynet pump drawing: IPs on its real ports
     return [{ id: `dev:${e.name}:in`, label: `${e.name} inlet`, text: 'IN', c: pp ? pf(pp[0]) : sidePt(e, e.ipIn || 'left') },
@@ -1033,7 +1036,8 @@ function splitPorts(it) {
 }
 function splitPipeFor(it) {
   if (!editing || !draft || !it || it.locked) return null;
-  if (isTcFit(it)) return tcFitOnPipe(it);         // a tee or a cross (Rule 5.25)
+  if (isTcFit(it)) return tcFitOnPipe(it) || teeOnHose(it);         // a tee or a cross (Rule 5.25), on a hose too (Rule 5.30)
+  if (isProbeTee(it)) return probeTeeOnPipe(it) || teeOnHose(it);    // a tee with a Temperature Probe (Rule 5.30)
   const mv = isMv(it);
   if (!mv && (it.kind || !SPLIT_SUBS.includes(it.subtype) || !hasIps(it))) return null;
   const ws = it.workspace, ports = splitPorts(it);
@@ -1055,7 +1059,11 @@ function splitPipeFor(it) {
     if (!best || d < best.d) best = { p, plan, d };
   }
   if (!best) return why;
-  const { p, plan } = best, ends = { A: p.from, B: p.to };
+  return applySplit(it, best.p, best.plan, mv ? (it.name || 'the Manual Valve') : it.name, '5.26');
+}
+// put the item into the pipe as splitAt planned: move it onto the pipe's line, put in the joints (they become elbows) and the pieces
+function applySplit(it, p, plan, who, rule) {
+  const ws = it.workspace, ends = { A: p.from, B: p.to };
   it.x = (it.x || 0) + plan.shift[0]; it.y = (it.y || 0) + plan.shift[1];
   if (plan.drop) { const own = ownCoupling(ends[plan.drop], p); if (own) draft.graphics = draft.graphics.filter(g => g !== own); }
   const joints = plan.joints.map(c => {
@@ -1070,9 +1078,84 @@ function splitPipeFor(it) {
     q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
     if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
   });
-  const who = mv ? (it.name || 'the Manual Valve') : it.name;
-  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (new: ${made.join(', ')})` : ''} (Rule 5.26).`
-    : `${p.name} was cut in two at ${who}: ${[p.name, ...made].join(', ')} (Rule 5.26).` };
+  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (new: ${made.join(', ')})` : ''} (Rule ${rule}).`
+    : `${p.name} was cut in two at ${who}: ${[p.name, ...made].join(', ')} (Rule ${rule}).` };
+}
+// A tee with a Temperature Probe put on a pipe cuts it as a tee does (Fritz, 2026-11-05: "The tees need to Break a Line if added to
+// a Pipe or hose just as normal tees", Rule 5.30). Its two IPs face away from its bend. A probe in the branch leaves the run
+// open: the run goes along the pipe (it is turned if it was across) and the pipe is cut in two, one piece on each end. A probe in
+// from the end leaves an end and the branch, at right angles: the end goes on the pipe and the branch is taken round with 90
+// degree elbows, as for a pump (Rule 5.26). Over an open pipe end the pipe is made shorter. It then takes the pipe's size.
+function probeTeePorts(it) {
+  const b = elPicPt(it, ...PROBE_TEES[it.probeTee].bend);
+  return devIps(it).map(q => { const dx = q.c[0] - b[0], dy = q.c[1] - b[1]; return { id: q.id, c: q.c, f: Math.abs(dx) > Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)] }; });
+}
+function probeTeeOnPipe(it) {
+  const ws = it.workspace, t = PROBE_TEES[it.probeTee];
+  const pipes = () => draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked);
+  const boxOf = () => { const gm = elGeom(it); return { x: gm.x || 0, y: gm.y || 0, w: gm.w || 160, h: gm.h || 100 }; };
+  const gapOf = p => Math.max(45, Math.ceil(9 * pipeWidth(p) / 5) * 5);
+  const planOn = p => splitAt(p.points[0], p.points[1], boxOf(), probeTeePorts(it), { gap: gapOf(p), aOpen: !!ownCoupling(p.from, p), bOpen: !!ownCoupling(p.to, p) });
+  const own = devIps(it).flatMap(q => pipesOn(q.id, ws));
+  if (own.length) {
+    const p = pipes().find(p => !own.includes(p) && planOn(p));
+    return p ? { ok: false, text: `${p.name || 'The pipe'} was not cut: ${it.name} is still joined to other pipes. Take those pipes off it first (Rule 5.30).` } : null;
+  }
+  const keep = { x: it.x, y: it.y, w: it.w, h: it.h, rot: it.rot }, back = st => { for (const [k, v] of Object.entries(st)) if (v === undefined) delete it[k]; else it[k] = v; };
+  const b0 = elPicPt(it, ...t.bend), base = elRot(it);
+  let pick = null, why = null;
+  for (const k of [0, 90, 270, 180]) {          // as it is first, then turned about its bend
+    back(keep);
+    const r = (base + k) % 360; if (r) it.rot = r; else delete it.rot;
+    turnElBox(it, keep);
+    const b1 = elPicPt(it, ...t.bend); it.x = +((it.x || 0) + b0[0] - b1[0]).toFixed(2); it.y = +((it.y || 0) + b0[1] - b1[1]).toFixed(2);
+    let best = null;
+    for (const p of pipes()) {
+      const plan = planOn(p); if (!plan) continue;
+      if (!plan.ok) { why = why || { ok: false, text: `${p.name || 'The pipe'} was not cut: ${plan.why}. Move it and drop it again (Rule 5.30).` }; continue; }
+      const d = p.points[0][1] === p.points[1][1] ? Math.abs(p.points[0][1] - b1[1]) : Math.abs(p.points[0][0] - b1[0]);
+      if (!best || d < best.d) best = { p, plan, d };
+    }
+    if (best && (!pick || (pick.plan.joints.length && !best.plan.joints.length))) pick = { ...best, st: { x: it.x, y: it.y, w: it.w, h: it.h, rot: it.rot } };
+    if (pick && !pick.plan.joints.length) break;          // straight in: the best there is
+  }
+  if (!pick) { back(keep); return why; }
+  back(pick.st);
+  if (sizeProbeTee(it, pipeWidth(pick.p))) {         // the pipe's size; ask again at that size
+    const plan = planOn(pick.p);
+    if (plan?.ok) pick.plan = plan; else back(pick.st);
+  }
+  return applySplit(it, pick.p, pick.plan, it.name, '5.30');
+}
+// A tee (a TC Pipe Fittings tee or cross, or a tee with a Temperature Probe) dropped on a hose cuts the hose (Fritz, 2026-11-05,
+// Rule 5.30): a hose bends, so the tee stays where it is and each piece of the hose goes to one end of its run (a probe tee: its
+// two IPs). Not a Quick Disconnect hose (Rule 5.28: its free end moves) and not a locked one.
+function teeOnHose(u) {
+  if (!editing || !draft || !u || u.locked) return null;
+  const ws = u.workspace;
+  let bend, arms, box;
+  if (isProbeTee(u)) {
+    bend = elPicPt(u, ...PROBE_TEES[u.probeTee].bend); arms = devIps(u).map(q => ({ id: q.id, c: q.c }));
+    const gm = elGeom(u); box = { x: gm.x || 0, y: gm.y || 0, w: gm.w || 160, h: gm.h || 100 };
+  } else {
+    if (u.onVessel || !['tee', 'cross'].includes((u.fittings || [])[0]?.kind)) return null;
+    const A = tcArms(u); if (!A) return null;
+    const run = A.arms.flatMap((a, i) => A.arms.slice(i + 1).filter(b => a.v[0] * b.v[0] + a.v[1] * b.v[1] < -0.99).map(b => [a, b]))[0];
+    if (!run) return null;
+    bend = A.b; arms = run.map(q => ({ id: q.id, c: q.c.map(Math.round) })); box = { x: u.x || 0, y: u.y || 0, w: u.w || 90, h: u.h || 90 };
+  }
+  if (arms.some(q => pipesOn(q.id, ws).length)) return null;
+  const near = Math.max(15, Math.min(box.w, box.h) * 0.3);
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.hose && !p.qd && !p.locked && p.workspace === ws)) {
+    const r = cutHose(p.points, bend, arms, box, { near }); if (!r) continue;
+    const q = Object.assign(clone(p), { id: newId() });
+    for (const k of ['name', 'label', 'labelVisible', '_key']) delete q[k];
+    q.points = r.pieces[1].pts; q.from = r.pieces[1].from; q.to = p.to;
+    p.points = r.pieces[0].pts; p.to = r.pieces[0].to;
+    giveName(q, draft.graphics); draft.graphics.push(q);
+    return { ok: true, text: `${p.name || 'The hose'} was cut in two at ${u.name}: ${[p.name, q.name].filter(Boolean).join(', ')} (Rule 5.30).` };
+  }
+  return null;
 }
 // Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve Widget (its one IP before Rule 5.24) is joined to the
 // nearer of its two ends instead (two pipes take one end each). Done as a Tab is drawn and once when Edit layout opens, so Save
@@ -1098,7 +1181,7 @@ function mvJoinEnds(lay, ws) {
 function buildDevIp(e, q) {
   const n = h('div', { class: 'gfx ip devip', 'data-ipid': q.id, 'data-dev': e.name, title: q.label }, h('span', {}, q.text));
   place(n, { x: q.c[0] - 11, y: q.c[1] - 11, w: 22, h: 22 });
-  n.style.setProperty('--ipc', isInline(e) ? '#a87ee8' : e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
+  n.style.setProperty('--ipc', isInline(e) || isThermowell(e) ? '#a87ee8' : e.subtype === 'pump' ? '#3fbf6a' : '#4fb3ff');
   return n;
 }
 function placeDevIps(e) {
@@ -1290,7 +1373,11 @@ function withLook(e, v) {
 const shownName = (e, v) => editing ? (e.label || e.name) : (v.label || e.name);
 function fillEl(n, e0) {
   // a clone shows its parent's values, with its own Visible (a Process moving the parent leaves the clone where it is)
-  const v = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {}, e = withLook(e0, v);
+  const v0 = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {};
+  // In Edit layout the pictures follow the Properties you just saved (Fritz, 2026-11-05: a valve's new Orientation showed only after
+  // Save layout): the Brain's .image / .imageOn / .imageOff / .imageOverlay are last Save layout's, so here they are the item's own
+  // (as the Brain makes them, lib/store.js), as shownName does for the Label
+  const v = editing ? { ...v0, image: e0.backpath ?? '', imageon: e0.imageOn ?? '', imageoff: e0.imageOff ?? '', imageoverlay: e0.imageOverlay ?? '' } : v0, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;
@@ -1415,8 +1502,12 @@ function fillEl(n, e0) {
   n.style.backgroundColor = e.bgColor || (img || missing ? '' : bg(v.background));      // Back Colour (Image block): behind its picture
   if (e.alarmClass === 'user' && firstSet(v.backcolor, e.backColor)) n.style.backgroundColor = firstSet(v.backcolor, e.backColor);     // a User Alarm's .backcolor
   // a valve at 45 degrees (Fritz: on a 45 degree elbow) shows its vertical picture turned left or right
-  const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
+  // a probe tee or a thermowell turns with its Rotate (Rule 5.30): turned 90 or 270, its picture is as wide as its box is high
+  const turn = img && e.subtype === 'valve' ? { l45: -45, r45: 45 }[e.orientation] || 0 : img ? elRot(e) : 0, flip = img && (e.flipH || e.flipV);    // and a Flip Horizontal / Vertical mirrors it
   n.classList.toggle('turned', !!(turn || flip));
+  const side = !!img && turnsEl(e) && elRot(e) % 180 === 90;
+  n.classList.toggle('side', side);
+  if (side) { const gm = elGeom(e); n.style.setProperty('--picw', (gm.h || 60) + 'px'); n.style.setProperty('--pich', (gm.w || 120) + 'px'); }
   if (turn || flip) { n.style.backgroundImage = ''; n.style.setProperty('--pic', `url("${media(img)}")`); n.style.setProperty('--turn', turn + 'deg'); n.style.setProperty('--sx', e.flipH ? -1 : 1); n.style.setProperty('--sy', e.flipV ? -1 : 1); }
   else n.style.backgroundImage = img ? `url("${media(img)}")` : '';
   n.classList.toggle('has-img', !!img);
@@ -1821,6 +1912,7 @@ function ipNode(id, ws) {
     // a tap water valve that is open is a source: water pushes out of its out end only (Fritz, 2026-10-21: one way; the tap end
     // takes nothing in), or out of both ends when it is set to Both
     if (e.subtype === 'valve') return !on ? { closed: true } : tapWater(e) ? (tapOut(e) === 'both' || tapOut(e) === end ? { key: id, push: true } : { closed: true }) : { key: 'dev:' + dn, pass: true };
+    if (isThermowell(e)) return { closed: true };       // a thermowell fills its opening: no flow (Rule 5.30)
     if (isInline(e)) return { key: 'dev:' + dn, pass: true };
     if (e.subtype === 'propValve') return propPct(e) > 0 ? { key: 'dev:' + dn, pass: true } : { closed: true };
     return on ? { key: id, push: end === 'out', pull: end === 'in' } : { key: 'dev:' + dn, pass: true };
@@ -2311,6 +2403,7 @@ window.addEventListener('pointerup', () => {
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
+  if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
   if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
   if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
@@ -3121,7 +3214,9 @@ for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventLis
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
-const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
+// an Interface with no ID yet (Fritz, 2026-11-05: a Suggested Name came out as 22_E_L_Vlv_MBV1__BR) uses the ID the Brain gives it on
+// the next save (Rule 3.2: the first letters of its Name), so the name still starts with it (Rule 3.1)
+const ifaceIdOf = dev => { const ds = S.config.devices || [], d = ds.find(x => x.name === dev); return !d ? '' : d.id || defaultInterfaceId(d.name, ds.filter(x => x !== d).map(x => x.id)); };
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
 const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an analog pin
 const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
@@ -3199,18 +3294,21 @@ async function newDeviceDialog(e, hint, what) {
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after)] : []),
-    ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after)] : []),        // no Cover on a valve
+    ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
     ...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
     ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : 'Valve') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
+  // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
+  // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
+  if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !work.typeCode) work.typeCode = isPumpDev(e) ? 'Pump' : 'Valve';      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
   if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   if (isPumpDev(e)) work.cover = e.cover || 'None';
-  if (mbv) Object.assign(work, { imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
+  if (mbv) Object.assign(work, { tapwater: !!e.tapwater, closeAll: e.closeAll ?? true, openAll: e.openAll ?? true, imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
@@ -3299,7 +3397,7 @@ async function newDeviceDialog(e, hint, what) {
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? ['tap', 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (mbv && e.template) { e._orient = work._orient; skyOrientSwitch(e); delete e._orient; applyDeviceTemplate(e, devTemplate(e)); }     // the Orientation picks its Template; the fixed attributes stay the Template's (Rule 5.16)
         if (dd) { const d = { ...work }; dbFromWork(d); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; }
         if (+work.w > 0) e.w = +work.w;
@@ -3327,13 +3425,47 @@ const tempKindOf = key => tempKinds().find(t => t[0] === key)?.[2] || { sensor: 
 // ---- Tees with a Temperature Probe (Fritz, 2026-11-02): Temperature Device subtypes drawn as a TC 1.5 Instrument Tee or Long
 // Tee with the probe (purple) in the branch or in from one end. The probe fills that opening, so the other two are its IPs, at
 // the center of each ferrule's outer face (Rule 5.20). Flow passes either way, like an inline sensor. Made like a Thermowell.
+// Since Fritz, 2026-11-05 (Rule 5.30) they are the same size as the TC Pipe Fittings Widget tee of the same shape (Templates Tee
+// and Instrument_Tee: 160 x 102 and 160 x 69), with their IPs on the same spots, so one can take the other's place on a pipe.
+// bend: where the center lines of its openings meet. body: how thick the tee's body is, a part of the picture's width.
 const PROBE_TEES = {
-  Instrument_Branch: { label: 'Instrument Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Branch.svg', size: [170, 74], ends: [[0, 29 / 91.2], [1, 29 / 91.2]] },     // redrawn 2026-11-04
-  Instrument_Run: { label: 'Instrument Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Run.svg', size: [170, 74], ends: [[1, 29 / 91.2], [0.5, 1]] },
-  Long_Branch: { label: 'Long Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Branch.svg', size: [170, 108], ends: [[0, 29 / 134], [1, 29 / 134]] },     // Fritz's drawing 2026-11-04
-  Long_Run: { label: 'Long Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Run.svg', size: [170, 108], ends: [[1, 29 / 134], [0.5, 1]] },
+  Instrument_Branch: { label: 'Instrument Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Branch.svg', size: [160, 69], ends: [[0, 29 / 91.2], [1, 29 / 91.2]], bend: [0.5, 29 / 91.2] },     // redrawn 2026-11-04
+  Instrument_Run: { label: 'Instrument Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee_Probe_Run.svg', size: [160, 69], ends: [[1, 29 / 91.2], [0.5, 1]], bend: [0.5, 29 / 91.2] },
+  Long_Branch: { label: 'Long Tee, probe in the branch', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Branch.svg', size: [160, 102], ends: [[0, 29 / 134], [1, 29 / 134]], bend: [0.5, 29 / 134] },     // Fritz's drawing 2026-11-04
+  Long_Run: { label: 'Long Tee, probe in from the end', img: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee_Probe_Run.svg', size: [160, 102], ends: [[1, 29 / 134], [0.5, 1]], bend: [0.5, 29 / 134] },
 };
+const PROBE_TEE_BODY = 0.183;
 function isProbeTee(e) { return e?.type === 'temperature' && e.subtype === 'probeTee' && !!PROBE_TEES[e.probeTee]; }
+function isThermowell(e) { return e?.type === 'temperature' && e.subtype === 'thermowell'; }
+// Probe tees and thermowells turn (Rotate 0, 90, 180, 270) and flip with their picture and IPs (Fritz, 2026-11-05, Rule 5.30).
+// The box is the box as drawn: turned 90 or 270, it is as wide as the picture is high.
+const turnsEl = e => isProbeTee(e) || isThermowell(e);
+const elRot = e => turnsEl(e) ? ((Math.round((+e.rot || 0) / 90) * 90) % 360 + 360) % 360 : 0;
+const EL_ROTATE = [0, 90, 180, 270].map(d => [String(d), d ? d + ' degrees clockwise' : 'Not rotated']);
+function elPicPt(e, fx, fy) {
+  const gm = elGeom(e), r = elRot(e), W = gm.w || 120, H = gm.h || 60, side = r % 180 === 90;
+  return boxPoint({ x: gm.x || 0, y: gm.y || 0, w: W, h: H }, side ? H : W, side ? W : H, fx, fy, r, !!e.flipH, !!e.flipV);
+}
+// turn the box with the picture when Rotate goes from level to upright or back, about its middle
+function turnElBox(work, before) {
+  if ((elRot(work) % 180 === 90) === (elRot(before) % 180 === 90)) return;
+  const w = +work.w || before.w || 120, hh = +work.h || before.h || 60;
+  Object.assign(work, { w: hh, h: w, x: Math.round((+work.x || 0) + (w - hh) / 2), y: Math.round((+work.y || 0) + (hh - w) / 2) });
+}
+// a probe tee takes the size of the pipe it is put in (as a TC Pipe Fittings Widget does, Rule 5.25), growing about its bend so its
+// IPs stay on the pipe's line. Its width and height are kept at pipe size 10 (elGeom).
+function sizeProbeTee(e, pw) {
+  const t = PROBE_TEES[e.probeTee]; if (!t || !pw) return false;
+  const k = pipeSize(e.workspace) / 10, side = elRot(e) % 180 === 90;
+  const pwide = Math.round(pw / PROBE_TEE_BODY / k), phigh = Math.round(pwide * t.size[1] / t.size[0]);
+  const [w, hh] = side ? [phigh, pwide] : [pwide, phigh];
+  if (w === e.w && hh === e.h) return false;
+  const b0 = elPicPt(e, ...t.bend);
+  Object.assign(e, { w, h: hh });
+  const b1 = elPicPt(e, ...t.bend);
+  e.x = +((e.x || 0) + b0[0] - b1[0]).toFixed(2); e.y = +((e.y || 0) + b0[1] - b1[1]).toFixed(2);     // elGeom scales about the middle
+  return true;
+}
 async function newProbeTee(kind) {
   const t = PROBE_TEES[kind]; if (!t) return;
   const key = await choose(`2a. Type of Temperature Probe in the ${t.label}`, tempKinds().map(([k, l]) => [l, k]), tempKinds()[0][0]);
@@ -3356,6 +3488,77 @@ async function newThermowell(length) {
   if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
+
+// ---- A Thermowell or a Temperature Probe on an IP (Fritz, 2026-11-05, Rule 5.30). In Edit layout a Thermowell dropped with its IP
+// near another IP (30 px, as a Quick Disconnect, Rule 5.28) snaps on: its IP sits on that IP (a tee's branch, a vessel port).
+// A front facing IP (an opening seen face-on: a port on the front of a vessel, the opening of a front view valve or elbow) shows
+// it from the front: "A thermowell placed on a Front Facing IP needs the graphic to change to the same as a Probe (Circle TEE)".
+// "Probes placed on the Front have an implicit Thermowell": a plain Temperature Probe dropped with its middle on a front facing IP
+// becomes a Thermowell seen from the front; dragged off again it is the plain probe it was.
+const THERMOWELL_FRONT = 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Front.svg', FRONT_WELL = 40, WELL_SNAP = 30;
+function ipOwnerBox(id) {
+  const dn = devOfIp(id); if (dn !== null) { const e = elNamed(dn); return e ? elGeom(e) : null; }
+  const eq = eqOfIp(id); if (eq !== null) return L().graphics.find(g => g.id === eq) || null;
+  const g = L().graphics.find(x => x.id === id);
+  return g?.attachTo ? L().graphics.find(x => x.id === g.attachTo) || null : null;
+}
+// an IP well inside its item's picture, away from every edge, is an opening seen face-on
+function frontIp(id, c) {
+  const b = ipOwnerBox(id); if (!b || !c) return false;
+  const x = b.x || 0, y = b.y || 0, w = b.w || 0, hh = b.h || 0, m = Math.min(w, hh) * 0.15;
+  return w > 0 && hh > 0 && c[0] > x + m && c[0] < x + w - m && c[1] > y + m && c[1] < y + hh - m;
+}
+function nearIp(ws, at, own) {
+  let best = null;
+  for (const q of allIps(ws)) {
+    if (own.includes(q.id)) continue;
+    const c = ipPoint(q.id, ws); if (!c) continue;
+    const d = Math.hypot(c[0] - at[0], c[1] - at[1]);
+    if (d <= WELL_SNAP && (!best || d < best.d)) best = { id: q.id, c, d };
+  }
+  return best;
+}
+const wellPic = e => e.front ? THERMOWELL_FRONT : (THERMOWELLS[e.thermowell] || THERMOWELLS.Short)[0];
+function setWellFront(e, front) {
+  if (!!e.front === front) return;
+  if (front) { e.front = true; delete e.rot; delete e.flipH; delete e.flipV; Object.assign(e, { w: FRONT_WELL, h: FRONT_WELL }); }
+  else { delete e.front; const w = (THERMOWELLS[e.thermowell] || THERMOWELLS.Short)[1]; Object.assign(e, { w, h: Math.round(w * 2 / 3) }); }
+  if (e.backpath === undefined || Object.values(THERMOWELLS).some(t => t[0] === e.backpath) || e.backpath === THERMOWELL_FRONT) { e.backpath = wellPic(e); e.background = 1; }
+}
+// put an item's point (from) on c by moving it
+const moveElBy = (e, from, c) => { e.x = Math.round((e.x || 0) + c[0] - from[0]); e.y = Math.round((e.y || 0) + c[1] - from[1]); };
+function wellOnIp(e) {
+  if (!editing || !draft || !e || e.locked || e.type !== 'temperature' || e.cloneOf) return null;
+  const ws = e.workspace;
+  if (isThermowell(e)) {
+    const own = devIps(e).map(q => q.id), at = devIps(e)[0].c, hit = nearIp(ws, at, own);
+    if (!hit) {
+      if (e.plainProbe) return wellOff(e);
+      if (!e.front) return null;
+      const mid = elPicPt(e, 0.5, 0.5); setWellFront(e, false); moveElBy(e, elPicPt(e, 0.5, 0.5), mid);
+      return { ok: true, text: `${e.name} is off the IP: it shows from the side again (Rule 5.30).` };
+    }
+    const front = frontIp(hit.id, hit.c);
+    if (e.plainProbe && !front) return wellOff(e);
+    setWellFront(e, front); moveElBy(e, devIps(e)[0].c, hit.c);
+    return { ok: true, text: `${e.name} is on ${ipLabel(hit.id, ws)}${front ? ', a front facing IP: it shows from the front' : ''} (Rule 5.30).` };
+  }
+  if (e.subtype || hasIps(e)) return null;
+  const gm = elGeom(e), mid = [(gm.x || 0) + (gm.w || 120) / 2, (gm.y || 0) + (gm.h || 60) / 2], hit = nearIp(ws, mid, []);
+  if (!hit || !frontIp(hit.id, hit.c)) return null;
+  e.plainProbe = { w: e.w, h: e.h, x: e.x, y: e.y, backpath: e.backpath, background: e.background, look: e.look };      // to be the plain probe again
+  e.subtype = 'thermowell'; e.thermowell = 'Short'; delete e.look; delete e.backpath;
+  setWellFront(e, true); moveElBy(e, devIps(e)[0].c, hit.c);
+  return { ok: true, text: `${e.name} is on ${ipLabel(hit.id, ws)}, a front facing IP: a probe there has a Thermowell, so it shows as one from the front (Rule 5.30).` };
+}
+function wellOff(e) {          // a plain probe that had an implicit Thermowell, taken off its front IP
+  const p = e.plainProbe, mid = elPicPt(e, 0.5, 0.5);
+  for (const k of ['subtype', 'thermowell', 'front', 'plainProbe', 'backpath', 'background', 'look', 'rot', 'flipH', 'flipV']) delete e[k];
+  for (const [k, v] of Object.entries(p)) if (v !== undefined && !['x', 'y'].includes(k)) e[k] = v;
+  const gm = elGeom(e); moveElBy(e, [(gm.x || 0) + (gm.w || 120) / 2, (gm.y || 0) + (gm.h || 60) / 2], mid);
+  return { ok: true, text: `${e.name} is off the front facing IP: it is a plain Temperature Probe again (Rule 5.30).` };
+}
+const ipLabel = (id, ws) => allIps(ws).find(q => q.id === id)?.label || 'the IP';
 
 // ---- RIMS tube, the first Skynet_Integrated_Device (Fritz, 2026-10-23). One picture (Skynet_TC1_2_Rims_Device.svg, no choice).
 // Its heating element and its temperature probe are built in: two Devices of their own (integratedIn = the RIMS tube's id) on one
@@ -4369,6 +4572,12 @@ function pumpDeviceFields(it, item) {
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 const isMbvDev = e => e?.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (e.template ? skyDev(e) && isMbvTpl(e.template) : true);
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e);
+// the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
+function autoLabel(type) {
+  const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
+  const used = [...(L0.elements || []), ...(L0.graphics || [])].map(x => re.exec(String(x.label ?? '').trim())).filter(Boolean).map(m => +m[1]);
+  return `${type}_${used.length ? Math.max(...used) + 1 : 1}`;
+}
 const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Defined Motorized Ball Valve';
 const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : mbvTitle(e);
 const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']];
@@ -4378,21 +4587,22 @@ const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
   const T = DEVICE_TIPS;
   return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.vGraphic, ...x }],
     ...(it.template ? [['_path', 'Path', 'ro', String(skyOrientPic(it._orient ?? orientPick(it))?.imageOff || it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: T.vPathSet, cls: 'mbvPath', ...x }],
-      ['_orient', 'Orientation', 'vorient', skyOrientChoices(it), true, false, { tip: T.vOrient, ...x }]]
+      ['_orient', 'Orientation', 'vorient', skyOrientChoices(it), true, false, { tip: T.vOrient, with: MBV_TOGGLE(it), ...x }]]
       : [['imageOff', 'Path (closed)', 'gpick', null, false, false, { tip: T.vPath, attr: MBV_IP_POP, ...x }], ['imageOn', 'Path (open)', 'gpick', null, false, false, { tip: T.vPathOpen, ...x }],
-        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), false, false, { tip: T.vOrientUser, ...x }]])];
+        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), false, false, { tip: T.vOrientUser, with: MBV_TOGGLE(it), ...x }]])];
 };
 // Toggle (what a tap does) and the Overlay with Database and .API ⬢ on its line (Fritz's screen 7); no Cover on a valve
 // Fritz, 2026-11-05 ("Toggles and Overlays should work normally"): the Skynet valve's too (its Template lists them as user settable)
-const MBV_TOGGLE_OVERLAY = (it, x = {}) => {
-  const T = DEVICE_TIPS;
-  return [['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.vToggle, ...x }], ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: T.vOverlay, dbPop: true, ...x }]];
-};
+// Fritz, 2026-11-05 ("It should look and feel almost a copy of the Pump dialogs"): two dropdowns on one line as the Pump's Cover and
+// Toggle are, so the Toggle sits beside the Orientation (a valve has no Cover)
+const MBV_TOGGLE = it => ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: DEVICE_TIPS.vToggle }];
+const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, ...x }]];
 // a valve's own (Rule 18.22): Tap water (Rule 6.15) and the Close all / Open all valves lists
-const MBV_OWN = it => [['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap }],
-  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd }] : ['tapwaterOut', 'Tap water flows out of', 'sel', TAP_OUT, false, false, { tip: DEVICE_TIPS.vTapEnd }]] : []),
-  ...(it.tapwater ? [['_vl', 'Close all valves list: always on. Open all valves list: never (a tap water valve).', 'note']]
-    : [['closeAll', 'Close all list', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'Open all list', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]])];
+// Fritz, 2026-11-05: short names (On Close List, On Open List) and the three switches on one line, in the Add box too
+const MBV_OWN = (it, x = {}) => [it.tapwater ? ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, ...x }]
+    : ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, with: [['closeAll', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]], ...x }],
+  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap water flows out of', 'sel', TAP_OUT, false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
+    ['_vl', 'A tap water valve is always on the Close List and never on the Open List (Rule 6.15).', 'note', null, false, false, x]] : [])];
 function mbvDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   if (it.template) {        // the Orientation picks the Template of its set (Rule 5.17), as in skyDevFields
@@ -4435,7 +4645,9 @@ function fieldsOf(item) {
   if (item.type === 'temperature') {
     const s = item.sensor || 'ds18b20';
     return [...(isProbeTee(item) ? [['_pt', `${PROBE_TEES[item.probeTee].label}: a Temperature Device (Fritz's drawing). The probe fills one opening, so its IPs are the other two; flow goes either way.`, 'note'],
-      ['flipH', 'Flip Horizontal (the picture and its IPs follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IPs follow)', 'bool']] : []),['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
+      ['flipH', 'Flip Horizontal (the picture and its IPs follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IPs follow)', 'bool'], ['rot', 'Rotate (the picture and its IPs follow)', 'sel', EL_ROTATE]] : []),
+      ...(isThermowell(item) ? [['_tw', `Thermowell (${item.front ? 'seen from the front, on a front facing IP' : item.thermowell || 'Short'}): a Temperature Device. Its one IP is the face of its TC cap; drop it on an IP (a tee's branch, a vessel port) and it snaps on. On a front facing IP it shows from the front (Rule 5.30).`, 'note'],
+        ['flipH', 'Flip Horizontal (the picture and its IP follow)', 'bool'], ['flipV', 'Flip Vertical (the picture and its IP follow)', 'bool'], ['rot', 'Rotate (the picture and its IP follow)', 'sel', EL_ROTATE]] : []), ['sensor', 'Probe type', 'sel', ['ds18b20', 'pt100', 'pt1000', 'thermocouple', 'ntc', 'lm35', 'tmp36'], true], ...SENSOR_FIELDS[s] ?? [], ...TEMP_COMMON, ['info', 'Reading now', 'info']];
   }
   if (item.type === 'analogIn') {
     const sig = item.signal || 'raw';
@@ -4458,9 +4670,16 @@ function field(f, obj) {
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x?.cls && out[1]) out[1].classList.add(x.cls);
   if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface (board) and its Available Ports)
-    const o2 = fieldOne(x.with, obj), first = out[1];
-    if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
-    out[1] = h('div', { class: 'fldPair' }, first, h('span', { class: 'pairLbl' }, x.with[1]), o2[1]);
+    // x.with may be a list of fields (Fritz, 2026-11-05: Tap water, On Close List and On Open List on one line)
+    const more = Array.isArray(x.with[0]) ? x.with : [x.with], first = out[1], parts = [first];
+    for (const w of more) {
+      const o2 = fieldOne(w, obj);
+      if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
+      const lbl = h('span', { class: 'pairLbl' }, w[1]);
+      if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.title = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], w[6].tip)); }
+      parts.push(lbl, o2[1]);
+    }
+    out[1] = h('div', { class: 'fldPair' }, ...parts);
   }
   if (x?.inTitle) {              // Fritz's screen 9: the lock, Visible and Hidden Locked sit in the title line of the dialog
     const t = h('span', { class: 'ttlExtra' }, ...(out[0]?.textContent ? [h('span', { class: 'ttlLbl' }, out[0].textContent)] : []), out[1]);
@@ -4778,7 +4997,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     };
     input._fill(obj.device);
   }      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
     ...(String(opts).startsWith('addnew') && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
     ...controllableNames((draft || S.config).elements).map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)),
@@ -5508,6 +5727,11 @@ async function editItem(kind, id) {
       }
     }
     if (kind === 'el') {
+      if (turnsEl(work)) {          // a probe tee or a thermowell: Rotate turns its box with it, about its middle (Rule 5.30)
+        work.rot = elRot(work); if (!work.rot) delete work.rot;
+        for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
+        turnElBox(work, item);
+      }
       if (skyDev(work)) {        // a User version of a Skynet Template: its fixed attributes stay the Template's (the Brain checks it too)
         if (work.tapwater && work._tapFor !== tapKey(work)) work.tapSource = '';
         delete work._tapFor;

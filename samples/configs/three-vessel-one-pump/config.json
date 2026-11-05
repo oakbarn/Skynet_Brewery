@@ -1443,6 +1443,48 @@
    "imageOverlay": "tint:red"
   },
   {
+   "name": "pic_HLT_Probe",
+   "type": "picture",
+   "workspace": "Brewhouse",
+   "backpath": "Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg",
+   "background": 1,
+   "x": 590,
+   "y": 275,
+   "w": 72,
+   "h": 48,
+   "hideName": true,
+   "tap": "none",
+   "label": "HLT Probe"
+  },
+  {
+   "name": "pic_MLT_Probe",
+   "type": "picture",
+   "workspace": "Brewhouse",
+   "backpath": "Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg",
+   "background": 1,
+   "x": 950,
+   "y": 245,
+   "w": 72,
+   "h": 48,
+   "hideName": true,
+   "tap": "none",
+   "label": "MLT Probe"
+  },
+  {
+   "name": "pic_BK_Probe",
+   "type": "picture",
+   "workspace": "Brewhouse",
+   "backpath": "Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg",
+   "background": 1,
+   "x": 1310,
+   "y": 275,
+   "w": 72,
+   "h": 48,
+   "hideName": true,
+   "tap": "none",
+   "label": "BK Probe"
+  },
+  {
    "name": "Pump_1",
    "type": "digitalOut",
    "subtype": "pump",

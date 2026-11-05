@@ -51,7 +51,7 @@ More rules:
 - **No spaces in Device names.**
 - If the name is already used, a number goes after the Label: `MB_25_Pump_Wort_2__BR`.
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
-- A name with `~` in it works in a Process as it is: `MB_25_E_L_Vlv_Fly~Sparge__SP = true`.
+- A name with `~` in it works in a Process as it is: `MB_25_eVlv_Fly~Sparge__SP = true`.
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
 - **One Device per port, with one exception.** Two Devices can't use the same port on the same Interface, except outputs of different Device Types. Like in BruControl, you pick the Interface, then the Port, and then you can add more than one type on that Port. Example: one heater wired to port 5 can have `MB_05_Hys_HLT__BR` and `MB_05_PID_HLT__BR`.
 - **The last one turned on wins.** When you enable (or turn on) one of them, the others on that port are turned off at once, so only one drives the heater. Inputs, like a probe or a switch, never share a port.
@@ -87,7 +87,7 @@ Every Device Type ID is unique. Some are in more than one list (`DO` is a plain 
 
 **Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `DO` direct on / off, `H_PWM` heating PWM, `H_AO` element on a 0-10 V power controller (SCR / SSVR).
 
-**Direct on / off:** `DO`, `Pump`, `M_L_Vlv` low temperature manual valve, `E_L_Vlv` low temperature electric valve, `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
+**Direct on / off:** `DO`, `Pump`, `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature; names made before 2026-11-05 keep `E_L_Vlv`), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
 
 **Direct inputs:** `DI` plain, `Float` (true while the float is made, false with no voltage), `DIN` momentary push button, `PB` push button (ON only while held), `Toggle`, `Latch` (ON until reset), `FlowSw` flow switch, `Intlk` door / lid / safety interlock, `EStop` emergency stop, `Leak` leak sensor, `Count` pulse counter.
 
