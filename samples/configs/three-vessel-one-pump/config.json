@@ -1396,20 +1396,6 @@
    "look": "dark"
   },
   {
-   "name": "pic_HLT_Element",
-   "type": "picture",
-   "workspace": "Brewhouse",
-   "follow": "HLT_Heat",
-   "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.svg",
-   "x": 655,
-   "y": 295,
-   "w": 110,
-   "h": 52,
-   "hideName": true,
-   "tap": "none",
-   "imageOverlay": "tint:red"
-  },
-  {
    "name": "BK_Heat",
    "type": "hysteresis",
    "workspace": "Brewhouse",
@@ -1427,62 +1413,6 @@
    "onText": "HEAT",
    "offText": "idle",
    "look": "dark"
-  },
-  {
-   "name": "pic_BK_Element",
-   "type": "picture",
-   "workspace": "Brewhouse",
-   "follow": "BK_Heat",
-   "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.svg",
-   "x": 1375,
-   "y": 295,
-   "w": 110,
-   "h": 52,
-   "hideName": true,
-   "tap": "none",
-   "imageOverlay": "tint:red"
-  },
-  {
-   "name": "pic_HLT_Probe",
-   "type": "picture",
-   "workspace": "Brewhouse",
-   "backpath": "Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg",
-   "background": 1,
-   "x": 590,
-   "y": 275,
-   "w": 72,
-   "h": 48,
-   "hideName": true,
-   "tap": "none",
-   "label": "HLT Probe"
-  },
-  {
-   "name": "pic_MLT_Probe",
-   "type": "picture",
-   "workspace": "Brewhouse",
-   "backpath": "Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg",
-   "background": 1,
-   "x": 950,
-   "y": 245,
-   "w": 72,
-   "h": 48,
-   "hideName": true,
-   "tap": "none",
-   "label": "MLT Probe"
-  },
-  {
-   "name": "pic_BK_Probe",
-   "type": "picture",
-   "workspace": "Brewhouse",
-   "backpath": "Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg",
-   "background": 1,
-   "x": 1310,
-   "y": 275,
-   "w": 72,
-   "h": 48,
-   "hideName": true,
-   "tap": "none",
-   "label": "BK Probe"
   },
   {
    "name": "Pump_1",
@@ -1715,37 +1645,311 @@
    "fontSize": 13
   },
   {
-   "id": "img_HLT",
-   "kind": "image",
+   "id": "v_HLT",
+   "kind": "vessel",
+   "vesselType": "vessel",
    "workspace": "Brewhouse",
-   "image": "Images/Skynet/Vessels/hlt.svg",
    "x": 580,
    "y": 45,
    "w": 260,
    "h": 320,
-   "locked": true
+   "name": "HLT_Vessel",
+   "label": "Hot liquor tank",
+   "labelVisible": false,
+   "labelAlign": "above",
+   "labelSize": 16,
+   "template": "Skynet_Vessel_Widget",
+   "templateCls": "skynet",
+   "vwidget": true,
+   "probeStyle": "thermowell",
+   "vtype": "Brew Kettle",
+   "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
+   "bundled": true,
+   "locked": true,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "probe": "HLT_Temp",
+   "ports": {
+    "outlet": {
+     "installed": true,
+     "position": "VW Center Bottom",
+     "standard": "TC 1.5"
+    },
+    "outlet2": {
+     "installed": false,
+     "position": "VW Right Middle",
+     "standard": "TC 1.5"
+    },
+    "tangential": {
+     "installed": false,
+     "position": "VW Left Low",
+     "standard": "TC 1.5"
+    },
+    "topInlet": {
+     "installed": false,
+     "position": "VW Left High",
+     "standard": "TC 1.5"
+    },
+    "sparge": {
+     "installed": false,
+     "position": "VW Lid Center",
+     "standard": "TC 1.5"
+    },
+    "cip": {
+     "installed": false,
+     "position": "VW Lid Right",
+     "standard": "TC 1.5"
+    },
+    "steamSlayer": {
+     "installed": false,
+     "position": "VW Right High",
+     "standard": "TC 1.5"
+    },
+    "thermowell": {
+     "installed": true,
+     "position": "VW Left Thermowell",
+     "standard": "TC 1.5"
+    },
+    "element": {
+     "installed": true,
+     "position": "VW Right Element",
+     "standard": "TC 2"
+    }
+   },
+   "heater": "HLT_Heat"
   },
   {
-   "id": "img_MLT",
-   "kind": "image",
+   "id": "ip_h_out",
+   "kind": "ip",
    "workspace": "Brewhouse",
-   "image": "Images/Skynet/Vessels/mash_tun.svg",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_HLT",
+   "port": "outlet",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 695,
+   "y": 328,
+   "label": "Outlet (TC 1.5)"
+  },
+  {
+   "id": "v_MLT",
+   "kind": "vessel",
+   "vesselType": "vessel",
+   "workspace": "Brewhouse",
    "x": 940,
    "y": 45,
    "w": 260,
    "h": 320,
-   "locked": true
+   "name": "MLT_Vessel",
+   "label": "Mash tun",
+   "labelVisible": false,
+   "labelAlign": "above",
+   "labelSize": 16,
+   "template": "Skynet_Vessel_Widget",
+   "templateCls": "skynet",
+   "vwidget": true,
+   "probeStyle": "thermowell",
+   "vtype": "Brew Kettle",
+   "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
+   "bundled": true,
+   "locked": true,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "probe": "MLT_Temp",
+   "ports": {
+    "outlet": {
+     "installed": true,
+     "position": "VW Center Bottom",
+     "standard": "TC 1.5"
+    },
+    "outlet2": {
+     "installed": false,
+     "position": "VW Right Middle",
+     "standard": "TC 1.5"
+    },
+    "tangential": {
+     "installed": false,
+     "position": "VW Left Low",
+     "standard": "TC 1.5"
+    },
+    "topInlet": {
+     "installed": true,
+     "position": "VW Left High",
+     "standard": "TC 1.5"
+    },
+    "sparge": {
+     "installed": false,
+     "position": "VW Lid Center",
+     "standard": "TC 1.5"
+    },
+    "cip": {
+     "installed": false,
+     "position": "VW Lid Right",
+     "standard": "TC 1.5"
+    },
+    "steamSlayer": {
+     "installed": false,
+     "position": "VW Right High",
+     "standard": "TC 1.5"
+    },
+    "thermowell": {
+     "installed": true,
+     "position": "VW Left Thermowell",
+     "standard": "TC 1.5"
+    },
+    "element": {
+     "installed": false,
+     "position": "VW Right Element",
+     "standard": "TC 2"
+    }
+   }
   },
   {
-   "id": "img_BK",
-   "kind": "image",
+   "id": "ip_m_out",
+   "kind": "ip",
    "workspace": "Brewhouse",
-   "image": "Images/Skynet/Vessels/boil_kettle.svg",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_MLT",
+   "port": "outlet",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1055,
+   "y": 328,
+   "label": "Outlet (TC 1.5)"
+  },
+  {
+   "id": "ip_m_in",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_MLT",
+   "port": "topInlet",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 945,
+   "y": 60,
+   "label": "Top Inlet (TC 1.5)"
+  },
+  {
+   "id": "v_BK",
+   "kind": "vessel",
+   "vesselType": "vessel",
+   "workspace": "Brewhouse",
    "x": 1300,
    "y": 45,
    "w": 260,
    "h": 320,
-   "locked": true
+   "name": "BK_Vessel",
+   "label": "Boil kettle",
+   "labelVisible": false,
+   "labelAlign": "above",
+   "labelSize": 16,
+   "template": "Skynet_Vessel_Widget",
+   "templateCls": "skynet",
+   "vwidget": true,
+   "probeStyle": "thermowell",
+   "vtype": "Brew Kettle",
+   "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
+   "bundled": true,
+   "locked": true,
+   "std": {
+    "type": "TC",
+    "size": 1.5
+   },
+   "probe": "BK_Temp",
+   "ports": {
+    "outlet": {
+     "installed": true,
+     "position": "VW Center Bottom",
+     "standard": "TC 1.5"
+    },
+    "outlet2": {
+     "installed": false,
+     "position": "VW Right Middle",
+     "standard": "TC 1.5"
+    },
+    "tangential": {
+     "installed": false,
+     "position": "VW Left Low",
+     "standard": "TC 1.5"
+    },
+    "topInlet": {
+     "installed": true,
+     "position": "VW Left High",
+     "standard": "TC 1.5"
+    },
+    "sparge": {
+     "installed": false,
+     "position": "VW Lid Center",
+     "standard": "TC 1.5"
+    },
+    "cip": {
+     "installed": false,
+     "position": "VW Lid Right",
+     "standard": "TC 1.5"
+    },
+    "steamSlayer": {
+     "installed": false,
+     "position": "VW Right High",
+     "standard": "TC 1.5"
+    },
+    "thermowell": {
+     "installed": true,
+     "position": "VW Left Thermowell",
+     "standard": "TC 1.5"
+    },
+    "element": {
+     "installed": true,
+     "position": "VW Right Element",
+     "standard": "TC 2"
+    }
+   },
+   "heater": "BK_Heat"
+  },
+  {
+   "id": "ip_b_out",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_BK",
+   "port": "outlet",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1415,
+   "y": 328,
+   "label": "Outlet (TC 1.5)"
+  },
+  {
+   "id": "ip_b_in",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_BK",
+   "port": "topInlet",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1305,
+   "y": 60,
+   "label": "Top Inlet (TC 1.5)"
   },
   {
    "id": "t_hlt",
@@ -1784,61 +1988,6 @@
    "bold": true
   },
   {
-   "id": "ip_h_out",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "HLT out",
-   "x": 697,
-   "y": 367,
-   "w": 26,
-   "h": 26,
-   "color": "#e8a33a"
-  },
-  {
-   "id": "ip_m_out",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "Mash tun out",
-   "x": 1057,
-   "y": 367,
-   "w": 26,
-   "h": 26,
-   "color": "#e8a33a"
-  },
-  {
-   "id": "ip_b_out",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "Kettle out",
-   "x": 1417,
-   "y": 367,
-   "w": 26,
-   "h": 26,
-   "color": "#e8a33a"
-  },
-  {
-   "id": "ip_m_in",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "Mash tun in (top)",
-   "x": 917,
-   "y": 62,
-   "w": 26,
-   "h": 26,
-   "color": "#e8a33a"
-  },
-  {
-   "id": "ip_b_in",
-   "kind": "ip",
-   "workspace": "Brewhouse",
-   "label": "Kettle in (top)",
-   "x": 1277,
-   "y": 62,
-   "w": 26,
-   "h": 26,
-   "color": "#e8a33a"
-  },
-  {
    "id": "ip_ferm",
    "kind": "ip",
    "workspace": "Brewhouse",
@@ -1858,7 +2007,7 @@
    "points": [
     [
      710,
-     380
+     343
     ],
     [
      710,
@@ -1878,7 +2027,7 @@
    "points": [
     [
      1070,
-     380
+     343
     ],
     [
      1070,
@@ -1898,7 +2047,7 @@
    "points": [
     [
      1430,
-     380
+     343
     ],
     [
      1430,
@@ -2295,7 +2444,7 @@
      75
     ],
     [
-     930,
+     960,
      75
     ]
    ],
@@ -2379,7 +2528,7 @@
      75
     ],
     [
-     1290,
+     1320,
      75
     ]
    ],

@@ -123,6 +123,9 @@ export function cleanVessel(b = {}) {
   // the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (empty = the kind's own size)
   const size = cleanSize(b.size); if (size) t.size = size;
   if (INTEGRATED[b.integrated]) t.integrated = b.integrated;
+  // the Vessel Widget class (Fritz, 2026-11-05, Rule 5.31): every spot of the Template has a Place slider (installed = Placed);
+  // its Temperature Probe is seen as a Thermowell (in from the side) or from the Front
+  if (b.vwidget === true) { t.vwidget = true; t.probeStyle = b.probeStyle === 'front' ? 'front' : 'thermowell'; }
   if (NAME_RE.test(text(b.base, 60))) t.base = text(b.base, 60);      // the Skynet Vessel Widget a User Bundled vessel Template is built on
   if (['ccoil', 'herms'].includes(vesselType)) t.liquidPorts = String(b.liquidPorts) === '4' ? 4 : 2;     // 2 or 4 liquid ports (Chillzilla: 4)
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
