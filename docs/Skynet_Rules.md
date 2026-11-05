@@ -823,7 +823,7 @@ with a value has a **Database and .API** box at the end of its Properties:
   Rule 5.16).
 
 6.15 **Close all and Open all valve lists** (Fritz, 2026-10-30). Every valve a Process switches (Electro_Mechanical, such as a
-Motorized Ball Valve) has two switches, **On the Close all valves list** and **On the Open all valves list**, both **on to start**.
+Motorized Ball Valve) has two switches, **On Close List** and **On Open List** (Fritz, 2026-11-05, renamed from Close all list / Open all list), both **on to start**.
 `close_all_valves` and `open_all_valves` in a Process (and PreBrew's house cleaning) use them; `all_pumps_off` turns every pump off.
 **A tap water valve is always on Close all and never on Open all**, and its Properties show this with no switches (the Brain puts it
 back on every save). A Manual valve is on neither list. (thread "Build the Standard Skynet Brew Process", Help 100)
@@ -1400,11 +1400,15 @@ Valve drill-down dialog", Help 128):
    **Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve** (its own pictures). The two rows the lists had for them
    are now this one row (Rule 15.3).
 3. The Add box is titled with the valve and works as the Pump's (Rules 4.2, 18.13, 18.15-18.17, 18.20): 1 Label ⬢ and Label
-   Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**, **Orientation**, **Toggle**,
-   **Overlay** with **Database and .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last. Enter goes Label,
+   Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**, **Orientation** with **Toggle**
+   on its line, **Overlay** with **Database and .API ⬢** on its line, **Tap water valve**, **On Close List** and **On Open List**
+   on one line, X, Y, Width, Height, and the Device Type greyed out last. Fritz, 2026-11-05: "It should look and feel almost a
+   copy of the Pump dialogs": two fields on one line in the Pump's dialogs are on one line here too. Enter goes Label,
    Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
-   valve** with its Tap end (Rule 6.15) and **Close all list** / **Open all list**.
+   valve**, **On Close List** and **On Open List** on one line (a tap water valve shows its Tap end instead, Rule 6.15).
+5. Its Type ID is **eVlv** (Fritz, 2026-11-05, was E_L_Vlv; the Device Type reads **DO: eVlv**). Valves named before keep their
+   names (Rule 3.5); the Brain upgrades the stored Type ID on load.
 - **Skynet Motorized Ball Valve:** the Path is greyed out (set by its Template, Rule 5.6) and follows the Orientation; the
   **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees) picks its Template (Rule 5.17), with that Template's
   Width and Height; **Toggle and Overlay work normally**, as on the Pump (Fritz, 2026-11-05: "Toggles and Overlays should work
@@ -1653,3 +1657,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
 - 2026-11-05: Rule 18.13 (and 18.21, 18.23): once a Pump or Motorized Ball Valve is added, its Interface and Port are greyed out for good; ✏ Change beside them is gone (physical wiring; the hidden key stays, only the Name changes with ✏ Change name). (thread "Add Motorized Ball Valve drill-down dialog")
+- 2026-11-05: Rule 18.23 and 6.15: the Motorized Ball Valve dialogs match the Pump's (Orientation and Toggle on one line; Tap water valve, On Close List and On Open List on one line, in the Add box too); the switches are renamed On Close List / On Open List; the valve Type ID E_L_Vlv becomes eVlv (old names kept, Rule 3.5). Help 128 and 46 updated. (thread "Add Motorized Ball Valve drill-down dialog")

@@ -17,14 +17,16 @@ assert.match(app, /if \(pick === 'mbv'\) \{[\s\S]{0,400}pickValve\(\)[\s\S]{0,30
 // the Pump's drill-down, no Cover
 const add = app.slice(app.indexOf('async function newDeviceDialog('), app.indexOf('// ---- Thermowell'));
 assert.match(add, /const dd = isDrillDev\(e\), mbv = isMbvDev\(e\)/);
-assert.match(add, /\.\.\.\(mbv \? \[\.\.\.MBV_GRAPHIC_FIELDS\(e, after\), \.\.\.MBV_TOGGLE_OVERLAY\(e, after\)\] : \[\]\)/, 'Graphic, Path, Orientation, Toggle, Overlay');
+assert.match(add, /\.\.\.\(mbv \? \[\.\.\.MBV_GRAPHIC_FIELDS\(e, after\), \.\.\.MBV_TOGGLE_OVERLAY\(e, after\), \.\.\.MBV_OWN\(\{ \.\.\.e, tapwater: false \}, after\)\] : \[\]\)/, 'Graphic, Path, Orientation + Toggle, Overlay, the three switches');
 assert.match(add, /\.\.\.\(isPumpDev\(e\) \? \['cover'\] : \[\]\)/, 'only a pump saves a Cover');
 assert.match(add, /mbv \? mbvTitle\(e\)/, 'the Add box is titled with the valve');
 const own = app.slice(app.indexOf('const MBV_GRAPHIC_FIELDS'), app.indexOf("// a new Alarm's Name follows its Label"));
-assert.ok(!/cover/i.test(own.replace(/Cover\)|a Cover|no Cover/g, '')), 'no Cover on a valve');
+assert.ok(!/cover/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover on a valve (code, not comments)');
 assert.match(own, /\['_orient', 'Orientation', 'vorient', skyOrientChoices\(it\), true/, 'a Skynet valve: Orientation picks its Template (Rule 5.17)');
 assert.match(own, /\['tap', 'Toggle', 'sel', PUMP_TAP\(it\.tap\)/, 'Toggle works normally, Skynet valve too (Fritz, 2026-11-05)');
-assert.match(own, /\['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES\(it\.imageOverlay\), false, false, \{ tip: T\.vOverlay, dbPop: true/, 'Overlay works normally, Database and .API on its line');
+assert.match(own, /'vorient', skyOrientChoices\(it\), true, false, \{ tip: T\.vOrient, with: MBV_TOGGLE\(it\)/, 'Orientation and Toggle on one line, as the Pump\'s Cover and Toggle');
+assert.match(own, /with: \[\['closeAll', 'On Close List', 'bool', true[^\]]*\], \['openAll', 'On Open List', 'bool', true/, 'Tap water, On Close List and On Open List on one line');
+assert.match(own, /\['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES\(it\.imageOverlay\), false, false, \{ tip: DEVICE_TIPS\.vOverlay, dbPop: true/, 'Overlay works normally, Database and .API on its line');
 assert.ok(!/'ro'/.test(own.slice(own.indexOf('MBV_TOGGLE_OVERLAY'))) , 'nothing greyed out in Toggle / Overlay');
 assert.match(own, /\['imageOff', 'Path \(closed\)', 'gpick', null, false, false, \{ tip: T\.vPath, attr: MBV_IP_POP/, 'a User Defined valve: its own pictures and IP spots (Rule 5.22)');
 assert.match(own, /\['device', '2\. Interface \(board\)', 'dev', 'addnewid', false, false, \{ set: true/, 'Interface and Port greyed out with Change once added (Rule 18.13)');

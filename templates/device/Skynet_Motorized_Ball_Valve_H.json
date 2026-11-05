@@ -2,7 +2,7 @@
   "title": "Skynet Motorized Ball Valve: Horizontal",
   "type": "digitalOut",
   "props": {
-    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg", "subtype": "valve", "valveType": "electric", "service": "room", "typeCode": "E_L_Vlv", "orientation": "h",
+    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg", "subtype": "valve", "valveType": "electric", "service": "room", "typeCode": "eVlv", "orientation": "h",
     "w": 90, "h": 77, "hideName": true, "hideValue": true, "look": "normal", "tap": "toggle",
     "tapwater": false, "showOnOffText": false, "onText": "OPEN", "offText": "CLOSED"
   },
