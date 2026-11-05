@@ -599,6 +599,11 @@ a pipe with its own open end moves along as one piece; a pipe moves its end only
 side lets go of the pipe (the end gets an open-end coupling). Older pipes with bends are cut at each bend into straight pipes
 joined by elbows when a Schema loads (Rule 15.2); the samples and the default Schema are changed (Rule 15.3). Hoses still bend.
 (thread "Limit pipes to horizontal, vertical, 45", Help 105)
+- **Joined again on Save layout** (Fritz, 2026-11-05: "maybe a resnap to IPs on Save Layout"). A pipe's open end within 14 px of an
+  IP joins it again when the layout is saved. A straight pipe stays Horizontal, Vertical or 45: if joining would bend it, a free IP
+  point with no other pipe on it moves back onto the pipe end instead. A click or double-click that wobbles under 4 pixels is not a
+  drag, and only the pipe ends a drag pulls off let go (an end already off its IP stays joined, so moving one thing never cuts a pipe
+  somewhere else on the Tab).
 
 5.20 **Where the IPs go** (Fritz, 2026-11-02, with two drawings): on every Device and Widget an IP sits at **the center of
 the opening**. On a TC pipe Widget (elbows, tees, reducers ...) and on any Device or Widget with TC ferrules, that is **the
@@ -1568,3 +1573,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 5.25 (TC Pipe Fittings is a Widget subclass: every elbow, tee, cross, U, reducer, check valve and End Cap is a Skynet TC Pipe Fittings Widget with an IP on each ferrule face; Skynet puts them in where pipes meet, a pipe drawn to the bend turns an elbow into a tee; added by hand from Elbows, Tees … and Add Widget > TC Pipe Fittings; fittings with probes stay Temperature Devices; no cut-off ends). New Cross; Elbow 45, Instrument Tee and the probe tees redrawn in the style of Fritz's 2026-11-04 Elbow and Tee; the cut-off 45 ends of Fitting_Elbow45, Skynet_TC15_45 and pipe_elbow45 fixed. Samples and default Schema changed. Help 124; next free Help number 125. (thread "Make Fritz's elbow and tee into SVG Widgets")
 - 2026-11-04: Added Rule 5.26 (a Pump, Valve or Manual Valve Widget dropped on a straight pipe cuts it: between the ends into separate pipes joined to its IPs, over an end the pipe is made shorter and both IPs joined, an end on a tee or other IP staying where it is; an IP that opens across the pipe is taken round with 90 degree elbows). Help 125; next free Help number 126 (Help 124 is taken by PR #193). (thread "Split a pipe when a pump is added")
 - 2026-11-05: Rule 9.8: Start Fresh on Windows also deletes the clean window's browser profile (saved user name and password), and Admin setup always opens with empty boxes (browser fill-in cleared). Help 18 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
+- 2026-11-05: Rule 5.19: Save layout joins a pipe's open end within 14 px of an IP again (a free IP point moves back onto a straight pipe's end); a wobble under 4 pixels is not a drag; only ends a drag pulls off let go (Fritz: changing IP1's Flow Color in the Three Vessel sample stopped the flow). Help 105 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
