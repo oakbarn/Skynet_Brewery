@@ -15,6 +15,8 @@ assert.equal(profileDir({ USERPROFILE: 'C:\\Users\\Fritz' }), 'C:\\Users\\Fritz\
 const args = appArgs('http://localhost:8080', profileDir(env));
 assert.ok(args.includes('--app=http://localhost:8080'));
 assert.ok(args.some(a => a.startsWith('--user-data-dir=') && a.endsWith('SkynetBrewer\\AppWindow')));
+// never syncs saved passwords in from the Microsoft account
+assert.ok(args.includes('--disable-sync'));
 // an old .bat's waiting "start http://localhost:8080" is found; other Command Prompts are not
 const procs = [
   { pid: 10, name: 'cmd.exe', cmd: 'C:\\WINDOWS\\system32\\cmd.exe /c ""C:\\Brewing\\Skynet_Brewer.bat" "' },
