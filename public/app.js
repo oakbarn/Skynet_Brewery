@@ -779,7 +779,7 @@ function elGeom(e) {
 // it can also be a gGlobal value holding the percent. It passes flow whenever it is above 0 % open.
 const PROP_TYPES = ['analogOut', 'pwmOut', 'gGlobal', 'shared'];
 // Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
-const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
+const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
 const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
 // One picture plus an On overlay instead of two pictures (Fritz, 2026-10-22): .imageOverlay is drawn on top while the item is on
 const OVERLAY_PIC = ['imageOverlay', 'On overlay (on top while on)', 'gpick', 'overlays'];
@@ -1301,7 +1301,7 @@ function fillEl(n, e0) {
     }
     case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
-    case 'pid': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
+    case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
@@ -1452,7 +1452,7 @@ function tapAction(e) {
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
     case 'manual': return 'manual';
-    case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': return 'dialog';
+    case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': case 'deadband': return 'dialog';
     default: return 'none';
   }
 }
@@ -1549,7 +1549,7 @@ function choose(title, buttons, current) {
 }
 
 // main setting of each control element, shown with an Enabled switch in its dialog
-const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'] };
+const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'], deadband: ['target', 'Target'] };
 function controlDialog(t) {
   const v = S.values[t.name] || {};
   const [prop, label] = CONTROL_MAIN[t.type];
@@ -1563,7 +1563,7 @@ function controlDialog(t) {
     await setProp(t.name, prop, x);
     if (en !== undefined) await setProp(t.name, 'enabled', en);
   };
-  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - ${label}` + (t.type === 'pid' ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
+  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - ${label}` + (['pid', 'deadband'].includes(t.type) ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
     h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+')),
     h('div', { class: 'vdBtns' },
       h('button', { type: 'button', class: 'big onb' + (v.enabled ? ' cur' : ''), onclick: () => done(true) }, 'Set + ON'),
@@ -1701,7 +1701,7 @@ async function stepperDialog(t, title) {
 // ---- pipes: drawn lines that show flow when all of their "flow when" elements are on
 // Heaters are on while Enabled (Fritz, 2026-10-27): a PID, Hysteresis or Duty Cycle counts as on from Enable to Disable,
 // not only while its output fires, for its own pictures and for a Picture Widget that turns on with it
-const HEAT_CTL_TYPES = ['pid', 'hysteresis', 'dutyCycle'];
+const HEAT_CTL_TYPES = ['pid', 'hysteresis', 'dutyCycle', 'deadband'];
 function turnsOn(name) {
   const e = L().elements.find(x => x.name === name), v = S.values[name];
   if (e && HEAT_CTL_TYPES.includes(e.type)) return !!v?.enabled;
@@ -2662,6 +2662,7 @@ const ADD_MENU = [
     ['Duty cycle (on for a % of each cycle)', 'dutyCycle', 'Duty'],
     ['Hysteresis (on / off around a target)', 'hysteresis', 'Hyst'],
     ['PID (holds a target temperature)', 'pid', 'PID'],
+    ['Deadband (steps its output % toward a target; leaves it alone close to the target)', 'deadband', 'DBand'],
   ]],
   ['Devices: digital inputs (board pin)', [
     ['Switch (on while closed)', 'digitalIn', 'DI', { mode: 'switch' }],
@@ -2933,7 +2934,7 @@ $('#addManualValve').onclick = () => addIpFit('manualValve');
 // Devices already placed on a Tab (not the ones on this Tab), grouped by type: Pumps, Valves ... Picking one puts its Clone on
 // this Tab with a name Skynet makes; its Visible, X and Y are its own. The list is filled each time it is opened.
 const CLONE_GROUPS = [['Pumps', e => e.subtype === 'pump'], ['Valves', e => e.subtype === 'valve' || e.subtype === 'propValve'],
-  ['Heat (PID, Hysteresis, Duty Cycle)', e => ['pid', 'hysteresis', 'dutyCycle'].includes(e.type)], ['Temperature probes', e => e.type === 'temperature'],
+  ['Heat (PID, Hysteresis, Deadband, Duty Cycle)', e => ['pid', 'hysteresis', 'deadband', 'dutyCycle'].includes(e.type)], ['Temperature probes', e => e.type === 'temperature'],
   ['Other outputs', e => ['digitalOut', 'pwmOut', 'analogOut'].includes(e.type)], ['Motors', e => e.type === 'stepper'],
   ['Inputs and sensors', e => ['digitalIn', 'analogIn', 'flowMeter', 'scale'].includes(e.type)], ['Other Devices', () => true]];
 function fillClones() {
@@ -3933,6 +3934,11 @@ const F = {
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
+  // Deadband (as in BruControl, Fritz 2026-11-05, Rule 6.17): Calc Time sets how often the output % steps; ± offsets around the Target
+  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'],
+    ['deadbandOffset', 'Deadband Offset (± around the Target: inside it the output is left alone)', 'num'], ['innerBandOffset', 'Inner Band Offset (± around the Target: inside it the output moves by the Inner Band Drive)', 'num'],
+    ['initialOutput', 'Initial Output % (when Enabled)', 'num'], ['innerBandDrive', 'Inner Band Drive (% change each Calc Time)', 'num'], ['outerBandDrive', 'Outer Band Drive (% change each Calc Time, outside the Inner Band)', 'num'],
+    ['maxOutput', 'Max output %', 'num'], ['calcTime', 'Calc Time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Picture Widget (Fritz, 2026-10-27): "Turns on with" picks what turns it on: an on/off Device or Widget, or a heater that is on while Enabled.
   // None = a still picture: the On pictures are greyed out.
   picture: [['follow', 'Turns on with (None = a still picture)', 'onsrc', null, true], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['text', 'Text on picture', 'text']],
@@ -4272,7 +4278,7 @@ function field(f, obj) {
 }
 // Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. Only shown; the Device
 // keeps its type (digitalOut ...) and Device Type ID (Pump) as they are saved.
-const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID' };
+const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND' };
 const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || ''; return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
@@ -5103,7 +5109,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const TYPE_TITLE = { gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -8106,7 +8112,7 @@ function fromPortFields(w) {
   }
   return w;
 }
-const ELECTRIC_TYPES = ['pid', 'hysteresis', 'dutyCycle', 'pwmOut'];
+const ELECTRIC_TYPES = ['pid', 'hysteresis', 'deadband', 'dutyCycle', 'pwmOut'];
 // the devices that can heat a vessel: gas valves (a valve whose Service is Gas) or electric elements (an output of kind
 // element, or a PID, hysteresis, duty cycle or PWM output); RIMS and HERMS: the profile's RIMS tubes or HERMS vessels
 function heatDevices(kind, p) {
@@ -8791,7 +8797,7 @@ F.skynetFitting = it => {
 // Devices that belong to a Schema: its heating element and its Temperature Probe
 F.skynetVessel = it => {
   const ports = Object.entries(eqClass(it).ports).filter(([k, d]) => it.ports?.[k]?.installed && d.ip).map(([, d]) => d.name).join(', ');      // its openings (a thermowell or element spot is not one)
-  const elems = [['', 'None'], ...L().elements.filter(e => ['digitalOut', 'pwmOut', 'dutyCycle', 'pid', 'hysteresis'].includes(e.type) && e.subtype !== 'valve' && e.subtype !== 'pump').map(e => [e.name, e.name])];
+  const elems = [['', 'None'], ...L().elements.filter(e => ['digitalOut', 'pwmOut', 'dutyCycle', 'pid', 'hysteresis', 'deadband'].includes(e.type) && e.subtype !== 'valve' && e.subtype !== 'pump').map(e => [e.name, e.name])];
   const probes = [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])];
   const electric = it.heatKind === 'electric' || it.ports?.element?.installed, well = it.ports?.thermowell?.installed;
   return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
