@@ -213,6 +213,8 @@ was closed. Do not offer it again.
 2.11 **Right-click gives Help** when the item can't move (outside Edit layout, a locked item, an
 empty spot, the Menu Bar). A yellow "?" sits by ☰ Menu tab headings and Properties titles, **but
 never on a Tab itself.** (2026-10-21, PR #57)
+*Exception (2026-11-05, waiting on Fritz's pick):* the free end of a Quick Disconnect hose moves outside Edit layout, and the right
+button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
@@ -477,7 +479,7 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   the kind and then Add Device. Then **⧉ Clone Device** (a list of the Devices on other Tabs).
 - **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕**, **Text ➕**, **Manual Valve ➕**,
   **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
-- **Row 2:** Draw pipe, Draw hose, **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
+- **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
   All, Unlock All, Tab settings, New tab, **👻 Hidden Tab** and its **orange ?** (a pop-up with how Edit layout
   works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Save Build.
 - **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
@@ -704,6 +706,25 @@ straight Horizontal or Vertical pipe (or added right on one):
   to choose which side its inlet is on.
 - Nothing is cut when the item is already on a pipe, is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
+
+5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
+IP of a Valve. Many home brewers have a manifold but move a pipe from source to source ... a special hose that connects to a Pump but
+can be run to a vessel or an IP. The hose end could be run anytime, not just in edit mode"; thread "Add movable quick disconnect hose",
+Help 127).
+- **The Quick Disconnect Widget** sits on an IP, most often a valve end. It is Fritz's **bold red four-point star with a grey center**
+  (his drawing, 2026-11-05: "I want it easy to see on a Tab"), never smaller than 40 px. In Edit layout it snaps onto the nearest IP
+  within 30 px and follows it; dragged off, it comes off. With a hose on it, it passes flow to the IP under it; with nothing on it, it
+  is shut (no flow).
+- **The Quick Disconnect hose** (**Draw QD hose**, Edit layout bar) hangs from a **pump IP**. Its **free end can be moved at any time,
+  not only in Edit layout**: with the **right mouse button** (Rule 2.9) on a computer, a **finger** on a phone or tablet (this is
+  running the brewery, so it works in run mode, Rule 2.35). Dropped on an IP or a Quick Disconnect it joins it (a Quick Disconnect wins
+  over the IP under it); anywhere in the **top third of a vessel** it is the same as putting the hose in the vessel's top (the whole top
+  third is one big IP); anywhere else the end is loose and no flow shows. Operators and admins can move it, the move is kept at once
+  for every screen, and a 🔒 locked hose does not move.
+- Flow and Flow Colors are as for every hose (Rules 5.10, 5.21). A hose in a vessel's top is an end of the line like a vessel port;
+  flow pumped from it takes that vessel's Out flow color.
+- **Exception to Rule 2.11** (waiting on Fritz's pick: this exception, or a change to Rule 2.11): only the free end of a Quick
+  Disconnect hose moves outside Edit layout; everything else on a Tab still moves only in Edit layout.
 
 ---
 
@@ -1568,3 +1589,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 5.25 (TC Pipe Fittings is a Widget subclass: every elbow, tee, cross, U, reducer, check valve and End Cap is a Skynet TC Pipe Fittings Widget with an IP on each ferrule face; Skynet puts them in where pipes meet, a pipe drawn to the bend turns an elbow into a tee; added by hand from Elbows, Tees … and Add Widget > TC Pipe Fittings; fittings with probes stay Temperature Devices; no cut-off ends). New Cross; Elbow 45, Instrument Tee and the probe tees redrawn in the style of Fritz's 2026-11-04 Elbow and Tee; the cut-off 45 ends of Fitting_Elbow45, Skynet_TC15_45 and pipe_elbow45 fixed. Samples and default Schema changed. Help 124; next free Help number 125. (thread "Make Fritz's elbow and tee into SVG Widgets")
 - 2026-11-04: Added Rule 5.26 (a Pump, Valve or Manual Valve Widget dropped on a straight pipe cuts it: between the ends into separate pipes joined to its IPs, over an end the pipe is made shorter and both IPs joined, an end on a tee or other IP staying where it is; an IP that opens across the pipe is taken round with 90 degree elbows). Help 125; next free Help number 126 (Help 124 is taken by PR #193). (thread "Split a pipe when a pump is added")
 - 2026-11-05: Rule 9.8: Start Fresh on Windows also deletes the clean window's browser profile (saved user name and password), and Admin setup always opens with empty boxes (browser fill-in cleared). Help 18 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
+- 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
