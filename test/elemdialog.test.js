@@ -27,3 +27,16 @@ assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'element' }), ['hea
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'element', integratedIn: 'x' }), ['skynet-integrated-devices']);
 assert.ok(fs.existsSync(new URL('../help/137-heating-element-device-properties.md', import.meta.url)));
 console.log('elemdialog tests passed');
+// Fritz, 2026-11-05: Heating Element Labels fill in by control mode
+{
+  const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
+  const src = app.match(/const heatMode = (e => .*);/)[1];
+  const heatMode = eval(src);
+  assert.equal(heatMode({ type: 'pid' }), 'PID'); assert.equal(heatMode({ type: 'hysteresis' }), 'HYS');
+  assert.equal(heatMode({ type: 'dutyCycle' }), 'DutyC'); assert.equal(heatMode({ type: 'deadband' }), 'DeadB');
+  assert.equal(heatMode({ type: 'digitalOut', subtype: 'element' }), 'DO'); assert.equal(heatMode({ type: 'pwmOut', subtype: 'element' }), 'PWM');
+  assert.equal(heatMode({ type: 'digitalOut', subtype: 'pump' }), null); assert.equal(heatMode({ type: 'pid', integratedIn: 'x' }), null);
+  assert.match(app, /work\.label = autoLabel\('hE_' \+ hm\)/);
+  assert.match(app, /'pwmOut', 'PWM', \{ units: '%', subtype: 'element' \}/, 'the Heating Element list PWM row is a heating PWM');
+  console.log('heating labels tests passed');
+}

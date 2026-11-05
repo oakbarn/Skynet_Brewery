@@ -901,6 +901,17 @@ Template"; thread "Build the Vessel Widget class", Help 133).
 - The Three Vessel sample's HLT, Mash tun and Boil kettle are Vessel Widgets (Outlet and Thermowell Placed; the Element on the HLT
   and Boil kettle; the Top Inlet on the Mash tun and Boil kettle).
 
+5.32 **Sight Glasses are TC Pipe Fittings with a Length** (Fritz, 2026-11-05: "Create 2 Sight Glass Pipe Fitting, One Caged and one
+not. Length attribute to stretch length"; thread "Add caged and plain sight glass fittings", Help 139).
+- Two Skynet TC Pipe Fittings Widgets (Rule 5.25): **Sight_Glass** (plain glass) and **Sight_Glass_Caged** (a stainless guard round
+  the glass), TC 1.5, an IP on each ferrule face (left and right), flow either way. Added from Elbows, Tees … and Add Widget > TC
+  Pipe Fittings; names SightGlass_n and SightGlassCaged_n.
+- **Length** (inches, ferrule face to ferrule face, 2 to 48, quarter inches; 6 when placed) stretches it along its pipe. Only the
+  glass (and the cage) gets longer: the picture is drawn for its Length, so the ferrules and end collars keep their shape and size.
+  Autosize to pipe makes it as thick as its pipe; with Autosize off, a typed Width sets the Length.
+- Its **Label** starts filled in as **site_glass_n** (the next number) and is never blank (Rule 18.15; Fritz, 2026-11-05: "site_glass_1").
+- Dropped on a straight pipe in Edit layout it cuts the pipe, as a tee's run does (Rule 5.25).
+
 ---
 
 ## 6. Devices, connections and safety
@@ -1246,8 +1257,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **136**. (2026-10-04,
-Markdown files in help/ on the Brain, numbered for order. Next free number: **138**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **140**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1622,7 +1632,9 @@ like Pump", Help 137):
    18.20, 18.23): 1 Label ⬢ and Label Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**,
    **Orientation** (Right / Left) with **Toggle** on its line, **Overlay** (None to start: the on picture glows) with **Database and
    .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**DO**). **No Cover.** It still asks before it
-   turns on (Rule 2.33). Label auto-fill: *waiting on Fritz* (Rule 18.15); for now the Label is typed, as a Pump's.
+   turns on (Rule 2.33). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in by its control mode as **hE_Mode_n**: PID
+   **hE_PID_1**, Hysteresis **hE_HYS_1**, Duty Cycle **hE_DutyC_1**, PWM **hE_PWM_1**, On/Off **hE_DO_1**, Deadband **hE_DeadB_1** (n the
+   next number not used yet for that mode). *The hE_ start and the _n end wait on Fritz's OK.*
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover; the Interface and Port are greyed out for good (Rule 18.13).
 5. **Vessel Device Template: Choose, then Build.** In the Heating Element list it takes the place of *Electric kettle, basic*
    (which stays in the full Add Device list, Devices: Skynet). **Choose** a Vessel Template that has an Element Port (the Vessel
@@ -1679,7 +1691,9 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
 2. The opening pattern (Rule 18.15 for a Widget): **1 Label** ⬢ and **Label Visible** (starts at No), **2 Picture** (the picture it
    shows, from the Picture list with the 🖼 icon picker), **3 Tab** greyed out as **🔨 Build Tab**. Nothing else shows until the
    Label and the Picture are done; ➕ Add Widget can always be pressed and says what is missing. Enter goes Label, Picture,
-   ➕ Add Widget (Rule 18.20). Label auto-fill: *waiting on Fritz* (Rule 18.15); for now the Label is typed, as a Pump's.
+   ➕ Add Widget (Rule 18.20). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in by its control mode as **hE_Mode_n**: PID
+   **hE_PID_1**, Hysteresis **hE_HYS_1**, Duty Cycle **hE_DutyC_1**, PWM **hE_PWM_1**, On/Off **hE_DO_1**, Deadband **hE_DeadB_1** (n the
+   next number not used yet for that mode). *The hE_ start and the _n end wait on Fritz's OK.*
 3. Then **4 Name** (the Suggested Name **pic_** + the Label, e.g. pic_Kettle_Element, as the samples name them; it may be edited),
    the **Graphic**, **Turns on with** (Rule 7.11) with **Toggle** (On/Off, Push button, None: what a tap does) on its line,
    **Overlay** (greyed out while Turns on with is None) with a ⬢ for the second picture (Picture when on, optional, Rule 7.8) and
@@ -1974,6 +1988,7 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 8.4 (Password key): Skynet's own key button in every new-password box makes a strong password that follows the Password rules; Edge's own key went away when the clean window stopped syncing (Rule 9.8, PR #205). Help 10 updated; no new Help number. (thread "Restore generate password Key on fresh install")
 - 2026-11-05: Added section 19, the **Vessel Rules** (Fritz: "Vessels will have their own Rules"; an exception to Rules 2.20, 1.21 and 5.31 for Vessel Widgets and Vessel Devices only): 19.1 Gallons (10 to start on every vessel Template), 19.2 Proportional (1 gallon = Fritz's plain vessel, 197 x 237) or Diameter, size follows volume, 19.3 the Tab's Master Vessel Sizer (only it resizes; no Master, no resizing), 19.4 Not Placed hidden even on the Build Tab, 👁 Show All. Help 135; next free Help number 136. (thread "Size Vessels by gallons with a Master Sizer")
 - 2026-11-05: Added Rule 18.24 (Adding a Heating Element: the Pump's drill-down without a Cover; in the Heating Element list, Vessel Device Template, Choose then Build, takes the place of Electric kettle, basic). (thread "Build Heating Element Add dialogs like Pump", Help 137)
+- 2026-11-05: Rule 18.24: Heating Element Labels fill in by control mode (hE_PID_1, hE_HYS_1, hE_DutyC_1, hE_PWM_1, hE_DO_1, hE_DeadB_1; Rule 18.15). The Heating Element list's PWM row is a heating PWM (H_PWM).
 - 2026-11-05: Added Rule 18.25 (Fritz: "PWM Build Dialog"): the PWM output and Analog output Add box and Properties follow the Pump's drill-down; no Cover, Orientation or Toggle; own set Start value / Decimals or Signal / Units / Low / High / Decimals; Label typed (auto fill asked). Help 136; next free Help number 137. (thread "Build PWM Add dialog like Pump")
 - 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")
 - 2026-11-05: New Rule 18.26: adding a Temperature Probe (plain, Thermowell, probe tee) uses the Pump's drill-down without a Cover, Toggle or Overlay; the kind of probe is still picked first (Fritz); Orientation with Flip, Probe type ⬢, Units with Decimals, Calibration offset with Database and .API ⬢; Label auto fill tP_n (Fritz's pick pending). Rule 18.15 lists it. Help 138; next free Help number 139. (thread "Build Probe Add dialogs like Pump")
@@ -1984,4 +1999,6 @@ Not Placed) or the dialog closes.
 - 2026-11-05: One exception to Rules 5.7 and 5.31 (Fritz): a Vessel built from a Vessel Widget Template is a Vessel Device; Elements,
   Probes, Thermowells and Valves on its IPs are integral parts (like the RIMS tube); a HERMS coil goes on the Left or Right HERMS IPs;
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
+- 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
+- 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")
 - 2026-11-05: Rule 18.25 / 18.15: a new PWM output's Label starts as PWM_n, a 4-20 mA Analog output's as 4_20_n, a 0-10 V (or 0-5 V) one's as 0_10_n (Fritz). Help 136 updated. (thread "Build PWM Add dialog like Pump")
