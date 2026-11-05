@@ -7,7 +7,7 @@ const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'
 // Picture ➕ and Add Widget > Picture Widget both go through the Add Widget box
 assert.match(app, /\$\('#addImg'\)\.onclick = guard\(\(\) => addThing\('picture'\)\)/, 'Picture ➕ makes a Picture Widget');
 assert.match(app, /if \(isPicW\(e\)\) \{ centerNew\(e\); if \(!\(await newPictureDialog\(e\)\)\) return; \}/, 'addThing opens the Add Widget box');
-const own = app.slice(app.indexOf('function pictureWidgetFields('), app.indexOf("// a new Alarm's Name follows its Label"));
+const own = app.slice(app.indexOf('function pictureWidgetFields('), app.indexOf('// Value, Time and DateTime Widget Properties'));
 // the order: 1 Label, 2 Picture, 3 Tab (the Build Tab in the Add box, Rule 4.1), 4 Name; no Interface or Port (Rule 1.2)
 const order = ["'1. Label'", "'2. Picture'", "'3. Tab'", "'4. Name'", "'Graphic'", "'Turns on with'", "'Overlay'", "'Text on picture'", "'X (Horizontal)'", "'Widget Type'"].map(k => own.indexOf(k));
 assert.ok(order.every(i => i > 0) && order.every((v, i) => !i || v > order[i - 1]), 'fields in the drill-down order');

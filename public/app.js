@@ -4721,6 +4721,9 @@ function mbvDeviceFields(it, item) {
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
 
+// a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
+const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
+
 // ---- Picture Widget (Fritz, 2026-11-05: "build a Picture Widget Build ... follow the look and sequences of the Pump drill Down",
 // Rule 18.25, Help 74). The Pump's Add box and Properties (Rules 18.13-18.21) made to fit a Widget: a Widget has no Interface or
 // Port (Rule 1.2) and is made on the 🔨 Build Tab first (Rule 4.1), so the Add Widget box asks 1 Label, 2 Picture, (3 Tab is the
@@ -4769,9 +4772,6 @@ function pictureWidgetFields(it, item, add) {
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: 'Its size on the Tab in pixels. 140 x 120 to start.', ...x }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: 'Its size on the Tab in pixels. 140 x 120 to start.', ...x }],
     ['_wt', 'Widget Type', 'ro', 'Picture', false, false, { tip: T.type, ...x }]];
 }
-
-// a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
-const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
 
 // Value, Time and DateTime Widget Properties (Fritz, 2026-11-05, Rule 1.23): the dialog pattern of the Timer Widget (Rule 18)
 function dataWidgetFields(it) {
