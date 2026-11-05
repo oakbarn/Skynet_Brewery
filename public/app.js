@@ -1290,7 +1290,11 @@ function withLook(e, v) {
 const shownName = (e, v) => editing ? (e.label || e.name) : (v.label || e.name);
 function fillEl(n, e0) {
   // a clone shows its parent's values, with its own Visible (a Process moving the parent leaves the clone where it is)
-  const v = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {}, e = withLook(e0, v);
+  const v0 = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {};
+  // In Edit layout the pictures follow the Properties you just saved (Fritz, 2026-11-05: a valve's new Orientation showed only after
+  // Save layout): the Brain's .image / .imageOn / .imageOff / .imageOverlay are last Save layout's, so here they are the item's own
+  // (as the Brain makes them, lib/store.js), as shownName does for the Label
+  const v = editing ? { ...v0, image: e0.backpath ?? '', imageon: e0.imageOn ?? '', imageoff: e0.imageOff ?? '', imageoverlay: e0.imageOverlay ?? '' } : v0, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;
@@ -3121,7 +3125,9 @@ for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventLis
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
-const ifaceIdOf = dev => (S.config.devices || []).find(d => d.name === dev)?.id || '';
+// an Interface with no ID yet (Fritz, 2026-11-05: a Suggested Name came out as 22_E_L_Vlv_MBV1__BR) uses the ID the Brain gives it on
+// the next save (Rule 3.2: the first letters of its Name), so the name still starts with it (Rule 3.1)
+const ifaceIdOf = dev => { const ds = S.config.devices || [], d = ds.find(x => x.name === dev); return !d ? '' : d.id || defaultInterfaceId(d.name, ds.filter(x => x !== d).map(x => x.id)); };
 const tabIdOf = tab => L().workspaces.find(w => w.name === tab)?.id || '';
 const ANALOG_TEMP = ['ntc', 'lm35', 'tmp36'];      // temperature sensors on an analog pin
 const isOneWire = e => e.type === 'temperature' && (!e.sensor || e.sensor === 'ds18b20');
@@ -3199,18 +3205,21 @@ async function newDeviceDialog(e, hint, what) {
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after)] : []),
-    ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after)] : []),        // no Cover on a valve
+    ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
     ...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
     ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : 'Valve') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
+  // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
+  // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
+  if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !work.typeCode) work.typeCode = isPumpDev(e) ? 'Pump' : 'Valve';      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
   if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   if (isPumpDev(e)) work.cover = e.cover || 'None';
-  if (mbv) Object.assign(work, { imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
+  if (mbv) Object.assign(work, { tapwater: !!e.tapwater, closeAll: e.closeAll ?? true, openAll: e.openAll ?? true, imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
   for (const b of cancels) b.textContent = '✖ Cancel';
@@ -3299,7 +3308,7 @@ async function newDeviceDialog(e, hint, what) {
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? ['tap', 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (mbv && e.template) { e._orient = work._orient; skyOrientSwitch(e); delete e._orient; applyDeviceTemplate(e, devTemplate(e)); }     // the Orientation picks its Template; the fixed attributes stay the Template's (Rule 5.16)
         if (dd) { const d = { ...work }; dbFromWork(d); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; }
         if (+work.w > 0) e.w = +work.w;
@@ -4369,6 +4378,12 @@ function pumpDeviceFields(it, item) {
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 const isMbvDev = e => e?.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (e.template ? skyDev(e) && isMbvTpl(e.template) : true);
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e);
+// the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
+function autoLabel(type) {
+  const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
+  const used = [...(L0.elements || []), ...(L0.graphics || [])].map(x => re.exec(String(x.label ?? '').trim())).filter(Boolean).map(m => +m[1]);
+  return `${type}_${used.length ? Math.max(...used) + 1 : 1}`;
+}
 const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Defined Motorized Ball Valve';
 const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : mbvTitle(e);
 const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']];
@@ -4378,21 +4393,22 @@ const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
   const T = DEVICE_TIPS;
   return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.vGraphic, ...x }],
     ...(it.template ? [['_path', 'Path', 'ro', String(skyOrientPic(it._orient ?? orientPick(it))?.imageOff || it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: T.vPathSet, cls: 'mbvPath', ...x }],
-      ['_orient', 'Orientation', 'vorient', skyOrientChoices(it), true, false, { tip: T.vOrient, ...x }]]
+      ['_orient', 'Orientation', 'vorient', skyOrientChoices(it), true, false, { tip: T.vOrient, with: MBV_TOGGLE(it), ...x }]]
       : [['imageOff', 'Path (closed)', 'gpick', null, false, false, { tip: T.vPath, attr: MBV_IP_POP, ...x }], ['imageOn', 'Path (open)', 'gpick', null, false, false, { tip: T.vPathOpen, ...x }],
-        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), false, false, { tip: T.vOrientUser, ...x }]])];
+        ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), false, false, { tip: T.vOrientUser, with: MBV_TOGGLE(it), ...x }]])];
 };
 // Toggle (what a tap does) and the Overlay with Database and .API ⬢ on its line (Fritz's screen 7); no Cover on a valve
 // Fritz, 2026-11-05 ("Toggles and Overlays should work normally"): the Skynet valve's too (its Template lists them as user settable)
-const MBV_TOGGLE_OVERLAY = (it, x = {}) => {
-  const T = DEVICE_TIPS;
-  return [['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.vToggle, ...x }], ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: T.vOverlay, dbPop: true, ...x }]];
-};
+// Fritz, 2026-11-05 ("It should look and feel almost a copy of the Pump dialogs"): two dropdowns on one line as the Pump's Cover and
+// Toggle are, so the Toggle sits beside the Orientation (a valve has no Cover)
+const MBV_TOGGLE = it => ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: DEVICE_TIPS.vToggle }];
+const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, ...x }]];
 // a valve's own (Rule 18.22): Tap water (Rule 6.15) and the Close all / Open all valves lists
-const MBV_OWN = it => [['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap }],
-  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd }] : ['tapwaterOut', 'Tap water flows out of', 'sel', TAP_OUT, false, false, { tip: DEVICE_TIPS.vTapEnd }]] : []),
-  ...(it.tapwater ? [['_vl', 'Close all valves list: always on. Open all valves list: never (a tap water valve).', 'note']]
-    : [['closeAll', 'Close all list', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'Open all list', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]])];
+// Fritz, 2026-11-05: short names (On Close List, On Open List) and the three switches on one line, in the Add box too
+const MBV_OWN = (it, x = {}) => [it.tapwater ? ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, ...x }]
+    : ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, with: [['closeAll', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]], ...x }],
+  ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap water flows out of', 'sel', TAP_OUT, false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
+    ['_vl', 'A tap water valve is always on the Close List and never on the Open List (Rule 6.15).', 'note', null, false, false, x]] : [])];
 function mbvDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   if (it.template) {        // the Orientation picks the Template of its set (Rule 5.17), as in skyDevFields
@@ -4458,9 +4474,16 @@ function field(f, obj) {
     h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'))];
   if (x?.cls && out[1]) out[1].classList.add(x.cls);
   if (x?.with && out[1]) {      // a second field on the same line (Fritz: Interface (board) and its Available Ports)
-    const o2 = fieldOne(x.with, obj), first = out[1];
-    if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
-    out[1] = h('div', { class: 'fldPair' }, first, h('span', { class: 'pairLbl' }, x.with[1]), o2[1]);
+    // x.with may be a list of fields (Fritz, 2026-11-05: Tap water, On Close List and On Open List on one line)
+    const more = Array.isArray(x.with[0]) ? x.with : [x.with], first = out[1], parts = [first];
+    for (const w of more) {
+      const o2 = fieldOne(w, obj);
+      if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
+      const lbl = h('span', { class: 'pairLbl' }, w[1]);
+      if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.title = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], w[6].tip)); }
+      parts.push(lbl, o2[1]);
+    }
+    out[1] = h('div', { class: 'fldPair' }, ...parts);
   }
   if (x?.inTitle) {              // Fritz's screen 9: the lock, Visible and Hidden Locked sit in the title line of the dialog
     const t = h('span', { class: 'ttlExtra' }, ...(out[0]?.textContent ? [h('span', { class: 'ttlLbl' }, out[0].textContent)] : []), out[1]);
@@ -4778,7 +4801,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     };
     input._fill(obj.device);
   }      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, d.id ? `${d.id}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
     ...(String(opts).startsWith('addnew') && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
     ...controllableNames((draft || S.config).elements).map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)),
