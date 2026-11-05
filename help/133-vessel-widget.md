@@ -50,6 +50,29 @@ When the Temperature Probe or the Element Port is Placed, pick the Device it use
 heating element output such as a Hysteresis or PID). Making that Device right from the vessel (picking its Interface, Port and
 Probe Type) is waiting on Fritz's decision about Rule 5.7.
 
+## The Vessel Device
+
+A Vessel built from a Vessel Widget Template is a **Vessel Device**: a special Device, made like the **RIMS tube** (the RIMS tube is
+a small Vessel Device whose Element and Probe are already set and locked). In its Properties, under each Placed IP, **On this IP**
+picks what is built into that IP:
+
+- **Nothing**: an open IP, for a Pipe, Hose or Fitting
+- **Heating Element**
+- **Temperature Probe** or **Thermowell with its Temperature Probe** (pick the probe type, then its Port or OneWire probe number)
+- **Motorized Valve**
+
+Pick the **Interface** (board) the parts are wired to once, then each part's **Port**. A part is not a separate Device: it is part
+of the vessel, it shows on the vessel at its IP, and it gets a small reading (On / Off, or the temperature) beside the vessel, the
+way the RIMS tube's do. It can't be deleted on its own. An Element, Probe or Thermowell fills its IP, so no flow goes through it;
+a Valve lets flow through only while it is on.
+
+**HERMS coil:** pick **Left** or **Right**. The coil is drawn under that side's **HERMS In** and **HERMS Out** IPs, shaped to fit
+them, and the two IPs become the coil's two ends: flow that goes in one comes out of the other.
+
+**Once it is built and saved there is no way back.** After 💾 Save Build ... > To a Tab and Save layout, its IPs, the parts built
+into them and its HERMS coil are locked for good, and it can't be un-bundled. Its Name, Labels, Gallons, Tab and place can still
+change. (One exception to Skynet Rules 5.7 and 5.31.)
+
 ## Your own additions
 
 You can still add your own Devices and Widgets to a Vessel Widget, and **Bundle** them with it to make a **User Bundled Template**

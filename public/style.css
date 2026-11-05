@@ -440,6 +440,9 @@ body.role-viewer .op-only { display: none !important; }
 #ws .gfx.vessel .vwPart { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
 #ws .gfx.vessel .vwPart.vwOff { opacity: .3; outline: 1px dashed rgba(255,255,255,.7); }
 #ws .gfx.vessel.heating .vwElem:not(.vwOff) { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
+/* a Vessel Device (Rule 5.31 exception): its HERMS coil sits under its IPs; an Element glows and a Valve shows green while on */
+#ws .vpPart.vp-element.on { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
+#ws .vpPart.vp-valve.on { filter: drop-shadow(0 0 5px #2ecc40); }
 #ws .gfx.vessel .vwGhost { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px dashed rgba(232,163,58,.8); background: rgba(232,163,58,.12); pointer-events: auto; }
 .vpop { position: fixed; top: 90px; right: 24px; z-index: 50; width: 340px; max-width: calc(100vw - 32px); background: #1d2329; color: #e8ecef; border: 1px solid #4a5058; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.5); padding: 0 14px 12px; font-size: 14px; }
 .vpop .vpop-head { margin: 0 -14px 8px; padding: 10px 14px; background: #2a3239; border-radius: 10px 10px 0 0; font-weight: 700; cursor: move; user-select: none; touch-action: none; }

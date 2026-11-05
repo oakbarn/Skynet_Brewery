@@ -553,6 +553,8 @@ picture. (2026-10-23)
 5.7 **Adding a Vessel asks: Widget or Integrated.** A Skynet Vessel Widget has no Devices, only
 built-in IPs. **A User Bundled vessel Template must be built on a Skynet Vessel Widget**; there is
 no other way to make one. (2026-10-23, PR #102)
+*Exception (Fritz, 2026-11-05: "I think the exception is good"):* a Vessel **built from a Vessel Widget Template** becomes a
+**Vessel Device** with parts built into its IPs (Rule 5.31, The Vessel Device). The Vessel Widget Templates themselves stay Widgets.
 
 5.8 **A Template sent to a Tab becomes a Tab item** (Tab_Vessel, Tab_Fitting, a Device) that can be
 deleted. What can be edited on it follows Rule 5.16. (2026-10-21; changed 2026-10-28)
@@ -865,6 +867,24 @@ Template"; thread "Build the Vessel Widget class", Help 133).
 - **Each IP has a Label** (Fritz, 2026-11-05: "Name the top on Sparge. The Label can be chosen by the User But start with the Name and
   Label the same"): it starts the same as its Name, the user can change it in Vessel Widget Properties, and an empty Label goes back
   to the Name (never blank, Rule 18.15).
+- **The Vessel Device** (*one exception* to Rules 5.7 and this Rule, Fritz 2026-11-05: "When we build off a Template, It Becomes
+  that Special Vessel Device." "Treat it just like the RIMs DEvice." Thread "Build locked Vessel Device from Template", Help 133):
+  - A Vessel built from a Vessel Widget Template is a **Vessel Device**, a special Device like the RIMS tube. An **Element**, a
+    **Temperature Probe**, a **Thermowell with its probe** or a **Valve** put on one of its IPs is **an integral part of it, not a
+    separate Device** (Fritz: "they are not separate devices themselves"), locked to that IP. Its Interface and each part's Port
+    are set in the Vessel's Properties, as the RIMS tube's element and probe are; each shows its reading or On / Off like the
+    RIMS tube's and can't be deleted on its own.
+  - A part fills its IP: an Element, Probe or Thermowell closes it (no flow); a Valve passes flow only while it is on.
+  - **HERMS coil:** Left or Right. It goes on that side's HERMS In and HERMS Out IPs as **a layer under them**, drawn to fit them
+    (the coil's look follows the Template's IPs), and the coil's ends **are** those two IPs, locked together: flow in one comes out
+    the other.
+  - **Once it is built and saved** (on a Tab, not the 🔨 Build Tab, and the layout saved), **its IPs (Place), parts and HERMS coil
+    can't be changed and it can't be un-bundled: there is no way back** (Fritz: "No Way to Back Out Once Built and Saved"). Its
+    Name, Labels, Gallons, Tab and place can still change.
+  - The **RIMS tube Template is a kind of Vessel Device Template** (Fritz, 2026-11-05: "the Element and Probe are set and Locked.
+    Just the shape and # of available IPs are fixed and shown"); it keeps its own Properties (Rules 5.3, 18.10).
+  - *Replaced for a Vessel Device:* "a user can change the Place sliders on their copy" and "A Placed Probe or Element links a
+    Device the Schema already has".
 - **Place** (a switch for each spot, in Vessel Widget Properties): on = it is on the vessel and works (an IP joins pipes, hoses and
   fittings; the Probe and Element show their pictures, and the Element glows while its heater is on). Off = it is not there: nothing
   shows on a Tab and nothing (a pipe, a Process) can use or change it. *Changed (Fritz, 2026-11-05, Rule 19.4):* a Not Placed spot
@@ -1970,5 +1990,11 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")
 - 2026-11-05: New Rule 18.26: adding a Temperature Probe (plain, Thermowell, probe tee) uses the Pump's drill-down without a Cover, Toggle or Overlay; the kind of probe is still picked first (Fritz); Orientation with Flip, Probe type ⬢, Units with Decimals, Calibration offset with Database and .API ⬢; Label auto fill tP_n (Fritz's pick pending). Rule 18.15 lists it. Help 138; next free Help number 139. (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Added Rule 18.27 (Adding a Picture Widget: the Pump's drill-down made to fit a Widget: 1 Label, 2 Picture, 3 Tab = the Build Tab, then the Name, Graphic, Turns on with + Toggle, Overlay, Text on picture, X, Y, Width, Height, Widget Type; Picture ➕ now makes a Picture Widget). Rule 4.5 updated. Help 74 updated. (thread "Build Picture Widget dialog like Pump")
+- 2026-11-05: Rule 5.31 changed (Fritz's Vessel IP Template drawing, PR #226): the Vessel Widget Main Template has 15 IPs (Right side
+  Sparge, HERMS In, HERMS Out, Element, repeated on the Left; Left and Right Back Element; Center Probe; Left and Right Tangential;
+  Center Outlet; Center Bottom Outlet); the names are general only; each IP has a Label that starts the same as its Name.
+- 2026-11-05: One exception to Rules 5.7 and 5.31 (Fritz): a Vessel built from a Vessel Widget Template is a Vessel Device; Elements,
+  Probes, Thermowells and Valves on its IPs are integral parts (like the RIMS tube); a HERMS coil goes on the Left or Right HERMS IPs;
+  once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
 - 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
 - 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")

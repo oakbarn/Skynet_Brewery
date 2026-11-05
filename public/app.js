@@ -403,6 +403,133 @@ const VW_IPS = {
 const EQ_VW = { ...EQ.vessel, ports: { ...VW_IPS, ...EQ.vessel.ports,
   thermowell: { ...EQ.vessel.ports.thermowell, pos: [...EQ.vessel.ports.thermowell.pos, ['VW Center Probe', 0.5, 0.731]] },
   element: { ...EQ.vessel.ports.element, pos: [...EQ.vessel.ports.element.pos, ['VW R Element', 0.923, 0.644]] } } };
+// ---- The Vessel Device (Fritz, 2026-11-05: "When we build off a Template, It Becomes that Special Vessel Device"; one exception
+// to Rules 5.7 and 5.31, Help 133). A Vessel built from a Vessel Widget Template is a special Device, treated like the RIMS tube
+// ("the Rims is like a small vessel with Limited IPs"): an Element, a Temperature Probe, a Thermowell with its probe, or a Valve
+// put on one of its IPs is an integral part of it (its Port is set in the Vessel's Properties; integratedIn = the Vessel), locked
+// to that IP. A HERMS coil goes on the Left or Right HERMS In and Out, as a layer under them; the two IPs then pass flow through the
+// coil. Once it is built and saved on a Tab, its IPs, parts and HERMS coil can't be changed: there is no way back.
+const VP_KINDS = [['', 'Nothing: an open IP'], ['element', 'Heating Element'], ['probe', 'Temperature Probe'], ['thermowell', 'Thermowell with its Temperature Probe'], ['valve', 'Motorized Valve']];
+const VP_PICS = { element: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg',
+  front: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Front.svg', valveH: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg',
+  valveF: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedFront.svg' };
+const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'] };
+const VP_KEYS = /_(part|pin|ptk|pidx)$/;
+const isVDev = g => !!g?.vdevice && isVW(g);
+const isVPart = e => String(e?.integratedAs || '').startsWith('ip:');
+const vpEl = (g, k, els = L().elements) => els.find(e => e.integratedIn === g.id && e.integratedAs === 'ip:' + k);
+const vpName = k => EQ_VW.ports[k]?.name || k;
+// built and saved: it is on a Tab (not the Build Tab) in the saved layout
+const vpLocked = g => !!S.config.graphics.find(x => x.id === g.id && x.workspace && !S.config.workspaces.find(w => w.name === x.workspace)?.build);
+const vpHermsOn = (g, k) => !!HERMS_SIDES[g.herms]?.includes(k);
+const vpText = (g, k) => { const e = vpEl(g, k, (draft || S.config).elements); return e ? `${VP_KINDS.find(([x]) => x === e.vpKind)?.[1] || e.vpKind} (${e.name})` : vpHermsOn(g, k) ? 'HERMS coil' : 'Nothing: an open IP'; };
+// the Properties: what each IP holds now
+function vpWork(g) {
+  const out = { vHerms: g.herms || '' }, devs = S.config.devices || [];
+  for (const [k, d] of Object.entries(EQ_VW.ports)) {
+    if (!d.vw) continue;
+    const e = vpEl(g, k, draft.elements);
+    Object.assign(out, { [k + '_part']: e?.vpKind || '', [k + '_pin']: e?.channel ?? '', [k + '_ptk']: e?.type === 'temperature' ? tempKey(e) : tempKinds()[0][0], [k + '_pidx']: e?.probeIndex ?? '' });
+    if (e && out.vpIface === undefined) out.vpIface = e.device;
+  }
+  out.vpIface ??= devs.length === 1 ? devs[0].name : '';
+  return out;
+}
+const vpProto = (kind, ptk) => kind === 'probe' || kind === 'thermowell' ? { type: 'temperature', ...tempKindOf(ptk) } : { type: 'digitalOut', subtype: kind === 'valve' ? 'valve' : 'element' };
+function vpFields(it, k, d) {
+  if (vpLocked(it)) return vpEl(it, k, draft.elements) || vpHermsOn(it, k) ? [[k + '_pnote', `${it.ports?.[k]?.label || d.name}: ${vpText(it, k)} (built in, locked)`, 'note']] : [];
+  if (vpHermsOn(it.vHerms !== undefined ? { ...it, herms: it.vHerms } : it, k)) return [[k + '_pnote', `${d.name}: the HERMS coil is on it`, 'note']];
+  const kind = it[k + '_part'], probe = kind === 'probe' || kind === 'thermowell', ow = probe && isOneWire(vpProto(kind, it[k + '_ptk']));
+  return [[k + '_part', `${d.name}: on this IP`, 'sel', VP_KINDS, true],
+    ...(probe ? [[k + '_ptk', `${d.name}: probe type`, 'sel', tempKinds().map(([a, b]) => [a, b]), true]] : []),
+    ...(!kind ? [] : ow ? [[k + '_pidx', `${d.name}: OneWire probe number`, 'probe']] : [[k + '_pin', `${d.name}: Available Ports / Pins`, 'pin', 'vp_' + k]])];
+}
+// the Available Ports lists of its parts: the free pins on its Interface that fit each one (two parts can't share a pin)
+function vpPinLists(w, g) {
+  const own = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)), els = draft.elements.filter(e => !own.includes(e));
+  for (const [k, d] of Object.entries(EQ_VW.ports)) {
+    if (!d.vw) continue;
+    const kind = w[k + '_part'], proto = kind ? vpProto(kind, w[k + '_ptk']) : null;
+    const taken = Object.keys(EQ_VW.ports).filter(x => x !== k && w[x + '_part'] && w[x + '_pin'] !== '' && w[x + '_pin'] !== undefined).map(x => String(w[x + '_pin']));
+    const pins = proto && w.vpIface ? freePins({ ...proto, device: w.vpIface, name: '\0new' }, els, S.config.devices, proto.type === 'temperature' && ANALOG_TEMP.includes(proto.sensor)).filter(p => !taken.includes(String(p))) : [];
+    $('#pins-vp_' + k)?.remove();
+    document.body.append(h('datalist', { id: 'pins-vp_' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: w.vpIface }, S.config.devices)); return h('option', { value: p, label: t }, t); })));
+  }
+}
+// make its parts (or bring them up to date) from vp (its Properties). Nothing changes when something is wrong (the error is thrown).
+function applyVParts(g, vp, tab, label) {
+  const old = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)), made = [], none = v => v === undefined || v === null || v === '';
+  const want = Object.entries(EQ_VW.ports).filter(([k, d]) => d.vw && vp[k + '_part'] && !vpHermsOn({ herms: vp.vHerms }, k));
+  if (want.length && none(vp.vpIface)) throw new Error('Pick the Interface (board) the parts on its IPs are wired to');
+  for (const [k, d] of want) {
+    const kind = vp[k + '_part'], o = old.find(e => e.integratedAs === 'ip:' + k), proto = vpProto(kind, vp[k + '_ptk']);
+    const e = { ...(o ? clone(o) : { w: 130, h: 60, enabled: false }), device: vp.vpIface, workspace: tab, integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind };
+    for (const x of [...TEMP_KEYS, 'wires', 'series', 'subtype']) delete e[x];
+    Object.assign(e, clone(proto));
+    if (proto.type === 'temperature') { e.units ??= '°F'; e.precision ??= 1; }
+    if (proto.type === 'temperature' && isOneWire(e)) { if (none(vp[k + '_pidx'])) throw new Error(`${d.name}: pick the OneWire probe number`); e.probeIndex = +vp[k + '_pidx']; delete e.channel; }
+    else { if (none(vp[k + '_pin'])) throw new Error(`${d.name}: pick its Port`); e.channel = vp[k + '_pin']; delete e.probeIndex; }
+    e.label = `${String(label || 'Vessel').trim()} ${g.ports?.[k]?.label || d.name}`;
+    e.typeCode = o?.typeCode && o.type === e.type && o.vpKind === kind ? o.typeCode : defaultCode(e);
+    e.name = !o || o.name === deviceSuggestion(o, o) ? deviceSuggestion(e, o || e) : o.name;
+    if (made.some(([m]) => m.name.toLowerCase() === e.name.toLowerCase())) e.name += '_' + (made.length + 1);
+    if (!o) Object.assign(e, { x: (g.x || 0) + made.length * 140, y: (g.y || 0) + (g.h || 50) + 20 });
+    made.push([e, o]);
+  }
+  const all = draft.elements; draft.elements = all.filter(e => !old.includes(e));        // its own parts are checked against the new ones, not their old selves
+  try {
+    for (const [e] of made) {
+      const err = portError(e, e); if (err) throw new Error(err);
+      if (isOneWire(e) ? made.some(([m]) => m !== e && isOneWire(m) && m.probeIndex === e.probeIndex) : made.some(([m]) => m !== e && !isOneWire(m) && pinsOf(m).some(p => pinsOf(e).includes(p))))
+        throw new Error(`${e.label} and another part need two different ${isOneWire(e) ? 'OneWire probe numbers' : 'Ports'}`);
+    }
+  } finally { draft.elements = all; }
+  draft.elements = draft.elements.filter(e => !old.includes(e) || made.some(([, o]) => o === e));
+  for (const [e, o] of made) {
+    if (o) { if (o.name !== e.name) for (const x of draft.elements) if (x.input === o.name) x.input = e.name; Object.keys(o).forEach(x => delete o[x]); Object.assign(o, e); }
+    else { useTabProfile(e); draft.elements.push(e); }
+  }
+}
+// what a Vessel Device's IP passes (ipNode): its HERMS coil joins its two IPs; an Element, Probe or Thermowell fills its IP; a Valve
+// is shut until it is on. Nothing on it: null (an open IP, the end of a flow).
+function vpFlow(v, k) {
+  if (vpHermsOn(v, k)) return { key: `eq:${v.id}:herms`, pass: true };
+  const e = vpEl(v, k); if (!e) return null;
+  return e.vpKind === 'valve' && isOn(e.name) ? null : { closed: true };
+}
+// the HERMS coil, drawn to fit its two IPs (Fritz, 2026-11-05: "adjust the Look of the HERMS Coils to match the Ips"): a lead in from
+// the wall at each IP and the coil's turns between them, in the colors of herms_coil.svg (the wall is on the left; flipped for the Right)
+function hermsCoil(w, hh, y1, y2, s) {
+  const cx = w * 0.58, rx = w * 0.36, ry = 6 * s, top = Math.min(y1, y2), bot = Math.max(y1, y2);
+  const n = Math.max(3, Math.round((bot - top) / (9 * s))), step = (bot - top) / (n - 1), x1 = cx - rx;
+  const leads = `M0 ${top}H${x1}M0 ${bot}H${x1}`, turns = Array.from({ length: n }, (_, i) => `<ellipse cx="${cx}" cy="${top + i * step}" rx="${rx}" ry="${ry}"/>`).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${hh}" viewBox="0 0 ${w} ${hh}"><g fill="none" stroke-linecap="round">`
+    + `<g stroke="#3b4148" stroke-width="${6 * s}"><path d="${leads}"/>${turns}</g><g stroke="#c9ced3" stroke-width="${3 * s}"><path d="${leads}"/>${turns}</g></g></svg>`;
+  return 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27');
+}
+// the pictures of its parts and its HERMS coil, on the vessel (at), s: its scale, W: its picture's width
+function vpParts(g, at, s, W) {
+  const out = [];
+  const hs = HERMS_SIDES[g.herms];
+  if (hs && g.ports?.[hs[0]]?.installed && g.ports?.[hs[1]]?.installed) {        // the coil: a layer under its two IPs, stretched to fit them
+    const [ax, ay] = at(hs[0], g.ports[hs[0]]), [, by] = at(hs[1], g.ports[hs[1]]), right = ax > W / 2, w = 120 * s, top = Math.min(ay, by) - 14 * s, hh = Math.abs(by - ay) + 28 * s;
+    out.push(h('div', { class: 'vwPart vpHerms', title: `HERMS coil on ${right ? 'Right' : 'Left'} HERMS In and Out (built in)`,
+      style: `left:${right ? ax - w : ax}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${hermsCoil(w, hh, ay - top, by - top, s)}");transform:scaleX(${right ? -1 : 1})` }));
+  }
+  for (const e of L().elements.filter(e => e.integratedIn === g.id && isVPart(e))) {
+    const k = e.integratedAs.slice(3), p = g.ports?.[k]; if (!p?.installed || !EQ_VW.ports[k]) continue;
+    const [px, py] = at(k, p), side = Math.abs(px - W / 2) > W * 0.4, right = px > W / 2;
+    let pic, w, hh, left, top, fl = 1;
+    if (e.vpKind === 'element' && side) { pic = VP_PICS.element; w = 110 * s; hh = 52 * s; left = right ? px + 5 * s - w : px - 5 * s; fl = right ? 1 : -1; }
+    else if (e.vpKind === 'thermowell' && side) { pic = VP_PICS.thermowell; w = 66 * s; hh = 44 * s; left = right ? px + 8 * s - w : px - 8 * s; fl = right ? -1 : 1; }
+    else if (e.vpKind === 'valve' && side) { pic = VP_PICS.valveH; w = hh = 60 * s; left = right ? px : px - w; }
+    else { pic = e.vpKind === 'valve' ? VP_PICS.valveF : e.vpKind === 'element' ? VP_PICS.element : VP_PICS.front; w = e.vpKind === 'element' ? 56 * s : 40 * s; hh = e.vpKind === 'element' ? 26 * s : 40 * s; left = px - w / 2; }
+    top ??= py - hh / 2;
+    out.push(h('div', { class: `vwPart vpPart vp-${e.vpKind}`, 'data-dev': e.name, title: `${p.label || vpName(k)}: ${e.label || e.name} (${e.name}, built in)`,
+      style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(pic)}");transform:scaleX(${fl})` }));
+  }
+  return out;
+}
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg'], ['LED red', 'Images/Skynet/Lights_LEDs/led_red.svg'], ['LED off (grey)', 'Images/Skynet/Lights_LEDs/led_off.svg'],
   ['Lightning bolt on', 'Images/Skynet/Lights_LEDs/bolt_on.svg'], ['Lightning bolt off', 'Images/Skynet/Lights_LEDs/bolt_off.svg'],
@@ -642,6 +769,7 @@ function vwParts(g) {
     out.push(h('div', { class: 'vwPart' + (k === 'element' ? ' vwElem' : ' vwProbe') + (ghost ? ' vwOff' : ''), title: tip + (!ghost && dev ? ': ' + dev : ''),
       style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(pic)}");transform:scaleX(${fl})` }));
   }
+  if (isVDev(g)) out.unshift(...vpParts(g, at, s, g.w || VW_W));       // a Vessel Device: its HERMS coil and the parts built into its IPs
   return out;
 }
 // ---- Vessels sized by gallons (Fritz, 2026-11-05, Rule 5.32). A Vessel Widget has a Gallons field (10 to start) and a Method:
@@ -879,7 +1007,8 @@ function buildIp(g) {
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
+const hasIps = e => e && !isVPart(e) && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
+// (a part built into a Vessel Device's IP has no IPs of its own: it sits in the vessel's IP, Rule 5.31 exception)
 // Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
 // "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
 const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)) || isProbeTee(e));
@@ -2053,6 +2182,7 @@ function ipNode(id, ws) {
   const g = L().graphics.find(g => g.id === id && g.workspace === ws);
   if (g?.port) {      // a port of an equipment widget: ports on the same circuit pass flow (chiller side, coil, filter, fitting)
     const v = L().graphics.find(x => x.id === g.attachTo), c = eqClass(v)?.ports[g.port]?.circuit;
+    if (isVDev(v)) { const r = vpFlow(v, g.port); if (r) return r; }       // a Vessel Device: its HERMS coil, or a part built into the IP
     if (isBfit(v) && bfitClosed(v)) return { closed: true };       // a closed valve in a Tab_Fitting
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
@@ -2332,6 +2462,7 @@ function renderPipes() {
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
   $$('#ws .gfx.vessel').forEach(n => n.classList.toggle('heating', !!n.dataset.heater && turnsOn(n.dataset.heater)));
+  $$('#ws .vpPart[data-dev]').forEach(n => n.classList.toggle('on', turnsOn(n.dataset.dev)));        // a Vessel Device's Element or Valve while it is on
 }
 
 // ---------------------------------------------------------------- edit mode
@@ -6117,6 +6248,8 @@ async function editItem(kind, id) {
   if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
+  const vdev = isVDev(item), vpRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, item); };
+  if (vdev) { Object.assign(work, vpWork(item)); vpPinLists(work, item); $('#dlgBody').addEventListener('change', vpRefresh); }
   if (isV) for (const [k, d] of Object.entries(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; if (d.vw) work[k + '_label'] = p.label || d.name; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
@@ -6129,7 +6262,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -6187,11 +6320,25 @@ async function editItem(kind, id) {
     } else if (isSkyV(item)) {        // a Skynet vessel: its ports come from its Template and don't change here
       const place = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_on')).map(k => [k.slice(0, -3), !!work[k]]));
       const lbl = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_label')).map(k => [k.slice(0, -6), String(work[k] ?? '').trim()]));
+      const vp = Object.fromEntries(Object.keys(work).filter(k => VP_KEYS.test(k) || ['vpIface', 'vHerms'].includes(k)).map(k => [k, work[k]]));
+      for (const k of Object.keys(vp)) delete work[k];
+      for (const k of Object.keys(work)) if (k.endsWith('_pnote')) delete work[k];
       for (const k of Object.keys(work)) if (/_(on|pos|std|label)$/.test(k)) delete work[k];
       work.ports = clone(item.ports || {});
       if (item.vwidget && !item.integrated) {      // a Vessel Widget: only its Place sliders, its IP Labels and its Probe's look change (its spots stay where the Template has them)
         for (const k of Object.keys(work.ports)) if (k in place) work.ports[k].installed = place[k];
         for (const [k, d] of Object.entries(eqClass(item).ports)) if (d.vw && work.ports[k] && k in lbl) work.ports[k].label = lbl[k] || d.name;      // an empty Label goes back to the Name
+        let vpApply = null;
+        if (isVDev(item) && vpLocked(item)) {       // built and saved: its IPs, parts and HERMS coil stay as they are (no way back)
+          for (const k of Object.keys(work.ports)) work.ports[k].installed = !!item.ports?.[k]?.installed;
+          if (item.herms) work.herms = item.herms; else delete work.herms;
+        } else if (isVDev(item)) {
+          const hs = HERMS_SIDES[vp.vHerms];
+          if (hs) { work.herms = vp.vHerms; for (const k of hs) if (work.ports[k]) work.ports[k].installed = true; } else delete work.herms;
+          for (const [k, d] of Object.entries(eqClass(item).ports)) if (d.vw && vp[k + '_part'] && !hs?.includes(k) && work.ports[k]) work.ports[k].installed = true;      // a part Places its IP
+          for (const [k, d] of Object.entries(eqClass(item).ports)) if (d.vw && !work.ports[k]?.installed) vp[k + '_part'] = '';      // Not Placed: nothing on it
+          vpApply = () => applyVParts({ ...item, ports: work.ports }, vp, work.workspace || item.workspace, work.label || work.name || item.name);
+        }
         work.probeStyle = work.probeStyle === 'front' ? 'front' : 'thermowell';
         if (work.ports.thermowell) work.ports.thermowell.position = VW_PROBE_POS[work.probeStyle];
         if (!work.ports.element?.installed) delete work.heater;        // not Placed: nothing on the vessel to link
@@ -6200,6 +6347,7 @@ async function editItem(kind, id) {
         if (work.volume === undefined) work.volume = work.units === 'Metric' ? 37.9 : 10;       // an older Vessel with no Gallons yet: 10
         if (!(+work.volume > 0)) throw new Error(`Type the ${work.units === 'Metric' ? 'Liters' : 'Gallons'} (more than 0)`);
         if (work.sizeMethod === 'diameter' && !(+work.diameter > 0 && +work.vheight > 0)) throw new Error('The Diameter method needs a Diameter and a Height (more than 0)');
+        vpApply?.();          // a Vessel Device's parts are made last, once nothing else is wrong
         if (work.sizeMethod !== 'diameter') delete work.sizeMethod;
         // only the Master Vessel Sizer is resized (Vessel Rules): another Vessel keeps its box, its Gallons set it from the Master
         const ws = draft.workspaces.find(w => w.name === (work.workspace || item.workspace)), m = vMaster(ws);
@@ -9842,6 +9990,7 @@ function placeTabVessel(t, tab, name) {
     if (d.vw) g.ports[k].label = q.label || d.name;          // a Vessel Widget IP: its Label starts the same as its Name
   }
   if (t.vwidget) { if (g.ports.thermowell) g.ports.thermowell.position = VW_PROBE_POS[g.probeStyle === 'front' ? 'front' : 'thermowell']; }
+  if (t.vwidget && !t.integrated) g.vdevice = true;        // built from a Vessel Widget Template: a Vessel Device (Rule 5.31 exception)
   draft.graphics.push(g); syncVesselPorts(g, null);
   const taken = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
   for (const k of Object.keys(FITTING_PORTS)) {
@@ -9911,6 +10060,11 @@ F.skynetFitting = it => {
 };
 
 // Show All: a Not Placed spot is listed only while 👁 Show All is on (one switched off now stays listed until the dialog closes)
+// a Vessel Device's Properties: its Interface and HERMS coil, or that it is locked (built and saved)
+const vdevHead = it => vpLocked(it) ? [['_vdl', `Vessel Device, built and saved: its IPs, the parts built into them${it.herms ? ' and its HERMS coil (' + (it.herms === 'left' ? 'Left' : 'Right') + ')' : ''} are locked for good. The Labels can still change.`, 'note']]
+  : [['_vdn', 'Vessel Device: an Element, Temperature Probe, Thermowell or Valve put on an IP is built into it (like the RIMS tube). Once it is built and saved on a Tab, its IPs, parts and HERMS coil are locked for good.', 'note'],
+    ['vpIface', 'Interface (board) the parts on its IPs are wired to', 'dev'],
+    ['vHerms', 'HERMS coil', 'sel', [['', 'None'], ['left', 'Left: on Left HERMS In and Left HERMS Out'], ['right', 'Right: on Right HERMS In and Right HERMS Out']], true]];
 const vwPlacedNow = (it, k) => k + '_on' in it ? !!it[k + '_on'] : !!it.ports?.[k]?.installed;
 const vwShows = (it, k) => !!it.vwShowAll || vwPlacedNow(it, k) || !!it.ports?.[k]?.installed;
 const hidN = it => Object.keys(it.ports || {}).filter(k => !vwShows(it, k)).length;
@@ -9931,7 +10085,7 @@ F.skynetVessel = it => {
   const ports = Object.entries(eqClass(it).ports).filter(([k, d]) => it.ports?.[k]?.installed && d.ip).map(([, d]) => d.name).join(', ');      // its openings (a thermowell or element spot is not one)
   const elems = [['', 'None'], ...L().elements.filter(e => ['digitalOut', 'pwmOut', 'dutyCycle', 'pid', 'hysteresis', 'deadband'].includes(e.type) && e.subtype !== 'valve' && e.subtype !== 'pump').map(e => [e.name, e.name])];
   const probes = [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])];
-  const vw = !!it.vwidget && !it.integrated;
+  const vw = !!it.vwidget && !it.integrated, vdev = vw && isVDev(it);
   const electric = vw ? !!it.element_on : it.heatKind === 'electric' || it.ports?.element?.installed, well = vw ? !!it.thermowell_on : it.ports?.thermowell?.installed;
   const spots = vw ? Object.entries(eqClass(it).ports).filter(([k]) => it.ports?.[k]) : [];
   return [['_t', vw ? `Vessel Widget, made from the Skynet Template ${it.template}. Its IPs, its Temperature Probe and its Element Port sit where the Template puts them; nobody can move them. Slide Place on for the ones this vessel has. An IP is a place to connect a Pipe, Hose, Fitting or anything else with its own IP; the TC, NPT or BSP type does not matter.`
@@ -9942,8 +10096,10 @@ F.skynetVessel = it => {
       // its picture starts as the Widget's and is edited like any other Widget's (Fritz, 2026-10-23)
       ['image', 'Graphic (picture path; its IPs stay on the openings of the Skynet picture)', 'path'],
       ...(vw ? [['_vw', 'Place (on = it is on this vessel and works; off = Not Placed: it is not there and is hidden, even on the Build Tab)', 'head'],
-        ['vwShowAll', it.vwShowAll ? 'All the spots show, the Not Placed ones too (as faint marks on the vessel).' : `Only the Placed spots show${hidN(it) ? ` (${hidN(it)} Not Placed hidden)` : ''}.`, 'showall', 'Show the Not Placed spots too, so one can be Placed'],
-        ...spots.filter(([k, d]) => d.ip && vwShows(it, k)).flatMap(([k, d]) => [[k + '_on', `${d.name} IP`, 'bool'], ...(d.vw ? [[k + '_label', `${d.name} Label (empty = the Name)`, 'text']] : [])]),
+        ...(vdev && vpLocked(it) ? [] : [['vwShowAll', it.vwShowAll ? 'All the spots show, the Not Placed ones too (as faint marks on the vessel).' : `Only the Placed spots show${hidN(it) ? ` (${hidN(it)} Not Placed hidden)` : ''}.`, 'showall', 'Show the Not Placed spots too, so one can be Placed']]),
+        ...(vdev ? vdevHead(it) : []),
+        ...spots.filter(([k, d]) => d.ip && vwShows(it, k)).flatMap(([k, d]) => [vdev && vpLocked(it) ? [k + '_onnote', `${d.name} IP: ${it.ports?.[k]?.installed ? 'Placed' : 'Not Placed'} (locked)`, 'note'] : [k + '_on', `${d.name} IP`, 'bool', false, vdev],
+          ...(d.vw ? [[k + '_label', `${d.name} Label (empty = the Name)`, 'text']] : []), ...(vdev && d.vw && (vpLocked(it) || it[k + '_on']) ? vpFields(it, k, d) : [])]),
         ...(it.ports?.thermowell && vwShows(it, 'thermowell') ? [['thermowell_on', 'Temperature Probe', 'bool', false, true], ...(well ? [['probeStyle', 'Probe: Front or Thermowell', 'sel', [['thermowell', 'Thermowell (in from the side)'], ['front', 'Front (seen from the front)']]]] : [])] : []),
         ...(it.ports?.element && vwShows(it, 'element') ? [['element_on', 'Element Port', 'bool', false, true]] : [])] : []),
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
@@ -9951,7 +10107,7 @@ F.skynetVessel = it => {
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
     ['_o', 'Orientation (the picture, its IPs and its fittings follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'],
     ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
-    ...looseField(it), ...VESSEL_FLOW(it),
+    ...(vdev && vpLocked(it) ? [] : looseField(it)), ...VESSEL_FLOW(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
     ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'],
     ...(vw && vMaster(draft?.workspaces.find(w => w.name === it.workspace))?.id !== it.id ? [['_wh', `Width ${it.w} x Height ${it.h}: set by its Gallons and the Tab's Master Vessel Sizer (only the Master is resized).`, 'note']]
