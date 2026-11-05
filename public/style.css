@@ -1042,3 +1042,6 @@ dialog :is(input, select, textarea):focus, dialog button:focus-visible { outline
 .pwWrap .pwKey.hidden { display: none; }
 .pwWrap.hasKey.keyOff input { padding-right: 40px !important; }
 .pwGenNote { margin: 0; }
+/* the Master Vessel Sizer (Vessel Rules, Fritz 2026-11-05): a ruler in its top left corner in Edit layout */
+.vMaster { position: absolute; left: 2px; top: 2px; font-size: 14px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: rgba(255,255,255,.85); pointer-events: none; display: none; }
+#ws.editing .vMaster { display: block; }
