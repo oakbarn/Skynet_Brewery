@@ -362,32 +362,32 @@ const EQ = {
     ports: { inlet: pt('Wort In', RIMS_POS, { on: true, def: 'Top Left', circuit: 'a' }), outlet: pt('Wort Out', RIMS_POS, { on: true, def: 'Bottom Right', circuit: 'a' }),
       thermowell: pt('Thermowell (probe)', [['Left End', 0, 0.5], ['Right End', 1, 0.5]], { ip: false, on: true, def: 'Left End' }),
       element: pt('Heating element', [['Right End', 1, 0.5], ['Left End', 0, 0.5], ['Element Housing', 0.65, 0.5]], { ip: false, on: true, def: 'Right End' }) } },
-  eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/Skynet/Other_Equipment/pipe_tee.svg', size: [90, 90],
+  eqTee: { title: 'Pipe tee', types: ['Equal tee', 'Reducing tee'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', size: [90, 90],
     ports: { a: pt('Run A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('Run B', SIDE4, { on: true, def: 'Right', circuit: 'a' }), c: pt('Branch', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
-  eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', size: [90, 90],
+  eqElbow90: { title: 'Pipe 90° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
-  eqElbow45: { title: 'Pipe 45° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', size: [90, 90],
+  eqElbow45: { title: 'Pipe 45° elbow', types: ['Short radius', 'Long radius'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Left', circuit: 'a' }),
       b: pt('End B', SIDE4.concat([['Bottom Right', 1, 1], ['Top Right', 1, 0], ['Bottom Left', 0, 1], ['Top Left', 0, 0]]), { on: true, def: 'Bottom Right', circuit: 'a' }) } },
-  eqCross: { title: 'Pipe cross', types: ['Equal cross', 'Reducing cross'], image: 'Images/Skynet/Other_Equipment/pipe_cross.svg', size: [90, 90],
+  eqCross: { title: 'Pipe cross', types: ['Equal cross', 'Reducing cross'], image: 'Images/Skynet/Other_Equipment/Skynet_TC15_Cross.svg', size: [90, 90],
     ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Right', circuit: 'a' }),
       c: pt('End C', SIDE4, { on: true, def: 'Top', circuit: 'a' }), d: pt('End D', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
 };
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg'], ['LED red', 'Images/Skynet/Lights_LEDs/led_red.svg'], ['LED off (grey)', 'Images/Skynet/Lights_LEDs/led_off.svg'],
   ['Lightning bolt on', 'Images/Skynet/Lights_LEDs/bolt_on.svg'], ['Lightning bolt off', 'Images/Skynet/Lights_LEDs/bolt_off.svg'],
-  ['Motorized ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg'], ['Motorized ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg'],
-  ['Motorized ball valve open (vertical, motor right)', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'], ['Motorized ball valve closed (vertical, motor right)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg'],
-  ['Motorized ball valve open (vertical, motor left)', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg'], ['Motorized ball valve closed (vertical, motor left)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg'],
-  ['Manual ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg'], ['Manual ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg'],
-  ['Manual ball valve open (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_OpenV_R.svg'], ['Manual ball valve closed (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_ClosedV_R.svg'],
-  ['Manual ball valve open (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_OpenV_L.svg'], ['Manual ball valve closed (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_ClosedV_L.svg'],
-  ['Manual butterfly valve open (horizontal)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg'], ['Manual butterfly valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg'],
-  ['Manual butterfly valve open (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenV_R.svg'], ['Manual butterfly valve closed (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_R.svg'],
-  ['Manual butterfly valve open (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenV_L.svg'], ['Manual butterfly valve closed (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg'],
-  ['Solenoid gas valve open (horizontal)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenH.svg'], ['Solenoid gas valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedH.svg'],
-  ['Solenoid gas valve open (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_R.svg'], ['Solenoid gas valve closed (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_R.svg'],
-  ['Solenoid gas valve open (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_OpenV_L.svg'], ['Solenoid gas valve closed (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_L.svg'],
+  ['Motorized ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg'],
+  ['Motorized ball valve closed (vertical, motor right)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg'],
+  ['Motorized ball valve closed (vertical, motor left)', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg'],
+  ['Manual ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg'],
+  ['Manual ball valve closed (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_ClosedV_R.svg'],
+  ['Manual ball valve closed (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_ClosedV_L.svg'],
+  ['Manual butterfly valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg'],
+  ['Manual butterfly valve closed (vertical, handle right)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_R.svg'],
+  ['Manual butterfly valve closed (vertical, handle left)', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedV_L.svg'],
+  ['Solenoid gas valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedH.svg'],
+  ['Solenoid gas valve closed (vertical, coil right)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_R.svg'],
+  ['Solenoid gas valve closed (vertical, coil left)', 'Images/Skynet/Valves/Valve_Gas_Solenoid_ClosedV_L.svg'],
   ['Submersible sump pump on', 'Images/Skynet/Pumps/Pump_Sump_On.svg'], ['Submersible sump pump off', 'Images/Skynet/Pumps/Pump_Sump_Off.svg'],
   ['March 809-PL (polysulfone in-line head, side inlet 90° to the outlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_90_Inlet.svg'],
   ['March 809-PL-C (polysulfone head, center inlet)', 'Images/Skynet/Pumps/Pump_March_809_Poly_Center_Inlet.svg'],
@@ -401,8 +401,8 @@ const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg']
   ['Topsflo TD5 (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_Topsflo_TD5_Poly_Center_Inlet.svg'],
   ['KegLand MKII 12V/24V (plastic head, center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_Poly_Center_Inlet.svg'],
   ['KegLand MKII with stainless head (center inlet)', 'Images/Skynet/Pumps/Pump_KegLand_MKII_SS_Center_Inlet.svg'],
-  ['Ball valve open (horizontal)', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'], ['Ball valve closed (horizontal)', 'Images/Skynet/Valves/Valve_Ball_ClosedH_1.png'],
-  ['Ball valve open (vertical)', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png'], ['Ball valve closed (vertical)', 'Images/Skynet/Valves/Valve_Ball_ClosedV-1x1.png']];
+  ['Motorized TC 1.5" ball valve (horizontal)', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg'],
+  ['Motorized TC 1.5" ball valve (vertical)', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg']];
 // On overlay pictures (Fritz, 2026-10-22): drawn on top of the item's picture while it is on, the picture below stays visible.
 // They have see-through backgrounds and live in the On_Off picture group (Fritz: its own folder): Skynet's in Images/Skynet/On_Off,
 // your own in Images/On_Off. The list shows that group first, then every other picture; Add new takes any picture in media/Images.
@@ -677,12 +677,12 @@ const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of
 const isMv = g => g?.kind === 'ip' && g.fitting === 'manualValve';
 const mvOpen = g => { const v = g?.name && S?.values?.[g.name]?.state; return v === undefined ? !!g?.open : !!v; };
 const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
-// Fritz's Manual Ball Valve drawings (2026-11-02): pictures a Manual Valve can have. The closed one is kept; while open the Tab
-// shows its _Open twin (side view: the handle along the pipe; front views: the handle end on)
+// Fritz's Manual Ball Valve drawings (2026-11-02): pictures a Manual Valve can have. While open the Tab shows the open overlay on
+// top of it (Fritz, 2026-11-05: the _Open pictures are retired to Delete/, an Overlay shows open)
 const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Manual Ball Valve, side view'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', 'Manual Ball Valve, front view (looking down the pipe)'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow']];
-const mvPic = g => isMv(g) && g.image && mvOpen(g) ? g.image.replace(/_Closed\.svg$/, '_Open.svg') : g.image;
+const mvPic = g => g.image;     // open shows the open overlay on the same picture (Fritz, 2026-11-05: no Open pictures)
 // A Manual Valve Widget has two IPs, one at each pipe end (Fritz, 2026-11-04, Rule 5.24; where they go is Rule 5.20): the center
 // of each ferrule's outer face on the side view, the left and right ends of the plain drawn valve, both at the center of the
 // opening on a front view, and the center of the opening plus the center of the bottom ferrule on a front elbow. A picture
@@ -814,7 +814,7 @@ const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, 
   BF_H: { o: 'h', w: 140, h: 170, ends: [[0, 135 / 170], [1, 135 / 170]] }, BF_V_R: { o: 'v', w: 170, h: 140, ends: [[35 / 170, 0], [35 / 170, 1]] }, BF_V_L: { o: 'v', w: 170, h: 140, ends: [[135 / 170, 0], [135 / 170, 1]] },
   BF_Front: { o: 'f', w: 120, h: 170, ends: [[0.5, 130 / 170], [0.5, 130 / 170]] }, BF_Front_Elbow: { o: 'f', w: 120, h: 200, ends: [[0.5, 0.65], [0.5, 1]] },
   BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] },
-  // the older motorized ball valve pictures (Valve_Ball_..._H_1 and ...V-1x1, .png or .svg, from BruControl's media): the pipe runs
+  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...): the pipe runs
   // across 97.5 of its 119 high, or stands up 22 in from the left of its 119 wide (Fritz, 2026-11-04: valves sit on the pipe)
   OLD_H: { o: 'h', w: 139, h: 119, ends: [[0, 97.5 / 119], [1, 97.5 / 119]] }, OLD_V: { o: 'v', w: 119, h: 141, ends: [[22 / 119, 0], [22 / 119, 1]] } };
 // Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
@@ -841,7 +841,7 @@ const OLD_PUMP_FLOW = { Rip: { w: 434, h: 292, ends: [[415 / 434, 138 / 292], [3
 // picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
 // .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
 // is the outline and shading only; the panel fills the cover's shape (taken from the Red one) with the user's color.
-const PUMP_COVERS = ['Red', 'Yellow', 'Blue', 'Green', 'Purple', 'Orange'];
+const PUMP_COVERS = ['Red', 'Yellow', 'Blue', 'Green', 'Purple', 'Orange', 'White'];     // White is RGB 250 250 250 (Fritz, 2026-11-05)
 const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'User cover (pick its color below)']];
 const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
 const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
@@ -891,8 +891,8 @@ function picFlow(path) {
   // (Fritz, 2026-11-04: every Skynet pump has IPs on its inlet and outlet, Rule 5.24)
   if (/(?:^|\/)Pump_[A-Za-z]+_Rip_(?:Off|On)\.(?:svg|png)$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Rip };
   if (/(?:^|\/)Pump_Sump_(?:Off|On)\.svg$/i.test(String(path || ''))) return { k: 'P', ...OLD_PUMP_FLOW.Sump };
-  const om = String(path || '').match(/(?:^|\/)Valve_Ball_(?:Open|Closed)(H_1|V-1x1)\.(?:png|svg)$/i);
-  if (om) return { k: om[1] === 'H_1' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'H_1' ? 'OLD_H' : 'OLD_V'] };
+  const om = String(path || '').match(/(?:^|\/)Motorized_TC15_Ball_Valve_(Horizontal|Vertical)\.svg$/i);
+  if (om) return { k: om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V'] };
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
   return k && PIC_FLOW[k] ? { k, o: k.endsWith('H') ? 'h' : 'v', ...PIC_FLOW[k] } : null;
@@ -2678,13 +2678,13 @@ const PRESETS = {
   pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOn: 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
@@ -4781,7 +4781,8 @@ function readFields(obj, root = $('#dlgBody')) {
 // A form of fields in a box (a dialog, or a Menu tab): "Add new ..." in a list and selects that change the fields are handled here.
 // onChange runs after any change. Returns build(), which draws the fields again.
 // Open / closed (on / off) pictures come in pairs (Fritz, 2026-10-22): picking one fills in its partner when a picture with the
-// matching name exists, e.g. Valve_Manual_ClosedV_R.svg -> Valve_Manual_OpenV_R.svg. The orientation is the user's pick.
+// matching name exists, e.g. a user's own My_Valve_Closed.svg -> My_Valve_Open.svg (Skynet's valves have no Open pictures since
+// 2026-11-05: an Overlay shows open). The orientation is the user's pick.
 const PIC_PAIR = { imageOff: 'imageOn', imageOn: 'imageOff', imageClosed: 'imageOpen', imageOpen: 'imageClosed' };
 const picPartner = p => { const swap = { Closed: 'Open', Open: 'Closed', closed: 'open', open: 'closed', Off: 'On', On: 'Off', off: 'on', on: 'off' };
   const file = p.split('/').pop(), m = file.match(/(Closed|Open|Off|On|(?<![A-Za-z])(?:closed|open|off|on))(?=[^a-z]|$)/);
@@ -7828,7 +7829,7 @@ function renderBuildTemplateTab(box) {
   bindForm(head, [['title', 'Title (shown in the Add Device lists)', 'text'],
     ['master', 'Main Template (set it when this Template is another Orientation of that valve: it keeps only what differs)', 'sel', [['', '(none: this is a main Template)'], ...masters.map(m => [m.name, m.title || m.name])]],
     ['_p', 'Pictures: the picture follows the Orientation (45 degrees turns the vertical one). Leave empty on another Orientation to use its main Template\'s.', 'note'],
-    ['picH0', 'Horizontal, picture when on', 'gpick'], ['picH1', 'Horizontal, picture when off', 'gpick'], ['picV0', 'Vertical, picture when on', 'gpick'], ['picV1', 'Vertical, picture when off', 'gpick'],
+    ['picH1', 'Horizontal, picture', 'gpick'], ['picH0', 'Horizontal, picture when on (optional; Skynet valves use the On overlay)', 'gpick'], ['picV1', 'Vertical, picture', 'gpick'], ['picV0', 'Vertical, picture when on (optional)', 'gpick'],
     ['notes', 'Notes', 'text']], work);
   const props = clone(t.props || {}), user = new Set(t.userFields || []), master = t.master && list.find(x => x.name === t.master);
   const grid = h('div', { class: 'btGrid' }, h('b', {}, 'Attribute'), h('b', {}, 'Value in the Template'), h('b', { title: 'Ticked: shows on, and can be changed on, the User versions made from this Template' }, 'User can set'));
@@ -7846,7 +7847,7 @@ function renderBuildTemplateTab(box) {
     const m = work.master && list.find(x => x.name === work.master);
     const own = m ? Object.fromEntries(Object.entries(all).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(m.props?.[k]))) : all;
     const userFields = [...grid.querySelectorAll('[data-user]')].filter(c => c.checked).map(c => c.dataset.user);
-    const pics = {}; if (work.picH0 && work.picH1) pics.h = [work.picH0, work.picH1]; if (work.picV0 && work.picV1) pics.v = [work.picV0, work.picV1];
+    const pics = {}; if (work.picH1) pics.h = [work.picH0 || '', work.picH1]; if (work.picV1) pics.v = [work.picV0 || '', work.picV1];
     const sameUser = m && JSON.stringify([...userFields].sort()) === JSON.stringify([...(m.userFields || [])].sort());
     const r = await api('PUT', '/ui/templates/device/' + encodeURIComponent(t.name), { title: work.title, master: work.master || undefined, notes: work.notes, type: t.type || m?.type || 'digitalOut',
       props: own, pics: Object.keys(pics).length && !(m && JSON.stringify(pics) === JSON.stringify(m.pics)) ? pics : undefined, userFields: sameUser ? undefined : userFields });
@@ -8366,11 +8367,11 @@ const tplOf = (kind, name) => TPL?.[kind].find(t => t.name.toLowerCase() === Str
 const tplNames = kind => TPL?.[kind].map(t => t.name) || [];
 // the Skynet pictures a Skynet Bundled Fitting can have (a User one can have any picture)
 const SKYNET_FIT_PICS = ['Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Cross.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Instrument_Tee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_Front.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Eccentric.svg', 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Front.svg',
-  'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_InstrumentTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
-  'Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg', 'Images/Skynet/Other_Equipment/pipe_elbow90.svg', 'Images/Skynet/Other_Equipment/pipe_elbow45.svg', 'Images/Skynet/Other_Equipment/pipe_tee.svg', 'Images/Skynet/Other_Equipment/pipe_cross.svg',
-  'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_OpenH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_OpenH.svg', 'Images/Skynet/Valves/Valve_Ball_OpenV-1x1.png', 'Images/Skynet/Valves/Valve_Ball_OpenH_1.png'];
+  'Images/Skynet/Other_Equipment/Skynet_TC15_90.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_45.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg', 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg',
+  'Images/Skynet/Valves/Valve_Check.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow90.svg', 'Images/Skynet/Other_Equipment/Fitting_U.svg', 'Images/Skynet/Other_Equipment/Fitting_End_Cap.svg', 'Images/Skynet/Other_Equipment/Fitting_Elbow45.svg', 'Images/Skynet/Other_Equipment/Fitting_Tee.svg', 'Images/Skynet/Other_Equipment/Fitting_Reducer.svg',
+  'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_LC.svg', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', 'Images/Skynet/Valves/Valve_Manual_ClosedH.svg', 'Images/Skynet/Valves/Valve_Manual_Butterfly_ClosedH.svg', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg', 'Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg'];
 const fitImage = t => { const k = (t.fittings || []).map(f => f.kind).filter(k => !['none', 'valve', 'cipBallValve'].includes(k)).pop();
-  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_OpenV_RC.svg'); };
+  return { check: 'Images/Skynet/Valves/Valve_Check.svg', flowMeter: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter.svg', flowMeterTemp: 'Images/Skynet/Other_Equipment/Fitting_Flow_Meter_Temp.svg', tee: 'Images/Skynet/Other_Equipment/Skynet_TC15_Long_Tee.svg', u: 'Images/Skynet/Other_Equipment/Fitting_U.svg', cap: 'Images/Skynet/Other_Equipment/Skynet_TC15_EndCap.svg', reducer: 'Images/Skynet/Other_Equipment/Skynet_TC2_1_Reducer_Concentric.svg', elbow45: 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg' }[k] || (k ? 'Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_90.svg' : 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg'); };
 const tplIcon = (kind, t) => t.image || (kind === 'fitting' ? fitImage(t) : EQ[t.vesselType]?.image) || 'Images/Skynet/Vessels/kettle.svg';
 const tplClassNote = t => t.cls === 'skynet'
   ? (t.editable ? 'Skynet Template. Skynet is still building its Templates, so it can be changed for now. Once they are locked it can only be cloned.' : 'Skynet Template: it can\'t be changed or deleted. Clone it to make your own.')
@@ -9132,7 +9133,7 @@ function profFields(kind) {
       ...(w.valueType === 'gauge' ? [['digits', 'Digits (how many)', 'num'], ['precision', 'Precision (decimals)', 'num']] : []),
       ['_s', 'A device with an ON / OFF state (a pump, valve, switch) can only be an LED or Text; a Gauge shows it as Text. A picture or label has no value, so it takes only the colors.', 'note'],
       ['notes', 'Notes', 'area']];
-    if (kind === 'valve') return [['name', 'Name', 'text'], ['imageOpen', 'Graphic when open', 'gpick'], ['imageClosed', 'Graphic when closed', 'gpick'],
+    if (kind === 'valve') return [['name', 'Name', 'text'], ['imageClosed', 'Graphic', 'gpick'], ['imageOpen', 'Graphic when open (optional; Skynet valves show open with the On overlay)', 'gpick'],
       ['orientation', 'Orientation', 'sel', Object.entries(ORIENTATIONS)],
       ['_o', 'Horizontal puts the pipe ends left and right, Vertical top and bottom, and 45 degrees on the corners. For Horizontal and Vertical pick graphics drawn that way; for the 45s pick the vertical graphics and the panel turns them 45 degrees (for a valve on a 45 degree elbow).', 'note'], ['notes', 'Notes', 'area']];
     if (kind === 'water') {

@@ -835,8 +835,7 @@
       "device": "SIM",
       "channel": 2,
       "label": "HLT out",
-      "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
-      "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
+      "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
       "hideName": true,
       "hideValue": true,
       "subtype": "valve",
@@ -856,8 +855,7 @@
       "device": "SIM",
       "channel": 3,
       "label": "MLT in",
-      "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
-      "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
+      "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
       "hideName": true,
       "hideValue": true,
       "subtype": "valve",
@@ -877,8 +875,7 @@
       "device": "SIM",
       "channel": 23,
       "label": "Back manifold left",
-      "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
-      "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
+      "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
       "hideName": true,
       "hideValue": true,
       "subtype": "valve",
@@ -898,8 +895,7 @@
       "device": "SIM",
       "channel": 4,
       "label": "MLT out",
-      "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
-      "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
+      "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
       "hideName": true,
       "hideValue": true,
       "subtype": "valve",
@@ -919,8 +915,7 @@
       "device": "SIM",
       "channel": 5,
       "label": "BK in",
-      "imageOn": "Images/Skynet/Valves/Valve_Ball_OpenH_1.png",
-      "imageOff": "Images/Skynet/Valves/Valve_Ball_ClosedH_1.png",
+      "imageOff": "Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Horizontal.svg",
       "hideName": true,
       "hideValue": true,
       "subtype": "valve",
@@ -954,10 +949,10 @@
       "w": 140,
       "h": 95,
       "follow": "MB_35_do_YellowPump_B1",
-      "imageOn": "Images/Skynet/Pumps/Pump_Yellow_Rip_On.png",
-      "imageOff": "Images/Skynet/Pumps/Pump_Yellow_Rip_Off.png",
+      "imageOff": "Images/Skynet/Pumps/Pump_Yellow_Rip_Off.svg",
       "hideName": true,
-      "_key": "ke7ba4e14bf50285d"
+      "_key": "ke7ba4e14bf50285d",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "MB_36_do_RedPump_B1",
@@ -984,10 +979,10 @@
       "w": 140,
       "h": 95,
       "follow": "MB_36_do_RedPump_B1",
-      "imageOn": "Images/Skynet/Pumps/Pump_Red_Rip_On.png",
-      "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.png",
+      "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.svg",
       "hideName": true,
-      "_key": "ke126b54323991278"
+      "_key": "ke126b54323991278",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "MB_37_do_BluePump_B1",
@@ -1014,10 +1009,10 @@
       "w": 140,
       "h": 95,
       "follow": "MB_37_do_BluePump_B1",
-      "imageOn": "Images/Skynet/Pumps/Pump_Blue_Rip_On.png",
-      "imageOff": "Images/Skynet/Pumps/Pump_Blue_Rip_Off.png",
+      "imageOff": "Images/Skynet/Pumps/Pump_Blue_Rip_Off.svg",
       "hideName": true,
-      "_key": "kbf29ded59e524e35"
+      "_key": "kbf29ded59e524e35",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "MB_38_do_GreenPump_B1",
@@ -1044,10 +1039,10 @@
       "w": 140,
       "h": 95,
       "follow": "MB_38_do_GreenPump_B1",
-      "imageOn": "Images/Skynet/Pumps/Pump_Green_Rip_On.png",
-      "imageOff": "Images/Skynet/Pumps/Pump_Green_Rip_Off.png",
+      "imageOff": "Images/Skynet/Pumps/Pump_Green_Rip_Off.svg",
       "hideName": true,
-      "_key": "ke6e5c87988ddd595"
+      "_key": "ke6e5c87988ddd595",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "MB_39_do_WhitePump_B1",
@@ -1074,10 +1069,10 @@
       "w": 140,
       "h": 95,
       "follow": "MB_39_do_WhitePump_B1",
-      "imageOn": "Images/Skynet/Pumps/Pump_Whute_Rip_On.png",
-      "imageOff": "Images/Skynet/Pumps/Pump_White_Rip_Off.png",
+      "imageOff": "Images/Skynet/Pumps/Pump_White_Rip_Off.svg",
       "hideName": true,
-      "_key": "k171429b6060cf336"
+      "_key": "k171429b6060cf336",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "HLT_Element",
@@ -1090,10 +1085,10 @@
       "device": "SIM",
       "channel": 40,
       "label": "HLT element",
-      "imageOn": "Images/Skynet/Other_Equipment/BigMacRElementOn.png",
-      "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.png",
+      "imageOff": "Images/Skynet/Other_Equipment/BigMacRElementOff.svg",
       "hideValue": true,
-      "_key": "ka56348eaef95e334"
+      "_key": "ka56348eaef95e334",
+      "imageOverlay": "tint:red"
     },
     {
       "name": "BK_Burner",
@@ -1106,11 +1101,11 @@
       "device": "SIM",
       "channel": 41,
       "label": "Brew Kettle Burner",
-      "imageOn": "Images/Skynet/Other_Equipment/BurnerFlame.png",
-      "imageOff": "Images/Skynet/Other_Equipment/Burner No Flame.png",
+      "imageOff": "Images/Skynet/Other_Equipment/Burner No Flame.svg",
       "hideValue": true,
       "confirm": true,
-      "_key": "k18f12a8fe4e21222"
+      "_key": "k18f12a8fe4e21222",
+      "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
     },
     {
       "name": "Cooling_Water",
