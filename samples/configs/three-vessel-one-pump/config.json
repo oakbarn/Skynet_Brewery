@@ -231,9 +231,8 @@
   },
   {
    "workspace": "Reporting",
-   "name": "gGV_Strike_Volume",
-   "type": "gGlobal",
-   "kind": "value",
+   "name": "w_Strike_Volume",
+   "type": "valueWidget",
    "x": 0,
    "y": 30,
    "w": 170,
@@ -247,13 +246,15 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "database": {
+    "frequency": "clicked"
+   }
   },
   {
    "workspace": "Reporting",
-   "name": "gGV_Mash_pH",
-   "type": "gGlobal",
-   "kind": "value",
+   "name": "w_Mash_pH",
+   "type": "valueWidget",
    "x": 175,
    "y": 30,
    "w": 170,
@@ -267,13 +268,15 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "database": {
+    "frequency": "clicked"
+   }
   },
   {
    "workspace": "Reporting",
-   "name": "gGV_PreBoil_Volume",
-   "type": "gGlobal",
-   "kind": "value",
+   "name": "w_PreBoil_Volume",
+   "type": "valueWidget",
    "x": 350,
    "y": 30,
    "w": 170,
@@ -287,13 +290,15 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "database": {
+    "frequency": "clicked"
+   }
   },
   {
    "workspace": "Reporting",
-   "name": "gGV_PreBoil_Gravity",
-   "type": "gGlobal",
-   "kind": "value",
+   "name": "w_PreBoil_Gravity",
+   "type": "valueWidget",
    "x": 0,
    "y": 88,
    "w": 170,
@@ -307,13 +312,15 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "database": {
+    "frequency": "clicked"
+   }
   },
   {
    "workspace": "Reporting",
-   "name": "gGV_PostBoil_Volume",
-   "type": "gGlobal",
-   "kind": "value",
+   "name": "w_PostBoil_Volume",
+   "type": "valueWidget",
    "x": 175,
    "y": 88,
    "w": 170,
@@ -327,13 +334,15 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "database": {
+    "frequency": "clicked"
+   }
   },
   {
    "workspace": "Reporting",
-   "name": "gGV_OG",
-   "type": "gGlobal",
-   "kind": "value",
+   "name": "w_OG",
+   "type": "valueWidget",
    "x": 350,
    "y": 88,
    "w": 170,
@@ -347,13 +356,15 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "database": {
+    "frequency": "clicked"
+   }
   },
   {
    "workspace": "Reporting",
-   "name": "gGV_Fermenter_Volume",
-   "type": "gGlobal",
-   "kind": "value",
+   "name": "w_Fermenter_Volume",
+   "type": "valueWidget",
    "x": 0,
    "y": 146,
    "w": 170,
@@ -367,7 +378,10 @@
    "foreColor": "#000000",
    "nameColor": "#fafafa",
    "nameBg": "#000000",
-   "nameAlign": "TopCenter"
+   "nameAlign": "TopCenter",
+   "database": {
+    "frequency": "clicked"
+   }
   },
   {
    "workspace": "Reporting",
