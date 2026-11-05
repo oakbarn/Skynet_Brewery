@@ -1702,6 +1702,24 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
 - Gone from its dialog (Rule 18.22; what an older Picture Widget already has set is kept): the Image block (Background #, Image
   Path 1-3), Hide value, Look, Digits, When tapped, Tap target and Ask before changing. Database and .API are not offered: a
   picture has no value (Rule 6.14).
+
+18.28 **A blank Label (or Port) can't be left: a pop-up says so** (Fritz, 2026-11-05: "If the Label Field is Blank and the User
+clicks any other field or Icon but the Cancel Button, A Pop Up Dialog that States the Label Cannot be Blank. Dialog self distructs
+after 5 seconds." Thread "Warn when Label is left blank", Help 140). In **every** Add / Build and Properties dialog that has a
+Label (every Device and Widget, Rule 18.15):
+- While the **Label is blank**, a click or tap on **any other field or icon** (Save, ➕ Add Device, the ? Help icon, a switch, a
+  dropdown ...) does nothing: a small pop-up says **"⚠ The Label cannot be blank."** and the focus goes back to the Label. Tab or
+  Enter from a blank Label does the same. The pop-up **goes away by itself after 5 seconds** (or when tapped).
+- **The Cancel button is "hot"** (Fritz, 2026-11-05: "The Cancel Button is Hot is part of the Rule"): ✖ Cancel (and Esc) always
+  work, even while the Label or the Port is blank (Rule 18.11 still asks first when something was changed).
+- The Label's own **⬆** and **⬢** icons work too, since they are ways of typing the Label.
+- **The same for a Port** when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): once the
+  user is on a blank Port, every other field or icon gives the pop-up **"⚠ The Port cannot be blank."**, except Cancel and the
+  fields before it (the Label and the Interface), so the user can still go back and pick another Interface.
+- **➕ Add new Interface…** (extends Rule 18.14, Fritz 2026-11-05: "If you choose to create a new Interface. that new Interface pops
+  into the DDLB. If the new Interface is aborted, the default Interface is posted back to the DDLB"): the new Interface is picked in
+  the Interface dropdown; if the new Interface is cancelled, the default Interface (the one that was there before) is put back.
+- It is one shared helper (public/labelguard.js) that watches every dialog, so a new dialog with a Label gets it by itself.
 ---
 
 ## 19. Vessel Rules
@@ -1998,3 +2016,4 @@ Not Placed) or the dialog closes.
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
 - 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
 - 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")
+- 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).

@@ -3645,6 +3645,7 @@ async function newDeviceDialog(e, hint, what) {
       // the Port list: only the free pins on this Interface that fit this Device Type, best first (Fritz, 2026-10-23)
       const free = h('datalist', { id: 'pins-free' }); body.append(free);
       portSel = body.querySelector(`select[data-k="${port[0]}"]`);
+      { const pe = body.querySelector(`[data-k="${port[0]}"]`); if (pe) Object.assign(pe.dataset, { guard: 'Port', guardAllow: 'label device' }); }      // a blank Port gets the pop-up too (Rule 18.28)
       const fillFree = w => {
         const ps = w.device ? freePins({ ...e, ...w, name: '\0new' }, (draft || S.config).elements.filter(x => x !== e), S.config.devices, port[3] === 'analog') : [];
         const opt = p => { const t = pinLabel(p, boardOfDevice(w, S.config.devices)); return h('option', { value: p, label: t }, t); };
@@ -3691,8 +3692,9 @@ async function newDeviceDialog(e, hint, what) {
         continue;
       }
       if (r === 'addIface') {      // ➕ Add new Interface…: the Add Interface pop-up, then back here with the new Interface picked
+        const ifaceWas = work.device;        // the default Interface, put back if the new one is not made (Fritz, 2026-11-05, Rule 18.28)
         try { readFields(work, body); } catch { }
-        work.device = (await addInterfaceDialog()) || undefined;
+        work.device = (await addInterfaceDialog()) || ifaceWas;
         continue;
       }
       if (r !== 'ok') return false;
@@ -4036,7 +4038,7 @@ async function newIntegratedDevice(tname) {
     for (;;) {
       rimsPinLists(w, null);
       const r = await dialog(`New Device: ${what}`, fields, w, false, t.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle']);
-      if (r === 'addIface') { try { readFields(w, body); } catch { } w.iface = (await addInterfaceDialog()) || ''; for (const b of oks) b.textContent = 'Create'; continue; }
+      if (r === 'addIface') { const was = w.iface; try { readFields(w, body); } catch { } w.iface = (await addInterfaceDialog()) || was || ''; for (const b of oks) b.textContent = 'Create'; continue; }
       if (r !== 'ok') return;
       const g0 = draft.graphics.length;
       try {
@@ -4650,7 +4652,7 @@ const F = {
   clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
     ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Tapping the Clone is tapping the parent: turning it on or off (or Enabled, for a PID) turns the parent and every Clone. A reading (a temperature probe) is shown the same way as the parent.`, 'note'],
     ['visibility', 'Visible (off = hidden on its Tab only)', 'vis'], ['workspace', 'Tab (the Tab this Clone is on)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
-  common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; empty = the Name)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
+  common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; never blank)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     // the Image block (Fritz, 2026-10-29): Background #, Back Colour, and Image Path 1-3, each with OPEN and a box to type a path in
     ['background', 'Background #', 'bgnum', null, false, 'b'], ['bgColor', 'Back Colour', 'color', null, false, 'b'],
     ['backpath', 'Image Path 1', 'imgopen', 1, false, 'b'], ['backpath_2', 'Image Path 2', 'imgopen', 2, false, 'b'], ['backpath_3', 'Image Path 3', 'imgopen', 3, false, 'b'], ['visibility', 'Visible (off = hidden on the Tab; a Process: name.visible = true)', 'vis'], ['hidden', 'Hidden, locked (on = stays hidden even when Visible is on; a Process: name.hidden = true)', 'bool'], ['hideValue', 'Hide value / text', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['digits', 'Digits shown (a Gauge; empty = as many as needed)', 'num'], ['fontSize', 'Value font size', 'num'],
@@ -4720,7 +4722,7 @@ const F = {
   timerWidget: [['name', 'Name', 'text', null, false, 'b'],
     ['_nm', 'A Timer Widget counts up or down in hh:mm:ss. Its Name is how a Process uses it: name.attribute = Something.', 'infonote', 'timer'],
     ['_tb', 'Timer', 'box'], ['timerType', 'Type', 'sel', [['countup', 'Count up'], ['countdown', 'Count down']], false, 'b'], ['resetValue', 'Reset value (hh:mm:ss)', 'text'], ['initial', 'Start value (hh:mm:ss)', 'text'], ['initRunning', 'Running when the Brain starts', 'bool'],
-    ['_lb', '', 'box'], ['label', 'Label (the title bar; empty = the Name)', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show', null, false, 'b'], ['nameFontSize', 'Font size', 'num'], ['nameFontFamily', 'Font', 'sel', FONTS],
+    ['_lb', '', 'box'], ['label', 'Label (the title bar; never blank)', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show', null, false, 'b'], ['nameFontSize', 'Font size', 'num'], ['nameFontFamily', 'Font', 'sel', FONTS],
     ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'], ['nameAlign', 'Alignment', 'sel', [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']]],
     ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
     ['style', 'Style', 'stylesel', 'timer', false, 'b'],
@@ -4737,7 +4739,7 @@ const F = {
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
-      ['label', 'Label (shown in the "by hand" message; empty = the Name)', 'text'], ['labelVisible', 'Show label', 'yn'],
+      ['label', 'Label (shown in the "by hand" message; never blank)', 'text'], ['labelVisible', 'Show label', 'yn'],
       ['image', 'Picture (Fritz\'s Manual Ball Valve drawings; its one IP is the middle of the picture)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
@@ -4772,7 +4774,7 @@ const FIT_PLACE = it => [...(isCap(it) ? [] : [AUTOSIZE_FIELD]), ...(it.onVessel
 // a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
 const VESSEL_FLOW = it => isKettle(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
 // the Vessel widget's settings: Position and Standard show once a port is set to Installed
-F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Type)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel Template ${it.template}. Changing it here does not change the Template.`, 'note']] : []), ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; never blank)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ...Object.entries(EQ[it.vesselType].ports).flatMap(([k, d]) => [['_' + k, d.name + (d.ip ? ' (IP)' : ' (not an IP)'), 'note'], [k + '_on', d.name + ' installed', 'yn', false, true],
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ...VESSEL_FLOW(it),
@@ -9313,7 +9315,7 @@ function vesselFields(p) {
     return [['name', 'Name', 'text'],
       isV ? ['vtype', 'Type', 'sel', types, true] : ['vtype', 'Type', 'vlist', w.vesselType + '.types'],
       ...(isV && w.vtype === 'Other' ? [['otherType', 'Other Type (what it is)', 'text']] : []),
-      ['label', 'Label (empty = the Type)', 'text'], ['labelVisible', 'Show label', 'yn', true], ['image', 'Graphic (picture path)', 'path'],
+      ['label', 'Label (never blank)', 'text'], ['labelVisible', 'Show label', 'yn', true], ['image', 'Graphic (picture path)', 'path'],
       ['_s', 'Size', 'head'],
       ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
         : [['volume', `Size (${u})`, 'num'], ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
@@ -10032,7 +10034,7 @@ function placeTabFitting(ft, tab, name, on) {
 }
 // the Properties of a Tab_Fitting on a Tab: everything, fully editable (even one from a Skynet Template)
 F.tabFitting = it => [['_t', `Tab_Fitting, made from the Bundled Fitting Template ${it.template || '(none)'}. Changing it here does not change the Template.`, 'note'],
-  ['name', 'Name', 'text'], ['label', 'Label (empty = the Name)', 'text'], ['image', 'Graphic (picture path)', 'path'],
+  ['name', 'Name', 'text'], ['label', 'Label (never blank)', 'text'], ['image', 'Graphic (picture path)', 'path'],
   ['turn', 'Turn (the picture and its IPs)', 'sel', TURNS],
   ...stdFields(it), ['_f', 'Fittings (from the vessel port outward)', 'head'], ...fittingSlotFields(it, true),
   ['_p', 'IPs', 'head'], ...Object.entries(bfitClass(it).ports).map(([k, d]) => [k + '_pos', d.name + ' position', 'sel', d.pos.map(q => q[0])]),
@@ -10051,7 +10053,7 @@ F.skynetFitting = it => {
   const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
   return [['_t', isCapOnly(it) ? `Skynet End Cap. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet Fitting ${it.template || ''}: ${made}. Every opening has a two-way IP built in, so there is nothing to set for them.`, 'note'],
-    ['name', 'Name', 'text'], ['label', 'Label (empty = the Name)', 'text'], ...stdFields(it), ...picks,
+    ['name', 'Name', 'text'], ['label', 'Label (never blank)', 'text'], ...stdFields(it), ...picks,
     ...(isCapOnly(it) ? [] : [['_o', 'Orientation (the picture and its IPs follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...looseField(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
@@ -10090,7 +10092,7 @@ F.skynetVessel = it => {
   const spots = vw ? Object.entries(eqClass(it).ports).filter(([k]) => it.ports?.[k]) : [];
   return [['_t', vw ? `Vessel Widget, made from the Skynet Template ${it.template}. Its IPs, its Temperature Probe and its Element Port sit where the Template puts them; nobody can move them. Slide Place on for the ones this vessel has. An IP is a place to connect a Pipe, Hose, Fitting or anything else with its own IP; the TC, NPT or BSP type does not matter.`
       : `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
-    ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Name)', 'text'],
+    ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; never blank)', 'text'],
     ...(vw ? vSizeFields(it) : []),
     ...(it.integrated === 'device' ? [['_d', 'Built in (Skynet_Integrated_Device: its IPs and its heating element can never be taken out of it)', 'head'], ...rimsFields(it)] : [
       // its picture starts as the Widget's and is edited like any other Widget's (Fritz, 2026-10-23)
