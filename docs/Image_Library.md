@@ -8,7 +8,7 @@ Copies live in `/mnt/project-files/Image_Library/<group>/` with the same group f
 
 **Rule (Fritz, 2026-10-27): new images are never added here automatically.** A new image goes in only when Fritz says to commit it.
 
-**2026-11-05 (Fritz):** the old pipe_ fittings, Skynet_TC15_InstrumentTee, the Valve_Ball PNGs and every Open valve picture were retired to the repo's Delete/ folder and taken off this list (see Delete/README.md and Help 128); Valve_Ball_ClosedH_1 / ClosedV-1x1 are renamed Motorized_TC15_Ball_Valve_Horizontal / _Vertical. The project-folder copies in Image_Library/ are not changed.
+**2026-11-05 (Fritz):** the old pipe_ fittings, Skynet_TC15_InstrumentTee, the Valve_Ball PNGs and every Open valve picture were retired to the repo's Delete/ folder and taken off this list (see Delete/README.md and Help 129); Valve_Ball_ClosedH_1 / ClosedV-1x1 are renamed Motorized_TC15_Ball_Valve_Horizontal / _Vertical. The project-folder copies in Image_Library/ are not changed.
 
 **Totals (2026-10-26, before that cleanup):** 133 files (113 SVG, 20 PNG) in 10 groups. The Motors group is empty.
 
