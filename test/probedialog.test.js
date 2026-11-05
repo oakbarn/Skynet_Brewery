@@ -13,7 +13,7 @@ assert.match(add, /\.\.\.\(pr \? \[\.\.\.PROBE_GRAPHIC_FIELDS\(e, after\), \.\.\
 assert.match(add, /pr \? probeTitle\(e\)/, 'the Add box is titled with the probe');
 assert.match(add, /if \(pr && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = autoLabel\(PROBE_AUTO_LABEL\);/, 'Label auto fill tP_n (Rule 18.15)');
 assert.match(add, /tap: pr \? undefined/, 'a probe has no Toggle');
-const own = app.slice(app.indexOf('// ---- Temperature Probe Device dialogs'), app.indexOf('// Value, Time and DateTime Widget Properties'));
+const ownAt = app.indexOf('// ---- Temperature Probe Device dialogs'), own = app.slice(ownAt, Math.min(...['// ---- Picture Widget', '// Value, Time and DateTime Widget Properties'].map(m => app.indexOf(m, ownAt)).filter(i => i > 0)));
 assert.ok(!/cover|imageOverlay|'tap'/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover, Toggle or Overlay on a probe');
 assert.match(own, /\['rot', 'Orientation', 'vorient', EL_ROTATE, false, false, \{ tip: DEVICE_TIPS\.pOrient, with: \['_flip', 'Flip'/, 'Orientation and Flip on one line');
 assert.match(own, /\['units', 'Units', 'sel'[^\n]*with: \['precision', 'Decimals'/, 'Units and Decimals on one line');
