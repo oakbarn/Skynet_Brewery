@@ -69,7 +69,7 @@ sw_Advance_BrewStatus.visible = false
 [SectionBrew102]
 step 1.00002 "SectionBrew102"
 gblV_Brew_Status = 102
-vSMsg = "Fill the HLT with the strike and sparge water. Enter the strike volume under Readings."
+vSMsg = "Fill the HLT with the strike and sparge water. Enter the strike volume on the Reporting Tab."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "HLT Filled?"
 gblS_Advance_Label.background = 4
@@ -523,7 +523,7 @@ sleep 1000
 [SectionBrew310]
 step 1.00018 "SectionBrew310"
 gblV_Brew_Status = 310
-vSMsg = "Enter the pre-boil volume and gravity under Readings."
+vSMsg = "Enter the pre-boil volume and gravity on the Reporting Tab."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Pre Boil Volume Good?"
 gblS_Advance_Label.background = 4
@@ -1011,7 +1011,7 @@ Chiller_Water = false
 [SectionBrew604]
 step 1.00026 "SectionBrew604"
 gblV_Brew_Status = 604
-vSMsg = "Enter the Original Gravity and the volume in the fermenter under Readings."
+vSMsg = "Enter the Original Gravity and the volume in the fermenter on the Reporting Tab."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "OG Entered?"
 gblS_Advance_Label.background = 4

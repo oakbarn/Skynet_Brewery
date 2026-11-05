@@ -20,6 +20,11 @@
    "style": "sky_tab_tennyson",
    "width": 1800,
    "height": 785
+  },
+  {
+   "name": "Reporting",
+   "width": 1720,
+   "height": 745
   }
  ],
  "elements": [
@@ -34,10 +39,11 @@
    "hideName": true,
    "initial": "Click Start Brew Day to begin. Testing mode runs every minute as one second.",
    "fontSize": 22,
-   "valueColor": "#ffffff",
    "background": "8",
    "readOnly": true,
-   "kind": "string"
+   "kind": "string",
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -50,10 +56,11 @@
    "hideName": true,
    "initial": "Not running",
    "fontSize": 22,
-   "valueColor": "#ffffff",
    "background": "8",
    "readOnly": true,
-   "kind": "string"
+   "kind": "string",
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -81,7 +88,9 @@
    "label": "Brew status",
    "initial": 0,
    "precision": 0,
-   "kind": "value"
+   "kind": "value",
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -119,7 +128,9 @@
    "initial": "",
    "fontSize": 17,
    "readOnly": true,
-   "kind": "string"
+   "kind": "string",
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -147,7 +158,9 @@
    "label": "Step alarm",
    "sound": "sounds/alarm_beep.wav",
    "loop": true,
-   "activeText": "TAP"
+   "activeText": "TAP",
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -160,7 +173,9 @@
    "label": "Warning",
    "sound": "sounds/alarm_beep.wav",
    "loop": false,
-   "activeText": "BEEP"
+   "activeText": "BEEP",
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -174,7 +189,9 @@
    "onText": "TESTING",
    "offText": "REAL",
    "look": "button",
-   "background": "6"
+   "background": "6",
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -190,7 +207,9 @@
    "fontSize": 20,
    "tap": "script",
    "tapTarget": "BrewDay_Flow",
-   "confirm": true
+   "confirm": true,
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
    "workspace": "Brewhouse",
@@ -206,125 +225,143 @@
    "fontSize": 20,
    "tap": "script",
    "tapTarget": "BrewDay_Stop",
-   "confirm": true
+   "confirm": true,
+   "backColor": "#000000",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGV_Strike_Volume",
    "type": "gGlobal",
    "kind": "value",
    "x": 0,
-   "y": 570,
+   "y": 30,
    "w": 170,
    "h": 52,
    "label": "Strike volume",
    "units": "gal",
    "precision": 2,
    "initial": 0,
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGV_Mash_pH",
    "type": "gGlobal",
    "kind": "value",
    "x": 175,
-   "y": 570,
+   "y": 30,
    "w": 170,
    "h": 52,
    "label": "Mash pH",
    "units": "pH",
    "precision": 2,
    "initial": 0,
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGV_PreBoil_Volume",
    "type": "gGlobal",
    "kind": "value",
    "x": 350,
-   "y": 570,
+   "y": 30,
    "w": 170,
    "h": 52,
    "label": "Pre-boil volume",
    "units": "gal",
    "precision": 2,
    "initial": 0,
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGV_PreBoil_Gravity",
    "type": "gGlobal",
    "kind": "value",
    "x": 0,
-   "y": 628,
+   "y": 88,
    "w": 170,
    "h": 52,
    "label": "Pre-boil gravity",
    "units": "",
    "precision": 3,
    "initial": 0,
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGV_PostBoil_Volume",
    "type": "gGlobal",
    "kind": "value",
    "x": 175,
-   "y": 628,
+   "y": 88,
    "w": 170,
    "h": 52,
    "label": "Post-boil volume",
    "units": "gal",
    "precision": 2,
    "initial": 0,
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGV_OG",
    "type": "gGlobal",
    "kind": "value",
    "x": 350,
-   "y": 628,
+   "y": 88,
    "w": 170,
    "h": 52,
    "label": "Original gravity",
    "units": "",
    "precision": 3,
    "initial": 0,
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGV_Fermenter_Volume",
    "type": "gGlobal",
    "kind": "value",
    "x": 0,
-   "y": 686,
+   "y": 146,
    "w": 170,
    "h": 52,
    "label": "Into fermenter",
    "units": "gal",
    "precision": 2,
    "initial": 0,
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "name": "gGS_Brew_Notes",
    "type": "gGlobal",
    "kind": "string",
    "x": 175,
-   "y": 686,
+   "y": 146,
    "w": 345,
    "h": 52,
    "label": "Notes",
    "initial": "",
-   "api": "getput"
+   "api": "getput",
+   "backColor": "#4fb3ff",
+   "foreColor": "#fafafa"
   },
   {
    "name": "gblS_BeerName_R1",
@@ -1622,9 +1659,9 @@
   {
    "id": "t_read",
    "kind": "text",
-   "workspace": "Brewhouse",
+   "workspace": "Reporting",
    "x": 0,
-   "y": 542,
+   "y": 2,
    "w": 520,
    "h": 24,
    "text": "Readings (tap to enter; they go to the database)",
