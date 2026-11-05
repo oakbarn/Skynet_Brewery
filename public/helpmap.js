@@ -21,12 +21,15 @@ export function elementTopic(e) {
   if (e.subtype === 'propValve') return ['proportional-valves'];      // Skynet KLD20T and the User Defined one (Fritz, 2026-11-03, Help 117)
   // a Motorized Ball Valve, Skynet or User Defined: the Pump's drill-down without a Cover (Fritz, 2026-11-05, Rule 18.23, Help 128)
   if (e.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (!e.template || /^Skynet_Motorized_Ball_Valve_/.test(e.template))) return ['motorized-ball-valve-device-properties'];
+  // a PWM output or an Analog output: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.25, Help 136)
+  if (['pwmOut', 'analogOut'].includes(e.type) && !e.kind && !e.template && !['propValve', 'element'].includes(e.subtype)) return ['pwm-and-analog-out-device-properties'];
   if (e.template && e.templateCls === 'skynet') return ['skynet-device-templates'];      // a User version of a Skynet Device Template
   switch (e.type) {
     case 'digitalOut':
       if (e.subtype === 'valve' && e.valveType === 'manual') return ['manual-valves'];
       if (e.subtype === 'valve' && e.tapwater) return ['tap-water-valves'];
-      if (e.subtype === 'pump' && !e.kind) return ['pump-device-properties'];      // the drill-down (Fritz, 2026-11-03, Rule 18.12)
+      if (e.subtype === 'pump' && !e.kind) return ['pump-device-properties'];
+      if (e.subtype === 'element' && !e.kind && !e.template) return ['heating-element-device-properties'];      // the Pump's drill-down (Fritz, 2026-11-05, Help 137)      // the drill-down (Fritz, 2026-11-03, Rule 18.12)
       return DEVICE;
     case 'deadband': return ['deadband-device'];      // as in BruControl (Fritz, 2026-11-05, Rule 6.17, Help 126)
     case 'stepper': return ['stepper-motors'];
@@ -83,7 +86,7 @@ const BAR = [
   ['.menuWrap', ['menu']],
   ['#devKind, #devAdd', ['edit-layout-bar', 'devices-select-device-type-and-add-device']],
   ['#editBar select[data-dev]', ['edit-layout-bar', 'the-shortcuts-pumps-valves-probe-heating-element-pwm']],
-  ['#wgtKind, #wgtAdd, #addImg, #addText, #addOverride, #vesselPick, #addManualValve, #addVesselType', ['edit-layout-bar', 'widgets']],
+  ['#wgtKind, #wgtAdd, #addImg, #addText, #addOverride, #vesselPick, #addManualValve, #addVesselType, #addBoolean, #addValueW, #addTimeW, #addDateTimeW', ['edit-layout-bar', 'widgets']],
   ['#addIpType', ['edit-layout-bar', 'row-2-pipes-fittings-locks-and-tabs']],
   ['#turnBar', ['build-tab-add-button', 'turn-and-flip-a-fitting-or-vessel']],
   ['#cloneDev', ['cloned-devices', 'make-a-clone']],

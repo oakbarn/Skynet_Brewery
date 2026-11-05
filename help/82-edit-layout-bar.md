@@ -4,8 +4,8 @@ The **Edit layout** bar (press the navy blue Edit layout button beside **☰ Men
 
 | Row | What is on it |
 |---|---|
-| **1** | Devices on the left, Widgets on the right |
-| **2** | Draw pipe, Draw hose, Elbows, Tees …, the turn buttons, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 👻 Hidden Tab and its orange **?**, 🔨 Build Tab, 🔨 To Build Tab, 📝 Processes, 👁 Preview, 💾 Save Build ... |
+| **1** | Devices on the left (with **Vessel** just before ⧉ Clone Device), Widgets on the right |
+| **2** | Draw pipe, Draw hose, Draw QD hose, Elbows, Tees …, **Add equipment ➕**, the turn buttons, 🔒 Lock, Lock All, Unlock All, ⚙ Tab settings, New tab, 👻 Hidden Tab and its orange **?**, 🔨 Build Tab, 🔨 To Build Tab, 📝 Processes, 👁 Preview, 💾 Save Build ... |
 | **3** | Update Schema Version, Save layout, Exit |
 
 The **orange ?** beside 👻 Hidden Tab pops up how Edit layout works (drag, resize, double-click for properties, locks, Hidden Tabs, Update Schema Version). **Close** is at the top and the bottom.
@@ -54,8 +54,12 @@ A **Widget** lives only in the app, with no board pin.
 - **Picture ➕** and **Text ➕**: one click each.
 - **Manual Valve ➕**: a valve turned by hand. Tap it on the Tab to show open or closed.
 - **Override ➕** adds the [Override button](96-override-button) (one per Tab).
-- **Add equipment ➕** (far right): chillers, coils, trub filter, RIMS tube and pipe fittings.
-- **Vessel** (last): a Vessel Widget (you add everything to it), an Integrated vessel (ready-made, see [Add a Vessel](66-add-a-vessel)) or a manual vessel (BrewZilla, DigiBoil).
+- **Boolean ➕**: a list of the ON / OFF types first, like the Probe list: **Switch**, **Push Button**, **Pulse Button** and **LED** (Semi_Widgets_Devices, see [Semi_Widgets_Devices](112-semi-widgets-devices)). Pick one and it is made.
+- **Value ➕**, **Time ➕** and **DateTime ➕**: one click each makes a [Value, Time or DateTime Widget](134-value-time-and-datetime-widgets).
+- **Vessel** (row 1, just before ⧉ Clone Device): a Vessel Widget (you add everything to it), an Integrated vessel (ready-made, see [Add a Vessel](66-add-a-vessel)) or a manual vessel (BrewZilla, DigiBoil).
+- **Add equipment ➕** (row 2, after Elbows, Tees …): chillers, coils, trub filter, RIMS tube and pipe fittings.
+
+Row 1 is tight so it all fits on the top line in a window about 1900 pixels wide (a full HD screen). In a narrower window the last buttons drop to a second line; they still work the same.
 
 ## Row 2: pipes, fittings, locks and Tabs
 
@@ -63,4 +67,4 @@ A **Widget** lives only in the app, with no board pin.
 
 ## ⧉ Clone Device
 
-**⧉ Clone Device** (row 1, after the shortcuts) lists the Devices already on another Tab, grouped by kind. Pick one and its Clone appears on this Tab. See [Cloned Devices](71-cloned-devices).
+**⧉ Clone Device** (row 1, after the shortcuts and Vessel) lists the Devices already on another Tab, grouped by kind. Pick one and its Clone appears on this Tab. See [Cloned Devices](71-cloned-devices).
