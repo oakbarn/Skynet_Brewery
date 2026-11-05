@@ -14,16 +14,37 @@ const app = read('public/app.js');
 // the Template: every spot Placed, a Vessel Widget, and its picture is a Skynet one
 const t = cleanVessel(JSON.parse(read('templates/vessel/Skynet_Vessel_Widget.json')));
 assert.equal(t.vwidget, true, 'a Vessel Widget');
-assert.equal(t.probeStyle, 'thermowell');
-const spots = ['outlet', 'outlet2', 'tangential', 'topInlet', 'sparge', 'cip', 'steamSlayer', 'thermowell', 'element'];
+assert.equal(t.probeStyle, 'front', 'the Probe sits on the Center Probe spot');
+// Fritz's Vessel IP Template drawing (2026-11-05): 15 IPs, the Right side repeated on the Left, plus the Probe and the Element Port
+const ipSpots = ['rSparge', 'rHermsIn', 'rHermsOut', 'rElement', 'lSparge', 'lHermsIn', 'lHermsOut', 'lElement', 'lBackElement', 'rBackElement',
+  'cProbe', 'lTangential', 'rTangential', 'cOutlet', 'cBottomOutlet'];
+const spots = [...ipSpots, 'thermowell', 'element'];
 assert.deepEqual(Object.keys(t.ports).sort(), [...spots].sort(), 'every spot');
 for (const k of spots) assert.equal(t.ports[k].installed, true, `${k} is Placed on the Template`);
 assert.ok(isVesselWidget({ ...t, cls: 'skynet' }), 'a Skynet Vessel Widget, so a User Bundled Template can be built on it');
 assert.ok(fs.existsSync(path.join(ROOT, 'media', t.image)), 'its picture');
 assert.ok(read('lib/picgroups.js').includes("'Skynet_Vessel_Widget.svg'"), 'in the Vessels picture group');
 // every spot has its position in the panel
-for (const k of spots) assert.ok(app.includes(`['${t.ports[k].position}', `), `${t.ports[k].position} is a position`);
-assert.ok(app.includes("['VW Front', 0.5, 0.8]"), 'the Front probe spot');
+for (const k of spots) assert.ok(app.includes(`['${t.ports[k].position}', `) || app.includes(`, '${t.ports[k].position}', `), `${t.ports[k].position} is a position`);
+assert.ok(app.includes("['VW Front', 0.5, 0.8]"), 'the older Front probe spot');
+assert.ok(app.includes("const VW_PROBE_POS = { thermowell: 'VW Left Thermowell', front: 'VW Center Probe' };"), 'a Front probe sits on the Center Probe spot');
+// every IP spot: a Vessel Widget IP named as Fritz drew it, the Left a mirror of the Right
+const names = { rSparge: 'Right Sparge', rHermsIn: 'Right HERMS In', rHermsOut: 'Right HERMS Out', rElement: 'Right Element', cProbe: 'Center Probe',
+  lBackElement: 'Left Back Element', rTangential: 'Right Tangential', cOutlet: 'Center Outlet', cBottomOutlet: 'Center Bottom Outlet' };
+for (const [k, n] of Object.entries(names)) assert.ok(app.includes(`${k}: vwPt('${n}', `), `${k} is ${n}`);
+const xy = k => { const m = app.match(new RegExp(`${k}: vwPt\\('[^']+', '[^']+', ([\\d.]+), ([\\d.]+)\\)`)); assert.ok(m, k); return [+m[1], +m[2]]; };
+for (const s of ['Sparge', 'HermsIn', 'HermsOut', 'Element', 'BackElement', 'Tangential']) {
+  const [rx, ry] = xy('r' + s), [lx, ly] = xy('l' + s);
+  assert.equal(ry, ly, `${s}: Left at the same height as Right`); assert.ok(Math.abs(rx + lx - 1) < 0.002, `${s}: Left mirrors Right`);
+}
+for (const s of ['Sparge', 'HermsIn', 'HermsOut', 'Element']) assert.ok(xy('r' + s)[1] < 0.7, `${s} on the side wall`);
+assert.ok(xy('rSparge')[1] < xy('rHermsIn')[1] && xy('rHermsIn')[1] < xy('rHermsOut')[1] && xy('rHermsOut')[1] < xy('rElement')[1], 'top to bottom');
+assert.ok(xy('cProbe')[1] < xy('cOutlet')[1] && xy('cOutlet')[1] < xy('cBottomOutlet')[1], 'center spots top to bottom');
+// only a Vessel Widget has them; each IP's Label starts the same as its Name and can be changed
+assert.ok(app.includes("const vClassOf = t => t.vwidget && (t.vesselType || 'vessel') === 'vessel' && !t.integrated ? EQ_VW : EQ[t.vesselType] || EQ.vessel;"));
+assert.ok(app.includes("if (d.vw) g.ports[k].label = q.label || d.name;"), 'Label starts as the Name');
+assert.ok(app.includes("work.ports[k].label = lbl[k] || d.name;"), 'an empty Label goes back to the Name');
+assert.equal(cleanVessel({ ports: { rSparge: { installed: true, label: 'Whirlpool' } } }).ports.rSparge.label, 'Whirlpool', 'a Template keeps IP Labels');
 // Place: not Placed is hidden, even in Edit layout, until 👁 Show All (Vessel Rules); the spots can't move; Properties have the sliders
 assert.ok(app.includes("if (ghost && !(editing && vwPeek === g.id)) continue;"), 'not Placed: hidden until Show All');
 assert.ok(app.includes("if (k in place) work.ports[k].installed = place[k];"), 'Place sliders set installed');

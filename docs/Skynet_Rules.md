@@ -842,9 +842,19 @@ only a single Template to start that would have all the IPs I can think of ... S
 Template"; thread "Build the Vessel Widget class", Help 133).
 - **One Skynet Template to start, Skynet_Vessel_Widget** (the Main Template, Rule 5.17; the word Master is not shown). Its picture is
   the Three Vessel sample's tank (260 x 320) drawn the Skynet way (Rule 7.4, 5.12: Images/Skynet/Vessels/Skynet_Vessel_Widget.svg).
-  Its spots: the **IPs** Outlet (center bottom), Second Outlet, Tangential, Top Inlet, Sparge, CIP and Steam Slayer; **one Temperature
-  Probe**, a **Thermowell** (in from the side) or **Front** (seen from the front); **one Element Port**. **Every Place slider is on**
-  on this Template.
+  Its spots (*changed* by Fritz's **Vessel IP Template** drawing, 2026-11-05, thread "Lay out Vessel Master Template IPs"): **15 IPs**.
+  **Right side, top to bottom: Sparge, HERMS In, HERMS Out, Element; the Right side is repeated on the Left** (Left Sparge ... Left
+  Element). **Left and Right Back Element** (face-on, level with the side Elements). **Center Probe**, **Left and Right Tangential**,
+  **Center Outlet** and the **Center Bottom Outlet** (on the bottom). Plus **one Temperature Probe**, **Front** (seen from the front,
+  on the Center Probe spot; the Template's choice) or a **Thermowell** (in from the side), and **one Element Port** (on the Right
+  Element spot). **Every Place slider is on** on this Template.
+  *Replaced:* "the IPs Outlet (center bottom), Second Outlet, Tangential, Top Inlet, Sparge, CIP and Steam Slayer" (older Vessel
+  Widgets, like the Three Vessel sample's, keep those spots).
+- **The IP names are general only** (Fritz, 2026-11-05: "These are General Names but names are meaningless. An Element could be placed
+  on any one. so no restrictions on IPs that are not already in effect."): anything with an IP can go on any of them.
+- **Each IP has a Label** (Fritz, 2026-11-05: "Name the top on Sparge. The Label can be chosen by the User But start with the Name and
+  Label the same"): it starts the same as its Name, the user can change it in Vessel Widget Properties, and an empty Label goes back
+  to the Name (never blank, Rule 18.15).
 - **Place** (a switch for each spot, in Vessel Widget Properties): on = it is on the vessel and works (an IP joins pipes, hoses and
   fittings; the Probe and Element show their pictures, and the Element glows while its heater is on). Off = it is not there: nothing
   shows on a Tab and nothing (a pipe, a Process) can use or change it. *Changed (Fritz, 2026-11-05, Rule 19.4):* a Not Placed spot
