@@ -20,7 +20,7 @@ export const stdShort = s => s?.type ? (STD_SHORT[s.type] || s.type) + (s.size !
 // a new kind is added here, through GitHub.
 export const FITTING_KINDS = {
   none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve', reducer: 'Reducer', cap: 'End Cap',
-  check: 'Check Valve', flowMeter: 'Flow Meter', flowMeterTemp: 'Flow Meter with Temperature',
+  check: 'Check Valve', flowMeter: 'Flow Meter', flowMeterTemp: 'Flow Meter with Temperature', sightGlass: 'Sight Glass',
 };
 export const FITTING_SLOTS = ['First Fitting', 'Second Fitting', 'Third Fitting', 'Fourth Fitting'];
 export const THERMOWELL_POS = { short: 'Short', long: 'Long' };
@@ -69,6 +69,7 @@ export function cleanFitting(b = {}) {
     const out = { kind };
     if (kind === 'tee' && f.thermowell) { out.thermowell = true; out.thermowellPos = THERMOWELL_POS[f.thermowellPos] ? f.thermowellPos : 'short'; }
     if (kind === 'reducer' && text(f.toSize, 30)) out.toSize = text(f.toSize, 30);       // the size of its other end, smaller or bigger (the type stays the same)
+    if (kind === 'sightGlass' && f.caged) out.caged = true;      // a stainless cage round the glass (Fritz, 2026-11-05, Rule 5.32)
     return out;
   });
   // where each IP sits on the picture (port key -> position name, e.g. { start: 'Bottom', end: 'Right' }), for a Skynet picture

@@ -1,6 +1,6 @@
 import { addEyes } from './eye.js';
 import { addKey } from './genpw.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose, sightGlassSvg, sgRatio, sgLength, SG_BODY, SG_INCH, SG_H, SG_DEFAULT, SG_MIN, SG_MAX } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -721,7 +721,7 @@ function buildVessel(g) {
   const t = VESSELS[g.vesselType] ? g.vesselType : 'mashTun';
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
-  if (g.image && isUnit({ ...g, loose: false })) n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated
+  if (g.image && isUnit({ ...g, loose: false })) n.append(h('div', { class: 'bfImg', style: `background-image:url("${isSightGlass({ ...g, loose: false }) ? sgPic(g) : media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated (a Sight Glass drawn for its Length, Rule 5.32)
   else if (g.image && isSkyV({ ...g, loose: false }) && (g.flipH || g.flipV || unitRot(g))) {     // a Skynet vessel flipped or rotated
     const [pw, ph] = picWH(g);
     n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));
@@ -897,11 +897,19 @@ const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point
 // settings but where they are (.x .y) and how big (.width .height), plus Autosize to pipe: on (the default) a fitting takes
 // the size of the pipes joined to its IPs, and Width and Height are greyed out until it is switched off. Turning and flipping
 // stay on the Edit layout bar's turn buttons. Pipe fittings have no Clone. A Manual Valve is not one: it is its own Widget.
-const PLAIN_FIT_KINDS = ['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check'];      // a check valve too: always one way, its orientation shows which (Fritz, 2026-10-28)
+const PLAIN_FIT_KINDS = ['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check', 'sightGlass'];      // a check valve too: always one way, its orientation shows which (Fritz, 2026-10-28)
 const plainFittings = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (PLAIN_FIT_KINDS.includes(f.kind) && !f.thermowell));
 const isPlainUnit = g => isUnit(g) && plainFittings(g.fittings);
 const isIpFit = g => isFitting(g) && g.fitting !== 'manualValve';
 const isPipeFit = g => isIpFit(g) || isPlainUnit(g);
+// a Sight Glass (Fritz, 2026-11-05, Rule 5.32): a TC Pipe Fittings Widget, plain or Caged, with a Length (inches, ferrule face to
+// ferrule face) that stretches only its glass. Its picture is drawn for its box (sightGlassSvg), so the ferrules keep their shape.
+const isSightGlass = g => isUnit(g) && (g.fittings || []).some(f => f.kind === 'sightGlass');
+const sgCaged = g => (g.fittings || []).some(f => f.kind === 'sightGlass' && f.caged);
+const sgPic = g => 'data:image/svg+xml,' + encodeURIComponent(sightGlassSvg((g.w || 169) / (g.h || 58), sgCaged(g)));
+const sgFromLength = g => { g.sgLength = sgLength(g.sgLength); g.w = Math.round((g.h || SG_H) * sgRatio(g.sgLength)); };
+// the Label a new Sight Glass starts with (Rule 18.15; Fritz, 2026-11-05): site_glass_n, the next number not used as a Label or Name
+const sgLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('site_glass_' + n)) n++; return 'site_glass_' + n; };
 const autoSized = g => (isPipeFit(g) || isMv(g)) && !isCap(g) && g.autoSize !== false;
 const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of the pipes joined to it; switch it off to type Width and Height)', 'bool', true, true];
 // Manual Valve Widget (Fritz, 2026-10-28): a pipe fitting you turn by hand, and a pseudo Device. Its .state (true = open) only
@@ -2794,10 +2802,10 @@ function autoFit(g) {
 // ended on its IPs. A pipe drawn to the bend of one (where its pipes' center lines meet) turns it back into a joint, so an elbow
 // can become a tee. They are also added by hand (Add Widget > TC Pipe Fittings, and Elbows, Tees ... on the Edit layout bar).
 const TC_FIT_TPL = { elbow90: 'Elbow_90', elbow45: 'Elbow_45', tee: 'Tee', cross: 'Cross' };
-const TC_FIT_ADD = ['Elbow_90', 'Elbow_45', 'Tee', 'Instrument_Tee', 'Cross', 'U_Bend', 'Reducer', 'Reducer_2_1_Concentric', 'Reducer_2_1_Eccentric', 'Check_Valve', 'End_Cap', 'Elbow_Front', 'Reducer_2_1_Front'];
+const TC_FIT_ADD = ['Elbow_90', 'Elbow_45', 'Tee', 'Instrument_Tee', 'Cross', 'U_Bend', 'Reducer', 'Reducer_2_1_Concentric', 'Reducer_2_1_Eccentric', 'Check_Valve', 'Sight_Glass', 'Sight_Glass_Caged', 'End_Cap', 'Elbow_Front', 'Reducer_2_1_Front'];
 const isTcFit = g => isPlainUnit(g);
 const tcBend = (g, t = tplOf('fitting', g.template)) => { const q = fracPos(t?.bend); return q ? unitPoint(g, q[1], q[2]) : null; };
-const tcName = (t, all) => { const k = (t.fittings || []).map(f => f.kind).find(k => k !== 'none'); const p = (t.name === 'Cross' ? 'Cross' : NAME_PREFIX[k]) || t.name;
+const tcName = (t, all) => { const k = (t.fittings || []).map(f => f.kind).find(k => k !== 'none'); const p = (t.name === 'Cross' ? 'Cross' : k === 'sightGlass' && t.fittings.some(f => f.caged) ? 'SightGlassCaged' : NAME_PREFIX[k]) || t.name;
   const used = new Set(all.map(x => x.name)); let n = 1; while (used.has(p + '_' + n)) n++; return p + '_' + n; };
 // the unit IP that leaves its bend in direction v (unit vector), if any
 function tcArm(u, v) {
@@ -2923,6 +2931,7 @@ function addTcFit(name) {
   const t = tplOf('fitting', name); if (!t) return toast(`No ${name} Template`, true);
   toBuild();
   const g = placeTabFitting(t, wsName, tcName(t, draft.graphics), null); g.labelVisible = false;
+  if (isSightGlass(g)) { g.label = sgLabel(draft.graphics); g.sgLength = SG_DEFAULT; sgFromLength(g); placeUnitParts(g); }    // Rule 5.32, Label Rule 18.15
   sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
 // A tee or a cross dropped on a straight pipe cuts it there (Fritz, 2026-11-05: "Tried to add a Tee to a Pipe and it did not
@@ -6289,6 +6298,13 @@ async function editItem(kind, id) {
       fitFromFields(work);
       if (item.onVessel && !work.joined && !isUnit(item)) { delete work.onVessel; delete work.onPort; }
       delete work.joined;
+      if (isSightGlass(item)) {    // a Sight Glass (Rule 5.32): a new Length sets its width; a typed Width (Autosize off) sets its Length
+        if (!String(work.label ?? '').trim()) work.label = item.label || sgLabel(draft.graphics.filter(x => x !== item));      // never blank (Rule 18.15)
+        const len = sgLength(work.sgLength);
+        if (len !== sgLength(item.sgLength)) { work.sgLength = len; sgFromLength(work); }      // its left end stays put
+        else if (+work.w !== +item.w || +work.h !== +item.h) work.sgLength = sgLength((+work.w || 1) / (+work.h || 1) * SG_H / SG_INCH);
+        else work.sgLength = len;
+      }
       if (isUnit(item)) {          // a Skynet Fitting: its IPs sit on its openings, wherever it is flipped or rotated
         work.rot = +work.rot || 0; if (!work.rot) delete work.rot;
         for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
@@ -9493,7 +9509,9 @@ const FIT_BODY = 0.28;
 function autoSizeUnit(g) {
   const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
   const pw = Math.max(0, ...ips.flatMap(ip => pipesOn(ip.id, g.workspace)).map(pipeWidth)); if (!pw) return;
-  const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90], w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
+  const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90];
+  let w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
+  if (isSightGlass(g)) { hh = Math.round(pw / SG_BODY); w = Math.round(hh * sgRatio(g.sgLength)); }       // a Sight Glass: as thick as its pipe, as long as its Length (Rule 5.32)
   if (w === g.w && hh === g.h) return;
   const b0 = tcBend(g, t);         // a TC Pipe Fitting grows about its bend, so its IPs stay on their pipes' lines (Rule 5.25)
   const cx = (g.x || 0) + (g.w || 90) / 2, cy = (g.y || 0) + (g.h || 90) / 2;
@@ -9700,7 +9718,7 @@ function stdFromFields(w) {
 const stdFields = (w, what = 'Connection Standard') => [['std_type', what, 'sel', [['', '(none)'], ...Object.entries(CONNECTION_STANDARDS)], true],
   ...(w.std_type ? [['std_size', textSize(w.std_type) ? 'Size (text, for example DN25)' : 'Size (for example 1.5)', textSize(w.std_type) ? 'text' : 'num']] : [])];
 function fitToFields(w) {
-  (w.fittings || []).forEach((f, i) => { w['f' + i] = f.kind; w['tw' + i] = !!f.thermowell; w['twp' + i] = f.thermowellPos; w['fv' + i] = f.valve; w['fp' + i] = f.probe; w['fm' + i] = f.meter; w['rs' + i] = f.toSize; });
+  (w.fittings || []).forEach((f, i) => { w['f' + i] = f.kind; w['tw' + i] = !!f.thermowell; w['twp' + i] = f.thermowellPos; w['fv' + i] = f.valve; w['fp' + i] = f.probe; w['fm' + i] = f.meter; w['rs' + i] = f.toSize; w['sgc' + i] = !!f.caged; });
   return stdToFields(w);
 }
 function fitFromFields(w) {
@@ -9711,7 +9729,8 @@ function fitFromFields(w) {
     if (f.kind === 'reducer' && w['rs' + i]) f.toSize = String(w['rs' + i]);
     if (METERS.includes(f.kind) && w['fm' + i]) f.meter = w['fm' + i];          // a flow meter: its Flow meter Device (and probe), picked on the Tab
     if (f.kind === 'flowMeterTemp' && w['fp' + i]) f.probe = w['fp' + i];
-    for (const k of ['f', 'tw', 'twp', 'fv', 'fp', 'fm', 'rs']) delete w[k + i];
+    if (f.kind === 'sightGlass' && w['sgc' + i]) f.caged = true;        // a Caged Sight Glass stays caged (Rule 5.32)
+    for (const k of ['f', 'tw', 'twp', 'fv', 'fp', 'fm', 'rs', 'sgc']) delete w[k + i];
     return f;
   });
   return stdFromFields(w);
@@ -10026,7 +10045,9 @@ F.skynetFitting = it => {
   const made = (it.fittings || []).filter(f => f.kind !== 'none').map(f => FITTING_KINDS[f.kind] + (f.thermowell ? ' with a thermowell' : '')).join(', ');
   if (isPlainUnit(it)) return [['_t', isCapOnly(it) ? `Skynet End Cap: a pipe fitting. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet TC Pipe Fittings Widget ${it.template || ''}: a ${made}. Every opening has a two-way IP built in. It has no settings but its place and its size. Turn or flip it with the turn buttons on the Edit layout bar.`, 'note'],
-    ['name', 'Name', 'text'], ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : []), ...FIT_PLACE(it)];
+    ['name', 'Name', 'text'], ...(isSightGlass(it) ? [['label', 'Label (never blank: it starts as site_glass_n, Rule 18.15)', 'text'],
+      ['sgLength', `Length (inches, ferrule face to ferrule face, ${SG_MIN} to ${SG_MAX}; only the glass${sgCaged(it) ? ' and its cage' : ''} stretches)`, 'num']] : []),
+    ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : []), ...FIT_PLACE(it)];
   const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
   return [['_t', isCapOnly(it) ? `Skynet End Cap. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet Fitting ${it.template || ''}: ${made}. Every opening has a two-way IP built in, so there is nothing to set for them.`, 'note'],

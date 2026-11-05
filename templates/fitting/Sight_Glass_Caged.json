@@ -1,0 +1,33 @@
+{
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "sightGlass",
+      "caged": true
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Sight_Glass_Caged.svg",
+  "size": [
+    169,
+    58
+  ],
+  "body": 0.227,
+  "ipPos": {
+    "start": "0,0.5",
+    "end": "1,0.5"
+  },
+  "bend": "0.5,0.5",
+  "notes": "A caged TC 1.5 sight glass (a stainless guard round the glass), 6 in long when placed (Fritz, 2026-11-05, Rule 5.32). Openings at the left and the right; each IP is the center of its ferrule's outer face. Flow goes either way. Its Length (inches) stretches only the glass: the picture is drawn for its length, so the ferrules keep their shape. Dropped on a straight pipe it cuts the pipe, as a tee does."
+}
