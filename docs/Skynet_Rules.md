@@ -198,7 +198,9 @@ day.
 number (Value). (2026-10-04, PR #14)
 
 2.7 **Color pickers:** Default first, None (see-through) second, then the standard color names with
-a swatch, then Custom. (2026-10-05, PR #31)
+a swatch, then Custom. (2026-10-05, PR #31) **White** in any color picker is **RGB 250 250 250 (#FAFAFA)**, the same White
+as the pump covers of Rule 7.13 (Fritz, 2026-11-05); an item saved with pure white (#FFFFFF) shows as White and is saved as
+250 250 250 the next time its Properties are saved.
 
 2.8 **Properties dialogs** have Delete, Cancel and Save at both the top and the bottom. (2026-10-04,
 PR #15)
@@ -1727,3 +1729,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Added Rule 5.27 (the Pump Standard: every Skynet pump picture drawn in the same 300 x 300 box, to scale, shown 150 x 150, inlet IP at (285, 150) and outlet IP at (243, 56), port tubes made longer where needed; older pumps become 150 x 150 once). Rule 5.11 notes pumps keep to it this way. Help 130; next free Help number 131. (thread "Standardize pump size and IPs")
 - 2026-11-05: Added Rule 5.29 (the Valve Standard: every valve picture in the same 300 x 300 box with its pipe through the middle, to one scale, IPs always on the same spots; shown 150 x 150; a user's own valve picture fills the box and its In and Out spots move and size the picture onto the IPs; older valves become square once). Notes under Rules 5.11, 5.22 and 5.24. Help 131; next free Help number 132. (thread "Standardize valve size and IPs")
 - 2026-11-05: Rule 5.25: a Tee, Instrument Tee or Cross dropped on a straight pipe cuts it there (turned so its run goes along the pipe). Rule 5.26: a valve or pump dragged off its pipes onto another pipe now cuts it (its old pipes let go first); one still joined says why. Help 124 and 125 updated; no new Help number. (thread "Fix Tee and valve not splitting a pipe")
+- 2026-11-05: Rule 2.7: White in any color picker is RGB 250 250 250 (#FAFAFA), as for the pump covers (Rule 7.13). Three Vessel sample: the brew status boxes are Black with White text, and the Readings boxes (Blue with White text) moved to a new Reporting Tab. No new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
