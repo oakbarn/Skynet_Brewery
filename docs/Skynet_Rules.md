@@ -1398,6 +1398,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
 [docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Heating Element** (Rule 18.24).
 [docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **PWM / Analog out** (Rule 18.25).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Temperature Probes** (Rule 18.26).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1496,7 +1497,7 @@ nothing and goes back to the calling dialog as it was. The first one built this 
    filled in (Label Visible off does not skip it). The Add Device box has it now.
    *Changed (Fritz, 2026-11-05):* **A Device or Widget must have a Label, and a Label can't be blank.** Some Devices and Widgets
    have their Label **filled in for you** with the pattern **Type_n**, n the next number not used yet: a **Motorized Ball Valve**
-   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"). It can be changed like any Label. When the
+   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** as **tP_1** (Rule 18.26). It can be changed like any Label. When the
    Label is filled in (by you or by the program) on a Build dialog, **the focus jumps to the next field** in the Enter order (the
    next one still empty). **Every Label is editable by the user**, filled in for you or not. Which Devices and Widgets fill in
    their Label is decided **dialog by dialog: Fritz says so when each dialog is built** (Fritz, 2026-11-05). Every other dialog that
@@ -1613,6 +1614,28 @@ get the Pump's Add box and Properties (Rules 4.2, 18.13, 18.15-18.17, 18.20, 18.
 4. Its Properties are the same, with the Interface and Port greyed out for good (Rule 18.13) and the Device Type last.
 5. The Label is typed (no Type_n fill-in until Fritz says, Rule 18.15).
 A Proportional Valve and a heating element's PWM keep their own dialogs until Fritz says (Rule 18.10).
+18.26 **Adding a Temperature Probe: the Pump's drill-down without a Cover, Toggle or Overlay** (Fritz, 2026-11-05: "Build the Probe
+Add Dialog Boxes using the Pump Drill down as the Template", thread "Build Probe Add dialogs like Pump", Help 138). For every
+Temperature Probe Device: a plain probe, a **Thermowell** (Short, Medium, Long) and a **tee with a Temperature Probe** (Instrument Tee,
+Long Tee, Rule 5.30). A probe built into a Skynet_Integrated_Device (RIMS tube, Integrated Electric Kettle) keeps its present dialog
+1. **The kind of probe is picked first, as before** (Fritz, 2026-11-05: "Choosing the Probe Type First like it is is fine"): the
+   list row of a plain probe (DS18B20, PT100 ...), or step 2a after picking a Thermowell or probe tee.
+2. The Add box is titled with the probe (e.g. **Short Thermowell: DS18B20**) and works as the Pump's (Rules 4.2, 18.13, 18.15-18.17,
+   18.20): 1 Label ⬢ and Label Visible, 2 Interface with its Port on the same line (**Probe #**, the OneWire probe number of a
+   DS18B20, or **Available Ports**: the chip-select pin of an RTD or thermocouple board, the analog pin of an NTC, LM35 or TMP36),
+   3 Tab; then the Name, and for a Thermowell or probe tee the **Graphic**, its **Path** (greyed out, the Skynet drawing, Rule 5.6) and
+   **Orientation** (Rotate 0, 90, 180, 270) with **Flip** on its line; then the probe's own set (Rule 18.22): **Probe type** greyed
+   out with a ⬢ for its settings (wires, reference resistor, thermocouple type, thermistor values, board voltage, Simulator
+   settings), **Units** with **Decimals** on one line, **Calibration offset** with **Database and .API ⬢** on its line; X, Y, Width,
+   Height, and the Device Type greyed out last (e.g. **TEMP: 1W**). Enter goes Label, Interface, Port, Tab, Orientation,
+   ➕ Add Device. **No Cover, Toggle or Overlay** (a probe is an input).
+3. Its Label starts filled in as **tP_n** (the next number), so the focus starts on the Interface (Rule 18.15). *(Built as recommended;
+   Fritz's pick on the decision card is pending: tP_n, Probe_n or no auto fill.)*
+4. Its Properties are the Pump's screen 9 (Rule 18.21) without Cover, Toggle and Overlay, plus the same own set and the **Reading
+   now**. The Interface and Port are greyed out for good once added (Rule 18.13); so is the **Probe type**: to use another kind of
+   probe, delete it and add it again.
+- Gone from these dialogs (what a probe already has set is kept): the Probe type dropdown, Device (empty = any), the separate Flip
+  Horizontal / Flip Vertical / Rotate rows (now Orientation and Flip), the Thermowell and probe tee notes (now the Graphic's tip).
 
 ---
 
@@ -1900,3 +1923,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.24 (Adding a Heating Element: the Pump's drill-down without a Cover; in the Heating Element list, Vessel Device Template, Choose then Build, takes the place of Electric kettle, basic). (thread "Build Heating Element Add dialogs like Pump", Help 137)
 - 2026-11-05: Added Rule 18.25 (Fritz: "PWM Build Dialog"): the PWM output and Analog output Add box and Properties follow the Pump's drill-down; no Cover, Orientation or Toggle; own set Start value / Decimals or Signal / Units / Low / High / Decimals; Label typed (auto fill asked). Help 136; next free Help number 137. (thread "Build PWM Add dialog like Pump")
 - 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")
+- 2026-11-05: New Rule 18.26: adding a Temperature Probe (plain, Thermowell, probe tee) uses the Pump's drill-down without a Cover, Toggle or Overlay; the kind of probe is still picked first (Fritz); Orientation with Flip, Probe type ⬢, Units with Decimals, Calibration offset with Database and .API ⬢; Label auto fill tP_n (Fritz's pick pending). Rule 18.15 lists it. Help 138; next free Help number 139. (thread "Build Probe Add dialogs like Pump")
