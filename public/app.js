@@ -658,7 +658,7 @@ const prefixOf = e => kindsOf(e.type)?.[e.kind || 'value']?.prefix;
 
 // IP (Initial Point) widget: app-only, not tied to any PLC or device port. A small marker where a flow starts or ends, e.g. at a pump outlet, a vessel port or a drain
 // IP widget types. "point" is a plain start / end point; the others are pipe fittings that join pipes and pass flow through.
-const FITTINGS = { point: 'IP point', pipe: 'Pipe (straight)', tee: 'Pipe tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Pipe cross', manualValve: 'Manual valve', coupling: 'Coupling / hose end', cap: 'Pipe cap (no IP: dead end)' };
+const FITTINGS = { point: 'IP point', pipe: 'Pipe (straight)', tee: 'Pipe tee', elbow90: '90° elbow', elbow45: '45° elbow', cross: 'Pipe cross', manualValve: 'Manual valve', coupling: 'Coupling / hose end', qd: 'Quick Disconnect (snaps on a valve IP)', cap: 'Pipe cap (no IP: dead end)' };
 const isFitting = g => g && g.kind === 'ip' && g.fitting && g.fitting !== 'point';
 // Pipe fittings (Fritz, 2026-10-28): a tee is only a tee, an elbow only an elbow, a reducer only a reducer. They have no
 // settings but where they are (.x .y) and how big (.width .height), plus Autosize to pipe: on (the default) a fitting takes
@@ -730,7 +730,7 @@ function sizeFitting(g) {
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
 // its settings and in the IP lists but cannot be typed over; the Label stays free text. Vessels keep the names users give them.
-const NAME_PREFIX = { text: 'w_Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', cap: 'Cap' };
+const NAME_PREFIX = { text: 'w_Text', point: 'IP', pipe: 'Straight', tee: 'Tee', elbow90: 'Elbow', elbow45: 'Elbow45', cross: 'Cross', manualValve: 'ManualValve', coupling: 'Coupling', qd: 'QD', cap: 'Cap' };
 const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : g.kind === 'text' ? 'w_Text' : null;
 function giveName(g, all) {
   // a Text Widget keeps the name it has: w_Text_N is only its first name, it can be changed (Fritz, 2026-10-29)
@@ -744,12 +744,15 @@ const ipName = g => g.name ? (g.label && g.label !== g.name ? `${g.name} (${g.la
 
 function buildIp(g) {
   const fit = isFitting(g) ? g.fitting : null;
+  if (isQd(g)) qdOnto(g);          // a Quick Disconnect sits on the IP it was dropped on and follows it (Rule 5.28)
   if (fit) sizeFitting(g);
+  if (isQd(g) && autoSized(g) && g.w < 40) { const [cx, cy] = ipCenter(g); g.w = g.h = 40; g.x = cx - 20; g.y = cy - 20; }      // never smaller than 40 px: easy to see
   // a coupling on just one pipe end is an open end: it shows in Edit layout only; joining two pipes it shows as a collar
   const lonely = fit === 'coupling' && pipesOn(g.id, g.workspace).length < 2;
   const open = isMv(g) && mvOpen(g), plain = isIpFit(g);
   const n = h('div', { class: 'gfx ip' + (fit ? ' fit' : '') + (lonely ? ' lonely' : '') + (g.hideRun ? ' hide-run' : '') + (isMv(g) && mvAsked(g) ? ' mvAsk' : ''), 'data-gid': g.id, 'data-fit': fit || '', title: (g.name ? (plain ? g.name : ipName(g)) : g.label || FITTINGS[fit] || 'IP') + (isMv(g) ? (open ? ' (open: click to close it)' : ' (closed: click to open it)') : '') });
-  if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(mvPic(g))}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
+  if (isQd(g)) { n.classList.add('has-img', 'qd'); n.style.backgroundImage = `url("${media(g.image || QD_PIC)}")`; }      // Fritz's red star (Rule 5.28)
+  else if (g.image) { n.classList.add('has-img'); n.style.backgroundImage = `url("${media(mvPic(g))}")`; if (+g.rotate) n.style.transform = `rotate(${+g.rotate}deg)`; }
   else if (fit) {
     n.innerHTML = `<svg viewBox="0 0 30 30" style="transform:rotate(${+g.rotate || 0}deg)"><g class="edge">${FIT_SVG[fit]}</g><g class="core">${FIT_SVG[fit]}</g></svg>`;
   } else n.append(h('span', {}, g.text ?? 'IP'));
@@ -1730,7 +1733,14 @@ function isOn(name) {
   if ('running' in v) return !!v.running;
   return !!v.value && v.value !== '0' && v.value !== 'false';
 }
-let drawPts = null, drawCursor = null, drawFrom = null, drawHose = false, drawOnIp = null;
+let drawPts = null, drawCursor = null, drawFrom = null, drawHose = false, drawOnIp = null, drawQd = false;
+// Quick Disconnects and Quick Disconnect hoses (Rule 5.28; the rest is with the End Cap code further down)
+const isQd = g => g?.kind === 'ip' && g.fitting === 'qd';
+const isQdHose = p => p?.kind === 'pipe' && p.hose && p.qd;
+const vtopOf = id => typeof id === 'string' && id.startsWith('vtop:') ? id.slice(5) : null;
+const vtopPoint = v => [Math.round((v.x || 0) + (v.w || 90) / 2), Math.round((v.y || 0) + (v.h || 90) * 0.08)];      // the middle of the vessel's top
+let qdDrag = null;            // a QD hose end being moved outside Edit layout
+const QD_PIC = 'Images/Skynet/Valves/Quick_Disconnect.svg';     // Fritz's drawing, 2026-11-05: a bold red star, easy to see on a Tab
 const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
 // An IP id is either an IP widget's id, or "dev:<name>:in" / "dev:<name>:out" for the built-in IPs of a pump or valve
 const devOfIp = id => (typeof id === 'string' && id.startsWith('dev:')) ? id.slice(4, id.lastIndexOf(':')) : null;
@@ -1738,10 +1748,13 @@ const eqOfIp = id => (typeof id === 'string' && id.startsWith('eq:')) ? id.slice
 const eqPort = (id, ws) => { const gid = eqOfIp(id); const g = gid && L().graphics.find(x => x.id === gid && (!ws || x.workspace === ws)); return g ? eqPorts(g).find(q => q.id === id) : null; };
 function ipPoint(id, ws) {
   if (!id) return null;
+  const vt = vtopOf(id);           // a Quick Disconnect hose put in the top of a vessel (Rule 5.28)
+  if (vt !== null) { const v = L().graphics.find(x => x.id === vt && isKettle(x) && (!ws || x.workspace === ws)); return v ? vtopPoint(v) : null; }
   if (eqOfIp(id) !== null) return eqPort(id, ws)?.c || null;
   const pn = devOfIp(id);
   if (pn !== null) { const e = elNamed(pn); if (!hasIps(e) || (ws && e.workspace !== ws)) return null; return devIps(e).find(q => q.id === id)?.c || null; }
   const g = L().graphics.find(g => g.kind === 'ip' && g.id === id && (!ws || g.workspace === ws));
+  if (isQd(g) && g.qdOn) return ipPoint(g.qdOn, ws) || ipCenter(g);      // a Quick Disconnect is where the IP under it is
   return g ? ipCenter(g) : null;
 }
 function allIps(ws) {
@@ -1789,12 +1802,16 @@ function ipNode(id, ws) {
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
   if ((isMv(g) && !mvOpen(g)) || g?.fitting === 'cap' || cappedIps().has(id)) return { closed: true };
+  // a Quick Disconnect (Rule 5.28): with a hose on it, it passes flow to the IP it sits on; with nothing on it, it is shut
+  if (isQd(g)) return pipesOn(id, ws).length ? { key: id, pass: true } : { closed: true };
   // a coupling joining two or more pipes / hoses passes flow; a hose end with nothing else on it is an open end (flow pours out)
   if (g?.fitting === 'coupling' && pipesOn(id, ws).length < 2) return { key: id, end: true };
   return isFitting(g) ? { key: id, pass: true } : { key: id, end: true };
 }
 // Where the flow in a pipe began (Rule 5.21): a Vessel with an Out flow color, or a Tap Water Valve (always Blue)
 function vesselFlowOf(ipId) {
+  const vt = vtopOf(ipId);         // a hose in the top of a vessel: flow from (or into) that vessel
+  if (vt !== null) { const v = L().graphics.find(x => x.id === vt); return isKettle(v) ? flowKey(v.flowColor) || '' : ''; }
   const g = L().graphics.find(x => x.id === ipId && x.kind === 'ip'), v = g?.attachTo && L().graphics.find(x => x.id === g.attachTo);
   return isKettle(v) ? flowKey(v.flowColor) || '' : '';
 }
@@ -1819,6 +1836,12 @@ function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap 
     if (a.closed || b.closed || a.key === b.key) continue;
     if (a.end && b.end) { if ((p.flowWhen || []).length) dir.set(p.id, 1); continue; }
     link(a.key, b.key, p);
+  }
+  // a Quick Disconnect passes flow to and from the IP it sits on (no pipe between them), while a hose is on it (Rule 5.28)
+  for (const q of L().graphics.filter(g => isQd(g) && g.qdOn && g.workspace === ws)) {
+    const a = node(q.id), b = node(q.qdOn);
+    if (a.closed || b.closed || a.key === b.key) continue;
+    link(a.key, b.key, { id: 'qd:' + q.id });
   }
   // a Tab_Fitting joined to a vessel port passes flow to and from that port (no pipe between them), unless a valve in it is closed
   for (const f of L().graphics.filter(g => isBfit(g) && g.onVessel && g.workspace === ws)) {
@@ -2003,7 +2026,8 @@ function renderPipes() {
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
   pipes.forEach(syncPipeEnds);
   const srcs = new Map(), flow = computeFlow(w.name, srcs), cones = reducers(pipes, w.name);
-  const tabFlow = tabFlowOf(w);
+  const tabFlow = tabFlowOf(w), grabs = [];
+  $$('#ws > .qdEnd').forEach(n => n.remove());
   for (const p of pipes) {
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
@@ -2022,7 +2046,13 @@ function renderPipes() {
     }
     if (editing && (p.points || []).length > 1) {   // a red ring marks a pipe end that is not on an IP (no flow until it is)
       if (!ipPoint(p.from, p.workspace)) g.append(mk('circle', { class: 'loose', cx: p.points[0][0], cy: p.points[0][1], r: 9 }));
-      if (!ipPoint(p.to, p.workspace)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
+      if (!ipPoint(p.to, p.workspace) && !isQdHose(p)) { const q = p.points[p.points.length - 1]; g.append(mk('circle', { class: 'loose', cx: q[0], cy: q[1], r: 9 })); }
+    }
+    // the free end of a Quick Disconnect hose can be grabbed at any time (Rule 5.28): right mouse button, or a finger
+    if (!editing && isQdHose(p) && !p.locked && p.baseVisible !== false && (p.points || []).length > 1 && can('operator')) {
+      const q = p.points[p.points.length - 1], r = Math.max(12, width);     // on top of everything on the Tab, so it can always be grabbed
+      grabs.push(h('div', { class: 'qdEnd', 'data-gid': p.id, title: `${p.label || p.name || 'Hose'}: drag this end with the right mouse button (or a finger) onto an IP, a Quick Disconnect or the top of a vessel`,
+        style: `left:${q[0] - r}px;top:${q[1] - r}px;width:${2 * r}px;height:${2 * r}px` }));
     }
     if (editing) {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
@@ -2042,6 +2072,8 @@ function renderPipes() {
       svg.append(g);
     }
   }
+  $('#ws').append(...grabs);
+  if (qdDrag?.target) { const [x, y] = qdDrag.target.c; svg.append(mk('circle', { class: 'qdTarget', cx: x, cy: y, r: Math.max(16, pipeWidth(qdDrag.p) * 1.5) })); }
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
   $$('#ws .gfx.vessel').forEach(n => n.classList.toggle('heating', !!n.dataset.heater && turnsOn(n.dataset.heater)));
@@ -2190,7 +2222,7 @@ $('#ws').addEventListener('pointermove', ev => {
     const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
     resizeBy(drag, dx, dy, k); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
   if (drag.mode === 'move' || drag.mode === 'resize') showGeo(ev, drag.item);
-  if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
+  if (drag.mode === 'point') { if (isQdHose(drag.item) && drag.i === drag.item.points.length - 1) drag.item.to = null; drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
 const DRAG_DEAD_PX = 4;          // screen pixels
@@ -2245,9 +2277,13 @@ window.addEventListener('pointerup', () => {
     if (isUnit(f) && f.onVessel && drag.item === f) unjoinUnit(f);      // a Skynet Fitting dragged off its vessel port comes off it (dropped back on, it joins again)
     if (f && !f.onVessel && !isCapOnly(f)) { joinFitting(f); renderWs(); }
     if (isCap(drag.item)) { snapCap(drag.item); renderWs(); }
+    if (isQd(drag.item)) { snapQd(drag.item); renderWs(); }
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
   if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
+  if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
+    const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
+  }
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow
   drag = null;
@@ -2340,13 +2376,14 @@ function rightClickTopic(target) {
 let pointerKind = 'mouse';
 document.addEventListener('pointerdown', ev => { pointerKind = ev.pointerType; }, true);
 document.addEventListener('contextmenu', ev => {
+  if (!editing && ev.target.closest?.('div.qdEnd')) { ev.preventDefault(); return; }     // the right button drags a QD hose end (Rule 5.28)
   if (ev.shiftKey || pointerKind !== 'mouse') return;     // a finger: see the long press below
   const topic = rightClickTopic(ev.target);
   if (topic) { ev.preventDefault(); openHelp(topic); }
 });
 let helpPress = null, helpShownAt = 0;
 $('#ws').addEventListener('pointerdown', ev => {
-  if (editing || ev.pointerType === 'mouse' || ev.target.closest('.btns, select, button, input')) return;
+  if (editing || ev.pointerType === 'mouse' || ev.target.closest('.btns, select, button, input, div.qdEnd')) return;
   const hit = tabItemAt(ev.target);
   if (!hit || (hit.kind === 'el' && tapAction(hit.item) === 'hold')) return;     // a push button is held on purpose
   clearTimeout(helpPress?.t);
@@ -2538,7 +2575,7 @@ function drawStraight(ev) {
   drawPts.push(e.c); finishPipe(e.id || undefined);
 }
 function stopDrawing() {
-  drawPts = null; drawCursor = null; drawFrom = null; drawHose = false; drawOnIp = null;
+  drawPts = null; drawCursor = null; drawFrom = null; drawHose = false; drawOnIp = null; drawQd = false;
   $('#ws').classList.remove('drawing'); $('#editHint').textContent = ''; $('#finishPipe').classList.add('hidden'); renderPipes();
 }
 // a loose pipe or hose end gets a coupling, so every pipe has an IP at both ends; another pipe can join it there later
@@ -2548,13 +2585,17 @@ function endCoupling(pts, i, j) {
   draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
 }
 function finishPipe(to) {
-  const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose;   // a double-click adds its point twice
+  const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
   const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowWhen: [], baseVisible: true, size: '0.5' };
   if (hose) g.hose = true; else g.straight = true;
   g.from = from || endCoupling(pts, 0, 1);
-  g.to = typeof to === 'string' ? to : endCoupling(pts, pts.length - 1, pts.length - 2);
+  if (qd) {        // a Quick Disconnect hose (Rule 5.28): its free end needs no coupling; it may end in the top of a vessel
+    g.qd = true;
+    const t = typeof to === 'string' ? { id: to } : qdTarget(g, pts[pts.length - 1]);
+    g.to = t?.id ?? null; if (t?.c) pts[pts.length - 1] = [...t.c];
+  } else g.to = typeof to === 'string' ? to : endCoupling(pts, pts.length - 1, pts.length - 2);
   giveName(g, draft.graphics);
   draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
@@ -3519,6 +3560,7 @@ function lockTab(on) {
 $('#lockAll').onclick = () => lockTab(true);
 $('#unlockAll').onclick = () => lockTab(false);
 $('#drawPipe').onclick = () => { stopDrawing(); drawPts = []; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Double-click (or tap) where the pipe starts: on an IP, or anywhere. Pipes run only Horizontal, Vertical or at 45 degrees; they turn only at a fitting (an elbow or tee joins them where two pipes meet). Esc cancels.'; renderPipes(); };
+$('#drawQdHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; drawQd = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Quick Disconnect hose: click the pump IP it hangs from, a few points to bend through, then the IP, Quick Disconnect or vessel top it goes to (or double-click to leave the end loose). Its end can be moved at any time.'; renderPipes(); };
 $('#drawHose').onclick = () => { stopDrawing(); $('#finishPipe').classList.remove('hidden'); drawPts = []; drawHose = true; $('#ws').classList.add('drawing'); $('#editHint').textContent = 'Click the start IP (or any point), click a few points for the hose to bend through, then click the end IP. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling.'; renderPipes(); };
 // a new equipment widget (pipe fittings too): made on the Build Tab, then Save Build ... puts it on a Tab
 function addVesselWidget(c) {
@@ -4045,7 +4087,7 @@ const PIPE_FIXED = it => { const b = pipeBox(it);
   return [['_fx', 'Not editable', 'head'], ['name', 'Name (given by Skynet; a Process uses it, e.g. ' + (it.name || 'Pipe_1') + '.flow_Color = Mash)', 'ro'],
     ...(PIPE_HIDE_FIXED ? [] : [['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']])]; };
 // where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
-const FIT_PLACE = it => [...(isCap(it) ? [] : [AUTOSIZE_FIELD]), ...(it.onVessel || it.capOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
+const FIT_PLACE = it => [...(isCap(it) ? [] : [AUTOSIZE_FIELD]), ...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
   ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 // a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
 const VESSEL_FLOW = it => isKettle(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
@@ -5266,7 +5308,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? 'Hose' : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -8529,6 +8571,83 @@ function snapCap(c) {
   if (best) { capOnto(c, best.ip); toast(`End Cap on ${best.ip.label || best.ip.name || 'the opening'}: it is closed`); }
   else if (c.capOn) { delete c.capOn; toast('End Cap taken off: the opening is open again'); }
 }
+// ---- Quick Disconnects and Quick Disconnect hoses (Fritz, 2026-11-05, Skynet Rule 5.28, Help 127)
+// Many home brewers move one hose from source to source on Brew Day. A Quick Disconnect Widget (a cam lock) sits on an IP,
+// most often the IP of a valve on a manifold. A Quick Disconnect hose (Draw QD hose) starts on a pump IP; its other end is free
+// and can be moved at any time, Edit layout or not: grab it with the right mouse button (a finger on a phone or tablet) and drop
+// it on an IP or a Quick Disconnect, or anywhere in the top third of a vessel, which is the same as putting the hose in its top.
+const qdOnIps = () => new Set(L().graphics.filter(g => isQd(g) && g.qdOn).map(g => g.qdOn));
+function qdOnto(q) {
+  const c = q.qdOn && ipPoint(q.qdOn, q.workspace); if (!c) return false;
+  q.x = Math.round(c[0] - (q.w || 30) / 2); q.y = Math.round(c[1] - (q.h || 30) / 2); return true;
+}
+// a Quick Disconnect dropped in Edit layout goes on the nearest free IP within 30 px (not a pipe fitting or another QD); dragged off, it is loose
+function snapQd(q) {
+  const [cx, cy] = [(q.x || 0) + (q.w || 30) / 2, (q.y || 0) + (q.h || 30) / 2], taken = qdOnIps(); taken.delete(q.qdOn);
+  let best = null;
+  for (const ip of allIps(q.workspace)) {
+    const g = draft.graphics.find(x => x.id === ip.id);
+    if (ip.id === q.id || taken.has(ip.id) || isQd(g) || (isFitting(g) && g.fitting !== 'coupling')) continue;
+    const c = ip.c || ipPoint(ip.id, q.workspace); if (!c) continue;
+    const d = Math.hypot(c[0] - cx, c[1] - cy);
+    if (d < 30 && (!best || d < best.d)) best = { d, ip };
+  }
+  if (best) { q.qdOn = best.ip.id; qdOnto(q); toast(`Quick Disconnect on ${best.ip.label || best.ip.name || 'the IP'}`); }
+  else if (q.qdOn) { delete q.qdOn; toast('Quick Disconnect taken off its IP'); }
+}
+// Where a Quick Disconnect hose end dropped at c goes: the nearest IP (a Quick Disconnect wins over the IP under it), else the
+// top third of a vessel, else nowhere (a loose end: no flow). Returns { id, c } or null.
+function qdTarget(p, c) {
+  const ws = p.workspace, under = qdOnIps(), r = Math.max(24, pipeWidth(p) * 2);
+  let best = null;
+  for (const q of allIps(ws)) {
+    if (q.id === p.from || under.has(q.id)) continue;
+    const at = q.c || ipPoint(q.id, ws); if (!at) continue;
+    const d = Math.hypot(at[0] - c[0], at[1] - c[1]);
+    if (d <= r && (!best || d < best.d)) best = { d, id: q.id, c: at };
+  }
+  if (best) return { id: best.id, c: best.c };
+  const v = [...L().graphics].reverse().find(v => isKettle(v) && v.workspace === ws && c[0] >= (v.x || 0) && c[0] <= (v.x || 0) + (v.w || 90) && c[1] >= (v.y || 0) && c[1] <= (v.y || 0) + (v.h || 90) / 3);
+  return v ? { id: 'vtop:' + v.id, c: vtopPoint(v) } : null;
+}
+// a moved hose hangs from its fixed end to its free end with a little sag
+function hoseSag(a, b) {
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]), sag = Math.min(80, len * 0.2);
+  return [[...a], [Math.round((a[0] + b[0]) / 2), Math.round((a[1] + b[1]) / 2 + sag)], [Math.round(b[0]), Math.round(b[1])]];
+}
+const qdWhere = (id, ws) => { const vt = vtopOf(id); if (vt !== null) { const v = L().graphics.find(x => x.id === vt); return `in the top of ${v?.name || v?.label || 'the vessel'}`; }
+  const g = L().graphics.find(x => x.id === id); if (g) return `on ${g.name || g.label || 'the IP'}`; return `on ${allIps(ws).find(q => q.id === id)?.label || 'the IP'}`; };
+// moving the free end outside Edit layout: a mouse grabs it with the right button (Rule 2.9), a finger just holds and drags it
+$('#ws').addEventListener('pointerdown', ev => {
+  if (editing) return;
+  const end = ev.target.closest?.('div.qdEnd'); if (!end) return;
+  if (ev.pointerType === 'mouse' && ev.button !== 2) return;
+  ev.preventDefault();
+  if (!can('operator')) return toast('Only an operator or an admin can move a hose', true);
+  const p = S.config.graphics.find(x => x.id === end.dataset.gid); if (!isQdHose(p) || p.locked) return;
+  qdDrag = { p, pts: clone(p.points), to: p.to, target: null, moved: false, start: [ev.clientX, ev.clientY] };
+});
+window.addEventListener('pointermove', ev => {
+  if (!qdDrag) return;
+  if (!qdDrag.moved && Math.hypot(ev.clientX - qdDrag.start[0], ev.clientY - qdDrag.start[1]) < 4) return;
+  qdDrag.moved = true;
+  const c = canvasPt(ev), t = qdTarget(qdDrag.p, c);
+  qdDrag.target = t; qdDrag.p.to = null; qdDrag.p.points = hoseSag(qdDrag.p.points[0], t ? t.c : c);
+  renderPipes();
+});
+// iPhone Safari pans or zooms on a finger drag unless the touch is stopped here (touch-action is not honoured on SVG there)
+$('#ws').addEventListener('touchstart', ev => { if (!editing && ev.target.closest?.('div.qdEnd')) ev.preventDefault(); }, { passive: false });
+window.addEventListener('pointercancel', () => { if (!qdDrag) return; Object.assign(qdDrag.p, { points: qdDrag.pts, to: qdDrag.to }); qdDrag = null; renderPipes(); });
+window.addEventListener('pointerup', async () => {
+  if (!qdDrag) return;
+  const d = qdDrag; qdDrag = null;
+  if (!d.moved) { Object.assign(d.p, { points: d.pts, to: d.to }); renderPipes(); return; }
+  d.p.to = d.target?.id ?? null; renderPipes();
+  try {
+    await api('POST', '/ui/hose', { id: d.p.id, to: d.p.to, points: d.p.points });
+    toast(`${d.p.label || d.p.name || 'The hose'}: ${d.p.to ? 'its end is ' + qdWhere(d.p.to, d.p.workspace) : 'its end is loose (no flow)'}`);
+  } catch (e) { Object.assign(d.p, { points: d.pts, to: d.to }); renderPipes(); toast(e.message, true); }
+});
 // a valve in a Tab_Fitting: a valve Device (closed while off) or a manual valve IP widget (closed until opened)
 function valveShut(name) {
   const e = L().elements.find(x => x.name === name);
