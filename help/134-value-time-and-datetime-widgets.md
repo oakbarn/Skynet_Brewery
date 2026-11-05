@@ -28,6 +28,18 @@ It keeps its value when the Brain restarts.
 - **Database and .API** (see [Database and .API](98-database-and-api)): **When Clicked** sends it each time someone sets it on its
   Tab (even to the same value); **In a Group** sends it with a Process line `send_db_group Group_Name`.
 
+## Widget, Device or Clone: your choice
+
+When you put a reading on a Tab, pick what fits your brewery (Fritz, 2026-11-05). Skynet does not choose for you:
+
+- **A Device** when a board reads it, for example a **smart pH meter** wired to an Interface: its reading comes in by itself.
+- **A Clone** of that Device (see [Cloned Devices](71-cloned-devices)) when you want the same reading on another Tab, for
+  example the Reporting Tab. A Clone always shows its Device's value, with no Process code.
+- **A Value, Time or DateTime Widget** when nothing reads it for you, for example a **pH meter that is not smart**: you read it
+  yourself and type the value in with a tap. A Process can set it too.
+
+The Three Vessel sample uses Value Widgets for its readings; a brewery with a smart pH meter would put a Clone there instead.
+
 ## In the samples
 
 The **Three Vessel** sample's **Reporting** Tab holds the brew day readings (Strike volume, Mash pH, Pre-boil volume ...) as Value
