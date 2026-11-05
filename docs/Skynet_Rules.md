@@ -162,6 +162,8 @@ the position; a locked item can still be double-clicked and changed, except whil
 with it (Rule 2.12). A Clone has them all, but most are its parent's and not editable (Rule 4.4). The full list, who lacks
 which, and the plan to bring the panel up to it: [docs/Universal_Properties.md](Universal_Properties.md). (thread "Set
 universal properties standard", Help 114)
+*Exception, Vessels* (Fritz, 2026-11-05: "Again Exception for Vessel Devices or Vessel Widgets"): a Vessel's `.width` and
+`.height` work only on the Master Vessel Sizer (Rule 19.3).
 
 1.22 **gGlobals are non-volatile** (Fritz, 2026-11-03). Besides having a global scope (Rule 1.19), **every gGlobal keeps its
 value**, unlike a normal Process variable, which is cleared every time a Process starts. A gGlobal is **never cleared when a
@@ -266,6 +268,8 @@ eight grab points: the four corners and the middle of each side. The picked item
 the others only the bottom right corner. A small box shows X, Y, Width and Height while moving or
 resizing. Locked items have none (Rule 2.12). Works on the Build Tab and every Tab. (2026-10-27,
 thread "Improve the Build Tab add and resize tools", Help 75)
+*Exception, Vessels* (Fritz, 2026-11-05): Vessel Widgets and Vessel Devices follow the Vessel Rules (Rule 19.3): only a Tab's
+Master Vessel Sizer has grab points.
 
 2.21 **🗂 Schema is at the top of the ☰ Menu** (under Edit layout), one click to the Schema Menu
 tab. (2026-10-28, thread "Add sample Schemas to the Schema list")
@@ -843,7 +847,9 @@ Template"; thread "Build the Vessel Widget class", Help 133).
   on this Template.
 - **Place** (a switch for each spot, in Vessel Widget Properties): on = it is on the vessel and works (an IP joins pipes, hoses and
   fittings; the Probe and Element show their pictures, and the Element glows while its heater is on). Off = it is not there: nothing
-  shows on a Tab and nothing (a pipe, a Process) can use or change it; only in Edit layout a faint mark shows where it would go.
+  shows on a Tab and nothing (a pipe, a Process) can use or change it. *Changed (Fritz, 2026-11-05, Rule 19.4):* a Not Placed spot
+  is hidden even on the Build Tab and in Edit layout; **👁 Show All** in the Vessel's Properties shows it.
+  *Replaced:* "only in Edit layout a faint mark shows where it would go."
 - **The spots are set by the Template and locked:** a user can't move an IP, the Probe or the Element Port.
 - **IPs on a vessel** (Fritz, 2026-11-05): an IP is a TC, NPT or BSP outlet or inlet; the type does not matter, it is a place to
   connect another Device or Widget with its own IP (a Pipe, Hose, Fitting or anything with an IP).
@@ -1200,7 +1206,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **134**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **136**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1567,6 +1573,37 @@ Valve drill-down dialog", Help 128):
 
 ---
 
+## 19. Vessel Rules
+
+Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
+Devices or Vessel Widgets." Where a Vessel Rule and a general Rule differ, the Vessel Rule wins for **Vessel Widgets and Vessel
+Devices only**; everything else keeps the general Rules (2.20, 1.21, 5.31). (thread "Size Vessels by gallons with a Master Sizer",
+Help 135)
+
+19.1 **Gallons.** Every Vessel has a **Gallons** field (Liters when its Units are Metric). **A Vessel Template starts at 10
+gallons**, Skynet and User Templates alike, and it is an editable field. **Gallons is one of the first fields of a new build from a
+Template** (right after the Label in the Properties that open on the Build Tab).
+
+19.2 **Size follows the Method: Proportional or Diameter.**
+- **Proportional:** Fritz's plain vessel is the **One Gallon start: 197 x 237 pixels** (Fritz, 2026-11-05). Its Width to Height is
+  the shape, and the Gallons field sizes it in proportion to that 1 gallon start.
+- **Diameter:** a **Diameter** and a **Height** field (inches; cm for Metric). They give the shape as if the vessel were 1 gallon;
+  then the Gallons size it.
+- **Size follows volume:** twice the gallons is the cube root of 2 (about 1.26) times as wide and as tall. 10 gallons is 424 x 511.
+  (Fritz, 2026-11-05: "I think the way you have done it will work.")
+
+19.3 **The Master Vessel Sizer** is a Tab attribute (Tab settings). Any one Vessel on the Tab can be assigned. **Only the Master's
+size fields are active**, in a Process or on the screen (grab points, Width, Height); it is the only one that can be resized, and
+**every Vessel on that Tab follows** at the same scale. Changing the Master's own Gallons resizes only the Master; another Vessel's
+Gallons or Method resizes only that Vessel, at the Master's scale. **No Master Vessel Sizer picked: no Vessel can be resized**
+(a new build is still drawn at its Gallons). A resized Vessel keeps the middle of its bottom where it was; its IPs, fittings and
+End Caps go with it (pipes per Rule 5.19). The Master shows 📏 in Edit layout.
+
+19.4 **Not Placed is hidden, even on a Build screen.** A spot that is Not Placed (Rule 5.31) is hidden on every Tab, the Build Tab
+and Edit layout included, and its slider is hidden in the Vessel's Properties. A **👁 Show All** button in the Build or Edit dialog
+(Vessel Widget Properties) shows the hidden items (their sliders, and faint marks on the vessel) until it is pressed again (🙈 Hide
+Not Placed) or the dialog closes.
+
 ## Open questions (not Rules yet)
 
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
@@ -1816,3 +1853,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 6.14: the Send to the database choice Once is replaced by **In a Group** (Database Groups with a hidden key and a Group Name, `send_db_group Group_Name` sends the Group each time, ✏ Change name updates every Process; old Once items go In the Group named Once). `send_db Name` sends even when Off (no `send_Now`). Help 98 and 05 updated; no new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 1.23 (Value, Time and DateTime Widgets); Rule 6.14 gets the Send to the database choice **When Clicked**. Three Vessel sample: the Reporting readings are Value Widgets (w_Strike_Volume ...) sent When Clicked; Notes stays a gGlobal for now. Rule 1.20 confirmed unchanged. Help 134; next free Help number 135. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 8.4 (Password key): Skynet's own key button in every new-password box makes a strong password that follows the Password rules; Edge's own key went away when the clean window stopped syncing (Rule 9.8, PR #205). Help 10 updated; no new Help number. (thread "Restore generate password Key on fresh install")
+- 2026-11-05: Added section 19, the **Vessel Rules** (Fritz: "Vessels will have their own Rules"; an exception to Rules 2.20, 1.21 and 5.31 for Vessel Widgets and Vessel Devices only): 19.1 Gallons (10 to start on every vessel Template), 19.2 Proportional (1 gallon = Fritz's plain vessel, 197 x 237) or Diameter, size follows volume, 19.3 the Tab's Master Vessel Sizer (only it resizes; no Master, no resizing), 19.4 Not Placed hidden even on the Build Tab, 👁 Show All. Help 135; next free Help number 136. (thread "Size Vessels by gallons with a Master Sizer")
