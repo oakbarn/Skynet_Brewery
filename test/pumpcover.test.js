@@ -1,5 +1,5 @@
 // Pump Cover Overlays (Fritz, 2026-11-02): my_Pump.cover = None (the default), Red, Yellow, Blue, Green, Purple, Orange, White or User;
-// my_Pump.coverColor is the User cover's color. Only pumps have them. Every Skynet no-cover pump drawing has all its covers.
+// my_Pump.coverColor is the User cover's color. Only pumps have them. A cover is a color; every cover fits every Skynet pump (2026-11-05).
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { Store, attrsOf, PUMP_COVER_CHOICES } from '../lib/store.js';
@@ -32,15 +32,21 @@ assert.equal(store.getProp('Pump_Wort', 'cover'), 'User');
 assert.equal(store.getProp('Pump_Wort', 'coverColor'), 'Teal');
 eng.stopAll?.();
 
-// every no-cover pump drawing has its seven Skynet covers (White since 2026-11-05) and the User cover, in the same box as the pump
+// One cover per color (Fritz, 2026-11-05, Rule 7.13): a cover is a color, and every cover fits every Skynet pump. Each no-cover
+// pump drawing has one cover outline (_Cover.svg) and one cover shape (_Cover_Shape.svg), in the same box as the pump; the panel
+// fills the shape with the color. No per-color files.
 const pumps = new URL('../media/Images/Skynet/Pumps/', import.meta.url), covers = new URL('Covers/', pumps);
 const vb = f => /viewBox="([^"]+)"/.exec(fs.readFileSync(f, 'utf8'))[1];
 const drawn = fs.readdirSync(pumps).filter(f => /^Pump_.+_Inlet\.svg$/.test(f));
 assert.equal(drawn.length, 12);
-for (const f of drawn) for (const c of PUMP_COVER_CHOICES.filter(c => c !== 'None')) {
-  const cf = new URL(f.replace('.svg', `_Cover_${c}.svg`), covers);
-  assert.ok(fs.existsSync(cf), `${f} has a ${c} cover`);
-  assert.equal(vb(cf), vb(new URL(f, pumps)), `${f} ${c} cover lies exactly over the pump`);
+for (const f of drawn) for (const end of ['_Cover.svg', '_Cover_Shape.svg']) {
+  const cf = new URL(f.replace('.svg', end), covers);
+  assert.ok(fs.existsSync(cf), `${f} has its ${end}`);
+  assert.equal(vb(cf), vb(new URL(f, pumps)), `${f} ${end} lies exactly over the pump`);
 }
+assert.equal(fs.readdirSync(covers).length, 24, 'two files per pump, none per color');
+const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+for (const c of PUMP_COVER_CHOICES.filter(c => !['None', 'User'].includes(c))) assert.match(app, new RegExp(`${c}: '#[0-9a-f]{6}'`), `${c} has its color`);
+assert.match(app, /White: '#fafafa'/, 'White is RGB 250 250 250');
 console.log('pump cover tests passed');
 process.exit(0);
