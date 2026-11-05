@@ -283,10 +283,16 @@ Template). Spots and their positions (picture box 260 x 320, Images/Skynet/Vesse
 | Temperature Probe (`thermowell`) | picture, no IP | `probeStyle` thermowell: VW Left Thermowell (0.077, 0.844), Skynet_TC15_Thermowell_Short.svg; front: VW Front (0.5, 0.8), Skynet_TC15_Thermowell_Front.svg |
 | Element Port (`element`) | picture, no IP | VW Right Element (0.923, 0.859), BigMacRElementOff.svg, glows while `heater` is on |
 
-Not Placed: no IP, nothing on the Tab; in Edit layout a faint mark. Properties (Vessel Widget Properties): Name, Type, Label,
+Not Placed: no IP, nothing on the Tab, hidden in Edit layout too (faint marks only with 👁 Show All, Rule 19.4). Properties (Vessel Widget Properties): Name, Type, Label,
 Graphic, the Place switches, Probe: Front or Thermowell, then the Devices (`probe`, `heater`: links to Devices the Schema has; making
 them from the vessel waits on Rule 5.7), Flip Horizontal, Out flow color, Label and place. An IP on a vessel is a TC, NPT or BSP
 outlet or inlet: a place to connect anything with its own IP.
+
+**Size by gallons (Vessel Rules 19.1-19.4, Help 135, 2026-11-05):** `volume` = **Gallons** (Liters when Metric; 10 on every vessel
+Template), `sizeMethod` Proportional (default: Fritz's plain vessel, 1 gallon = 197 x 237) or `diameter` with `diameter` and
+`vheight` (inches; cm Metric). Size follows volume (10 gal = 424 x 511). Tab settings **Master Vessel Sizer** (`tab.vSizer` = the
+vessel's id, `tab.vScale` its scale): only the Master has grab points and Width / Height (📏 in Edit layout); every Vessel Widget on
+the Tab follows it. No Master: no resizing. Not Placed spots are hidden even on the Build Tab until **👁 Show All** in Properties.
 
 ### Tab_Fitting (from a Bundled Fitting Template)
 | Setting | Notes |

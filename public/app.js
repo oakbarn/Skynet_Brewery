@@ -301,11 +301,15 @@ const bundledIps = v => draft.graphics.filter(g => g.kind === 'ip' && g.attachTo
 const RS_DIRS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 const RS_TIP = { n: 'top', s: 'bottom', e: 'right', w: 'left', nw: 'top left', ne: 'top right', se: 'bottom right', sw: 'bottom left' };
 function editDeco(n, o) {
+  if (isVW(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id === o.id) n.append(h('div', { class: 'vMaster', title: 'Master Vessel Sizer: resize it and every Vessel on this Tab follows' }, '📏'));
   if (o.locked) { n.classList.add('locked'); n.append(h('div', { class: 'lock', title: 'Locked in place' }, '🔒')); }
   else if (o.cloneId) n.append(h('div', { class: 'cloneMark', title: `Clone of ${o.cloneOf}: it moves, its size is its parent's` }, '⧉'));
   else if (o.bundled && !isUnit(o) && !isSkyV(o)) n.append(h('div', { class: 'lock', title: 'Bundled with its IPs: moves as one, no editing' }, '📦'));
   else if (autoSized(o)) return;       // a pipe fitting on Autosize to pipe: no grab points until Autosize is switched off
-  else n.append(...RS_DIRS.map(d => h('div', { class: 'rs rs-' + d, 'data-rs': d, title: `Drag to make it bigger or smaller (${RS_TIP[d]})` })));
+  else if (isVW(o) && vMaster(draft?.workspaces.find(w => w.name === o.workspace))?.id !== o.id) return;    // Vessel Rules: only the Master Vessel Sizer is resized
+  else {
+    n.append(...RS_DIRS.map(d => h('div', { class: 'rs rs-' + d, 'data-rs': d, title: `Drag to make it bigger or smaller (${RS_TIP[d]})` })));
+  }
 }
 
 // Vessel widgets (app-only): electrically heated, gas heated, or an unheated mash tun. A background picture by path,
@@ -595,14 +599,15 @@ function buildVessel(g) {
 const VW_PROBE_POS = { thermowell: 'VW Left Thermowell', front: 'VW Front' };
 const VW_PICS = { thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg', front: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Front.svg',
   element: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg' };
-const VW_W = 260;       // the Template's picture box is 260 x 320: the parts are drawn to that scale and grow with the vessel
+const VW_W = 260;
+let vwPeek = null;       // the Vessel whose Properties have 👁 Show All pressed: its Not Placed spots show as faint marks       // the Template's picture box is 260 x 320: the parts are drawn to that scale and grow with the vessel
 function vwParts(g) {
   const out = [], C = eqClass(g), s = picWH(g)[0] / VW_W, fl = g.flipH ? -1 : 1;
   const at = (k, p) => { const d = C.ports[k], q = d.pos.find(q => q[0] === p.position) || [0, 0.5, 0.5]; return unitPoint({ ...g, x: 0, y: 0 }, q[1], q[2]); };
   for (const [k, d] of Object.entries(C.ports)) {
     const p = g.ports?.[k]; if (!p) continue;
     const [px, py] = at(k, p), ghost = !p.installed;
-    if (ghost && !editing) continue;          // not Placed: nothing on the Tab
+    if (ghost && !(editing && vwPeek === g.id)) continue;          // not Placed: hidden, even on the Build Tab, until 👁 Show All (Vessel Rules)
     const tip = `${d.name}${ghost ? ': not Placed (double-click the vessel and slide its Place on)' : ''}`;
     if (d.ip) { if (ghost) out.push(h('div', { class: 'vwGhost', title: tip, style: `left:${px}px;top:${py}px` })); continue; }
     let pic, w, hh, left, top;
@@ -614,6 +619,46 @@ function vwParts(g) {
       style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(pic)}");transform:scaleX(${fl})` }));
   }
   return out;
+}
+// ---- Vessels sized by gallons (Fritz, 2026-11-05, Rule 5.32). A Vessel Widget has a Gallons field (10 to start) and a Method:
+// Proportional (its picture's own Width to Height is the shape of a 1 gallon vessel) or Diameter (its Diameter and Height give the
+// shape). Size follows volume: twice the gallons is the cube root of 2 (about 1.26) times as wide and as tall. A Tab names one
+// Vessel its Master Vessel Sizer (Tab settings): the Master's size on the screen sets the scale, and every Vessel Widget on that Tab
+// follows it. Changing the Master's own Gallons grows or shrinks only the Master.
+const V1_GAL = [197, 237];       // Fritz's plain vessel, the One Gallon start (Fritz, 2026-11-05): Proportional uses its Width to Height
+const isVW = g => g?.kind === 'vessel' && !!g.vwidget && !g.integrated && isSkyV(g);
+const vGal = g => { const v = +(g.volume ?? g.maxVolume) > 0 ? +(g.volume ?? g.maxVolume) : 10; return g.units === 'Metric' ? v / 3.78541 : v; };
+function vAspect(g) {        // its shape: Height / Width of its box
+  if (g.sizeMethod === 'diameter' && +g.diameter > 0 && +g.vheight > 0) return +g.vheight / +g.diameter;
+  return V1_GAL[1] / V1_GAL[0];
+}
+const V1_SCALE = V1_GAL[0] * Math.cbrt(V1_GAL[1] / V1_GAL[0]);        // with no Master yet: 1 gallon is 197 x 237
+const vScaleFor = tab => { const ws = draft?.workspaces.find(w => w.name === tab), m = vMaster(ws); return !m ? V1_SCALE : +ws.vScale > 0 ? ws.vScale : vScaleOf(m); };
+const vMaster = ws => { const id = ws?.vSizer; return id ? draft?.graphics.find(g => g.id === id && isVW(g) && g.workspace === ws.name) || null : null; };
+const vScaleOf = m => (m.w || VW_W) / Math.cbrt(vGal(m) / vAspect(m));         // the width of a 1 gallon vessel of square shape
+function vBox(g, c) { const a = vAspect(g), w = c * Math.cbrt(vGal(g) / a); return [Math.max(20, Math.round(w)), Math.max(20, Math.round(w * a))]; }
+// after a Vessel's Properties are saved: the Master's new Width or Height sets the Tab's scale; new Gallons or Method resize it
+function vSizeAfterEdit(g, before) {
+  const ws = draft.workspaces.find(w => w.name === g.workspace), m = vMaster(ws);
+  if (!m) { if (ws?.build && (g.volume !== before.volume || vAspect(g) !== vAspect(before))) { vResize(g, ...vBox(g, vScaleFor(ws.from || ws.name))); renderWs(); } return; }    // a new build: its Gallons size it
+  const offBefore = offEnds();
+  if (m === g && (g.w !== before.w || g.h !== before.h)) { if (g.h !== before.h && g.w === before.w) g.w = Math.round(g.h / vAspect(g)); vSizeTab(ws, true); }
+  else vResize(g, ...vBox(g, vScaleFor(ws.name)));
+  renderWs(); letGoBentEnds(offBefore);
+}
+function vResize(g, w, hh) {         // the bottom middle stays put (it stands where it stood), its IPs and fittings follow
+  if (g.w === w && g.h === hh) return false;
+  const cx = (g.x || 0) + (g.w || 0) / 2, by = (g.y || 0) + (g.h || 0);
+  Object.assign(g, { w, h: hh, x: Math.round(cx - w / 2), y: Math.round(by - hh) });
+  placeUnitParts(g); return true;
+}
+// size every Vessel Widget on a Tab from its Master (fromMaster: the Master's box was just changed, so it sets a new scale)
+function vSizeTab(ws, fromMaster) {
+  const m = vMaster(ws); if (!m) { if (ws) delete ws.vScale; return 0; }
+  if (fromMaster || !(+ws.vScale > 0)) { const a = vAspect(m); m.h = Math.round((m.w || VW_W) * a); ws.vScale = vScaleOf(m); }
+  let n = 0;
+  for (const g of draft.graphics.filter(g => isVW(g) && g.workspace === ws.name)) if (vResize(g, ...vBox(g, ws.vScale)) || g === m) n++;
+  return n;
 }
 // an IP dropped on a vessel becomes one of its ports
 function attachIp(ip) {
@@ -2458,6 +2503,7 @@ window.addEventListener('pointerup', () => {
     if (isQd(drag.item)) { snapQd(drag.item); renderWs(); }
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
+  if (drag?.mode === 'resize' && drag.moved && isVW(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
   if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
@@ -4123,6 +4169,7 @@ function moveBuildTo(tab) {
   if (items.some(x => x.kind === 'override') && ovrHas(to.name, items.find(x => x.kind === 'override'))) throw new Error(`The ${to.name} Tab already has an Override button: only one is allowed on a Tab. Delete one of them, or pick another Tab.`);
   centerOn(items, to);
   for (const x of items) x.workspace = to.name;
+  if (vMaster(to)) for (const v of items.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
   // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_P_L_Vlv_Fly_Sparge__SP)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
@@ -4199,7 +4246,7 @@ async function saveBuildTemplate({ name, skynet }) {
       if (!on) throw new Error('A User Bundled vessel Template must be built on a Skynet Vessel Widget: Add equipment > Vessel > Widget, pick a Skynet Vessel Widget, build and Bundle it on the Build Tab, then save it here.');
       t.base = on;
     }
-    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
+    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'sizeMethod', 'diameter', 'vheight']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
     if (EQ[g.vesselType]?.ports.in2) t.liquidPorts = g.ports?.in2?.installed ? 4 : 2;
     for (const [k, p] of Object.entries(base.ports || {})) if (!g.ports?.[k]) t.ports[k] = p;     // ports the Tab item doesn't have stay as they were
     for (const [k, p] of Object.entries(g.ports || {})) {
@@ -5108,6 +5155,12 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...opts.map(o => o?.group ? h('optgroup', { label: o.group }, ...o.items.map(i => opt(pair(i)))) : opt(pair(o))));
   }
   else if (kind === 'note') return [h('div', { class: 'full muted' }, label)];
+  else if (kind === 'showall') {     // 👁 Show All (Vessel Rules, Fritz 2026-11-05): a button that shows what is hidden, pressed again hides it
+    const cb = h('input', { type: 'checkbox', class: 'hidden', 'data-k': key, 'data-kind': 'bool', 'data-rerender': '1' }); cb.checked = !!v;
+    const b = h('button', { type: 'button', class: v ? 'primary' : '', title: opts || '', onclick: () => {
+      cb.checked = !cb.checked; vwPeek = cb.checked ? obj.id : null; renderWs(); cb.dispatchEvent(new Event('change', { bubbles: true })); } }, v ? '🙈 Hide Not Placed' : '👁 Show All');
+    return [h('div', { class: 'full' }, b, cb, ' ', h('span', { class: 'muted' }, label))];
+  }
   else if (kind === 'infonote') return [h('div', { class: 'full infoNote' }, label, ' ', infoIcon(opts))];     // a note with the orange ? (more about it)
   else if (kind === 'head') return [h('div', { class: 'full dlgHead' }, label)];
   else if (kind === 'orient') {      // Orientation (Rule 18.19): one pick that sets Flip Horizontal and Flip Vertical
@@ -5808,7 +5861,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -5866,6 +5919,14 @@ async function editItem(kind, id) {
         if (work.ports.thermowell) work.ports.thermowell.position = VW_PROBE_POS[work.probeStyle];
         if (!work.ports.element?.installed) delete work.heater;        // not Placed: nothing on the vessel to link
         if (!work.ports.thermowell?.installed) delete work.probe;
+        delete work.vwShowAll;
+        if (work.volume === undefined) work.volume = work.units === 'Metric' ? 37.9 : 10;       // an older Vessel with no Gallons yet: 10
+        if (!(+work.volume > 0)) throw new Error(`Type the ${work.units === 'Metric' ? 'Liters' : 'Gallons'} (more than 0)`);
+        if (work.sizeMethod === 'diameter' && !(+work.diameter > 0 && +work.vheight > 0)) throw new Error('The Diameter method needs a Diameter and a Height (more than 0)');
+        if (work.sizeMethod !== 'diameter') delete work.sizeMethod;
+        // only the Master Vessel Sizer is resized (Vessel Rules): another Vessel keeps its box, its Gallons set it from the Master
+        const ws = draft.workspaces.find(w => w.name === (work.workspace || item.workspace)), m = vMaster(ws);
+        if (!m || m.id !== item.id) { work.w = item.w; work.h = item.h; }
       }
       if (canLoosen() && work.bundled === false && !item.integrated) { work.loose = true; delete work.bundled; } else { work.bundled = true; delete work.loose; }
       if (rims) {        // its own heating element and temperature probe follow its Properties
@@ -5982,6 +6043,7 @@ async function editItem(kind, id) {
       const placed = syncVesselPorts(item, before.isNew ? null : before);
       if (isSkyV(item)) turnVesselParts(item, before);         // flipped or rotated: its IPs and fittings turn with it
       placeUnitParts(item);
+      if (isVW(item)) vSizeAfterEdit(item, before);
       if (!bf && !isSkyV(item) && (placed.length || before.isNew)) vesselPopup(item, placed);
       delete item.isNew;
     }
@@ -6004,7 +6066,7 @@ async function editItem(kind, id) {
 
 async function editWorkspace() {
   if (!editing) return;
-  const w = curWs(); const work = clone(w);
+  const w = curWs(); const work = clone(w), before = clone(w);
   await loadMediaPictures();
   const r = await dialog('Tab settings', [['name', 'Name', 'text'],
     ['id', 'Tab ID (exactly 2 letters, unique; it ends the suggested name of each new Device on this tab, e.g. ..._Fly_Sparge_SP)', 'text'],
@@ -6020,6 +6082,7 @@ async function editWorkspace() {
     ['_sizeHead', 'Size', 'head'],
     ['width', 'Tab width (default 1600)', 'num'], ['height', 'Tab height (default 900)', 'num'],
     ['pipeSize', 'Pipe size: how thick a 1/2" pipe is drawn on this tab (default 10). Other pipe and hose sizes, reducers and fittings scale from it', 'num'],
+    ['vSizer', 'Master Vessel Sizer: resize this Vessel and every Vessel on the Tab follows (None = no Vessel can be resized)', 'sel', [['', 'None'], ...draft.graphics.filter(g => isVW(g) && g.workspace === w.name).map(g => [g.id, `${g.label || g.name} (${g.volume ?? 10} ${volUnit(g.units)})`])]],
     ['_flHead', 'Flow Color', 'head'],
     ['flowColor', 'Flow Color of every pipe and hose on this Tab (tab.flow_Color in a Process)', 'flowc', 'tab'],
     ['_flNote', 'Mash, Boil, Whirlpool and Ferment: a pipe with its own Flow color keeps it. Tap, Strike and the plain colors: every pipe takes it. Always: flow from a Tap Water Valve is Blue, and flow that began at a Vessel with an Out flow color takes that color. A Process line tab.flow_Color = Mash sets it on the Tab the screen shows.', 'note']], work, draft.workspaces.length > 1, TAB_SPOT);
@@ -6042,7 +6105,9 @@ async function editWorkspace() {
       if (others.some(x => String(x.id).toUpperCase() === work.id)) throw new Error(`Tab ID ${work.id} is used by the ${others.find(x => String(x.id).toUpperCase() === work.id).name} tab`);
     } catch (e) { toast(e.message, true); return null; }
     if (work.name !== w.name) { for (const x of [...draft.elements, ...draft.graphics]) if (x.workspace === w.name) x.workspace = work.name; wsName = work.name; }
-    Object.keys(w).forEach(k => delete w[k]); Object.assign(w, work);     // a cleared box (picture "(none)", color Default) must remove the old value
+    Object.keys(w).forEach(k => delete w[k]); Object.assign(w, work);
+    if (!w.vSizer) { delete w.vSizer; delete w.vScale; }
+    else if (w.vSizer !== before.vSizer) { const off = offEnds(); vSizeTab(w, true); renderWs(); letGoBentEnds(off); }     // a new Master: every Vessel on the Tab takes its scale (Vessel Rules)     // a cleared box (picture "(none)", color Default) must remove the old value
     renderTabs(); renderWs();
     return w.name;           // saved: its name (➕ Add new Tab… in the Add Device box uses it)
   }
@@ -9296,7 +9361,9 @@ function vesselTplFields(w) {
     ['image', 'Graphic (picture path)', 'path'],
     ['_s', 'Size', 'head'], ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS)],
     ...(ferm ? [['maxVolume', `Largest batch (${u})`, 'num'], ['minVolume', `Smallest batch (${u})`, 'num'], ['extraTrub', `Trub loss, left in the fermenter (${u})`, 'num']]
-      : [['volume', `Size (${u})`, 'num'], ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
+      : [['volume', `Size: ${u === 'L' ? 'Liters' : 'Gallons'} (10 gallons to start; a Vessel Widget is drawn to this size)`, 'num'],
+        ...(isV ? [['sizeMethod', 'Method (how its shape is worked out)', 'sel', V_METHODS, true], ...(w.sizeMethod === 'diameter' ? [['diameter', `Diameter (${u === 'L' ? 'cm' : 'inches'})`, 'num'], ['vheight', `Height (${u === 'L' ? 'cm' : 'inches'})`, 'num']] : [])] : []),
+        ['deadspace', `Dead space, left in the bottom (${u})`, 'num'], ...(isV ? [['extraTrub', `Extra trub loss (${u})`, 'num']] : [])]),
     ...(heat.length ? [['_h', 'Heat', 'head'], ['heatKind', 'Heat Source', 'sel', heat.map(k => [k, HEAT_KINDS[k]]), true],
       ...(w.heatKind === 'other' ? [['otherHeat', 'Other heat source (what it is)', 'text']] : []),
       ['_hd', 'The Device that heats it, and its probe, are picked on the Tab_Vessel.', 'note']] : []),
@@ -9485,7 +9552,9 @@ function placeTabVessel(t, tab, name) {
   const C = EQ[t.vesselType] || EQ.vessel, n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: (t.size || C.size)[0], h: (t.size || C.size)[1],
     labelAlign: 'above', labelSize: 16, labelVisible: true, name, template: t.name, templateCls: t.cls, image: t.image || C.image, bundled: true, ports: {} };
-  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'vwidget', 'probeStyle']) if (t[k] !== undefined) g[k] = clone(t[k]);
+  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'vwidget', 'probeStyle', 'sizeMethod', 'diameter', 'vheight']) if (t[k] !== undefined) g[k] = clone(t[k]);
+  if (t.vwidget && g.volume === undefined) g.volume = g.units === 'Metric' ? 37.9 : 10;      // 10 gallons to start (Rule 5.32)
+  if (t.vwidget) [g.w, g.h] = vBox(g, vScaleFor(draft.workspaces.find(w => w.name === tab)?.from || tab));      // its size from its Gallons
   for (const [k, d] of Object.entries(C.ports)) {
     const q = t.ports?.[k]; if (!q || (!q.installed && !t.vwidget)) continue;      // a Vessel Widget keeps every spot of its Template, Placed or not
     g.ports[k] = { installed: !!q.installed, position: q.position || portDefPos(d), standard: stdShort(q.std || t.std) };
@@ -9557,6 +9626,21 @@ F.skynetFitting = it => {
       ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']])];
 };
 
+// Show All: a Not Placed spot is listed only while 👁 Show All is on (one switched off now stays listed until the dialog closes)
+const vwPlacedNow = (it, k) => k + '_on' in it ? !!it[k + '_on'] : !!it.ports?.[k]?.installed;
+const vwShows = (it, k) => !!it.vwShowAll || vwPlacedNow(it, k) || !!it.ports?.[k]?.installed;
+const hidN = it => Object.keys(it.ports || {}).filter(k => !vwShows(it, k)).length;
+// a Vessel Widget's size (Rule 5.32): Gallons, Method, and for Diameter its Diameter and Height
+const V_METHODS = [['proportional', 'Proportional (the plain vessel shape: 1 gallon is 197 x 237)'], ['diameter', 'Diameter (its Diameter and Height give the shape)']];
+function vSizeFields(it) {
+  const metric = it.units === 'Metric', ws = draft?.workspaces.find(w => w.name === it.workspace), m = vMaster(ws);
+  const who = !m ? `This Tab has no Master Vessel Sizer yet (Tab settings: double-click an empty spot on the Tab).`
+    : m.id === it.id ? `This Vessel is the Master Vessel Sizer of the ${ws.name} Tab: resizing it resizes every Vessel on the Tab.`
+    : `The Master Vessel Sizer of the ${ws.name} Tab is ${m.label || m.name}: this Vessel follows its scale.`;
+  return [['_sz', 'Size', 'head'], ['volume', metric ? 'Liters' : 'Gallons', 'num'], ['sizeMethod', 'Method', 'sel', V_METHODS, true],
+    ...(it.sizeMethod === 'diameter' ? [['diameter', `Diameter (${metric ? 'cm' : 'inches'})`, 'num'], ['vheight', `Height (${metric ? 'cm' : 'inches'})`, 'num']] : []),
+    ['_szn', `Size follows volume: twice the gallons is about 1.26 times as wide and as tall. ${who}`, 'note']];
+}
 // the Properties of a Skynet vessel: no port or IP settings (its openings have their IPs built in), Flip Horizontal, and the
 // Devices that belong to a Schema: its heating element and its Temperature Probe
 F.skynetVessel = it => {
@@ -9569,13 +9653,15 @@ F.skynetVessel = it => {
   return [['_t', vw ? `Vessel Widget, made from the Skynet Template ${it.template}. Its IPs, its Temperature Probe and its Element Port sit where the Template puts them; nobody can move them. Slide Place on for the ones this vessel has. An IP is a place to connect a Pipe, Hose, Fitting or anything else with its own IP; the TC, NPT or BSP type does not matter.`
       : `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['vtype', 'Type', 'vlist', it.vesselType + '.types'], ['label', 'Label (the only text on it; empty = the Name)', 'text'],
+    ...(vw ? vSizeFields(it) : []),
     ...(it.integrated === 'device' ? [['_d', 'Built in (Skynet_Integrated_Device: its IPs and its heating element can never be taken out of it)', 'head'], ...rimsFields(it)] : [
       // its picture starts as the Widget's and is edited like any other Widget's (Fritz, 2026-10-23)
       ['image', 'Graphic (picture path; its IPs stay on the openings of the Skynet picture)', 'path'],
-      ...(vw ? [['_vw', 'Place (on = it is on this vessel and works; off = it is not there, and shows only as a faint mark in Edit layout)', 'head'],
-        ...spots.filter(([, d]) => d.ip).map(([k, d]) => [k + '_on', `${d.name} IP`, 'bool']),
-        ...(it.ports?.thermowell ? [['thermowell_on', 'Temperature Probe', 'bool', false, true], ...(well ? [['probeStyle', 'Probe: Front or Thermowell', 'sel', [['thermowell', 'Thermowell (in from the side)'], ['front', 'Front (seen from the front)']]]] : [])] : []),
-        ...(it.ports?.element ? [['element_on', 'Element Port', 'bool', false, true]] : [])] : []),
+      ...(vw ? [['_vw', 'Place (on = it is on this vessel and works; off = Not Placed: it is not there and is hidden, even on the Build Tab)', 'head'],
+        ['vwShowAll', it.vwShowAll ? 'All the spots show, the Not Placed ones too (as faint marks on the vessel).' : `Only the Placed spots show${hidN(it) ? ` (${hidN(it)} Not Placed hidden)` : ''}.`, 'showall', 'Show the Not Placed spots too, so one can be Placed'],
+        ...spots.filter(([k, d]) => d.ip && vwShows(it, k)).map(([k, d]) => [k + '_on', `${d.name} IP`, 'bool']),
+        ...(it.ports?.thermowell && vwShows(it, 'thermowell') ? [['thermowell_on', 'Temperature Probe', 'bool', false, true], ...(well ? [['probeStyle', 'Probe: Front or Thermowell', 'sel', [['thermowell', 'Thermowell (in from the side)'], ['front', 'Front (seen from the front)']]]] : [])] : []),
+        ...(it.ports?.element && vwShows(it, 'element') ? [['element_on', 'Element Port', 'bool', false, true]] : [])] : []),
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),
       ...(electric ? [['heater', 'Heating Element: Select Device or None (it glows while on)', 'sel', elems]] : []),
       ...(well ? [['probe', 'Temperature Probe: Select Temperature Probe or None', 'sel', probes]] : [])]),
@@ -9583,7 +9669,10 @@ F.skynetVessel = it => {
     ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...looseField(it), ...VESSEL_FLOW(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
-    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']];
+    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'],
+    ...(vw && vMaster(draft?.workspaces.find(w => w.name === it.workspace))?.id !== it.id ? [['_wh', `Width ${it.w} x Height ${it.h}: set by its Gallons and the Tab's Master Vessel Sizer (only the Master is resized).`, 'note']]
+      : [['w', 'Width', 'num'], ['h', 'Height', 'num']]),
+    ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']];
 };
 
 // draw profile equipment on the loaded Schema's Equipment tab (a fresh drawing, or the old one brought up to date)
