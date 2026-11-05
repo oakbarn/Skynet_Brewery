@@ -24,8 +24,8 @@ assert.ok(read('lib/picgroups.js').includes("'Skynet_Vessel_Widget.svg'"), 'in t
 // every spot has its position in the panel
 for (const k of spots) assert.ok(app.includes(`['${t.ports[k].position}', `), `${t.ports[k].position} is a position`);
 assert.ok(app.includes("['VW Front', 0.5, 0.8]"), 'the Front probe spot');
-// Place: not Placed shows only in Edit layout; the spots can't move; Properties have the sliders
-assert.ok(app.includes("if (ghost && !editing) continue;"), 'not Placed: nothing outside Edit layout');
+// Place: not Placed is hidden, even in Edit layout, until 👁 Show All (Vessel Rules); the spots can't move; Properties have the sliders
+assert.ok(app.includes("if (ghost && !(editing && vwPeek === g.id)) continue;"), 'not Placed: hidden until Show All');
 assert.ok(app.includes("if (k in place) work.ports[k].installed = place[k];"), 'Place sliders set installed');
 assert.ok(app.includes("'Vessel Widget Properties'"), 'its dialog title');
 assert.equal(cleanVessel({ vwidget: true, probeStyle: 'front' }).probeStyle, 'front');

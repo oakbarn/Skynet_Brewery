@@ -26,7 +26,8 @@ export function elementTopic(e) {
     case 'digitalOut':
       if (e.subtype === 'valve' && e.valveType === 'manual') return ['manual-valves'];
       if (e.subtype === 'valve' && e.tapwater) return ['tap-water-valves'];
-      if (e.subtype === 'pump' && !e.kind) return ['pump-device-properties'];      // the drill-down (Fritz, 2026-11-03, Rule 18.12)
+      if (e.subtype === 'pump' && !e.kind) return ['pump-device-properties'];
+      if (e.subtype === 'element' && !e.kind && !e.template) return ['heating-element-device-properties'];      // the Pump's drill-down (Fritz, 2026-11-05, Help 137)      // the drill-down (Fritz, 2026-11-03, Rule 18.12)
       return DEVICE;
     case 'deadband': return ['deadband-device'];      // as in BruControl (Fritz, 2026-11-05, Rule 6.17, Help 126)
     case 'stepper': return ['stepper-motors'];
