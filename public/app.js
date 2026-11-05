@@ -3529,7 +3529,7 @@ function portForName(e) {
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
-const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace));
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
