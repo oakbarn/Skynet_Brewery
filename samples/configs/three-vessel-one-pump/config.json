@@ -244,7 +244,10 @@
    "initial": 0,
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "workspace": "Reporting",
@@ -261,7 +264,10 @@
    "initial": 0,
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "workspace": "Reporting",
@@ -278,7 +284,10 @@
    "initial": 0,
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "workspace": "Reporting",
@@ -295,7 +304,10 @@
    "initial": 0,
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "workspace": "Reporting",
@@ -312,7 +324,10 @@
    "initial": 0,
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "workspace": "Reporting",
@@ -329,7 +344,10 @@
    "initial": 0,
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "workspace": "Reporting",
@@ -346,7 +364,10 @@
    "initial": 0,
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "workspace": "Reporting",
@@ -361,7 +382,10 @@
    "initial": "",
    "api": "getput",
    "backColor": "#4fb3ff",
-   "foreColor": "#fafafa"
+   "foreColor": "#000000",
+   "nameColor": "#fafafa",
+   "nameBg": "#000000",
+   "nameAlign": "TopCenter"
   },
   {
    "name": "gblS_BeerName_R1",
