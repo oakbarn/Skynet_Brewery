@@ -6,6 +6,10 @@ Nobody can see or switch anything without signing in. Phones and computers stay 
 
 The first time the panel opens, it asks you to create the **admin account** (a user name and a password; by default at least 8 characters, see [Password rules](39-password-rules)). This only works from your home network, so a stranger can never create it.
 
+Want the panel to pick a password for you? Tap the **key** in the Password box. It makes a strong password that follows the [Password rules](39-password-rules), puts it in both boxes and shows it. **Write it down** before you tap **Create admin account** (the browser may also offer to save it when you sign in). Tap the eye to hide it. The same key is in **Forgot password?**, **Settings > My account** and **Settings > Users** (Add user).
+
+(Edge used to show its own key here. It needs Edge signed in and syncing, and Skynet's own window never syncs, so Skynet now has its own key.)
+
 ## Roles
 
 **Viewer** watches, **Operator** runs a brew day, **Admin** does everything. Admins add and change users in **Settings > Users**; see [Settings](09-settings).

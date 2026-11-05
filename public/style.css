@@ -1034,3 +1034,10 @@ dialog :is(input, select, textarea):focus, dialog button:focus-visible { outline
 #dlgTitle .ttlExtra { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; font-size: .78em; font-weight: 600; vertical-align: middle; }
 #dlgTitle .ttlExtra .sw { margin: 0; }
 #dlgBody .dbPopLbl { font-weight: 700; color: var(--fg, inherit); margin-left: 14px; }
+/* Skynet's own "make a strong password" key, left of the eye in new-password boxes */
+.pwWrap.hasKey input { padding-right: 76px !important; }
+.pwWrap .pwKey { position: absolute; right: 38px; top: 50%; transform: translateY(-50%); border: none; background: none; padding: 4px 6px; color: var(--muted); line-height: 0; }
+.pwWrap .pwKey:hover { color: var(--accent); }
+.pwWrap .pwKey.hidden { display: none; }
+.pwWrap.hasKey.keyOff input { padding-right: 40px !important; }
+.pwGenNote { margin: 0; }
