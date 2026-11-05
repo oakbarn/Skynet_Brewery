@@ -160,13 +160,16 @@ FunctionEnd
 Function AskStartFresh
   StrCpy $Fresh 0
   MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Skynet Brewer is already installed in $INSTDIR.$\r$\n$\r$\nDelete all users and Schemas and Start Fresh?$\r$\n$\r$\nNo (recommended): keep everything and just update.$\r$\nYes: a warning comes next, so you can still back out." /SD IDNO IDNO keep
-  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (scripts)$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: back out. Nothing is deleted." /SD IDNO IDYES wipe
+  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (scripts)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: back out. Nothing is deleted." /SD IDNO IDYES wipe
     DetailPrint "Start Fresh: backed out. Nothing was deleted."
     Goto keep
   wipe:
     RMDir /r "$INSTDIR\config"
     RMDir /r "$INSTDIR\data"
     RMDir /r "$INSTDIR\scripts"
+    ; Skynet's own clean window (Rule 2.36) keeps a small browser profile of its own. Its saved user name and password
+    ; would be filled in on the new admin setup, so it goes too. It is made again, empty, the next time the window opens.
+    RMDir /r "$LOCALAPPDATA\SkynetBrewer\AppWindow"
     ${If} ${FileExists} "$INSTDIR\config\*.*"
     ${OrIf} ${FileExists} "$INSTDIR\data\*.*"
     ${OrIf} ${FileExists} "$INSTDIR\scripts\*.*"
