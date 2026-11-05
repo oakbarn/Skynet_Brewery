@@ -347,6 +347,7 @@ when the panel stops (☰ Menu > Close Skynet Brewer, Rule 2.25, or the black wi
 never stops the panel (Rule 2.25), and double-clicking **Skynet Brewer** again opens it again. The first time, sign in once in the
 clean window (it keeps its own sign-in). Phones, tablets and other computers open the panel in their browser as before.
 (thread "Open Skynet in its own clean window", Help 122)
+The clean window shows **the Skynet Brewer beer mug** (the same mug as the Desktop shortcut) on the taskbar, also when it is minimized, and in its title bar; the panel's Help window and the Sign in page show it too, and so do browser tabs. (Fritz, 2026-11-05, thread "Show a beer mug icon when minimized")
 
 ## 3. Names and file names
 
@@ -1541,3 +1542,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Rule 18.21: Database and .API is on the Overlay line as a ⬢ pop-up (no box) on the Pump's Add box and Properties (Fritz's screen 7). Help 115 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Changed Rule 6.14 (new Send to the database choice "At clock time" writes every day at a clock time; the At clock time box shows only for that choice; the Every choices no longer have a clock time, and an older "Every 1 day at 12 AM" becomes At clock time 12 AM). Help 98 updated; no new Help number. (thread "Add At clock time to Send to the database")
 - 2026-11-04: Added Rule 5.25 (TC Pipe Fittings is a Widget subclass: every elbow, tee, cross, U, reducer, check valve and End Cap is a Skynet TC Pipe Fittings Widget with an IP on each ferrule face; Skynet puts them in where pipes meet, a pipe drawn to the bend turns an elbow into a tee; added by hand from Elbows, Tees … and Add Widget > TC Pipe Fittings; fittings with probes stay Temperature Devices; no cut-off ends). New Cross; Elbow 45, Instrument Tee and the probe tees redrawn in the style of Fritz's 2026-11-04 Elbow and Tee; the cut-off 45 ends of Fitting_Elbow45, Skynet_TC15_45 and pipe_elbow45 fixed. Samples and default Schema changed. Help 124; next free Help number 125. (thread "Make Fritz's elbow and tee into SVG Widgets")
+- 2026-11-05: Rule 2.36: the clean window shows the Skynet Brewer beer mug on the taskbar (also when minimized); the panel, Sign in and Help pages all use it as their icon. Help 122 updated; no new Help number. (thread "Show a beer mug icon when minimized")
