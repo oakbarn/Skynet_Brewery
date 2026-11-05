@@ -36,7 +36,10 @@ main { padding: 10px 14px; }
 /* the Edit layout bar's three rows (Fritz, 2026-10-28): Devices and Widgets, then drawing and Tab tools, then hint and Save */
 #editBar .editRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1 1 100%; }
 #editBar .editGap { width: 4px; }
-#editBar .editRow:first-child { gap: 5px; }     /* row 1 is long: tighter, so Vessel stays on it on a wide screen (Fritz, 2026-11-03) */
+#editBar .editRow:first-child { gap: 3px; }     /* row 1 is long: tighter, so it all stays on the top line on a wide screen (Fritz, 2026-11-03 and 2026-11-05) */
+#editBar .editRow:first-child > button { padding: 5px 6px; }
+#editBar .editRow:first-child > select { padding: 4px 3px; }
+#editBar .editRow:first-child .plus { font-size: .85em; }
 #editBar #editHint { flex: 1 1 20em; }
 #editBar select { width: auto; max-width: 12em; flex: 0 0 auto; field-sizing: content; }     /* as wide as its name (Chrome, Edge), at most 12em */
 #editBar .plus { color: #d21; font-weight: bold; }
@@ -1002,6 +1005,7 @@ dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .fldPair > select:first-child { flex: 1; min-width: 0; }
 .fldPair .pairLbl { white-space: nowrap; font-size: .9em; opacity: .8; }
 .fldPair select.pinSel { flex: none; width: 110px; }
+.fldPair > input:not([type="checkbox"]) { flex: 1; min-width: 0; width: auto; }      /* two number or text boxes on one line (a PWM: Start value and Decimals) */
 /* the Graphic shown on a Device dialog with its Orientation (Rule 18.19) */
 .devPreviewWrap { display: flex; align-items: center; justify-content: flex-start; min-height: 60px; }
 .devPreview { position: relative; display: inline-block; line-height: 0; background: var(--panel2, transparent); border-radius: 6px; }
@@ -1042,3 +1046,6 @@ dialog :is(input, select, textarea):focus, dialog button:focus-visible { outline
 .pwWrap .pwKey.hidden { display: none; }
 .pwWrap.hasKey.keyOff input { padding-right: 40px !important; }
 .pwGenNote { margin: 0; }
+/* the Master Vessel Sizer (Vessel Rules, Fritz 2026-11-05): a ruler in its top left corner in Edit layout */
+.vMaster { position: absolute; left: 2px; top: 2px; font-size: 14px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: rgba(255,255,255,.85); pointer-events: none; display: none; }
+#ws.editing .vMaster { display: block; }

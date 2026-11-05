@@ -6,7 +6,7 @@ import { elementTopic } from '../public/helpmap.js';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 assert.match(app, /const isProbeDev = e => e\?\.type === 'temperature' && !e\.integratedIn && !e\.template && !e\.kind;/, 'every probe but one built into an Integrated Device');
-assert.match(app, /const isDrillDev = e => isPumpDev\(e\) \|\| isMbvDev\(e\) \|\| isProbeDev\(e\);/);
+assert.match(app, /const isDrillDev = e => isPumpDev\(e\) \|\| isMbvDev\(e\)[^\n]* \|\| isProbeDev\(e\)[^\n]*;/);
 const add = app.slice(app.indexOf('async function newDeviceDialog('), app.indexOf('// ---- Thermowell'));
 assert.match(add, /const port = pr \? probePort\(e\)/, 'the Port is on the Interface line');
 assert.match(add, /\.\.\.\(pr \? \[\.\.\.PROBE_GRAPHIC_FIELDS\(e, after\), \.\.\.PROBE_OWN\(e, after\)\] : \[\]\)/, 'Graphic, Orientation, its own set');
