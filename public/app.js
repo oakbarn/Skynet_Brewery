@@ -1473,7 +1473,7 @@ function fillEl(n, e0) {
       text = e.text ?? ''; break;
   }
   // outputs on while running above 0, timers while running, steppers while moving, flow meters while flowing, sound players while playing
-  if (STATE_PICS.has(e.type) && (e.imageOn || e.imageOff || v.imageon || v.imageoff)) img = (on ? (v.imageon || e.imageOn) : (v.imageoff || e.imageOff)) || pic;
+  if (STATE_PICS.has(e.type) && (e.imageOn || e.imageOff || v.imageon || v.imageoff)) img = (on ? (v.imageon || e.imageOn || (isPwmDev(e) ? v.imageoff || e.imageOff : '')) : (v.imageoff || e.imageOff)) || pic;     // a PWM / Analog out: one picture, on and off (Rule 18.25)
   if (isPropValve(e)) {                              // show percent open, and the open / closed picture
     const pct = propPct(e); on = pct > 0;
     text = `${Math.round(Math.max(0, Math.min(100, pct)))}%`;
@@ -3320,21 +3320,22 @@ async function newDeviceDialog(e, hint, what) {
   const pinPort = port[2] === 'pin', portF = [port[0], pinPort ? 'Available Ports' : port[1], pinPort ? 'pinsel' : port[2], ...port.slice(3)];
   const T = DEVICE_TIPS, after = { after: true };
   // the Pump's drill-down (Rules 18.13-18.21) and, the same without a Cover, the Motorized Ball Valve's (Fritz, 2026-11-05, Rule 18.23)
-  const dd = isDrillDev(e), mbv = isMbvDev(e);
+  const dd = isDrillDev(e), mbv = isMbvDev(e), pwm = isPwmDev(e);
   if (mbv && e.template) e._orient = orientPick(e);
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
     ['device', n() + 'Interface (board)', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + T.port : ''), ...(pinPort ? { with: portF } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
-    ...(codes.length > 1 && !(e.template && e.typeCode) && !dd ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
+    ...(codes.length > 1 && !(e.template && e.typeCode) && (!dd || pwm) ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after)] : []),
     ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
+    ...(pwm ? [...PWM_GRAPHIC_FIELDS(e, after), ...PWM_OVERLAY(e, after), ...PWM_OWN(e, after)] : []),        // PWM / Analog out (Rule 18.25)
     ...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
-    ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : 'Valve') }), false, false, { tip: T.type }]] : [])];
+    ...(dd && !pwm ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : 'Valve') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
@@ -3345,6 +3346,7 @@ async function newDeviceDialog(e, hint, what) {
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
   if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   if (isPumpDev(e)) work.cover = e.cover || 'None';
+  if (pwm) { delete work.tap; Object.assign(work, { initial: e.initial, precision: e.precision, signal: e.signal, units: e.units, rangeLow: e.rangeLow, rangeHigh: e.rangeHigh }); }
   if (mbv) Object.assign(work, { tapwater: !!e.tapwater, closeAll: e.closeAll ?? true, openAll: e.openAll ?? true, imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
@@ -3365,7 +3367,7 @@ async function newDeviceDialog(e, hint, what) {
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
-      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
+      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pwm ? `Add ${TYPE_TITLE[e.type]}${e.type === 'analogOut' && e.signal ? ' ' + e.signal : ''}` : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
       gate();
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
@@ -3433,8 +3435,8 @@ async function newDeviceDialog(e, hint, what) {
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
-        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? ['tap', 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
+          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (mbv && e.template) { e._orient = work._orient; skyOrientSwitch(e); delete e._orient; applyDeviceTemplate(e, devTemplate(e)); }     // the Orientation picks its Template; the fixed attributes stay the Template's (Rule 5.16)
         if (dd) { const d = { ...work }; dbFromWork(d); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; }
         if (+work.w > 0) e.w = +work.w;
@@ -4610,7 +4612,10 @@ function pumpDeviceFields(it, item) {
 // (Rule 18.22): Tap water (Rule 6.15), the Close all / Open all lists, and a User Defined valve's In and Out IP spots (Rule 5.22).
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 const isMbvDev = e => e?.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (e.template ? skyDev(e) && isMbvTpl(e.template) : true);
-const isDrillDev = e => isPumpDev(e) || isMbvDev(e);
+// PWM / Analog out (Fritz, 2026-11-05: "PWM Build Dialog", Rule 18.25): a PWM output or an Analog output (0-10 V, 4-20 mA) gets the
+// Pump's drill-down too. Not a Proportional Valve (its own dialog) nor a heating element's PWM (the Heating Element dialog).
+const isPwmDev = e => ['pwmOut', 'analogOut'].includes(e?.type) && !e.kind && !e.template && !e.integratedIn && !['propValve', 'element'].includes(e.subtype);
+const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e);
 // the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
 function autoLabel(type) {
   const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
@@ -4618,7 +4623,7 @@ function autoLabel(type) {
   return `${type}_${used.length ? Math.max(...used) + 1 : 1}`;
 }
 const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Defined Motorized Ball Valve';
-const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : mbvTitle(e);
+const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : isPwmDev(e) ? `${TYPE_TITLE[e.type]} Device Properties` : mbvTitle(e);
 const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']];
 const MBV_IP_POP = { title: 'In and Out IP spots', fields: IP_AT_FIELDS };
 // the Graphic, its Path (set on a Skynet valve, Rule 5.6; a User Defined valve's closed and open pictures) and Orientation
@@ -4658,6 +4663,34 @@ function mbvDeviceFields(it, item) {
     ...MBV_GRAPHIC_FIELDS(it), ...MBV_TOGGLE_OVERLAY(it), ...MBV_OWN(it),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
+}
+
+// ---- PWM / Analog out Device Properties (Fritz, 2026-11-05: "PWM Build Dialog", Rule 18.25): the Pump's drill-down (Rules 18.12-18.21).
+// No Cover (pumps only, Rule 7.13), no Orientation (no IPs) and no Toggle (a tap opens the box that sets its %). Its Graphic is
+// one picture, the same when on and off, and the Overlay shows it is running (above 0 %). Its own set (Rule 18.22): a PWM output's
+// Start value and Decimals; an Analog output's Signal and Units, its Low and High values, and Decimals. Two to a line, as the Pump's.
+const PWM_SIGNALS = ['0-10V', '4-20mA', '0-5V'];
+const PWM_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.pGraphic, ...x }],
+  ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.pPath, ...x }]];
+const PWM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.pOverlay, dbPop: true, ...x }]];
+const PWM_OWN = (it, x = {}) => it.type === 'analogOut'
+  ? [['signal', 'Signal', 'sel', PWM_SIGNALS, false, false, { tip: DEVICE_TIPS.pSignal, with: ['units', 'Units', 'text', null, false, false, { tip: DEVICE_TIPS.pUnits }], ...x }],
+    ['rangeLow', 'Low value', 'num', null, false, false, { tip: DEVICE_TIPS.pLow, with: ['rangeHigh', 'High value', 'num', null, false, false, { tip: DEVICE_TIPS.pHigh }], ...x }],
+    ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec, ...x }]]
+  : [['initial', 'Start value (%)', 'num', null, false, false, { tip: DEVICE_TIPS.pStart, with: ['precision', 'Decimals', 'num', null, false, false, { tip: DEVICE_TIPS.pDec }], ...x }]];
+const PWM_TYPE = it => ['typeCode', 'Device Type', 'sel', typeCodes(it).map(([c, l]) => [c, `${shownType({ ...it, typeCode: c })}   ${l}`]), false, false, { tip: DEVICE_TIPS.type }];
+function pwmDeviceFields(it, item) {
+  const T = DEVICE_TIPS;
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'pwm'] }],
+    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
+    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
+    ...PWM_GRAPHIC_FIELDS(it), ...PWM_OVERLAY(it), ...PWM_OWN(it),
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }],
+    PWM_TYPE(it)];
 }
 
 // a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
@@ -4816,6 +4849,16 @@ const DEVICE_TIPS = {
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
   vTapEnd: 'Which end the tap water comes in at; it flows out of the other end.',
+  // PWM / Analog out (Fritz, 2026-11-05, Rule 18.25)
+  pGraphic: 'The picture of this output as it will show on the Tab. With no picture it shows its value (for example 45 %).',
+  pPath: 'The picture file (optional). It is the same picture when on and off; the Overlay shows it is running.',
+  pOverlay: 'Drawn on top of the picture while the output is above 0 %: the steady red and yellow lightning bolt to start (Rule 7.15); None for no overlay.',
+  pStart: 'The output in % when the Brain starts (0 = off).',
+  pDec: 'How many decimals its value shows.',
+  pSignal: 'What the module on this pin puts out: 0-10 V, 4-20 mA or 0-5 V.',
+  pUnits: 'The units of its value (%, Hz, psi ...).',
+  pLow: 'Its value at the lowest signal (0 V or 4 mA).',
+  pHigh: 'Its value at the highest signal (10 V, 5 V or 20 mA).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && kind === 'text' && obj._ref && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
@@ -5689,7 +5732,8 @@ async function editItem(kind, id) {
     if (isDataW(it)) return [...dataWidgetFields(it), ...dbFields(it)];       // Value, Time and DateTime Widget Properties (Rule 1.23)       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
-    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Motorized Ball Valve: the same drill-down (Rule 18.23)
+    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
+    if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],

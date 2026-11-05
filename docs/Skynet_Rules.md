@@ -1200,7 +1200,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **134**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **138**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1383,7 +1383,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12) and the **Motorized Ball Valve** (Rule 18.23).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **PWM / Analog out** (Rule 18.25).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1564,6 +1564,21 @@ Valve drill-down dialog", Help 128):
 - Gone from these dialogs, as for the Pump (what a valve already has set is kept): Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind,
   Picture ⬢, Background picture ⬢, Text when on / off, Flip Horizontal / Vertical (the Orientation does it), Valve type and Service.
   The Motorized Butterfly Valve and the Proportional Valves keep their present dialogs until Fritz says (Rule 18.10).
+
+18.25 **Adding a PWM or Analog output: the Pump's drill-down** (Fritz, 2026-11-05: "PWM Build Dialog", thread "Build PWM Add dialog
+like Pump", Help 136): a **PWM output** and an **Analog output** (0-10 V, 4-20 mA), from the PWM / Analog out list or the Pump speed rows,
+get the Pump's Add box and Properties (Rules 4.2, 18.13, 18.15-18.17, 18.20, 18.21):
+1. The Add box is titled **Add PWM Output** or **Add Analog Output 0-10V**: 1 Label ⬢ and Label Visible, 2 Interface with Available
+   Ports (only free PWM pins), the **Device Type** (PWM or AO to start; P_Pump, P_Fan ... can be picked, since this kind has more than
+   one, Rule 4.2), 3 Tab; then the Name, the **Graphic**, its **Path** (one picture, the same on and off; optional, with none it shows
+   its value), **Overlay** with **Database and .API ⬢** on its line (drawn while it is above 0 %), its own set, X, Y, Width, Height.
+   Enter goes Label, Interface, Ports, Device Type, Tab, ➕ Add Device.
+2. Its own set (Rule 18.22), two to a line as the Pump's: a PWM output **Start value (%)** with **Decimals**; an Analog output
+   **Signal** with **Units**, **Low value** with **High value**, then **Decimals**.
+3. **No Cover** (pumps only, Rule 7.13), **no Orientation** (it has no IPs) and **no Toggle** (a tap opens the box that sets its %).
+4. Its Properties are the same, with the Interface and Port greyed out for good (Rule 18.13) and the Device Type last.
+5. The Label is typed (no Type_n fill-in until Fritz says, Rule 18.15).
+A Proportional Valve and a heating element's PWM keep their own dialogs until Fritz says (Rule 18.10).
 
 ---
 
@@ -1816,3 +1831,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 6.14: the Send to the database choice Once is replaced by **In a Group** (Database Groups with a hidden key and a Group Name, `send_db_group Group_Name` sends the Group each time, ✏ Change name updates every Process; old Once items go In the Group named Once). `send_db Name` sends even when Off (no `send_Now`). Help 98 and 05 updated; no new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 1.23 (Value, Time and DateTime Widgets); Rule 6.14 gets the Send to the database choice **When Clicked**. Three Vessel sample: the Reporting readings are Value Widgets (w_Strike_Volume ...) sent When Clicked; Notes stays a gGlobal for now. Rule 1.20 confirmed unchanged. Help 134; next free Help number 135. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 8.4 (Password key): Skynet's own key button in every new-password box makes a strong password that follows the Password rules; Edge's own key went away when the clean window stopped syncing (Rule 9.8, PR #205). Help 10 updated; no new Help number. (thread "Restore generate password Key on fresh install")
+- 2026-11-05: Added Rule 18.25 (Fritz: "PWM Build Dialog"): the PWM output and Analog output Add box and Properties follow the Pump's drill-down; no Cover, Orientation or Toggle; own set Start value / Decimals or Signal / Units / Low / High / Decimals; Label typed (auto fill asked). Help 136; next free Help number 137. (thread "Build PWM Add dialog like Pump")
