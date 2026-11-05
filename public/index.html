@@ -65,6 +65,7 @@
       <select class="typePick" data-dev="probe" data-head="Probe" title="Temperature probes: a shortcut, the same as Select Device Type > Probe, then Add Device"></select>
       <select class="typePick" data-dev="heat" data-head="Heating Element" title="Heating elements: a shortcut, the same as Select Device Type > Heating Element, then Add Device"></select>
       <select class="typePick" data-dev="pwm" data-head="PWM" title="PWM and analog outputs: a shortcut, the same as Select Device Type > PWM / Analog out, then Add Device"></select>
+      <select id="vesselPick" class="typePick" title="Add a Vessel (Kettle, HLT, MLT ...): a Widget you add everything to, or a ready-made Integrated one"></select>
       <select id="cloneDev" class="typePick" title="Show a Device that is on another Tab on this Tab too. The Clone is the same Device: turning it on turns the parent and every Clone on."></select>
       <span class="editGap"></span>
       <select id="wgtKind" title="Select Widget Type: the major kinds of Widget (app only, no board pin). Add Widget then lists only that kind"></select>
@@ -73,15 +74,17 @@
       <button id="addText" title="A Text on the 🔨 Build Tab">Text <span class="plus">➕</span></button>
       <button id="addManualValve" title="Manual valve Widget: no board pin, turned by hand. Tap it on the Tab to show open or closed">Manual Valve <span class="plus">➕</span></button>
       <button id="addOverride" title="An Override button on the 🔨 Build Tab: one press and running Processes move on (one per Tab)">Override <span class="plus">➕</span></button>
-      <span class="spacer"></span>
-      <select id="addVesselType" class="typePick" title="Equipment Widgets: chillers, coils, trub filter, RIMS tube, pipe fittings"></select>
-      <select id="vesselPick" class="typePick" title="Add a Vessel (Kettle, HLT, MLT ...): a Widget you add everything to, or a ready-made Integrated one"></select>
+      <select id="addBoolean" class="typePick" title="Boolean ➕ (Rule 4.5): a list of the ON / OFF Semi_Widgets_Devices first (Switch, Push Button, Pulse Button, LED, Rule 1.20); pick one and it is made on the 🔨 Build Tab"></select>
+      <button id="addValueW" title="A Value Widget on the 🔨 Build Tab: shows a number on a Tab, a tap sets it (Rule 1.23)">Value <span class="plus">➕</span></button>
+      <button id="addTimeW" title="A Time Widget on the 🔨 Build Tab: shows a time (hh:mm:ss), a tap sets it (Rule 1.23)">Time <span class="plus">➕</span></button>
+      <button id="addDateTimeW" title="A DateTime Widget on the 🔨 Build Tab: shows a date and time, a tap sets it (Rule 1.23)">DateTime <span class="plus">➕</span></button>
       </div>
       <div class="editRow">
       <button id="drawPipe" title="Click points on the tab. Double-click or Enter to finish, Esc to cancel.">Draw pipe</button>
       <button id="drawHose" title="A hose bends: click points for it to curve through. Double-click or Enter to finish, Esc to cancel. Loose ends get a coupling (an IP).">Draw hose</button>
       <button id="drawQdHose" title="A Quick Disconnect hose (Rule 5.28): it hangs from a pump IP and its other end can be moved at any time, even outside Edit layout (right mouse button, or a finger), onto an IP, a Quick Disconnect or the top third of a vessel.">Draw QD hose</button>
       <select id="addIpType" class="typePick" title="Fittings and IPs: an IP point, a tee, elbows, a cross, a coupling or a cap. Pick one and it is made on the 🔨 Build Tab"></select>
+      <select id="addVesselType" class="typePick" title="Equipment Widgets: chillers, coils, trub filter, RIMS tube, pipe fittings"></select>
       <button id="finishPipe" class="primary hidden">Finish pipe</button>
       <span id="turnBar" class="turnBar hidden" title="Turn or flip the picked fitting or vessel. Its IPs and what is joined to it follow.">
         <button id="turnFlipH" class="flip" title="Flip Horizontal (mirror left and right)">⇆ Flip H</button>

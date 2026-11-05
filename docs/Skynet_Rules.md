@@ -162,6 +162,8 @@ the position; a locked item can still be double-clicked and changed, except whil
 with it (Rule 2.12). A Clone has them all, but most are its parent's and not editable (Rule 4.4). The full list, who lacks
 which, and the plan to bring the panel up to it: [docs/Universal_Properties.md](Universal_Properties.md). (thread "Set
 universal properties standard", Help 114)
+*Exception, Vessels* (Fritz, 2026-11-05: "Again Exception for Vessel Devices or Vessel Widgets"): a Vessel's `.width` and
+`.height` work only on the Master Vessel Sizer (Rule 19.3).
 
 1.22 **gGlobals are non-volatile** (Fritz, 2026-11-03). Besides having a global scope (Rule 1.19), **every gGlobal keeps its
 value**, unlike a normal Process variable, which is cleared every time a Process starts. A gGlobal is **never cleared when a
@@ -266,6 +268,8 @@ eight grab points: the four corners and the middle of each side. The picked item
 the others only the bottom right corner. A small box shows X, Y, Width and Height while moving or
 resizing. Locked items have none (Rule 2.12). Works on the Build Tab and every Tab. (2026-10-27,
 thread "Improve the Build Tab add and resize tools", Help 75)
+*Exception, Vessels* (Fritz, 2026-11-05): Vessel Widgets and Vessel Devices follow the Vessel Rules (Rule 19.3): only a Tab's
+Master Vessel Sizer has grab points.
 
 2.21 **🗂 Schema is at the top of the ☰ Menu** (under Edit layout), one click to the Schema Menu
 tab. (2026-10-28, thread "Add sample Schemas to the Schema list")
@@ -491,6 +495,15 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   PWM / Analog out, Inputs, Probe, Sensors, Motors, Weight) and **Add Device** (only that kind's Devices;
   a Pump, Valve or on/off heating element is in On/Off too). Then the shortcuts **Pumps**, **Valves**,
   **Probe**, **Heating Element** and **PWM**: one click shows only that kind's list, the same as picking
+  the kind and then Add Device. Then **Vessel** and **⧉ Clone Device** (a list of the Devices on other Tabs) (Fritz,
+  2026-11-05: "place vessel before clone").
+- **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕**, **Text ➕**, **Manual Valve ➕**,
+  **Override ➕**, **Boolean ➕** (a list of the types first, like Probe: Switch, Push Button, Pulse Button, LED, the
+  ON / OFF Semi_Widgets_Devices of Rule 1.20), **Value ➕**, **Time ➕**, **DateTime ➕** (one click each, Rule 1.23)
+  (Fritz, 2026-11-05). Row 1 is made tight so it all fits on the top line in a full HD (1920 wide) window; a narrower
+  window wraps the last ones.
+- **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), **Add equipment ➕**
+  (moved from row 1, Fritz 2026-11-05), the turn buttons, Lock, Lock
   the kind and then Add Device. Then **⧉ Clone Device** (a list of the Devices on other Tabs).
 - **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕** (a Picture Widget, Rule 18.27), **Text ➕**, **Manual Valve ➕**,
   **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
@@ -499,7 +512,8 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Save Build.
 - **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
   still shows on row 3.
-*Replaced:* the ➕ Add box of PR #117 (2026-10-27).
+*Replaced:* the ➕ Add box of PR #117 (2026-10-27). *Replaced (2026-11-05):* row 1 Widgets ended with **Add equipment ➕** and
+**Vessel** at the far right (2026-11-03).
 
 ## 5. Templates and Integrated items
 
@@ -843,7 +857,9 @@ Template"; thread "Build the Vessel Widget class", Help 133).
   on this Template.
 - **Place** (a switch for each spot, in Vessel Widget Properties): on = it is on the vessel and works (an IP joins pipes, hoses and
   fittings; the Probe and Element show their pictures, and the Element glows while its heater is on). Off = it is not there: nothing
-  shows on a Tab and nothing (a pipe, a Process) can use or change it; only in Edit layout a faint mark shows where it would go.
+  shows on a Tab and nothing (a pipe, a Process) can use or change it. *Changed (Fritz, 2026-11-05, Rule 19.4):* a Not Placed spot
+  is hidden even on the Build Tab and in Edit layout; **👁 Show All** in the Vessel's Properties shows it.
+  *Replaced:* "only in Edit layout a faint mark shows where it would go."
 - **The spots are set by the Template and locked:** a user can't move an IP, the Probe or the Element Port.
 - **IPs on a vessel** (Fritz, 2026-11-05): an IP is a TC, NPT or BSP outlet or inlet; the type does not matter, it is a place to
   connect another Device or Widget with its own IP (a Pipe, Hose, Fitting or anything with an IP).
@@ -1200,7 +1216,8 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **134**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **136**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **138**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1383,6 +1400,9 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Heating Element** (Rule 18.24).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **PWM / Analog out** (Rule 18.25).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Temperature Probes** (Rule 18.26).
 [docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Picture Widget** (Rule 18.27).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
@@ -1482,7 +1502,7 @@ nothing and goes back to the calling dialog as it was. The first one built this 
    filled in (Label Visible off does not skip it). The Add Device box has it now.
    *Changed (Fritz, 2026-11-05):* **A Device or Widget must have a Label, and a Label can't be blank.** Some Devices and Widgets
    have their Label **filled in for you** with the pattern **Type_n**, n the next number not used yet: a **Motorized Ball Valve**
-   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"). It can be changed like any Label. When the
+   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** as **tP_1** (Rule 18.26). It can be changed like any Label. When the
    Label is filled in (by you or by the program) on a Build dialog, **the focus jumps to the next field** in the Enter order (the
    next one still empty). **Every Label is editable by the user**, filled in for you or not. Which Devices and Widgets fill in
    their Label is decided **dialog by dialog: Fritz says so when each dialog is built** (Fritz, 2026-11-05). Every other dialog that
@@ -1565,6 +1585,63 @@ Valve drill-down dialog", Help 128):
   Picture ⬢, Background picture ⬢, Text when on / off, Flip Horizontal / Vertical (the Orientation does it), Valve type and Service.
   The Motorized Butterfly Valve and the Proportional Valves keep their present dialogs until Fritz says (Rule 18.10).
 
+18.24 **Adding a Heating Element: the Pump's drill-down without a Cover** (Fritz, 2026-11-05: "Same with Heating Element but
+instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build", thread "Build Heating Element Add dialogs
+like Pump", Help 137):
+1. **Heating Element (or On/Off) > Heating element, on / off (relay, SSR or contactor)**, then 2. **Pick the heating element**, each
+   with its picture: **Skynet Heating Element** (the Skynet element drawing, its Path set, Rule 5.6) or **User Defined Heating
+   Element** (its own Path (off) and Path (on)).
+3. The Add box is titled with the element and works as the Pump's and the Motorized Ball Valve's (Rules 4.2, 18.13, 18.15-18.17,
+   18.20, 18.23): 1 Label ⬢ and Label Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**,
+   **Orientation** (Right / Left) with **Toggle** on its line, **Overlay** (None to start: the on picture glows) with **Database and
+   .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**DO**). **No Cover.** It still asks before it
+   turns on (Rule 2.33). Label auto-fill: *waiting on Fritz* (Rule 18.15); for now the Label is typed, as a Pump's.
+4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover; the Interface and Port are greyed out for good (Rule 18.13).
+5. **Vessel Device Template: Choose, then Build.** In the Heating Element list it takes the place of *Electric kettle, basic*
+   (which stays in the full Add Device list, Devices: Skynet). **Choose** a Vessel Template that has an Element Port (the Vessel
+   Widget, Rule 5.31, first), then the Heating Element is added as above; **Build** puts the Heating Element on the picked Tab
+   (Rule 4.1) and a copy of the Vessel Template on the 🔨 Build Tab with its **Element Placed and linked** to the new Heating
+   Element. The Vessel keeps no Devices of its own (Rule 5.7): the Heating Element is its own Device, which the Element spot links
+   (Rule 5.31).
+- Heating elements built into a RIMS tube or an Integrated kettle, and the PID, Hysteresis, Deadband and Duty Cycle heaters, keep
+  their present dialogs until Fritz says (Rule 18.10).
+18.25 **Adding a PWM or Analog output: the Pump's drill-down** (Fritz, 2026-11-05: "PWM Build Dialog", thread "Build PWM Add dialog
+like Pump", Help 136): a **PWM output** and an **Analog output** (0-10 V, 4-20 mA), from the PWM / Analog out list or the Pump speed rows,
+get the Pump's Add box and Properties (Rules 4.2, 18.13, 18.15-18.17, 18.20, 18.21):
+1. The Add box is titled **Add PWM Output** or **Add Analog Output 0-10V**: 1 Label ⬢ and Label Visible, 2 Interface with Available
+   Ports (only free PWM pins), the **Device Type** (PWM or AO to start; P_Pump, P_Fan ... can be picked, since this kind has more than
+   one, Rule 4.2), 3 Tab; then the Name, the **Graphic**, its **Path** (one picture, the same on and off; optional, with none it shows
+   its value), **Overlay** with **Database and .API ⬢** on its line (drawn while it is above 0 %), its own set, X, Y, Width, Height.
+   Enter goes Label, Interface, Ports, Device Type, Tab, ➕ Add Device.
+2. Its own set (Rule 18.22), two to a line as the Pump's: a PWM output **Start value (%)** with **Decimals**; an Analog output
+   **Signal** with **Units**, **Low value** with **High value**, then **Decimals**.
+3. **No Cover** (pumps only, Rule 7.13), **no Orientation** (it has no IPs) and **no Toggle** (a tap opens the box that sets its %).
+4. Its Properties are the same, with the Interface and Port greyed out for good (Rule 18.13) and the Device Type last.
+5. The Label is typed (no Type_n fill-in until Fritz says, Rule 18.15).
+A Proportional Valve and a heating element's PWM keep their own dialogs until Fritz says (Rule 18.10).
+18.26 **Adding a Temperature Probe: the Pump's drill-down without a Cover, Toggle or Overlay** (Fritz, 2026-11-05: "Build the Probe
+Add Dialog Boxes using the Pump Drill down as the Template", thread "Build Probe Add dialogs like Pump", Help 138). For every
+Temperature Probe Device: a plain probe, a **Thermowell** (Short, Medium, Long) and a **tee with a Temperature Probe** (Instrument Tee,
+Long Tee, Rule 5.30). A probe built into a Skynet_Integrated_Device (RIMS tube, Integrated Electric Kettle) keeps its present dialog
+1. **The kind of probe is picked first, as before** (Fritz, 2026-11-05: "Choosing the Probe Type First like it is is fine"): the
+   list row of a plain probe (DS18B20, PT100 ...), or step 2a after picking a Thermowell or probe tee.
+2. The Add box is titled with the probe (e.g. **Short Thermowell: DS18B20**) and works as the Pump's (Rules 4.2, 18.13, 18.15-18.17,
+   18.20): 1 Label ⬢ and Label Visible, 2 Interface with its Port on the same line (**Probe #**, the OneWire probe number of a
+   DS18B20, or **Available Ports**: the chip-select pin of an RTD or thermocouple board, the analog pin of an NTC, LM35 or TMP36),
+   3 Tab; then the Name, and for a Thermowell or probe tee the **Graphic**, its **Path** (greyed out, the Skynet drawing, Rule 5.6) and
+   **Orientation** (Rotate 0, 90, 180, 270) with **Flip** on its line; then the probe's own set (Rule 18.22): **Probe type** greyed
+   out with a ⬢ for its settings (wires, reference resistor, thermocouple type, thermistor values, board voltage, Simulator
+   settings), **Units** with **Decimals** on one line, **Calibration offset** with **Database and .API ⬢** on its line; X, Y, Width,
+   Height, and the Device Type greyed out last (e.g. **TEMP: 1W**). Enter goes Label, Interface, Port, Tab, Orientation,
+   ➕ Add Device. **No Cover, Toggle or Overlay** (a probe is an input).
+3. Its Label starts filled in as **tP_n** (the next number), so the focus starts on the Interface (Rule 18.15). *(Built as recommended;
+   Fritz's pick on the decision card is pending: tP_n, Probe_n or no auto fill.)*
+4. Its Properties are the Pump's screen 9 (Rule 18.21) without Cover, Toggle and Overlay, plus the same own set and the **Reading
+   now**. The Interface and Port are greyed out for good once added (Rule 18.13); so is the **Probe type**: to use another kind of
+   probe, delete it and add it again.
+- Gone from these dialogs (what a probe already has set is kept): the Probe type dropdown, Device (empty = any), the separate Flip
+  Horizontal / Flip Vertical / Rotate rows (now Orientation and Flip), the Thermowell and probe tee notes (now the Graphic's tip).
+
 18.27 **Adding a Picture Widget: the Pump's drill-down made to fit a Widget** (Fritz, 2026-11-05: "build a Picture Widget Build, I
 will look at what you did and modify, but follow the look and sequences of the Pump drill Down", thread "Build Picture Widget dialog
 like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made on the 🔨 Build Tab first (Rule 4.1), so:
@@ -1586,6 +1663,37 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
   Path 1-3), Hide value, Look, Digits, When tapped, Tap target and Ask before changing. Database and .API are not offered: a
   picture has no value (Rule 6.14).
 ---
+
+## 19. Vessel Rules
+
+Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
+Devices or Vessel Widgets." Where a Vessel Rule and a general Rule differ, the Vessel Rule wins for **Vessel Widgets and Vessel
+Devices only**; everything else keeps the general Rules (2.20, 1.21, 5.31). (thread "Size Vessels by gallons with a Master Sizer",
+Help 135)
+
+19.1 **Gallons.** Every Vessel has a **Gallons** field (Liters when its Units are Metric). **A Vessel Template starts at 10
+gallons**, Skynet and User Templates alike, and it is an editable field. **Gallons is one of the first fields of a new build from a
+Template** (right after the Label in the Properties that open on the Build Tab).
+
+19.2 **Size follows the Method: Proportional or Diameter.**
+- **Proportional:** Fritz's plain vessel is the **One Gallon start: 197 x 237 pixels** (Fritz, 2026-11-05). Its Width to Height is
+  the shape, and the Gallons field sizes it in proportion to that 1 gallon start.
+- **Diameter:** a **Diameter** and a **Height** field (inches; cm for Metric). They give the shape as if the vessel were 1 gallon;
+  then the Gallons size it.
+- **Size follows volume:** twice the gallons is the cube root of 2 (about 1.26) times as wide and as tall. 10 gallons is 424 x 511.
+  (Fritz, 2026-11-05: "I think the way you have done it will work.")
+
+19.3 **The Master Vessel Sizer** is a Tab attribute (Tab settings). Any one Vessel on the Tab can be assigned. **Only the Master's
+size fields are active**, in a Process or on the screen (grab points, Width, Height); it is the only one that can be resized, and
+**every Vessel on that Tab follows** at the same scale. Changing the Master's own Gallons resizes only the Master; another Vessel's
+Gallons or Method resizes only that Vessel, at the Master's scale. **No Master Vessel Sizer picked: no Vessel can be resized**
+(a new build is still drawn at its Gallons). A resized Vessel keeps the middle of its bottom where it was; its IPs, fittings and
+End Caps go with it (pipes per Rule 5.19). The Master shows 📏 in Edit layout.
+
+19.4 **Not Placed is hidden, even on a Build screen.** A spot that is Not Placed (Rule 5.31) is hidden on every Tab, the Build Tab
+and Edit layout included, and its slider is hidden in the Vessel's Properties. A **👁 Show All** button in the Build or Edit dialog
+(Vessel Widget Properties) shows the hidden items (their sliders, and faint marks on the vessel) until it is pressed again (🙈 Hide
+Not Placed) or the dialog closes.
 
 ## Open questions (not Rules yet)
 
@@ -1836,4 +1944,9 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
 - 2026-11-05: Rule 6.14: the Send to the database choice Once is replaced by **In a Group** (Database Groups with a hidden key and a Group Name, `send_db_group Group_Name` sends the Group each time, ✏ Change name updates every Process; old Once items go In the Group named Once). `send_db Name` sends even when Off (no `send_Now`). Help 98 and 05 updated; no new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 1.23 (Value, Time and DateTime Widgets); Rule 6.14 gets the Send to the database choice **When Clicked**. Three Vessel sample: the Reporting readings are Value Widgets (w_Strike_Volume ...) sent When Clicked; Notes stays a gGlobal for now. Rule 1.20 confirmed unchanged. Help 134; next free Help number 135. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 8.4 (Password key): Skynet's own key button in every new-password box makes a strong password that follows the Password rules; Edge's own key went away when the clean window stopped syncing (Rule 9.8, PR #205). Help 10 updated; no new Help number. (thread "Restore generate password Key on fresh install")
+- 2026-11-05: Added section 19, the **Vessel Rules** (Fritz: "Vessels will have their own Rules"; an exception to Rules 2.20, 1.21 and 5.31 for Vessel Widgets and Vessel Devices only): 19.1 Gallons (10 to start on every vessel Template), 19.2 Proportional (1 gallon = Fritz's plain vessel, 197 x 237) or Diameter, size follows volume, 19.3 the Tab's Master Vessel Sizer (only it resizes; no Master, no resizing), 19.4 Not Placed hidden even on the Build Tab, 👁 Show All. Help 135; next free Help number 136. (thread "Size Vessels by gallons with a Master Sizer")
+- 2026-11-05: Added Rule 18.24 (Adding a Heating Element: the Pump's drill-down without a Cover; in the Heating Element list, Vessel Device Template, Choose then Build, takes the place of Electric kettle, basic). (thread "Build Heating Element Add dialogs like Pump", Help 137)
+- 2026-11-05: Added Rule 18.25 (Fritz: "PWM Build Dialog"): the PWM output and Analog output Add box and Properties follow the Pump's drill-down; no Cover, Orientation or Toggle; own set Start value / Decimals or Signal / Units / Low / High / Decimals; Label typed (auto fill asked). Help 136; next free Help number 137. (thread "Build PWM Add dialog like Pump")
+- 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")
+- 2026-11-05: New Rule 18.26: adding a Temperature Probe (plain, Thermowell, probe tee) uses the Pump's drill-down without a Cover, Toggle or Overlay; the kind of probe is still picked first (Fritz); Orientation with Flip, Probe type ⬢, Units with Decimals, Calibration offset with Database and .API ⬢; Label auto fill tP_n (Fritz's pick pending). Rule 18.15 lists it. Help 138; next free Help number 139. (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Added Rule 18.27 (Adding a Picture Widget: the Pump's drill-down made to fit a Widget: 1 Label, 2 Picture, 3 Tab = the Build Tab, then the Name, Graphic, Turns on with + Toggle, Overlay, Text on picture, X, Y, Width, Height, Widget Type; Picture ➕ now makes a Picture Widget). Rule 4.5 updated. Help 74 updated. (thread "Build Picture Widget dialog like Pump")
