@@ -51,20 +51,22 @@ function setMode(m) {
 }
 
 // Admin setup (a new install or the installer's Start Fresh, Rule 9.8) starts with empty boxes. The panel itself keeps no
-// old names there; a browser that saved a password for this address (Chrome, Edge, Safari) would fill in the old user name
-// and password, so the boxes are marked as a new account and anything the browser fills in during the first seconds is
-// cleared. What the user types is left alone.
+// old names there; a browser that saved a password for this address (Chrome, Edge, Safari), or that syncs saved passwords
+// in from a Microsoft or Google account a while later, would fill in the old user name and password. So the boxes are
+// marked as a new account, and for as long as setup is open any box the person has not clicked, typed or pasted in is kept
+// empty. A browser may hide a filled-in password from the page, so an untouched box is emptied whatever it shows.
+let freshTimer = null;
 function freshSetupBoxes() {
   const name = $('#lgName'), pass = $('#lgPass'), pass2 = $('#lgPass2');
   name.setAttribute('autocomplete', 'off'); name.name = 'new-admin-name';
   pass.setAttribute('autocomplete', 'new-password'); pass.name = 'new-admin-password';
   pass2.setAttribute('autocomplete', 'new-password');
-  const typed = new Set();
-  for (const i of [name, pass, pass2]) for (const ev of ['keydown', 'paste']) i.addEventListener(ev, () => typed.add(i));
-  // a browser may hide a filled-in password from the page until it is clicked, so every untouched box is emptied
-  const clear = () => { for (const i of [name, pass, pass2]) if (!typed.has(i)) i.value = ''; };
+  const touched = new Set();
+  for (const i of [name, pass, pass2]) for (const ev of ['pointerdown', 'keydown', 'paste']) i.addEventListener(ev, () => touched.add(i));
+  const clear = () => { for (const i of [name, pass, pass2]) if (!touched.has(i)) i.value = ''; };
   clear();
-  for (const ms of [50, 250, 600, 1200, 2500]) setTimeout(() => { if (mode === 'setup') clear(); }, ms);
+  clearInterval(freshTimer);
+  freshTimer = setInterval(() => { if (mode !== 'setup' || touched.size === 3) clearInterval(freshTimer); else clear(); }, 200);
 }
 
 function showCode(code, name, isNew) {
