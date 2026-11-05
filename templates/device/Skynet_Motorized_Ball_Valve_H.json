@@ -13,6 +13,6 @@
   "userFields": ["name", "label", "hideName", "workspace", "x", "y", "w", "h", "locked", "visibility", "hidden", "fontSize",
     "foreColor", "backColor", "align", "wrap", "nameFontFamily", "nameFontSize", "nameColor", "nameBg", "valueColor", "valueBg", "nameFont", "valueFont", "nameAlign", "valueAlign", "border",
     "typeCode", "device", "channel", "activeLow", "oneShot", "oneShotDirection",
-    "orientation", "flipH", "flipV", "tapwater", "tapSource", "showOnOffText", "onText", "offText"],
+    "orientation", "flipH", "flipV", "tapwater", "tapSource", "showOnOffText", "onText", "offText", "tap", "imageOverlay"],
   "notes": "A Skynet Template (Rule 5.17). Room Temperature Liquid. A High Temperature valve is its own Skynet Template."
 }

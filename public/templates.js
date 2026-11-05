@@ -163,6 +163,9 @@ export const isUserBundledVessel = (t, all) => t?.cls === 'user' && !!vesselBase
 // Fixed always, even when a Template doesn't list them: the pictures, Kind, Valve type, Service, Look and tap behaviour.
 export const DEVICE_FIXED = ['type', 'subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'imageOverlay', 'background', 'backpath', 'backpath_2', 'backpath_3',
   'look', 'digits', 'tap', 'tapTarget', 'confirm', 'hideValue', 'ipIn', 'ipOut'];
+// fixed unless a Template lists them in its userFields: only the Skynet Motorized Ball Valve does (Fritz, 2026-11-05: "Toggles and
+// Overlays should work normally", an exception to Rule 5.18 by Rule 18.23)
+export const DEVICE_FREEABLE = ['tap', 'imageOverlay'];
 const KEY_RE = /^\w{1,40}$/;
 const jsonSafe = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
 export function cleanDevice(b = {}) {
@@ -174,7 +177,7 @@ export function cleanDevice(b = {}) {
   const pics = {};
   for (const o of ['h', 'v']) { const p = b.pics?.[o]; if (Array.isArray(p) && p.length === 2) pics[o] = p.map(x => text(x, 300)); }
   if (Object.keys(pics).length) t.pics = pics;
-  if (Array.isArray(b.userFields)) t.userFields = [...new Set(b.userFields.filter(k => typeof k === 'string' && KEY_RE.test(k) && !DEVICE_FIXED.includes(k)))];
+  if (Array.isArray(b.userFields)) t.userFields = [...new Set(b.userFields.filter(k => typeof k === 'string' && KEY_RE.test(k) && (!DEVICE_FIXED.includes(k) || DEVICE_FREEABLE.includes(k))))];
   for (const k of Object.keys(t)) if (t[k] === undefined) delete t[k];
   return t;
 }

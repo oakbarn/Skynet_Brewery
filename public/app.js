@@ -4064,7 +4064,7 @@ function pumpDeviceFields(it, item) {
 // ---- Motorized Ball Valve Device Properties (Fritz, 2026-11-05: "Create a Motorized Ball Valve Add Dialog using the Pump Drill Down
 // Format. Valves do not have covers but every thing else the same.", Rule 18.23). The Skynet Motorized Ball Valve and the User
 // Defined Motorized Ball Valve get the Pump's Add box and Properties (Rules 18.13-18.21) without a Cover. A Skynet one's Toggle and
-// Overlay are set by its Template (Rules 5.16 and 5.18), so they are shown greyed out. Besides those, a valve keeps its own set
+// Overlay can be changed too (Fritz, 2026-11-05: an exception to Rule 5.18 for this valve). Besides those, a valve keeps its own set
 // (Rule 18.22): Tap water (Rule 6.15), the Close all / Open all lists, and a User Defined valve's In and Out IP spots (Rule 5.22).
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 const isMbvDev = e => e?.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (e.template ? skyDev(e) && isMbvTpl(e.template) : true);
@@ -4073,7 +4073,6 @@ const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Define
 const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : mbvTitle(e);
 const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']];
 const MBV_IP_POP = { title: 'In and Out IP spots', fields: IP_AT_FIELDS };
-const tapName = v => PUMP_TAP(v).find(c => c[0] === (v || 'toggle'))?.[1] || v;
 // the Graphic, its Path (set on a Skynet valve, Rule 5.6; a User Defined valve's closed and open pictures) and Orientation
 const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
   const T = DEVICE_TIPS;
@@ -4084,10 +4083,10 @@ const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
         ['orientation', 'Orientation', 'vorient', MBV_ORIENT(it.orientation), false, false, { tip: T.vOrientUser, ...x }]])];
 };
 // Toggle (what a tap does) and the Overlay with Database and .API ⬢ on its line (Fritz's screen 7); no Cover on a valve
+// Fritz, 2026-11-05 ("Toggles and Overlays should work normally"): the Skynet valve's too (its Template lists them as user settable)
 const MBV_TOGGLE_OVERLAY = (it, x = {}) => {
-  const T = DEVICE_TIPS, ovl = OVERLAY_CHOICES(it.imageOverlay).find(c => c[0] === (it.imageOverlay || ''))?.[1] || '';
-  return it.template ? [['_tap', 'Toggle', 'ro', tapName(it.tap), false, false, { tip: T.vToggleSet, ...x }], ['_ovl', 'Overlay', 'ro', ovl, false, false, { tip: T.vOverlaySet, dbPop: true, ...x }]]
-    : [['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.vToggle, ...x }], ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: T.vOverlay, dbPop: true, ...x }]];
+  const T = DEVICE_TIPS;
+  return [['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.vToggle, ...x }], ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: T.vOverlay, dbPop: true, ...x }]];
 };
 // a valve's own (Rule 18.22): Tap water (Rule 6.15) and the Close all / Open all valves lists
 const MBV_OWN = it => [['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap }],
@@ -4239,9 +4238,7 @@ const DEVICE_TIPS = {
   vOrient: 'How the valve stands: Horizontal, Vertical Left, Vertical Right, Front or 45 degrees. The Graphic here and the valve on the Tab follow, and its IPs too.',
   vOrientUser: 'Where the two pipe ends of your picture are: Horizontal, Vertical, or turned 45 degrees Left or Right. Its IPs follow.',
   vToggle: 'What a tap on the valve does: On/Off opens or closes it with one click; Push button is open only while held.',
-  vToggleSet: 'What a tap on the valve does: On/Off opens or closes it with one click. It is set by the Skynet Template (Rules 5.16 and 5.18).',
   vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.15); the flashing bolt and others are choices, None for no overlay.',
-  vOverlaySet: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt (Rule 7.15). It is set by the Skynet Template (Rules 5.16 and 5.18).',
   vTap: 'On: this valve lets tap water in when it is open, no pump needed (Rule 6.15). It is always on the Close all valves list.',
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',

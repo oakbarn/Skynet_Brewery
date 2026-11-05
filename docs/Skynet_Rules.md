@@ -1317,7 +1317,7 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 
 18.23 **Adding a Motorized Ball Valve: the Pump's drill-down without a Cover** (Fritz, 2026-11-05: "Create a Motorized Ball Valve
 Add Dialog using the Pump Drill Down Format. Valves do not have covers but every thing else the same.", thread "Add Motorized Ball
-Valve drill-down dialog", Help 126):
+Valve drill-down dialog", Help 128):
 1. **Valves (or On/Off) > Motorized Ball Valve, open / closed (relay)**, then 2. **Pick the valve**, each with its picture:
    **Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve** (its own pictures). The two rows the lists had for them
    are now this one row (Rule 15.3).
@@ -1329,8 +1329,9 @@ Valve drill-down dialog", Help 126):
    valve** with its Tap end (Rule 6.15) and **Close all list** / **Open all list**.
 - **Skynet Motorized Ball Valve:** the Path is greyed out (set by its Template, Rule 5.6) and follows the Orientation; the
   **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees) picks its Template (Rule 5.17), with that Template's
-  Width and Height; **Toggle and Overlay are greyed out**: tap behaviour and the overlay are fixed by the Template (Rules 5.16 and
-  5.18; the steady bolt, Rule 7.15).
+  Width and Height; **Toggle and Overlay work normally**, as on the Pump (Fritz, 2026-11-05: "Toggles and Overlays should work
+  normally"): an exception to Rule 5.18's fixed tap behaviour and overlay for this valve only; its Templates list them as user
+  settable. It starts with On/Off and the steady bolt (Rule 7.15).
 - **User Defined Motorized Ball Valve:** **Path (closed)** with a ⬢ for its In and Out IP spots (Rule 5.22) and **Path (open)** (a
   valve shows open and closed, so the User pump's one-path exception is not used); Orientation Horizontal, Vertical, 45 degrees
   Left or Right; Toggle and Overlay can be picked.
@@ -1564,4 +1565,4 @@ Valve drill-down dialog", Help 126):
 - 2026-11-04: Rule 18.21: Database and .API is on the Overlay line as a ⬢ pop-up (no box) on the Pump's Add box and Properties (Fritz's screen 7). Help 115 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Changed Rule 6.14 (new Send to the database choice "At clock time" writes every day at a clock time; the At clock time box shows only for that choice; the Every choices no longer have a clock time, and an older "Every 1 day at 12 AM" becomes At clock time 12 AM). Help 98 updated; no new Help number. (thread "Add At clock time to Send to the database")
 - 2026-11-04: Added Rule 5.25 (TC Pipe Fittings is a Widget subclass: every elbow, tee, cross, U, reducer, check valve and End Cap is a Skynet TC Pipe Fittings Widget with an IP on each ferrule face; Skynet puts them in where pipes meet, a pipe drawn to the bend turns an elbow into a tee; added by hand from Elbows, Tees … and Add Widget > TC Pipe Fittings; fittings with probes stay Temperature Devices; no cut-off ends). New Cross; Elbow 45, Instrument Tee and the probe tees redrawn in the style of Fritz's 2026-11-04 Elbow and Tee; the cut-off 45 ends of Fitting_Elbow45, Skynet_TC15_45 and pipe_elbow45 fixed. Samples and default Schema changed. Help 124; next free Help number 125. (thread "Make Fritz's elbow and tee into SVG Widgets")
-- 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Skynet valve Toggle and Overlay greyed out (Rules 5.16, 5.18). Help 126. (thread "Add Motorized Ball Valve drill-down dialog")
+- 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
