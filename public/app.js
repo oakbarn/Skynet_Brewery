@@ -1264,7 +1264,11 @@ function withLook(e, v) {
 const shownName = (e, v) => editing ? (e.label || e.name) : (v.label || e.name);
 function fillEl(n, e0) {
   // a clone shows its parent's values, with its own Visible (a Process moving the parent leaves the clone where it is)
-  const v = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {}, e = withLook(e0, v);
+  const v0 = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {};
+  // In Edit layout the pictures follow the Properties you just saved (Fritz, 2026-11-05: a valve's new Orientation showed only after
+  // Save layout): the Brain's .image / .imageOn / .imageOff / .imageOverlay are last Save layout's, so here they are the item's own
+  // (as the Brain makes them, lib/store.js), as shownName does for the Label
+  const v = editing ? { ...v0, image: e0.backpath ?? '', imageon: e0.imageOn ?? '', imageoff: e0.imageOff ?? '', imageoverlay: e0.imageOverlay ?? '' } : v0, e = withLook(e0, v);
   const nm = n.querySelector('.nm'), vl = n.querySelector('.vl');
   if (e !== e0 || n._looked) {             // re-apply the colors and placement (they may have been changed back)
     n._looked = e !== e0;

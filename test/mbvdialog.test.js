@@ -47,3 +47,8 @@ console.log('mbvdialog tests passed');
   assert.ok(set.includes('i.disabled = true') && !set.includes("'✏ Change'") && !set.includes('i.disabled = false'), 'no ✏ Change beside the Interface and Port');
   console.log('fixed wiring tests passed');
 }
+// Fritz, 2026-11-05: in Edit layout a saved Orientation turns the picture on the Tab at once (not after Save layout)
+{
+  assert.match(app, /const v = editing \? \{ \.\.\.v0, image: e0\.backpath \?\? '', imageon: e0\.imageOn \?\? '', imageoff: e0\.imageOff \?\? '', imageoverlay: e0\.imageOverlay \?\? '' \} : v0/);
+  console.log('edit layout picture tests passed');
+}
