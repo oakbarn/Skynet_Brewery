@@ -1,0 +1,21 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "vwidget": true,
+  "probeStyle": "thermowell",
+  "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
+  "size": [260, 320],
+  "std": { "type": "TC", "size": 1.5 },
+  "ports": {
+    "outlet": { "installed": true, "position": "VW Center Bottom" },
+    "outlet2": { "installed": true, "position": "VW Right Middle" },
+    "tangential": { "installed": true, "position": "VW Left Low" },
+    "topInlet": { "installed": true, "position": "VW Left High" },
+    "sparge": { "installed": true, "position": "VW Lid Center" },
+    "cip": { "installed": true, "position": "VW Lid Right" },
+    "steamSlayer": { "installed": true, "position": "VW Right High" },
+    "thermowell": { "installed": true, "position": "VW Left Thermowell" },
+    "element": { "installed": true, "position": "VW Right Element", "std": { "type": "TC", "size": 2 } }
+  },
+  "notes": "The Vessel Widget (Fritz, 2026-11-05, Rule 5.31): one Skynet Template with every IP (Outlet, Second Outlet, Tangential, Top Inlet, Sparge, CIP, Steam Slayer), one Temperature Probe (Thermowell or Front) and one Element Port. Each has a Place slider, all on here. The spots are set by the Template and can't be moved."
+}

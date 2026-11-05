@@ -264,6 +264,27 @@ One unit: its openings have their IPs built in, nothing to set for them.
 
 A Skynet_Integrated_Device vessel (RIMS tube, Basic electric kettle) shows its Interface, ports and heater control here instead of the Graphic / Heating Element / Probe pickers, and can never be un-bundled.
 
+### Vessel Widget (from the Skynet_Vessel_Widget Template; `vwidget: true`, 2026-11-05, Rule 5.31, Help 133)
+A class of Skynet vessel: one Template with every spot, each with a **Place** slider (`ports.<spot>.installed`; all on on the
+Template). Spots and their positions (picture box 260 x 320, Images/Skynet/Vessels/Skynet_Vessel_Widget.svg), locked by the Template:
+
+| Spot | Kind | Position |
+|---|---|---|
+| Outlet (`outlet`) | IP | VW Center Bottom (0.5, 0.931) |
+| Second Outlet (`outlet2`) | IP | VW Right Middle (0.923, 0.641) |
+| Tangential (`tangential`) | IP | VW Left Low (0.077, 0.625) |
+| Top Inlet (`topInlet`, new) | IP | VW Left High (0.077, 0.094) |
+| Sparge (`sparge`) | IP | VW Lid Center (0.5, 0.044) |
+| CIP (`cip`) | IP | VW Lid Right (0.769, 0.044) |
+| Steam Slayer (`steamSlayer`) | IP | VW Right High (0.923, 0.1875) |
+| Temperature Probe (`thermowell`) | picture, no IP | `probeStyle` thermowell: VW Left Thermowell (0.077, 0.844), Skynet_TC15_Thermowell_Short.svg; front: VW Front (0.5, 0.8), Skynet_TC15_Thermowell_Front.svg |
+| Element Port (`element`) | picture, no IP | VW Right Element (0.923, 0.859), BigMacRElementOff.svg, glows while `heater` is on |
+
+Not Placed: no IP, nothing on the Tab; in Edit layout a faint mark. Properties (Vessel Widget Properties): Name, Type, Label,
+Graphic, the Place switches, Probe: Front or Thermowell, then the Devices (`probe`, `heater`: links to Devices the Schema has; making
+them from the vessel waits on Rule 5.7), Flip Horizontal, Out flow color, Label and place. An IP on a vessel is a TC, NPT or BSP
+outlet or inlet: a place to connect anything with its own IP.
+
 ### Tab_Fitting (from a Bundled Fitting Template)
 | Setting | Notes |
 |---|---|
@@ -482,3 +503,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-04: TC Pipe Fittings Widget subclass (Rule 5.25, Help 124): new Cross; Elbow_45 and Instrument_Tee redrawn; joints where pipes meet become TC Pipe Fittings; the old equipment Pipe tee / elbows / cross left the Add lists. (thread "Make Fritz's elbow and tee into SVG Widgets")
 - 2026-11-04: Manual Valve Widget has two IPs, one at each pipe end, in every Orientation (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
 - 2026-11-05: Quick Disconnect Widget (Fritz's red star on a valve IP) and Quick Disconnect Hose (its free end moves at any time, onto an IP, a Quick Disconnect or the top third of a vessel) (Rule 5.28, Help 127). (thread "Add movable quick disconnect hose")
+- 2026-11-05: Vessel Widget class (Rule 5.31, Help 133): Skynet_Vessel_Widget Template, a Place slider on each IP, the Temperature Probe (Thermowell or Front) and the Element Port; new vessel port Top Inlet. The Three Vessel sample's vessels use it.

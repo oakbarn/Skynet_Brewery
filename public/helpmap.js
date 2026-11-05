@@ -52,6 +52,7 @@ export function graphicTopic(g) {
     case 'vessel':
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && plainFit(g.fittings)) return ['tc-pipe-fittings'];      // TC Pipe Fittings (Rule 5.25, Help 124)
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet') return ['skynet-fittings'];
+      if (g.vwidget && !g.integrated) return ['vessel-widget'];      // the Vessel Widget class (Fritz, 2026-11-05, Rule 5.31, Help 133)
       if (g.integrated) return g.vesselType === 'rims' ? ['skynet-integrated-devices'] : ['skynet-integrated-electric-kettle'];
       if (g.template && g.templateCls === 'skynet') return ['skynet-vessels'];
       if (g.vesselType === 'bfit' || g.template) return ['vessel-and-fitting-templates', 'tabvessel-and-tabfitting'];
