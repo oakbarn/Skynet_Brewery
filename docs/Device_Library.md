@@ -350,6 +350,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 - A Temperature probe (4.11) drawn as a TC 1.5 thermowell. After picking the length, a pop-up (step 2a) asks which Temperature Probe type is in it; then the normal New Device box.
 - **Pictures:** Skynet_TC15_Thermowell_Short.svg (90 wide), _Medium.svg (138), _Long.svg (192), in Images/Skynet/Other_Equipment.
 - **Settings:** the same as its probe type, plus its length.
+- **IP (Rule 5.30, 2026-11-05):** one, on the outer face of its TC cap; no flow. Rotate and Flip. Dropped with its cap within 30 px of an IP it snaps on. On a front facing IP it shows from the front (Skynet_TC15_Thermowell_Front.svg, 40 x 40, IP in the middle); a plain Temperature probe dropped on a front facing IP becomes one (an implicit Thermowell).
 
 ### 4.12a Tee with a Temperature Probe (Skynet Device, Rule 5.20)
 Fritz (2026-11-02, Help 110): a Temperature Device (type temperature, `subtype: probeTee`), not a pipe Widget. Made from **Probe** on the Edit layout bar like a Thermowell: pick the probe type, then Interface and Port.
@@ -361,7 +362,8 @@ Fritz (2026-11-02, Help 110): a Temperature Device (type temperature, `subtype: 
 | Long_Branch | Skynet_TC15_Long_Tee_Probe_Branch.svg (Fritz's drawing 2026-11-04) | left, right |
 | Long_Run | Skynet_TC15_Long_Tee_Probe_Run.svg (redrawn 2026-11-04) | right, branch |
 
-Flow passes through either way (like an inline sensor). Flip Horizontal and Flip Vertical turn the picture and its IPs. It reads like any Temperature probe (4.11).
+Flow passes through either way (like an inline sensor). Flip Horizontal, Flip Vertical and Rotate (0, 90, 180, 270) turn the picture and its IPs. It reads like any Temperature probe (4.11).
+Since Rule 5.30 (2026-11-05): the same size as the TC Pipe Fittings Widget tee of its shape (Instrument 160 x 69, Long 160 x 102) with its IPs on the same spots; dropped on a pipe or hose it cuts it like a tee and takes the pipe's size.
 
 ### 4.13 Analog input
 - **Add menu entries** (Devices: analog sensors):
