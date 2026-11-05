@@ -120,3 +120,27 @@ test('nothing is cut when the pipe passes by, is at 45, or there is no room to g
   assert.equal(splitAt([0, 0], [300, 300], BOX, PUMP), null);
   assert.equal(splitAt([90, 110], [400, 110], BOX, PUMP).ok, false);
 });
+
+// Rule 5.25 (Fritz, 2026-11-05): a tee or a cross dropped on a pipe cuts it there
+import { fitOnPipe } from '../public/pipefit.js';
+const TEE = [{ id: 'w', c: [170, 203], v: [-1, 0] }, { id: 'e', c: [230, 203], v: [1, 0] }, { id: 's', c: [200, 240], v: [0, 1] }];
+const BEND = [200, 203];
+
+test('a tee dropped between the ends of a level pipe cuts it in two on its run', () => {
+  const r = fitOnPipe([0, 200], [400, 200], BEND, TEE);
+  assert.equal(r.ok, true); assert.equal(r.mode, 'mid'); assert.deepEqual(r.shift, [0, -3]);
+  assert.deepEqual(r.pieces, [{ from: 'A', to: 'w', pts: [[0, 200], [170, 200]] }, { from: 'e', to: 'B', pts: [[230, 200], [400, 200]] }]);
+});
+
+test('a tee whose run is across the pipe asks to be turned; a pipe that passes by is left alone', () => {
+  assert.deepEqual(fitOnPipe([200, 0], [200, 400], BEND, TEE), { ok: false, turn: true });
+  assert.equal(fitOnPipe([0, 260], [400, 260], BEND, TEE), null);
+  assert.equal(fitOnPipe([300, 200], [400, 200], BEND, TEE), null);
+});
+
+test('a tee dropped over an open end makes the pipe shorter; over a joined end it says why', () => {
+  const r = fitOnPipe([180, 200], [400, 200], BEND, TEE, { aOpen: true });
+  assert.equal(r.ok, true); assert.equal(r.mode, 'end'); assert.equal(r.drop, 'A');
+  assert.deepEqual(r.pieces, [{ from: 'e', to: 'B', pts: [[230, 200], [400, 200]] }]);
+  assert.equal(fitOnPipe([180, 200], [400, 200], BEND, TEE).ok, false);
+});
