@@ -3,9 +3,20 @@
 The **Vessel Widget** is a class of vessel (Skynet Rule 5.31). It starts from **one Skynet Template, Skynet_Vessel_Widget**, that
 has every spot a brew vessel can have, each with a **Place** slider:
 
-- **IPs:** Outlet (center bottom), Second Outlet, Tangential (whirlpool), Top Inlet, Sparge, CIP and Steam Slayer
-- **one Temperature Probe**, seen as a **Thermowell** (in from the side) or from the **Front**
-- **one Element Port** (the heating element)
+- **15 IPs**, laid out from Fritz's Vessel IP Template drawing (2026-11-05):
+  - **Right side**, top to bottom: **Right Sparge**, **Right HERMS In**, **Right HERMS Out**, **Right Element**
+  - **Left side**, the same: **Left Sparge**, **Left HERMS In**, **Left HERMS Out**, **Left Element**
+  - **Left Back Element** and **Right Back Element** (seen from the front, level with the side Elements)
+  - **Center Probe**, **Left Tangential** and **Right Tangential**, **Center Outlet**, and the **Center Bottom Outlet** on the
+    bottom
+- **one Temperature Probe**, seen from the **Front** (on the Center Probe spot) or as a **Thermowell** (in from the side)
+- **one Element Port** (the heating element, on the Right Element spot)
+
+**The names are only general.** Anything with an IP can go on any of them: an Element on a HERMS spot, a pipe on a Back Element
+spot, and so on. There are no limits on which IP is used for what.
+
+**Each IP has a Label** that starts the same as its Name. Change it in Vessel Widget Properties, next to the IP's Place slider
+(for example "Whirlpool return" for Right Tangential). The Label is the text shown by the IP; empty it and it goes back to the Name.
 
 On the Template every Place slider is on. The idea: Skynet builds kettle Templates from it with the sliders set to match real
 kettles. You pick the one closest to yours, slide off what your kettle does not have, and it matches.
@@ -48,6 +59,7 @@ You can still add your own Devices and Widgets to a Vessel Widget, and **Bundle*
 
 The **Three Vessel** sample's Hot liquor tank, Mash tun and Boil kettle are Vessel Widgets: each one has its Outlet, a Thermowell
 and, on the HLT and the Boil kettle, the Element Port Placed. The Mash tun and the Boil kettle have their Top Inlet Placed too.
+They were built before the IP Template drawing, so they keep their first spots (Outlet, Top Inlet and the side Thermowell).
 
 ## Size
 
