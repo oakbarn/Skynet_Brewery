@@ -5,6 +5,8 @@
   "probeStyle": "thermowell",
   "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
   "size": [260, 320],
+  "volume": 10,
+  "sizeMethod": "proportional",
   "std": { "type": "TC", "size": 1.5 },
   "ports": {
     "outlet": { "installed": true, "position": "VW Center Bottom" },

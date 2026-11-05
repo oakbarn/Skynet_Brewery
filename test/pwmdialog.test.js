@@ -1,0 +1,26 @@
+// PWM / Analog out Add dialog (Fritz, 2026-11-05: "PWM Build Dialog", the Pump's drill-down, Rule 18.25, Help 136).
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { elementTopic } from '../public/helpmap.js';
+
+const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+assert.match(app, /const isDrillDev = e => isPumpDev\(e\) \|\| isMbvDev\(e\)[^\n]* \|\| isPwmDev\(e\)[^\n]*;/);
+const isPwmDev = eval(app.match(/const isPwmDev = (e => [^\n]+);/)[1]);
+assert.ok(isPwmDev({ type: 'pwmOut' }) && isPwmDev({ type: 'analogOut', signal: '0-10V' }), 'PWM and Analog outputs');
+assert.ok(!isPwmDev({ type: 'analogOut', subtype: 'propValve' }), 'not a Proportional Valve');
+assert.ok(!isPwmDev({ type: 'pwmOut', subtype: 'element' }), 'not a heating element');
+assert.ok(!isPwmDev({ type: 'digitalOut' }));
+const add = app.slice(app.indexOf('async function newDeviceDialog('), app.indexOf('// ---- Thermowell'));
+assert.match(add, /pwm = isPwmDev\(e\)/);
+assert.match(add, /\.\.\.\(pwm \? \[\.\.\.PWM_GRAPHIC_FIELDS\(e, after\), \.\.\.PWM_OVERLAY\(e, after\), \.\.\.PWM_OWN\(e, after\)\] : \[\]\)/);
+assert.match(add, /\.\.\.\(dd \? \[\.\.\.\(pwm \? \[\] : \['tap'\]\)/, 'a PWM keeps its own tap (it opens the % box)');
+const own = app.slice(app.indexOf('const PWM_SIGNALS'), app.indexOf("// a new Alarm's Name follows its Label"));
+assert.ok(!/cover|orient|'tap'/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover, Orientation or Toggle');
+assert.match(own, /\['device', '2\. Interface \(board\)', 'dev', 'addnewid', false, false, \{ set: true[^\n]*'pinsel', 'pwm'/, 'fixed wiring, PWM pins');
+assert.match(own, /dbPop: true/, 'Database and .API on the Overlay line');
+assert.match(app, /if \(isPwmDev\(it\)\) return pwmDeviceFields\(it, item\);/);
+assert.ok(!/isPwmDev\(e\)[^\n]*autoLabel/.test(app), 'no Label auto fill unless Fritz says (Rule 18.15)');
+assert.deepEqual(elementTopic({ type: 'pwmOut' }), ['pwm-and-analog-out-device-properties']);
+assert.deepEqual(elementTopic({ type: 'analogOut', subtype: 'propValve' }), ['proportional-valves']);
+assert.ok(fs.existsSync(new URL('../help/136-pwm-and-analog-out-device-properties.md', import.meta.url)));
+console.log('pwmdialog tests passed');
