@@ -37,9 +37,10 @@ always on top of everything on the Tab.
 
 While you drag, a **green ring** shows where the end will go. Let go on:
 
-- **an IP or a Quick Disconnect**: the hose joins it. A Quick Disconnect wins over the valve IP under it.
+- **a Quick Disconnect** (within 25 pixels, a bigger snap so it is easy to hit) **or an IP** (within the normal 10 pixel snap):
+  the hose joins it. A Quick Disconnect wins over the valve IP under it, and over a plain IP that is closer.
 - **anywhere in the top third of a vessel**: the whole top third is one big IP. It is the same as putting the hose in the
-  top of the vessel, and the hose end goes to the middle of the vessel's top.
+  top of the vessel. The hose is then drawn going up over the vessel's rim and hanging down inside it.
 - **anywhere else**: the end is loose and no flow shows in the hose.
 
 A message says where the end went. Every screen sees the move at once and it is kept (no Save layout needed).

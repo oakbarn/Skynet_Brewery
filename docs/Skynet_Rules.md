@@ -213,8 +213,8 @@ was closed. Do not offer it again.
 2.11 **Right-click gives Help** when the item can't move (outside Edit layout, a locked item, an
 empty spot, the Menu Bar). A yellow "?" sits by ☰ Menu tab headings and Properties titles, **but
 never on a Tab itself.** (2026-10-21, PR #57)
-*Exception (2026-11-05, waiting on Fritz's pick):* the free end of a Quick Disconnect hose moves outside Edit layout, and the right
-button drags it (Rule 5.28).
+*Exception (Fritz, 2026-11-05: "Exception for QD Hose Only"):* only the free end of a Quick Disconnect hose moves outside Edit layout,
+and the right button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
@@ -732,8 +732,12 @@ Help 127).
   for every screen, and a 🔒 locked hose does not move.
 - Flow and Flow Colors are as for every hose (Rules 5.10, 5.21). A hose in a vessel's top is an end of the line like a vessel port;
   flow pumped from it takes that vessel's Out flow color.
-- **Exception to Rule 2.11** (waiting on Fritz's pick: this exception, or a change to Rule 2.11): only the free end of a Quick
-  Disconnect hose moves outside Edit layout; everything else on a Tab still moves only in Edit layout.
+- **Exception to Rule 2.11** (Fritz, 2026-11-05: "Exception for QD Hose Only"): only the free end of a Quick Disconnect hose moves
+  outside Edit layout; everything else on a Tab still moves only in Edit layout.
+- **Snap** (Fritz, 2026-11-05): the hose end snaps to a **Quick Disconnect within 25 px**, a larger snap that is only for a QD; to a
+  plain IP it snaps within the normal 10 px (Snap to align). A Quick Disconnect wins over a closer plain IP.
+- **A hose in a vessel's top hangs in it** (Fritz, 2026-11-05): once it snaps there, the hose is drawn up and over the vessel's rim
+  and down inside it, out of sight below the rim, on top of the other items on the Tab.
 
 ---
 
@@ -1641,3 +1645,5 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Added Rule 6.17 (Deadband Device, as in BruControl's Deadband Output: Deadband Offset, Inner Band Offset, Initial Output, Inner and Outer Band Drive, Calc Time, Out Time, Reversed; output in %; BruControl import). Help 126; next free Help number 127. (thread "Add Deadband control")
 - 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
+- 2026-11-05: Rule 5.28 and Rule 2.11: Fritz picked an exception to Rule 2.11 for the Quick Disconnect hose only (not a change to Rule 2.11). The hose end snaps to a Quick Disconnect within 25 px, to a plain IP within the normal 10 px. (thread "Add movable quick disconnect hose")
+- 2026-11-05: Rule 5.28: a Quick Disconnect hose put in a vessel's top is drawn hanging over the rim and down inside the vessel. (thread "Add movable quick disconnect hose")
