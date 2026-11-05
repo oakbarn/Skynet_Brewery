@@ -49,7 +49,7 @@ A tee with a Temperature Probe in it is a **Temperature Device**, not a pipe Wid
 - **Instrument Tee** or **Long Tee**, **probe in the branch**: the probe (purple) fills the branch, so its IPs are the **left and right** ferrules.
 - **Instrument Tee** or **Long Tee**, **probe in from the end**: the probe fills the left end, so its IPs are the **right ferrule and the branch**.
 
-As with a Thermowell, you pick the type of probe in it (DS18B20, PT100 ...), then the Interface and its Port. Its Properties have **Flip Horizontal** and **Flip Vertical**, and the picture and its IPs follow. Flow passes through it either way.
+As with a Thermowell, you pick the type of probe in it (DS18B20, PT100 ...), then the Interface and its Port. Its Properties have **Flip Horizontal**, **Flip Vertical** and **Rotate**, and the picture and its IPs follow. Flow passes through it either way. It is the size of the TC Pipe Fittings tee of its shape, with its IPs on the same spots, and dropped on a pipe or hose it cuts it like a tee: see **Probe tees and thermowells on pipes** (Help 132).
 
 ## Motorized valve Devices
 

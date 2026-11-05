@@ -718,6 +718,8 @@ body.onWorkspace #top .menuCopy { display: none; }
 /* a valve at 45 degrees: its vertical picture turned left or right (the box stays square and upright) */
 .el.turned { overflow: visible; }
 .el.turned::before { content: ''; position: absolute; inset: 0; background: var(--pic) center / contain no-repeat; transform: scale(var(--sx, 1), var(--sy, 1)) rotate(var(--turn, 0deg)); pointer-events: none; }
+/* a probe tee or thermowell turned 90 or 270 (Rule 5.30): its picture is as wide as the box is high */
+.el.turned.side::before { inset: auto; left: 50%; top: 50%; width: var(--picw); height: var(--pich); transform: translate(-50%, -50%) scale(var(--sx, 1), var(--sy, 1)) rotate(var(--turn, 0deg)); }
 
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
