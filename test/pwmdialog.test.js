@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { elementTopic } from '../public/helpmap.js';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
-assert.match(app, /const isDrillDev = e => isPumpDev\(e\) \|\| isMbvDev\(e\) \|\| isPwmDev\(e\);/);
+assert.match(app, /const isDrillDev = e => isPumpDev\(e\) \|\| isMbvDev\(e\)[^\n]* \|\| isPwmDev\(e\)[^\n]*;/);
 const isPwmDev = eval(app.match(/const isPwmDev = (e => [^\n]+);/)[1]);
 assert.ok(isPwmDev({ type: 'pwmOut' }) && isPwmDev({ type: 'analogOut', signal: '0-10V' }), 'PWM and Analog outputs');
 assert.ok(!isPwmDev({ type: 'analogOut', subtype: 'propValve' }), 'not a Proportional Valve');

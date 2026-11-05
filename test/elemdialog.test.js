@@ -20,7 +20,7 @@ const own = app.slice(app.indexOf('const ELEM_GRAPHIC_FIELDS'), app.indexOf('fun
 assert.ok(!/cover/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover on a Heating Element');
 assert.match(own, /'orient', null, false, false, \{ tip: T\.eOrient, with: tog/, 'Orientation and Toggle on one line');
 assert.match(own, /dbPop: true/, 'Overlay with Database and .API');
-assert.match(app, /const isDrillDev = e => isPumpDev\(e\) \|\| isMbvDev\(e\) \|\| isElemDev\(e\);/);
+assert.match(app, /const isDrillDev = e => isPumpDev\(e\) \|\| isMbvDev\(e\)[^\n]* \|\| isElemDev\(e\)[^\n]*;/);
 assert.match(app, /const isElemDev = e => e\?\.type === 'digitalOut' && e\.subtype === 'element' && !e\.kind && !e\.template && !e\.integratedIn;/, 'not a RIMS or Integrated kettle element (Rule 18.10)');
 assert.match(app, /if \(isElemDev\(it\)\) return \[\.\.\.elemDeviceFields\(it, item\), \['typeCode', 'Device Type', 'ro'/);
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'element' }), ['heating-element-device-properties']);
