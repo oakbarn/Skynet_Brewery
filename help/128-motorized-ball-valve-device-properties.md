@@ -22,14 +22,14 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**. If **➕ Add Device**
    looks faded, press it anyway: it tells you what is still missing.
 4. Press **➕ Add Device**. The valve goes on the Tab you picked and its Properties open. The **Interface** and **Port** are now
-   greyed out and set; press **✏ Change** beside them to change them on purpose.
+   greyed out and set: they are the wiring, so they stay as they are. To wire it to another board or pin, delete it and add it again. Its Name can still be changed with **✏ Change name**.
 
 ## Properties, from the top
 
 1. The title is the valve (**Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve**), with the **🔓 lock**,
    **Visible** and **Hidden Locked** beside it. Then **Delete**, **Cancel** and **Save**.
 2. **1. Label ⬆ ⬢** and **Label Visible**. A Label is never blank: leave it empty and it becomes the Name.
-3. **2. Interface (board)** and **Available Ports**, greyed out with **✏ Change**.
+3. **2. Interface (board)** and **Available Ports**, greyed out (the board and pin it is wired to).
 4. **3. Tab** and **4. Name** (the Suggested Name; you may type your own).
 5. **Graphic**, **Path** and **Orientation**.
 6. **Toggle**, then **Overlay** with **Database and .API ⬢**.
