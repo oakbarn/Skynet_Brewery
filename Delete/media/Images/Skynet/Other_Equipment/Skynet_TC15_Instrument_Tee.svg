@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80">
+  <!-- Skynet TC 1.5 instrument tee (Fritz's drawing, 2026-11-02): a short branch. IPs at the center of each ferrule face, left (0, 0.3), right (1, 0.3), branch (0.5, 1) -->
+  <g fill="#000" stroke="#000" stroke-width="3.2" stroke-linejoin="round">
+    <path d="M12 10 H148 V38 H102 A8 8 0 0 0 94 46 V68.5 H66 V46 A8 8 0 0 0 58 38 H12 Z"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(1.50 24.00) rotate(0.00)"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(158.50 24.00) rotate(180.00)"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(80.00 78.50) rotate(-90.00)"/>
+  </g>
+  <g fill="#808080">
+    <path d="M12 10 H148 V38 H102 A8 8 0 0 0 94 46 V68.5 H66 V46 A8 8 0 0 0 58 38 H12 Z"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(1.50 24.00) rotate(0.00)"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(158.50 24.00) rotate(180.00)"/>
+    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(80.00 78.50) rotate(-90.00)"/>
+  </g>
+</svg>

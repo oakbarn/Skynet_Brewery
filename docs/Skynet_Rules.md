@@ -668,6 +668,24 @@ should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123).
   No Cover) the outer face of the inlet union on the pump head and the top of the outlet pipe; on the sump pump the middle of its
   screen (inlet) and the top of its riser (outlet). A pump picture of a user's own keeps them on the middle of its sides.
 
+5.25 **TC Pipe Fittings is a Widget subclass** (Fritz, 2026-11-04: "Widget Subclass TC Pipe Fittings"; "Clean up any svg that have
+broken or missing end. I like the way you install them when pipes need them. There is a need to add manually as well. They should
+all have IPs and they become Skynet Widgets"; thread "Make Fritz's elbow and tee into SVG Widgets", Help 124).
+- Every elbow (90 and 45), tee (the normal Tee and the Instrument Tee), cross, U, reducer, check valve and End Cap is a Skynet
+  **TC Pipe Fittings Widget**: a Skynet drawing with an IP on the outer face of each ferrule (Rule 5.20), Autosize to pipe, and the
+  settings of Rule 5.14. Its Properties title reads "TC Pipe Fittings Widget: <name>".
+- **Skynet puts them in where pipes need them** (Rule 5.19): where pipes meet at a corner, or three or four at one point, the joint
+  becomes the TC Pipe Fitting the pipes need, turned the right way, its bend (where its pipes' center lines meet) on the joint and
+  each pipe ended on one of its IPs. A pipe drawn to the bend of one turns it back into a joint, so an elbow becomes a tee and a tee a
+  cross. Two pipes in line still join on one IP (a coupling). Autosize grows a TC Pipe Fitting about its bend.
+- **They are also added by hand:** Edit layout bar > Elbows, Tees … and Add Widget > TC Pipe Fittings (on the Build Tab, Rule 4.1).
+  The older equipment pipe fittings (Pipe tee, Pipe 90° and 45° elbow, Pipe cross) are no longer in the Add lists; ones already on
+  a Tab still draw.
+- **A fitting with a Temperature Probe is a Device**, a Temperature Device subtype (Probe Tee), not a TC Pipe Fitting (Rule 5.20).
+- **Every drawing has whole ends:** no ferrule or pipe end is cut off by the picture's edge.
+- Older Schemas (Rule 15.2): an IP elbow, tee or cross becomes its TC Pipe Fitting when its Tab is shown in Edit layout; Save layout
+  keeps it. The samples and the default Schema are changed (Rule 15.3).
+
 5.26 **A pump or valve put on a pipe cuts the pipe** (Fritz, 2026-11-04: a Pump added between the ends of a
 Pipe divides it in two separate pipes joined to its IPs; dropped on the end of a pipe "it needs both IPs": the pipe is shortened and
 the pump or valve connects with its IPs; thread "Split a pipe when a pump is added", Help 125).
@@ -1543,4 +1561,5 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Rule 18.21: an Overlay dropdown (the On overlay) just below the Cover on the Pump dialogs, Add box and Properties (Fritz). Help 115 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Rule 18.21: Database and .API is on the Overlay line as a ⬢ pop-up (no box) on the Pump's Add box and Properties (Fritz's screen 7). Help 115 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Changed Rule 6.14 (new Send to the database choice "At clock time" writes every day at a clock time; the At clock time box shows only for that choice; the Every choices no longer have a clock time, and an older "Every 1 day at 12 AM" becomes At clock time 12 AM). Help 98 updated; no new Help number. (thread "Add At clock time to Send to the database")
+- 2026-11-04: Added Rule 5.25 (TC Pipe Fittings is a Widget subclass: every elbow, tee, cross, U, reducer, check valve and End Cap is a Skynet TC Pipe Fittings Widget with an IP on each ferrule face; Skynet puts them in where pipes meet, a pipe drawn to the bend turns an elbow into a tee; added by hand from Elbows, Tees … and Add Widget > TC Pipe Fittings; fittings with probes stay Temperature Devices; no cut-off ends). New Cross; Elbow 45, Instrument Tee and the probe tees redrawn in the style of Fritz's 2026-11-04 Elbow and Tee; the cut-off 45 ends of Fitting_Elbow45, Skynet_TC15_45 and pipe_elbow45 fixed. Samples and default Schema changed. Help 124; next free Help number 125. (thread "Make Fritz's elbow and tee into SVG Widgets")
 - 2026-11-04: Added Rule 5.26 (a Pump, Valve or Manual Valve Widget dropped on a straight pipe cuts it: between the ends into separate pipes joined to its IPs, over an end the pipe is made shorter and both IPs joined, an end on a tee or other IP staying where it is; an IP that opens across the pipe is taken round with 90 degree elbows). Help 125; next free Help number 126 (Help 124 is taken by PR #193). (thread "Split a pipe when a pump is added")
