@@ -47,6 +47,7 @@ import { Messaging, CARRIERS } from './lib/messaging.js';
 import { checkIds, rtdPinError, ethernetPinError } from './public/naming.js';
 import { elementNameError, checkFileName } from './public/names.js';
 import { applyDeviceTemplate } from './public/templates.js';
+import { addGroup, groupById, checkGroupName, renameGroupInText } from './lib/dbgroups.js';
 import { renameInProcesses, renameElementRefs, renameGraphicRefs } from './lib/renames.js';
 import { gStandardOnDisk } from './lib/gstandard.js';
 import { cleanUserStyles } from './public/styles.js';
@@ -314,7 +315,7 @@ function processWords() {
 }
 
 function needRole(p, m) {
-  if (p === '/ui/set' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/(once|now)\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
+  if (p === '/ui/set' || p === '/ui/hose' || p === '/ui/hold' || p === '/ui/valve/confirm' || p === '/ui/override' || p === '/ui/brewprocess/start' || p === '/ui/stopall' || p === '/ui/import/beerxml' || p.startsWith('/ui/recipe') || p === '/ui/log/sets' || /^\/ui\/log\/now\//.test(p) || /^\/ui\/scripts\/[^/]+\/(start|stop|restart)$/.test(p)) return 'operator';
   if (p === '/ui/ports') return 'admin';
   if (/^\/ui\/equipment\/[a-z0-9-]+\/lock$/.test(p)) return 'operator';      // brewers lock and unlock the Equipment Profile
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
@@ -513,6 +514,7 @@ async function route(req, res) {
     if (!el) return fail(res, 404, `No element "${name}"`);
     if (INPUT_PROPS[el.type]?.includes(String(prop).toLowerCase()) && el.device && hw.devices.get(el.device)?.type !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
     store.setProp(name, prop, value, 'ui');
+    logger.clicked(name, prop);      // "When Clicked" (Rule 6.14): set on its Tab, so it goes to the database now
     return ok(res);
   }
   // the free end of a Quick Disconnect hose, moved on a Tab outside Edit layout (Fritz, 2026-11-05, Rule 5.28): operators may
@@ -818,8 +820,29 @@ async function route(req, res) {
     return res.end(buildCsv(rows, { names, layout: sp.get('layout'), tz }));
   }
   if (p === '/ui/log/sets' && m === 'PUT') { store.config.logSets = cleanLogSets((await jsonBody(req)).sets); store.writeConfig(); broadcast('config', {}); return ok(res); }
-  let s = /^\/ui\/log\/(once|now)\/(.+)$/.exec(p);
-  if (s && m === 'POST') { if (s[1] === 'once') logger.arm(s[2]); else logger.logNow(s[2], 'ondemand'); return ok(res); }
+  let s = /^\/ui\/log\/now\/(.+)$/.exec(p);
+  if (s && m === 'POST') { logger.logNow(s[1], 'ondemand'); return ok(res); }
+  // Database Groups (Rule 6.14): ➕ Add new Group… and ✏ Change name in an item's Database and .API box
+  if (p === '/ui/dbgroups' && m === 'POST') {
+    const g = addGroup(store.config, (await jsonBody(req)).name);
+    store.writeConfig(); broadcast('config', {});
+    return ok(res, { group: g });
+  }
+  if (p === '/ui/dbgroups/rename' && m === 'POST') {
+    const b = await jsonBody(req), g = groupById(store.config, b.id);
+    if (!g) return fail(res, 404, 'That Group is gone');
+    const to = checkGroupName(store.config, b.name, g.id), from = g.name;
+    g.name = to; store.writeConfig(); broadcast('config', {});
+    // Update All: every Process line send_db_group Old becomes send_db_group New
+    const changed = [];
+    if (from !== to) for (const name of engine.names()) {
+      const text = engine.read(name), out = renameGroupInText(text, from, to);
+      if (out === text) continue;
+      engine.backup(name); engine.write(name, out);
+      changed.push({ name, running: engine.running.has(name) });
+    }
+    return ok(res, { group: g, processes: changed });
+  }
 
   // scripts
   if (p === '/ui/scripts' && m === 'GET') return ok(res, engine.list());
