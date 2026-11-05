@@ -3556,9 +3556,16 @@ document.addEventListener('keydown', ev => {
   (all[i + 1] || ok)?.focus();
 }, true);
 document.addEventListener('pointerdown', () => { dlgArrowKey = false; }, true);
+// The default Interface of a new Device (Fritz, 2026-11-05: "Then Goes to Interface. There is a Default. User accepts or selects (or
+// creates) an Interface"): the one the last new Device went on, or else the first Interface. Kept in this browser only.
+const LAST_IFACE_KEY = 'skynet.lastIface';
+function defaultIface(devs) {
+  let last = ''; try { last = localStorage.getItem(LAST_IFACE_KEY) || ''; } catch { }
+  return devs.some(d => d.name === last) ? last : devs[0]?.name;
+}
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
-  const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
+  const work = { label: '', device: e.device ?? defaultIface(devs), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
   const pr = isProbeDev(e);      // a Temperature Probe: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26)
   if (pr) for (const k of PROBE_SETTING_KEYS) if (e[k] !== undefined) work[k] = e[k];
   const port = pr ? probePort(e) : isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
@@ -3652,7 +3659,10 @@ async function newDeviceDialog(e, hint, what) {
         .filter(x => x && !x.disabled && x.offsetParent !== null);
       const seqNext = t => { const l = seq(), i = l.indexOf(t); (i >= 0 && l[i + 1] || oks.filter(b => b.offsetParent !== null).pop())?.focus(); };
       dlgEnterSeq = t => { if (seq().includes(t)) { seqNext(t); return true; } return false; };
-      { const l = seq(); (l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }        // the first one still empty has the focus
+      // Fritz, 2026-11-05: a blank Label gets the focus; a Label Skynet filled in is skipped (taken as accepted, still editable) and
+      // the focus goes to the Interface, which has its default to accept or change
+      { const l = seq(), lab = body.querySelector('[data-k="label"]'), dv = body.querySelector('[data-k="device"]');
+        (lab && !String(lab.value ?? '').trim() ? lab : dv && !dv.disabled && dv.offsetParent !== null ? dv : l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }
       body.oninput = body.onchange = ev => {
         gate();
         if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)) { const t = ev.target; setTimeout(() => seqNext(t), 0); }
@@ -3713,6 +3723,7 @@ async function newDeviceDialog(e, hint, what) {
         if (+work.h > 0) e.h = +work.h;
         if (dd && (+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
         e.name = name;
+        try { if (e.device) localStorage.setItem(LAST_IFACE_KEY, e.device); } catch { }      // the next new Device's default Interface
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
         if (e.type === 'digitalIn' && work.typeCode === 'DIN') { e.mode = 'momentary'; e.pulse ??= 100; e.lockout ??= 3000; }

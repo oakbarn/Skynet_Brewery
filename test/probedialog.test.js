@@ -40,3 +40,16 @@ for (const e of [{ type: 'temperature', sensor: 'ds18b20' }, { type: 'temperatur
 assert.deepEqual(elementTopic({ type: 'temperature', integratedIn: 'g1' }), ['skynet-integrated-devices']);
 assert.ok(fs.existsSync(new URL('../help/138-temperature-probe-device-properties.md', import.meta.url)));
 console.log('probedialog tests passed');
+// Fritz, 2026-11-05 (PR #231): the Add Device order for every Device. True PWM Devices get only PWM pins, the others only the
+// pins that can't do PWM (the PWM pins only when none of those is free); the Interface has a default; a blank Label gets the focus.
+{
+  const { freePins } = await import('../public/naming.js');
+  const devs = [{ name: 'Brewery Mega', id: 'BM' }], PWM = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
+  const relay = freePins({ type: 'digitalOut', device: 'Brewery Mega', name: 'x' }, [], devs);
+  assert.ok(relay.length && relay.every(p => !PWM.includes(p)), 'a relay: no PWM pins');
+  const pwm = freePins({ type: 'pwmOut', device: 'Brewery Mega', name: 'x' }, [], devs);
+  assert.ok(pwm.length && pwm.every(p => PWM.includes(p)), 'a PWM output: only PWM pins');
+  assert.match(app, /work = \{ label: '', device: e\.device \?\? defaultIface\(devs\)/, 'the Interface has a default');
+  assert.match(app, /\(lab && !String\(lab\.value \?\? ''\)\.trim\(\) \? lab : dv && !dv\.disabled/, 'blank Label first, else the Interface');
+  console.log('add order tests passed');
+}

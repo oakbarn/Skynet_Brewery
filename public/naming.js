@@ -329,8 +329,14 @@ export function freePins(el, elements, devices, analog) {
   const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? P.onewire);
   const special = (list, p) => list !== P.pins && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
   const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || p === owPin || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
-  return pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
+  const free = pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
     .map((p, i) => [p, extras(p), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+  // Fritz, 2026-11-05: "If The Device works best with true PWM, select only those Ports That are PWM. If works with Pseudo PWM fine,
+  // select NON PWM Ports." A Device that needs no true PWM is offered only the pins that can't do it (Rule 4.2); only when none of
+  // those is free are the PWM pins offered. (On a Pi every pin does PWM, so nothing is held back.)
+  if (pool !== P.pins || !special(P.pwm, P.pwm[0])) return free;
+  const plain = free.filter(p => !P.pwm.includes(p));
+  return plain.length ? plain : free;
 }
 function pinAdvice(el, mine, others, owPin, eth, P = PROFILES.mega) {
   const special = (list, p) => list !== P.pins && list.includes(p);

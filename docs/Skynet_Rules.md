@@ -470,6 +470,14 @@ are done (the Label filled in, Rule 18.15). The Device goes on the picked Tab (R
 Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). The **Add Device box** (Fritz's Pump example, 2026-11-04): 1 Label (⬢) and Label Visible, 2 Interface (board) with
 **Available Ports** (a dropdown of the free pins) on the same line, 3 Tab; until they are done only the greyed out Device Type
 shows below them. Then 4 the **Name** (the Suggested Name, which may be edited) shows, with Cover (a pump), X, Y, Width and Height. (Help 82)
+**The Add Device order for every Device** (Fritz, 2026-11-05, on PR #231): the user's input goes in order. **A blank Label gets the
+focus; a Label Skynet filled in is skipped** (taken as accepted; it can still be edited) and the focus goes to the **Interface**,
+which has a **default** (the Interface the last new Device went on, or else the first one) to accept, change, or ➕ Add new. Then the
+**Available Ports**: a Device that works best with **true PWM** is offered only PWM pins; any other Device (on/off, or pseudo PWM done
+in software) is offered only the pins that **can't** do PWM, so the PWM pins are kept for the Devices that need them (only when none
+of those is free are the PWM pins offered; on a Pi every pin does PWM). Once the Label (never blank), Interface and Port are set (and
+the Tab), the Suggested Name is built (Rule 3.1); spaces in a Label become `_` in the name. This is in the one Add Device box every
+Device uses (Pump, Motorized Ball Valve, Heating Element, PWM / Analog out, Temperature Probe ...).
 *Replaced:* 1 Interface, 2 Available Ports/Pins, 3 Suggested Name, 4 Label, on the Build Tab (2026-10-28); before that
 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
@@ -1990,3 +1998,4 @@ Not Placed) or the dialog closes.
   Probes, Thermowells and Valves on its IPs are integral parts (like the RIMS tube); a HERMS coil goes on the Left or Right HERMS IPs;
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
 - 2026-11-05: Rule 18.26 and 18.15: a Temperature Probe's Label fills in by its kind, tP_1W_1, tP_RTD_1, tP_10KNTC_1, tP_50KNTC_1, tP_100KNTC_1, tP_TC_1, tP_LM35_1, tP_TMP36_1 (Fritz: "Probe 10KNTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_. Other Thermoresistors follow 10KNTC"). Help 138 updated. (thread "Build Probe Add dialogs like Pump")
+- 2026-11-05: Rule 4.2: the Add Device order for every Device (Fritz): a blank Label gets the focus, a filled one is skipped to the Interface; the Interface has a default (the last one used, else the first); Available Ports: true PWM Devices only PWM pins, the others only non-PWM pins (PWM pins only when no other is free). Rule 3.1's single or double underscore before the Tab ID asked. (thread "Build Probe Add dialogs like Pump")
