@@ -1,4 +1,4 @@
-// Pump Cover Overlays (Fritz, 2026-11-02): my_Pump.cover = None (the default), Red, Yellow, Blue, Green, Purple, Orange or User;
+// Pump Cover Overlays (Fritz, 2026-11-02): my_Pump.cover = None (the default), Red, Yellow, Blue, Green, Purple, Orange, White or User;
 // my_Pump.coverColor is the User cover's color. Only pumps have them. Every Skynet no-cover pump drawing has all its covers.
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
@@ -32,7 +32,7 @@ assert.equal(store.getProp('Pump_Wort', 'cover'), 'User');
 assert.equal(store.getProp('Pump_Wort', 'coverColor'), 'Teal');
 eng.stopAll?.();
 
-// every no-cover pump drawing has its six Skynet covers and the User cover, in the same box as the pump
+// every no-cover pump drawing has its seven Skynet covers (White since 2026-11-05) and the User cover, in the same box as the pump
 const pumps = new URL('../media/Images/Skynet/Pumps/', import.meta.url), covers = new URL('Covers/', pumps);
 const vb = f => /viewBox="([^"]+)"/.exec(fs.readFileSync(f, 'utf8'))[1];
 const drawn = fs.readdirSync(pumps).filter(f => /^Pump_.+_Inlet\.svg$/.test(f));

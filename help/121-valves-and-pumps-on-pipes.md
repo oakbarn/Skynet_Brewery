@@ -11,7 +11,7 @@ or the pump's port on one side and out the other, the same in every Orientation.
 - If two pipes would move it different ways (they were drawn out of line with each other), it is left where it is. Move the
   pipes into line and it centers.
 - **Hoses** bend, so a hose simply goes to the valve's or pump's IP.
-- The older ball valve pictures from BruControl (`Valve_Ball_ClosedV-1x1`, `Valve_Ball_ClosedH_1` and their Open ones) and every
+- The older ball valve pictures from BruControl (now `Motorized_TC15_Ball_Valve_Vertical` and `Motorized_TC15_Ball_Valve_Horizontal`) and every
   Skynet valve and pump drawing know where their pipe is. A picture of your own keeps its IPs in the middle of its sides; on the
   **User Defined Motorized Ball Valve** you set the **In and Out IP** spots yourself.
 
