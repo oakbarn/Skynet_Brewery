@@ -191,8 +191,10 @@ What each ID means:
 - Valves have no inlet / outlet side. Starts as OPEN / CLOSED, tap = toggle.
 
 ### 4.3a Skynet Motorized Ball Valve Device (Skynet Template, Rules 5.16 and 5.17)
-- **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: one entry, **Skynet Motorized Ball Valve** (starts
-  Horizontal). Its **Orientation** picks Horizontal, Vertical Left, Vertical Right, Front or 45 degrees (Rule 5.17: each is its own
+- **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: **Motorized Ball Valve, open / closed (relay)**, then
+  **Pick the valve** > **Skynet Motorized Ball Valve** (starts Horizontal). The Add box and Properties are the Pump's drill-down
+  without a Cover (Rule 18.23, Help 126): Graphic, Path (greyed out), Orientation, Toggle and Overlay (greyed out, set by the
+  Template), Database and .API ⬢, Tap water valve, Close all / Open all list. Its **Orientation** picks Horizontal, Vertical Left, Vertical Right, Front or 45 degrees (Rule 5.17: each is its own
   Template, never shown as Master / Daughter). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR, _Front).
 - **Type ID:** E_L_Vlv (set by the Template, so the Add Device box doesn't ask for it).
 - **Fixed by the Template** (not in its Properties; the Brain puts them back on every layout save): Kind = valve, Valve type =
@@ -207,6 +209,10 @@ What each ID means:
   the pipe ends (Rule 5.24, 2026-11-04, Help 123; before, they were on the corners of its box).
 
 ### 4.3c User Defined Motorized Ball Valve (Fritz, 2026-11-03)
+**Since 2026-11-05 (Rule 18.23, Help 126):** picked as **Motorized Ball Valve > Pick the valve > User Defined Motorized Ball Valve**;
+its Add box and Properties are the Pump's drill-down without a Cover: **Path (closed)** with ⬢ In and Out IP spots, **Path (open)**,
+Orientation (Horizontal, Vertical, 45 degrees Left / Right), Toggle, Overlay with Database and .API ⬢, Tap water valve, Close all /
+Open all list. The text below is how it was added before.
 The Valves list row under the Skynet valves (was "Motorized valve, open / closed (relay)"): digitalOut, subtype valve, the user's own
 picture (Picture when on / off, Image Path 1-3, Rule 7.10). **In IP across % / down %** and **Out IP across % / down %** (ipInX, ipInY,
 ipOutX, ipOutY: % of the item's Width and Height) place its two IPs; blank = Skynet places them. The Valves list also ends with
@@ -467,3 +473,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-04: 4.2 Pump: adding a Pump, pick the pump with its picture (Rule 18.13). (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: 4.3a Skynet Motorized Ball Valve: IPs on the pipe ends at 45 degrees too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
 - 2026-11-04: 4.2 Pump: IPs on the inlet and outlet of every Skynet pump picture, the older Riptide-style ones and the sump pump too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
+- 2026-11-05: 4.3a and 4.3c: one Motorized Ball Valve row with a valve picker; the Pump's drill-down Add box and Properties without a Cover (Rule 18.23, Help 126). (thread "Add Motorized Ball Valve drill-down dialog")
