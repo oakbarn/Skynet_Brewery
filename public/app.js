@@ -1921,17 +1921,54 @@ function syncStraight(p) {
 }
 // After a drag: a pipe end that is no longer on its IP (the IP went off the pipe's line) lets go of it. It gets an open end
 // (a coupling), and the toast says which pipes let go so they can be joined again with a fitting.
-function letGoBentEnds() {
+// Only ends that this drag pulled off let go: one already off its IP before the drag (a picture whose ports moved) stays joined,
+// so moving one thing never cuts a pipe somewhere else on the Tab (Fritz, 2026-11-05: the flow stopped).
+const OFF_PX = 1.5;
+function offEnds() {
+  const off = new Set();
+  for (const p of (draft?.graphics || []).filter(g => g.kind === 'pipe' && g.straight && g.workspace === wsName && (g.points || []).length === 2))
+    for (const [k, i] of [['from', 0], ['to', 1]]) { const c = ipPoint(p[k], p.workspace); if (c && Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) > OFF_PX) off.add(p.id + ':' + k); }
+  return off;
+}
+function letGoBentEnds(skip = null) {
   if (!editing || !draft) return;
   const gone = [];
   for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.straight && g.workspace === wsName && (g.points || []).length === 2)) {
     for (const [k, i, j] of [['from', 0, 1], ['to', 1, 0]]) {
+      if (skip?.has(p.id + ':' + k)) continue;
       const c = ipPoint(p[k], p.workspace);
-      if (!c || Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) <= 1.5) continue;
+      if (!c || Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) <= OFF_PX) continue;
       p[k] = endCoupling(p.points, i, j); gone.push(p.name || 'a pipe');
     }
   }
-  if (gone.length) { renderWs(); toast(`${[...new Set(gone)].join(', ')} let go: pipes run only Horizontal, Vertical or 45 (Rule 5.19). Join it again in line, or with an elbow or tee.`, true); }
+  if (gone.length) { renderWs(); toast(`${[...new Set(gone)].join(', ')} let go: pipes run only Horizontal, Vertical or 45 (Rule 5.19). Join it again in line, or with an elbow or tee. An end still within ${REJOIN_PX} px of an IP joins it again on Save layout.`, true); }
+}
+// Save layout joins pipe ends back on (Fritz, 2026-11-05, Rule 5.19): an open end (a coupling only that pipe uses) within
+// REJOIN_PX of an IP joins it again. A straight pipe joins only if it stays Horizontal, Vertical or 45; if not, a free IP point
+// with no other pipe on it moves back onto the pipe end instead. Returns how many ends joined.
+const REJOIN_PX = 14;
+function rejoinEnds() {
+  if (!draft) return 0;
+  let n = 0;
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) {
+    for (const k of ['from', 'to']) {
+      const own = p[k] && ownCoupling(p[k], p); if (!own) continue;
+      const pts = p.points, i = k === 'from' ? 0 : pts.length - 1, j = k === 'from' ? 1 : pts.length - 2, e = pts[i], other = k === 'from' ? p.to : p.from;
+      const near = allIps(p.workspace).filter(q => q.id !== own.id && q.id !== other).map(q => ({ id: q.id, c: q.c || ipPoint(q.id, p.workspace) }))
+        .filter(q => q.c && Math.hypot(q.c[0] - e[0], q.c[1] - e[1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - e[0], a.c[1] - e[1]) - Math.hypot(b.c[0] - e[0], b.c[1] - e[1]));
+      for (const q of near) {
+        if (!p.straight || pts.length !== 2 || onAngle(q.c, pts[j], 0.5)) pts[i] = [...q.c];
+        else {
+          const g = draft.graphics.find(x => x.id === q.id && x.kind === 'ip');
+          if (!g || isFitting(g) || g.attachTo || g.locked || pipesOn(g.id, p.workspace).length) continue;
+          g.x = (g.x || 0) + e[0] - q.c[0]; g.y = (g.y || 0) + e[1] - q.c[1];
+        }
+        p[k] = q.id; draft.graphics = draft.graphics.filter(x => x !== own); n++;
+        break;
+      }
+    }
+  }
+  return n;
 }
 // A hose is a pipe that bends: a smooth curve through its points (Catmull-Rom spline drawn as Bezier curves)
 function hoseD(pts) {
@@ -2149,6 +2186,9 @@ $('#ws').addEventListener('pointermove', ev => {
     if (Math.hypot(q[0] - drag.start[0], q[1] - drag.start[1]) > 5) { toast(drag.why, true); drag = null; }
     return;
   }
+  // a click or double-click that wobbles a few pixels is not a drag (Fritz, 2026-11-05: opening an IP moved it off its pipes)
+  if (!drag.moved && downAt && drag.mode !== 'point' && Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) < DRAG_DEAD_PX) return;
+  if (!drag.moved) drag.offBefore = offEnds();      // pipe ends already off their IPs before this drag are not this drag's doing
   drag.moved = true;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
   let mx = 0, my = 0;
@@ -2176,6 +2216,9 @@ $('#ws').addEventListener('pointermove', ev => {
   if (drag.mode === 'point') { if (isQdHose(drag.item) && drag.i === drag.item.points.length - 1) drag.item.to = null; drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
+const DRAG_DEAD_PX = 4;          // screen pixels
+let downAt = null;
+window.addEventListener('pointerdown', ev => { downAt = [ev.clientX, ev.clientY]; }, true);
 // Snap to align (Fritz, 2026-10-28): while something with IPs is moved, when one of its IPs comes within 10 px of an IP of
 // something else on the Tab (a pipe end, a fitting, a valve, a vessel port), it jumps so the two IPs sit exactly on each other.
 // Returns the extra [x, y] shift, or [0, 0] when nothing is that close.
@@ -2233,7 +2276,7 @@ window.addEventListener('pointerup', () => {
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
   }
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
-  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds();     // Rule 5.19: a pipe never bends to follow
+  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
@@ -3765,9 +3808,10 @@ function renameNote(r) {
 }
 const saveLayout = guard(async () => {
   if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
+  const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
-  const note = renameNote(r);
+  const note = renameNote(r) + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
   toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note, false, note ? 9000 : 0); editing = false; await load(); setEditing(false);
 });
 // the Update Version switch is remembered on this browser
