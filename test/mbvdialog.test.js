@@ -39,3 +39,9 @@ assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'valve', template: 
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'valve', template: 'Skynet_Motorized_Butterfly_Valve_H', templateCls: 'skynet' }), ['skynet-device-templates']);
 assert.ok(fs.existsSync(new URL('../help/128-motorized-ball-valve-device-properties.md', import.meta.url)));
 console.log('mbvdialog tests passed');
+// Fritz, 2026-11-05: the Interface and Port are the wiring: greyed out for good once added, no ✏ Change (Pumps too)
+{
+  const set = app.slice(app.indexOf("  if (x?.set && out[1]) {"), app.indexOf("  if (x && out[1]) {\n    const icons"));
+  assert.ok(set.includes('i.disabled = true') && !set.includes("'✏ Change'") && !set.includes('i.disabled = false'), 'no ✏ Change beside the Interface and Port');
+  console.log('fixed wiring tests passed');
+}
