@@ -454,6 +454,16 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Holes:** Thermowell (upper, front center, probe built in), Outlet (lower, front bottom center, a plain IP), Heating element (right side, glows while on).
 - Label starts as Kettle. The base of every future Skynet Integrated Electric Kettle (later ones add fittings and a valve as built-in parts). The kettle itself can still be bundled with other things.
 
+### 5.3 Vessel Device (built from a Vessel Widget Template)
+- **Made by:** placing a Vessel Widget Template (Skynet_Vessel_Widget, or a kettle Template built from it). It goes on the Build Tab as a Vessel Device (Skynet Rule 5.31, one exception to Rule 5.7; Help 133).
+- **Picture:** the Template's (Skynet_Vessel_Widget.svg: 15 IPs from Fritz's Vessel IP Template drawing).
+- **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its OneWire number). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
+- **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_eVlv_HLT_Right_Sparge__BH`.
+- **Flow:** an Element, Probe or Thermowell closes its IP; a Valve passes flow only while it is on.
+- **HERMS coil:** Left or Right, drawn under that side's HERMS In and Out IPs; the two IPs are the coil's ends.
+- **Locked once built and saved** on a Tab: IPs (Place), parts and HERMS coil can't be changed; no un-bundling.
+- The **RIMS tube** (5.1) is a small Vessel Device Template whose Element and Probe are already set and locked (Fritz, 2026-11-05).
+
 ---
 
 ## 6. Reserved, not built yet
@@ -484,3 +494,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-04: 4.3a Skynet Motorized Ball Valve: IPs on the pipe ends at 45 degrees too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
 - 2026-11-04: 4.2 Pump: IPs on the inlet and outlet of every Skynet pump picture, the older Riptide-style ones and the sump pump too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
 - 2026-11-05: 4.3a and 4.3c: one Motorized Ball Valve row with a valve picker; the Pump's drill-down Add box and Properties without a Cover (Rule 18.23, Help 128). (thread "Add Motorized Ball Valve drill-down dialog")
+- 2026-11-05: Added 5.3 Vessel Device (built from a Vessel Widget Template; parts built into its IPs, HERMS coil, locked once built and saved; Skynet Rule 5.31).
