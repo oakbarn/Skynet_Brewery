@@ -7,7 +7,7 @@ import fs from 'node:fs'; import path from 'node:path';
 const dir = path.join(import.meta.dirname, '..', 'media', 'Images', 'Skynet', 'Pumps');
 const pumps = fs.readdirSync(dir).filter(f => /^Pump_.*\.svg$/.test(f) && !/Sump/.test(f)).map(f => path.join(dir, f));
 const covers = fs.readdirSync(path.join(dir, 'Covers')).filter(f => f.endsWith('.svg')).map(f => path.join(dir, 'Covers', f));
-assert.ok(pumps.length >= 25 && covers.length >= 80, 'found the pump pictures and covers');
+assert.ok(pumps.length >= 25 && covers.length >= 24, 'found the pump pictures and covers');
 for (const f of [...pumps, ...covers]) {
   const t = fs.readFileSync(f, 'utf8'), root = t.match(/<svg[^>]*>/)[0];
   assert.ok(root.includes('viewBox="0 0 300 300"') && root.includes('data-pump-standard="1"'), `${path.basename(f)} is in the 300 x 300 Pump Standard box`);

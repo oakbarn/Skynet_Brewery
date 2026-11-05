@@ -834,11 +834,13 @@ const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_Marc
 // pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
 // the bottom (60, 117), out the top of the riser on its right (110, 12).
 const OLD_PUMP_FLOW = { Rip: PUMP_STD, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
-// Pump Cover Overlays (Fritz, 2026-11-02): a cover drawn over a Skynet pump drawing (the no-cover ones above), between the
-// picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
-// .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
-// is the outline and shading only; the panel fills the cover's shape (taken from the Red one) with the user's color.
-const PUMP_COVERS = ['Red', 'Yellow', 'Blue', 'Green', 'Purple', 'Orange', 'White'];     // White is RGB 250 250 250 (Fritz, 2026-11-05)
+// Pump Cover Overlays (Fritz, 2026-11-02; one per color since 2026-11-05, Rule 7.13): a cover drawn over a Skynet pump drawing
+// (the no-cover ones above), between the picture and the On overlay, shown on and off. .cover picks it: None (the default), a
+// Skynet color, or User, whose color is .coverColor (any RGB). A cover is a color, not a file: every cover fits every Skynet pump.
+// Each pump has its cover's outline and shading (Covers/<pump>_Cover.svg) and its shape (<pump>_Cover_Shape.svg); the panel fills
+// the shape with the cover's color, so a new color needs no new drawings.
+const PUMP_COVER_COLORS = { Red: '#d32f2f', Yellow: '#f6c21c', Blue: '#1e63c8', Green: '#2e9e44', Purple: '#7b3fa8', Orange: '#f57c00', White: '#fafafa' };     // White is RGB 250 250 250 (Fritz, 2026-11-05)
+const PUMP_COVERS = Object.keys(PUMP_COVER_COLORS);
 const COVER_CHOICES = [['None', 'None (no cover)'], ...PUMP_COVERS.map(c => [c, c + ' cover']), ['User', 'User cover (pick its color below)']];
 const COVER_DIR = 'Images/Skynet/Pumps/Covers/';
 const coverPump = path => { const m = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/); return m && PUMP_FLOW[m[1]] ? m[1] : null; };
@@ -847,9 +849,9 @@ function coverOf(e, v) {
   const pump = coverPump(v.imageoff || e.imageOff || v.imageon || e.imageOn);
   const want = String(v.cover || e.cover || 'None').trim().toLowerCase();
   if (!pump || want === 'none' || !want) return null;
-  if (want === 'user') return { file: `${COVER_DIR}${pump}_Cover_User.svg`, mask: `${COVER_DIR}${pump}_Cover_Red.svg`, color: v.covercolor || e.coverColor || '#808080' };
-  const c = PUMP_COVERS.find(x => x.toLowerCase() === want);
-  return c ? { file: `${COVER_DIR}${pump}_Cover_${c}.svg` } : null;
+  const c = want === 'user' ? null : PUMP_COVERS.find(x => x.toLowerCase() === want);
+  const color = want === 'user' ? v.covercolor || e.coverColor || '#808080' : c && PUMP_COVER_COLORS[c];
+  return color ? { file: `${COVER_DIR}${pump}_Cover.svg`, mask: `${COVER_DIR}${pump}_Cover_Shape.svg`, color } : null;
 }
 // Add Pump step 2 (Fritz's drawing, 2026-11-04): pick the pump. Each row has its picture; the pick is the Pump's Picture
 // (one of the Skynet brew pump drawings above, Help 104) and the Add box's title.

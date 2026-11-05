@@ -1012,11 +1012,14 @@ An Alarm made before 2026-11-02 keeps working as before.
 
 7.13 **Pump Cover Overlays** (Fritz, 2026-11-02, thread "Draw SVGs for common brew pumps", Help 111): a pump picture is drawn in
 layers, bottom up: the **pump picture** (a Skynet no-cover pump drawing), the **Cover overlay**, then the **On overlay**. The cover
-has a see-through background and shows on and off. Skynet covers come in **Red, Yellow, Blue, Green, Purple and Orange** for
-every Skynet no-cover pump drawing (Images/Skynet/Pumps/Covers/), and are Skynet items. **White** (RGB 250 250 250, #FAFAFA) was
-added by Fritz 2026-11-05; every White pump cover is that color. The **User Cover** is one more choice
-whose cover color the user sets (standard color list). A Pump Device has **.cover** (None, Red, Yellow, Blue, Green, Purple,
-Orange, White, User; **None is the default**) and **.coverColor** (the User cover's color).
+has a see-through background and shows on and off. **One cover for each color, and every cover fits every Skynet pump** (Fritz,
+2026-11-05: "1 of each Color that I ask For and User created ones that just change the color using RGB. All Covers can overlay any
+Pump"). A cover is a color, not a drawing: each Skynet no-cover pump drawing has one cover outline and one cover shape
+(Images/Skynet/Pumps/Covers/), and Skynet fills the shape with the cover's color. The **Skynet colors** are the ones Fritz asks for:
+**Red, Yellow, Blue, Green, Purple, Orange and White** (White is RGB 250 250 250, #FAFAFA). The **User Cover** is the same cover in
+any color the user sets (standard color list or Custom RGB). A new color needs no new drawings. A Pump Device has **.cover** (None,
+Red, Yellow, Blue, Green, Purple, Orange, White, User; **None is the default**) and **.coverColor** (the User cover's color).
+*Replaced (2026-11-05):* each pump had its own cover file in every color (about 96 files); those are in Delete/.
 
 7.14 **Every new Alarm meets the new Alarm standard** (Rule 7.12: a Basic Skynet Alarm or a User Alarm). **Old Alarms**
 (made before 2026-11-02, in the samples and Schemas) **are changed to the new Basic format one by one**, using Basic Alarm
@@ -1769,3 +1772,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 5.25: a Tee, Instrument Tee or Cross dropped on a straight pipe cuts it there (turned so its run goes along the pipe). Rule 5.26: a valve or pump dragged off its pipes onto another pipe now cuts it (its old pipes let go first); one still joined says why. Help 124 and 125 updated; no new Help number. (thread "Fix Tee and valve not splitting a pipe")
 - 2026-11-05: Added Rule 5.30 (tees with a Temperature Probe are the size of the TC Pipe Fittings tee of their shape with IPs on the same spots, Rotate, and cut a pipe like a tee; a tee or probe tee dropped on a hose cuts the hose; a Thermowell has one IP on its cap face and snaps onto an IP; on a front facing IP it shows from the front; a plain Temperature Probe on a front facing IP has an implicit Thermowell). Three Vessel sample shows its probes. Help 132; next free Help number 133. (thread "Add IPs to probe thermowells and tees")
 - 2026-11-05: Rule 2.7: White in any color picker is RGB 250 250 250 (#FAFAFA), as for the pump covers (Rule 7.13). Three Vessel sample: the brew status boxes are Black with White text, and the Readings boxes (Blue with White text) moved to a new Reporting Tab. No new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
+- 2026-11-05: Rule 7.13 changed (Fritz): one cover per color plus User (any RGB), and every cover fits every Skynet pump; a cover is a color filled into each pump's cover shape, so the per-pump, per-color files moved to Delete/. Help 111 updated. (thread "Clean up SVG names and retire old pictures")
