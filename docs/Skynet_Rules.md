@@ -820,7 +820,32 @@ Help 132).
   40 x 40), its IP in the middle. Dragged off, it shows from the side again.
 - **A plain Temperature Probe dropped with its middle on a front facing IP has an implicit Thermowell**: it becomes a Thermowell seen
   from the front. Dragged off again, it is the plain probe it was (its look and size come back).
-- In the samples, the Three Vessel sample shows a Short Thermowell picture on each vessel beside its reading.
+- In the samples, the Three Vessel sample shows a Short Thermowell picture on each vessel beside its reading (since Rule 5.31, drawn by its Vessel Widget).
+
+5.31 **The Vessel Widget class: one Master Template with every spot, each with a Place slider** (Fritz, 2026-11-05: "New Class
+Vessel Widget. Start making it with the Vessels you have on 3 Vessel Sample. There will be Skynet Templates that will have IPs pre
+placed and Locked in position (user cannot change). There will be one Temperature Probe (Front or Thermowell) ... that is Place or Not
+Place ... There will be one Element Port that also have the Place Slider. Make the IPs the same with Place Sliders then there will be
+only a single Template to start that would have all the IPs I can think of ... Set all the Place slider to true on the Master
+Template"; thread "Build the Vessel Widget class", Help 133).
+- **One Skynet Template to start, Skynet_Vessel_Widget** (the Main Template, Rule 5.17; the word Master is not shown). Its picture is
+  the Three Vessel sample's tank (260 x 320) drawn the Skynet way (Rule 7.4, 5.12: Images/Skynet/Vessels/Skynet_Vessel_Widget.svg).
+  Its spots: the **IPs** Outlet (center bottom), Second Outlet, Tangential, Top Inlet, Sparge, CIP and Steam Slayer; **one Temperature
+  Probe**, a **Thermowell** (in from the side) or **Front** (seen from the front); **one Element Port**. **Every Place slider is on**
+  on this Template.
+- **Place** (a switch for each spot, in Vessel Widget Properties): on = it is on the vessel and works (an IP joins pipes, hoses and
+  fittings; the Probe and Element show their pictures, and the Element glows while its heater is on). Off = it is not there: nothing
+  shows on a Tab and nothing (a pipe, a Process) can use or change it; only in Edit layout a faint mark shows where it would go.
+- **The spots are set by the Template and locked:** a user can't move an IP, the Probe or the Element Port.
+- **IPs on a vessel** (Fritz, 2026-11-05): an IP is a TC, NPT or BSP outlet or inlet; the type does not matter, it is a place to
+  connect another Device or Widget with its own IP (a Pipe, Hose, Fitting or anything with an IP).
+- **The plan** (Fritz, 2026-11-05): more kettle Templates are built from the Main one with their Place sliders set to match real
+  kettles, so a user picks the one closest to theirs; a user can change the Place sliders on their copy and add Devices and Widgets of
+  their own, and Bundle them into a User Bundled Template (Rule 5.7).
+- A Placed Probe or Element links a Device the Schema already has. *Waiting on Fritz's pick (Rule 5.7: "A Skynet Vessel Widget has
+  no Devices, only built-in IPs"):* a Placed Probe making its own Device (Interface, Port, Probe Type), and the Element likewise.
+- The Three Vessel sample's HLT, Mash tun and Boil kettle are Vessel Widgets (Outlet and Thermowell Placed; the Element on the HLT
+  and Boil kettle; the Top Inlet on the Mash tun and Boil kettle).
 
 ---
 
@@ -1156,7 +1181,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **127**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **134**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1768,3 +1793,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 2.7: White in any color picker is RGB 250 250 250 (#FAFAFA), as for the pump covers (Rule 7.13). Three Vessel sample: the brew status boxes are Black with White text, and the Readings boxes (Blue with White text) moved to a new Reporting Tab. No new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Rule 7.13 changed (Fritz): one cover per color plus User (any RGB), and every cover fits every Skynet pump; a cover is a color filled into each pump's cover shape, so the per-pump, per-color files moved to Delete/. Help 111 updated. (thread "Clean up SVG names and retire old pictures")
 - 2026-11-05: The test pump on the valve spots is retired (Fritz: the Pump Standard, Rule 5.27, stays). Pump_1 in the Three Vessel One Pump sample is back on Pump_Red_Rip_Off.svg; the test picture went to Delete/ (Rule 15.3). (thread "Standardize valve size and IPs")
+- 2026-11-05: Added Rule 5.31, the Vessel Widget class (one Skynet_Vessel_Widget Template, a Place slider on every IP, the Temperature Probe and the Element Port; spots locked). The Three Vessel sample uses it. Rule 11.1 next free Help number now 134. (thread "Build the Vessel Widget class", Help 133)
