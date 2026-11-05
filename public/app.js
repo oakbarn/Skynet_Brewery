@@ -681,6 +681,9 @@ const pressOverride = guard(async () => {
 
 // variable classes: shared and gGlobal (gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
 const isVarEl = e => ['shared', 'gGlobal'].includes(e?.type);
+// Value, Time and DateTime Widgets (Fritz, 2026-11-05, Rule 1.23): one value on a Tab, set by a tap; its data type comes from its type
+const DATA_W = { valueWidget: { dt: 'value', word: 'Value', w: 170, h: 56 }, timeWidget: { dt: 'time', word: 'Time', w: 170, h: 56 }, dateTimeWidget: { dt: 'datetime', word: 'DateTime', w: 230, h: 56 } };
+const isDataW = e => !!e && e.type in DATA_W;
 const vkKind = e => e?.type === 'gGlobal' ? (e.kind || 'value') : null;
 // the button look of a Push Button or Pulse Button (Semi_Widgets_Devices, public/semi.js): the same as the gGlobal ones
 const semiLook = e => ['pushButton', 'pulseButton'].includes(e?.type) ? SEMI_KINDS[e.type].look : null;
@@ -1436,6 +1439,8 @@ function fillEl(n, e0) {
       }
       n.classList.toggle('longtext', vkKind(e) === 'longstring');
       break;
+    case 'valueWidget': case 'timeWidget': case 'dateTimeWidget':
+      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
@@ -1606,6 +1611,7 @@ function tapAction(e) {
     case 'alarm': return 'acknowledge';
     case 'soundPlayer': return 'toggle';
     case 'shared': return e.readOnly ? 'none' : 'dialog';
+    case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return e.readOnly ? 'none' : 'dialog';
     case 'gGlobal':
       if (e.readOnly) return 'none';
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
@@ -1773,10 +1779,11 @@ function valueDialog(t) {
   }
   if (isBoolEl(t)) return choose(title, [['ON', true], ['OFF', false]], isOn(t.name)).then(r => r !== undefined && setProp(t.name, boolProp(t), r));
   const numDev = ['pwmOut', 'analogOut', 'analogIn', 'temperature'].includes(t.type);
-  if (!(isVarEl(t) || numDev) || t.readOnly) return;
+  if (!(isVarEl(t) || numDev || isDataW(t)) || t.readOnly) return;
   if (numDev) t = { ...t, dataType: 'value', units: t.type === 'pwmOut' ? '%' : t.units,
     min: t.type === 'pwmOut' ? 0 : t.type === 'analogOut' ? (t.rangeLow ?? 0) : t.min, max: t.type === 'pwmOut' ? 100 : t.type === 'analogOut' ? (t.rangeHigh ?? 100) : t.max };
   const d = $('#valDlg'); d.innerHTML = '';
+  if (isDataW(t)) t = { ...t, dataType: DATA_W[t.type].dt };
   const num = t.dataType === 'value', k = vkKind(t);
   const inp = t.dataType === 'string' && k !== 'graphic'
     ? h('textarea', { class: 'vdInput', rows: k === 'longstring' ? 12 : 3 }, v.value ?? '')
@@ -3014,6 +3021,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (!D.visible) e.visibility = 'hidden';
   if (D.wrap) e.wrap = true;
   if (type === 'shared') e.dataType = 'value';
+  if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = d.word + '_' + i; e.dataType = d.dt; if (type === 'valueWidget') e.precision = 2; }     // a Label from the start (Rule 18.15)
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
   if (SEMI_KINDS[type] && !kind) { e.w = SEMI_KINDS[type].w; e.h = SEMI_KINDS[type].h; }
@@ -3166,6 +3174,7 @@ const DEV_TYPES = () => [
 ].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], typeof r[1] === 'function' ? r[1] : () => addThing(r[1], r[2], r[3], r[0])])]);
 const WGT_TYPES = () => [
   ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
+  ['dataw', 'Value, Time and DateTime Widgets', Object.entries(DATA_W).map(([t, d]) => [`${d.word} Widget (shows a ${d.word.toLowerCase()}; a tap sets it)`, () => addThing(t, 'w_' + d.word)])],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
   ['semi', 'Semi_Widgets_Devices (Switch, buttons, LED, Manual Valve)', [...amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
     ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')]]],
@@ -4653,6 +4662,22 @@ function mbvDeviceFields(it, item) {
 // a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
 const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
 
+// Value, Time and DateTime Widget Properties (Fritz, 2026-11-05, Rule 1.23): the dialog pattern of the Timer Widget (Rule 18)
+function dataWidgetFields(it) {
+  const d = DATA_W[it.type], val = it.type === 'valueWidget';
+  const start = { valueWidget: 'Start value (a number)', timeWidget: 'Start value (hh:mm:ss)', dateTimeWidget: 'Start value (mm/dd/yyyy hh:mm:ss)' }[it.type];
+  const al = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
+  return [['name', 'Name', 'text', null, false, 'b'],
+    ['_nm', `A ${d.word} Widget shows one ${d.word.toLowerCase()} on its Tab; a tap sets it (unless Read only). Its Name is how a Process uses it: name = Something.`, 'infonote', 'dataw'],
+    ['_vb', d.word, 'box'], ['initial', start, val ? 'num' : 'text'],
+    ...(val ? [['units', 'Units (gal, pH, °F ...)', 'text'], ['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] : []),
+    ['readOnly', 'Read only (a tap does nothing; a Process sets it)', 'bool'],
+    ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', al],
+    ['_lb', '', 'box'], ['label', 'Label (never blank)', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show', null, false, 'b'], ['nameFontSize', 'Font size', 'num'], ['nameFontFamily', 'Font', 'sel', FONTS],
+    ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'], ['nameAlign', 'Alignment', 'sel', al.map(([k, l]) => [k.replace('Middle', 'Top'), l])],
+    ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
+    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
+}
 function fieldsFor(item) {
   let fs = fieldsOf(item);
   if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
@@ -4954,6 +4979,31 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
       ...SOURCES.map(([k, l]) => h('option', { value: k, ...(k === src ? { selected: true } : {}) }, l)));
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
     input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv);
+  }
+  else if (kind === 'dbgroup') {   // a Database Group (Rule 6.14): the Groups, ➕ Add new Group…, and ✏ Change name (every Process follows)
+    const gs = S.config.dbGroups || [];
+    const s = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(pick a Group)'),
+      ...gs.map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.name)), h('option', { value: '__add__' }, '➕ Add new Group…'));
+    const ren = h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group Old_Name follows (Update All)', onclick: guard(async ev => {
+      ev.preventDefault();
+      const g = gs.find(x => x.id === s.value); if (!g) return toast('Pick a Group first', true);
+      const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process with send_db_group ${g.name} is changed to it.`, g.name) || '').trim();
+      if (!to || to === g.name) return;
+      const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
+      g.name = r.group.name; s.selectedOptions[0].textContent = g.name;
+      toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
+    }) }, '✏ Change name');
+    s.addEventListener('change', guard(async () => {
+      if (s.value !== '__add__') return;
+      const name = (prompt('Name of the new Group (letters, digits and _, like Readings). A Process sends it with send_db_group Name.') || '').trim();
+      if (!name) { s.value = v || ''; return; }
+      try {
+        const r = await api('POST', '/ui/dbgroups', { name });
+        S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
+        s.insertBefore(h('option', { value: r.group.id }, r.group.name), s.querySelector('option[value="__add__"]')); s.value = r.group.id;
+      } catch (e) { s.value = v || ''; throw e; }
+    }));
+    input = h('div', { class: 'cpick' }, s, ren);
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
@@ -5323,6 +5373,13 @@ const INFO = {
     ['No name and no background picture', '. Manual valves still wait for their click or Done, and Looper Processes (background loops) are left alone.']],
     attributes: [['none', 'a Process does not use it: a person presses it']],
     example: 'wait Kettle_Temp >= 152' },
+  dataw: { title: 'Value, Time and DateTime Widgets', properties: [
+    ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
+    ['Name', ' (w_Value_N, w_Time_N, w_DateTime_N to start) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
+    ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
+    ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
+    ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; In a Group sends it with send_db_group.'],
+    ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']] },
   timer: { title: 'Timer Widget', properties: [
     ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
     ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
@@ -5614,7 +5671,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const TYPE_TITLE = { valueWidget: 'Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -5627,7 +5684,8 @@ async function editItem(kind, id) {
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
-    if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];       // Timer Widget Properties (Fritz, 2026-10-29)
+    if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];
+    if (isDataW(it)) return [...dataWidgetFields(it), ...dbFields(it)];       // Value, Time and DateTime Widget Properties (Rule 1.23)       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Motorized Ball Valve: the same drill-down (Rule 18.23)
@@ -5778,7 +5836,7 @@ async function editItem(kind, id) {
       }
       if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
-      if (isDrillDev(item) && !String(work.label ?? '').trim()) work.label = work.name || item.name;     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
+      if ((isDrillDev(item) || isDataW(item)) && !String(work.label ?? '').trim()) work.label = work.name || item.name;     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
       if (follow) work.name = deviceSuggestion(work, item) || work.name; else autoNamed.delete(item);
@@ -6556,8 +6614,8 @@ $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 
 // ---------------------------------------------------------------- variables page: gGlobal, shared
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
-const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', process: 'When a Process starts',
-  once: 'Once', datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
+const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', clicked: 'When Clicked (each time someone sets it on its Tab)', process: 'When a Process starts',
+  group: 'In a Group (send_db_group Group_Name sends the Group)', datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
   days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
@@ -6568,6 +6626,7 @@ function logSummary(lg) {
   if (f === 'process') return lg.process ? `When "${lg.process}" starts` : 'When a Process starts (none picked)';
   if (f === 'datetime') return `At ${lg.at || '?'}`;
   if (f === 'clock') return `Every day at ${lg.at || '?'}`;
+  if (f === 'group') { const g = (S.config.dbGroups || []).find(x => x.id === lg.group); return g ? `In the Group ${g.name}` : 'In a Group (none picked)'; }
   if (!TIME_MODES.includes(f)) return LOG_LABEL[f] || f;
   const every = f === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[f]}`;
   return every;
@@ -6581,19 +6640,20 @@ function dbFields(it) {
   return [['', 'Database and .API', 'box'],
     ['db_frequency', 'Send to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m]), true],
     ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])]]] : []),
+    ...(f === 'group' ? [['db_group', 'Group', 'dbgroup']] : []),
     ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N (a whole number, 1 or more)', 'num']] : []),
     ...(f === 'hms' ? [['db_interval', 'Every (00:00:00)', 'text']] : []),
     ...(f === 'clock' ? [['db_at', 'At clock time, e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
     ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]]] : []),
     ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
-    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now.', 'note'],
+    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now; send_db_group Group_Name sends every item In that Group.', 'note'],
     ['', '', 'boxend']];
 }
 function dbToWork(work) {
   const d = work.database || {};
   work.db_frequency = d.frequency || 'none';
-  for (const k of ['every', 'interval', 'at', 'process', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
   // an older "Every 1 day at 12 AM" opens as At clock time 12 AM (the Every choices have no clock time now)
   if (d.at && work.db_frequency === 'days' && (d.every === undefined || +d.every === 1)) { work.db_frequency = 'clock'; delete work.db_every; }
   work.api = work.api || 'off';
@@ -6602,17 +6662,18 @@ function dbToWork(work) {
 // db_ fields -> work.database (checked); throws a message for a setting that can't work
 function dbFromWork(work) {
   const f = work.db_frequency || 'none', d = { frequency: f };
-  for (const k of ['every', 'interval', 'at', 'process', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
+  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
   delete work.db_frequency;
   if (!work.api || work.api === 'off') delete work.api;
   if (f === 'none' || !f) { delete work.database; return; }
   if (f === 'process' && !d.process) throw new Error('Database: pick the Process that sends this value');
+  if (f === 'group' && !(S.config.dbGroups || []).some(g => g.id === d.group)) throw new Error('Database: pick the Group (or ➕ Add new Group…)');
   if (f === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(d.interval || '')) throw new Error('Database: the interval must look like 00:05:00');
   if (TIME_MODES.includes(f) && f !== 'hms' && d.every !== undefined && !(Number.isInteger(d.every) && d.every >= 1)) throw new Error('Database: N must be a whole number, 1 or more');
   if (f === 'clock' && !validClock(d.at || '')) throw new Error('Database: clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30');
   if (f === 'datetime' && !/^\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}(:\d{2})?$/.test(d.at || '')) throw new Error('Database: the date and time must look like 2026-11-01T06:00');
   for (const k of Object.keys(d)) {
-    const keep = { frequency: true, attribute: true, process: f === 'process', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
+    const keep = { frequency: true, attribute: true, process: f === 'process', group: f === 'group', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
     if (!keep) delete d[k];
   }
   work.database = d;
@@ -6628,8 +6689,7 @@ function varRow(e) {
   if (e.type === 'gGlobal') {
     const lg = e.database || { frequency: 'none' };
     cells.push(h('td', {}, logSummary(lg)), h('td', {}, API_LABEL[e.api || 'off'].replace(/ \(.*\)$/, '')),
-      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now'),
-        lg.frequency === 'once' ? h('button', { title: 'Send one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
+      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now')));
   }
   const open = e.type === 'gGlobal' && isVarKind(e.kind) ? () => guard(editGlobal)(e) : () => openProps('el', e.name);
   return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(open) }, ...cells);
