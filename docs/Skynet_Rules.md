@@ -218,6 +218,10 @@ button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
+*Changed (Fritz, 2026-11-05: "Locked Vessels cannot be moved with a Mouse but can be moved by there x y attributes"):* a 🔒
+**locked Vessel** can't be moved with the mouse, but a new **X** or **Y** typed in its Properties moves it, to the pixel (moving
+something 1 pixel left can look much better on the screen). Its IPs, joined fittings and End Caps go with it, as with a drag,
+and it stays locked. A bundled vessel's Properties have X and Y too. Pipe ends left off its IPs let go (Rule 5.19). (Help 56)
 
 2.13 **Phones and tablets do not move pictures** in Edit layout; they only select, and holding a
 finger opens Properties. A switch on ☰ Menu > Default can allow it. (2026-10-21, PR #59)
@@ -1666,3 +1670,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 18.13 (and 18.21, 18.23): once a Pump or Motorized Ball Valve is added, its Interface and Port are greyed out for good; ✏ Change beside them is gone (physical wiring; the hidden key stays, only the Name changes with ✏ Change name). (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Rule 18.23 and 6.15: the Motorized Ball Valve dialogs match the Pump's (Orientation and Toggle on one line; Tap water valve, On Close List and On Open List on one line, in the Add box too); the switches are renamed On Close List / On Open List; the valve Type ID E_L_Vlv becomes eVlv (old names kept, Rule 3.5). Help 128 and 46 updated. (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Rule 18.15 changed (Fritz: "A Device or Widget must have a label. Some Devices or Widgets will have a Label Auto filled in following a pattern ... Type_n where n is the next number ... A Label cannot be blank"; "Pumps do NOT have Auto Fill, Valves do"): a Motorized Ball Valve's Label starts as mBV_n; a filled Label sends the focus to the next field. Rules 4.2 and 18.23 follow. Help 128 updated. (thread "Add Motorized Ball Valve drill-down dialog")
+- 2026-11-05: Rule 2.12 changed (Fritz): a 🔒 locked Vessel can't be moved with the mouse but moves by its X and Y in Properties (to the pixel), with its IPs, joined fittings and End Caps; bundled vessels' Properties got X and Y. Other locked items are as before. Help 56 updated; no new Help number. (thread "Let locked vessels move by X and Y")
