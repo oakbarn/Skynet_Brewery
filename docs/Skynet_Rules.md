@@ -213,6 +213,8 @@ was closed. Do not offer it again.
 2.11 **Right-click gives Help** when the item can't move (outside Edit layout, a locked item, an
 empty spot, the Menu Bar). A yellow "?" sits by ☰ Menu tab headings and Properties titles, **but
 never on a Tab itself.** (2026-10-21, PR #57)
+*Exception (2026-11-05, waiting on Fritz's pick):* the free end of a Quick Disconnect hose moves outside Edit layout, and the right
+button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
@@ -482,7 +484,7 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   the kind and then Add Device. Then **⧉ Clone Device** (a list of the Devices on other Tabs).
 - **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕**, **Text ➕**, **Manual Valve ➕**,
   **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
-- **Row 2:** Draw pipe, Draw hose, **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
+- **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
   All, Unlock All, Tab settings, New tab, **👻 Hidden Tab** and its **orange ?** (a pop-up with how Edit layout
   works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Save Build.
 - **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
@@ -656,8 +658,8 @@ Help 121). A pipe joined to a valve or pump runs straight on through it: the IPs
 and the valve or pump is moved across (left or right on an up-and-down pipe, up or down on a level one) until each IP is on its pipe's
 line. **The pipes stay where they are; the valve or pump moves.** This is done for every Tab as it is shown and once when Edit layout
 opens, so Save layout keeps it. Two pipes that would move it different ways (drawn out of line) leave it as it is. Hoses bend, so a
-hose just goes to the IP. The older ball valve pictures (Valve_Ball_..._H_1 and ...V-1x1, from BruControl) have their pipe spot set
-too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides, or where the User Defined valve's In and
+hose just goes to the IP. The older ball valve pictures (from BruControl; since 2026-11-05 named Motorized_TC15_Ball_Valve_Horizontal and _Vertical)
+have their pipe spot set too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides, or where the User Defined valve's In and
 Out IP spots put them.
 
 5.24 **Ball valves have two IPs, one at each pipe end, in every Orientation, and every Skynet Pump has IPs on its inlet and outlet** (Fritz, 2026-11-04: "Ball Valve Devices and Widgets
@@ -717,6 +719,25 @@ straight Horizontal or Vertical pipe (or added right on one):
   to choose which side its inlet is on.
 - Nothing is cut when the item is already on a pipe, is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
+
+5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
+IP of a Valve. Many home brewers have a manifold but move a pipe from source to source ... a special hose that connects to a Pump but
+can be run to a vessel or an IP. The hose end could be run anytime, not just in edit mode"; thread "Add movable quick disconnect hose",
+Help 127).
+- **The Quick Disconnect Widget** sits on an IP, most often a valve end. It is Fritz's **bold red four-point star with a grey center**
+  (his drawing, 2026-11-05: "I want it easy to see on a Tab"), never smaller than 40 px. In Edit layout it snaps onto the nearest IP
+  within 30 px and follows it; dragged off, it comes off. With a hose on it, it passes flow to the IP under it; with nothing on it, it
+  is shut (no flow).
+- **The Quick Disconnect hose** (**Draw QD hose**, Edit layout bar) hangs from a **pump IP**. Its **free end can be moved at any time,
+  not only in Edit layout**: with the **right mouse button** (Rule 2.9) on a computer, a **finger** on a phone or tablet (this is
+  running the brewery, so it works in run mode, Rule 2.35). Dropped on an IP or a Quick Disconnect it joins it (a Quick Disconnect wins
+  over the IP under it); anywhere in the **top third of a vessel** it is the same as putting the hose in the vessel's top (the whole top
+  third is one big IP); anywhere else the end is loose and no flow shows. Operators and admins can move it, the move is kept at once
+  for every screen, and a 🔒 locked hose does not move.
+- Flow and Flow Colors are as for every hose (Rules 5.10, 5.21). A hose in a vessel's top is an end of the line like a vessel port;
+  flow pumped from it takes that vessel's Out flow color.
+- **Exception to Rule 2.11** (waiting on Fritz's pick: this exception, or a change to Rule 2.11): only the free end of a Quick
+  Disconnect hose moves outside Edit layout; everything else on a Tab still moves only in Edit layout.
 
 ---
 
@@ -850,6 +871,8 @@ Motors, Lights_LEDs, Hop_Infusion, Other_Equipment, Miscellaneous and On_Off. (2
 
 7.5 **Keep the two-picture (On and Off) code** until Fritz says to delete it, even though On overlays
 now exist. Ask before deleting any On picture files. (2026-10-22, PR #81)
+*2026-11-05 (Fritz):* every Skynet **Open valve picture** is retired to Delete/ (Rule 15.3); the two-picture code stays for a
+user's own pictures. Pump On pictures stay in Skynet, but nothing that ships uses them (Rule 7.8). Help 129.
 
 7.6 **Sounds** go in media/sounds; pictures in media/Images. (2026-10-20, PR #48)
 
@@ -861,6 +884,11 @@ docs/Image_Library.md (and the Image_Library folder) only when Fritz says to com
 Widgets, and for heaters (Rule 7.9). Two pictures (on and off) are still allowed where needed. This
 is new in Skynet; BruControl never had it. In Properties the overlay comes right after the picture
 and the second picture comes last, marked optional. (2026-10-27, Help 58)
+**Skynet valves have no Open picture** (Fritz, 2026-11-05: "I generally want to get away with changing the background picture for
+switching from Off to On. Better to use the Overlay in all the sample Schema."): a valve keeps its one picture and its On overlay
+shows open (the bolt on a motorized valve, the green ring and tick on a Manual Valve Widget). The sample Schemas and the default
+Schema swap no pictures: pumps, valves and burners keep their Off picture with the bolt overlay, a heating element glows red
+(tint). Help 129.
 
 7.9 **Heaters are On while Enabled.** A PID, Hysteresis or Duty Cycle counts as On from Enable to
 Disable (not only while its output fires): its overlay or On picture, a vessel's heater glow and a
@@ -902,9 +930,10 @@ An Alarm made before 2026-11-02 keeps working as before.
 7.13 **Pump Cover Overlays** (Fritz, 2026-11-02, thread "Draw SVGs for common brew pumps", Help 111): a pump picture is drawn in
 layers, bottom up: the **pump picture** (a Skynet no-cover pump drawing), the **Cover overlay**, then the **On overlay**. The cover
 has a see-through background and shows on and off. Skynet covers come in **Red, Yellow, Blue, Green, Purple and Orange** for
-every Skynet no-cover pump drawing (Images/Skynet/Pumps/Covers/), and are Skynet items. The **User Cover** is one more choice
+every Skynet no-cover pump drawing (Images/Skynet/Pumps/Covers/), and are Skynet items. **White** (RGB 250 250 250, #FAFAFA) was
+added by Fritz 2026-11-05; every White pump cover is that color. The **User Cover** is one more choice
 whose cover color the user sets (standard color list). A Pump Device has **.cover** (None, Red, Yellow, Blue, Green, Purple,
-Orange, User; **None is the default**) and **.coverColor** (the User cover's color).
+Orange, White, User; **None is the default**) and **.coverColor** (the User cover's color).
 
 7.14 **Every new Alarm meets the new Alarm standard** (Rule 7.12: a Basic Skynet Alarm or a User Alarm). **Old Alarms**
 (made before 2026-11-02, in the samples and Schemas) **are changed to the new Basic format one by one**, using Basic Alarm
@@ -1621,6 +1650,8 @@ Valve drill-down dialog", Help 128):
 - 2026-11-04: Added Rule 5.26 (a Pump, Valve or Manual Valve Widget dropped on a straight pipe cuts it: between the ends into separate pipes joined to its IPs, over an end the pipe is made shorter and both IPs joined, an end on a tee or other IP staying where it is; an IP that opens across the pipe is taken round with 90 degree elbows). Help 125; next free Help number 126 (Help 124 is taken by PR #193). (thread "Split a pipe when a pump is added")
 - 2026-11-05: Rule 9.8: Start Fresh on Windows also deletes the clean window's browser profile (saved user name and password), and Admin setup always opens with empty boxes (browser fill-in cleared). Help 18 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
 - 2026-11-05: Rule 5.19: Save layout joins a pipe's open end within 14 px of an IP again (a free IP point moves back onto a straight pipe's end); a wobble under 4 pixels is not a drag; only ends a drag pulls off let go (Fritz: changing IP1's Flow Color in the Three Vessel sample stopped the flow). Help 105 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-05: Skynet pictures cleaned up (Fritz, thread "Clean up SVG names and retire old pictures"): Valve_Ball_ClosedH_1 / ClosedV-1x1 renamed Motorized_TC15_Ball_Valve_Horizontal / _Vertical; pipe_cross, pipe_elbow45, pipe_elbow90, pipe_tee, Skynet_TC15_InstrumentTee and every Open valve picture retired to Delete/ (replacements listed in Delete/README.md). Rule 7.5 note, Rule 7.8: Skynet valves have no Open picture, the On overlay shows open, and the sample and default Schemas swap no pictures. Rule 7.13: White cover (RGB 250 250 250). Rule 5.23 names updated. Help 129.
 - 2026-11-05: Added Rule 6.17 (Deadband Device, as in BruControl's Deadband Output: Deadband Offset, Inner Band Offset, Initial Output, Inner and Outer Band Drive, Calc Time, Out Time, Reversed; output in %; BruControl import). Help 126; next free Help number 127. (thread "Add Deadband control")
 - 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
+- 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
 - 2026-11-05: Rule 2.12 changed (Fritz): a 🔒 locked Vessel can't be moved with the mouse but moves by its X and Y in Properties (to the pixel), with its IPs, joined fittings and End Caps; bundled vessels' Properties got X and Y. Other locked items are as before. Help 56 updated; no new Help number. (thread "Let locked vessels move by X and Y")

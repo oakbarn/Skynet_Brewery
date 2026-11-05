@@ -34,8 +34,10 @@ A Skynet pipe fitting already on a Tab takes its new picture the next time you o
 The **Manual Valve Widget** is the same special Widget as before: its Open/Closed (.state) only changes when someone clicks it on its Tab, and a running Process waits for that click. Its Properties now have a **Picture**:
 
 - **Plain**: the drawn valve, as before.
-- **Manual Ball Valve, side view**: the pipe runs across the middle. The handle **along the pipe** means **open**; seen end on, it is closed.
-- **Manual Ball Valve, front view**: looking down the pipe. The handle **across the pipe** means **closed**; seen end on (a short stub), it is open.
+- **Manual Ball Valve, side view**: the pipe runs across the middle.
+- **Manual Ball Valve, front view**: looking down the pipe.
+
+The picture stays the same open or closed; while open the **open overlay** (a green ring and a tick) is drawn on top (Fritz, 2026-11-05: the Open pictures are retired).
 - **Manual Ball Valve on a front elbow**: the same, with the elbow's leg going down.
 
 The Tab swaps between the open and the closed picture by itself, and the green open overlay still shows while it is open. A Manual Valve has one IP, in the middle of its picture.

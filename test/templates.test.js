@@ -184,7 +184,8 @@ console.log('templates ok');
   const el = applyDeviceTemplate({ name: 'V1', template: VL.name, templateCls: 'skynet', subtype: 'pump', service: 'gas', imageOn: 'x.png', look: 'led', background: 2, orientation: 'h', w: 50 }, VL);
   assert.equal(el.subtype, 'valve'); assert.equal(el.service, 'room'); assert.equal(el.look, 'normal'); assert.equal(el.background, undefined);
   assert.equal(el.orientation, 'h', 'orientation is the user\'s'); assert.equal(el.w, 50);
-  assert.match(el.imageOn, /Valve_Motor_Ball_OpenH\.svg$/);
+  assert.equal(el.imageOn, undefined, 'Skynet valves have no Open picture: the On overlay shows open (Fritz, 2026-11-05)');
+  assert.match(el.imageOff, /Valve_Motor_Ball_ClosedH\.svg$/);
   assert.match(applyDeviceTemplate({ orientation: 'v' }, VL).imageOff, /ClosedV_LC\.svg$/);
   // Tap water: off by default; the source end sets which end the water leaves by; unset = Needs setting (no tap flow)
   assert.equal(H.props.tapwater, false);
@@ -231,7 +232,7 @@ console.log('templates ok');
   assert.equal(cleanDevice({ type: 'analogOut' }).type, 'analogOut', 'a Template can be an analogOut');
   // a user can't change the signal: the Brain puts it back
   const el = applyDeviceTemplate({ type: 'analogOut', template: k.name, signal: '0-10V', rangeHigh: 50, orientation: 'v' }, k);
-  assert.equal(el.signal, '0-5V'); assert.equal(el.rangeHigh, 100); assert.match(el.imageOn, /OpenV_LC/);
+  assert.equal(el.signal, '0-5V'); assert.equal(el.rangeHigh, 100); assert.equal(el.imageOn, undefined); assert.match(el.imageOff, /ClosedV_LC/);
   const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
   assert.match(app, /SKY_DEV_ROWS\('digitalOut'\)/, 'the On/Off list has only the on / off Skynet valves');
   assert.match(app, /'User Defined Proportional Valve 0-100 %/, 'the User Defined Proportional Valve row');
