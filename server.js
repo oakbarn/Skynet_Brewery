@@ -325,7 +325,7 @@ function needRole(p, m) {
   if (p.startsWith('/ui/brainmove')) return 'admin';   // Move Brain: every file, logins included, and the USB ports   // Get Skynet pictures: copies pictures from GitHub onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
-const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/style.css', '/favicon.ico', '/favicon.svg']);
+const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/genpw.js', '/style.css', '/favicon.ico', '/favicon.svg']);
 const clientIp = req => req.socket.remoteAddress ?? '';
 // HTTPS through a proxy on this computer (for example "tailscale serve")
 const viaHttps = req => req.headers['x-forwarded-proto'] === 'https' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(clientIp(req));

@@ -1,4 +1,5 @@
 import { addEyes } from './eye.js';
+import { addKey } from './genpw.js';
 import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe, boxPoint, cutHose } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
@@ -7145,6 +7146,9 @@ function renderSettings() {
 }
 // ---- accounts
 addEyes();
+// Skynet's own "make a strong password" key in Settings (My account and Add user), like on Admin setup
+addKey($('#pwNew'), { also: [$('#pwNew2')], getRules: () => S.passwordRules, onFill: () => toast('Strong password made: write it down before you save') });
+addKey($('#nuPass'), { getRules: () => S.passwordRules, onFill: () => toast('Strong password made: write it down and give it to the new user') });
 const signOut = guard(async () => { await api('POST', '/auth/logout'); location.replace('/login.html'); });
 $('#pwSave').onclick = guard(async () => {
   if ($('#pwNew').value !== $('#pwNew2').value) throw new Error('The two new passwords are not the same');
