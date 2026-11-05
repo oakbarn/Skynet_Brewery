@@ -3304,7 +3304,9 @@ document.addEventListener('pointerdown', () => { dlgArrowKey = false; }, true);
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
   const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
-  const port = isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
+  const pr = isProbeDev(e);      // a Temperature Probe: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26)
+  if (pr) for (const k of PROBE_SETTING_KEYS) if (e[k] !== undefined) work[k] = e[k];
+  const port = pr ? probePort(e) : isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
     : e.type === 'analogIn' && e.adc === 'ads1115' ? ['channel', 'ADS1115 channel (0-3)', 'num']
       : e.type === 'scale' ? ['channel', 'HX711 DT pin(s), comma between several boards (e.g. 26, 28)', 'text']
         : ['channel', e.type === 'stepper' ? 'STEP pin (the other pins are set in its properties)' : 'Port (pin, e.g. 25 or A5)', 'pin', PIN_LIST[e.type] || (ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital')];
@@ -3317,13 +3319,13 @@ async function newDeviceDialog(e, hint, what) {
   // naming order. The Name shows once 1-4 are done. The Device Type, when its kind has more than one, comes after the Interface.
   // Fritz, 2026-11-04 (his Pump example): short field names, the rest of the explanation in the tip of each name (Rule 18.16);
   // the Interface and its Available Ports on one line; the Name, Cover, X, Y, Width and Height show once 1-3 are done.
-  const pinPort = port[2] === 'pin', portF = [port[0], pinPort ? 'Available Ports' : port[1], pinPort ? 'pinsel' : port[2], ...port.slice(3)];
+  const pinPort = port[2] === 'pin' || pr, portF = pr ? port : [port[0], pinPort ? 'Available Ports' : port[1], pinPort ? 'pinsel' : port[2], ...port.slice(3)];
   const T = DEVICE_TIPS, after = { after: true };
   // the Pump's drill-down (Rules 18.13-18.21) and, the same without a Cover, the Motorized Ball Valve's (Fritz, 2026-11-05, Rule 18.23)
   const dd = isDrillDev(e), mbv = isMbvDev(e);
   if (mbv && e.template) e._orient = orientPick(e);
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
-    ['device', n() + 'Interface (board)', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + T.port : ''), ...(pinPort ? { with: portF } : {}) }],
+    ['device', n() + 'Interface (board)', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + (pr && isOneWire(e) ? T.pNum : T.port) : ''), ...(pinPort ? { with: portF } : {}) }],
     ...(pinPort ? [] : [[...portF.slice(0, 1), n() + portF[1], ...portF.slice(2), ...(portF.length < 4 ? [undefined] : []), false, false, { tip: T.port }]]),
     ...(codes.length > 1 && !(e.template && e.typeCode) && !dd ? [['typeCode', 'Device Type', 'sel', codes.map(([c, l]) => [c, `${c}   ${l}`]), false, false, { tip: T.type }]] : []),
     ['workspace', n() + 'Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
@@ -3332,19 +3334,22 @@ async function newDeviceDialog(e, hint, what) {
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after)] : []),
     ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
+    ...(pr ? [...PROBE_GRAPHIC_FIELDS(e, after), ...PROBE_OWN(e, after)] : []),        // no Cover, Toggle or Overlay on a probe
     ...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
-    ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : 'Valve') }), false, false, { tip: T.type }]] : [])];
+    ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : pr ? '' : 'Valve') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
+  if (pr && !String(work.label ?? '').trim()) work.label = autoLabel(PROBE_AUTO_LABEL);       // a Temperature Probe: tP_1, tP_2 ... (Rule 18.26)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
-  if (dd && !work.typeCode) work.typeCode = isPumpDev(e) ? 'Pump' : 'Valve';      // the list it was picked in (Rule 4.2): shown greyed out, read only
+  if (dd && !pr && !work.typeCode) work.typeCode = isPumpDev(e) ? 'Pump' : 'Valve';      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
-  if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
+  if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: pr ? undefined : e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   if (isPumpDev(e)) work.cover = e.cover || 'None';
+  if (pr) Object.assign(work, { units: e.units || '°F', precision: e.precision ?? 1, offset: e.offset, rot: String(elRot(e)), _flip: flipOf(e), backpath: e.backpath, front: e.front, probeTee: e.probeTee, thermowell: e.thermowell, sensor: e.sensor, tcType: e.tcType, r0: e.r0, beta: e.beta });
   if (mbv) Object.assign(work, { tapwater: !!e.tapwater, closeAll: e.closeAll ?? true, openAll: e.openAll ?? true, imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
@@ -3365,7 +3370,7 @@ async function newDeviceDialog(e, hint, what) {
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
-      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
+      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : pr ? probeTitle(e) : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
       gate();
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
@@ -3434,7 +3439,15 @@ async function newDeviceDialog(e, hint, what) {
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? ['tap', 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
+          const before = { ...e }; flipFrom(work);
+          for (const k of ['flipH', 'flipV']) if (work[k]) e[k] = true; else delete e[k];
+          e.rot = +work.rot || 0; if (!e.rot) delete e.rot;
+          if (+work.precision >= 0) e.precision = +work.precision;
+          if (work.offset !== undefined && work.offset !== '') e.offset = +work.offset;
+          if (hasProbePic(e)) { const b = { ...e, w: +work.w || e.w, h: +work.h || e.h, x: Number.isFinite(+work.x) ? +work.x : e.x, y: Number.isFinite(+work.y) ? +work.y : e.y }; turnElBox(b, before); work.w = b.w; work.h = b.h; work.x = b.x; work.y = b.y; }
+        }
         if (mbv && e.template) { e._orient = work._orient; skyOrientSwitch(e); delete e._orient; applyDeviceTemplate(e, devTemplate(e)); }     // the Orientation picks its Template; the fixed attributes stay the Template's (Rule 5.16)
         if (dd) { const d = { ...work }; dbFromWork(d); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; }
         if (+work.w > 0) e.w = +work.w;
@@ -3509,8 +3522,9 @@ async function newProbeTee(kind) {
   if (key === undefined) return;
   const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'probeTee', probeTee: kind, workspace: wsName, x: D.x, y: D.y, w: t.size[0], h: t.size[1], units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: t.img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
-  if (!(await newDeviceDialog(e, 'Temp'))) return;
-  useTabProfile(e); stackNew(e);
+  centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
+  if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
+  useTabProfile(e); if (!e._keepXY) stackNew(e); delete e._keepXY;
   if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
@@ -3520,8 +3534,9 @@ async function newThermowell(length) {
   if (key === undefined) return;
   const D = TD(), e = { name: 'Temp_New', type: 'temperature', subtype: 'thermowell', thermowell: length, workspace: wsName, x: D.x, y: D.y, w, h: 60, units: '°F', precision: 1, ...clone(tempKindOf(key)), backpath: img, background: 1 };
   if (!D.visible) e.visibility = 'hidden';
-  if (!(await newDeviceDialog(e, 'Temp'))) return;
-  useTabProfile(e); stackNew(e);
+  centerNew(e);       // so the Add box shows where it will go (Rule 18.26, as the Pump's)
+  if (!(await newDeviceDialog(e, 'Temp', probeTitle(e)))) return;
+  useTabProfile(e); if (!e._keepXY) stackNew(e); delete e._keepXY;
   if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box
   draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
 }
@@ -4610,7 +4625,7 @@ function pumpDeviceFields(it, item) {
 // (Rule 18.22): Tap water (Rule 6.15), the Close all / Open all lists, and a User Defined valve's In and Out IP spots (Rule 5.22).
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 const isMbvDev = e => e?.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (e.template ? skyDev(e) && isMbvTpl(e.template) : true);
-const isDrillDev = e => isPumpDev(e) || isMbvDev(e);
+const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, Temperature Probe (Rule 18.26)
 // the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
 function autoLabel(type) {
   const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
@@ -4618,7 +4633,7 @@ function autoLabel(type) {
   return `${type}_${used.length ? Math.max(...used) + 1 : 1}`;
 }
 const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Defined Motorized Ball Valve';
-const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : mbvTitle(e);
+const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : isProbeDev(e) ? probeTitle(e) : mbvTitle(e);
 const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']];
 const MBV_IP_POP = { title: 'In and Out IP spots', fields: IP_AT_FIELDS };
 // the Graphic, its Path (set on a Skynet valve, Rule 5.6; a User Defined valve's closed and open pictures) and Orientation
@@ -4662,6 +4677,48 @@ function mbvDeviceFields(it, item) {
 
 // a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
 const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
+
+// ---- Temperature Probe Device dialogs (Fritz, 2026-11-05: "Build the Probe Add Dialog Boxes using the Pump Drill down as the
+// Template", Rule 18.26). A plain probe, a Thermowell (Short, Medium, Long) and a probe tee (Instrument Tee, Long Tee) get the Pump's
+// Add box and Properties (Rules 18.13-18.21). The probe type is still picked first (Fritz: "Choosing the Probe Type First like it is
+// is fine"): the list row of a plain probe, step 2a of a Thermowell or probe tee. A probe has no Cover, Toggle or Overlay (it is an
+// input); its own set (Rule 18.22) is the Probe type (its settings in a ⬢ pop-up), Units with Decimals, the Calibration offset with
+// Database and .API ⬢, and the Reading now. A probe that is part of a Skynet_Integrated_Device keeps its present dialog.
+const isProbeDev = e => e?.type === 'temperature' && !e.integratedIn && !e.template && !e.kind;
+// the Label filled in for you (Rule 18.15): Type_n, n the next number
+const PROBE_AUTO_LABEL = 'tP';
+const probeKindName = e => { const t = tempKinds().find(k => k[0] === tempKey(e)); return t ? t[1].replace(/\s*\(.*$/, '') : String(e.sensor || 'ds18b20').toUpperCase(); };
+const probeShape = e => isProbeTee(e) ? PROBE_TEES[e.probeTee].label : isThermowell(e) ? (e.front ? 'Thermowell (front)' : `${e.thermowell || 'Short'} Thermowell`) : 'Temperature Probe';
+const probeTitle = e => `${probeShape(e)}: ${probeKindName(e)}`;
+const hasProbePic = e => isProbeTee(e) || isThermowell(e);
+// where the probe's pin goes: the OneWire probe number (DS18B20), the chip-select pin (RTD, thermocouple) or the analog pin
+const probePort = e => isOneWire(e) ? ['probeIndex', 'Probe #', 'probe'] : ['channel', 'Available Ports', 'pinsel', ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital'];
+// the Probe type ⬢ pop-up: the settings of its kind of probe (not the board or pin: those are on the dialog)
+const PROBE_TYPE_POP = { title: 'Probe type settings', fields: o => [...(SENSOR_FIELDS[o.sensor || 'ds18b20'] || []).filter(f => !['device', 'channel', 'probeIndex'].includes(f[0])), ['sim', 'Simulator settings (JSON)', 'json']] };
+const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim'];
+const PROBE_FLIP = [['', 'No flip'], ['h', 'Flip Horizontal'], ['v', 'Flip Vertical'], ['hv', 'Flip both']];
+const flipOf = e => (e.flipH ? 'h' : '') + (e.flipV ? 'v' : '');
+function flipFrom(w) { if (w._flip === undefined) return; w.flipH = w._flip.includes('h'); w.flipV = w._flip.includes('v'); if (!w.flipH) delete w.flipH; if (!w.flipV) delete w.flipV; delete w._flip; }
+// the Graphic, its Path (a Skynet drawing: set, Rule 5.6) and Orientation (Rotate) with Flip on its line; a plain probe has no picture
+const PROBE_GRAPHIC_FIELDS = (it, x = {}) => !hasProbePic(it) ? [] : [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.pGraphic, ...x }],
+  ['_ppath', 'Path', 'ro', String(it.backpath || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pPath, ...x }],
+  ['rot', 'Orientation', 'vorient', EL_ROTATE, false, false, { tip: DEVICE_TIPS.pOrient, with: ['_flip', 'Flip', 'sel', PROBE_FLIP], ...x }]];
+const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(it), false, false, { tip: DEVICE_TIPS.pType, attr: PROBE_TYPE_POP, ...x }],
+  ['units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']], false, false, { tip: DEVICE_TIPS.pUnits, with: ['precision', 'Decimals', 'num'], ...x }],
+  ['offset', 'Calibration offset', 'num', null, false, false, { tip: DEVICE_TIPS.pOffset, dbPop: true, ...x }]];
+function probeDeviceFields(it, item) {
+  const T = DEVICE_TIPS;
+  it._flip = flipOf(it);
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + (isOneWire(it) ? T.pNum : T.port), with: probePort(it) }],
+    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
+    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Probe follows it until you type a name of your own)' : ''), 'note'],
+    ...PROBE_GRAPHIC_FIELDS(it), ...PROBE_OWN(it), ['info', 'Reading now', 'info'],
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
+}
 
 // Value, Time and DateTime Widget Properties (Fritz, 2026-11-05, Rule 1.23): the dialog pattern of the Timer Widget (Rule 18)
 function dataWidgetFields(it) {
@@ -4760,7 +4817,7 @@ function field(f, obj) {
     const icons = []; let wrap;
     if (x.up) icons.push(h('button', { type: 'button', class: 'fldIcon fldUp', title: `Type it in a bigger box (${x.up} lines)`, onclick: ev => { ev.preventDefault(); upEntry(wrap, f, x.up); } }, '⬆'));
     if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
-    if (icons.length) { wrap = h('div', { class: 'fldIcons' }, out[1], ...icons); out[1] = wrap; }
+    if (icons.length) { wrap = h('div', { class: 'fldIcons' + (x.after ? ' afterStep hidden' : '') }, out[1], ...icons); out[1] = wrap; }      // waits with its field (Rule 18.15)
   }
   if (f[5] === 'b' && out[0]?.tagName === 'LABEL') out[0].classList.add('strong');      // a main field: its name in bold
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
@@ -4816,6 +4873,14 @@ const DEVICE_TIPS = {
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
   vTapEnd: 'Which end the tap water comes in at; it flows out of the other end.',
+  // the Temperature Probe (Fritz, 2026-11-05, Rule 18.26)
+  pNum: 'Probe #: the OneWire probe number of this DS18B20 (Devices page > OneWire probes). All DS18B20 probes share one data pin.',
+  pGraphic: 'The picture of this probe as it will show on the Tab, turned to its Orientation. A Thermowell snaps onto an IP; on a front facing IP it shows from the front. A probe tee cuts a pipe as a tee does (Rule 5.30).',
+  pPath: 'The Skynet drawing of this Thermowell or probe tee. It is set and cannot be changed.',
+  pOrient: 'Turn it 90, 180 or 270 degrees clockwise, and flip it. The Graphic here and the probe on the Tab follow, and its IPs too.',
+  pType: 'The kind of probe, picked first. The ⬢ beside it has its settings (wires, resistor, thermocouple type ...). To use another kind, delete it and add it again.',
+  pUnits: 'Units the reading shows in (°F or °C), and how many decimals.',
+  pOffset: 'Added to every reading, to calibrate the probe (for example -0.4). The Database and .API ⬢ on its line sets what it sends to the database.',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && kind === 'text' && obj._ref && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
@@ -5036,6 +5101,15 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const draw = () => {
       const root = box.closest('#dlgBody, .dlgBody, dialog') || document;
       const q = k => root.querySelector(`[data-k="${k}"]`);
+      if (obj.type === 'temperature') {    // a Thermowell or probe tee (Rule 18.26): its Skynet drawing, turned and flipped
+        const r = +(q('rot')?.value ?? obj.rot ?? 0) || 0, f = q('_flip')?.value ?? flipOf(obj);
+        const src = obj.front ? THERMOWELL_FRONT : obj.backpath;
+        pic.src = src ? media(src) : ''; pic.classList.toggle('hidden', !src); cov.classList.add('hidden');
+        pic.style.width = obj.front ? '90px' : '180px'; pic.style.height = 'auto';      // a Skynet drawing may have no size of its own (only a viewBox)
+        box.style.margin = r % 180 ? '30px 0' : '';
+        box.style.transform = `${r ? `rotate(${r}deg) ` : ''}${f ? `scale(${f.includes('h') ? -1 : 1}, ${f.includes('v') ? -1 : 1})` : ''}`;
+        return;
+      }
       if (obj.subtype === 'valve') {    // a Motorized Ball Valve (Rule 18.23): no Cover; its Orientation picks the picture, flips and turn
         const o = q('_orient'), sp = o ? skyOrientPic(o.value) : null, w = { imageOff: obj.imageOff, flipH: !!obj.flipH, flipV: !!obj.flipV, rot: 0 };
         if (sp) Object.assign(w, sp);
@@ -5689,7 +5763,8 @@ async function editItem(kind, id) {
     if (isDataW(it)) return [...dataWidgetFields(it), ...dbFields(it)];       // Value, Time and DateTime Widget Properties (Rule 1.23)       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
-    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Motorized Ball Valve: the same drill-down (Rule 18.23)
+    if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
+    if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
@@ -5823,6 +5898,7 @@ async function editItem(kind, id) {
       }
     }
     if (kind === 'el') {
+      if (isProbeDev(item)) { flipFrom(work); delete work._ptype; delete work._ppath; }      // the Flip pick sets Flip Horizontal / Vertical (Rule 18.26)
       if (turnsEl(work)) {          // a probe tee or a thermowell: Rotate turns its box with it, about its middle (Rule 5.30)
         work.rot = elRot(work); if (!work.rot) delete work.rot;
         for (const k of ['flipH', 'flipV']) if (!work[k]) delete work[k];
