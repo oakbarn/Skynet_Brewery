@@ -1,5 +1,5 @@
 // Motorized Ball Valve Add dialog (Fritz, 2026-11-05: "Create a Motorized Ball Valve Add Dialog using the Pump Drill Down Format.
-// Valves do not have covers but every thing else the same.", Rule 18.23, Help 126).
+// Valves do not have covers but every thing else the same.", Rule 18.23, Help 128).
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { elementTopic } from '../public/helpmap.js';
@@ -23,8 +23,9 @@ assert.match(add, /mbv \? mbvTitle\(e\)/, 'the Add box is titled with the valve'
 const own = app.slice(app.indexOf('const MBV_GRAPHIC_FIELDS'), app.indexOf("// a new Alarm's Name follows its Label"));
 assert.ok(!/cover/i.test(own.replace(/Cover\)|a Cover|no Cover/g, '')), 'no Cover on a valve');
 assert.match(own, /\['_orient', 'Orientation', 'vorient', skyOrientChoices\(it\), true/, 'a Skynet valve: Orientation picks its Template (Rule 5.17)');
-assert.match(own, /\['_tap', 'Toggle', 'ro'/, 'a Skynet valve: Toggle set by the Template (Rules 5.16, 5.18)');
-assert.match(own, /\['_ovl', 'Overlay', 'ro', ovl, false, false, \{ tip: T\.vOverlaySet, dbPop: true/, 'a Skynet valve: Overlay set, Database and .API on its line');
+assert.match(own, /\['tap', 'Toggle', 'sel', PUMP_TAP\(it\.tap\)/, 'Toggle works normally, Skynet valve too (Fritz, 2026-11-05)');
+assert.match(own, /\['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES\(it\.imageOverlay\), false, false, \{ tip: T\.vOverlay, dbPop: true/, 'Overlay works normally, Database and .API on its line');
+assert.ok(!/'ro'/.test(own.slice(own.indexOf('MBV_TOGGLE_OVERLAY'))) , 'nothing greyed out in Toggle / Overlay');
 assert.match(own, /\['imageOff', 'Path \(closed\)', 'gpick', null, false, false, \{ tip: T\.vPath, attr: MBV_IP_POP/, 'a User Defined valve: its own pictures and IP spots (Rule 5.22)');
 assert.match(own, /\['device', '2\. Interface \(board\)', 'dev', 'addnewid', false, false, \{ set: true/, 'Interface and Port greyed out with Change once added (Rule 18.13)');
 assert.match(app, /if \(isMbvDev\(it\)\) return \[\.\.\.mbvDeviceFields\(it, item\), \['typeCode', 'Device Type', 'ro'/, 'Properties: the drill-down, Device Type last');
@@ -32,9 +33,9 @@ assert.match(app, /if \(isMbvDev\(it\)\) return \[\.\.\.mbvDeviceFields\(it, ite
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 assert.ok(isMbvTpl('Skynet_Motorized_Ball_Valve_VR') && !isMbvTpl('Skynet_Motorized_Butterfly_Valve_H'), 'not the butterfly valve (one dialog at a time, Rule 18.10)');
 assert.match(app, /const isMbvDev = e => e\?\.type === 'digitalOut' && e\.subtype === 'valve' && !e\.kind && e\.valveType !== 'manual'/);
-// Help 126
+// Help 128
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'valve' }), ['motorized-ball-valve-device-properties']);
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'valve', template: 'Skynet_Motorized_Ball_Valve_H', templateCls: 'skynet' }), ['motorized-ball-valve-device-properties']);
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'valve', template: 'Skynet_Motorized_Butterfly_Valve_H', templateCls: 'skynet' }), ['skynet-device-templates']);
-assert.ok(fs.existsSync(new URL('../help/126-motorized-ball-valve-device-properties.md', import.meta.url)));
+assert.ok(fs.existsSync(new URL('../help/128-motorized-ball-valve-device-properties.md', import.meta.url)));
 console.log('mbvdialog tests passed');

@@ -44,7 +44,7 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
 |---|---|---|
 | Path | greyed out: set by its Skynet Template, follows the Orientation | **Path (closed)** and **Path (open)**: your pictures. The ⬢ beside Path (closed) sets where the In and Out IPs are |
 | Orientation | Horizontal, Vertical Left, Vertical Right, Front, 45 degrees | Horizontal, Vertical, 45 degrees Left, 45 degrees Right |
-| Toggle and Overlay | greyed out: set by its Skynet Template (Rules 5.16 and 5.18) | yours to pick |
+| Toggle and Overlay | yours to pick (they start as On/Off and the steady bolt) | yours to pick |
 | Width and Height | its Template's size for each Orientation | 150 x 150 to start |
 
 Settings these dialogs no longer show (Invert, One-shot, Text when on / off, Flip, Service) are kept if a valve already had them.
