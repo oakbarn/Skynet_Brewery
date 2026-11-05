@@ -543,6 +543,8 @@ PR #47; PR #91)
 
 5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
 (2026-10-04, PR #3)
+Pumps keep to this through the **Pump Standard** (Rule 5.27): every Skynet pump drawing is to the same scale in the same
+300 x 300 box. (Fritz, 2026-11-05: "They could comply with the rule if we drew everyone in the same Ratio Box.")
 
 5.12 **Kettle pictures are empty:** no wort or liquid drawn, and no heating element drawn on a plain
 kettle. Each kettle has a plain and an _Electric version. (2026-10-22, 2026-10-23)
@@ -715,6 +717,25 @@ straight Horizontal or Vertical pipe (or added right on one):
   to choose which side its inlet is on.
 - Nothing is cut when the item is already on a pipe, is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
+
+5.27 **The Pump Standard: every pump in the same 300 x 300 box, with its IPs in the same spots** (Fritz, 2026-11-05: "They could
+comply with the rule if we drew everyone in the same Ratio Box. We could make it a 300 x 300 for all Pump Drawings and by default
+display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standardize pump size and IPs", Help 130).
+- **Why:** a pump put in the same place as the one it replaces must stay joined to the same pipes.
+- **Every Skynet pump picture is drawn in a 300 x 300 box:** the brew pump drawings (March, Chugger, Riptide, Topsflo, KegLand), their
+  Cover Overlays, and the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, every color and No Cover).
+- **The IPs are always in the same spots** (Orientation Right): the **inlet** at **(285, 150)** of the box (the middle of its height,
+  near the right side) and the **outlet** at **(243, 56)** (near the top right). Shown at **150 x 150** that is (142.5, 75) and
+  (121.5, 28). Orientation Left mirrors them. The IPs stay on the tips of the ports (Rule 5.20, 5.24).
+- **To scale (Rule 5.11):** the brew pump drawings are all the same scale, 20 units = 1 inch in the box (10 at 150 x 150). Where a
+  pump's ports are closer together than the spots, its **port tube is drawn longer** (straight tube only) to reach them. The older
+  Riptide-style pictures came from BruControl at their own scale; their inlet and outlet pipes are made a little longer the same way.
+- **A pump shows at 150 x 150 to start.** A pump can still be resized; the spots grow with its box, so two pumps of the same size
+  and X, Y always line up.
+- **Older Schemas** (Rule 15.2): once per Schema, a Pump Device or Picture Widget showing a Skynet pump picture becomes 150 x 150
+  about its middle; Rule 5.23 then puts it back on its pipes.
+- The **sump pump** is not a pipe pump (it sits in the liquid and draws in through its screen), so it keeps its own box. A **User
+  pump** picture keeps its IPs in the middle of its sides.
 
 5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
 IP of a Valve. Many home brewers have a manifold but move a pipe from source to source ... a special hose that connects to a Pump but
@@ -1650,3 +1671,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Added Rule 6.17 (Deadband Device, as in BruControl's Deadband Output: Deadband Offset, Inner Band Offset, Initial Output, Inner and Outer Band Drive, Calc Time, Out Time, Reversed; output in %; BruControl import). Help 126; next free Help number 127. (thread "Add Deadband control")
 - 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
+- 2026-11-05: Added Rule 5.27 (the Pump Standard: every Skynet pump picture drawn in the same 300 x 300 box, to scale, shown 150 x 150, inlet IP at (285, 150) and outlet IP at (243, 56), port tubes made longer where needed; older pumps become 150 x 150 once). Rule 5.11 notes pumps keep to it this way. Help 130; next free Help number 131. (thread "Standardize pump size and IPs")
