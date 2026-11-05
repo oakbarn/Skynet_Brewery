@@ -881,6 +881,18 @@ Template"; thread "Build the Vessel Widget class", Help 133).
 - The Three Vessel sample's HLT, Mash tun and Boil kettle are Vessel Widgets (Outlet and Thermowell Placed; the Element on the HLT
   and Boil kettle; the Top Inlet on the Mash tun and Boil kettle).
 
+5.32 **Sight Glasses are TC Pipe Fittings with a Length** (Fritz, 2026-11-05: "Create 2 Sight Glass Pipe Fitting, One Caged and one
+not. Length attribute to stretch length"; thread "Add caged and plain sight glass fittings", Help 139).
+- Two Skynet TC Pipe Fittings Widgets (Rule 5.25): **Sight_Glass** (plain glass) and **Sight_Glass_Caged** (a stainless guard round
+  the glass), TC 1.5, an IP on each ferrule face (left and right), flow either way. Added from Elbows, Tees … and Add Widget > TC
+  Pipe Fittings; names SightGlass_n and SightGlassCaged_n.
+- **Length** (inches, ferrule face to ferrule face, 2 to 48, quarter inches; 6 when placed) stretches it along its pipe. Only the
+  glass (and the cage) gets longer: the picture is drawn for its Length, so the ferrules and end collars keep their shape and size.
+  Autosize to pipe makes it as thick as its pipe; with Autosize off, a typed Width sets the Length.
+- Its **Label** starts filled in as **sG_n** (the next number) and is never blank (Rule 18.15). *Built as Claude's reading; Fritz to
+  confirm.*
+- Dropped on a straight pipe in Edit layout it cuts the pipe, as a tee's run does (Rule 5.25).
+
 ---
 
 ## 6. Devices, connections and safety
@@ -1226,8 +1238,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **136**. (2026-10-04,
-Markdown files in help/ on the Brain, numbered for order. Next free number: **138**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **140**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1960,3 +1971,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")
 - 2026-11-05: New Rule 18.26: adding a Temperature Probe (plain, Thermowell, probe tee) uses the Pump's drill-down without a Cover, Toggle or Overlay; the kind of probe is still picked first (Fritz); Orientation with Flip, Probe type ⬢, Units with Decimals, Calibration offset with Database and .API ⬢; Label auto fill tP_n (Fritz's pick pending). Rule 18.15 lists it. Help 138; next free Help number 139. (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Added Rule 18.27 (Adding a Picture Widget: the Pump's drill-down made to fit a Widget: 1 Label, 2 Picture, 3 Tab = the Build Tab, then the Name, Graphic, Turns on with + Toggle, Overlay, Text on picture, X, Y, Width, Height, Widget Type; Picture ➕ now makes a Picture Widget). Rule 4.5 updated. Help 74 updated. (thread "Build Picture Widget dialog like Pump")
+- 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label sG_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
