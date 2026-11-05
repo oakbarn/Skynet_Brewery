@@ -3601,6 +3601,7 @@ async function newDeviceDialog(e, hint, what) {
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
   if (pr && !String(work.label ?? '').trim()) work.label = autoLabel(PROBE_AUTO_LABEL);       // a Temperature Probe: tP_1, tP_2 ... (Rule 18.26)
+  if (pwm && !String(work.label ?? '').trim()) work.label = autoLabel(pwmAutoLabel(e));      // PWM_1, 4_20_1, 0_10_1 ... (Fritz, 2026-11-05, Rule 18.25)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !pr && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
@@ -5036,6 +5037,8 @@ function mbvDeviceFields(it, item) {
 // one picture, the same when on and off, and the Overlay shows it is running (above 0 %). Its own set (Rule 18.22): a PWM output's
 // Start value and Decimals; an Analog output's Signal and Units, its Low and High values, and Decimals. Two to a line, as the Pump's.
 const PWM_SIGNALS = ['0-10V', '4-20mA', '0-5V'];
+// Fritz, 2026-11-05 (Rule 18.15): the Label starts filled in: "PWM = _PWM_  4-20ma = _4_20_,  O-10v = 0_10" (a 0-5 V Analog output with the 0-10 V ones)
+const pwmAutoLabel = e => e.type === 'pwmOut' ? 'PWM' : e.signal === '4-20mA' ? '4_20' : '0_10';
 const PWM_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.pGraphic, ...x }],
   ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.pPath, ...x }]];
 const PWM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.pOverlay, dbPop: true, ...x }]];
