@@ -84,7 +84,7 @@ const BAR = [
   ['.menuWrap', ['menu']],
   ['#devKind, #devAdd', ['edit-layout-bar', 'devices-select-device-type-and-add-device']],
   ['#editBar select[data-dev]', ['edit-layout-bar', 'the-shortcuts-pumps-valves-probe-heating-element-pwm']],
-  ['#wgtKind, #wgtAdd, #addImg, #addText, #addOverride, #vesselPick, #addManualValve, #addVesselType', ['edit-layout-bar', 'widgets']],
+  ['#wgtKind, #wgtAdd, #addImg, #addText, #addOverride, #vesselPick, #addManualValve, #addVesselType, #addBoolean, #addValueW, #addTimeW, #addDateTimeW', ['edit-layout-bar', 'widgets']],
   ['#addIpType', ['edit-layout-bar', 'row-2-pipes-fittings-locks-and-tabs']],
   ['#turnBar', ['build-tab-add-button', 'turn-and-flip-a-fitting-or-vessel']],
   ['#cloneDev', ['cloned-devices', 'make-a-clone']],
