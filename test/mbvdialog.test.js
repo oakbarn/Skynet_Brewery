@@ -52,3 +52,9 @@ console.log('mbvdialog tests passed');
   assert.match(app, /const v = editing \? \{ \.\.\.v0, image: e0\.backpath \?\? '', imageon: e0\.imageOn \?\? '', imageoff: e0\.imageOff \?\? '', imageoverlay: e0\.imageOverlay \?\? '' \} : v0/);
   console.log('edit layout picture tests passed');
 }
+// Fritz, 2026-11-05 (Rule 18.15 changed): a new valve's Label starts as mBV_n; Pumps don't auto fill
+{
+  assert.match(app, /if \(mbv && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = autoLabel\('mBV'\);/);
+  assert.ok(!/isPumpDev\(e\)[^\n]*autoLabel/.test(app), 'no Label auto fill on a Pump');
+  console.log('valve label auto fill tests passed');
+}
