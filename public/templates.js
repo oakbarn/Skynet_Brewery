@@ -138,6 +138,7 @@ export function cleanVessel(b = {}) {
   for (const [k, q] of Object.entries(b.ports && typeof b.ports === 'object' ? b.ports : {})) {
     if (!/^\w{1,30}$/.test(k)) continue;
     const p = { installed: !!q?.installed, position: text(q?.position, 60) || undefined };
+    if (text(q?.label, 60)) p.label = text(q.label, 60);      // a Vessel Widget IP's own Label (it starts the same as its Name)
     if (p.installed && FITTING_PORTS[k] && text(q?.fitting, 60)) { p.fitting = text(q.fitting, 60); p.bundleName = text(q.bundleName, 80) || undefined; }
     const std = cleanStd(q?.std, `${k} Connection Standard`); if (std) p.std = std;
     for (const x of Object.keys(p)) if (p[x] === undefined) delete p[x];
