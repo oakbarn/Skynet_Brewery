@@ -382,6 +382,27 @@ const EQ = {
     ports: { a: pt('End A', SIDE4, { on: true, def: 'Left', circuit: 'a' }), b: pt('End B', SIDE4, { on: true, def: 'Right', circuit: 'a' }),
       c: pt('End C', SIDE4, { on: true, def: 'Top', circuit: 'a' }), d: pt('End D', SIDE4, { on: true, def: 'Bottom', circuit: 'a' }) } },
 };
+// ---- Fritz's Vessel IP Template (2026-11-05, "Vessel IP Template.png"; Rule 5.31): the IP spots of the Vessel Widget Main Template,
+// on its 260 x 320 picture (Skynet_Vessel_Widget.svg). Right side top to bottom Sparge, HERMS In, HERMS Out, Element, the same
+// on the Left; lower body Tangential left and right, Center Probe, Center Outlet, Center Bottom Outlet; Back Element left and
+// right (the green spots). The names are only general: anything with an IP (an Element too) can go on any of them. Each IP
+// has a Label that starts the same as its Name and can be changed. `vw`: a Vessel Widget spot only.
+const vwPt = (name, pos, x, y) => pt(name, [[pos, x, y]], { vw: true });
+const VW_IPS = {
+  rSparge: vwPt('Right Sparge', 'VW R Sparge', 0.923, 0.19), rHermsIn: vwPt('Right HERMS In', 'VW R HERMS In', 0.923, 0.313),
+  rHermsOut: vwPt('Right HERMS Out', 'VW R HERMS Out', 0.923, 0.443), rElement: vwPt('Right Element', 'VW R Element', 0.923, 0.644),
+  lSparge: vwPt('Left Sparge', 'VW L Sparge', 0.077, 0.19), lHermsIn: vwPt('Left HERMS In', 'VW L HERMS In', 0.077, 0.313),
+  lHermsOut: vwPt('Left HERMS Out', 'VW L HERMS Out', 0.077, 0.443), lElement: vwPt('Left Element', 'VW L Element', 0.077, 0.644),
+  lBackElement: vwPt('Left Back Element', 'VW L Back Element', 0.292, 0.644), rBackElement: vwPt('Right Back Element', 'VW R Back Element', 0.708, 0.644),
+  cProbe: vwPt('Center Probe', 'VW C Probe', 0.5, 0.731),
+  lTangential: vwPt('Left Tangential', 'VW L Tangential', 0.205, 0.807), rTangential: vwPt('Right Tangential', 'VW R Tangential', 0.795, 0.807),
+  cOutlet: vwPt('Center Outlet', 'VW C Outlet', 0.5, 0.881), cBottomOutlet: vwPt('Center Bottom Outlet', 'VW C Bottom Outlet', 0.5, 0.931),
+};
+// the Vessel Widget's class: the plain vessel's ports (older Vessel Widgets, like the Three Vessel sample's, use them) and Fritz's IP
+// spots. The Template's Temperature Probe (Front) sits on the Center Probe spot and its Element Port on the Right Element spot.
+const EQ_VW = { ...EQ.vessel, ports: { ...VW_IPS, ...EQ.vessel.ports,
+  thermowell: { ...EQ.vessel.ports.thermowell, pos: [...EQ.vessel.ports.thermowell.pos, ['VW Center Probe', 0.5, 0.731]] },
+  element: { ...EQ.vessel.ports.element, pos: [...EQ.vessel.ports.element.pos, ['VW R Element', 0.923, 0.644]] } } };
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg'], ['LED red', 'Images/Skynet/Lights_LEDs/led_red.svg'], ['LED off (grey)', 'Images/Skynet/Lights_LEDs/led_off.svg'],
   ['Lightning bolt on', 'Images/Skynet/Lights_LEDs/bolt_on.svg'], ['Lightning bolt off', 'Images/Skynet/Lights_LEDs/bolt_off.svg'],
@@ -437,7 +458,9 @@ function usedPaths(re) {
 }
 const HEAT_SOURCES = ['None', 'Electric element', 'Gas burner', 'Induction', 'Steam jacket', 'HERMS coil'];
 const EQ_STANDARDS = ['TC 1.5', 'NPT 1/2 FPT', 'BSP 1/2', 'MM', 'TC 2', 'NPT 3/4 FPT', 'NPT 1/2 MPT'];
-const eqClass = g => g?.kind === 'vessel' ? (g.vesselType === 'bfit' ? bfitClass(g) : EQ[g.vesselType]) : null;
+const eqClass = g => g?.kind === 'vessel' ? (g.vesselType === 'bfit' ? bfitClass(g) : vClassOf(g)) : null;
+// a Vessel Widget has the spots of Fritz's Vessel IP Template too (Rule 5.31); every other vessel keeps the plain vessel's ports
+const vClassOf = t => t.vwidget && (t.vesselType || 'vessel') === 'vessel' && !t.integrated ? EQ_VW : EQ[t.vesselType] || EQ.vessel;
 // list keys: "standard" (shared), "<class>.types", "<class>.<port>"
 function vList(key) {
   const [c, p] = key.split('.');
@@ -483,7 +506,8 @@ function vPortXY(g, k, pos) {
   if (isSkyV(g)) return unitPoint(g, q[1], q[2]);           // a Skynet vessel: flipped and rotated with its picture
   return [(g.x || 0) + q[1] * (g.w || 200), (g.y || 0) + q[2] * (g.h || 200)];
 }
-const vPortLabel = (g, k, p) => `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
+// a port's Label: a Vessel Widget IP's own Label (it starts the same as its Name, Fritz 2026-11-05), else its Name and Standard
+const vPortLabel = (g, k, p) => p.label ? p.label : `${eqClass(g).ports[k].name}${p.standard ? ` (${p.standard})` : ''}`;
 // the starting port settings of a new widget
 const eqDefaultPorts = c => Object.fromEntries(Object.entries(EQ[c].ports).filter(([, d]) => d.on).map(([k, d]) => [k, { installed: true, position: portDefPos(d), standard: EQ_STANDARDS[0] }]));
 // Create, move or remove a widget's port IPs to match its settings. Returns the ports that were placed or moved.
@@ -596,7 +620,7 @@ function buildVessel(g) {
 // (its IPs, one Temperature Probe and one Element Port), each with a Place slider. Placed: it is on the vessel and works (an IP
 // joins pipes, hoses and fittings; the Probe and the Element show their pictures). Not Placed: it is not there at all, and in Edit
 // layout only a faint mark shows where it would go. Its spots are set by the Template: nobody can move them.
-const VW_PROBE_POS = { thermowell: 'VW Left Thermowell', front: 'VW Front' };
+const VW_PROBE_POS = { thermowell: 'VW Left Thermowell', front: 'VW Center Probe' };
 const VW_PICS = { thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg', front: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Front.svg',
   element: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg' };
 const VW_W = 260;
@@ -4333,6 +4357,7 @@ async function saveBuildTemplate({ name, skynet }) {
     for (const [k, p] of Object.entries(g.ports || {})) {
       const { fitting, bundleName, ...was } = base.ports?.[k] || {};       // its fitting is set again below, from what is on the Build Tab
       t.ports[k] = { ...was, installed: !!p.installed, position: p.position };
+      if (p.label) t.ports[k].label = p.label; else delete t.ports[k].label;      // a Vessel Widget IP's own Label
     }
     for (const f of w.fits) {
       const q = t.ports[f.onPort]; if (!q || !FITTING_PORTS[f.onPort]) continue;
@@ -6083,7 +6108,7 @@ async function editItem(kind, id) {
   if (isUnit(item) || isSkyV(item)) { work.rot = String(unitRot(item)); delete work.turn; }
   const rims = isSkyV(item) && item.integrated === 'device', rimsRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } rimsPinLists(x, item); };
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
-  if (isV) for (const k of Object.keys(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; }
+  if (isV) for (const [k, d] of Object.entries(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; if (d.vw) work[k + '_label'] = p.label || d.name; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
   // a new Alarm Widget: its Name follows its Label (Rule 18.3) until a name of its own is typed
@@ -6145,10 +6170,12 @@ async function editItem(kind, id) {
       work.name = noSpaces(work.name || '') || item.name;
     } else if (isSkyV(item)) {        // a Skynet vessel: its ports come from its Template and don't change here
       const place = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_on')).map(k => [k.slice(0, -3), !!work[k]]));
-      for (const k of Object.keys(work)) if (/_(on|pos|std)$/.test(k)) delete work[k];
+      const lbl = Object.fromEntries(Object.keys(work).filter(k => k.endsWith('_label')).map(k => [k.slice(0, -6), String(work[k] ?? '').trim()]));
+      for (const k of Object.keys(work)) if (/_(on|pos|std|label)$/.test(k)) delete work[k];
       work.ports = clone(item.ports || {});
-      if (item.vwidget && !item.integrated) {      // a Vessel Widget: only its Place sliders and its Probe's look change (its spots stay where the Template has them)
+      if (item.vwidget && !item.integrated) {      // a Vessel Widget: only its Place sliders, its IP Labels and its Probe's look change (its spots stay where the Template has them)
         for (const k of Object.keys(work.ports)) if (k in place) work.ports[k].installed = place[k];
+        for (const [k, d] of Object.entries(eqClass(item).ports)) if (d.vw && work.ports[k] && k in lbl) work.ports[k].label = lbl[k] || d.name;      // an empty Label goes back to the Name
         work.probeStyle = work.probeStyle === 'front' ? 'front' : 'thermowell';
         if (work.ports.thermowell) work.ports.thermowell.position = VW_PROBE_POS[work.probeStyle];
         if (!work.ports.element?.installed) delete work.heater;        // not Placed: nothing on the vessel to link
@@ -9784,7 +9811,7 @@ function addTemplateToTab(kind, t, tab, name, { cloneAs } = {}) {
     : `${name} is on the 🔨 Build Tab. Change it there, then press 💾 Save Build ... > To a Tab to put it on the ${b.from} tab.`, false, 8000);
 }
 function placeTabVessel(t, tab, name) {
-  const C = EQ[t.vesselType] || EQ.vessel, n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
+  const C = vClassOf(t), n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: (t.size || C.size)[0], h: (t.size || C.size)[1],
     labelAlign: 'above', labelSize: 16, labelVisible: true, name, template: t.name, templateCls: t.cls, image: t.image || C.image, bundled: true, ports: {} };
   for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'vwidget', 'probeStyle', 'sizeMethod', 'diameter', 'vheight']) if (t[k] !== undefined) g[k] = clone(t[k]);
@@ -9793,6 +9820,7 @@ function placeTabVessel(t, tab, name) {
   for (const [k, d] of Object.entries(C.ports)) {
     const q = t.ports?.[k]; if (!q || (!q.installed && !t.vwidget)) continue;      // a Vessel Widget keeps every spot of its Template, Placed or not
     g.ports[k] = { installed: !!q.installed, position: q.position || portDefPos(d), standard: stdShort(q.std || t.std) };
+    if (d.vw) g.ports[k].label = q.label || d.name;          // a Vessel Widget IP: its Label starts the same as its Name
   }
   if (t.vwidget) { if (g.ports.thermowell) g.ports.thermowell.position = VW_PROBE_POS[g.probeStyle === 'front' ? 'front' : 'thermowell']; }
   draft.graphics.push(g); syncVesselPorts(g, null);
@@ -9894,7 +9922,7 @@ F.skynetVessel = it => {
       ['image', 'Graphic (picture path; its IPs stay on the openings of the Skynet picture)', 'path'],
       ...(vw ? [['_vw', 'Place (on = it is on this vessel and works; off = Not Placed: it is not there and is hidden, even on the Build Tab)', 'head'],
         ['vwShowAll', it.vwShowAll ? 'All the spots show, the Not Placed ones too (as faint marks on the vessel).' : `Only the Placed spots show${hidN(it) ? ` (${hidN(it)} Not Placed hidden)` : ''}.`, 'showall', 'Show the Not Placed spots too, so one can be Placed'],
-        ...spots.filter(([k, d]) => d.ip && vwShows(it, k)).map(([k, d]) => [k + '_on', `${d.name} IP`, 'bool']),
+        ...spots.filter(([k, d]) => d.ip && vwShows(it, k)).flatMap(([k, d]) => [[k + '_on', `${d.name} IP`, 'bool'], ...(d.vw ? [[k + '_label', `${d.name} Label (empty = the Name)`, 'text']] : [])]),
         ...(it.ports?.thermowell && vwShows(it, 'thermowell') ? [['thermowell_on', 'Temperature Probe', 'bool', false, true], ...(well ? [['probeStyle', 'Probe: Front or Thermowell', 'sel', [['thermowell', 'Thermowell (in from the side)'], ['front', 'Front (seen from the front)']]]] : [])] : []),
         ...(it.ports?.element && vwShows(it, 'element') ? [['element_on', 'Element Port', 'bool', false, true]] : [])] : []),
       ...(electric || well ? [['_d', 'Devices', 'head']] : []),

@@ -2,22 +2,91 @@
   "vesselType": "vessel",
   "vtype": "Brew Kettle",
   "vwidget": true,
-  "probeStyle": "thermowell",
+  "probeStyle": "front",
   "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
-  "size": [260, 320],
+  "size": [
+    260,
+    320
+  ],
   "volume": 10,
   "sizeMethod": "proportional",
-  "std": { "type": "TC", "size": 1.5 },
-  "ports": {
-    "outlet": { "installed": true, "position": "VW Center Bottom" },
-    "outlet2": { "installed": true, "position": "VW Right Middle" },
-    "tangential": { "installed": true, "position": "VW Left Low" },
-    "topInlet": { "installed": true, "position": "VW Left High" },
-    "sparge": { "installed": true, "position": "VW Lid Center" },
-    "cip": { "installed": true, "position": "VW Lid Right" },
-    "steamSlayer": { "installed": true, "position": "VW Right High" },
-    "thermowell": { "installed": true, "position": "VW Left Thermowell" },
-    "element": { "installed": true, "position": "VW Right Element", "std": { "type": "TC", "size": 2 } }
+  "std": {
+    "type": "TC",
+    "size": 1.5
   },
-  "notes": "The Vessel Widget (Fritz, 2026-11-05, Rule 5.31): one Skynet Template with every IP (Outlet, Second Outlet, Tangential, Top Inlet, Sparge, CIP, Steam Slayer), one Temperature Probe (Thermowell or Front) and one Element Port. Each has a Place slider, all on here. The spots are set by the Template and can't be moved."
+  "ports": {
+    "rSparge": {
+      "installed": true,
+      "position": "VW R Sparge"
+    },
+    "rHermsIn": {
+      "installed": true,
+      "position": "VW R HERMS In"
+    },
+    "rHermsOut": {
+      "installed": true,
+      "position": "VW R HERMS Out"
+    },
+    "rElement": {
+      "installed": true,
+      "position": "VW R Element"
+    },
+    "lSparge": {
+      "installed": true,
+      "position": "VW L Sparge"
+    },
+    "lHermsIn": {
+      "installed": true,
+      "position": "VW L HERMS In"
+    },
+    "lHermsOut": {
+      "installed": true,
+      "position": "VW L HERMS Out"
+    },
+    "lElement": {
+      "installed": true,
+      "position": "VW L Element"
+    },
+    "lBackElement": {
+      "installed": true,
+      "position": "VW L Back Element"
+    },
+    "rBackElement": {
+      "installed": true,
+      "position": "VW R Back Element"
+    },
+    "cProbe": {
+      "installed": true,
+      "position": "VW C Probe"
+    },
+    "lTangential": {
+      "installed": true,
+      "position": "VW L Tangential"
+    },
+    "rTangential": {
+      "installed": true,
+      "position": "VW R Tangential"
+    },
+    "cOutlet": {
+      "installed": true,
+      "position": "VW C Outlet"
+    },
+    "cBottomOutlet": {
+      "installed": true,
+      "position": "VW C Bottom Outlet"
+    },
+    "thermowell": {
+      "installed": true,
+      "position": "VW Center Probe"
+    },
+    "element": {
+      "installed": true,
+      "position": "VW R Element",
+      "std": {
+        "type": "TC",
+        "size": 2
+      }
+    }
+  },
+  "notes": "The Vessel Widget Main Template (Fritz, 2026-11-05, Rule 5.31, his Vessel IP Template drawing): 15 IPs. Right side top to bottom Sparge, HERMS In, HERMS Out, Element, the same on the Left; Left and Right Back Element; Center Probe; Left and Right Tangential; Center Outlet; Center Bottom Outlet. The names are only general: anything with an IP can go on any of them. Plus one Temperature Probe (Front, on the Center Probe spot) and one Element Port (on the Right Element spot). Each has a Place slider, all on here. The spots are set by the Template and can't be moved."
 }
