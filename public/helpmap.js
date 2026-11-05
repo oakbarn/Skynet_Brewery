@@ -14,6 +14,8 @@ const DEVICE = ['devices', 'putting-a-device-on-a-tab'];
 export function elementTopic(e) {
   if (!e) return null;
   if (e.integratedIn) return ['skynet-integrated-devices'];
+  // a Temperature Probe, plain, Thermowell or probe tee: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26, Help 138)
+  if (e.type === 'temperature' && !e.template && !e.kind) return ['temperature-probe-device-properties'];
   if (e.subtype === 'thermowell') return ['probe-tees-and-thermowells-on-pipes', 'thermowells'];     // Rule 5.30, Help 132
   if (e.subtype === 'probeTee') return ['pipe-widgets-from-fritzs-drawings', 'tees-with-a-temperature-probe'];   // Fritz, 2026-11-02
   if (e.subtype === 'propValve') return ['proportional-valves'];      // Skynet KLD20T and the User Defined one (Fritz, 2026-11-03, Help 117)

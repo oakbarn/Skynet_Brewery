@@ -17,7 +17,7 @@ for (const [page, section] of ALL_TOPICS()) {
   if (section) assert.ok(pages[page].includes(section), `"${page}" has a part "${section}"`);
 }
 assert.deepEqual(elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), ['manual-valves']);
-assert.deepEqual(elementTopic({ type: 'temperature', subtype: 'probeTee' }), ['pipe-widgets-from-fritzs-drawings', 'tees-with-a-temperature-probe'], 'a tee with a Temperature Probe (Fritz, 2026-11-02)');
+assert.deepEqual(elementTopic({ type: 'temperature', subtype: 'probeTee' }), ['temperature-probe-device-properties'], 'a tee with a Temperature Probe: the Probe drill-down (Fritz, 2026-11-05, Rule 18.26)');
 assert.deepEqual(elementTopic({ type: 'flowMeter' })[0], 'devices', 'unknown devices go to Devices');
 assert.deepEqual(elementTopic({ type: 'alarm', alarmClass: 'basic' }), ['alarm-widget'], 'the Alarm Widget subclasses have their own Help page');
 assert.deepEqual(elementTopic({ type: 'alarm' }), ['alarms-and-sound'], 'an older Alarm keeps Alarms and sound');
