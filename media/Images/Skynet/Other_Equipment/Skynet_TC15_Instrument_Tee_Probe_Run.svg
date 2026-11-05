@@ -1,16 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80">
-  <!-- Skynet Instrument Tee with a Temperature Probe (purple) in from the left (Fritz, 2026-11-02): a Temperature Device. The probe fills the left end, so the IPs are right and the branch -->
-  <g fill="#000" stroke="#000" stroke-width="3.2" stroke-linejoin="round">
-    <path d="M12 10 H148 V38 H102 A8 8 0 0 0 94 46 V68.5 H66 V46 A8 8 0 0 0 58 38 H12 Z"/>
-    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(1.50 24.00) rotate(0.00)"/>
-    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(158.50 24.00) rotate(180.00)"/>
-    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(80.00 78.50) rotate(-90.00)"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 91.2">
+  <!-- Skynet Instrument Tee with a Temperature Probe (purple) in from the left (2026-11-04): a Temperature Device. The probe fills the left end, so the IPs are right (1, 0.318) and the branch (0.5, 1) -->
+  <g stroke="#505050" stroke-width="1.6" stroke-linejoin="round" fill="#808080">
+    <path d="M16.5 9.8 H193.5 V48.2 H134.9 A10.7 10.7 0 0 0 124.2 58.9 V74.7 H85.8 V58.9 A10.7 10.7 0 0 0 75.1 48.2 H16.5 Z"/>
+    <rect x="1" y="1" width="16.5" height="56" rx="5"/>
+    <rect x="192.5" y="1" width="16.5" height="56" rx="5"/>
+    <rect x="77" y="73.7" width="56" height="16.5" rx="5"/>
   </g>
-  <g fill="#808080">
-    <path d="M12 10 H148 V38 H102 A8 8 0 0 0 94 46 V68.5 H66 V46 A8 8 0 0 0 58 38 H12 Z"/>
-    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(1.50 24.00) rotate(0.00)"/>
-    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(158.50 24.00) rotate(180.00)"/>
-    <rect x="0" y="-21" width="11.5" height="42" rx="5" transform="translate(80.00 78.50) rotate(-90.00)"/>
-  </g>
-  <rect x="1.5" y="18" width="76" height="12" fill="#a347a3"/>
+  <rect x="2.5" y="21.4" width="98" height="15.2" fill="#a248a3"/>
 </svg>

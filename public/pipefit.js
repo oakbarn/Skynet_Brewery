@@ -35,7 +35,7 @@ export function alongLine(a, d, c) {
 // with these arms when not turned: elbow90 W + S, elbow45 W + SE, tee W + E + S, cross all four. Turning by k * 45 degrees
 // (clockwise) moves every arm k steps round. Two pipes in line = a coupling (its collar is turned across the pipe). Anything no
 // fitting fits (two pipes 45 degrees apart, odd tees) stays a coupling and is listed as a problem (ok: false).
-const ARMS = { elbow90: [4, 2], elbow45: [4, 1], tee: [4, 0, 2], cross: [0, 2, 4, 6] };
+export const ARMS = { elbow90: [4, 2], elbow45: [4, 1], tee: [4, 0, 2], cross: [0, 2, 4, 6] };
 export function fitFor(dirs) {
   const want = [...new Set(dirs)].sort((x, y) => x - y);
   if (want.length === 1) return { fitting: 'coupling', rotate: String((want[0] * 45) % 180), ok: true };

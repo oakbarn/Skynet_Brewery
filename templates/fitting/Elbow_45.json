@@ -20,12 +20,13 @@
   "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Elbow_45.svg",
   "size": [
     100,
-    80
+    79
   ],
-  "body": 0.28,
+  "body": 0.358,
   "ipPos": {
-    "start": "0.16,0.8",
-    "end": "1,0.3"
+    "start": "0.194,0.756",
+    "end": "0.991,0.341"
   },
-  "notes": "A 45 degree elbow, for piping (Fritz's drawing, 2026-11-02). Openings at the bottom left (45 degrees) and the right; each IP is the center of its ferrule's outer face."
+  "notes": "A 45 degree elbow, for piping (2026-11-04, in the style of Fritz's new 90 elbow). Openings at the bottom left (45 degrees) and the right; each IP is the center of its ferrule's outer face. A TC Pipe Fittings Widget.",
+  "bend": "0.524,0.341"
 }
