@@ -444,11 +444,11 @@ Suggested Name made with it. Cancel in Tab settings makes no Tab and goes back t
 Tab first (Rule 5.21).
 
 4.2 **New Device order** (the **Add Device** box, Fritz 2026-11-04, "to build a name that follows my naming conventions"):
-**1 Label** (typed; Fritz 2026-11-04), **2 Interface**, **3 Port** (Available Ports/Pins: only free ones that fit), **4 Tab**,
+**1 Label** (typed, or filled in as Type_n where Rule 18.15 says; Fritz 2026-11-04/05), **2 Interface**, **3 Port** (Available Ports/Pins: only free ones that fit), **4 Tab**,
 **5 Name** (the Suggested Name, made from them; it shows once 1-4 are done, and the user may type their own). Then Width and
 Height (**150 x 150** to start). The Device Type comes from the list it was picked in, and is asked after the Interface only
 when that kind has more than one. **✖ Cancel** and **➕ Add Device** sit at the top and the bottom; Add Device works once 1-4
-are done (the Label typed, Rule 18.15). The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
+are done (the Label filled in, Rule 18.15). The Device goes on the picked Tab (Rule 4.1), in the middle unless ☰ Menu > Default sets X and Y, and the rest of its
 Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). The **Add Device box** (Fritz's Pump example, 2026-11-04): 1 Label (⬢) and Label Visible, 2 Interface (board) with
 **Available Ports** (a dropdown of the free pins) on the same line, 3 Tab; until they are done only the greyed out Device Type
 shows below them. Then 4 the **Name** (the Suggested Name, which may be edited) shows, with Cover (a pump), X, Y, Width and Height. (Help 82)
@@ -1342,7 +1342,13 @@ nothing and goes back to the calling dialog as it was. The first one built this 
    until all four are done it looks faded and pressing it says what is still missing (Fritz, 2026-11-04: "Add Device button
    does not work"; a greyed out button gave no reason on a phone). Then the hidden properties appear, with
    the **Name** (the Suggested Name) on top of them, then the rest (Cover for a pump, X, Y, Width, Height ...). The Label must be
-   typed (Label Visible off does not skip it). The Add Device box has it now. Every other dialog that
+   filled in (Label Visible off does not skip it). The Add Device box has it now.
+   *Changed (Fritz, 2026-11-05):* **A Device or Widget must have a Label, and a Label can't be blank.** Some Devices and Widgets
+   have their Label **filled in for you** with the pattern **Type_n**, n the next number not used yet: a **Motorized Ball Valve**
+   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"). It can be changed like any Label. When the
+   Label is filled in (by you or by the program) on a Build dialog, **the focus jumps to the next field** in the Enter order (the
+   next one still empty). **Every Label is editable by the user**, filled in for you or not. Which Devices and Widgets fill in
+   their Label is decided **dialog by dialog: Fritz says so when each dialog is built** (Fritz, 2026-11-05). Every other dialog that
 makes a new Device (for now the RIMS tube and the Integrated Electric Kettle New Device box) gets it one at a time, when Fritz
 says (Rule 18.10).
 
@@ -1399,6 +1405,7 @@ Valve drill-down dialog", Help 128):
 1. **Valves (or On/Off) > Motorized Ball Valve, open / closed (relay)**, then 2. **Pick the valve**, each with its picture:
    **Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve** (its own pictures). The two rows the lists had for them
    are now this one row (Rule 15.3).
+   Its Label starts filled in as **mBV_n** (the next number), so the focus starts on the Interface (Rule 18.15).
 3. The Add box is titled with the valve and works as the Pump's (Rules 4.2, 18.13, 18.15-18.17, 18.20): 1 Label ⬢ and Label
    Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**, **Orientation** with **Toggle**
    on its line, **Overlay** with **Database and .API ⬢** on its line, **Tap water valve**, **On Close List** and **On Open List**
@@ -1658,3 +1665,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
 - 2026-11-05: Rule 18.13 (and 18.21, 18.23): once a Pump or Motorized Ball Valve is added, its Interface and Port are greyed out for good; ✏ Change beside them is gone (physical wiring; the hidden key stays, only the Name changes with ✏ Change name). (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Rule 18.23 and 6.15: the Motorized Ball Valve dialogs match the Pump's (Orientation and Toggle on one line; Tap water valve, On Close List and On Open List on one line, in the Add box too); the switches are renamed On Close List / On Open List; the valve Type ID E_L_Vlv becomes eVlv (old names kept, Rule 3.5). Help 128 and 46 updated. (thread "Add Motorized Ball Valve drill-down dialog")
+- 2026-11-05: Rule 18.15 changed (Fritz: "A Device or Widget must have a label. Some Devices or Widgets will have a Label Auto filled in following a pattern ... Type_n where n is the next number ... A Label cannot be blank"; "Pumps do NOT have Auto Fill, Valves do"): a Motorized Ball Valve's Label starts as mBV_n; a filled Label sends the focus to the next field. Rules 4.2 and 18.23 follow. Help 128 updated. (thread "Add Motorized Ball Valve drill-down dialog")

@@ -3118,6 +3118,9 @@ async function newDeviceDialog(e, hint, what) {
     ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : 'Valve') }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
+  // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
+  // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
+  if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !work.typeCode) work.typeCode = isPumpDev(e) ? 'Pump' : 'Valve';      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
@@ -4282,6 +4285,12 @@ function pumpDeviceFields(it, item) {
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 const isMbvDev = e => e?.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (e.template ? skyDev(e) && isMbvTpl(e.template) : true);
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e);
+// the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
+function autoLabel(type) {
+  const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
+  const used = [...(L0.elements || []), ...(L0.graphics || [])].map(x => re.exec(String(x.label ?? '').trim())).filter(Boolean).map(m => +m[1]);
+  return `${type}_${used.length ? Math.max(...used) + 1 : 1}`;
+}
 const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Defined Motorized Ball Valve';
 const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : mbvTitle(e);
 const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']];
