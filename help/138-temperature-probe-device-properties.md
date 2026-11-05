@@ -10,7 +10,9 @@ A probe reads a temperature, so it has **no Cover, Toggle or Overlay**. This cov
    thermocouple, an NTC thermistor, LM35 or TMP36. For a **Thermowell** or a **probe tee**, pick it first, then step **2a**
    asks the kind of probe in it. The kind of probe is always picked first.
 2. The Add box opens with the probe as its title, for example **Short Thermowell: DS18B20**. Its **Label** is already filled in
-   as **tP_1**, tP_2 ... (the next number), so the cursor starts on the next empty field. You can change the Label, but it can't
+   by its kind of probe as **tP_Type_n** (the next number for that kind): **tP_1W_1** (DS18B20), **tP_RTD_1** (PT100 or PT1000),
+   **tP_TC_1** (thermocouple), **tP_10KNTC_1**, **tP_50KNTC_1**, **tP_100KNTC_1** (NTC thermistors), **tP_LM35_1**, **tP_TMP36_1**,
+   so the cursor starts on the next empty field. You can change the Label, but it can't
    be blank. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font and colors) and **Label Visible**, 2 the
    **Interface (board)** and, on the same line, the **Port**: the **Probe #** for a DS18B20 (its OneWire probe number), or an
    **Available Port** (the chip-select pin of an RTD or thermocouple board, the analog pin of an NTC, LM35 or TMP36), 3 the **Tab**.

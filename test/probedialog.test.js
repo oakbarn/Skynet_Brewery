@@ -11,7 +11,17 @@ const add = app.slice(app.indexOf('async function newDeviceDialog('), app.indexO
 assert.match(add, /const port = pr \? probePort\(e\)/, 'the Port is on the Interface line');
 assert.match(add, /\.\.\.\(pr \? \[\.\.\.PROBE_GRAPHIC_FIELDS\(e, after\), \.\.\.PROBE_OWN\(e, after\)\] : \[\]\)/, 'Graphic, Orientation, its own set');
 assert.match(add, /pr \? probeTitle\(e\)/, 'the Add box is titled with the probe');
-assert.match(add, /if \(pr && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = autoLabel\(PROBE_AUTO_LABEL\);/, 'Label auto fill tP_n (Rule 18.15)');
+assert.match(add, /if \(pr && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = probeAutoLabel\(work\.typeCode \|\| defaultCode\(e\)\);/, 'Label auto fill by kind (Rule 18.15)');
+// Fritz, 2026-11-05: 10K NTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_; other thermistors follow 10KNTC
+{
+  const { defaultCode } = await import('../public/naming.js');
+  assert.match(app, /const PROBE_LABEL_CODE = \{ '100KNT': '100KNTC' \};/);
+  assert.match(app, /const probeAutoLabel = code => autoLabel\(`\$\{PROBE_AUTO_LABEL\}_\$\{PROBE_LABEL_CODE\[code\] \|\| code \|\| 'NTC'\}`\);/);
+  const lab = e => { const c = defaultCode({ type: 'temperature', ...e }); return `tP_${{ '100KNT': '100KNTC' }[c] || c}_1`; };
+  assert.equal(lab({ sensor: 'ds18b20' }), 'tP_1W_1'); assert.equal(lab({ sensor: 'pt100' }), 'tP_RTD_1'); assert.equal(lab({ sensor: 'pt1000' }), 'tP_RTD_1');
+  assert.equal(lab({ sensor: 'ntc', r0: 10000 }), 'tP_10KNTC_1'); assert.equal(lab({ sensor: 'ntc', r0: 50000 }), 'tP_50KNTC_1'); assert.equal(lab({ sensor: 'ntc', r0: 100000 }), 'tP_100KNTC_1');
+  assert.equal(lab({ sensor: 'thermocouple' }), 'tP_TC_1'); assert.equal(lab({ sensor: 'lm35' }), 'tP_LM35_1'); assert.equal(lab({ sensor: 'tmp36' }), 'tP_TMP36_1');
+}
 assert.match(add, /tap: pr \? undefined/, 'a probe has no Toggle');
 const ownAt = app.indexOf('// ---- Temperature Probe Device dialogs'), own = app.slice(ownAt, Math.min(...['// ---- Picture Widget', '// Value, Time and DateTime Widget Properties'].map(m => app.indexOf(m, ownAt)).filter(i => i > 0)));
 assert.ok(!/cover|imageOverlay|'tap'/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover, Toggle or Overlay on a probe');
