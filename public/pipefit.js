@@ -157,3 +157,42 @@ export function fitOnPipe(a, b, bend, arms, { near = 15, aOpen = false, bOpen = 
   return aIn ? { ok: true, mode: 'end', shift: s, drop: 'A', pieces: [{ from: fwd.id, to: 'B', pts: [pt(fwd.c), [...b]] }] }
     : { ok: true, mode: 'end', shift: s, drop: 'B', pieces: [{ from: 'A', to: back.id, pts: [[...a], pt(back.c)] }] };
 }
+
+// A Device picture turned and flipped in its box (Fritz, 2026-11-05: probe tees and thermowells, Rule 5.30). box: the box as drawn
+// on the Tab; pw, ph: the picture's own width and height (a box turned 90 or 270 is ph wide and pw high); fx, fy: a point of the
+// picture as drawn in its file, in fractions of its width and height. The picture is turned clockwise by rot, then flipped
+// (the same as the CSS scale(sx, sy) rotate(turn)). Returns where that point is on the Tab.
+export function boxPoint(box, pw, ph, fx, fy, rot = 0, flipH = false, flipV = false) {
+  const a = rot * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), dx = (fx - 0.5) * pw, dy = (fy - 0.5) * ph;
+  const x = dx * c - dy * s, y = dx * s + dy * c;
+  return [box.x + box.w / 2 + (flipH ? -x : x), box.y + box.h / 2 + (flipV ? -y : y)];
+}
+
+// A tee dropped on a hose cuts the hose (Fritz, 2026-11-05: "The tees need to Break a Line if added to a Pipe or hose just as
+// normal tees", Rule 5.30). A hose bends, so the tee does not move: the hose is cut where it passes nearest the tee's bend and
+// each piece goes to one of the tee's two run ends (the one on its side). pts: the hose's points; bend: the tee's bend; arms:
+// [{ id, c }] its two ends; box: the tee's box (hose points under it are left out); near: how far off the hose the bend may be;
+// minEnd: how much hose must be left on each side. Returns null, or { pieces: [{ to, pts }, { from, pts }] } where the first
+// piece keeps the hose's start (to: an arm id) and the second its end (from: an arm id).
+export function cutHose(pts, bend, arms, box, { near = 15, minEnd = 10 } = {}) {
+  if ((pts || []).length < 2 || arms.length !== 2) return null;
+  let best = null, run = 0;
+  const lens = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1], dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy, L = Math.sqrt(L2);
+    lens.push(L);
+    if (!L) continue;
+    const t = Math.max(0, Math.min(1, ((bend[0] - a[0]) * dx + (bend[1] - a[1]) * dy) / L2)), q = [a[0] + t * dx, a[1] + t * dy];
+    const d = Math.hypot(q[0] - bend[0], q[1] - bend[1]);
+    if (!best || d < best.d) best = { d, i, s: run + t * L, u: [dx / L, dy / L] };
+    run += L;
+  }
+  if (!best || best.d > near || best.s < minEnd || run - best.s < minEnd) return null;
+  const inBox = q => q[0] > box.x && q[0] < box.x + box.w && q[1] > box.y && q[1] < box.y + box.h;
+  // the arm further back along the hose takes the start's piece
+  const along = q => (q.c[0] - bend[0]) * best.u[0] + (q.c[1] - bend[1]) * best.u[1];
+  const [A, B] = along(arms[0]) <= along(arms[1]) ? arms : [arms[1], arms[0]];
+  const first = pts.slice(0, best.i + 1).filter((q, k) => !k || !inBox(q)), second = pts.slice(best.i + 1).filter((q, k, all) => k === all.length - 1 || !inBox(q));
+  if (inBox(first[0]) || inBox(second[second.length - 1])) return null;     // an end of the hose is under the tee
+  return { pieces: [{ to: A.id, pts: [...first.map(q => [...q]), [...A.c]] }, { from: B.id, pts: [[...B.c], ...second.map(q => [...q])] }] };
+}

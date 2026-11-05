@@ -3,7 +3,7 @@
 // Interface ID: 1 to 4 letters, unique. A new Interface gets the first letter of its first two words ("Main Brewery Mega USB" = MB),
 //   or MB_2, MB_3 ... when MB is taken. An Admin can change it. (Fritz, 2026-10-21)
 // Tab ID: exactly 2 letters, unique ("Sparge" = SP). An Admin can change it.
-// Device name (Fritz, 2026-10-23): InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_E_L_Vlv_Fly~Sparge_In__SP
+// Device name (Fritz, 2026-10-23): InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_eVlv_Fly~Sparge_In__SP
 //   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
 
@@ -19,7 +19,7 @@ const T = {
   PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DBand: 'Deadband', DO: 'Direct On / Off (relay, SSR, contactor; also a heating element on one)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
-  Pump: 'Pump', M_L_Vlv: 'Low Temperature Manual Valve', E_L_Vlv: 'Low Temperature Electric Valve', M_H_Vlv: 'High Temperature Manual Valve',
+  Pump: 'Pump', M_L_Vlv: 'Low Temperature Manual Valve', eVlv: 'Electric Valve (motorized ball valve, low temperature)', M_H_Vlv: 'High Temperature Manual Valve',
   E_H_Vlv: 'High Temperature Electric Valve', G_Vlv: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
   Fan: 'Fan', Chill: 'Chiller / glycol / fridge compressor', HtPad: 'Fermenter heat wrap or pad', Ignit: 'Burner igniter',
   // direct input
@@ -40,7 +40,7 @@ export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
 const list = ids => ids.split(' ').map(id => [id, T[id]]);
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
-  digitalOut: list('DO Pump M_L_Vlv E_L_Vlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  digitalOut: list('DO Pump M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
   pwmOut: list('PWM H_PWM P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr P_LED'),
   analogOut: list('AO H_AO P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr'),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
@@ -69,14 +69,15 @@ export function defaultCode(el, hint) {
   const has = c => codes.some(x => x[0] === c);
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
-  else if (el.type === 'digitalOut') c = { pump: 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'E_L_Vlv' }[el.subtype];
+  else if (el.type === 'digitalOut') c = { pump: 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv' }[el.subtype];
   else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: el.type === 'pwmOut' ? 'H_PWM' : 'H_AO', propValve: 'P_L_Vlv', pump: 'P_Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];
   return c && has(c) ? c : codes[0][0];
 }
 // The type codes of PR #61 (PmP, VlV ...) -> the Device Type IDs. A code that no longer fits is worked out again.
-const OLD_CODES = { PmP: 'Pump', VlV: 'E_L_Vlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
+// E_L_Vlv -> eVlv (Fritz, 2026-11-05: "_E_L_Vlv_ change to _eVlv_"); names already made keep it (Rule 3.5)
+const OLD_CODES = { PmP: 'Pump', VlV: 'eVlv', E_L_Vlv: 'eVlv', MtR: 'Mtr', FaN: 'Fan', LgT: 'Light', LeD: 'LED', ElM: 'DO', BrN: 'G_Vlv',
   PWM_PmP: 'P_Pump', PWM_VlV: 'P_L_Vlv', PWM_MtR: 'P_Mtr', PWM_FaN: 'P_Fan', PWM_LgT: 'P_LED', PWM_LeD: 'P_LED', PWM_ElM: 'H_PWM',
   AO_PmP: 'P_Pump', AO_VlV: 'P_L_Vlv', AO_MtR: 'P_Mtr', AO_FaN: 'P_Fan', AO_ElM: 'H_AO',
   DiN: 'DIN', FlT: 'Float', FlS: 'FlowSw', BtN: 'PB', SfT: 'Intlk', CnT: 'Count', PrS: 'Pres', LvL: 'Level', VoL: 'Vol', PhM: 'PH_Met',
