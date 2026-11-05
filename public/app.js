@@ -3425,7 +3425,7 @@ const DEV_TYPES = () => [
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
   ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
-  ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
+  ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%', subtype: 'element' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), VESSEL_ELEMENT]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
@@ -3609,6 +3609,7 @@ async function newDeviceDialog(e, hint, what) {
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
+  { const hm = heatMode(e); if (hm && !String(work.label ?? '').trim()) work.label = autoLabel('hE_' + hm); }     // a Heating Element (Fritz, 2026-11-05): hE_PID_1 ...
   if (pr && !String(work.label ?? '').trim()) work.label = autoLabel(PROBE_AUTO_LABEL);       // a Temperature Probe: tP_1, tP_2 ... (Rule 18.26)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !pr && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
@@ -4987,6 +4988,9 @@ const isPwmDev = e => ['pwmOut', 'analogOut'].includes(e?.type) && !e.kind && !e
 // the Heating Element (Fritz, 2026-11-05: "Same with Heating Element"): an on / off element of its own (not one built into a RIMS tube or
 // an Integrated kettle, which keep their present dialog, Rule 18.10)
 const isElemDev = e => e?.type === 'digitalOut' && e.subtype === 'element' && !e.kind && !e.template && !e.integratedIn;
+// Heating Element Labels fill in by control mode (Fritz, 2026-11-05, Rule 18.15): PID, HYS, DutyC, PWM, DO (on / off), DeadB
+const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
+const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? 'DO' : e.type === 'pwmOut' ? 'PWM' : null);
 const isSkyElem = e => e?.imageOff === ELEM_OFF;
 const elemTitle = e => isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e) || isElemDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, PWM / Analog out, Heating Element, Temperature Probe (Rule 18.26)
