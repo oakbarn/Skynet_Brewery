@@ -255,6 +255,7 @@ function drawWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
+  if (editing && draft && !drawPts) joinLooseEnds(w.name);     // a loose pipe end on another pipe joins it (a tee or an elbow)
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) for (const g of draft.graphics.filter(g => g.workspace === w.name && isPlainUnit(g) && autoSized(g))) autoSizeUnit(g);
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
@@ -2429,6 +2430,58 @@ function unitToJoint(u) {
   }
   draft.graphics = draft.graphics.filter(x => x !== u && !ids.has(x.id)); draft.graphics.push(j);
   autoFit(j); return j.id;
+}
+// A loose pipe end (its own coupling) that meets another pipe joins it (Fritz, 2026-11-05, Rule 5.25): on another loose end the two
+// become one joint (an elbow, or a coupling when in line); partway along another pipe, away from its IPs, that pipe is cut in two
+// there and the three ends share one joint (a tee). Skynet then puts in the TC Pipe Fitting the joint needs.
+const JOIN_TOL = 6;
+function lineHit(a, b, c, d) {      // where line a-b meets line c-d (null when parallel)
+  const r = [b[0] - a[0], b[1] - a[1]], s = [d[0] - c[0], d[1] - c[1]], den = r[0] * s[1] - r[1] * s[0];
+  if (Math.abs(den) < 1e-9) return null;
+  const t = ((c[0] - a[0]) * s[1] - (c[1] - a[1]) * s[0]) / den;
+  return [a[0] + t * r[0], a[1] + t * r[1]];
+}
+function joinLooseEnds(ws) {
+  if (!editing || !draft) return 0;
+  let n = 0;
+  const loose = () => draft.graphics.filter(g => g.workspace === ws && g.kind === 'ip' && g.fitting === 'coupling' && g.autoFit && !g.port && !(drawPts && g.id === drawFrom))
+    .map(g => ({ g, ps: pipesOn(g.id, ws) })).filter(x => x.ps.length === 1 && x.ps[0].straight && x.ps[0].points.length === 2);
+  const endOf = (p, id) => p.from === id ? 0 : 1;
+  const setEnd = (p, i, id, c) => { if (i === 0) p.from = id; else p.to = id; p.points[i] = [Math.round(c[0]), Math.round(c[1])]; };
+  // 1. two loose ends at (nearly) one place: one joint
+  for (let again = true; again;) {
+    again = false;
+    const L = loose();
+    for (let i = 0; i < L.length && !again; i++) for (let j = i + 1; j < L.length && !again; j++) {
+      const A = L[i], B = L[j], ca = ipCenter(A.g), cb = ipCenter(B.g);
+      if (A.ps[0] === B.ps[0] || Math.hypot(ca[0] - cb[0], ca[1] - cb[1]) > JOIN_TOL) continue;
+      const pa = A.ps[0], ia = endOf(pa, A.g.id), pb = B.ps[0], ib = endOf(pb, B.g.id);
+      const hit = lineHit(pa.points[0], pa.points[1], pb.points[0], pb.points[1]) || cb;     // in line: B's end
+      if (Math.hypot(hit[0] - ca[0], hit[1] - ca[1]) > JOIN_TOL || Math.hypot(hit[0] - cb[0], hit[1] - cb[1]) > JOIN_TOL) continue;
+      const c = hit.map(Math.round);
+      Object.assign(B.g, { x: c[0] - (B.g.w || 30) / 2, y: c[1] - (B.g.h || 30) / 2 });
+      setEnd(pa, ia, B.g.id, c); setEnd(pb, ib, B.g.id, c);
+      draft.graphics = draft.graphics.filter(g => g !== A.g); autoFit(B.g); n++; again = true;
+    }
+  }
+  // 2. a loose end partway along another straight pipe: that pipe is cut in two there
+  for (const A of loose()) {
+    const pa = A.ps[0], ia = endOf(pa, A.g.id), ca = ipCenter(A.g);
+    for (const q of draft.graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && p.straight && !p.hose && p !== pa && (p.points || []).length === 2)) {
+      const [q0, q1] = q.points, hit = lineHit(pa.points[0], pa.points[1], q0, q1); if (!hit) continue;
+      if (Math.hypot(hit[0] - ca[0], hit[1] - ca[1]) > JOIN_TOL) continue;
+      const len = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]), t = ((hit[0] - q0[0]) * (q1[0] - q0[0]) + (hit[1] - q0[1]) * (q1[1] - q0[1])) / (len * len);
+      if (t * len < JOIN_TOL * 2 || (1 - t) * len < JOIN_TOL * 2) continue;          // at its ends: the IP there takes it
+      const c = hit.map(Math.round);
+      Object.assign(A.g, { x: c[0] - (A.g.w || 30) / 2, y: c[1] - (A.g.h || 30) / 2 });
+      setEnd(pa, ia, A.g.id, c);
+      const rest = { ...clone(q), id: newId(), from: A.g.id, to: q.to, points: [c, [...q1]] }; delete rest.name; delete rest._key;
+      q.to = A.g.id; q.points = [[...q0], c];
+      draft.graphics.push(rest); giveName(rest, draft.graphics);
+      autoFit(A.g); n++; break;
+    }
+  }
+  return n;
 }
 // every IP elbow, tee and cross on a Tab becomes its TC Pipe Fittings Widget (also the ones in older Schemas, Rule 15.2)
 function tcFitJoints(ws) {

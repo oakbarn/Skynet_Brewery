@@ -21,6 +21,10 @@ each pipe ends on one of its IPs.
 
 - **Make a tee from an elbow:** draw a new pipe starting (or ending) on the **bend** of the elbow, where the two pipes' center
   lines meet. The elbow becomes a tee. Do the same on a tee to make it a cross.
+- **Join a pipe partway along another pipe:** start or end the new pipe on the other pipe, away from its IPs. Skynet cuts that
+  pipe in two there and puts in a tee.
+- **Two loose pipe ends** that meet become one joint, so an elbow goes in (or a coupling, when they are in line).
+- A pipe that only crosses another one in its middle does not join it.
 - Two pipes in a straight line just join on one IP (a coupling). An open pipe end gets a coupling too.
 
 ## Adding one by hand
