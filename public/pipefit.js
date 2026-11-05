@@ -196,3 +196,28 @@ export function cutHose(pts, bend, arms, box, { near = 15, minEnd = 10 } = {}) {
   if (inBox(first[0]) || inBox(second[second.length - 1])) return null;     // an end of the hose is under the tee
   return { pieces: [{ to: A.id, pts: [...first.map(q => [...q]), [...A.c]] }, { from: B.id, pts: [[...B.c], ...second.map(q => [...q])] }] };
 }
+
+// Sight Glass TC Pipe Fittings (Fritz, 2026-11-05: "Create 2 Sight Glass Pipe Fitting, one Caged and one not. Length attribute to
+// stretch length", Rule 5.32). The picture is drawn for the box it fills, so a longer sight glass only gets a longer glass: the
+// ferrules and end collars keep their size and shape. Drawn in the units of the TC 1.5 Tee (Fritz's drawing, 2026-11-04): 58 high,
+// ferrules 16.5 x 56, pipe 38.4 thick (SG_BODY of the height), 28.2 units to the inch (SG_INCH). Glass empty (as kettles, Rule 5.12).
+export const SG_H = 58, SG_INCH = 28.2, SG_BODY = 38.4 / 58, SG_MIN = 2, SG_MAX = 48, SG_DEFAULT = 6;
+export const sgLength = v => { const n = Math.round(+v * 4) / 4; return Number.isFinite(n) && n > 0 ? Math.min(SG_MAX, Math.max(SG_MIN, n)) : SG_DEFAULT; };   // inches, face to face
+export const sgRatio = len => sgLength(len) * SG_INCH / SG_H;        // width / height of the picture for a Length
+export function sightGlassSvg(ratio, caged) {
+  const r = n => Math.round(n * 100) / 100;
+  const W = r(Math.max(sgRatio(SG_MIN), +ratio || sgRatio(SG_DEFAULT)) * SG_H), g0 = 26.5, g1 = r(W - 26.5), gl = r(g1 - g0);
+  const fer = '<g stroke="#505050" stroke-width="1.6" stroke-linejoin="round" fill="#808080">' +
+    `<rect x="1" y="1" width="16.5" height="56" rx="5"/><rect x="${r(W - 17.5)}" y="1" width="16.5" height="56" rx="5"/>` +
+    `<rect x="17.5" y="6" width="9" height="46" rx="2"/><rect x="${r(W - 26.5)}" y="6" width="9" height="46" rx="2"/></g>`;
+  const glass = `<rect x="${g0}" y="10" width="${gl}" height="38" fill="#d6ecf7" fill-opacity="0.85" stroke="#6a8fa3" stroke-width="1.4"/>` +
+    `<rect x="${r(g0 + 3)}" y="14" width="${r(Math.max(1, gl - 6))}" height="4" rx="2" fill="#ffffff" fill-opacity="0.9"/>` +
+    `<rect x="${r(g0 + 3)}" y="40" width="${r(Math.max(1, gl - 6))}" height="2" rx="1" fill="#9cc3d6" fill-opacity="0.8"/>`;
+  let cage = '';
+  if (caged) {          // a stainless guard round the glass: top and bottom bars and posts between them, about every inch
+    const n = Math.max(1, Math.round(gl / SG_INCH)), step = gl / (n + 1);
+    cage = '<g stroke="#505050" stroke-width="1.2" fill="#a9aeb4">' + `<rect x="${g0}" y="6.5" width="${gl}" height="6" rx="1.5"/><rect x="${g0}" y="45.5" width="${gl}" height="6" rx="1.5"/>` +
+      Array.from({ length: n }, (_, i) => `<rect x="${r(g0 + step * (i + 1) - 2)}" y="12.5" width="4" height="33"/>`).join('') + '</g>';
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${SG_H}" preserveAspectRatio="none" data-ips="0,0.5 1,0.5">` + fer + glass + cage + '</svg>';
+}

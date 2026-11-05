@@ -437,6 +437,8 @@ Every IP is the center of a ferrule's outer face, or the center of the opening o
 | Reducer (TC 2) | Reducer to 1.5 (drawn like the concentric one) | Left (big), Right (small) |
 | End_Cap | End Cap | none: closes an opening |
 | Check_Valve | Check valve (one way, Left to Right) | Left, Right |
+| Sight_Glass | Sight glass, plain glass; **Length** (inches, 2 to 48, 6 when placed) stretches only the glass (Rule 5.32, Help 139) | Left, Right |
+| Sight_Glass_Caged | Sight glass with a stainless cage round the glass; **Length** as above | Left, Right |
 | Butterfly_Valve_1in | Reducer, 1 in valve, Reducer | Left, Right |
 | CIP_Ball_Valve | CIP spray ball with valve | |
 | Flow_Meter | Flow meter (either way) | Left, Right; pick Flow meter Device |
@@ -514,3 +516,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-05: Quick Disconnect Widget (Fritz's red star on a valve IP) and Quick Disconnect Hose (its free end moves at any time, onto an IP, a Quick Disconnect or the top third of a vessel) (Rule 5.28, Help 127). (thread "Add movable quick disconnect hose")
 - 2026-11-05: Vessel Widget class (Rule 5.31, Help 133): Skynet_Vessel_Widget Template, a Place slider on each IP, the Temperature Probe (Thermowell or Front) and the Element Port; new vessel port Top Inlet. The Three Vessel sample's vessels use it.
 - 2026-11-05: Picture Widget: Add Widget box and Properties follow the Pump drill-down (Rule 18.27, Help 74); Picture ➕ makes a Picture Widget. (thread "Build Picture Widget dialog like Pump")
+- 2026-11-05: Sight_Glass and Sight_Glass_Caged TC Pipe Fittings (Rule 5.32, Help 139): a Length setting in inches stretches the glass; Label starts as site_glass_n. (thread "Add caged and plain sight glass fittings")

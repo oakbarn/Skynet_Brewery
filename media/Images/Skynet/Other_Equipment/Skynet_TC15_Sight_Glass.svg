@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 169.2 58" preserveAspectRatio="none" data-ips="0,0.5 1,0.5">
+  <!-- Skynet TC 1.5 sight glass, 6 in (Rule 5.32). On a Tab the picture is drawn for its Length: only the glass stretch. IPs at the center of each ferrule face, left (0, 0.5), right (1, 0.5) -->
+  <g stroke="#505050" stroke-width="1.6" stroke-linejoin="round" fill="#808080"><rect x="1" y="1" width="16.5" height="56" rx="5"/><rect x="151.7" y="1" width="16.5" height="56" rx="5"/><rect x="17.5" y="6" width="9" height="46" rx="2"/><rect x="142.7" y="6" width="9" height="46" rx="2"/></g><rect x="26.5" y="10" width="116.2" height="38" fill="#d6ecf7" fill-opacity="0.85" stroke="#6a8fa3" stroke-width="1.4"/><rect x="29.5" y="14" width="110.2" height="4" rx="2" fill="#ffffff" fill-opacity="0.9"/><rect x="29.5" y="40" width="110.2" height="2" rx="1" fill="#9cc3d6" fill-opacity="0.8"/>
+</svg>
