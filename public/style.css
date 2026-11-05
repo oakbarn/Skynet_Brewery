@@ -239,6 +239,10 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .el.k-pushbutton { touch-action: none; }
 /* BruControl-style elements */
 .el.stretch { background-size: 100% 100%; }
+.el.stretch.turned::before { background-size: 100% 100%; }
+/* a user's own valve picture moved and sized so its In and Out spots sit on the Valve Standard IPs (Rule 5.29) */
+.el.vfit { background-size: var(--vfs) !important; background-position: var(--vfp) !important; }
+.el.vfit.turned::before { background-size: var(--vfs); background-position: var(--vfp); }
 .el.no-border { border-color: transparent !important; box-shadow: none !important; }
 .el.show-border { border: 1px solid #000; }
 .el.look-indicator .vl::before { content: ''; flex: none; width: .9em; height: .9em; border-radius: 50%; background: var(--ind, transparent); border: 1px solid rgba(0,0,0,.45); margin-right: .45em; }

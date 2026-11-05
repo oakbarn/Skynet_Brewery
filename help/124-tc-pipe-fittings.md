@@ -35,6 +35,20 @@ each pipe ends on one of its IPs.
 The new fitting goes on the Build Tab like every new item (Rule 4.1). Turn and flip it with the turn buttons on the Edit layout
 bar (Rule 5.5), then join pipes to its IPs.
 
+## Dropping a tee or a cross on a pipe
+
+Drag a **Tee**, an **Instrument Tee** or a **Cross** onto a straight pipe and let go. Skynet puts it into the pipe:
+
+- **Between the pipe's ends:** the pipe is cut in two. The tee moves across onto the pipe's line, and its two in-line ends (the
+  run) each join one of the pieces. Its branch is left open, ready for the next pipe. The first piece keeps the pipe's Name and
+  Flow Color; the other takes the next Pipe_N name.
+- **Its run goes across the pipe?** Skynet turns it a quarter turn (or more) about its bend so the run goes along the pipe.
+- **Over an open end of the pipe:** the pipe is made shorter and joins the tee.
+- Nothing is cut when the tee is still joined to other pipes, is Locked, the pipe is a hose, or the pipe is shorter than the
+  tee, or its end there is already joined to something. A message at the bottom of the screen says what was done (or why not).
+
+Press **Save layout** to keep it, or **Exit** without saving to put everything back.
+
 ## Fittings with a Temperature Probe
 
 A tee with a Temperature Probe in it is **not** a TC Pipe Fitting. It is a **Temperature Device** (subtype Probe Tee), because it

@@ -1,10 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="434" height="292" viewBox="0 0 434 292" preserveAspectRatio="none">
-  <!-- Skynet drawing: Riptide-style pump, off, purple cover. Same size and pipe spots as the Riptide pump PNGs. -->
-  <defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-pump-standard="1">
+  <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Riptide-style picture from BruControl; inlet and outlet pipes made a little longer to reach the spots. -->
+  <g transform="translate(2.94 58.23) scale(0.67)">
+    <rect x="349" y="-3.35" width="24" height="4.35" fill="#7f7f7f"/>
+    <rect x="326" y="-3.35" width="12" height="7.35" fill="#f8f8f8" stroke="#c9c9c9" stroke-width="1"/>
+    <rect x="414" y="126" width="10.16" height="24" fill="#7f7f7f"/>
+<defs>
     <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d887d"/><stop offset=".45" stop-color="#e4e0d6"/><stop offset="1" stop-color="#9c978b"/></linearGradient>
     <linearGradient id="steelV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8e4da"/><stop offset=".5" stop-color="#b3ad9f"/><stop offset="1" stop-color="#8a8579"/></linearGradient>
     <linearGradient id="motor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4a4a"/><stop offset=".35" stop-color="#2a2a2a"/><stop offset="1" stop-color="#141414"/></linearGradient>
   </defs>
+
+  <!-- Skynet drawing: Riptide-style pump, off, purple cover. Same size and pipe spots as the Riptide pump PNGs. -->
+  
   <!-- outlet pipe, branch and the white line, where the PNG has them -->
   <rect x="326" y="0" width="12" height="200" rx="3" fill="#f8f8f8" stroke="#c9c9c9" stroke-width="1"/>
   <rect x="349" y="0" width="24" height="136" fill="#7f7f7f"/>
@@ -44,4 +51,5 @@
   <path d="M130 129 H244 L257 140 H143 Z" fill="#a349a4" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
   <rect x="144" y="140" width="113" height="75" fill="#a349a4" stroke="#000" stroke-width="3"/>
   <path d="M126 109 H238 M149 146 H251" stroke="#c77fc8" stroke-width="3" opacity=".8"/>
+  </g>
 </svg>

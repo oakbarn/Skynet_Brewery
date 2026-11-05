@@ -216,7 +216,9 @@ console.log('templates ok');
 {
   const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
   for (const k of ['ipInX', 'ipInY', 'ipOutX', 'ipOutY']) assert.ok(app.includes(`['${k}', `), k + ' is in the valve Properties');
-  assert.match(app, /fl\(ipAt\(e, 'in'\) \|\| pe\?\.\[0\]/, 'a set In spot comes before the drawing\'s own');
+  // since the Valve Standard (Fritz, 2026-11-05, Rule 5.29) the IPs stay on the standard spots and the set spots move the picture
+  assert.match(app, /fl\(pe\?\.\[0\] \|\| ipAt\(e, 'in'\)/, 'the standard spots come first');
+  assert.match(app, /function valveFit\(e\)/, 'the In and Out spots move and size the picture');
   assert.match(app, /'Manual Valve \(Widget, no pin/, 'the Manual Valve Widget is in the Valves list');
 }
 // The first Skynet Proportional Valve (Fritz, 2026-11-03): the BruControl KLD20T, an analogOut 0-5 V, 0-100 %, Valves list only.

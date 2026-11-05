@@ -1,5 +1,5 @@
 {
   "title": "Skynet KLD20T Proportional Valve: Vertical Right",
   "master": "Skynet_KLD20T_Proportional_Valve_H",
-  "props": { "orientation": "v", "flipH": true, "w": 77, "h": 90 }
+  "props": { "orientation": "v", "flipH": true, "w": 150, "h": 150 }
 }

@@ -30,7 +30,8 @@ The pipe is made **shorter** and the pump or valve is joined in with **both of i
 
 ## When nothing is cut
 
-- The pump or valve is already joined to a pipe, or it is Locked.
+- The pump or valve is still joined to another pipe, or it is Locked. A pump or valve you **drag off** its pipes lets them go
+  (Rule 5.19), so dropped on another pipe it cuts that one. One still joined says so in a message.
 - The pipe is a hose, or runs at 45 degrees; the valve is turned 45 degrees or is a front view.
 - There is not enough pipe left to go round the pump or to put it in. Move it further along the pipe, or draw a longer pipe.
 
