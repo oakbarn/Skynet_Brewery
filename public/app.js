@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -255,6 +255,7 @@ function drawWs() {
   if (editing) { imgs.push(grid); sizes.push('20px 20px, 20px 20px'); poss.push('0 0, 0 0'); }
   ws.style.backgroundImage = imgs.join(', '); ws.style.backgroundSize = sizes.join(', '); ws.style.backgroundPosition = poss.join(', '); ws.style.backgroundRepeat = 'no-repeat' + (editing ? ', repeat, repeat' : '');
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
+  if (editing && draft && !drawPts) joinLooseEnds(w.name);     // a loose pipe end on another pipe joins it (a tee or an elbow)
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
   if (editing && draft) for (const g of draft.graphics.filter(g => g.workspace === w.name && isPlainUnit(g) && autoSized(g))) autoSizeUnit(g);
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
@@ -778,7 +779,7 @@ function elGeom(e) {
 // it can also be a gGlobal value holding the percent. It passes flow whenever it is above 0 % open.
 const PROP_TYPES = ['analogOut', 'pwmOut', 'gGlobal', 'shared'];
 // Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
-const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
+const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
 const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
 // One picture plus an On overlay instead of two pictures (Fritz, 2026-10-22): .imageOverlay is drawn on top while the item is on
 const OVERLAY_PIC = ['imageOverlay', 'On overlay (on top while on)', 'gpick', 'overlays'];
@@ -984,6 +985,65 @@ function centerOnPipes(lay, ws) {
     g.x = (g.x || 0) + mx; g.y = (g.y || 0) + my; n++;
   }
   return n;
+}
+// A pump or valve put on a pipe cuts it (Fritz, 2026-11-04, Rule 5.26; the geometry is splitAt in public/pipefit.js).
+// Dropped between a straight pipe's ends, the pipe becomes two pipes, one on each of its IPs; dropped over a pipe's end, the
+// pipe is made shorter and joined to it (an end on a tee, an elbow or another IP stays there and is joined to its other IP). Only for an item none of whose
+// IPs has a pipe yet, in Edit layout. Returns { ok, text }, or null when no pipe runs through it.
+const SPLIT_SUBS = ['pump', 'valve', 'propValve'];
+const FACES = [[-1, 0], [1, 0], [0, -1], [0, 1]];       // left, right, up, down: the way an opening faces
+const nearFace = (fx, fy) => FACES[[fx, 1 - fx, fy, 1 - fy].reduce((m, v, i, a) => v < a[m] ? i : m, 0)];
+function splitPorts(it) {
+  if (isMv(it)) {          // a Manual Valve: each end faces away from its middle (none for a front view)
+    const [cx, cy] = ipCenter(it);
+    return eqPorts(it).map(q => { const dx = q.c[0] - cx, dy = q.c[1] - cy; return { id: q.id, c: q.c, f: Math.abs(dx) > 2 * Math.abs(dy) ? [Math.sign(dx), 0] : Math.abs(dy) > 2 * Math.abs(dx) ? [0, Math.sign(dy)] : null }; });
+  }
+  const f = picFlow(it.imageOff || it.imageOn), pe = picEnds(it), gm = elGeom(it);
+  const turned = it.subtype === 'valve' && ['l45', 'r45'].includes(it.orientation);
+  return devIps(it).map((q, i) => {
+    let face = null;
+    if (turned || (f && f.o === 'f')) face = null;          // a 45 degree valve, or a front view (both IPs on its opening)
+    else if (pe && !ipAt(it, i ? 'out' : 'in')) { const [fx, fy] = f.ends[i]; face = nearFace(fx, fy); if (it.flipH) face = [-face[0], face[1]]; if (it.flipV) face = [face[0], -face[1]]; }
+    else face = nearFace((q.c[0] - (gm.x || 0)) / (gm.w || 120), (q.c[1] - (gm.y || 0)) / (gm.h || 60));
+    return { id: q.id, c: q.c, f: face };
+  });
+}
+function splitPipeFor(it) {
+  if (!editing || !draft || !it || it.locked) return null;
+  const mv = isMv(it);
+  if (!mv && (it.kind || !SPLIT_SUBS.includes(it.subtype) || !hasIps(it))) return null;
+  const ws = it.workspace, ports = splitPorts(it);
+  if (ports.length !== 2 || ports.some(q => pipesOn(q.id, ws).length) || (mv && pipesOn(it.id, ws).length)) return null;   // already on its pipes
+  const gm = mv ? it : elGeom(it), box = { x: gm.x || 0, y: gm.y || 0, w: gm.w || (mv ? 30 : 120), h: gm.h || (mv ? 30 : 60) };
+  const mid = [box.x + box.w / 2, box.y + box.h / 2];
+  let best = null, why = null;
+  for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked)) {
+    const gap = Math.max(45, Math.ceil(9 * pipeWidth(p) / 5) * 5);      // room for a TC elbow (Rule 5.25) between the turns
+    const plan = splitAt(p.points[0], p.points[1], box, ports, { gap, aOpen: !!ownCoupling(p.from, p), bOpen: !!ownCoupling(p.to, p) });
+    if (!plan) continue;
+    if (!plan.ok) { why = why || { ok: false, text: `${p.name || 'The pipe'} was not cut: ${plan.why}. Flip it or move it and drop it again (Rule 5.26).` }; continue; }
+    const d = p.points[0][1] === p.points[1][1] ? Math.abs(p.points[0][1] - mid[1]) : Math.abs(p.points[0][0] - mid[0]);
+    if (!best || d < best.d) best = { p, plan, d };
+  }
+  if (!best) return why;
+  const { p, plan } = best, ends = { A: p.from, B: p.to };
+  it.x = (it.x || 0) + plan.shift[0]; it.y = (it.y || 0) + plan.shift[1];
+  if (plan.drop) { const own = ownCoupling(ends[plan.drop], p); if (own) draft.graphics = draft.graphics.filter(g => g !== own); }
+  const joints = plan.joints.map(c => {
+    const ip = { id: newId(), kind: 'ip', fitting: 'coupling', autoFit: true, workspace: ws, x: c[0] - 15, y: c[1] - 15, w: 30, h: 30, label: '', color: '#9aa0a6', rotate: '0' };
+    draft.graphics.push(ip); giveName(ip, draft.graphics); return ip.id;
+  });
+  const idOf = k => k === 'A' || k === 'B' ? ends[k] : /^J\d$/.test(k) ? joints[+k[1]] : k;
+  const made = [];
+  plan.pieces.forEach((pc, i) => {
+    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
+    if (i) { delete q.name; delete q.label; delete q.labelVisible; }
+    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
+    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
+  });
+  const who = mv ? (it.name || 'the Manual Valve') : it.name;
+  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${who}${made.length ? ` (new: ${made.join(', ')})` : ''} (Rule 5.26).`
+    : `${p.name} was cut in two at ${who}: ${[p.name, ...made].join(', ')} (Rule 5.26).` };
 }
 // Older Schemas (Rule 15.2): a pipe joined to the middle of a Manual Valve Widget (its one IP before Rule 5.24) is joined to the
 // nearer of its two ends instead (two pipes take one end each). Done as a Tab is drawn and once when Edit layout opens, so Save
@@ -1249,7 +1309,7 @@ function fillEl(n, e0) {
     }
     case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
-    case 'pid': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
+    case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
@@ -1400,7 +1460,7 @@ function tapAction(e) {
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
     case 'manual': return 'manual';
-    case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': return 'dialog';
+    case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': case 'deadband': return 'dialog';
     default: return 'none';
   }
 }
@@ -1497,7 +1557,7 @@ function choose(title, buttons, current) {
 }
 
 // main setting of each control element, shown with an Enabled switch in its dialog
-const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'] };
+const CONTROL_MAIN = { pwmOut: ['value', 'Output %'], dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'], deadband: ['target', 'Target'] };
 function controlDialog(t) {
   const v = S.values[t.name] || {};
   const [prop, label] = CONTROL_MAIN[t.type];
@@ -1511,7 +1571,7 @@ function controlDialog(t) {
     await setProp(t.name, prop, x);
     if (en !== undefined) await setProp(t.name, 'enabled', en);
   };
-  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - ${label}` + (t.type === 'pid' ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
+  d.append(h('div', { class: 'vdTitle' }, `${v.label ?? t.name} - ${label}` + (['pid', 'deadband'].includes(t.type) ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
     h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+')),
     h('div', { class: 'vdBtns' },
       h('button', { type: 'button', class: 'big onb' + (v.enabled ? ' cur' : ''), onclick: () => done(true) }, 'Set + ON'),
@@ -1649,7 +1709,7 @@ async function stepperDialog(t, title) {
 // ---- pipes: drawn lines that show flow when all of their "flow when" elements are on
 // Heaters are on while Enabled (Fritz, 2026-10-27): a PID, Hysteresis or Duty Cycle counts as on from Enable to Disable,
 // not only while its output fires, for its own pictures and for a Picture Widget that turns on with it
-const HEAT_CTL_TYPES = ['pid', 'hysteresis', 'dutyCycle'];
+const HEAT_CTL_TYPES = ['pid', 'hysteresis', 'dutyCycle', 'deadband'];
 function turnsOn(name) {
   const e = L().elements.find(x => x.name === name), v = S.values[name];
   if (e && HEAT_CTL_TYPES.includes(e.type)) return !!v?.enabled;
@@ -1847,17 +1907,54 @@ function syncStraight(p) {
 }
 // After a drag: a pipe end that is no longer on its IP (the IP went off the pipe's line) lets go of it. It gets an open end
 // (a coupling), and the toast says which pipes let go so they can be joined again with a fitting.
-function letGoBentEnds() {
+// Only ends that this drag pulled off let go: one already off its IP before the drag (a picture whose ports moved) stays joined,
+// so moving one thing never cuts a pipe somewhere else on the Tab (Fritz, 2026-11-05: the flow stopped).
+const OFF_PX = 1.5;
+function offEnds() {
+  const off = new Set();
+  for (const p of (draft?.graphics || []).filter(g => g.kind === 'pipe' && g.straight && g.workspace === wsName && (g.points || []).length === 2))
+    for (const [k, i] of [['from', 0], ['to', 1]]) { const c = ipPoint(p[k], p.workspace); if (c && Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) > OFF_PX) off.add(p.id + ':' + k); }
+  return off;
+}
+function letGoBentEnds(skip = null) {
   if (!editing || !draft) return;
   const gone = [];
   for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.straight && g.workspace === wsName && (g.points || []).length === 2)) {
     for (const [k, i, j] of [['from', 0, 1], ['to', 1, 0]]) {
+      if (skip?.has(p.id + ':' + k)) continue;
       const c = ipPoint(p[k], p.workspace);
-      if (!c || Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) <= 1.5) continue;
+      if (!c || Math.hypot(c[0] - p.points[i][0], c[1] - p.points[i][1]) <= OFF_PX) continue;
       p[k] = endCoupling(p.points, i, j); gone.push(p.name || 'a pipe');
     }
   }
-  if (gone.length) { renderWs(); toast(`${[...new Set(gone)].join(', ')} let go: pipes run only Horizontal, Vertical or 45 (Rule 5.19). Join it again in line, or with an elbow or tee.`, true); }
+  if (gone.length) { renderWs(); toast(`${[...new Set(gone)].join(', ')} let go: pipes run only Horizontal, Vertical or 45 (Rule 5.19). Join it again in line, or with an elbow or tee. An end still within ${REJOIN_PX} px of an IP joins it again on Save layout.`, true); }
+}
+// Save layout joins pipe ends back on (Fritz, 2026-11-05, Rule 5.19): an open end (a coupling only that pipe uses) within
+// REJOIN_PX of an IP joins it again. A straight pipe joins only if it stays Horizontal, Vertical or 45; if not, a free IP point
+// with no other pipe on it moves back onto the pipe end instead. Returns how many ends joined.
+const REJOIN_PX = 14;
+function rejoinEnds() {
+  if (!draft) return 0;
+  let n = 0;
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) {
+    for (const k of ['from', 'to']) {
+      const own = p[k] && ownCoupling(p[k], p); if (!own) continue;
+      const pts = p.points, i = k === 'from' ? 0 : pts.length - 1, j = k === 'from' ? 1 : pts.length - 2, e = pts[i], other = k === 'from' ? p.to : p.from;
+      const near = allIps(p.workspace).filter(q => q.id !== own.id && q.id !== other).map(q => ({ id: q.id, c: q.c || ipPoint(q.id, p.workspace) }))
+        .filter(q => q.c && Math.hypot(q.c[0] - e[0], q.c[1] - e[1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - e[0], a.c[1] - e[1]) - Math.hypot(b.c[0] - e[0], b.c[1] - e[1]));
+      for (const q of near) {
+        if (!p.straight || pts.length !== 2 || onAngle(q.c, pts[j], 0.5)) pts[i] = [...q.c];
+        else {
+          const g = draft.graphics.find(x => x.id === q.id && x.kind === 'ip');
+          if (!g || isFitting(g) || g.attachTo || g.locked || pipesOn(g.id, p.workspace).length) continue;
+          g.x = (g.x || 0) + e[0] - q.c[0]; g.y = (g.y || 0) + e[1] - q.c[1];
+        }
+        p[k] = q.id; draft.graphics = draft.graphics.filter(x => x !== own); n++;
+        break;
+      }
+    }
+  }
+  return n;
 }
 // A hose is a pipe that bends: a smooth curve through its points (Catmull-Rom spline drawn as Bezier curves)
 function hoseD(pts) {
@@ -2066,6 +2163,9 @@ $('#ws').addEventListener('pointermove', ev => {
     if (Math.hypot(q[0] - drag.start[0], q[1] - drag.start[1]) > 5) { toast(drag.why, true); drag = null; }
     return;
   }
+  // a click or double-click that wobbles a few pixels is not a drag (Fritz, 2026-11-05: opening an IP moved it off its pipes)
+  if (!drag.moved && downAt && drag.mode !== 'point' && Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) < DRAG_DEAD_PX) return;
+  if (!drag.moved) drag.offBefore = offEnds();      // pipe ends already off their IPs before this drag are not this drag's doing
   drag.moved = true;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
   let mx = 0, my = 0;
@@ -2093,6 +2193,9 @@ $('#ws').addEventListener('pointermove', ev => {
   if (drag.mode === 'point') { drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
   else if (drag.mode === 'pipe') { movePipe(drag, dx, dy); for (const q of drag.carry) { const n = $(`#ws .gfx.ip[data-gid="${CSS.escape(q.g.id)}"]`); if (n) place(n, q.g); } renderPipes(); }
 });
+const DRAG_DEAD_PX = 4;          // screen pixels
+let downAt = null;
+window.addEventListener('pointerdown', ev => { downAt = [ev.clientX, ev.clientY]; }, true);
 // Snap to align (Fritz, 2026-10-28): while something with IPs is moved, when one of its IPs comes within 10 px of an IP of
 // something else on the Tab (a pipe end, a fitting, a valve, a vessel port), it jumps so the two IPs sit exactly on each other.
 // Returns the extra [x, y] shift, or [0, 0] when nothing is that close.
@@ -2144,8 +2247,9 @@ window.addEventListener('pointerup', () => {
     if (isCap(drag.item)) { snapCap(drag.item); renderWs(); }
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
+  if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
-  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds();     // Rule 5.19: a pipe never bends to follow
+  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
@@ -2335,6 +2439,58 @@ function unitToJoint(u) {
   draft.graphics = draft.graphics.filter(x => x !== u && !ids.has(x.id)); draft.graphics.push(j);
   autoFit(j); return j.id;
 }
+// A loose pipe end (its own coupling) that meets another pipe joins it (Fritz, 2026-11-05, Rule 5.25): on another loose end the two
+// become one joint (an elbow, or a coupling when in line); partway along another pipe, away from its IPs, that pipe is cut in two
+// there and the three ends share one joint (a tee). Skynet then puts in the TC Pipe Fitting the joint needs.
+const JOIN_TOL = 6;
+function lineHit(a, b, c, d) {      // where line a-b meets line c-d (null when parallel)
+  const r = [b[0] - a[0], b[1] - a[1]], s = [d[0] - c[0], d[1] - c[1]], den = r[0] * s[1] - r[1] * s[0];
+  if (Math.abs(den) < 1e-9) return null;
+  const t = ((c[0] - a[0]) * s[1] - (c[1] - a[1]) * s[0]) / den;
+  return [a[0] + t * r[0], a[1] + t * r[1]];
+}
+function joinLooseEnds(ws) {
+  if (!editing || !draft) return 0;
+  let n = 0;
+  const loose = () => draft.graphics.filter(g => g.workspace === ws && g.kind === 'ip' && g.fitting === 'coupling' && g.autoFit && !g.port && !(drawPts && g.id === drawFrom))
+    .map(g => ({ g, ps: pipesOn(g.id, ws) })).filter(x => x.ps.length === 1 && x.ps[0].straight && x.ps[0].points.length === 2);
+  const endOf = (p, id) => p.from === id ? 0 : 1;
+  const setEnd = (p, i, id, c) => { if (i === 0) p.from = id; else p.to = id; p.points[i] = [Math.round(c[0]), Math.round(c[1])]; };
+  // 1. two loose ends at (nearly) one place: one joint
+  for (let again = true; again;) {
+    again = false;
+    const L = loose();
+    for (let i = 0; i < L.length && !again; i++) for (let j = i + 1; j < L.length && !again; j++) {
+      const A = L[i], B = L[j], ca = ipCenter(A.g), cb = ipCenter(B.g);
+      if (A.ps[0] === B.ps[0] || Math.hypot(ca[0] - cb[0], ca[1] - cb[1]) > JOIN_TOL) continue;
+      const pa = A.ps[0], ia = endOf(pa, A.g.id), pb = B.ps[0], ib = endOf(pb, B.g.id);
+      const hit = lineHit(pa.points[0], pa.points[1], pb.points[0], pb.points[1]) || cb;     // in line: B's end
+      if (Math.hypot(hit[0] - ca[0], hit[1] - ca[1]) > JOIN_TOL || Math.hypot(hit[0] - cb[0], hit[1] - cb[1]) > JOIN_TOL) continue;
+      const c = hit.map(Math.round);
+      Object.assign(B.g, { x: c[0] - (B.g.w || 30) / 2, y: c[1] - (B.g.h || 30) / 2 });
+      setEnd(pa, ia, B.g.id, c); setEnd(pb, ib, B.g.id, c);
+      draft.graphics = draft.graphics.filter(g => g !== A.g); autoFit(B.g); n++; again = true;
+    }
+  }
+  // 2. a loose end partway along another straight pipe: that pipe is cut in two there
+  for (const A of loose()) {
+    const pa = A.ps[0], ia = endOf(pa, A.g.id), ca = ipCenter(A.g);
+    for (const q of draft.graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && p.straight && !p.hose && p !== pa && (p.points || []).length === 2)) {
+      const [q0, q1] = q.points, hit = lineHit(pa.points[0], pa.points[1], q0, q1); if (!hit) continue;
+      if (Math.hypot(hit[0] - ca[0], hit[1] - ca[1]) > JOIN_TOL) continue;
+      const len = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]), t = ((hit[0] - q0[0]) * (q1[0] - q0[0]) + (hit[1] - q0[1]) * (q1[1] - q0[1])) / (len * len);
+      if (t * len < JOIN_TOL * 2 || (1 - t) * len < JOIN_TOL * 2) continue;          // at its ends: the IP there takes it
+      const c = hit.map(Math.round);
+      Object.assign(A.g, { x: c[0] - (A.g.w || 30) / 2, y: c[1] - (A.g.h || 30) / 2 });
+      setEnd(pa, ia, A.g.id, c);
+      const rest = { ...clone(q), id: newId(), from: A.g.id, to: q.to, points: [c, [...q1]] }; delete rest.name; delete rest._key;
+      q.to = A.g.id; q.points = [[...q0], c];
+      draft.graphics.push(rest); giveName(rest, draft.graphics);
+      autoFit(A.g); n++; break;
+    }
+  }
+  return n;
+}
 // every IP elbow, tee and cross on a Tab becomes its TC Pipe Fittings Widget (also the ones in older Schemas, Rule 15.2)
 function tcFitJoints(ws) {
   if (!editing || !draft || !TPL) return 0;
@@ -2514,6 +2670,7 @@ const ADD_MENU = [
     ['Duty cycle (on for a % of each cycle)', 'dutyCycle', 'Duty'],
     ['Hysteresis (on / off around a target)', 'hysteresis', 'Hyst'],
     ['PID (holds a target temperature)', 'pid', 'PID'],
+    ['Deadband (steps its output % toward a target; leaves it alone close to the target)', 'deadband', 'DBand'],
   ]],
   ['Devices: digital inputs (board pin)', [
     ['Switch (on while closed)', 'digitalIn', 'DI', { mode: 'switch' }],
@@ -2633,7 +2790,9 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
   delete e._keepXY;
   if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box (Fritz, 2026-11-04)
-  draft.elements.push(e); sel = { kind: 'el', id: e.name }; renderWs(); editItem('el', e.name);
+  draft.elements.push(e); sel = { kind: 'el', id: e.name };
+  const cut = splitPipeFor(e); if (cut?.ok) toast(cut.text, false, 6000);      // added right on a pipe (Rule 5.26)
+  renderWs(); editItem('el', e.name);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
 // version: template = the Template's name. Only the Template's userFields show in its Properties; the rest are set by it.
@@ -2801,7 +2960,7 @@ $('#addManualValve').onclick = () => addIpFit('manualValve');
 // Devices already placed on a Tab (not the ones on this Tab), grouped by type: Pumps, Valves ... Picking one puts its Clone on
 // this Tab with a name Skynet makes; its Visible, X and Y are its own. The list is filled each time it is opened.
 const CLONE_GROUPS = [['Pumps', e => e.subtype === 'pump'], ['Valves', e => e.subtype === 'valve' || e.subtype === 'propValve'],
-  ['Heat (PID, Hysteresis, Duty Cycle)', e => ['pid', 'hysteresis', 'dutyCycle'].includes(e.type)], ['Temperature probes', e => e.type === 'temperature'],
+  ['Heat (PID, Hysteresis, Deadband, Duty Cycle)', e => ['pid', 'hysteresis', 'deadband', 'dutyCycle'].includes(e.type)], ['Temperature probes', e => e.type === 'temperature'],
   ['Other outputs', e => ['digitalOut', 'pwmOut', 'analogOut'].includes(e.type)], ['Motors', e => e.type === 'stepper'],
   ['Inputs and sensors', e => ['digitalIn', 'analogIn', 'flowMeter', 'scale'].includes(e.type)], ['Other Devices', () => true]];
 function fillClones() {
@@ -3700,9 +3859,10 @@ function renameNote(r) {
 }
 const saveLayout = guard(async () => {
   if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
+  const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
-  const note = renameNote(r);
+  const note = renameNote(r) + (rejoined ? ` Joined ${rejoined} pipe end${rejoined === 1 ? '' : 's'} back on ${rejoined === 1 ? 'its IP' : 'their IPs'}.` : '');
   toast((r?.version ? `Layout saved. New Schema version: ${r.version}` : 'Layout saved') + note, false, note ? 9000 : 0); editing = false; await load(); setEditing(false);
 });
 // the Update Version switch is remembered on this browser
@@ -3813,6 +3973,11 @@ const F = {
   dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
   hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
   pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
+  // Deadband (as in BruControl, Fritz 2026-11-05, Rule 6.17): Calc Time sets how often the output % steps; ± offsets around the Target
+  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'],
+    ['deadbandOffset', 'Deadband Offset (± around the Target: inside it the output is left alone)', 'num'], ['innerBandOffset', 'Inner Band Offset (± around the Target: inside it the output moves by the Inner Band Drive)', 'num'],
+    ['initialOutput', 'Initial Output % (when Enabled)', 'num'], ['innerBandDrive', 'Inner Band Drive (% change each Calc Time)', 'num'], ['outerBandDrive', 'Outer Band Drive (% change each Calc Time, outside the Inner Band)', 'num'],
+    ['maxOutput', 'Max output %', 'num'], ['calcTime', 'Calc Time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Picture Widget (Fritz, 2026-10-27): "Turns on with" picks what turns it on: an on/off Device or Widget, or a heater that is on while Enabled.
   // None = a still picture: the On pictures are greyed out.
   picture: [['follow', 'Turns on with (None = a still picture)', 'onsrc', null, true], ['imageOn', 'Picture when on', 'path'], ['imageOff', 'Picture when off', 'path'], ['text', 'Text on picture', 'text']],
@@ -4203,7 +4368,7 @@ function field(f, obj) {
 }
 // Device General Type (Fritz, 2026-11-04, Rule 18.18): shown at the start of a Device Type, e.g. DO: Pump. Only shown; the Device
 // keeps its type (digitalOut ...) and Device Type ID (Pump) as they are saved.
-const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID' };
+const GENERAL_TYPE = { digitalOut: 'DO', pwmOut: 'PWM', analogOut: 'AO', digitalIn: 'DI', analogIn: 'AI', temperature: 'TEMP', flowMeter: 'FLOW', scale: 'SCALE', stepper: 'STEP', dutyCycle: 'DUTY', hysteresis: 'HYS', pid: 'PID', deadband: 'DBAND' };
 const shownType = e => { const g = GENERAL_TYPE[e?.type], c = e?.typeCode || ''; return !g ? c : !c || c.toUpperCase() === g ? g : `${g}: ${c}`; };
 // the tip of a field (Rule 18.16): a small pop-up with the rest of what the field is for
 function fieldTip(name, text) {
@@ -5059,7 +5224,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const TYPE_TITLE = { gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -8063,7 +8228,7 @@ function fromPortFields(w) {
   }
   return w;
 }
-const ELECTRIC_TYPES = ['pid', 'hysteresis', 'dutyCycle', 'pwmOut'];
+const ELECTRIC_TYPES = ['pid', 'hysteresis', 'deadband', 'dutyCycle', 'pwmOut'];
 // the devices that can heat a vessel: gas valves (a valve whose Service is Gas) or electric elements (an output of kind
 // element, or a PID, hysteresis, duty cycle or PWM output); RIMS and HERMS: the profile's RIMS tubes or HERMS vessels
 function heatDevices(kind, p) {
@@ -8748,7 +8913,7 @@ F.skynetFitting = it => {
 // Devices that belong to a Schema: its heating element and its Temperature Probe
 F.skynetVessel = it => {
   const ports = Object.entries(eqClass(it).ports).filter(([k, d]) => it.ports?.[k]?.installed && d.ip).map(([, d]) => d.name).join(', ');      // its openings (a thermowell or element spot is not one)
-  const elems = [['', 'None'], ...L().elements.filter(e => ['digitalOut', 'pwmOut', 'dutyCycle', 'pid', 'hysteresis'].includes(e.type) && e.subtype !== 'valve' && e.subtype !== 'pump').map(e => [e.name, e.name])];
+  const elems = [['', 'None'], ...L().elements.filter(e => ['digitalOut', 'pwmOut', 'dutyCycle', 'pid', 'hysteresis', 'deadband'].includes(e.type) && e.subtype !== 'valve' && e.subtype !== 'pump').map(e => [e.name, e.name])];
   const probes = [['', 'None'], ...L().elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name])];
   const electric = it.heatKind === 'electric' || it.ports?.element?.installed, well = it.ports?.thermowell?.installed;
   return [['_t', `Skynet vessel ${it.template}. Its openings (${ports || 'none'}) have their IPs built in, so there is nothing to set for them.`, 'note'],

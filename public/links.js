@@ -36,7 +36,7 @@ export const linkOf = d => d?.type === 'simulator' ? d.realType || '' : d?.type 
 
 // Devices that heat: electric elements, burner gas valves and igniters, heat pads, and the outputs of PID, Hysteresis and Duty Cycle
 const HEAT_CODES = new Set(['H_PWM', 'H_AO', 'HtPad', 'Ignit', 'G_Vlv']);
-export const isHeating = el => !!el && (['pid', 'hysteresis', 'dutyCycle'].includes(el.type) || HEAT_CODES.has(el.typeCode) || el.subtype === 'element');
+export const isHeating = el => !!el && (['pid', 'hysteresis', 'dutyCycle', 'deadband'].includes(el.type) || HEAT_CODES.has(el.typeCode) || el.subtype === 'element');
 
 // { level, text } for an Interface; heating = it has a heating Device on it
 export function rating(d, heating = false) {

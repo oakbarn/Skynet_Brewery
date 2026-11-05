@@ -25,7 +25,7 @@ export const hasDeviceControlled = el => SEMI_CONTROL_TYPES.includes(el?.type);
 export const NONE = 'None';
 export const PULSE_MS = 100;
 
-const HEATER_CONTROLS = ['dutyCycle', 'hysteresis', 'pid'];
+const HEATER_CONTROLS = ['dutyCycle', 'hysteresis', 'pid', 'deadband'];
 const manualDevice = el => el?.type === 'digitalOut' && el.subtype === 'valve' && el.valveType === 'manual';
 // The attribute that is a Device's ON / OFF, or null when it has none a Semi_Widgets_Device may switch. A Manual valve Device is
 // turned by hand (a Process waits for its Done, Rule 5.13), and an input is read from its board, so neither can be picked.
