@@ -24,6 +24,8 @@ The old way, where a pipe end was dragged along with a pump, valve or vessel and
 - **The whole pipe moves along** when its other end is its own open end (a coupling only that pipe uses). It keeps its length and angle.
 - **The pipe stretches or shrinks along its own line** when you move the thing on its end in line with the pipe.
 - **Moved off to the side**, the pipe keeps its direction and does not follow. When you let go of the mouse, that end **lets go** of the IP, gets an open end (red ring), and a message names the pipe. Put the item back in line, or join the pipe again with an elbow or tee.
+- **Save layout joins it again** when the open end is still within 14 px of an IP. If the pipe would bend, a free IP point (one with no other pipe on it) moves back onto the pipe end instead.
+- A click or double-click that wobbles a few pixels does not move anything, and moving one thing never lets go of a pipe somewhere else on the Tab.
 - Dragging a pipe itself moves it as one piece, as before. Dropped with an end on an IP, it joins that IP.
 
 ## Older Schemas
