@@ -1498,13 +1498,12 @@
    "h": 150,
    "ipIn": "left",
    "ipOut": "right",
-   "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off_Valve_IPs_Test.svg",
+   "imageOff": "Images/Skynet/Pumps/Pump_Red_Rip_Off.svg",
    "hideValue": true,
    "tap": "toggle",
    "onText": "ON",
    "offText": "OFF",
-   "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg",
-   "flipH": true
+   "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
   },
   {
    "name": "Chiller_Water",

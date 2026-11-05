@@ -1522,12 +1522,6 @@ Valve drill-down dialog", Help 128):
 
 ## Open questions (not Rules yet)
 
-- **Pumps on the valve spots? (TEST, 2026-11-05, thread "Standardize valve size and IPs")** Fritz: "I want to check if we can make the
-  same rule for Pumps." Pump_1 in the Three Vessel One Pump sample uses a test picture, Images/Skynet/Pumps/Pump_Red_Rip_Off_Valve_IPs_Test.svg:
-  the Pump Standard Red Riptide-style pump with its IPs on the Valve Standard spots (inlet at the middle of the right side, outlet at
-  the middle of the left side, the outlet pipe drawn looping over the pump), shown 150 x 150, Orientation Left. Rule 5.27 is not
-  changed. To go back: point Pump_1 at Pump_Red_Rip_Off.svg again (kept as it was).
-
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
    file names (Rule 3.7)? (asked 2026-10-23)
 2. **Other Skynet fittings and vessels:** Fritz allowed Bundle / Unbundle on them "for now"
@@ -1769,3 +1763,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 5.25: a Tee, Instrument Tee or Cross dropped on a straight pipe cuts it there (turned so its run goes along the pipe). Rule 5.26: a valve or pump dragged off its pipes onto another pipe now cuts it (its old pipes let go first); one still joined says why. Help 124 and 125 updated; no new Help number. (thread "Fix Tee and valve not splitting a pipe")
 - 2026-11-05: Added Rule 5.30 (tees with a Temperature Probe are the size of the TC Pipe Fittings tee of their shape with IPs on the same spots, Rotate, and cut a pipe like a tee; a tee or probe tee dropped on a hose cuts the hose; a Thermowell has one IP on its cap face and snaps onto an IP; on a front facing IP it shows from the front; a plain Temperature Probe on a front facing IP has an implicit Thermowell). Three Vessel sample shows its probes. Help 132; next free Help number 133. (thread "Add IPs to probe thermowells and tees")
 - 2026-11-05: Rule 2.7: White in any color picker is RGB 250 250 250 (#FAFAFA), as for the pump covers (Rule 7.13). Three Vessel sample: the brew status boxes are Black with White text, and the Readings boxes (Blue with White text) moved to a new Reporting Tab. No new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
+- 2026-11-05: The test pump on the valve spots is retired (Fritz: the Pump Standard, Rule 5.27, stays). Pump_1 in the Three Vessel One Pump sample is back on Pump_Red_Rip_Off.svg; the test picture went to Delete/ (Rule 15.3). (thread "Standardize valve size and IPs")
