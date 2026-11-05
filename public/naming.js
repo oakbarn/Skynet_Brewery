@@ -285,7 +285,12 @@ export function busCheck(el, elements, devices) {
 export const PWM_PINS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
 export const COUNTER_PINS = ['2', '3', '18', '19', '20', '21'];
 const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0 and D1 are the USB link)
-const needsPwm = e => ['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm);
+// Pseudo PWM (Fritz, 2026-11-05): a PWM Device on a plain pin, switched fully on and off by the Brain (lib/hardware.js), needs no PWM pin.
+// An analog output can't: its 0-10 V module needs a real PWM signal.
+export const canPseudoPwm = e => e?.type === 'pwmOut' || (['pid', 'deadband'].includes(e?.type) && !!e.pwm);
+export const PSEUDO_PWM_PERIOD = 1000;      // ms: one on and off cycle
+export const pseudoPwmOn = (pct, now, period = PSEUDO_PWM_PERIOD) => { const p = Math.max(0, Math.min(100, Number(pct) || 0)); return p >= 100 || (p > 0 && (now % period) < period * p / 100); };
+const needsPwm = e => !(e.pseudoPwm && canPseudoPwm(e)) && (['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm));
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
 const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
 
