@@ -117,8 +117,8 @@ Y hidden while it is on an IP, lock, Tab). Name **QD_1, QD_2 ...**
 ### Quick Disconnect Hose (`kind: pipe`, `hose: true`, `qd: true`, 2026-11-05, Rule 5.28, Help 127)
 A hose drawn with **Draw QD hose** (Edit layout bar, row 2). Its first end hangs from a **pump IP** and stays put; its **free end** (`to`)
 can be moved **at any time, Edit layout or not**: the right mouse button (Rule 2.9), or a finger on a phone or tablet, on the yellow
-dashed ring at its end. Dropped on an **IP or Quick Disconnect** it joins it; anywhere in the **top third of a vessel** it is in that
-vessel's top (`to: vtop:<vessel id>`, one big IP); anywhere else it is loose (no flow). Operators and admins move it; the move is kept
+dashed ring at its end. Dropped on a **Quick Disconnect** (within 25 px) or an **IP** (within the normal 10 px) it joins it; anywhere in the **top third of a vessel** it is in that
+vessel's top (`to: vtop:<vessel id>`, one big IP), drawn hanging over the rim and down inside; anywhere else it is loose (no flow). Operators and admins move it; the move is kept
 at once and every screen sees it (`POST /ui/hose`). A locked hose stays. Settings: the same as a Hose; its Properties title reads
 **Quick Disconnect Hose**. Flow and Flow Colors as every hose (Rule 5.21); a vessel's Out flow color colors flow pumped from its top.
 

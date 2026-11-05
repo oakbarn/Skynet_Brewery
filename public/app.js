@@ -1738,7 +1738,15 @@ let drawPts = null, drawCursor = null, drawFrom = null, drawHose = false, drawOn
 const isQd = g => g?.kind === 'ip' && g.fitting === 'qd';
 const isQdHose = p => p?.kind === 'pipe' && p.hose && p.qd;
 const vtopOf = id => typeof id === 'string' && id.startsWith('vtop:') ? id.slice(5) : null;
-const vtopPoint = v => [Math.round((v.x || 0) + (v.w || 90) / 2), Math.round((v.y || 0) + (v.h || 90) * 0.08)];      // the middle of the vessel's top
+// a hose in a vessel's top hangs over the rim and down inside it (Fritz, 2026-11-05): its end is a fifth of the way down, in the middle
+const vtopPoint = v => [Math.round((v.x || 0) + (v.w || 90) / 2), Math.round((v.y || 0) + (v.h || 90) * 0.22)];
+function hangShape(a, v) {
+  const w = v.w || 90, hh = v.h || 90, cx = (v.x || 0) + w / 2, top = (v.y || 0) + hh * 0.03, s = a[0] <= cx ? -1 : 1;     // s: the side it comes from
+  const rim = [Math.round(cx + s * w * 0.12), Math.round(top - Math.max(14, hh * 0.06))];      // up and over the rim
+  const lip = [Math.round(cx + s * w * 0.02), Math.round(top + 4)];
+  const len = Math.hypot(rim[0] - a[0], rim[1] - a[1]), mid = [Math.round((a[0] + rim[0]) / 2), Math.round((a[1] + rim[1]) / 2 + Math.min(60, len * 0.15))];
+  return [[...a], mid, rim, lip, vtopPoint(v)];
+}
 let qdDrag = null;            // a QD hose end being moved outside Edit layout
 const QD_PIC = 'Images/Skynet/Valves/Quick_Disconnect.svg';     // Fritz's drawing, 2026-11-05: a bold red star, easy to see on a Tab
 const ipCenter = g => [(g.x || 0) + (g.w || 30) / 2, (g.y || 0) + (g.h || 30) / 2];
@@ -2024,9 +2032,18 @@ function renderPipes() {
   const line = (p, attrs) => p.hose ? mk('path', { d: hoseD(p.points || []), ...attrs }) : mk('polyline', { points: (p.points || []).map(q => q.join(',')).join(' '), ...attrs });
   const liveIps = new Set();
   const pipes = L().graphics.filter(g => g.kind === 'pipe' && g.workspace === w.name);
+  for (const p of pipes) if (isQdHose(p) && vtopOf(p.to) !== null && p.points?.length) {      // a QD hose in a vessel's top hangs in it
+    const v = L().graphics.find(x => x.id === vtopOf(p.to)), a = ipPoint(p.from, p.workspace) || p.points[0];
+    if (isKettle(v)) p.points = hangShape(a, v);
+  }
   pipes.forEach(syncPipeEnds);
   const srcs = new Map(), flow = computeFlow(w.name, srcs), cones = reducers(pipes, w.name);
   const tabFlow = tabFlowOf(w), grabs = [];
+  // a QD hose in a vessel's top is drawn over everything, and hidden below the vessel's rim, so it hangs over the rim and down
+  // into the vessel (Fritz, 2026-11-05). It goes on a layer of its own above the Tab's items.
+  let over = $('#qdOver');
+  if (!over) { over = document.createElementNS(NS, 'svg'); over.id = 'qdOver'; $('#ws').append(over); }
+  over.innerHTML = '';
   $$('#ws > .qdEnd').forEach(n => n.remove());
   for (const p of pipes) {
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
@@ -2058,7 +2075,13 @@ function renderPipes() {
       if (sel?.kind === 'gfx' && sel.id === p.id) g.append(line(p, { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 2, 'stroke-dasharray': '4 3' }));
       if (!p.locked && p.hose) (p.points || []).forEach((q, i) => { const c = mk('circle', { class: 'handle', cx: q[0], cy: q[1], r: 6, 'data-gid': p.id, 'data-pi': i }); g.append(c); });
     }
-    svg.append(g);
+    const hv = isQdHose(p) && vtopOf(p.to) !== null && L().graphics.find(x => x.id === vtopOf(p.to));
+    if (isKettle(hv) && !editing) {      // in Edit layout it stays on the pipe layer, where it can be picked
+      const cx = (hv.x || 0) + (hv.w || 90) / 2, x0 = cx - (hv.w || 90) * 0.3, x1 = cx + (hv.w || 90) * 0.3,      // hidden only inside the vessel's walls
+        y0 = (hv.y || 0) + (hv.h || 90) * 0.03 + 4, y1 = (hv.y || 0) + (hv.h || 90) + 2, id = 'qdClip_' + p.id;
+      const cp = mk('clipPath', { id }); cp.append(mk('path', { d: `M-9999 -9999H29999V29999H-9999Z M${x0} ${y0}H${x1}V${y1}H${x0}Z`, 'clip-rule': 'evenodd' }));
+      over.append(cp); g.setAttribute('clip-path', `url(#${id})`); over.append(g);
+    } else svg.append(g);
   }
   if (drawPts) {
     const all = drawCursor ? [...drawPts, drawCursor] : drawPts;
@@ -8595,17 +8618,21 @@ function snapQd(q) {
   if (best) { q.qdOn = best.ip.id; qdOnto(q); toast(`Quick Disconnect on ${best.ip.label || best.ip.name || 'the IP'}`); }
   else if (q.qdOn) { delete q.qdOn; toast('Quick Disconnect taken off its IP'); }
 }
-// Where a Quick Disconnect hose end dropped at c goes: the nearest IP (a Quick Disconnect wins over the IP under it), else the
-// top third of a vessel, else nowhere (a loose end: no flow). Returns { id, c } or null.
+// Where a Quick Disconnect hose end dropped at c goes: a Quick Disconnect within 25 px (Fritz, 2026-11-05: a larger snap, but only
+// to a QD), else a plain IP within the normal 10 px snap (Snap to align), else the top third of a vessel, else nowhere (a loose
+// end: no flow). A Quick Disconnect wins over the IP under it. Returns { id, c } or null.
+const QD_SNAP_PX = 25;
 function qdTarget(p, c) {
-  const ws = p.workspace, under = qdOnIps(), r = Math.max(24, pipeWidth(p) * 2);
-  let best = null;
+  const ws = p.workspace, under = qdOnIps();
+  let qd = null, ip = null;
   for (const q of allIps(ws)) {
     if (q.id === p.from || under.has(q.id)) continue;
     const at = q.c || ipPoint(q.id, ws); if (!at) continue;
-    const d = Math.hypot(at[0] - c[0], at[1] - c[1]);
-    if (d <= r && (!best || d < best.d)) best = { d, id: q.id, c: at };
+    const d = Math.hypot(at[0] - c[0], at[1] - c[1]), isq = isQd(L().graphics.find(x => x.id === q.id));
+    if (isq && d <= QD_SNAP_PX && (!qd || d < qd.d)) qd = { d, id: q.id, c: at };
+    if (!isq && d <= ALIGN_PX && (!ip || d < ip.d)) ip = { d, id: q.id, c: at };
   }
+  const best = qd || ip;
   if (best) return { id: best.id, c: best.c };
   const v = [...L().graphics].reverse().find(v => isKettle(v) && v.workspace === ws && c[0] >= (v.x || 0) && c[0] <= (v.x || 0) + (v.w || 90) && c[1] >= (v.y || 0) && c[1] <= (v.y || 0) + (v.h || 90) / 3);
   return v ? { id: 'vtop:' + v.id, c: vtopPoint(v) } : null;
@@ -8632,7 +8659,9 @@ window.addEventListener('pointermove', ev => {
   if (!qdDrag.moved && Math.hypot(ev.clientX - qdDrag.start[0], ev.clientY - qdDrag.start[1]) < 4) return;
   qdDrag.moved = true;
   const c = canvasPt(ev), t = qdTarget(qdDrag.p, c);
-  qdDrag.target = t; qdDrag.p.to = null; qdDrag.p.points = hoseSag(qdDrag.p.points[0], t ? t.c : c);
+  qdDrag.target = t; qdDrag.p.to = null;
+  const v = t && vtopOf(t.id) !== null && L().graphics.find(x => x.id === vtopOf(t.id));
+  qdDrag.p.points = v ? hangShape(qdDrag.p.points[0], v) : hoseSag(qdDrag.p.points[0], t ? t.c : c);
   renderPipes();
 });
 // iPhone Safari pans or zooms on a finger drag unless the touch is stopped here (touch-action is not honoured on SVG there)

@@ -61,6 +61,12 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 #ws.editing #pipes .hit { pointer-events: stroke; }
 #pipes .handle { fill: var(--accent); stroke: #000; cursor: move; }
 /* the free end of a Quick Disconnect hose (Rule 5.28): grabbed outside Edit layout with the right mouse button or a finger */
+#qdOver { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; z-index: 40; pointer-events: none; }
+#qdOver .pipe, #qdOver .flow { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+#qdOver .flow { stroke-dasharray: 10 14; animation: flow 0.9s linear infinite; }
+#qdOver .flow.rev { animation-direction: reverse; }
+#qdOver .flow.off { display: none; }
+#qdOver .hit { fill: none; stroke: transparent; pointer-events: none; }
 #ws > .qdEnd { position: absolute; z-index: 50; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,.15); border: 3px dashed #ffd24a; cursor: grab; touch-action: none; }
 #ws > .qdEnd:hover { background: rgba(255,210,74,.35); }
 #ws .gfx.ip.qd { background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 3; filter: drop-shadow(0 0 2px #000); }
