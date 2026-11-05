@@ -997,7 +997,10 @@ backup, and the panel starts again from the samples with Admin setup. **Kept:** 
 the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
 **Fresh is fresh** (Fritz, 2026-11-05): Start Fresh on Windows also deletes the clean window's own browser profile (Rule 2.36,
 `%LOCALAPPDATA%\SkynetBrewer\AppWindow`), which holds the user name and password the browser saved. Admin setup always opens
-with **empty** boxes: it is marked as a new account and anything a browser fills in by itself is cleared (what you type stays).
+with **empty** boxes: it is marked as a new account and, for as long as setup is open, any box you have not clicked, typed or
+pasted in is kept empty, even when a browser fills it in later. Skynet's clean window never syncs with a Microsoft or Google
+account (Edge signs new profiles in by itself and synced the old login back in). Saving your password still works: it is
+kept only in Skynet's own window and fills in on Sign in as before.
 (thread "Make Start Fresh admin setup truly fresh")
 
 9.9 **Move to a new Brain** (Fritz, 2026-11-03): someone who runs the Brain on a Windows, Linux or Mac computer can move it to a
@@ -1658,3 +1661,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
 - 2026-11-05: Rule 18.13 (and 18.21, 18.23): once a Pump or Motorized Ball Valve is added, its Interface and Port are greyed out for good; ✏ Change beside them is gone (physical wiring; the hidden key stays, only the Name changes with ✏ Change name). (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Rule 2.12 changed (Fritz): a 🔒 locked Vessel can't be moved with the mouse but moves by its X and Y in Properties (to the pixel), with its IPs, joined fittings and End Caps; bundled vessels' Properties got X and Y. Other locked items are as before. Help 56 updated; no new Help number. (thread "Let locked vessels move by X and Y")
+- 2026-11-05: Rule 9.8: Skynet's clean window (Rule 2.36) never syncs with a Microsoft or Google account, so saved passwords stay in Skynet's own window and still fill in on Sign in (Edge synced Fritz's old login back in after Start Fresh); Admin setup keeps untouched boxes empty for as long as it is open. Help 18 and 122 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
