@@ -817,26 +817,21 @@ const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, 
   // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...): the pipe runs
   // across 97.5 of its 119 high, or stands up 22 in from the left of its 119 wide (Fritz, 2026-11-04: valves sit on the pipe)
   OLD_H: { o: 'h', w: 139, h: 119, ends: [[0, 97.5 / 119], [1, 97.5 / 119]] }, OLD_V: { o: 'v', w: 119, h: 141, ends: [[22 / 119, 0], [22 / 119, 1]] } };
-// Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
-// port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
-const PUMP_FLOW = {
-  Pump_March_809_Poly_90_Inlet: { w: 50.9, h: 51.6, ends: [[0.988, 0.543], [0.636, 0.0]] },
-  Pump_March_809_Poly_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
-  Pump_March_809_SS_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
-  Pump_March_815_Poly_90_Inlet: { w: 57.0, h: 58.6, ends: [[0.989, 0.529], [0.652, 0.0]] },
-  Pump_March_815_Poly_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
-  Pump_March_815_SS_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
-  Pump_Chugger_SS_90_Inlet: { w: 60.1, h: 62.6, ends: [[0.99, 0.527], [0.646, 0.0]] },
-  Pump_Chugger_SS_Center_Inlet: { w: 106.2, h: 61.6, ends: [[0.994, 0.536], [0.806, 0.0]] },
-  Pump_Riptide_SS_Center_Inlet: { w: 100.2, h: 74.6, ends: [[0.994, 0.63], [0.804, 0.0]] },
-  Pump_Topsflo_TD5_Poly_Center_Inlet: { w: 67.2, h: 46.6, ends: [[0.991, 0.536], [0.763, 0.0]] },
-  Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
-  Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
-};
-// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones are 434 x 292 with the inlet on the outer face of the union
-// on the right of the pump head (415, 138) and the outlet at the top of the pipe going up (361, 0); the submersible sump pump is
-// 120 x 140 and draws in through the middle of its screen at the bottom (60, 117), out the top of the riser on its right (110, 12).
-const OLD_PUMP_FLOW = { Rip: { w: 434, h: 292, ends: [[415 / 434, 138 / 292], [361 / 434, 0]] }, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
+// The Pump Standard (Fritz, 2026-11-05, Rule 5.27): every Skynet pump picture is drawn in the same 300 x 300 box (shown 150 x 150)
+// with its inlet IP at (285, 150) and its outlet IP at (243, 56), so one pump can replace another in the same place and stay joined
+// to its pipes. The Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover) are all to the same scale
+// (Rule 5.11: 20 units = 1 inch in the box, 10 at 150 x 150); their port tubes are made longer where needed to reach the two spots.
+// The IPs sit on the tips of the ports, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
+const PUMP_STD = { w: 300, h: 300, ends: [[285 / 300, 150 / 300], [243 / 300, 56 / 300]] };
+const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
+  'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
+  'Pump_Chugger_SS_Center_Inlet', 'Pump_Riptide_SS_Center_Inlet', 'Pump_Topsflo_TD5_Poly_Center_Inlet', 'Pump_KegLand_MKII_Poly_Center_Inlet',
+  'Pump_KegLand_MKII_SS_Center_Inlet'].map(k => [k, PUMP_STD]));
+// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
+// the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
+// pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
+// the bottom (60, 117), out the top of the riser on its right (110, 12).
+const OLD_PUMP_FLOW = { Rip: PUMP_STD, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
 // Pump Cover Overlays (Fritz, 2026-11-02): a cover drawn over a Skynet pump drawing (the no-cover ones above), between the
 // picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
 // .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
@@ -2675,7 +2670,7 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 150, h: 150, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
     const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
