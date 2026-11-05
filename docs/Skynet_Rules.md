@@ -1321,8 +1321,9 @@ until 💾 Save on the dialog. (Help 115)
 3. The Add box is titled with the pump (e.g. **Blichmann Riptide**). Besides Rule 4.2's fields it has the **Label ⬢** (Label
    pop-up), **Label Visible**, **Cover**, **X (Horizontal)**, **Y (Vertical)**, Width and Height, and the **Device Type** greyed
    out, read only (Pump: it comes from the list it was picked in). X and Y typed here are kept.
-4. Once ➕ Add Device is pressed, its Properties (Rule 18.12) show the **Interface (board)** and **Port** greyed out and set, each
-   with **✏ Change** to change it on purpose; **Tab, X, Y, Width and Height** on the dialog itself (they are in the Pump
+4. Once ➕ Add Device is pressed, its Properties (Rule 18.12) show the **Interface (board)** and **Port** greyed out and set, **for
+   good** (Fritz, 2026-11-05: it is physical wiring, so a user almost never changes it; the Device keeps its hidden key, Rule 3.10,
+   and only its Name changes, with ✏ Change name). To wire it to another board or pin, delete it and add it again. **Tab, X, Y, Width and Height** on the dialog itself (they are in the Pump
    Properties ⬢ pop-up too); the **Device Type** greyed out, read only; and the Name with ✏ Change name once built (Rule 3.11).
 The Add box follows Rule 4.2's order (1 Label, 2 Interface, 3 Port, 4 Tab, 5 Name) and the pump goes on the picked Tab (Rule 4.1).
 (Help 115)
@@ -1377,7 +1378,7 @@ opens with the focus on the first empty field of the sequence. Arrow keys change
 18.21 **Pump Device Properties are Fritz's screen 9** (2026-11-04, [docs/Blichmann_Pump_Sequence.png](Blichmann_Pump_Sequence.png)):
 the title is the pump (e.g. **Blichmann Riptide** ?) with the 🔓 lock, **Visible** and **Hidden Locked** on the title line; 🗑 Delete,
 ✖ Cancel, 💾 Save; **1. Label** ⬆ ⬢ and **Label Visible**; **2. Interface (board)** with **Available Ports** on the same line
-(greyed out with ✏ Change, Rule 18.13); **3. Tab**; **4. Name** and the Suggested Name; the **Graphic**; its **Path** (greyed out on a
+(greyed out for good, Rule 18.13); **3. Tab**; **4. Name** and the Suggested Name; the **Graphic**; its **Path** (greyed out on a
 Skynet pump drawing, editable on a User pump, Rule 18.19); **Orientation** (Right / Left); **Cover** with **Toggle** (On/Off, Push
 button, None: what a tap does) on the same line; just below it the **Overlay** (the On overlay, Rule 7.15; Fritz,
 2026-11-04: "add an Overlay DDLB just below the Cover DDLB", in the Add box too), and on its line **Database and .API ⬢**:
@@ -1386,6 +1387,7 @@ Type** (DO: Pump) greyed out last. A User pump has the same Properties. **Only t
 Pump Properties ⬢, Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind, Picture ⬢, Background picture ⬢ and Text when on / off are gone
 from its dialog (what a Pump already has set is kept). The On / Off text is shown with an **Overlay** instead (Rule 7.13).
 *Replaced:* for the Pump, Rule 18.12's list of fields (2026-11-03).
+*Replaced (Rule 18.13):* the Interface and Port each had **✏ Change** to change them on purpose (2026-11-04).
 
 18.22 **Each Device and Widget has only its own Properties** (Fritz, 2026-11-04): besides the Universal Properties (Rule 1.21),
 a Device or Widget may have a limited set of attributes and Properties, only the ones that fit it (the Pump: Rule 18.21). Other
@@ -1650,3 +1652,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Added Rule 6.17 (Deadband Device, as in BruControl's Deadband Output: Deadband Offset, Inner Band Offset, Initial Output, Inner and Outer Band Drive, Calc Time, Out Time, Reversed; output in %; BruControl import). Help 126; next free Help number 127. (thread "Add Deadband control")
 - 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
+- 2026-11-05: Rule 18.13 (and 18.21, 18.23): once a Pump or Motorized Ball Valve is added, its Interface and Port are greyed out for good; ✏ Change beside them is gone (physical wiring; the hidden key stays, only the Name changes with ✏ Change name). (thread "Add Motorized Ball Valve drill-down dialog")
