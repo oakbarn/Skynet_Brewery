@@ -177,8 +177,9 @@ console.log('templates ok');
   assert.ok(T.view().device.length >= 3);
   // fixed: Kind, Valve type, Service, pictures, look, tap; user settable: orientation, flips, Tap water, Text On/Off
   const fx = deviceFixed(H);
-  for (const k of ['subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'look', 'tap', 'confirm', 'background', 'backpath_2']) assert.ok(fx.has(k), k + ' fixed');
-  for (const k of ['orientation', 'flipH', 'tapwater', 'showOnOffText', 'name', 'w']) assert.ok(!fx.has(k), k + ' user settable');
+  for (const k of ['subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'look', 'confirm', 'background', 'backpath_2']) assert.ok(fx.has(k), k + ' fixed');
+  // Toggle (tap) and Overlay are the user's on the Skynet Motorized Ball Valve (Fritz, 2026-11-05, Rule 18.23)
+  for (const k of ['orientation', 'flipH', 'tapwater', 'showOnOffText', 'name', 'w', 'tap', 'imageOverlay']) assert.ok(!fx.has(k), k + ' user settable');
   // a User version sent with changed fixed attributes is put back; its picture follows its orientation
   const el = applyDeviceTemplate({ name: 'V1', template: VL.name, templateCls: 'skynet', subtype: 'pump', service: 'gas', imageOn: 'x.png', look: 'led', background: 2, orientation: 'h', w: 50 }, VL);
   assert.equal(el.subtype, 'valve'); assert.equal(el.service, 'room'); assert.equal(el.look, 'normal'); assert.equal(el.background, undefined);
