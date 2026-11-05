@@ -4383,12 +4383,11 @@ function field(f, obj) {
     out[0].addEventListener('click', ev => { if (ev.target === out[0]) { ev.preventDefault(); fieldTip(out[0].textContent, x.tip); } });
   }
   if (x?.after) for (const o of out) o?.classList?.add('afterStep', 'hidden');
-  if (x?.set && out[1]) {      // set once it is added (Fritz's Add Pump drawing, 2026-11-04): greyed out until ✏ Change
+  if (x?.set && out[1]) {      // set once it is added: greyed out for good. Fritz, 2026-11-05: the Interface and Port are physical
+    // wiring and almost never change, so there is no ✏ Change; the Device keeps its hidden key and only its Name changes (✏ Change name)
     const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
-    for (const i of ins()) i.disabled = true;
+    for (const i of ins()) { i.disabled = true; i.title = 'Set when it was added: the board and pin it is wired to'; }
     out[0].classList.add('greyed');
-    const chg = h('button', { type: 'button', class: 'nameBtn', title: 'Change it (a Process that uses this Device is not changed)', onclick: ev => { ev.preventDefault(); for (const i of ins()) i.disabled = false; out[0].classList.remove('greyed'); chg.remove(); } }, '✏ Change');
-    out[1] = h('div', { class: 'fldIcons' }, box, chg);
   }
   if (x && out[1]) {
     const icons = []; let wrap;
