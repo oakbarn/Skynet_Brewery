@@ -16,7 +16,7 @@ const T = {
   '100KNT': '100K NTC thermistor (3D printer type)', NTC: 'NTC thermistor, other size', LM35: 'LM35 analog temperature sensor',
   TMP36: 'TMP36 analog temperature sensor',
   // heating
-  PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DO: 'Direct On / Off (relay, SSR, contactor; also a heating element on one)',
+  PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DBand: 'Deadband', DO: 'Direct On / Off (relay, SSR, contactor; also a heating element on one)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
   Pump: 'Pump', M_L_Vlv: 'Low Temperature Manual Valve', E_L_Vlv: 'Low Temperature Electric Valve', M_H_Vlv: 'High Temperature Manual Valve',
@@ -51,6 +51,7 @@ export const TYPE_CODES = {
   dutyCycle: list('DutyCy'),
   hysteresis: list('Hys'),
   pid: list('PID'),
+  deadband: list('DBand'),
 };
 export const isDevice = el => !!el && Object.hasOwn(TYPE_CODES, el.type);
 export const typeCodes = el => TYPE_CODES[el?.type] ?? [];
@@ -204,7 +205,7 @@ export function portKeys(el) {
 }
 // Fritz, 2026-10-23: outputs of different Device Types may share a port, e.g. MB_05_Hys_HLT__BR and MB_05_PID_HLT__BR on one
 // heater. The one turned on or enabled last wins: the others on that port are turned off (lib/store.js).
-export const SHARED_PORT_TYPES = ['digitalOut', 'pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid'];
+export const SHARED_PORT_TYPES = ['digitalOut', 'pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband'];
 const mayShare = (a, b) => SHARED_PORT_TYPES.includes(a.type) && SHARED_PORT_TYPES.includes(b.type) && (a.typeCode || a.type) !== (b.typeCode || b.type);
 // Devices that share a port with this one (other names)
 export function portSharers(el, elements) {
@@ -279,7 +280,7 @@ export function busCheck(el, elements, devices) {
 export const PWM_PINS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
 export const COUNTER_PINS = ['2', '3', '18', '19', '20', '21'];
 const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0 and D1 are the USB link)
-const needsPwm = e => ['pwmOut', 'analogOut'].includes(e.type) || (e.type === 'pid' && e.pwm);
+const needsPwm = e => ['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm);
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
 const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
 

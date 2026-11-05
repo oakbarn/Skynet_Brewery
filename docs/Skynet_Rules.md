@@ -817,6 +817,19 @@ inside Skynet (no Arduino IDE), with WiFi or network settings set the same way. 
 language. This Rule is for a Windows Brain only, because BruControl runs only on Windows. Gaps and plan: docs/BruControl_Connections.md.
 (thread "Match BruControl's Arduino connections on Windows")
 
+6.17 **Deadband Device, as in BruControl** (Fritz, 2026-11-05: "Add Deadband", "look at BruControl's Deadband Control"). A
+Deadband is its own control output Device (Type ID **DBand**), next to Duty Cycle, Hysteresis and PID. It reads an Input and,
+every **Calc Time**, steps its output % toward the **Target**:
+- within **± Deadband Offset** of the Target the output is left alone (the whole Deadband is twice the offset);
+- within **± Inner Band Offset** (outside the Deadband) it moves by the **Inner Band Drive**;
+- further out it moves by the **Outer Band Drive**.
+Below the Target the output goes up, above it goes down; **Reversed** turns that round (cooling). It starts at the **Initial
+Output** when Enabled. On a PWM pin (PWM output on) the pin follows the output %; on an on/off pin it is on for that % of each
+**Output window** (a Duty Cycle). The Skynet way (Rule 15.1): the output is a **%** (0-100), not BruControl's 0-255, so Import
+changes the Initial Output and the two Drives to % and says so. Like the PID it counts as a heater, is On while Enabled
+(Rule 7.9) and can share a heater's port (Rule 6.1). Starting values: Deadband Offset 0.5, Inner Band Offset 2, Initial Output 0,
+Inner Band Drive 1, Outer Band Drive 5, Calc Time 10 s, Output window 2 s. (thread "Add Deadband control", Help 126)
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -1021,7 +1034,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **122**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **127**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1580,3 +1593,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 5.26 (a Pump, Valve or Manual Valve Widget dropped on a straight pipe cuts it: between the ends into separate pipes joined to its IPs, over an end the pipe is made shorter and both IPs joined, an end on a tee or other IP staying where it is; an IP that opens across the pipe is taken round with 90 degree elbows). Help 125; next free Help number 126 (Help 124 is taken by PR #193). (thread "Split a pipe when a pump is added")
 - 2026-11-05: Rule 9.8: Start Fresh on Windows also deletes the clean window's browser profile (saved user name and password), and Admin setup always opens with empty boxes (browser fill-in cleared). Help 18 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
 - 2026-11-05: Rule 5.19: Save layout joins a pipe's open end within 14 px of an IP again (a free IP point moves back onto a straight pipe's end); a wobble under 4 pixels is not a drag; only ends a drag pulls off let go (Fritz: changing IP1's Flow Color in the Three Vessel sample stopped the flow). Help 105 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
+- 2026-11-05: Added Rule 6.17 (Deadband Device, as in BruControl's Deadband Output: Deadband Offset, Inner Band Offset, Initial Output, Inner and Outer Band Drive, Calc Time, Out Time, Reversed; output in %; BruControl import). Help 126; next free Help number 127. (thread "Add Deadband control")
