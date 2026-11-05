@@ -31,6 +31,7 @@ function setMode(m) {
   }
   $('#lgPassLabel').textContent = m === 'forgot' ? 'New password' : 'Password';
   $('#lgPass').autocomplete = newPw ? 'new-password' : 'current-password';
+  if (m === 'setup') freshSetupBoxes();
   $('#lgForgot').classList.toggle('hidden', m !== 'login');
   $('#lgBack').classList.toggle('hidden', m !== 'forgot' && m !== 'code');
   $('#lgBtn').textContent = { login: 'Sign in', setup: 'Create admin account', forgot: 'Set new password', code: 'Send me a code' }[m];
@@ -47,6 +48,23 @@ function setMode(m) {
   const locked = (m === 'setup' || m === 'forgot') && !st.setupAllowed;
   $('#loginForm').querySelectorAll('input,button').forEach(e => e.disabled = locked);
   $('#lgName').focus();
+}
+
+// Admin setup (a new install or the installer's Start Fresh, Rule 9.8) starts with empty boxes. The panel itself keeps no
+// old names there; a browser that saved a password for this address (Chrome, Edge, Safari) would fill in the old user name
+// and password, so the boxes are marked as a new account and anything the browser fills in during the first seconds is
+// cleared. What the user types is left alone.
+function freshSetupBoxes() {
+  const name = $('#lgName'), pass = $('#lgPass'), pass2 = $('#lgPass2');
+  name.setAttribute('autocomplete', 'off'); name.name = 'new-admin-name';
+  pass.setAttribute('autocomplete', 'new-password'); pass.name = 'new-admin-password';
+  pass2.setAttribute('autocomplete', 'new-password');
+  const typed = new Set();
+  for (const i of [name, pass, pass2]) for (const ev of ['keydown', 'paste']) i.addEventListener(ev, () => typed.add(i));
+  // a browser may hide a filled-in password from the page until it is clicked, so every untouched box is emptied
+  const clear = () => { for (const i of [name, pass, pass2]) if (!typed.has(i)) i.value = ''; };
+  clear();
+  for (const ms of [50, 250, 600, 1200, 2500]) setTimeout(() => { if (mode === 'setup') clear(); }, ms);
 }
 
 function showCode(code, name, isNew) {

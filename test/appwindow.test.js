@@ -53,3 +53,14 @@ assert.equal(openAppWindow('u', { platform: 'win32', env, find: () => edge, run:
   assert.equal(closeAppWindow({ platform: 'win32', env, run: () => { throw new Error('no PowerShell'); } }), false);
 }
 console.log('appwindow tests passed');
+// The beer mug icon (Fritz, 2026-11-05): the clean window shows it on the taskbar, also when minimized
+{
+  const fs = await import('node:fs');
+  for (const f of ['favicon.svg', 'favicon.ico']) assert.ok(fs.existsSync(new URL(`../public/${f}`, import.meta.url)), `public/${f} missing`);
+  for (const page of ['index.html', 'login.html', 'help.html']) {
+    const html = fs.readFileSync(new URL(`../public/${page}`, import.meta.url), 'utf8');
+    assert.match(html, /<link rel="icon" href="favicon\.svg"/, `${page} has no beer mug icon`);
+  }
+  assert.match(fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), /PUBLIC_FILES = new Set\([^)]*'\/favicon\.svg'/, 'the icon must show before sign-in');
+  console.log('beer mug icon tests passed');
+}
