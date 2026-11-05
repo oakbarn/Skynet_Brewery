@@ -9,19 +9,21 @@ import { temperatureFrom } from '../lib/sensors.js';
 import { Store } from '../lib/store.js';
 
 // Fritz, 2026-10-23: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID (the port always in it, the type third)
-assert.equal(suggestName({ iface: 'MB', port: 25, code: 'P_L_Vlv', label: 'Fly Sparge', tab: 'SP' }), 'MB_25_P_L_Vlv_Fly_Sparge__SP');
-assert.equal(suggestName({ iface: 'MB', port: 'A0', code: '10KNTC', label: 'Mash/Tun', tab: 'SP' }), 'MB_A0_10KNTC_Mash~Tun__SP');
+assert.equal(suggestName({ iface: 'MB', port: 25, code: 'P_L_Vlv', label: 'Fly Sparge', tab: 'SP' }), 'MB_25_P_L_Vlv_Fly_Sparge_SP');
+assert.equal(suggestName({ iface: 'MB', port: 'A0', code: '10KNTC', label: 'Mash/Tun', tab: 'SP' }), 'MB_A0_10KNTC_Mash~Tun_SP');
 assert.equal(parseLabel('  Hot  Liquor Tank '), 'Hot_Liquor_Tank', 'spaces at the ends go, spaces inside become _');
 assert.equal(parseLabel('a<b>c:d"e/f\\g|h?i*j.k,l'), 'a~b~c~d~e~f~g~h~i~j~k~l', 'each of < > : " / \\ | ? * . , becomes ~');
 assert.equal(parseLabel('.Kettle'), '~Kettle', 'a leading dot becomes ~ too');
 assert.equal(parseLabel('Mash 🍺 Tun\u0007'), 'Mash_Tun', 'emoji and control characters are dropped');
 assert.equal(parseLabel('Mash 👨‍👩‍👧 Tun © 2'), 'Mash_Tun_©_2', 'joined emoji go, © stays (as the name rules count it)');
 assert.equal(parseLabel('Kettle #2 (Boil)'), 'Kettle_#2_(Boil)', 'other characters stay');
-assert.equal(suggestName({ iface: 'MB', port: '700', code: '1W', label: '', tab: 'BR' }), 'MB_700_1W__BR', 'an empty Label is left out');
+assert.equal(suggestName({ iface: 'MB', port: '700', code: '1W', label: '', tab: 'BR' }), 'MB_700_1W_BR', 'an empty Label is left out');
 assert.equal(suggestName({ iface: 'MB', code: 'Pump', label: 'Wort' }), 'MB_Pump_Wort', 'no tab: no __');
 const used = new Set(['MB_Pump_Wort__BR', 'MB_Pump_Wort_2__BR']);
 assert.equal(uniqueName('MB_Pump_Wort__BR', n => used.has(n)), 'MB_Pump_Wort_3__BR', 'a name already used gets a number after the Label');
 assert.equal(uniqueName('MB_Pump_Mash__BR', n => used.has(n)), 'MB_Pump_Mash__BR');
+// Fritz, 2026-11-05: single underscores between the parts; a taken name gets its number before the Tab ID
+assert.equal(uniqueName('MB_25_Pump_Wort_BR', n => n === 'MB_25_Pump_Wort_BR', 'BR'), 'MB_25_Pump_Wort_2_BR');
 const toks = tokenize('if MB_E_L_Vlv_Fly~Sparge__SP == true', 1);
 assert.equal(toks[1].v, 'MB_E_L_Vlv_Fly~Sparge__SP', 'a name with ~ works bare in a Process');
 

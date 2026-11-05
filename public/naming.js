@@ -105,14 +105,18 @@ export const hydroPort = index => String(HYDRO_PORT_BASE + Math.max(1, Math.trun
 export const ONEWIRE_PORT_BASE = 700;
 export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ? String(ONEWIRE_PORT_BASE + Math.trunc(Number(index)) - 1) : '';
 
+// Fritz, 2026-11-05 (Rule 3.1 changed): "Single Underscores between parts of name": InterfaceID_Port_Type_Label_TabID.
+// Names made before keep their double __ before the Tab ID (Rule 3.5).
 export function suggestName({ iface, port, code, label, tab } = {}) {
-  const head = [iface, port, code, parseLabel(label)].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
-  return tab ? (head ? `${head}__${tab}` : tab) : head;
+  return [iface, port, code, parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
 }
-// A suggested name that is already used (an old Device, or a Widget) gets _2, _3 ... after the Label: MB_25_Pump_Wort_2__BR
-export function uniqueName(name, isTaken) {
+// A suggested name that is already used (an old Device, or a Widget) gets _2, _3 ... after the Label: MB_25_Pump_Wort_2_BR.
+// tab: the Tab ID at its end, so the number goes before it (an older name's __ before the Tab ID works too).
+export function uniqueName(name, isTaken, tab) {
   if (!name || !isTaken(name)) return name;
-  const cut = name.lastIndexOf('__'), head = cut > 0 ? name.slice(0, cut) : name, tail = cut > 0 ? name.slice(cut) : '';
+  const t = String(tab ?? '').trim(), old = name.lastIndexOf('__');
+  const cut = old > 0 ? old : t && name.endsWith('_' + t) && name.length > t.length + 1 ? name.length - t.length - 1 : -1;
+  const head = cut > 0 ? name.slice(0, cut) : name, tail = cut > 0 ? name.slice(cut) : '';
   let i = 2; while (isTaken(`${head}_${i}${tail}`)) i++;
   return `${head}_${i}${tail}`;
 }
