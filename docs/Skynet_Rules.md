@@ -691,6 +691,27 @@ all have IPs and they become Skynet Widgets"; thread "Make Fritz's elbow and tee
 - Older Schemas (Rule 15.2): an IP elbow, tee or cross becomes its TC Pipe Fitting when its Tab is shown in Edit layout; Save layout
   keeps it. The samples and the default Schema are changed (Rule 15.3).
 
+5.26 **A pump or valve put on a pipe cuts the pipe** (Fritz, 2026-11-04: a Pump added between the ends of a
+Pipe divides it in two separate pipes joined to its IPs; dropped on the end of a pipe "it needs both IPs": the pipe is shortened and
+the pump or valve connects with its IPs; thread "Split a pipe when a pump is added", Help 125).
+In Edit layout, when a Pump, a Valve (on/off or Proportional) or a Manual Valve Widget that is not on any pipe yet is dropped on a
+straight Horizontal or Vertical pipe (or added right on one):
+- **Between the pipe's ends:** the pipe is cut into separate pipes, one joined to each of its IPs. The first keeps the pipe's
+  Name, Label, size and Flow Color; the new ones take the next Pipe_N names and the same size and Flow Color.
+- **Over one end of the pipe:** the pipe is made **shorter** and joined to its IPs. An **open end** goes away: the pipe joins one
+  IP and the other IP is the new open end. An end on a **tee, an elbow, a vessel port or another IP** stays where it is: the pump
+  or valve slides back along the pipe, clear of it, and **both IPs are joined**, one to the shortened pipe and one by a short new
+  pipe to what the end was on (Fritz, 2026-11-04: "it needs both IPs").
+- A piece runs straight on into an IP that faces along the pipe (Rule 5.23: the pump or valve moves across onto the pipe's line).
+  An IP that opens across the pipe (a pump's outlet on top when the pipe is level, or its inlet on the side when the pipe runs
+  up and down) gets its piece **taken round with 90 degree elbows**: out of the IP, across past the side of the pump, and back
+  onto the pipe's line (Rule 5.19: a pipe turns only at a fitting). Flip the pump (Orientation Right / Left) before dropping it
+  to choose which side its inlet is on.
+- Nothing is cut when the item is already on a pipe, is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
+  view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
+
+---
+
 ## 6. Devices, connections and safety
 
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
@@ -924,6 +945,10 @@ with **No (back out, nothing deleted)** as the default. Confirmed, it deletes `c
 `data` (users, passwords, sign-ins, recovery code, brew log, saved values) and `scripts` (Processes) for good, with no
 backup, and the panel starts again from the samples with Admin setup. **Kept:** `media` (pictures and sounds, Rule 7.3) and
 the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
+**Fresh is fresh** (Fritz, 2026-11-05): Start Fresh on Windows also deletes the clean window's own browser profile (Rule 2.36,
+`%LOCALAPPDATA%\SkynetBrewer\AppWindow`), which holds the user name and password the browser saved. Admin setup always opens
+with **empty** boxes: it is marked as a new account and anything a browser fills in by itself is cleared (what you type stays).
+(thread "Make Start Fresh admin setup truly fresh")
 
 9.9 **Move to a new Brain** (Fritz, 2026-11-03): someone who runs the Brain on a Windows, Linux or Mac computer can move it to a
 Raspberry Pi later (or any Brain to any other), with **☰ Menu > Move Brain** (Admins), in three steps:
@@ -1546,4 +1571,6 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Rule 18.21: Database and .API is on the Overlay line as a ⬢ pop-up (no box) on the Pump's Add box and Properties (Fritz's screen 7). Help 115 updated. (thread "Set the drill-down dialog standard for Devices")
 - 2026-11-04: Changed Rule 6.14 (new Send to the database choice "At clock time" writes every day at a clock time; the At clock time box shows only for that choice; the Every choices no longer have a clock time, and an older "Every 1 day at 12 AM" becomes At clock time 12 AM). Help 98 updated; no new Help number. (thread "Add At clock time to Send to the database")
 - 2026-11-04: Added Rule 5.25 (TC Pipe Fittings is a Widget subclass: every elbow, tee, cross, U, reducer, check valve and End Cap is a Skynet TC Pipe Fittings Widget with an IP on each ferrule face; Skynet puts them in where pipes meet, a pipe drawn to the bend turns an elbow into a tee; added by hand from Elbows, Tees … and Add Widget > TC Pipe Fittings; fittings with probes stay Temperature Devices; no cut-off ends). New Cross; Elbow 45, Instrument Tee and the probe tees redrawn in the style of Fritz's 2026-11-04 Elbow and Tee; the cut-off 45 ends of Fitting_Elbow45, Skynet_TC15_45 and pipe_elbow45 fixed. Samples and default Schema changed. Help 124; next free Help number 125. (thread "Make Fritz's elbow and tee into SVG Widgets")
+- 2026-11-04: Added Rule 5.26 (a Pump, Valve or Manual Valve Widget dropped on a straight pipe cuts it: between the ends into separate pipes joined to its IPs, over an end the pipe is made shorter and both IPs joined, an end on a tee or other IP staying where it is; an IP that opens across the pipe is taken round with 90 degree elbows). Help 125; next free Help number 126 (Help 124 is taken by PR #193). (thread "Split a pipe when a pump is added")
+- 2026-11-05: Rule 9.8: Start Fresh on Windows also deletes the clean window's browser profile (saved user name and password), and Admin setup always opens with empty boxes (browser fill-in cleared). Help 18 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
 - 2026-11-05: Rule 5.19: Save layout joins a pipe's open end within 14 px of an IP again (a free IP point moves back onto a straight pipe's end); a wobble under 4 pixels is not a drag; only ends a drag pulls off let go (Fritz: changing IP1's Flow Color in the Three Vessel sample stopped the flow). Help 105 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
