@@ -173,6 +173,14 @@ Schema keeps its own saved values. Updates keep them; only the installer's Start
 Pulse Button gGlobals always start let go, and a Long String with a text file takes its value from the file. (thread "Keep gGlobal
 values after restart", Help 118)
 
+1.23 **Value, Time and DateTime Widgets** (Fritz, 2026-11-05): Widgets that **show one value on a Tab** for the user to look at,
+before and after it is sent: a **Value Widget** (a number, with Units, Decimals, Step, Lowest and Highest), a **Time Widget**
+(hh:mm:ss) and a **DateTime Widget**. Names start `w_Value_N`, `w_Time_N`, `w_DateTime_N`; the Label is never blank (Rule 18.15).
+A tap sets it (unless **Read only**); every Process reads and sets it by its Name, as Devices and Widgets are global in scope
+across Processes, so they **stay Widgets and do not become gGlobals**. It keeps its value when the Brain restarts. Database and
+.API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
+Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -918,10 +926,15 @@ lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 6.14 **Database and .API on every Device and Widget** (Fritz, 2026-10-30, Help 98). Every Device and Widget
 with a value has a **Database and .API** box at the end of its Properties:
 - **Send to the database**: Off, On demand, On value change (at most 10 a second, the last change never lost),
-  When a Process starts, Once, At a date and time (once), At clock time (every day at that time), Every N ms /
+  **When Clicked** (each time someone sets it on its Tab), When a Process starts, **In a Group**, At a date and time (once), At clock time (every day at that time), Every N ms /
   seconds / minutes / hours / days, Every 00:00:00. The **At clock time** box shows only when **At clock time** is
   picked; the Every choices have no clock time (Fritz, 2026-11-04). **What to send** is its main value unless another attribute is picked.
-  `send_db Name` in a Process sends it now, whatever the setting.
+  `send_db Name` in a Process sends it now, whatever the setting, **even when it is Off** (Fritz, 2026-11-05: kept
+  `send_db Name`, no `send_Now` command).
+- **Database Groups** (Fritz, 2026-11-05): **In a Group** puts the item in a **Group**. A Group has a **meaningless hidden key**
+  (the items point to it) and a **Group Name**. The Process line **`send_db_group Group_Name`** sends every item In that Group,
+  **each time** it runs. **➕ Add new Group…** ends the Group list; **✏ Change name** changes the Group Name and **every Process**
+  follows (Update All), like Rule 3.11. **Once is gone** (Rule 15.2): each Schema's Once items go **In the Group named Once**.
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
   (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
@@ -1800,4 +1813,6 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 7.13 changed (Fritz): one cover per color plus User (any RGB), and every cover fits every Skynet pump; a cover is a color filled into each pump's cover shape, so the per-pump, per-color files moved to Delete/. Help 111 updated. (thread "Clean up SVG names and retire old pictures")
 - 2026-11-05: The test pump on the valve spots is retired (Fritz: the Pump Standard, Rule 5.27, stays). Pump_1 in the Three Vessel One Pump sample is back on Pump_Red_Rip_Off.svg; the test picture went to Delete/ (Rule 15.3). (thread "Standardize valve size and IPs")
 - 2026-11-05: Added Rule 5.31, the Vessel Widget class (one Skynet_Vessel_Widget Template, a Place slider on every IP, the Temperature Probe and the Element Port; spots locked). The Three Vessel sample uses it. Rule 11.1 next free Help number now 134. (thread "Build the Vessel Widget class", Help 133)
+- 2026-11-05: Rule 6.14: the Send to the database choice Once is replaced by **In a Group** (Database Groups with a hidden key and a Group Name, `send_db_group Group_Name` sends the Group each time, ✏ Change name updates every Process; old Once items go In the Group named Once). `send_db Name` sends even when Off (no `send_Now`). Help 98 and 05 updated; no new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
+- 2026-11-05: Added Rule 1.23 (Value, Time and DateTime Widgets); Rule 6.14 gets the Send to the database choice **When Clicked**. Three Vessel sample: the Reporting readings are Value Widgets (w_Strike_Volume ...) sent When Clicked; Notes stays a gGlobal for now. Rule 1.20 confirmed unchanged. Help 134; next free Help number 135. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 8.4 (Password key): Skynet's own key button in every new-password box makes a strong password that follows the Password rules; Edge's own key went away when the clean window stopped syncing (Rule 9.8, PR #205). Help 10 updated; no new Help number. (thread "Restore generate password Key on fresh install")
