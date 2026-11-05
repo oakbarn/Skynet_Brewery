@@ -218,6 +218,10 @@ button drags it (Rule 5.28).
 
 2.12 **Only unlocked items may move**, Edit layout included. 🔒 Lock All and 🔓 Unlock All are
 one-time **actions, not switches**, and work on the current Tab only. (2026-10-22, PR #79)
+*Changed (Fritz, 2026-11-05: "Locked Vessels cannot be moved with a Mouse but can be moved by there x y attributes"):* a 🔒
+**locked Vessel** can't be moved with the mouse, but a new **X** or **Y** typed in its Properties moves it, to the pixel (moving
+something 1 pixel left can look much better on the screen). Its IPs, joined fittings and End Caps go with it, as with a drag,
+and it stays locked. A bundled vessel's Properties have X and Y too. Pipe ends left off its IPs let go (Rule 5.19). (Help 56)
 
 2.13 **Phones and tablets do not move pictures** in Edit layout; they only select, and holding a
 finger opens Properties. A switch on ☰ Menu > Default can allow it. (2026-10-21, PR #59)
@@ -543,6 +547,10 @@ PR #47; PR #91)
 
 5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
 (2026-10-04, PR #3)
+Valves keep to this through the **Valve Standard** (Rule 5.29): every Skynet valve drawing is to the same scale in the same
+300 x 300 box.
+Pumps keep to this through the **Pump Standard** (Rule 5.27): every Skynet pump drawing is to the same scale in the same
+300 x 300 box. (Fritz, 2026-11-05: "They could comply with the rule if we drew everyone in the same Ratio Box.")
 
 5.12 **Kettle pictures are empty:** no wort or liquid drawn, and no heating element drawn on a plain
 kettle. Each kettle has a plain and an _Electric version. (2026-10-22, 2026-10-23)
@@ -646,7 +654,8 @@ Open/Closed. (thread "Create pipe Widgets from Fritz's drawings", Help 110)
 Skynet one is the **BruControl KLD20T** (1/2" NPT, SS304, 24 VDC, 0-5 VDC signal): an Analog Output, 0-100 %, a Skynet Template
 set under Rules 5.16 and 5.17 (one entry, Orientation Horizontal / Vertical Left / Vertical Right / 45 degrees; its signal and
 range are fixed). The User Defined Proportional Valve replaces "Proportional valve 0-100 % (analog output)": its own pictures,
-signal and range, and In / Out IP spots like the User Defined Motorized Ball Valve. More Skynet Proportional Valves only when
+signal and range, and In / Out spots like the User Defined Motorized Ball Valve (since Rule 5.29 they move and size the picture
+onto the standard IP spots). More Skynet Proportional Valves only when
 Fritz names them, and no new pictures without his word (Rule 13.3).
 
 5.23 **Valves and pumps sit centered on their pipes** (Fritz, 2026-11-04, with a drawing, thread "Center pumps and valves on pipes",
@@ -655,11 +664,11 @@ and the valve or pump is moved across (left or right on an up-and-down pipe, up 
 line. **The pipes stay where they are; the valve or pump moves.** This is done for every Tab as it is shown and once when Edit layout
 opens, so Save layout keeps it. Two pipes that would move it different ways (drawn out of line) leave it as it is. Hoses bend, so a
 hose just goes to the IP. The older ball valve pictures (from BruControl; since 2026-11-05 named Motorized_TC15_Ball_Valve_Horizontal and _Vertical)
-have their pipe spot set too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides, or where the User Defined valve's In and
-Out IP spots put them.
+have their pipe spot set too. A picture Skynet doesn't know (a user's own) keeps its IPs in the middle of its sides; on a valve those are the Valve Standard
+spots, and the User Defined valve's In and Out spots move its picture onto them (Rule 5.29).
 
 5.24 **Ball valves have two IPs, one at each pipe end, in every Orientation, and every Skynet Pump has IPs on its inlet and outlet** (Fritz, 2026-11-04: "Ball Valve Devices and Widgets
-should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123). Where they go is Rule 5.20.
+should have IPs", thread "Add IPs to Ball Valve Devices and Widgets", Help 123). Where they go is Rule 5.20. Since 2026-11-05 every valve's spots are those of the Valve Standard (Rule 5.29).
 - **Skynet Motorized Ball Valve Device:** Horizontal, Vertical Left and Vertical Right on the ends of its pipe, Front both at the
   center of the opening, and **45 degrees on the ends of its pipe, turned with the picture** (before, a 45 degree valve put them on
   the corners of its box). The 45 degree turn works the same for every Skynet valve drawing.
@@ -721,6 +730,25 @@ straight Horizontal or Vertical pipe (or added right on one):
 - Nothing is cut when the item is still joined to another pipe (a message says so; one dragged off its pipes lets them go first, Rule 5.19, and then cuts the pipe it is dropped on), is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
 
+5.27 **The Pump Standard: every pump in the same 300 x 300 box, with its IPs in the same spots** (Fritz, 2026-11-05: "They could
+comply with the rule if we drew everyone in the same Ratio Box. We could make it a 300 x 300 for all Pump Drawings and by default
+display as 150 x 150 which was the Size of my Rip Off Pump svgs"; thread "Standardize pump size and IPs", Help 130).
+- **Why:** a pump put in the same place as the one it replaces must stay joined to the same pipes.
+- **Every Skynet pump picture is drawn in a 300 x 300 box:** the brew pump drawings (March, Chugger, Riptide, Topsflo, KegLand), their
+  Cover Overlays, and the older Riptide-style pictures (Pump_<color>_Rip_Off / _On, every color and No Cover).
+- **The IPs are always in the same spots** (Orientation Right): the **inlet** at **(285, 150)** of the box (the middle of its height,
+  near the right side) and the **outlet** at **(243, 56)** (near the top right). Shown at **150 x 150** that is (142.5, 75) and
+  (121.5, 28). Orientation Left mirrors them. The IPs stay on the tips of the ports (Rule 5.20, 5.24).
+- **To scale (Rule 5.11):** the brew pump drawings are all the same scale, 20 units = 1 inch in the box (10 at 150 x 150). Where a
+  pump's ports are closer together than the spots, its **port tube is drawn longer** (straight tube only) to reach them. The older
+  Riptide-style pictures came from BruControl at their own scale; their inlet and outlet pipes are made a little longer the same way.
+- **A pump shows at 150 x 150 to start.** A pump can still be resized; the spots grow with its box, so two pumps of the same size
+  and X, Y always line up.
+- **Older Schemas** (Rule 15.2): once per Schema, a Pump Device or Picture Widget showing a Skynet pump picture becomes 150 x 150
+  about its middle; Rule 5.23 then puts it back on its pipes.
+- The **sump pump** is not a pipe pump (it sits in the liquid and draws in through its screen), so it keeps its own box. A **User
+  pump** picture keeps its IPs in the middle of its sides.
+
 5.28 **Quick Disconnects and Quick Disconnect hoses** (Fritz, 2026-11-05: "a Widget that is a Quick Disconnect that can be placed on an
 IP of a Valve. Many home brewers have a manifold but move a pipe from source to source ... a special hose that connects to a Pump but
 can be run to a vessel or an IP. The hose end could be run anytime, not just in edit mode"; thread "Add movable quick disconnect hose",
@@ -739,6 +767,33 @@ Help 127).
   flow pumped from it takes that vessel's Out flow color.
 - **Exception to Rule 2.11** (waiting on Fritz's pick: this exception, or a change to Rule 2.11): only the free end of a Quick
   Disconnect hose moves outside Edit layout; everything else on a Tab still moves only in Edit layout.
+
+5.29 **The Valve Standard: every valve in the same 300 x 300 box, with its IPs in the same spots** (Fritz, 2026-11-05: "All Valves
+follow the 300 x 300 with IPs in the same place so easy to change a valve from Ball to Butterfly or Manual to Motorized. So a new Rule
+for Valves, even User ones. The graphic will be resized to 300 x 300 and IPs placed correctly on a User Created valve. The IPs are
+placed at the same Points of the Graphic. I know this may offset the View a little, But I think the consistency is better";
+thread "Standardize valve size and IPs", Help 131).
+- **Why:** a valve swapped for another kind (Ball for Butterfly, Manual for Motorized, a Skynet one for a user's own) in the same
+  place stays joined to the same pipes.
+- **Every Skynet valve picture is drawn in a 300 x 300 box** with its pipe running **through the middle of the box**: the Motorized
+  Ball and Butterfly valves, the Manual and Manual Butterfly valves, the Gas Solenoid valves and the older Motorized_TC15 ball valves,
+  in every Orientation. They are all drawn **to the same scale** (Rule 5.11), and where a valve is shorter than the box its pipe is
+  drawn on, straight, out to the edge of the box (as the Pump Standard lengthens port tubes, Rule 5.27).
+- **The IPs are always on the same spots:** Horizontal at the middle of the left and right sides, **(0, 150)** and **(300, 150)**;
+  Vertical Left and Vertical Right at the middle of the top and bottom, **(150, 0)** and **(150, 300)**; 45 degrees on the
+  Horizontal spots turned about the middle; a front view (looking down the pipe) both at the middle, **(150, 150)**; a front elbow at
+  the middle and the middle of its bottom, **(150, 300)**. The IP is on the end of the valve's pipe (Rule 5.20).
+- **A valve shows at 150 x 150 to start** (the same as a pump, so the two are to the same scale). It can still be resized; a square
+  box keeps the spots on its sides.
+- **A user's own valve picture** (User Defined Motorized Ball Valve, User Defined Proportional Valve, or a picture picked for a valve)
+  **is resized to fill the square box** and its IPs go on the same spots for its Orientation. When its **In and Out spots** are set
+  (the ⬢ beside Path (closed), or the % boxes), the picture is moved and sized so those spots sit on the IPs. The view may be a little
+  off; the consistency is worth it.
+- **Older Schemas** (Rule 15.2): once per Schema, every valve with a picture (and a Picture Widget showing a Skynet valve picture)
+  becomes square about its middle: 150 x 150, or smaller where a pipe joined to it is too short for its IPs to move out that far.
+  Rule 5.23 then keeps it on its pipes.
+- Not in this Rule: the **Manual Valve Widget** (Rule 5.15) sizes itself to its pipe like a pipe fitting, and the **check valve** is a
+  pipe fitting (Rule 5.14).
 
 ---
 
@@ -998,7 +1053,10 @@ backup, and the panel starts again from the samples with Admin setup. **Kept:** 
 the `backups` folder. (thread "Add Start Fresh option to installer", Help 18)
 **Fresh is fresh** (Fritz, 2026-11-05): Start Fresh on Windows also deletes the clean window's own browser profile (Rule 2.36,
 `%LOCALAPPDATA%\SkynetBrewer\AppWindow`), which holds the user name and password the browser saved. Admin setup always opens
-with **empty** boxes: it is marked as a new account and anything a browser fills in by itself is cleared (what you type stays).
+with **empty** boxes: it is marked as a new account and, for as long as setup is open, any box you have not clicked, typed or
+pasted in is kept empty, even when a browser fills it in later. Skynet's clean window never syncs with a Microsoft or Google
+account (Edge signs new profiles in by itself and synced the old login back in). Saving your password still works: it is
+kept only in Skynet's own window and fills in on Sign in as before.
 (thread "Make Start Fresh admin setup truly fresh")
 
 9.9 **Move to a new Brain** (Fritz, 2026-11-03): someone who runs the Brain on a Windows, Linux or Mac computer can move it to a
@@ -1426,6 +1484,12 @@ Valve drill-down dialog", Help 128):
 
 ## Open questions (not Rules yet)
 
+- **Pumps on the valve spots? (TEST, 2026-11-05, thread "Standardize valve size and IPs")** Fritz: "I want to check if we can make the
+  same rule for Pumps." Pump_1 in the Three Vessel One Pump sample uses a test picture, Images/Skynet/Pumps/Pump_Red_Rip_Off_Valve_IPs_Test.svg:
+  the Pump Standard Red Riptide-style pump with its IPs on the Valve Standard spots (inlet at the middle of the right side, outlet at
+  the middle of the left side, the outlet pipe drawn looping over the pump), shown 150 x 150, Orientation Left. Rule 5.27 is not
+  changed. To go back: point Pump_1 at Pump_Red_Rip_Off.svg again (kept as it was).
+
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
    file names (Rule 3.7)? (asked 2026-10-23)
 2. **Other Skynet fittings and vessels:** Fritz allowed Bundle / Unbundle on them "for now"
@@ -1658,4 +1722,8 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Added Rule 5.28 (Quick Disconnect Widget: Fritz's red star snaps onto a valve IP; Quick Disconnect hose: hangs from a pump IP, its free end moves at any time with the right mouse button or a finger, onto an IP, a Quick Disconnect or the top third of a vessel). Rule 4.5 row 2 gets Draw QD hose. Exception note on Rule 2.11, waiting on Fritz's pick (exception or change Rule 2.11). Help 127. (thread "Add movable quick disconnect hose")
 - 2026-11-05: Rule 18.13 (and 18.21, 18.23): once a Pump or Motorized Ball Valve is added, its Interface and Port are greyed out for good; ✏ Change beside them is gone (physical wiring; the hidden key stays, only the Name changes with ✏ Change name). (thread "Add Motorized Ball Valve drill-down dialog")
+- 2026-11-05: Rule 2.12 changed (Fritz): a 🔒 locked Vessel can't be moved with the mouse but moves by its X and Y in Properties (to the pixel), with its IPs, joined fittings and End Caps; bundled vessels' Properties got X and Y. Other locked items are as before. Help 56 updated; no new Help number. (thread "Let locked vessels move by X and Y")
+- 2026-11-05: Rule 9.8: Skynet's clean window (Rule 2.36) never syncs with a Microsoft or Google account, so saved passwords stay in Skynet's own window and still fill in on Sign in (Edge synced Fritz's old login back in after Start Fresh); Admin setup keeps untouched boxes empty for as long as it is open. Help 18 and 122 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
+- 2026-11-05: Added Rule 5.27 (the Pump Standard: every Skynet pump picture drawn in the same 300 x 300 box, to scale, shown 150 x 150, inlet IP at (285, 150) and outlet IP at (243, 56), port tubes made longer where needed; older pumps become 150 x 150 once). Rule 5.11 notes pumps keep to it this way. Help 130; next free Help number 131. (thread "Standardize pump size and IPs")
+- 2026-11-05: Added Rule 5.29 (the Valve Standard: every valve picture in the same 300 x 300 box with its pipe through the middle, to one scale, IPs always on the same spots; shown 150 x 150; a user's own valve picture fills the box and its In and Out spots move and size the picture onto the IPs; older valves become square once). Notes under Rules 5.11, 5.22 and 5.24. Help 131; next free Help number 132. (thread "Standardize valve size and IPs")
 - 2026-11-05: Rule 5.25: a Tee, Instrument Tee or Cross dropped on a straight pipe cuts it there (turned so its run goes along the pipe). Rule 5.26: a valve or pump dragged off its pipes onto another pipe now cuts it (its old pipes let go first); one still joined says why. Help 124 and 125 updated; no new Help number. (thread "Fix Tee and valve not splitting a pipe")

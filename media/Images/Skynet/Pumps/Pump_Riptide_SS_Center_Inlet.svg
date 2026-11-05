@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100.2 74.6">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-pump-standard="1">
+  <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Drawn to scale, 20 units = 1 inch here (10 at 150 x 150); its port tube made 0.2" (inlet) and 0" (outlet) longer to reach the spots. -->
+  <g transform="translate(81.88 56) scale(2)">
+    <rect x="99" y="42.8" width="2.56" height="8.4" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
+
   <!-- Skynet drawing: Blichmann Riptide, cover off (stainless head, center inlet, valve on the outlet). Off, no cover. 10 units = 1 inch. Inlet IP at the tip of the right-hand port (0.994, 0.63), outlet IP at the tip of the top port (0.804, 0.0). -->
   <g stroke-linejoin="round">
     <rect x="8.0" y="66.0" width="49.6" height="8.0" rx="0.8" fill="#5a5a5a" stroke="#2b2b2b" stroke-width="1.2"/>
@@ -20,5 +24,6 @@
     <rect x="76.4" y="0.0" width="8.4" height="26.0" rx="0.0" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/><path d="M76.4 1.6 L84.8 1.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 3.2 L84.8 2.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 4.8 L84.8 4.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 6.4 L84.8 5.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 8.0 L84.8 7.4" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 9.6 L84.8 9.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 11.2 L84.8 10.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 12.8 L84.8 12.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 14.4 L84.8 13.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 16.0 L84.8 15.4" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 17.6 L84.8 17.0" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 19.2 L84.8 18.6" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 20.8 L84.8 20.2" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 22.4 L84.8 21.8" stroke="#2b2b2b" stroke-width="0.5"/><path d="M76.4 24.0 L84.8 23.4" stroke="#2b2b2b" stroke-width="0.5"/>
     <rect x="72.6" y="14.2" width="16.0" height="6.0" rx="1.2" fill="#b9bcc0" stroke="#2b2b2b" stroke-width="1.2"/>
     <rect x="88.4" y="16.0" width="9.0" height="2.4" rx="1.0" fill="#c62828" stroke="#2b2b2b" stroke-width="0.8"/>
+  </g>
   </g>
 </svg>
