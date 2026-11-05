@@ -158,7 +158,8 @@ export const isUserBundledVessel = (t, all) => t?.cls === 'user' && !!vesselBase
 // A Master Template can have Daughters for common orientations: a Daughter names its master and sets only what differs.
 //   type      the Device type (digitalOut)
 //   props     its attributes (subtype, valveType, service, orientation, size, look, tap ...)
-//   pics      { h: [picture when on, picture when off], v: [...] }: the picture follows the orientation (45 degrees turns v)
+//   pics      { h: [picture when on, picture when off], v: [...] }: the picture follows the orientation (45 degrees turns v). The
+//             picture when on is "" on every Skynet valve (Fritz, 2026-11-05): the picture stays and the On overlay shows open
 //   userFields  the attributes a user can set
 // Fixed always, even when a Template doesn't list them: the pictures, Kind, Valve type, Service, Look and tap behaviour.
 export const DEVICE_FIXED = ['type', 'subtype', 'valveType', 'service', 'imageOn', 'imageOff', 'imageOverlay', 'background', 'backpath', 'backpath_2', 'backpath_3',
@@ -199,7 +200,7 @@ export function applyDeviceTemplate(el, t) {
   for (const k of fixed) { if (k in (t.props || {})) el[k] = jsonSafe(t.props[k]); else if (k !== 'type') delete el[k]; }
   if (t.type) el.type = t.type;
   const p = t.pics?.[el.orientation === 'h' ? 'h' : 'v'];
-  if (p) { el.imageOn = p[0]; el.imageOff = p[1]; }
+  if (p) { if (p[0]) el.imageOn = p[0]; else delete el.imageOn; el.imageOff = p[1]; }
   if (el.subtype === 'valve') { if (el.tapwater) el.tapwaterOut = tapOutFrom(el.tapSource); else { delete el.tapwaterOut; delete el.tapSource; } }
   return el;
 }

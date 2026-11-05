@@ -6,7 +6,7 @@ import fs from 'node:fs'; import path from 'node:path'; import zlib from 'node:z
 
 const dir = path.join(import.meta.dirname, '..', 'media', 'Images', 'Skynet');
 const files = [...fs.readdirSync(path.join(dir, 'Pumps')).filter(f => /_Rip_(On|Off)\.(svg|png)$/.test(f)).map(f => path.join(dir, 'Pumps', f)),
-  ...fs.readdirSync(path.join(dir, 'Valves')).filter(f => /^Valve_Ball_(Open|Closed)/.test(f)).map(f => path.join(dir, 'Valves', f))];
+  ...fs.readdirSync(path.join(dir, 'Valves')).filter(f => /^Motorized_TC15_Ball_Valve_/.test(f)).map(f => path.join(dir, 'Valves', f))];
 assert.ok(files.length >= 20, 'found the pictures');
 const cyan = (r, g, b) => Math.abs(r - 153) + Math.abs(g - 217) + Math.abs(b - 234) < 30;
 

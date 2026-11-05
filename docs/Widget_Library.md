@@ -235,7 +235,7 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 - The Skynet RIMS_Tube Template is a Skynet_Integrated_Device (its Devices are built in): see the Device Library.
 
 ### Pipe tee, Pipe 90° elbow, Pipe 45° elbow, Pipe cross
-- Pictures in Images/Skynet/Other_Equipment (pipe_tee, pipe_elbow90, pipe_elbow45, pipe_cross), 90 x 90.
+- Pictures in Images/Skynet/Other_Equipment (Skynet_TC15_Long_Tee, Skynet_TC15_Elbow_90, Skynet_TC15_Elbow_45, Skynet_TC15_Cross; the old pipe_tee, pipe_elbow90, pipe_elbow45 and pipe_cross were retired to Delete/ on 2026-11-05), 90 x 90.
 - Types: Equal / Reducing (tee, cross); Short radius / Long radius (elbows).
 - Ports: Tee = Run A, Run B, Branch. Elbows = End A, End B. Cross = End A, B, C, D. Flow passes between all of them.
 
