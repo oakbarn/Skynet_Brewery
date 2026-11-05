@@ -795,6 +795,31 @@ thread "Standardize valve size and IPs", Help 131).
 - Not in this Rule: the **Manual Valve Widget** (Rule 5.15) sizes itself to its pipe like a pipe fitting, and the **check valve** is a
   pipe fitting (Rule 5.14).
 
+5.30 **Probe tees and thermowells have IPs and go in pipes like tees** (Fritz, 2026-11-05: "On Probes make sure that the Thermowells,
+Instrument Tees, and Long Tees have IPs. On Tees, they need to match the Widget Tees IP Placement. The tees need to Break a Line if
+added to a Pipe or hose just as normal tees"; "A thermowell placed on a Front Facing IP needs the graphic to change to the same as a
+Probe (Circle TEE). In fact, Probes placed on the Front have an implicit Thermowell"; thread "Add IPs to probe thermowells and tees",
+Help 132).
+- **Tees with a Temperature Probe** (Instrument Tee and Long Tee, probe in the branch or in from the end; Temperature Devices, Rule
+  5.25) are the **same size as the TC Pipe Fittings Widget tee of the same shape** (Tee 160 x 102, Instrument Tee 160 x 69) with their
+  **IPs on the same spots**: the center of each open ferrule face (Rule 5.20). The probe fills one opening, so they have two IPs.
+- They **Rotate** (0, 90, 180, 270) as well as Flip; the picture and its IPs follow.
+- **Dropped on a straight pipe in Edit layout, a probe tee cuts it as a tee does** (Rule 5.25): probe in the branch, its run goes along
+  the pipe (it is turned if its run was across the pipe) and the pipe is cut in two, one piece on each end; probe in from the end, its
+  open end goes on the pipe and its branch is taken round with 90 degree elbows (as a pump's port, Rule 5.26). Over an open end the
+  pipe is made shorter. It then takes the pipe's size, about its bend, as a TC Pipe Fitting does.
+- **A tee dropped on a hose cuts the hose** (a TC Pipe Fittings Tee, Instrument Tee or Cross, or a probe tee): the tee stays where
+  it is and each piece of the hose goes to one end of its run (a probe tee: its two IPs). Not a Quick Disconnect hose (Rule 5.28) or a
+  locked hose. Pumps and valves still don't cut hoses (Rule 5.26).
+- **A Thermowell has one IP**, on the outer face of its TC cap (it fills the opening it is in, so no flow goes through it). It Rotates
+  and Flips. Dropped in Edit layout with its IP within 30 px of another IP (a tee's branch, a vessel port), it **snaps on**.
+- **On a front facing IP** (an opening seen face-on: a port on the front of a vessel, the opening of a front view valve or elbow) a
+  Thermowell shows **from the front**: the round TC cap with the probe (purple) in its middle (Skynet_TC15_Thermowell_Front.svg,
+  40 x 40), its IP in the middle. Dragged off, it shows from the side again.
+- **A plain Temperature Probe dropped with its middle on a front facing IP has an implicit Thermowell**: it becomes a Thermowell seen
+  from the front. Dragged off again, it is the plain probe it was (its look and size come back).
+- In the samples, the Three Vessel sample shows a Short Thermowell picture on each vessel beside its reading.
+
 ---
 
 ## 6. Devices, connections and safety
@@ -1727,3 +1752,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Added Rule 5.27 (the Pump Standard: every Skynet pump picture drawn in the same 300 x 300 box, to scale, shown 150 x 150, inlet IP at (285, 150) and outlet IP at (243, 56), port tubes made longer where needed; older pumps become 150 x 150 once). Rule 5.11 notes pumps keep to it this way. Help 130; next free Help number 131. (thread "Standardize pump size and IPs")
 - 2026-11-05: Added Rule 5.29 (the Valve Standard: every valve picture in the same 300 x 300 box with its pipe through the middle, to one scale, IPs always on the same spots; shown 150 x 150; a user's own valve picture fills the box and its In and Out spots move and size the picture onto the IPs; older valves become square once). Notes under Rules 5.11, 5.22 and 5.24. Help 131; next free Help number 132. (thread "Standardize valve size and IPs")
 - 2026-11-05: Rule 5.25: a Tee, Instrument Tee or Cross dropped on a straight pipe cuts it there (turned so its run goes along the pipe). Rule 5.26: a valve or pump dragged off its pipes onto another pipe now cuts it (its old pipes let go first); one still joined says why. Help 124 and 125 updated; no new Help number. (thread "Fix Tee and valve not splitting a pipe")
+- 2026-11-05: Added Rule 5.30 (tees with a Temperature Probe are the size of the TC Pipe Fittings tee of their shape with IPs on the same spots, Rotate, and cut a pipe like a tee; a tee or probe tee dropped on a hose cuts the hose; a Thermowell has one IP on its cap face and snaps onto an IP; on a front facing IP it shows from the front; a plain Temperature Probe on a front facing IP has an implicit Thermowell). Three Vessel sample shows its probes. Help 132; next free Help number 133. (thread "Add IPs to probe thermowells and tees")
