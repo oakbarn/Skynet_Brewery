@@ -3600,7 +3600,7 @@ async function newDeviceDialog(e, hint, what) {
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
-  if (pr && !String(work.label ?? '').trim()) work.label = autoLabel(PROBE_AUTO_LABEL);       // a Temperature Probe: tP_1, tP_2 ... (Rule 18.26)
+  if (pr && !String(work.label ?? '').trim()) work.label = probeAutoLabel(work.typeCode || defaultCode(e));       // a Temperature Probe: tP_1W_1, tP_RTD_1 ... (Rule 18.26)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !pr && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
@@ -5069,8 +5069,12 @@ const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (n
 // input); its own set (Rule 18.22) is the Probe type (its settings in a ⬢ pop-up), Units with Decimals, the Calibration offset with
 // Database and .API ⬢, and the Reading now. A probe that is part of a Skynet_Integrated_Device keeps its present dialog.
 const isProbeDev = e => e?.type === 'temperature' && !e.integratedIn && !e.template && !e.kind;
-// the Label filled in for you (Rule 18.15): Type_n, n the next number
+// the Label filled in for you (Rule 18.15) by the kind of probe (Fritz, 2026-11-05: "Probe 10KNTC = _10KNTC_, One Wire = _1W_,
+// RTD = _RTD_. Other Thermoresistors follow 10KNTC"): tP_<Type ID>_n, n the next number for that kind, e.g. tP_1W_1, tP_10KNTC_1.
+// The Type ID is the probe's (Rule 3.1); the 100K NTC's is 100KNT (6 letters), its Label part 100KNTC like the other thermistors.
 const PROBE_AUTO_LABEL = 'tP';
+const PROBE_LABEL_CODE = { '100KNT': '100KNTC' };
+const probeAutoLabel = code => autoLabel(`${PROBE_AUTO_LABEL}_${PROBE_LABEL_CODE[code] || code || 'NTC'}`);
 const probeKindName = e => { const t = tempKinds().find(k => k[0] === tempKey(e)); return t ? t[1].replace(/\s*\(.*$/, '') : String(e.sensor || 'ds18b20').toUpperCase(); };
 const probeShape = e => isProbeTee(e) ? PROBE_TEES[e.probeTee].label : isThermowell(e) ? (e.front ? 'Thermowell (front)' : `${e.thermowell || 'Short'} Thermowell`) : 'Temperature Probe';
 const probeTitle = e => `${probeShape(e)}: ${probeKindName(e)}`;

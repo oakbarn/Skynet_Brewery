@@ -1532,7 +1532,7 @@ nothing and goes back to the calling dialog as it was. The first one built this 
    filled in (Label Visible off does not skip it). The Add Device box has it now.
    *Changed (Fritz, 2026-11-05):* **A Device or Widget must have a Label, and a Label can't be blank.** Some Devices and Widgets
    have their Label **filled in for you** with the pattern **Type_n**, n the next number not used yet: a **Motorized Ball Valve**
-   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** as **tP_1** (Rule 18.26). It can be changed like any Label. When the
+   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** by its kind, as **tP_1W_1**, **tP_RTD_1**, **tP_10KNTC_1** ... (Rule 18.26). It can be changed like any Label. When the
    Label is filled in (by you or by the program) on a Build dialog, **the focus jumps to the next field** in the Enter order (the
    next one still empty). **Every Label is editable by the user**, filled in for you or not. Which Devices and Widgets fill in
    their Label is decided **dialog by dialog: Fritz says so when each dialog is built** (Fritz, 2026-11-05). Every other dialog that
@@ -1664,8 +1664,11 @@ Long Tee, Rule 5.30). A probe built into a Skynet_Integrated_Device (RIMS tube, 
    settings), **Units** with **Decimals** on one line, **Calibration offset** with **Database and .API ⬢** on its line; X, Y, Width,
    Height, and the Device Type greyed out last (e.g. **TEMP: 1W**). Enter goes Label, Interface, Port, Tab, Orientation,
    ➕ Add Device. **No Cover, Toggle or Overlay** (a probe is an input).
-3. Its Label starts filled in as **tP_n** (the next number), so the focus starts on the Interface (Rule 18.15). *(Built as recommended;
-   Fritz's pick on the decision card is pending: tP_n, Probe_n or no auto fill.)*
+3. Its Label starts filled in by its kind of probe as **tP_Type_n**, n the next number for that kind, so the focus starts on the
+   Interface (Rule 18.15). Fritz, 2026-11-05: "Probe 10KNTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_. Other Thermoresistors follow
+   10KNTC": **tP_1W_1** (DS18B20), **tP_RTD_1** (PT100 and PT1000), **tP_10KNTC_1**, **tP_50KNTC_1**, **tP_100KNTC_1** (the other
+   thermistors like the 10K; another size is **tP_NTC_1**), and by their Type ID **tP_TC_1** (thermocouple), **tP_LM35_1**,
+   **tP_TMP36_1**. *(The tP_ start and _n end follow the Heating Element's hE_; they wait on Fritz's OK.)*
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without Cover, Toggle and Overlay, plus the same own set and the **Reading
    now**. The Interface and Port are greyed out for good once added (Rule 18.13); so is the **Probe type**: to use another kind of
    probe, delete it and add it again.
@@ -1986,3 +1989,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: One exception to Rules 5.7 and 5.31 (Fritz): a Vessel built from a Vessel Widget Template is a Vessel Device; Elements,
   Probes, Thermowells and Valves on its IPs are integral parts (like the RIMS tube); a HERMS coil goes on the Left or Right HERMS IPs;
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
+- 2026-11-05: Rule 18.26 and 18.15: a Temperature Probe's Label fills in by its kind, tP_1W_1, tP_RTD_1, tP_10KNTC_1, tP_50KNTC_1, tP_100KNTC_1, tP_TC_1, tP_LM35_1, tP_TMP36_1 (Fritz: "Probe 10KNTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_. Other Thermoresistors follow 10KNTC"). Help 138 updated. (thread "Build Probe Add dialogs like Pump")
