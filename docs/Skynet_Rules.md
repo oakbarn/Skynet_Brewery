@@ -504,6 +504,10 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   window wraps the last ones.
 - **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), **Add equipment ➕**
   (moved from row 1, Fritz 2026-11-05), the turn buttons, Lock, Lock
+  the kind and then Add Device. Then **⧉ Clone Device** (a list of the Devices on other Tabs).
+- **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕** (a Picture Widget, Rule 18.27), **Text ➕**, **Manual Valve ➕**,
+  **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
+- **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
   All, Unlock All, Tab settings, New tab, **👻 Hidden Tab** and its **orange ?** (a pop-up with how Edit layout
   works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Save Build.
 - **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
@@ -1399,6 +1403,7 @@ Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Di
 [docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Heating Element** (Rule 18.24).
 [docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **PWM / Analog out** (Rule 18.25).
 [docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Temperature Probes** (Rule 18.26).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Picture Widget** (Rule 18.27).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1637,6 +1642,26 @@ Long Tee, Rule 5.30). A probe built into a Skynet_Integrated_Device (RIMS tube, 
 - Gone from these dialogs (what a probe already has set is kept): the Probe type dropdown, Device (empty = any), the separate Flip
   Horizontal / Flip Vertical / Rotate rows (now Orientation and Flip), the Thermowell and probe tee notes (now the Graphic's tip).
 
+18.27 **Adding a Picture Widget: the Pump's drill-down made to fit a Widget** (Fritz, 2026-11-05: "build a Picture Widget Build, I
+will look at what you did and modify, but follow the look and sequences of the Pump drill Down", thread "Build Picture Widget dialog
+like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made on the 🔨 Build Tab first (Rule 4.1), so:
+1. **Picture ➕** on the Edit layout bar, or **Add Widget > Pictures and text > Picture Widget**, opens the **Add Widget box**, titled
+   **Picture Widget**, with ✖ Cancel and **➕ Add Widget** at the top and the bottom (Picture ➕ made a plain still picture before;
+   those already on a Tab keep working).
+2. The opening pattern (Rule 18.15 for a Widget): **1 Label** ⬢ and **Label Visible** (starts at No), **2 Picture** (the picture it
+   shows, from the Picture list with the 🖼 icon picker), **3 Tab** greyed out as **🔨 Build Tab**. Nothing else shows until the
+   Label and the Picture are done; ➕ Add Widget can always be pressed and says what is missing. Enter goes Label, Picture,
+   ➕ Add Widget (Rule 18.20). Label auto-fill: *waiting on Fritz* (Rule 18.15); for now the Label is typed, as a Pump's.
+3. Then **4 Name** (the Suggested Name **pic_** + the Label, e.g. pic_Kettle_Element, as the samples name them; it may be edited),
+   the **Graphic**, **Turns on with** (Rule 7.11) with **Toggle** (On/Off, Push button, None: what a tap does) on its line,
+   **Overlay** (greyed out while Turns on with is None) with a ⬢ for the second picture (Picture when on, optional, Rule 7.8) and
+   the Back Colour, **Text on picture** ⬆, X, Y, Width, Height (140 x 120 to start), and the **Widget Type** (Picture) greyed out last.
+4. **Picture Widget Properties** are the Pump's screen 9 (Rule 18.21) for a Widget: the lock, Visible and Hidden Locked in the
+   title line; 🗑 Delete, ✖ Cancel, 💾 Save; 1 Label ⬆ ⬢ and Label Visible, 2 Picture, 3 Tab, 4 Name (✏ Change name once built,
+   Rule 3.11), then the same fields as the Add box. The Label is never blank (a blank one becomes the Name on Save).
+- Gone from its dialog (Rule 18.22; what an older Picture Widget already has set is kept): the Image block (Background #, Image
+  Path 1-3), Hide value, Look, Digits, When tapped, Tap target and Ask before changing. Database and .API are not offered: a
+  picture has no value (Rule 6.14).
 ---
 
 ## 19. Vessel Rules
@@ -1924,3 +1949,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.25 (Fritz: "PWM Build Dialog"): the PWM output and Analog output Add box and Properties follow the Pump's drill-down; no Cover, Orientation or Toggle; own set Start value / Decimals or Signal / Units / Low / High / Decimals; Label typed (auto fill asked). Help 136; next free Help number 137. (thread "Build PWM Add dialog like Pump")
 - 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")
 - 2026-11-05: New Rule 18.26: adding a Temperature Probe (plain, Thermowell, probe tee) uses the Pump's drill-down without a Cover, Toggle or Overlay; the kind of probe is still picked first (Fritz); Orientation with Flip, Probe type ⬢, Units with Decimals, Calibration offset with Database and .API ⬢; Label auto fill tP_n (Fritz's pick pending). Rule 18.15 lists it. Help 138; next free Help number 139. (thread "Build Probe Add dialogs like Pump")
+- 2026-11-05: Added Rule 18.27 (Adding a Picture Widget: the Pump's drill-down made to fit a Widget: 1 Label, 2 Picture, 3 Tab = the Build Tab, then the Name, Graphic, Turns on with + Toggle, Overlay, Text on picture, X, Y, Width, Height, Widget Type; Picture ➕ now makes a Picture Widget). Rule 4.5 updated. Help 74 updated. (thread "Build Picture Widget dialog like Pump")
