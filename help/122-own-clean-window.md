@@ -19,7 +19,7 @@ If the taskbar still shows the Edge or Chrome icon the first time, close the cle
 
 The clean window uses **its own small browser profile**, kept in `%LOCALAPPDATA%\SkynetBrewer\AppWindow`. Nothing in your normal Edge or Chrome is touched: its bookmarks bar, settings, tabs and sign-ins look exactly as before, while Skynet runs and after it closes.
 
-Because it has its own profile, **sign in once** in the clean window the first time. It remembers you after that.
+Because it has its own profile, **sign in once** in the clean window the first time. It remembers you after that. If you let it save your password, it is kept only in the clean window: the window never syncs with your Microsoft or Google account, and the installer's **Start Fresh** deletes it.
 
 ## Closing
 
