@@ -698,6 +698,11 @@ all have IPs and they become Skynet Widgets"; thread "Make Fritz's elbow and tee
 - **A loose pipe end that meets another pipe joins it** (Fritz, 2026-11-05): on another loose end the two become one joint (an elbow,
   or a coupling when in line); partway along another pipe, away from its IPs, that pipe is cut in two there and the joint becomes a
   tee. Skynet then puts in the TC Pipe Fitting. A pipe that only crosses another one in its middle does not join it.
+- **A tee or a cross dropped on a pipe cuts it** (Fritz, 2026-11-05: "Tried to add a Tee to a Pipe and it did not divide";
+  thread "Fix Tee and valve not splitting a pipe"): in Edit layout, a Tee, Instrument Tee or Cross with no pipes on it dropped on
+  a straight pipe moves across onto the pipe's line (turned about its bend if its run went across the pipe) and the pipe is cut
+  into two pipes, one on each end of its run; the branch stays open. Over an open end the pipe is made shorter and joins it.
+  The first piece keeps the pipe's Name, Label and Flow Color, as in Rule 5.26.
 - **They are also added by hand:** Edit layout bar > Elbows, Tees … and Add Widget > TC Pipe Fittings (on the Build Tab, Rule 4.1).
   The older equipment pipe fittings (Pipe tee, Pipe 90° and 45° elbow, Pipe cross) are no longer in the Add lists; ones already on
   a Tab still draw.
@@ -722,7 +727,7 @@ straight Horizontal or Vertical pipe (or added right on one):
   up and down) gets its piece **taken round with 90 degree elbows**: out of the IP, across past the side of the pump, and back
   onto the pipe's line (Rule 5.19: a pipe turns only at a fitting). Flip the pump (Orientation Right / Left) before dropping it
   to choose which side its inlet is on.
-- Nothing is cut when the item is already on a pipe, is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
+- Nothing is cut when the item is still joined to another pipe (a message says so; one dragged off its pipes lets them go first, Rule 5.19, and then cuts the pipe it is dropped on), is Locked, the pipe is a hose or a 45 degree pipe, a 45 degree valve, a front
   view valve, or when there is not enough pipe left to go round or to put it in; a message says why. Undo by Exit without saving.
 
 5.27 **The Pump Standard: every pump in the same 300 x 300 box, with its IPs in the same spots** (Fritz, 2026-11-05: "They could
@@ -1721,3 +1726,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 9.8: Skynet's clean window (Rule 2.36) never syncs with a Microsoft or Google account, so saved passwords stay in Skynet's own window and still fill in on Sign in (Edge synced Fritz's old login back in after Start Fresh); Admin setup keeps untouched boxes empty for as long as it is open. Help 18 and 122 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
 - 2026-11-05: Added Rule 5.27 (the Pump Standard: every Skynet pump picture drawn in the same 300 x 300 box, to scale, shown 150 x 150, inlet IP at (285, 150) and outlet IP at (243, 56), port tubes made longer where needed; older pumps become 150 x 150 once). Rule 5.11 notes pumps keep to it this way. Help 130; next free Help number 131. (thread "Standardize pump size and IPs")
 - 2026-11-05: Added Rule 5.29 (the Valve Standard: every valve picture in the same 300 x 300 box with its pipe through the middle, to one scale, IPs always on the same spots; shown 150 x 150; a user's own valve picture fills the box and its In and Out spots move and size the picture onto the IPs; older valves become square once). Notes under Rules 5.11, 5.22 and 5.24. Help 131; next free Help number 132. (thread "Standardize valve size and IPs")
+- 2026-11-05: Rule 5.25: a Tee, Instrument Tee or Cross dropped on a straight pipe cuts it there (turned so its run goes along the pipe). Rule 5.26: a valve or pump dragged off its pipes onto another pipe now cuts it (its old pipes let go first); one still joined says why. Help 124 and 125 updated; no new Help number. (thread "Fix Tee and valve not splitting a pipe")

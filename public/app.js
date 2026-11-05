@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -1033,12 +1033,18 @@ function splitPorts(it) {
 }
 function splitPipeFor(it) {
   if (!editing || !draft || !it || it.locked) return null;
+  if (isTcFit(it)) return tcFitOnPipe(it);         // a tee or a cross (Rule 5.25)
   const mv = isMv(it);
   if (!mv && (it.kind || !SPLIT_SUBS.includes(it.subtype) || !hasIps(it))) return null;
   const ws = it.workspace, ports = splitPorts(it);
-  if (ports.length !== 2 || ports.some(q => pipesOn(q.id, ws).length) || (mv && pipesOn(it.id, ws).length)) return null;   // already on its pipes
+  if (ports.length !== 2) return null;
   const gm = mv ? it : elGeom(it), box = { x: gm.x || 0, y: gm.y || 0, w: gm.w || (mv ? 30 : 120), h: gm.h || (mv ? 30 : 60) };
   const mid = [box.x + box.w / 2, box.y + box.h / 2];
+  const own = [...ports.map(q => q.id), ...(mv ? [it.id] : [])].flatMap(id => pipesOn(id, ws));
+  if (own.length) {           // already on its pipes: nothing is cut, but say so when it was dropped on another pipe
+    const p = draft.graphics.find(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !own.includes(p) && splitAt(p.points[0], p.points[1], box, ports));
+    return p ? { ok: false, text: `${p.name || 'The pipe'} was not cut: ${mv ? (it.name || 'the Manual Valve') : it.name} is still joined to other pipes. Take those pipes off it first (Rule 5.26).` } : null;
+  }
   let best = null, why = null;
   for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked)) {
     const gap = Math.max(45, Math.ceil(9 * pipeWidth(p) / 5) * 5);      // room for a TC elbow (Rule 5.25) between the turns
@@ -2304,12 +2310,12 @@ window.addEventListener('pointerup', () => {
     if (isQd(drag.item)) { snapQd(drag.item); renderWs(); }
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
+  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
   if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
   }
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
-  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
@@ -2568,6 +2574,69 @@ function addTcFit(name) {
   toBuild();
   const g = placeTabFitting(t, wsName, tcName(t, draft.graphics), null); g.labelVisible = false;
   sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+}
+// A tee or a cross dropped on a straight pipe cuts it there (Fritz, 2026-11-05: "Tried to add a Tee to a Pipe and it did not
+// divide"; Rule 5.25). Its run (two ends in line) goes along the pipe: the fitting moves across onto the pipe's line, turning if its
+// run is across the pipe, and the pipe is cut into two pipes, one on each end of the run. Dropped over an open end of the pipe, the
+// pipe is made shorter and joined to it. Only a fitting with no pipes on it yet, not Locked, in Edit layout. Returns null when it
+// is not on a pipe, else { ok, text } for the message.
+function tcArms(u) {
+  const t = tplOf('fitting', u.template), b = tcBend(u, t); if (!b) return null;
+  const arms = [];
+  for (const [k, pos] of Object.entries(t.ipPos || {})) {
+    const q = fracPos(pos), ip = q && draft.graphics.find(x => x.kind === 'ip' && x.attachTo === u.id && x.port === k); if (!ip) continue;
+    const c = unitPoint(u, q[1], q[2]), dx = c[0] - b[0], dy = c[1] - b[1], l = Math.hypot(dx, dy);
+    if (l) arms.push({ id: ip.id, c, v: [dx / l, dy / l] });
+  }
+  return { b, arms };
+}
+function tcFitOnPipe(u) {
+  if (!editing || !draft || !u || u.locked || u.onVessel || !isTcFit(u)) return null;
+  const A0 = tcArms(u); if (!A0 || A0.arms.length < 2) return null;
+  const ws = u.workspace;
+  const near = Math.max(15, Math.min(u.w || 90, u.h || 90) * 0.3);
+  const own = A0.arms.flatMap(q => pipesOn(q.id, ws));
+  if (own.length) {           // already on its pipes: nothing is cut, but say so when it was dropped on another pipe
+    const p = draft.graphics.find(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !own.includes(p) && fitOnPipe(p.points[0], p.points[1], A0.b, A0.arms, { near }));
+    return p ? { ok: false, text: `${p.name || 'The pipe'} was not cut: ${u.name} is still joined to other pipes. Take those pipes off it first (Rule 5.25).` } : null;
+  }
+  const opts = p => ({ near, aOpen: !!ownCoupling(p.from, p), bOpen: !!ownCoupling(p.to, p) });
+  const offOf = p => { const [a, b] = p.points, L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return Math.abs(((A0.b[0] - a[0]) * (a[1] - b[1]) + (A0.b[1] - a[1]) * (b[0] - a[0])) / L); };
+  const cands = draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked)
+    .filter(p => fitOnPipe(p.points[0], p.points[1], A0.b, A0.arms, opts(p))).sort((x, y) => offOf(x) - offOf(y));
+  const p = cands[0]; if (!p) return null;
+  // its run along the pipe: as it is, else turned about its bend (a quarter turn first)
+  const keep = { x: u.x, y: u.y, rot: u.rot, turn: u.turn }, base = unitRot(u);
+  let plan = null;
+  for (const k of [0, 90, 270, 180, 45, 315, 135, 225]) {
+    delete u.turn; const r = (base + k) % 360; if (r) u.rot = r; else delete u.rot;
+    const b1 = tcBend(u); u.x = +((u.x || 0) + A0.b[0] - b1[0]).toFixed(2); u.y = +((u.y || 0) + A0.b[1] - b1[1]).toFixed(2);
+    const A = tcArms(u); plan = fitOnPipe(p.points[0], p.points[1], A.b, A.arms, opts(p));
+    if (plan && !plan.turn) break;
+    Object.assign(u, { x: keep.x, y: keep.y }); plan = null;
+  }
+  const back = () => { for (const k of ['rot', 'turn']) if (keep[k] === undefined) delete u[k]; else u[k] = keep[k]; Object.assign(u, { x: keep.x, y: keep.y }); placeUnitParts(u); };
+  if (!plan) { back(); return { ok: false, text: `${u.name} was not put into ${p.name || 'the pipe'}: none of its ends are in line with it (Rule 5.25).` }; }
+  if (!plan.ok) { back(); return { ok: false, text: `${u.name} was not put into ${p.name || 'the pipe'}: ${plan.why}. Move it and drop it again (Rule 5.25).` }; }
+  u.x = +((u.x || 0) + plan.shift[0]).toFixed(2); u.y = +((u.y || 0) + plan.shift[1]).toFixed(2); placeUnitParts(u);
+  const ends = { A: p.from, B: p.to };
+  if (plan.drop) { const own = ownCoupling(ends[plan.drop], p); if (own) draft.graphics = draft.graphics.filter(g => g !== own); }
+  const idOf = k => k === 'A' || k === 'B' ? ends[k] : k;
+  const pieces = [], made = [];
+  plan.pieces.forEach((pc, i) => {
+    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
+    if (i) { delete q.name; delete q.label; delete q.labelVisible; delete q._key; }
+    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
+    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
+    pieces.push(q);
+  });
+  if (autoSized(u)) autoSizeUnit(u);             // it takes the pipe's size, about its bend (its ends stay on the pipe's line)
+  const armIds = new Set(A0.arms.map(q => q.id));
+  for (const q of pieces) for (const [k, i] of [['from', 0], ['to', 1]]) {
+    const ip = armIds.has(q[k]) && draft.graphics.find(x => x.id === q[k]); if (ip) q.points[i] = ipCenter(ip).map(Math.round);
+  }
+  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${u.name} (Rule 5.25).`
+    : `${p.name} was cut in two at ${u.name}: ${[p.name, ...made].join(', ')} (Rule 5.25).` };
 }
 const TC_FIT_ROWS = () => TC_FIT_ADD.map(n => tplOf('fitting', n)).filter(Boolean).map(t => [`${t.name.replace(/_/g, ' ')}`, () => addTcFit(t.name)]);
 // Drawing: the pointer snaps onto an IP when it is close to one, else to the 5 px grid
