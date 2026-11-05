@@ -1075,6 +1075,12 @@ must be impossible to miss: a big code, copy, download and print, and a required
 8.3 **Password rules** are set by the Admin in Settings > Password rules. Old passwords keep working.
 (2026-10-21, PR #53)
 
+8.4 **Password key** (Fritz, 2026-11-05): every new-password box (Admin setup, Forgot password, Settings > My account,
+Settings > Users > Add user) has Skynet's own **key** button that makes a strong password following the Password rules
+(Rule 8.3), fills it in both boxes and shows it so it can be written down. Skynet has its own key because a browser's
+"Suggest strong password" key needs the browser signed in and syncing, and the clean window never syncs (Rule 9.8).
+(thread "Restore generate password Key on fresh install", Help 10)
+
 ## 9. Delivery: PRs and zips
 
 9.1 **Every code change ships as a pull request (PR)** on GitHub. (2026-10-21)
@@ -1794,3 +1800,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 7.13 changed (Fritz): one cover per color plus User (any RGB), and every cover fits every Skynet pump; a cover is a color filled into each pump's cover shape, so the per-pump, per-color files moved to Delete/. Help 111 updated. (thread "Clean up SVG names and retire old pictures")
 - 2026-11-05: The test pump on the valve spots is retired (Fritz: the Pump Standard, Rule 5.27, stays). Pump_1 in the Three Vessel One Pump sample is back on Pump_Red_Rip_Off.svg; the test picture went to Delete/ (Rule 15.3). (thread "Standardize valve size and IPs")
 - 2026-11-05: Added Rule 5.31, the Vessel Widget class (one Skynet_Vessel_Widget Template, a Place slider on every IP, the Temperature Probe and the Element Port; spots locked). The Three Vessel sample uses it. Rule 11.1 next free Help number now 134. (thread "Build the Vessel Widget class", Help 133)
+- 2026-11-05: Added Rule 8.4 (Password key): Skynet's own key button in every new-password box makes a strong password that follows the Password rules; Edge's own key went away when the clean window stopped syncing (Rule 9.8, PR #205). Help 10 updated; no new Help number. (thread "Restore generate password Key on fresh install")

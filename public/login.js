@@ -1,5 +1,6 @@
 // Sign-in page, first-time setup of the admin account, and "Forgot password?" with the recovery code
 import { addEyes } from './eye.js';
+import { addKey } from './genpw.js';
 const $ = s => document.querySelector(s);
 let mode = 'login';            // login | setup | forgot | code (sign in with a code sent by email or text)
 let codeSent = false;
@@ -29,6 +30,10 @@ function setMode(m) {
   for (const i of ['#lgPass', '#lgPass2']) {
     if (newPw && rules) $(i).maxLength = rules.max; else $(i).removeAttribute('maxlength');
   }
+  // Skynet's own key: makes a strong password (a browser's own key needs sync, which the clean window never uses, Rule 9.8)
+  keyBtn?.classList.toggle('hidden', !newPw);
+  keyBtn?.parentElement.classList.toggle('keyOff', !newPw);
+  $('#lgGenNote').classList.add('hidden');
   $('#lgPassLabel').textContent = m === 'forgot' ? 'New password' : 'Password';
   $('#lgPass').autocomplete = newPw ? 'new-password' : 'current-password';
   if (m === 'setup') freshSetupBoxes();
@@ -62,8 +67,9 @@ function freshSetupBoxes() {
   pass.setAttribute('autocomplete', 'new-password'); pass.name = 'new-admin-password';
   pass2.setAttribute('autocomplete', 'new-password');
   const touched = new Set();
-  for (const i of [name, pass, pass2]) for (const ev of ['pointerdown', 'keydown', 'paste']) i.addEventListener(ev, () => touched.add(i));
-  const clear = () => { for (const i of [name, pass, pass2]) if (!touched.has(i)) i.value = ''; };
+  for (const i of [name, pass, pass2]) for (const ev of ['pointerdown', 'keydown', 'paste', 'pwgen']) i.addEventListener(ev, () => touched.add(i));
+  // once the person is in the password box, the "again" box is theirs too: a browser's "Suggest strong password" fills both
+  const clear = () => { for (const i of [name, pass, pass2]) if (!touched.has(i) && !(i === pass2 && touched.has(pass))) i.value = ''; };
   clear();
   clearInterval(freshTimer);
   freshTimer = setInterval(() => { if (mode !== 'setup' || touched.size === 3) clearInterval(freshTimer); else clear(); }, 200);
@@ -135,4 +141,9 @@ $('#loginForm').addEventListener('submit', async ev => {
 });
 
 addEyes();
+const keyBtn = addKey($('#lgPass'), {
+  also: [$('#lgPass2')],
+  getRules: () => st.passwordRules,
+  onFill: () => $('#lgGenNote').classList.remove('hidden'),
+});
 init().catch(e => { $('#lgError').textContent = 'Cannot reach the panel: ' + e.message; });
