@@ -780,8 +780,8 @@ const isSightGlass = g => isUnit(g) && (g.fittings || []).some(f => f.kind === '
 const sgCaged = g => (g.fittings || []).some(f => f.kind === 'sightGlass' && f.caged);
 const sgPic = g => 'data:image/svg+xml,' + encodeURIComponent(sightGlassSvg((g.w || 169) / (g.h || 58), sgCaged(g)));
 const sgFromLength = g => { g.sgLength = sgLength(g.sgLength); g.w = Math.round((g.h || SG_H) * sgRatio(g.sgLength)); };
-// the Label a new Sight Glass starts with (Rule 18.15): sG_n, the next number not used as a Label or Name
-const sgLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('sG_' + n)) n++; return 'sG_' + n; };
+// the Label a new Sight Glass starts with (Rule 18.15; Fritz, 2026-11-05): site_glass_n, the next number not used as a Label or Name
+const sgLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('site_glass_' + n)) n++; return 'site_glass_' + n; };
 const autoSized = g => (isPipeFit(g) || isMv(g)) && !isCap(g) && g.autoSize !== false;
 const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of the pipes joined to it; switch it off to type Width and Height)', 'bool', true, true];
 // Manual Valve Widget (Fritz, 2026-10-28): a pipe fitting you turn by hand, and a pseudo Device. Its .state (true = open) only
@@ -9896,7 +9896,7 @@ F.skynetFitting = it => {
   const made = (it.fittings || []).filter(f => f.kind !== 'none').map(f => FITTING_KINDS[f.kind] + (f.thermowell ? ' with a thermowell' : '')).join(', ');
   if (isPlainUnit(it)) return [['_t', isCapOnly(it) ? `Skynet End Cap: a pipe fitting. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet TC Pipe Fittings Widget ${it.template || ''}: a ${made}. Every opening has a two-way IP built in. It has no settings but its place and its size. Turn or flip it with the turn buttons on the Edit layout bar.`, 'note'],
-    ['name', 'Name', 'text'], ...(isSightGlass(it) ? [['label', 'Label (never blank: it starts as sG_n, Rule 18.15)', 'text'],
+    ['name', 'Name', 'text'], ...(isSightGlass(it) ? [['label', 'Label (never blank: it starts as site_glass_n, Rule 18.15)', 'text'],
       ['sgLength', `Length (inches, ferrule face to ferrule face, ${SG_MIN} to ${SG_MAX}; only the glass${sgCaged(it) ? ' and its cage' : ''} stretches)`, 'num']] : []),
     ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : []), ...FIT_PLACE(it)];
   const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here

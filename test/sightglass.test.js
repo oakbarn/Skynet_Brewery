@@ -28,3 +28,4 @@ assert.ok(!short.includes('#a9aeb4') && long.includes('#a9aeb4'), 'only the Cage
 const app = fs.readFileSync(path.join(ROOT, 'public', 'app.js'), 'utf8');
 assert.ok(/TC_FIT_ADD = \[[^\]]*'Sight_Glass', 'Sight_Glass_Caged'/.test(app), 'both on the Add lists');
 console.log('sightglass ok');
+assert.ok(app.includes("return 'site_glass_' + n"), 'a new Sight Glass Label starts as site_glass_n (Fritz, 2026-11-05)');
