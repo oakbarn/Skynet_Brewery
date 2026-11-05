@@ -889,8 +889,7 @@ not. Length attribute to stretch length"; thread "Add caged and plain sight glas
 - **Length** (inches, ferrule face to ferrule face, 2 to 48, quarter inches; 6 when placed) stretches it along its pipe. Only the
   glass (and the cage) gets longer: the picture is drawn for its Length, so the ferrules and end collars keep their shape and size.
   Autosize to pipe makes it as thick as its pipe; with Autosize off, a typed Width sets the Length.
-- Its **Label** starts filled in as **sG_n** (the next number) and is never blank (Rule 18.15). *Built as Claude's reading; Fritz to
-  confirm.*
+- Its **Label** starts filled in as **site_glass_n** (the next number) and is never blank (Rule 18.15; Fritz, 2026-11-05: "site_glass_1").
 - Dropped on a straight pipe in Edit layout it cuts the pipe, as a tee's run does (Rule 5.25).
 
 ---
@@ -1971,4 +1970,5 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")
 - 2026-11-05: New Rule 18.26: adding a Temperature Probe (plain, Thermowell, probe tee) uses the Pump's drill-down without a Cover, Toggle or Overlay; the kind of probe is still picked first (Fritz); Orientation with Flip, Probe type ⬢, Units with Decimals, Calibration offset with Database and .API ⬢; Label auto fill tP_n (Fritz's pick pending). Rule 18.15 lists it. Help 138; next free Help number 139. (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Added Rule 18.27 (Adding a Picture Widget: the Pump's drill-down made to fit a Widget: 1 Label, 2 Picture, 3 Tab = the Build Tab, then the Name, Graphic, Turns on with + Toggle, Overlay, Text on picture, X, Y, Width, Height, Widget Type; Picture ➕ now makes a Picture Widget). Rule 4.5 updated. Help 74 updated. (thread "Build Picture Widget dialog like Pump")
-- 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label sG_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
+- 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
+- 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")

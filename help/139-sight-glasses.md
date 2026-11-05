@@ -13,7 +13,7 @@ Each has an **IP on the outer face of each ferrule** (left and right), so a pipe
 ## Adding one
 
 In **Edit layout**, pick **Elbows, Tees … > Sight Glass** (or Sight Glass Caged), or **Add Widget > TC Pipe Fittings**. It goes on
-the Build Tab like every new item (Rule 4.1), 6 inches long. Its **Label** starts as **sG_1**, **sG_2** and so on (you can change it,
+the Build Tab like every new item (Rule 4.1), 6 inches long. Its **Label** starts as **site_glass_1**, **site_glass_2** and so on (you can change it,
 but it can't be blank).
 
 Drop it on a straight pipe and Skynet cuts the pipe and puts the sight glass in, the same as a tee.
