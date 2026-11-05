@@ -9,7 +9,7 @@ import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames } from './semi.js';
@@ -3572,6 +3572,25 @@ function defaultIface(devs) {
   let last = ''; try { last = localStorage.getItem(LAST_IFACE_KEY) || ''; } catch { }
   return devs.some(d => d.name === last) ? last : devs[0]?.name;
 }
+// No free PWM pin for a true PWM Device (Fritz, 2026-11-05: "2 choices for User 1. Add Interface, 2 Use Pseudo PWM with explanation
+// of degradation"). Resolves 'iface', 'pseudo' or undefined (Cancel: pick another Interface).
+function pickNoPwm(iface, pseudo) {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'pumpPick', 'data-nomenu': '' }), close = v => { d.close(); d.remove(); res(v); };
+    d.append(h('h3', {}, `No free PWM pin on ${iface}`),
+      h('p', {}, 'This Device works best with true PWM (a smooth, fast on and off the board makes itself), and every PWM pin on this Interface is used.'),
+      h('div', { class: 'pumpPickList' },
+        h('button', { type: 'button', class: 'pumpPickRow', onclick: () => close('iface') }, h('span', {}, '1. ➕ Add an Interface (another board with free PWM pins), then come back here with it picked')),
+        ...(pseudo ? [h('button', { type: 'button', class: 'pumpPickRow', onclick: () => close('pseudo') }, h('span', {}, '2. Use Pseudo PWM on a plain pin'))] : [])),
+      ...(pseudo ? [h('p', { class: 'muted' }, 'Pseudo PWM: the Brain turns a plain pin fully on and off once every second, on for the % part of each second (50 % = ½ s on, ½ s off). '
+        + 'What you lose: true PWM switches hundreds of times a second, so a pump or fan runs at a smooth speed and an LED dims evenly. With Pseudo PWM a pump or fan surges and slows each second, '
+        + 'an LED blinks, and the timing wobbles a little with the USB or network link. A heating element on an SSR heats the same on average, so it is fine for heat; it is poor for pump or motor speed.')]
+        : [h('p', { class: 'muted' }, 'An Analog output (0-10 V or 4-20 mA module) needs a real PWM signal, so Pseudo PWM can\'t be used for it.')]),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => close(undefined) }, '✖ Cancel')));
+    d.oncancel = ev => { ev.preventDefault(); close(undefined); };
+    document.body.append(d); d.showModal();
+  });
+}
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
   const work = { label: '', device: e.device ?? defaultIface(devs), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
@@ -3662,6 +3681,16 @@ async function newDeviceDialog(e, hint, what) {
         portSel.value = cur;
       };
       fillFree(work); gate();
+      // a true PWM Device on an Interface with no free PWM pin: Add Interface, or Pseudo PWM (once for each Interface)
+      const asked = new Set();
+      const noPwm = async w => {
+        if (!w.device || asked.has(w.device) || w.pseudoPwm || !portSel || portSel.options.length > 1 || !['pwmOut', 'analogOut', 'pid', 'deadband'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && !e.pwm)) return;
+        asked.add(w.device);
+        const k = await pickNoPwm(w.device, canPseudoPwm(e));
+        if (k === 'iface') return $('#dlg').close('addIface');
+        if (k === 'pseudo') { work.pseudoPwm = true; const x = { ...work }; try { readFields(x, body); } catch { } fillFree(x); gate(); toast('Pseudo PWM: pick a plain pin', false, 5000); }
+      };
+      noPwm(work);
       // Fritz's Blichmann Pump Sequence (2026-11-04, Rule 18.20): Enter goes 1 Label, 2 Interface, 3 Available Ports, 4 Tab,
       // then Orientation (a Pump) and last the ➕ Add Device button; picking from a dropdown of the sequence goes on to the next one.
       const seq = () => [body.querySelector('[data-k="label"]'), body.querySelector('[data-k="device"]'), body.querySelector(`[data-k="${port[0]}"]`),
@@ -3684,7 +3713,7 @@ async function newDeviceDialog(e, hint, what) {
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
         if (ev.type === 'change' && ev.target.dataset?.k === 'workspace' && ev.target.value === ADD_TAB) return $('#dlg').close('addTab');
         const w = { ...work }; try { readFields(w, body); } catch { }
-        fillFree(w);
+        fillFree(w); noPwm(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
       };
       const r = await shown;
@@ -3717,6 +3746,7 @@ async function newDeviceDialog(e, hint, what) {
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
+        if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
           ...(isPumpDev(e) ? ['cover'] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
@@ -6252,7 +6282,7 @@ async function editItem(kind, id) {
     if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
-    if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
+    if (isPwmDev(it)) return [...pwmDeviceFields(it, item), ...(it.pseudoPwm ? [['_pseudo', 'Pseudo PWM: on a plain pin, the Brain turns it fully on for its % of every second (Fritz, 2026-11-05). A pump or fan surges; heat is fine. For true PWM, delete it and add it again on a PWM pin.', 'note']] : [])];      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPicW(it)) return pictureWidgetFields(it, item);         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.27)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);

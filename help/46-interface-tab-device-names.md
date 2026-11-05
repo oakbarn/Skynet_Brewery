@@ -120,3 +120,14 @@ Interfaces and tabs from before get an ID by themselves the first time the Schem
 Only an **Admin** can edit a Schema: add or change Interfaces, Devices, Widgets and tabs, or move graphics in **Edit layout**. Operators run Processes and switch things; Viewers watch.
 
 See also [Devices and boards](03-devices) and [Login, users and passwords](10-login).
+
+## No free PWM pin
+
+A Device that needs true PWM (a PWM output, a PID or Deadband on a PWM pin) is offered only PWM pins; every other Device is offered only
+the pins that can't do PWM, so the PWM pins stay free. If the Interface has no free PWM pin left, a pop-up gives two choices:
+
+1. **➕ Add an Interface**: add another board, and the Add Device box comes back with it picked.
+2. **Use Pseudo PWM on a plain pin**: the Brain turns the pin fully on for the Device's % of every second and off for the rest (50 % = ½ s on,
+   ½ s off). A heating element on an SSR heats the same on average, but a pump or fan surges and slows each second and an LED blinks.
+   Its Properties say it is on Pseudo PWM. An Analog output can't use it.
+

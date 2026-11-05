@@ -53,3 +53,18 @@ console.log('probedialog tests passed');
   assert.match(app, /\(lab && !String\(lab\.value \?\? ''\)\.trim\(\) \? lab : dv && !dv\.disabled/, 'blank Label first, else the Interface');
   console.log('add order tests passed');
 }
+// Fritz, 2026-11-05: no free PWM pin for a true PWM Device: 1. Add Interface, 2. Pseudo PWM (with what it loses)
+{
+  const { freePins, pseudoPwmOn, canPseudoPwm } = await import('../public/naming.js');
+  const devs = [{ name: 'Brewery Mega', id: 'BM' }], PWM = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
+  const ps = freePins({ type: 'pwmOut', pseudoPwm: true, device: 'Brewery Mega', name: 'x' }, [], devs);
+  assert.ok(ps.length && ps.every(p => !PWM.includes(p)), 'Pseudo PWM: plain pins');
+  assert.ok(canPseudoPwm({ type: 'pwmOut' }) && !canPseudoPwm({ type: 'analogOut' }), 'an analog output needs real PWM');
+  assert.ok(pseudoPwmOn(50, 200) && !pseudoPwmOn(50, 700) && !pseudoPwmOn(0, 0) && pseudoPwmOn(100, 999), '50 % = on for half of each second');
+  assert.match(app, /function pickNoPwm\(iface, pseudo\)/);
+  assert.match(app, /1\. ➕ Add an Interface/); assert.match(app, /2\. Use Pseudo PWM on a plain pin/); assert.match(app, /What you lose:/);
+  const hw = fs.readFileSync(new URL('../lib/hardware.js', import.meta.url), 'utf8');
+  assert.match(hw, /if \(el\.pseudoPwm && canPseudoPwm\(el\)\) return `DO \$\{pinOf\(el\.channel\)\}/, 'the Brain switches the plain pin');
+  assert.match(hw, /this\.pseudoTimer = setInterval\(\(\) => this\._pseudoTick\(\), 50\);/);
+  console.log('pseudo pwm tests passed');
+}
