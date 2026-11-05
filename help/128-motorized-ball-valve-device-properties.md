@@ -14,10 +14,11 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic**: the valve as it will show on the Tab, closed, turned to its Orientation.
    - **Path**: the picture file.
-   - **Orientation**: how the valve stands. The Graphic turns with it, and so do its IPs.
-   - **Toggle**: what a tap does (On/Off opens or closes it with one click).
+   - **Orientation** and, on the same line, **Toggle**: how the valve stands (the Graphic and its IPs turn with it), and what
+     a tap does (On/Off opens or closes it with one click).
    - **Overlay**: drawn on top while the valve is open (the steady red and yellow lightning bolt). On the same line,
      **Database and .API ⬢** opens its settings (Help 98).
+   - **Tap water valve**, **On Close List** and **On Open List** on one line (both lists on to start).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out.
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**. If **➕ Add Device**
    looks faded, press it anyway: it tells you what is still missing.
@@ -31,12 +32,15 @@ with one difference: **a valve has no Cover**. (Skynet Rule 18.23)
 2. **1. Label ⬆ ⬢** and **Label Visible**. A Label is never blank: leave it empty and it becomes the Name.
 3. **2. Interface (board)** and **Available Ports**, greyed out (the board and pin it is wired to).
 4. **3. Tab** and **4. Name** (the Suggested Name; you may type your own).
-5. **Graphic**, **Path** and **Orientation**.
-6. **Toggle**, then **Overlay** with **Database and .API ⬢**.
-7. The valve's own settings: **Tap water valve** (see [Tap water valves](31-tap-water-valves)) with its **Tap end**, and **Close all list** /
-   **Open all list** (is it closed by `close_all_valves` and opened by `open_all_valves` in a Process). A tap water valve is
-   always on the Close all list and never on the Open all list.
-8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out.
+5. **Graphic** and **Path**, then **Orientation** and **Toggle** on one line (as on the Pump).
+6. **Overlay** with **Database and .API ⬢**.
+7. The valve's own settings: **Tap water valve**, **On Close List** and **On Open List**, all three on one line (see [Tap water valves](31-tap-water-valves)).
+   On Close List: `close_all_valves` in a Process closes it. On Open List: `open_all_valves` opens it. A tap water valve shows its
+   **Tap end** instead, and is always on the Close List and never on the Open List.
+8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out (**DO: eVlv**).
+
+The Suggested Name follows the naming format (Rule 3.1): Interface ID, Port, `eVlv`, Label, Tab ID, such as
+`22_E_eVlv_MBV1__BR`. Valves added before 2026-11-05 keep their `E_L_Vlv` names (names never change by themselves, Rule 3.5).
 
 ## Skynet or User Defined
 

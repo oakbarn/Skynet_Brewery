@@ -22,7 +22,7 @@ Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properti
 ### Device names
 `InterfaceID_Port_DeviceTypeID_Label__TabID`
 
-Example: `MB_25_E_L_Vlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID E_L_Vlv, Label "Fly/Sparge In", Tab SP).
+Example: `MB_25_eVlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
 
 - **Interface ID:** 1 to 4 letters, unique (for example MB). An Admin can change it.
 - **Tab ID:** exactly 2 letters, unique (for example SP). Two underscores go before it.
@@ -105,7 +105,7 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 | Group | Type IDs |
 |---|---|
 | Temperature | 1W, RTD, TC, 10KNTC, 5KNTC, 50KNTC, 100KNT, NTC, LM35, TMP36 |
-| Direct On / Off output | DO, Pump, M_L_Vlv, E_L_Vlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
+| Direct On / Off output | DO, Pump, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
 | PWM output | PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED |
 | Analog output | AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr |
 | Digital input | DI, Float, DIN, PB, Toggle, Latch, FlowSw, Intlk, EStop, Leak, Count |
@@ -123,7 +123,7 @@ What each ID means:
 | 1W | DS18B20 OneWire probe | DO | Direct On/Off (relay, SSR, contactor; also an element on one) |
 | RTD | PT100 / PT1000 on a MAX31865 board | Pump | Pump |
 | TC | Thermocouple on a MAX31855 / MAX31856 board | M_L_Vlv | Low Temperature Manual Valve |
-| 10KNTC | 10K NTC thermistor (BCS-462 / BruControl type) | E_L_Vlv | Low Temperature Electric Valve |
+| 10KNTC | 10K NTC thermistor (BCS-462 / BruControl type) | eVlv | Electric Valve (motorized ball valve, low temperature; was E_L_Vlv) |
 | 5KNTC | 5K NTC thermistor | M_H_Vlv | High Temperature Manual Valve |
 | 50KNTC | 50K NTC thermistor | E_H_Vlv | High Temperature Electric Valve |
 | 100KNT | 100K NTC thermistor (3D printer type) | G_Vlv | Solenoid Gas Valve |
@@ -157,7 +157,7 @@ What each ID means:
 
 ### 4.1 Direct On / Off output (Relay, SSR, contactor)
 - **Add menu:** Devices: outputs > Relay module / SSR / contactor (on-off). Also Pump and Valve (below).
-- **Type IDs:** DO, Pump, M_L_Vlv, E_L_Vlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
+- **Type IDs:** DO, Pump, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
 - **Port:** any digital pin (plain pins offered first). Can share a port with a different output type.
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
@@ -180,7 +180,7 @@ What each ID means:
 
 ### 4.3 Valve
 - **Add menu:** Devices: outputs > Valve (relay output with an IP at each end). A Valve Profile can be picked when it is made.
-- **Type IDs:** E_L_Vlv (default), E_H_Vlv, M_L_Vlv, M_H_Vlv, G_Vlv.
+- **Type IDs:** eVlv (default), E_H_Vlv, M_L_Vlv, M_H_Vlv, G_Vlv.
 - Same settings as 4.1 with Kind = valve, plus:
   - Valve type: **Electro_Mechanical** (switched by its pin) or **Manual** (turned by hand; a Process shows a pop-up and waits for Done)
   - Orientation: by its shape, Horizontal, Vertical, 45° Left, 45° Right
@@ -194,9 +194,9 @@ What each ID means:
 - **Add menu:** Valves (and On/Off) on the Edit layout bar, at the top: **Motorized Ball Valve, open / closed (relay)**, then
   **Pick the valve** > **Skynet Motorized Ball Valve** (starts Horizontal). The Add box and Properties are the Pump's drill-down
   without a Cover (Rule 18.23, Help 128): Graphic, Path (greyed out), Orientation, Toggle and Overlay (user settable: an exception
-  to Rule 5.18, Fritz 2026-11-05), Database and .API ⬢, Tap water valve, Close all / Open all list. Its **Orientation** picks Horizontal, Vertical Left, Vertical Right, Front or 45 degrees (Rule 5.17: each is its own
+  to Rule 5.18, Fritz 2026-11-05), Database and .API ⬢, Tap water valve, On Close List / On Open List. Its **Orientation** picks Horizontal, Vertical Left, Vertical Right, Front or 45 degrees (Rule 5.17: each is its own
   Template, never shown as Master / Daughter). Templates in templates/device/ (Skynet_Motorized_Ball_Valve_H, _VL, _VR, _Front).
-- **Type ID:** E_L_Vlv (set by the Template, so the Add Device box doesn't ask for it).
+- **Type ID:** eVlv (set by the Template; Fritz 2026-11-05, was E_L_Vlv, names already made keep it, so the Add Device box doesn't ask for it).
 - **Fixed by the Template** (not in its Properties; the Brain puts them back on every layout save): Kind = valve, Valve type =
   Electro_Mechanical, Service = Room Temperature Liquid, pictures (Valve_Motor_Ball_*H for Horizontal, *V_LC for Vertical and 45),
   Look normal, Ask before changing, background / .backpath, _2, _3, Digits, Hide value.
