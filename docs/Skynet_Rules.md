@@ -1217,7 +1217,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget and the **Pump Device** (Rule 18.12).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12) and the **Motorized Ball Valve** (Rule 18.23).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1361,6 +1361,30 @@ from its dialog (what a Pump already has set is kept). The On / Off text is show
 18.22 **Each Device and Widget has only its own Properties** (Fritz, 2026-11-04): besides the Universal Properties (Rule 1.21),
 a Device or Widget may have a limited set of attributes and Properties, only the ones that fit it (the Pump: Rule 18.21). Other
 dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
+
+18.23 **Adding a Motorized Ball Valve: the Pump's drill-down without a Cover** (Fritz, 2026-11-05: "Create a Motorized Ball Valve
+Add Dialog using the Pump Drill Down Format. Valves do not have covers but every thing else the same.", thread "Add Motorized Ball
+Valve drill-down dialog", Help 128):
+1. **Valves (or On/Off) > Motorized Ball Valve, open / closed (relay)**, then 2. **Pick the valve**, each with its picture:
+   **Skynet Motorized Ball Valve** or **User Defined Motorized Ball Valve** (its own pictures). The two rows the lists had for them
+   are now this one row (Rule 15.3).
+3. The Add box is titled with the valve and works as the Pump's (Rules 4.2, 18.13, 18.15-18.17, 18.20): 1 Label ⬢ and Label
+   Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**, **Orientation**, **Toggle**,
+   **Overlay** with **Database and .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last. Enter goes Label,
+   Interface, Ports, Tab, Orientation, ➕ Add Device. **No Cover** (Covers are for pumps, Rule 7.13).
+4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover, plus the valve's own set (Rule 18.22): **Tap water
+   valve** with its Tap end (Rule 6.15) and **Close all list** / **Open all list**.
+- **Skynet Motorized Ball Valve:** the Path is greyed out (set by its Template, Rule 5.6) and follows the Orientation; the
+  **Orientation** (Horizontal, Vertical Left, Vertical Right, Front, 45 degrees) picks its Template (Rule 5.17), with that Template's
+  Width and Height; **Toggle and Overlay work normally**, as on the Pump (Fritz, 2026-11-05: "Toggles and Overlays should work
+  normally"): an exception to Rule 5.18's fixed tap behaviour and overlay for this valve only; its Templates list them as user
+  settable. It starts with On/Off and the steady bolt (Rule 7.15).
+- **User Defined Motorized Ball Valve:** **Path (closed)** with a ⬢ for its In and Out IP spots (Rule 5.22) and **Path (open)** (a
+  valve shows open and closed, so the User pump's one-path exception is not used); Orientation Horizontal, Vertical, 45 degrees
+  Left or Right; Toggle and Overlay can be picked.
+- Gone from these dialogs, as for the Pump (what a valve already has set is kept): Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind,
+  Picture ⬢, Background picture ⬢, Text when on / off, Flip Horizontal / Vertical (the Orientation does it), Valve type and Service.
+  The Motorized Butterfly Valve and the Proportional Valves keep their present dialogs until Fritz says (Rule 18.10).
 
 ---
 
@@ -1594,3 +1618,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-05: Rule 9.8: Start Fresh on Windows also deletes the clean window's browser profile (saved user name and password), and Admin setup always opens with empty boxes (browser fill-in cleared). Help 18 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
 - 2026-11-05: Rule 5.19: Save layout joins a pipe's open end within 14 px of an IP again (a free IP point moves back onto a straight pipe's end); a wobble under 4 pixels is not a drag; only ends a drag pulls off let go (Fritz: changing IP1's Flow Color in the Three Vessel sample stopped the flow). Help 105 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
 - 2026-11-05: Added Rule 6.17 (Deadband Device, as in BruControl's Deadband Output: Deadband Offset, Inner Band Offset, Initial Output, Inner and Outer Band Drive, Calc Time, Out Time, Reversed; output in %; BruControl import). Help 126; next free Help number 127. (thread "Add Deadband control")
+- 2026-11-05: New Rule 18.23: adding a Motorized Ball Valve uses the Pump's drill-down without a Cover (pick the valve with its picture; Skynet or User Defined); Toggle and Overlay work normally on the Skynet valve too (an exception to Rule 5.18 for this valve). Help 128. (thread "Add Motorized Ball Valve drill-down dialog")
