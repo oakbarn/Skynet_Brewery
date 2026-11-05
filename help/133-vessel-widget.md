@@ -19,8 +19,10 @@ Device or Widget that has its own IP, such as a Pipe, a Hose, a Fitting, or anyt
 
 - **Place on:** it is on the vessel and works. An IP joins pipes, hoses and fittings. The Probe and the Element show their
   pictures, and the Element glows while its heater is on.
-- **Place off:** it is not there at all. Nothing shows on the Tab, and no pipe or Process can use it. In **Edit layout** a faint
-  mark shows where it would go (a dashed ring for an IP, a faint picture for the Probe or Element).
+- **Place off (Not Placed):** it is not there at all. Nothing shows on the Tab, and no pipe or Process can use it. It is hidden
+  even on the 🔨 Build Tab and in Edit layout, and its slider is hidden in Vessel Widget Properties. Press **👁 Show All** in the
+  Properties to list the Not Placed spots (so you can Place one) and to see faint marks where they would go (a dashed ring for an
+  IP, a faint picture for the Probe or Element). Press **🙈 Hide Not Placed** to hide them again (Vessel Rule 19.4).
 
 The spots are set by the Template: **nobody can move them**. A locked vessel moves only by its X and Y (Rule 2.12), and its IPs go
 with it.
@@ -46,3 +48,7 @@ You can still add your own Devices and Widgets to a Vessel Widget, and **Bundle*
 
 The **Three Vessel** sample's Hot liquor tank, Mash tun and Boil kettle are Vessel Widgets: each one has its Outlet, a Thermowell
 and, on the HLT and the Boil kettle, the Element Port Placed. The Mash tun and the Boil kettle have their Top Inlet Placed too.
+
+## Size
+
+A Vessel Widget is sized by its **Gallons** (10 to start): see Help **Vessel sizing by gallons**.
