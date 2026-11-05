@@ -19,7 +19,11 @@ assert.ok(!/cover|orient|'tap'/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover, 
 assert.match(own, /\['device', '2\. Interface \(board\)', 'dev', 'addnewid', false, false, \{ set: true[^\n]*'pinsel', 'pwm'/, 'fixed wiring, PWM pins');
 assert.match(own, /dbPop: true/, 'Database and .API on the Overlay line');
 assert.match(app, /if \(isPwmDev\(it\)\) return pwmDeviceFields\(it, item\);/);
-assert.ok(!/isPwmDev\(e\)[^\n]*autoLabel/.test(app), 'no Label auto fill unless Fritz says (Rule 18.15)');
+assert.match(app, /if \(pwm && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = autoLabel\(pwmAutoLabel\(e\)\);/, 'Label auto fill (Fritz, 2026-11-05)');
+const pwmAutoLabel = eval(app.match(/const pwmAutoLabel = (e => [^\n]+);/)[1]);
+assert.equal(pwmAutoLabel({ type: 'pwmOut' }), 'PWM');
+assert.equal(pwmAutoLabel({ type: 'analogOut', signal: '4-20mA' }), '4_20');
+assert.equal(pwmAutoLabel({ type: 'analogOut', signal: '0-10V' }), '0_10');
 assert.deepEqual(elementTopic({ type: 'pwmOut' }), ['pwm-and-analog-out-device-properties']);
 assert.deepEqual(elementTopic({ type: 'analogOut', subtype: 'propValve' }), ['proportional-valves']);
 assert.ok(fs.existsSync(new URL('../help/136-pwm-and-analog-out-device-properties.md', import.meta.url)));
