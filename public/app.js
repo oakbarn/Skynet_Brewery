@@ -3048,7 +3048,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     }
     if (!(await newDeviceDialog(e, prefix, what))) return;
   }
-  if (isPicW(e)) { centerNew(e); if (!(await newPictureDialog(e))) return; }      // the Add Widget box, the Pump's drill-down for a Widget (Rule 18.25)
+  if (isPicW(e)) { centerNew(e); if (!(await newPictureDialog(e))) return; }      // the Add Widget box, the Pump's drill-down for a Widget (Rule 18.27)
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
@@ -3452,7 +3452,7 @@ async function newDeviceDialog(e, hint, what) {
     }
   } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
 }
-// ---- The Add Widget box of a Picture Widget (Fritz, 2026-11-05, Rule 18.25): the Add Device box's look and sequence for a Widget.
+// ---- The Add Widget box of a Picture Widget (Fritz, 2026-11-05, Rule 18.27): the Add Device box's look and sequence for a Widget.
 // 1 Label (⬢) and Label Visible, 2 Picture, 3 Tab (the 🔨 Build Tab, Rule 4.1; greyed out), then the Name and the rest show. Enter
 // goes Label, Picture, ➕ Add Widget (Rule 18.20). ➕ Add Widget can always be pressed and says what is missing (Rule 18.15).
 async function newPictureDialog(e) {
@@ -3819,7 +3819,7 @@ function useTabProfile(e) {
 // LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
 const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : 'normal';
 // Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
-// Fritz, 2026-11-05 (Rule 18.25): Picture ➕ makes a Picture Widget through its Add Widget box (it made a plain still picture; those
+// Fritz, 2026-11-05 (Rule 18.27): Picture ➕ makes a Picture Widget through its Add Widget box (it made a plain still picture; those
 // already on a Tab keep working, and a Picture Widget that turns on with None is a still picture)
 $('#addImg').onclick = guard(() => addThing('picture'));
 // a new Text Widget starts with the Default tab's size, place and Visible (copied now; colors and alignment follow the Default). Word wrap is always on.
@@ -4725,7 +4725,7 @@ function mbvDeviceFields(it, item) {
 const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
 
 // ---- Picture Widget (Fritz, 2026-11-05: "build a Picture Widget Build ... follow the look and sequences of the Pump drill Down",
-// Rule 18.25, Help 74). The Pump's Add box and Properties (Rules 18.13-18.21) made to fit a Widget: a Widget has no Interface or
+// Rule 18.27, Help 74). The Pump's Add box and Properties (Rules 18.13-18.21) made to fit a Widget: a Widget has no Interface or
 // Port (Rule 1.2) and is made on the 🔨 Build Tab first (Rule 4.1), so the Add Widget box asks 1 Label, 2 Picture, (3 Tab is the
 // Build Tab), then 4 the Name. Its own set (Rule 18.22): the Picture, Turns on with and Toggle, the Overlay (the second picture in
 // its ⬢ pop-up) and the Text on picture. What an older Picture Widget already has set (Image Path 1-3, Look ...) is kept.
@@ -5801,7 +5801,7 @@ async function editItem(kind, id) {
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Motorized Ball Valve: the same drill-down (Rule 18.23)
-    if (isPicW(it)) return pictureWidgetFields(it, item);         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.25)
+    if (isPicW(it)) return pictureWidgetFields(it, item);         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.27)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],

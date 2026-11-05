@@ -1,5 +1,5 @@
 // Picture Widget Add box and Properties (Fritz, 2026-11-05: "build a Picture Widget Build ... follow the look and sequences of
-// the Pump drill Down", Rule 18.25, Help 74)
+// the Pump drill Down", Rule 18.27, Help 74)
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
