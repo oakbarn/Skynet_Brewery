@@ -4,7 +4,7 @@
   "props": {
     "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg", "subtype": "propValve", "service": "room", "typeCode": "P_L_Vlv", "orientation": "h",
     "signal": "0-5V", "rangeLow": 0, "rangeHigh": 100, "units": "%", "precision": 0,
-    "w": 90, "h": 77, "hideName": true, "look": "normal"
+    "w": 150, "h": 150, "hideName": true, "look": "normal"
   },
   "pics": {
     "h": ["", "Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg"],

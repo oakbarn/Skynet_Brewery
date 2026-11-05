@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="119" height="141" viewBox="0 0 119 141" preserveAspectRatio="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-valve-standard="1">
+  <!-- The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs
+       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); straight pipe runs out to the edges. -->
+  <rect x="137.5" y="0" width="25" height="73.45" fill="#8a8f96"/>
+  <rect x="137.5" y="226.55" width="25" height="73.45" fill="#8a8f96"/>
+  <g transform="translate(125.8 72.45) scale(1.1)">
   <!-- Skynet drawing: motorised ball valve, closed, vertical pipe. Same size and pipe spot as Valve_Ball_ClosedV-1x1.png. -->
   <rect x="10" y="0" width="24" height="141" fill="#7f7f7f"/>
   <path d="M15 2 V139" stroke="#a3a3a3" stroke-width="3"/>
@@ -13,4 +18,5 @@
   <rect x="54" y="36" width="14" height="86" rx="8" fill="#4f8ff0"/>
   <path d="M68 46 V112" stroke="#1f55b0" stroke-width="2"/><path d="M80 46 V112" stroke="#1f55b0" stroke-width="2"/><path d="M92 46 V112" stroke="#1f55b0" stroke-width="2"/><path d="M104 46 V112" stroke="#1f55b0" stroke-width="2"/>
   <rect x="54" y="36" width="62" height="86" rx="8" fill="none" stroke="#1b3f7a" stroke-width="3"/>
+</g>
 </svg>
