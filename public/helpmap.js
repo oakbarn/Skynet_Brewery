@@ -50,12 +50,13 @@ export function elementTopic(e) {
 }
 
 // a Skynet pipe fitting: a tee, elbow, U, reducer or End Cap and nothing else (the same test as isPlainUnit in app.js)
-const plainFit = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check'].includes(f.kind) && !f.thermowell));
+const plainFit = fs => (fs || []).some(f => f.kind !== 'none') && (fs || []).every(f => f.kind === 'none' || (['tee', 'elbow90', 'elbow45', 'u', 'reducer', 'cap', 'check', 'sightGlass'].includes(f.kind) && !f.thermowell));
 // a graphic: equipment, an IP or fitting, a pipe or hose, a picture or a text
 export function graphicTopic(g) {
   if (!g) return null;
   switch (g.kind) {
     case 'vessel':
+      if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && (g.fittings || []).some(f => f.kind === 'sightGlass')) return ['sight-glasses'];      // Rule 5.32, Help 139
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && plainFit(g.fittings)) return ['tc-pipe-fittings'];      // TC Pipe Fittings (Rule 5.25, Help 124)
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet') return ['skynet-fittings'];
       if (g.vwidget && !g.integrated) return ['vessel-widget'];      // the Vessel Widget class (Fritz, 2026-11-05, Rule 5.31, Help 133)

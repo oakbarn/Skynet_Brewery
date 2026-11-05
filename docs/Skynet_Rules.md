@@ -909,6 +909,17 @@ Template"; thread "Build the Vessel Widget class", Help 133).
 - The Three Vessel sample's HLT, Mash tun and Boil kettle are Vessel Widgets (Outlet and Thermowell Placed; the Element on the HLT
   and Boil kettle; the Top Inlet on the Mash tun and Boil kettle).
 
+5.32 **Sight Glasses are TC Pipe Fittings with a Length** (Fritz, 2026-11-05: "Create 2 Sight Glass Pipe Fitting, One Caged and one
+not. Length attribute to stretch length"; thread "Add caged and plain sight glass fittings", Help 139).
+- Two Skynet TC Pipe Fittings Widgets (Rule 5.25): **Sight_Glass** (plain glass) and **Sight_Glass_Caged** (a stainless guard round
+  the glass), TC 1.5, an IP on each ferrule face (left and right), flow either way. Added from Elbows, Tees … and Add Widget > TC
+  Pipe Fittings; names SightGlass_n and SightGlassCaged_n.
+- **Length** (inches, ferrule face to ferrule face, 2 to 48, quarter inches; 6 when placed) stretches it along its pipe. Only the
+  glass (and the cage) gets longer: the picture is drawn for its Length, so the ferrules and end collars keep their shape and size.
+  Autosize to pipe makes it as thick as its pipe; with Autosize off, a typed Width sets the Length.
+- Its **Label** starts filled in as **site_glass_n** (the next number) and is never blank (Rule 18.15; Fritz, 2026-11-05: "site_glass_1").
+- Dropped on a straight pipe in Edit layout it cuts the pipe, as a tee's run does (Rule 5.25).
+
 ---
 
 ## 6. Devices, connections and safety
@@ -1254,8 +1265,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **136**. (2026-10-04,
-Markdown files in help/ on the Brain, numbered for order. Next free number: **138**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **140**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1999,3 +2009,5 @@ Not Placed) or the dialog closes.
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
 - 2026-11-05: Rule 18.26 and 18.15: a Temperature Probe's Label fills in by its kind, tP_1W_1, tP_RTD_1, tP_10KNTC_1, tP_50KNTC_1, tP_100KNTC_1, tP_TC_1, tP_LM35_1, tP_TMP36_1 (Fritz: "Probe 10KNTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_. Other Thermoresistors follow 10KNTC"). Help 138 updated. (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Rule 4.2: the Add Device order for every Device (Fritz): a blank Label gets the focus, a filled one is skipped to the Interface; the Interface has a default (the last one used, else the first); Available Ports: true PWM Devices only PWM pins, the others only non-PWM pins (PWM pins only when no other is free). Rule 3.1's single or double underscore before the Tab ID asked. (thread "Build Probe Add dialogs like Pump")
+- 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
+- 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")
