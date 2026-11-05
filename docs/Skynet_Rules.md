@@ -1440,10 +1440,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Heating Element** (Rule 18.24).
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **PWM / Analog out** (Rule 18.25).
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Temperature Probes** (Rule 18.26).
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23) and the **Picture Widget** (Rule 18.27).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23), the **Heating Element** (Rule 18.24), the **PWM / Analog out** (Rule 18.25), the **Temperature Probes** (Rule 18.26) and the **Picture Widget** (Rule 18.27).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1542,7 +1539,7 @@ nothing and goes back to the calling dialog as it was. The first one built this 
    filled in (Label Visible off does not skip it). The Add Device box has it now.
    *Changed (Fritz, 2026-11-05):* **A Device or Widget must have a Label, and a Label can't be blank.** Some Devices and Widgets
    have their Label **filled in for you** with the pattern **Type_n**, n the next number not used yet: a **Motorized Ball Valve**
-   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** as **tP_1** (Rule 18.26). It can be changed like any Label. When the
+   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** as **tP_1** (Rule 18.26); a **PWM output** as **PWM_1**, an **Analog output** as **4_20_1** or **0_10_1** (Rule 18.25). It can be changed like any Label. When the
    Label is filled in (by you or by the program) on a Build dialog, **the focus jumps to the next field** in the Enter order (the
    next one still empty). **Every Label is editable by the user**, filled in for you or not. Which Devices and Widgets fill in
    their Label is decided **dialog by dialog: Fritz says so when each dialog is built** (Fritz, 2026-11-05). Every other dialog that
@@ -1659,7 +1656,8 @@ get the Pump's Add box and Properties (Rules 4.2, 18.13, 18.15-18.17, 18.20, 18.
    **Signal** with **Units**, **Low value** with **High value**, then **Decimals**.
 3. **No Cover** (pumps only, Rule 7.13), **no Orientation** (it has no IPs) and **no Toggle** (a tap opens the box that sets its %).
 4. Its Properties are the same, with the Interface and Port greyed out for good (Rule 18.13) and the Device Type last.
-5. The Label is typed (no Type_n fill-in until Fritz says, Rule 18.15).
+5. The Label starts filled in (Rule 18.15; Fritz, 2026-11-05: "PWM = _PWM_  4-20ma = _4_20_,  O-10v = 0_10"): a PWM output as
+   **PWM_1**, PWM_2 ...; a 4-20 mA Analog output as **4_20_1** ...; a 0-10 V (or 0-5 V) Analog output as **0_10_1** ....
 A Proportional Valve and a heating element's PWM keep their own dialogs until Fritz says (Rule 18.10).
 18.26 **Adding a Temperature Probe: the Pump's drill-down without a Cover, Toggle or Overlay** (Fritz, 2026-11-05: "Build the Probe
 Add Dialog Boxes using the Pump Drill down as the Template", thread "Build Probe Add dialogs like Pump", Help 138). For every
@@ -2003,3 +2001,4 @@ Not Placed) or the dialog closes.
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
 - 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
 - 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")
+- 2026-11-05: Rule 18.25 / 18.15: a new PWM output's Label starts as PWM_n, a 4-20 mA Analog output's as 4_20_n, a 0-10 V (or 0-5 V) one's as 0_10_n (Fritz). Help 136 updated. (thread "Build PWM Add dialog like Pump")
