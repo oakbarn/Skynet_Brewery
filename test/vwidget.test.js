@@ -71,3 +71,20 @@ for (const [n, on] of Object.entries(want)) {
 }
 assert.ok(!c.graphics.some(g => ['img_HLT', 'img_MLT', 'img_BK'].includes(g.id)), 'the old pictures went');
 console.log('vessel widget ok');
+
+// The Vessel Device (Fritz, 2026-11-05, one exception to Rules 5.7 and 5.31): built from a Vessel Widget Template, with parts
+// (Element, Probe, Thermowell, Valve) built into its IPs like the RIMS tube, a HERMS coil on the Left or Right HERMS IPs, and no
+// way back once built and saved
+assert.ok(app.includes("if (t.vwidget && !t.integrated) g.vdevice = true;"), 'built from a Vessel Widget Template: a Vessel Device');
+for (const k of ['element', 'probe', 'thermowell', 'valve']) assert.ok(app.includes(`['${k}', `), `a ${k} can go on an IP`);
+assert.ok(app.includes("const HERMS_SIDES = { left: ['lHermsIn', 'lHermsOut'], right: ['rHermsIn', 'rHermsOut'] };"), 'HERMS coil Left or Right');
+assert.ok(app.includes("if (vpHermsOn(v, k)) return { key: `eq:${v.id}:herms`, pass: true };"), 'the coil joins its two IPs');
+assert.ok(app.includes("return e.vpKind === 'valve' && isOn(e.name) ? null : { closed: true };"), 'a part fills its IP; a valve passes flow only while on');
+assert.ok(app.includes("const vpLocked = g => !!S.config.graphics.find(x => x.id === g.id && x.workspace && !S.config.workspaces.find(w => w.name === x.workspace)?.build);"), 'locked once built and saved');
+assert.ok(app.includes("for (const k of Object.keys(work.ports)) work.ports[k].installed = !!item.ports?.[k]?.installed;"), 'locked: Place does not change');
+assert.ok(app.includes("...(vdev && vpLocked(it) ? [] : looseField(it))"), 'locked: no un-bundling');
+assert.ok(app.includes("integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind"), 'its parts are built in, like the RIMS tube');
+assert.ok(app.includes('const hasIps = e => e && !isVPart(e) &&'), 'a built-in valve has no IPs of its own');
+assert.ok(read('help/133-vessel-widget.md').includes('## The Vessel Device'), 'Help explains the Vessel Device');
+assert.ok(read('docs/Skynet_Rules.md').includes('**The Vessel Device** (*one exception* to Rules 5.7 and this Rule'), 'the exception is in the Rules');
+console.log('vessel device ok');
