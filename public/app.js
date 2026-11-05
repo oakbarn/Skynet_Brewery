@@ -4955,6 +4955,31 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
     input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv);
   }
+  else if (kind === 'dbgroup') {   // a Database Group (Rule 6.14): the Groups, ➕ Add new Group…, and ✏ Change name (every Process follows)
+    const gs = S.config.dbGroups || [];
+    const s = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(pick a Group)'),
+      ...gs.map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.name)), h('option', { value: '__add__' }, '➕ Add new Group…'));
+    const ren = h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group Old_Name follows (Update All)', onclick: guard(async ev => {
+      ev.preventDefault();
+      const g = gs.find(x => x.id === s.value); if (!g) return toast('Pick a Group first', true);
+      const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process with send_db_group ${g.name} is changed to it.`, g.name) || '').trim();
+      if (!to || to === g.name) return;
+      const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
+      g.name = r.group.name; s.selectedOptions[0].textContent = g.name;
+      toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
+    }) }, '✏ Change name');
+    s.addEventListener('change', guard(async () => {
+      if (s.value !== '__add__') return;
+      const name = (prompt('Name of the new Group (letters, digits and _, like Readings). A Process sends it with send_db_group Name.') || '').trim();
+      if (!name) { s.value = v || ''; return; }
+      try {
+        const r = await api('POST', '/ui/dbgroups', { name });
+        S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
+        s.insertBefore(h('option', { value: r.group.id }, r.group.name), s.querySelector('option[value="__add__"]')); s.value = r.group.id;
+      } catch (e) { s.value = v || ''; throw e; }
+    }));
+    input = h('div', { class: 'cpick' }, s, ren);
+  }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
     input = h('select', { 'data-k': key, 'data-kind': kind, 'data-list': opts }, ...os.map(o => h('option', { value: o, ...(o === (v ?? os[0]) ? { selected: true } : {}) }, o)), h('option', { value: '__add__' }, 'Add new ...'));
@@ -6557,7 +6582,7 @@ $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 // ---------------------------------------------------------------- variables page: gGlobal, shared
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
 const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', process: 'When a Process starts',
-  once: 'Once', datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
+  group: 'In a Group (send_db_group Group_Name sends the Group)', datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
   days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
@@ -6568,6 +6593,7 @@ function logSummary(lg) {
   if (f === 'process') return lg.process ? `When "${lg.process}" starts` : 'When a Process starts (none picked)';
   if (f === 'datetime') return `At ${lg.at || '?'}`;
   if (f === 'clock') return `Every day at ${lg.at || '?'}`;
+  if (f === 'group') { const g = (S.config.dbGroups || []).find(x => x.id === lg.group); return g ? `In the Group ${g.name}` : 'In a Group (none picked)'; }
   if (!TIME_MODES.includes(f)) return LOG_LABEL[f] || f;
   const every = f === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[f]}`;
   return every;
@@ -6581,19 +6607,20 @@ function dbFields(it) {
   return [['', 'Database and .API', 'box'],
     ['db_frequency', 'Send to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m]), true],
     ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])]]] : []),
+    ...(f === 'group' ? [['db_group', 'Group', 'dbgroup']] : []),
     ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N (a whole number, 1 or more)', 'num']] : []),
     ...(f === 'hms' ? [['db_interval', 'Every (00:00:00)', 'text']] : []),
     ...(f === 'clock' ? [['db_at', 'At clock time, e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
     ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]]] : []),
     ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
-    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now.', 'note'],
+    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now; send_db_group Group_Name sends every item In that Group.', 'note'],
     ['', '', 'boxend']];
 }
 function dbToWork(work) {
   const d = work.database || {};
   work.db_frequency = d.frequency || 'none';
-  for (const k of ['every', 'interval', 'at', 'process', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
   // an older "Every 1 day at 12 AM" opens as At clock time 12 AM (the Every choices have no clock time now)
   if (d.at && work.db_frequency === 'days' && (d.every === undefined || +d.every === 1)) { work.db_frequency = 'clock'; delete work.db_every; }
   work.api = work.api || 'off';
@@ -6602,17 +6629,18 @@ function dbToWork(work) {
 // db_ fields -> work.database (checked); throws a message for a setting that can't work
 function dbFromWork(work) {
   const f = work.db_frequency || 'none', d = { frequency: f };
-  for (const k of ['every', 'interval', 'at', 'process', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
+  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
   delete work.db_frequency;
   if (!work.api || work.api === 'off') delete work.api;
   if (f === 'none' || !f) { delete work.database; return; }
   if (f === 'process' && !d.process) throw new Error('Database: pick the Process that sends this value');
+  if (f === 'group' && !(S.config.dbGroups || []).some(g => g.id === d.group)) throw new Error('Database: pick the Group (or ➕ Add new Group…)');
   if (f === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(d.interval || '')) throw new Error('Database: the interval must look like 00:05:00');
   if (TIME_MODES.includes(f) && f !== 'hms' && d.every !== undefined && !(Number.isInteger(d.every) && d.every >= 1)) throw new Error('Database: N must be a whole number, 1 or more');
   if (f === 'clock' && !validClock(d.at || '')) throw new Error('Database: clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30');
   if (f === 'datetime' && !/^\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}(:\d{2})?$/.test(d.at || '')) throw new Error('Database: the date and time must look like 2026-11-01T06:00');
   for (const k of Object.keys(d)) {
-    const keep = { frequency: true, attribute: true, process: f === 'process', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
+    const keep = { frequency: true, attribute: true, process: f === 'process', group: f === 'group', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
     if (!keep) delete d[k];
   }
   work.database = d;
@@ -6628,8 +6656,7 @@ function varRow(e) {
   if (e.type === 'gGlobal') {
     const lg = e.database || { frequency: 'none' };
     cells.push(h('td', {}, logSummary(lg)), h('td', {}, API_LABEL[e.api || 'off'].replace(/ \(.*\)$/, '')),
-      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now'),
-        lg.frequency === 'once' ? h('button', { title: 'Send one more time', onclick: guard(async () => { await api('POST', '/ui/log/once/' + encodeURIComponent(e.name)); toast('Armed'); }) }, 'Once again') : ''));
+      h('td', {}, h('button', { onclick: guard(async () => { await api('POST', '/ui/log/now/' + encodeURIComponent(e.name)); toast('Sent to the database'); }) }, 'Log now')));
   }
   const open = e.type === 'gGlobal' && isVarKind(e.kind) ? () => guard(editGlobal)(e) : () => openProps('el', e.name);
   return h('tr', { title: 'Double-click for its Properties (Database and .API are set there)', ondblclick: rowDbl(open) }, ...cells);

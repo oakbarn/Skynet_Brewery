@@ -25,7 +25,7 @@ const COMMANDS = [
   ['if', 'test something'], ['elseif', 'another test'], ['else if', 'another test'], ['else', 'when no test fit'], ['endif', 'end of the if'],
   ['wait', 'until true, or a time'], ['sleep', 'pause, in ms'], ['goto', 'jump to a [label]'], ['step', 'start a step'],
   ['start', 'a Process or timer'], ['stop', 'a Process, timer or alarm'], ['restart', 'a Process from the top'], ['reset', 'a timer'],
-  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'],
+  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'], ['send_db_group', 'send a database Group now'],
   ['new value', 'make a number'], ['new string', 'make a text'], ['new bool', 'make a true/false'], ['new time', 'make a time'], ['new datetime', 'make a date and time'],
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
   ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'],
@@ -53,7 +53,7 @@ export function fit(name, typed) {
 }
 
 // commands that take something after them: the pick ends in a space and the next list opens by itself
-const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db',
+const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group',
   'new value', 'new string', 'new bool', 'new time', 'new datetime']);
 const COMPARE = [['= ', 'is equal to'], ['== ', 'is equal to (the same as =)'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
 const SET = [['= ', 'set it to'], ['+= ', 'add to it'], ['-= ', 'take from it'], ['++', 'add 1']];

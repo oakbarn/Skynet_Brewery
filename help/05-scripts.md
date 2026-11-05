@@ -41,6 +41,7 @@ restart                        start this process over from the top
 print "text"                   write to Output
 show tab "Brewery"             switch every screen to a tab
 send_db "gGV_Kettle_Temp"      send a reading to the database now
+send_db_group Readings        send every item In the Group Readings to the database now
 // a comment
 ```
 

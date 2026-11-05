@@ -14,7 +14,7 @@ Pictures, Labels and manual vessels have no value, so they have no box.
 | **On demand** | Only when asked: a `send_db` line in a Process, **Log now** on the Variables screen, or the API |
 | **On value change** | Every time the value changes, at most 10 times a second (the last change is never lost) |
 | **When a Process starts** | Each time the Process you pick starts |
-| **Once** | One time after the Brain starts (**Once again** on the Variables screen arms it again) |
+| **In a Group** | Each time a Process runs `send_db_group Group_Name` for its Group (see below) |
 | **At a date and time (once)** | One time, at the date and time you type, like `2026-11-01T06:00` |
 | **At clock time (every day)** | Every day at the clock time you type, like `12 AM`, `6:30 PM` or `18:30` |
 | **Every N milliseconds / seconds / minutes / hours / days** | Every N of them (fastest is 100 ms) |
@@ -31,7 +31,23 @@ send_db HLT_Temp
 send_db "gGV_Mash_pH"
 ```
 
-`send_db Name` writes the reading at once, whatever its frequency. It was `log Name`; older Processes are changed to `send_db` when the Brain starts (Skynet Rule 15.2).
+`send_db Name` writes the reading at once, whatever its frequency, even when it is **Off** (Fritz, 2026-11-05). It was `log Name`; older Processes are changed to `send_db` when the Brain starts (Skynet Rule 15.2).
+
+### Groups: send many at once
+
+Pick **In a Group** and a **Group** in the Database and .API box to put the item in that Group. A Process line
+
+```
+send_db_group Readings
+```
+
+sends every item In the Group **Readings** to the database, **each time** the line runs (a brew day can send its readings at the end, for example). `send_db Name` still sends one item at any time.
+
+- **➕ Add new Group…** at the end of the Group list makes a new Group: type its Name (letters, digits and `_`, like `Readings` or `Brew_Day_End`).
+- A Group has a hidden key that never changes; its items point to that key. **✏ Change name** beside the Group list changes its Name, and **every Process** with `send_db_group Old_Name` is changed to the new Name at once (Update All). A running Process keeps the old text until it is restarted.
+- **Check** in the Process editor says when a `send_db_group` line names a Group that is not there.
+
+The old choice **Once** (one time after the Brain started) is gone (Skynet Rule 6.14, 2026-11-05). When a Schema loads, every item that was set to Once is put **In the Group named Once**, so a Process line `send_db_group Once` sends them.
 
 ### Time and hidden key
 
