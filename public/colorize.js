@@ -24,7 +24,7 @@ export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
 export const LOGIC = ['and', 'or', 'not'];
 // element types that sit on a PLC port: Devices. Every other type (but gGlobal) is a Widget.
-export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid'];
+export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid', 'deadband'];
 const CMD = new Set(COMMANDS), CONST = new Set([...CONSTANTS, ...SKYNET_CONSTANTS.map(c => c[0].toLowerCase())]), LOG = new Set(LOGIC);
 
 // The colors, for a light page (the files) and for the panel's dark look. Notepad++ uses the light ones.

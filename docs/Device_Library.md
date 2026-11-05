@@ -113,7 +113,7 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 | Flow meter | FlowM |
 | Scale | Scale |
 | Stepper motor | Step |
-| Heating control | PID, DutyCy, Hys |
+| Heating control | PID, DutyCy, Hys, DBand |
 | Reserved (not built) | DHT11, DHT22, Hydro |
 
 What each ID means:
@@ -275,6 +275,13 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 - **Type ID:** PID. Counts as heating (PR #108).
 - **Port:** any pin; with PWM output on it needs a PWM pin.
 - **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, Kp, Ki, Kd, Max output %, Max integral %, Calculation time (s), Output window (s), Reversed (cooling), PWM output (off = time-proportioned on/off).
+
+### 4.9.1 Deadband (control output)
+- **Add menu:** Devices: control outputs > Deadband. As in BruControl's Deadband Output (Skynet Rule 6.17, Help 125).
+- **Type ID:** DBand (General Type DBAND, proposed). Counts as heating and is On while Enabled (Rule 7.9); can share a heater's port (Rule 6.1).
+- **Port:** any pin; with PWM output on it needs a PWM pin.
+- **How it works:** every Calc Time its output % steps toward the Target: left alone within ± Deadband Offset, by the Inner Band Drive within ± Inner Band Offset, by the Outer Band Drive further out. Below the Target it goes up, above it goes down (Reversed for cooling). Starts at the Initial Output when Enabled.
+- **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, Deadband Offset (0.5), Inner Band Offset (2), Initial Output % (0), Inner Band Drive (1), Outer Band Drive (5), Max output % (100), Calc Time (10 s), Output window (2 s), Reversed (cooling), PWM output (off = time-proportioned on/off).
 
 ### 4.10 Digital input
 - **Add menu entries** (Devices: digital inputs), each a preset of the same Device:
