@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Skynet Brewer beer mug: the browser tab and taskbar icon (Rule 2.36). Same mug as the Desktop shortcut (install/windows/skynet.ico). -->
+  <rect x="8" y="8" width="240" height="240" rx="40" fill="#1f2a36"/>
+  <path d="M184 92 h10 a34 34 0 0 1 0 68 h-10 v-16 h10 a18 18 0 0 0 0 -36 h-10 z" fill="#f2a51a"/>
+  <rect x="78" y="72" width="108" height="142" rx="12" fill="#f2a51a"/>
+  <circle cx="110" cy="150" r="8" fill="#ffd36b"/>
+  <circle cx="140" cy="180" r="6.5" fill="#ffd36b"/>
+  <circle cx="125" cy="120" r="5" fill="#ffd36b"/>
+  <g fill="#fff6dc">
+    <circle cx="92" cy="68" r="20"/>
+    <circle cx="108" cy="52" r="20"/>
+    <circle cx="122" cy="50" r="20"/>
+    <circle cx="136" cy="46" r="20"/>
+    <circle cx="162" cy="58" r="20"/>
+    <circle cx="170" cy="72" r="16"/>
+    <rect x="74" y="58" width="112" height="28" rx="14"/>
+  </g>
+</svg>
