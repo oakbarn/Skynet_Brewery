@@ -1,5 +1,5 @@
 import { addEyes } from './eye.js';
-import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt } from './pipefit.js';
+import { DIRS, ARMS, dirOf, onAngle, angledEnd, alongLine, fitFor, splitAt, fitOnPipe } from './pipefit.js';
 import { watchButtons } from './buttons.js';
 import { elementTopic, graphicTopic, barTopic, menuTopic, viewTopic, TAB_SPOT } from './helpmap.js';
 import { attachAutofill } from './autofill.js';
@@ -805,38 +805,33 @@ function sidePt(e, side) {
 // sides of its picture (left and right if it is wider than tall, else top and bottom). A pump keeps IN and OUT: a running pump
 // pushes from IN to OUT, and its head orientation is fixed, so the picture shows it rather than a setting.
 // (Older layouts may still carry ipIn / ipOut sides; those are honoured.)
-// Where the pipe meets a Skynet valve picture (Fritz, 2026-10-28: the IPs sit on the picture where the water flows, not in the
-// middle of the box's sides). Every Skynet valve drawing in Images/Skynet/Valves has its pipe at the same spot: across at 92 of
-// its 120 high (H), or turned to stand up with the pipe 28 (V_R, V_RC) or 92 (V_L, V_LC) in from the left of its 120 wide.
-// Fritz's motorized butterfly valve (2026-11-02) is taller: 140 x 170 with its pipe at 135. A front view (looking down the pipe)
-// has both IPs at the center of its opening; a front elbow has one there and one at the center of its bottom ferrule (Rule 5.20).
-const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] },
-  BF_H: { o: 'h', w: 140, h: 170, ends: [[0, 135 / 170], [1, 135 / 170]] }, BF_V_R: { o: 'v', w: 170, h: 140, ends: [[35 / 170, 0], [35 / 170, 1]] }, BF_V_L: { o: 'v', w: 170, h: 140, ends: [[135 / 170, 0], [135 / 170, 1]] },
-  BF_Front: { o: 'f', w: 120, h: 170, ends: [[0.5, 130 / 170], [0.5, 130 / 170]] }, BF_Front_Elbow: { o: 'f', w: 120, h: 200, ends: [[0.5, 0.65], [0.5, 1]] },
-  BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] },
-  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...): the pipe runs
-  // across 97.5 of its 119 high, or stands up 22 in from the left of its 119 wide (Fritz, 2026-11-04: valves sit on the pipe)
-  OLD_H: { o: 'h', w: 139, h: 119, ends: [[0, 97.5 / 119], [1, 97.5 / 119]] }, OLD_V: { o: 'v', w: 119, h: 141, ends: [[22 / 119, 0], [22 / 119, 1]] } };
-// Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
-// port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
-const PUMP_FLOW = {
-  Pump_March_809_Poly_90_Inlet: { w: 50.9, h: 51.6, ends: [[0.988, 0.543], [0.636, 0.0]] },
-  Pump_March_809_Poly_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
-  Pump_March_809_SS_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
-  Pump_March_815_Poly_90_Inlet: { w: 57.0, h: 58.6, ends: [[0.989, 0.529], [0.652, 0.0]] },
-  Pump_March_815_Poly_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
-  Pump_March_815_SS_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
-  Pump_Chugger_SS_90_Inlet: { w: 60.1, h: 62.6, ends: [[0.99, 0.527], [0.646, 0.0]] },
-  Pump_Chugger_SS_Center_Inlet: { w: 106.2, h: 61.6, ends: [[0.994, 0.536], [0.806, 0.0]] },
-  Pump_Riptide_SS_Center_Inlet: { w: 100.2, h: 74.6, ends: [[0.994, 0.63], [0.804, 0.0]] },
-  Pump_Topsflo_TD5_Poly_Center_Inlet: { w: 67.2, h: 46.6, ends: [[0.991, 0.536], [0.763, 0.0]] },
-  Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
-  Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
-};
-// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones are 434 x 292 with the inlet on the outer face of the union
-// on the right of the pump head (415, 138) and the outlet at the top of the pipe going up (361, 0); the submersible sump pump is
-// 120 x 140 and draws in through the middle of its screen at the bottom (60, 117), out the top of the riser on its right (110, 12).
-const OLD_PUMP_FLOW = { Rip: { w: 434, h: 292, ends: [[415 / 434, 138 / 292], [361 / 434, 0]] }, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
+// The Valve Standard (Fritz, 2026-11-05, Rule 5.29: "All Valves follow the 300 x 300 with IPs in the same place so easy to change a
+// valve from Ball to Butterfly or Manual to Motorized"): every Skynet valve picture is drawn in the same 300 x 300 box, to the same
+// scale, with its pipe running through the middle of the box and straight pipe out to the edges. So the IPs are always on the same
+// spots: a level valve on the middle of its left and right sides (0, 150) and (300, 150), an upright one (Vertical Left or Right) on
+// the middle of its top and bottom (150, 0) and (150, 300), a front view (looking down the pipe) both at the middle (150, 150), and a
+// front elbow at the middle and the middle of its bottom (150, 300). A 45 degree valve turns the level spots about the middle.
+const VALVE_STD = { h: [[0, 0.5], [1, 0.5]], v: [[0.5, 0], [0.5, 1]], f: [[0.5, 0.5], [0.5, 0.5]], fe: [[0.5, 0.5], [0.5, 1]] };
+const vstd = (o, kind = o) => ({ o, w: 300, h: 300, ends: VALVE_STD[kind] });
+const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h'), BF_V_R: vstd('v'), BF_V_L: vstd('v'),
+  BF_Front: vstd('f'), BF_Front_Elbow: vstd('f', 'fe'), BALL_Front: vstd('f'),
+  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...)
+  OLD_H: vstd('h'), OLD_V: vstd('v') };
+// The Pump Standard (Fritz, 2026-11-05, Rule 5.27): every Skynet pump picture is drawn in the same 300 x 300 box (shown 150 x 150)
+// with its inlet IP at (285, 150) and its outlet IP at (243, 56), so one pump can replace another in the same place and stay joined
+// to its pipes. The Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover) are all to the same scale
+// (Rule 5.11: 20 units = 1 inch in the box, 10 at 150 x 150); their port tubes are made longer where needed to reach the two spots.
+// The IPs sit on the tips of the ports, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
+const PUMP_STD = { w: 300, h: 300, ends: [[285 / 300, 150 / 300], [243 / 300, 56 / 300]] };
+const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
+  'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
+  'Pump_Chugger_SS_Center_Inlet', 'Pump_Riptide_SS_Center_Inlet', 'Pump_Topsflo_TD5_Poly_Center_Inlet', 'Pump_KegLand_MKII_Poly_Center_Inlet',
+  'Pump_KegLand_MKII_SS_Center_Inlet'].map(k => [k, PUMP_STD]));
+// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
+// the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
+// pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
+// the bottom (60, 117), out the top of the riser on its right (110, 12).
+const OLD_PUMP_FLOW = { Rip: PUMP_STD, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
 // Pump Cover Overlays (Fritz, 2026-11-02): a cover drawn over a Skynet pump drawing (the no-cover ones above), between the
 // picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
 // .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
@@ -884,7 +879,12 @@ function pickModel(title, rows) {
     document.body.append(d); d.showModal();
   });
 }
+// TEST (Fritz, 2026-11-05, thread "Standardize valve size and IPs"): a pump with its IPs on the Valve Standard spots (Rule 5.29), inlet at
+// the middle of the right side and outlet at the middle of the left, like a level valve. Only Pump_1 in the Three Vessel One Pump sample
+// uses it. Not a Rule yet: to go back, point that pump at Pump_Red_Rip_Off.svg again (kept as it was, Rule 5.27).
+const PUMP_VALVE_TEST = { w: 300, h: 300, ends: [[1, 0.5], [0, 0.5]] };
 function picFlow(path) {
+  if (/(?:^|\/)Pump_Red_Rip_Off_Valve_IPs_Test\.svg$/.test(String(path || ''))) return { k: 'P', ...PUMP_VALVE_TEST };
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
   // the older Riptide-style pump pictures (Pump_<color>_Rip_Off / _On, .svg or .png, every cover color) and the sump pump
@@ -895,12 +895,12 @@ function picFlow(path) {
   if (om) return { k: om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V'] };
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
-  return k && PIC_FLOW[k] ? { k, o: k.endsWith('H') ? 'h' : 'v', ...PIC_FLOW[k] } : null;
+  return k && PIC_FLOW[k] ? { k, ...PIC_FLOW[k] } : null;
 }
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
-  const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
+  const f = picFlow(e.imageOff || e.imageOn) || userValveStd(e), o = e.orientation;
   // a valve at 45 degrees shows its picture turned about its middle (Rule 5.5), so its two IPs turn with it (Rule 5.24)
   const turn = f && f.k !== 'P' && f.o !== 'f' && e.subtype === 'valve' ? { l45: -45, r45: 45 }[o] || 0 : 0;
   if (!f || (!turn && f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
@@ -912,15 +912,33 @@ function picEnds(e) {
   return pts.map(([px, py]) => !turn ? [Math.round(px), Math.round(py)]
     : [Math.round(cx + (px - cx) * Math.cos(r) - (py - cy) * Math.sin(r)), Math.round(cy + (px - cx) * Math.sin(r) + (py - cy) * Math.cos(r))]);
 }
+// A valve picture of a user's own follows the Valve Standard too (Fritz, 2026-11-05, Rule 5.29: "The graphic will be resized to
+// 300 x 300 and IPs placed correctly on a User Created valve"): the picture fills its square box and its IPs go on the same spots as
+// a Skynet valve's for its Orientation (Horizontal: the middle of the left and right sides; Vertical: the middle of the top and
+// bottom; 45 degrees: the level spots turned). Where the user has set its In and Out spots, the picture is moved and sized so those
+// spots sit on the IPs (valveFit).
+const isUserValvePic = e => !!e && (e.subtype === 'valve' || e.subtype === 'propValve') && !isInline(e) && !!(e.imageOff || e.imageOn) && !picFlow(e.imageOff || e.imageOn);
+const userValveKind = e => e.orientation === 'v' ? 'v' : e.orientation === 'h' || e.orientation === 'l45' || e.orientation === 'r45' ? 'h' : (e.w || 120) >= (e.h || 60) ? 'h' : 'v';
+const userValveStd = e => isUserValvePic(e) ? { k: 'U', ...vstd(userValveKind(e)) } : null;
+// the picture's size and place in its box (in % of the box) so the user's In and Out spots land on the standard IP spots, or null
+function valveFit(e) {
+  if (!isUserValvePic(e) || !pctOk(e.ipInX) || !pctOk(e.ipInY) || !pctOk(e.ipOutX) || !pctOk(e.ipOutY)) return null;
+  const a = [+e.ipInX / 100, +e.ipInY / 100], b = [+e.ipOutX / 100, +e.ipOutY / 100], [A, B] = VALVE_STD[userValveKind(e)];
+  const d = Math.hypot(b[0] - a[0], b[1] - a[1]); if (d < 0.05) return null;       // both spots on one point: it just fills the box
+  const k = Math.hypot(B[0] - A[0], B[1] - A[1]) / d, mx = (A[0] + B[0]) / 2 - k * (a[0] + b[0]) / 2, my = (A[1] + B[1]) / 2 - k * (a[1] + b[1]) / 2;
+  const r = v => Math.round(v * 1000) / 10;
+  return { size: `${r(k)}% ${r(k)}%`, k, mx, my };
+}
 // a valve flipped (Flip Horizontal / Vertical): its IPs mirror about its middle, as its picture does
 const flipPt = e => {
   if (!e.flipH && !e.flipV) return c => c;
   const gm = elGeom(e), cx = (gm.x || 0) + (gm.w || 120) / 2, cy = (gm.y || 0) + (gm.h || 60) / 2;
   return c => [e.flipH ? Math.round(2 * cx - c[0]) : c[0], e.flipV ? Math.round(2 * cy - c[1]) : c[1]];
 };
-// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): its In and Out IPs go where the user sets them on its picture, in % of
-// the item's width (across, from the left) and height (down, from the top). Both blank = Skynet finds them as before.
-const IP_AT_FIELDS = [['_ipat', 'In and Out IPs: where the two pipe ends are on the picture, in % of its Width (across, from the left) and Height (down, from the top). Leave them blank and Skynet finds them.', 'note'],
+// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): the user sets where its two pipe ends are on its picture, in % of the
+// item's width (across, from the left) and height (down, from the top). Since the Valve Standard (Fritz, 2026-11-05, Rule 5.29) the
+// IPs stay on the standard spots and these move and size the picture instead (valveFit). ipAt is only for a valve with no picture.
+const IP_AT_FIELDS = [['_ipat', 'In and Out spots: where the two pipe ends are on your picture, in % of its Width (across, from the left) and Height (down, from the top). The IPs are always on the Valve Standard spots (Rule 5.29); Skynet moves and sizes your picture so these spots sit on them. Leave them blank and the picture just fills the box.', 'note'],
   ['ipInX', 'In IP across % (0 = left edge, 100 = right edge)', 'num'], ['ipInY', 'In IP down % (0 = top, 100 = bottom)', 'num'],
   ['ipOutX', 'Out IP across %', 'num'], ['ipOutY', 'Out IP down %', 'num']];
 const pctOk = v => v !== undefined && v !== null && v !== '' && Number.isFinite(+v);
@@ -943,8 +961,10 @@ const devIps = e => {
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
   const pe = picEnds(e), fl = flipPt(e);
-  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(ipAt(e, 'in') || pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
-    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(ipAt(e, 'out') || pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
+  // the Valve Standard (Rule 5.29) puts them on the same spots for every valve picture, a user's own too; a valve with no picture
+  // keeps them on the middle of its sides
+  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(pe?.[0] || ipAt(e, 'in') || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
+    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(pe?.[1] || ipAt(e, 'out') || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
 };
 // A valve or pump sits centered on its pipes (Fritz, 2026-11-04, Rule 5.23): each straight pipe joined to one of its IPs runs on
 // through the IP, so the picture's own pipe (or port) is in line with it. Where an IP is off a pipe's line, the valve or pump moves
@@ -1006,19 +1026,25 @@ function splitPorts(it) {
   return devIps(it).map((q, i) => {
     let face = null;
     if (turned || (f && f.o === 'f')) face = null;          // a 45 degree valve, or a front view (both IPs on its opening)
-    else if (pe && !ipAt(it, i ? 'out' : 'in')) { const [fx, fy] = f.ends[i]; face = nearFace(fx, fy); if (it.flipH) face = [-face[0], face[1]]; if (it.flipV) face = [face[0], -face[1]]; }
+    else if (pe) { const [fx, fy] = (f || userValveStd(it)).ends[i]; face = nearFace(fx, fy); if (it.flipH) face = [-face[0], face[1]]; if (it.flipV) face = [face[0], -face[1]]; }
     else face = nearFace((q.c[0] - (gm.x || 0)) / (gm.w || 120), (q.c[1] - (gm.y || 0)) / (gm.h || 60));
     return { id: q.id, c: q.c, f: face };
   });
 }
 function splitPipeFor(it) {
   if (!editing || !draft || !it || it.locked) return null;
+  if (isTcFit(it)) return tcFitOnPipe(it);         // a tee or a cross (Rule 5.25)
   const mv = isMv(it);
   if (!mv && (it.kind || !SPLIT_SUBS.includes(it.subtype) || !hasIps(it))) return null;
   const ws = it.workspace, ports = splitPorts(it);
-  if (ports.length !== 2 || ports.some(q => pipesOn(q.id, ws).length) || (mv && pipesOn(it.id, ws).length)) return null;   // already on its pipes
+  if (ports.length !== 2) return null;
   const gm = mv ? it : elGeom(it), box = { x: gm.x || 0, y: gm.y || 0, w: gm.w || (mv ? 30 : 120), h: gm.h || (mv ? 30 : 60) };
   const mid = [box.x + box.w / 2, box.y + box.h / 2];
+  const own = [...ports.map(q => q.id), ...(mv ? [it.id] : [])].flatMap(id => pipesOn(id, ws));
+  if (own.length) {           // already on its pipes: nothing is cut, but say so when it was dropped on another pipe
+    const p = draft.graphics.find(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !own.includes(p) && splitAt(p.points[0], p.points[1], box, ports));
+    return p ? { ok: false, text: `${p.name || 'The pipe'} was not cut: ${mv ? (it.name || 'the Manual Valve') : it.name} is still joined to other pipes. Take those pipes off it first (Rule 5.26).` } : null;
+  }
   let best = null, why = null;
   for (const p of draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked)) {
     const gap = Math.max(45, Math.ceil(9 * pipeWidth(p) / 5) * 5);      // room for a TC elbow (Rule 5.25) between the turns
@@ -1400,6 +1426,10 @@ function fillEl(n, e0) {
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
+  // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
+  const vf = img ? valveFit(e) : null;
+  n.classList.toggle('vfit', !!vf);
+  if (vf) { const gm = elGeom(e); n.style.setProperty('--vfs', vf.size); n.style.setProperty('--vfp', `${Math.round(vf.mx * (gm.w || 120))}px ${Math.round(vf.my * (gm.h || 60))}px`); }
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
 }
 // The On overlay covers just the picture underneath (Fritz: sized to the picture), not the empty sides of a wide or tall item.
@@ -1418,7 +1448,7 @@ function fitOverlay(n, ov, img, stretch) {
   if (!W || !H || !w || !hh) return full();
   Object.assign(ov.style, { inset: 'auto', left: (W - w) / 2 + 'px', top: (H - hh) / 2 + 'px', width: w + 'px', height: hh + 'px' });
 }
-const stretchPic = (e, v) => !!e.backpathsImported && hasPictures(e, v);     // imported BruControl pictures fill the item
+const stretchPic = (e, v) => (!!e.backpathsImported && hasPictures(e, v)) || isUserValvePic(e);     // imported BruControl pictures, and a user's own valve picture (Rule 5.29), fill the item
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
 const imgState = new Map();
 function imgMissing(url, node) {
@@ -2284,12 +2314,12 @@ window.addEventListener('pointerup', () => {
     if (isQd(drag.item)) { snapQd(drag.item); renderWs(); }
   }
   if (drag?.mode === 'pipe' && drag.moved) dropPipe(drag);
+  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
   if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
   }
   if (drag?.mode === 'point' || drag?.mode === 'pipe') renderWs();
-  if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow
   drag = null;
 });
 $('#ws').addEventListener('dblclick', ev => {
@@ -2549,6 +2579,69 @@ function addTcFit(name) {
   const g = placeTabFitting(t, wsName, tcName(t, draft.graphics), null); g.labelVisible = false;
   sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
+// A tee or a cross dropped on a straight pipe cuts it there (Fritz, 2026-11-05: "Tried to add a Tee to a Pipe and it did not
+// divide"; Rule 5.25). Its run (two ends in line) goes along the pipe: the fitting moves across onto the pipe's line, turning if its
+// run is across the pipe, and the pipe is cut into two pipes, one on each end of the run. Dropped over an open end of the pipe, the
+// pipe is made shorter and joined to it. Only a fitting with no pipes on it yet, not Locked, in Edit layout. Returns null when it
+// is not on a pipe, else { ok, text } for the message.
+function tcArms(u) {
+  const t = tplOf('fitting', u.template), b = tcBend(u, t); if (!b) return null;
+  const arms = [];
+  for (const [k, pos] of Object.entries(t.ipPos || {})) {
+    const q = fracPos(pos), ip = q && draft.graphics.find(x => x.kind === 'ip' && x.attachTo === u.id && x.port === k); if (!ip) continue;
+    const c = unitPoint(u, q[1], q[2]), dx = c[0] - b[0], dy = c[1] - b[1], l = Math.hypot(dx, dy);
+    if (l) arms.push({ id: ip.id, c, v: [dx / l, dy / l] });
+  }
+  return { b, arms };
+}
+function tcFitOnPipe(u) {
+  if (!editing || !draft || !u || u.locked || u.onVessel || !isTcFit(u)) return null;
+  const A0 = tcArms(u); if (!A0 || A0.arms.length < 2) return null;
+  const ws = u.workspace;
+  const near = Math.max(15, Math.min(u.w || 90, u.h || 90) * 0.3);
+  const own = A0.arms.flatMap(q => pipesOn(q.id, ws));
+  if (own.length) {           // already on its pipes: nothing is cut, but say so when it was dropped on another pipe
+    const p = draft.graphics.find(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !own.includes(p) && fitOnPipe(p.points[0], p.points[1], A0.b, A0.arms, { near }));
+    return p ? { ok: false, text: `${p.name || 'The pipe'} was not cut: ${u.name} is still joined to other pipes. Take those pipes off it first (Rule 5.25).` } : null;
+  }
+  const opts = p => ({ near, aOpen: !!ownCoupling(p.from, p), bOpen: !!ownCoupling(p.to, p) });
+  const offOf = p => { const [a, b] = p.points, L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; return Math.abs(((A0.b[0] - a[0]) * (a[1] - b[1]) + (A0.b[1] - a[1]) * (b[0] - a[0])) / L); };
+  const cands = draft.graphics.filter(p => p.kind === 'pipe' && p.straight && !p.hose && p.workspace === ws && (p.points || []).length === 2 && !p.locked)
+    .filter(p => fitOnPipe(p.points[0], p.points[1], A0.b, A0.arms, opts(p))).sort((x, y) => offOf(x) - offOf(y));
+  const p = cands[0]; if (!p) return null;
+  // its run along the pipe: as it is, else turned about its bend (a quarter turn first)
+  const keep = { x: u.x, y: u.y, rot: u.rot, turn: u.turn }, base = unitRot(u);
+  let plan = null;
+  for (const k of [0, 90, 270, 180, 45, 315, 135, 225]) {
+    delete u.turn; const r = (base + k) % 360; if (r) u.rot = r; else delete u.rot;
+    const b1 = tcBend(u); u.x = +((u.x || 0) + A0.b[0] - b1[0]).toFixed(2); u.y = +((u.y || 0) + A0.b[1] - b1[1]).toFixed(2);
+    const A = tcArms(u); plan = fitOnPipe(p.points[0], p.points[1], A.b, A.arms, opts(p));
+    if (plan && !plan.turn) break;
+    Object.assign(u, { x: keep.x, y: keep.y }); plan = null;
+  }
+  const back = () => { for (const k of ['rot', 'turn']) if (keep[k] === undefined) delete u[k]; else u[k] = keep[k]; Object.assign(u, { x: keep.x, y: keep.y }); placeUnitParts(u); };
+  if (!plan) { back(); return { ok: false, text: `${u.name} was not put into ${p.name || 'the pipe'}: none of its ends are in line with it (Rule 5.25).` }; }
+  if (!plan.ok) { back(); return { ok: false, text: `${u.name} was not put into ${p.name || 'the pipe'}: ${plan.why}. Move it and drop it again (Rule 5.25).` }; }
+  u.x = +((u.x || 0) + plan.shift[0]).toFixed(2); u.y = +((u.y || 0) + plan.shift[1]).toFixed(2); placeUnitParts(u);
+  const ends = { A: p.from, B: p.to };
+  if (plan.drop) { const own = ownCoupling(ends[plan.drop], p); if (own) draft.graphics = draft.graphics.filter(g => g !== own); }
+  const idOf = k => k === 'A' || k === 'B' ? ends[k] : k;
+  const pieces = [], made = [];
+  plan.pieces.forEach((pc, i) => {
+    const q = i ? Object.assign(clone(p), { id: newId() }) : p;
+    if (i) { delete q.name; delete q.label; delete q.labelVisible; delete q._key; }
+    q.points = pc.pts.map(c => [...c]); q.from = idOf(pc.from); q.to = idOf(pc.to);
+    if (i) { giveName(q, draft.graphics); draft.graphics.push(q); made.push(q.name); }
+    pieces.push(q);
+  });
+  if (autoSized(u)) autoSizeUnit(u);             // it takes the pipe's size, about its bend (its ends stay on the pipe's line)
+  const armIds = new Set(A0.arms.map(q => q.id));
+  for (const q of pieces) for (const [k, i] of [['from', 0], ['to', 1]]) {
+    const ip = armIds.has(q[k]) && draft.graphics.find(x => x.id === q[k]); if (ip) q.points[i] = ipCenter(ip).map(Math.round);
+  }
+  return { ok: true, text: plan.mode === 'end' ? `${p.name} was made shorter and joined to ${u.name} (Rule 5.25).`
+    : `${p.name} was cut in two at ${u.name}: ${[p.name, ...made].join(', ')} (Rule 5.25).` };
+}
 const TC_FIT_ROWS = () => TC_FIT_ADD.map(n => tplOf('fitting', n)).filter(Boolean).map(t => [`${t.name.replace(/_/g, ' ')}`, () => addTcFit(t.name)]);
 // Drawing: the pointer snaps onto an IP when it is close to one, else to the 5 px grid
 function drawSnap(ev) {
@@ -2679,16 +2772,16 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 150, h: 150, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 150, h: 150, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 150, h: 150, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {

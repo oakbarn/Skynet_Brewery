@@ -59,7 +59,7 @@ Want the panel as if it had never been installed? Run the installer over it. Bef
   Your pictures and sounds (`media`) and the `backups` folder are **kept**.
   - **No** on the warning backs out. Nothing is deleted, and the update carries on as normal.
   - **Yes** deletes them. The panel then starts like a new install from the samples, and you make the admin account again (write down the new **recovery code**).
-  - On Windows it also deletes the user name and password that Skynet's own window remembered, so nothing old is filled in. The admin setup boxes always start empty, even if your browser saved a password for the panel.
+  - On Windows it also deletes the user name and password that Skynet's own window remembered, so nothing old is filled in. Skynet's window never syncs with your Microsoft account, so a synced login can't come back either. You can still save your password in Skynet's window, and it fills in on Sign in as usual. The admin setup boxes stay empty until you click or type in them, even if your browser saved a password for the panel.
 
 The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and the Linux / Pi installer all ask it. If Windows can't delete a file because a program still has it open, the installer says so: restart the computer and run it again.
 

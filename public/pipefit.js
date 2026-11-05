@@ -127,3 +127,33 @@ export function splitAt(a, b, box, ports, { gap = 30, aOpen = false, bOpen = fal
     return { joints: [E, K, J], pieces: [{ from: q.id, to: 'J0', pts: [c2, E] }, { from: 'J0', to: 'J1', pts: [E, K] }, { from: 'J1', to: 'J2', pts: [K, J] }] };
   }
 }
+
+// A tee or a cross put on a straight pipe cuts it (Fritz, 2026-11-05, Rule 5.25): its run (the two ends in line) goes along the pipe
+// and the pipe is cut there. a, b: the pipe's two ends. bend: where the fitting's pipes' center lines meet. arms: its open ends
+// { id, c: [x, y], v: [ux, uy] } where v is the way that end leaves the bend. near: how far off the pipe's line the bend may be.
+// aOpen / bOpen: that end of the pipe is open (its own coupling), so it may go away when the fitting is dropped over it.
+// Returns null when the pipe is not under the fitting, { ok: false, turn: true } when no two of its ends are in line with the
+// pipe (the caller turns it and asks again), { ok: false, why } when it can't be put in, else { ok: true, mode, shift, pieces,
+// drop } as splitAt: mode 'mid' (cut in two) or 'end' (made shorter), shift moves the fitting across onto the pipe's line, pieces
+// [{ from, to, pts }] with from / to 'A', 'B' or an arm id, and drop the end ('A' or 'B') whose coupling goes away.
+export function fitOnPipe(a, b, bend, arms, { near = 15, aOpen = false, bOpen = false, margin = 5 } = {}) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+  if (!L) return null;
+  const u = [dx / L, dy / L], rel = c => [c[0] - a[0], c[1] - a[1]];
+  const off = rel(bend)[0] * -u[1] + rel(bend)[1] * u[0];                // how far the bend is off the pipe's line
+  if (Math.abs(off) > near) return null;
+  const shift = [off * u[1], -off * u[0]];                                // across, onto the line
+  const t = c => (c[0] + shift[0] - a[0]) * u[0] + (c[1] + shift[1] - a[1]) * u[1];
+  const tb = t(bend);
+  if (tb < -near || tb > L + near) return null;                           // beyond the pipe's ends
+  const fwd = arms.find(q => q.v[0] * u[0] + q.v[1] * u[1] > 0.99), back = arms.find(q => q.v[0] * u[0] + q.v[1] * u[1] < -0.99);
+  if (!fwd || !back) return { ok: false, turn: true };
+  const pt = c => [Math.round(a[0] + u[0] * t(c)), Math.round(a[1] + u[1] * t(c))];
+  const s = [Math.round(shift[0] * 100) / 100, Math.round(shift[1] * 100) / 100];
+  const tB = t(back.c), tF = t(fwd.c), aIn = tB <= margin, bIn = tF >= L - margin;
+  if (aIn && bIn) return { ok: false, why: 'the pipe is shorter than the fitting' };
+  if (!aIn && !bIn) return { ok: true, mode: 'mid', shift: s, drop: null, pieces: [{ from: 'A', to: back.id, pts: [[...a], pt(back.c)] }, { from: fwd.id, to: 'B', pts: [pt(fwd.c), [...b]] }] };
+  if (aIn ? !aOpen : !bOpen) return { ok: false, why: 'that end of the pipe is already joined to something' };
+  return aIn ? { ok: true, mode: 'end', shift: s, drop: 'A', pieces: [{ from: fwd.id, to: 'B', pts: [pt(fwd.c), [...b]] }] }
+    : { ok: true, mode: 'end', shift: s, drop: 'B', pieces: [{ from: 'A', to: back.id, pts: [[...a], pt(back.c)] }] };
+}

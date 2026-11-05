@@ -3,7 +3,7 @@
   "type": "digitalOut",
   "props": {
     "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg", "subtype": "valve", "valveType": "electric", "service": "room", "typeCode": "eVlv", "orientation": "h",
-    "w": 90, "h": 77, "hideName": true, "hideValue": true, "look": "normal", "tap": "toggle",
+    "w": 150, "h": 150, "hideName": true, "hideValue": true, "look": "normal", "tap": "toggle",
     "tapwater": false, "showOnOffText": false, "onText": "OPEN", "offText": "CLOSED"
   },
   "pics": {
