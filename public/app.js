@@ -949,6 +949,27 @@ const MBV_TPL = 'Skynet_Motorized_Ball_Valve_H';
 const MBV_MODELS = [['Skynet Motorized Ball Valve', 'sky', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg'],
   ['User Defined Motorized Ball Valve: your own picture, you set its In and Out IPs', 'user', 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg']];
 function pickValve() { return pickModel('2. Pick the valve', MBV_MODELS); }
+// Add Heating Element step 2 (Fritz, 2026-11-05: "Same with Heating Element", after the Pump and the Motorized Ball Valve): pick the
+// element, each row with its picture. A Skynet Heating Element has the Skynet element drawing (its Path is set, Rule 5.6); a User
+// Defined one has its own off and on pictures.
+const ELEM_OFF = 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', ELEM_ON = 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg';
+const ELEM_MODELS = [['Skynet Heating Element', 'sky', ELEM_OFF], ['User Defined Heating Element: your own pictures', 'user', 'Images/Skynet/Lights_LEDs/led_red.svg']];
+function pickElement() { return pickModel('2. Pick the heating element', ELEM_MODELS); }
+// "Vessel Device Template", Choose then Build (Fritz, 2026-11-05: in the Heating Element list, in place of the Electric kettle, basic):
+// pick a Vessel Template that has an Element Port, then the Heating Element is added as above, and a copy of the Vessel Template is
+// built on the 🔨 Build Tab (Rule 4.1) with its Element Placed and linked to the new Heating Element. The Vessel itself still has no
+// Devices of its own (Rule 5.7): the Heating Element is its own Device, the Vessel's Element spot only links it (Rule 5.31).
+const elemVesselTpls = () => (TPL?.vessel || []).filter(t => t.ports?.element && (isVesselWidget(t) || isUserBundledVessel(t, TPL.vessel)))
+  .sort((a, b) => !!b.vwidget - !!a.vwidget || a.name.localeCompare(b.name));
+async function pickElemVessel() {
+  if (!TPL) await loadTemplates().catch(() => {});
+  const icon = t => ({ key: t.name, label: t.name, img: tplIcon('vessel', t), title: t.notes || t.name }), all = elemVesselTpls();
+  return pickVessel('Heating Element: choose the Vessel Device Template, then Build', [
+    { head: 'Vessel Widget', note: 'The Vessel Widget class: every IP, a Temperature Probe and an Element Port, each with a Place slider. Its Element is Placed for you.',
+      items: all.filter(t => t.vwidget).map(icon), empty: 'No Vessel Widget Template yet.' },
+    { head: 'Vessel Templates with an Element Port', note: 'Skynet Vessel Widgets and your User Bundled Templates that have an Element Port.',
+      items: all.filter(t => !t.vwidget).map(icon), empty: 'None yet.' }]);
+}
 // the picker of step 2: rows of [name, key, picture]; resolves with the key (undefined = Cancel)
 function pickModel(title, rows) {
   return new Promise(res => {
@@ -3059,6 +3080,12 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     what = MBV_MODELS.find(m => m[1] === k)[0].replace(/:.*$/, '');
     if (k === 'sky') { pick = 'skyDevice'; extra = { template: MBV_TPL }; } else { pick = 'valve'; extra = undefined; }
   }
+  let elemVessel = null;          // Vessel Device Template (Fritz, 2026-11-05): choose the Vessel first, then its Heating Element
+  if (pick === 'vesselElement') {
+    const k = await pickElemVessel(); if (!k) return;
+    elemVessel = tplOf('vessel', k); if (!elemVessel) return toast('That Template is gone', true);
+    pick = 'element';
+  }
   if (pick === 'skyDevice') { const p = skyDevPreset(extra.template); if (!p) return toast(`No Skynet Template ${extra.template}`, true); pick = 'skyValve'; extra = p; }
   const preset = PRESETS[pick], type = preset ? preset.type : pick === 'skyValve' ? extra.type : pick, kind = extra?.kind;
   const e0 = { type, kind }; let i = 1, base = prefixOf(e0) ? prefixOf(e0) + 'New' : (prefix || type) + '_';
@@ -3092,7 +3119,16 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
       what = PUMP_MODELS.find(m => m[1] === k)[0];
       centerNew(e);       // so the Add box shows where it will go
     }
-    if (!(await newDeviceDialog(e, prefix, what))) return;
+    if (pick === 'element') {      // Add Heating Element step 2 (Fritz, 2026-11-05): which element; the Pump's drill-down follows
+      const k = await pickElement(); if (!k) return;
+      if (k === 'user') { e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; }
+      else { e.imageOff = ELEM_OFF; e.imageOn = ELEM_ON; }
+      what = elemVessel ? `Heating Element for ${elemVessel.name}` : ELEM_MODELS.find(m => m[1] === k)[0].replace(/:.*$/, '');
+      e._title = what;
+      centerNew(e);
+    }
+    const ok = await newDeviceDialog(e, prefix, what); delete e._title;
+    if (!ok) return;
   }
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
@@ -3101,7 +3137,19 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box (Fritz, 2026-11-04)
   draft.elements.push(e); sel = { kind: 'el', id: e.name };
   const cut = splitPipeFor(e); if (cut?.ok) toast(cut.text, false, 6000);      // added right on a pipe (Rule 5.26)
+  if (elemVessel) return elemVesselBuild(elemVessel, e);
   renderWs(); editItem('el', e.name);
+}
+// the Vessel of "Vessel Device Template" built on the 🔨 Build Tab with its Element Placed and linked to the new Heating Element
+function elemVesselBuild(t, e) {
+  const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(x => x.name)].filter(Boolean);
+  addTemplateToTab('vessel', t, e.workspace, bundleName(t.name, tabIdOf(e.workspace) || 'Build', taken));
+  const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
+  if (g) {
+    g.ports ||= {}; g.ports.element = { ...(g.ports.element || { position: t.ports.element.position }), installed: true };
+    g.heater = e.name; syncVesselPorts(g, null); renderWs(); editItem('gfx', g.id);
+  }
+  toast(`${e.name} is on the ${e.workspace} Tab. ${g?.name || t.name} is on the 🔨 Build Tab with its Element linked to it: 💾 Save Build ... > To a Tab puts it on the ${e.workspace} Tab.`, false, 9000);
 }
 // ---- Skynet Device Templates (Fritz, 2026-10-28, Rules 5.16 and 5.17; public/templates.js). A Device made from one is its User
 // version: template = the Template's name. Only the Template's userFields show in its Properties; the rest are set by it.
@@ -3204,6 +3252,8 @@ const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: '
 // Fritz, 2026-11-05: one row for the Motorized Ball Valves; step 2 picks the Skynet one or the User Defined one (with pictures)
 const MBV = ['Motorized Ball Valve, open / closed (relay)', 'mbv', 'Valve'];
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
+// Fritz, 2026-11-05: "instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build"
+const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'DO'];
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
@@ -3211,7 +3261,7 @@ const DEV_TYPES = () => [
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
   ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
   ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
-    am('RIMS tube'), am('Electric kettle, basic')]],
+    am('RIMS tube'), VESSEL_ELEMENT]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
   ['probe', 'Probe (temperature)', [...amGroup('Devices: temperature'), ...amGroup('Devices: Skynet').filter(r => ['thermowell', 'probeTee'].includes(r[1]))]],
@@ -3366,7 +3416,7 @@ async function newDeviceDialog(e, hint, what) {
   const pinPort = port[2] === 'pin', portF = [port[0], pinPort ? 'Available Ports' : port[1], pinPort ? 'pinsel' : port[2], ...port.slice(3)];
   const T = DEVICE_TIPS, after = { after: true };
   // the Pump's drill-down (Rules 18.13-18.21) and, the same without a Cover, the Motorized Ball Valve's (Fritz, 2026-11-05, Rule 18.23)
-  const dd = isDrillDev(e), mbv = isMbvDev(e);
+  const dd = isDrillDev(e), mbv = isMbvDev(e), elem = isElemDev(e);
   if (mbv && e.template) e._orient = orientPick(e);
   const fields = [['label', n() + 'Label', 'text', null, false, false, { tip: T.label, ...(dd ? { attr: LABEL_POP } : {}) }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
     ['device', n() + 'Interface (board)', 'dev', 'addnewid', false, false, { tip: T.iface + (pinPort ? ' ' + T.port : ''), ...(pinPort ? { with: portF } : {}) }],
@@ -3378,19 +3428,21 @@ async function newDeviceDialog(e, hint, what) {
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
     ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after)] : []),
     ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
+    ...(elem ? [...ELEM_GRAPHIC_FIELDS(e, after), ...ELEM_OVERLAY(e, after), ...ELEM_OWN(e, after)] : []),        // a Heating Element: no Cover either
     ...(dd ? [['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }]] : []),
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
-    ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || (isPumpDev(e) ? 'Pump' : 'Valve') }), false, false, { tip: T.type }]] : [])];
+    ...(dd ? [['typeCode', 'Device Type', 'ro', shownType({ ...e, typeCode: work.typeCode || drillCode(e) }), false, false, { tip: T.type }]] : [])];
   work.w = e.w; work.h = e.h;
   work.hideName = e.hideName ?? true;        // Label Visible starts at No (Fritz, 2026-11-04, Rule 18.15)
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
-  if (dd && !work.typeCode) work.typeCode = isPumpDev(e) ? 'Pump' : 'Valve';      // the list it was picked in (Rule 4.2): shown greyed out, read only
+  if (dd && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
   if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   if (isPumpDev(e)) work.cover = e.cover || 'None';
+  if (elem) work.imageOn = e.imageOn;
   if (mbv) Object.assign(work, { tapwater: !!e.tapwater, closeAll: e.closeAll ?? true, openAll: e.openAll ?? true, imageOn: e.imageOn, orientation: e.orientation, _orient: e._orient, template: e.template, ipInX: e.ipInX, ipInY: e.ipInY, ipOutX: e.ipOutX, ipOutY: e.ipOutY });
   const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent], labels0 = was;
   for (const b of oks) b.textContent = '➕ Add Device';
@@ -3411,7 +3463,7 @@ async function newDeviceDialog(e, hint, what) {
   try {
     for (;;) {
       let last = deviceSuggestion(work), touched = !!work.name && work.name !== last;
-      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
+      const shown = dialog(isPumpDev(e) && pumpModelOf(e) ? pumpModelOf(e) : mbv ? mbvTitle(e) : elem ? e._title || elemTitle(e) : `Add Device: ${what ? what.replace(/\s*\(.*$/, '') : elTitle(e).replace(/ Device$/, '')}`, fields, work, false, ['edit-layout-bar', 'add-device']);
       gate();
       const nameBox = body.querySelector('[data-k="name"]');
       if (!touched) nameBox.value = last;
@@ -3480,7 +3532,7 @@ async function newDeviceDialog(e, hint, what) {
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? ['tap', 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover'] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (mbv && e.template) { e._orient = work._orient; skyOrientSwitch(e); delete e._orient; applyDeviceTemplate(e, devTemplate(e)); }     // the Orientation picks its Template; the fixed attributes stay the Template's (Rule 5.16)
         if (dd) { const d = { ...work }; dbFromWork(d); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; }
         if (+work.w > 0) e.w = +work.w;
@@ -4650,6 +4702,32 @@ function pumpDeviceFields(it, item) {
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
 
+// ---- Heating Element Device Properties (Fritz, 2026-11-05: "Same with Heating Element"): the Pump's Add box and Properties
+// (Rules 18.13-18.21) without a Cover, as the Motorized Ball Valve's (Rule 18.23). A Skynet Heating Element's Path is set (Rule 5.6); a
+// User Defined one has Path (off) and Path (on). Orientation Right / Left with Toggle on its line; Overlay with Database and .API ⬢.
+// It still asks before it turns on (Rule 2.33).
+const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
+  const T = DEVICE_TIPS, tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.eToggle }];
+  return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.eGraphic, ...x }],
+    ...(isSkyElem(it) ? [['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: T.ePathSet, ...x }]]
+      : [['imageOff', 'Path (off)', 'gpick', null, false, false, { tip: T.ePath, ...x }], ['imageOn', 'Path (on)', 'gpick', null, false, false, { tip: T.ePathOn, ...x }]]),
+    ['_or', 'Orientation', 'orient', null, false, false, { tip: T.eOrient, with: tog, ...x }]];
+};
+const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
+const ELEM_OWN = (it, x = {}) => [['_ask', 'A Heating Element asks before it turns on (Rule 2.33).', 'note', null, false, false, x]];
+function elemDeviceFields(it, item) {
+  const T = DEVICE_TIPS;
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + ' ' + T.port, with: ['channel', 'Available Ports', 'pinsel', 'digital'] }],
+    ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
+    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Heating Element follows it until you type a name of your own)' : ''), 'note'],
+    ...ELEM_GRAPHIC_FIELDS(it), ...ELEM_OVERLAY(it), ...ELEM_OWN(it),
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
+}
+
 // ---- Motorized Ball Valve Device Properties (Fritz, 2026-11-05: "Create a Motorized Ball Valve Add Dialog using the Pump Drill Down
 // Format. Valves do not have covers but every thing else the same.", Rule 18.23). The Skynet Motorized Ball Valve and the User
 // Defined Motorized Ball Valve get the Pump's Add box and Properties (Rules 18.13-18.21) without a Cover. A Skynet one's Toggle and
@@ -4657,7 +4735,13 @@ function pumpDeviceFields(it, item) {
 // (Rule 18.22): Tap water (Rule 6.15), the Close all / Open all lists, and a User Defined valve's In and Out IP spots (Rule 5.22).
 const isMbvTpl = n => /^Skynet_Motorized_Ball_Valve_/.test(n || '');
 const isMbvDev = e => e?.type === 'digitalOut' && e.subtype === 'valve' && !e.kind && e.valveType !== 'manual' && (e.template ? skyDev(e) && isMbvTpl(e.template) : true);
-const isDrillDev = e => isPumpDev(e) || isMbvDev(e);
+// the Heating Element (Fritz, 2026-11-05: "Same with Heating Element"): an on / off element of its own (not one built into a RIMS tube or
+// an Integrated kettle, which keep their present dialog, Rule 18.10)
+const isElemDev = e => e?.type === 'digitalOut' && e.subtype === 'element' && !e.kind && !e.template && !e.integratedIn;
+const isSkyElem = e => e?.imageOff === ELEM_OFF;
+const elemTitle = e => isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';
+const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isElemDev(e);
+const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'DO' : 'Valve';
 // the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
 function autoLabel(type) {
   const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
@@ -4665,7 +4749,7 @@ function autoLabel(type) {
   return `${type}_${used.length ? Math.max(...used) + 1 : 1}`;
 }
 const mbvTitle = e => e?.template ? 'Skynet Motorized Ball Valve' : 'User Defined Motorized Ball Valve';
-const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : mbvTitle(e);
+const drillTitle = e => isPumpDev(e) ? pumpModelOf(e) || 'Pump Device Properties' : isElemDev(e) ? elemTitle(e) : mbvTitle(e);
 const MBV_ORIENT = v => [...(v ? [] : [['', 'As its picture is drawn']]), ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']];
 const MBV_IP_POP = { title: 'In and Out IP spots', fields: IP_AT_FIELDS };
 // the Graphic, its Path (set on a Skynet valve, Rule 5.6; a User Defined valve's closed and open pictures) and Orientation
@@ -4863,6 +4947,14 @@ const DEVICE_TIPS = {
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
   vTapEnd: 'Which end the tap water comes in at; it flows out of the other end.',
+  // the Heating Element (Fritz, 2026-11-05)
+  eGraphic: 'The picture of this Heating Element as it will show on the Tab, off, turned to its Orientation.',
+  ePathSet: 'The picture of the Skynet Heating Element. It is set and cannot be changed (a User Defined one has its own paths).',
+  ePath: 'The picture of your Heating Element when it is off.',
+  ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
+  eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
+  eToggle: 'What a tap on the Heating Element does: On/Off turns it on or off (it asks first); Push button is on only while held.',
+  eOverlay: 'Drawn on top of the Heating Element while it is on: None to start (its on picture glows); the bolts are choices (Rule 7.15).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && kind === 'text' && obj._ref && String(obj.name ?? '').trim()) return lockedName(key, label, obj);
@@ -5742,6 +5834,7 @@ async function editItem(kind, id) {
     if (isDataW(it)) return [...dataWidgetFields(it), ...dbFields(it)];       // Value, Time and DateTime Widget Properties (Rule 1.23)       // Timer Widget Properties (Fritz, 2026-10-29)
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
+    if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
