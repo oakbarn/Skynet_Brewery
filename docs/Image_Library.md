@@ -8,7 +8,9 @@ Copies live in `/mnt/project-files/Image_Library/<group>/` with the same group f
 
 **Rule (Fritz, 2026-10-27): new images are never added here automatically.** A new image goes in only when Fritz says to commit it.
 
-**Totals:** 133 files (113 SVG, 20 PNG) in 10 groups. The Motors group is empty.
+**2026-11-05 (Fritz):** the old pipe_ fittings, Skynet_TC15_InstrumentTee, the Valve_Ball PNGs and every Open valve picture were retired to the repo's Delete/ folder and taken off this list (see Delete/README.md and Help 129); Valve_Ball_ClosedH_1 / ClosedV-1x1 are renamed Motorized_TC15_Ball_Valve_Horizontal / _Vertical. The project-folder copies in Image_Library/ are not changed.
+
+**Totals (2026-10-26, before that cleanup):** 133 files (113 SVG, 20 PNG) in 10 groups. The Motors group is empty.
 
 Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size on screen). PNG sizes are pixels. Where a PNG and an SVG share a name, the PNG is the original and the SVG is either a hand redraw ("Skynet drawing") or a panel auto-trace. "Pump_Whute_Rip_On" is the original file name, typo included.
 
@@ -96,16 +98,11 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 | `Skynet_TC15_90.svg` | Skynet TC 1.5 inch 90 degree elbow (after Fritz's drawing): openings at the middle of the Bottom and Right edges, a long round bend | viewBox 0 0 100 100 (100x100) | Fitting Template Elbow_90; Skynet Bundled Fitting picture choice |
 | `Skynet_TC15_EndCap.svg` | Skynet TC 1.5 inch End Cap, seen from the side (after Fritz's drawing). On an opening it turns to face it. | viewBox 0 0 100 100 (100x100) | Fitting Template End_Cap; Skynet Bundled Fitting picture choice |
 | `Skynet_TC15_EqualTee.svg` | Skynet TC 1.5 inch equal tee (after Fritz's drawing): openings at the middle of the Left, Right and Top edges, round inside corners | viewBox 0 0 100 100 (100x100) | Fitting Template Tee; Skynet Bundled Fitting picture choice |
-| `Skynet_TC15_InstrumentTee.svg` | Skynet TC 1.5 inch instrument tee (after Fritz's drawing): a short tee with a short, narrow branch for a probe or gauge. Openings at the middle of the Left, ... | viewBox 0 0 100 56 (100x56) | Fitting Template Instrument_Tee; Skynet Bundled Fitting picture choice |
 | `Skynet_TC15_Thermowell_Long.svg` | Skynet TC 1.5 inch long thermowell (after Fritz's drawing): the TC cap on the left, the well (purple) reaching right | viewBox 0 0 320 100 (320x100) | Thermowell Device (Short/Medium/Long) |
 | `Skynet_TC15_Thermowell_Medium.svg` | Skynet TC 1.5 inch medium thermowell (after Fritz's drawing): the TC cap on the left, the well (purple) reaching right | viewBox 0 0 230 100 (230x100) | Thermowell Device (Short/Medium/Long) |
 | `Skynet_TC15_Thermowell_Short.svg` | Skynet TC 1.5 inch short thermowell (after Fritz's drawing): the TC cap on the left, the well (purple) reaching right | viewBox 0 0 150 100 (150x100) | Thermowell Device (Short/Medium/Long) |
 | `Skynet_TC1_2_Rims_Device.svg` | Skynet RIMS tube, an Integrated Device (Fritz's drawing, 2026-10-23): wort in at the top left and out at the bottom (TC fittings with their IPs built in), th... | viewBox 0 0 413 58 (413x58) | Integrated Device Template RIMS_Tube |
 | `herms_coil.svg` | HERMS coil. | viewBox 0 0 180 180 (180x180) | Vessel/Equipment Template HERMS_Coil; Equipment Widget "HERMS coil" |
-| `pipe_cross.svg` | Pipe cross (4 ends). | viewBox 0 0 90 90 (90x90) | Equipment Widget "Pipe cross"; Skynet Bundled Fitting picture choice |
-| `pipe_elbow45.svg` | Pipe 45° elbow. | viewBox 0 0 90 90 (90x90) | Equipment Widget "Pipe 45° elbow"; Skynet Bundled Fitting picture choice |
-| `pipe_elbow90.svg` | Pipe 90° elbow. | viewBox 0 0 90 90 (90x90) | Fitting Template Valve_90; Fitting Template Valve_Tee_Thermowell_90; Equipment Widget "Pipe 90° elbow"; Skynet Bundled Fitting picture choice |
-| `pipe_tee.svg` | Pipe tee (3 ends). | viewBox 0 0 90 90 (90x90) | Equipment Widget "Pipe tee"; Skynet Bundled Fitting picture choice |
 | `trub_filter.svg` | Trub / hop filter canister. | viewBox 0 0 100 170 (100x170) | Vessel/Equipment Template Trub_Filter; Equipment Widget "Trub filter" |
 
 ## Pumps
@@ -142,39 +139,21 @@ Notes: "viewBox" is the drawing's own size in SVG units (it scales to any size o
 
 | Name | What it shows | Size | Used by |
 |---|---|---|---|
-| `Valve_Ball_ClosedH_1.png` | Original PNG (Valve Ball ClosedH 1). | 139x119 px | On/Off picture list "Ball valve closed (horizontal)"; sample Schema (config/brewery.json) |
-| `Valve_Ball_ClosedH_1.svg` | motorised ball valve, closed, horizontal pipe. Same size and pipe spot as Valve_Ball_ClosedH_1.png. | viewBox 0 0 139 119 (139x119) | not used yet |
-| `Valve_Ball_ClosedV-1x1.png` | Original PNG (Valve Ball ClosedV-1x1). | 119x141 px | On/Off picture list "Ball valve closed (vertical)" |
-| `Valve_Ball_ClosedV-1x1.svg` | motorised ball valve, closed, vertical pipe. Same size and pipe spot as Valve_Ball_ClosedV-1x1.png. | viewBox 0 0 119 141 (119x141) | not used yet |
-| `Valve_Ball_OpenH_1.png` | Original PNG (Valve Ball OpenH 1). | 139x119 px | On/Off picture list "Ball valve open (horizontal)"; Skynet Bundled Fitting picture choice; sample Schema (config/brewery.json) |
-| `Valve_Ball_OpenH_1.svg` | Auto-traced SVG of Valve_Ball_OpenH_1 (made by the panel; quality only fair). | viewBox 0 0 139 119 (139x119) | not used yet |
-| `Valve_Ball_OpenV-1x1.png` | Original PNG (Valve Ball OpenV-1x1). | 119x141 px | On/Off picture list "Ball valve open (vertical)"; Skynet Bundled Fitting picture choice |
-| `Valve_Ball_OpenV-1x1.svg` | Auto-traced SVG of Valve_Ball_OpenV-1x1 (made by the panel; quality only fair). | viewBox 0 0 119 141 (119x141) | not used yet |
+| `Motorized_TC15_Ball_Valve_Horizontal.svg` | Motorized TC 1.5 inch ball valve, horizontal pipe (the older BruControl drawing, renamed from Valve_Ball_ClosedH_1 by Fritz 2026-11-05). Open shows the On overlay. | viewBox 0 0 139 119 (139x119) | On/Off picture list; sample Schemas and default Schema |
+| `Motorized_TC15_Ball_Valve_Vertical.svg` | Motorized TC 1.5 inch ball valve, vertical pipe (the older BruControl drawing, renamed from Valve_Ball_ClosedV-1x1 by Fritz 2026-11-05). Open shows the On overlay. | viewBox 0 0 119 141 (119x141) | On/Off picture list; sample Schemas and default Schema |
 | `Valve_Check.svg` | Skynet check valve: openings at the middle of the Left (flow in) and Right (flow out) edges. The arrow shows the only way liquid can go. | viewBox 0 0 100 100 (100x100) | Fitting Template Check_Valve; Skynet Bundled Fitting picture choice |
 | `Valve_Gas_Solenoid_ClosedH.svg` | Skynet solenoid gas valve, closed (ring; brass body, black coil with a flame), horizontal: pipe ends at the middle of the Left and Right edges, coil on top | viewBox 0 0 140 120 (140x120) | On/Off picture list "Solenoid gas valve closed (horizontal)" |
 | `Valve_Gas_Solenoid_ClosedV_L.svg` | Skynet solenoid gas valve, closed (ring; brass body, black coil with a flame), vertical: pipe ends at the middle of the Top and Bottom edges, coil on the left | viewBox 0 0 120 140 (120x140) | On/Off picture list "Solenoid gas valve closed (vertical, coil left)" |
 | `Valve_Gas_Solenoid_ClosedV_R.svg` | Skynet solenoid gas valve, closed (ring; brass body, black coil with a flame), vertical: pipe ends at the middle of the Top and Bottom edges, coil on the right | viewBox 0 0 120 140 (120x140) | On/Off picture list "Solenoid gas valve closed (vertical, coil right)" |
-| `Valve_Gas_Solenoid_OpenH.svg` | Skynet solenoid gas valve, open (red dot and a bolt on the coil; brass body, black coil with a flame), horizontal: pipe ends at the middle of the Left and Ri... | viewBox 0 0 140 120 (140x120) | On/Off picture list "Solenoid gas valve open (horizontal)" |
-| `Valve_Gas_Solenoid_OpenV_L.svg` | Skynet solenoid gas valve, open (red dot and a bolt on the coil; brass body, black coil with a flame), vertical: pipe ends at the middle of the Top and Botto... | viewBox 0 0 120 140 (120x140) | On/Off picture list "Solenoid gas valve open (vertical, coil left)" |
-| `Valve_Gas_Solenoid_OpenV_R.svg` | Skynet solenoid gas valve, open (red dot and a bolt on the coil; brass body, black coil with a flame), vertical: pipe ends at the middle of the Top and Botto... | viewBox 0 0 120 140 (120x140) | On/Off picture list "Solenoid gas valve open (vertical, coil right)" |
 | `Valve_Manual_Butterfly_ClosedH.svg` | Skynet manual butterfly valve, closed (handle across the pipe), horizontal: pipe ends at the middle of the Left and Right edges, handle on top | viewBox 0 0 140 120 (140x120) | On/Off picture list "Manual butterfly valve closed (horizontal)" |
 | `Valve_Manual_Butterfly_ClosedV_L.svg` | Skynet manual butterfly valve, closed (handle across the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the left | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual butterfly valve closed (vertical, handle left)" |
 | `Valve_Manual_Butterfly_ClosedV_R.svg` | Skynet manual butterfly valve, closed (handle across the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the right | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual butterfly valve closed (vertical, handle right)" |
-| `Valve_Manual_Butterfly_OpenH.svg` | Skynet manual butterfly valve, open (handle along the pipe), horizontal: pipe ends at the middle of the Left and Right edges, handle on top | viewBox 0 0 140 120 (140x120) | Fitting Template Butterfly_Valve_1in; On/Off picture list "Manual butterfly valve open (horizontal)"; Skynet Bundled Fitting picture choice |
-| `Valve_Manual_Butterfly_OpenV_L.svg` | Skynet manual butterfly valve, open (handle along the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the left | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual butterfly valve open (vertical, handle left)" |
-| `Valve_Manual_Butterfly_OpenV_R.svg` | Skynet manual butterfly valve, open (handle along the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the right | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual butterfly valve open (vertical, handle right)" |
 | `Valve_Manual_ClosedH.svg` | Skynet manual ball valve, closed (handle across the pipe), horizontal: pipe ends at the middle of the Left and Right edges, handle on top | viewBox 0 0 140 120 (140x120) | On/Off picture list "Manual ball valve closed (horizontal)" |
 | `Valve_Manual_ClosedV_L.svg` | Skynet manual ball valve, closed (handle across the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the left | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual ball valve closed (vertical, handle left)" |
 | `Valve_Manual_ClosedV_R.svg` | Skynet manual ball valve, closed (handle across the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the right | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual ball valve closed (vertical, handle right)" |
-| `Valve_Manual_OpenH.svg` | Skynet manual ball valve, open (handle along the pipe), horizontal: pipe ends at the middle of the Left and Right edges, handle on top | viewBox 0 0 140 120 (140x120) | On/Off picture list "Manual ball valve open (horizontal)"; Skynet Bundled Fitting picture choice |
-| `Valve_Manual_OpenV_L.svg` | Skynet manual ball valve, open (handle along the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the left | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual ball valve open (vertical, handle left)" |
-| `Valve_Manual_OpenV_R.svg` | Skynet manual ball valve, open (handle along the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the right | viewBox 0 0 120 140 (120x140) | On/Off picture list "Manual ball valve open (vertical, handle right)" |
 | `Valve_Motor_Ball_ClosedH.svg` | Skynet motorized ball valve, closed, horizontal: pipe ends at the middle of the Left and Right edges; the ring means closed | viewBox 0 0 140 120 (140x120) | On/Off picture list "Motorized ball valve closed (horizontal)"; Proportional valve preset |
 | `Valve_Motor_Ball_ClosedV_LC.svg` | Skynet motorized ball valve, closed, vertical, motor on the left: pipe ends at the middle of the Top and Bottom edges | viewBox 0 0 120 140 (120x140) | On/Off picture list "Motorized ball valve closed (vertical, motor left)" |
 | `Valve_Motor_Ball_ClosedV_RC.svg` | Skynet motorized ball valve, closed, vertical, motor on the right: pipe ends at the middle of the Top and Bottom edges | viewBox 0 0 120 140 (120x140) | On/Off picture list "Motorized ball valve closed (vertical, motor right)"; Valve Profile default |
-| `Valve_Motor_Ball_OpenH.svg` | Skynet motorized ball valve, open, horizontal: pipe ends at the middle of the Left and Right edges; the red bolts mean open | viewBox 0 0 140 120 (140x120) | On/Off picture list "Motorized ball valve open (horizontal)"; Proportional valve preset; Skynet Bundled Fitting picture choice |
-| `Valve_Motor_Ball_OpenV_LC.svg` | Skynet motorized ball valve, open, vertical, motor on the left: pipe ends at the middle of the Top and Bottom edges | viewBox 0 0 120 140 (120x140) | On/Off picture list "Motorized ball valve open (vertical, motor left)"; Skynet Bundled Fitting picture choice |
-| `Valve_Motor_Ball_OpenV_RC.svg` | Skynet motorized ball valve, open, vertical, motor on the right: pipe ends at the middle of the Top and Bottom edges | viewBox 0 0 120 140 (120x140) | On/Off picture list "Motorized ball valve open (vertical, motor right)"; Skynet Bundled Fitting picture choice; Valve Profile default |
 
 ## Vessels
 

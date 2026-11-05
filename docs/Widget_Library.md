@@ -106,6 +106,22 @@ Color overrides only Mash, Boil, Whirlpool and Ferment. Flow from a **Tap Water 
 
 Two pipe sizes meeting on one IP get a reducer cone drawn by themselves.
 
+### Quick Disconnect Widget (`kind: ip`, `fitting: qd`, 2026-11-05, Rule 5.28, Help 127)
+A cam lock **Quick Disconnect** that sits on an **IP**, most often a valve end on a manifold. Drawn as Fritz's **bold red four-point star
+with a grey center** (`Images/Skynet/Valves/Quick_Disconnect.svg`, not in the Image Library), never smaller than 40 px, so it is easy to
+see on a Tab. Added from **Elbows, Tees …** or **Add Widget** (IPs, couplings and caps), made on the Build Tab first (Rule 4.1). In Edit
+layout it **snaps onto the nearest IP within 30 px** (`qdOn`) and follows that IP when it moves; dragged off, it comes off. With a hose
+on it, it passes flow to the IP under it; with nothing on it, it is shut. Settings: those of a pipe fitting (Rule 5.14: Autosize, X and
+Y hidden while it is on an IP, lock, Tab). Name **QD_1, QD_2 ...**
+
+### Quick Disconnect Hose (`kind: pipe`, `hose: true`, `qd: true`, 2026-11-05, Rule 5.28, Help 127)
+A hose drawn with **Draw QD hose** (Edit layout bar, row 2). Its first end hangs from a **pump IP** and stays put; its **free end** (`to`)
+can be moved **at any time, Edit layout or not**: the right mouse button (Rule 2.9), or a finger on a phone or tablet, on the yellow
+dashed ring at its end. Dropped on an **IP or Quick Disconnect** it joins it; anywhere in the **top third of a vessel** it is in that
+vessel's top (`to: vtop:<vessel id>`, one big IP); anywhere else it is loose (no flow). Operators and admins move it; the move is kept
+at once and every screen sees it (`POST /ui/hose`). A locked hose stays. Settings: the same as a Hose; its Properties title reads
+**Quick Disconnect Hose**. Flow and Flow Colors as every hose (Rule 5.21); a vessel's Out flow color colors flow pumped from its top.
+
 ### Graphic (picture) — "Add graphic"
 | Setting | Notes |
 |---|---|
@@ -219,7 +235,7 @@ All of these are a picture with a Name, a Type, a Label and ports. Every port ex
 - The Skynet RIMS_Tube Template is a Skynet_Integrated_Device (its Devices are built in): see the Device Library.
 
 ### Pipe tee, Pipe 90° elbow, Pipe 45° elbow, Pipe cross
-- Pictures in Images/Skynet/Other_Equipment (pipe_tee, pipe_elbow90, pipe_elbow45, pipe_cross), 90 x 90.
+- Pictures in Images/Skynet/Other_Equipment (Skynet_TC15_Long_Tee, Skynet_TC15_Elbow_90, Skynet_TC15_Elbow_45, Skynet_TC15_Cross; the old pipe_tee, pipe_elbow90, pipe_elbow45 and pipe_cross were retired to Delete/ on 2026-11-05), 90 x 90.
 - Types: Equal / Reducing (tee, cross); Short radius / Long radius (elbows).
 - Ports: Tee = Run A, Run B, Branch. Elbows = End A, End B. Cross = End A, B, C, D. Flow passes between all of them.
 
@@ -465,3 +481,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-04: Fritz's new drawings for Elbow_90 and Tee (thicker pipe, grey outline, IPs on the ferrule faces, Rule 5.20); the Three Vessel sample uses them for all its elbows and tees. (thread "Make Fritz's 90 elbow into an SVG Widget")
 - 2026-11-04: TC Pipe Fittings Widget subclass (Rule 5.25, Help 124): new Cross; Elbow_45 and Instrument_Tee redrawn; joints where pipes meet become TC Pipe Fittings; the old equipment Pipe tee / elbows / cross left the Add lists. (thread "Make Fritz's elbow and tee into SVG Widgets")
 - 2026-11-04: Manual Valve Widget has two IPs, one at each pipe end, in every Orientation (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
+- 2026-11-05: Quick Disconnect Widget (Fritz's red star on a valve IP) and Quick Disconnect Hose (its free end moves at any time, onto an IP, a Quick Disconnect or the top third of a vessel) (Rule 5.28, Help 127). (thread "Add movable quick disconnect hose")

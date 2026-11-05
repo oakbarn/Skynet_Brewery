@@ -63,7 +63,7 @@ assert.deepEqual([t2.bgColor, t2.nameAlign, t2.valueAlign, t2.digits, t2.precisi
 assert.equal(tabs.save(t1.id, { ...t2, valueType: 'led', ledMode: 'momentary' }).ledMode, 'momentary');
 assert.throws(() => tabs.save(t1.id, { ...t2, digits: 20 }), /1 to 12/);
 const v1 = valves.create('Ball H');
-assert.equal(v1.orientation, 'v'); assert.match(v1.imageOpen, /Valve_Motor_Ball_Open/);
+assert.equal(v1.orientation, 'v'); assert.equal(v1.imageOpen, undefined, 'no Open picture: the On overlay shows open (2026-11-05)'); assert.match(v1.imageClosed, /Valve_Motor_Ball_Closed/);
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'l45' }).orientation, 'l45');
 assert.equal(valves.save(v1.id, { ...v1, orientation: 'sideways' }).orientation, 'v');
 
