@@ -3063,7 +3063,7 @@ const ADD_MENU = [
     ['Pulse Button (one 100 ms ON per tap)', 'pulseButton', 'pl_'], ['LED (a light that shows ON or OFF)', 'led', 'led_', { look: 'indicator', hideName: false }],
   ]],
   ['Widgets (app only, no board pin)', [
-    ['Picture', 'picture'], ['Shared variable', 'shared'],
+    ['Picture Widget', 'picture'], ['Shared variable', 'shared'],
     ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
@@ -3130,6 +3130,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     const ok = await newDeviceDialog(e, prefix, what); delete e._title;
     if (!ok) return;
   }
+  if (isPicW(e)) { centerNew(e); if (!(await newPictureDialog(e))) return; }      // the Add Widget box, the Pump's drill-down for a Widget (Rule 18.27)
   if (pick === 'valve' && S.valveProfiles?.length && !(await useValveProfile(e))) return;
   useTabProfile(e);
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
@@ -3567,6 +3568,64 @@ async function newDeviceDialog(e, hint, what) {
     }
   } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
 }
+// ---- The Add Widget box of a Picture Widget (Fritz, 2026-11-05, Rule 18.27): the Add Device box's look and sequence for a Widget.
+// 1 Label (⬢) and Label Visible, 2 Picture, 3 Tab (the 🔨 Build Tab, Rule 4.1; greyed out), then the Name and the rest show. Enter
+// goes Label, Picture, ➕ Add Widget (Rule 18.20). ➕ Add Widget can always be pressed and says what is missing (Rule 18.15).
+async function newPictureDialog(e) {
+  const work = { type: 'picture', label: PIC_AUTO_LABEL ? autoLabel('Picture') : '', hideName: e.hideName ?? true, imageOff: e.imageOff, imageOn: e.imageOn, imageOverlay: e.imageOverlay,
+    follow: e.follow, tap: e.tap, text: e.text, x: e.x, y: e.y, w: e.w, h: e.h };
+  // a new Picture Widget starts as a still picture with no picture yet (the green / red LEDs are for on / off Devices)
+  if (work.imageOff === 'Images/Skynet/Lights_LEDs/led_red.svg') { delete work.imageOff; delete work.imageOn; }
+  const KEEP = ['label', 'hideName', 'imageOff', 'imageOn', 'imageOverlay', 'bgColor', 'follow', 'tap', 'text', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'];
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
+  for (const b of oks) b.textContent = '➕ Add Widget';
+  for (const b of cancels) b.textContent = '✖ Cancel';
+  const gate = () => {
+    const w = { ...work }; try { readFields(w, body); } catch { }
+    const why = !String(w.label || '').trim() ? 'Type a Label first (1. Label)' : !w.imageOff || w.imageOff === '__add__' ? 'Pick the Picture first (2. Picture)' : '';
+    for (const b of oks) { b.disabled = false; b.classList.toggle('waitStep', !!why); b.title = why; }
+    for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !!why);
+    return why;
+  };
+  try {
+    for (;;) {
+      let last = picSuggest(e, work.label), touched = !!work.name && work.name !== last;
+      const shown = dialog('Picture Widget', it => pictureWidgetFields(it, e, true), work, false, ['picture-widget', 'adding-a-picture-widget']);
+      const base = body.onchange;          // the form's own: Add new ... in a picture list, and Turns on with greying the Overlay
+      const nameBox = () => body.querySelector('[data-k="name"]');
+      const sync = () => { gate(); const nb = nameBox(); if (nb && !touched) nb.value = last; };
+      sync();
+      const seq = () => ['label', 'imageOff'].map(k => body.querySelector(`[data-k="${k}"]`)).filter(x => x && !x.disabled && x.offsetParent !== null);
+      const seqNext = t => { const l = seq(), i = l.indexOf(t); (i >= 0 && l[i + 1] || oks.filter(b => b.offsetParent !== null).pop())?.focus(); };
+      dlgEnterSeq = t => { if (seq().includes(t)) { seqNext(t); return true; } return false; };
+      { const l = seq(); (l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }        // the first one still empty has the focus
+      body.oninput = body.onchange = ev => {
+        const t = ev.target;
+        if (ev.type === 'change') base?.(ev);
+        if (t === nameBox()) { touched = t.value.trim() !== '' && t.value !== last; gate(); return; }
+        if (t.dataset?.k === 'label') last = picSuggest(e, t.value);
+        sync();
+        if (ev.type === 'change' && t.tagName === 'SELECT' && !dlgArrowKey && t.isConnected && seq().includes(t) && !['', '__add__'].includes(t.value)) setTimeout(() => seqNext(t), 0);
+      };
+      const r = await shown;
+      if (r !== 'ok') return false;
+      try {
+        const missing = gate();
+        readFields(work, body);
+        if (missing) throw new Error(missing);
+        const sug = picSuggest(e, work.label), name = noSpaces(work.name || sug);
+        const bad = elementNameError(name, 'Widget'); if (bad) throw new Error(bad);
+        if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Names must be unique.`);
+        for (const k of KEEP) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+        if (+work.w > 0) e.w = +work.w;
+        if (+work.h > 0) e.h = +work.h;
+        if ((+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
+        e.name = name;
+        return true;
+      } catch (err) { toast(err.message, true); work.name = noSpaces(work.name || ''); }
+    }
+  } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
+}
 // ---- Thermowell (Fritz, 2026-10-23): a Temperature Device drawn as a TC 1.5 thermowell, Short, Medium or Long. After picking it
 // (step 2) a pop-up asks the type of Temperature Probe in it (2a), then the New Device box goes on as for any Device.
 const THERMOWELLS = { Short: ['Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg', 90], Medium: ['Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Medium.svg', 138], Long: ['Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Long.svg', 192] };
@@ -3878,7 +3937,9 @@ function useTabProfile(e) {
 // LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
 const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : 'normal';
 // Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
-$('#addImg').onclick = () => { toBuild(); const g = { id: newId(), kind: 'image', workspace: wsName, x: 40, y: 40, w: 200, h: 200, image: '' }; draft.graphics.push(g); renderWs(); editItem('gfx', g.id); };
+// Fritz, 2026-11-05 (Rule 18.27): Picture ➕ makes a Picture Widget through its Add Widget box (it made a plain still picture; those
+// already on a Tab keep working, and a Picture Widget that turns on with None is a still picture)
+$('#addImg').onclick = guard(() => addThing('picture'));
 // a new Text Widget starts with the Default tab's size, place and Visible (copied now; colors and alignment follow the Default). Word wrap is always on.
 $('#addText').onclick = () => addText();
 function addText() {
@@ -4887,6 +4948,55 @@ function probeDeviceFields(it, item) {
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
 
+// ---- Picture Widget (Fritz, 2026-11-05: "build a Picture Widget Build ... follow the look and sequences of the Pump drill Down",
+// Rule 18.27, Help 74). The Pump's Add box and Properties (Rules 18.13-18.21) made to fit a Widget: a Widget has no Interface or
+// Port (Rule 1.2) and is made on the 🔨 Build Tab first (Rule 4.1), so the Add Widget box asks 1 Label, 2 Picture, (3 Tab is the
+// Build Tab), then 4 the Name. Its own set (Rule 18.22): the Picture, Turns on with and Toggle, the Overlay (the second picture in
+// its ⬢ pop-up) and the Text on picture. What an older Picture Widget already has set (Image Path 1-3, Look ...) is kept.
+const isPicW = e => e?.type === 'picture';
+// Rule 18.15: does a new Picture Widget's Label start filled in as Picture_n? Fritz decides (asked 2026-11-05); off until he says
+const PIC_AUTO_LABEL = false;
+// '' = the old default: a tap turns on or off what it turns on with (nothing for a still picture)
+const PIC_TAP = v => [['', 'On/Off'], ['hold', 'Push button'], ['none', 'None'], ...(v && !['', 'toggle', 'hold', 'none'].includes(v) ? [[v, v]] : [])];
+// the Suggested Name: pic_ and the Label (as the samples name them, e.g. pic_Kettle_Element), until a name of its own is typed
+const picSuggest = (it, label) => {
+  const L0 = draft || S.config, b = 'pic_' + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Picture');
+  let n = b, i = 2; while (L0.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++;
+  return n;
+};
+const PIC_TIPS = {
+  label: 'The name shown on the Tab, for example Kettle Element. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
+  labelVisible: 'On: the Label shows on the Tab. Off: no Label shows (a picture usually needs none).',
+  picture: 'The picture it shows. Pick it from the list (the 🖼 opens the icon picker); Add new ... takes any picture in media/Images.',
+  tabBuild: 'A new Widget is made on the 🔨 Build Tab first, then sent to its Tab (Rule 4.1).',
+  tab: 'The Tab this Widget is on.',
+  name: 'Made from the Label: pic_ and the Label. You may type your own; it must be unique. A Process uses it, e.g. pic_Kettle.visible = false.',
+  graphic: 'The picture as it will show on the Tab.',
+  follow: 'What turns the picture On: an on / off Device or Widget, or a heater (On while Enabled). None = a still picture, so the Overlay is greyed out.',
+  toggle: 'What a tap on the picture does to what it turns on with: On/Off turns it on or off with one click; Push button is on only while held; None does nothing.',
+  overlay: 'Drawn on top of the picture while it is On: the preferred way (Rule 7.8). The ⬢ beside it holds the second picture (optional) and the Back Colour.',
+  text: 'Text drawn on the picture (optional). The ⬆ opens a bigger box.',
+  type: 'A Picture Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
+};
+const PIC_POP = { title: 'Picture attributes', fields: [['imageOn', 'Picture when on (a second picture instead of the Overlay, optional)', 'gpick'], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+// add: the Add Widget box (the fields after 1-2 wait, as in the Add Device box); otherwise its Properties (the Pump's screen 9)
+function pictureWidgetFields(it, item, add) {
+  const T = PIC_TIPS, x = add ? { after: true } : {};
+  return [...(add ? [] : [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }]]),
+    ['label', '1. Label', 'text', null, false, false, { ...(add ? {} : { up: 2 }), attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['imageOff', '2. Picture', 'gpick', 'pictures', false, false, { tip: T.picture }],
+    add ? ['_tab', '3. Tab', 'ro', '🔨 Build Tab', false, false, { tip: T.tabBuild }] : ['workspace', '3. Tab', 'ws', null, false, false, { tip: T.tab }],
+    ['name', '4. Name', 'text', null, false, false, { tip: T.name, ...x }],
+    add ? ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, x] : ['_sug', `Suggested Name: ${picSuggest(item, it.label)}`, 'note'],
+    ['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic, ...x }],
+    ['follow', 'Turns on with', 'onsrc', null, true, false, { tip: T.follow, with: ['tap', 'Toggle', 'sel', PIC_TAP(it.tap)], ...x }],
+    ['imageOverlay', 'Overlay', 'gpick', 'overlays', false, false, { tip: T.overlay, attr: PIC_POP, ...x }],
+    ['text', 'Text on picture', 'text', null, false, false, { tip: T.text, up: 2, ...x }],
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: DEVICE_TIPS.xy, ...x }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: DEVICE_TIPS.xy, ...x }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: 'Its size on the Tab in pixels. 140 x 120 to start.', ...x }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: 'Its size on the Tab in pixels. 140 x 120 to start.', ...x }],
+    ['_wt', 'Widget Type', 'ro', 'Picture', false, false, { tip: T.type, ...x }]];
+}
+
 // Value, Time and DateTime Widget Properties (Fritz, 2026-11-05, Rule 1.23): the dialog pattern of the Timer Widget (Rule 18)
 function dataWidgetFields(it) {
   const d = DATA_W[it.type], val = it.type === 'valueWidget';
@@ -4986,6 +5096,7 @@ function field(f, obj) {
     if (x.attr) icons.push(h('button', { type: 'button', class: 'fldIcon fldAttr', title: x.attr.title, onclick: ev => { ev.preventDefault(); attrEntry(x.attr, obj); } }, '⬢'));
     if (icons.length) { wrap = h('div', { class: 'fldIcons' + (x.after ? ' afterStep hidden' : '') }, out[1], ...icons); out[1] = wrap; }      // waits with its field (Rule 18.15)
   }
+  if (x?.after && out[1]?.classList?.contains('fldIcons')) out[1].classList.add('afterStep', 'hidden');      // its ⬆ / ⬢ wait with it (the Picture Widget's Add box)
   if (f[5] === 'b' && out[0]?.tagName === 'LABEL') out[0].classList.add('strong');      // a main field: its name in bold
   if (['w', 'h'].includes(f[0]) && autoSized(obj)) {
     out[0].classList.add('greyed'); out[0].title = 'Autosize to pipe is on: switch it off to set the size';
@@ -5958,6 +6069,7 @@ async function editItem(kind, id) {
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
+    if (isPicW(it)) return pictureWidgetFields(it, item);         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.27)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
@@ -6114,7 +6226,7 @@ async function editItem(kind, id) {
       }
       if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
-      if ((isDrillDev(item) || isDataW(item)) && !String(work.label ?? '').trim()) work.label = work.name || item.name;     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
+      if ((isDrillDev(item) || isDataW(item) || isPicW(item)) && !String(work.label ?? '').trim()) work.label = work.name || item.name;     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
       if (follow) work.name = deviceSuggestion(work, item) || work.name; else autoNamed.delete(item);
