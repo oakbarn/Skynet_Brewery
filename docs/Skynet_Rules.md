@@ -491,15 +491,21 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   PWM / Analog out, Inputs, Probe, Sensors, Motors, Weight) and **Add Device** (only that kind's Devices;
   a Pump, Valve or on/off heating element is in On/Off too). Then the shortcuts **Pumps**, **Valves**,
   **Probe**, **Heating Element** and **PWM**: one click shows only that kind's list, the same as picking
-  the kind and then Add Device. Then **⧉ Clone Device** (a list of the Devices on other Tabs).
+  the kind and then Add Device. Then **Vessel** and **⧉ Clone Device** (a list of the Devices on other Tabs) (Fritz,
+  2026-11-05: "place vessel before clone").
 - **Row 1, Widgets:** **Select Widget Type** and **Add Widget**, **Picture ➕**, **Text ➕**, **Manual Valve ➕**,
-  **Override ➕**, then **Add equipment ➕** and **Vessel** at the far right (Fritz's order, 2026-11-03).
-- **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), the turn buttons, Lock, Lock
+  **Override ➕**, **Boolean ➕** (a list of the types first, like Probe: Switch, Push Button, Pulse Button, LED, the
+  ON / OFF Semi_Widgets_Devices of Rule 1.20), **Value ➕**, **Time ➕**, **DateTime ➕** (one click each, Rule 1.23)
+  (Fritz, 2026-11-05). Row 1 is made tight so it all fits on the top line in a full HD (1920 wide) window; a narrower
+  window wraps the last ones.
+- **Row 2:** Draw pipe, Draw hose, **Draw QD hose** (Rule 5.28), **Elbows, Tees …** (fittings and IPs), **Add equipment ➕**
+  (moved from row 1, Fritz 2026-11-05), the turn buttons, Lock, Lock
   All, Unlock All, Tab settings, New tab, **👻 Hidden Tab** and its **orange ?** (a pop-up with how Edit layout
   works, the hint that was on row 3), Build Tab, To Build Tab, Processes, Preview, Save Build.
 - **Row 3:** **Update Schema Version** (was Update Version), Save layout, Exit. A locked Equipment Profile warning
   still shows on row 3.
-*Replaced:* the ➕ Add box of PR #117 (2026-10-27).
+*Replaced:* the ➕ Add box of PR #117 (2026-10-27). *Replaced (2026-11-05):* row 1 Widgets ended with **Add equipment ➕** and
+**Vessel** at the far right (2026-11-03).
 
 ## 5. Templates and Integrated items
 
@@ -1816,3 +1822,4 @@ Valve drill-down dialog", Help 128):
 - 2026-11-05: Rule 6.14: the Send to the database choice Once is replaced by **In a Group** (Database Groups with a hidden key and a Group Name, `send_db_group Group_Name` sends the Group each time, ✏ Change name updates every Process; old Once items go In the Group named Once). `send_db Name` sends even when Off (no `send_Now`). Help 98 and 05 updated; no new Help number. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 1.23 (Value, Time and DateTime Widgets); Rule 6.14 gets the Send to the database choice **When Clicked**. Three Vessel sample: the Reporting readings are Value Widgets (w_Strike_Volume ...) sent When Clicked; Notes stays a gGlobal for now. Rule 1.20 confirmed unchanged. Help 134; next free Help number 135. (thread "Recolor 3 Vessel sample and add Reporting Tab")
 - 2026-11-05: Added Rule 8.4 (Password key): Skynet's own key button in every new-password box makes a strong password that follows the Password rules; Edge's own key went away when the clean window stopped syncing (Rule 9.8, PR #205). Help 10 updated; no new Help number. (thread "Restore generate password Key on fresh install")
+- 2026-11-05: Rule 4.5 updated: row 1 gets **Boolean ➕** (a list first, like Probe: Switch, Push Button, Pulse Button, LED), **Value ➕**, **Time ➕** and **DateTime ➕**; **Vessel** moves before ⧉ Clone Device; **Add equipment ➕** moves to row 2 after Elbows, Tees …; row 1 made tighter so it fits on the top line at 1920 wide. Help 82 updated; no new Help number. (thread "Add Widget buttons to Edit layout bar")

@@ -3212,6 +3212,7 @@ function fillAddType() {
   const adds = (sel, head, list, k) => fillPick(sel, head, k ? [['', list.find(x => x[0] === k)?.[2] || []]] : list.map(([, t, rows]) => [t, rows]));
   adds($('#devAdd'), 'Add Device', dev, $('#devKind').value); adds($('#wgtAdd'), 'Add Widget', wgt, $('#wgtKind').value);
   for (const s of $$('#editBar select[data-dev]')) fillPick(s, s.dataset.head, [['', dev.find(x => x[0] === s.dataset.dev)[2]]]);
+  fillPick($('#addBoolean'), 'Boolean ➕', [['', amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])])]]);     // Rule 4.5: the list first, like Probe
   fillPick($('#vesselPick'), 'Vessel', [['', VESSEL_ROWS]]);
   fillPick($('#addVesselType'), 'Add equipment ➕', [['', EQUIP_ROWS()]]);
   fillPick($('#addIpType'), 'Elbows, Tees …', [['TC Pipe Fittings', TC_FIT_ROWS()], ['IPs, couplings and caps', FIT_ROWS()]]);
@@ -3220,6 +3221,8 @@ function fillAddType() {
 $('#devKind').onchange = $('#wgtKind').onchange = () => fillAddType();
 for (const s of $$('#editBar select.typePick')) s.addEventListener('change', () => pickRun(s));
 $('#addManualValve').onclick = () => addIpFit('manualValve');
+// Value ➕, Time ➕, DateTime ➕ (Rule 4.5, Fritz 2026-11-05): one click, the same as Select Widget Type > Value, Time and DateTime Widgets
+for (const [id, t] of [['#addValueW', 'valueWidget'], ['#addTimeW', 'timeWidget'], ['#addDateTimeW', 'dateTimeWidget']]) $(id).onclick = guard(() => addThing(t, 'w_' + DATA_W[t].word));
 // ⧉ Clone Device (Fritz, 2026-10-27): the only way to make a Clone. It works on any Tab, the Build Tab too. The list holds the
 // Devices already placed on a Tab (not the ones on this Tab), grouped by type: Pumps, Valves ... Picking one puts its Clone on
 // this Tab with a name Skynet makes; its Visible, X and Y are its own. The list is filled each time it is opened.
