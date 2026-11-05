@@ -10,7 +10,7 @@ has no Cover**. (Skynet Rule 18.24)
 2. **Pick the heating element.** Each one has its picture:
    - **Skynet Heating Element**: the Skynet element drawing. Its picture is set, and it glows when on.
    - **User Defined Heating Element**: your own off and on pictures.
-3. The Add box opens with the element's name as its title. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font and
+3. The Add box opens with the element's name as its title. Its **Label** is already filled in by its control mode (On/Off: **hE_DO_1**, hE_DO_2 ...; see below), so the cursor starts on the next empty field. Fill it in order: 1 the **Label** (the ⬢ beside it sets its font and
    colors) and **Label Visible**, 2 the **Interface (board)** and an **Available Port** on the same line, 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic**: the element as it will show on the Tab, off, turned to its Orientation.
@@ -35,6 +35,19 @@ In the **Heating Element** list, **Vessel Device Template** takes the place of *
 
 The Vessel still has no Devices of its own (Rule 5.7): the Heating Element is its own Device, and the Vessel's Element spot links to
 it (Rule 5.31). *Electric kettle, basic* is still in the full **Add Device** list (Devices: Skynet).
+
+## Labels fill in by control mode
+
+Every Heating Element's Label starts filled in, with the next free number. You can change it, but it can't be blank.
+
+| Control mode | Label |
+|---|---|
+| PID | hE_PID_1 |
+| Hysteresis | hE_HYS_1 |
+| Duty Cycle | hE_DutyC_1 |
+| PWM (Heating element power 0-100 %) | hE_PWM_1 |
+| On/Off | hE_DO_1 |
+| Deadband | hE_DeadB_1 |
 
 ## Properties, from the top
 

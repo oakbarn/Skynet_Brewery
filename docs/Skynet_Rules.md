@@ -1625,7 +1625,9 @@ like Pump", Help 137):
    18.20, 18.23): 1 Label ⬢ and Label Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**,
    **Orientation** (Right / Left) with **Toggle** on its line, **Overlay** (None to start: the on picture glows) with **Database and
    .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**DO**). **No Cover.** It still asks before it
-   turns on (Rule 2.33). Label auto-fill: *waiting on Fritz* (Rule 18.15); for now the Label is typed, as a Pump's.
+   turns on (Rule 2.33). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in by its control mode as **hE_Mode_n**: PID
+   **hE_PID_1**, Hysteresis **hE_HYS_1**, Duty Cycle **hE_DutyC_1**, PWM **hE_PWM_1**, On/Off **hE_DO_1**, Deadband **hE_DeadB_1** (n the
+   next number not used yet for that mode). *The hE_ start and the _n end wait on Fritz's OK.*
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover; the Interface and Port are greyed out for good (Rule 18.13).
 5. **Vessel Device Template: Choose, then Build.** In the Heating Element list it takes the place of *Electric kettle, basic*
    (which stays in the full Add Device list, Devices: Skynet). **Choose** a Vessel Template that has an Element Port (the Vessel
@@ -1681,7 +1683,9 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
 2. The opening pattern (Rule 18.15 for a Widget): **1 Label** ⬢ and **Label Visible** (starts at No), **2 Picture** (the picture it
    shows, from the Picture list with the 🖼 icon picker), **3 Tab** greyed out as **🔨 Build Tab**. Nothing else shows until the
    Label and the Picture are done; ➕ Add Widget can always be pressed and says what is missing. Enter goes Label, Picture,
-   ➕ Add Widget (Rule 18.20). Label auto-fill: *waiting on Fritz* (Rule 18.15); for now the Label is typed, as a Pump's.
+   ➕ Add Widget (Rule 18.20). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in by its control mode as **hE_Mode_n**: PID
+   **hE_PID_1**, Hysteresis **hE_HYS_1**, Duty Cycle **hE_DutyC_1**, PWM **hE_PWM_1**, On/Off **hE_DO_1**, Deadband **hE_DeadB_1** (n the
+   next number not used yet for that mode). *The hE_ start and the _n end wait on Fritz's OK.*
 3. Then **4 Name** (the Suggested Name **pic_** + the Label, e.g. pic_Kettle_Element, as the samples name them; it may be edited),
    the **Graphic**, **Turns on with** (Rule 7.11) with **Toggle** (On/Off, Push button, None: what a tap does) on its line,
    **Overlay** (greyed out while Turns on with is None) with a ⬢ for the second picture (Picture when on, optional, Rule 7.8) and
@@ -1986,3 +1990,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: One exception to Rules 5.7 and 5.31 (Fritz): a Vessel built from a Vessel Widget Template is a Vessel Device; Elements,
   Probes, Thermowells and Valves on its IPs are integral parts (like the RIMS tube); a HERMS coil goes on the Left or Right HERMS IPs;
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
+- 2026-11-05: Rule 18.24: Heating Element Labels fill in by control mode (hE_PID_1, hE_HYS_1, hE_DutyC_1, hE_PWM_1, hE_DO_1, hE_DeadB_1; Rule 18.15). The Heating Element list's PWM row is a heating PWM (H_PWM).
