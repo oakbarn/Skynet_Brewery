@@ -3550,7 +3550,7 @@ function lockedRiders(item) {
 function lockedDrag(item, p, riders) {
   const names = riders?.slice(0, 3).map(lockName).join(', ') + (riders?.length > 3 ? ` and ${riders.length - 3} more` : '');
   const why = riders ? `🔒 ${lockName(item)} can't move: ${names} ${riders.length > 1 ? 'are' : 'is'} locked and would move with it. Unlock ${riders.length > 1 ? 'them' : 'it'} first (🔓 Unlock, or 🔓 Unlock All).`
-    : `🔒 ${lockName(item)} is locked in place. Press 🔓 Unlock (or 🔓 Unlock All) to move it.`;
+    : `🔒 ${lockName(item)} is locked in place. Press 🔓 Unlock (or 🔓 Unlock All) to move it${item.kind === 'vessel' ? ', or type a new X and Y in its Properties (double-click it)' : ''}.`;
   return { mode: 'locked', item, start: p, why };
 }
 // an Equipment Profile that is locked owns the equipment, IPs and pipes on its Tab: their lock can't change either
@@ -4077,7 +4077,7 @@ const F = {
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path'], ...IP_AT_FIELDS],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
+    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']],
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
@@ -4121,7 +4121,7 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ...VESSEL_FLOW(it),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
-  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
+  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
@@ -4407,12 +4407,11 @@ function field(f, obj) {
     out[0].addEventListener('click', ev => { if (ev.target === out[0]) { ev.preventDefault(); fieldTip(out[0].textContent, x.tip); } });
   }
   if (x?.after) for (const o of out) o?.classList?.add('afterStep', 'hidden');
-  if (x?.set && out[1]) {      // set once it is added (Fritz's Add Pump drawing, 2026-11-04): greyed out until ✏ Change
+  if (x?.set && out[1]) {      // set once it is added: greyed out for good. Fritz, 2026-11-05: the Interface and Port are physical
+    // wiring and almost never change, so there is no ✏ Change; the Device keeps its hidden key and only its Name changes (✏ Change name)
     const box = out[1], ins = () => [...(box.matches?.('select, input') ? [box] : []), ...(box.querySelectorAll?.('select, input, button') ?? [])];
-    for (const i of ins()) i.disabled = true;
+    for (const i of ins()) { i.disabled = true; i.title = 'Set when it was added: the board and pin it is wired to'; }
     out[0].classList.add('greyed');
-    const chg = h('button', { type: 'button', class: 'nameBtn', title: 'Change it (a Process that uses this Device is not changed)', onclick: ev => { ev.preventDefault(); for (const i of ins()) i.disabled = false; out[0].classList.remove('greyed'); chg.remove(); } }, '✏ Change');
-    out[1] = h('div', { class: 'fldIcons' }, box, chg);
   }
   if (x && out[1]) {
     const icons = []; let wrap;
@@ -5123,10 +5122,11 @@ async function attrEntry(attr, obj) {
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
-  const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked };
+  const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked, x: v.x || 0, y: v.y || 0 };
   const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
-    ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
+    ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
+    ['x', 'X Horizontal (the whole bundle moves)', 'num'], ['y', 'Y Vertical (the whole bundle moves)', 'num'],
     ...(isBfit(v) && plainFittings(v.fittings) ? [] : [['clone', `Clone: put a copy of this ${what} and its IPs next to it`, 'bool']])], work, false, graphicTopic(v));     // pipe fittings have no Clone (Fritz, 2026-10-28)
   if (r !== 'ok') return;
   readFields(work);
@@ -5135,6 +5135,12 @@ async function editBundle(v) {
     const frozen = profileFrozen(v);
     if (frozen) toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
     else for (const g of [v, ...bundleParts(v)]) setLock(g, work.locked);
+  }
+  const bx = Math.round(+work.x || 0) - (v.x || 0), by = Math.round(+work.y || 0) - (v.y || 0);
+  if ((bx || by) && Number.isFinite(bx) && Number.isFinite(by)) {      // Rule 2.12: X and Y move it even when it is 🔒 locked
+    const offBefore = offEnds();
+    v.x = (v.x || 0) + bx; v.y = (v.y || 0) + by; shiftVesselParts(v, bx, by);
+    renderWs(); letGoBentEnds(offBefore);
   }
   if (work.workspace && work.workspace !== v.workspace) {
     const old = v.workspace;
@@ -5466,7 +5472,7 @@ async function editItem(kind, id) {
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
-    const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked;
+    const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked, wasXY = [+item.x || 0, +item.y || 0], wasNew = !!item.isNew;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
     if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
       const frozen = profileFrozen(item);
@@ -5481,6 +5487,10 @@ async function editItem(kind, id) {
       const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === oldTab && (ips.includes(p.from) || ips.includes(p.to)));
       toast(`Moved to the ${item.workspace} tab.` + (piped ? ` Its pipes stayed on ${oldTab}; draw new ones here.` : ''));
     }
+    // a new X or Y moves a vessel with its IPs and fittings, 🔒 locked or not (Rule 2.12, Fritz 2026-11-05)
+    const vMove = item.kind === 'vessel' && !wasNew && item.workspace === oldTab, offBefore = vMove ? offEnds() : null;
+    const moveX = vMove ? (+item.x || 0) - wasXY[0] : 0, moveY = vMove ? (+item.y || 0) - wasXY[1] : 0;
+    if (moveX || moveY) { shiftVesselParts(item, moveX, moveY); if (before) { before.x = (+before.x || 0) + moveX; before.y = (+before.y || 0) + moveY; } }
     if (isV) {
       if (bf) {         // IPs of fittings that are gone go too (and the Start IP once it is joined)
         const gone = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id && g.port && !eqClass(item).ports[g.port]).map(g => g.id);
@@ -5493,6 +5503,7 @@ async function editItem(kind, id) {
       if (!bf && !isSkyV(item) && (placed.length || before.isNew)) vesselPopup(item, placed);
       delete item.isNew;
     }
+    if (moveX || moveY) { renderWs(); letGoBentEnds(offBefore); }     // as after a drag: a pipe never bends to follow (Rule 5.19)
     if (type === 'vessel' && !item.bundled && !item.onVessel && !isUnit(item) && !(item.loose && !before?.loose) && bundledIps(item).length &&
       confirm(`Bundle ${item.label || item.name} with its ${bundledIps(item).length === 1 ? 'IP' : bundledIps(item).length + ' IPs'}?\n\nThey will move as one unit, and the vessel and its IPs can't be edited until you switch Bundled off.\n\nPress Cancel if you still need to drag its IPs into place.`)) {
       item.bundled = true; $('#vpop')?.remove(); toast('Bundled');
@@ -8682,6 +8693,11 @@ function valveShut(name) {
 }
 const bfitClosed = f => (f.fittings || []).some(x => x.kind === 'valve' && x.valve && valveShut(x.valve));
 // every part that moves with a vessel: its port IPs, the Tab_Fittings joined to it and their IPs
+// Rule 2.12 (Fritz, 2026-11-05): a 🔒 locked vessel can't be moved with the mouse, but a new X or Y in its Properties moves it,
+// to the pixel (one pixel left can look much better). Its IPs, joined fittings and End Caps go with it, the same as a drag.
+function shiftVesselParts(v, dx, dy) {
+  for (const g of bundleParts(v)) { g.x = (g.x || 0) + dx; g.y = (g.y || 0) + dy; }
+}
 function bundleParts(v) {
   const out = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id);
   for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === v.id)) out.push(f, ...draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === f.id));
@@ -9072,7 +9088,7 @@ F.skynetVessel = it => {
     ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...looseField(it), ...VESSEL_FLOW(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
-    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
+    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']];
 };
 
 // draw profile equipment on the loaded Schema's Equipment tab (a fresh drawing, or the old one brought up to date)
