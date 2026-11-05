@@ -39,10 +39,3 @@ to it is too short for the IPs to move out that far. It is then moved back onto 
 
 The **Manual Valve Widget** sizes itself to its pipe, like a pipe fitting, so it is not part of this standard. The **check valve** is a
 pipe fitting.
-
-## Test: a pump on the valve spots
-
-To see whether pumps could follow the same idea, **Pump_1** in the **Three Vessel One Pump** sample uses a test picture
-(Pump_Red_Rip_Off_Valve_IPs_Test.svg): the red Riptide-style pump with its IPs on the valve spots, so it sits in a straight pipe like a
-level valve. Its outlet pipe is drawn up and over the pump to the other side. It is only a test: the Pump Standard (Help 130) has not
-changed, and the old picture is kept, so the pump can go back to Pump_Red_Rip_Off.svg at once.
