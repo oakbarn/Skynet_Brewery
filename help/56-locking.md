@@ -15,6 +15,16 @@ Every item's properties also have a small **Lock position** icon: 🔓 means unl
 
 Locking or unlocking a vessel does the same to its ports (IPs) and the fittings joined to it, because they move with it.
 
+## Moving a locked vessel by X and Y
+
+A 🔒 locked vessel can't be moved with the mouse, but you can still move it by its **X** and **Y** (Skynet Rule 2.12). This is handy for a small touch-up: moving a vessel 1 pixel left can make the screen look much better.
+
+1. In **Edit layout**, double-click the vessel to open its Properties.
+2. Type the new **X** (left and right) and **Y** (up and down). One more is 1 pixel right (or down); one less is 1 pixel left (or up).
+3. Press **Save**, then **Save layout**.
+
+The vessel's IPs, joined fittings and End Caps move with it, the same as a drag, and the vessel stays locked. A bundled vessel's Properties have X and Y too: the whole bundle moves. A straight pipe whose end is left off a moved IP lets go of it, as after a drag (see [Pipe angles](105-pipe-angles-and-upright-kettles)).
+
 ## Lock All and Unlock All
 
 **🔒 Lock All** locks every item on the tab you are looking at: devices, widgets, pictures, text, vessels, IPs, pipes and hoses. **🔓 Unlock All** unlocks every item on that tab.
