@@ -1470,6 +1470,12 @@ Valve drill-down dialog", Help 128):
 
 ## Open questions (not Rules yet)
 
+- **Pumps on the valve spots? (TEST, 2026-11-05, thread "Standardize valve size and IPs")** Fritz: "I want to check if we can make the
+  same rule for Pumps." Pump_1 in the Three Vessel One Pump sample uses a test picture, Images/Skynet/Pumps/Pump_Red_Rip_Off_Valve_IPs_Test.svg:
+  the Pump Standard Red Riptide-style pump with its IPs on the Valve Standard spots (inlet at the middle of the right side, outlet at
+  the middle of the left side, the outlet pipe drawn looping over the pump), shown 150 x 150, Orientation Left. Rule 5.27 is not
+  changed. To go back: point Pump_1 at Pump_Red_Rip_Off.svg again (kept as it was).
+
 1. **Panel Version name** (`PR107_Skynet-v.20261026_23_23`): should it follow ISO 8601 too, like
    file names (Rule 3.7)? (asked 2026-10-23)
 2. **Other Skynet fittings and vessels:** Fritz allowed Bundle / Unbundle on them "for now"
