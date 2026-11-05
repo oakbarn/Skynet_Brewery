@@ -514,6 +514,7 @@ async function route(req, res) {
     if (!el) return fail(res, 404, `No element "${name}"`);
     if (INPUT_PROPS[el.type]?.includes(String(prop).toLowerCase()) && el.device && hw.devices.get(el.device)?.type !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
     store.setProp(name, prop, value, 'ui');
+    logger.clicked(name, prop);      // "When Clicked" (Rule 6.14): set on its Tab, so it goes to the database now
     return ok(res);
   }
   // the free end of a Quick Disconnect hose, moved on a Tab outside Edit layout (Fritz, 2026-11-05, Rule 5.28): operators may

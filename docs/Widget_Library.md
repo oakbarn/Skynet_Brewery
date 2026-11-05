@@ -154,6 +154,9 @@ Process attributes: `.text` (`.value` = `.text`), `.label`, `.label_visible`, `.
 
 ---
 
+### Value, Time and DateTime Widgets (`valueWidget`, `timeWidget`, `dateTimeWidget`; 2026-11-05, Rule 1.23, Help 134)
+Show one value on a Tab (a number, hh:mm:ss, or a date and time); a tap sets it unless Read only; every Process reads and sets it by its Name. Names start `w_Value_N`, `w_Time_N`, `w_DateTime_N`; the Label is never blank. Value box: Start value (Value Widget: Units, Decimals, Step, Lowest, Highest), Read only, Fore / Back color, Alignment; Label box; Properties box; Database and .API (When Clicked, In a Group ...). Keeps its value when the Brain restarts.
+
 ### Timer Widget (Timer Widget Properties, 2026-10-29, Help 92)
 Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no background.**
 

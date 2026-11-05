@@ -13,6 +13,7 @@ Pictures, Labels and manual vessels have no value, so they have no box.
 | **Off** | Never (the start) |
 | **On demand** | Only when asked: a `send_db` line in a Process, **Log now** on the Variables screen, or the API |
 | **On value change** | Every time the value changes, at most 10 times a second (the last change is never lost) |
+| **When Clicked** | Each time someone sets it on its Tab (a tap, then Set), even to the same value |
 | **When a Process starts** | Each time the Process you pick starts |
 | **In a Group** | Each time a Process runs `send_db_group Group_Name` for its Group (see below) |
 | **At a date and time (once)** | One time, at the date and time you type, like `2026-11-01T06:00` |
