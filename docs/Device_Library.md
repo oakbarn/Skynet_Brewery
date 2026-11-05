@@ -277,7 +277,7 @@ valve, 24 VDC power, 0-5 VDC control signal, 0-100 % open.
 - **Settings:** Interface, Pin, Active low, Enabled at start, Input (a sensor Device), Target, Kp, Ki, Kd, Max output %, Max integral %, Calculation time (s), Output window (s), Reversed (cooling), PWM output (off = time-proportioned on/off).
 
 ### 4.9.1 Deadband (control output)
-- **Add menu:** Devices: control outputs > Deadband. As in BruControl's Deadband Output (Skynet Rule 6.17, Help 125).
+- **Add menu:** Devices: control outputs > Deadband. As in BruControl's Deadband Output (Skynet Rule 6.17, Help 126).
 - **Type ID:** DBand (General Type DBAND, proposed). Counts as heating and is On while Enabled (Rule 7.9); can share a heater's port (Rule 6.1).
 - **Port:** any pin; with PWM output on it needs a PWM pin.
 - **How it works:** every Calc Time its output % steps toward the Target: left alone within ± Deadband Offset, by the Inner Band Drive within ± Inner Band Offset, by the Outer Band Drive further out. Below the Target it goes up, above it goes down (Reversed for cooling). Starts at the Initial Output when Enabled.
