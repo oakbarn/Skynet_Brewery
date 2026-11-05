@@ -805,38 +805,33 @@ function sidePt(e, side) {
 // sides of its picture (left and right if it is wider than tall, else top and bottom). A pump keeps IN and OUT: a running pump
 // pushes from IN to OUT, and its head orientation is fixed, so the picture shows it rather than a setting.
 // (Older layouts may still carry ipIn / ipOut sides; those are honoured.)
-// Where the pipe meets a Skynet valve picture (Fritz, 2026-10-28: the IPs sit on the picture where the water flows, not in the
-// middle of the box's sides). Every Skynet valve drawing in Images/Skynet/Valves has its pipe at the same spot: across at 92 of
-// its 120 high (H), or turned to stand up with the pipe 28 (V_R, V_RC) or 92 (V_L, V_LC) in from the left of its 120 wide.
-// Fritz's motorized butterfly valve (2026-11-02) is taller: 140 x 170 with its pipe at 135. A front view (looking down the pipe)
-// has both IPs at the center of its opening; a front elbow has one there and one at the center of its bottom ferrule (Rule 5.20).
-const PIC_FLOW = { H: { w: 140, h: 120, ends: [[0, 92 / 120], [1, 92 / 120]] }, V_R: { w: 120, h: 140, ends: [[28 / 120, 0], [28 / 120, 1]] }, V_L: { w: 120, h: 140, ends: [[92 / 120, 0], [92 / 120, 1]] },
-  BF_H: { o: 'h', w: 140, h: 170, ends: [[0, 135 / 170], [1, 135 / 170]] }, BF_V_R: { o: 'v', w: 170, h: 140, ends: [[35 / 170, 0], [35 / 170, 1]] }, BF_V_L: { o: 'v', w: 170, h: 140, ends: [[135 / 170, 0], [135 / 170, 1]] },
-  BF_Front: { o: 'f', w: 120, h: 170, ends: [[0.5, 130 / 170], [0.5, 130 / 170]] }, BF_Front_Elbow: { o: 'f', w: 120, h: 200, ends: [[0.5, 0.65], [0.5, 1]] },
-  BALL_Front: { o: 'f', w: 120, h: 160, ends: [[0.5, 118 / 160], [0.5, 118 / 160]] },
-  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...): the pipe runs
-  // across 97.5 of its 119 high, or stands up 22 in from the left of its 119 wide (Fritz, 2026-11-04: valves sit on the pipe)
-  OLD_H: { o: 'h', w: 139, h: 119, ends: [[0, 97.5 / 119], [1, 97.5 / 119]] }, OLD_V: { o: 'v', w: 119, h: 141, ends: [[22 / 119, 0], [22 / 119, 1]] } };
-// Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover): the inlet IP sits on the tip of the inlet
-// port and the outlet IP on the tip of the outlet port, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
-const PUMP_FLOW = {
-  Pump_March_809_Poly_90_Inlet: { w: 50.9, h: 51.6, ends: [[0.988, 0.543], [0.636, 0.0]] },
-  Pump_March_809_Poly_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
-  Pump_March_809_SS_Center_Inlet: { w: 83.2, h: 50.6, ends: [[0.993, 0.553], [0.776, 0.0]] },
-  Pump_March_815_Poly_90_Inlet: { w: 57.0, h: 58.6, ends: [[0.989, 0.529], [0.652, 0.0]] },
-  Pump_March_815_Poly_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
-  Pump_March_815_SS_Center_Inlet: { w: 93.2, h: 56.6, ends: [[0.994, 0.548], [0.795, 0.0]] },
-  Pump_Chugger_SS_90_Inlet: { w: 60.1, h: 62.6, ends: [[0.99, 0.527], [0.646, 0.0]] },
-  Pump_Chugger_SS_Center_Inlet: { w: 106.2, h: 61.6, ends: [[0.994, 0.536], [0.806, 0.0]] },
-  Pump_Riptide_SS_Center_Inlet: { w: 100.2, h: 74.6, ends: [[0.994, 0.63], [0.804, 0.0]] },
-  Pump_Topsflo_TD5_Poly_Center_Inlet: { w: 67.2, h: 46.6, ends: [[0.991, 0.536], [0.763, 0.0]] },
-  Pump_KegLand_MKII_Poly_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
-  Pump_KegLand_MKII_SS_Center_Inlet: { w: 62.2, h: 42.6, ends: [[0.99, 0.563], [0.752, 0.0]] },
-};
-// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones are 434 x 292 with the inlet on the outer face of the union
-// on the right of the pump head (415, 138) and the outlet at the top of the pipe going up (361, 0); the submersible sump pump is
-// 120 x 140 and draws in through the middle of its screen at the bottom (60, 117), out the top of the riser on its right (110, 12).
-const OLD_PUMP_FLOW = { Rip: { w: 434, h: 292, ends: [[415 / 434, 138 / 292], [361 / 434, 0]] }, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
+// The Valve Standard (Fritz, 2026-11-05, Rule 5.29: "All Valves follow the 300 x 300 with IPs in the same place so easy to change a
+// valve from Ball to Butterfly or Manual to Motorized"): every Skynet valve picture is drawn in the same 300 x 300 box, to the same
+// scale, with its pipe running through the middle of the box and straight pipe out to the edges. So the IPs are always on the same
+// spots: a level valve on the middle of its left and right sides (0, 150) and (300, 150), an upright one (Vertical Left or Right) on
+// the middle of its top and bottom (150, 0) and (150, 300), a front view (looking down the pipe) both at the middle (150, 150), and a
+// front elbow at the middle and the middle of its bottom (150, 300). A 45 degree valve turns the level spots about the middle.
+const VALVE_STD = { h: [[0, 0.5], [1, 0.5]], v: [[0.5, 0], [0.5, 1]], f: [[0.5, 0.5], [0.5, 0.5]], fe: [[0.5, 0.5], [0.5, 1]] };
+const vstd = (o, kind = o) => ({ o, w: 300, h: 300, ends: VALVE_STD[kind] });
+const PIC_FLOW = { H: vstd('h'), V_R: vstd('v'), V_L: vstd('v'), BF_H: vstd('h'), BF_V_R: vstd('v'), BF_V_L: vstd('v'),
+  BF_Front: vstd('f'), BF_Front_Elbow: vstd('f', 'fe'), BALL_Front: vstd('f'),
+  // the older motorized ball valve pictures (Motorized_TC15_Ball_Valve_Horizontal / _Vertical, once BruControl's Valve_Ball_...)
+  OLD_H: vstd('h'), OLD_V: vstd('v') };
+// The Pump Standard (Fritz, 2026-11-05, Rule 5.27): every Skynet pump picture is drawn in the same 300 x 300 box (shown 150 x 150)
+// with its inlet IP at (285, 150) and its outlet IP at (243, 56), so one pump can replace another in the same place and stay joined
+// to its pipes. The Skynet brew pump drawings (Fritz, 2026-10-31: drawn from the real pumps, no cover) are all to the same scale
+// (Rule 5.11: 20 units = 1 inch in the box, 10 at 150 x 150); their port tubes are made longer where needed to reach the two spots.
+// The IPs sit on the tips of the ports, where a hose or pipe goes on. ends = [inlet, outlet] as parts of the picture.
+const PUMP_STD = { w: 300, h: 300, ends: [[285 / 300, 150 / 300], [243 / 300, 56 / 300]] };
+const PUMP_FLOW = Object.fromEntries(['Pump_March_809_Poly_90_Inlet', 'Pump_March_809_Poly_Center_Inlet', 'Pump_March_809_SS_Center_Inlet',
+  'Pump_March_815_Poly_90_Inlet', 'Pump_March_815_Poly_Center_Inlet', 'Pump_March_815_SS_Center_Inlet', 'Pump_Chugger_SS_90_Inlet',
+  'Pump_Chugger_SS_Center_Inlet', 'Pump_Riptide_SS_Center_Inlet', 'Pump_Topsflo_TD5_Poly_Center_Inlet', 'Pump_KegLand_MKII_Poly_Center_Inlet',
+  'Pump_KegLand_MKII_SS_Center_Inlet'].map(k => [k, PUMP_STD]));
+// The older Skynet pump pictures (Rule 5.24): the Riptide-style ones (Pump_<color>_Rip_Off / _On) follow the Pump Standard too, with
+// the inlet on the outer face of the union on the pump head and the outlet at the top of the pipe going up. The submersible sump
+// pump is not a pipe pump (it sits in the liquid), so it keeps its own 120 x 140 box: it draws in through the middle of its screen at
+// the bottom (60, 117), out the top of the riser on its right (110, 12).
+const OLD_PUMP_FLOW = { Rip: PUMP_STD, Sump: { w: 120, h: 140, ends: [[60 / 120, 117 / 140], [110 / 120, 12 / 140]] } };
 // Pump Cover Overlays (Fritz, 2026-11-02): a cover drawn over a Skynet pump drawing (the no-cover ones above), between the
 // picture and the On overlay, shown on and off. .cover picks it: None (the default), a Skynet color, or User, whose color is
 // .coverColor. Each cover has the same box as its pump, in Images/Skynet/Pumps/Covers/<pump>_Cover_<color>.svg. The User cover
@@ -884,7 +879,12 @@ function pickModel(title, rows) {
     document.body.append(d); d.showModal();
   });
 }
+// TEST (Fritz, 2026-11-05, thread "Standardize valve size and IPs"): a pump with its IPs on the Valve Standard spots (Rule 5.29), inlet at
+// the middle of the right side and outlet at the middle of the left, like a level valve. Only Pump_1 in the Three Vessel One Pump sample
+// uses it. Not a Rule yet: to go back, point that pump at Pump_Red_Rip_Off.svg again (kept as it was, Rule 5.27).
+const PUMP_VALVE_TEST = { w: 300, h: 300, ends: [[1, 0.5], [0, 0.5]] };
 function picFlow(path) {
+  if (/(?:^|\/)Pump_Red_Rip_Off_Valve_IPs_Test\.svg$/.test(String(path || ''))) return { k: 'P', ...PUMP_VALVE_TEST };
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
   // the older Riptide-style pump pictures (Pump_<color>_Rip_Off / _On, .svg or .png, every cover color) and the sump pump
@@ -895,12 +895,12 @@ function picFlow(path) {
   if (om) return { k: om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V', ...PIC_FLOW[om[1] === 'Horizontal' ? 'OLD_H' : 'OLD_V'] };
   const m = String(path || '').match(/(?:^|\/)Valve_(Motor_Ball|Manual|Manual_Butterfly|Gas_Solenoid|Motor_Butterfly)_(?:Open|Closed)(H|V_L|V_R|Front_Elbow|Front)C?\.svg$/);
   const k = !m ? null : m[1] === 'Motor_Butterfly' ? 'BF_' + m[2] : m[2] === 'Front' && m[1] === 'Motor_Ball' ? 'BALL_Front' : m[2];
-  return k && PIC_FLOW[k] ? { k, o: k.endsWith('H') ? 'h' : 'v', ...PIC_FLOW[k] } : null;
+  return k && PIC_FLOW[k] ? { k, ...PIC_FLOW[k] } : null;
 }
 // the two pipe ends on the picture as drawn in the box (it is fitted in, centered, unless it fills the item), or null when the
 // picture is not a Skynet valve drawing or the Orientation says otherwise (a 45 degree valve is turned)
 function picEnds(e) {
-  const f = picFlow(e.imageOff || e.imageOn), o = e.orientation;
+  const f = picFlow(e.imageOff || e.imageOn) || userValveStd(e), o = e.orientation;
   // a valve at 45 degrees shows its picture turned about its middle (Rule 5.5), so its two IPs turn with it (Rule 5.24)
   const turn = f && f.k !== 'P' && f.o !== 'f' && e.subtype === 'valve' ? { l45: -45, r45: 45 }[o] || 0 : 0;
   if (!f || (!turn && f.o !== 'f' && (o === 'l45' || o === 'r45'))) return null;     // a front view has no orientation
@@ -912,15 +912,33 @@ function picEnds(e) {
   return pts.map(([px, py]) => !turn ? [Math.round(px), Math.round(py)]
     : [Math.round(cx + (px - cx) * Math.cos(r) - (py - cy) * Math.sin(r)), Math.round(cy + (px - cx) * Math.sin(r) + (py - cy) * Math.cos(r))]);
 }
+// A valve picture of a user's own follows the Valve Standard too (Fritz, 2026-11-05, Rule 5.29: "The graphic will be resized to
+// 300 x 300 and IPs placed correctly on a User Created valve"): the picture fills its square box and its IPs go on the same spots as
+// a Skynet valve's for its Orientation (Horizontal: the middle of the left and right sides; Vertical: the middle of the top and
+// bottom; 45 degrees: the level spots turned). Where the user has set its In and Out spots, the picture is moved and sized so those
+// spots sit on the IPs (valveFit).
+const isUserValvePic = e => !!e && (e.subtype === 'valve' || e.subtype === 'propValve') && !isInline(e) && !!(e.imageOff || e.imageOn) && !picFlow(e.imageOff || e.imageOn);
+const userValveKind = e => e.orientation === 'v' ? 'v' : e.orientation === 'h' || e.orientation === 'l45' || e.orientation === 'r45' ? 'h' : (e.w || 120) >= (e.h || 60) ? 'h' : 'v';
+const userValveStd = e => isUserValvePic(e) ? { k: 'U', ...vstd(userValveKind(e)) } : null;
+// the picture's size and place in its box (in % of the box) so the user's In and Out spots land on the standard IP spots, or null
+function valveFit(e) {
+  if (!isUserValvePic(e) || !pctOk(e.ipInX) || !pctOk(e.ipInY) || !pctOk(e.ipOutX) || !pctOk(e.ipOutY)) return null;
+  const a = [+e.ipInX / 100, +e.ipInY / 100], b = [+e.ipOutX / 100, +e.ipOutY / 100], [A, B] = VALVE_STD[userValveKind(e)];
+  const d = Math.hypot(b[0] - a[0], b[1] - a[1]); if (d < 0.05) return null;       // both spots on one point: it just fills the box
+  const k = Math.hypot(B[0] - A[0], B[1] - A[1]) / d, mx = (A[0] + B[0]) / 2 - k * (a[0] + b[0]) / 2, my = (A[1] + B[1]) / 2 - k * (a[1] + b[1]) / 2;
+  const r = v => Math.round(v * 1000) / 10;
+  return { size: `${r(k)}% ${r(k)}%`, k, mx, my };
+}
 // a valve flipped (Flip Horizontal / Vertical): its IPs mirror about its middle, as its picture does
 const flipPt = e => {
   if (!e.flipH && !e.flipV) return c => c;
   const gm = elGeom(e), cx = (gm.x || 0) + (gm.w || 120) / 2, cy = (gm.y || 0) + (gm.h || 60) / 2;
   return c => [e.flipH ? Math.round(2 * cx - c[0]) : c[0], e.flipV ? Math.round(2 * cy - c[1]) : c[1]];
 };
-// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): its In and Out IPs go where the user sets them on its picture, in % of
-// the item's width (across, from the left) and height (down, from the top). Both blank = Skynet finds them as before.
-const IP_AT_FIELDS = [['_ipat', 'In and Out IPs: where the two pipe ends are on the picture, in % of its Width (across, from the left) and Height (down, from the top). Leave them blank and Skynet finds them.', 'note'],
+// The User Defined Motorized Ball Valve (Fritz, 2026-11-03): the user sets where its two pipe ends are on its picture, in % of the
+// item's width (across, from the left) and height (down, from the top). Since the Valve Standard (Fritz, 2026-11-05, Rule 5.29) the
+// IPs stay on the standard spots and these move and size the picture instead (valveFit). ipAt is only for a valve with no picture.
+const IP_AT_FIELDS = [['_ipat', 'In and Out spots: where the two pipe ends are on your picture, in % of its Width (across, from the left) and Height (down, from the top). The IPs are always on the Valve Standard spots (Rule 5.29); Skynet moves and sizes your picture so these spots sit on them. Leave them blank and the picture just fills the box.', 'note'],
   ['ipInX', 'In IP across % (0 = left edge, 100 = right edge)', 'num'], ['ipInY', 'In IP down % (0 = top, 100 = bottom)', 'num'],
   ['ipOutX', 'Out IP across %', 'num'], ['ipOutY', 'Out IP down %', 'num']];
 const pctOk = v => v !== undefined && v !== null && v !== '' && Number.isFinite(+v);
@@ -943,8 +961,10 @@ const devIps = e => {
   const tap = e.subtype === 'valve' && e.tapwater && !['both', 'none'].includes(tapOut(e)) ? tapOut(e) : null;     // a one-way tap water valve: TAP and OUT ends
   const t = end => !tap ? '' : end === tap ? 'OUT' : 'TAP', l = end => `${e.name} ${!tap ? 'end' : end === tap ? 'tap water out' : 'tap side'}`;
   const pe = picEnds(e), fl = flipPt(e);
-  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(ipAt(e, 'in') || pe?.[0] || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
-    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(ipAt(e, 'out') || pe?.[1] || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
+  // the Valve Standard (Rule 5.29) puts them on the same spots for every valve picture, a user's own too; a valve with no picture
+  // keeps them on the middle of its sides
+  return [{ id: `dev:${e.name}:in`, label: l('in'), text: t('in'), c: fl(pe?.[0] || ipAt(e, 'in') || sidePt(e, o?.[0] || e.ipIn || (wide ? 'left' : 'top'))) },
+    { id: `dev:${e.name}:out`, label: l('out'), text: t('out'), c: fl(pe?.[1] || ipAt(e, 'out') || sidePt(e, o?.[1] || e.ipOut || (wide ? 'right' : 'bottom'))) }];
 };
 // A valve or pump sits centered on its pipes (Fritz, 2026-11-04, Rule 5.23): each straight pipe joined to one of its IPs runs on
 // through the IP, so the picture's own pipe (or port) is in line with it. Where an IP is off a pipe's line, the valve or pump moves
@@ -1006,7 +1026,7 @@ function splitPorts(it) {
   return devIps(it).map((q, i) => {
     let face = null;
     if (turned || (f && f.o === 'f')) face = null;          // a 45 degree valve, or a front view (both IPs on its opening)
-    else if (pe && !ipAt(it, i ? 'out' : 'in')) { const [fx, fy] = f.ends[i]; face = nearFace(fx, fy); if (it.flipH) face = [-face[0], face[1]]; if (it.flipV) face = [face[0], -face[1]]; }
+    else if (pe) { const [fx, fy] = (f || userValveStd(it)).ends[i]; face = nearFace(fx, fy); if (it.flipH) face = [-face[0], face[1]]; if (it.flipV) face = [face[0], -face[1]]; }
     else face = nearFace((q.c[0] - (gm.x || 0)) / (gm.w || 120), (q.c[1] - (gm.y || 0)) / (gm.h || 60));
     return { id: q.id, c: q.c, f: face };
   });
@@ -1402,6 +1422,10 @@ function fillEl(n, e0) {
   n.classList.toggle('has-img', !!img);
   if (e.fontSize) vl.style.fontSize = e.fontSize + 'px';
   n.classList.toggle('stretch', stretch);    // imported BruControl pictures fill the item
+  // a user's own valve picture with its In and Out spots set: moved and sized so they sit on the Valve Standard IPs (Rule 5.29)
+  const vf = img ? valveFit(e) : null;
+  n.classList.toggle('vfit', !!vf);
+  if (vf) { const gm = elGeom(e); n.style.setProperty('--vfs', vf.size); n.style.setProperty('--vfp', `${Math.round(vf.mx * (gm.w || 120))}px ${Math.round(vf.my * (gm.h || 60))}px`); }
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
 }
 // The On overlay covers just the picture underneath (Fritz: sized to the picture), not the empty sides of a wide or tall item.
@@ -1420,7 +1444,7 @@ function fitOverlay(n, ov, img, stretch) {
   if (!W || !H || !w || !hh) return full();
   Object.assign(ov.style, { inset: 'auto', left: (W - w) / 2 + 'px', top: (H - hh) / 2 + 'px', width: w + 'px', height: hh + 'px' });
 }
-const stretchPic = (e, v) => !!e.backpathsImported && hasPictures(e, v);     // imported BruControl pictures fill the item
+const stretchPic = (e, v) => (!!e.backpathsImported && hasPictures(e, v)) || isUserValvePic(e);     // imported BruControl pictures, and a user's own valve picture (Rule 5.29), fill the item
 // pictures that failed to load: true = missing, false = fine, a Set = still loading (nodes to refresh when known)
 const imgState = new Map();
 function imgMissing(url, node) {
@@ -2744,16 +2768,16 @@ $('#editMode').addEventListener('change', e => {
 });
 // Ready-made Device Outputs: a Digital Output with its kind, IPs, pictures and tap behaviour already set (all can be changed after)
 const PRESETS = {
-  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 140, h: 110, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
+  pump: { type: 'digitalOut', subtype: 'pump', ipIn: 'left', ipOut: 'right', w: 150, h: 150, imageOn: 'Images/Skynet/Pumps/Pump_Red_Rip_On.png', imageOff: 'Images/Skynet/Pumps/Pump_Red_Rip_Off.png', imageOverlay: BOLT, hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   // analogOut when that output type is installed (its fields exist), otherwise a gGlobal value holding 0-100 %
   get propValve() {
-    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 90, h: 70, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
+    const look = { subtype: 'propValve', ipIn: 'left', ipOut: 'right', w: 150, h: 150, hideName: true, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedH.svg', imageOverlay: BOLT };
     return F.analogOut ? { type: 'analogOut', signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%', precision: 0, ...look }
       : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
   element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
-  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 64, h: 55, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
+  valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 150, h: 150, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
 (() => {
@@ -3595,7 +3619,7 @@ function lockedRiders(item) {
 function lockedDrag(item, p, riders) {
   const names = riders?.slice(0, 3).map(lockName).join(', ') + (riders?.length > 3 ? ` and ${riders.length - 3} more` : '');
   const why = riders ? `🔒 ${lockName(item)} can't move: ${names} ${riders.length > 1 ? 'are' : 'is'} locked and would move with it. Unlock ${riders.length > 1 ? 'them' : 'it'} first (🔓 Unlock, or 🔓 Unlock All).`
-    : `🔒 ${lockName(item)} is locked in place. Press 🔓 Unlock (or 🔓 Unlock All) to move it.`;
+    : `🔒 ${lockName(item)} is locked in place. Press 🔓 Unlock (or 🔓 Unlock All) to move it${item.kind === 'vessel' ? ', or type a new X and Y in its Properties (double-click it)' : ''}.`;
   return { mode: 'locked', item, start: p, why };
 }
 // an Equipment Profile that is locked owns the equipment, IPs and pipes on its Tab: their lock can't change either
@@ -4122,7 +4146,7 @@ const F = {
   inlineSides: [['ipIn', 'IN IP side', 'sel', SIDES], ['ipOut', 'OUT IP side', 'sel', ['right', 'left', 'top', 'bottom']]],
   propValve: [['imageOn', 'Picture when open (above 0 %)', 'path'], ['imageOff', 'Picture when closed (0 %)', 'path'], ...IP_AT_FIELDS],
   vessel: [['vesselType', 'Kind', 'sel', Object.keys(VESSELS).filter(k => !EQ[k])], ['image', 'Background picture path (empty = plain drawn vessel)', 'path'], ['label', 'Label', 'text'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
+    ['heater', 'Heater (element or burner output; glows when on)', 'elem'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']],
   // a pipe fitting: only its place and size (Fritz, 2026-10-28); a Manual Valve: its label too, and what a Process does with it
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
@@ -4166,7 +4190,7 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
     ...(it[k + '_on'] ? [[k + '_pos', d.name + ' position', 'vlist', it.vesselType + '.' + k], [k + '_std', d.name + ' Connection Standard', 'vlist', 'standard']] : [])]),
   ...VESSEL_FLOW(it),
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
-  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
+  ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
 F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
@@ -5167,10 +5191,11 @@ async function attrEntry(attr, obj) {
 
 // a bundled vessel: only Bundled and Tab can change; the whole bundle moves to the new tab as is
 async function editBundle(v) {
-  const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked };
+  const work = { bundled: true, workspace: v.workspace, clone: false, locked: !!v.locked, x: v.x || 0, y: v.y || 0 };
   const what = isBfit(v) ? 'Tab_Fitting' : v.template ? 'Tab_Vessel' : 'vessel';
   const r = await dialog(`${v.label || v.name} (bundled)`, [['_b', `This ${what} and its IPs are bundled: they move as one and can't be edited. Switch off Bundled to edit, move or delete them.`, 'note'],
-    ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
+    ['bundled', 'Bundled with its IPs', 'bool'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'], ['workspace', 'Tab (the whole bundle moves)', 'ws'],
+    ['x', 'X Horizontal (the whole bundle moves)', 'num'], ['y', 'Y Vertical (the whole bundle moves)', 'num'],
     ...(isBfit(v) && plainFittings(v.fittings) ? [] : [['clone', `Clone: put a copy of this ${what} and its IPs next to it`, 'bool']])], work, false, graphicTopic(v));     // pipe fittings have no Clone (Fritz, 2026-10-28)
   if (r !== 'ok') return;
   readFields(work);
@@ -5179,6 +5204,12 @@ async function editBundle(v) {
     const frozen = profileFrozen(v);
     if (frozen) toast(`🔒 The Equipment Profile "${frozen.name}" of this Tab is locked, so its equipment, IPs and pipes can't change.`, true);
     else for (const g of [v, ...bundleParts(v)]) setLock(g, work.locked);
+  }
+  const bx = Math.round(+work.x || 0) - (v.x || 0), by = Math.round(+work.y || 0) - (v.y || 0);
+  if ((bx || by) && Number.isFinite(bx) && Number.isFinite(by)) {      // Rule 2.12: X and Y move it even when it is 🔒 locked
+    const offBefore = offEnds();
+    v.x = (v.x || 0) + bx; v.y = (v.y || 0) + by; shiftVesselParts(v, bx, by);
+    renderWs(); letGoBentEnds(offBefore);
   }
   if (work.workspace && work.workspace !== v.workspace) {
     const old = v.workspace;
@@ -5510,7 +5541,7 @@ async function editItem(kind, id) {
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;
-    const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked;
+    const before = isV ? clone(item) : null, oldTab = item.workspace, lockWas = !!item.locked, wasXY = [+item.x || 0, +item.y || 0], wasNew = !!item.isNew;
     Object.keys(item).forEach(k => delete item[k]); Object.assign(item, work);
     if (!!item.locked !== lockWas) {      // the 🔓 / 🔒 icon works like the 🔒 Lock button: a vessel's ports and joined fittings go with it
       const frozen = profileFrozen(item);
@@ -5525,6 +5556,10 @@ async function editItem(kind, id) {
       const piped = draft.graphics.some(p => p.kind === 'pipe' && p.workspace === oldTab && (ips.includes(p.from) || ips.includes(p.to)));
       toast(`Moved to the ${item.workspace} tab.` + (piped ? ` Its pipes stayed on ${oldTab}; draw new ones here.` : ''));
     }
+    // a new X or Y moves a vessel with its IPs and fittings, 🔒 locked or not (Rule 2.12, Fritz 2026-11-05)
+    const vMove = item.kind === 'vessel' && !wasNew && item.workspace === oldTab, offBefore = vMove ? offEnds() : null;
+    const moveX = vMove ? (+item.x || 0) - wasXY[0] : 0, moveY = vMove ? (+item.y || 0) - wasXY[1] : 0;
+    if (moveX || moveY) { shiftVesselParts(item, moveX, moveY); if (before) { before.x = (+before.x || 0) + moveX; before.y = (+before.y || 0) + moveY; } }
     if (isV) {
       if (bf) {         // IPs of fittings that are gone go too (and the Start IP once it is joined)
         const gone = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === item.id && g.port && !eqClass(item).ports[g.port]).map(g => g.id);
@@ -5537,6 +5572,7 @@ async function editItem(kind, id) {
       if (!bf && !isSkyV(item) && (placed.length || before.isNew)) vesselPopup(item, placed);
       delete item.isNew;
     }
+    if (moveX || moveY) { renderWs(); letGoBentEnds(offBefore); }     // as after a drag: a pipe never bends to follow (Rule 5.19)
     if (type === 'vessel' && !item.bundled && !item.onVessel && !isUnit(item) && !(item.loose && !before?.loose) && bundledIps(item).length &&
       confirm(`Bundle ${item.label || item.name} with its ${bundledIps(item).length === 1 ? 'IP' : bundledIps(item).length + ' IPs'}?\n\nThey will move as one unit, and the vessel and its IPs can't be edited until you switch Bundled off.\n\nPress Cancel if you still need to drag its IPs into place.`)) {
       item.bundled = true; $('#vpop')?.remove(); toast('Bundled');
@@ -8726,6 +8762,11 @@ function valveShut(name) {
 }
 const bfitClosed = f => (f.fittings || []).some(x => x.kind === 'valve' && x.valve && valveShut(x.valve));
 // every part that moves with a vessel: its port IPs, the Tab_Fittings joined to it and their IPs
+// Rule 2.12 (Fritz, 2026-11-05): a 🔒 locked vessel can't be moved with the mouse, but a new X or Y in its Properties moves it,
+// to the pixel (one pixel left can look much better). Its IPs, joined fittings and End Caps go with it, the same as a drag.
+function shiftVesselParts(v, dx, dy) {
+  for (const g of bundleParts(v)) { g.x = (g.x || 0) + dx; g.y = (g.y || 0) + dy; }
+}
 function bundleParts(v) {
   const out = draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id);
   for (const f of draft.graphics.filter(g => isBfit(g) && g.onVessel === v.id)) out.push(f, ...draft.graphics.filter(g => g.kind === 'ip' && g.attachTo === f.id));
@@ -9116,7 +9157,7 @@ F.skynetVessel = it => {
     ...(isKettle(it) ? [['_ko', 'A kettle stays upright: Flip Horizontal only, no Flip Vertical or Rotate (Rule 5.5).', 'note']] : [['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE]]),
     ...looseField(it), ...VESSEL_FLOW(it),
     ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
-    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
+    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock']];
 };
 
 // draw profile equipment on the loaded Schema's Equipment tab (a fresh drawing, or the old one brought up to date)

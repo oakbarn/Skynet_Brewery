@@ -3,8 +3,8 @@
   "master": "Skynet_Motorized_Butterfly_Valve_H",
   "props": {
     "orientation": "v",
-    "w": 109,
-    "h": 90,
+    "w": 150,
+    "h": 150,
     "flipH": true
   }
 }

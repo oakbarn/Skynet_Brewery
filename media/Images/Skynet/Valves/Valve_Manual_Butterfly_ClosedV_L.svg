@@ -1,4 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-valve-standard="1">
+  <!-- The Valve Standard (Fritz, 2026-11-05, Rule 5.29): every valve in the same 300 x 300 box, its pipe through the middle, so its IPs
+       are always on the same spots. The drawing is at scale 1.1 (the same for every Skynet valve); straight pipe runs out to the edges. -->
+  <rect x="137.5" y="0" width="25" height="74" fill="#8a8f96"/>
+  <rect x="137.5" y="226" width="25" height="74" fill="#8a8f96"/>
+  <g transform="translate(48.8 73) scale(1.1)">
   <!-- Skynet manual butterfly valve, closed (handle across the pipe), vertical: pipe ends at the middle of the Top and Bottom edges, handle on the left -->
   <g transform="translate(0 140) rotate(-90)">
     <rect x="8" y="81" width="124" height="22" fill="#8f9296" stroke="#2b2b2b" stroke-width="3"/>
@@ -12,4 +17,5 @@
     <circle cx="70" cy="92" r="9" fill="#ffffff" stroke="#111" stroke-width="4"/>
     <rect x="62" y="4" width="16" height="48" rx="5" fill="#2b2b2b"/><rect x="65" y="7" width="10" height="42" rx="3" fill="#5b6066"/>
   </g>
+</g>
 </svg>

@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 106.2 61.6">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" data-pump-standard="1">
+  <!-- Skynet Pump Standard (Fritz, 2026-11-05, Rule 5.11): every pump drawn in the same 300 x 300 box, shown 150 x 150; inlet IP at (285, 150), outlet IP at (243, 56). Cover for Pump_Chugger_SS_Center_Inlet.svg, same box and spots. -->
+  <g transform="translate(71.81 83.96) scale(2)">
+
   <!-- Skynet pump Cover Overlay: Purple cover. Same box as Pump_Chugger_SS_Center_Inlet.svg, so it lies exactly over it; see-through around the cover. -->
   <defs><clipPath id="in"><path d="M0.3 53.0 V16.3 Q0.3 2.0 14.6 2.0 H54.3 Q68.6 2.0 68.6 16.3 V53.0 Z"/></clipPath></defs>
   <g stroke-linejoin="round">
@@ -11,5 +14,6 @@
     <rect x="7.1" y="34.6" width="19.1" height="1.8" rx="0.6" fill="#000000" fill-opacity="0.45"/>
     <path d="M65.6 4.0 V52.0" stroke="#000000" stroke-opacity="0.35" stroke-width="0.8"/>
     <path d="M0.3 53.0 V16.3 Q0.3 2.0 14.6 2.0 H54.3 Q68.6 2.0 68.6 16.3 V53.0 Z" fill="none" stroke="#2b2b2b" stroke-width="1.2"/>
+  </g>
   </g>
 </svg>
