@@ -879,7 +879,12 @@ function pickModel(title, rows) {
     document.body.append(d); d.showModal();
   });
 }
+// TEST (Fritz, 2026-11-05, thread "Standardize valve size and IPs"): a pump with its IPs on the Valve Standard spots (Rule 5.29), inlet at
+// the middle of the right side and outlet at the middle of the left, like a level valve. Only Pump_1 in the Three Vessel One Pump sample
+// uses it. Not a Rule yet: to go back, point that pump at Pump_Red_Rip_Off.svg again (kept as it was, Rule 5.27).
+const PUMP_VALVE_TEST = { w: 300, h: 300, ends: [[1, 0.5], [0, 0.5]] };
 function picFlow(path) {
+  if (/(?:^|\/)Pump_Red_Rip_Off_Valve_IPs_Test\.svg$/.test(String(path || ''))) return { k: 'P', ...PUMP_VALVE_TEST };
   const pm = String(path || '').match(/(?:^|\/)(Pump_[A-Za-z0-9_]+)\.svg$/);
   if (pm && PUMP_FLOW[pm[1]]) return { k: 'P', ...PUMP_FLOW[pm[1]] };
   // the older Riptide-style pump pictures (Pump_<color>_Rip_Off / _On, .svg or .png, every cover color) and the sump pump
