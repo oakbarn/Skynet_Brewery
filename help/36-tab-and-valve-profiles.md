@@ -30,7 +30,7 @@ The **Default** Menu tab picks the Tab Background Profile a **new tab** gets.
 
 A Valve Profile is how a new valve starts:
 
-- **Graphic** (the valve as drawn) and, optional, **Graphic when open**. Skynet valves have no open pictures (Fritz, 2026-11-05): the valve keeps its picture and the **On overlay** shows it is open ([Retired Skynet pictures](128-retired-skynet-pictures)).
+- **Graphic** (the valve as drawn) and, optional, **Graphic when open**. Skynet valves have no open pictures (Fritz, 2026-11-05): the valve keeps its picture and the **On overlay** shows it is open ([Retired Skynet pictures](129-retired-skynet-pictures)).
 - **Orientation**: **Horizontal** (pipe ends left and right), **Vertical** (top and bottom), **45 degrees Left** (top left and bottom right corners) or **45 degrees Right** (top right and bottom left). For Horizontal and Vertical, pick graphics drawn that way. For the 45s, pick the **vertical** graphics: the panel turns them 45 degrees left or right for you. The 45s are for a valve sitting on a 45 degree elbow.
 
 Skynet's own valve pictures are SVG files in `Images/samples`, so they stay sharp at any size and can't be deleted (see [Media](07-media)):

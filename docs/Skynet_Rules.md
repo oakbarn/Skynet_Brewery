@@ -833,7 +833,7 @@ Motors, Lights_LEDs, Hop_Infusion, Other_Equipment, Miscellaneous and On_Off. (2
 7.5 **Keep the two-picture (On and Off) code** until Fritz says to delete it, even though On overlays
 now exist. Ask before deleting any On picture files. (2026-10-22, PR #81)
 *2026-11-05 (Fritz):* every Skynet **Open valve picture** is retired to Delete/ (Rule 15.3); the two-picture code stays for a
-user's own pictures. Pump On pictures stay in Skynet, but nothing that ships uses them (Rule 7.8). Help 128.
+user's own pictures. Pump On pictures stay in Skynet, but nothing that ships uses them (Rule 7.8). Help 129.
 
 7.6 **Sounds** go in media/sounds; pictures in media/Images. (2026-10-20, PR #48)
 
@@ -849,7 +849,7 @@ and the second picture comes last, marked optional. (2026-10-27, Help 58)
 switching from Off to On. Better to use the Overlay in all the sample Schema."): a valve keeps its one picture and its On overlay
 shows open (the bolt on a motorized valve, the green ring and tick on a Manual Valve Widget). The sample Schemas and the default
 Schema swap no pictures: pumps, valves and burners keep their Off picture with the bolt overlay, a heating element glows red
-(tint). Help 128.
+(tint). Help 129.
 
 7.9 **Heaters are On while Enabled.** A PID, Hysteresis or Duty Cycle counts as On from Enable to
 Disable (not only while its output fires): its overlay or On picture, a vessel's heater glow and a
@@ -1586,4 +1586,4 @@ dialogs are changed to their own set one at a time, on Fritz's say (Rule 18.10).
 - 2026-11-04: Added Rule 5.26 (a Pump, Valve or Manual Valve Widget dropped on a straight pipe cuts it: between the ends into separate pipes joined to its IPs, over an end the pipe is made shorter and both IPs joined, an end on a tee or other IP staying where it is; an IP that opens across the pipe is taken round with 90 degree elbows). Help 125; next free Help number 126 (Help 124 is taken by PR #193). (thread "Split a pipe when a pump is added")
 - 2026-11-05: Rule 9.8: Start Fresh on Windows also deletes the clean window's browser profile (saved user name and password), and Admin setup always opens with empty boxes (browser fill-in cleared). Help 18 updated; no new Help number. (thread "Make Start Fresh admin setup truly fresh")
 - 2026-11-05: Rule 5.19: Save layout joins a pipe's open end within 14 px of an IP again (a free IP point moves back onto a straight pipe's end); a wobble under 4 pixels is not a drag; only ends a drag pulls off let go (Fritz: changing IP1's Flow Color in the Three Vessel sample stopped the flow). Help 105 updated; no new Help number. (thread "Add flow colors to pipe and hose Widgets")
-- 2026-11-05: Skynet pictures cleaned up (Fritz, thread "Clean up SVG names and retire old pictures"): Valve_Ball_ClosedH_1 / ClosedV-1x1 renamed Motorized_TC15_Ball_Valve_Horizontal / _Vertical; pipe_cross, pipe_elbow45, pipe_elbow90, pipe_tee, Skynet_TC15_InstrumentTee and every Open valve picture retired to Delete/ (replacements listed in Delete/README.md). Rule 7.5 note, Rule 7.8: Skynet valves have no Open picture, the On overlay shows open, and the sample and default Schemas swap no pictures. Rule 7.13: White cover (RGB 250 250 250). Rule 5.23 names updated. Help 128.
+- 2026-11-05: Skynet pictures cleaned up (Fritz, thread "Clean up SVG names and retire old pictures"): Valve_Ball_ClosedH_1 / ClosedV-1x1 renamed Motorized_TC15_Ball_Valve_Horizontal / _Vertical; pipe_cross, pipe_elbow45, pipe_elbow90, pipe_tee, Skynet_TC15_InstrumentTee and every Open valve picture retired to Delete/ (replacements listed in Delete/README.md). Rule 7.5 note, Rule 7.8: Skynet valves have no Open picture, the On overlay shows open, and the sample and default Schemas swap no pictures. Rule 7.13: White cover (RGB 250 250 250). Rule 5.23 names updated. Help 129.
