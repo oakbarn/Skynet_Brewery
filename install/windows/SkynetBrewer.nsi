@@ -304,12 +304,15 @@ Function AskImporter
     CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
     CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
     CreateShortCut "$DESKTOP\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+    ; and one in the Import folder, where its Schema files go (Fritz, 2026-11-06)
+    CreateShortCut "$BrewDir\Import\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
     DetailPrint "Added the Skynet BruControl Importer"
     Return
   leave:
     Delete "$INSTDIR\Skynet_Importer.bat"
     Delete "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk"
     Delete "$DESKTOP\Skynet BruControl Importer.lnk"
+    Delete "$BrewDir\Import\Skynet BruControl Importer.lnk"
 FunctionEnd
 
 Function StartPanel
@@ -320,6 +323,9 @@ FunctionEnd
 Section "Uninstall"
   Delete "$DESKTOP\Skynet Brewer.lnk"
   Delete "$DESKTOP\Skynet BruControl Importer.lnk"
+  ; the Importer shortcut in the Import folder (the folder and your files in it are kept)
+  Delete "$INSTDIR\..\Import\Skynet BruControl Importer.lnk"
+  Delete "$INSTDIR\Import\Skynet BruControl Importer.lnk"
   RMDir /r "$SMPROGRAMS\Skynet Brewer"
   DeleteRegKey HKCU "${UNINST_KEY}"
 
