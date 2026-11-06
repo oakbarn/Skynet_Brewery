@@ -32,12 +32,13 @@ the Importer will guide you through. Click **Start ▶**.
 
 ## Step 2: Pick your BruControl config file
 
-The Importer looks in **Documents\BruControl** first (the real Documents folder, even when Windows keeps it on OneDrive), then
-OneDrive's Documents\BruControl, then **C:\BruControl**. It lists every BruControl config file (`.brucfg`) in that folder and in
-its subfolders (such as a Backups folder), newest first, with the folder it is in, the date it was saved and its size.
+The Importer looks **only in Documents\BruControl** first (the real Documents folder, even when Windows keeps it on
+OneDrive). It lists every BruControl config file (`.brucfg`) there, newest first, with the date it was saved and its size.
+BruControl may keep a **default config** there too; it is listed last and marked *(BruControl default)*.
 
-- Your config file is somewhere else? Click **📁 Change folder…** and pick the folder, or type the folder in the box and press
-  Enter (or click **Look**). The Importer remembers the folder for next time.
+- **No config file there, or only the default one?** The Importer asks you to point to the folder that holds yours: click
+  **📁 Change folder…** and pick the folder, or type the folder in the box and press Enter (or click **Look**). Next time the
+  Change folder box opens at the folder you picked last.
 - **⌂ Documents\BruControl** goes back to the usual folder.
 - **Click** a file to see what is in it: its Interfaces (boards), Tabs (workspaces), how many Devices and Widgets (elements),
   Processes (scripts) and gGlobals it has.
