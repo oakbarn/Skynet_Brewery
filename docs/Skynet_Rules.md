@@ -1424,7 +1424,7 @@ Rules must be written to both the Skynet Panel or the Import BruControl Program 
 **Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
 boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7), as a file the Panel opens.
 - **It is a choice when installing** (Fritz, 2026-11-06). The Windows Setup asks "Will you import a BruControl configuration
-  on this computer?" Yes adds the Importer's shortcuts; No leaves them out (Setup can be run again to add it). On an update the
+  on this computer?" Yes adds the Importer's shortcuts (Desktop, Start menu and the Import folder); No leaves them out (Setup can be run again to add it). On an update the
   last answer is the default.
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save

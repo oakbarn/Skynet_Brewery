@@ -65,7 +65,7 @@ Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema fi
 ## Installing the Importer
 
 The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Yes adds the **Skynet BruControl
-Importer** shortcut to your Desktop and Start menu; No leaves it out, and you can run Setup again to add it later. Setup
+Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. Setup
 always makes the Import folder, as BeerSmith or other programs may save their files there too.
 
 ## Next steps (being built)
