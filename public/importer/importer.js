@@ -118,6 +118,18 @@ $('#pickBtn').onclick = async () => {
     if (r.picked) look(r.picked);
   } catch (e) { toast(e.message); }
 };
+// Browse for the config file with Windows' Open box (in Documents\BruControl); its folder is listed and the file picked
+$('#browseBtn').onclick = async () => {
+  try {
+    const r = await api('POST', '/api/pick-file', { start: state.folder || state.start?.defaultFolder || '' });
+    if (r.none) return toast('Browse works on Windows. Type the folder in the box and press Enter.');
+    if (!r.picked) return;
+    const dir = r.picked.replace(/[\\/][^\\/]*$/, '');
+    await look(dir);
+    const i = state.files.findIndex(f => f.path.toLowerCase() === r.picked.toLowerCase());
+    if (i >= 0) select(i); else toast('That is not a BruControl config file (.brucfg).');
+  } catch (e) { toast(e.message); }
+};
 $('#files tbody').onclick = e => { const tr = e.target.closest('tr'); if (tr) select(Number(tr.dataset.i)); };
 $('#files tbody').ondblclick = async e => { const tr = e.target.closest('tr'); if (!tr) return; await select(Number(tr.dataset.i)); next(); };
 for (const id of ['#back4', '#back4a']) $(id).onclick = () => show(3);
