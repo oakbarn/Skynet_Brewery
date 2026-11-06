@@ -7279,7 +7279,7 @@ $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 // ---------------------------------------------------------------- variables page: gGlobal, shared
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
 const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', clicked: 'When Clicked (each time someone sets it on its Tab)', process: 'When a Process starts',
-  datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
+  datetime: 'At a date and time (once)', clock: 'At clock time (every day)', second: 'Every second', minute: 'Every minute', hour: 'Every hour', midnight: 'Every day (at Midnight)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
   days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)

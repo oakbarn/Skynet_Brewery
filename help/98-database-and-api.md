@@ -17,6 +17,8 @@ Pictures, Labels and manual vessels have no value, so they have no box.
 | **When a Process starts** | Each time the Process you pick starts |
 | **At a date and time (once)** | One time, at the date and time you type, like `2026-11-01T06:00` |
 | **At clock time (every day)** | Every day at the clock time you type, like `12 AM`, `6:30 PM` or `18:30` |
+| **Every second**, **Every minute**, **Every hour** | Shortcuts: every 1 second, minute or hour |
+| **Every day (at Midnight)** | Shortcut: every day at 12 AM |
 | **Every N milliseconds / seconds / minutes / hours / days** | Every N of them (fastest is 100 ms) |
 | **Every 00:00:00** | Every interval you type, like `00:05:00` |
 
@@ -50,7 +52,7 @@ stop_db_group Mash
 
 **Example: the Mash probe.** You want your Mash Temperature Probe in the database every minute, but only during the Mash.
 
-1. In the probe's Database and .API box, set **Send to the database** to **Every N minutes** with N = **1**, and switch on the Group **Mash** (➕ Add new Group… makes it the first time).
+1. In the probe's Database and .API box, set **Send to the database** to **Every minute**, and switch on the Group **Mash** (➕ Add new Group… makes it the first time).
 2. At the beginning of your Mash Process, add the line `start_db_group Mash`. From then on the probe reports to the database every minute.
 3. At the end of the Mash Process, add the line `stop_db_group Mash`.
 

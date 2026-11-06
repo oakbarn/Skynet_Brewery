@@ -1030,7 +1030,8 @@ lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 6.14 **Database and .API on every Device and Widget** (Fritz, 2026-10-30, Help 98). Every Device and Widget
 with a value has a **Database and .API** box at the end of its Properties:
 - **Send to the database**: Off, On demand, On value change (at most 10 a second, the last change never lost),
-  **When Clicked** (each time someone sets it on its Tab), When a Process starts, At a date and time (once), At clock time (every day at that time), Every N ms /
+  **When Clicked** (each time someone sets it on its Tab), When a Process starts, At a date and time (once), At clock time (every day at that time), **Every second, Every minute, Every hour, Every day (at Midnight)** (shortcuts,
+  Fritz 2026-11-06, listed just above the Every N choices), Every N ms /
   seconds / minutes / hours / days, Every 00:00:00. The **At clock time** box shows only when **At clock time** is
   picked; the Every choices have no clock time (Fritz, 2026-11-04). **What to send** is its main value unless another attribute is picked.
   `send_db Name` in a Process sends it now, whatever the setting, **even when it is Off** (Fritz, 2026-11-05: kept
@@ -1048,7 +1049,7 @@ with a value has a **Database and .API** box at the end of its Properties:
     whatever its Groups, even when they are stopped. **`send_db_group Group_Name`** sends every item of the Group **once, now**,
     started or not.
   - **Example (Fritz):** you want a Mash Temperature Probe sent to the database **every minute**, but only during the Mash. Set
-    the probe's Send to the database to **Every 1 minute** and switch on the Group **Mash**. At the beginning of the Mash a
+    the probe's Send to the database to **Every minute** and switch on the Group **Mash**. At the beginning of the Mash a
     Process line `start_db_group Mash` starts the Group, and the probe reports to the database every minute. At the end of the
     Mash a Process line `stop_db_group Mash` stops it. The database only has that probe's data during the Mash.
   - A Group has a **meaningless hidden key** (the items point to it) and a **Group Name**. **✏ Change name** changes the Group
@@ -2094,3 +2095,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
 - 2026-11-06: Rule 6.14 Database Groups rewritten (Fritz): a Device or Widget can belong to more than one Group; Grouping is how a set of items is sent to the Database or not; `start_db_group Group_Name` starts a Group and `stop_db_group Group_Name` stops it; an item in a Group is sent by its own setting only while one of its Groups is started; On demand (`send_db`) is always true; `send_db_group` sends the Group once. In a Group is no longer a Send to the database choice (old items become On demand in their Group). Fritz's Mash probe example added. Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Rule 6.14: Send to the database gets shortcut choices **Every second, Every minute, Every hour, Every day (at Midnight)**, listed just above Every N milliseconds (Fritz: "I know you can set these with the way it is but these are shortcuts"). Help 98 updated. (thread "Rewrite Database Group Rules")
