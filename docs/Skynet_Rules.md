@@ -1034,17 +1034,28 @@ supply manifolds", Help 146).
 - **A click on a valve on its Tab opens or closes it** (operators and admins). Open: the bolt (Motorized) or the green ring (Manual).
   Processes use the valve's own name (`<name>.state = true`); Motorized valves are on the Close all / Open all valve lists (Rule 6.15).
 - **Added from** Edit layout bar > **Elbows, Tees …** > Valve Tees and Supply Manifolds, or Select Device Type > **Valves**: six rows,
-  each fitting with all its valves Manual or all Motorized to start. It goes on the Build Tab (Rule 4.1) and its Properties open; a
-  Motorized one picks its Interface and Ports there.
+  each fitting with all its valves Manual or all Motorized to start. Its **Add box and Properties are the Pump's drill-down**
+  (Rule 18.29). It goes straight on the Tab picked in the Add box (Rule 4.1: it holds Devices) and its Properties open.
 - **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
   or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
   name (Rule 3.1), e.g. `MB_22_eVlv_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
-- Flip Horizontal, Flip Vertical and Rotate (45 degree steps) as every Skynet item (Rule 5.5): the valves and IPs turn with it. No
-  Autosize to pipe (it is drawn at the Valve Standard size) and no Clone. Dropped on a straight pipe in Edit layout, its run goes along
-  the pipe and the pipe is cut, as a tee's (Rule 5.25).
-- *Standard exceptions used* (Fritz: "the standard exceptions would apply if it fits"): its valves' Interface and Ports are set in the
-  fitting's Properties, not in a Pump-style Add box (as the RIMS tube's and the Vessel Device's parts, Rules 4.2 / 18.13 / 18.23), and
-  unlike the Vessel Device it is **not locked** once saved, so a valve can always be swapped Manual / Motorized.
+- **Orientation: no Flip, only three turns** (Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left
+  Vertical 90, Right Vertical 90"): **Horizontal** (the valves hang down), **Left Vertical 90** (turned a quarter clockwise, the valves
+  point left) and **Right Vertical 90** (a quarter the other way, the valves point right). The Valve Tee is the same. The Edit layout
+  bar's turn buttons step through these three and Flip says it has none (an exception to Rule 5.5). The valves and IPs turn with it.
+  No Autosize to pipe (it is drawn at the Valve Standard size) and no Clone. Dropped on a straight pipe in Edit layout, its run goes
+  along the pipe (turned to one of the three) and the pipe is cut, as a tee's (Rule 5.25).
+- **The valve ends match the tee ends** (Fritz, 2026-11-06: "The valve ends need to match the Tee ends in the graphic"): each valve is
+  drawn on the tee's own grid, the same pipe as the tee's branch, a TC 1.5 ferrule at the top clamped to the branch ferrule, and the
+  same ferrule at the bottom, whose face is the valve's IP. Drawn by the panel, so no picture was added to the Image Library.
+- **Valve numbers** (Fritz, 2026-11-06: "When Building or editing a Manifold Supply the Valves need to be number corresponding to the
+  Valve 1 in the dialog"): in Edit layout and on the Graphic of its Add box and Properties each valve shows its number (1, 2, 3), the
+  same as **Valve 1**, **Valve 2**, **Valve 3** in the dialog and **V1**, **V2**, **V3** in its valves' Labels. Not shown in run mode.
+- *Standard exceptions used* (Fritz: "the standard exceptions would apply if it fits"): unlike the Vessel Device it is **not locked**
+  once saved, so a valve can always be swapped Manual / Motorized. A Motorized valve's Port (and the fitting's Interface) is greyed
+  out once saved (Rule 18.13); to wire it again, make it Manual, Save, then Motorized again and pick the Port.
+  *Replaced (2026-11-06):* its valves' Interface and Ports were set in the fitting's Properties, not in a Pump-style Add box; Flip
+  Horizontal, Flip Vertical and Rotate in 45 degree steps.
 
 ---
 
@@ -1551,10 +1562,13 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   - **Boards and Tabs** (page 5): the Interfaces, the Tabs (no Tab backgrounds for now), and **only the items that have an
     Interface and a Port**. Everything else on a Tab is a **Placeholder** (a grey box with the BruControl name) at the same
     place and size, until a later step brings it in; a hidden item's Placeholder stays hidden.
-  - **Pictures** (Fritz, 2026-11-06: "Do not move any files and just use the Paths that exist"): every picture an item names
-    is read from the path BruControl saved (any folder) and copied to the Panel's `media\Images\User` folder; nothing is
-    moved and a picture already there is never written over. The item keeps its picture path even when the picture is not on
-    the computer (Fritz: "Import the path regardless"); it is listed in the report. The brewer never has to make a zip.
+  - **Pictures and Sounds** (Fritz, 2026-11-06: "The Picture Paths and Sounds are imported. The files stay where they were so
+    BruControl continues to work normally. You do have the option of copying those files to a new folder that consolidates
+    all the picture files and sound files so if you move to a Pi or other computer, those files will be available. They are
+    never deleted in their original spot, just copies made."). By default each item keeps the path BruControl saved (any
+    folder), even when the file is not on the computer (it is listed in the report). The option copies every picture to
+    `media\Images\User` and every sound to `media\sounds\User`, and the items use the copies; a copy already there is never
+    written over. The brewer never has to make a zip.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
   Processes, which travel beside it, as Processes are shared by every Schema). It is marked a **first draft** until the
@@ -1681,7 +1695,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23), the **Heating Element** (Rule 18.24), the **PWM / Analog out** (Rule 18.25), the **Temperature Probes** (Rule 18.26), the **Picture Widget** (Rule 18.27) and the **Value, Time and DateTime Widgets** (Rule 18.29).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23), the **Heating Element** (Rule 18.24), the **PWM / Analog out** (Rule 18.25), the **Temperature Probes** (Rule 18.26), the **Picture Widget** (Rule 18.27), the **Valve Tees and Supply Manifolds** (Rule 18.29) and the **Value, Time and DateTime Widgets** (Rule 18.30).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1726,7 +1740,7 @@ commands it**. Until a dialog is changed, it keeps its present layout (Rules 2.2
 is changed, it follows Rule 15.3 (the old way is changed everywhere Skynet ships it).
 *Exception (Fritz, 2026-11-06: "Yes Hover on all Dialogs. You can take a snippet of help and have it in the Hover Dialog"):* moving
 explanations into hover help (Rule 2.38) is done to **every dialog at once**, since it changes no field. The hover help may be a short
-piece of the Help page. And "Widgets follow Pump Drill Down look" is Fritz's command for **every Widget dialog** (Rule 18.29).
+piece of the Help page. And "Widgets follow Pump Drill Down look" is Fritz's command for **every Widget dialog** (Rule 18.30).
 
 18.11 **Cancel warns before throwing away changes.** In every dialog with ✖ Cancel and 💾 Save, if anything was changed and
 Cancel is pressed, a warning asks whether to really discard the changes or go back and save. With no changes, Cancel just
@@ -1970,7 +1984,26 @@ Label (every Device and Widget, Rule 18.15):
   into the DDLB. If the new Interface is aborted, the default Interface is posted back to the DDLB"): the new Interface is picked in
   the Interface dropdown; if the new Interface is cancelled, the default Interface (the one that was there before) is put back.
 - It is one shared helper (public/labelguard.js) that watches every dialog, so a new dialog with a Label gets it by itself.
-18.29 **Widgets look like the Pump's drill-down** (Fritz, 2026-11-06: "Widgets follow Pump Drill Down look", "Widget look similar to the
+
+18.29 **Valve Tees and Supply Manifolds: the Pump's drill-down** (Fritz, 2026-11-06: "The long tees with valves and all those other
+intergraded ones you built need their property dialog and the Build look and feel like the Pump Drill down", thread "Add valve Tees
+and supply manifolds", Help 146). The Valve Tee, Double and Triple Supply Manifold (Rule 5.35) get the Pump's Add box and Properties
+(Rules 18.13-18.21), kept clean: every explanation is in the tip of the field's name (Rule 18.16; Fritz, 2026-11-06: "Dialogs should
+be kept as clean as possible"):
+1. The Add box is titled with the fitting (e.g. **Double Supply Manifold**): **1. Label ⬢** (filled in: valve_tee_n, manifold_2_n,
+   manifold_3_n; ⬢ its look) and **Label Visible** (No to start); **2. Interface (board)** (one board for all its Motorized valves);
+   **3. Valve 1**, **Valve 2**, **Valve 3**, each **Manual** or **Motorized**, a Motorized one with its **Available Ports** on the
+   same line (two valves can't share a Port); **4. Tab** (➕ Add new Tab… and ➕ Add new Interface… work as Rule 18.14); then the
+   **5. Name**, the **Graphic** (its valves as picked, with their numbers), its **Path** (greyed out, Rule 5.6), **Orientation**
+   (Rule 5.35's three), X, Y, Width, Height, and the **Device Type** greyed out last (e.g. Fitting with V1 DO: eVlv, V2 DO: M_L_Vlv).
+   ➕ Add Device can always be pressed and says what is missing (Rule 18.15). Enter goes Label, Interface, each Valve and Port, Tab,
+   Orientation, ➕ Add Device (Rule 18.20).
+2. Its **Properties** are the same with 🗑 Delete, ✖ Cancel and 💾 Save and the 🔓 lock in the title line. A valve saved Motorized
+   shows its **Port** greyed out, and the **Interface** is greyed out while any valve has a saved Port (Rule 18.13).
+- *Replaced:* the Properties listed a note, Name, Label, a Valves heading, Flip Horizontal, Flip Vertical, Rotate and a Label and place
+  heading (2026-11-06, PR #239).
+
+18.30 **Widgets look like the Pump's drill-down** (Fritz, 2026-11-06: "Widgets follow Pump Drill Down look", "Widget look similar to the
 Pump Drill Down"). Every Widget's Properties are brought to the Pump's screen 9 (Rule 18.21), as the Picture Widget's are (Rule 18.27).
 Fritz's word is the command for all the Widgets (Rule 18.10); they are done one kind after another. First: the **Value, Time and
 DateTime Widgets** (Rule 1.23), then the **Timer Widget** (Count, Start value, Reset value, Running at start with Database and .API ⬢,
@@ -1983,7 +2016,6 @@ Value, Time and DateTime Widgets: the lock, Visible and Hidden Locked in the tit
 **3 Name**; the Start value; a Value Widget's **Units ⬢** (Decimals, Step, Lowest, Highest); **Read only** with **Database and .API ⬢**
 on its line; **Fore color ⬢** (Back color, Alignment); X, Y, Width, Height; and the **Widget Type** greyed out last. Every explanation
 is in the hover help of the field's name (Rule 2.38). (Help 134)
-
 ---
 
 ## 19. Vessel Rules
@@ -2303,10 +2335,12 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the Importer's page 3 has Browse for the config file (Windows' Open box in Documents\BruControl, .brucfg only); picture paths are imported even when the picture is not on the computer, and the brewer never makes a zip. Help 143 updated. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 5.35 changed and Rule 18.29 added (Fritz: "need their property dialog and the Build look and feel like the Pump Drill down. The valve ends need to match the Tee ends in the graphic"; "the Valves need to be number corresponding to the Valve 1 in the dialog"; "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90"): the Valve Tee and Supply Manifolds get the Pump's drill-down Add box and Properties, valve ends drawn with TC ferrules that match the tees, valve numbers in Edit layout and on the dialogs' Graphic, and only three Orientations with no Flip. Help 146 updated; no new Help number used. (thread "Add valve Tees and supply manifolds")
+- 2026-11-06: Rule 15.4 changed (Fritz): the Importer imports picture and sound paths and leaves the files where they were, so BruControl keeps working; copying them into media\Images\User and media\sounds\User (for a Pi or another computer) is an option, and the originals are never deleted. Importer page 2 and page 4, Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 2.38 (dialogs kept as clean as possible: explanations go in hover help, shown at once while the mouse rests on a field's or dropdown's name and gone when it moves off; a tap on phones and tablets; for the Panel and the BruControl Import). Rule 18.16 points to it. Help 147; next free Help number 148. (thread "Add hover help to clean dialogs")
-- 2026-11-06: Added Rule 18.29 (Widgets look like the Pump's drill-down, all Widgets by Fritz's command, one kind after another; first the Value, Time and DateTime Widgets). Help 134 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Added Rule 18.30 (Widgets look like the Pump's drill-down, all Widgets by Fritz's command, one kind after another; first the Value, Time and DateTime Widgets). Help 134 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Added Rule 3.14 (Widget names wgt_Type_Label_TabID with Fritz's Type letters, PIX for Picture; names follow the Label and Tab until typed; old names stay). Rule 18.27 updated. Help 74, 91, 112 updated. (thread "Add hover help to clean dialogs")
-- 2026-11-06: Rule 18.10 exception (Fritz): hover help goes on every dialog at once (a snippet of Help may be the hover text), and every Widget dialog gets the Pump drill-down look (Rule 18.29). (thread "Add hover help to clean dialogs")
-- 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.29: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")
-- 2026-11-06: Rule 18.29: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Rule 18.10 exception (Fritz): hover help goes on every dialog at once (a snippet of Help may be the hover text), and every Widget dialog gets the Pump drill-down look (Rule 18.30). (thread "Add hover help to clean dialogs")
+- 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.30: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Rule 18.30: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")

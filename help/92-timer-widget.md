@@ -1,6 +1,6 @@
 # Timer Widget
 
-A **Timer Widget** counts up or down in hours, minutes and seconds. Add one in Edit layout with **Select Widget Type > Timer** (it is made on the 🔨 Build Tab first, like every new Widget). Double-click it in Edit layout to open its **Timer Widget Properties**, in the same look as the Pump's (Skynet Rule 18.29). **A Timer Widget has no pictures.**
+A **Timer Widget** counts up or down in hours, minutes and seconds. Add one in Edit layout with **Select Widget Type > Timer** (it is made on the 🔨 Build Tab first, like every new Widget). Double-click it in Edit layout to open its **Timer Widget Properties**, in the same look as the Pump's (Skynet Rule 18.30). **A Timer Widget has no pictures.**
 
 ## Styles
 
