@@ -36,7 +36,7 @@ The panel goes in **`C:\Brewing\BrewPanel`** on Windows, and in **`Brewing/BrewP
 2. Double-click `Skynet_Brewer_Setup_<date>.exe`. Windows may say **Windows protected your PC**: click **More info**, then **Run anyway**. The installer just isn't signed with a paid certificate.
 3. Keep the folder `C:\Brewing\BrewPanel` and click **Install**.
    - If Node.js is missing, it offers to install it. Windows asks for permission.
-   - If the panel is already there, it asks **Delete all users and Schemas and Start Fresh?** Answer **No** to keep everything. **Yes** shows a red warning first, so you can still back out (see [Start Fresh](18-updating)).
+   - If the panel is already there, it asks what the update does: **1. Update the program and keep everything** (the normal choice), **2. Update the program and reset all users**, or **3. Start Fresh: delete everything**. Choices 2 and 3 show a warning first, so you can still back out (see [Updating](18-updating)).
    - If you had the panel straight in `C:\Brewing` before, it offers to copy your data, layout, processes and pictures across. The old folder isn't changed.
 4. Start it with **Skynet Brewer** on the Desktop. The black window is the panel running; your browser opens the panel a few seconds later.
 

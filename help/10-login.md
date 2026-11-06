@@ -40,7 +40,7 @@ A helper forgot theirs? An admin sets a new one in **Settings > Users**.
 
 ## Updates keep your logins
 
-Installing a new version keeps every user, password, sign-in and the recovery code. They are removed only when you answer **Yes** to the installer's **Start Fresh** question and confirm its warning. Then the panel asks you to create the admin account again. (The old Testing mode switch, which cleared logins on every new version, was retired on 2026-11-03.)
+Installing a new version keeps every user, password, sign-in and the recovery code. They are removed only when you pick **Update the program and reset all users** or **Start Fresh** in the installer and confirm its warning (see [Updating](18-updating)). Then the panel asks you to create the admin account again. (The old Testing mode switch, which cleared logins on every new version, was retired on 2026-11-03.)
 
 ## No recovery code and no admin can sign in?
 
