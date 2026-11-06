@@ -80,23 +80,23 @@ if [ "$SRC" != "$DEST" ]; then
     echo "Updating the panel in $DEST"
     echo "Your own folders: config (layout, tabs, devices, settings), data (brew log, users, passwords, logins),"
     echo "media (pictures and sounds) and scripts (Processes)."
-    # What this update does (Rule 9.8, Fritz 2026-11-06): 1 keep everything (the default, and what a non-interactive run
-    # does), 2 reset all users, 3 Start Fresh. 2 and 3 each have a warning with No as the default; No backs out.
+    # What this update does (Rule 9.8, Fritz 2026-11-06): 1 Start Fresh, 2 reset all users, 3 keep everything (the original
+    # No: the default, and what a non-interactive run does). 1 and 2 each have a warning with No as the default; No backs out.
     FRESH=no
     echo ""
     echo "Skynet Brewer is already installed here. The program files are always updated. Pick what this update does:"
-    echo "  1. Update the program and keep everything (recommended)"
-    echo "     Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are."
+    echo "  1. Start Fresh: delete everything"
+    echo "     Deletes every Schema, setting, user, password, the brew log and every Process, for good."
+    echo "     Kept: pictures and sounds (media) and the backups folder. A warning comes next."
     echo "  2. Update the program and reset all users"
     echo "     Deletes every user, password, sign-in and the recovery code. You make the admin account again."
     echo "     Your Schemas, settings, brew log, Processes, pictures and sounds are kept."
-    echo "  3. Start Fresh: delete everything"
-    echo "     Deletes every Schema, setting, user, password, the brew log and every Process, for good."
-    echo "     Kept: pictures and sounds (media) and the backups folder. A warning comes next."
-    CHOICE=1
+    echo "  3. Update the program and keep everything (recommended)"
+    echo "     Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are."
+    CHOICE=3
     if [ "${YES:-no}" != yes ] && [ -t 0 ]; then
       while :; do
-        read -r -p "Pick 1, 2 or 3 [1] " CHOICE; CHOICE="${CHOICE:-1}"
+        read -r -p "Pick 1, 2 or 3 [3] " CHOICE; CHOICE="${CHOICE:-3}"
         case "$CHOICE" in 1|2|3) break ;; *) echo "Type 1, 2 or 3." ;; esac
       done
     fi
@@ -110,7 +110,7 @@ if [ "$SRC" != "$DEST" ]; then
       else
         echo "Backed out. Nothing was deleted."
       fi
-    elif [ "$CHOICE" = 3 ]; then
+    elif [ "$CHOICE" = 1 ]; then
       printf '\n\033[1;31m%s\033[0m\n' "WARNING: ALL EXISTING DATA WILL BE DELETED, for good, with no backup:"
       echo "  - every Schema, Tab, Device, Widget and setting (config)"
       echo "  - every user, password, sign-in and the recovery code, the brew log and saved values (data)"
