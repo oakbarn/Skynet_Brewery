@@ -5585,30 +5585,21 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
     input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv);
   }
-  else if (kind === 'dbgroup') {   // a Database Group (Rule 6.14): the Groups, ➕ Add new Group…, and ✏ Change name (every Process follows)
-    const gs = S.config.dbGroups || [];
-    const s = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(pick a Group)'),
-      ...gs.map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.name)), h('option', { value: '__add__' }, '➕ Add new Group…'));
-    const ren = h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group Old_Name follows (Update All)', onclick: guard(async ev => {
+  else if (kind === 'dbgroups') {   // Database Groups (Rule 6.14, Fritz 2026-11-06): an item can be in more than one Group.
+    // The box shows its Groups and 👥 Groups…, which opens the Group list (➕ Add new Group… at the top). A click on a Group shows
+    // the Group dialog with all its members; a double-click adds this Device or Widget to the Group and shows the members.
+    // The choice is kept in the hidden holder (data-groups) and saved with the Properties.
+    const holder = h('span', { class: 'hidden', 'data-k': key, 'data-kind': kind, 'data-groups': JSON.stringify(Array.isArray(v) ? v : []) });
+    const sum = h('span', { class: 'dbGroupSum' });
+    const show = () => { const ids = JSON.parse(holder.dataset.groups); const ns = ids.map(id => (S.config.dbGroups || []).find(g => g.id === id)?.name).filter(Boolean);
+      sum.textContent = ns.length ? ns.join(', ') : '(none: sent by its setting all the time)'; };
+    show();
+    const btn = h('button', { type: 'button', title: 'Pick the Database Groups this item belongs to', onclick: guard(async ev => {
       ev.preventDefault();
-      const g = gs.find(x => x.id === s.value); if (!g) return toast('Pick a Group first', true);
-      const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process with send_db_group ${g.name} is changed to it.`, g.name) || '').trim();
-      if (!to || to === g.name) return;
-      const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
-      g.name = r.group.name; s.selectedOptions[0].textContent = g.name;
-      toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
-    }) }, '✏ Change name');
-    s.addEventListener('change', guard(async () => {
-      if (s.value !== '__add__') return;
-      const name = (prompt('Name of the new Group (letters, digits and _, like Readings). A Process sends it with send_db_group Name.') || '').trim();
-      if (!name) { s.value = v || ''; return; }
-      try {
-        const r = await api('POST', '/ui/dbgroups', { name });
-        S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
-        s.insertBefore(h('option', { value: r.group.id }, r.group.name), s.querySelector('option[value="__add__"]')); s.value = r.group.id;
-      } catch (e) { s.value = v || ''; throw e; }
-    }));
-    input = h('div', { class: 'cpick' }, s, ren);
+      const cur = await dbGroupPicker(obj?.name || 'this item', JSON.parse(holder.dataset.groups));
+      if (cur) { holder.dataset.groups = JSON.stringify(cur); show(); holder.dispatchEvent(new Event('change', { bubbles: true })); }
+    }) }, '👥 Groups…');
+    return [h('div', { class: 'full' }, label), h('div', { class: 'full dbGroups' }, sum, ' ', btn, holder)];
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
@@ -5782,6 +5773,7 @@ function readFields(obj, root = $('#dlgBody')) {
     else if (kind === 'yn') v = inp.value === 'yes';
     else if (kind === 'stpick') v = inp.value === '' || inp.value === '__add__' ? undefined : inp.dataset.num ? +inp.value : inp.value;
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
+    else if (kind === 'dbgroups') { v = JSON.parse(inp.dataset.groups || '[]'); if (!v.length) v = undefined; }
     else if (kind === 'json') { if (inp.value.trim() === '') v = undefined; else { try { v = JSON.parse(inp.value); } catch { throw new Error(`${k}: not valid JSON`); } } }
     else v = inp.value === '' ? undefined : inp.value;
     if (v === undefined) delete obj[k]; else obj[k] = v;
@@ -5998,7 +5990,7 @@ const INFO = {
     ['Name', ' (w_Value_N, w_Time_N, w_DateTime_N to start) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
-    ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; In a Group sends it with send_db_group.'],
+    ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']] },
   timer: { title: 'Timer Widget', properties: [
     ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
@@ -6071,6 +6063,78 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:no
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
 // a small dialog on top of the Properties (Rule 18 pop-ups): ✖ Cancel and 💾 Save at the top and the bottom; build(body) fills it
+// Database Groups (Rule 6.14, Fritz 2026-11-06). The Group list: ➕ Add new Group… at the top, then every Group (✔ = this item is
+// in it). A click shows the Group dialog with all its members; a double-click adds this item to the Group and shows the members.
+// Returns the Group keys this item is in after 💾 Save, or null for Cancel.
+const groupMembers = (id, me, mine) => [...new Set([...((editing && draft ? draft : S.config).elements || [])
+  .filter(e => e.name !== me && dbOf(e) && [...(e.database.groups || []), ...(e.database.group ? [e.database.group] : [])].includes(id)).map(e => e.name),
+  ...(mine ? [me] : [])])].sort((a, b) => a.localeCompare(b));
+const dbOf = e => e?.database && e.database.frequency && e.database.frequency !== 'none' ? e.database : null;
+async function dbGroupPicker(me, start) {
+  const cur = new Set(start.filter(id => (S.config.dbGroups || []).some(g => g.id === id)));
+  let list, timer = null;
+  const fill = (pick) => {
+    const gs = S.config.dbGroups || [];
+    list.replaceChildren(h('option', { value: '__add__' }, '➕ Add new Group…'),
+      ...gs.map(g => h('option', { value: g.id }, `${cur.has(g.id) ? '✔ ' : '    '}${g.name}  (${groupMembers(g.id, me, cur.has(g.id)).length} members)`)));
+    if (pick) list.value = pick; else list.selectedIndex = -1;
+  };
+  const addNew = async () => {          // Rule 18.14: build the new Group, come back, refresh the list, select it
+    const name = (prompt('Name of the new Group (letters, digits and _, like Mash). A Process starts it with start_db_group Name and stops it with stop_db_group Name.') || '').trim();
+    if (!name) return fill();
+    const r = await api('POST', '/ui/dbgroups', { name });
+    S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
+    fill(r.group.id);
+  };
+  const open = async id => { const g = (S.config.dbGroups || []).find(x => x.id === id); if (g) { await dbGroupDialog(g, me, cur); fill(id); } };
+  const r = await layerDialog('Database Groups', body => {
+    list = h('select', { size: 10, class: 'dbGroupList', title: 'Click a Group to see its members; double-click to add this item to it' });
+    list.addEventListener('click', guard(async () => {
+      const id = list.value; if (!id) return;
+      if (id === '__add__') return addNew();
+      clearTimeout(timer); timer = setTimeout(() => { timer = null; open(id); }, 300);     // wait: it may be a double-click
+    }));
+    list.addEventListener('dblclick', guard(async () => {
+      clearTimeout(timer); timer = null;
+      const id = list.value; if (!id || id === '__add__') return;
+      cur.add(id); fill(id); await open(id);
+    }));
+    body.append(h('p', { class: 'muted' }, `Groups of ${me}. Click a Group to see all its members. Double-click a Group to add ${me} to it. `
+      + 'An item in a Group is sent to the database by its own setting only while one of its Groups is started (start_db_group Mash ... stop_db_group Mash); send_db always works.'), list);
+    fill();
+  });
+  return r === 'ok' ? [...cur] : null;
+}
+// The Group dialog: its Name (✏ Change name, every Process follows) and all its members
+async function dbGroupDialog(g, me, cur) {
+  await new Promise(res => {
+    const d = h('dialog', { class: 'miniDlg' }), body = h('div', { class: 'miniBody' });
+    const close = () => { d.close(); d.remove(); res(); };
+    const title = h('h3', {}, `Group ${g.name}`);
+    const draw = () => {
+      const ms = groupMembers(g.id, me, cur.has(g.id));
+      body.replaceChildren(h('div', { class: 'full dbGroupDlg' },
+        h('p', { class: 'muted' }, `start_db_group ${g.name} starts sending its members to the database by their own settings; stop_db_group ${g.name} stops it; send_db_group ${g.name} sends them all once, now.`),
+        h('div', {}, h('b', {}, `Members (${ms.length})`)),
+        ms.length ? h('select', { size: Math.min(10, Math.max(3, ms.length)), class: 'dbGroupList' }, ...ms.map(n => h('option', { value: n }, n === me ? `${n}  (this item)` : n)))
+          : h('p', { class: 'muted' }, 'No members yet.'),
+        h('div', { class: 'bar' },
+          h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group, start_db_group or stop_db_group Old_Name follows (Update All)', onclick: guard(async () => {
+            const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process line with ${g.name} (send_db_group, start_db_group, stop_db_group) is changed to it.`, g.name) || '').trim();
+            if (!to || to === g.name) return;
+            const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
+            g.name = r.group.name; title.textContent = `Group ${g.name}`; draw();
+            toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
+          }) }, '✏ Change name'),
+          cur.has(g.id) ? h('button', { type: 'button', onclick: () => { cur.delete(g.id); draw(); } }, `➖ Take ${me} out of this Group`)
+            : h('button', { type: 'button', onclick: () => { cur.add(g.id); draw(); } }, `➕ Add ${me} to this Group`))));
+    };
+    const bar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', onclick: close }, '✔ OK'));
+    d.append(title, bar(), body, bar()); draw();
+    d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
+    document.body.append(d); d.showModal();
+  });
+}
 function layerDialog(title, build, canDelete = false) {
   return new Promise(res => {
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
@@ -7278,7 +7342,7 @@ $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 // ---------------------------------------------------------------- variables page: gGlobal, shared
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
 const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', clicked: 'When Clicked (each time someone sets it on its Tab)', process: 'When a Process starts',
-  group: 'In a Group (send_db_group Group_Name sends the Group)', datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
+  datetime: 'At a date and time (once)', clock: 'At clock time (every day)', second: 'Every second', minute: 'Every minute', hour: 'Every hour', midnight: 'Every day (at Midnight)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
   days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
@@ -7290,10 +7354,11 @@ function logSummary(lg) {
   if (f === 'process') return lg.process ? `When "${lg.process}" starts` : 'When a Process starts (none picked)';
   if (f === 'datetime') return `At ${lg.at || '?'}`;
   if (f === 'clock') return `Every day at ${lg.at || '?'}`;
-  if (f === 'group') { const g = (S.config.dbGroups || []).find(x => x.id === lg.group); return g ? `In the Group ${g.name}` : 'In a Group (none picked)'; }
-  if (!TIME_MODES.includes(f)) return LOG_LABEL[f] || f;
+  const gs = (lg.groups || []).map(id => (S.config.dbGroups || []).find(x => x.id === id)?.name).filter(Boolean);
+  const inG = s => gs.length && f !== 'none' ? `${s}, while Group ${gs.join(' or ')} is started` : s;
+  if (!TIME_MODES.includes(f)) return inG(LOG_LABEL[f] || f);
   const every = f === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[f]}`;
-  return every;
+  return inG(every);
 }
 // The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
 // dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
@@ -7304,23 +7369,25 @@ function dbFields(it) {
   return [['', 'Database and .API', 'box'],
     ['db_frequency', 'Send to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m]), true],
     ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])]]] : []),
-    ...(f === 'group' ? [['db_group', 'Group', 'dbgroup']] : []),
     ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N (a whole number, 1 or more)', 'num']] : []),
     ...(f === 'hms' ? [['db_interval', 'Every (00:00:00)', 'text']] : []),
     ...(f === 'clock' ? [['db_at', 'At clock time, e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
-    ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]]] : []),
+    ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]],
+      ['db_groups', 'Database Groups (optional): in a Group, it is sent by the setting above only while one of its Groups is started. On demand always works.', 'dbgroups']] : []),
     ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
     // API_Name (Fritz, 2026-11-06, Rule 6.18): what a Voice Command says; Unique in the Schema; may be blank, with a warning
     ['apiName', 'API_Name (what a Voice Command says; must be Unique)', 'text', null, true],
     ...(cleanApiName(it.apiName) ? [] : [['_apiw', '⚠ API_Name is blank: a Voice Command can\'t be used for this item.', 'note']]),
-    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now; send_db_group Group_Name sends every item In that Group.', 'note'],
+    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now (always, even Off or in a stopped Group); send_db_group Group_Name sends every item of that Group now, once.', 'note'],
     ['', '', 'boxend']];
 }
 function dbToWork(work) {
   const d = work.database || {};
   work.db_frequency = d.frequency || 'none';
-  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  for (const k of ['every', 'interval', 'at', 'process', 'groups', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  if (d.group && !d.groups) work.db_groups = [d.group];
+  if (work.db_frequency === 'group') work.db_frequency = 'ondemand';     // the old In a Group (2026-11-06)
   // an older "Every 1 day at 12 AM" opens as At clock time 12 AM (the Every choices have no clock time now)
   if (d.at && work.db_frequency === 'days' && (d.every === undefined || +d.every === 1)) { work.db_frequency = 'clock'; delete work.db_every; }
   work.api = work.api || 'off';
@@ -7339,18 +7406,18 @@ function dbFromWork(work, self) {
     } else delete work.apiName;
   }
   const f = work.db_frequency || 'none', d = { frequency: f };
-  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
+  for (const k of ['every', 'interval', 'at', 'process', 'groups', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
+  if (d.groups) { d.groups = d.groups.filter(id => (S.config.dbGroups || []).some(g => g.id === id)); if (!d.groups.length) delete d.groups; }
   delete work.db_frequency;
   if (!work.api || work.api === 'off') delete work.api;
   if (f === 'none' || !f) { delete work.database; return; }
   if (f === 'process' && !d.process) throw new Error('Database: pick the Process that sends this value');
-  if (f === 'group' && !(S.config.dbGroups || []).some(g => g.id === d.group)) throw new Error('Database: pick the Group (or ➕ Add new Group…)');
   if (f === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(d.interval || '')) throw new Error('Database: the interval must look like 00:05:00');
   if (TIME_MODES.includes(f) && f !== 'hms' && d.every !== undefined && !(Number.isInteger(d.every) && d.every >= 1)) throw new Error('Database: N must be a whole number, 1 or more');
   if (f === 'clock' && !validClock(d.at || '')) throw new Error('Database: clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30');
   if (f === 'datetime' && !/^\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}(:\d{2})?$/.test(d.at || '')) throw new Error('Database: the date and time must look like 2026-11-01T06:00');
   for (const k of Object.keys(d)) {
-    const keep = { frequency: true, attribute: true, process: f === 'process', group: f === 'group', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
+    const keep = { frequency: true, attribute: true, process: f === 'process', groups: true, every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
     if (!keep) delete d[k];
   }
   work.database = d;
