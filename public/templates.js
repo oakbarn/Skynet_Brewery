@@ -21,6 +21,7 @@ export const stdShort = s => s?.type ? (STD_SHORT[s.type] || s.type) + (s.size !
 export const FITTING_KINDS = {
   none: 'None', valve: 'Valve', tee: 'Tee', elbow90: '90 Degree Elbow', elbow45: '45 Degree Elbow', u: 'U', cipBallValve: 'CIP Ball Valve', reducer: 'Reducer', cap: 'End Cap',
   check: 'Check Valve', flowMeter: 'Flow Meter', flowMeterTemp: 'Flow Meter with Temperature', sightGlass: 'Sight Glass',
+  valveTee: 'Long Tee with a Valve',      // a Valve Tee or a Supply Manifold (Fritz, 2026-11-06, Rule 5.35): a valve built into the branch
 };
 export const FITTING_SLOTS = ['First Fitting', 'Second Fitting', 'Third Fitting', 'Fourth Fitting'];
 export const THERMOWELL_POS = { short: 'Short', long: 'Long' };
@@ -90,8 +91,9 @@ export function cleanFitting(b = {}) {
 export function fittingEnds(t) {
   const fs = (t.fittings || []).filter(f => f.kind !== 'none');
   if (!fs.length) return [];
-  const ends = fs[fs.length - 1].kind === 'cap' ? [] : [{ key: 'end', name: 'End' }];
+  const ends = fs[fs.length - 1].kind === 'cap' ? [] : [{ key: 'end', name: fs.some(f => f.kind === 'valveTee') ? 'Open end 2' : 'End' }];
   fs.forEach((f, i) => { if (f.kind === 'tee' && !f.thermowell) ends.push({ key: 'branch' + (i + 1), name: `Tee ${i + 1} branch` }); });
+  fs.forEach((f, i) => { if (f.kind === 'valveTee') ends.push({ key: 'branch' + (i + 1), name: `Valve ${i + 1} end` }); });     // the far end of the valve (Rule 5.35)
   return ends;
 }
 

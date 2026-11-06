@@ -976,6 +976,38 @@ end"; thread "Add Process command to connect QD hose", Help 142).
 - Predictive text offers .connect after a QD hose's name and, after `=`, the Quick Disconnects, Vessels and IPs on its Tab, then
   none; Check (Help 81) finds a wrong hose, a place not on its Tab, a vessel with no top, and `+=` or reading .connect.
 
+5.35 **Valve Tees and Supply Manifolds: Long Tees with a valve built into each branch** (Fritz, 2026-11-06: "Long Tee with integrated
+Motorized Valve and one with Long Tee with Manual Valve (and method to change valve type like a regular valve), a Double Supply
+Manifold (2 long Tees with 2 Integrated Valves with IPs only at Valve ends and 2 one on each open end of the joined Tees. Both Manual
+and Motorized Versions with ability to swap manual to motorized individually by valve. And a Triple Supply Manifold the same. Add to
+Pipe Fitting"; "These have their own unique attributes ... the standard exceptions would apply if it fits"; thread "Add valve Tees and
+supply manifolds", Help 146).
+- Three Skynet TC Pipe Fittings with valves built in: the **Valve Tee** (one Long Tee, Template Valve_Tee), the **Double Supply
+  Manifold** (2 Long Tees joined end to end, Supply_Manifold_2) and the **Triple Supply Manifold** (3, Supply_Manifold_3). TC 1.5,
+  Fritz's Long Tee drawing (Rule 5.25) with a valve on each branch, drawn to the Valve Standard (Rule 5.29).
+- **IPs only on the two open ends of the joined tees and on the far end of each valve** (Rule 5.20): the Valve Tee has 3, the Double 4,
+  the Triple 5. Flow goes any way through the tees; **a closed valve shuts its IP**.
+- **Each valve is a valve Device built into the fitting** (a Skynet_Integrated_Device, Rule 5.2, like the RIMS tube's parts): it can't be
+  taken out or deleted by itself; deleting the fitting deletes its valves. Rule 5.14 already says a valve in a fitting is a Device.
+- **Manual or Motorized, each valve on its own**, the same way as a regular valve's **Valve type** (Rule 5.13): in the fitting's
+  Properties each valve is **Manual** (turned by hand, no Port: a Process shows a pop-up and waits for Done) or **Motorized** (switched by
+  its Port; one Interface for all the Motorized valves of the fitting, then each valve's Port; two valves can't share a Port). The
+  picture follows (Manual ball valve or Motorized ball valve) and stays on the same spot.
+- **A click on a valve on its Tab opens or closes it** (operators and admins). Open: the bolt (Motorized) or the green ring (Manual).
+  Processes use the valve's own name (`<name>.state = true`); Motorized valves are on the Close all / Open all valve lists (Rule 6.15).
+- **Added from** Edit layout bar > **Elbows, Tees …** > Valve Tees and Supply Manifolds, or Select Device Type > **Valves**: six rows,
+  each fitting with all its valves Manual or all Motorized to start. It goes on the Build Tab (Rule 4.1) and its Properties open; a
+  Motorized one picks its Interface and Ports there.
+- **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
+  or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
+  name (Rule 3.1), e.g. `MB_22_eVlv_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
+- Flip Horizontal, Flip Vertical and Rotate (45 degree steps) as every Skynet item (Rule 5.5): the valves and IPs turn with it. No
+  Autosize to pipe (it is drawn at the Valve Standard size) and no Clone. Dropped on a straight pipe in Edit layout, its run goes along
+  the pipe and the pipe is cut, as a tee's (Rule 5.25).
+- *Standard exceptions used* (Fritz: "the standard exceptions would apply if it fits"): its valves' Interface and Ports are set in the
+  fitting's Properties, not in a Pump-style Add box (as the RIMS tube's and the Vessel Device's parts, Rules 4.2 / 18.13 / 18.23), and
+  unlike the Vessel Device it is **not locked** once saved, so a valve can always be swapped Manual / Motorized.
+
 ---
 
 ## 6. Devices, connections and safety
@@ -2172,3 +2204,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 6.14: Send to the database gets shortcut choices **Every second, Every minute, Every hour, Every day (at Midnight)**, listed just above Every N milliseconds (Fritz: "I know you can set these with the way it is but these are shortcuts"). Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Rule 6.14: the Database Groups switches are replaced by a **👥 Groups…** button and a Group list (➕ Add new Group… at the top); a click on a Group shows the Group dialog with all its members, a double-click adds the Device or Widget to the Group and shows its members (Fritz, dialog change commanded under Rule 18). Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Added Rule 1.24 (make a gGlobal in a Process: new gGlobalValue gV_X = 10, new gV gV_X, new value gV_X all the same; declare = new; a start that does not fit is an error; = is the first value only). Help 145 (next free Help number 146). (thread "Declare gGlobals inside a Process")
+- 2026-11-06: Added Rule 5.35 (Valve Tees and Supply Manifolds: the Valve Tee, Double and Triple Supply Manifold, TC 1.5 Long Tees with a valve Device built into each branch; IPs only on the open ends of the tees and the far end of each valve; each valve Manual or Motorized on its own in the fitting's Properties; added from Elbows, Tees … and the Valves list). Help 146; next free Help number 147. (thread "Add valve Tees and supply manifolds")

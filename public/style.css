@@ -786,6 +786,11 @@ button.barSim.sim { background: repeating-linear-gradient(45deg, #ffd400 0 8px, 
 /* ➕ Add box on the Edit layout bar (Fritz, 2026-10-27) */
 .turnBar { display: inline-flex; gap: 2px; padding: 0 4px; border-left: 1px solid var(--border, #555); border-right: 1px solid var(--border, #555); }
 #ws .gfx.vessel .bfImg { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
+/* Valve Tees and Supply Manifolds (Rule 5.35): the valves on the picture, turned with it; a click opens or closes one */
+#ws .gfx.vessel .mfVals { position: absolute; inset: 0; pointer-events: none; }
+#ws .gfx.vessel .mfValve { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: auto; cursor: pointer; }
+#ws .gfx.vessel .mfValve .mfOver { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
+#ws.editing .gfx.vessel .mfValve { cursor: inherit; }
 /* Process editor picture picker (Alt+P) */
 .picPickDlg .ppTools { flex-wrap: wrap; gap: 8px; }
 .picPickDlg .ppTools input { flex: 1; min-width: 8em; }
