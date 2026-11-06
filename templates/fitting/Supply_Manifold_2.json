@@ -1,0 +1,33 @@
+{
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "valveTee"
+    },
+    {
+      "kind": "valveTee"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Supply_Manifold_2.svg",
+  "size": [
+    320,
+    262
+  ],
+  "ipPos": {
+    "start": "0,0.0843",
+    "end": "1,0.0843",
+    "branch1": "0.2500,1",
+    "branch2": "0.7500,1"
+  },
+  "bend": "0.5,0.0843",
+  "notes": "A Double Supply Manifold (Fritz, 2026-11-06, Rule 5.35): 2 Long Tees joined end to end, a Valve built into each branch. IPs only on the two open ends of the joined tees and on the far end of each valve. Each valve is Manual or Motorized on its own."
+}
