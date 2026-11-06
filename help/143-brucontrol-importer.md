@@ -13,9 +13,13 @@ makes is exactly what the Panel makes.
 Double-click **Skynet BruControl Importer** on the Desktop or in the Start menu (Skynet Brewer folder). The Setup .exe puts it
 there. A black command window opens and stays open while you use the Importer; **✖ Close Importer** at the top right stops it.
 
-## Step 1: Welcome
+## Page 1: Welcome
 
-The Welcome screen tells you what stays the same (your boards, wiring, Devices, screens, scripts, pictures), what is different
+A short welcome: what the Importer does, and that it never changes BruControl or its files. Click **Next ▶**.
+
+## Page 2: BruControl and Skynet
+
+This page tells you what stays the same (your boards, wiring, Devices, screens, scripts, pictures), what is different
 in Skynet (it runs in a browser, some new words, Skynet pictures and Templates, everything comes in the Skynet way), and the steps
 the Importer will guide you through. Click **Start ▶**.
 
@@ -30,7 +34,7 @@ the Importer will guide you through. Click **Start ▶**.
 | Global | gGlobal |
 | Device (a board) | Interface |
 
-## Step 2: Pick your BruControl config file
+## Page 3: Pick your BruControl config file
 
 The Importer looks **only in Documents\BruControl** first (the real Documents folder, even when Windows keeps it on
 OneDrive). It lists every BruControl config file (`.brucfg`) there, newest first, with the date it was saved and its size.
