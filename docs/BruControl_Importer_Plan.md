@@ -120,3 +120,51 @@ stay in the private project folder.
 1. Is `26-26-46 VGC UNI and MB Relay.brucfg` the Oakbarn Brewery?
 2. OK with "one program, two doors" (same Windows install, two shortcuts), instead of a fully separate program?
 4. Open question 10 is still open: keep the strict Process check on import, or allow a BruControl-style lenient start?
+
+## 9. Setup questions the Importer asks (Fritz, 2026-11-06)
+
+Fritz's list of questions, asked before the items are brought in, so each BruControl item becomes the right Skynet Vessel,
+Device or Widget. Plan only: nothing is built until Fritz says go. Both programs share the same Rules, Devices, Widgets and
+Templates (Rule 15.4), so every answer feeds the same Vessel Templates and Vessel Rules (section 19) the Panel uses.
+
+How they are asked (the Rules for dialogs):
+- One clean page per question group, Back and Next at the top and the bottom.
+- Short field names, with the longer explanation in a hover or tap tip (Rule 18.16).
+- A choice of more than two things is a **dropdown**. A Yes / No is a **switch**. "Other" opens a text box for what it is.
+- Plain English, correct spelling (Rule 2.37).
+
+### Page A: Units (asked once)
+1. **Units:** **Metric** (mL, kg, °C ...) or **US** (ounces, pounds, °F ...). Two choices. Every later question that has a size
+   uses it (Liters or Gallons, cm or inches).
+
+### Page B: Vessels
+2. **How many Vessels do you have?** A number. Pages C come once for each Vessel (Vessel 1, Vessel 2 ...).
+
+### Page C: one page for each Vessel
+3. **Function:** HLT; HLT with HERMS; Mash Tun; Mash Tun with RIMS; Brew Kettle; Fermentor; Other (a text box for what it is).
+4. **Capacity:** Liters (Metric) or Gallons (US). This is the Vessel's Gallons field (Rule 19.1).
+5. **Dead Space:** the same units as Capacity.
+6. **Outlet fitting:** TC 1.5; NPT; BSP; None.
+7. **Thermowell:** Center Above, Manual Thermometer; Center Above, BruControl Probe; None.
+8. **High Return:** Sparge Arm; Steam Slayer; Inlet; None.
+9. **Tangential Inlet:** Left; Right; None.
+10. **Outlet:** TC above Bottom; TC Bottom Outlet; BSP above Bottom; BSP Bottom Outlet; None.
+11. **HERMS Coil inside the Vessel:** Left Outlet and Inlet; Right Outlet and Inlet; Right Inlet, Left Outlet; Left Inlet,
+    Right Outlet; None.
+12. **Heat Source:**
+    - BruControl Heating Element
+    - Gas Burner, not smart. Then two switches: **BruControl controls the Gas Valve**; **BruControl controls the Igniter**.
+    - Gas Burner with smart control. Then two switches: **BruControl controls the Gas Valve**; **BruControl turns on the Smart
+      control**.
+    - Gas Burner, total manual control
+    - BruControl RIMS Tube
+    - Oakbarn Modified HERMS (BruControl)
+    - Unheated
+
+### Open questions for Fritz on this list
+1. **Two Outlet questions (6 and 10).** Suggestion: 6 is the outlet's **fitting** (TC 1.5, NPT, BSP) and 10 is **where** it is (above
+   the bottom or a bottom outlet). Then 10 could be just "Above Bottom; Bottom; None", since 6 already says TC or BSP.
+2. **"BruControl Probe" and "BruControl controls ..."**: when the answer says BruControl controls or reads it, should the
+   Importer then ask **which imported Device** it is (a dropdown of the items on a board port, for example the gas valve's relay)?
+3. **Order:** these questions come after Names (page 4) and before the items are placed, so the Vessels are made first and the
+   Devices are put on them?
