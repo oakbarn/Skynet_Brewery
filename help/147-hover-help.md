@@ -6,7 +6,8 @@ fields themselves. The explanation of a field is in its **hover help**.
 ## See the help of a field
 
 - A field name with a **dotted underline** has hover help.
-- **Rest the mouse on the name** (of a field or a dropdown). A small yellow box shows what the field is for, right away.
+- **Rest the mouse on the name** (of a field or a dropdown). A small yellow box shows what the field is for, instantly.
+- **Buttons** (Delete, Cancel, Save, ⬆, ⬢ ...) and the **dialog title** have hover help too. The title shows a short piece of its Help page.
 - The box **stays as long as the mouse is on the name**. Move the mouse off (or click, press a key or scroll) and it goes away.
 - **Click the name** to open the same help in a small pop-up with **Close**, if you want to keep it open while you read.
 
