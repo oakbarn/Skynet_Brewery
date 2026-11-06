@@ -183,6 +183,18 @@ across Processes, so they **stay Widgets and do not become gGlobals**. It keeps 
 .API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
 Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
 
+1.24 **Making a gGlobal in a Process** (Fritz, 2026-11-06). Besides the gGlobal screen (Rule 1.19), a Process line makes a
+gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gV_X = 10` (the long word), `new gV gV_X = 10` (the
+short word) and `new value gV_X = 10` (a normal variable word with a name that starts gV_). The words are **gGlobalValue / gV**
+(gV_), **gGlobalString / gS** (gS_), **gGlobalTime / gT** (gT_), **gGlobalDateTime / gD** (gD_, as Rule 1.19) and
+**gGlobalBoolean / gB** (gB_). **`declare` is the same word as `new`.** Picking or typing the long word in the Process editor
+fills in the start of the name (gV_ ...). **A start that does not fit the word is an error** (`new value gS_X`: gS_ is for a
+String), and so is a long or short word with a name that does not start with its letters. A Graphic gGlobal (gG_) is made only
+on the gGlobal screen. The gGlobal is made **the first time the line runs**, saved in the Schema like one made on the gGlobal
+screen, never on a Tab; the `= 10` is its **first value** only, and afterwards the line does nothing, because a gGlobal keeps
+its value (Rule 1.22). A name already used by a Device or Widget, or by a gGlobal of another Kind, is an error. Any other name
+after `new value` is still a Process variable. (thread "Declare gGlobals inside a Process", Help 145)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -368,6 +380,11 @@ never stops the panel (Rule 2.25), and double-clicking **Skynet Brewer** again o
 clean window (it keeps its own sign-in). Phones, tablets and other computers open the panel in their browser as before.
 (thread "Open Skynet in its own clean window", Help 122)
 The clean window shows **the Skynet Brewer beer mug** (the same mug as the Desktop shortcut) on the taskbar, also when it is minimized, and in its title bar; the panel's Help window and the Sign in page show it too, and so do browser tabs. (Fritz, 2026-11-05, thread "Show a beer mug icon when minimized")
+
+2.37 **Correct spelling and plain English at all times** (Fritz, 2026-11-06: "correct spelling at all times", "Plain
+English. Get and Put are computer terms that only geeks understand", "Get and put follow in the ( )"). Every word a user sees
+(dialogs, dropdowns, pop-ups, messages, Help) is spelled correctly and says it in plain English. When a computer word is
+needed, it follows in ( ) after the plain words, for example **Read Only (Get: outside programs like Node-Red can read it.)**.
 
 ## 3. Names and file names
 
@@ -1062,20 +1079,43 @@ lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 6.14 **Database and .API on every Device and Widget** (Fritz, 2026-10-30, Help 98). Every Device and Widget
 with a value has a **Database and .API** box at the end of its Properties:
 - **Send to the database**: Off, On demand, On value change (at most 10 a second, the last change never lost),
-  **When Clicked** (each time someone sets it on its Tab), When a Process starts, **In a Group**, At a date and time (once), At clock time (every day at that time), Every N ms /
+  **When Clicked** (each time someone sets it on its Tab), When a Process starts, At a date and time (once), At clock time (every day at that time), **Every second, Every minute, Every hour, Every day (at Midnight)** (shortcuts,
+  Fritz 2026-11-06, listed just above the Every N choices), Every N ms /
   seconds / minutes / hours / days, Every 00:00:00. The **At clock time** box shows only when **At clock time** is
   picked; the Every choices have no clock time (Fritz, 2026-11-04). **What to send** is its main value unless another attribute is picked.
   `send_db Name` in a Process sends it now, whatever the setting, **even when it is Off** (Fritz, 2026-11-05: kept
   `send_db Name`, no `send_Now` command).
-- **Database Groups** (Fritz, 2026-11-05): **In a Group** puts the item in a **Group**. A Group has a **meaningless hidden key**
-  (the items point to it) and a **Group Name**. The Process line **`send_db_group Group_Name`** sends every item In that Group,
-  **each time** it runs. **➕ Add new Group…** ends the Group list; **✏ Change name** changes the Group Name and **every Process**
-  follows (Update All), like Rule 3.11. **Once is gone** (Rule 15.2): each Schema's Once items go **In the Group named Once**.
+- **Database Groups** (Fritz, 2026-11-05, rewritten 2026-11-06). **A Group is how a set of Devices and Widgets is sent to the
+  Database or not.** A Process command starts sending a Group, and another Process command stops it:
+  **`start_db_group Group_Name`** and **`stop_db_group Group_Name`**.
+  - **A single Device or Widget can belong to more than one Group** (Fritz, 2026-11-06). The Database and .API box shows the
+    item's Groups and a **👥 Groups…** button (Fritz, 2026-11-06, a dialog change he commanded, Rule 18). It opens the **Group
+    list**: a list box of the existing Groups with **➕ Add new Group…** at the top (Rule 18.14: it makes the Group, comes back and
+    selects it); ✔ marks the Groups the item is in. **A click on a Group opens the Group dialog with all its members. A
+    double-click on a Group adds this Device or Widget to it** and opens the Group dialog with its members. The Group dialog also
+    has ✏ Change name and ➕ Add / ➖ Take this item out. The Group list's 💾 Save keeps the choice; it is saved with the Properties.
+  - **An item assigned to a Database Group is only sent to the database while a Group it belongs to is started.** It is sent by
+    its **own** Send to the database setting (Every 1 minute, On value change, When Clicked ...), so the item sets *how often*
+    and the Group sets *when*. An item in no Group is sent by its setting all the time, as before. Every Group is stopped when
+    the Brain starts.
+  - **On demand is always true still** (Fritz, 2026-11-06): `send_db Name` (and Log now, and the API) sends the item at once,
+    whatever its Groups, even when they are stopped. **`send_db_group Group_Name`** sends every item of the Group **once, now**,
+    started or not.
+  - **Example (Fritz):** you want a Mash Temperature Probe sent to the database **every minute**, but only during the Mash. Set
+    the probe's Send to the database to **Every minute** and add it to the Group **Mash** (👥 Groups…, double-click Mash). At the beginning of the Mash a
+    Process line `start_db_group Mash` starts the Group, and the probe reports to the database every minute. At the end of the
+    Mash a Process line `stop_db_group Mash` stops it. The database only has that probe's data during the Mash.
+  - A Group has a **meaningless hidden key** (the items point to it) and a **Group Name**. **✏ Change name** changes the Group
+    Name and **every Process** follows (`send_db_group`, `start_db_group`, `stop_db_group`; Update All, like Rule 3.11).
+  - **In a Group is no longer a Send to the database choice, and Once is gone** (Rule 15.2): each Schema's Once items and In a
+    Group items become **On demand** still in their Group, so `send_db_group` still sends them as before.
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
   (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
-- **.API**: Off (the start), Get only, Get and Put. Only items with .API on are in `/api/items`, MQTT and Home
-  Assistant; only Get and Put can be changed from outside.
+- **.API**: Off (the start), **Read Only (Get: outside programs like Node-Red can read it.)**, **Read & Control (Get & Put:
+  outside programs like Node-Red can also control it.)** (Fritz, 2026-11-06, renamed from Get only / Get and Put; elsewhere in these Rules Get only = Read Only and
+  Get and Put = Read & Control). Only items with .API on are in `/api/items`, MQTT and Home Assistant; only Read & Control can be
+  changed from outside.
 - **Safeguards so a bot can't take over:** board readings (inputs, probes), names, Tabs, Interfaces, ports and
   pictures are never changed from outside; a Manual Valve Widget has no .API (only a click turns it); ten wrong
   API keys in 10 minutes shut that address out for 15 minutes; every outside change is written in the Processes
@@ -1111,6 +1151,20 @@ Output** when Enabled. On a PWM pin (PWM output on) the pin follows the output %
 changes the Initial Output and the two Drives to % and says so. Like the PID it counts as a heater, is On while Enabled
 (Rule 7.9) and can share a heater's port (Rule 6.1). Starting values: Deadband Offset 0.5, Inner Band Offset 2, Initial Output 0,
 Inner Band Drive 1, Outer Band Drive 5, Calc Time 10 s, Output window 2 s. (thread "Add Deadband control", Help 126)
+
+6.18 **API_Name: the name a Voice Command says** (Fritz, 2026-11-06: "a new string field associated with API. API_Name. This
+field must be Unique. It is what a Voice Command would use. It would only be on the Database and API Popup"). Every Device and
+Widget with a value has an **API_Name** String, **only on its Database and .API pop-up**, below .API.
+- It **must be Unique** in the Schema; capitals and extra spaces don't count (`Red Pump` = `red  pump`). Saving one that is
+  already used is refused and says which item has it. Spaces are allowed; `< > : " / \ | ? *` are not; at most 60 characters.
+- It **may be blank, with a warning** that a Voice Command can't be used for that item (Fritz, 2026-11-06: "It can be blank,
+  but with a Warning that you could not use a Voice Command").
+- A Voice Command says it: an API_Name **Red Pump** is switched by "Turn on Red Pump" (Fritz, 2026-11-06). Home Assistant (Alexa,
+  Google Home, Siri) names the item by its API_Name (its Label when blank); `/api/items/<name>` finds an item by its Name or its
+  API_Name. It opens nothing by itself: the item's .API (Rule 6.14) still says what outside programs may do.
+- It replaces the "Voice Name" planned on 2026-10-30 (unique, starting as the Label): an API_Name starts blank.
+- It is not the item's Name (Rule 3.1): Processes keep using the Name. The BruControl Importer (Rule 15.4) carries it over later.
+  (thread "Add unique API_Name for voice commands", Help 144)
 
 ## 7. Pictures
 
@@ -1336,7 +1390,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **143**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **145** (143 is the BruControl Importer's, 144 API_Name). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2144,4 +2198,10 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
 - 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")
+- 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")
+- 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can also control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")
+- 2026-11-06: Rule 6.14 Database Groups rewritten (Fritz): a Device or Widget can belong to more than one Group; Grouping is how a set of items is sent to the Database or not; `start_db_group Group_Name` starts a Group and `stop_db_group Group_Name` stops it; an item in a Group is sent by its own setting only while one of its Groups is started; On demand (`send_db`) is always true; `send_db_group` sends the Group once. In a Group is no longer a Send to the database choice (old items become On demand in their Group). Fritz's Mash probe example added. Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Rule 6.14: Send to the database gets shortcut choices **Every second, Every minute, Every hour, Every day (at Midnight)**, listed just above Every N milliseconds (Fritz: "I know you can set these with the way it is but these are shortcuts"). Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Rule 6.14: the Database Groups switches are replaced by a **👥 Groups…** button and a Group list (➕ Add new Group… at the top); a click on a Group shows the Group dialog with all its members, a double-click adds the Device or Widget to the Group and shows its members (Fritz, dialog change commanded under Rule 18). Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Added Rule 1.24 (make a gGlobal in a Process: new gGlobalValue gV_X = 10, new gV gV_X, new value gV_X all the same; declare = new; a start that does not fit is an error; = is the first value only). Help 145 (next free Help number 146). (thread "Declare gGlobals inside a Process")
 - 2026-11-06: Added Rule 5.35 (Valve Tees and Supply Manifolds: the Valve Tee, Double and Triple Supply Manifold, TC 1.5 Long Tees with a valve Device built into each branch; IPs only on the open ends of the tees and the far end of each valve; each valve Manual or Motorized on its own in the fitting's Properties; added from Elbows, Tees … and the Valves list). Help 146; next free Help number 147. (thread "Add valve Tees and supply manifolds")

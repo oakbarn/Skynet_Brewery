@@ -17,6 +17,7 @@ import { CLASSES, addSteps } from './lib/scaffold.js';
 import { Engine } from './lib/engine.js';
 import { Logger, LOG_MODES } from './lib/logger.js';
 import { cleanDatabase, ApiGuard, apiList, apiItem, apiPut } from './lib/itemapi.js';
+import { apiNameListError } from './public/apiname.js';
 import { buildCsv, csvFileName, cleanLogSets } from './lib/logcsv.js';
 import { Hardware } from './lib/hardware.js';
 import { importBeerXml } from './lib/beerxml.js';
@@ -473,7 +474,7 @@ async function route(req, res) {
       }
     }
     g = /^\/api\/log\/(.+)$/.exec(p);         // send its reading to the database now
-    if (g && m === 'POST') { if (!apiItem(store, g[1])) return fail(res, 404, `No item named "${cleanName(g[1])}" that outside programs may read`); logger.logNow(g[1], 'api'); return ok(res); }
+    if (g && m === 'POST') { const it = apiItem(store, g[1]); if (!it) return fail(res, 404, `No item named "${cleanName(g[1])}" that outside programs may read`); logger.logNow(it.name, 'api'); return ok(res); }
     if ((p === '/api/log' || p === '/api/log.csv') && m === 'GET') {
       const rows = logger.query(Object.fromEntries(url.searchParams));
       return p.endsWith('.csv') ? send(res, 200, csv(rows), 'text/csv; charset=utf-8') : ok(res, rows);
@@ -550,6 +551,7 @@ async function route(req, res) {
     { const bad = kindChangeError(store.config.elements, body.elements); if (bad) return fail(res, 400, bad); }
     for (const el of body.elements ?? []) fixValveLists(el);      // a tap water valve: always on Close all, never on Open all (Rule 6.15)
     for (const el of body.elements ?? []) cleanDatabase(el);     // .database and .API: only the known settings are kept (lib/itemapi.js)
+    { const bad = body.elements && apiNameListError(body.elements); if (bad) return fail(res, 400, bad); }     // API_Name is Unique (Rule 6.18)
     // device_controlled (Semi_Widgets_Devices, public/semi.js): only a Device with an ON / OFF state; a deleted one goes back to None
     if (body.elements) { const { errors } = checkControlled(body.elements); if (errors.length) return fail(res, 400, errors[0]); }
     // only one Override button on each Tab (Fritz, 2026-10-30)
@@ -837,7 +839,7 @@ async function route(req, res) {
     if (!g) return fail(res, 404, 'That Group is gone');
     const to = checkGroupName(store.config, b.name, g.id), from = g.name;
     g.name = to; store.writeConfig(); broadcast('config', {});
-    // Update All: every Process line send_db_group Old becomes send_db_group New
+    // Update All: every Process line send_db_group / start_db_group / stop_db_group Old gets the New Name
     const changed = [];
     if (from !== to) for (const name of engine.names()) {
       const text = engine.read(name), out = renameGroupInText(text, from, to);
