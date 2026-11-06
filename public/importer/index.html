@@ -56,8 +56,28 @@
         <ul>
           <li><b>Your boards, wiring and cables.</b> The same Arduino Mega, Grand Central, ESP32 and friends, the same USB COM ports,
             Ethernet and WiFi links, and the same pin numbers. Nothing is rewired.</li>
-          <li><b>Your Devices.</b> Pumps, valves, elements, probes and PWM outputs come over with their ports.</li>
-          <li><b>Your screens and scripts.</b> Every workspace becomes a Tab, and every script becomes a Process that runs the same way.</li>
+          <li><b>Your Elements.</b> Pumps, valves, heating elements and such come into Skynet as <b>Devices</b>, using the same
+            hardwiring, the same Interfaces and the same assigned Pin / Port.
+            <ul>
+              <li>BruControl made a major change with <b>Firmware 46</b>: the Mega ports A0 to A15 became ports 54 to 69. If you have
+                Firmware 46, it imports fine. If you did not upgrade to Firmware 46, the older A0 to A15 import fine too. In Skynet
+                you can call those ports either way, because they are the same port.</li>
+              <li>Skynet has <b>subclasses of Devices</b> (Elements in BruControl). In BruControl an On/Off Pump and a Motorized Ball
+                Valve were both DO (digital output) ports. In Skynet they are also the general class DO, but with the subclasses
+                <b>DO:Pump</b> and <b>DO:Motorized Valve</b>.</li>
+              <li>You could build a Pump or Valve in Skynet almost the same way as in BruControl, but in Skynet you can push a button to
+                create a Pump or Valve, and it has many of the features your BruControl Pump or Valve had. The Skynet Pump or Valve
+                is the better choice, so a Pump or Valve is generally updated to a new Skynet one, because of its built-in features
+                (and less coding in a Process, your script).</li>
+            </ul></li>
+          <li><b>Your Workspaces</b> are created as Skynet <b>Tabs</b> in the browser. A Workspace and a Tab are very similar and
+            generally have the same attributes. Each is a container that holds <b>Devices</b> (your BruControl Elements) and
+            <b>Widgets</b> (your Timers, Switches and other application Elements).
+            <ul>
+              <li><b>Globals</b> are replaced by a Text Widget, a Value Widget and so on. Globals that were strictly variables become a
+                <b>gGlobal</b>: a variable with global scope (across Processes).</li>
+            </ul></li>
+          <li><b>Your scripts</b> each become a Process that runs the same way.</li>
           <li><b>Your pictures and sounds</b> from the BruControl Media folder.</li>
         </ul>
       </div>
