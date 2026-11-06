@@ -4,15 +4,16 @@
 // on the name and a small help box shows its explanation at once; it stays as long as the mouse is on the name and goes away
 // when the mouse moves off. A tap (phones and tablets, Rule 2.35) or a click still opens the small pop-up with Close (Rule 18.16).
 // One shared helper that watches the whole page, so every dialog of the Panel and of the BruControl Import gets it by itself.
-export const HOVER_DELAY_MS = 250;      // a short rest, so the help does not flash while the mouse passes over a name
+export const HOVER_DELAY_MS = 0;        // Fritz, 2026-11-06: "Help for any Choice is always available instantly"
 export const GAP = 6;                   // pixels between the name and the help box
 
-// the help of an element: data-help, or the old title of a tip label (moved to data-help so the browser's own tooltip, which
-// comes late and goes away by itself, does not show too)
+// the help of an element: data-help, or the old title of a tip label or of anything in a dialog (a button, an icon), moved to
+// data-help so the browser's own tooltip, which comes late and goes away by itself, does not show too (Fritz, 2026-11-06: "add
+// hover over the Buttons as well")
 export function helpOf(el) {
   if (!el) return '';
   if (el.dataset?.help) return el.dataset.help;
-  if (el.classList?.contains('tipLbl') && el.getAttribute?.('title')) {
+  if ((el.classList?.contains('tipLbl') || el.closest?.('dialog')) && el.getAttribute?.('title')) {
     el.dataset.help = el.getAttribute('title'); el.removeAttribute('title');
     return el.dataset.help;
   }
@@ -27,7 +28,7 @@ export function placeBubble(r, box, view) {
   return { left: Math.round(left), top: Math.round(Math.max(4, top)) };
 }
 
-const helpTarget = t => t?.closest?.('[data-help], .tipLbl') || null;
+const helpTarget = t => t?.closest?.('[data-help], .tipLbl, dialog [title]') || null;
 
 function start(doc = globalThis.document) {
   if (!doc || doc._hoverHelp) return;
@@ -67,6 +68,56 @@ function start(doc = globalThis.document) {
   });
   // a click, a key, a scroll or a dialog closing puts it away
   for (const k of ['pointerdown', 'keydown', 'scroll', 'close']) doc.addEventListener(k, () => { if (on) hide(); }, true);
+}
+
+// A snippet of a Help page for a dialog's title (Fritz, 2026-11-06: "You can take a snippet of help and have it in the Hover
+// Dialog", "maybe over the Dialog Title"): the first paragraph under the page's title, or under the section asked for, as plain
+// words (no ** or links), its first sentences up to about 220 letters.
+export function helpSnippet(md, section = '') {
+  const lines = String(md ?? '').replace(/\r/g, '').split('\n');
+  let i = 0;
+  if (section) {
+    const want = String(section).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const at = lines.findIndex(l => /^#{1,6}\s/.test(l) && l.replace(/^#+\s*/, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() === want);
+    if (at >= 0) i = at + 1;
+  }
+  const para = [], list = [];
+  for (; i < lines.length; i++) {
+    const l = lines[i].trim(), into = para.length && /:$/.test(para.at(-1));      // a line ending with : goes on into its list
+    if (into && /^[-*]\s+/.test(l)) { list.push(l.replace(/^[-*]\s+/, '')); continue; }
+    if (into && /^\|/.test(l)) { const c = l.split('|')[1]?.trim(); if (c && !/^-+$/.test(c) && lines[i + 1]?.trim().match(/^\|\s*-/) == null) list.push(c); continue; }
+    if (into && list.length && !l) break;
+    if (/^#/.test(l) || /^!\[/.test(l) || /^\|/.test(l) || /^```/.test(l)) { if (para.length && !into) break; continue; }
+    if (!l) { if (para.length && !into) break; continue; }
+    if (into) break;
+    para.push(l.replace(/^[-*]\s+/, ''));
+  }
+  if (list.length) para.push(list.join(', ') + '.');
+  let t = para.join(' ').replace(/\s*\([^()]*\b(Rule|Fritz)\b[^()]*\)/g, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`]{1,3}([^*_`]+)[*_`]{1,3}/g, '$1').replace(/\s+/g, ' ').trim();
+  // the first sentences, up to about 220 letters (a snippet, not the page)
+  const sentences = t.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g) || [];
+  let out = '';
+  for (const x of sentences) { if (out && (out + x).length > 220) break; out += x; }
+  t = out.trim();
+  if (t.length > 320) t = t.slice(0, 320).replace(/\s+\S*$/, '') + ' …';
+  return t;
+}
+// the snippet for a Help topic ([page, section], as the yellow ? Help opens it), read once from the Brain's Help pages
+const snipCache = new Map();
+let pageList = null;
+export async function loadSnippet(topic) {
+  const [want, section] = Array.isArray(topic) ? topic : [topic];
+  if (!want) return '';
+  const key = want + '#' + (section || '');
+  if (!snipCache.has(key)) snipCache.set(key, (async () => {
+    pageList ??= fetch('/ui/help').then(r => r.json()).catch(() => []);
+    const list = await pageList, w = String(want).toLowerCase();
+    const page = (Array.isArray(list) ? list : list.pages || []).find(p => p.name === w || p.name.replace(/^\d+-/, '') === w);
+    if (!page) return '';
+    const md = await fetch('/ui/help/' + encodeURIComponent(page.name)).then(r => (r.ok ? r.text() : '')).catch(() => '');
+    return helpSnippet(md, section);
+  })());
+  return snipCache.get(key);
 }
 
 if (typeof document !== 'undefined') start(document);

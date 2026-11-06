@@ -9,7 +9,8 @@ import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
+import { loadSnippet } from './hoverhelp.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -1131,10 +1132,17 @@ const NAME_PREFIX = { text: 'w_Text', point: 'IP', pipe: 'Straight', tee: 'Tee',
 const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind === 'ip' && !g.port ? NAME_PREFIX[g.fitting || 'point'] || 'IP' : g.kind === 'text' ? 'w_Text' : null;
 function giveName(g, all) {
   // a Text Widget keeps the name it has: w_Text_N is only its first name, it can be changed (Fritz, 2026-10-29)
+  if (!g.name && widgetTypeId(g, isTapMv(g))) { g.name = graphicWidgetName(g); autoNamed.add(g); return; }      // a new one: wgt_Type_Label_TabID (Rule 3.14)
   const p = autoPrefix(g); if (!p || (g.name && (g.kind === 'text' || g.name.startsWith(p + '_')))) return;
   // a Text's name is used by Processes (w_Text_1.visible = false), so it can't be a Device's name either
   const used = new Set([...all.map(x => x.name), ...(g.kind === 'text' ? (draft || S.config).elements.map(e => e.name) : [])]); let n = 1; while (used.has(p + '_' + n)) n++;
   g.name = p + '_' + n;
+}
+// a Text, Override or Manual Valve Widget (a drawn item): wgt_Type_Label_TabID, unique among every Device and Widget (Rule 3.14)
+function graphicWidgetName(g, self = g) {
+  const code = widgetTypeId(g, isTapMv(g)); if (!code) return '';
+  const L0 = draft || S.config, taken = n => [...L0.elements, ...L0.graphics].some(x => x !== self && x.name && x.name.toLowerCase() === n.toLowerCase());
+  return uniqueName(suggestWidgetName({ code, label: g.label, tab: tabIdOf(g.workspace) }), taken, tabIdOf(g.workspace));
 }
 const nameAll = gs => { for (const g of gs || []) giveName(g, gs); };
 const ipName = g => g.name ? (g.label && g.label !== g.name ? `${g.name} (${g.label})` : g.name) : (g.label || g.id);
@@ -3463,6 +3471,10 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (!e._keepXY) { centerNew(e); stackNew(e); }     // X and Y typed in the Add box are kept
   delete e._keepXY;
   if (e.workspace && e.workspace !== wsName) { wsName = e.workspace; renderTabs(); }      // the Tab picked in the Add box (Fritz, 2026-11-04)
+  if (!isDevice(e) && widgetTypeId(e)) {      // a new Widget's name: wgt_Type_Label_TabID (Fritz, 2026-11-06, Rule 3.14); it follows its Label and Tab
+    if (!isPicW(e)) e.name = widgetSuggestion(e);      // until a name of its own is typed (the Picture Widget's Add box already named it)
+    if (e.name === widgetSuggestion(e)) autoNamed.add(e);
+  }
   draft.elements.push(e); sel = { kind: 'el', id: e.name };
   const cut = splitPipeFor(e); if (cut?.ok) toast(cut.text, false, 6000);      // added right on a pipe (Rule 5.26)
   if (elemVessel) return elemVesselBuild(elemVessel, e);
@@ -3696,6 +3708,10 @@ function portForName(e) {
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
 const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace));
+// the Suggested Name of a Widget (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID; on the 🔨 Build Tab it has no Tab ID yet,
+// and Save Build ... > To a Tab adds it, as for a Device
+const widgetSuggestion = (e, self = e) => { const code = widgetTypeId(e); return code ? uniqueName(suggestWidgetName({ code, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace)) : ''; };
+const nameSuggestion = (e, self = e) => isDevice(e) ? deviceSuggestion(e, self) : widgetSuggestion(e, self);
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
@@ -4320,6 +4336,7 @@ $('#addText').onclick = () => addText();
 function addText() {
   toBuild();
   const D = TD(), g = { id: newId(), kind: 'text', workspace: wsName, x: D.x, y: D.y, w: D.width, h: D.height, text: 'Text', fontSize: 18, ...(D.visible ? {} : { visible: false }) };
+  { let n = 1; while (draft.graphics.some(x => x.kind === 'text' && x.label === 'Text_' + n)) n++; g.label = 'Text_' + n; }      // a Label from the start (Rule 18.15): its name is wgt_TXT_Text_1 ...
   draft.graphics.push(g); giveName(g, draft.graphics); renderWs(); editItem('gfx', g.id);
 };
 // the Override button: one per Tab, made on the 🔨 Build Tab like every new Widget; its Properties open
@@ -4628,10 +4645,14 @@ function moveBuildTo(tab) {
   for (const x of items) x.workspace = to.name;
   if (vMaster(to)) for (const v of items.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
-  // a new Device still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_P_L_Vlv_Fly_Sparge__SP)
+  // a new Device or Widget still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_P_L_Vlv_Fly_Sparge_SP, wgt_DT_DateTime_1_BR)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
-    const n = deviceSuggestion(e);
+    const n = nameSuggestion(e);
     if (n && n !== e.name && !nameTaken(n, e)) { swapName(items.filter(x => x !== e), e.name, n); e.name = n; }
+  }
+  for (const g of items.filter(x => draft.graphics.includes(x) && autoNamed.has(x))) {
+    const n = graphicWidgetName(g);
+    if (n && n !== g.name) { swapName(items.filter(x => x !== g), g.name, n); g.name = n; }
   }
   draft.workspaces = draft.workspaces.filter(w => w !== b);
   wsName = to.name; sel = null;
@@ -5286,8 +5307,8 @@ function pwmDeviceFields(it, item) {
     PWM_TYPE(it)];
 }
 
-// a new Alarm's Name follows its Label (Rule 18.3): alm_ + the Label, until a name of its own is typed
-const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Alarm'); let n = b, i = 2; while (draft.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++; return n; };
+// a new Alarm's Name follows its Label (Rule 18.3): wgt_ALM_Label_TabID (Rule 3.14), until a name of its own is typed
+const almSuggest = (it, label) => widgetSuggestion({ ...it, type: 'alarm', label }, it);      // wgt_ALM_Label_TabID (Rule 3.14)
 
 // ---- Temperature Probe Device dialogs (Fritz, 2026-11-05: "Build the Probe Add Dialog Boxes using the Pump Drill down as the
 // Template", Rule 18.26). A plain probe, a Thermowell (Short, Medium, Long) and a probe tee (Instrument Tee, Long Tee) get the Pump's
@@ -5345,19 +5366,15 @@ const isPicW = e => e?.type === 'picture';
 const PIC_AUTO_LABEL = false;
 // '' = the old default: a tap turns on or off what it turns on with (nothing for a still picture)
 const PIC_TAP = v => [['', 'On/Off'], ['hold', 'Push button'], ['none', 'None'], ...(v && !['', 'toggle', 'hold', 'none'].includes(v) ? [[v, v]] : [])];
-// the Suggested Name: pic_ and the Label (as the samples name them, e.g. pic_Kettle_Element), until a name of its own is typed
-const picSuggest = (it, label) => {
-  const L0 = draft || S.config, b = 'pic_' + (noSpaces(String(label || '').replace(/\\[a-zA-Z+-]+(\{[^}]*\})?/g, '')).replace(/[^\w-]/g, '') || 'Picture');
-  let n = b, i = 2; while (L0.elements.some(e => e !== it && e.name.toLowerCase() === n.toLowerCase())) n = b + '_' + i++;
-  return n;
-};
+// the Suggested Name: wgt_PIX_Label_TabID (Rule 3.14), until a name of its own is typed
+const picSuggest = (it, label) => widgetSuggestion({ ...it, type: 'picture', label }, it);      // wgt_PIX_Label_TabID (Rule 3.14)
 const PIC_TIPS = {
   label: 'The name shown on the Tab, for example Kettle Element. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows (a picture usually needs none).',
   picture: 'The picture it shows. Pick it from the list (the 🖼 opens the icon picker); Add new ... takes any picture in media/Images.',
   tabBuild: 'A new Widget is made on the 🔨 Build Tab first, then sent to its Tab (Rule 4.1).',
   tab: 'The Tab this Widget is on.',
-  name: 'Made from the Label: pic_ and the Label. You may type your own; it must be unique. A Process uses it, e.g. pic_Kettle.visible = false.',
+  name: 'Made from the Label and the Tab: wgt_PIX_Label_TabID (wgt_PIX_Kettle_BR). You may type your own; it must be unique. A Process uses it, e.g. wgt_PIX_Kettle_BR.visible = false.',
   graphic: 'The picture as it will show on the Tab.',
   follow: 'What turns the picture On: an on / off Device or Widget, or a heater (On while Enabled). None = a still picture, so the Overlay is greyed out.',
   toggle: 'What a tap on the picture does to what it turns on with: On/Off turns it on or off with one click; Push button is on only while held; None does nothing.',
@@ -5392,7 +5409,7 @@ const DATAW_TIPS = {
   label: 'The name shown on the Tab, for example Strike Volume. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   tab: 'The Tab this Widget is on.',
-  name: 'How a Process uses it, for example w_Value_1 = 5.2. It must be unique.',
+  name: 'Made from the Label and the Tab: wgt_VAL_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID (wgt_DT_DateTime_1_BR). A Process uses it, for example wgt_VAL_Strike_BR = 5.2. It must be unique.',
   start: 'The value it shows when it is made. It keeps its value when the Brain restarts.',
   units: 'Shown after the number, for example gal, pH or °F. The ⬢ beside it sets the Decimals, the Step for − and +, the Lowest and the Highest.',
   readOnly: 'On: a tap does nothing; only a Process sets it. Off: a tap and Set changes it.',
@@ -5417,6 +5434,42 @@ function dataWidgetFields(it) {
     ['foreColor', 'Fore color', 'color', null, false, false, { tip: T.colors, attr: DATAW_LOOK_POP }],
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
+}
+// the parts every Widget's drill-down shares (Rule 18.29): the title line, 1 Label, 2 Tab, 3 Name ... and the place and size
+const WGT_TIPS = {
+  label: 'The name shown on the Tab. The ⬢ beside it sets its font, size and colors.',
+  labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
+  tab: 'The Tab this Widget is on.',
+  name: 'How a Process uses it. It must be unique.',
+  xy: 'Where it goes on the Tab, in pixels from the top left corner.',
+  size: 'Its size on the Tab in pixels.',
+  type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
+};
+const wgtHead = (tips = {}) => [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+  ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: tips.label || WGT_TIPS.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: tips.labelVisible || WGT_TIPS.labelVisible }],
+  ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
+  ['name', '3. Name', 'text', null, false, false, { tip: tips.name || WGT_TIPS.name }]];
+const wgtPlace = () => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: WGT_TIPS.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: WGT_TIPS.xy }],
+  ['w', 'Width (pixels)', 'num', null, false, false, { tip: WGT_TIPS.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: WGT_TIPS.size }]];
+const wgtType = (word, tip) => ['_wt', 'Widget Type', 'ro', word, false, false, { tip: tip || WGT_TIPS.type }];
+// Timer Widget Properties in the Pump's drill-down look (Rule 18.29): no pictures and no background; its look is a Style (Rule 2.24)
+const TIMER_TIPS = {
+  label: 'The title bar of the Timer on the Tab. The ⬢ beside it sets its font, size and colors.',
+  name: 'How a Process uses it, for example tm_Mash.start or tm_Mash.value. It must be unique.',
+  type: 'Count up from the Start value, or count down to zero.',
+  start: 'The time it shows when it is made or reset by the Brain, in hh:mm:ss.',
+  reset: 'The time a reset puts it back to, in hh:mm:ss.',
+  running: 'On: it is already counting when the Brain starts.',
+  style: 'Its look. Skynet Styles 🔒 can\'t be changed; ➕ Add new User Style… makes one of your own.',
+};
+function timerWidgetFields() {
+  const T = TIMER_TIPS;
+  return [...wgtHead(T),
+    ['timerType', 'Count', 'sel', [['countup', 'Count up'], ['countdown', 'Count down']], false, false, { tip: T.type }],
+    ['initial', 'Start value', 'text', null, false, false, { tip: T.start }], ['resetValue', 'Reset value', 'text', null, false, false, { tip: T.reset }],
+    ['initRunning', 'Running at start', 'bool', null, false, false, { tip: T.running, dbPop: true }],      // Database and .API ⬢ on its line
+    ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
+    ...wgtPlace()];
 }
 const dataWidgetType = it => ['_wt', 'Widget Type', 'ro', DATA_W[it.type].word, false, false, { tip: DATAW_TIPS.type }];
 function fieldsFor(item) {
@@ -6123,7 +6176,7 @@ const INFO = {
     ['Two subclasses', ', picked when it is made and never changed: the Basic Skynet Alarm (the Skynet bell) and the User Alarm (your own pictures).'],
     ['Basic Skynet Alarm layers', ', bottom to top: Layer 4 Back (colored by .back), Layer 3 Fore (the bell, colored by .fore), Layer 2 Set Graphic (a Skynet picture or None), Layer 1 Active overlay (on top while it is active, or None). The bell picture itself is set by Skynet.'],
     ['User Alarm', ': a background picture (Image Path 1; the ⬢ Graphic Dialog has the others), any picture as its Set Graphic, an Active overlay, and a Back color behind them.'],
-    ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (alm_ + the Label).'],
+    ['Label', ' first, never blank, with Show label, the ⬆ bigger box and the ⬢ Label attributes. A new Alarm\'s Name follows its Label (wgt_ALM_Label_TabID, Rule 3.14).'],
     ['Alarm settings', ': Kind of alarm (Hop 1, Brew Flow 2, Pre-Hop 3, General 4, Sound only 5), its timer or Hop Alarm, the sound and Repeat.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']],
     attributes: [['.active', 'true = the alarm is on'], ['.back', 'Layer 4 on a Basic Skynet Alarm; the color behind a User Alarm'], ['.fore', 'Layer 3, the bell (Basic Skynet Alarm)'], ['.label'], ['.visible'], ['.hiddenlock'],
@@ -6150,7 +6203,7 @@ const INFO = {
     example: 'wait Kettle_Temp >= 152' },
   dataw: { title: 'Value, Time and DateTime Widgets', properties: [
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
-    ['Name', ' (w_Value_N, w_Time_N, w_DateTime_N to start) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
+    ['Name', ' (wgt_VAL_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
     ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
@@ -6186,7 +6239,10 @@ function infoPopup(kind) {
 // canCopy: a COPY button at the top (Fritz's Text Widget Properties): the dialog closes with 'copy'
 function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
   return new Promise(res => {
-    $('#dlgTitle').textContent = title;
+    // the title is a hover help spot too: a snippet of its Help page (Fritz, 2026-11-06, Rule 2.38)
+    const ttl = h('span', { class: 'dlgTtlText' }, title);
+    $('#dlgTitle').replaceChildren(ttl);
+    if (topic) loadSnippet(topic).then(t => { if (t && ttl.isConnected) ttl.dataset.help = t; }).catch(() => { });
     bindForm($('#dlgBody'), fields, obj);
     if (topic) {      // the ? beside the title: closes the dialog (asking first when something was changed) and opens Help
       const d = $('#dlg'), before = formSnap();
@@ -6532,7 +6588,7 @@ async function editItem(kind, id) {
   if (kind === 'el' && fromSkyTpl(item) && !TPL) await loadTemplates();      // its Template says which attributes show
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
-    if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];
+    if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.29)
     if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
@@ -6733,8 +6789,8 @@ async function editItem(kind, id) {
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
       if ((isDrillDev(item) || isDataW(item) || isPicW(item)) && !String(work.label ?? '').trim()) work.label = work.name || item.name;     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
-      const follow = autoNamed.has(item) && work.name === item.name && isDevice(work);
-      if (follow) work.name = deviceSuggestion(work, item) || work.name; else autoNamed.delete(item);
+      const follow = autoNamed.has(item) && work.name === item.name && (isDevice(work) || !!widgetTypeId(work));      // a new Widget follows its suggestion too (Rule 3.14)
+      if (follow) work.name = nameSuggestion(work, item) || work.name; else autoNamed.delete(item);
       if (!work.name) throw new Error('Name is required');
       if (work.name !== item.name) { const bad = elementNameError(work.name, isDevice(work) ? 'Device' : 'Widget'); if (bad) throw new Error(bad); }   // public/names.js
       if (isDevice(work) && work.name.toLowerCase() !== item.name.toLowerCase() && nameTaken(work.name, item)) throw new Error(`The name ${work.name} is already used. Device names must be unique.`);
@@ -6752,6 +6808,9 @@ async function editItem(kind, id) {
         c.of = work.name; c.name = cloneName(work.name, cloneTaken(c), cloneNumber(was));
         for (const g of draft.graphics) for (const k of ['from', 'to']) if (devOfIp(g[k]) === was) g[k] = g[k].replace(`dev:${was}:`, `dev:${c.name}:`);
       }
+    }
+    if (kind === 'gfx' && autoNamed.has(item)) {      // a new Text, Override or Manual Valve follows wgt_Type_Label_TabID (Rule 3.14) until a name of its own is typed
+      if ((work.name ?? item.name) === item.name) work.name = graphicWidgetName({ ...item, ...work }, item) || item.name; else autoNamed.delete(item);
     }
     const kindChanged = kind === 'el' && work.kind !== item.kind;
     const pickedPort = work.attachTo !== item.attachTo;

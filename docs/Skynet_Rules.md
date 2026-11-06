@@ -393,13 +393,17 @@ Import** (they share these Rules, Rule 15.4):
 1. A dialog shows **short field names and the fields themselves**. Sentences that explain what a field or the dialog does are
    **not** written on the dialog.
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
-   a dropdown) and a small yellow help box shows the explanation **right away**. It **stays as long as the mouse is on the name**
+   a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
+   the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. It **stays as long as the mouse is on the name**
    and goes away as soon as the mouse moves off (or on a click, a key or a scroll). It never hides the field it explains.
 3. **Phones and tablets** (run mode, Rule 2.35) have no mouse: a **tap** on the name opens the small pop-up with Close
    (Rule 18.16), as before. Tap-and-hold is not used, so it never clashes with holding a finger for Properties (Rule 2.9).
-4. What **stays on the dialog**: warnings the user must act on (⚠ The Label cannot be blank, Rule 18.28), what something is now
+4. **Buttons and the dialog title have hover help too** (Fritz, 2026-11-06: "add hover over the Buttons as well and maybe over the
+   Dialog Title"): a button (🗑 Delete, ✖ Cancel, 💾 Save, ⬆, ⬢ ...) says what it does, and the **title** (for example "DateTime
+   Widget") shows **a short snippet of its Help page** ("You can take a snippet of help and have it in the Hover Dialog").
+5. What **stays on the dialog**: warnings the user must act on (⚠ The Label cannot be blank, Rule 18.28), what something is now
    (the Suggested Name, OPEN / CLOSED), and the dialog's own Help ? (Rule 2.11), which still opens the full Help page.
-5. Words in the hover help follow Rule 2.37 (correct spelling, plain English).
+6. Words in the hover help follow Rule 2.37 (correct spelling, plain English).
 It is one shared helper (public/hoverhelp.js) that watches every dialog, so a new dialog only has to give each field its tip.
 (thread "Add hover help to clean dialogs", Help 147)
 
@@ -481,6 +485,19 @@ add and simulate", Help 76)
 warns: a plain word like "Pump" becomes a reserved word in Processes and can cause problems in the
 code; the Device name is only used in Processes and never shown on a Tab, so a unique, meaningful
 name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
+
+3.14 **Widget names** follow `wgt_Type_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-06: "Suggested names for
+widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name is good. wgt_DT_DateTime_1_BR"). Example
+`wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
+**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
+**PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
+**OVR** Override (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `_`, as in Rule 3.1; a taken name
+gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
+> To a Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
+fittings and Clones keep their own names. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
+alm_Hops, sw_1 ... keep working. The **BruControl Import** uses the same pattern when it brings Widgets in (Rule 15.4).
+*Replaced:* pic_ + Label (Picture Widget, Rule 18.27), w_Text_N (Text Widget), alm_ + Label (Alarm), w_Value_N, w_Time_N,
+w_DateTime_N, and the sw_, pb_, pl_, led_ hints. (thread "Add hover help to clean dialogs")
 
 ## 4. Making things: the Build Tab
 
@@ -1703,6 +1720,9 @@ Height) can sit in a "... Properties" pop-up opened with the Attribute Dialog ic
 18.10 **One dialog at a time.** Each Widget or Device dialog is changed to these Rules **one at a time, only when Fritz
 commands it**. Until a dialog is changed, it keeps its present layout (Rules 2.22 and 2.23 still describe those). When one
 is changed, it follows Rule 15.3 (the old way is changed everywhere Skynet ships it).
+*Exception (Fritz, 2026-11-06: "Yes Hover on all Dialogs. You can take a snippet of help and have it in the Hover Dialog"):* moving
+explanations into hover help (Rule 2.38) is done to **every dialog at once**, since it changes no field. The hover help may be a short
+piece of the Help page. And "Widgets follow Pump Drill Down look" is Fritz's command for **every Widget dialog** (Rule 18.29).
 
 18.11 **Cancel warns before throwing away changes.** In every dialog with ✖ Cancel and 💾 Save, if anything was changed and
 Cancel is pressed, a warning asks whether to really discard the changes or go back and save. With no changes, Cancel just
@@ -1918,7 +1938,7 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
    ➕ Add Widget (Rule 18.20). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in by its control mode as **hE_Mode_n**: PID
    **hE_PID_1**, Hysteresis **hE_HYS_1**, Duty Cycle **hE_DutyC_1**, PWM **hE_PWM_1**, On/Off **hE_DO_1**, Deadband **hE_DeadB_1** (n the
    next number not used yet for that mode). *The hE_ start and the _n end wait on Fritz's OK.*
-3. Then **4 Name** (the Suggested Name **pic_** + the Label, e.g. pic_Kettle_Element, as the samples name them; it may be edited),
+3. Then **4 Name** (the Suggested Name **wgt_PIX_Label_TabID**, Rule 3.14, e.g. wgt_PIX_Kettle_Element_BR; it may be edited),
    the **Graphic**, **Turns on with** (Rule 7.11) with **Toggle** (On/Off, Push button, None: what a tap does) on its line,
    **Overlay** (greyed out while Turns on with is None) with a ⬢ for the second picture (Picture when on, optional, Rule 7.8) and
    the Back Colour, **Text on picture** ⬆, X, Y, Width, Height (140 x 120 to start), and the **Widget Type** (Picture) greyed out last.
@@ -1949,7 +1969,8 @@ Label (every Device and Widget, Rule 18.15):
 18.29 **Widgets look like the Pump's drill-down** (Fritz, 2026-11-06: "Widgets follow Pump Drill Down look", "Widget look similar to the
 Pump Drill Down"). Every Widget's Properties are brought to the Pump's screen 9 (Rule 18.21), as the Picture Widget's are (Rule 18.27).
 Fritz's word is the command for all the Widgets (Rule 18.10); they are done one kind after another. First: the **Value, Time and
-DateTime Widgets** (Rule 1.23): the lock, Visible and Hidden Locked in the title line; **1 Label ⬆ ⬢** and Label Visible, **2 Tab**,
+DateTime Widgets** (Rule 1.23), then the **Timer Widget** (Count, Start value, Reset value, Running at start with Database and .API ⬢,
+Style; no pictures). The Value, Time and DateTime Widgets: the lock, Visible and Hidden Locked in the title line; **1 Label ⬆ ⬢** and Label Visible, **2 Tab**,
 **3 Name**; the Start value; a Value Widget's **Units ⬢** (Decimals, Step, Lowest, Highest); **Read only** with **Database and .API ⬢**
 on its line; **Fore color ⬢** (Back color, Alignment); X, Y, Width, Height; and the **Widget Type** greyed out last. Every explanation
 is in the hover help of the field's name (Rule 2.38). (Help 134)
@@ -2275,3 +2296,6 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.4: the Importer's page 3 has Browse for the config file (Windows' Open box in Documents\BruControl, .brucfg only); picture paths are imported even when the picture is not on the computer, and the brewer never makes a zip. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 2.38 (dialogs kept as clean as possible: explanations go in hover help, shown at once while the mouse rests on a field's or dropdown's name and gone when it moves off; a tap on phones and tablets; for the Panel and the BruControl Import). Rule 18.16 points to it. Help 147; next free Help number 148. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Added Rule 18.29 (Widgets look like the Pump's drill-down, all Widgets by Fritz's command, one kind after another; first the Value, Time and DateTime Widgets). Help 134 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Added Rule 3.14 (Widget names wgt_Type_Label_TabID with Fritz's Type letters, PIX for Picture; names follow the Label and Tab until typed; old names stay). Rule 18.27 updated. Help 74, 91, 112 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Rule 18.10 exception (Fritz): hover help goes on every dialog at once (a snippet of Help may be the hover text), and every Widget dialog gets the Pump drill-down look (Rule 18.29). (thread "Add hover help to clean dialogs")
+- 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.29: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")

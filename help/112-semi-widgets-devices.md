@@ -15,7 +15,7 @@ pin (Rule 1.2). Like a Device they have an **ON / OFF state** (`.state`, true or
 
 In Edit layout, **Select Widget Type > Semi_Widgets_Devices**, then pick Switch, Push Button, Pulse Button, LED or Manual
 Valve Widget. Like every new Widget it is made on the 🔨 Build Tab and its Properties open; **Save Build ...** sends it to a Tab.
-New names start `sw_`, `pb_`, `pl_` and `led_` (hints only; a Manual Valve Widget is `ManualValve_N`).
+New names are `wgt_SW_...`, `wgt_PB_...`, `wgt_PL_...` and `wgt_LED_...`, then the Label and the Tab ID (Skynet Rule 3.14), for example `wgt_SW_Mash_Stir_BR`; a Manual Valve Widget is `wgt_MV_...` and a Tap Water Valve `wgt_TWV_...`. Older names (`sw_1`, `ManualValve_1`) keep working.
 
 ## Device controlled
 
