@@ -19,7 +19,7 @@ import { SKYNET_CONSTANTS } from './skconst.js';
 export const CLASSES = ['', 'cmd', 'dev', 'wid', 'vk', 'vapi', 'var', 'proc', 'op', 'str', 'num', 'com', 'lab', 'attr'];
 const C = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
 
-export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show', 'send_db', 'send_db_group', 'new', 'play',
+export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait', 'start', 'stop', 'reset', 'print', 'clear', 'show', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group', 'new', 'play',
   'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off'];
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
 export const LOGIC = ['and', 'or', 'not'];
