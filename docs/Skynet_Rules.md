@@ -1080,6 +1080,20 @@ changes the Initial Output and the two Drives to % and says so. Like the PID it 
 (Rule 7.9) and can share a heater's port (Rule 6.1). Starting values: Deadband Offset 0.5, Inner Band Offset 2, Initial Output 0,
 Inner Band Drive 1, Outer Band Drive 5, Calc Time 10 s, Output window 2 s. (thread "Add Deadband control", Help 126)
 
+6.18 **API_Name: the name a Voice Command says** (Fritz, 2026-11-06: "a new string field associated with API. API_Name. This
+field must be Unique. It is what a Voice Command would use. It would only be on the Database and API Popup"). Every Device and
+Widget with a value has an **API_Name** String, **only on its Database and .API pop-up**, below .API.
+- It **must be Unique** in the Schema; capitals and extra spaces don't count (`Red Pump` = `red  pump`). Saving one that is
+  already used is refused and says which item has it. Spaces are allowed; `< > : " / \ | ? *` are not; at most 60 characters.
+- It **may be blank, with a warning** that a Voice Command can't be used for that item (Fritz, 2026-11-06: "It can be blank,
+  but with a Warning that you could not use a Voice Command").
+- A Voice Command says it: an API_Name **Red Pump** is switched by "Turn on Red Pump" (Fritz, 2026-11-06). Home Assistant (Alexa,
+  Google Home, Siri) names the item by its API_Name (its Label when blank); `/api/items/<name>` finds an item by its Name or its
+  API_Name. It opens nothing by itself: the item's .API (Rule 6.14) still says what outside programs may do.
+- It replaces the "Voice Name" planned on 2026-10-30 (unique, starting as the Label): an API_Name starts blank.
+- It is not the item's Name (Rule 3.1): Processes keep using the Name. The BruControl Importer (Rule 15.4) carries it over later.
+  (thread "Add unique API_Name for voice commands", Help 144)
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -1304,7 +1318,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **143**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **145** (143 is the BruControl Importer's, 144 API_Name). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2077,3 +2091,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
+- 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")

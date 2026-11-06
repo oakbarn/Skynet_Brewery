@@ -64,6 +64,8 @@ The database is a SQLite file on the Brain (`data/brewlog.db`): free, SQL, nothi
 | **Get only** | Can read it |
 | **Get and Put** | Can read it and change it |
 
+**API_Name** (below .API in the pop-up) is the name a Voice Command says. It must be Unique and may be blank (with a warning): see [API_Name](144-api-name-for-voice-commands).
+
 The addresses and the safeguards are on [API (other programs)](11-api). A gGlobal shows up in MQTT and Home Assistant only when its .API is on, and can be changed there only with **Get and Put**.
 
 ## gGlobal (one variable class)
