@@ -136,7 +136,8 @@
       <p>The displayname is called the <b>Label</b> in Skynet. Label better says what it is. Unlike BruControl, the Label is an
         independent field and must be filled in: in BruControl it was optional, in Skynet it is mandatory. Don't worry when importing:
         if the BruControl displayname was blank, BruControl just showed the Element Name, so the Skynet import puts the BruControl
-        Name into the Label and sets its visible property to false.</p>
+        Name into the Label and does not show the Label on the Tab (its <code>.label_visible</code> is false; the item itself is still
+        shown).</p>
       <p>Skynet keeps hidden and locked as separate settings (BruControl's <code>hiddenlocked</code> is not of much use in Skynet). In
         Skynet <code>.visible</code> is true or false. When your Scripts or Elements are imported, visibility is updated to the new
         format automatically.</p>
