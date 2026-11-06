@@ -28,7 +28,7 @@ const xml = `\uFEFF<?xml version="1.0" encoding="utf-8"?>
   <Processes><Process/></Processes>
   <Workspaces>
     <Workspace><Name>Brew</Name><Elements><Element/><Element/></Elements></Workspace>
-    <Workspace><Name>Fermentation</Name><Elements><Element/></Elements></Workspace>
+    <Workspace><Name>Fermentation</Name><Elements><Element/><Element i:type="GlobalVariableElement"/></Elements></Workspace>
   </Workspaces>
 </Configuration>`;
 fs.writeFileSync(path.join(dir, 'Oakbarn.brucfg'), xml);
@@ -55,8 +55,8 @@ const s = summarize(xml);
 assert.deepEqual(s.interfaces, [
   { name: 'Brewery (2560)', link: 'Serial', enabled: true, ports: 2 },
   { name: 'Interface 1', link: 'Serial', enabled: false, ports: 0 }]);
-assert.deepEqual(s.tabs, [{ name: 'Brew', items: 2 }, { name: 'Fermentation', items: 1 }]);
-assert.equal(s.items, 3); assert.equal(s.processes, 1); assert.equal(s.globals, 3);
+assert.deepEqual(s.tabs, [{ name: 'Brew', items: 2 }, { name: 'Fermentation', items: 2 }]);
+assert.equal(s.items, 4); assert.equal(s.processes, 1); assert.equal(s.globals, 4, 'the Globals list and the Global Variable elements');
 assert.throws(() => summarize('<x/>'), /not a BruControl config file/);
 
 // the Importer keeps only its own small settings (last folder and file), never Schemas (Rule 1.7)
