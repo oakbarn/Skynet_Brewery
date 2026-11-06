@@ -1660,7 +1660,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23), the **Heating Element** (Rule 18.24), the **PWM / Analog out** (Rule 18.25), the **Temperature Probes** (Rule 18.26) and the **Picture Widget** (Rule 18.27).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23), the **Heating Element** (Rule 18.24), the **PWM / Analog out** (Rule 18.25), the **Temperature Probes** (Rule 18.26), the **Picture Widget** (Rule 18.27) and the **Value, Time and DateTime Widgets** (Rule 18.29).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1946,6 +1946,14 @@ Label (every Device and Widget, Rule 18.15):
   into the DDLB. If the new Interface is aborted, the default Interface is posted back to the DDLB"): the new Interface is picked in
   the Interface dropdown; if the new Interface is cancelled, the default Interface (the one that was there before) is put back.
 - It is one shared helper (public/labelguard.js) that watches every dialog, so a new dialog with a Label gets it by itself.
+18.29 **Widgets look like the Pump's drill-down** (Fritz, 2026-11-06: "Widgets follow Pump Drill Down look", "Widget look similar to the
+Pump Drill Down"). Every Widget's Properties are brought to the Pump's screen 9 (Rule 18.21), as the Picture Widget's are (Rule 18.27).
+Fritz's word is the command for all the Widgets (Rule 18.10); they are done one kind after another. First: the **Value, Time and
+DateTime Widgets** (Rule 1.23): the lock, Visible and Hidden Locked in the title line; **1 Label ⬆ ⬢** and Label Visible, **2 Tab**,
+**3 Name**; the Start value; a Value Widget's **Units ⬢** (Decimals, Step, Lowest, Highest); **Read only** with **Database and .API ⬢**
+on its line; **Fore color ⬢** (Back color, Alignment); X, Y, Width, Height; and the **Widget Type** greyed out last. Every explanation
+is in the hover help of the field's name (Rule 2.38). (Help 134)
+
 ---
 
 ## 19. Vessel Rules
@@ -2266,3 +2274,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the Importer's page 3 has Browse for the config file (Windows' Open box in Documents\BruControl, .brucfg only); picture paths are imported even when the picture is not on the computer, and the brewer never makes a zip. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 2.38 (dialogs kept as clean as possible: explanations go in hover help, shown at once while the mouse rests on a field's or dropdown's name and gone when it moves off; a tap on phones and tablets; for the Panel and the BruControl Import). Rule 18.16 points to it. Help 147; next free Help number 148. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Added Rule 18.29 (Widgets look like the Pump's drill-down, all Widgets by Fritz's command, one kind after another; first the Value, Time and DateTime Widgets). Help 134 updated. (thread "Add hover help to clean dialogs")

@@ -5384,22 +5384,41 @@ function pictureWidgetFields(it, item, add) {
     ['_wt', 'Widget Type', 'ro', 'Picture', false, false, { tip: T.type, ...x }]];
 }
 
-// Value, Time and DateTime Widget Properties (Fritz, 2026-11-05, Rule 1.23): the dialog pattern of the Timer Widget (Rule 18)
+// Value, Time and DateTime Widget Properties (Fritz, 2026-11-05, Rule 1.23). Fritz, 2026-11-06: "Widgets follow Pump Drill Down
+// look": the Pump's screen 9 (Rule 18.21) for a Widget, like the Picture Widget (Rule 18.27): the lock, Visible and Hidden Locked in
+// the title line; 1 Label ⬆ ⬢ and Label Visible, 2 Tab, 3 Name, then its own fields with the extras in ⬢ pop-ups, its place and
+// size, and the Widget Type greyed out last. The explanations are in the hover help of each name (Rule 2.38).
+const DATAW_TIPS = {
+  label: 'The name shown on the Tab, for example Strike Volume. The ⬢ beside it sets its font, size and colors.',
+  labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
+  tab: 'The Tab this Widget is on.',
+  name: 'How a Process uses it, for example w_Value_1 = 5.2. It must be unique.',
+  start: 'The value it shows when it is made. It keeps its value when the Brain restarts.',
+  units: 'Shown after the number, for example gal, pH or °F. The ⬢ beside it sets the Decimals, the Step for − and +, the Lowest and the Highest.',
+  readOnly: 'On: a tap does nothing; only a Process sets it. Off: a tap and Set changes it.',
+  colors: 'The color of the value. The ⬢ beside it sets the Back color and the Alignment.',
+  xy: 'Where it goes on the Tab, in pixels from the top left corner.',
+  size: 'Its size on the Tab in pixels.',
+  type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
+};
+const DATAW_ALIGN = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
+const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
+const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
 function dataWidgetFields(it) {
-  const d = DATA_W[it.type], val = it.type === 'valueWidget';
-  const start = { valueWidget: 'Start value (a number)', timeWidget: 'Start value (hh:mm:ss)', dateTimeWidget: 'Start value (mm/dd/yyyy hh:mm:ss)' }[it.type];
-  const al = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
-  return [['name', 'Name', 'text', null, false, 'b'],
-    ['_nm', `A ${d.word} Widget shows one ${d.word.toLowerCase()} on its Tab; a tap sets it (unless Read only). Its Name is how a Process uses it: name = Something.`, 'infonote', 'dataw'],
-    ['_vb', d.word, 'box'], ['initial', start, val ? 'num' : 'text'],
-    ...(val ? [['units', 'Units (gal, pH, °F ...)', 'text'], ['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] : []),
-    ['readOnly', 'Read only (a tap does nothing; a Process sets it)', 'bool'],
-    ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', al],
-    ['_lb', '', 'box'], ['label', 'Label (never blank)', 'text', null, false, 'b'], ['hideName', 'Visible (Show label)', 'show', null, false, 'b'], ['nameFontSize', 'Font size', 'num'], ['nameFontFamily', 'Font', 'sel', FONTS],
-    ['nameColor', 'Fore color', 'color'], ['nameBg', 'Back color', 'color'], ['nameAlign', 'Alignment', 'sel', al.map(([k, l]) => [k.replace('Middle', 'Top'), l])],
-    ['_pb', 'Properties', 'box'], ['visibility', 'Visible', 'vis', null, false, 'b'], ['hidden', 'Hidden Locked', 'bool', null, false, 'b'],
-    ['workspace', 'Tab', 'ws'], ['x', 'X Horizontal', 'num'], ['y', 'Y Vertical', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'], ['_end', '', 'boxend']];
+  const val = it.type === 'valueWidget', T = DATAW_TIPS;
+  const start = { valueWidget: 'Start value', timeWidget: 'Start value (hh:mm:ss)', dateTimeWidget: 'Start value (mm/dd/yyyy hh:mm:ss)' }[it.type];
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ['workspace', '2. Tab', 'ws', null, false, false, { tip: T.tab }],
+    ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
+    ['initial', start, val ? 'num' : 'text', null, false, false, { tip: T.start }],
+    ...(val ? [['units', 'Units', 'text', null, false, false, { tip: T.units, attr: DATAW_NUM_POP }]] : []),
+    ['readOnly', 'Read only', 'bool', null, false, false, { tip: T.readOnly, dbPop: true }],      // Database and .API ⬢ on its line, as the Pump's Overlay
+    ['foreColor', 'Fore color', 'color', null, false, false, { tip: T.colors, attr: DATAW_LOOK_POP }],
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
+const dataWidgetType = it => ['_wt', 'Widget Type', 'ro', DATA_W[it.type].word, false, false, { tip: DATAW_TIPS.type }];
 function fieldsFor(item) {
   let fs = fieldsOf(item);
   if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
@@ -6186,6 +6205,7 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
     d.oncancel = ev => { ev.preventDefault(); cancel(); };
     d.onclose = () => res(d.returnValue);
     d.returnValue = 'cancel'; d.showModal(); d._snap = formSnap();
+    setTimeout(() => { d._snap = formSnap(); }, 0);      // again once the title line has its lock, Visible and Hidden Locked (they come a tick later)
   });
 }
 
@@ -6513,7 +6533,7 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...F.timerWidget, ...dbFields(it)];
-    if (isDataW(it)) return [...dataWidgetFields(it), ...dbFields(it)];       // Value, Time and DateTime Widget Properties (Rule 1.23)       // Timer Widget Properties (Fritz, 2026-10-29)
+    if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
