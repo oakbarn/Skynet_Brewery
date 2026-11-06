@@ -150,6 +150,8 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     if (el && attr === el.main) attr = '';
     if (el?.bools?.includes(attr) || declared.get(op[1] ?? op[2]) === 'bool') for (const [k, h] of ON_OFF) add(k, h);
     if (el?.type === 'timer' && attr === 'type') { add('countdown', ''); add('countup', ''); }
+    // Hose_1.connect = : the Quick Disconnects, Vessels and IPs on the hose's Tab (Rule 5.34)
+    if (attr === 'connect' && el?.connect) { for (const [n, h] of el.connect) add(quote(n), h, n); if (!w) return done(); }
     if (!w && !forced) return done();
   }
   if (!w && !forced) return null;

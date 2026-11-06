@@ -30,4 +30,58 @@ assert.ok(moveHoseEnd(cfg(), { id: 'h1', to: 'cap', points: pts }).error, 'an En
 assert.ok(moveHoseEnd(cfg(), { id: 'h1', to: 'dev:Pump_1:out', points: pts }).error, 'not back onto its own fixed end');
 assert.ok(moveHoseEnd(cfg(), { id: 'h1', to: null, points: [[0, 'x']] }).error, 'bad points');
 { const c = cfg(); c.graphics[0].locked = true; assert.ok(moveHoseEnd(c, { id: 'h1', to: null, points: pts }).error, 'a locked hose stays'); }
+
+// ---- Hose_1.connect = QD_1 / = Kettle in a Process (Fritz, 2026-11-06, Rule 5.34) ----
+{
+  const { connectTarget, connectHose, connectChoices, findQdHose } = await import('../lib/qdhose.js');
+  const c = cfg(); c.graphics.push({ id: 'q1n', kind: 'pipe', name: 'Hose_1', hose: true, qd: true, workspace: 'Brew', from: 'dev:Pump_1:out', to: null, points: [[0, 0], [9, 9]] });
+  c.graphics.find(g => g.id === 'q1').name = 'QD_1';
+  c.graphics.find(g => g.id === 'k1').name = 'Mash_Tun';
+  c.graphics.find(g => g.id === 'ch').name = 'Chiller';
+  c.graphics.push({ id: 'k2', kind: 'vessel', vesselType: 'vessel', vdevice: true, vwidget: true, name: 'HLT_Device', workspace: 'Brew' });
+  c.graphics.push({ id: 'k3', kind: 'vessel', vesselType: 'vessel', name: 'BK', workspace: 'Cellar' });
+  const h = findQdHose(c, 'hose_1');
+  assert.equal(h?.id, 'q1n', 'found by name, any case');
+  assert.deepEqual(connectTarget(c, h, 'QD_1'), { to: 'q1', where: 'on QD_1' });
+  assert.equal(connectTarget(c, h, 'Mash_Tun').to, 'vtop:k1', 'a Vessel Widget: its top third, the same as a drag there');
+  assert.equal(connectTarget(c, h, 'HLT_Device').to, 'vtop:k2', 'a Vessel Device too');
+  assert.equal(connectTarget(c, h, 'none').to, null, 'none takes it off');
+  assert.match(connectTarget(c, h, 'Chiller').error, /no top/);
+  assert.match(connectTarget(c, h, 'BK').error, /Cellar Tab/);
+  assert.match(connectTarget(c, h, 'Nope').error, /nothing named/);
+  assert.match(connectTarget(c, h, 'Hose_1').error, /not a Quick Disconnect/);
+  assert.deepEqual(connectChoices(c, h).map(x => x[0]), ['QD_1', 'Mash_Tun', 'HLT_Device', 'none']);
+  assert.ok(connectHose(c, h, 'vtop:k1').ok); assert.equal(h.to, 'vtop:k1'); assert.equal(h.qdAuto, true, 'each screen hangs it with a sag');
+  assert.ok(moveHoseEnd(c, { id: 'q1n', to: null, points: pts }).ok); assert.equal(h.qdAuto, undefined, 'dragged by hand: the drawn points');
+}
+{
+  const fs = await import('node:fs'), os = await import('node:os'), path = await import('node:path');
+  const { Store } = await import('../lib/store.js'), { Engine } = await import('../lib/engine.js');
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'qdconn')), file = path.join(d, 'c.json'), c = cfg();
+  c.graphics.push({ id: 'q1n', kind: 'pipe', name: 'Hose_1', hose: true, qd: true, workspace: 'Brew', from: 'dev:Pump_1:out', to: null, points: [[0, 0], [9, 9]] });
+  c.graphics.find(g => g.id === 'q1').name = 'QD_1'; c.graphics.find(g => g.id === 'k1').name = 'Mash_Tun';
+  c.elements = [{ name: 'Done', type: 'gKonstant', kind: 'value' }];
+  fs.writeFileSync(file, JSON.stringify(c));
+  const store = new Store(file, path.join(d, 'data')); store.load();
+  const eng = new Engine(store, path.join(d, 'scripts'), { logNow() { } });
+  let moved = 0; eng.on('config', () => moved++);
+  const until = async (f, ms = 4000) => { for (let i = 0; i < ms / 20 && !f(); i++) await new Promise(r => setTimeout(r, 20)); return f(); };
+  const ok = eng.check('Hose_1.connect = Mash_Tun\nHose_1.connect = QD_1\nHose_1.connect = none\n');
+  assert.deepEqual(ok.errors, [], 'Check passes good lines');
+  const bad = eng.check('Hose_1.connect = Nope\nHose_9.connect = QD_1\nHose_1.connect += QD_1\nif Hose_1.connect == QD_1\nendif\n');
+  assert.deepEqual([...new Set(bad.errors.map(e => e.line))], [1, 2, 3, 4], 'Check finds a wrong place, a wrong hose, += and a read');
+  eng.write('brew', 'Hose_1.connect = Mash_Tun\nDone = 1\nHose_1.connect = Mash_Tun\nDone = 2\n');
+  eng.start('brew');
+  assert.ok(await until(() => eng.valveList().length === 1), 'asks for the hose');
+  const g = () => store.config.graphics.find(x => x.id === 'q1n');
+  assert.equal(g().to, 'vtop:k1', 'drawn in the vessel top at once'); assert.equal(moved, 1);
+  assert.deepEqual(eng.valveList().map(a => [a.name, a.hose, a.where, a.tab]), [['hose:Hose_1', true, 'in the top of Mash_Tun', 'Brew']]);
+  await new Promise(r => setTimeout(r, 200));
+  assert.equal(store.getProp('Done', 'value'), 0, 'the Process waits for Done');
+  eng.confirmValve('hose:Hose_1');
+  assert.ok(await until(() => store.getProp('Done', 'value') === 2), 'Done lets it go on; already there needs no second ask');
+  assert.equal(moved, 1);
+  clearTimeout(store._persistTimer);
+}
 console.log('qdhose tests passed');
+process.exit(0);

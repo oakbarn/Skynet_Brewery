@@ -87,7 +87,14 @@ function renderValves(all = []) {
   if (!list.length) { if (d?.open) d.close(); return; }
   if (!d) { d = h('dialog', { id: 'valveDlg', class: 'valveDlg', 'data-nomenu': true }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
   d.innerHTML = '';
-  d.append(h('h3', {}, list.every(a => a.ask) ? '📋 Brew Day' : '✋ Manual valve'), ...list.map(a => a.ask ? h('div', { class: 'valveAsk' },
+  d.append(h('h3', {}, list.every(a => a.ask) ? '📋 Brew Day' : list.every(a => a.hose) ? '🔗 Quick Disconnect hose' : '✋ Manual valve'), ...list.map(a => a.hose ? h('div', { class: 'valveAsk' },
+    // Hose_1.connect = QD_1 in a Process (Rule 5.34): the hose is already drawn there; a person moves the real one and presses Done
+    h('div', { class: 'valveDo' }, `PUT ${a.label} ${a.where}`),
+    h('div', { class: 'muted' }, `It is drawn there on the ${a.tab || ''} Tab. The Process ${a.process} waits until you press Done.`),
+    h('div', { class: 'bar' }, a.tab && a.tab !== curWs()?.name ? h('button', { onclick: () => { d.close(); wsName = a.tab; setView('workspace'); renderTabs(); renderWs(); renderValves(S.valves); } }, `Go to ${a.tab}`) : '',
+      h('span', { class: 'spacer' }), can('operator')
+      ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, '✔ Done: the hose is on')
+      : h('span', { class: 'muted' }, 'An operator or admin must press Done.'))) : a.ask ? h('div', { class: 'valveAsk' },
     // ask "..." in a Process (the Brew Process): what to do, and Done when it is done
     (n => (setRich(n, a.label), n))(h('div', { class: 'valveDo', style: 'white-space: pre-line' })),
     h('div', { class: 'muted' }, `The Process ${a.process} waits until you press Done.`),
@@ -169,7 +176,7 @@ function connect() {
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
   es.addEventListener('recipe', () => { if (menuTab === 'recipe' && !profDirty.recipe) { rcView = null; renderMenuPane(); } });
-  es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); });
+  es.addEventListener('valves', e => { S.valves = JSON.parse(e.data); renderValves(S.valves); if (view === 'workspace') renderPipes(); });
   es.addEventListener('flow', e => { S.flow = JSON.parse(e.data); if (view === 'workspace') renderPipes(); });     // flow colors a Process set (Rule 5.21)
   es.addEventListener('show', e => { const n = JSON.parse(e.data); if (S.config.workspaces.some(w => w.name === n)) { wsName = n; setView('workspace'); renderTabs(); renderWs(); } });
   es.addEventListener('config', () => { if (!editing) load(); });
@@ -2294,6 +2301,8 @@ function syncPipeEnds(p) {
   const pts = p.points; if (!pts || pts.length < 2) return;
   if (p.straight && pts.length === 2) return syncStraight(p);
   const a = ipPoint(p.from, p.workspace), b = ipPoint(p.to, p.workspace), n = pts.length;
+  // a Process connected this Quick Disconnect hose (Hose_1.connect = QD_1, Rule 5.34): it hangs the same as one dragged there by hand
+  if (isQdHose(p) && p.qdAuto) { p.points = hoseSag(a || pts[0], b || pts[n - 1]); return; }
   if (a) snapEnd(pts, 0, n > 2 && !p.hose ? 1 : undefined, a);
   if (b) snapEnd(pts, n - 1, n > 2 && !p.hose ? n - 2 : undefined, b);
 }
@@ -2427,7 +2436,7 @@ function renderPipes() {
     const flowing = flow.has(p.id), backwards = flow.get(p.id) === -1;
     if (flowing) { if (p.from) liveIps.add(p.from); if (p.to) liveIps.add(p.to); }
     const width = pipeWidth(p), color = p.color || (p.hose ? '#c9ced3' : '#8a8f96');
-    const g = mk('g', { 'data-gid': p.id });
+    const g = mk('g', { 'data-gid': p.id, ...(isQdHose(p) && (S?.valves || []).some(a => a.hose && a.name === 'hose:' + (p.name || p.id)) ? { class: 'qdAsk' } : {}) });     // a Process waits for this hose (Rule 5.34): it blinks
     if (p.baseVisible !== false || editing) {
       const op = p.baseVisible === false ? 0.35 : 1;
       for (const r of cones.filter(r => r.p === p)) g.append(mk('polygon', { class: 'reducer', points: r.pts.map(q => q.join(',')).join(' '), fill: color, opacity: op }));
@@ -2540,7 +2549,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     drawPts.push(c); renderPipes(); return;
   }
   const handle = ev.target.closest('circle.handle');
-  if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = noMove() ? null : { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; ev.preventDefault(); return; }
+  if (handle) { sel = { kind: 'gfx', id: handle.dataset.gid }; drag = noMove() ? null : { mode: 'point', item: findItem('gfx', sel.id), i: +handle.dataset.pi }; if (drag?.item) delete drag.item.qdAuto; ev.preventDefault(); return; }
   const hit = ev.target.closest('#pipes g');
   const pip = ev.target.closest('.devip');
   let node = pip ? (pip.dataset.eq ? $(`#ws .gfx[data-gid="${CSS.escape(pip.dataset.eq)}"]`) : $(`#ws .el[data-name="${CSS.escape(pip.dataset.dev)}"]`)) : ev.target.closest('.el,.gfx');
@@ -9727,6 +9736,12 @@ window.addEventListener('pointerup', async () => {
   const d = qdDrag; qdDrag = null;
   if (!d.moved) { Object.assign(d.p, { points: d.pts, to: d.to }); renderPipes(); return; }
   d.p.to = d.target?.id ?? null; renderPipes();
+  // a person moved the end by hand: they say the real hose is there too before it is kept (Fritz, 2026-11-06, Rule 5.34)
+  const hn = d.p.label || d.p.name || 'The hose', there = d.p.to ? qdWhere(d.p.to, d.p.workspace) : 'off (loose, no flow)';
+  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 30)));      // the hose shows where it went before the question
+  if (!confirm(`Is the real ${hn} ${there} now?\n\nOK = Yes, it is connected: keep it there.\nCancel = No: put it back where it was.`)) {
+    Object.assign(d.p, { points: d.pts, to: d.to }); renderPipes(); return;
+  }
   try {
     await api('POST', '/ui/hose', { id: d.p.id, to: d.p.to, points: d.p.points });
     toast(`${d.p.label || d.p.name || 'The hose'}: ${d.p.to ? 'its end is ' + qdWhere(d.p.to, d.p.workspace) : 'its end is loose (no flow)'}`);

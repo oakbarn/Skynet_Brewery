@@ -942,6 +942,23 @@ hose outlet; thread "Add hose bib Manual Valve Widget", Help 141).
   Picture on any Manual Valve. Name ManualValve_n; its **Label** starts filled in as **tap_water_n** (Rule 18.15).
 - Autosize to pipe as every Manual Valve (Rule 5.29 does not cover Manual Valves).
 
+5.34 **A Process connects a Quick Disconnect hose, and a person confirms it is there** (Fritz, 2026-11-06: "A process command to put a
+QD Hose in a Vessel with a automatic need for confirmation that the hose is placed (similar to a Manual Valve) or a QD IP. Maybe
+myQD_Hose.connect = qd_Ip_name or myQD_Hose.connect = vessel_Device_Name" ... "or vessel_Widget_Name" ... "Same as manually dragging
+it to top Third of a vessel" ... "The connection confirmation needs to be for a connect process command or the manual dragging the
+end"; thread "Add Process command to connect QD hose", Help 142).
+- **The line:** `Hose_1.connect = QD_1` (a Quick Disconnect, or a plain IP), `Hose_1.connect = Mash_Tun` (a Vessel Widget or a Vessel
+  Device), `Hose_1.connect = none` (taken off, loose). The hose is named by its Name (or its Label when only one item has it), and
+  the place by its Name, with no quotes; the place must be on the hose's Tab. Only a Quick Disconnect hose (Rule 5.28) has .connect,
+  and it is only set, with `=`.
+- **A Vessel is its top third**, the same as dragging the end there by hand (Rule 5.28): the hose hangs over the rim and inside it.
+- **The Process moves the drawing at once, then waits** (like a Manual valve, Rule 5.13): a pop-up says where to put the hose, the
+  hose blinks, and the Process goes on when an operator or admin presses **Done**. A hose already there asks nothing. Override does
+  not pass it.
+- **Dragging the end by hand asks too:** "Is the real hose there now?" OK keeps it, Cancel puts the end back.
+- Predictive text offers .connect after a QD hose's name and, after `=`, the Quick Disconnects, Vessels and IPs on its Tab, then
+  none; Check (Help 81) finds a wrong hose, a place not on its Tab, a vessel with no top, and `+=` or reading .connect.
+
 ---
 
 ## 6. Devices, connections and safety
@@ -1287,7 +1304,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **142**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **143**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2059,3 +2076,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Rule 18.25 / 18.15: a new PWM output's Label starts as PWM_n, a 4-20 mA Analog output's as 4_20_n, a 0-10 V (or 0-5 V) one's as 0_10_n (Fritz). Help 136 updated. (thread "Build PWM Add dialog like Pump")
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
+- 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
