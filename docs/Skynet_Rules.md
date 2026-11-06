@@ -1422,7 +1422,21 @@ same code, Skynet Templates, pictures, sounds, Rules and Importing Norms, so a v
 the Panel. A Template or Rule is written for both the Panel and the Importer, and the other way round (Fritz: "a Template or
 Rules must be written to both the Skynet Panel or the Import BruControl Program and vice versus"). It is a second shortcut,
 **Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
-boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7).
+boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7), as a file the Panel opens.
+- **It is a choice when installing** (Fritz, 2026-11-06). The Windows Setup asks "Will you import a BruControl configuration
+  on this computer?" Yes adds the Importer's shortcuts; No leaves them out (Setup can be run again to add it). On an update the
+  last answer is the default.
+- **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
+  the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
+  their files there too. An uninstall never deletes it.
+- **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
+  folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3). It holds the Schema, its Processes (they travel beside it, as
+  Processes are shared by every Schema) and the import report. Until the question steps are built it is marked a **first
+  draft**.
+- **Open a Schema file** (Panel, Schema.json page, admins only): lists the files in the Import folder, or takes a `.json` file
+  from the computer in use. It adds the Schema under a name of its own (an existing Schema is never overwritten), adds its
+  Processes (a Process with the same name and different text is kept as a backup first) and can load it right away. It also
+  opens a Schema saved with the Panel's own **Save as .json file**.
 - **It starts with Welcome pages** (Fritz, 2026-11-06: "Welcome is Page 1, Similarities and differences are Page 2"; more pages
   may come): **Page 1** is just the welcome; **Page 2** explains what stays the same and what is different between BruControl
   and Skynet, and how the Importer guides the brewer through the import.
@@ -2135,3 +2149,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")
 - 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can also control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")
+- 2026-11-06: Rule 15.4: the Importer is a choice in the Windows Setup ("Will you import a BruControl configuration on this computer?"); Setup always makes the Brewing folder's Import subfolder (C:\Brewing\Import), also for BeerSmith or other programs; the Importer saves its Schema file there (Save the Schema) and the Panel opens it (Schema.json > Open a Schema file). Help 143 and Help 44 updated. (thread "Plan the BruControl config importer")

@@ -10956,6 +10956,37 @@ $('#cfgExport').onclick = guard(async () => {
   download(r.file, JSON.stringify(r.schema, null, 2), 'application/json');
   toast(`Saved ${r.file}`);
 });
+// Schema.json: Open a Schema file (Fritz, 2026-11-06). The BruControl Importer saves its Schema in the Brewing folder's Import
+// subfolder (C:\Brewing\Import); a file saved with "Save as .json file" works too. It becomes a new Schema (Rule 15.4).
+$('#cfgImport').onclick = guard(async () => {
+  const dir = await api('GET', '/ui/schemas/importfolder');
+  const PC = '__pc';
+  const opts = [...dir.files.map(f => [f.name, `${f.name}   (${f.modified})`]), [PC, 'A .json file on this computer…']];
+  const w = { pick: dir.files[0]?.name ?? PC, load: false };
+  const fields = [['pick', 'Schema file', 'sel', opts],
+    ['_n', dir.exists ? `Files in the Import folder (${dir.folder}), newest first. The BruControl Importer saves its Schemas there.` : `The Import folder (${dir.folder}) is not there yet. The BruControl Importer makes it when it saves a Schema.`, 'note'],
+    ['load', 'Load it now (the panel switches to it)', 'bool'],
+    ['_p', 'The file becomes a new Schema; no Schema here is changed. Its Processes are added (a Process with the same name that differs is backed up first).', 'note']];
+  if (await dialog('Open a Schema file', fields, w) !== 'ok') return;
+  readFields(w);
+  let body, q = 'load=' + (w.load ? '1' : '0');
+  if (w.pick === PC) {
+    const inp = h('input', { type: 'file', accept: '.json,application/json' });
+    const f = await new Promise(res => { inp.onchange = () => res(inp.files[0]); inp.click(); });
+    if (!f) return;
+    body = await f.text();
+  } else q += '&file=' + encodeURIComponent(w.pick);
+  if (w.load && !okToSwitch(w.pick, 'Loading the Schema')) return;
+  const r = await api('POST', '/ui/schemas/import?' + q, body ?? '', true);
+  const p = r.processes;
+  const lines = [`Schema "${r.made.name}" added.`,
+    `Processes: ${p.written.length} added${p.backedUp.length ? ` (${p.backedUp.length} older ones backed up as .bak)` : ''}${p.same.length ? `, ${p.same.length} already the same` : ''}${p.failed.length ? `, ${p.failed.length} could not be written` : ''}.`];
+  if (r.draft) lines.push('This is a first draft from the BruControl Importer (made without its questions).');
+  if (r.warningCount) lines.push(`${r.warningCount} notes from the import${r.warningCount > 30 ? ' (the first 30)' : ''}:`, ...r.warnings.slice(0, 30).map(x => '• ' + x));
+  if (w.load) await afterSchemaSwitch(`Schema "${r.made.name}" opened and loaded`);
+  else { S.schemas = await api('GET', '/ui/schemas'); renderSchemaPick(); toast(`Schema "${r.made.name}" added. Pick it in the Schema list to load it.`); }
+  alert(lines.join('\n'));
+});
 window.addEventListener('beforeunload', ev => { if (cfgDirty || dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
 watchButtons();      // every dialog's Cancel, Save, Close, Delete and OK get their icon (public/buttons.js)

@@ -119,6 +119,28 @@ $('#pickBtn').onclick = async () => {
 };
 $('#files tbody').onclick = e => { const tr = e.target.closest('tr'); if (tr) select(Number(tr.dataset.i)); };
 $('#files tbody').ondblclick = async e => { const tr = e.target.closest('tr'); if (!tr) return; await select(Number(tr.dataset.i)); next(); };
+$('#toSave').onclick = () => {
+  const f = state.files.find(x => x.path === state.sel);
+  $('#schemaName').value = (f?.name ?? 'Imported_Schema').replace(/\.(brucfg|config)$/i, '').replace(/\s+/g, '_');
+  $('#importDir').textContent = state.start?.importFolder ?? '';
+  $('#saveResult').classList.add('hidden');
+  show(7);
+};
+for (const id of ['#back7', '#back7a']) $(id).onclick = () => show(4);
+$('#saveBtn').onclick = async () => {
+  const b = $('#saveBtn'); b.disabled = true; b.textContent = 'Saving…';
+  try {
+    const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value });
+    const box = $('#saveResult');
+    box.innerHTML = `<p>✅ Saved <b>${esc(r.file)}</b> in <code>${esc(r.folder)}</code>.</p>
+      <p>${r.interfaces} Interfaces, ${r.tabs} Tabs, ${r.items} Devices and Widgets, ${r.processes} Processes${r.warnings ? `, ${r.warnings} notes for the report` : ''}.</p>
+      <p>Next: in the Skynet Panel, open <b>Schema.json</b> and click <b>Open a Schema file</b>.</p>
+      ${state.start?.windows ? '<button id="openDir">📂 Open the Import folder</button>' : ''}`;
+    box.classList.remove('hidden');
+    const o = $('#openDir'); if (o) o.onclick = () => api('POST', '/api/open-import').catch(e => toast(e.message));
+  } catch (e) { toast(e.message); }
+  finally { b.disabled = false; b.textContent = '💾 Save the Schema'; }
+};
 $('#closeBtn').onclick = async () => {
   if (!confirm('Close the Importer? Nothing has been changed.')) return;
   try { await api('POST', '/api/close'); } catch { /* it is closing */ }

@@ -50,8 +50,25 @@ BruControl may keep a **default config** there too; it is listed last and marked
   Processes (scripts) and gGlobals it has.
 - **Double-click** a file (or click it and **Next ▶**) to pick it and go on. Back and Next are at the top and the bottom.
 
+## Save the Schema
+
+**Save the Schema** saves what the Importer made as one Skynet Schema file (`.json`) in the **Import folder**:
+`C:\Brewing\Import` when the panel is in `C:\Brewing\BrewPanel`. Type the Schema's name (spaces become `_`) and click
+**💾 Save the Schema**. The file is named `<Name>_YYYY-MM-DDTHHMMSS.json`, so an older one is never written over.
+**📂 Open the Import folder** shows it in File Explorer.
+
+The file holds the Schema (Interfaces, Tabs, Devices and Widgets), its Processes and the import report. Until the question
+steps below are built, it is a **first draft** made straight from your config file, so you can already try the whole trip.
+
+Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema file** (Help 44).
+
+## Installing the Importer
+
+The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Yes adds the **Skynet BruControl
+Importer** shortcut to your Desktop and Start menu; No leaves it out, and you can run Setup again to add it later. Setup
+always makes the Import folder, as BeerSmith or other programs may save their files there too.
+
 ## Next steps (being built)
 
 Boards, then Tabs and items (for each BruControl item the Importer asks a few plain questions, so it becomes the right Skynet
-Device, Widget or Template), then Processes, then **Save the Schema** and send it to your Brain, with a report of every change
-(Rule 15.1).
+Device, Widget or Template), then Processes, with a report of every change (Rule 15.1).

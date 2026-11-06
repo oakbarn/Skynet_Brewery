@@ -10,9 +10,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isConfigName } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isConfigName, importFolder, importFileName, buildSchemaFile, safeName } from './lib/importer.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
+import { convertBruControl } from './lib/brucontrol.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -20,6 +21,7 @@ const PORT = Number(process.env.IMPORTER_PORT ?? 8095);
 const WIN = process.platform === 'win32';
 const SETTINGS = settingsFile();
 const MAX_CONFIG = 100 * 1024 * 1024;
+const IMPORT_DIR = importFolder(ROOT);     // C:\Brewing\Import (Fritz, 2026-11-06)
 
 // Windows' real Documents folder (it may have been moved to OneDrive or another drive)
 function documentsFolder() {
@@ -62,7 +64,7 @@ async function api(req, res, p, q) {
   if (p === '/api/start' && m === 'GET') {
     // Always Documents\BruControl first (Fritz, 2026-11-06); the person points elsewhere when their config is not there
     const home = CANDIDATES[0] ?? '';
-    return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, defaultFolder: home, folder: home, lastFolder: settings.folder ?? '', file: settings.file ?? '' });
+    return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, importFolder: IMPORT_DIR, defaultFolder: home, folder: home, lastFolder: settings.folder ?? '', file: settings.file ?? '' });
   }
   if (p === '/api/configs' && m === 'GET') return json(res, 200, findConfigs(q.get('folder') ?? ''));
   if (p === '/api/folder' && m === 'POST') {
@@ -86,6 +88,25 @@ async function api(req, res, p, q) {
     if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) from the list.' });
     settings.file = file; saveSettings(SETTINGS, settings);
     return json(res, 200, { ok: true, file });
+  }
+  // Save the Schema into Brewing\Import, for the Panel to open (Schema.json > Open a Schema file). Until the question steps are
+  // built this is a FIRST DRAFT made by the older import code, so the whole trip (BruControl > Importer > Panel) can be tried.
+  if (p === '/api/save' && m === 'POST') {
+    const { file, name } = await body(req);
+    if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) first.' });
+    const conv = convertBruControl(fs.readFileSync(file, 'utf8'), { mediaFolder: 'Images' });
+    const out = buildSchemaFile(conv, { name: name || path.basename(file), source: path.basename(file), draft: true, version: readVersion(ROOT).version || '' });
+    fs.mkdirSync(IMPORT_DIR, { recursive: true });
+    const fname = importFileName(out.schema.name);
+    fs.writeFileSync(path.join(IMPORT_DIR, fname), JSON.stringify(out, null, 2));
+    return json(res, 200, { folder: IMPORT_DIR, file: fname, name: out.schema.name, tabs: out.schema.workspaces.length, items: out.schema.elements.length,
+      interfaces: out.schema.devices.length, processes: out.processes.length, warnings: out.warnings.length });
+  }
+  if (p === '/api/open-import' && m === 'POST') {
+    if (!WIN) return json(res, 200, { ok: false });
+    fs.mkdirSync(IMPORT_DIR, { recursive: true });
+    spawn('explorer.exe', [IMPORT_DIR], { detached: true, stdio: 'ignore' }).on('error', () => {}).unref();
+    return json(res, 200, { ok: true });
   }
   if (p === '/api/close' && m === 'POST') {
     json(res, 200, { ok: true });
