@@ -868,7 +868,7 @@ async function route(req, res) {
     if (!g) return fail(res, 404, 'That Group is gone');
     const to = checkGroupName(store.config, b.name, g.id), from = g.name;
     g.name = to; store.writeConfig(); broadcast('config', {});
-    // Update All: every Process line send_db_group Old becomes send_db_group New
+    // Update All: every Process line send_db_group / start_db_group / stop_db_group Old gets the New Name
     const changed = [];
     if (from !== to) for (const name of engine.names()) {
       const text = engine.read(name), out = renameGroupInText(text, from, to);

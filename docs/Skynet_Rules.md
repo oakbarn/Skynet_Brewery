@@ -183,6 +183,18 @@ across Processes, so they **stay Widgets and do not become gGlobals**. It keeps 
 .API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
 Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
 
+1.24 **Making a gGlobal in a Process** (Fritz, 2026-11-06). Besides the gGlobal screen (Rule 1.19), a Process line makes a
+gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gV_X = 10` (the long word), `new gV gV_X = 10` (the
+short word) and `new value gV_X = 10` (a normal variable word with a name that starts gV_). The words are **gGlobalValue / gV**
+(gV_), **gGlobalString / gS** (gS_), **gGlobalTime / gT** (gT_), **gGlobalDateTime / gD** (gD_, as Rule 1.19) and
+**gGlobalBoolean / gB** (gB_). **`declare` is the same word as `new`.** Picking or typing the long word in the Process editor
+fills in the start of the name (gV_ ...). **A start that does not fit the word is an error** (`new value gS_X`: gS_ is for a
+String), and so is a long or short word with a name that does not start with its letters. A Graphic gGlobal (gG_) is made only
+on the gGlobal screen. The gGlobal is made **the first time the line runs**, saved in the Schema like one made on the gGlobal
+screen, never on a Tab; the `= 10` is its **first value** only, and afterwards the line does nothing, because a gGlobal keeps
+its value (Rule 1.22). A name already used by a Device or Widget, or by a gGlobal of another Kind, is an error. Any other name
+after `new value` is still a Process variable. (thread "Declare gGlobals inside a Process", Help 145)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -964,6 +976,38 @@ end"; thread "Add Process command to connect QD hose", Help 142).
 - Predictive text offers .connect after a QD hose's name and, after `=`, the Quick Disconnects, Vessels and IPs on its Tab, then
   none; Check (Help 81) finds a wrong hose, a place not on its Tab, a vessel with no top, and `+=` or reading .connect.
 
+5.35 **Valve Tees and Supply Manifolds: Long Tees with a valve built into each branch** (Fritz, 2026-11-06: "Long Tee with integrated
+Motorized Valve and one with Long Tee with Manual Valve (and method to change valve type like a regular valve), a Double Supply
+Manifold (2 long Tees with 2 Integrated Valves with IPs only at Valve ends and 2 one on each open end of the joined Tees. Both Manual
+and Motorized Versions with ability to swap manual to motorized individually by valve. And a Triple Supply Manifold the same. Add to
+Pipe Fitting"; "These have their own unique attributes ... the standard exceptions would apply if it fits"; thread "Add valve Tees and
+supply manifolds", Help 146).
+- Three Skynet TC Pipe Fittings with valves built in: the **Valve Tee** (one Long Tee, Template Valve_Tee), the **Double Supply
+  Manifold** (2 Long Tees joined end to end, Supply_Manifold_2) and the **Triple Supply Manifold** (3, Supply_Manifold_3). TC 1.5,
+  Fritz's Long Tee drawing (Rule 5.25) with a valve on each branch, drawn to the Valve Standard (Rule 5.29).
+- **IPs only on the two open ends of the joined tees and on the far end of each valve** (Rule 5.20): the Valve Tee has 3, the Double 4,
+  the Triple 5. Flow goes any way through the tees; **a closed valve shuts its IP**.
+- **Each valve is a valve Device built into the fitting** (a Skynet_Integrated_Device, Rule 5.2, like the RIMS tube's parts): it can't be
+  taken out or deleted by itself; deleting the fitting deletes its valves. Rule 5.14 already says a valve in a fitting is a Device.
+- **Manual or Motorized, each valve on its own**, the same way as a regular valve's **Valve type** (Rule 5.13): in the fitting's
+  Properties each valve is **Manual** (turned by hand, no Port: a Process shows a pop-up and waits for Done) or **Motorized** (switched by
+  its Port; one Interface for all the Motorized valves of the fitting, then each valve's Port; two valves can't share a Port). The
+  picture follows (Manual ball valve or Motorized ball valve) and stays on the same spot.
+- **A click on a valve on its Tab opens or closes it** (operators and admins). Open: the bolt (Motorized) or the green ring (Manual).
+  Processes use the valve's own name (`<name>.state = true`); Motorized valves are on the Close all / Open all valve lists (Rule 6.15).
+- **Added from** Edit layout bar > **Elbows, Tees …** > Valve Tees and Supply Manifolds, or Select Device Type > **Valves**: six rows,
+  each fitting with all its valves Manual or all Motorized to start. It goes on the Build Tab (Rule 4.1) and its Properties open; a
+  Motorized one picks its Interface and Ports there.
+- **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
+  or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
+  name (Rule 3.1), e.g. `MB_22_eVlv_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
+- Flip Horizontal, Flip Vertical and Rotate (45 degree steps) as every Skynet item (Rule 5.5): the valves and IPs turn with it. No
+  Autosize to pipe (it is drawn at the Valve Standard size) and no Clone. Dropped on a straight pipe in Edit layout, its run goes along
+  the pipe and the pipe is cut, as a tee's (Rule 5.25).
+- *Standard exceptions used* (Fritz: "the standard exceptions would apply if it fits"): its valves' Interface and Ports are set in the
+  fitting's Properties, not in a Pump-style Add box (as the RIMS tube's and the Vessel Device's parts, Rules 4.2 / 18.13 / 18.23), and
+  unlike the Vessel Device it is **not locked** once saved, so a valve can always be swapped Manual / Motorized.
+
 ---
 
 ## 6. Devices, connections and safety
@@ -1035,15 +1079,36 @@ lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 6.14 **Database and .API on every Device and Widget** (Fritz, 2026-10-30, Help 98). Every Device and Widget
 with a value has a **Database and .API** box at the end of its Properties:
 - **Send to the database**: Off, On demand, On value change (at most 10 a second, the last change never lost),
-  **When Clicked** (each time someone sets it on its Tab), When a Process starts, **In a Group**, At a date and time (once), At clock time (every day at that time), Every N ms /
+  **When Clicked** (each time someone sets it on its Tab), When a Process starts, At a date and time (once), At clock time (every day at that time), **Every second, Every minute, Every hour, Every day (at Midnight)** (shortcuts,
+  Fritz 2026-11-06, listed just above the Every N choices), Every N ms /
   seconds / minutes / hours / days, Every 00:00:00. The **At clock time** box shows only when **At clock time** is
   picked; the Every choices have no clock time (Fritz, 2026-11-04). **What to send** is its main value unless another attribute is picked.
   `send_db Name` in a Process sends it now, whatever the setting, **even when it is Off** (Fritz, 2026-11-05: kept
   `send_db Name`, no `send_Now` command).
-- **Database Groups** (Fritz, 2026-11-05): **In a Group** puts the item in a **Group**. A Group has a **meaningless hidden key**
-  (the items point to it) and a **Group Name**. The Process line **`send_db_group Group_Name`** sends every item In that Group,
-  **each time** it runs. **➕ Add new Group…** ends the Group list; **✏ Change name** changes the Group Name and **every Process**
-  follows (Update All), like Rule 3.11. **Once is gone** (Rule 15.2): each Schema's Once items go **In the Group named Once**.
+- **Database Groups** (Fritz, 2026-11-05, rewritten 2026-11-06). **A Group is how a set of Devices and Widgets is sent to the
+  Database or not.** A Process command starts sending a Group, and another Process command stops it:
+  **`start_db_group Group_Name`** and **`stop_db_group Group_Name`**.
+  - **A single Device or Widget can belong to more than one Group** (Fritz, 2026-11-06). The Database and .API box shows the
+    item's Groups and a **👥 Groups…** button (Fritz, 2026-11-06, a dialog change he commanded, Rule 18). It opens the **Group
+    list**: a list box of the existing Groups with **➕ Add new Group…** at the top (Rule 18.14: it makes the Group, comes back and
+    selects it); ✔ marks the Groups the item is in. **A click on a Group opens the Group dialog with all its members. A
+    double-click on a Group adds this Device or Widget to it** and opens the Group dialog with its members. The Group dialog also
+    has ✏ Change name and ➕ Add / ➖ Take this item out. The Group list's 💾 Save keeps the choice; it is saved with the Properties.
+  - **An item assigned to a Database Group is only sent to the database while a Group it belongs to is started.** It is sent by
+    its **own** Send to the database setting (Every 1 minute, On value change, When Clicked ...), so the item sets *how often*
+    and the Group sets *when*. An item in no Group is sent by its setting all the time, as before. Every Group is stopped when
+    the Brain starts.
+  - **On demand is always true still** (Fritz, 2026-11-06): `send_db Name` (and Log now, and the API) sends the item at once,
+    whatever its Groups, even when they are stopped. **`send_db_group Group_Name`** sends every item of the Group **once, now**,
+    started or not.
+  - **Example (Fritz):** you want a Mash Temperature Probe sent to the database **every minute**, but only during the Mash. Set
+    the probe's Send to the database to **Every minute** and add it to the Group **Mash** (👥 Groups…, double-click Mash). At the beginning of the Mash a
+    Process line `start_db_group Mash` starts the Group, and the probe reports to the database every minute. At the end of the
+    Mash a Process line `stop_db_group Mash` stops it. The database only has that probe's data during the Mash.
+  - A Group has a **meaningless hidden key** (the items point to it) and a **Group Name**. **✏ Change name** changes the Group
+    Name and **every Process** follows (`send_db_group`, `start_db_group`, `stop_db_group`; Update All, like Rule 3.11).
+  - **In a Group is no longer a Send to the database choice, and Once is gone** (Rule 15.2): each Schema's Once items and In a
+    Group items become **On demand** still in their Group, so `send_db_group` still sends them as before.
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
   (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
@@ -2160,6 +2225,11 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")
 - 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can also control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")
+- 2026-11-06: Rule 6.14 Database Groups rewritten (Fritz): a Device or Widget can belong to more than one Group; Grouping is how a set of items is sent to the Database or not; `start_db_group Group_Name` starts a Group and `stop_db_group Group_Name` stops it; an item in a Group is sent by its own setting only while one of its Groups is started; On demand (`send_db`) is always true; `send_db_group` sends the Group once. In a Group is no longer a Send to the database choice (old items become On demand in their Group). Fritz's Mash probe example added. Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Rule 6.14: Send to the database gets shortcut choices **Every second, Every minute, Every hour, Every day (at Midnight)**, listed just above Every N milliseconds (Fritz: "I know you can set these with the way it is but these are shortcuts"). Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Rule 6.14: the Database Groups switches are replaced by a **👥 Groups…** button and a Group list (➕ Add new Group… at the top); a click on a Group shows the Group dialog with all its members, a double-click adds the Device or Widget to the Group and shows its members (Fritz, dialog change commanded under Rule 18). Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Added Rule 1.24 (make a gGlobal in a Process: new gGlobalValue gV_X = 10, new gV gV_X, new value gV_X all the same; declare = new; a start that does not fit is an error; = is the first value only). Help 145 (next free Help number 146). (thread "Declare gGlobals inside a Process")
+- 2026-11-06: Added Rule 5.35 (Valve Tees and Supply Manifolds: the Valve Tee, Double and Triple Supply Manifold, TC 1.5 Long Tees with a valve Device built into each branch; IPs only on the open ends of the tees and the far end of each valve; each valve Manual or Motorized on its own in the fitting's Properties; added from Elbows, Tees … and the Valves list). Help 146; next free Help number 147. (thread "Add valve Tees and supply manifolds")
 - 2026-11-06: Rule 15.4: the Importer is a choice in the Windows Setup ("Will you import a BruControl configuration on this computer?"); Setup always makes the Brewing folder's Import subfolder (C:\Brewing\Import), also for BeerSmith or other programs; the Importer saves its Schema file there (Save the Schema) and the Panel opens it (Schema.json > Open a Schema file). Help 143 and Help 44 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")

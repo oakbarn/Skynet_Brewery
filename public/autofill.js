@@ -20,13 +20,16 @@
 //  - Only names are ever offered: never a hidden key (Rule 3.10), and never a Clone, which is not used in Processes (Rule 4.4).
 import { DEVICE_TYPES } from './colorize.js';
 import { SKYNET_CONSTANTS, showConstant } from './skconst.js';
+import { G_DECLARE } from './gkinds.js';
 
 const COMMANDS = [
   ['if', 'test something'], ['elseif', 'another test'], ['else if', 'another test'], ['else', 'when no test fit'], ['endif', 'end of the if'],
   ['wait', 'until true, or a time'], ['sleep', 'pause, in ms'], ['goto', 'jump to a [label]'], ['step', 'start a step'],
   ['start', 'a Process or timer'], ['stop', 'a Process, timer or alarm'], ['restart', 'a Process from the top'], ['reset', 'a timer'],
-  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'], ['send_db_group', 'send a database Group now'],
+  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'], ['send_db_group', 'send a database Group now, once'], ['start_db_group', 'start sending a database Group'], ['stop_db_group', 'stop sending a database Group'],
   ['new value', 'make a number'], ['new string', 'make a text'], ['new bool', 'make a true/false'], ['new time', 'make a time'], ['new datetime', 'make a date and time'],
+  // gGlobals made in a Process (Fritz, 2026-11-06, Rule 1.24): picking one also fills in the start of the name (gV_ ...)
+  ...Object.values(G_DECLARE).map(d => [`new ${d.long}`, `make a gGlobal: ${d.what}`]),
   ['lock_Equipment', 'lock the Equipment Profile'], ['unlock_Equipment', 'unlock the Equipment Profile'],
   ['ask', 'a pop-up, waits for Done'], ['close_all_valves', 'the Close all valves list'], ['open_all_valves', 'the Open all valves list'], ['all_pumps_off', 'every pump off'],
   ['import_recipe', 'a .bsmx or .xml file'], ['start_hop_alerts', 'hop alerts for the boil'], ['stop_hop_alerts', 'stop the hop alerts'],
@@ -34,6 +37,9 @@ const COMMANDS = [
 // words that fit anywhere on a line, not only at its start
 const ANYWHERE = [['true', ''], ['false', ''], ['now', 'date and time'], ['and', ''], ['or', ''], ['not', '']];
 const NEW_KINDS = [['value', 'a number'], ['string', 'a text'], ['bool', 'true or false'], ['time', '00:10:00'], ['datetime', 'date and time']];
+// new gGlobalValue -> new gGlobalValue gV_ (the start of a gGlobal's name comes with its word, Rule 1.24)
+const G_PREFIX = Object.fromEntries(Object.values(G_DECLARE).flatMap(d => [[d.long.toLowerCase(), d.prefix], [d.short.toLowerCase(), d.prefix]]));
+const G_TEXT = Object.fromEntries(Object.values(G_DECLARE).map(d => [`new ${d.long}`, `new ${d.long} ${d.prefix}`]));
 const ON_OFF = [['true', 'on'], ['false', 'off'], ['on', ''], ['off', '']];
 const IDENT = /[A-Za-z_][A-Za-z0-9_~]*$/;
 const IS_IDENT = /^[A-Za-z_][A-Za-z0-9_~]*$/;
@@ -53,13 +59,13 @@ export function fit(name, typed) {
 }
 
 // commands that take something after them: the pick ends in a space and the next list opens by itself
-const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group',
+const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group',
   'new value', 'new string', 'new bool', 'new time', 'new datetime']);
 const COMPARE = [['= ', 'is equal to'], ['== ', 'is equal to (the same as =)'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
 const SET = [['= ', 'set it to'], ['+= ', 'add to it'], ['-= ', 'take from it'], ['++', 'add 1']];
 const MATH = [['+ ', ''], ['- ', ''], ['* ', ''], ['/ ', '']];
 const JOIN = [['and ', 'both must be true'], ['or ', 'one must be true']];
-const NEW_RE = /^\s*new\s+(\w+)\s+([A-Za-z_]\w*)/gim;
+const NEW_RE = /^\s*(?:new|declare)\s+(\w+)\s+([A-Za-z_]\w*)/gim;
 
 // what to offer for the line before the cursor (no DOM, so test/autofill.test.js can check it)
 //   words = { elements: [{ name, type, main, attrs, bools }], processes: [...], tabs: [...] }, above = the text above the cursor,
@@ -86,7 +92,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   const done = () => { const list = [...first, ...second]; return list.length ? { list, typed: q ? w.length + 1 : w.length } : null; };
   // in quotes the pick keeps its quotes; a name that needs quotes gets them
   const named = (n, hint) => q ? add(`"${n}"`, hint, n) : add(quote(n), hint, n);
-  const command = (k, h) => add(TAKES.has(k) ? k + ' ' : k, h, k);
+  const command = (k, h) => add(G_TEXT[k] ?? (TAKES.has(k) ? k + ' ' : k), h, k);
 
   // what can come after a whole name: "if Pump " -> == != > < and .state .visible ...; "Pump " -> = += and .visible = ...
   function after(name, attr, before) {
@@ -126,9 +132,16 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     if (forced && inCond && /(\btrue|\bfalse|\bon|\boff|\bnow|\d|")\s+$/i.test(pre) && !/(==|!=|<=|>=|<|>|=)\s*$/.test(pre)) return { list: JOIN.map(([text, hint]) => ({ text, hint })), typed: 0 };
   }
 
-  // after the word that comes first
-  const cmd = /^\s*(start|stop|restart|reset|play|show(?:\s+tab|\s+workspace)?|goto|new)\s+$/i.exec(pre)?.[1].toLowerCase().replace(/\s+/g, ' ');
-  if (cmd === 'new') { if (!q) for (const [k, h] of NEW_KINDS) add(k + ' ', h, k); return done(); }
+  // new gGlobalValue (or new gV) typed by hand: the start of the name, gV_
+  const gw = /^\s*(?:new|declare)\s+(\w+)\s+$/i.exec(pre)?.[1].toLowerCase();
+  if (gw && G_PREFIX[gw] && !q) { add(G_PREFIX[gw], 'a gGlobal name starts with this'); return done(); }
+  // after the word that comes first (declare is the same as new)
+  const cmd = /^\s*(start|stop|restart|reset|play|show(?:\s+tab|\s+workspace)?|goto|new|declare)\s+$/i.exec(pre)?.[1].toLowerCase().replace(/\s+/g, ' ').replace('declare', 'new');
+  if (cmd === 'new') {
+    if (!q) for (const [k, h] of NEW_KINDS) add(k + ' ', h, k);
+    if (!q) for (const d of Object.values(G_DECLARE)) { add(`${d.long} ${d.prefix}`, `a gGlobal: ${d.what}`, d.long); add(`${d.short} ${d.prefix}`, `short for ${d.long}`, d.short); }
+    return done();
+  }
   if (cmd === 'goto') { for (const m of all.matchAll(/^\s*\[([^\]\n]+)\]/gm)) add(m[1], 'label'); return done(); }
   if (cmd?.startsWith('show')) { for (const t of W.tabs || []) named(t, 'Tab'); return done(); }
   if (cmd === 'play') { for (const e of els) if (e.type === 'alarm' || e.type === 'soundPlayer') named(e.name, e.type); return done(); }
@@ -167,7 +180,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
   } else {
     // a value: in an if, a wait, after = or an operator. Only what can stand there, in this order (Fritz, 2026-10-28):
     // variables made in this Process, timers, gGlobals, Devices, Widgets, Processes, then true / false / now / not
-    for (const [n, k] of declared) add(n + (/(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre) ? '' : ' '), `variable (${k})`, n);
+    for (const [n, k] of declared) add(n + (/(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre) ? '' : ' '), /^g[vstdb]_/i.test(n) ? 'gGlobal' : `variable (${k})`, n);
   }
   // a name the line goes on after (if Pump ...) ends in a space and opens the next list; a value after = or == ends the line
   const isRhs = /(==|!=|<=|>=|<|>|=|\+|-|\*|\/)\s*$/.test(pre);
@@ -204,7 +217,7 @@ export function attachAutofill(ta, box, words, on = () => true) {
   const close = () => { box.classList.add('hidden'); ghost.classList.add('hidden'); items = []; ctx = null; };
   const lineBefore = () => { const v = ta.value, p = ta.selectionStart; return v.slice(v.lastIndexOf('\n', p - 1) + 1, p); };
   const atLineEnd = () => { const c = ta.value[ta.selectionEnd]; return ta.selectionStart === ta.selectionEnd && (c === undefined || c === '\n' || c === '\r'); };
-  const declared = () => new Set([...ta.value.matchAll(/^\s*new\s+\w+\s+([A-Za-z_]\w*)/gim)].map(m => m[1]));
+  const declared = () => new Set([...ta.value.matchAll(/^\s*(?:new|declare)\s+(?!gglobal|g[vstdb]\s)\w+\s+(?!g[VSTDB]_)([A-Za-z_]\w*)/gim)].map(m => m[1]));
 
   function insert(from, text) {
     const p = ta.selectionStart;

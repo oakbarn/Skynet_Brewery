@@ -30,7 +30,8 @@ const s = get('wa');
 assert.equal(s.list[0].text, 'wait '); assert.equal(s.list[0].label, 'wait'); assert.ok(s.list[0].hint);
 assert.equal(s.typed, 2);
 assert.ok(texts('en').includes('endif'), 'endif takes nothing after it: no space');
-assert.deepEqual(texts('  new '), ['value ', 'string ', 'bool ', 'time ', 'datetime ']);
+assert.deepEqual(texts('  new ').slice(0, 5), ['value ', 'string ', 'bool ', 'time ', 'datetime ']);
+assert.ok(texts('  new ').includes('gGlobalValue gV_'), 'the gGlobal words come after (Rule 1.24)');
 
 // after the first word the list fits it
 assert.deepEqual(texts('start '), ['sub_Fill', 'scr_Mash', 'tm_Mash', 'alm_Hops']);
