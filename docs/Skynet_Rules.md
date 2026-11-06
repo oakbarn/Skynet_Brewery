@@ -369,6 +369,11 @@ clean window (it keeps its own sign-in). Phones, tablets and other computers ope
 (thread "Open Skynet in its own clean window", Help 122)
 The clean window shows **the Skynet Brewer beer mug** (the same mug as the Desktop shortcut) on the taskbar, also when it is minimized, and in its title bar; the panel's Help window and the Sign in page show it too, and so do browser tabs. (Fritz, 2026-11-05, thread "Show a beer mug icon when minimized")
 
+2.37 **Correct spelling and plain English at all times** (Fritz, 2026-11-06: "correct spelling at all times", "Plain
+English. Get and Put are computer terms that only geeks understand", "Get and put follow in the ( )"). Every word a user sees
+(dialogs, dropdowns, pop-ups, messages, Help) is spelled correctly and says it in plain English. When a computer word is
+needed, it follows in ( ) after the plain words, for example **Read Only (Get: outside programs like Node-Red can read it.)**.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -1059,8 +1064,10 @@ with a value has a **Database and .API** box at the end of its Properties:
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
   (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
-- **.API**: Off (the start), Get only, Get and Put. Only items with .API on are in `/api/items`, MQTT and Home
-  Assistant; only Get and Put can be changed from outside.
+- **.API**: Off (the start), **Read Only (Get: outside programs like Node-Red can read it.)**, **Read & Control (Get & Put:
+  outside programs like Node-Red can also control it.)** (Fritz, 2026-11-06, renamed from Get only / Get and Put; elsewhere in these Rules Get only = Read Only and
+  Get and Put = Read & Control). Only items with .API on are in `/api/items`, MQTT and Home Assistant; only Read & Control can be
+  changed from outside.
 - **Safeguards so a bot can't take over:** board readings (inputs, probes), names, Tabs, Interfaces, ports and
   pictures are never changed from outside; a Manual Valve Widget has no .API (only a click turns it); ten wrong
   API keys in 10 minutes shut that address out for 15 minutes; every outside change is written in the Processes
@@ -1096,6 +1103,20 @@ Output** when Enabled. On a PWM pin (PWM output on) the pin follows the output %
 changes the Initial Output and the two Drives to % and says so. Like the PID it counts as a heater, is On while Enabled
 (Rule 7.9) and can share a heater's port (Rule 6.1). Starting values: Deadband Offset 0.5, Inner Band Offset 2, Initial Output 0,
 Inner Band Drive 1, Outer Band Drive 5, Calc Time 10 s, Output window 2 s. (thread "Add Deadband control", Help 126)
+
+6.18 **API_Name: the name a Voice Command says** (Fritz, 2026-11-06: "a new string field associated with API. API_Name. This
+field must be Unique. It is what a Voice Command would use. It would only be on the Database and API Popup"). Every Device and
+Widget with a value has an **API_Name** String, **only on its Database and .API pop-up**, below .API.
+- It **must be Unique** in the Schema; capitals and extra spaces don't count (`Red Pump` = `red  pump`). Saving one that is
+  already used is refused and says which item has it. Spaces are allowed; `< > : " / \ | ? *` are not; at most 60 characters.
+- It **may be blank, with a warning** that a Voice Command can't be used for that item (Fritz, 2026-11-06: "It can be blank,
+  but with a Warning that you could not use a Voice Command").
+- A Voice Command says it: an API_Name **Red Pump** is switched by "Turn on Red Pump" (Fritz, 2026-11-06). Home Assistant (Alexa,
+  Google Home, Siri) names the item by its API_Name (its Label when blank); `/api/items/<name>` finds an item by its Name or its
+  API_Name. It opens nothing by itself: the item's .API (Rule 6.14) still says what outside programs may do.
+- It replaces the "Voice Name" planned on 2026-10-30 (unique, starting as the Label): an API_Name starts blank.
+- It is not the item's Name (Rule 3.1): Processes keep using the Name. The BruControl Importer (Rule 15.4) carries it over later.
+  (thread "Add unique API_Name for voice commands", Help 144)
 
 ## 7. Pictures
 
@@ -1321,7 +1342,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **143**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **145** (143 is the BruControl Importer's, 144 API_Name). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1383,6 +1404,18 @@ cannot be changed safely stays as it was and is listed in the import report. Eac
 in docs/Importing_Norms.md. First norm: `.xposition` / `.yposition` become `.x_hPosition` /
 `.y_vPosition` (Rule 1.15), on the item and in every Process. (2026-10-28, thread "Start the
 Importing Norms document")
+**Exception for names, BruControl Importer** (Fritz, 2026-11-06: "the user during import can import his names ... I want it
+plain that the Skynet way is better in the end"). By default every imported name is changed to the Skynet naming convention
+(Rule 3.1). The user may instead **keep the BruControl names**, but only after two warnings, like Start Fresh (Rule 9.8):
+1. **"Do you really want to keep your BruControl names?"** It explains plainly why not: a Skynet name tells you the Interface,
+   port, type, Label and Tab at a glance; Skynet renames an item everywhere (Processes too), so nothing is lost by changing; new
+   Devices get Skynet names, so a kept BruControl name mixes two styles on the same Tab; and Help, samples and Templates all use the
+   Skynet way. **No (use the Skynet names) is the default.**
+2. A second, last chance to back out: **"Last chance: keep the BruControl names?"**, again with **No (back out, use the Skynet
+   names)** as the default.
+Only after both are confirmed are the BruControl names kept. Even then, characters a name may not have (Rule 3.4) and spaces are
+changed as always, and every item still gets its hidden key (Rule 3.10). Everything else that comes in is still changed to the
+Skynet way. Either choice can be changed later item by item, since Skynet renames everywhere.
 
 15.2 **Everything conforms to the latest standard. Backward compatibility is not needed.** When a
 standard changes, existing Schemas, Processes, names and files are changed to it (with backups),
@@ -1398,6 +1431,27 @@ First use: the old Ball valve pictures (Valve_Ball_*) gave way to the Skynet Mot
 (Rule 5.17) in the 2 and 3 vessel samples and the default Schema. (Fritz, 2026-10-31, thread "Update samples to the
 new valve and Rules")
 
+
+15.4 **The Skynet BruControl Importer** (Fritz, 2026-11-06). A BruControl config file (`.brucfg`) is brought into Skynet by
+the **Skynet BruControl Importer**, a program that runs on **Windows only, on the same computer as BruControl**. It only reads
+BruControl's files and never changes them. **It shares everything with the Panel:** it is built from the same repo and uses the
+same code, Skynet Templates, pictures, sounds, Rules and Importing Norms, so a valve from the Importer is exactly a valve from
+the Panel. A Template or Rule is written for both the Panel and the Importer, and the other way round (Fritz: "a Template or
+Rules must be written to both the Skynet Panel or the Import BruControl Program and vice versus"). It is a second shortcut,
+**Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
+boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7).
+- **It starts with Welcome pages** (Fritz, 2026-11-06: "Welcome is Page 1, Similarities and differences are Page 2"; more pages
+  may come): **Page 1** is just the welcome; **Page 2** explains what stays the same and what is different between BruControl
+  and Skynet, and how the Importer guides the brewer through the import.
+- **Page 3 is the Starting dialog, the config file picker** (Fritz, 2026-11-06). It looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
+  BruControl may keep a default config there too; it is listed and marked as BruControl's default. If no config file is there
+  (or only the default one), the user is asked to **point to the folder** that holds theirs (Fritz, 2026-11-06). Clicking a file
+  shows what is in it.
+- **One config file, one Schema.** A user may have more than one config file; each one is imported on its own into its
+  own Schema, and config files are never combined (Fritz, 2026-11-06).
+- The Oakbarn Schema is the first one built with it. For each BruControl item the Importer asks the brewer questions, so the
+  right Skynet Device or Widget is used (Fritz, 2026-11-06).
+(thread "Plan the BruControl config importer", Help 143; plan: docs/BruControl_Importer_Plan.md)
 ---
 
 ## 16. The Brew Process
@@ -2094,5 +2148,9 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
+- 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")
+- 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")
+- 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can also control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")
 - 2026-11-06: Rule 6.14 Database Groups rewritten (Fritz): a Device or Widget can belong to more than one Group; Grouping is how a set of items is sent to the Database or not; `start_db_group Group_Name` starts a Group and `stop_db_group Group_Name` stops it; an item in a Group is sent by its own setting only while one of its Groups is started; On demand (`send_db`) is always true; `send_db_group` sends the Group once. In a Group is no longer a Send to the database choice (old items become On demand in their Group). Fritz's Mash probe example added. Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Rule 6.14: Send to the database gets shortcut choices **Every second, Every minute, Every hour, Every day (at Midnight)**, listed just above Every N milliseconds (Fritz: "I know you can set these with the way it is but these are shortcuts"). Help 98 updated. (thread "Rewrite Database Group Rules")
