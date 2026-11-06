@@ -163,7 +163,7 @@ async function convert() {
   show(5);
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
   try {
-    const r = await api('POST', '/api/convert', { file: state.sel, names });
+    const r = await api('POST', '/api/convert', { file: state.sel, names, copyMedia: $('#copyMedia').checked });
     state.converted = true;
     const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` class="${cls[i]}"` : ''}>${c}</td>`).join('') + '</tr>';
     box.innerHTML = `<div class="card"><p>Import Copy: <code>${esc(r.copy)}</code></p>
@@ -176,11 +176,11 @@ async function convert() {
         ${Object.entries(r.byKind).map(([k, n]) => row([esc(k), n], ['', 'n'])).join('') || row(['(none)', ''])}</table></div></div>
       <h3>Tabs (workspaces)</h3><table><tr><th>Tab</th><th>ID</th><th>Items</th><th>Placeholders</th></tr>
         ${r.tabs.map(t => row([esc(t.name), esc(t.id), t.items, t.placeholders], ['', '', 'n', 'n'])).join('')}</table>
-      ${r.pictures.total ? `<h3>Pictures</h3><p><b>${r.pictures.copied}</b> of <b>${r.pictures.total}</b> pictures were copied to <code>media\\Images\\User</code>
-        from the folders BruControl saved (nothing is moved).${r.pictures.missing.length ? ` <b>${r.pictures.missing.length}</b> are not on this computer: copy each one
-        into <code>media\\Images\\User</code> under the name shown, or put it back where BruControl had it and click <b>◀ Back</b> and <b>Next ▶</b> again.` : ''}</p>
-        ${r.pictures.missing.length ? `<details><summary>Pictures not found (${r.pictures.missing.length})</summary><table><tr><th>Where BruControl had it</th><th>Name in Images\\User</th></tr>
-        ${r.pictures.missing.map(x => row([esc(x.from), esc(x.to.split('/').pop())])).join('')}</table></details>` : ''}` : ''}
+      ${r.media.pictures + r.media.sounds ? `<h3>Pictures and Sounds</h3><p><b>${r.media.pictures}</b> pictures and <b>${r.media.sounds}</b> sounds are imported by their path.
+        ${r.media.copy ? 'They were <b>copied</b> to <code>media\\Images\\User</code> and <code>media\\sounds\\User</code>; the originals stay where they were.'
+          : 'The files stay where they were, so BruControl keeps working.'}${r.media.missing.length ? ` <b>${r.media.missing.length}</b> are not on this computer; their path is kept.` : ''}</p>
+        ${r.media.missing.length ? `<details><summary>Not on this computer (${r.media.missing.length})</summary><table><tr><th>Kind</th><th>Path</th></tr>
+        ${r.media.missing.map(x => row([x.kind === 'sound' ? 'Sound' : 'Picture', esc(x.from)])).join('')}</table></details>` : ''}` : ''}
       ${r.renames.length ? `<details><summary>New names (${r.renames.length})</summary><table><tr><th>BruControl</th><th>Skynet</th></tr>
         ${r.renames.map(x => row([esc(x.from), esc(x.to)])).join('')}</table></details>` : ''}
       ${r.warnings.length ? `<h3>Notes for the report</h3><ul>${r.warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}`;

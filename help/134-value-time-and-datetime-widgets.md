@@ -21,7 +21,7 @@ It keeps its value when the Brain restarts.
 
 ## Properties
 
-They look like the Pump's Properties (Skynet Rule 18.29; Fritz, 2026-11-06: "Widget look similar to the Pump Drill Down").
+They look like the Pump's Properties (Skynet Rule 18.30; Fritz, 2026-11-06: "Widget look similar to the Pump Drill Down").
 Rest the mouse on a field's name to see what it is for (hover help).
 
 - **The title line:** the 🔓 lock, **Visible** and **Hidden Locked**.

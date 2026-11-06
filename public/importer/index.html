@@ -57,7 +57,10 @@
           <li><b>Your boards, wiring and cables.</b> The same Arduino Mega, Grand Central, ESP32 and friends, the same USB COM ports,
             Ethernet and WiFi links, and the same pin numbers. Nothing is rewired.</li>
           <li><b>Your Elements, Workspaces and Scripts</b> all come over. Each one is explained below.</li>
-          <li><b>Your pictures and sounds</b> from the BruControl Media folder.</li>
+          <li><b>Pictures and Sounds:</b> the picture paths and sounds are imported. The files stay where they were, so BruControl
+            continues to work normally. You do have the option of copying those files to a new folder that consolidates all the
+            picture files and sound files, so if you move to a Pi or another computer, those files will be available. They are
+            never deleted in their original spot, just copies made.</li>
         </ul>
       </div>
       <div class="card">
@@ -291,6 +294,14 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
         Label, the name shown on the Tab.</p>
       <label class="choice"><input type="radio" name="names" value="bru"> Keep my BruControl names</label>
       <p class="small">Allowed, but not the Skynet way. Two warnings come first. Spaces and characters a name may not have still change.</p>
+    </div>
+    <h2>Pictures and Sounds</h2>
+    <div class="card">
+      <p>The picture paths and sounds are imported. <b>The files stay where they were</b>, so BruControl continues to work normally.</p>
+      <label class="choice"><input type="checkbox" id="copyMedia"> Also copy my pictures and sounds into one folder</label>
+      <p class="small">Copies every picture into <code>media\Images\User</code> and every sound into <code>media\sounds\User</code> of the
+        Skynet Panel, so they are all together if you move to a Pi or another computer. They are never deleted in their original
+        spot, just copies made.</p>
     </div>
     <div class="buttons"><button id="back4">◀ Back</button><span class="spacer"></span><button class="primary" id="next4">Next ▶</button></div>
   </section>
