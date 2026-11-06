@@ -124,3 +124,10 @@ A name that starts with `VGC` made a digital output a **valve** and a PWM output
    another computer. (The old method rewrote the paths to `Images` and left the copying to the brewer, with File Move.)
 
 Next steps are decided with Fritz.
+
+### Later: Globals (postponed, Fritz 2026-11-06)
+"We will work on the global import later as it is very involved. We can look at how it was used in BruControl and make
+some educated guess, but will need confirmation from a User. For example, a global that was hiddenlocked was probably only
+a variable with global scope." So when this step is built, the Importer looks at how each BruControl Global was used
+(hidden or locked, shown on a Workspace, used in which Scripts), makes an educated guess at the Skynet kind, and asks the
+brewer to confirm it. Until then every Global is a Placeholder. (The old method's Global rules are in section 6 above, for reference.)
