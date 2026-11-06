@@ -5452,7 +5452,7 @@ function field(f, obj) {
       const o2 = fieldOne(w, obj);
       if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
       const lbl = h('span', { class: 'pairLbl' }, w[1]);
-      if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.title = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], w[6].tip)); }
+      if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.dataset.help = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], w[6].tip)); }
       parts.push(lbl, o2[1]);
     }
     out[1] = h('div', { class: 'fldPair' }, ...parts);
@@ -5466,8 +5466,8 @@ function field(f, obj) {
     out[1] = h('div', { class: 'fldPair' }, out[1], h('span', { class: 'pairLbl dbPopLbl' }, 'Database and .API'),
       h('button', { type: 'button', class: 'fldIcon fldAttr', title: 'Database and .API: send to the database, and .API', onclick: ev => { ev.preventDefault(); attrEntry(DB_POP, obj); } }, '⬢'));
   }
-  if (x?.tip && out[0]) {        // Rule 18.16: the name stays short; hover it (or tap it) for more
-    out[0].classList.add('tipLbl'); out[0].title = x.tip;
+  if (x?.tip && out[0]) {        // Rules 18.16, 2.38: the name stays short; rest the mouse on it (hover help, public/hoverhelp.js) or tap it
+    out[0].classList.add('tipLbl'); out[0].dataset.help = x.tip;
     out[0].addEventListener('click', ev => { if (ev.target === out[0]) { ev.preventDefault(); fieldTip(out[0].textContent, x.tip); } });
   }
   if (x?.after) for (const o of out) o?.classList?.add('afterStep', 'hidden');
