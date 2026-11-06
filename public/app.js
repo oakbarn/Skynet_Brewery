@@ -12,6 +12,7 @@ import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from '
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
+import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames } from './semi.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
@@ -3661,7 +3662,7 @@ async function newDeviceDialog(e, hint, what) {
   if (pwm && !String(work.label ?? '').trim()) work.label = autoLabel(pwmAutoLabel(e));      // PWM_1, 4_20_1, 0_10_1 ... (Fritz, 2026-11-05, Rule 18.25)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !pr && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
-  if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
+  if (dd) { work.database = e.database; work.api = e.api; work.apiName = e.apiName; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
   if (dd) Object.assign(work, { x: e.x, y: e.y, imageOff: e.imageOff, subtype: e.subtype, tap: pr ? undefined : e.tap || 'toggle', imageOverlay: e.imageOverlay, flipH: e.flipH, flipV: e.flipV, nameFontSize: e.nameFontSize, nameFontFamily: e.nameFontFamily, nameBold: e.nameBold, nameColor: e.nameColor, nameBg: e.nameBg, nameAlign: e.nameAlign });
   if (isPumpDev(e)) work.cover = e.cover || 'None';
   if (pr) Object.assign(work, { units: e.units || '°F', precision: e.precision ?? 1, offset: e.offset, rot: String(elRot(e)), _flip: flipOf(e), backpath: e.backpath, front: e.front, probeTee: e.probeTee, thermowell: e.thermowell, sensor: e.sensor, tcType: e.tcType, r0: e.r0, beta: e.beta });
@@ -3782,7 +3783,7 @@ async function newDeviceDialog(e, hint, what) {
           if (hasProbePic(e)) { const b = { ...e, w: +work.w || e.w, h: +work.h || e.h, x: Number.isFinite(+work.x) ? +work.x : e.x, y: Number.isFinite(+work.y) ? +work.y : e.y }; turnElBox(b, before); work.w = b.w; work.h = b.h; work.x = b.x; work.y = b.y; }
         }
         if (mbv && e.template) { e._orient = work._orient; skyOrientSwitch(e); delete e._orient; applyDeviceTemplate(e, devTemplate(e)); }     // the Orientation picks its Template; the fixed attributes stay the Template's (Rule 5.16)
-        if (dd) { const d = { ...work }; dbFromWork(d); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; }
+        if (dd) { const d = { ...work }; dbFromWork(d, e); if (d.database) e.database = d.database; else delete e.database; if (d.api) e.api = d.api; else delete e.api; if (d.apiName) e.apiName = d.apiName; else delete e.apiName; }
         if (+work.w > 0) e.w = +work.w;
         if (+work.h > 0) e.h = +work.h;
         if (dd && (+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
@@ -5711,7 +5712,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   else if (kind === 'multi') {
     const names = draft.elements.filter(e => ['digitalOut', 'switch', 'digitalIn', 'alarm'].includes(e.type) || isVarEl(e)).map(e => e.name).sort();
     input = h('select', { 'data-k': key, 'data-kind': kind, multiple: true, size: 8, title: 'Double-click a name to open its Properties' }, ...names.map(n => h('option', { value: n, ...((v || []).includes(n) ? { selected: true } : {}) }, n)));
-  } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}) });
+  } else input = h('input', { 'data-k': key, 'data-kind': kind, type: kind === 'num' ? 'number' : 'text', value: v ?? '', ...(kind === 'path' ? { placeholder: 'e.g. valves/valve_open.png' } : {}), ...(rerender === true ? { 'data-rerender': '1' } : {}) });
   const full = kind === 'multi' || kind === 'area';
   return full ? [h('label', { class: 'full' }, label), h('div', { class: 'full' }, input)] : [h('label', {}, label), input];
 }
@@ -6370,7 +6371,7 @@ async function editItem(kind, id) {
       return;
     }
     readFields(work);
-    if (kind === 'el') dbFromWork(work);
+    if (kind === 'el') dbFromWork(work, item);
     if (bf) {           // a Tab_Fitting: its fittings, then its IPs (which come from the fittings)
       fitFromFields(work);
       if (item.onVessel && !work.joined && !isUnit(item)) { delete work.onVessel; delete work.onPort; }
@@ -7281,7 +7282,8 @@ const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now o
   days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
-const API_LABEL = { off: 'Off', get: 'Get only (outside programs read it)', getput: 'Get and Put (outside programs read and change it)' };
+// Fritz, 2026-11-06: plain English first (Read Only, Read & Control); the computer words Get / Get & Put follow in the ( )
+const API_LABEL = { off: 'Off', get: 'Read Only (Get: outside programs like Node-Red can read it.)', getput: 'Read & Control (Get & Put: outside programs like Node-Red can also control it.)' };
 function logSummary(lg) {
   lg = lg || { frequency: 'none' };
   const f = lg.frequency || 'none';
@@ -7309,6 +7311,9 @@ function dbFields(it) {
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
     ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]]] : []),
     ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
+    // API_Name (Fritz, 2026-11-06, Rule 6.18): what a Voice Command says; Unique in the Schema; may be blank, with a warning
+    ['apiName', 'API_Name (what a Voice Command says; must be Unique)', 'text', null, true],
+    ...(cleanApiName(it.apiName) ? [] : [['_apiw', '⚠ API_Name is blank: a Voice Command can\'t be used for this item.', 'note']]),
     ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now; send_db_group Group_Name sends every item In that Group.', 'note'],
     ['', '', 'boxend']];
 }
@@ -7319,10 +7324,20 @@ function dbToWork(work) {
   // an older "Every 1 day at 12 AM" opens as At clock time 12 AM (the Every choices have no clock time now)
   if (d.at && work.db_frequency === 'days' && (d.every === undefined || +d.every === 1)) { work.db_frequency = 'clock'; delete work.db_every; }
   work.api = work.api || 'off';
+  work.apiName = work.apiName || '';
   delete work.database;
 }
 // db_ fields -> work.database (checked); throws a message for a setting that can't work
-function dbFromWork(work) {
+function dbFromWork(work, self) {
+  { // API_Name (Rule 6.18): blank is allowed; a filled one must be Unique in the Schema
+    const n = cleanApiName(work.apiName);
+    if (n) {
+      const bad = apiNameProblem(n); if (bad) throw new Error(bad);
+      const other = apiNameOwner((editing && draft ? draft : S.config).elements, n, self);
+      if (other) throw new Error(`API_Name "${n}" is already used by ${other.name}: an API_Name must be Unique`);
+      work.apiName = n;
+    } else delete work.apiName;
+  }
   const f = work.db_frequency || 'none', d = { frequency: f };
   for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
   delete work.db_frequency;
@@ -7514,11 +7529,11 @@ async function globalDialog(work, orig) {
     // Database and .API (Rule 6.14): the extras behind the ⬢ (Rule 18.9)
     body.append(row('Database and .API', h('span', { class: 'muted' }, `${logSummary(work.database)}; .API ${API_LABEL[work.api || 'off'].replace(/ \(.*\)$/, '')}`),
       attrIcon('Database and .API settings', async () => {
-        const w2 = { name: work.name, database: work.database, api: work.api }; dbToWork(w2);
+        const w2 = { name: work.name, database: work.database, api: work.api, apiName: work.apiName }; dbToWork(w2);
         const r = await dialog(`${work.name || 'gGlobal'}: Database and .API`, it => dbFields(it), w2, false, ['database-and-api']);
         if (r !== 'ok') return;
-        readFields(w2); dbFromWork(w2);
-        work.database = w2.database; work.api = w2.api; render();
+        readFields(w2); dbFromWork(w2, orig);
+        work.database = w2.database; work.api = w2.api; work.apiName = w2.apiName; render();
       })));
   }
   render(); snap0 = snap();

@@ -485,7 +485,7 @@
     <div class="form admin-only">
       <label>Title <input id="setTitle"></label>
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
-      <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> for outside programs to change a Device or Widget whose .API is Get and Put (<code>/api/items</code>). Ten wrong keys from one address shut it out for 15 minutes.<input id="setKey"></label>
+      <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> for outside programs to change a Device or Widget whose .API is Read &amp; Control (<code>/api/items</code>). Ten wrong keys from one address shut it out for 15 minutes.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>
       <label class="check"><input type="checkbox" class="swc" id="setWarnPaths"> Warn me when a process uses a file that is not on the Brain (saved right away)</label>
       <div>Start these processes when the server starts:</div>
@@ -529,7 +529,7 @@
         <label>Topic name<input id="mqBase" placeholder="brewpanel"></label>
       </div>
       <div class="checks"><label><input type="checkbox" class="swc" id="mqHa"> Announce to Home Assistant (needed for Alexa, Google Home and Siri)</label></div>
-      <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop processes. They can change gGlobals whose .API is Get and Put and that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start processes that you tick below. Inputs from hardware are read only, and Shared variables are never shared.</p>
+      <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop processes. They can change gGlobals whose .API is Read &amp; Control and that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start processes that you tick below. Inputs from hardware are read only, and Shared variables are never shared.</p>
       <table class="grid"><thead><tr><th>Device or Widget</th><th>Type</th><th>Voice can hear it</th><th>Can change it</th></tr></thead><tbody id="mqItems"></tbody></table>
       <div>Voice and MQTT may <b>start</b> these processes:</div>
       <div id="mqScripts" class="checks"></div>
