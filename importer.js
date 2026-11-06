@@ -10,9 +10,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isConfigName } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isConfigName, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
+import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -20,6 +21,8 @@ const PORT = Number(process.env.IMPORTER_PORT ?? 8095);
 const WIN = process.platform === 'win32';
 const SETTINGS = settingsFile();
 const MAX_CONFIG = 100 * 1024 * 1024;
+const IMPORT_DIR = importFolder(ROOT);     // C:\Brewing\Import (Fritz, 2026-11-06)
+const MEDIA_DIR = process.env.SKYNET_MEDIA_DIR || path.join(ROOT, 'media');     // the Panel's media folder (pictures go to Images\User)
 
 // Windows' real Documents folder (it may have been moved to OneDrive or another drive)
 function documentsFolder() {
@@ -31,6 +34,7 @@ function documentsFolder() {
 }
 const CANDIDATES = defaultFolders(process.env, documentsFolder());
 const settings = loadSettings(SETTINGS);
+let converted = null;      // the last converted Import Copy: { file, copy, conv, report }
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png' };
 function sendFile(res, file) {
@@ -62,7 +66,7 @@ async function api(req, res, p, q) {
   if (p === '/api/start' && m === 'GET') {
     // Always Documents\BruControl first (Fritz, 2026-11-06); the person points elsewhere when their config is not there
     const home = CANDIDATES[0] ?? '';
-    return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, defaultFolder: home, folder: home, lastFolder: settings.folder ?? '', file: settings.file ?? '' });
+    return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, importFolder: IMPORT_DIR, defaultFolder: home, folder: home, lastFolder: settings.folder ?? '', file: settings.file ?? '' });
   }
   if (p === '/api/configs' && m === 'GET') return json(res, 200, findConfigs(q.get('folder') ?? ''));
   if (p === '/api/folder' && m === 'POST') {
@@ -86,6 +90,47 @@ async function api(req, res, p, q) {
     if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) from the list.' });
     settings.file = file; saveSettings(SETTINGS, settings);
     return json(res, 200, { ok: true, file });
+  }
+  // Make the Import Copy of the config file and convert the copy (Fritz, 2026-11-06). The first pass brings in the items on a
+  // board port and the Tabs; everything else is a Placeholder on its Tab. names: 'skynet' (default) or 'bru' (Rule 15.1).
+  if (p === '/api/convert' && m === 'POST') {
+    const { file, names } = await body(req);
+    if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) first.' });
+    if (fs.statSync(file).size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
+    const copy = makeImportCopy(file, IMPORT_DIR);
+    // Pictures: read from the path BruControl saved, wherever it is, and COPIED to media\Images\User; nothing is moved
+    // (Fritz, 2026-11-06). A picture already in Images\User (an earlier import) is kept, never written over.
+    const picture = (from, to) => {
+      try {
+        if (!fs.statSync(from).isFile()) return false;
+        const dest = path.join(MEDIA_DIR, ...to.split('/'));
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        if (!fs.existsSync(dest)) fs.copyFileSync(from, dest, fs.constants.COPYFILE_EXCL);
+        return true;
+      } catch { return false; }
+    };
+    const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', picture });
+    converted = { file, copy, ...r };
+    return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings });
+  }
+  // Save the Schema into Brewing\Import, for the Panel to open (Schema.json > Open a Schema file)
+  if (p === '/api/save' && m === 'POST') {
+    const { file, name } = await body(req);
+    if (!converted || converted.file !== file) return json(res, 400, { error: 'Go back to Names and click Next first, so the config file is converted.' });
+    const out = buildSchemaFile(converted.conv, { name: name || path.basename(file), source: path.basename(file), draft: true, version: readVersion(ROOT).version || '' });
+    out.importCopy = path.basename(converted.copy);
+    out.importReport = { stage: 'new import, step 1: Interfaces, Tabs, items on a board port and Placeholders', names: converted.report.names, renames: converted.report.renames };
+    fs.mkdirSync(IMPORT_DIR, { recursive: true });
+    const fname = importFileName(out.schema.name);
+    fs.writeFileSync(path.join(IMPORT_DIR, fname), JSON.stringify(out, null, 2));
+    return json(res, 200, { folder: IMPORT_DIR, file: fname, name: out.schema.name, tabs: out.schema.workspaces.length, items: out.schema.elements.length,
+      interfaces: out.schema.devices.length, placeholders: out.schema.graphics.length, warnings: out.warnings.length });
+  }
+  if (p === '/api/open-import' && m === 'POST') {
+    if (!WIN) return json(res, 200, { ok: false });
+    fs.mkdirSync(IMPORT_DIR, { recursive: true });
+    spawn('explorer.exe', [IMPORT_DIR], { detached: true, stdio: 'ignore' }).on('error', () => {}).unref();
+    return json(res, 200, { ok: true });
   }
   if (p === '/api/close' && m === 'POST') {
     json(res, 200, { ok: true });

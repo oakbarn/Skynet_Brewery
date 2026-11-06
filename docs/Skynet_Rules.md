@@ -1487,7 +1487,32 @@ same code, Skynet Templates, pictures, sounds, Rules and Importing Norms, so a v
 the Panel. A Template or Rule is written for both the Panel and the Importer, and the other way round (Fritz: "a Template or
 Rules must be written to both the Skynet Panel or the Import BruControl Program and vice versus"). It is a second shortcut,
 **Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
-boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7).
+boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7), as a file the Panel opens.
+- **It is a choice when installing** (Fritz, 2026-11-06). The Windows Setup asks "Will you import a BruControl configuration
+  on this computer?" Yes adds the Importer's shortcuts (Desktop, Start menu and the Import folder); No leaves them out (Setup can be run again to add it). On an update the
+  last answer is the default.
+- **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
+  the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
+  their files there too. An uninstall never deletes it.
+- **The import is built step by step** (Fritz, 2026-11-06: "start a new import function and we will build it"). It is a new
+  import function; the older import code is described in docs/BruControl_Old_Import_Method.md for reference only. So far:
+  - **Names** (page 4): Skynet names (Rule 3.1) by default, or keep the BruControl names after two warnings (Rule 15.1).
+  - **Import Copy** (Fritz: "Make an Import Copy, then convert the Import copy"): the config file is copied into
+    `Brewing\Import\BruControl` and only the copy is converted.
+  - **Boards and Tabs** (page 5): the Interfaces, the Tabs (no Tab backgrounds for now), and **only the items that have an
+    Interface and a Port**. Everything else on a Tab is a **Placeholder** (a grey box with the BruControl name) at the same
+    place and size, until a later step brings it in; a hidden item's Placeholder stays hidden.
+  - **Pictures** (Fritz, 2026-11-06: "Do not move any files and just use the Paths that exist"): every picture an item names
+    is read from the path BruControl saved (any folder) and copied to the Panel's `media\Images\User` folder; nothing is
+    moved and a picture already there is never written over. A picture not on the computer is listed in the report.
+- **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
+  folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
+  Processes, which travel beside it, as Processes are shared by every Schema). It is marked a **first draft** until the
+  import is finished.
+- **Open a Schema file** (Panel, Schema.json page, admins only): lists the files in the Import folder, or takes a `.json` file
+  from the computer in use. It adds the Schema under a name of its own (an existing Schema is never overwritten), adds its
+  Processes (a Process with the same name and different text is kept as a backup first) and can load it right away. It also
+  opens a Schema saved with the Panel's own **Save as .json file**.
 - **It starts with Welcome pages** (Fritz, 2026-11-06: "Welcome is Page 1, Similarities and differences are Page 2"; more pages
   may come): **Page 1** is just the welcome; **Page 2** explains what stays the same and what is different between BruControl
   and Skynet, and how the Importer guides the brewer through the import.
@@ -2205,3 +2230,6 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 6.14: the Database Groups switches are replaced by a **👥 Groups…** button and a Group list (➕ Add new Group… at the top); a click on a Group shows the Group dialog with all its members, a double-click adds the Device or Widget to the Group and shows its members (Fritz, dialog change commanded under Rule 18). Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Added Rule 1.24 (make a gGlobal in a Process: new gGlobalValue gV_X = 10, new gV gV_X, new value gV_X all the same; declare = new; a start that does not fit is an error; = is the first value only). Help 145 (next free Help number 146). (thread "Declare gGlobals inside a Process")
 - 2026-11-06: Added Rule 5.35 (Valve Tees and Supply Manifolds: the Valve Tee, Double and Triple Supply Manifold, TC 1.5 Long Tees with a valve Device built into each branch; IPs only on the open ends of the tees and the far end of each valve; each valve Manual or Motorized on its own in the fitting's Properties; added from Elbows, Tees … and the Valves list). Help 146; next free Help number 147. (thread "Add valve Tees and supply manifolds")
+- 2026-11-06: Rule 15.4: the Importer is a choice in the Windows Setup ("Will you import a BruControl configuration on this computer?"); Setup always makes the Brewing folder's Import subfolder (C:\Brewing\Import), also for BeerSmith or other programs; the Importer saves its Schema file there (Save the Schema) and the Panel opens it (Schema.json > Open a Schema file). Help 143 and Help 44 updated. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")
