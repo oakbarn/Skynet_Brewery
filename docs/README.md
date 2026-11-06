@@ -16,6 +16,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Existing Alarms](ExistingAlarms.md) | Every old-style Alarm in the sample Schemas (Name, Schema, Tab), to change to the new Basic format one by one. |
 | [Importing Norms](Importing_Norms.md) | Every change an import makes to bring a BruControl Schema (or anything old) up to the Skynet way. |
 | [BruControl Importer Plan](BruControl_Importer_Plan.md) | The plan for the Windows BruControl Importer: one program with the Panel, what we need from a BruControl brewer, proposed Rule 15.4. Waiting for Fritz's OK. |
+| [BruControl Old Import Method](BruControl_Old_Import_Method.md) | How the older import code turned a BruControl config file into Skynet items, kept for reference while the new import function is built step by step (Fritz, 2026-11-06). |
 | [Existing gGlobals](ExistingGlobals.md) | Every gGlobal in the default and sample Schemas (Name, Schema, Tab), to sort into true variables and Text or Graphic Widgets. |
 | [Remote access](REMOTE_ACCESS.md) | Reaching the panel from outside the house. |
 | [MQTT and voice](MQTT_AND_VOICE.md) | MQTT and voice assistant hookups. |

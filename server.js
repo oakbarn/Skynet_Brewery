@@ -25,6 +25,7 @@ import { convertBruControl, applyBruControl } from './lib/brucontrol.js';
 import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas } from './lib/schemas.js';
+import { importFolder, listSchemaFiles, readSchemaFile } from './lib/importer.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
 import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
@@ -326,6 +327,7 @@ function needRole(p, m) {
   if (p === '/ui/mqtt') return m === 'GET' ? 'viewer' : 'admin';     // MQTT and voice settings: everyone sees the list, admins change it
   if (p.startsWith('/ui/config')) return 'admin';      // Config Editor: the whole config, API key included
   if (/^\/ui\/schemas\/[a-z0-9-]+\/export$/.test(p)) return 'admin';   // Schema.json: Save as .json file
+  if (p.startsWith('/ui/schemas/import')) return 'admin';   // Schema.json: Open a Schema file (Brewing\\Import)
   if (p.startsWith('/ui/filemove/')) return 'admin';   // File Move: copies files onto the Brain
   if (p.startsWith('/ui/skynetpics/')) return 'admin';
   if (p.startsWith('/ui/brainmove')) return 'admin';   // Move Brain: every file, logins included, and the USB ports   // Get Skynet pictures: copies pictures from GitHub onto the Brain
@@ -728,6 +730,33 @@ async function route(req, res) {
   // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }
   if (p === '/ui/schema/layout' && m === 'POST') { const b = await jsonBody(req); return ok(res, schemas.layoutAction(b.tab, b.action)); }
+  // Open a Schema file (Fritz, 2026-11-06): the files the BruControl Importer saved in the Brewing folder's Import subfolder,
+  // or a .json file sent from this browser. It becomes a new Schema; its Processes are written (an old one that differs is backed up).
+  if (p === '/ui/schemas/importfolder' && m === 'GET') return ok(res, listSchemaFiles(importFolder(ROOT)));
+  if (p === '/ui/schemas/import' && m === 'POST') {
+    const pick = url.searchParams.get('file');
+    let raw;
+    if (pick) {
+      if (!/^[^\\/:*?"<>|]+\.json$/i.test(pick)) return fail(res, 400, 'Pick a .json file from the Import folder');
+      try { raw = fs.readFileSync(path.join(importFolder(ROOT), pick), 'utf8'); } catch { return fail(res, 404, 'That file is not in the Import folder any more'); }
+    } else raw = await readBody(req, 64 * 1024 * 1024);
+    let got;
+    try { got = readSchemaFile(dropKeys(JSON.parse(raw))); } catch (e) { return fail(res, 400, e instanceof SyntaxError ? 'That file is not a Skynet Schema file (it is not JSON).' : e.message); }
+    const made = schemas.addFromFile(got.schema, { from: pick || got.source || 'a .json file' });
+    const procs = { written: [], backedUp: [], same: [], failed: [] };
+    for (const { name, text } of got.processes) {
+      try {
+        if (engine.exists(name)) {
+          if (engine.read(name) === text) { procs.same.push(name); continue; }
+          engine.backup(name); procs.backedUp.push(name);
+        }
+        engine.write(name, text); procs.written.push(name);
+      } catch (e) { procs.failed.push(`${name} (${e.message})`); }
+    }
+    if (procs.written.length) engine.renumber();
+    if (url.searchParams.get('load') === '1') schemas.load(made.id);
+    return ok(res, { ...schemaView(), made, processes: procs, draft: got.draft, warnings: got.warnings.slice(0, 200), warningCount: got.warnings.length });
+  }
   let sc = /^\/ui\/schemas\/([a-z0-9-]+)(?:\/(load|backup|backups|restore|version|export|clone))?$/.exec(p);
   if (sc) {
     if (!schemas.has(sc[1])) return fail(res, 404, 'No such Schema');

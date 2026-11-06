@@ -19,10 +19,10 @@
   <li data-step="1">Welcome</li>
   <li data-step="2">BruControl and Skynet</li>
   <li data-step="3">Your BruControl config</li>
-  <li data-step="4" class="later">Boards</li>
-  <li data-step="5" class="later">Tabs and items</li>
+  <li data-step="4">Names</li>
+  <li data-step="5">Boards and Tabs</li>
   <li data-step="6" class="later">Processes</li>
-  <li data-step="7" class="later">Save the Schema</li>
+  <li data-step="7">Save the Schema</li>
 </ol>
 
 <main>
@@ -277,16 +277,51 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
   </section>
 
   <!-- Step 4: not built yet -->
+  <!-- Step 4: Names (Rule 15.1): the Skynet names, or keep the BruControl names after two warnings -->
   <section class="step hidden" id="step4">
-    <div class="buttons top"><button id="back4a">◀ Back</button></div>
-    <h1>Boards</h1>
-    <p class="lead">You picked <b id="chosen"></b>.</p>
-    <div class="card"><p>The next part of the Importer (reading the boards, Tabs, pictures and scripts) is being built now.
-      Your pick is remembered, so the next version starts with this file.</p></div>
-    <div class="buttons"><button id="back4">◀ Back</button></div>
+    <div class="buttons top"><button id="back4a">◀ Back</button><span class="spacer"></span><button class="primary" id="next4a">Next ▶</button></div>
+    <h1>Names</h1>
+    <p class="lead">You picked <b id="chosen"></b>. How should your items be named in Skynet?</p>
+    <div class="card">
+      <label class="choice"><input type="radio" name="names" value="skynet" checked> <b>Skynet names (recommended)</b></label>
+      <p class="small">Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for example
+        <code>MB_28_do_ManualAlarm_B1</code> becomes <code>BR_28_DO_Manually_BB</code>. Your BruControl DisplayName becomes the
+        Label, the name shown on the Tab.</p>
+      <label class="choice"><input type="radio" name="names" value="bru"> Keep my BruControl names</label>
+      <p class="small">Allowed, but not the Skynet way. Two warnings come first. Spaces and characters a name may not have still change.</p>
+    </div>
+    <div class="buttons"><button id="back4">◀ Back</button><span class="spacer"></span><button class="primary" id="next4">Next ▶</button></div>
+  </section>
+
+  <!-- Step 5: the Import Copy is made and converted; what comes in -->
+  <section class="step hidden" id="step5">
+    <div class="buttons top"><button id="back5a">◀ Back</button><span class="spacer"></span><button class="primary" id="next5a">Next ▶</button></div>
+    <h1>Boards and Tabs</h1>
+    <p class="lead">A copy of your config file was made (the <b>Import Copy</b>) and only the copy is converted. BruControl's own file is not changed.</p>
+    <div id="convBody"><p class="muted">Converting…</p></div>
+    <div class="buttons"><button id="back5">◀ Back</button><span class="spacer"></span><button class="primary" id="next5">Next ▶</button></div>
+  </section>
+
+  <!-- Step 7: save the Schema into Brewing\Import for the Panel -->
+  <section class="step hidden" id="step7">
+    <div class="buttons top"><button id="back7a">◀ Back</button></div>
+    <h1>Save the Schema</h1>
+    <p class="lead">One config file makes one Schema. It is saved as one file in the <b>Import</b> folder of your Brewing folder, where
+      the Skynet Panel can open it (Schema.json &gt; <b>Open a Schema file</b>).</p>
+    <div class="card">
+      <div class="folderRow"><label for="schemaName">Schema name</label><input id="schemaName" spellcheck="false" maxlength="80"></div>
+      <p class="muted small">Saved in <code id="importDir"></code> as <i>name</i>_<i>date</i>T<i>time</i>.json. BruControl's own files are not changed.</p>
+      <p class="note" id="draftNote">This is the <b>first pass</b>: your Interfaces, your Tabs, and the items on a board port. Everything else is
+        a Placeholder on its Tab, where BruControl had it, until the next steps bring it in. Processes are not in it yet.</p>
+      <div class="buttons"><span class="spacer"></span><button class="primary" id="saveBtn">💾 Save the Schema</button></div>
+      <div id="saveResult" class="hidden"></div>
+    </div>
+    <div class="buttons"><button id="back7">◀ Back</button></div>
   </section>
 </main>
 
+<dialog id="ask"><h2 id="askTitle"></h2><div id="askText"></div>
+  <div class="buttons"><button id="askYes"></button><span class="spacer"></span><button class="primary" id="askNo" autofocus></button></div></dialog>
 <div id="toast" class="hidden"></div>
 <script type="module" src="/importer/importer.js"></script>
 </body>

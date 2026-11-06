@@ -50,8 +50,59 @@ BruControl may keep a **default config** there too; it is listed last and marked
   Processes (scripts) and gGlobals it has.
 - **Double-click** a file (or click it and **Next ▶**) to pick it and go on. Back and Next are at the top and the bottom.
 
+## Names
+
+Pick how your items are named in Skynet:
+
+- **Skynet names (recommended).** Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for
+  example `MB_28_do_ManualAlarm_B1` becomes `BR_28_DO_Manually_BB`.
+- **Keep my BruControl names.** Allowed, but two warnings come first, like Start Fresh: **"Do you really want to keep your
+  BruControl names?"** and then **"Last chance"**. **No** (use the Skynet names) is the default both times. Spaces and
+  characters a name may not have still change.
+
+Your BruControl **DisplayName** becomes the **Label**, the name shown on the Tab. A blank DisplayName: the Label is the Name,
+and it is not shown on the Tab.
+
+## Boards and Tabs
+
+**Next ▶** makes the **Import Copy**: your config file is copied into `C:\Brewing\Import\BruControl` (named
+*name*_*date*T*time*.brucfg) and only the copy is converted, so BruControl's own file is never changed. Then you see what comes in:
+
+- your **Interfaces** (BruControl boards), each with its Interface ID;
+- your **Tabs** (BruControl workspaces), each with its Tab ID. Tab backgrounds are left out for now;
+- the **items on a board port** (BruControl elements that have an Interface and a Port). For now only these come in;
+- a **Placeholder** for every other item on a Tab (Timers, Alarms, switches, Globals, script pictures ...). It is a grey box
+  with ⬚ and the BruControl name, at the same place and size as in BruControl, so you can see what is still to come. A hidden
+  item's Placeholder stays hidden.
+
+- your **pictures**: every picture an item uses is read from the folder BruControl saved for it (any folder: BruControl had a
+  Browse box, so they may be anywhere) and **copied** into the Panel's `media\Images\User` folder. Nothing is moved: your
+  pictures stay where they are. A picture that is not on this computer is listed with the name it gets in `Images\User`: copy
+  it there under that name (or put it back where BruControl had it and convert again) and it appears. A picture already in
+  `Images\User` is never written over.
+
+The list of new names and the notes for the report are at the bottom.
+
+## Save the Schema
+
+**Save the Schema** saves what the Importer made as one Skynet Schema file (`.json`) in the **Import folder**:
+`C:\Brewing\Import` when the panel is in `C:\Brewing\BrewPanel`. Type the Schema's name (spaces become `_`) and click
+**💾 Save the Schema**. The file is named `<Name>_YYYY-MM-DDTHHMMSS.json`, so an older one is never written over.
+**📂 Open the Import folder** shows it in File Explorer.
+
+The file holds the Schema (Interfaces, Tabs, the items on a board port and the Placeholders) and the import report. It is
+marked a **first draft**: the import is being built one step at a time, and Processes are not in it yet.
+
+Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema file** (Help 44).
+
+## Installing the Importer
+
+The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Yes adds the **Skynet BruControl
+Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. Setup
+always makes the Import folder, as BeerSmith or other programs may save their files there too.
+
 ## Next steps (being built)
 
-Boards, then Tabs and items (for each BruControl item the Importer asks a few plain questions, so it becomes the right Skynet
-Device, Widget or Template), then Processes, then **Save the Schema** and send it to your Brain, with a report of every change
-(Rule 15.1).
+The import is built one step at a time with Fritz: next come the other BruControl items (each Placeholder becomes the right
+Skynet Device, Widget or Template, with a few plain questions), then Processes, with a report of every change (Rule 15.1).
+How the older import code did each part is in `docs/BruControl_Old_Import_Method.md`.
