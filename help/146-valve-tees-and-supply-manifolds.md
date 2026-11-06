@@ -20,29 +20,38 @@ Pipes and hoses join there. Liquid goes any way through the tees; a **closed val
 ## Add one
 
 In **Edit layout**, open **Elbows, Tees …** and pick one from **Valve Tees and Supply Manifolds**, or use
-**Select Device Type > Valves**. Each fitting has two rows:
+**Select Device Type > Valves**. Each fitting has two rows: **..., Manual valves** (every valve starts Manual) and
+**..., Motorized valves** (every valve starts Motorized).
 
-- **..., Manual valves**: every valve starts Manual.
-- **..., Motorized valves**: every valve starts Motorized.
+The **Add box** works like a Pump's (Skynet Rule 18.29). Hover the name of any field for its help.
 
-It goes on the Build Tab (like every new item) and its Properties open. Its Name is **ValveTee_1**, **Manifold2_1** or
-**Manifold3_1**, and its **Label** starts as **valve_tee_1**, **manifold_2_1** or **manifold_3_1** (you can change it, but it can't be
-blank).
+1. **Label**: filled in for you (**valve_tee_1**, **manifold_2_1**, **manifold_3_1**). You can change it, but it can't be blank.
+2. **Interface (board)**: the board its Motorized valves are wired to (one board for all of them).
+3. **Valve 1**, **Valve 2**, **Valve 3**: **Manual** or **Motorized**. A Motorized valve picks its Port in **Available Ports** on the
+   same line. Two valves can't share a Port.
+4. **Tab**: the Tab it goes on.
+
+Then the **Name** (ValveTee_1, Manifold2_1 or Manifold3_1 to start), the **Graphic**, its **Path**, the **Orientation**, X, Y, Width,
+Height and the **Device Type**. Press **➕ Add Device**: it goes on that Tab and its Properties open. Enter goes from field to field
+and last to ➕ Add Device.
+
+## The valve numbers
+
+In Edit layout, and on the Graphic in the Add box and the Properties, each valve shows a yellow number, **1**, **2**, **3**. It is the
+same valve as **Valve 1**, **Valve 2**, **Valve 3** in the dialog, and as **V1**, **V2**, **V3** in its Label. The numbers are not
+shown when Edit layout is off.
 
 ## Manual or Motorized, one valve at a time
 
 Each valve is a **valve Device built into the fitting** (a Skynet_Integrated_Device, like the RIMS tube's heating element). It can't
 be taken out or deleted by itself; deleting the fitting deletes its valves.
 
-In the fitting's **Properties**, under **Valves**, each valve has its own dropdown, the same choice as a regular valve's **Valve type**:
+In the fitting's **Properties** (the same fields as the Add box) change any valve from **Manual** to **Motorized** or back and press
+Save. A **Manual** valve is turned by hand: when a Process asks for it to be opened or closed, a pop-up asks someone to do it and the
+Process waits for **Done**. A **Motorized** valve is switched by its Port.
 
-- **Manual**: turned by hand. It has no Port. When a Process asks for it to be opened or closed, a pop-up asks someone to do it and the
-  Process waits for **Done**.
-- **Motorized**: switched by a Port. Pick the **Interface** (one board for all the Motorized valves of this fitting) and then each
-  valve's **Port**. Two valves can't share a Port.
-
-Change any valve from Manual to Motorized (or back) at any time and press Save. Its picture changes, and it stays on the same spot, so
-the pipes on it stay joined.
+Once a Motorized valve is saved, its **Port** is greyed out, and so is the **Interface** (it is wiring). To wire a valve to another
+Port, make it **Manual**, Save, then make it **Motorized** again and pick the Port.
 
 ## Using it
 
@@ -54,7 +63,10 @@ the pipes on it stay joined.
 
 ## Turning it and putting it in a pipe
 
-Flip Horizontal, Flip Vertical and Rotate (in 45 degree steps) are in its Properties and on the Edit layout bar's turn buttons; the
-valves and IPs turn with it. Dropped on a straight pipe in Edit layout, its run goes along the pipe and the pipe is cut in two, one
-piece on each open end, the same as a tee. It keeps its own size (it is drawn to the Valve Standard size), so it has no Autosize to
-pipe.
+It has no Flip. Its **Orientation** has three choices: **Horizontal** (the valves hang down), **Left Vertical 90** (the valves point
+left) and **Right Vertical 90** (the valves point right). The Edit layout bar's turn buttons step through the same three. The valves,
+their numbers and the IPs turn with it.
+
+Each valve is drawn with the same TC 1.5 ferrules as the tees: the top one is clamped to the tee's branch, and the bottom one is the
+valve's IP. Dropped on a straight pipe in Edit layout, its run goes along the pipe and the pipe is cut in two, one piece on each open
+end, the same as a tee. It keeps its own size, so it has no Autosize to pipe.
