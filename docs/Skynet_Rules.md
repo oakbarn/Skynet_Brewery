@@ -1513,10 +1513,13 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   - **Boards and Tabs** (page 5): the Interfaces, the Tabs (no Tab backgrounds for now), and **only the items that have an
     Interface and a Port**. Everything else on a Tab is a **Placeholder** (a grey box with the BruControl name) at the same
     place and size, until a later step brings it in; a hidden item's Placeholder stays hidden.
-  - **Pictures** (Fritz, 2026-11-06: "Do not move any files and just use the Paths that exist"): every picture an item names
-    is read from the path BruControl saved (any folder) and copied to the Panel's `media\Images\User` folder; nothing is
-    moved and a picture already there is never written over. The item keeps its picture path even when the picture is not on
-    the computer (Fritz: "Import the path regardless"); it is listed in the report. The brewer never has to make a zip.
+  - **Pictures and Sounds** (Fritz, 2026-11-06: "The Picture Paths and Sounds are imported. The files stay where they were so
+    BruControl continues to work normally. You do have the option of copying those files to a new folder that consolidates
+    all the picture files and sound files so if you move to a Pi or other computer, those files will be available. They are
+    never deleted in their original spot, just copies made."). By default each item keeps the path BruControl saved (any
+    folder), even when the file is not on the computer (it is listed in the report). The option copies every picture to
+    `media\Images\User` and every sound to `media\sounds\User`, and the items use the copies; a copy already there is never
+    written over. The brewer never has to make a zip.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
   Processes, which travel beside it, as Processes are shared by every Schema). It is marked a **first draft** until the
@@ -2247,3 +2250,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the Importer's page 3 has Browse for the config file (Windows' Open box in Documents\BruControl, .brucfg only); picture paths are imported even when the picture is not on the computer, and the brewer never makes a zip. Help 143 updated. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.4 changed (Fritz): the Importer imports picture and sound paths and leaves the files where they were, so BruControl keeps working; copying them into media\Images\User and media\sounds\User (for a Pi or another computer) is an option, and the originals are never deleted. Importer page 2 and page 4, Help 143 updated. (thread "Plan the BruControl config importer")
