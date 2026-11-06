@@ -1,0 +1,62 @@
+// The NEW BruControl import function (lib/bruimport.js, Rule 15.4), step 1: Interfaces, Tabs, items on a board port,
+// Placeholders, the names choice (Rule 15.1), and the Import Copy
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { importBruControl, PLACEHOLDER_MARK } from '../lib/bruimport.js';
+import { makeImportCopy } from '../lib/importer.js';
+
+const xml = `\uFEFF<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+<Devices><Device><Name>Main Brewery</Name><Interface>Serial</Interface><SerialPort>5</SerialPort><TypeName>Mega 2560</TypeName><Enabled>true</Enabled>
+ <Ports><DevicePort i:type="DigitalOutPort"><ID>p1</ID><Number>28</Number><Enabled>true</Enabled></DevicePort>
+  <DevicePort i:type="AnalogInPort"><ID>p2</ID><Number>61</Number></DevicePort>
+  <DevicePort i:type="CounterInPort"><ID>p3</ID><Number>2</Number></DevicePort></Ports></Device></Devices>
+<Workspaces><Workspace><Name>Brew House</Name><BackgroundImagePath>C:\\BruControl\\Media\\back.png</BackgroundImagePath><Elements>
+ <Element i:type="DeviceElement"><ID>e1</ID><Name>Pump Red</Name><DisplayName>Red Pump</DisplayName><PortID>p1</PortID><X>10</X><Y>20</Y><Width>100</Width><Height>60</Height></Element>
+ <Element i:type="DeviceElement"><ID>e2</ID><Name>MB_61_Wort</Name><DisplayName i:nil="true"/><PortID>p2</PortID><X>200</X><Y>20</Y><Width>100</Width><Height>60</Height></Element>
+ <Element i:type="DeviceElement"><ID>e3</ID><Name>Flow</Name><PortID>p3</PortID><X>0</X><Y>900</Y><Width>50</Width><Height>20</Height></Element>
+ <Element i:type="TimerElement"><ID>e4</ID><Name>tm_Mash</Name><X>400</X><Y>100</Y><Width>120</Width><Height>50</Height></Element>
+ <Element i:type="GlobalVariableElement"><ID>e5</ID><Name>gblV_x</Name><Appearance><Visibility>Hidden</Visibility></Appearance><X>5</X><Y>5</Y><Width>10</Width><Height>10</Height></Element>
+</Elements></Workspace></Workspaces>
+<Processes><Process><Name>scrMash</Name><Script>sleep 1</Script></Process></Processes></Configuration>`;
+
+const r = importBruControl(xml);
+const c = r.conv;
+assert.equal(c.devices.length, 1); assert.equal(c.devices[0].port, 'COM5'); assert.equal(c.devices[0].board, 'mega'); assert.equal(c.devices[0].id, 'MB');
+assert.deepEqual(c.workspaces.map(w => [w.name, w.id]), [['Brew House', 'BH']]);
+assert.equal(c.workspaces[0].background, undefined, 'no Tab backgrounds for now');
+// only the items with an Interface and a Port that this step knows
+assert.deepEqual(c.elements.map(e => e.bru.name), ['Pump Red', 'MB_61_Wort']);
+const [pump, wort] = c.elements;
+assert.equal(pump.type, 'digitalOut'); assert.equal(pump.device, 'Main Brewery'); assert.equal(pump.channel, 28);
+assert.equal(pump.label, 'Red Pump'); assert.equal(pump.hideName, undefined);
+assert.equal(pump.name, 'MB_28_DO_Red_Pump_BH', 'Skynet name, Rule 3.1');
+assert.equal(wort.label, 'MB_61_Wort', 'a blank DisplayName: Label = Name'); assert.equal(wort.hideName, true, '... not shown on the Tab');
+assert.equal(wort.name, 'MB_61_AI_MB~61~Wort_BH'.replace(/~/g, '_'));
+assert.equal(c.scripts.length, 0, 'Processes come later');
+// a Placeholder for everything else, where BruControl had it; a hidden one stays hidden
+assert.equal(c.graphics.length, 3);
+const tm = c.graphics.find(g => g.placeholder.bruName === 'tm_Mash');
+assert.deepEqual([tm.kind, tm.workspace, tm.x, tm.y, tm.w, tm.h], ['text', 'Brew House', 400, 100, 120, 50]);
+assert.ok(tm.text.startsWith(PLACEHOLDER_MARK) && tm.text.includes('tm_Mash'));
+assert.equal(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').visible, false);
+assert.equal(c.graphics.find(g => g.placeholder.bruName === 'Flow').placeholder.why, 'CounterInPort pins come later');
+assert.equal(c.workspaces[0].height, 940, 'the Tab fits its items');
+assert.equal(r.report.items, 2); assert.equal(r.report.placeholders, 3);
+assert.deepEqual(r.report.renames.map(x => x.from), ['Pump Red', 'MB_61_Wort']);
+
+// keep the BruControl names (Rule 15.1): spaces and characters a name may not have still change
+const k = importBruControl(xml, { names: 'bru' });
+assert.deepEqual(k.conv.elements.map(e => e.name), ['Pump_Red', 'MB_61_Wort']);
+assert.ok(k.conv.warnings.some(w => /kept your BruControl names/.test(w)));
+assert.throws(() => importBruControl('<x/>'), /not a BruControl config file/);
+
+// the Import Copy: BruControl's file is copied into Import\BruControl and only the copy is read
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'bruimp-'));
+const src = path.join(tmp, 'My Brewery.brucfg'); fs.writeFileSync(src, xml);
+const copy = makeImportCopy(src, path.join(tmp, 'Import'), { ms: new Date(2026, 10, 6, 18, 5, 9).getTime() });
+assert.equal(copy, path.join(tmp, 'Import', 'BruControl', 'My_Brewery_2026-11-06T180509.brucfg'));
+assert.equal(fs.readFileSync(copy, 'utf8'), xml);
+fs.rmSync(tmp, { recursive: true, force: true });
+console.log('bruimport tests passed');

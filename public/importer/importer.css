@@ -46,3 +46,11 @@ table.words th { background: var(--panel2); }
 .cards.two { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .cards.two > div { background: var(--panel2); border-radius: 8px; padding: 8px 12px; }
 .example { color: var(--muted); }
+.choice { display: block; margin: 8px 0 2px; font-size: 15px; cursor: pointer; }
+.choice + p { margin: 0 0 8px 26px; }
+#convBody table { border-collapse: collapse; margin: 6px 0 10px; }
+#convBody th, #convBody td { border: 1px solid var(--line); padding: 3px 8px; text-align: left; }
+#convBody td.n { text-align: right; }
+#ask { background: var(--panel); color: inherit; border: 1px solid var(--warn); border-radius: 10px; max-width: 620px; }
+#ask::backdrop { background: rgba(0, 0, 0, 0.5); }
+#ask h2 { margin-top: 0; }
