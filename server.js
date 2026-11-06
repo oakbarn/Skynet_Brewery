@@ -55,7 +55,7 @@ import { safeNamesOnDisk, renameQuoted } from './lib/namechars.js';
 import { kindChangeError } from './public/gkinds.js';
 import { useKeySecret, keyReplacer, dropKeys, claimKeys, keyRenames, followClones, stripKeysText, keepKeysByName } from './lib/keys.js';
 import { readVersion, VersionCheck } from './lib/version.js';
-import { moveHoseEnd } from './lib/qdhose.js';
+import { moveHoseEnd, isQdHose, connectChoices } from './lib/qdhose.js';
 import { applyPendingMove, makeMoveFile, unlock, saveChecked, stageMove, checkedFile, lastMove, usbInterfaces, remapConfig, remapSchemaFiles, suggestPorts, MAX_MOVE, MIN_MOVE_PASSWORD } from './lib/brainmove.js';
 import { Auth, cleanPasswordRules, describePasswordRules, PW_CHARSETS, PW_LIMITS, codeFingerprint, COOKIE, ROLES, ROLE_INFO, roleAtLeast, isPrivateAddress, parseCookies } from './lib/auth.js';
 
@@ -218,6 +218,7 @@ engine.on('print', e => broadcast('print', e));
 engine.on('show', ws => broadcast('show', ws));
 engine.on('alert', a => broadcast('alert', a));
 engine.on('flow', f => broadcast('flow', f));           // flow colors a Process set (Rule 5.21)
+engine.on('config', () => { store.writeConfig(); broadcast('config', {}); });     // a Process moved a Quick Disconnect hose (Rule 5.34)
 engine.on('valves', v => broadcast('valves', v));          // Manual valves waiting for someone to turn them by hand            // a Process that kept failing and was not restarted again
 store.on('config', () => broadcast('config', {}));
 store.on('devices', () => broadcast('devices', hw.list()));
@@ -307,7 +308,10 @@ function processWords() {
   return {
     elements: [...[...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
       // pipes and hoses have one Process attribute, .flow_Color; tab.flow_Color is the Tab on the screen (Rule 5.21)
-      ...(store.config?.graphics ?? []).filter(g => (g.kind === 'pipe' || (g.kind === 'ip' && (!g.fitting || g.fitting === 'point'))) && g.name).map(g => ({ name: g.name, type: g.kind === 'ip' ? 'ip' : g.hose ? 'hose' : 'pipe', main: 'flow_Color', attrs: ['flow_Color'], bools: [] })),
+      ...(store.config?.graphics ?? []).filter(g => (g.kind === 'pipe' || (g.kind === 'ip' && (!g.fitting || g.fitting === 'point'))) && g.name).map(g => isQdHose(g)
+        // a Quick Disconnect hose also has .connect (Rule 5.34): after "Hose_1.connect =" the list shows where it can go
+        ? { name: g.name, type: 'QD hose', attrs: ['connect', 'flow_Color'], bools: [], connect: connectChoices(store.config, g) }
+        : { name: g.name, type: g.kind === 'ip' ? 'ip' : g.hose ? 'hose' : 'pipe', main: 'flow_Color', attrs: ['flow_Color'], bools: [] }),
       { name: 'tab', type: 'tab', main: 'flow_Color', attrs: ['flow_Color'], bools: [] }],
     processes: engine.names(),
     tabs: (store.config?.workspaces ?? []).map(w => w.name).filter(Boolean),

@@ -647,6 +647,8 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 #ws .gfx.ip .mvOver { position: absolute; inset: -15%; background: center / contain no-repeat; pointer-events: none; }
 #ws .gfx.ip.mvAsk { animation: mvBlink 1s ease-in-out infinite; border-radius: 50%; }
 @keyframes mvBlink { 50% { box-shadow: 0 0 0 6px var(--warn); } }
+#pipes g.qdAsk .pipe.hose { animation: qdBlink 1s ease-in-out infinite; }     /* a Process waits for this Quick Disconnect hose (Rule 5.34) */
+@keyframes qdBlink { 50% { stroke: var(--warn); } }
 .mvAskBar { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1001; max-width: min(720px, calc(100vw - 32px));
   background: var(--panel); color: var(--text); border: 2px solid var(--warn); border-radius: 10px; padding: 8px 12px; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
 .mvAskRow + .mvAskRow { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
