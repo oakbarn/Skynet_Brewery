@@ -1133,7 +1133,7 @@ const autoPrefix = g => g.kind === 'pipe' ? (g.hose ? 'Hose' : 'Pipe') : g.kind 
 function giveName(g, all) {
   // a Text Widget keeps the name it has: w_Text_N is only its first name, it can be changed (Fritz, 2026-10-29)
   if (!g.name && widgetTypeId(g, isTapMv(g))) { g.name = graphicWidgetName(g); autoNamed.add(g); return; }      // a new one: wgt_Type_Label_TabID (Rule 3.14)
-  const p = autoPrefix(g); if (!p || (g.name && (g.kind === 'text' || g.name.startsWith(p + '_')))) return;
+  const p = autoPrefix(g); if (!p || (g.name && (g.kind === 'text' || g.name.startsWith(p + '_') || (g.name.startsWith('wgt_') && widgetTypeId(g, isTapMv(g)))))) return;
   // a Text's name is used by Processes (w_Text_1.visible = false), so it can't be a Device's name either
   const used = new Set([...all.map(x => x.name), ...(g.kind === 'text' ? (draft || S.config).elements.map(e => e.name) : [])]); let n = 1; while (used.has(p + '_' + n)) n++;
   g.name = p + '_' + n;
@@ -4345,7 +4345,7 @@ function addOverride() {
   const tab = toBuild(); if (!tab) return;
   if (ovrHas(tab.name)) return toast('The 🔨 Build Tab already has an Override button: only one is allowed on a Tab. Save Build ... sends it to a Tab.', true);
   const g = { id: newId(), kind: 'override', workspace: tab.name, x: 40, y: 40, w: 160, h: 60, ...OVR };
-  draft.graphics.push(g); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+  draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
 // COPY in a Widget's Properties (Fritz, 2026-10-29): a copy with everything the same but a new name (the next w_Text_N), made on
 // the 🔨 Build Tab like every new Widget (Rule 4.1), a little down and right of where the first one is; its Properties open.
@@ -5452,6 +5452,79 @@ const wgtHead = (tips = {}) => [['locked', '', 'lock', null, false, false, { inT
 const wgtPlace = () => [['x', 'X (Horizontal)', 'num', null, false, false, { tip: WGT_TIPS.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: WGT_TIPS.xy }],
   ['w', 'Width (pixels)', 'num', null, false, false, { tip: WGT_TIPS.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: WGT_TIPS.size }]];
 const wgtType = (word, tip) => ['_wt', 'Widget Type', 'ro', word, false, false, { tip: tip || WGT_TIPS.type }];
+// ---- The other Widgets in the Pump's drill-down look (Fritz, 2026-11-06, Rule 18.29). Same order for each: the title line,
+// 1 Label ⬆ ⬢ and Label Visible, 2 Tab, 3 Name, its own fields (extras in ⬢ pop-ups), X, Y, Width, Height, the Widget Type last.
+// Every explanation that was a note on the dialog is in the hover help of a field's name now (Rule 2.38).
+const LOOK_FIELDS = (keys = {}) => [['fontSize', 'Font size (px; empty = Default)', 'num'], ['font', 'Font', 'sel', FONTS], ['bold', 'Bold', 'bool'],
+  ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES]].map(f => (keys[f[0]] ? [keys[f[0]], ...f.slice(1)] : f));
+// Text Widget (Rule 2.22): its Label has its own keys (label_visible, size_label ...)
+const TEXT_LABEL_POP = { title: 'Label attributes', fields: [['label', 'Label', 'text', null, false, 'b'], ['labelVisible', 'Visible (Show label)', 'bool'], ['labelSize', 'Font size', 'num'], ['labelFont', 'Font', 'sel', FONTS],
+  ['labelBold', 'Bold', 'bool'], ['labelColor', 'Fore color', 'color'], ['labelBg', 'Back color', 'color'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES]] };
+const TEXT_LOOK_POP = { title: 'Text look', fields: LOOK_FIELDS() };
+const TEXT_TIPS = {
+  label: 'The small title over the Text on the Tab. The ⬢ beside it sets its font, size and colors.',
+  labelVisible: 'On: the Label shows over the Text. Off: only the Text shows.',
+  name: 'How a Process uses it, for example wgt_TXT_Note_BR = "Mashing" or wgt_TXT_Note_BR.visible = false. It must be unique.',
+  text: 'What it says on the Tab. Rich Text codes work here and in the Label: \\b bold, \\i italic, \\n new line, \\c{Red} color (Help > Rich Text Embedded Code). The ⬆ opens a bigger box; the ⬢ sets its font, size, colors and alignment. Word wrap is always on.',
+  color: 'The color of the Text.',
+};
+function textWidgetFields() {
+  const T = TEXT_TIPS;
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visible', 'Visible', 'bool', true, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: TEXT_LABEL_POP, tip: T.label }], ['labelVisible', 'Label Visible', 'bool', null, false, false, { tip: T.labelVisible }],
+    ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
+    ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
+    ['text', 'Text', 'text', null, false, false, { up: 30, attr: TEXT_LOOK_POP, tip: T.text }],
+    ['color', 'Fore color', 'color', null, false, false, { tip: T.color }],
+    ...wgtPlace(), wgtType('Text')];
+}
+// Override button (Rule 2.27): one press and every running Process moves on; only one on a Tab
+const OVR_TIPS = {
+  label: 'What the button says on this Tab. One press and every running Process moves on: a wait or sleep is passed and the loop it sits in is left. Only one on a Tab.',
+  name: 'Made by Skynet from the Label and the Tab (Rule 3.14).',
+  color: 'The color of its words. The ⬢ beside it sets the font, size, Back color and alignment.',
+};
+function overrideFields(it) {
+  const T = OVR_TIPS;
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, tip: T.label }],
+    ['workspace', '2. Tab', 'ws', null, false, false, { tip: WGT_TIPS.tab }],
+    ['_nmro', '3. Name', 'ro', it.name || '', false, false, { tip: T.name }],
+    ['color', 'Fore color', 'color', null, false, false, { tip: T.color, attr: { title: 'Button look', fields: LOOK_FIELDS().map(f => (f[0] === 'align' ? [f[0], f[1], f[2], TB_ALIGN_CHOICES.filter(c => c[0])] : f)) } }],
+    ...wgtPlace(), wgtType('Override')];
+}
+// Sound Player: plays one sound file; pauses for alarms
+const SND_TIPS = {
+  name: 'How a Process uses it: play wgt_SND_Music_BR, stop wgt_SND_Music_BR, or wgt_SND_Music_BR.path = "..." to change the sound.',
+  path: 'The sound file it plays. Only one sound plays at a time. A Sound Player has the lowest priority (5): it pauses while any alarm sounds and goes on by itself after.',
+  loop: 'On: the sound plays over and over until it is stopped.',
+};
+const soundPlayerFields = () => [...wgtHead(SND_TIPS),
+  ['path', 'Sound file', 'gpick', 'sounds', false, false, { tip: SND_TIPS.path }], ['loop', 'Repeat sound', 'bool', null, false, false, { tip: SND_TIPS.loop }],
+  ...wgtPlace(), wgtType('Sound Player')];
+// Semi_Widgets_Devices (Rule 1.20): the Switch, Push Button, Pulse Button and LED
+const SEMI_PIC_POP = { title: 'Pictures', fields: [['imageOn', 'Picture when on', 'path']] };
+const SEMI_TEXT_POP = { title: 'Text when off', fields: [['offText', 'Text when off', 'text']] };
+const semiWidgetFields = (type, it) => {
+  const k = SEMI_KINDS[type], led = type === 'led';
+  return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_SW_Stir_BR'}.state = true. It must be unique.` }),
+    ['deviceControlled', 'Device controlled', 'devctl', null, false, false, { tip: `${k.title}: one of the ${SEMI_CLASS} (a Widget with an ON / OFF state). With a Device controlled, it and the Device follow each other, like a Clone. ${SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.`, dbPop: true }],
+    ...(led ? [] : [['imageOff', 'Picture', 'path', null, false, false, { tip: 'Its picture when OFF. The ⬢ beside it holds the picture when ON.', attr: SEMI_PIC_POP }]]),
+    ['onText', 'Text when on', 'text', null, false, false, { tip: 'The words it shows while ON. The ⬢ beside it holds the words while OFF.', attr: SEMI_TEXT_POP }],
+    ...wgtPlace(), wgtType(k.title.replace(/ \(.*$/, ''))];
+};
+// the Label Widget: words on a Tab, nothing else
+const LBL_LOOK_POP = { title: 'Label look', fields: [['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES], ['nameFontFamily', 'Font', 'sel', FONTS], ['nameFontSize', 'Font size (px; empty = Default)', 'num']] };
+const labelWidgetFields = () => [...wgtHead({ label: 'The words it shows on the Tab. The ⬢ beside it sets its font, size and colors.' }),
+  ['foreColor', 'Fore color', 'color', null, false, false, { tip: 'The color of its words. The ⬢ beside it sets the Back color, alignment, font and size.', attr: LBL_LOOK_POP }],
+  ...wgtPlace(), wgtType('Label')];
+// Manual Valve Widget (Rule 5.24) and the Tap Water Valve (Rule 5.33): turned by hand only
+const mvWidgetFields = it => [['_mvnow', `It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now.`, 'note'],
+  ['label', '1. Label', 'text', null, false, false, { tip: 'Shown in the "Open it by hand" message on the Tab, and the start of its name. It can\'t be blank.' }],
+  ['labelVisible', 'Label Visible', 'yn', null, false, false, { tip: 'On: the Label shows on the Tab.' }],
+  ['_nmro', '2. Name', 'ro', it.name, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BR'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).` }],
+  ['image', 'Picture', 'sel', MV_PICS, false, false, { tip: "Fritz's Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. One click on it on its Tab opens or closes it, at any time; that is the only way it changes." }],
+  ...FIT_PLACE(it), wgtType(isTapMv(it) ? 'Tap Water Valve' : 'Manual Valve')];
 // Timer Widget Properties in the Pump's drill-down look (Rule 18.29): no pictures and no background; its look is a Style (Rule 2.24)
 const TIMER_TIPS = {
   label: 'The title bar of the Timer on the Tab. The ⬢ beside it sets its font, size and colors.',
@@ -6596,13 +6669,16 @@ async function editItem(kind, id) {
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
-    if (isPicW(it)) return pictureWidgetFields(it, item);         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.27)
+    if (isPicW(it)) return pictureWidgetFields(it, item);
+    if (it.type === 'soundPlayer') return soundPlayerFields();      // the other Widgets: the Pump's drill-down look (Rule 18.29)
+    if (SEMI_KINDS[it.type] && !it.cloneId) return semiWidgetFields(it.type, it);
+    if (it.type === 'label') return labelWidgetFields();         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.27)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
       ['typeCode', 'Device Type (for the suggested name)', 'sel', [['', '(none)'], ...typeCodes(it).map(([c, l]) => [c, `${c}   ${l}`])]]);
     return [...(skyDev(it) ? skyDevFields(it, f) : f), ...dbFields(it)];      // .database and .API are always the user's to set (Rule 5.16)
-  } : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
+  } : isMv(item) ? mvWidgetFields : type === 'text' ? textWidgetFields : type === 'override' ? overrideFields : isUnit(item) ? F.skynetFitting : isSkyV(item) ? F.skynetVessel : isBfit(item) ? F.tabFitting : eqClass(item) ? F.vesselNew : autoPrefix(item) && type !== 'text' && type !== 'pipe' ? it => [['_nm', `Name: ${item.name} (given by Skynet, cannot be changed)` + (type === 'text' ? `. A Process uses it: ${item.name}.visible = false` : ''), 'note'], ...(typeof F[type] === 'function' ? F[type](it) : F[type])] : F[type];
   const work = clone(item), before0 = item.fitting;
   if (kind === 'el') dbToWork(work);
   const isV = !!eqClass(item), bf = isBfit(item);
