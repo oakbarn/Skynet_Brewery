@@ -64,6 +64,7 @@ Every Device and Widget has two true / false attributes:
 | Element (on a workspace) | Device (has a PLC port) or Widget (app only); never "element" | Built |
 | Interface | Interface (a board) | Built |
 | `DisplayName` (Appearance) | Label | Built |
+| A blank `DisplayName` (BruControl showed the Element Name) | the Label is the BruControl Name and is not shown on the Tab (`.label_visible = false`); the item itself stays visible (Fritz, 2026-11-06) | Not built yet (Importer) |
 | `"tm_Mash" displayname = "Mash"` | `tm_Mash.label = "Mash"` | Built (Process lines) |
 
 ## 4. Process code in the Skynet style
