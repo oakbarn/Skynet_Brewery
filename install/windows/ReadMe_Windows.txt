@@ -295,8 +295,8 @@ STEP 8. CREATE THE ADMIN ACCOUNT (FIRST TIME ONLY)
   [ ] Pick a sample Schema to start from (a Schema is a whole brewery: Tabs, Devices,
       pipes and settings; you can load another later in Settings).
 
-  Updates keep your users and passwords. You only do this step again if you answer
-  Yes to the installer's Start Fresh question.
+  Updates keep your users and passwords. You only do this step again if you pick
+  "reset all users" or "Start Fresh" in the installer.
 
 
 STEP 9. STARTING THE PANEL EVERY DAY

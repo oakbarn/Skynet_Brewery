@@ -43,13 +43,17 @@ start, into a folder you don't have yet. On an update the installers ask "Keep a
 them as they are?". Yes keeps them; No asks about each one and moves any you replace
 to the "backups" folder. Stop the panel before you update. The Help pages are
 replaced by the new manual; the old ones go to help\backups.
-START FRESH: before that, the installers ask "Delete all users and Schemas and Start
-Fresh?". No (the default) keeps everything. Yes shows a warning that ALL EXISTING
-DATA WILL BE DELETED (config, data and scripts, with no backup; media is kept), and
-No there backs out with nothing deleted.
+UPDATE CHOICES: before that, the installers ask what the update does:
+  1. Start Fresh: delete everything. A warning says ALL EXISTING DATA WILL BE DELETED
+     (config, data and scripts, with no backup; media is kept).
+  2. Update the program and reset all users: deletes every user, password, sign-in
+     and the recovery code after a warning. Schemas, brew log, Processes, pictures
+     and sounds are kept. You make the admin account again.
+  3. Update the program and keep everything (the default, already picked).
+  No on either warning backs out with nothing deleted.
 Zips from before October 5, 2026 still had those folders inside. If you unzip one
 of those over your panel, choose "Skip these files".
-An update keeps every user, password and sign-in. Only Start Fresh (Yes, then
+An update keeps every user, password and sign-in. Only choice 1 or 2 (then
 confirm the warning) removes them. In the panel, Help > "Updating to a new version" has
 the details.
 
