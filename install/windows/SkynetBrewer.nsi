@@ -247,12 +247,16 @@ Section "Skynet Brew Panel" SecMain
 
   ; The start file. It finds this folder by itself, and installs Node.js if it is ever missing.
   CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Brewer.bat" "$INSTDIR\Skynet_Brewer.bat"
+  ; The BruControl Importer, the second door of the same program (Rule 15.4)
+  CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
 
   ; Shortcuts. "Start in" is the panel folder.
   SetOutPath "$INSTDIR"
   CreateShortCut "$DESKTOP\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   CreateDirectory "$SMPROGRAMS\Skynet Brewer"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+  CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+  CreateShortCut "$DESKTOP\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Panel folder.lnk" "$INSTDIR"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Uninstall Skynet Brewer.lnk" "$INSTDIR\Uninstall Skynet Brewer.exe"
 
@@ -285,6 +289,7 @@ FunctionEnd
 ; ---------------------------------------------------------------- Uninstall
 Section "Uninstall"
   Delete "$DESKTOP\Skynet Brewer.lnk"
+  Delete "$DESKTOP\Skynet BruControl Importer.lnk"
   RMDir /r "$SMPROGRAMS\Skynet Brewer"
   DeleteRegKey HKCU "${UNINST_KEY}"
 
@@ -301,6 +306,8 @@ Section "Uninstall"
     RMDir /r "$INSTDIR\install"
     RMDir /r "$INSTDIR\defaults"
     Delete "$INSTDIR\server.js"
+    Delete "$INSTDIR\importer.js"
+    Delete "$INSTDIR\Skynet_Importer.bat"
     Delete "$INSTDIR\package.json"
     Delete "$INSTDIR\package-lock.json"
     Delete "$INSTDIR\README.md"
