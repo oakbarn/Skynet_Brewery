@@ -22,7 +22,7 @@
   <li data-step="4" class="later">Boards</li>
   <li data-step="5" class="later">Tabs and items</li>
   <li data-step="6" class="later">Processes</li>
-  <li data-step="7" class="later">Save the Schema</li>
+  <li data-step="7">Save the Schema</li>
 </ol>
 
 <main>
@@ -281,9 +281,28 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <div class="buttons top"><button id="back4a">◀ Back</button></div>
     <h1>Boards</h1>
     <p class="lead">You picked <b id="chosen"></b>.</p>
-    <div class="card"><p>The next part of the Importer (reading the boards, Tabs, pictures and scripts) is being built now.
-      Your pick is remembered, so the next version starts with this file.</p></div>
-    <div class="buttons"><button id="back4">◀ Back</button></div>
+    <div class="card"><p>The question steps (Boards, Tabs and items, Processes) are being built now. Your pick is remembered, so the
+      next version starts with this file.</p>
+      <p>You can already <b>save a first draft</b> of the Schema and open it in the Skynet Panel, to try the whole trip. The first draft
+      is made by the older import code, without the questions, so it is not yet the Skynet way.</p></div>
+    <div class="buttons"><button id="back4">◀ Back</button><span class="spacer"></span><button class="primary" id="toSave">Save a first draft ▶</button></div>
+  </section>
+
+  <!-- Step 7: save the Schema into Brewing\Import for the Panel -->
+  <section class="step hidden" id="step7">
+    <div class="buttons top"><button id="back7a">◀ Back</button></div>
+    <h1>Save the Schema</h1>
+    <p class="lead">One config file makes one Schema. It is saved as one file in the <b>Import</b> folder of your Brewing folder, where
+      the Skynet Panel can open it (Schema.json &gt; <b>Open a Schema file</b>).</p>
+    <div class="card">
+      <div class="folderRow"><label for="schemaName">Schema name</label><input id="schemaName" spellcheck="false" maxlength="80"></div>
+      <p class="muted small">Saved in <code id="importDir"></code> as <i>name</i>_<i>date</i>T<i>time</i>.json. BruControl's own files are not changed.</p>
+      <p class="note" id="draftNote">This is a <b>first draft</b>, made by the older import code without the questions. Use it to try the trip into
+        the Panel; the finished Importer will make the real one.</p>
+      <div class="buttons"><span class="spacer"></span><button class="primary" id="saveBtn">💾 Save the Schema</button></div>
+      <div id="saveResult" class="hidden"></div>
+    </div>
+    <div class="buttons"><button id="back7">◀ Back</button></div>
   </section>
 </main>
 

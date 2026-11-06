@@ -66,6 +66,7 @@ Var Upgrade
 Var Fresh
 Var OldPanel
 Var Stamp
+Var BrewDir
 
 ; ---------------------------------------------------------------- Node.js
 ; Puts 1 in $R9 when a new enough Node.js is on this computer.
@@ -247,16 +248,24 @@ Section "Skynet Brew Panel" SecMain
 
   ; The start file. It finds this folder by itself, and installs Node.js if it is ever missing.
   CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Brewer.bat" "$INSTDIR\Skynet_Brewer.bat"
-  ; The BruControl Importer, the second door of the same program (Rule 15.4)
-  CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
+  ; The Import folder, always made (Fritz, 2026-11-06): the Brewing folder's Import subfolder (C:\Brewing\Import when the
+  ; panel is in C:\Brewing\BrewPanel). The BruControl Importer saves its Schema files there, and later BeerSmith or other
+  ; programs can save their files there too. Never deleted by an uninstall: it holds your files.
+  ${GetFileName} "$INSTDIR" $0
+  ${If} $0 == "BrewPanel"
+    ${GetParent} "$INSTDIR" $BrewDir
+  ${Else}
+    StrCpy $BrewDir "$INSTDIR"
+  ${EndIf}
+  CreateDirectory "$BrewDir\Import"
+  DetailPrint "Import folder: $BrewDir\Import"
 
   ; Shortcuts. "Start in" is the panel folder.
   SetOutPath "$INSTDIR"
   CreateShortCut "$DESKTOP\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
   CreateDirectory "$SMPROGRAMS\Skynet Brewer"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet Brewer.lnk" "$INSTDIR\Skynet_Brewer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
-  CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
-  CreateShortCut "$DESKTOP\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+  Call AskImporter
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Panel folder.lnk" "$INSTDIR"
   CreateShortCut "$SMPROGRAMS\Skynet Brewer\Uninstall Skynet Brewer.lnk" "$INSTDIR\Uninstall Skynet Brewer.exe"
 
@@ -281,6 +290,27 @@ Section "Skynet Brew Panel" SecMain
   WriteRegDWORD HKCU "${UNINST_KEY}" "NoModify" 1
   WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
 SectionEnd
+
+; The BruControl Importer, the second door of the same program (Rule 15.4), is a choice (Fritz, 2026-11-06). Its program
+; files are always there (they are the Panel's own); Yes adds its start file and shortcuts, No leaves them out (and takes
+; away the shortcuts of an earlier install). On an update, the answer you gave last time is the default.
+Function AskImporter
+  ${If} ${FileExists} "$INSTDIR\Skynet_Importer.bat"
+    MessageBox MB_YESNO|MB_ICONQUESTION "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDYES IDYES add IDNO leave
+  ${Else}
+    MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDNO IDYES add IDNO leave
+  ${EndIf}
+  add:
+    CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
+    CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+    CreateShortCut "$DESKTOP\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+    DetailPrint "Added the Skynet BruControl Importer"
+    Return
+  leave:
+    Delete "$INSTDIR\Skynet_Importer.bat"
+    Delete "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk"
+    Delete "$DESKTOP\Skynet BruControl Importer.lnk"
+FunctionEnd
 
 Function StartPanel
   ExecShell "open" "$INSTDIR\Skynet_Brewer.bat"

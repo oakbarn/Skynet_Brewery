@@ -83,3 +83,44 @@ assert.ok(!importerProfileDir(env).includes(profileDir(env)), 'the Panel window 
 
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('importer tests passed');
+
+// ---- the Schema file: Importer -> Brewing\Import -> Panel (Fritz, 2026-11-06)
+import { brewingFolder, importFolder, importFileName, safeName, buildSchemaFile, readSchemaFile, listSchemaFiles, SCHEMA_FILE_KIND } from '../lib/importer.js';
+import { Schemas } from '../lib/schemas.js';
+assert.equal(brewingFolder(path.join('C:', 'Brewing', 'BrewPanel')), path.join('C:', 'Brewing'), 'the folder above BrewPanel');
+assert.equal(importFolder(path.join('x', 'Brewing', 'BrewPanel'), {}), path.join('x', 'Brewing', 'Import'));
+assert.equal(importFolder('/a', { SKYNET_IMPORT_DIR: '/b' }), '/b');
+assert.equal(safeName('26-26-46 VGC UNI: MB Relay.brucfg'), '26-26-46_VGC_UNI~_MB_Relay');
+assert.equal(importFileName('Oakbarn', new Date(2026, 10, 6, 18, 5, 9).getTime()), 'Oakbarn_2026-11-06T180509.json', 'ISO 8601 (Rule 3)');
+{
+  const conv = { devices: [{ name: 'Brewery' }], workspaces: [{ name: 'B1' }], elements: [{ name: 'Pump_1', workspace: 'B1' }], scripts: [{ name: 'Mash', text: 'sleep 1' }], autostart: [], warnings: ['w1'] };
+  const f = buildSchemaFile(conv, { name: 'Oak barn', source: 'Oak.brucfg' });
+  assert.equal(f.kind, SCHEMA_FILE_KIND); assert.equal(f.schema.name, 'Oak_barn'); assert.equal(f.draft, true);
+  assert.deepEqual(f.processes, [{ name: 'Mash', text: 'sleep 1' }]);
+  const back = readSchemaFile(JSON.parse(JSON.stringify(f)));
+  assert.equal(back.fromImporter, true); assert.equal(back.processes.length, 1); assert.equal(back.schema.elements.length, 1);
+  // a file from the Panel's own "Save as .json file" opens too (no Processes in it)
+  const own = readSchemaFile({ name: 'Mine', workspaces: [], elements: [] });
+  assert.equal(own.fromImporter, false); assert.deepEqual(own.processes, []);
+  assert.throws(() => readSchemaFile({ hello: 1 }), /not a Skynet Schema file/);
+
+  // the Panel adds it as a new Schema; a taken name gets _2
+  const sdir = fs.mkdtempSync(path.join(os.tmpdir(), 'schimp-'));
+  const fakeStore = { config: { schema: { id: 'main', name: 'Main' }, workspaces: [], elements: [], devices: [] } };
+  const sch = Object.create(Schemas.prototype);
+  sch.dir = sdir; sch.store = fakeStore;
+  sch.file = id => path.join(sdir, id + '.json');
+  sch.has = id => fs.existsSync(sch.file(id));
+  sch.list = () => fs.readdirSync(sdir).filter(n => n.endsWith('.json')).map(n => ({ id: n.slice(0, -5), name: JSON.parse(fs.readFileSync(path.join(sdir, n), 'utf8')).name }));
+  const a = sch.addFromFile(f.schema, { from: 'Oak.json' });
+  assert.equal(a.name, 'Oak_barn');
+  const saved = JSON.parse(fs.readFileSync(sch.file(a.id), 'utf8'));
+  assert.equal(saved.importedFrom, 'Oak.json'); assert.equal(saved.elements[0].name, 'Pump_1'); assert.equal(saved.title, 'Oak_barn');
+  assert.equal(sch.addFromFile(f.schema).name, 'Oak_barn_2', 'a taken name gets _2');
+  // the Import folder list, newest first
+  fs.writeFileSync(path.join(sdir, 'notes.txt'), 'x');
+  assert.equal(listSchemaFiles(sdir).files.length, 2);
+  assert.equal(listSchemaFiles(path.join(sdir, 'none')).exists, false);
+  fs.rmSync(sdir, { recursive: true, force: true });
+}
+console.log('importer Schema file tests passed');
