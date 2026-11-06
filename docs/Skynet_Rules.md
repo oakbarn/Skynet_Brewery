@@ -1970,7 +1970,12 @@ Label (every Device and Widget, Rule 18.15):
 Pump Drill Down"). Every Widget's Properties are brought to the Pump's screen 9 (Rule 18.21), as the Picture Widget's are (Rule 18.27).
 Fritz's word is the command for all the Widgets (Rule 18.10); they are done one kind after another. First: the **Value, Time and
 DateTime Widgets** (Rule 1.23), then the **Timer Widget** (Count, Start value, Reset value, Running at start with Database and .API ⬢,
-Style; no pictures). The Value, Time and DateTime Widgets: the lock, Visible and Hidden Locked in the title line; **1 Label ⬆ ⬢** and Label Visible, **2 Tab**,
+Style; no pictures), the **Text Widget** (Text ⬆ ⬢ with its look, Fore color; its Label ⬢ has its own label attributes), the
+**Override button** (1 Label, 2 Tab, 3 Name greyed out, Fore color ⬢ with its look), the **Sound Player** (Sound file, Repeat sound),
+the **Switch, Push Button, Pulse Button and LED** (Device controlled with Database and .API ⬢, Picture ⬢ with the picture when on,
+Text when on ⬢ with the text when off; the LED has no picture), the **Label Widget** (Fore color ⬢ with its look) and the **Manual Valve
+and Tap Water Valve** (1 Label, Label Visible, 2 Name greyed out, Picture, its place; OPEN or CLOSED now stays on the dialog). The
+Value, Time and DateTime Widgets: the lock, Visible and Hidden Locked in the title line; **1 Label ⬆ ⬢** and Label Visible, **2 Tab**,
 **3 Name**; the Start value; a Value Widget's **Units ⬢** (Decimals, Step, Lowest, Highest); **Read only** with **Database and .API ⬢**
 on its line; **Fore color ⬢** (Back color, Alignment); X, Y, Width, Height; and the **Widget Type** greyed out last. Every explanation
 is in the hover help of the field's name (Rule 2.38). (Help 134)
@@ -2299,3 +2304,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 3.14 (Widget names wgt_Type_Label_TabID with Fritz's Type letters, PIX for Picture; names follow the Label and Tab until typed; old names stay). Rule 18.27 updated. Help 74, 91, 112 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 18.10 exception (Fritz): hover help goes on every dialog at once (a snippet of Help may be the hover text), and every Widget dialog gets the Pump drill-down look (Rule 18.29). (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.29: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Rule 18.29: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")

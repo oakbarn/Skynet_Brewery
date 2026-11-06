@@ -23,3 +23,10 @@ with **Close**.
 - The yellow **?** in the title, which opens the full Help page.
 
 The **BruControl Import** works the same way.
+
+## Widget dialogs
+
+Every Widget's Properties look like the Pump's (Skynet Rule 18.29): the 🔓 lock, Visible and Hidden Locked in the title line, then
+**1. Label** (⬆ a bigger box, ⬢ its font, size and colors) and Label Visible, **2. Tab**, **3. Name**, the Widget's own fields with
+the extras behind a ⬢, its place and size, and the **Widget Type** greyed out last. A new Widget is named
+**wgt_Type_Label_TabID**, for example **wgt_DT_DateTime_1_BR** (Rule 3.14).
