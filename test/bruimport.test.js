@@ -17,6 +17,7 @@ const xml = `\uFEFF<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.or
  <Element i:type="DeviceElement"><ID>e2</ID><Name>MB_61_Wort</Name><DisplayName i:nil="true"/><PortID>p2</PortID><X>200</X><Y>20</Y><Width>100</Width><Height>60</Height></Element>
  <Element i:type="DeviceElement"><ID>e3</ID><Name>Flow</Name><PortID>p3</PortID><X>0</X><Y>900</Y><Width>50</Width><Height>20</Height></Element>
  <Element i:type="TimerElement"><ID>e4</ID><Name>tm_Mash</Name><X>400</X><Y>100</Y><Width>120</Width><Height>50</Height></Element>
+ <Element i:type="AlarmElement"><ID>e6</ID><Name>alm_Hops</Name><SoundFile>C:\\BruControl\\Media\\hops.wav</SoundFile><X>600</X><Y>10</Y><Width>80</Width><Height>40</Height></Element>
  <Element i:type="GlobalVariableElement"><ID>e5</ID><Name>gblV_x</Name><Appearance><BackgroundImageIndex>1</BackgroundImageIndex><BackgroundImages><d:string>D:\\My Pictures\\Brew\\hops.png</d:string></BackgroundImages><Visibility>Hidden</Visibility></Appearance><X>5</X><Y>5</Y><Width>10</Width><Height>10</Height></Element>
 </Elements></Workspace></Workspaces>
 <Processes><Process><Name>scrMash</Name><Script>sleep 1</Script></Process></Processes></Configuration>`;
@@ -36,23 +37,31 @@ assert.equal(wort.label, 'MB_61_Wort', 'a blank DisplayName: Label = Name'); ass
 assert.equal(wort.name, 'MB_61_AI_MB~61~Wort_BH'.replace(/~/g, '_'));
 assert.equal(c.scripts.length, 0, 'Processes come later');
 // a Placeholder for everything else, where BruControl had it; a hidden one stays hidden
-assert.equal(c.graphics.length, 3);
+assert.equal(c.graphics.length, 4);
 const tm = c.graphics.find(g => g.placeholder.bruName === 'tm_Mash');
 assert.deepEqual([tm.kind, tm.workspace, tm.x, tm.y, tm.w, tm.h], ['text', 'Brew House', 400, 100, 120, 50]);
 assert.ok(tm.text.startsWith(PLACEHOLDER_MARK) && tm.text.includes('tm_Mash'));
 assert.equal(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').visible, false);
 assert.equal(c.graphics.find(g => g.placeholder.bruName === 'Flow').placeholder.why, 'CounterInPort pins come later');
 assert.equal(c.workspaces[0].height, 940, 'the Tab fits its items');
-assert.equal(r.report.items, 2); assert.equal(r.report.placeholders, 3);
+assert.equal(r.report.items, 2); assert.equal(r.report.placeholders, 4);
 assert.deepEqual(r.report.renames.map(x => x.from), ['Pump Red', 'MB_61_Wort']);
 
-// pictures (Fritz, 2026-11-06): read from the path BruControl saved, in ANY folder, and copied to Images/User; nothing moved
-assert.equal(pump.backpath, 'Images/User/pump_off.png'); assert.equal(pump.backpath_2, 'Images/User/pump_on.png'); assert.equal(pump.background, 2);
-assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').placeholder.pictures, ['Images/User/hops.png'], 'a Global with a picture on another path');
+// pictures and sounds (Fritz, 2026-11-06): their paths are imported and the files stay where they were (any folder) ...
+assert.equal(pump.backpath, 'C:\\BruControl\\Media\\pump_off.png'); assert.equal(pump.backpath_2, 'E:\\Other\\pump_on.png'); assert.equal(pump.background, 2);
+assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').placeholder.pictures, ['D:\\My Pictures\\Brew\\hops.png'], 'a Global with a picture on another path');
+assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'alm_Hops').placeholder.sounds, ['C:\\BruControl\\Media\\hops.wav']);
+// ... checked, never copied, unless asked
 const asked = [];
-const p2 = importBruControl(xml, { picture: (from, to) => { asked.push([from, to]); return !from.startsWith('E:'); } });
-assert.deepEqual(asked, [['C:\\BruControl\\Media\\pump_off.png', 'Images/User/pump_off.png'], ['E:\\Other\\pump_on.png', 'Images/User/pump_on.png'], ['D:\\My Pictures\\Brew\\hops.png', 'Images/User/hops.png']]);
-assert.deepEqual(p2.report.pictures, { total: 3, copied: 2, missing: [{ from: 'E:\\Other\\pump_on.png', to: 'Images/User/pump_on.png' }] });
+const p1 = importBruControl(xml, { media: (from, to) => { asked.push([from, to]); return !from.startsWith('E:'); } });
+assert.ok(asked.every(([, to]) => to === null), 'nothing copied by default');
+assert.deepEqual(p1.report.media, { copy: false, pictures: 3, sounds: 1, found: 3, missing: [{ kind: 'picture', from: 'E:\\Other\\pump_on.png', path: 'E:\\Other\\pump_on.png' }] });
+// the option: copies in media/Images/User and media/sounds/User, and the items point to the copies
+const copied = [];
+const p2 = importBruControl(xml, { copy: true, media: (from, to) => { copied.push([from, to]); return true; } });
+assert.deepEqual(copied, [['C:\\BruControl\\Media\\pump_off.png', 'Images/User/pump_off.png'], ['E:\\Other\\pump_on.png', 'Images/User/pump_on.png'],
+  ['C:\\BruControl\\Media\\hops.wav', 'sounds/User/hops.wav'], ['D:\\My Pictures\\Brew\\hops.png', 'Images/User/hops.png']]);
+assert.equal(p2.conv.elements[0].backpath, 'Images/User/pump_off.png');
 const nm = pictureNamer();
 assert.equal(nm('C:\\A\\x.png'), 'Images/User/x.png'); assert.equal(nm('D:\\B\\x.png'), 'Images/User/x_2.png', 'same file name, other folder');
 assert.equal(nm('c:\\a\\X.PNG'), 'Images/User/x.png', 'the same picture once');
