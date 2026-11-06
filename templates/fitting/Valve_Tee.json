@@ -1,0 +1,32 @@
+{
+  "std": {
+    "type": "TC",
+    "size": 1.5
+  },
+  "fittings": [
+    {
+      "kind": "valveTee"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    },
+    {
+      "kind": "none"
+    }
+  ],
+  "image": "Images/Skynet/Other_Equipment/Skynet_TC15_Valve_Tee.svg",
+  "size": [
+    160,
+    262
+  ],
+  "ipPos": {
+    "start": "0,0.0843",
+    "end": "1,0.0843",
+    "branch1": "0.5000,1"
+  },
+  "bend": "0.5,0.0843",
+  "notes": "A TC 1.5 Long Tee with a Valve built into its branch (Fritz, 2026-11-06, Rule 5.35). IPs on the left and right ferrule faces and on the far end of the valve. The valve is Manual or Motorized, and can be changed in its Properties."
+}

@@ -430,6 +430,8 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 ### Skynet Bundled Fitting Templates (TC 1.5 unless noted)
 **TC Pipe Fittings** (Rule 5.25, Help 124): the plain ones here (elbows, tees, cross, U, reducers, check valve, End Cap) are a Widget subclass. Skynet puts the elbow, tee or cross the pipes need where they meet (a pipe drawn to an elbow's bend makes it a tee), and they are added by hand from Elbows, Tees … or Add Widget > TC Pipe Fittings. Elbows, tees and the cross also have a `bend` (where the pipes' center lines meet on the picture).
 
+**Valve Tees and Supply Manifolds** (Rule 5.35, Help 146) are on the same Elbows, Tees … list but are not Widgets: each valve built into them is a valve Device, so they are in the Device Library (5.4).
+
 Every IP is the center of a ferrule's outer face, or the center of the opening on a front view (Rule 5.20). Fritz's 2026-11-02 drawings give each Template its own shape (`size`), where its IPs sit as "x,y" fractions of the picture (`ipPos`), and how thick its pipe is drawn (`body`, used by Autosize to pipe). A Skynet pipe fitting already on a Tab takes its Template's new picture when Edit layout opens. Tees with a Temperature Probe in them are Temperature Devices (Device Library).
 
 | Name | Fittings | Openings |
@@ -528,3 +530,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-05: Picture Widget: Add Widget box and Properties follow the Pump drill-down (Rule 18.27, Help 74); Picture ➕ makes a Picture Widget. (thread "Build Picture Widget dialog like Pump")
 - 2026-11-05: Sight_Glass and Sight_Glass_Caged TC Pipe Fittings (Rule 5.32, Help 139): a Length setting in inches stretches the glass; Label starts as site_glass_n. (thread "Add caged and plain sight glass fittings")
 - 2026-11-06: Tap Water Valve, a Manual Valve Widget with a household hose bib picture, one IP on its hose outlet, a tap water source while open, Label tap_water_n (Rule 5.33, Help 141). (thread "Add hose bib Manual Valve Widget")
+- 2026-11-06: Pointer to the Valve Tee and Supply Manifolds (Rule 5.35): on the Elbows, Tees … list, but they are Skynet_Integrated_Devices (Device Library 5.4). (thread "Add valve Tees and supply manifolds")

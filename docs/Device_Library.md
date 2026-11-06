@@ -464,6 +464,16 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Locked once built and saved** on a Tab: IPs (Place), parts and HERMS coil can't be changed; no un-bundling.
 - The **RIMS tube** (5.1) is a small Vessel Device Template whose Element and Probe are already set and locked (Fritz, 2026-11-05).
 
+### 5.4 Valve Tee and Supply Manifolds (Skynet Rule 5.35)
+- **Add menu:** Edit layout bar > Elbows, Tees … > Valve Tees and Supply Manifolds, or Select Device Type > Valves. Six rows: **Long Tee with a Valve**, **Double Supply Manifold** and **Triple Supply Manifold**, each with all its valves **Manual** or all **Motorized** to start. Templates: Valve_Tee, Supply_Manifold_2, Supply_Manifold_3 (Bundled Fitting Templates).
+- **Pictures:** Skynet_TC15_Valve_Tee.svg, Skynet_TC15_Supply_Manifold_2.svg, Skynet_TC15_Supply_Manifold_3.svg (Fritz's Long Tees joined end to end); the panel draws each valve on its branch: Valve_Manual_ClosedV_R.svg or Valve_Motor_Ball_ClosedV_RC.svg (Valve Standard, Rule 5.29).
+- **IPs:** only the two open ends of the joined tees and the far end of each valve (3, 4 or 5). A closed valve shuts its IP.
+- **Built-in Devices:** one valve per tee, a Digital Output with Kind = valve. **Manual** = Valve type Manual (no Port; a Process shows a pop-up and waits for Done), Type ID M_L_Vlv. **Motorized** = Valve type Electro_Mechanical, Type ID eVlv, on a Port of the fitting's one **Interface**. Two valves can't share a Port.
+- **Each valve is swapped Manual / Motorized on its own** in the fitting's Properties (Valves: Valve 1, Valve 2 ...), at any time; not locked once saved (unlike 5.3).
+- **Named:** the fitting ValveTee_n / Manifold2_n / Manifold3_n, Label valve_tee_n / manifold_2_n / manifold_3_n (never blank). Each valve's Label is `<fitting Label> V1`, `V2` ...; its name the suggested name, e.g. `MB_22_eVlv_manifold_2_1_V1_BR`, `M_L_Vlv_manifold_2_1_V2_BR`.
+- A click on a valve on its Tab opens or closes it. Motorized valves are on Close all / Open all.
+- Flip and Rotate (45 degree steps); no Autosize, no Clone. Dropped on a straight pipe it cuts the pipe like a tee.
+
 ---
 
 ## 6. Reserved, not built yet
@@ -495,3 +505,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-04: 4.2 Pump: IPs on the inlet and outlet of every Skynet pump picture, the older Riptide-style ones and the sump pump too (Rule 5.24, Help 123). (thread "Add IPs to Ball Valve Devices and Widgets")
 - 2026-11-05: 4.3a and 4.3c: one Motorized Ball Valve row with a valve picker; the Pump's drill-down Add box and Properties without a Cover (Rule 18.23, Help 128). (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Added 5.3 Vessel Device (built from a Vessel Widget Template; parts built into its IPs, HERMS coil, locked once built and saved; Skynet Rule 5.31).
+- 2026-11-06: Added 5.4 Valve Tee and Supply Manifolds (Double, Triple): Long Tees with a valve Device built into each branch, each Manual or Motorized on its own (Skynet Rule 5.35, Help 146). (thread "Add valve Tees and supply manifolds")
