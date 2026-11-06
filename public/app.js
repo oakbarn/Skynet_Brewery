@@ -170,7 +170,7 @@ function connect() {
   es.addEventListener('values', e => {
     const ch = JSON.parse(e.data);
     for (const [n, props] of Object.entries(ch)) { S.values[n] = { ...(S.values[n] || {}), ...props }; if ('state' in props && S.config.graphics.some(g => isMv(g) && g.name === n)) setMvOpen(n, props.state); else updateEl(n); }
-    renderPipes(); updateMeters(); updateAlarms(); if (view === 'globals') refreshGlobalValues(ch);
+    renderPipes(); updateMeters(); updateAlarms(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
   es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
@@ -274,7 +274,7 @@ function drawWs() {
   for (const g of L().graphics.filter(g => gTab(g) === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));     // a Process can move a Text Widget to another Tab (.tab)
   if (!editing) { mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
   const clones = L().graphics.filter(g => g.workspace === w.name && isClone(g)).map(cloneEl).filter(Boolean);
-  for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones]) ws.append(buildEl(e));
+  for (const e of [...L().elements.filter(e => e.workspace === w.name && !isMfPart(e)), ...clones]) ws.append(buildEl(e));     // a Valve Tee's valves are drawn on it (Rule 5.35)
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
   if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
   const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP
@@ -538,6 +538,144 @@ function vpParts(g, at, s, W) {
   }
   return out;
 }
+// ---- Valve Tees and Supply Manifolds (Fritz, 2026-11-06, Rule 5.35, Help 146). Skynet TC Pipe Fittings with a Valve built into the
+// branch of each Long Tee: the Valve Tee (one tee), the Double Supply Manifold (2 tees joined end to end) and the Triple Supply
+// Manifold (3). IPs only on the two open ends of the joined tees and on the far end of each valve. Each valve is a valve Device
+// built into it (integratedIn = the fitting, integratedAs = 'mf:branchN', like the RIMS tube's parts): Manual (Valve type Manual,
+// no Port: a Process shows a pop-up and waits for Done, Rule 5.13) or Motorized (Electro_Mechanical, on a Port of the fitting's
+// Interface). Each valve is changed from Manual to Motorized and back on its own in the fitting's Properties, like a regular
+// valve's Valve type; its picture follows (the Valve Standard, Rule 5.29, keeps it on the same spot). A closed valve shuts its IP.
+const MF_TPLS = { Valve_Tee: { what: 'Long Tee with a Valve', prefix: 'ValveTee', label: 'valve_tee' },
+  Supply_Manifold_2: { what: 'Double Supply Manifold', prefix: 'Manifold2', label: 'manifold_2' },
+  Supply_Manifold_3: { what: 'Triple Supply Manifold', prefix: 'Manifold3', label: 'manifold_3' } };
+const MF_KINDS = [['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)'], ['motorized', 'Motorized (switched by its Port)']];
+const MF_PICS = { manual: 'Images/Skynet/Valves/Valve_Manual_ClosedV_R.svg', motorized: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg' };
+const MF_TEE_H = 134 / 344;          // the joined tees are the top of the picture; each valve fills the square box under its tee
+const isMf = g => isUnit(g) && (g.fittings || []).some(f => f.kind === 'valveTee');
+const isMfPart = e => String(e?.integratedAs || '').startsWith('mf:');
+const mfKeys = g => (g.fittings || []).map((f, i) => f.kind === 'valveTee' ? 'branch' + (i + 1) : null).filter(Boolean);
+const mfEl = (g, k, els = L().elements) => els.find(e => e.integratedIn === g.id && e.integratedAs === 'mf:' + k);
+const mfKind = e => e?.valveType === 'manual' ? 'manual' : 'motorized';
+const mfInfo = g => MF_TPLS[g?.template] || { what: 'Valve Tee', prefix: 'ValveTee', label: 'valve_tee' };
+const mfNum = k => +String(k).replace(/\D/g, '') || 1;
+// its next free Name (ValveTee_1, Manifold2_1 ...) and Label (valve_tee_1, manifold_2_1 ...: never blank, Rule 18.15)
+const mfNext = (p, used) => { const u = new Set(used.map(x => String(x || '').toLowerCase())); let n = 1; while (u.has(`${p}_${n}`.toLowerCase())) n++; return `${p}_${n}`; };
+// the valves drawn on it, turned and flipped with its picture; open: the On overlay (Motorized: the bolt, Manual: the green ring)
+function mfValves(g) {
+  const keys = mfKeys(g), N = keys.length || 1, wrap = h('div', { class: 'mfVals', style: `transform:${unitTransform(g)}` });
+  keys.forEach((k, i) => {
+    const e = mfEl(g, k), kind = mfKind(e), open = !!e && isOn(e.name);
+    const tip = e ? `Valve ${mfNum(k)}: ${e.label || e.name} (${e.name}), ${kind === 'manual' ? 'Manual' : 'Motorized'}, ${open ? 'open' : 'closed'}${editing ? '' : `. Click to ${open ? 'close' : 'open'} it`}` +
+      (kind === 'motorized' && !e.channel && e.channel !== 0 ? '. No Port yet: pick it in the Properties' : '') : `Valve ${mfNum(k)}: not made yet (open the Properties)`;
+    const v = h('div', { class: `mfValve mf-${kind}` + (open ? ' open' : ''), 'data-dev': e?.name || '', title: tip,
+      style: `left:${i / N * 100}%;width:${100 / N}%;top:${MF_TEE_H * 100}%;height:${(1 - MF_TEE_H) * 100}%;background-image:url("${media(MF_PICS[kind])}")` });
+    if (open) v.append(h('div', { class: 'mfOver', style: `background-image:url("${media(kind === 'manual' ? MV_OVERLAY : BOLT)}")` }));
+    wrap.append(v);
+  });
+  return wrap;
+}
+// a valve opened or closed (here, by a Process or on another screen): its picture follows
+function updateMfs(ch) {
+  const names = new Set(Object.keys(ch || {}));
+  for (const g of L().graphics.filter(g => isMf(g) && g.workspace === curWs()?.name && mfKeys(g).some(k => names.has(mfEl(g, k)?.name)))) {
+    const n = $(`#ws .gfx[data-gid="${CSS.escape(g.id)}"] .mfVals`); if (n) n.replaceWith(mfValves(g));
+  }
+}
+// a click on a valve (not in Edit layout) opens or closes it, as a click on a valve Device does
+const toggleMfValve = guard(async name => {
+  const e = name && elByName(name); if (!e) throw new Error('This valve is not made yet: save the layout once (Edit layout > Save layout)');
+  if (!can('operator')) throw new Error('Only an operator or an admin can open or close a valve');
+  await setProp(e.name, 'state', !isOn(e.name));
+});
+// what a valve's IP passes (ipNode): shut while its valve is closed (null: its IP is open, flow goes through the tees)
+function mfFlow(g, k) {
+  if (!mfKeys(g).includes(k)) return null;
+  const e = mfEl(g, k);
+  return e && isOn(e.name) ? null : { closed: true };
+}
+// Edit layout bar > Elbows, Tees … (and Select Device Type > Valves): it goes on the Build Tab (Rule 4.1) with every valve Manual or
+// every valve Motorized, and its Properties open (a Motorized one picks its Interface and each valve's Port there)
+function addMf(tname, kind) {
+  const t = tplOf('fitting', tname); if (!t) return toast(`No ${tname} Template`, true);
+  toBuild();
+  const I = MF_TPLS[t.name] || mfInfo({}), used = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
+  const g = placeTabFitting(t, wsName, mfNext(I.prefix, used), null);
+  g.label = mfNext(I.label, draft.graphics.map(x => x.label)); g.labelVisible = false;
+  applyMf(g, Object.fromEntries(mfKeys(g).map(k => [k + '_mfk', kind])), wsName, g.label, true);
+  sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+}
+const MF_ROWS = () => Object.keys(MF_TPLS).filter(n => tplOf('fitting', n)).flatMap(n => ['manual', 'motorized'].map(k =>
+  [`${MF_TPLS[n].what}, ${k === 'manual' ? 'Manual' : 'Motorized'} valve${n === 'Valve_Tee' ? '' : 's'}`, () => addMf(n, k)]));
+// its Properties: the Interface its Motorized valves are wired to, then each valve: Manual or Motorized, and a Motorized one's Port
+function mfWork(g) {
+  const out = {};
+  for (const k of mfKeys(g)) {
+    const e = mfEl(g, k, draft.elements);
+    Object.assign(out, { [k + '_mfk']: mfKind(e), [k + '_mfpin']: e?.channel ?? '' });
+    if (e?.device && out.mfIface === undefined) out.mfIface = e.device;
+  }
+  const devs = S.config.devices || [];
+  out.mfIface ??= devs.length === 1 ? devs[0].name : '';
+  return out;
+}
+function mfFields(it) {
+  const keys = mfKeys(it), motor = keys.some(k => it[k + '_mfk'] === 'motorized'), N = keys.length;
+  return [['_mf', `Valve${N > 1 ? 's' : ''} (built in: ${N > 1 ? 'each one is Manual or Motorized on its own' : 'Manual or Motorized'})`, 'head'],
+    ...(motor ? [['mfIface', 'Interface (board) the Motorized valves are wired to', 'dev']] : []),
+    ...keys.flatMap(k => [[k + '_mfk', `Valve ${mfNum(k)}`, 'sel', MF_KINDS, true],
+      ...(it[k + '_mfk'] === 'motorized' ? [[k + '_mfpin', `Valve ${mfNum(k)}: Available Ports / Pins`, 'pin', 'mf_' + k]] : [])])];
+}
+// the Available Ports lists of its Motorized valves: the free pins on its Interface (two valves can't share a pin)
+function mfPinLists(w, g) {
+  const own = draft.elements.filter(e => e.integratedIn === g.id && isMfPart(e)), els = draft.elements.filter(e => !own.includes(e));
+  for (const k of mfKeys(g)) {
+    const taken = mfKeys(g).filter(x => x !== k && w[x + '_mfk'] === 'motorized' && (w[x + '_mfpin'] ?? '') !== '').map(x => String(w[x + '_mfpin']));
+    const pins = w[k + '_mfk'] === 'motorized' && w.mfIface ? freePins({ type: 'digitalOut', subtype: 'valve', device: w.mfIface, name: '\0new' }, els, S.config.devices, false).filter(p => !taken.includes(String(p))) : [];
+    $('#pins-mf_' + k)?.remove();
+    document.body.append(h('datalist', { id: 'pins-mf_' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: w.mfIface }, S.config.devices)); return h('option', { value: p, label: t }, t); })));
+  }
+}
+// make its valves (or bring them up to date) from w (its Properties). Nothing changes when something is wrong (the error is thrown).
+// loose: a new one, whose Motorized valves get their Interface and Ports in the Properties that open next.
+function applyMf(g, w, tab, label, loose = false) {
+  const none = v => v === undefined || v === null || v === '', old = draft.elements.filter(e => e.integratedIn === g.id && isMfPart(e)), made = [];
+  const base = String(label || g.label || g.name || mfInfo(g).label).trim();
+  for (const k of mfKeys(g)) {
+    const o = old.find(e => e.integratedAs === 'mf:' + k), kind = w[k + '_mfk'] || mfKind(o), motor = kind === 'motorized';
+    const e = { ...(o ? clone(o) : { w: 40, h: 40 }), type: 'digitalOut', subtype: 'valve', valveType: motor ? 'electric' : 'manual', workspace: tab, integratedIn: g.id, integratedAs: 'mf:' + k, tap: 'toggle' };
+    e.x = Math.round(g.x || 0); e.y = Math.round(g.y || 0);          // never shown on its own: it sits on the fitting
+    e.label = `${base} V${mfNum(k)}`;
+    if (motor) {
+      if (!loose && none(w.mfIface)) throw new Error('Pick the Interface (board) the Motorized valves are wired to');
+      if (!loose && none(w[k + '_mfpin'])) throw new Error(`Valve ${mfNum(k)}: pick its Port`);
+      if (!none(w.mfIface)) e.device = w.mfIface; else delete e.device;
+      if (!none(w[k + '_mfpin'])) e.channel = w[k + '_mfpin']; else delete e.channel;
+      e.imageOverlay = BOLT;
+    } else { for (const x of ['device', 'channel', 'imageOverlay', 'activeLow', 'oneShot', 'oneShotDirection']) delete e[x]; }
+    e.typeCode = o?.typeCode && o.valveType === e.valveType ? o.typeCode : defaultCode(e);
+    const follow = !o || o.name === deviceSuggestion(o, o) || o.valveType !== e.valveType;       // a name typed by hand stays, unless the valve changed kind
+    e.name = follow ? deviceSuggestion(e, o || e) : o.name;
+    if (!e.name) e.name = `${g.name}_V${mfNum(k)}`;
+    for (let i = 2, b = e.name; made.some(([m]) => m.name.toLowerCase() === e.name.toLowerCase()); i++) e.name = `${b}_${i}`;
+    made.push([e, o, follow && e.name === deviceSuggestion(e, o || e)]);
+  }
+  const all = draft.elements; draft.elements = all.filter(e => !old.includes(e));        // its own valves are checked against the new ones, not their old selves
+  try {
+    for (const [e] of made) {
+      if (e.valveType === 'manual' || none(e.channel)) continue;
+      const err = portError(e, e); if (err) throw new Error(err);
+      if (made.some(([m]) => m !== e && m.valveType !== 'manual' && !none(m.channel) && pinsOf(m).some(p => pinsOf(e).includes(p)))) throw new Error(`${e.label} and another valve need two different Ports`);
+    }
+  } finally { draft.elements = all; }
+  for (const [e, o, sug] of made) {
+    if (o) {
+      if (o.name !== e.name) for (const x of draft.elements) if (x.input === o.name) x.input = e.name;
+      Object.keys(o).forEach(x => delete o[x]); Object.assign(o, e);
+    } else draft.elements.push(e);
+    if (sug) autoNamed.add(o || e);       // its name follows the suggestion: Save Build ... > To a Tab adds that Tab's ID (Rule 3.1)
+  }
+}
+
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg'], ['LED red', 'Images/Skynet/Lights_LEDs/led_red.svg'], ['LED off (grey)', 'Images/Skynet/Lights_LEDs/led_off.svg'],
   ['Lightning bolt on', 'Images/Skynet/Lights_LEDs/bolt_on.svg'], ['Lightning bolt off', 'Images/Skynet/Lights_LEDs/bolt_off.svg'],
@@ -730,6 +868,7 @@ function buildVessel(g) {
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
   if (g.image && isUnit({ ...g, loose: false })) n.append(h('div', { class: 'bfImg', style: `background-image:url("${isSightGlass({ ...g, loose: false }) ? sgPic(g) : media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated (a Sight Glass drawn for its Length, Rule 5.32)
+  if (isMf(g)) n.append(mfValves(g));         // a Valve Tee or Supply Manifold: its valves, Manual or Motorized, open or closed (Rule 5.35)
   else if (g.image && isSkyV({ ...g, loose: false }) && (g.flipH || g.flipV || unitRot(g))) {     // a Skynet vessel flipped or rotated
     const [pw, ph] = picWH(g);
     n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));
@@ -1024,7 +1163,7 @@ function buildIp(g) {
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && !isVPart(e) && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
+const hasIps = e => e && !isVPart(e) && !isMfPart(e) && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
 // (a part built into a Vessel Device's IP has no IPs of its own: it sits in the vessel's IP, Rule 5.31 exception)
 // Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
 // "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
@@ -1312,6 +1451,7 @@ function splitPorts(it) {
 function splitPipeFor(it) {
   if (!editing || !draft || !it || it.locked) return null;
   if (isTcFit(it)) return tcFitOnPipe(it) || teeOnHose(it);         // a tee or a cross (Rule 5.25), on a hose too (Rule 5.30)
+  if (isMf(it)) return tcFitOnPipe(it);         // a Valve Tee or Supply Manifold: its run goes along the pipe, like a tee's (Rule 5.35)
   if (isProbeTee(it)) return probeTeeOnPipe(it) || teeOnHose(it);    // a tee with a Temperature Probe (Rule 5.30)
   const mv = isMv(it);
   if (!mv && (it.kind || !SPLIT_SUBS.includes(it.subtype) || !hasIps(it))) return null;
@@ -1921,6 +2061,8 @@ $('#ws').addEventListener('click', ev => {
   if (editing) return;
   const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
   if (mv) return toggleManualValve(mv.dataset.gid);
+  const mfv = ev.target.closest('.mfValve');
+  if (mfv) return toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35)
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const e = elByName(n.dataset.name); if (e) doTap(e);
@@ -2201,6 +2343,7 @@ function ipNode(id, ws) {
   if (g?.port) {      // a port of an equipment widget: ports on the same circuit pass flow (chiller side, coil, filter, fitting)
     const v = L().graphics.find(x => x.id === g.attachTo), c = eqClass(v)?.ports[g.port]?.circuit;
     if (isVDev(v)) { const r = vpFlow(v, g.port); if (r) return r; }       // a Vessel Device: its HERMS coil, or a part built into the IP
+    if (isMf(v)) { const r = mfFlow(v, g.port); if (r) return r; }         // a Valve Tee or Supply Manifold: a closed valve shuts its IP (Rule 5.35)
     if (isBfit(v) && bfitClosed(v)) return { closed: true };       // a closed valve in a Tab_Fitting
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
@@ -2970,7 +3113,7 @@ function tcArms(u) {
   return { b, arms };
 }
 function tcFitOnPipe(u) {
-  if (!editing || !draft || !u || u.locked || u.onVessel || !isTcFit(u)) return null;
+  if (!editing || !draft || !u || u.locked || u.onVessel || !(isTcFit(u) || isMf(u))) return null;
   const A0 = tcArms(u); if (!A0 || A0.arms.length < 2) return null;
   const ws = u.workspace;
   const near = Math.max(15, Math.min(u.w || 90, u.h || 90) * 0.3);
@@ -3445,7 +3588,8 @@ const DEV_TYPES = () => [
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
   ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')],
-    ['Tap Water Valve (household hose bib: a Manual Valve Widget, only a click opens or closes it)', () => addIpFit('manualValve', 'tap')]]],
+    ['Tap Water Valve (household hose bib: a Manual Valve Widget, only a click opens or closes it)', () => addIpFit('manualValve', 'tap')],
+    ...MF_ROWS()]],      // Valve Tees and Supply Manifolds (Rule 5.35): also in Elbows, Tees … on the Edit layout bar
   ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%', subtype: 'element' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), VESSEL_ELEMENT]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
@@ -3498,7 +3642,7 @@ function fillAddType() {
   fillPick($('#addBoolean'), 'Boolean ➕', [['', amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])])]]);     // Rule 4.5: the list first, like Probe
   fillPick($('#vesselPick'), 'Vessel', [['', VESSEL_ROWS]]);
   fillPick($('#addVesselType'), 'Add equipment ➕', [['', EQUIP_ROWS()]]);
-  fillPick($('#addIpType'), 'Elbows, Tees …', [['TC Pipe Fittings', TC_FIT_ROWS()], ['IPs, couplings and caps', FIT_ROWS()]]);
+  fillPick($('#addIpType'), 'Elbows, Tees …', [['TC Pipe Fittings', TC_FIT_ROWS()], ['Valve Tees and Supply Manifolds (Rule 5.35)', MF_ROWS()], ['IPs, couplings and caps', FIT_ROWS()]]);
   fillClones();
 }
 $('#devKind').onchange = $('#wgtKind').onchange = () => fillAddType();
@@ -5585,30 +5729,21 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
     input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv);
   }
-  else if (kind === 'dbgroup') {   // a Database Group (Rule 6.14): the Groups, ➕ Add new Group…, and ✏ Change name (every Process follows)
-    const gs = S.config.dbGroups || [];
-    const s = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(pick a Group)'),
-      ...gs.map(g => h('option', { value: g.id, ...(g.id === v ? { selected: true } : {}) }, g.name)), h('option', { value: '__add__' }, '➕ Add new Group…'));
-    const ren = h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group Old_Name follows (Update All)', onclick: guard(async ev => {
+  else if (kind === 'dbgroups') {   // Database Groups (Rule 6.14, Fritz 2026-11-06): an item can be in more than one Group.
+    // The box shows its Groups and 👥 Groups…, which opens the Group list (➕ Add new Group… at the top). A click on a Group shows
+    // the Group dialog with all its members; a double-click adds this Device or Widget to the Group and shows the members.
+    // The choice is kept in the hidden holder (data-groups) and saved with the Properties.
+    const holder = h('span', { class: 'hidden', 'data-k': key, 'data-kind': kind, 'data-groups': JSON.stringify(Array.isArray(v) ? v : []) });
+    const sum = h('span', { class: 'dbGroupSum' });
+    const show = () => { const ids = JSON.parse(holder.dataset.groups); const ns = ids.map(id => (S.config.dbGroups || []).find(g => g.id === id)?.name).filter(Boolean);
+      sum.textContent = ns.length ? ns.join(', ') : '(none: sent by its setting all the time)'; };
+    show();
+    const btn = h('button', { type: 'button', title: 'Pick the Database Groups this item belongs to', onclick: guard(async ev => {
       ev.preventDefault();
-      const g = gs.find(x => x.id === s.value); if (!g) return toast('Pick a Group first', true);
-      const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process with send_db_group ${g.name} is changed to it.`, g.name) || '').trim();
-      if (!to || to === g.name) return;
-      const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
-      g.name = r.group.name; s.selectedOptions[0].textContent = g.name;
-      toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
-    }) }, '✏ Change name');
-    s.addEventListener('change', guard(async () => {
-      if (s.value !== '__add__') return;
-      const name = (prompt('Name of the new Group (letters, digits and _, like Readings). A Process sends it with send_db_group Name.') || '').trim();
-      if (!name) { s.value = v || ''; return; }
-      try {
-        const r = await api('POST', '/ui/dbgroups', { name });
-        S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
-        s.insertBefore(h('option', { value: r.group.id }, r.group.name), s.querySelector('option[value="__add__"]')); s.value = r.group.id;
-      } catch (e) { s.value = v || ''; throw e; }
-    }));
-    input = h('div', { class: 'cpick' }, s, ren);
+      const cur = await dbGroupPicker(obj?.name || 'this item', JSON.parse(holder.dataset.groups));
+      if (cur) { holder.dataset.groups = JSON.stringify(cur); show(); holder.dispatchEvent(new Event('change', { bubbles: true })); }
+    }) }, '👥 Groups…');
+    return [h('div', { class: 'full' }, label), h('div', { class: 'full dbGroups' }, sum, ' ', btn, holder)];
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
@@ -5782,6 +5917,7 @@ function readFields(obj, root = $('#dlgBody')) {
     else if (kind === 'yn') v = inp.value === 'yes';
     else if (kind === 'stpick') v = inp.value === '' || inp.value === '__add__' ? undefined : inp.dataset.num ? +inp.value : inp.value;
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
+    else if (kind === 'dbgroups') { v = JSON.parse(inp.dataset.groups || '[]'); if (!v.length) v = undefined; }
     else if (kind === 'json') { if (inp.value.trim() === '') v = undefined; else { try { v = JSON.parse(inp.value); } catch { throw new Error(`${k}: not valid JSON`); } } }
     else v = inp.value === '' ? undefined : inp.value;
     if (v === undefined) delete obj[k]; else obj[k] = v;
@@ -5998,7 +6134,7 @@ const INFO = {
     ['Name', ' (w_Value_N, w_Time_N, w_DateTime_N to start) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
-    ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; In a Group sends it with send_db_group.'],
+    ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']] },
   timer: { title: 'Timer Widget', properties: [
     ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
@@ -6071,6 +6207,78 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:no
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
 // a small dialog on top of the Properties (Rule 18 pop-ups): ✖ Cancel and 💾 Save at the top and the bottom; build(body) fills it
+// Database Groups (Rule 6.14, Fritz 2026-11-06). The Group list: ➕ Add new Group… at the top, then every Group (✔ = this item is
+// in it). A click shows the Group dialog with all its members; a double-click adds this item to the Group and shows the members.
+// Returns the Group keys this item is in after 💾 Save, or null for Cancel.
+const groupMembers = (id, me, mine) => [...new Set([...((editing && draft ? draft : S.config).elements || [])
+  .filter(e => e.name !== me && dbOf(e) && [...(e.database.groups || []), ...(e.database.group ? [e.database.group] : [])].includes(id)).map(e => e.name),
+  ...(mine ? [me] : [])])].sort((a, b) => a.localeCompare(b));
+const dbOf = e => e?.database && e.database.frequency && e.database.frequency !== 'none' ? e.database : null;
+async function dbGroupPicker(me, start) {
+  const cur = new Set(start.filter(id => (S.config.dbGroups || []).some(g => g.id === id)));
+  let list, timer = null;
+  const fill = (pick) => {
+    const gs = S.config.dbGroups || [];
+    list.replaceChildren(h('option', { value: '__add__' }, '➕ Add new Group…'),
+      ...gs.map(g => h('option', { value: g.id }, `${cur.has(g.id) ? '✔ ' : '    '}${g.name}  (${groupMembers(g.id, me, cur.has(g.id)).length} members)`)));
+    if (pick) list.value = pick; else list.selectedIndex = -1;
+  };
+  const addNew = async () => {          // Rule 18.14: build the new Group, come back, refresh the list, select it
+    const name = (prompt('Name of the new Group (letters, digits and _, like Mash). A Process starts it with start_db_group Name and stops it with stop_db_group Name.') || '').trim();
+    if (!name) return fill();
+    const r = await api('POST', '/ui/dbgroups', { name });
+    S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
+    fill(r.group.id);
+  };
+  const open = async id => { const g = (S.config.dbGroups || []).find(x => x.id === id); if (g) { await dbGroupDialog(g, me, cur); fill(id); } };
+  const r = await layerDialog('Database Groups', body => {
+    list = h('select', { size: 10, class: 'dbGroupList', title: 'Click a Group to see its members; double-click to add this item to it' });
+    list.addEventListener('click', guard(async () => {
+      const id = list.value; if (!id) return;
+      if (id === '__add__') return addNew();
+      clearTimeout(timer); timer = setTimeout(() => { timer = null; open(id); }, 300);     // wait: it may be a double-click
+    }));
+    list.addEventListener('dblclick', guard(async () => {
+      clearTimeout(timer); timer = null;
+      const id = list.value; if (!id || id === '__add__') return;
+      cur.add(id); fill(id); await open(id);
+    }));
+    body.append(h('p', { class: 'muted' }, `Groups of ${me}. Click a Group to see all its members. Double-click a Group to add ${me} to it. `
+      + 'An item in a Group is sent to the database by its own setting only while one of its Groups is started (start_db_group Mash ... stop_db_group Mash); send_db always works.'), list);
+    fill();
+  });
+  return r === 'ok' ? [...cur] : null;
+}
+// The Group dialog: its Name (✏ Change name, every Process follows) and all its members
+async function dbGroupDialog(g, me, cur) {
+  await new Promise(res => {
+    const d = h('dialog', { class: 'miniDlg' }), body = h('div', { class: 'miniBody' });
+    const close = () => { d.close(); d.remove(); res(); };
+    const title = h('h3', {}, `Group ${g.name}`);
+    const draw = () => {
+      const ms = groupMembers(g.id, me, cur.has(g.id));
+      body.replaceChildren(h('div', { class: 'full dbGroupDlg' },
+        h('p', { class: 'muted' }, `start_db_group ${g.name} starts sending its members to the database by their own settings; stop_db_group ${g.name} stops it; send_db_group ${g.name} sends them all once, now.`),
+        h('div', {}, h('b', {}, `Members (${ms.length})`)),
+        ms.length ? h('select', { size: Math.min(10, Math.max(3, ms.length)), class: 'dbGroupList' }, ...ms.map(n => h('option', { value: n }, n === me ? `${n}  (this item)` : n)))
+          : h('p', { class: 'muted' }, 'No members yet.'),
+        h('div', { class: 'bar' },
+          h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group, start_db_group or stop_db_group Old_Name follows (Update All)', onclick: guard(async () => {
+            const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process line with ${g.name} (send_db_group, start_db_group, stop_db_group) is changed to it.`, g.name) || '').trim();
+            if (!to || to === g.name) return;
+            const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
+            g.name = r.group.name; title.textContent = `Group ${g.name}`; draw();
+            toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
+          }) }, '✏ Change name'),
+          cur.has(g.id) ? h('button', { type: 'button', onclick: () => { cur.delete(g.id); draw(); } }, `➖ Take ${me} out of this Group`)
+            : h('button', { type: 'button', onclick: () => { cur.add(g.id); draw(); } }, `➕ Add ${me} to this Group`))));
+    };
+    const bar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', onclick: close }, '✔ OK'));
+    d.append(title, bar(), body, bar()); draw();
+    d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
+    document.body.append(d); d.showModal();
+  });
+}
 function layerDialog(title, build, canDelete = false) {
   return new Promise(res => {
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
@@ -6328,6 +6536,8 @@ async function editItem(kind, id) {
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
   const vdev = isVDev(item), vpRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, item); };
   if (vdev) { Object.assign(work, vpWork(item)); vpPinLists(work, item); $('#dlgBody').addEventListener('change', vpRefresh); }
+  const mf = isMf(item), mfRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } mfPinLists(x, item); };       // a Valve Tee or Supply Manifold (Rule 5.35)
+  if (mf) { Object.assign(work, mfWork(item)); mfPinLists(work, item); $('#dlgBody').addEventListener('change', mfRefresh); }
   if (isV) for (const [k, d] of Object.entries(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; if (d.vw) work[k + '_label'] = p.label || d.name; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
@@ -6340,7 +6550,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? `${mfInfo(item).what}: ${item.name}` : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -6382,6 +6592,12 @@ async function editItem(kind, id) {
         if (len !== sgLength(item.sgLength)) { work.sgLength = len; sgFromLength(work); }      // its left end stays put
         else if (+work.w !== +item.w || +work.h !== +item.h) work.sgLength = sgLength((+work.w || 1) / (+work.h || 1) * SG_H / SG_INCH);
         else work.sgLength = len;
+      }
+      if (mf) {          // a Valve Tee or Supply Manifold (Rule 5.35): its Label is never blank (Rule 18.15); its valves follow its Properties
+        if (!String(work.label ?? '').trim()) work.label = item.label || mfNext(mfInfo(item).label, draft.graphics.filter(x => x !== item).map(x => x.label));
+        const w = Object.fromEntries(Object.keys(work).filter(k => /_(mfk|mfpin)$/.test(k) || k === 'mfIface').map(k => [k, work[k]]));
+        for (const k of Object.keys(w)) delete work[k];
+        applyMf({ ...item, ...work, id: item.id, fittings: item.fittings }, w, work.workspace || item.workspace, work.label);
       }
       if (isUnit(item)) {          // a Skynet Fitting: its IPs sit on its openings, wherever it is flipped or rotated
         work.rot = +work.rot || 0; if (!work.rot) delete work.rot;
@@ -7278,7 +7494,7 @@ $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 // ---------------------------------------------------------------- variables page: gGlobal, shared
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
 const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', clicked: 'When Clicked (each time someone sets it on its Tab)', process: 'When a Process starts',
-  group: 'In a Group (send_db_group Group_Name sends the Group)', datetime: 'At a date and time (once)', clock: 'At clock time (every day)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
+  datetime: 'At a date and time (once)', clock: 'At clock time (every day)', second: 'Every second', minute: 'Every minute', hour: 'Every hour', midnight: 'Every day (at Midnight)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
   days: 'Every N days', hms: 'Every 00:00:00' };
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
@@ -7290,10 +7506,11 @@ function logSummary(lg) {
   if (f === 'process') return lg.process ? `When "${lg.process}" starts` : 'When a Process starts (none picked)';
   if (f === 'datetime') return `At ${lg.at || '?'}`;
   if (f === 'clock') return `Every day at ${lg.at || '?'}`;
-  if (f === 'group') { const g = (S.config.dbGroups || []).find(x => x.id === lg.group); return g ? `In the Group ${g.name}` : 'In a Group (none picked)'; }
-  if (!TIME_MODES.includes(f)) return LOG_LABEL[f] || f;
+  const gs = (lg.groups || []).map(id => (S.config.dbGroups || []).find(x => x.id === id)?.name).filter(Boolean);
+  const inG = s => gs.length && f !== 'none' ? `${s}, while Group ${gs.join(' or ')} is started` : s;
+  if (!TIME_MODES.includes(f)) return inG(LOG_LABEL[f] || f);
   const every = f === 'hms' ? `Every ${lg.interval || '?'}` : `Every ${lg.every ?? 1} ${{ ms: 'ms', seconds: 'sec', minutes: 'min', hours: 'h', days: 'day(s)' }[f]}`;
-  return every;
+  return inG(every);
 }
 // The Database and .API box at the end of every Device and Widget's Properties that has a value. The settings sit in the
 // dialog as db_frequency, db_every ... and go back into item.database when it is saved (dbFromWork).
@@ -7304,23 +7521,25 @@ function dbFields(it) {
   return [['', 'Database and .API', 'box'],
     ['db_frequency', 'Send to the database', 'sel', S.logModes.map(m => [m, LOG_LABEL[m] || m]), true],
     ...(f === 'process' ? [['db_process', 'Process', 'sel', [['', '(pick a Process)'], ...S.scripts.map(x => [x.name, x.name])]]] : []),
-    ...(f === 'group' ? [['db_group', 'Group', 'dbgroup']] : []),
     ...(TIME_MODES.includes(f) && f !== 'hms' ? [['db_every', 'N (a whole number, 1 or more)', 'num']] : []),
     ...(f === 'hms' ? [['db_interval', 'Every (00:00:00)', 'text']] : []),
     ...(f === 'clock' ? [['db_at', 'At clock time, e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
-    ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]]] : []),
+    ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]],
+      ['db_groups', 'Database Groups (optional): in a Group, it is sent by the setting above only while one of its Groups is started. On demand always works.', 'dbgroups']] : []),
     ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
     // API_Name (Fritz, 2026-11-06, Rule 6.18): what a Voice Command says; Unique in the Schema; may be blank, with a warning
     ['apiName', 'API_Name (what a Voice Command says; must be Unique)', 'text', null, true],
     ...(cleanApiName(it.apiName) ? [] : [['_apiw', '⚠ API_Name is blank: a Voice Command can\'t be used for this item.', 'note']]),
-    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now; send_db_group Group_Name sends every item In that Group.', 'note'],
+    ['_dbn', 'Each reading is kept with its time and the item\'s hidden key, so a later name still finds the older readings. send_db Name in a Process sends it now (always, even Off or in a stopped Group); send_db_group Group_Name sends every item of that Group now, once.', 'note'],
     ['', '', 'boxend']];
 }
 function dbToWork(work) {
   const d = work.database || {};
   work.db_frequency = d.frequency || 'none';
-  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  for (const k of ['every', 'interval', 'at', 'process', 'groups', 'attribute']) if (d[k] !== undefined) work['db_' + k] = d[k];
+  if (d.group && !d.groups) work.db_groups = [d.group];
+  if (work.db_frequency === 'group') work.db_frequency = 'ondemand';     // the old In a Group (2026-11-06)
   // an older "Every 1 day at 12 AM" opens as At clock time 12 AM (the Every choices have no clock time now)
   if (d.at && work.db_frequency === 'days' && (d.every === undefined || +d.every === 1)) { work.db_frequency = 'clock'; delete work.db_every; }
   work.api = work.api || 'off';
@@ -7339,18 +7558,18 @@ function dbFromWork(work, self) {
     } else delete work.apiName;
   }
   const f = work.db_frequency || 'none', d = { frequency: f };
-  for (const k of ['every', 'interval', 'at', 'process', 'group', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
+  for (const k of ['every', 'interval', 'at', 'process', 'groups', 'attribute']) { if (work['db_' + k] !== undefined && work['db_' + k] !== '') d[k] = work['db_' + k]; delete work['db_' + k]; }
+  if (d.groups) { d.groups = d.groups.filter(id => (S.config.dbGroups || []).some(g => g.id === id)); if (!d.groups.length) delete d.groups; }
   delete work.db_frequency;
   if (!work.api || work.api === 'off') delete work.api;
   if (f === 'none' || !f) { delete work.database; return; }
   if (f === 'process' && !d.process) throw new Error('Database: pick the Process that sends this value');
-  if (f === 'group' && !(S.config.dbGroups || []).some(g => g.id === d.group)) throw new Error('Database: pick the Group (or ➕ Add new Group…)');
   if (f === 'hms' && !/^\d+:\d{1,2}(:\d{1,2})?$/.test(d.interval || '')) throw new Error('Database: the interval must look like 00:05:00');
   if (TIME_MODES.includes(f) && f !== 'hms' && d.every !== undefined && !(Number.isInteger(d.every) && d.every >= 1)) throw new Error('Database: N must be a whole number, 1 or more');
   if (f === 'clock' && !validClock(d.at || '')) throw new Error('Database: clock time not understood. Use e.g. 12 AM, 6:30 PM or 18:30');
   if (f === 'datetime' && !/^\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}(:\d{2})?$/.test(d.at || '')) throw new Error('Database: the date and time must look like 2026-11-01T06:00');
   for (const k of Object.keys(d)) {
-    const keep = { frequency: true, attribute: true, process: f === 'process', group: f === 'group', every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
+    const keep = { frequency: true, attribute: true, process: f === 'process', groups: true, every: TIME_MODES.includes(f) && f !== 'hms', interval: f === 'hms', at: f === 'clock' || f === 'datetime' }[k];
     if (!keep) delete d[k];
   }
   work.database = d;
@@ -9503,7 +9722,8 @@ function bfitClass(g) {
   const POS = BF_POS.concat(Object.values(g.ipPos || {}).map(fracPos).filter(Boolean));
   const at = (k, def) => turnPos(g.ipPos?.[k] && POS.some(q => q[0] === g.ipPos[k]) ? g.ipPos[k] : def, isUnit(g) ? 0 : g.turn);   // a Template can say where its openings are on its picture
   const chk = hasCheck(g);         // with a check valve in it, the Start side and the far side are two circuits, joined one way
-  if (!g.onVessel && !isCapOnly(g)) ports.start = pt(chk ? 'Start (flow goes in here)' : 'Start (vessel side)', POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: chk ? 'ci' : 'a' });
+  const mf = (g.fittings || []).some(f => f.kind === 'valveTee');      // a Valve Tee or Supply Manifold: two open ends (Rule 5.35)
+  if (!g.onVessel && !isCapOnly(g)) ports.start = pt(chk ? 'Start (flow goes in here)' : mf ? 'Open end 1' : 'Start (vessel side)', POS, { on: true, def: at('start', flat ? 'Left' : 'Top'), circuit: chk ? 'ci' : 'a' });
   fittingEnds(g).forEach((e, i) => ports[e.key] = pt(e.name, POS, { on: true, def: at(e.key, e.key === 'end' ? (flat ? 'Right' : 'Bottom') : flat ? (i % 2 ? 'Top' : 'Bottom') : (i % 2 ? 'Left' : 'Right')), circuit: chk ? 'co' : 'a' }));
   (g.fittings || []).forEach((f, i) => { if (f.kind === 'tee' && f.thermowell) ports['tw' + (i + 1)] = pt(`Thermowell ${i + 1} (${THERMOWELL_POS[f.thermowellPos] || 'Short'})`, BF_POS, { ip: false, def: flat ? 'Top' : 'Right' }); });
   return { title: 'Tab_Fitting', types: [], image: fitImage(g), size: [90, 90], ports };
@@ -9533,7 +9753,7 @@ function isUnit(g) { return isBfit(g) && g.templateCls === 'skynet' && !g.loose;
 // again, like any other. Un-bundled (loose) it is edited as a plain Tab_Fitting or Tab_Vessel; bundled again, it is one unit
 // and its IPs go back onto its openings. Once the Templates are Integrated (locked) this goes.
 const canLoosen = () => !TPL?.locked;
-const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.integrated ? [['bundled', 'Bundled (for now a Skynet item can be un-bundled to work on it; once the Skynet Templates are Integrated it can\'t)', 'bool', true]] : [];
+const looseField = it => canLoosen() && !it.onVessel && !isCapOnly(it) && !it.integrated && !isMf(it) ? [['bundled', 'Bundled (for now a Skynet item can be un-bundled to work on it; once the Skynet Templates are Integrated it can\'t)', 'bool', true]] : [];
 // Skynet vessels (Fritz, 2026-10-22): a Tab_Vessel made from a Skynet Vessel Template is one unit too. Each opening has its IP
 // built in where the Template puts it; they can't be moved, set or unbundled. It has Flip Horizontal, Flip Vertical and Rotate
 // like a Skynet Fitting (Fritz, 2026-10-23). Vessels made from a User Template keep their port settings.
@@ -9841,7 +10061,7 @@ function fittingSlotFields(w, onTab) {
   const meters = onTab ? [['', 'None'], ...L().elements.filter(e => e.type === 'flowMeter').map(e => [e.name, e.name])] : null;
   return FITTING_SLOTS.flatMap((label, i) => {
     const k = w['f' + i] || 'none';
-    return [['f' + i, label, 'sel', Object.entries(FITTING_KINDS), true],
+    return [['f' + i, label, 'sel', Object.entries(FITTING_KINDS).filter(([k]) => k !== 'valveTee' || k === w['f' + i]), true],      // a Long Tee with a Valve is only a Skynet one (Rule 5.35)
       ...(k === 'valve' ? [onTab ? ['fv' + i, 'Valve: Select Device, Widget or None', 'sel', valves] : ['_v' + i, 'Valve: Select Device, Widget or None (picked when it is on a Tab)', 'note']] : []),
       ...(METERS.includes(k) ? [onTab ? ['fm' + i, 'Flow Meter: Select Flow meter Device or None', 'sel', meters] : ['_m' + i, 'Flow Meter: Select Flow meter Device or None (picked when it is on a Tab)', 'note']] : []),
       ...(k === 'flowMeterTemp' ? [onTab ? ['fp' + i, 'Temperature: Select Temperature Probe or None', 'sel', probes] : ['_t' + i, 'Temperature: Select Temperature Probe or None (picked when it is on a Tab)', 'note']] : []),
@@ -10147,6 +10367,13 @@ F.skynetFitting = it => {
       ['sgLength', `Length (inches, ferrule face to ferrule face, ${SG_MIN} to ${SG_MAX}; only the glass${sgCaged(it) ? ' and its cage' : ''} stretches)`, 'num']] : []),
     ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : []), ...FIT_PLACE(it)];
   const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
+  if (isMf(it)) return [['_t', `Skynet ${mfInfo(it).what} (${it.template || ''}): ${mfKeys(it).length > 1 ? mfKeys(it).length + ' Long Tees joined end to end, a valve built into each branch' : 'a Long Tee with a valve built into its branch'}. ` +
+      'IPs on the two open ends of the tees and on the far end of each valve. Its valves are Devices built into it: they can\'t be taken out (Rule 5.2), but each one can be changed from Manual to Motorized and back here (Rule 5.35).', 'note'],
+    ['name', 'Name', 'text'], ['label', 'Label (never blank: it starts as ' + mfInfo(it).label + '_n, Rule 18.15)', 'text'], ...mfFields(it),
+    ['_o', 'Orientation (the picture, its valves and its IPs follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
+    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
+    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num'],
+    ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
   return [['_t', isCapOnly(it) ? `Skynet End Cap. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet Fitting ${it.template || ''}: ${made}. Every opening has a two-way IP built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['label', 'Label (never blank)', 'text'], ...stdFields(it), ...picks,

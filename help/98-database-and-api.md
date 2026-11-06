@@ -15,9 +15,10 @@ Pictures, Labels and manual vessels have no value, so they have no box.
 | **On value change** | Every time the value changes, at most 10 times a second (the last change is never lost) |
 | **When Clicked** | Each time someone sets it on its Tab (a tap, then Set), even to the same value |
 | **When a Process starts** | Each time the Process you pick starts |
-| **In a Group** | Each time a Process runs `send_db_group Group_Name` for its Group (see below) |
 | **At a date and time (once)** | One time, at the date and time you type, like `2026-11-01T06:00` |
 | **At clock time (every day)** | Every day at the clock time you type, like `12 AM`, `6:30 PM` or `18:30` |
+| **Every second**, **Every minute**, **Every hour** | Shortcuts: every 1 second, minute or hour |
+| **Every day (at Midnight)** | Shortcut: every day at 12 AM |
 | **Every N milliseconds / seconds / minutes / hours / days** | Every N of them (fastest is 100 ms) |
 | **Every 00:00:00** | Every interval you type, like `00:05:00` |
 
@@ -34,21 +35,38 @@ send_db "gGV_Mash_pH"
 
 `send_db Name` writes the reading at once, whatever its frequency, even when it is **Off** (Fritz, 2026-11-05). It was `log Name`; older Processes are changed to `send_db` when the Brain starts (Skynet Rule 15.2).
 
-### Groups: send many at once
+### Database Groups: send only when you want
 
-Pick **In a Group** and a **Group** in the Database and .API box to put the item in that Group. A Process line
+**Grouping is how a set of Devices and Widgets is sent to the database, or not.** A Process line starts sending a Group, and another Process line stops it:
 
 ```
-send_db_group Readings
+start_db_group Mash
+stop_db_group Mash
 ```
 
-sends every item In the Group **Readings** to the database, **each time** the line runs (a brew day can send its readings at the end, for example). `send_db Name` still sends one item at any time.
+- **A Device or Widget can belong to more than one Group.** Below **What to send** in its Database and .API box you see its Groups and a **👥 Groups…** button. It opens the **Group list**:
+  - **➕ Add new Group…** at the top makes a new Group: type its Name (letters, digits and `_`, like `Mash`, `Boil` or `Readings`). The new Group is then selected in the list.
+  - **Click** a Group to open the Group dialog with all its members.
+  - **Double-click** a Group to add this Device or Widget to it; the Group dialog opens with its members. A ✔ in the list marks the Groups it is in.
+  - In the Group dialog, **➖ Take it out of this Group** (or **➕ Add it**) changes your mind, and **✏ Change name** renames the Group.
+  - **💾 Save** in the Group list keeps your choice; it is saved when you Save the Properties.
+- **An item in a Group is only sent to the database while one of its Groups is started.** It is sent by its own **Send to the database** setting (Every 1 minute, On value change, When Clicked ...): the item says *how often*, the Group says *when*. An item in no Group is sent by its setting all the time.
+- **On demand always works.** `send_db Name` sends the item at once, even when its Groups are stopped.
+- `send_db_group Readings` sends every item of the Group **Readings** once, now, started or not (a brew day can send its readings at the end, for example).
+- Every Group is stopped when the Brain starts. The Processes console prints each start and stop.
 
-- **➕ Add new Group…** at the end of the Group list makes a new Group: type its Name (letters, digits and `_`, like `Readings` or `Brew_Day_End`).
-- A Group has a hidden key that never changes; its items point to that key. **✏ Change name** beside the Group list changes its Name, and **every Process** with `send_db_group Old_Name` is changed to the new Name at once (Update All). A running Process keeps the old text until it is restarted.
-- **Check** in the Process editor says when a `send_db_group` line names a Group that is not there.
+**Example: the Mash probe.** You want your Mash Temperature Probe in the database every minute, but only during the Mash.
 
-The old choice **Once** (one time after the Brain started) is gone (Skynet Rule 6.14, 2026-11-05). When a Schema loads, every item that was set to Once is put **In the Group named Once**, so a Process line `send_db_group Once` sends them.
+1. In the probe's Database and .API box, set **Send to the database** to **Every minute**. Press **👥 Groups…** and double-click **Mash** (➕ Add new Group… makes it the first time).
+2. At the beginning of your Mash Process, add the line `start_db_group Mash`. From then on the probe reports to the database every minute.
+3. At the end of the Mash Process, add the line `stop_db_group Mash`.
+
+Your database only has that probe's data during the Mash. If the probe is also in the Group **Boil**, `start_db_group Boil` sends it during the boil too.
+
+- A Group has a hidden key that never changes; its items point to that key. **✏ Change name** in the Group dialog changes its Name, and **every Process** with `send_db_group`, `start_db_group` or `stop_db_group Old_Name` is changed to the new Name at once (Update All). A running Process keeps the old text until it is restarted.
+- **Check** in the Process editor says when one of these lines names a Group that is not there.
+
+The old choices **Once** and **In a Group** are gone (Skynet Rule 6.14). When a Schema loads, every item that was set to Once or In a Group becomes **On demand** and stays in its Group (Once items get the Group named **Once**), so a Process line `send_db_group Once` still sends them as before.
 
 ### Time and hidden key
 

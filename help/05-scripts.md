@@ -21,6 +21,7 @@ The saved file is read every time a process starts, so it never runs an old copy
 new value vVCount              make a number variable
 vVCount = 3                    set it
 new value vVHops = 10          make one and set it on one line
+new gV gV_Strike = 163         make a gGlobal (every Process can use it, Help 145)
 V_BK_In = true                 open a valve (turn an output on)
 gblS_Msg = "Mash in"           set a variable
 tm_Whirlpool = 00:20:00        set a timer
@@ -41,7 +42,9 @@ restart                        start this process over from the top
 print "text"                   write to Output
 show tab "Brewery"             switch every screen to a tab
 send_db "gGV_Kettle_Temp"      send a reading to the database now
-send_db_group Readings        send every item In the Group Readings to the database now
+send_db_group Readings        send every item of the Group Readings to the database now, once
+start_db_group Mash           the items in the Group Mash are sent by their own setting from now on
+stop_db_group Mash            ... until this line (see Database and .API)
 // a comment
 ```
 
