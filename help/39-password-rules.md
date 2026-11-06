@@ -30,6 +30,6 @@ Passwords made before you change the rules keep working. A user only meets the n
 
 ## Start Fresh
 
-If you answer **Yes** to the installer's **Start Fresh** question, every login is deleted along with the settings, so the password rules go back to the defaults. A normal update keeps both the logins and the password rules.
+If you pick **Start Fresh** in the installer, every login is deleted along with the settings, so the password rules go back to the defaults. **Update the program and reset all users** deletes the logins but keeps the password rules. A normal update keeps both the logins and the password rules.
 
 The emergency tool `node tools/reset-password.js` on the Brain always uses the default rules, so you can get back in even if the rules were set too strict.

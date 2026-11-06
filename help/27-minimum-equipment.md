@@ -176,7 +176,7 @@ Core cost, without sensors and outputs: about **$120-165 for System 1**, plus ab
 - **One Brain at a time.** Two panels driving the same boards fight each other.
 - **Away from home only through Tailscale.** Never open a port on your router for the panel.
 - **The microSD card wears out** with all-day logging. A small UPS (battery backup) and, on a Pi 5, an SSD instead of the card help. Always shut the Pi down before unplugging it.
-- Updates keep every sign-in; only the installer's **Start Fresh** (answered Yes) removes them.
+- Updates keep every sign-in; only the installer's **reset all users** or **Start Fresh** choice (confirmed) removes them.
 - **Hardware safety comes first.** The panel is not a safety system. Keep hard-wired safety devices: an E-stop, float switches, burner flame safety, and GFCI on anything mains powered. Have mains wiring checked by an electrician.
 
 See also [Installing the panel](19-installing) and [Devices](03-devices).
