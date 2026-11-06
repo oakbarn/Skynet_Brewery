@@ -66,6 +66,7 @@ export function graphicTopic(g) {
       if (g.bundled) return ['equipment', 'bundle-a-vessel-with-its-ips'];
       return g.vesselType === 'vessel' ? ['vessel-tab'] : ['equipment', 'other-equipment'];
     case 'ip':
+      if (g.fitting === 'manualValve' && /Tap_Water_Valve_Hose_Bib\.svg$/.test(g.image || '')) return ['tap-water-valve'];      // Rule 5.33, Help 141
       if (g.fitting === 'manualValve') return ['pipe-fittings-and-manual-valves', 'the-manual-valve-widget'];
       if (g.fitting === 'qd') return ['quick-disconnects-and-qd-hoses', 'the-quick-disconnect-widget'];      // Rule 5.28, Help 127
       if (['elbow90', 'elbow45', 'tee', 'cross'].includes(g.fitting)) return ['tc-pipe-fittings'];
@@ -118,7 +119,7 @@ export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE,
   elementTopic({ type: 'gGlobal', kind: 'list' }), elementTopic({ type: 'analogOut', subtype: 'propValve' }),
   ...['switch', 'pushButton', 'pulseButton', 'led'].map(type => elementTopic({ type })),
   ...[{ vesselType: 'vessel' }, { vesselType: 'pchiller' }, { bundled: true }, { vesselType: 'bfit' }, { vesselType: 'bfit', templateCls: 'skynet' }, { vesselType: 'bfit', templateCls: 'skynet', fittings: [{ kind: 'tee' }] }, { vesselType: 'vessel', template: 'HLT', templateCls: 'skynet' }].map(v => graphicTopic({ kind: 'vessel', ...v })),
-  ...[{ fitting: 'manualValve' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
+  ...[{ fitting: 'manualValve' }, { fitting: 'manualValve', image: 'Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg' }, { fitting: 'tee' }, {}].map(f => graphicTopic({ kind: 'ip', ...f })),
   ['vessel-and-fitting-templates', 'vessel-template-settings'], ['vessel-and-fitting-templates', 'bundled-fitting-template-settings'],
   graphicTopic({ kind: 'pipe' }), graphicTopic({ kind: 'pipe', hose: true }), graphicTopic({ kind: 'pipe', hose: true, qd: true }), graphicTopic({ kind: 'ip', fitting: 'qd' }), graphicTopic({ kind: 'image' }), graphicTopic({ kind: 'text' }), graphicTopic({ kind: 'clone' }), graphicTopic({ kind: 'override' }),
   ...BAR.map(b => b[1])];

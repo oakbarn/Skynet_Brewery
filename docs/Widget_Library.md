@@ -72,10 +72,20 @@ A pipe fitting turned by hand and a pseudo Device (Rule 5.15, Help 87). Name Man
 | Label, Show label | The Label is used in the "by hand" message |
 | Autosize to pipe, X, Y, Width, Height, Lock position | As a pipe fitting |
 | Open overlay | Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, drawn on top while open (fixed) |
-| Picture (`image`) | Plain (the drawn valve), or Fritz's Manual Ball Valve drawings (2026-11-02, Help 110): side view, front view, on a front elbow (Images/Skynet/Valves/Manual_Ball_Valve_*_Closed.svg; the Tab shows the _Open twin while open). |
+| Picture (`image`) | Plain (the drawn valve), or Fritz's Manual Ball Valve drawings (2026-11-02, Help 110): side view, front view, on a front elbow (Images/Skynet/Valves/Manual_Ball_Valve_*_Closed.svg; the Tab shows the _Open twin while open), or the **Tap Water Valve** (below). |
 | IPs (Rule 5.24, Help 123) | **Two**, one at each pipe end (`eq:<id>:in`, `eq:<id>:out`): plain valve left and right ends; side view the outer face of each ferrule; front view both at the center of the opening; front elbow the center of the opening and the bottom ferrule face; a user's picture the middle of its left and right sides. They turn with Rotate 45; a closed valve blocks both. (Before 2026-11-04 it had one IP in its middle.) |
 
 In a Process: `ManualValve_1.state = true` (or `ManualValve_1 = true`) does not change it. It shows "✋ OPEN ... by hand, then click it on the ... Tab to confirm" at the top of every screen, the valve blinks, and the Process waits until it is clicked to that state. Reading it (`if ManualValve_1 == true`) works as for any Device.
+
+#### Tap Water Valve (a Manual Valve Widget, Rule 5.33, Help 141)
+A brass household hose bib with a green cross handle (Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg). Added as **Tap Water Valve** from Select Device Type > Valves or Select Widget Type > Semi_Widgets_Devices, or by picking its Picture on a Manual Valve. Name ManualValve_n, Label starts as **tap_water_n**.
+
+| Setting | Notes |
+|---|---|
+| IP | **One**, the center of the hose thread's outer face (`eq:<id>:out`). The wall side has no IP. It does not cut a pipe. |
+| .state | As every Manual Valve: only a click changes it; a Process asks by hand. |
+| Flow | Open: a tap water source, flow pushes out of the hose outlet with no pump, tap water Blue (Rule 5.21). Closed: blocks the hose on it. |
+
 
 **Snap to align** (2026-10-28, Help 86): in Edit layout, anything with IPs that is dragged so one of its IPs comes within 10 px of another IP on the Tab jumps so the two sit exactly on each other (hold Alt to place it without the jump). On Skynet valve pictures (motorized ball, manual ball, butterfly, gas solenoid) the two IPs sit on the picture's pipe ends, not the middle of the box's sides.
 
@@ -517,3 +527,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-05: Vessel Widget class (Rule 5.31, Help 133): Skynet_Vessel_Widget Template, a Place slider on each IP, the Temperature Probe (Thermowell or Front) and the Element Port; new vessel port Top Inlet. The Three Vessel sample's vessels use it.
 - 2026-11-05: Picture Widget: Add Widget box and Properties follow the Pump drill-down (Rule 18.27, Help 74); Picture ➕ makes a Picture Widget. (thread "Build Picture Widget dialog like Pump")
 - 2026-11-05: Sight_Glass and Sight_Glass_Caged TC Pipe Fittings (Rule 5.32, Help 139): a Length setting in inches stretches the glass; Label starts as site_glass_n. (thread "Add caged and plain sight glass fittings")
+- 2026-11-06: Tap Water Valve, a Manual Valve Widget with a household hose bib picture, one IP on its hose outlet, a tap water source while open, Label tap_water_n (Rule 5.33, Help 141). (thread "Add hose bib Manual Valve Widget")

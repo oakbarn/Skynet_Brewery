@@ -922,20 +922,29 @@ const MV_OVERLAY = 'Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg';
 // top of it (Fritz, 2026-11-05: the _Open pictures are retired to Delete/, an Overlay shows open)
 const MV_PICS = [['', 'Plain (the drawn valve)'], ['Images/Skynet/Valves/Manual_Ball_Valve_Side_Closed.svg', 'Manual Ball Valve, side view'],
   ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Closed.svg', 'Manual Ball Valve, front view (looking down the pipe)'],
-  ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow']];
+  ['Images/Skynet/Valves/Manual_Ball_Valve_Front_Elbow_Closed.svg', 'Manual Ball Valve on a front elbow'],
+  ['Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg', 'Tap Water Valve (household hose bib; one IP, the hose outlet)']];
+// The Tap Water Valve (Fritz, 2026-11-06, Rule 5.33): a Manual Valve Widget with the household hose bib picture. The house water
+// comes in from the wall, so it has one IP only, on its hose thread, and while open it is a tap water source (flow pushes out).
+const TAP_PIC = 'Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg';
+const isTapMv = g => isMv(g) && g.image === TAP_PIC;
+// the Label a new Tap Water Valve starts with (Rule 18.15): tap_water_n, the next number not used as a Label or Name
+const tapLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('tap_water_' + n)) n++; return 'tap_water_' + n; };
 const mvPic = g => g.image;     // open shows the open overlay on the same picture (Fritz, 2026-11-05: no Open pictures)
 // A Manual Valve Widget has two IPs, one at each pipe end (Fritz, 2026-11-04, Rule 5.24; where they go is Rule 5.20): the center
 // of each ferrule's outer face on the side view, the left and right ends of the plain drawn valve, both at the center of the
 // opening on a front view, and the center of the opening plus the center of the bottom ferrule on a front elbow. A picture
 // Skynet doesn't know (a user's own) has them in the middle of its left and right sides. They turn with the valve (Rotate 45).
 // ends = [end 1, end 2] as parts of the picture's box (the picture fills the box).
-const MV_ENDS = { plain: [[0, 0.5], [1, 0.5]], Side: [[0.015, 0.5], [0.985, 0.5]], Front: [[0.5, 0.5], [0.5, 0.5]], Front_Elbow: [[0.5, 0.5], [0.5, 0.99]] };
+const MV_ENDS = { plain: [[0, 0.5], [1, 0.5]], Side: [[0.015, 0.5], [0.985, 0.5]], Front: [[0.5, 0.5], [0.5, 0.5]], Front_Elbow: [[0.5, 0.5], [0.5, 0.99]],
+  tap: [[1 / 3, 0.987]] };       // the Tap Water Valve: the center of its hose thread's outer face (Rule 5.33)
 function mvEnds(g) {
   const m = String(g.image || '').match(/Manual_Ball_Valve_(Side|Front_Elbow|Front)_(?:Open|Closed)\.svg$/);
-  const ends = !g.image ? MV_ENDS.plain : m ? MV_ENDS[m[1]] : MV_ENDS.plain;
+  const ends = !g.image ? MV_ENDS.plain : isTapMv(g) ? MV_ENDS.tap : m ? MV_ENDS[m[1]] : MV_ENDS.plain;
   const x = g.x || 0, y = g.y || 0, w = g.w || 30, hh = g.h || 30, cx = x + w / 2, cy = y + hh / 2, r = (+g.rotate || 0) * Math.PI / 180;
   const at = ([fx, fy]) => { const dx = x + fx * w - cx, dy = y + fy * hh - cy; return [Math.round(cx + dx * Math.cos(r) - dy * Math.sin(r)), Math.round(cy + dx * Math.sin(r) + dy * Math.cos(r))]; };
   const nm = g.name || g.label || 'Manual valve';
+  if (isTapMv(g)) return [{ id: `eq:${g.id}:out`, label: `${nm} hose outlet`, text: '', circuit: 'a', mv: true, tap: true, c: at(ends[0]) }];
   return ends.map((e, i) => ({ id: `eq:${g.id}:${i ? 'out' : 'in'}`, label: `${nm} end ${i + 1}`, text: '', circuit: 'a', mv: true, c: at(e) }));
 }
 const FIT_SVG = {
@@ -2167,6 +2176,7 @@ const pipeJoined = p => !!(ipPoint(p.from, p.workspace) && ipPoint(p.to, p.works
 function ipNode(id, ws) {
   const q = eqOfIp(id) !== null && eqPort(id, ws);
   if (q?.mv && !mvOpen(L().graphics.find(x => x.id === eqOfIp(id)))) return { closed: true };     // a closed Manual Valve blocks both ends
+  if (q?.tap) return { key: id, push: true, tap: true };       // an open Tap Water Valve (Rule 5.33): house water pushes out of its hose outlet
   if (q) return { key: `eq:${eqOfIp(id)}:${q.circuit}`, pass: true };
   const dn = devOfIp(id);
   if (dn !== null) {
@@ -2205,7 +2215,7 @@ const tabFlowOf = w => (!editing && S.flow?.tab) || flowKey(w?.flowColor) || '';
 // an IP's own Flow Color (Fritz, 2026-11-03): first of all, flow that begins at that IP takes it (an HLT outlet IP set to Red)
 const ipFlowOf = id => { const g = L().graphics.find(x => x.id === id && x.kind === 'ip'); return g ? (!editing && g.name && S.flow?.ips?.[g.name]) || flowKey(g.flowColor) || '' : ''; };
 const pipeFlowOf = p => (!editing && p.name && S.flow?.pipes?.[p.name]) || flowKey(p.flowColor) || '';
-const isTapNode = (key, n) => n?.push && devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve';
+const isTapNode = (key, n) => n?.push && (n.tap || (devOfIp(key) !== null && elNamed(devOfIp(key))?.subtype === 'valve'));
 function computeFlow(ws, src = new Map()) {    // src: pipe id -> { vessel, tap } where its flow began (filled in here)
   const dir = new Map();                         // pipe id -> 1 (as drawn) or -1 (backwards)
   const nodes = new Map(), adj = new Map(), radj = new Map();    // adj: the way flow can go; radj: back against it (a pump's IN pulls)
@@ -3424,7 +3434,8 @@ const DEV_TYPES = () => [
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
-  ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
+  ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')],
+    ['Tap Water Valve (household hose bib: a Manual Valve Widget, only a click opens or closes it)', () => addIpFit('manualValve', 'tap')]]],
   ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%', subtype: 'element' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), VESSEL_ELEMENT]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
@@ -3439,7 +3450,8 @@ const WGT_TYPES = () => [
   ['dataw', 'Value, Time and DateTime Widgets', Object.entries(DATA_W).map(([t, d]) => [`${d.word} Widget (shows a ${d.word.toLowerCase()}; a tap sets it)`, () => addThing(t, 'w_' + d.word)])],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
   ['semi', 'Semi_Widgets_Devices (Switch, buttons, LED, Manual Valve)', [...amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
-    ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')]]],
+    ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')],
+    ['Tap Water Valve (household hose bib Manual Valve Widget)', () => addIpFit('manualValve', 'tap')]]],
   ['controls', 'On-screen controls', amGroup('Widgets').filter(r => !['picture', 'label', 'manual'].includes(r[1])).map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
   ['vessels', 'Vessels', VESSEL_ROWS],
   ['equipment', 'Equipment (chillers, coils, filters)', EQUIP_ROWS()],
@@ -4361,13 +4373,14 @@ function pickVessel(title, groups) {
     document.body.append(d); d.showModal();
   });
 }
-function addIpFit(fit) {
+function addIpFit(fit, kind) {
   toBuild();
   const base = { point: 'IP', pipe: 'Pipe', cap: 'Cap', coupling: 'Coupling' }[fit] || FITTINGS[fit];
   let i = 1; while (draft.graphics.some(g => g.kind === 'ip' && g.label === base + ' ' + i)) i++;
   const g = { id: newId(), kind: 'ip', workspace: wsName, x: 60, y: 60, w: 30, h: 30, label: base + ' ' + i, color: fit === 'point' ? '#e8a33a' : '#8a8f96' };
   if (fit !== 'point') g.fitting = fit;
   if (isIpFit(g)) delete g.label;          // a pipe fitting has no label, only its Skynet name (Tee_1)
+  if (kind === 'tap') { g.image = TAP_PIC; g.label = tapLabel(draft.graphics); }       // the Tap Water Valve (Rule 5.33)
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
 // a new Tab (New tab, and ➕ Add new Tab… in the Add Device box): its name checked, a unique 2 letter Tab ID. Returns it, or null.
@@ -4783,7 +4796,7 @@ const F = {
   ip: it => isIpFit(it) ? [['_pf', `${FITTINGS[it.fitting]}: a pipe fitting. It has no settings but its place and its size. Turn it with the turn buttons on the Edit layout bar.`, 'note'], ...FIT_PLACE(it)]
     : isMv(it) ? [['_mv', `A Manual Valve is turned by hand: one click on it on its Tab opens or closes it, at any time, and that is the only way it changes. It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now. A Process line ${it.name || 'ManualValve_1'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).`, 'note'],
       ['label', 'Label (shown in the "by hand" message; never blank)', 'text'], ['labelVisible', 'Show label', 'yn'],
-      ['image', 'Picture (Fritz\'s Manual Ball Valve drawings; its one IP is the middle of the picture)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
+      ['image', 'Picture (Fritz\'s Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source)', 'sel', MV_PICS], ...FIT_PLACE(it)] : F.ipPoint,
   ipPoint: [['fitting', 'Type', 'fit'], ['rotate', 'Turn (degrees)', 'sel', ['0', '45', '90', '135', '180', '225', '270', '315']], ['attachTo', 'Port on vessel (moves with it; set by dropping the IP on a vessel)', 'vessel'], ['label', 'Name / label (e.g. Red pump out, MLT in, Drain)', 'text'],
     ['flowColor', 'Flow Color (flow that begins at this IP takes it, first of all: Rule 5.21)', 'flowc', 'ip'], ['labelVisible', 'Show label on screen', 'yn'], ['labelAlign', 'Label position', 'sel', ['below', 'above', 'top', 'center', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right']], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size', 'num'],
     ['image', 'Background picture path (empty = drawn shape)', 'path'], ['text', 'Text on marker', 'text'], ['color', 'Color', 'color'], ['hideRun', 'Hide its label and picture too when not editing (the IP marker itself only shows in Edit layout)', 'yn'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']],
