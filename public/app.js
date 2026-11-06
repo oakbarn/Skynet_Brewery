@@ -7283,7 +7283,7 @@ const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now o
 const TIME_MODES = ['ms', 'seconds', 'minutes', 'hours', 'days', 'hms'];
 // .API: who outside Skynet may reach it (web API /api/items, MQTT and voice)
 // Fritz, 2026-11-06: plain English first (Read Only, Read & Control); the computer words Get / Get & Put follow in the ( )
-const API_LABEL = { off: 'Off', get: 'Read Only (Get: outside programs like Node-Red can read it.)', getput: 'Read & Control (Get & Put: outside programs like Node-Red can read and control it.)' };
+const API_LABEL = { off: 'Off', get: 'Read Only (Get: outside programs like Node-Red can read it.)', getput: 'Read & Control (Get & Put: outside programs like Node-Red can also control it.)' };
 function logSummary(lg) {
   lg = lg || { frequency: 'none' };
   const f = lg.frequency || 'none';

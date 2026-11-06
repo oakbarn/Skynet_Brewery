@@ -62,7 +62,7 @@ The database is a SQLite file on the Brain (`data/brewlog.db`): free, SQL, nothi
 |---|---|
 | **Off** | Can't see it (the start) |
 | **Read Only (Get: outside programs like Node-Red can read it.)** | Can read it |
-| **Read & Control (Get & Put: outside programs like Node-Red can read and control it.)** | Can read it and control it (change it) |
+| **Read & Control (Get & Put: outside programs like Node-Red can also control it.)** | Can read it and control it (change it) |
 
 **API_Name** (below .API in the pop-up) is the name a Voice Command says. It must be Unique and may be blank (with a warning): see [API_Name](144-api-name-for-voice-commands).
 
