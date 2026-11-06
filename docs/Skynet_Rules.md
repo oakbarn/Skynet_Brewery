@@ -1312,15 +1312,16 @@ document is kept.
 installer (the Windows Setup .exe, the Mac .command, the Linux / Pi .sh) finds the panel already installed, it asks what this
 update does. The program files are always updated. The Windows Setup shows a page with three round choice buttons; the Mac
 and Linux / Pi installers show the same three as a numbered list:
-1. **Update the program and keep everything** (recommended, the default, and what a silent or unattended update does).
+1. **Start Fresh: delete everything**, as below.
 2. **Update the program and reset all users**: after a warning (No, go back, is the default) it deletes every user, password,
    sign-in and the recovery code (`data/users.json` and `data/sessions.json`), and on Windows the user name and password the
    clean window remembers. Schemas and settings (`config`), the brew log and saved values (`data`), Processes (`scripts`) and
    `media` are kept. The panel opens at Admin setup.
-3. **Start Fresh: delete everything**, as below.
-With 1 or 2 the installer still offers to replace single folders ("Keep all of them as they are?").
+3. **Update the program and keep everything** (the original No: recommended, already picked, and what a silent or
+   unattended update does).
+With 2 or 3 the installer still offers to replace single folders ("Keep all of them as they are?").
 *Replaced:* "it first asks **Delete all users and Schemas and Start Fresh?** (No is the default)." (2026-11-02)
-**Start Fresh** (Fritz, 2026-11-02): choice 3 shows a second warning that **all existing data will be deleted**, listing what goes,
+**Start Fresh** (Fritz, 2026-11-02): choice 1 shows a second warning that **all existing data will be deleted**, listing what goes,
 with **No (back out, nothing deleted)** as the default. Confirmed, it deletes `config` (Schemas, Tabs, Devices, settings),
 `data` (users, passwords, sign-ins, recovery code, brew log, saved values) and `scripts` (Processes) for good, with no
 backup, and the panel starts again from the samples with Admin setup. **Kept:** `media` (pictures and sounds, Rule 7.3) and
@@ -2240,7 +2241,7 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 6.14: the Database Groups switches are replaced by a **👥 Groups…** button and a Group list (➕ Add new Group… at the top); a click on a Group shows the Group dialog with all its members, a double-click adds the Device or Widget to the Group and shows its members (Fritz, dialog change commanded under Rule 18). Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Added Rule 1.24 (make a gGlobal in a Process: new gGlobalValue gV_X = 10, new gV gV_X, new value gV_X all the same; declare = new; a start that does not fit is an error; = is the first value only). Help 145 (next free Help number 146). (thread "Declare gGlobals inside a Process")
 - 2026-11-06: Added Rule 5.35 (Valve Tees and Supply Manifolds: the Valve Tee, Double and Triple Supply Manifold, TC 1.5 Long Tees with a valve Device built into each branch; IPs only on the open ends of the tees and the far end of each valve; each valve Manual or Motorized on its own in the fitting's Properties; added from Elbows, Tees … and the Valves list). Help 146; next free Help number 147. (thread "Add valve Tees and supply manifolds")
-- 2026-11-06: Rule 9.8 changed (Fritz: "Better options in Install of Skynet Panel"): on an existing install the installers offer three choices, 1 Update the program and keep everything (default), 2 Update the program and reset all users (users, passwords, sign-ins, recovery code; after a warning), 3 Start Fresh (delete everything, after the red warning). Rule 10.1 updated to match. Help 18, 19 and 10 updated; no new Help number used. (thread "Improve Setup install options")
+- 2026-11-06: Rule 9.8 changed (Fritz: "Better options in Install of Skynet Panel"): on an existing install the installers offer three choices in Fritz's order, 1 Start Fresh (delete everything, after the red warning), 2 Update the program and reset all users (users, passwords, sign-ins, recovery code; after a warning), 3 Update the program and keep everything (the original No, already picked). Rule 10.1 updated to match. Help 18, 19 and 10 updated; no new Help number used. (thread "Improve Setup install options")
 - 2026-11-06: Rule 15.4: the Importer is a choice in the Windows Setup ("Will you import a BruControl configuration on this computer?"); Setup always makes the Brewing folder's Import subfolder (C:\Brewing\Import), also for BeerSmith or other programs; the Importer saves its Schema file there (Save the Schema) and the Panel opens it (Schema.json > Open a Schema file). Help 143 and Help 44 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")

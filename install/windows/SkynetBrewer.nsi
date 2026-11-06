@@ -2,9 +2,9 @@
 ;
 ; Puts the Skynet Brew Panel in C:\Brewing\BrewPanel (changeable), writes Skynet_Brewer.bat there,
 ; and adds a "Skynet Brewer" shortcut to the Desktop and the Start menu.
-; On an update a page asks what to do (Rule 9.8): 1 update and keep everything (the default), 2 update and reset all users
-; (deletes users, passwords, sign-ins and the recovery code after a warning), or 3 Start Fresh (deletes config, data and
-; scripts after a second warning; media is kept). With 1 or 2 you can still choose to replace one of your folders.
+; On an update a page asks what to do (Rule 9.8): 1 Start Fresh (deletes config, data and scripts after a second warning;
+; media is kept), 2 update and reset all users (deletes users, passwords, sign-ins and the recovery code after a warning),
+; or 3 update and keep everything (the default, the original No). With 2 or 3 you can still replace one of your folders.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config, media and scripts samples are in its defaults\ folder)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
@@ -164,9 +164,9 @@ FunctionEnd
 
 ; ---------------------------------------------------------------- What this update does (Rule 9.8)
 ; Shown only when the panel is already in the chosen folder. Three choices (Fritz, 2026-11-06):
-;   keep   Update the program and keep everything (the default, and what a silent /S update does)
-;   users  Update the program and reset all users: users, passwords, sign-ins and the recovery code are deleted
-;   fresh  Start Fresh: everything is deleted, as if the panel was never installed (media and backups are kept)
+;   1 fresh  Start Fresh: everything is deleted, as if the panel was never installed (media and backups are kept)
+;   2 users  Update the program and reset all users: users, passwords, sign-ins and the recovery code are deleted
+;   3 keep   Update the program and keep everything (the original No: the default, and what a silent /S update does)
 ; Reset and Start Fresh each have a warning with No as the default; No goes back to this page and nothing is deleted.
 ; The page only records the choice in $Choice. Nothing is deleted until the panel is stopped (Section SecMain).
 Function UpdateChoicePage
@@ -183,9 +183,9 @@ Function UpdateChoicePage
   ${NSD_CreateLabel} 0 0 100% 14u "Found in $INSTDIR. The program files are always updated."
   Pop $0
 
-  ${NSD_CreateRadioButton} 0 18u 100% 12u "&1. Update the program and keep everything (recommended)"
-  Pop $RadioKeep
-  ${NSD_CreateLabel} 12u 31u 96% 18u "Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are."
+  ${NSD_CreateRadioButton} 0 18u 100% 12u "&1. Start Fresh: delete everything"
+  Pop $RadioFresh
+  ${NSD_CreateLabel} 12u 31u 96% 18u "Deletes every Schema, setting, user, password, the brew log and every Process, for good. Kept: pictures and sounds (media) and the backups folder. A warning comes next."
   Pop $0
 
   ${NSD_CreateRadioButton} 0 52u 100% 12u "&2. Update the program and reset all users"
@@ -193,9 +193,9 @@ Function UpdateChoicePage
   ${NSD_CreateLabel} 12u 65u 96% 26u "Deletes every user, password, sign-in and the recovery code. You make the admin account again. Your Schemas, settings, brew log, Processes, pictures and sounds are kept."
   Pop $0
 
-  ${NSD_CreateRadioButton} 0 94u 100% 12u "&3. Start Fresh: delete everything"
-  Pop $RadioFresh
-  ${NSD_CreateLabel} 12u 107u 96% 26u "Deletes every Schema, setting, user, password, the brew log and every Process, for good. Kept: pictures and sounds (media) and the backups folder. A warning comes next."
+  ${NSD_CreateRadioButton} 0 94u 100% 12u "&3. Update the program and keep everything (recommended)"
+  Pop $RadioKeep
+  ${NSD_CreateLabel} 12u 107u 96% 26u "Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are. This is the one already picked."
   Pop $0
 
   ${NSD_Check} $RadioKeep
@@ -243,7 +243,7 @@ Function ResetUsers
   ${EndIf}
 FunctionEnd
 
-; Choice 3: delete all users, Schemas and Processes and start as if the panel was never installed. $Fresh = 1 when done.
+; Choice 1: delete all users, Schemas and Processes and start as if the panel was never installed. $Fresh = 1 when done.
 Function StartFresh
   RMDir /r "$INSTDIR\config"
   RMDir /r "$INSTDIR\data"
