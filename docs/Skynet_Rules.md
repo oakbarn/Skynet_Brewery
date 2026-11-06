@@ -183,6 +183,18 @@ across Processes, so they **stay Widgets and do not become gGlobals**. It keeps 
 .API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
 Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
 
+1.24 **Making a gGlobal in a Process** (Fritz, 2026-11-06). Besides the gGlobal screen (Rule 1.19), a Process line makes a
+gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gV_X = 10` (the long word), `new gV gV_X = 10` (the
+short word) and `new value gV_X = 10` (a normal variable word with a name that starts gV_). The words are **gGlobalValue / gV**
+(gV_), **gGlobalString / gS** (gS_), **gGlobalTime / gT** (gT_), **gGlobalDateTime / gD** (gD_, as Rule 1.19) and
+**gGlobalBoolean / gB** (gB_). **`declare` is the same word as `new`.** Picking or typing the long word in the Process editor
+fills in the start of the name (gV_ ...). **A start that does not fit the word is an error** (`new value gS_X`: gS_ is for a
+String), and so is a long or short word with a name that does not start with its letters. A Graphic gGlobal (gG_) is made only
+on the gGlobal screen. The gGlobal is made **the first time the line runs**, saved in the Schema like one made on the gGlobal
+screen, never on a Tab; the `= 10` is its **first value** only, and afterwards the line does nothing, because a gGlobal keeps
+its value (Rule 1.22). A name already used by a Device or Widget, or by a gGlobal of another Kind, is an error. Any other name
+after `new value` is still a Process variable. (thread "Declare gGlobals inside a Process", Help 145)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -2159,3 +2171,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 6.14 Database Groups rewritten (Fritz): a Device or Widget can belong to more than one Group; Grouping is how a set of items is sent to the Database or not; `start_db_group Group_Name` starts a Group and `stop_db_group Group_Name` stops it; an item in a Group is sent by its own setting only while one of its Groups is started; On demand (`send_db`) is always true; `send_db_group` sends the Group once. In a Group is no longer a Send to the database choice (old items become On demand in their Group). Fritz's Mash probe example added. Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Rule 6.14: Send to the database gets shortcut choices **Every second, Every minute, Every hour, Every day (at Midnight)**, listed just above Every N milliseconds (Fritz: "I know you can set these with the way it is but these are shortcuts"). Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Rule 6.14: the Database Groups switches are replaced by a **👥 Groups…** button and a Group list (➕ Add new Group… at the top); a click on a Group shows the Group dialog with all its members, a double-click adds the Device or Widget to the Group and shows its members (Fritz, dialog change commanded under Rule 18). Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Added Rule 1.24 (make a gGlobal in a Process: new gGlobalValue gV_X = 10, new gV gV_X, new value gV_X all the same; declare = new; a start that does not fit is an error; = is the first value only). Help 145 (next free Help number 146). (thread "Declare gGlobals inside a Process")

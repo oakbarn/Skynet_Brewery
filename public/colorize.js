@@ -23,6 +23,8 @@ export const COMMANDS = ['if', 'elseif', 'else', 'endif', 'goto', 'sleep', 'wait
   'step', 'restart', 'pause', 'tab', 'value', 'string', 'bool', 'time', 'datetime', 'ask', 'close_all_valves', 'open_all_valves', 'all_pumps_off'];
 export const CONSTANTS = ['true', 'false', 'now', 'on', 'off'];
 export const LOGIC = ['and', 'or', 'not'];
+// gGlobals made in a Process (Rule 1.24): declare is the same as new, and the gGlobal words
+COMMANDS.push('declare', 'gglobalvalue', 'gglobalstring', 'gglobaltime', 'gglobaldatetime', 'gglobalboolean', 'gv', 'gs', 'gt', 'gd', 'gb');
 // element types that sit on a PLC port: Devices. Every other type (but gGlobal) is a Widget.
 export const DEVICE_TYPES = ['digitalOut', 'digitalIn', 'temperature', 'analogIn', 'pwmOut', 'analogOut', 'flowMeter', 'scale', 'stepper', 'dutyCycle', 'hysteresis', 'pid', 'deadband'];
 const CMD = new Set(COMMANDS), CONST = new Set([...CONSTANTS, ...SKYNET_CONSTANTS.map(c => c[0].toLowerCase())]), LOG = new Set(LOGIC);
