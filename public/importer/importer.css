@@ -1,0 +1,40 @@
+/* Skynet BruControl Importer: on top of the Panel's own style.css (one look, Rule 15.4) */
+main { max-width: 1100px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 14px 0 6px; }
+h2 { font-size: 16px; margin: 0 0 8px; color: var(--accent); }
+.lead { font-size: 15px; max-width: 900px; }
+.small { font-size: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.cards .card { margin: 0; }
+.card ul, .card ol { margin: 0; padding-left: 20px; }
+.card li { margin: 5px 0; }
+table.words { border-collapse: collapse; margin: 6px 0; }
+table.words th, table.words td { border: 1px solid var(--line); padding: 3px 8px; text-align: left; }
+table.words th { background: var(--panel2); }
+.buttons { display: flex; gap: 8px; align-items: center; margin: 14px 0; }
+.buttons.top { margin: 10px 0 0; }
+
+#steps { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; margin: 0; padding: 8px 14px; background: var(--panel2); border-bottom: 1px solid var(--line); counter-reset: s; }
+#steps li { counter-increment: s; padding: 3px 10px; border-radius: 14px; color: var(--muted); }
+#steps li::before { content: counter(s) ". "; }
+#steps li.now { background: var(--accent); color: #1b1305; font-weight: 600; }
+#steps li.done { color: var(--ok); }
+#steps li.later { opacity: 0.6; }
+
+.folderRow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.folderRow label { font-weight: 600; }
+#folder { flex: 1 1 320px; font-family: var(--mono); }
+.tableWrap { overflow-x: auto; margin-top: 10px; }
+#files { width: 100%; border-collapse: collapse; }
+#files th, #files td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+#files td:nth-child(2) { white-space: normal; font-weight: 600; }
+#files tbody tr { cursor: pointer; }
+#files tbody tr:hover { background: var(--panel2); }
+#files tbody tr.sel { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.note { background: var(--panel2); border-left: 4px solid var(--warn); padding: 8px 10px; border-radius: 4px; }
+#peekBody table { border-collapse: collapse; margin: 6px 0 10px; }
+#peekBody th, #peekBody td { border: 1px solid var(--line); padding: 3px 8px; text-align: left; }
+#peekBody .counts { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 8px; }
+#peekBody .counts b { font-size: 18px; color: var(--accent); }
+#toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--bad); padding: 8px 14px; border-radius: 8px; z-index: 50; max-width: 90vw; }

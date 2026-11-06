@@ -1381,6 +1381,22 @@ First use: the old Ball valve pictures (Valve_Ball_*) gave way to the Skynet Mot
 (Rule 5.17) in the 2 and 3 vessel samples and the default Schema. (Fritz, 2026-10-31, thread "Update samples to the
 new valve and Rules")
 
+
+15.4 **The Skynet BruControl Importer** (Fritz, 2026-11-06). A BruControl config file (`.brucfg`) is brought into Skynet by
+the **Skynet BruControl Importer**, a program that runs on **Windows only, on the same computer as BruControl**. It only reads
+BruControl's files and never changes them. **It shares everything with the Panel:** it is built from the same repo and uses the
+same code, Skynet Templates, pictures, sounds, Rules and Importing Norms, so a valve from the Importer is exactly a valve from
+the Panel. A Template or Rule is written for both the Panel and the Importer, and the other way round (Fritz: "a Template or
+Rules must be written to both the Skynet Panel or the Import BruControl Program and vice versus"). It is a second shortcut,
+**Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
+boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7).
+- **It starts with a Welcome screen** that explains what stays the same and what is different between BruControl and Skynet,
+  and how the Importer guides the brewer through the import.
+- **Then the Starting dialog** looks in **Documents\BruControl** (or a folder the user sets, if the config file is not there)
+  and **lists the config files** to pick from (subfolders too, newest first). Clicking one shows what is in it.
+- The Oakbarn Schema is the first one built with it. For each BruControl item the Importer asks the brewer questions, so the
+  right Skynet Device or Widget is used (Fritz, 2026-11-06).
+(thread "Plan the BruControl config importer", Help 143; plan: docs/BruControl_Importer_Plan.md)
 ---
 
 ## 16. The Brew Process
@@ -2077,3 +2093,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
+- 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user sets). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
