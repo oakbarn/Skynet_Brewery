@@ -2,8 +2,9 @@
 ;
 ; Puts the Skynet Brew Panel in C:\Brewing\BrewPanel (changeable), writes Skynet_Brewer.bat there,
 ; and adds a "Skynet Brewer" shortcut to the Desktop and the Start menu.
-; On an update it keeps your config, data, media and scripts folders, unless you choose to replace one, or choose
-; Start Fresh (deletes config, data and scripts after a second warning; media is kept).
+; On an update a page asks what to do (Rule 9.8): 1 Start Fresh (deletes config, data and scripts after a second warning;
+; media is kept), 2 update and reset all users (deletes users, passwords, sign-ins and the recovery code after a warning),
+; or 3 update and keep everything (the default, the original No). With 2 or 3 you can still replace one of your folders.
 ;
 ; Build it with tools/build-release.sh (needs NSIS: "sudo apt install nsis" on Linux), which passes:
 ;   -DSRC=<the BrewPanel folder of the release (config, media and scripts samples are in its defaults\ folder)>  -DVERSION=<version>  -DOUTFILE=<setup .exe to write>
@@ -13,6 +14,7 @@ Unicode true
 !include "LogicLib.nsh"
 !include "FileFunc.nsh"
 !include "WordFunc.nsh"
+!include "nsDialogs.nsh"
 
 !ifndef SRC
   !error "Build this with tools/build-release.sh"
@@ -45,7 +47,7 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !define MUI_ICON "skynet.ico"
 !define MUI_UNICON "skynet.ico"
 !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
-!define MUI_WELCOMEPAGE_TEXT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop.$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? Your layout, settings, brew data, users and passwords, pictures, sounds and processes are kept."
+!define MUI_WELCOMEPAGE_TEXT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop.$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
 !define MUI_DIRECTORYPAGE_TEXT_TOP "The panel goes in this folder. C:\Brewing\BrewPanel is recommended."
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_TEXT "Start Skynet Brewer now"
@@ -56,6 +58,7 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_DIRECTORY
+Page custom UpdateChoicePage UpdateChoiceLeave
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -64,6 +67,10 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 
 Var Upgrade
 Var Fresh
+Var Choice
+Var RadioKeep
+Var RadioUsers
+Var RadioFresh
 Var OldPanel
 Var Stamp
 Var BrewDir
@@ -155,32 +162,102 @@ Function AskReplaceFolders
   done:
 FunctionEnd
 
-; ---------------------------------------------------------------- Start Fresh on an existing install
-; Asks whether to delete all users, Schemas and Processes and start as if the panel was never installed. A second, red
-; warning comes before anything is deleted, with No (go back and keep everything) as the default. $Fresh = 1 when deleted.
-Function AskStartFresh
-  StrCpy $Fresh 0
-  MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Skynet Brewer is already installed in $INSTDIR.$\r$\n$\r$\nDelete all users and Schemas and Start Fresh?$\r$\n$\r$\nNo (recommended): keep everything and just update.$\r$\nYes: a warning comes next, so you can still back out." /SD IDNO IDNO keep
-  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (scripts)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: back out. Nothing is deleted." /SD IDNO IDYES wipe
-    DetailPrint "Start Fresh: backed out. Nothing was deleted."
-    Goto keep
-  wipe:
-    RMDir /r "$INSTDIR\config"
-    RMDir /r "$INSTDIR\data"
-    RMDir /r "$INSTDIR\scripts"
-    ; Skynet's own clean window (Rule 2.36) keeps a small browser profile of its own. Its saved user name and password
-    ; would be filled in on the new admin setup, so it goes too. It is made again, empty, the next time the window opens.
-    RMDir /r "$LOCALAPPDATA\SkynetBrewer\AppWindow"
-    ${If} ${FileExists} "$INSTDIR\config\*.*"
-    ${OrIf} ${FileExists} "$INSTDIR\data\*.*"
-    ${OrIf} ${FileExists} "$INSTDIR\scripts\*.*"
-      MessageBox MB_OK|MB_ICONEXCLAMATION "Some files could not be deleted (a program still has them open). What is left is kept. Restart the computer and run the installer again to finish the Start Fresh." /SD IDOK
-      DetailPrint "Start Fresh: some files could not be deleted."
-    ${Else}
-      DetailPrint "Start Fresh: users, Schemas, settings, brew log and Processes deleted. The panel starts again from the samples."
-    ${EndIf}
-    StrCpy $Fresh 1
-  keep:
+; ---------------------------------------------------------------- What this update does (Rule 9.8)
+; Shown only when the panel is already in the chosen folder. Three choices (Fritz, 2026-11-06):
+;   1 fresh  Start Fresh: everything is deleted, as if the panel was never installed (media and backups are kept)
+;   2 users  Update the program and reset all users: users, passwords, sign-ins and the recovery code are deleted
+;   3 keep   Update the program and keep everything (the original No: the default, and what a silent /S update does)
+; Reset and Start Fresh each have a warning with No as the default; No goes back to this page and nothing is deleted.
+; The page only records the choice in $Choice. Nothing is deleted until the panel is stopped (Section SecMain).
+Function UpdateChoicePage
+  StrCpy $Choice "keep"
+  ${IfNot} ${FileExists} "$INSTDIR\server.js"
+    Abort   ; a new install: nothing to choose
+  ${EndIf}
+  !insertmacro MUI_HEADER_TEXT "Skynet Brewer is already installed" "Pick what this update does. Your choice is used only after you click Install."
+  nsDialogs::Create 1018
+  Pop $0
+  ${If} $0 == error
+    Abort
+  ${EndIf}
+  ${NSD_CreateLabel} 0 0 100% 14u "Found in $INSTDIR. The program files are always updated."
+  Pop $0
+
+  ${NSD_CreateRadioButton} 0 18u 100% 12u "&1. Start Fresh: delete everything"
+  Pop $RadioFresh
+  ${NSD_CreateLabel} 12u 31u 96% 18u "Deletes every Schema, setting, user, password, the brew log and every Process, for good. Kept: pictures and sounds (media) and the backups folder. A warning comes next."
+  Pop $0
+
+  ${NSD_CreateRadioButton} 0 52u 100% 12u "&2. Update the program and reset all users"
+  Pop $RadioUsers
+  ${NSD_CreateLabel} 12u 65u 96% 26u "Deletes every user, password, sign-in and the recovery code. You make the admin account again. Your Schemas, settings, brew log, Processes, pictures and sounds are kept."
+  Pop $0
+
+  ${NSD_CreateRadioButton} 0 94u 100% 12u "&3. Update the program and keep everything (recommended)"
+  Pop $RadioKeep
+  ${NSD_CreateLabel} 12u 107u 96% 26u "Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are. This is the one already picked."
+  Pop $0
+
+  ${NSD_Check} $RadioKeep
+  nsDialogs::Show
+FunctionEnd
+
+Function UpdateChoiceLeave
+  ${NSD_GetState} $RadioUsers $0
+  ${If} $0 == ${BST_CHECKED}
+    MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2 "Reset all users?$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every user and password$\r$\n   - every sign-in, on every computer and phone$\r$\n   - the recovery code$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your Schemas and settings (config), brew log and saved values (data), Processes (scripts), pictures and sounds (media).$\r$\n$\r$\nThe panel then asks you to make the admin account again.$\r$\n$\r$\nYes: reset all users.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+      Abort
+    StrCpy $Choice "users"
+    Return
+  ${EndIf}
+  ${NSD_GetState} $RadioFresh $0
+  ${If} $0 == ${BST_CHECKED}
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "WARNING: ALL EXISTING DATA WILL BE DELETED.$\r$\n$\r$\nThese are deleted for good, with no backup:$\r$\n   - every Schema, Tab, Device, Widget and setting (config)$\r$\n   - every user, password, sign-in and the recovery code (data)$\r$\n   - the brew log and saved values (data)$\r$\n   - every Process (scripts)$\r$\n   - the user name and password the Skynet window remembers$\r$\n$\r$\nKept: your pictures and sounds (media) and the backups folder.$\r$\n$\r$\nThe panel then starts like a new install: you make the admin account again.$\r$\n$\r$\nYes: delete it all and Start Fresh.$\r$\nNo: go back. Nothing is deleted." IDYES +2
+      Abort
+    StrCpy $Choice "fresh"
+    Return
+  ${EndIf}
+  StrCpy $Choice "keep"
+FunctionEnd
+
+; Skynet's own clean window (Rule 2.36) keeps a small browser profile of its own. Its saved user name and password
+; would be filled in on the new admin setup, so it goes on a reset or a Start Fresh. It is made again, empty, the next time
+; the window opens.
+Function ForgetWindowLogin
+  RMDir /r "$LOCALAPPDATA\SkynetBrewer\AppWindow"
+FunctionEnd
+
+; Choice 2: users.json holds the users, their passwords (hashed), contacts and the recovery code; sessions.json the sign-ins.
+Function ResetUsers
+  Delete "$INSTDIR\data\users.json"
+  Delete "$INSTDIR\data\users.json.tmp"
+  Delete "$INSTDIR\data\sessions.json"
+  Delete "$INSTDIR\data\sessions.json.tmp"
+  Call ForgetWindowLogin
+  ${If} ${FileExists} "$INSTDIR\data\users.json"
+  ${OrIf} ${FileExists} "$INSTDIR\data\sessions.json"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "The users could not be reset (a program still has the files open). Restart the computer and run the installer again." /SD IDOK
+    DetailPrint "Reset all users: some files could not be deleted."
+  ${Else}
+    DetailPrint "Reset all users: every user, password, sign-in and the recovery code deleted. Make the admin account again."
+  ${EndIf}
+FunctionEnd
+
+; Choice 1: delete all users, Schemas and Processes and start as if the panel was never installed. $Fresh = 1 when done.
+Function StartFresh
+  RMDir /r "$INSTDIR\config"
+  RMDir /r "$INSTDIR\data"
+  RMDir /r "$INSTDIR\scripts"
+  Call ForgetWindowLogin
+  ${If} ${FileExists} "$INSTDIR\config\*.*"
+  ${OrIf} ${FileExists} "$INSTDIR\data\*.*"
+  ${OrIf} ${FileExists} "$INSTDIR\scripts\*.*"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Some files could not be deleted (a program still has them open). What is left is kept. Restart the computer and run the installer again to finish the Start Fresh." /SD IDOK
+    DetailPrint "Start Fresh: some files could not be deleted."
+  ${Else}
+    DetailPrint "Start Fresh: users, Schemas, settings, brew log and Processes deleted. The panel starts again from the samples."
+  ${EndIf}
+  StrCpy $Fresh 1
 FunctionEnd
 
 ; ---------------------------------------------------------------- Install
@@ -197,8 +274,13 @@ Section "Skynet Brew Panel" SecMain
   StrCpy $Upgrade 0
   ${If} ${FileExists} "$INSTDIR\server.js"
     StrCpy $Upgrade 1
-    Call AskStartFresh
-    ${If} $Fresh == 0
+    StrCpy $Fresh 0
+    ${If} $Choice == "fresh"
+      Call StartFresh
+    ${ElseIf} $Choice == "users"
+      Call ResetUsers
+      DetailPrint "Updating. Kept as they are: layout and settings (config), brew data and log (data), pictures and sounds (media), processes (scripts)."
+    ${Else}
       DetailPrint "Updating. Kept as they are: layout and settings (config), brew data, log, users and passwords (data), pictures and sounds (media), processes (scripts)."
     ${EndIf}
     ${If} $Fresh == 0
