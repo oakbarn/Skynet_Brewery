@@ -141,7 +141,9 @@ How they are asked (the Rules for dialogs):
 2. **How many Vessels do you have?** A number. Pages C come once for each Vessel (Vessel 1, Vessel 2 ...).
 
 ### Page C: one page for each Vessel
-3. **Function:** HLT; HLT with HERMS; Mash Tun; Mash Tun with RIMS; Brew Kettle; Fermentor; Other (a text box for what it is).
+3. **Function:** HLT; HLT with HERMS; Mash Tun; Mash Tun with RIMS; Brew Kettle; Fermentor; **All In One** (then a second
+   dropdown for which one: BrewZilla 3, BrewZilla 4, Grainfather, and so on, plus Other with a text box); Other (a text box for
+   what it is).
 4. **Capacity:** Liters (Metric) or Gallons (US). This is the Vessel's Gallons field (Rule 19.1).
 5. **Dead Space:** the same units as Capacity.
 6. **Outlet fitting:** TC 1.5; NPT; BSP; None.
@@ -166,5 +168,8 @@ How they are asked (the Rules for dialogs):
    the bottom or a bottom outlet). Then 10 could be just "Above Bottom; Bottom; None", since 6 already says TC or BSP.
 2. **"BruControl Probe" and "BruControl controls ..."**: when the answer says BruControl controls or reads it, should the
    Importer then ask **which imported Device** it is (a dropdown of the items on a board port, for example the gas valve's relay)?
-3. **Order:** these questions come after Names (page 4) and before the items are placed, so the Vessels are made first and the
+3. **All In One systems** (Fritz, 2026-11-06): which models go in the list besides BrewZilla 3, BrewZilla 4 and Grainfather
+   (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One skip the questions it already answers (Outlet,
+   Thermowell, HERMS Coil, Heat Source), since each model is built the same way?
+4. **Order:** these questions come after Names (page 4) and before the items are placed, so the Vessels are made first and the
    Devices are put on them?
