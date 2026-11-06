@@ -1030,15 +1030,31 @@ lost-link watchdog as every other board. (2026-10-28, Help 78, PR #119 open)
 6.14 **Database and .API on every Device and Widget** (Fritz, 2026-10-30, Help 98). Every Device and Widget
 with a value has a **Database and .API** box at the end of its Properties:
 - **Send to the database**: Off, On demand, On value change (at most 10 a second, the last change never lost),
-  **When Clicked** (each time someone sets it on its Tab), When a Process starts, **In a Group**, At a date and time (once), At clock time (every day at that time), Every N ms /
+  **When Clicked** (each time someone sets it on its Tab), When a Process starts, At a date and time (once), At clock time (every day at that time), Every N ms /
   seconds / minutes / hours / days, Every 00:00:00. The **At clock time** box shows only when **At clock time** is
   picked; the Every choices have no clock time (Fritz, 2026-11-04). **What to send** is its main value unless another attribute is picked.
   `send_db Name` in a Process sends it now, whatever the setting, **even when it is Off** (Fritz, 2026-11-05: kept
   `send_db Name`, no `send_Now` command).
-- **Database Groups** (Fritz, 2026-11-05): **In a Group** puts the item in a **Group**. A Group has a **meaningless hidden key**
-  (the items point to it) and a **Group Name**. The Process line **`send_db_group Group_Name`** sends every item In that Group,
-  **each time** it runs. **➕ Add new Group…** ends the Group list; **✏ Change name** changes the Group Name and **every Process**
-  follows (Update All), like Rule 3.11. **Once is gone** (Rule 15.2): each Schema's Once items go **In the Group named Once**.
+- **Database Groups** (Fritz, 2026-11-05, rewritten 2026-11-06). **A Group is how a set of Devices and Widgets is sent to the
+  Database or not.** A Process command starts sending a Group, and another Process command stops it:
+  **`start_db_group Group_Name`** and **`stop_db_group Group_Name`**.
+  - **A single Device or Widget can belong to more than one Group** (Fritz, 2026-11-06). The Database and .API box has a switch
+    for each Group (each one is yes or no, so a switch, Rule 2.5), with **➕ Add new Group…** at the end.
+  - **An item assigned to a Database Group is only sent to the database while a Group it belongs to is started.** It is sent by
+    its **own** Send to the database setting (Every 1 minute, On value change, When Clicked ...), so the item sets *how often*
+    and the Group sets *when*. An item in no Group is sent by its setting all the time, as before. Every Group is stopped when
+    the Brain starts.
+  - **On demand is always true still** (Fritz, 2026-11-06): `send_db Name` (and Log now, and the API) sends the item at once,
+    whatever its Groups, even when they are stopped. **`send_db_group Group_Name`** sends every item of the Group **once, now**,
+    started or not.
+  - **Example (Fritz):** you want a Mash Temperature Probe sent to the database **every minute**, but only during the Mash. Set
+    the probe's Send to the database to **Every 1 minute** and switch on the Group **Mash**. At the beginning of the Mash a
+    Process line `start_db_group Mash` starts the Group, and the probe reports to the database every minute. At the end of the
+    Mash a Process line `stop_db_group Mash` stops it. The database only has that probe's data during the Mash.
+  - A Group has a **meaningless hidden key** (the items point to it) and a **Group Name**. **✏ Change name** changes the Group
+    Name and **every Process** follows (`send_db_group`, `start_db_group`, `stop_db_group`; Update All, like Rule 3.11).
+  - **In a Group is no longer a Send to the database choice, and Once is gone** (Rule 15.2): each Schema's Once items and In a
+    Group items become **On demand** with their Group switched on, so `send_db_group` still sends them as before.
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
   (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
@@ -2077,3 +2093,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
+- 2026-11-06: Rule 6.14 Database Groups rewritten (Fritz): a Device or Widget can belong to more than one Group; Grouping is how a set of items is sent to the Database or not; `start_db_group Group_Name` starts a Group and `stop_db_group Group_Name` stops it; an item in a Group is sent by its own setting only while one of its Groups is started; On demand (`send_db`) is always true; `send_db_group` sends the Group once. In a Group is no longer a Send to the database choice (old items become On demand in their Group). Fritz's Mash probe example added. Help 98 updated. (thread "Rewrite Database Group Rules")

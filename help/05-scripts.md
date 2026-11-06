@@ -41,7 +41,9 @@ restart                        start this process over from the top
 print "text"                   write to Output
 show tab "Brewery"             switch every screen to a tab
 send_db "gGV_Kettle_Temp"      send a reading to the database now
-send_db_group Readings        send every item In the Group Readings to the database now
+send_db_group Readings        send every item of the Group Readings to the database now, once
+start_db_group Mash           the items in the Group Mash are sent by their own setting from now on
+stop_db_group Mash            ... until this line (see Database and .API)
 // a comment
 ```
 
