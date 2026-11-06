@@ -128,7 +128,7 @@ Alexa, Google Home and Siri do not talk MQTT themselves. **Home Assistant** sits
    * **Running processes**, **Stop all processes**, and a **Start** button for each process you allowed,
    * read-only gGlobals (.API on) such as your message panel or *Process status*, and any gGlobal you tick.
 
-Name things the way you will say them: the **Label** of each element becomes its name in Home Assistant and on your speakers.
+Name things the way you will say them: each item's **API_Name** (its Database and .API pop-up, Skynet Rule 6.18) becomes its name in Home Assistant and on your speakers. An API_Name is Unique. An item with a blank API_Name uses its **Label**.
 
 ### Alexa (start here)
 
