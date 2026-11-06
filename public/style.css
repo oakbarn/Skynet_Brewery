@@ -1017,7 +1017,7 @@ label.tipLbl, .tipLbl, [data-help] { cursor: help; text-decoration: underline do
 /* Rule 2.38 (Fritz, 2026-11-06): hover help, shown while the mouse rests on a field's name (public/hoverhelp.js) */
 .hoverHelp { position: fixed; inset: auto; margin: 0; z-index: 10000; max-width: min(360px, calc(100vw - 16px)); padding: 7px 10px;
   background: #fffbe0; color: #1b232c; border: 1px solid #c9b25a; border-radius: 7px; box-shadow: 0 4px 14px rgba(0,0,0,.35);
-  font: 13px/1.4 var(--font); white-space: normal; text-align: left; pointer-events: none; }
+  font: 13px/1.4 var(--font); white-space: pre-line; text-align: left; pointer-events: none; }
 .hoverHelp:not([popover]):not(.show) { display: none; }
 dialog.tipDlg { max-width: 420px; width: calc(100% - 32px); }
 .fldPair { display: flex; align-items: center; gap: 8px; min-width: 0; }

@@ -13,7 +13,7 @@ export const GAP = 6;                   // pixels between the name and the help 
 export function helpOf(el) {
   if (!el) return '';
   if (el.dataset?.help) return el.dataset.help;
-  if ((el.classList?.contains('tipLbl') || el.closest?.('dialog')) && el.getAttribute?.('title')) {
+  if ((el.classList?.contains('tipLbl') || el.closest?.('dialog, [data-hover-titles]')) && el.getAttribute?.('title')) {
     el.dataset.help = el.getAttribute('title'); el.removeAttribute('title');
     return el.dataset.help;
   }
@@ -28,7 +28,7 @@ export function placeBubble(r, box, view) {
   return { left: Math.round(left), top: Math.round(Math.max(4, top)) };
 }
 
-const helpTarget = t => t?.closest?.('[data-help], .tipLbl, dialog [title]') || null;
+const helpTarget = t => t?.closest?.('[data-help], .tipLbl, dialog [title], [data-hover-titles] [title]') || null;      // the BruControl Import's pages: data-hover-titles on its body
 
 function start(doc = globalThis.document) {
   if (!doc || doc._hoverHelp) return;
@@ -93,7 +93,7 @@ export function helpSnippet(md, section = '') {
     para.push(l.replace(/^[-*]\s+/, ''));
   }
   if (list.length) para.push(list.join(', ') + '.');
-  let t = para.join(' ').replace(/\s*\([^()]*\b(Rule|Fritz)\b[^()]*\)/g, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`]{1,3}([^*_`]+)[*_`]{1,3}/g, '$1').replace(/\s+/g, ' ').trim();
+  let t = para.join(' ').replace(/\s*\([^()]*\b(Rule|Fritz)\b[^()]*\)/g, '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/(\*{1,3}|`)([^*`]+)\1/g, '$2').replace(/\s+/g, ' ').trim();
   // the first sentences, up to about 220 letters (a snippet, not the page)
   const sentences = t.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g) || [];
   let out = '';
