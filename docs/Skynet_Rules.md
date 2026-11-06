@@ -369,6 +369,11 @@ clean window (it keeps its own sign-in). Phones, tablets and other computers ope
 (thread "Open Skynet in its own clean window", Help 122)
 The clean window shows **the Skynet Brewer beer mug** (the same mug as the Desktop shortcut) on the taskbar, also when it is minimized, and in its title bar; the panel's Help window and the Sign in page show it too, and so do browser tabs. (Fritz, 2026-11-05, thread "Show a beer mug icon when minimized")
 
+2.37 **Correct spelling and plain English at all times** (Fritz, 2026-11-06: "correct spelling at all times", "Plain
+English. Get and Put are computer terms that only geeks understand", "Get and put follow in the ( )"). Every word a user sees
+(dialogs, dropdowns, pop-ups, messages, Help) is spelled correctly and says it in plain English. When a computer word is
+needed, it follows in ( ) after the plain words, for example **Read Only (Get: outside programs like Node-Red can read it.)**.
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -1042,8 +1047,10 @@ with a value has a **Database and .API** box at the end of its Properties:
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
   (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
-- **.API**: Off (the start), Get only, Get and Put. Only items with .API on are in `/api/items`, MQTT and Home
-  Assistant; only Get and Put can be changed from outside.
+- **.API**: Off (the start), **Read Only (Get: outside programs like Node-Red can read it.)**, **Read & Control (Get & Put:
+  outside programs like Node-Red can read and control it.)** (Fritz, 2026-11-06, renamed from Get only / Get and Put; elsewhere in these Rules Get only = Read Only and
+  Get and Put = Read & Control). Only items with .API on are in `/api/items`, MQTT and Home Assistant; only Read & Control can be
+  changed from outside.
 - **Safeguards so a bot can't take over:** board readings (inputs, probes), names, Tabs, Interfaces, ports and
   pictures are never changed from outside; a Manual Valve Widget has no .API (only a click turns it); ten wrong
   API keys in 10 minutes shut that address out for 15 minutes; every outside change is written in the Processes
@@ -2092,3 +2099,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
 - 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")
+- 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can read and control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")

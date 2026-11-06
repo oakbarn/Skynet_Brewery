@@ -26,7 +26,7 @@ reach it.
 ## Where it is used
 
 - **Home Assistant (Alexa, Google Home, Siri)**: the API_Name is the name the item gets there and on your speakers. With
-  no API_Name its Label is used, as before. The item must still have its **.API** on (Get only to read it, Get and Put to
+  no API_Name its Label is used, as before. The item must still have its **.API** on (Read Only to read it, Read & Control to
   change it): the API_Name does not open anything by itself.
 - **The web API** (`/api/items`): an item can be asked for by its Name or by its API_Name, for example
   `/api/items/Red%20Pump` or `/api/items/Red_Pump` (an `_` in the address stands for a space). The list shows each item's
