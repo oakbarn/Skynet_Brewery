@@ -3,14 +3,15 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { defaultFolders, startFolder, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isoLocal } from '../lib/importer.js';
+import { defaultFolders, startFolder, findConfigs, isConfigName, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isoLocal } from '../lib/importer.js';
 import { importerProfileDir, profileDir, openAppWindow } from '../lib/appwindow.js';
 
-// Documents\BruControl first (the real Documents folder Windows reports), then the usual places, each once
+// ONLY Documents\BruControl (the real Documents folder Windows reports); nowhere else (Fritz, 2026-11-06)
 const env = { USERPROFILE: 'C:\\Users\\Fritz', OneDrive: 'C:\\Users\\Fritz\\OneDrive', SystemDrive: 'C:', LOCALAPPDATA: 'C:\\Users\\Fritz\\AppData\\Local' };
-assert.deepEqual(defaultFolders(env, 'C:\\Users\\Fritz\\Documents'), [
-  'C:\\Users\\Fritz\\Documents\\BruControl', 'C:\\Users\\Fritz\\OneDrive\\Documents\\BruControl', 'C:\\BruControl']);
-assert.equal(defaultFolders(env, 'D:\\Docs')[0], 'D:\\Docs\\BruControl', 'a moved Documents folder comes first');
+assert.deepEqual(defaultFolders(env, 'C:\\Users\\Fritz\\OneDrive\\Documents'), ['C:\\Users\\Fritz\\OneDrive\\Documents\\BruControl']);
+assert.deepEqual(defaultFolders(env), ['C:\\Users\\Fritz\\Documents\\BruControl']);
+assert.ok(isConfigName('Oakbarn.BRUCFG') && isConfigName('default.config') && isConfigName('Default.brucfg'));
+assert.ok(!isConfigName('app.config') && !isConfigName('notes.txt'), 'only BruControl config files');
 assert.equal(startFolder(['a', 'b', 'c'], p => p === 'b'), 'b', 'the first folder that is there');
 assert.equal(startFolder(['a', 'b'], () => false), 'a', 'none there: the usual one, shown as not found');
 
@@ -36,13 +37,17 @@ fs.writeFileSync(path.join(dir, 'Backups', 'Old.BRUCFG'), xml);
 fs.writeFileSync(path.join(dir, 'notes.txt'), 'not a config');
 const old = Date.now() / 1000 - 86400;
 fs.utimesSync(path.join(dir, 'Backups', 'Old.BRUCFG'), old, old);
+fs.writeFileSync(path.join(dir, 'default.config'), xml);
 const found = findConfigs(dir);
 assert.equal(found.exists, true);
-assert.deepEqual(found.files.map(f => [f.name, f.sub]), [['Oakbarn.brucfg', ''], ['Old.BRUCFG', 'Backups']], 'newest first, subfolders too, any case');
+assert.deepEqual(found.files.map(f => [f.name, f.isDefault]), [['Oakbarn.brucfg', false], ['default.config', true]], 'only this folder; the default one last');
+assert.equal(found.own, 1);
+assert.deepEqual(findConfigs(dir, { depth: 1 }).files.map(f => [f.name, f.sub]), [['Oakbarn.brucfg', ''], ['Old.BRUCFG', 'Backups'], ['default.config', '']], 'subfolders only when asked, newest first, any case');
+fs.rmSync(path.join(dir, 'Oakbarn.brucfg'));
+assert.equal(findConfigs(dir).own, 0, 'only the default config: the person is asked to point to their folder');
 assert.match(found.files[0].modified, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, 'ISO 8601 date (Rule 3)');
 assert.ok(found.files[0].size > 0);
-assert.deepEqual(findConfigs(path.join(dir, 'nope')), { folder: path.join(dir, 'nope'), exists: false, files: [] }, 'a missing folder');
-assert.equal(findConfigs(dir, { depth: 0 }).files.length, 1, 'depth 0 stays in the folder');
+assert.deepEqual(findConfigs(path.join(dir, 'nope')), { folder: path.join(dir, 'nope'), exists: false, own: 0, files: [] }, 'a missing folder');
 assert.equal(isoLocal(new Date(2026, 10, 6, 4, 5).getTime()), '2026-11-06 04:05');
 
 // a quick look inside

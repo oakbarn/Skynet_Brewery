@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, startFolder, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, CONFIG_EXT } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isConfigName } from './lib/importer.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
 
@@ -31,7 +31,6 @@ function documentsFolder() {
 }
 const CANDIDATES = defaultFolders(process.env, documentsFolder());
 const settings = loadSettings(SETTINGS);
-const isDir = p => { try { return fs.statSync(p).isDirectory(); } catch { return false; } };
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png' };
 function sendFile(res, file) {
@@ -46,7 +45,7 @@ const body = req => new Promise((ok, bad) => {
   let s = ''; req.on('data', d => { s += d; if (s.length > 1e6) { bad(new Error('Too much')); req.destroy(); } });
   req.on('end', () => { try { ok(s ? JSON.parse(s) : {}); } catch { bad(new Error('Bad request')); } });
 });
-const isConfig = p => typeof p === 'string' && path.isAbsolute(p) && p.toLowerCase().endsWith(CONFIG_EXT);
+const isConfig = p => typeof p === 'string' && path.isAbsolute(p) && isConfigName(path.basename(p));
 
 function pickFolder(start) {
   return new Promise(ok => {
@@ -61,8 +60,9 @@ function pickFolder(start) {
 async function api(req, res, p, q) {
   const m = req.method;
   if (p === '/api/start' && m === 'GET') {
-    const folder = settings.folder && isDir(settings.folder) ? settings.folder : startFolder(CANDIDATES);
-    return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, candidates: CANDIDATES, defaultFolder: startFolder(CANDIDATES), folder, file: settings.file ?? '' });
+    // Always Documents\BruControl first (Fritz, 2026-11-06); the person points elsewhere when their config is not there
+    const home = CANDIDATES[0] ?? '';
+    return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, defaultFolder: home, folder: home, lastFolder: settings.folder ?? '', file: settings.file ?? '' });
   }
   if (p === '/api/configs' && m === 'GET') return json(res, 200, findConfigs(q.get('folder') ?? ''));
   if (p === '/api/folder' && m === 'POST') {

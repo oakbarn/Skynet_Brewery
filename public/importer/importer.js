@@ -36,15 +36,19 @@ function render(list) {
   const tb = $('#files tbody');
   tb.innerHTML = list.files.map((f, i) => `<tr data-i="${i}" class="${f.path === state.sel ? 'sel' : ''}">
     <td><input type="radio" name="cfg" ${f.path === state.sel ? 'checked' : ''} aria-label="Pick ${esc(f.name)}"></td>
-    <td>${esc(f.name)}</td><td>${esc(f.sub || '(this folder)')}</td><td>${esc(f.modified)}</td><td>${sizeText(f.size)}</td></tr>`).join('');
+    <td>${esc(f.name)}${f.isDefault ? ' <span class="muted">(BruControl default)</span>' : ''}</td><td>${esc(f.modified)}</td><td>${sizeText(f.size)}</td></tr>`).join('');
   $('#files').classList.toggle('hidden', !list.files.length);
-  const empty = $('#empty');
+  // No config of the brewer's own here (none, or only BruControl's default one): ask them to point to their folder
+  const empty = $('#empty'), own = list.files.filter(f => !f.isDefault).length;
   if (!list.exists) {
-    empty.innerHTML = `The folder <code>${esc(list.folder || '(none)')}</code> is not on this computer. Use <b>Change folder…</b> to pick the folder that holds your BruControl config file.`;
+    empty.innerHTML = `The folder <code>${esc(list.folder || '(none)')}</code> is not on this computer. Click <b>📁 Change folder…</b> and point to the folder that holds your BruControl config file.`;
   } else if (!list.files.length) {
-    empty.innerHTML = `No BruControl config files (<code>.brucfg</code>) are in this folder or its subfolders. Use <b>Change folder…</b> to look somewhere else.`;
+    empty.innerHTML = `Your BruControl config file is not in this folder. Click <b>📁 Change folder…</b> and point to the folder that holds it.`;
+  } else if (!own) {
+    empty.innerHTML = `Only BruControl's default config is in this folder. If your own config file is somewhere else, click <b>📁 Change folder…</b> and point to its folder.`;
   }
-  empty.classList.toggle('hidden', list.exists && list.files.length > 0);
+  empty.classList.toggle('hidden', list.exists && own > 0);
+  $('#pickBtn').classList.toggle('primary', !list.exists || !own);
   if (state.sel && !list.files.some(f => f.path === state.sel)) { state.sel = ''; $('#peek').classList.add('hidden'); }
   setNext();
 }
@@ -106,7 +110,7 @@ $('#folder').onkeydown = e => { if (e.key === 'Enter') look($('#folder').value);
 $('#homeBtn').onclick = () => look(state.start?.defaultFolder ?? '');
 $('#pickBtn').onclick = async () => {
   try {
-    const r = await api('POST', '/api/pick-folder', { start: state.folder });
+    const r = await api('POST', '/api/pick-folder', { start: state.start?.lastFolder || state.folder });
     if (r.none) return toast('Change folder works on Windows. Type the folder in the box and press Enter.');
     if (r.picked) look(r.picked);
   } catch (e) { toast(e.message); }

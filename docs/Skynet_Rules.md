@@ -1392,8 +1392,10 @@ Rules must be written to both the Skynet Panel or the Import BruControl Program 
 boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7).
 - **It starts with a Welcome screen** that explains what stays the same and what is different between BruControl and Skynet,
   and how the Importer guides the brewer through the import.
-- **Then the Starting dialog** looks in **Documents\BruControl** (or a folder the user sets, if the config file is not there)
-  and **lists the config files** to pick from (subfolders too, newest first). Clicking one shows what is in it.
+- **Then the Starting dialog** looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
+  BruControl may keep a default config there too; it is listed and marked as BruControl's default. If no config file is there
+  (or only the default one), the user is asked to **point to the folder** that holds theirs (Fritz, 2026-11-06). Clicking a file
+  shows what is in it.
 - The Oakbarn Schema is the first one built with it. For each BruControl item the Importer asks the brewer questions, so the
   right Skynet Device or Widget is used (Fritz, 2026-11-06).
 (thread "Plan the BruControl config importer", Help 143; plan: docs/BruControl_Importer_Plan.md)
@@ -2093,4 +2095,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
-- 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user sets). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
+- 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
