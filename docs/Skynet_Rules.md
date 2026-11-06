@@ -928,6 +928,20 @@ not. Length attribute to stretch length"; thread "Add caged and plain sight glas
 - Its **Label** starts filled in as **site_glass_n** (the next number) and is never blank (Rule 18.15; Fritz, 2026-11-05: "site_glass_1").
 - Dropped on a straight pipe in Edit layout it cuts the pipe, as a tee's run does (Rule 5.25).
 
+5.33 **The Tap Water Valve is a Manual Valve Widget with one IP** (Fritz, 2026-11-06: "Create Manual Valve Widget: a Tap Water
+Valve that is a standard Manual House Hold Hose Bib with pix of one like you could buy a home dept"; his picture marks the IP at the
+hose outlet; thread "Add hose bib Manual Valve Widget", Help 141).
+- A **Manual Valve Widget** (Rule 5.15: only a click on its Tab opens or closes it; a Process asks for it by hand and waits) with
+  the Skynet picture **Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg**: a brass household hose bib with a green cross handle,
+  the wall side on the right, the spout turned down to a hose thread.
+- **One IP only**, the center of the hose thread's outer face (the water comes in from the wall, which has no IP). This is not a
+  ball valve, so Rule 5.24's two IPs do not apply; with one IP it does not cut a pipe it is dropped on (Rule 5.26).
+- **Open, it is a tap water source**: flow pushes out of its hose outlet with no pump, tap water Blue (Rule 5.21). Closed, it
+  blocks the hose on it.
+- Added from Select Device Type > Valves and Select Widget Type > Semi_Widgets_Devices (**Tap Water Valve**), or by picking its
+  Picture on any Manual Valve. Name ManualValve_n; its **Label** starts filled in as **tap_water_n** (Rule 18.15).
+- Autosize to pipe as every Manual Valve (Rule 5.29 does not cover Manual Valves).
+
 ---
 
 ## 6. Devices, connections and safety
@@ -1273,7 +1287,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **141**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **142**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2044,3 +2058,4 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Rule 4.2: no free PWM pin for a true PWM Device: 1. Add an Interface, or 2. Pseudo PWM on a plain pin (the Brain switches it once a second; what it loses is explained). (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Rule 18.25 / 18.15: a new PWM output's Label starts as PWM_n, a 4-20 mA Analog output's as 4_20_n, a 0-10 V (or 0-5 V) one's as 0_10_n (Fritz). Help 136 updated. (thread "Build PWM Add dialog like Pump")
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
+- 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")

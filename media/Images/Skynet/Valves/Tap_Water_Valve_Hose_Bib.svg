@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <!-- Skynet Tap Water Valve: a household brass hose bib (sill cock) with a green cross handle, like one from a home store
+       (Fritz, 2026-11-06). A Manual Valve Widget picture (Rule 5.33). The wall side (house water) is on the right and has no IP;
+       its one IP is the center of the hose thread's outer face at the bottom, (100, 296). While open the Tab shows the open overlay. -->
+  <defs>
+    <linearGradient id="brassV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3c493"/><stop offset="0.35" stop-color="#d79a63"/>
+      <stop offset="0.75" stop-color="#b06f3c"/><stop offset="1" stop-color="#7d4a24"/>
+    </linearGradient>
+    <linearGradient id="brassH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8a5228"/><stop offset="0.3" stop-color="#d79a63"/>
+      <stop offset="0.55" stop-color="#f0bf8c"/><stop offset="1" stop-color="#94592c"/>
+    </linearGradient>
+    <linearGradient id="nut" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9c6a2e"/><stop offset="0.45" stop-color="#e2be78"/><stop offset="1" stop-color="#8d5f28"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4fa772"/><stop offset="0.55" stop-color="#23804c"/><stop offset="1" stop-color="#145a33"/>
+    </linearGradient>
+    <linearGradient id="stem" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7a7a7a"/><stop offset="0.5" stop-color="#e3e3e3"/><stop offset="1" stop-color="#6d6d6d"/>
+    </linearGradient>
+  </defs>
+  <g stroke="#3d2410" stroke-width="2.5" stroke-linejoin="round">
+    <!-- wall side: male pipe thread and hex into the house plumbing (no IP) -->
+    <rect x="262" y="138" width="34" height="58" rx="5" fill="url(#brassV)"/>
+    <path d="M270 138V196M278 138V196M286 138V196" fill="none" stroke="#7d4a24" stroke-width="2"/>
+    <path d="M238 124H264L270 134V200L264 210H238Z" fill="url(#nut)"/>
+    <path d="M238 142H270M238 192H270" fill="none" stroke="#8d5f28" stroke-width="2"/>
+    <!-- body and spout: one brass casting, the spout turned down to the hose thread -->
+    <path d="M240 128C240 122 236 120 230 120H138C108 120 80 140 76 172L74 230H126L128 196C130 188 136 205 150 205H230C236 205 240 202 240 196Z" fill="url(#brassV)"/>
+    <path d="M80 176C84 150 104 132 132 128" fill="none" stroke="#f8d7b3" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+    <!-- raised casting mark on the body -->
+    <ellipse cx="196" cy="162" rx="16" ry="11" fill="none" stroke="#9b5f30" stroke-width="3"/>
+    <path d="M189 162H203" fill="none" stroke="#9b5f30" stroke-width="3" stroke-linecap="round"/>
+    <!-- spout collar -->
+    <rect x="70" y="226" width="60" height="14" rx="3" fill="url(#brassH)"/>
+    <!-- hose thread (3/4" GHT), the IP is the center of its bottom face -->
+    <rect x="73" y="240" width="54" height="56" rx="3" fill="url(#brassH)"/>
+    <path d="M73 248L127 252M73 258L127 262M73 268L127 272M73 278L127 282M73 288L127 292" fill="none" stroke="#7d4a24" stroke-width="2.5"/>
+    <!-- bonnet: packing nut (hex) on top of the body -->
+    <path d="M150 120V96H158L162 90H200L204 96H212V120Z" fill="url(#nut)"/>
+    <path d="M170 90V120M192 90V120" fill="none" stroke="#8d5f28" stroke-width="2"/>
+    <!-- stem -->
+    <rect x="173" y="62" width="16" height="30" fill="url(#stem)" stroke="#333"/>
+    <!-- green cross handle (four spokes, seen from the side: two spokes and the hub) -->
+    <path d="M108 50C108 42 114 38 122 38H240C248 38 254 42 254 50C254 58 248 62 240 62H122C114 62 108 58 108 50Z" fill="url(#green)" stroke="#0e3d22"/>
+    <rect x="166" y="30" width="30" height="40" rx="7" fill="url(#green)" stroke="#0e3d22"/>
+    <path d="M118 44H160M202 44H244" fill="none" stroke="#9fd8b3" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="181" cy="50" r="7" fill="#c9c9c9" stroke="#333" stroke-width="2"/>
+    <path d="M178 50H184M181 47V53" stroke="#333" stroke-width="1.5"/>
+  </g>
+</svg>
