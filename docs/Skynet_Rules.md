@@ -1396,6 +1396,8 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   BruControl may keep a default config there too; it is listed and marked as BruControl's default. If no config file is there
   (or only the default one), the user is asked to **point to the folder** that holds theirs (Fritz, 2026-11-06). Clicking a file
   shows what is in it.
+- **One config file, one Schema.** A user may have more than one config file; each one is imported on its own into its
+  own Schema, and config files are never combined (Fritz, 2026-11-06).
 - The Oakbarn Schema is the first one built with it. For each BruControl item the Importer asks the brewer questions, so the
   right Skynet Device or Widget is used (Fritz, 2026-11-06).
 (thread "Plan the BruControl config importer", Help 143; plan: docs/BruControl_Importer_Plan.md)
