@@ -109,6 +109,11 @@ stay in the private project folder.
    Schema, hand it to the Brain.
 5. **Try other brewers' files** as they arrive; each new thing found becomes an Importing Norm.
 6. **Put the Importer shortcut in the Windows Setup .exe.**
+7. **Option: start from the Skynet model** (Fritz, 2026-11-06). The Importer may ask whether the brewer wants a **new Schema based on
+   a Skynet Schema Template** (like the 3 Vessel sample, with all its Processes built in from the Skynet Process Templates:
+   Prebrew, Heat Strike, Strike, Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Clean, Ferment) instead of
+   bringing the BruControl Scripts over line by line. The brewer answers a few questions and the brewery is ready to brew. The
+   Templates themselves are built in their own thread; the Importer uses them (Rule 15.4).
 
 ## 8. Questions for Fritz
 
