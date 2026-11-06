@@ -466,13 +466,15 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 
 ### 5.4 Valve Tee and Supply Manifolds (Skynet Rule 5.35)
 - **Add menu:** Edit layout bar > Elbows, Tees … > Valve Tees and Supply Manifolds, or Select Device Type > Valves. Six rows: **Long Tee with a Valve**, **Double Supply Manifold** and **Triple Supply Manifold**, each with all its valves **Manual** or all **Motorized** to start. Templates: Valve_Tee, Supply_Manifold_2, Supply_Manifold_3 (Bundled Fitting Templates).
-- **Pictures:** Skynet_TC15_Valve_Tee.svg, Skynet_TC15_Supply_Manifold_2.svg, Skynet_TC15_Supply_Manifold_3.svg (Fritz's Long Tees joined end to end); the panel draws each valve on its branch: Valve_Manual_ClosedV_R.svg or Valve_Motor_Ball_ClosedV_RC.svg (Valve Standard, Rule 5.29).
+- **Pictures:** Skynet_TC15_Valve_Tee.svg, Skynet_TC15_Supply_Manifold_2.svg, Skynet_TC15_Supply_Manifold_3.svg (Fritz's Long Tees joined end to end); the panel draws each valve on its branch, Manual or Motorized, with TC 1.5 ferrules that match the tee ends (top one clamped to the branch, bottom one the IP); no picture file.
 - **IPs:** only the two open ends of the joined tees and the far end of each valve (3, 4 or 5). A closed valve shuts its IP.
 - **Built-in Devices:** one valve per tee, a Digital Output with Kind = valve. **Manual** = Valve type Manual (no Port; a Process shows a pop-up and waits for Done), Type ID M_L_Vlv. **Motorized** = Valve type Electro_Mechanical, Type ID eVlv, on a Port of the fitting's one **Interface**. Two valves can't share a Port.
 - **Each valve is swapped Manual / Motorized on its own** in the fitting's Properties (Valves: Valve 1, Valve 2 ...), at any time; not locked once saved (unlike 5.3).
 - **Named:** the fitting ValveTee_n / Manifold2_n / Manifold3_n, Label valve_tee_n / manifold_2_n / manifold_3_n (never blank). Each valve's Label is `<fitting Label> V1`, `V2` ...; its name the suggested name, e.g. `MB_22_eVlv_manifold_2_1_V1_BR`, `M_L_Vlv_manifold_2_1_V2_BR`.
 - A click on a valve on its Tab opens or closes it. Motorized valves are on Close all / Open all.
-- Flip and Rotate (45 degree steps); no Autosize, no Clone. Dropped on a straight pipe it cuts the pipe like a tee.
+- **Add box and Properties:** the Pump's drill-down (Rule 18.29): 1 Label, 2 Interface, 3 Valve 1 / 2 / 3 (Manual or Motorized, Available Ports on its line), 4 Tab, then Name, Graphic, Path, Orientation, X, Y, Width, Height, Device Type. A saved Motorized valve's Port and the Interface are greyed out (make it Manual, Save, then Motorized to wire it again).
+- **Valve numbers** 1, 2, 3 on the valves in Edit layout and on the dialog Graphic, matching Valve 1, 2, 3.
+- **Orientation:** Horizontal, Left Vertical 90, Right Vertical 90; no Flip. No Autosize, no Clone. Dropped on a straight pipe it cuts the pipe like a tee.
 
 ---
 
@@ -506,3 +508,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-05: 4.3a and 4.3c: one Motorized Ball Valve row with a valve picker; the Pump's drill-down Add box and Properties without a Cover (Rule 18.23, Help 128). (thread "Add Motorized Ball Valve drill-down dialog")
 - 2026-11-05: Added 5.3 Vessel Device (built from a Vessel Widget Template; parts built into its IPs, HERMS coil, locked once built and saved; Skynet Rule 5.31).
 - 2026-11-06: Added 5.4 Valve Tee and Supply Manifolds (Double, Triple): Long Tees with a valve Device built into each branch, each Manual or Motorized on its own (Skynet Rule 5.35, Help 146). (thread "Add valve Tees and supply manifolds")
+- 2026-11-06: 5.4 Valve Tee and Supply Manifolds: the Pump's drill-down Add box and Properties (Rule 18.29), valve ends with TC ferrules matching the tees, valve numbers, three Orientations and no Flip. (thread "Add valve Tees and supply manifolds")

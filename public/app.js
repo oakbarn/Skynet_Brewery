@@ -549,7 +549,20 @@ const MF_TPLS = { Valve_Tee: { what: 'Long Tee with a Valve', prefix: 'ValveTee'
   Supply_Manifold_2: { what: 'Double Supply Manifold', prefix: 'Manifold2', label: 'manifold_2' },
   Supply_Manifold_3: { what: 'Triple Supply Manifold', prefix: 'Manifold3', label: 'manifold_3' } };
 const MF_KINDS = [['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)'], ['motorized', 'Motorized (switched by its Port)']];
-const MF_PICS = { manual: 'Images/Skynet/Valves/Valve_Manual_ClosedV_R.svg', motorized: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg' };
+// Fritz, 2026-11-06: "The valve ends need to match the Tee ends in the graphic". Each valve is drawn here in the 210 x 210 box
+// under its tee, on the tee's own grid: the same 38.4 wide pipe as the tee's branch, a TC ferrule (56 x 16.5) at the top, clamped to
+// the tee's branch ferrule, and the same ferrule at the bottom, where its IP is (the face of that ferrule). Closed: the Manual handle
+// lies across the pipe; the Motorized actuator sits on the right. Drawn in code, so no picture is added to the Image Library.
+const MF_FIT = 'fill="#808080" stroke="#505050" stroke-width="1.6" stroke-linejoin="round"';
+const MF_BODY = `<rect x="85.8" y="16" width="38.4" height="180" ${MF_FIT}/><rect x="77" y="0.8" width="56" height="16.5" rx="5" ${MF_FIT}/>`
+  + `<rect x="77" y="192.7" width="56" height="16.5" rx="5" ${MF_FIT}/><rect x="70" y="0" width="70" height="12" rx="3" fill="#b9bec4" stroke="#505050" stroke-width="1.6"/>`
+  + `<rect x="66" y="76" width="78" height="58" rx="10" ${MF_FIT}/><circle cx="105" cy="105" r="13" fill="#fff" stroke="#111" stroke-width="5"/>`;
+const MF_SVG = inner => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 210">${MF_BODY}${inner}</svg>`);
+const MF_PICS = {
+  manual: MF_SVG('<rect x="143" y="99" width="12" height="12" fill="#8f9296" stroke="#2b2b2b" stroke-width="2"/><rect x="152" y="96" width="54" height="18" rx="6" fill="#2b2b2b"/><rect x="156" y="100" width="46" height="10" rx="4" fill="#5b6066"/>'),
+  motorized: MF_SVG('<rect x="143" y="96" width="12" height="18" fill="#1d4f9a" stroke="#000" stroke-width="1.5"/><rect x="153" y="70" width="53" height="70" rx="7" fill="#2f72d0" stroke="#000" stroke-width="2.5"/>'
+    + '<rect x="155" y="72" width="49" height="13" rx="6" fill="#5b95e6"/><ellipse cx="179.5" cy="78.5" rx="9" ry="3.5" fill="#d8d8d8"/><path d="M157 112 H202" stroke="#1d4f9a" stroke-width="1.5" stroke-dasharray="5 3"/>') };
+const mfPicUrl = kind => MF_PICS[kind] || MF_PICS.manual;
 const MF_TEE_H = 134 / 344;          // the joined tees are the top of the picture; each valve fills the square box under its tee
 const isMf = g => isUnit(g) && (g.fittings || []).some(f => f.kind === 'valveTee');
 const isMfPart = e => String(e?.integratedAs || '').startsWith('mf:');
@@ -568,11 +581,21 @@ function mfValves(g) {
     const tip = e ? `Valve ${mfNum(k)}: ${e.label || e.name} (${e.name}), ${kind === 'manual' ? 'Manual' : 'Motorized'}, ${open ? 'open' : 'closed'}${editing ? '' : `. Click to ${open ? 'close' : 'open'} it`}` +
       (kind === 'motorized' && !e.channel && e.channel !== 0 ? '. No Port yet: pick it in the Properties' : '') : `Valve ${mfNum(k)}: not made yet (open the Properties)`;
     const v = h('div', { class: `mfValve mf-${kind}` + (open ? ' open' : ''), 'data-dev': e?.name || '', title: tip,
-      style: `left:${i / N * 100}%;width:${100 / N}%;top:${MF_TEE_H * 100}%;height:${(1 - MF_TEE_H) * 100}%;background-image:url("${media(MF_PICS[kind])}")` });
+      style: `left:${i / N * 100}%;width:${100 / N}%;top:${MF_TEE_H * 100}%;height:${(1 - MF_TEE_H) * 100}%;background-image:url("${mfPicUrl(kind)}")` });
     if (open) v.append(h('div', { class: 'mfOver', style: `background-image:url("${media(kind === 'manual' ? MV_OVERLAY : BOLT)}")` }));
     wrap.append(v);
   });
   return wrap;
+}
+// Fritz, 2026-11-06: "When Building or editing a Manifold Supply the Valves need to be number corresponding to the Valve 1 in the
+// dialog": in Edit layout (and on the Graphic in its dialogs) each valve shows its number, 1, 2, 3, left of its body, upright
+// whichever way the fitting is turned or flipped
+const mfNumAt = (g, i) => { const N = mfKeys(g).length || 1; return [(i + 40 / 210) / N, MF_TEE_H + 105 / 210 * (1 - MF_TEE_H)]; };
+function mfNums(g) {
+  return mfKeys(g).map((k, i) => {
+    const [x, y] = unitPoint(g, ...mfNumAt(g, i));
+    return h('div', { class: 'mfNum', title: `Valve ${mfNum(k)} (the same number as in its Properties)`, style: `left:${x - (g.x || 0)}px;top:${y - (g.y || 0)}px` }, String(mfNum(k)));
+  });
 }
 // a valve opened or closed (here, by a Process or on another screen): its picture follows
 function updateMfs(ch) {
@@ -593,16 +616,167 @@ function mfFlow(g, k) {
   const e = mfEl(g, k);
   return e && isOn(e.name) ? null : { closed: true };
 }
-// Edit layout bar > Elbows, Tees … (and Select Device Type > Valves): it goes on the Build Tab (Rule 4.1) with every valve Manual or
-// every valve Motorized, and its Properties open (a Motorized one picks its Interface and each valve's Port there)
-function addMf(tname, kind) {
+// Edit layout bar > Elbows, Tees … (and Select Device Type > Valves): the Pump's drill-down Add box (Fritz, 2026-11-06: "The long
+// tees with valves ... need their property dialog and the Build look and feel like the Pump Drill down", Rules 18.13-18.21).
+// 1 Label (filled in, valve_tee_n ...), 2 Interface, 3 each Valve (Manual or Motorized, a Motorized one with its Port on the same
+// line), 4 Tab, then the Name, the Graphic, its Path, Orientation with Flip, X, Y, Width, Height and the Device Type. ➕ Add Device can
+// always be pressed and says what is missing (Rule 18.15). It goes straight on the Tab picked (Rule 4.1: it holds Devices).
+async function addMf(tname, kind) {
   const t = tplOf('fitting', tname); if (!t) return toast(`No ${tname} Template`, true);
-  toBuild();
-  const I = MF_TPLS[t.name] || mfInfo({}), used = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
-  const g = placeTabFitting(t, wsName, mfNext(I.prefix, used), null);
-  g.label = mfNext(I.label, draft.graphics.map(x => x.label)); g.labelVisible = false;
-  applyMf(g, Object.fromEntries(mfKeys(g).map(k => [k + '_mfk', kind])), wsName, g.label, true);
-  sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+  const I = MF_TPLS[t.name] || mfInfo({}), used = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)];
+  const fits = clone(t.fittings || []), keys = mfKeys({ fittings: fits }), devs = S.config.devices || [];
+  let tab = wsName; { const b = draft.workspaces.find(w => w.name === wsName); if (b?.build) tab = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || wsName; }
+  const work = { template: t.name, image: t.image, fittings: fits, label: mfNext(I.label, draft.graphics.map(x => x.label)), labelVisible: false, labelAlign: 'below', labelSize: 12,
+    mfIface: defaultIface(devs), workspace: tab, rot: '0', w: t.size?.[0] || 160, h: t.size?.[1] || 262, x: 60, y: 60 };
+  for (const k of keys) work[k + '_mfk'] = kind;
+  { const b = draft.workspaces.find(w => w.name === tab); work.x = Math.max(0, Math.round(((+b?.width || 1600) - work.w) / 2)); work.y = Math.max(0, Math.round(((+b?.height || 900) - work.h) / 2)); }
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), cancels = $$('#dlg [data-close="cancel"]'), was = [oks[0]?.textContent, cancels[0]?.textContent];
+  const setBtns = () => { for (const b of oks) b.textContent = '➕ Add Device'; for (const b of cancels) b.textContent = '✖ Cancel'; };
+  const gate = () => {
+    const w = { ...work }; try { readFields(w, body); } catch { }
+    const motor = keys.filter(k => w[k + '_mfk'] === 'motorized'), noPin = motor.find(k => (w[k + '_mfpin'] ?? '') === '');
+    const why = !String(w.label || '').trim() ? 'Type a Label first (1. Label)' : motor.length && !w.mfIface ? 'Pick the Interface first (2. Interface): it has Motorized valves'
+      : noPin ? `Pick the Port of Valve ${mfNum(noPin)} first (3. Valve ${mfNum(noPin)}: Available Ports)` : !w.workspace ? 'Pick the Tab first (4. Tab)' : '';
+    for (const b of oks) { b.disabled = false; b.classList.toggle('waitStep', !!why); b.title = why; }
+    for (const x of body.querySelectorAll('.afterStep')) x.classList.toggle('hidden', !!why);
+    return why;
+  };
+  // Enter goes 1 Label, 2 Interface, each Motorized valve's Port, 4 Tab, Orientation, then ➕ Add Device (Rule 18.20)
+  const seqKeys = () => ['label', 'mfIface', ...keys.flatMap(k => [k + '_mfk', k + '_mfpin']), 'workspace', 'rot'];
+  const seqEl = k => { const x = body.querySelector(`[data-k="${k}"]`); return x && !x.disabled && x.offsetParent !== null ? x : null; };
+  const seqNext = k => { const l = seqKeys(); for (let i = l.indexOf(k) + 1; i > 0 && i < l.length; i++) { const x = seqEl(l[i]); if (x) return x.focus(); } oks.filter(b => b.offsetParent !== null).pop()?.focus(); };
+  let made = null;
+  try {
+    setBtns();
+    for (;;) {
+      let touched = !!work.name, last = mfNext(I.prefix, used());
+      if (!touched) work.name = last;
+      const shown = dialog(I.what, it => mfDrillFields(it, null, true), work, false, ['valve-tees-and-supply-manifolds']);
+      const base = body.onchange;         // the form's own: a Valve changed redraws its line (its Port shows for Motorized)
+      gate();
+      dlgEnterSeq = t => { const k = t.dataset?.k; if (!seqKeys().includes(k)) return false; seqNext(k); return true; };
+      { const lab = seqEl('label'); (lab && !lab.value.trim() ? lab : seqEl('mfIface') || seqEl('workspace'))?.focus(); }
+      body.oninput = body.onchange = ev => {
+        const t = ev.target, k = t.dataset?.k;
+        if (ev.type === 'change' && k === 'mfIface' && t.value === ADD_IFACE) return $('#dlg').close('addIface');
+        if (ev.type === 'change' && k === 'workspace' && t.value === ADD_TAB) return $('#dlg').close('addTab');
+        if (k === 'name') touched = t.value.trim() !== '' && t.value !== last;
+        if (ev.type === 'change') base?.(ev);
+        gate();
+        if (ev.type === 'change' && t.tagName === 'SELECT' && !dlgArrowKey && seqKeys().includes(k) && t.value !== '') setTimeout(() => seqNext(k), 0);
+      };
+      const r = await shown;
+      body.oninput = body.onchange = null; dlgEnterSeq = null;
+      if (r === 'addTab' || r === 'addIface') {        // Rule 18.14: keep what is typed, make the new one, come back with it picked
+        const prev = r === 'addTab' ? work.workspace : work.mfIface;
+        try { readFields(work, body); } catch { }
+        for (const b of oks) b.textContent = was[0]; for (const b of cancels) b.textContent = was[1];
+        if (r === 'addTab') work.workspace = (await addTabForDevice()) || prev; else work.mfIface = (await addInterfaceDialog()) || prev;
+        setBtns(); continue;
+      }
+      if (r !== 'ok') return;
+      try {
+        const missing = gate();
+        readFields(work, body);
+        if (missing) throw new Error(missing);
+        const name = noSpaces(work.name || last);
+        const bad = elementNameError(name, 'Device'); if (bad) throw new Error(bad);
+        if (used().some(n => String(n || '').toLowerCase() === name.toLowerCase())) throw new Error(`The name ${name} is already used. Names must be unique.`);
+        const g = placeTabFitting(t, work.workspace, name, null);
+        try {
+          Object.assign(g, { label: String(work.label).trim(), labelVisible: !!work.labelVisible, labelAlign: work.labelAlign, labelSize: work.labelSize, labelColor: work.labelColor, x: Math.round(+work.x || 0), y: Math.round(+work.y || 0) });
+          if (!g.labelColor) delete g.labelColor;
+          if (+work.w > 0) g.w = +work.w; if (+work.h > 0) g.h = +work.h;
+          if (+work.rot) g.rot = +work.rot;
+          applyMf(g, mfOf(work), work.workspace, g.label);
+        } catch (err) { draft.graphics = draft.graphics.filter(x => x !== g && x.attachTo !== g.id); throw err; }
+        placeUnitParts(g);
+        try { if (work.mfIface) localStorage.setItem(LAST_IFACE_KEY, work.mfIface); } catch { }
+        if (g.workspace !== wsName) { wsName = g.workspace; renderTabs(); }      // the Tab picked in the Add box
+        sel = { kind: 'gfx', id: g.id }; renderWs();
+        made = g; break;
+      } catch (err) { toast(err.message, true); }
+    }
+  } finally { dlgEnterSeq = null; body.oninput = body.onchange = null; for (const b of oks) { b.textContent = was[0]; b.disabled = false; b.title = ''; b.classList.remove('waitStep'); } for (const b of cancels) b.textContent = was[1]; }
+  if (made) await editItem('gfx', made.id);       // its Properties next, as a new Pump's (Rule 18.13)
+}
+// the valve settings of the dialog's work: each valve's kind and Port, and the Interface
+const mfOf = w => Object.fromEntries(Object.keys(w).filter(k => /_(mfk|mfpin)$/.test(k) || k === 'mfIface').map(k => [k, w[k]]));
+// The drill-down fields (Rules 18.12-18.21), the same in the Add box (adding) and the Properties. A valve saved Motorized keeps its
+// Port greyed out for good, and so does the Interface (Rule 18.13: it is wiring); to wire it again, make it Manual, Save, and make it
+// Motorized again (each valve still changes from Manual to Motorized and back at any time, Rule 5.35).
+const MF_TIPS = {
+  label: 'The name people see. It starts filled in (valve_tee_1, manifold_2_1 ...); you can change it but it can\'t be blank. Each valve\'s Label is this Label with V1, V2, V3 after it. ⬢: the Label\'s look.',
+  labelVisible: 'Show the Label on the Tab.',
+  iface: 'The board the Motorized valves are wired to (one board for all of them). A fitting with only Manual valves does not need one.',
+  valve: 'Manual: turned by hand; a Process shows a pop-up and waits for Done (Rule 5.13). Motorized: switched by its Port. The number is the one shown on the valve in Edit layout.',
+  port: 'The free pins on the Interface. Two valves can\'t share a Port. Once saved it is greyed out (it is wiring, Rule 18.13).',
+  tab: 'The Tab it goes on. Pipes only join IPs on the same Tab.',
+  name: 'Its Name, the Suggested Name to start (ValveTee_1, Manifold2_1 ...); you may edit it to make it your own. Each valve has its own Name made from its Label (Rule 3.1), used in a Process.',
+  graphic: 'How it looks on the Tab, with its valves as picked and their numbers.',
+  path: 'The Skynet drawing of the tees: set by its Template (Rule 5.6). The valves are drawn to match it.',
+  orient: 'Horizontal (the valves hang down), Left Vertical 90 (turned a quarter clockwise: the valves point left) or Right Vertical 90 (a quarter the other way: the valves point right). No Flip (Fritz, 2026-11-06). The picture, its valves and its IPs follow.',
+  xy: 'Where it is on the Tab, in pixels from the top left corner.', size: 'Its size in pixels. It keeps its shape as drawn (no Autosize).',
+  type: 'A Skynet TC Pipe Fitting with its valve Devices built in (Rule 5.35).' };
+const MF_LABEL_POP = { title: 'Label attributes', fields: () => [['label', 'Label', 'text'], ['labelVisible', 'Visible (Show label)', 'yn', true], ['labelSize', 'Font size (px; empty = Default)', 'num'],
+  ['labelColor', 'Fore color', 'color'], ['labelAlign', 'Label position', 'sel', LABEL_POS]] };
+const MF_KIND_SEL = [['manual', 'Manual'], ['motorized', 'Motorized']];
+// Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90" (the Valve Tee too)
+const MF_ROTS = [0, 90, 270];
+const MF_ORIENT = [['0', 'Horizontal'], ['90', 'Left Vertical 90'], ['270', 'Right Vertical 90']];
+const mfSetPin = (item, k) => { const e = item && mfEl(item, k, draft.elements); return e && e.valveType !== 'manual' && (e.channel ?? '') !== '' ? e : null; };
+const mfIfaceText = n => n ? (ifaceIdOf(n) ? `${ifaceIdOf(n)}: ${n}` : n) : '(none)';
+function mfPortChoices(it, item, k) {
+  const own = item ? draft.elements.filter(e => e.integratedIn === item.id && isMfPart(e)) : [], els = draft.elements.filter(e => !own.includes(e));
+  const taken = mfKeys(it).filter(x => x !== k && it[x + '_mfk'] === 'motorized' && (it[x + '_mfpin'] ?? '') !== '').map(x => String(it[x + '_mfpin']));
+  const pins = it.mfIface ? freePins({ type: 'digitalOut', subtype: 'valve', device: it.mfIface, name: '\0new' }, els, S.config.devices, false).filter(p => !taken.includes(String(p))) : [];
+  const b = boardOfDevice({ device: it.mfIface }, S.config.devices), cur = String(it[k + '_mfpin'] ?? '');
+  return [['', !it.mfIface ? '(Interface first)' : pins.length ? '(pick)' : '(no free Port)'], ...pins.map(p => [String(p), pinLabel(p, b)]), ...(cur && !pins.map(String).includes(cur) ? [[cur, cur]] : [])];
+}
+const mfTypeText = it => 'Fitting with ' + mfKeys(it).map(k => { const m = it[k + '_mfk'] === 'motorized', e = { type: 'digitalOut', subtype: 'valve', valveType: m ? 'electric' : 'manual' }; return `V${mfNum(k)} ${shownType({ ...e, typeCode: defaultCode(e) })}`; }).join(', ');
+function mfDrillFields(it, item, adding) {
+  const T = MF_TIPS, keys = mfKeys(it), after = adding ? { after: true } : {};
+  if (!MF_ROTS.includes(unitRot(it))) it.rot = '0'; else it.rot = String(unitRot(it));
+  const setIface = !adding && keys.some(k => mfSetPin(item, k));
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }],
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: MF_LABEL_POP, tip: T.label }], ['labelVisible', 'Label Visible', 'yn', true, false, false, { tip: T.labelVisible }],
+    setIface ? ['_mfIfaceRo', '2. Interface (board)', 'ro', mfIfaceText(it.mfIface), false, false, { tip: T.iface }]
+      : ['mfIface', '2. Interface (board)', 'dev', adding ? 'addnewid' : null, true, false, { tip: T.iface }],
+    ...keys.map((k, i) => {
+      const motor = it[k + '_mfk'] === 'motorized', set = !adding && motor && mfSetPin(item, k);
+      const port = !motor ? null : set ? ['_' + k + '_pinro', 'Port', 'ro', pinLabel(set.channel, boardOfDevice(set, S.config.devices)), false, false, { tip: T.port }]
+        : [k + '_mfpin', 'Available Ports', 'sel', mfPortChoices(it, item, k), true, false, { tip: T.port }];
+      return [k + '_mfk', `${i ? '' : '3. '}Valve ${mfNum(k)}`, 'sel', MF_KIND_SEL, true, false, { tip: T.valve, ...(port ? { with: port } : {}) }];
+    }),
+    ['workspace', '4. Tab', 'ws', adding ? 'addnewid' : null, false, false, { tip: T.tab }],
+    ['name', '5. Name', 'text', null, false, false, { tip: T.name, ...after }],
+    ['_pv', 'Graphic', 'mfpic', null, false, false, { tip: T.graphic, ...after }],
+    ['_mpath', 'Path', 'ro', String(it.image || '').replace(/^Images\//, ''), false, false, { tip: T.path, ...after }],
+    ['rot', 'Orientation', 'vorient', MF_ORIENT, false, false, { tip: T.orient, ...after }],
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
+    ['_mtype', 'Device Type', 'ro', mfTypeText(it), false, false, { tip: T.type }]];
+}
+// the Graphic on its dialogs: the tees, each valve as picked (Manual or Motorized) with its number, turned and flipped as picked
+function mfPreview(obj) {
+  const box = h('div', { class: 'mfPrev' });
+  const draw = () => {
+    const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
+    const keys = mfKeys(obj), N = keys.length || 1, W = 110 * N, H = Math.round(W * 262 / (160 * N));
+    const g = { x: 0, y: 0, w: W, h: H, rot: +(q('rot')?.value ?? obj.rot ?? 0) || 0, fittings: obj.fittings };
+    const side = unitRot(g) % 180 === 90, diag = unitRot(g) % 90 === 45, D = Math.ceil(Math.hypot(W, H));
+    const BW = side ? H : diag ? D : W, BH = side ? W : diag ? D : H, ox = (BW - W) / 2, oy = (BH - H) / 2;
+    const pic = h('div', { style: `position:absolute;left:${ox}px;top:${oy}px;width:${W}px;height:${H}px;transform:${unitTransform(g)}` },
+      h('div', { style: `position:absolute;inset:0;background:url("${media(obj.image)}") 0 0/100% 100% no-repeat` }),
+      ...keys.map((k, i) => h('div', { style: `position:absolute;left:${i / N * 100}%;width:${100 / N}%;top:${MF_TEE_H * 100}%;height:${(1 - MF_TEE_H) * 100}%;background:url("${mfPicUrl((q(k + '_mfk')?.value) || obj[k + '_mfk'])}") 0 0/100% 100% no-repeat` })));
+    const nums = keys.map((k, i) => { const [x, y] = unitPoint(g, ...mfNumAt(g, i)); return h('div', { class: 'mfNum', style: `left:${x + ox}px;top:${y + oy}px` }, String(mfNum(k))); });
+    box.style.width = BW + 'px'; box.style.height = BH + 'px';
+    box.replaceChildren(pic, ...nums);
+  };
+  const on = () => { if (!box.isConnected) { document.removeEventListener('change', on, true); document.removeEventListener('input', on, true); return; } setTimeout(draw, 0); };
+  document.addEventListener('change', on, true); document.addEventListener('input', on, true);
+  setTimeout(draw, 0);
+  return box;
 }
 const MF_ROWS = () => Object.keys(MF_TPLS).filter(n => tplOf('fitting', n)).flatMap(n => ['manual', 'motorized'].map(k =>
   [`${MF_TPLS[n].what}, ${k === 'manual' ? 'Manual' : 'Motorized'} valve${n === 'Valve_Tee' ? '' : 's'}`, () => addMf(n, k)]));
@@ -618,23 +792,6 @@ function mfWork(g) {
   out.mfIface ??= devs.length === 1 ? devs[0].name : '';
   return out;
 }
-function mfFields(it) {
-  const keys = mfKeys(it), motor = keys.some(k => it[k + '_mfk'] === 'motorized'), N = keys.length;
-  return [['_mf', `Valve${N > 1 ? 's' : ''} (built in: ${N > 1 ? 'each one is Manual or Motorized on its own' : 'Manual or Motorized'})`, 'head'],
-    ...(motor ? [['mfIface', 'Interface (board) the Motorized valves are wired to', 'dev']] : []),
-    ...keys.flatMap(k => [[k + '_mfk', `Valve ${mfNum(k)}`, 'sel', MF_KINDS, true],
-      ...(it[k + '_mfk'] === 'motorized' ? [[k + '_mfpin', `Valve ${mfNum(k)}: Available Ports / Pins`, 'pin', 'mf_' + k]] : [])])];
-}
-// the Available Ports lists of its Motorized valves: the free pins on its Interface (two valves can't share a pin)
-function mfPinLists(w, g) {
-  const own = draft.elements.filter(e => e.integratedIn === g.id && isMfPart(e)), els = draft.elements.filter(e => !own.includes(e));
-  for (const k of mfKeys(g)) {
-    const taken = mfKeys(g).filter(x => x !== k && w[x + '_mfk'] === 'motorized' && (w[x + '_mfpin'] ?? '') !== '').map(x => String(w[x + '_mfpin']));
-    const pins = w[k + '_mfk'] === 'motorized' && w.mfIface ? freePins({ type: 'digitalOut', subtype: 'valve', device: w.mfIface, name: '\0new' }, els, S.config.devices, false).filter(p => !taken.includes(String(p))) : [];
-    $('#pins-mf_' + k)?.remove();
-    document.body.append(h('datalist', { id: 'pins-mf_' + k }, ...pins.map(p => { const t = pinLabel(p, boardOfDevice({ device: w.mfIface }, S.config.devices)); return h('option', { value: p, label: t }, t); })));
-  }
-}
 // make its valves (or bring them up to date) from w (its Properties). Nothing changes when something is wrong (the error is thrown).
 // loose: a new one, whose Motorized valves get their Interface and Ports in the Properties that open next.
 function applyMf(g, w, tab, label, loose = false) {
@@ -649,7 +806,7 @@ function applyMf(g, w, tab, label, loose = false) {
       if (!loose && none(w.mfIface)) throw new Error('Pick the Interface (board) the Motorized valves are wired to');
       if (!loose && none(w[k + '_mfpin'])) throw new Error(`Valve ${mfNum(k)}: pick its Port`);
       if (!none(w.mfIface)) e.device = w.mfIface; else delete e.device;
-      if (!none(w[k + '_mfpin'])) e.channel = w[k + '_mfpin']; else delete e.channel;
+      if (!none(w[k + '_mfpin'])) e.channel = /^\d+$/.test(String(w[k + '_mfpin'])) ? +w[k + '_mfpin'] : w[k + '_mfpin']; else delete e.channel;
       e.imageOverlay = BOLT;
     } else { for (const x of ['device', 'channel', 'imageOverlay', 'activeLow', 'oneShot', 'oneShotDirection']) delete e[x]; }
     e.typeCode = o?.typeCode && o.valveType === e.valveType ? o.typeCode : defaultCode(e);
@@ -868,7 +1025,7 @@ function buildVessel(g) {
   const n = h('div', { class: `gfx vessel v-${t}` + (g.image ? ' has-img' : ''), 'data-gid': g.id, 'data-heater': g.heater || '', title: (eqClass(g) && g.name ? g.name + ': ' : '') + (g.label || (g.template ? (t === 'bfit' ? 'Tab_Fitting' : 'Tab_Vessel') + ' from ' + g.template : VESSELS[t])) });
   place(n, g);
   if (g.image && isUnit({ ...g, loose: false })) n.append(h('div', { class: 'bfImg', style: `background-image:url("${isSightGlass({ ...g, loose: false }) ? sgPic(g) : media(g.image)}");transform:${unitTransform(g)}` }));   // a Skynet Fitting: flipped and rotated (a Sight Glass drawn for its Length, Rule 5.32)
-  if (isMf(g)) n.append(mfValves(g));         // a Valve Tee or Supply Manifold: its valves, Manual or Motorized, open or closed (Rule 5.35)
+  if (isMf(g)) n.append(mfValves(g), ...(editing ? mfNums(g) : []));         // a Valve Tee or Supply Manifold: its valves, Manual or Motorized, open or closed (Rule 5.35)
   else if (g.image && isSkyV({ ...g, loose: false }) && (g.flipH || g.flipV || unitRot(g))) {     // a Skynet vessel flipped or rotated
     const [pw, ph] = picWH(g);
     n.append(h('div', { class: 'bfImg', style: `background-image:url("${media(g.image)}");transform:${unitTransform(g)};inset:auto;width:${pw}px;height:${ph}px;left:${((g.w || 90) - pw) / 2}px;top:${((g.h || 90) - ph) / 2}px` }));
@@ -3130,7 +3287,8 @@ function tcFitOnPipe(u) {
   // its run along the pipe: as it is, else turned about its bend (a quarter turn first)
   const keep = { x: u.x, y: u.y, rot: u.rot, turn: u.turn }, base = unitRot(u);
   let plan = null;
-  for (const k of [0, 90, 270, 180, 45, 315, 135, 225]) {
+  // a Valve Tee or Supply Manifold turns only Horizontal, Left Vertical 90 or Right Vertical 90 (Fritz, 2026-11-06, Rule 5.35)
+  for (const k of isMf(u) ? [base, ...MF_ROTS.filter(r => r !== base)].map(r => (r - base + 360) % 360) : [0, 90, 270, 180, 45, 315, 135, 225]) {
     delete u.turn; const r = (base + k) % 360; if (r) u.rot = r; else delete u.rot;
     const b1 = tcBend(u); u.x = +((u.x || 0) + A0.b[0] - b1[0]).toFixed(2); u.y = +((u.y || 0) + A0.b[1] - b1[1]).toFixed(2);
     const A = tcArms(u); plan = fitOnPipe(p.points[0], p.points[1], A.b, A.arms, opts(p));
@@ -4381,6 +4539,12 @@ function turnSel(op) {
   if (!k) return;
   if (k === 'kettle' && op !== 'h') return toast('A kettle stays upright: it can Flip Horizontal, never Flip Vertical or turn (Rule 5.5).', true);
   if (lockedRiders(g).length) return toast(`${g.label || g.name} has a 🔒 locked part, so it can't turn.`, true);
+  if (isMf(g)) {         // Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90"
+    if (typeof op !== 'number') return toast(`${g.label || g.name} has no Flip: it turns Horizontal, Left Vertical 90 or Right Vertical 90 (Rule 5.35).`, true);
+    const i = MF_ROTS.indexOf(unitRot(g)), r = MF_ROTS[((i < 0 ? 0 : i) + (op > 0 ? 1 : -1) + MF_ROTS.length) % MF_ROTS.length];
+    delete g.flipH; delete g.flipV; delete g.turn; if (r) g.rot = r; else delete g.rot;
+    placeUnitParts(g); renderWs(); letGoBentEnds(); return;
+  }
   if (k === 'turn') { if (typeof op === 'number') g.rotate = String(((+g.rotate || 0) + op + 360) % 360); renderWs(); return; }
   const before = clone(g), r = (typeof op === 'number' ? op : 0) * Math.PI / 180;
   const M = op === 'h' ? [-1, 0, 0, 1] : op === 'v' ? [1, 0, 0, -1] : [Math.cos(r), -Math.sin(r), Math.sin(r), Math.cos(r)];
@@ -5775,6 +5939,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const os = opts || [], cur = String(v ?? os[0]?.[0] ?? '');
     input = h('select', { 'data-k': key, 'data-kind': 'sel', class: 'orientSel', ...(rerender === true ? { 'data-rerender': '1' } : {}) }, ...os.map(([o, l]) => h('option', { value: o, ...(o === cur ? { selected: true } : {}) }, l)));
   }
+  else if (kind === 'mfpic') return [h('label', {}, label), h('div', { class: 'devPreviewWrap' }, mfPreview(obj))];      // a Valve Tee or Supply Manifold (Rule 5.35)
   else if (kind === 'devpic') {      // the Graphic shown on the dialog (Rule 18.19): its picture, Cover and Orientation, kept up to date
     const box = h('div', { class: 'devPreview' }), pic = h('img', { alt: '' }), cov = h('div', { class: 'pvCover' });
     box.append(pic, cov);
@@ -5831,7 +5996,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     };
     input._fill(obj.device);
   }      // filled with the free pins      // the Add Device box (Fritz, 2026-11-04): a new Tab built on the spot
-  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
+  else if (kind === 'dev') input = h('select', { 'data-k': key, 'data-kind': kind, ...(rerender === true ? { 'data-rerender': '1' } : {}) }, h('option', { value: '' }, '(none)'), ...(S.config.devices || []).map(d => h('option', { value: d.name, ...(d.name === v ? { selected: true } : {}) }, ifaceIdOf(d.name) ? `${ifaceIdOf(d.name)}: ${d.name}` : d.name)),      // Fritz, 2026-11-04: "Interface ID: Interface Name", e.g. BM: Brewery Mega
     ...(String(opts).startsWith('addnew') && can('admin') ? [h('option', { value: ADD_IFACE }, '➕ Add new Interface…')] : []));      // Fritz, 2026-10-27: opens the Add Interface pop-up
   else if (kind === 'devctl') input = h('select', { 'data-k': key, 'data-kind': 'elem', title: PICK_TIP }, h('option', { value: '' }, 'None'),
     ...controllableNames((draft || S.config).elements).map(n => h('option', { value: n, ...(n === v ? { selected: true } : {}) }, n)),
@@ -6536,8 +6701,8 @@ async function editItem(kind, id) {
   if (rims) { Object.assign(work, rimsWork(item)); rimsPinLists(work, item); $('#dlgBody').addEventListener('change', rimsRefresh); }
   const vdev = isVDev(item), vpRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } vpPinLists(x, item); };
   if (vdev) { Object.assign(work, vpWork(item)); vpPinLists(work, item); $('#dlgBody').addEventListener('change', vpRefresh); }
-  const mf = isMf(item), mfRefresh = () => { const x = { ...work }; try { readFields(x, $('#dlgBody')); } catch { } mfPinLists(x, item); };       // a Valve Tee or Supply Manifold (Rule 5.35)
-  if (mf) { Object.assign(work, mfWork(item)); mfPinLists(work, item); $('#dlgBody').addEventListener('change', mfRefresh); }
+  const mf = isMf(item), mfRefresh = () => { };       // a Valve Tee or Supply Manifold (Rule 5.35)
+  if (mf) Object.assign(work, mfWork(item));
   if (isV) for (const [k, d] of Object.entries(eqClass(item).ports)) { const p = item.ports?.[k] || {}; work[k + '_on'] = !!p.installed; work[k + '_pos'] = p.position; work[k + '_std'] = p.standard; if (d.vw) work[k + '_label'] = p.label || d.name; }
   if (type === 'text' && work.labelVisible === undefined && !item._ref) work.labelVisible = true;     // a new Text Widget shows its Label (Fritz's design)
   if (type === 'text' && !work.label) work.label = work.name;             // an empty Label is the Name: show it in the box
@@ -6550,7 +6715,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? `${mfInfo(item).what}: ${item.name}` : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -6595,8 +6760,9 @@ async function editItem(kind, id) {
       }
       if (mf) {          // a Valve Tee or Supply Manifold (Rule 5.35): its Label is never blank (Rule 18.15); its valves follow its Properties
         if (!String(work.label ?? '').trim()) work.label = item.label || mfNext(mfInfo(item).label, draft.graphics.filter(x => x !== item).map(x => x.label));
-        const w = Object.fromEntries(Object.keys(work).filter(k => /_(mfk|mfpin)$/.test(k) || k === 'mfIface').map(k => [k, work[k]]));
+        const w = mfOf(work);
         for (const k of Object.keys(w)) delete work[k];
+        delete work.flipH; delete work.flipV; delete work._flip; if (!MF_ROTS.includes(+work.rot || 0)) work.rot = '0';      // no Flip, three Orientations (Fritz, 2026-11-06)
         applyMf({ ...item, ...work, id: item.id, fittings: item.fittings }, w, work.workspace || item.workspace, work.label);
       }
       if (isUnit(item)) {          // a Skynet Fitting: its IPs sit on its openings, wherever it is flipped or rotated
@@ -10367,13 +10533,7 @@ F.skynetFitting = it => {
       ['sgLength', `Length (inches, ferrule face to ferrule face, ${SG_MIN} to ${SG_MAX}; only the glass${sgCaged(it) ? ' and its cage' : ''} stretches)`, 'num']] : []),
     ...(it.onVessel ? [['_j', 'It sits on a port of its vessel and moves with it.', 'note']] : []), ...FIT_PLACE(it)];
   const picks = fittingSlotFields(it, true).filter(f => /^f[vpm]\d$/.test(f[0]));       // only the valve and probe it uses are picked here
-  if (isMf(it)) return [['_t', `Skynet ${mfInfo(it).what} (${it.template || ''}): ${mfKeys(it).length > 1 ? mfKeys(it).length + ' Long Tees joined end to end, a valve built into each branch' : 'a Long Tee with a valve built into its branch'}. ` +
-      'IPs on the two open ends of the tees and on the far end of each valve. Its valves are Devices built into it: they can\'t be taken out (Rule 5.2), but each one can be changed from Manual to Motorized and back here (Rule 5.35).', 'note'],
-    ['name', 'Name', 'text'], ['label', 'Label (never blank: it starts as ' + mfInfo(it).label + '_n, Rule 18.15)', 'text'], ...mfFields(it),
-    ['_o', 'Orientation (the picture, its valves and its IPs follow)', 'head'], ['flipH', 'Flip Horizontal', 'bool'], ['flipV', 'Flip Vertical', 'bool'], ['rot', 'Rotate', 'sel', ROTATE],
-    ['_look', 'Label and place', 'head'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelSize', 'Label size', 'num'],
-    ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num'],
-    ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
+  if (isMf(it)) return mfDrillFields(it, draft.graphics.find(g => g.id === it.id), false);       // the Pump's drill-down (Fritz, 2026-11-06, Rule 5.35)
   return [['_t', isCapOnly(it) ? `Skynet End Cap. Drag it onto an opening to close it; drag it off to open it again.${it.capOn ? ' It is on an opening now.' : ''}` :
       `Skynet Fitting ${it.template || ''}: ${made}. Every opening has a two-way IP built in, so there is nothing to set for them.`, 'note'],
     ['name', 'Name', 'text'], ['label', 'Label (never blank)', 'text'], ...stdFields(it), ...picks,

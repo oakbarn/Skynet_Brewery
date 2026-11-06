@@ -37,3 +37,17 @@ assert.ok(app.includes("if (isMf(v)) { const r = mfFlow(v, g.port); if (r) retur
 assert.ok(app.includes('!isVPart(e) && !isMfPart(e)'), 'its valves have no IPs of their own');
 assert.ok(fs.existsSync(path.join(ROOT, 'help', '146-valve-tees-and-supply-manifolds.md')), 'Help 146');
 console.log('manifold ok');
+// Fritz, 2026-11-06 (Rule 18.29): the Pump's drill-down Add box and Properties; valve ends that match the tee ends; valve numbers;
+// no Flip, only Horizontal, Left Vertical 90, Right Vertical 90
+assert.ok(app.includes("dialog(I.what, it => mfDrillFields(it, null, true)"), 'the Add box is the drill-down');
+assert.ok(app.includes('if (isMf(it)) return mfDrillFields(it, '), 'the Properties are the drill-down');
+for (const f of ["'1. Label'", "'2. Interface (board)'", "'4. Tab'", "'5. Name'", "'Device Type'"]) assert.ok(app.includes(f), f);
+assert.ok(app.includes("const MF_ORIENT = [['0', 'Horizontal'], ['90', 'Left Vertical 90'], ['270', 'Right Vertical 90']]"), 'three Orientations');
+assert.ok(app.includes('const MF_ROTS = [0, 90, 270]'), 'the turn buttons and a pipe drop keep to them');
+assert.ok(app.includes("class: 'mfNum'"), 'valve numbers');
+assert.ok(app.includes('<rect x="77" y="0.8" width="56" height="16.5" rx="5"') && app.includes('<rect x="77" y="192.7" width="56" height="16.5" rx="5"'), 'each valve has the tee\'s 56 x 16.5 ferrule at both ends');
+for (const n of ['Valve_Tee', 'Supply_Manifold_2', 'Supply_Manifold_3']) {
+  const t = tpl(n), svg = fs.readFileSync(path.join(ROOT, 'media', t.image), 'utf8');
+  assert.equal((svg.match(/<rect x="70" y="122" width="70" height="12"/g) || []).length, t.fittings.filter(f => f.kind === 'valveTee').length, `${n}: half a clamp on each branch ferrule`);
+}
+console.log('manifold drill-down ok');
