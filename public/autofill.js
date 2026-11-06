@@ -26,7 +26,7 @@ const COMMANDS = [
   ['if', 'test something'], ['elseif', 'another test'], ['else if', 'another test'], ['else', 'when no test fit'], ['endif', 'end of the if'],
   ['wait', 'until true, or a time'], ['sleep', 'pause, in ms'], ['goto', 'jump to a [label]'], ['step', 'start a step'],
   ['start', 'a Process or timer'], ['stop', 'a Process, timer or alarm'], ['restart', 'a Process from the top'], ['reset', 'a timer'],
-  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'], ['send_db_group', 'send a database Group now'],
+  ['play', 'an alarm or sound'], ['print', 'to the console'], ['clear', 'the console'], ['show tab', 'go to a Tab'], ['send_db', 'send to the database now'], ['send_db_group', 'send a database Group now, once'], ['start_db_group', 'start sending a database Group'], ['stop_db_group', 'stop sending a database Group'],
   ['new value', 'make a number'], ['new string', 'make a text'], ['new bool', 'make a true/false'], ['new time', 'make a time'], ['new datetime', 'make a date and time'],
   // gGlobals made in a Process (Fritz, 2026-11-06, Rule 1.24): picking one also fills in the start of the name (gV_ ...)
   ...Object.values(G_DECLARE).map(d => [`new ${d.long}`, `make a gGlobal: ${d.what}`]),
@@ -59,7 +59,7 @@ export function fit(name, typed) {
 }
 
 // commands that take something after them: the pick ends in a space and the next list opens by itself
-const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group',
+const TAKES = new Set(['if', 'elseif', 'else if', 'wait', 'sleep', 'goto', 'step', 'start', 'stop', 'reset', 'play', 'print', 'show tab', 'send_db', 'send_db_group', 'start_db_group', 'stop_db_group',
   'new value', 'new string', 'new bool', 'new time', 'new datetime']);
 const COMPARE = [['= ', 'is equal to'], ['== ', 'is equal to (the same as =)'], ['!= ', 'is not'], ['> ', 'more than'], ['< ', 'less than'], ['>= ', 'at least'], ['<= ', 'at most']];
 const SET = [['= ', 'set it to'], ['+= ', 'add to it'], ['-= ', 'take from it'], ['++', 'add 1']];

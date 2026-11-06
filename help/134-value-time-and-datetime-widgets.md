@@ -26,7 +26,7 @@ It keeps its value when the Brain restarts.
 - **Label box:** Label, Visible (Show label), Font size, Font, Fore color, Back color, Alignment.
 - **Properties box:** Visible, Hidden Locked, Tab, X, Y, Width, Height, Lock position.
 - **Database and .API** (see [Database and .API](98-database-and-api)): **When Clicked** sends it each time someone sets it on its
-  Tab (even to the same value); **In a Group** sends it with a Process line `send_db_group Group_Name`.
+  Tab (even to the same value); in a **Database Group** it is sent only while one of its Groups is started (`start_db_group Group_Name` ... `stop_db_group Group_Name`).
 
 ## Widget, Device or Clone: your choice
 
