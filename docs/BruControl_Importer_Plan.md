@@ -163,6 +163,17 @@ How they are asked (the Rules for dialogs):
     - Oakbarn Modified HERMS (BruControl)
     - Unheated
 
+### Educated guesses, and the Scripts as clues (Fritz, 2026-11-06)
+"We can make an educated guess. We may also want to import his Scripts even if the User elects to use Skynet Templated
+Processes as we may gain what a vessel is used for."
+- Each answer starts with the Importer's **educated guess**, worked out from the config file (item names and DisplayNames such
+  as HLT, MLT, BK, Kettle; which port runs which heater or valve; pictures; the Tab it sits on). The brewer only checks it
+  and changes what is wrong.
+- The **BruControl Scripts are always read**, even when the brewer picks the Skynet Templated Processes (section 7, option 7).
+  They are clues for the guesses: a script that heats to strike temperature and then opens the valves into the mash tun
+  tells which vessel is the HLT and which heater and valves belong to it. Whether the Scripts are also brought in as Processes
+  stays the brewer's choice.
+
 ### Open questions for Fritz on this list
 1. **Two Outlet questions (6 and 10).** Suggestion: 6 is the outlet's **fitting** (TC 1.5, NPT, BSP) and 10 is **where** it is (above
    the bottom or a bottom outlet). Then 10 could be just "Above Bottom; Bottom; None", since 6 already says TC or BSP.
