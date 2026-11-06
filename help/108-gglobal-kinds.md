@@ -15,9 +15,11 @@ Every gGlobal has one **Kind**. The Kind is picked when the gGlobal is made and 
 | **gT_Global_Time** | a Time, `hh:mm:ss` | `gT_Mash_Rest.value = 01:00:00` |
 | **gD_Global_DateTime** | a Date Time | `gD_Brew_Day_Start.value = "2026-11-07T07:00:00"` |
 
-The name prefixes (`gS_`, `gG_`, `gV_` ...) are hints. Any name works.
+On this screen the name prefixes (`gS_`, `gG_`, `gV_` ...) are hints and any name works. In a Process, a name's prefix tells which Kind it is (Help 145).
 
 ## Making a gGlobal
+
+A Process can make one too, with a line such as `new gV gV_Strike_Temp = 163` (Help 145).
 
 1. Open the **gGlobal** screen (☰ Menu > Variables) and press **➕ New gGlobal**.
 2. Type its **Name**. It can't be blank, has no spaces and must be unique.
