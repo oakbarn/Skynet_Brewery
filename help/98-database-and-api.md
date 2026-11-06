@@ -61,10 +61,14 @@ The database is a SQLite file on the Brain (`data/brewlog.db`): free, SQL, nothi
 | Choice | Outside programs (web API, MQTT, Home Assistant, voice) |
 |---|---|
 | **Off** | Can't see it (the start) |
-| **Get only** | Can read it |
-| **Get and Put** | Can read it and change it |
+| **Read Only (Get: outside programs like Node-Red can read it.)** | Can read it |
+| **Read & Control (Get & Put: outside programs like Node-Red can also control it.)** | Can read it and control it (change it) |
 
-The addresses and the safeguards are on [API (other programs)](11-api). A gGlobal shows up in MQTT and Home Assistant only when its .API is on, and can be changed there only with **Get and Put**.
+**API_Name** (below .API in the pop-up) is the name a Voice Command says. It must be Unique and may be blank (with a warning): see [API_Name](144-api-name-for-voice-commands).
+
+The addresses and the safeguards are on [API (other programs)](11-api). A gGlobal shows up in MQTT and Home Assistant only when its .API is on, and can be changed there only with **Read & Control**.
+
+The choices were called Get only and Get and Put until 2026-11-06. Fritz wanted plain English first, with the computer words in ( ); they work the same. In the Rules and the other Help pages, Get only means Read Only and Get and Put means Read & Control.
 
 ## gGlobal (one variable class)
 
