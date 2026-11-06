@@ -1429,10 +1429,18 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
   their files there too. An uninstall never deletes it.
+- **The import is built step by step** (Fritz, 2026-11-06: "start a new import function and we will build it"). It is a new
+  import function; the older import code is described in docs/BruControl_Old_Import_Method.md for reference only. So far:
+  - **Names** (page 4): Skynet names (Rule 3.1) by default, or keep the BruControl names after two warnings (Rule 15.1).
+  - **Import Copy** (Fritz: "Make an Import Copy, then convert the Import copy"): the config file is copied into
+    `Brewing\Import\BruControl` and only the copy is converted.
+  - **Boards and Tabs** (page 5): the Interfaces, the Tabs (no Tab backgrounds for now), and **only the items that have an
+    Interface and a Port**. Everything else on a Tab is a **Placeholder** (a grey box with the BruControl name) at the same
+    place and size, until a later step brings it in; a hidden item's Placeholder stays hidden.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
-  folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3). It holds the Schema, its Processes (they travel beside it, as
-  Processes are shared by every Schema) and the import report. Until the question steps are built it is marked a **first
-  draft**.
+  folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
+  Processes, which travel beside it, as Processes are shared by every Schema). It is marked a **first draft** until the
+  import is finished.
 - **Open a Schema file** (Panel, Schema.json page, admins only): lists the files in the Import folder, or takes a `.json` file
   from the computer in use. It adds the Schema under a name of its own (an existing Schema is never overwritten), adds its
   Processes (a Process with the same name and different text is kept as a backup first) and can load it right away. It also
@@ -2150,3 +2158,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")
 - 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can also control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")
 - 2026-11-06: Rule 15.4: the Importer is a choice in the Windows Setup ("Will you import a BruControl configuration on this computer?"); Setup always makes the Brewing folder's Import subfolder (C:\Brewing\Import), also for BeerSmith or other programs; the Importer saves its Schema file there (Save the Schema) and the Panel opens it (Schema.json > Open a Schema file). Help 143 and Help 44 updated. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
