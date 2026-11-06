@@ -1,19 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 344">
   <!-- Skynet TC 1.5 Supply Manifold, 2 Long Tees joined end to end (Fritz, 2026-11-06, Rule 5.35). Each tee is Fritz's Long Tee
-       (210 x 134). The valve on each branch is drawn by the panel in the 210 x 210 box under it (Valve Standard, Rule 5.29), Manual
-       or Motorized. IPs: the open end of the first and last tee (0, 29/344) and (1, 29/344), and the far end of each valve (bottom). -->
+       (210 x 134). The valve on each branch is drawn by the panel in the 210 x 210 box under it, Manual
+       or Motorized, with TC ferrules that match the tee ends; the clamp at each branch end is half here, half on the valve. IPs: the open end of the first and last tee (0, 29/344) and (1, 29/344), and the far end of each valve (bottom). -->
   <g stroke="#505050" stroke-width="1.6" stroke-linejoin="round" fill="#808080">
     <g transform="translate(0 0)">
       <path d="M16.5 9.8 H193.5 V48.2 H134.9 A10.7 10.7 0 0 0 124.2 58.9 V117.5 H85.8 V58.9 A10.7 10.7 0 0 0 75.1 48.2 H16.5 Z"/>
       <rect x="1" y="1" width="16.5" height="56" rx="5"/>
       <rect x="192.5" y="1" width="16.5" height="56" rx="5"/>
       <rect x="77" y="116.5" width="56" height="16.5" rx="5"/>
+      <rect x="70" y="122" width="70" height="12" rx="3" fill="#b9bec4"/>
     </g>
     <g transform="translate(210 0)">
       <path d="M16.5 9.8 H193.5 V48.2 H134.9 A10.7 10.7 0 0 0 124.2 58.9 V117.5 H85.8 V58.9 A10.7 10.7 0 0 0 75.1 48.2 H16.5 Z"/>
       <rect x="1" y="1" width="16.5" height="56" rx="5"/>
       <rect x="192.5" y="1" width="16.5" height="56" rx="5"/>
       <rect x="77" y="116.5" width="56" height="16.5" rx="5"/>
+      <rect x="70" y="122" width="70" height="12" rx="3" fill="#b9bec4"/>
     </g>
     <rect x="198" y="0" width="24" height="58" rx="6" fill="#b9bec4"/>
   </g>
