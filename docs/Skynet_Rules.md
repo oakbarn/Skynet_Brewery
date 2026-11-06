@@ -1398,6 +1398,18 @@ cannot be changed safely stays as it was and is listed in the import report. Eac
 in docs/Importing_Norms.md. First norm: `.xposition` / `.yposition` become `.x_hPosition` /
 `.y_vPosition` (Rule 1.15), on the item and in every Process. (2026-10-28, thread "Start the
 Importing Norms document")
+**Exception for names, BruControl Importer** (Fritz, 2026-11-06: "the user during import can import his names ... I want it
+plain that the Skynet way is better in the end"). By default every imported name is changed to the Skynet naming convention
+(Rule 3.1). The user may instead **keep the BruControl names**, but only after two warnings, like Start Fresh (Rule 9.8):
+1. **"Do you really want to keep your BruControl names?"** It explains plainly why not: a Skynet name tells you the Interface,
+   port, type, Label and Tab at a glance; Skynet renames an item everywhere (Processes too), so nothing is lost by changing; new
+   Devices get Skynet names, so a kept BruControl name mixes two styles on the same Tab; and Help, samples and Templates all use the
+   Skynet way. **No (use the Skynet names) is the default.**
+2. A second, last chance to back out: **"Last chance: keep the BruControl names?"**, again with **No (back out, use the Skynet
+   names)** as the default.
+Only after both are confirmed are the BruControl names kept. Even then, characters a name may not have (Rule 3.4) and spaces are
+changed as always, and every item still gets its hidden key (Rule 3.10). Everything else that comes in is still changed to the
+Skynet way. Either choice can be changed later item by item, since Skynet renames everywhere.
 
 15.2 **Everything conforms to the latest standard. Backward compatibility is not needed.** When a
 standard changes, existing Schemas, Processes, names and files are changed to it (with backups),
@@ -1413,6 +1425,27 @@ First use: the old Ball valve pictures (Valve_Ball_*) gave way to the Skynet Mot
 (Rule 5.17) in the 2 and 3 vessel samples and the default Schema. (Fritz, 2026-10-31, thread "Update samples to the
 new valve and Rules")
 
+
+15.4 **The Skynet BruControl Importer** (Fritz, 2026-11-06). A BruControl config file (`.brucfg`) is brought into Skynet by
+the **Skynet BruControl Importer**, a program that runs on **Windows only, on the same computer as BruControl**. It only reads
+BruControl's files and never changes them. **It shares everything with the Panel:** it is built from the same repo and uses the
+same code, Skynet Templates, pictures, sounds, Rules and Importing Norms, so a valve from the Importer is exactly a valve from
+the Panel. A Template or Rule is written for both the Panel and the Importer, and the other way round (Fritz: "a Template or
+Rules must be written to both the Skynet Panel or the Import BruControl Program and vice versus"). It is a second shortcut,
+**Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
+boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7).
+- **It starts with Welcome pages** (Fritz, 2026-11-06: "Welcome is Page 1, Similarities and differences are Page 2"; more pages
+  may come): **Page 1** is just the welcome; **Page 2** explains what stays the same and what is different between BruControl
+  and Skynet, and how the Importer guides the brewer through the import.
+- **Page 3 is the Starting dialog, the config file picker** (Fritz, 2026-11-06). It looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
+  BruControl may keep a default config there too; it is listed and marked as BruControl's default. If no config file is there
+  (or only the default one), the user is asked to **point to the folder** that holds theirs (Fritz, 2026-11-06). Clicking a file
+  shows what is in it.
+- **One config file, one Schema.** A user may have more than one config file; each one is imported on its own into its
+  own Schema, and config files are never combined (Fritz, 2026-11-06).
+- The Oakbarn Schema is the first one built with it. For each BruControl item the Importer asks the brewer questions, so the
+  right Skynet Device or Widget is used (Fritz, 2026-11-06).
+(thread "Plan the BruControl config importer", Help 143; plan: docs/BruControl_Importer_Plan.md)
 ---
 
 ## 16. The Brew Process
@@ -2109,4 +2142,6 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
+- 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 5.35 (Valve Tees and Supply Manifolds: the Valve Tee, Double and Triple Supply Manifold, TC 1.5 Long Tees with a valve Device built into each branch; IPs only on the open ends of the tees and the far end of each valve; each valve Manual or Motorized on its own in the fitting's Properties; added from Elbows, Tees … and the Valves list). Help 146; next free Help number 147. (thread "Add valve Tees and supply manifolds")
