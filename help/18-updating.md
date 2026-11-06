@@ -14,7 +14,7 @@
 
 **Want the samples back in one folder?** Run the installer again and answer **No** to "Keep all of them as they are?". It then asks about each folder (config, media, scripts, data) and moves the ones you pick to `backups/<folder>_<date>`. Or do it yourself: stop the panel and rename the folder (for example `media` to `media_old`). The panel copies the samples into a fresh `media` the next time it starts.
 
-> **Sign-ins are kept.** A new version keeps every user, password and the **recovery code**. The only time an update removes them is when you answer **Yes** to the installer's **Start Fresh** question and confirm the warning. See [Login, users and passwords](10-login).
+> **Sign-ins are kept.** A new version keeps every user, password and the **recovery code**. The only time an update removes them is when you pick **Update the program and reset all users** or **Start Fresh** in the installer and confirm the warning. See [Login, users and passwords](10-login).
 
 ## Every update: stop the panel first
 
@@ -42,28 +42,33 @@ Run the same installer you used the first time, from the new release. It sees th
 - **Mac:** `Install Skynet Brewer.command` next to the new zip.
 - **Linux / Pi:** `bash install-skynet-brewer.sh` next to the new zip.
 
-It first asks **Delete all users and Schemas and Start Fresh?** (answer **No** to keep everything, see [Start Fresh](#start-fresh-delete-all-users-and-schemas) below). Then it asks **Keep all of them as they are?** about your config, data, media and scripts folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
+It first asks what this update does (see [The three update choices](#the-three-update-choices) below; the first one keeps everything). Then it asks **Keep all of them as they are?** about your config, data, media and scripts folders. **Yes** (the normal answer) keeps them all. It also puts a copy of your layout in `config/backups/brewery_before_update_<date>.json`, just in case. Dates in file and folder names are ISO 8601, for example `20261023T113005` (year, month, day, T, hour, minute, second).
 
-## Start Fresh: delete all users and Schemas
+## The three update choices
 
-Want the panel as if it had never been installed? Run the installer over it. Before anything else it asks:
+When the installer finds the panel already there, it asks what this update does. The program files are always updated. On Windows it is a page with three round buttons; on a Mac, Linux or Pi you type **1**, **2** or **3**.
 
-> **Delete all users and Schemas and Start Fresh?**
+1. **Update the program and keep everything** (recommended, and the default). Your Schemas, settings, users and passwords, brew log, Processes, pictures and sounds stay as they are.
+2. **Update the program and reset all users.** A warning comes first; **No** goes back and nothing is deleted. **Yes** deletes, for good:
+   - every user and password
+   - every sign-in, on every computer and phone
+   - the recovery code
+   - on Windows, the user name and password Skynet's own window remembered
 
-- **No** (the normal answer, and the default) keeps everything and just updates.
-- **Yes** shows a second, red warning: **ALL EXISTING DATA WILL BE DELETED**. It lists what goes, for good and with no backup:
-  - every Schema, Tab, Device, Widget and setting (`config`)
-  - every user, password, sign-in and the recovery code, the brew log and saved values (`data`)
-  - every Process (`scripts`)
+   Your Schemas and settings (`config`), brew log and saved values (`data`), Processes (`scripts`), pictures and sounds (`media`) are **kept**. The panel opens at admin setup: make the admin account again and write down the new **recovery code**.
+3. **Start Fresh: delete everything.** The panel as if it had never been installed. A second, red warning comes first: **ALL EXISTING DATA WILL BE DELETED**. It lists what goes, for good and with no backup:
+   - every Schema, Tab, Device, Widget and setting (`config`)
+   - every user, password, sign-in and the recovery code, the brew log and saved values (`data`)
+   - every Process (`scripts`)
 
-  Your pictures and sounds (`media`) and the `backups` folder are **kept**.
-  - **No** on the warning backs out. Nothing is deleted, and the update carries on as normal.
-  - **Yes** deletes them. The panel then starts like a new install from the samples, and you make the admin account again (write down the new **recovery code**).
-  - On Windows it also deletes the user name and password that Skynet's own window remembered, so nothing old is filled in. Skynet's window never syncs with your Microsoft account, so a synced login can't come back either. You can still save your password in Skynet's window, and it fills in on Sign in as usual. The admin setup boxes stay empty until you click or type in them, even if your browser saved a password for the panel.
+   Your pictures and sounds (`media`) and the `backups` folder are **kept**.
+   - **No** on the warning goes back. Nothing is deleted.
+   - **Yes** deletes them. The panel then starts like a new install from the samples, and you make the admin account again (write down the new **recovery code**).
+   - On Windows it also deletes the user name and password that Skynet's own window remembered, so nothing old is filled in. Skynet's window never syncs with your Microsoft account, so a synced login can't come back either. You can still save your password in Skynet's window, and it fills in on Sign in as usual. The admin setup boxes stay empty until you click or type in them, even if your browser saved a password for the panel.
 
 The Windows installer (`Skynet_Brewer_Setup_<date>.exe`), the Mac installer and the Linux / Pi installer all ask it. If Windows can't delete a file because a program still has it open, the installer says so: restart the computer and run it again.
 
-> Only want one folder back to the samples? Answer **No** to Start Fresh, then **No** to "Keep all of them as they are?" (above). That moves a folder to `backups` instead of deleting it.
+> Only want one folder back to the samples? Pick **1** (or **2**), then answer **No** to "Keep all of them as they are?" (above). That moves a folder to `backups` instead of deleting it.
 
 ## Update by hand: unzip over the panel
 
