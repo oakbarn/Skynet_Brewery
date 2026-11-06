@@ -1273,7 +1273,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **140**. (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **141**. (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1555,11 +1555,7 @@ nothing and goes back to the calling dialog as it was. The first one built this 
    filled in (Label Visible off does not skip it). The Add Device box has it now.
    *Changed (Fritz, 2026-11-05):* **A Device or Widget must have a Label, and a Label can't be blank.** Some Devices and Widgets
    have their Label **filled in for you** with the pattern **Type_n**, n the next number not used yet: a **Motorized Ball Valve**
-<<<<<<< HEAD
-   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** by its kind, as **tP_1W_1**, **tP_RTD_1**, **tP_10KNTC_1** ... (Rule 18.26). It can be changed like any Label. When the
-=======
-   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** as **tP_1** (Rule 18.26); a **PWM output** as **PWM_1**, an **Analog output** as **4_20_1** or **0_10_1** (Rule 18.25). It can be changed like any Label. When the
->>>>>>> origin/claude/project-thread-vzxi0a
+   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** by its kind, as **tP_1W_1**, **tP_RTD_1**, **tP_10KNTC_1** ... (Rule 18.26); a **PWM output** as **PWM_1**, an **Analog output** as **4_20_1** or **0_10_1** (Rule 18.25). It can be changed like any Label. When the
    Label is filled in (by you or by the program) on a Build dialog, **the focus jumps to the next field** in the Enter order (the
    next one still empty). **Every Label is editable by the user**, filled in for you or not. Which Devices and Widgets fill in
    their Label is decided **dialog by dialog: Fritz says so when each dialog is built** (Fritz, 2026-11-05). Every other dialog that
@@ -1727,6 +1723,24 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
 - Gone from its dialog (Rule 18.22; what an older Picture Widget already has set is kept): the Image block (Background #, Image
   Path 1-3), Hide value, Look, Digits, When tapped, Tap target and Ask before changing. Database and .API are not offered: a
   picture has no value (Rule 6.14).
+
+18.28 **A blank Label (or Port) can't be left: a pop-up says so** (Fritz, 2026-11-05: "If the Label Field is Blank and the User
+clicks any other field or Icon but the Cancel Button, A Pop Up Dialog that States the Label Cannot be Blank. Dialog self distructs
+after 5 seconds." Thread "Warn when Label is left blank", Help 140). In **every** Add / Build and Properties dialog that has a
+Label (every Device and Widget, Rule 18.15):
+- While the **Label is blank**, a click or tap on **any other field or icon** (Save, ➕ Add Device, the ? Help icon, a switch, a
+  dropdown ...) does nothing: a small pop-up says **"⚠ The Label cannot be blank."** and the focus goes back to the Label. Tab or
+  Enter from a blank Label does the same. The pop-up **goes away by itself after 5 seconds** (or when tapped).
+- **The Cancel button is "hot"** (Fritz, 2026-11-05: "The Cancel Button is Hot is part of the Rule"): ✖ Cancel (and Esc) always
+  work, even while the Label or the Port is blank (Rule 18.11 still asks first when something was changed).
+- The Label's own **⬆** and **⬢** icons work too, since they are ways of typing the Label.
+- **The same for a Port** when the Device needs one (Fritz: "If the device needs a Port, the same Rule for a Port"): once the
+  user is on a blank Port, every other field or icon gives the pop-up **"⚠ The Port cannot be blank."**, except Cancel and the
+  fields before it (the Label and the Interface), so the user can still go back and pick another Interface.
+- **➕ Add new Interface…** (extends Rule 18.14, Fritz 2026-11-05: "If you choose to create a new Interface. that new Interface pops
+  into the DDLB. If the new Interface is aborted, the default Interface is posted back to the DDLB"): the new Interface is picked in
+  the Interface dropdown; if the new Interface is cancelled, the default Interface (the one that was there before) is put back.
+- It is one shared helper (public/labelguard.js) that watches every dialog, so a new dialog with a Label gets it by itself.
 ---
 
 ## 19. Vessel Rules
@@ -2026,9 +2040,7 @@ Not Placed) or the dialog closes.
 - 2026-11-05: Rule 4.2: the Add Device order for every Device (Fritz): a blank Label gets the focus, a filled one is skipped to the Interface; the Interface has a default (the last one used, else the first); Available Ports: true PWM Devices only PWM pins, the others only non-PWM pins (PWM pins only when no other is free). Rule 3.1: one underscore between every part (Fritz). (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
 - 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")
-<<<<<<< HEAD
 - 2026-11-05: Rule 3.1 changed (Fritz: "Single Underscores between parts of name"): Device names are InterfaceID_Port_DeviceTypeID_Label_TabID with one _ between every part; older names keep their __ (Rule 3.5). Rule 4.2 follows. Help 46 and the Device Library updated. (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Rule 4.2: no free PWM pin for a true PWM Device: 1. Add an Interface, or 2. Pseudo PWM on a plain pin (the Brain switches it once a second; what it loses is explained). (thread "Build Probe Add dialogs like Pump")
-=======
 - 2026-11-05: Rule 18.25 / 18.15: a new PWM output's Label starts as PWM_n, a 4-20 mA Analog output's as 4_20_n, a 0-10 V (or 0-5 V) one's as 0_10_n (Fritz). Help 136 updated. (thread "Build PWM Add dialog like Pump")
->>>>>>> origin/claude/project-thread-vzxi0a
+- 2026-11-05: Added Rule 18.28: a blank Label (or a blank Port) gets a 5 second pop-up "The Label cannot be blank" on any click but Cancel; Cancel is always hot; an aborted ➕ Add new Interface puts the default back (Help 140).
