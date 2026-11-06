@@ -20,9 +20,9 @@ A reference list of every Device the panel can make today, with its settings. Pa
 Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properties open. **Save Build** sends it to a Tab.
 
 ### Device names
-`InterfaceID_Port_DeviceTypeID_Label__TabID`
+`InterfaceID_Port_DeviceTypeID_Label_TabID` (one underscore between the parts, Fritz 2026-11-05; names made before keep their `__` before the Tab ID)
 
-Example: `MB_25_eVlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
+Example: `MB_25_eVlv_Fly~Sparge_In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
 
 - **Interface ID:** 1 to 4 letters, unique (for example MB). An Admin can change it.
 - **Tab ID:** exactly 2 letters, unique (for example SP). Two underscores go before it.
@@ -33,7 +33,7 @@ Example: `MB_25_eVlv_Fly~Sparge_In__SP` (Interface MB, pin 25, Type ID eVlv, Lab
 
 ### Ports
 - **One Device per port** on an Interface.
-- **Exception:** outputs of *different* Device Types may share a port (for example `MB_05_Hys_HLT__BR` and `MB_05_PID_HLT__BR` on one heater). The one turned on or enabled last wins; the others on that port are turned off. Output types that can share: Direct On/Off, PWM, Analog output, Duty Cycle, Hysteresis, PID.
+- **Exception:** outputs of *different* Device Types may share a port (for example `MB_05_Hys_HLT_BR` and `MB_05_PID_HLT_BR` on one heater). The one turned on or enabled last wins; the others on that port are turned off. Output types that can share: Direct On/Off, PWM, Analog output, Duty Cycle, Hysteresis, PID.
 - **Virtual ports** (no real pin):
   - **OneWire probes (DS18B20): 700 to 799.** Probe number 1 = port 700, probe 2 = 701 ... One Device per probe number.
   - **Hydrometers (Tilt or any other): 200, 201 ...** Reserved; Hydro Devices are not built yet.
@@ -65,7 +65,7 @@ Devices with on/off states also have **Picture when on / off**, an **On overlay*
 A **Clone** shows a Device on another Tab too (Skynet Rule 4.4, Help 71). It is the same Device, not a new one: it has no
 Interface, port or settings of its own, so it never counts against "one Device per port".
 - **Made only with ⧉ Clone Device** (Edit layout bar), on any Tab, the Build Tab too. The list is grouped by type.
-- **Name:** made by Skynet, never typed: `<Parent_Name>_Clone_N`, e.g. `MB_06_Pump_Wort__HS_Clone_1`. It follows a parent rename.
+- **Name:** made by Skynet, never typed: `<Parent_Name>_Clone_N`, e.g. `MB_06_Pump_Wort_HS_Clone_1`. It follows a parent rename.
 - **Its own settings:** Visible, Tab, X, Y, Lock position. **Not used in Processes.**
 - **Everything else is the parent's** (pictures, look, size, value). Tapping it taps the parent: an on/off Device or one with
   Enabled (PID) turns on or off; a reading Device (1W) is only shown, in the parent's format.
@@ -458,7 +458,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - **Made by:** placing a Vessel Widget Template (Skynet_Vessel_Widget, or a kettle Template built from it). It goes on the Build Tab as a Vessel Device (Skynet Rule 5.31, one exception to Rule 5.7; Help 133).
 - **Picture:** the Template's (Skynet_Vessel_Widget.svg: 15 IPs from Fritz's Vessel IP Template drawing).
 - **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its OneWire number). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
-- **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_eVlv_HLT_Right_Sparge__BH`.
+- **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_eVlv_HLT_Right_Sparge_BH`.
 - **Flow:** an Element, Probe or Thermowell closes its IP; a Valve passes flow only while it is on.
 - **HERMS coil:** Left or Right, drawn under that side's HERMS In and Out IPs; the two IPs are the coil's ends.
 - **Locked once built and saved** on a Tab: IPs (Place), parts and HERMS coil can't be changed; no un-bundling.

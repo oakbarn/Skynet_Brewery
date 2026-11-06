@@ -11,7 +11,17 @@ const add = app.slice(app.indexOf('async function newDeviceDialog('), app.indexO
 assert.match(add, /const port = pr \? probePort\(e\)/, 'the Port is on the Interface line');
 assert.match(add, /\.\.\.\(pr \? \[\.\.\.PROBE_GRAPHIC_FIELDS\(e, after\), \.\.\.PROBE_OWN\(e, after\)\] : \[\]\)/, 'Graphic, Orientation, its own set');
 assert.match(add, /pr \? probeTitle\(e\)/, 'the Add box is titled with the probe');
-assert.match(add, /if \(pr && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = autoLabel\(PROBE_AUTO_LABEL\);/, 'Label auto fill tP_n (Rule 18.15)');
+assert.match(add, /if \(pr && !String\(work\.label \?\? ''\)\.trim\(\)\) work\.label = probeAutoLabel\(work\.typeCode \|\| defaultCode\(e\)\);/, 'Label auto fill by kind (Rule 18.15)');
+// Fritz, 2026-11-05: 10K NTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_; other thermistors follow 10KNTC
+{
+  const { defaultCode } = await import('../public/naming.js');
+  assert.match(app, /const PROBE_LABEL_CODE = \{ '100KNT': '100KNTC' \};/);
+  assert.match(app, /const probeAutoLabel = code => autoLabel\(`\$\{PROBE_AUTO_LABEL\}_\$\{PROBE_LABEL_CODE\[code\] \|\| code \|\| 'NTC'\}`\);/);
+  const lab = e => { const c = defaultCode({ type: 'temperature', ...e }); return `tP_${{ '100KNT': '100KNTC' }[c] || c}_1`; };
+  assert.equal(lab({ sensor: 'ds18b20' }), 'tP_1W_1'); assert.equal(lab({ sensor: 'pt100' }), 'tP_RTD_1'); assert.equal(lab({ sensor: 'pt1000' }), 'tP_RTD_1');
+  assert.equal(lab({ sensor: 'ntc', r0: 10000 }), 'tP_10KNTC_1'); assert.equal(lab({ sensor: 'ntc', r0: 50000 }), 'tP_50KNTC_1'); assert.equal(lab({ sensor: 'ntc', r0: 100000 }), 'tP_100KNTC_1');
+  assert.equal(lab({ sensor: 'thermocouple' }), 'tP_TC_1'); assert.equal(lab({ sensor: 'lm35' }), 'tP_LM35_1'); assert.equal(lab({ sensor: 'tmp36' }), 'tP_TMP36_1');
+}
 assert.match(add, /tap: pr \? undefined/, 'a probe has no Toggle');
 const ownAt = app.indexOf('// ---- Temperature Probe Device dialogs'), own = app.slice(ownAt, Math.min(...['// ---- Picture Widget', '// Value, Time and DateTime Widget Properties'].map(m => app.indexOf(m, ownAt)).filter(i => i > 0)));
 assert.ok(!/cover|imageOverlay|'tap'/i.test(own.replace(/\/\/.*$/gm, '')), 'no Cover, Toggle or Overlay on a probe');
@@ -30,3 +40,31 @@ for (const e of [{ type: 'temperature', sensor: 'ds18b20' }, { type: 'temperatur
 assert.deepEqual(elementTopic({ type: 'temperature', integratedIn: 'g1' }), ['skynet-integrated-devices']);
 assert.ok(fs.existsSync(new URL('../help/138-temperature-probe-device-properties.md', import.meta.url)));
 console.log('probedialog tests passed');
+// Fritz, 2026-11-05 (PR #231): the Add Device order for every Device. True PWM Devices get only PWM pins, the others only the
+// pins that can't do PWM (the PWM pins only when none of those is free); the Interface has a default; a blank Label gets the focus.
+{
+  const { freePins } = await import('../public/naming.js');
+  const devs = [{ name: 'Brewery Mega', id: 'BM' }], PWM = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
+  const relay = freePins({ type: 'digitalOut', device: 'Brewery Mega', name: 'x' }, [], devs);
+  assert.ok(relay.length && relay.every(p => !PWM.includes(p)), 'a relay: no PWM pins');
+  const pwm = freePins({ type: 'pwmOut', device: 'Brewery Mega', name: 'x' }, [], devs);
+  assert.ok(pwm.length && pwm.every(p => PWM.includes(p)), 'a PWM output: only PWM pins');
+  assert.match(app, /work = \{ label: '', device: e\.device \?\? defaultIface\(devs\)/, 'the Interface has a default');
+  assert.match(app, /\(lab && !String\(lab\.value \?\? ''\)\.trim\(\) \? lab : dv && !dv\.disabled/, 'blank Label first, else the Interface');
+  console.log('add order tests passed');
+}
+// Fritz, 2026-11-05: no free PWM pin for a true PWM Device: 1. Add Interface, 2. Pseudo PWM (with what it loses)
+{
+  const { freePins, pseudoPwmOn, canPseudoPwm } = await import('../public/naming.js');
+  const devs = [{ name: 'Brewery Mega', id: 'BM' }], PWM = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
+  const ps = freePins({ type: 'pwmOut', pseudoPwm: true, device: 'Brewery Mega', name: 'x' }, [], devs);
+  assert.ok(ps.length && ps.every(p => !PWM.includes(p)), 'Pseudo PWM: plain pins');
+  assert.ok(canPseudoPwm({ type: 'pwmOut' }) && !canPseudoPwm({ type: 'analogOut' }), 'an analog output needs real PWM');
+  assert.ok(pseudoPwmOn(50, 200) && !pseudoPwmOn(50, 700) && !pseudoPwmOn(0, 0) && pseudoPwmOn(100, 999), '50 % = on for half of each second');
+  assert.match(app, /function pickNoPwm\(iface, pseudo\)/);
+  assert.match(app, /1\. ➕ Add an Interface/); assert.match(app, /2\. Use Pseudo PWM on a plain pin/); assert.match(app, /What you lose:/);
+  const hw = fs.readFileSync(new URL('../lib/hardware.js', import.meta.url), 'utf8');
+  assert.match(hw, /if \(el\.pseudoPwm && canPseudoPwm\(el\)\) return `DO \$\{pinOf\(el\.channel\)\}/, 'the Brain switches the plain pin');
+  assert.match(hw, /this\.pseudoTimer = setInterval\(\(\) => this\._pseudoTick\(\), 50\);/);
+  console.log('pseudo pwm tests passed');
+}

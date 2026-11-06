@@ -371,8 +371,10 @@ The clean window shows **the Skynet Brewer beer mug** (the same mug as the Deskt
 
 ## 3. Names and file names
 
-3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label__TabID`
-(example `MB_A0_10KNTC_Mash~Tun__SP`). The panel suggests the name; an Admin may type another.
+3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
+"Single Underscores between parts of name"; example `MB_A0_10KNTC_Mash~Tun_SP`). Spaces in the Label become `_`. Names made before
+keep their double `__` before the Tab ID (Rule 3.5); a taken name gets _2, _3 ... before the Tab ID.
+*Replaced:* `InterfaceID_Port_DeviceTypeID_Label__TabID`, two underscores before the Tab ID (2026-10-23). The panel suggests the name; an Admin may type another.
 Full details (Type IDs, virtual ports, what happens to odd characters) are in the Device Library.
 (2026-10-23, PR #97)
 *Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
@@ -470,6 +472,20 @@ are done (the Label filled in, Rule 18.15). The Device goes on the picked Tab (R
 Properties open. The Tab list ends with **➕ Add new Tab…**: the Label, Interface and Port are kept while the new Tab is named and built in Tab settings; once it is saved the Add Device box comes back with the new Tab picked and the Suggested Name made with it (Fritz, 2026-11-04). The **Add Device box** (Fritz's Pump example, 2026-11-04): 1 Label (⬢) and Label Visible, 2 Interface (board) with
 **Available Ports** (a dropdown of the free pins) on the same line, 3 Tab; until they are done only the greyed out Device Type
 shows below them. Then 4 the **Name** (the Suggested Name, which may be edited) shows, with Cover (a pump), X, Y, Width and Height. (Help 82)
+**The Add Device order for every Device** (Fritz, 2026-11-05, on PR #231): the user's input goes in order. **A blank Label gets the
+focus; a Label Skynet filled in is skipped** (taken as accepted; it can still be edited) and the focus goes to the **Interface**,
+which has a **default** (the Interface the last new Device went on, or else the first one) to accept, change, or ➕ Add new. Then the
+**Available Ports**: a Device that works best with **true PWM** is offered only PWM pins; any other Device (on/off, or pseudo PWM done
+in software) is offered only the pins that **can't** do PWM, so the PWM pins are kept for the Devices that need them (only when none
+of those is free are the PWM pins offered; on a Pi every pin does PWM). Once the Label (never blank), Interface and Port are set (and
+the Tab), the Suggested Name is built (Rule 3.1); spaces in a Label become `_` in the name. This is in the one Add Device box every
+Device uses (Pump, Motorized Ball Valve, Heating Element, PWM / Analog out, Temperature Probe ...).
+**No free PWM pin** (Fritz, 2026-11-05: "If No PWM Pin is available for a True PWM, 2 choices for User 1. Add Interface, 2 Use Pseudo PWM
+with explanation of degradation"): when a true PWM Device's Interface has no free PWM pin, a pop-up gives **1. ➕ Add an Interface**
+(Rule 18.14: the Add box waits and comes back with it picked) or **2. Use Pseudo PWM on a plain pin**, with what it loses: the Brain turns
+the plain pin fully on for the Device's % of every second and off for the rest, so a pump or fan surges, an LED blinks and the timing
+wobbles with the link; a heating element on an SSR heats the same on average. An Analog output can't use Pseudo PWM (its module needs
+a real PWM signal), so it gets only choice 1.
 *Replaced:* 1 Interface, 2 Available Ports/Pins, 3 Suggested Name, 4 Label, on the Build Tab (2026-10-28); before that
 1 Interface, 2 Device Type, 3 Ports, then Label; Create (2026-10-23).
 
@@ -1539,7 +1555,11 @@ nothing and goes back to the calling dialog as it was. The first one built this 
    filled in (Label Visible off does not skip it). The Add Device box has it now.
    *Changed (Fritz, 2026-11-05):* **A Device or Widget must have a Label, and a Label can't be blank.** Some Devices and Widgets
    have their Label **filled in for you** with the pattern **Type_n**, n the next number not used yet: a **Motorized Ball Valve**
+<<<<<<< HEAD
+   starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** by its kind, as **tP_1W_1**, **tP_RTD_1**, **tP_10KNTC_1** ... (Rule 18.26). It can be changed like any Label. When the
+=======
    starts as **mBV_1**, then mBV_2 ... (Fritz: "Pumps do NOT have Auto Fill, Valves do"); a **Temperature Probe** as **tP_1** (Rule 18.26); a **PWM output** as **PWM_1**, an **Analog output** as **4_20_1** or **0_10_1** (Rule 18.25). It can be changed like any Label. When the
+>>>>>>> origin/claude/project-thread-vzxi0a
    Label is filled in (by you or by the program) on a Build dialog, **the focus jumps to the next field** in the Enter order (the
    next one still empty). **Every Label is editable by the user**, filled in for you or not. Which Devices and Widgets fill in
    their Label is decided **dialog by dialog: Fritz says so when each dialog is built** (Fritz, 2026-11-05). Every other dialog that
@@ -1674,8 +1694,11 @@ Long Tee, Rule 5.30). A probe built into a Skynet_Integrated_Device (RIMS tube, 
    settings), **Units** with **Decimals** on one line, **Calibration offset** with **Database and .API ⬢** on its line; X, Y, Width,
    Height, and the Device Type greyed out last (e.g. **TEMP: 1W**). Enter goes Label, Interface, Port, Tab, Orientation,
    ➕ Add Device. **No Cover, Toggle or Overlay** (a probe is an input).
-3. Its Label starts filled in as **tP_n** (the next number), so the focus starts on the Interface (Rule 18.15). *(Built as recommended;
-   Fritz's pick on the decision card is pending: tP_n, Probe_n or no auto fill.)*
+3. Its Label starts filled in by its kind of probe as **tP_Type_n**, n the next number for that kind, so the focus starts on the
+   Interface (Rule 18.15). Fritz, 2026-11-05: "Probe 10KNTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_. Other Thermoresistors follow
+   10KNTC": **tP_1W_1** (DS18B20), **tP_RTD_1** (PT100 and PT1000), **tP_10KNTC_1**, **tP_50KNTC_1**, **tP_100KNTC_1** (the other
+   thermistors like the 10K; another size is **tP_NTC_1**), and by their Type ID **tP_TC_1** (thermocouple), **tP_LM35_1**,
+   **tP_TMP36_1**. *(The tP_ start and _n end follow the Heating Element's hE_; they wait on Fritz's OK.)*
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without Cover, Toggle and Overlay, plus the same own set and the **Reading
    now**. The Interface and Port are greyed out for good once added (Rule 18.13); so is the **Probe type**: to use another kind of
    probe, delete it and add it again.
@@ -1999,6 +2022,13 @@ Not Placed) or the dialog closes.
 - 2026-11-05: One exception to Rules 5.7 and 5.31 (Fritz): a Vessel built from a Vessel Widget Template is a Vessel Device; Elements,
   Probes, Thermowells and Valves on its IPs are integral parts (like the RIMS tube); a HERMS coil goes on the Left or Right HERMS IPs;
   once built and saved there is no way back. The RIMS tube Template is a kind of Vessel Device Template.
+- 2026-11-05: Rule 18.26 and 18.15: a Temperature Probe's Label fills in by its kind, tP_1W_1, tP_RTD_1, tP_10KNTC_1, tP_50KNTC_1, tP_100KNTC_1, tP_TC_1, tP_LM35_1, tP_TMP36_1 (Fritz: "Probe 10KNTC = _10KNTC_, One Wire = _1W_, RTD = _RTD_. Other Thermoresistors follow 10KNTC"). Help 138 updated. (thread "Build Probe Add dialogs like Pump")
+- 2026-11-05: Rule 4.2: the Add Device order for every Device (Fritz): a blank Label gets the focus, a filled one is skipped to the Interface; the Interface has a default (the last one used, else the first); Available Ports: true PWM Devices only PWM pins, the others only non-PWM pins (PWM pins only when no other is free). Rule 3.1: one underscore between every part (Fritz). (thread "Build Probe Add dialogs like Pump")
 - 2026-11-05: Added Rule 5.32 (Sight Glass and Sight Glass Caged TC Pipe Fittings with a Length that stretches only the glass; Label site_glass_n). Rule 11.1: the next free Help number line was doubled; now one line. Help 139; next free Help number 140. (thread "Add caged and plain sight glass fittings")
 - 2026-11-05: Rule 5.32: a new Sight Glass Label starts as site_glass_n (Fritz: "site_glass_1"). (thread "Add caged and plain sight glass fittings")
+<<<<<<< HEAD
+- 2026-11-05: Rule 3.1 changed (Fritz: "Single Underscores between parts of name"): Device names are InterfaceID_Port_DeviceTypeID_Label_TabID with one _ between every part; older names keep their __ (Rule 3.5). Rule 4.2 follows. Help 46 and the Device Library updated. (thread "Build Probe Add dialogs like Pump")
+- 2026-11-05: Rule 4.2: no free PWM pin for a true PWM Device: 1. Add an Interface, or 2. Pseudo PWM on a plain pin (the Brain switches it once a second; what it loses is explained). (thread "Build Probe Add dialogs like Pump")
+=======
 - 2026-11-05: Rule 18.25 / 18.15: a new PWM output's Label starts as PWM_n, a 4-20 mA Analog output's as 4_20_n, a 0-10 V (or 0-5 V) one's as 0_10_n (Fritz). Help 136 updated. (thread "Build PWM Add dialog like Pump")
+>>>>>>> origin/claude/project-thread-vzxi0a
