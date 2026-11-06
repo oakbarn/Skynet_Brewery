@@ -9,7 +9,7 @@ import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames } from './semi.js';
@@ -3425,7 +3425,7 @@ const DEV_TYPES = () => [
     ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
   ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')]]],
-  ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%' }], ...amGroup('Devices: control outputs'),
+  ['heat', 'Heating Element', [ELEMENT, ['Heating element power 0-100 % (PWM output)', 'pwmOut', 'PWM', { units: '%', subtype: 'element' }], ...amGroup('Devices: control outputs'),
     am('RIMS tube'), VESSEL_ELEMENT]],
   ['pwm', 'PWM / Analog out', [am('PWM output'), am('Analog output 0-10 V'), am('Analog output 4-20 mA')]],
   ['inputs', 'Inputs (switches, buttons)', amGroup('Devices: digital inputs')],
@@ -3529,7 +3529,7 @@ function portForName(e) {
   return a && +a[1] <= 15 ? String(54 + +a[1]) : pin;      // analog pins as BruControl numbers them: A5 = 59 (Fritz, 2026-10-23)
 }
 // a name still used by something else (an older Device, a Widget) gets _2, _3 ... after the Label
-const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self));
+const deviceSuggestion = (e, self = e) => uniqueName(suggestName({ iface: ifaceIdOf(e.device), port: portForName(e), code: e.typeCode, label: e.label, tab: tabIdOf(e.workspace) }), n => nameTaken(n, self), tabIdOf(e.workspace));
 const autoNamed = new WeakSet();      // new Devices whose name still follows the suggestion (until the layout is saved)
 const PIN_LIST = { pwmOut: 'pwm', analogOut: 'pwm', analogIn: 'analog', flowMeter: 'interrupt' };
 // a name used by another Device or Widget (any capitals)
@@ -3565,9 +3565,35 @@ document.addEventListener('keydown', ev => {
   (all[i + 1] || ok)?.focus();
 }, true);
 document.addEventListener('pointerdown', () => { dlgArrowKey = false; }, true);
+// The default Interface of a new Device (Fritz, 2026-11-05: "Then Goes to Interface. There is a Default. User accepts or selects (or
+// creates) an Interface"): the one the last new Device went on, or else the first Interface. Kept in this browser only.
+const LAST_IFACE_KEY = 'skynet.lastIface';
+function defaultIface(devs) {
+  let last = ''; try { last = localStorage.getItem(LAST_IFACE_KEY) || ''; } catch { }
+  return devs.some(d => d.name === last) ? last : devs[0]?.name;
+}
+// No free PWM pin for a true PWM Device (Fritz, 2026-11-05: "2 choices for User 1. Add Interface, 2 Use Pseudo PWM with explanation
+// of degradation"). Resolves 'iface', 'pseudo' or undefined (Cancel: pick another Interface).
+function pickNoPwm(iface, pseudo) {
+  return new Promise(res => {
+    const d = h('dialog', { class: 'pumpPick', 'data-nomenu': '' }), close = v => { d.close(); d.remove(); res(v); };
+    d.append(h('h3', {}, `No free PWM pin on ${iface}`),
+      h('p', {}, 'This Device works best with true PWM (a smooth, fast on and off the board makes itself), and every PWM pin on this Interface is used.'),
+      h('div', { class: 'pumpPickList' },
+        h('button', { type: 'button', class: 'pumpPickRow', onclick: () => close('iface') }, h('span', {}, '1. ➕ Add an Interface (another board with free PWM pins), then come back here with it picked')),
+        ...(pseudo ? [h('button', { type: 'button', class: 'pumpPickRow', onclick: () => close('pseudo') }, h('span', {}, '2. Use Pseudo PWM on a plain pin'))] : [])),
+      ...(pseudo ? [h('p', { class: 'muted' }, 'Pseudo PWM: the Brain turns a plain pin fully on and off once every second, on for the % part of each second (50 % = ½ s on, ½ s off). '
+        + 'What you lose: true PWM switches hundreds of times a second, so a pump or fan runs at a smooth speed and an LED dims evenly. With Pseudo PWM a pump or fan surges and slows each second, '
+        + 'an LED blinks, and the timing wobbles a little with the USB or network link. A heating element on an SSR heats the same on average, so it is fine for heat; it is poor for pump or motor speed.')]
+        : [h('p', { class: 'muted' }, 'An Analog output (0-10 V or 4-20 mA module) needs a real PWM signal, so Pseudo PWM can\'t be used for it.')]),
+      h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', onclick: () => close(undefined) }, '✖ Cancel')));
+    d.oncancel = ev => { ev.preventDefault(); close(undefined); };
+    document.body.append(d); d.showModal();
+  });
+}
 async function newDeviceDialog(e, hint, what) {
   const devs = S.config.devices || [];
-  const work = { label: '', device: e.device ?? (devs.length === 1 ? devs[0].name : undefined), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
+  const work = { label: '', device: e.device ?? defaultIface(devs), channel: e.channel, probeIndex: e.probeIndex, typeCode: e.typeCode || defaultCode(e, hint), workspace: e.workspace, type: e.type, sensor: e.sensor, adc: e.adc };
   const pr = isProbeDev(e);      // a Temperature Probe: the Pump's drill-down (Fritz, 2026-11-05, Rule 18.26)
   if (pr) for (const k of PROBE_SETTING_KEYS) if (e[k] !== undefined) work[k] = e[k];
   const port = pr ? probePort(e) : isOneWire(e) ? ['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe']
@@ -3609,7 +3635,9 @@ async function newDeviceDialog(e, hint, what) {
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
-  if (pr && !String(work.label ?? '').trim()) work.label = autoLabel(PROBE_AUTO_LABEL);       // a Temperature Probe: tP_1, tP_2 ... (Rule 18.26)
+  { const hm = heatMode(e); if (hm && !String(work.label ?? '').trim()) work.label = autoLabel('hE_' + hm); }     // a Heating Element (Fritz, 2026-11-05): hE_PID_1 ...
+  if (pr && !String(work.label ?? '').trim()) work.label = probeAutoLabel(work.typeCode || defaultCode(e));       // a Temperature Probe: tP_1W_1, tP_RTD_1 ... (Rule 18.26)
+  if (pwm && !String(work.label ?? '').trim()) work.label = autoLabel(pwmAutoLabel(e));      // PWM_1, 4_20_1, 0_10_1 ... (Fritz, 2026-11-05, Rule 18.25)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
   if (dd && !pr && !work.typeCode) work.typeCode = drillCode(e);      // the list it was picked in (Rule 4.2): shown greyed out, read only
   if (dd) { work.database = e.database; work.api = e.api; dbToWork(work); }       // Database and .API in its ⬢ pop-up (Fritz's screen 7)
@@ -3655,6 +3683,16 @@ async function newDeviceDialog(e, hint, what) {
         portSel.value = cur;
       };
       fillFree(work); gate();
+      // a true PWM Device on an Interface with no free PWM pin: Add Interface, or Pseudo PWM (once for each Interface)
+      const asked = new Set();
+      const noPwm = async w => {
+        if (!w.device || asked.has(w.device) || w.pseudoPwm || !portSel || portSel.options.length > 1 || !['pwmOut', 'analogOut', 'pid', 'deadband'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && !e.pwm)) return;
+        asked.add(w.device);
+        const k = await pickNoPwm(w.device, canPseudoPwm(e));
+        if (k === 'iface') return $('#dlg').close('addIface');
+        if (k === 'pseudo') { work.pseudoPwm = true; const x = { ...work }; try { readFields(x, body); } catch { } fillFree(x); gate(); toast('Pseudo PWM: pick a plain pin', false, 5000); }
+      };
+      noPwm(work);
       // Fritz's Blichmann Pump Sequence (2026-11-04, Rule 18.20): Enter goes 1 Label, 2 Interface, 3 Available Ports, 4 Tab,
       // then Orientation (a Pump) and last the ➕ Add Device button; picking from a dropdown of the sequence goes on to the next one.
       const seq = () => [body.querySelector('[data-k="label"]'), body.querySelector('[data-k="device"]'), body.querySelector(`[data-k="${port[0]}"]`),
@@ -3662,7 +3700,10 @@ async function newDeviceDialog(e, hint, what) {
         .filter(x => x && !x.disabled && x.offsetParent !== null);
       const seqNext = t => { const l = seq(), i = l.indexOf(t); (i >= 0 && l[i + 1] || oks.filter(b => b.offsetParent !== null).pop())?.focus(); };
       dlgEnterSeq = t => { if (seq().includes(t)) { seqNext(t); return true; } return false; };
-      { const l = seq(); (l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }        // the first one still empty has the focus
+      // Fritz, 2026-11-05: a blank Label gets the focus; a Label Skynet filled in is skipped (taken as accepted, still editable) and
+      // the focus goes to the Interface, which has its default to accept or change
+      { const l = seq(), lab = body.querySelector('[data-k="label"]'), dv = body.querySelector('[data-k="device"]');
+        (lab && !String(lab.value ?? '').trim() ? lab : dv && !dv.disabled && dv.offsetParent !== null ? dv : l.find(x => !String(x.value ?? '').trim()) || l[0])?.focus(); }
       body.oninput = body.onchange = ev => {
         gate();
         if (ev.type === 'change' && ev.target.tagName === 'SELECT' && !dlgArrowKey && seq().includes(ev.target) && ![ADD_TAB, ADD_IFACE, ''].includes(ev.target.value)) { const t = ev.target; setTimeout(() => seqNext(t), 0); }
@@ -3674,7 +3715,7 @@ async function newDeviceDialog(e, hint, what) {
         if (ev.type === 'change' && ev.target.dataset?.k === 'device' && ev.target.value === ADD_IFACE) return $('#dlg').close('addIface');
         if (ev.type === 'change' && ev.target.dataset?.k === 'workspace' && ev.target.value === ADD_TAB) return $('#dlg').close('addTab');
         const w = { ...work }; try { readFields(w, body); } catch { }
-        fillFree(w);
+        fillFree(w); noPwm(w);
         last = deviceSuggestion(w); if (!touched) nameBox.value = last;
       };
       const r = await shown;
@@ -3708,6 +3749,7 @@ async function newDeviceDialog(e, hint, what) {
         if (nameTaken(name, e)) throw new Error(`The name ${name} is already used. Device names must be unique.`);
         const err = portError({ ...e, ...work, name }, e); if (err) throw new Error(err);
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
+        if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
           ...(isPumpDev(e) ? ['cover'] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
@@ -3724,6 +3766,7 @@ async function newDeviceDialog(e, hint, what) {
         if (+work.h > 0) e.h = +work.h;
         if (dd && (+work.x !== e.x || +work.y !== e.y) && Number.isFinite(+work.x) && Number.isFinite(+work.y)) { e.x = +work.x; e.y = +work.y; e._keepXY = true; }
         e.name = name;
+        try { if (e.device) localStorage.setItem(LAST_IFACE_KEY, e.device); } catch { }      // the next new Device's default Interface
         if (name === sug) autoNamed.add(e);
         // Fritz, 2026-10-23: a DIN push button gives one trigger per press, however long it is held, and a second press within 3 s does nothing
         if (e.type === 'digitalIn' && work.typeCode === 'DIN') { e.mode = 'momentary'; e.pulse ??= 100; e.lockout ??= 3000; }
@@ -4989,6 +5032,9 @@ const isPwmDev = e => ['pwmOut', 'analogOut'].includes(e?.type) && !e.kind && !e
 // the Heating Element (Fritz, 2026-11-05: "Same with Heating Element"): an on / off element of its own (not one built into a RIMS tube or
 // an Integrated kettle, which keep their present dialog, Rule 18.10)
 const isElemDev = e => e?.type === 'digitalOut' && e.subtype === 'element' && !e.kind && !e.template && !e.integratedIn;
+// Heating Element Labels fill in by control mode (Fritz, 2026-11-05, Rule 18.15): PID, HYS, DutyC, PWM, DO (on / off), DeadB
+const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
+const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? 'DO' : e.type === 'pwmOut' ? 'PWM' : null);
 const isSkyElem = e => e?.imageOff === ELEM_OFF;
 const elemTitle = e => isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e) || isElemDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, PWM / Analog out, Heating Element, Temperature Probe (Rule 18.26)
@@ -5047,6 +5093,8 @@ function mbvDeviceFields(it, item) {
 // one picture, the same when on and off, and the Overlay shows it is running (above 0 %). Its own set (Rule 18.22): a PWM output's
 // Start value and Decimals; an Analog output's Signal and Units, its Low and High values, and Decimals. Two to a line, as the Pump's.
 const PWM_SIGNALS = ['0-10V', '4-20mA', '0-5V'];
+// Fritz, 2026-11-05 (Rule 18.15): the Label starts filled in: "PWM = _PWM_  4-20ma = _4_20_,  O-10v = 0_10" (a 0-5 V Analog output with the 0-10 V ones)
+const pwmAutoLabel = e => e.type === 'pwmOut' ? 'PWM' : e.signal === '4-20mA' ? '4_20' : '0_10';
 const PWM_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.pGraphic, ...x }],
   ['imageOff', 'Path', 'gpick', null, false, false, { tip: DEVICE_TIPS.pPath, ...x }]];
 const PWM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.pOverlay, dbPop: true, ...x }]];
@@ -5065,6 +5113,7 @@ function pwmDeviceFields(it, item) {
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
     ...PWM_GRAPHIC_FIELDS(it), ...PWM_OVERLAY(it), ...PWM_OWN(it),
+    ...(it.pseudoPwm ? [['_pseudo', 'Pseudo PWM: on a plain pin, the Brain turns it fully on for its % of every second (Fritz, 2026-11-05). A pump or fan surges; heat is fine. For true PWM, delete it and add it again on a PWM pin.', 'note']] : []),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }],
     PWM_TYPE(it)];
@@ -5080,8 +5129,12 @@ const almSuggest = (it, label) => { const p = prefixOf(it) || 'alm_', b = p + (n
 // input); its own set (Rule 18.22) is the Probe type (its settings in a ⬢ pop-up), Units with Decimals, the Calibration offset with
 // Database and .API ⬢, and the Reading now. A probe that is part of a Skynet_Integrated_Device keeps its present dialog.
 const isProbeDev = e => e?.type === 'temperature' && !e.integratedIn && !e.template && !e.kind;
-// the Label filled in for you (Rule 18.15): Type_n, n the next number
+// the Label filled in for you (Rule 18.15) by the kind of probe (Fritz, 2026-11-05: "Probe 10KNTC = _10KNTC_, One Wire = _1W_,
+// RTD = _RTD_. Other Thermoresistors follow 10KNTC"): tP_<Type ID>_n, n the next number for that kind, e.g. tP_1W_1, tP_10KNTC_1.
+// The Type ID is the probe's (Rule 3.1); the 100K NTC's is 100KNT (6 letters), its Label part 100KNTC like the other thermistors.
 const PROBE_AUTO_LABEL = 'tP';
+const PROBE_LABEL_CODE = { '100KNT': '100KNTC' };
+const probeAutoLabel = code => autoLabel(`${PROBE_AUTO_LABEL}_${PROBE_LABEL_CODE[code] || code || 'NTC'}`);
 const probeKindName = e => { const t = tempKinds().find(k => k[0] === tempKey(e)); return t ? t[1].replace(/\s*\(.*$/, '') : String(e.sensor || 'ds18b20').toUpperCase(); };
 const probeShape = e => isProbeTee(e) ? PROBE_TEES[e.probeTee].label : isThermowell(e) ? (e.front ? 'Thermowell (front)' : `${e.thermowell || 'Short'} Thermowell`) : 'Temperature Probe';
 const probeTitle = e => `${probeShape(e)}: ${probeKindName(e)}`;

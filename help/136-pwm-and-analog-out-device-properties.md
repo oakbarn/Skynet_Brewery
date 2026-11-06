@@ -8,7 +8,8 @@ pipe ends) and **no Toggle** (a tap opens the box where you set its %). (Skynet 
 
 1. In Edit layout, click **PWM** (or **Select Device Type > PWM / Analog out**) and pick **PWM output**, **Analog output 0-10 V**
    or **Analog output 4-20 mA**. The **Pump speed** rows in the Pumps list open the same box.
-2. The Add box opens titled **Add PWM Output** or **Add Analog Output**. Fill it in order: 1 the **Label** (the ⬢ beside it sets
+2. The Add box opens titled **Add PWM Output** or **Add Analog Output**. Its **Label** is already filled in: **PWM_1** for a PWM output, **4_20_1** for a 4-20 mA Analog output, **0_10_1** for a 0-10 V one
+   (the next number each time), so the cursor starts on the next empty field. You can change it, but it can't be blank. Fill it in order: 1 the **Label** (the ⬢ beside it sets
    its font and colors) and **Label Visible**, 2 the **Interface (board)** and an **Available Port** on the same line (only the
    free PWM pins show), the **Device Type** (PWM to start; pick P_Pump, P_Fan ... if it drives one of those), 3 the **Tab**.
    Then the **Suggested Name** shows, made from them, with the rest:
