@@ -40,6 +40,8 @@ BruControl may keep a **default config** there too; it is listed last and marked
   **📁 Change folder…** and pick the folder, or type the folder in the box and press Enter (or click **Look**). Next time the
   Change folder box opens at the folder you picked last.
 - **⌂ Documents\BruControl** goes back to the usual folder.
+- **One config file makes one Schema.** You may have more than one config file: pick one, and import any other one on
+  its own afterwards. Config files are never combined (Rule 15.4).
 - **Click** a file to see what is in it: its Interfaces (boards), Tabs (workspaces), how many Devices and Widgets (elements),
   Processes (scripts) and gGlobals it has.
 - **Double-click** a file (or click it and **Next ▶**) to pick it and go on. Back and Next are at the top and the bottom.
