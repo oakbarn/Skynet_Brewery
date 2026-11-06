@@ -64,6 +64,7 @@ Every Device and Widget has two true / false attributes:
 | Element (on a workspace) | Device (has a PLC port) or Widget (app only); never "element" | Built |
 | Interface | Interface (a board) | Built |
 | `DisplayName` (Appearance) | Label | Built |
+| A blank `DisplayName` (BruControl showed the Element Name) | the Label is the BruControl Name and is not shown on the Tab (`.label_visible = false`); the item itself stays visible (Fritz, 2026-11-06) | Not built yet (Importer) |
 | `"tm_Mash" displayname = "Mash"` | `tm_Mash.label = "Mash"` | Built (Process lines) |
 
 ## 4. Process code in the Skynet style
@@ -88,7 +89,7 @@ The name alone is the item's main value; everything else is `name.attribute`.
 | A name with `< > : " / \ \| ? *` in it: `Pump:1` | `Pump~1` (each one becomes `~`, `_2` if taken); the old name becomes the Label; Processes follow (Rule 3.4) | Built |
 | The same name used twice | the second one gets `_2`, `_3` ... and a warning | Built |
 | Names, all of them | follow the Skynet naming Rules (3.3, 3.4); each item gets its hidden key (Rule 3.10) | Norm |
-| Device names | the Suggested Name `InterfaceID_Port_DeviceTypeID_Label__TabID` (Rule 3.1) is offered; a kept BruControl name gets the own-name warning (Rule 3.13) | To decide with Fritz when the importer starts |
+| Device names | the Skynet name `InterfaceID_Port_DeviceTypeID_Label_TabID` (Rule 3.1) by default. The user may keep the BruControl names only after "Do you really want to keep your BruControl names?" (why not; No is the default) and a last chance to back out (Rule 15.1, Fritz 2026-11-06). Rule 3.4 characters and spaces are still changed | Decided, not built yet (Importer) |
 
 ## 6. Globals (BruControl's Global class is retired)
 
