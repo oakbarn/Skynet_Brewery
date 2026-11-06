@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isConfigName, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
@@ -51,6 +51,16 @@ const body = req => new Promise((ok, bad) => {
 });
 const isConfig = p => typeof p === 'string' && path.isAbsolute(p) && isConfigName(path.basename(p));
 
+// the Windows Open box for the config file itself (Fritz, 2026-11-06)
+function pickFile(start) {
+  return new Promise(ok => {
+    if (!WIN) return ok({ picked: '', none: true });
+    const ps = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-STA', '-Command', pickFileScript(start)], { windowsHide: true });
+    let out = ''; ps.stdout.on('data', d => { out += d; });
+    ps.on('error', () => ok({ picked: '', none: true }));
+    ps.on('close', () => ok({ picked: out.trim() }));
+  });
+}
 function pickFolder(start) {
   return new Promise(ok => {
     if (!WIN) return ok({ picked: '', none: true });
@@ -75,6 +85,7 @@ async function api(req, res, p, q) {
     settings.folder = folder.trim(); saveSettings(SETTINGS, settings);
     return json(res, 200, findConfigs(settings.folder));
   }
+  if (p === '/api/pick-file' && m === 'POST') { const { start } = await body(req); return json(res, 200, await pickFile(start || CANDIDATES[0] || '')); }
   if (p === '/api/pick-folder' && m === 'POST') { const { start } = await body(req); return json(res, 200, await pickFolder(start ?? '')); }
   if (p === '/api/peek' && m === 'GET') {
     const file = q.get('file') ?? '';
