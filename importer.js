@@ -22,7 +22,7 @@ const WIN = process.platform === 'win32';
 const SETTINGS = settingsFile();
 const MAX_CONFIG = 100 * 1024 * 1024;
 const IMPORT_DIR = importFolder(ROOT);     // C:\Brewing\Import (Fritz, 2026-11-06)
-const MEDIA_DIR = process.env.SKYNET_MEDIA_DIR || path.join(ROOT, 'media');     // the Panel's media folder (pictures go to Images\User)
+const MEDIA_DIR = process.env.SKYNET_MEDIA_DIR || path.join(ROOT, 'media');     // the Panel's media folder (copies go to Images\User, sounds\User)
 
 // Windows' real Documents folder (it may have been moved to OneDrive or another drive)
 function documentsFolder() {
@@ -105,22 +105,24 @@ async function api(req, res, p, q) {
   // Make the Import Copy of the config file and convert the copy (Fritz, 2026-11-06). The first pass brings in the items on a
   // board port and the Tabs; everything else is a Placeholder on its Tab. names: 'skynet' (default) or 'bru' (Rule 15.1).
   if (p === '/api/convert' && m === 'POST') {
-    const { file, names } = await body(req);
+    const { file, names, copyMedia } = await body(req);
     if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) first.' });
     if (fs.statSync(file).size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
     const copy = makeImportCopy(file, IMPORT_DIR);
-    // Pictures: read from the path BruControl saved, wherever it is, and COPIED to media\Images\User; nothing is moved
-    // (Fritz, 2026-11-06). A picture already in Images\User (an earlier import) is kept, never written over.
-    const picture = (from, to) => {
+    // Pictures and sounds (Fritz, 2026-11-06): their paths are imported and the files stay where they were, so BruControl keeps
+    // working. Only when asked (copyMedia) is each one COPIED, never moved, to media\Images\User or media\sounds\User, for a
+    // move to a Pi or another computer. A copy already there is kept, never written over.
+    const media = (from, to) => {
       try {
         if (!fs.statSync(from).isFile()) return false;
+        if (!to) return true;
         const dest = path.join(MEDIA_DIR, ...to.split('/'));
         fs.mkdirSync(path.dirname(dest), { recursive: true });
         if (!fs.existsSync(dest)) fs.copyFileSync(from, dest, fs.constants.COPYFILE_EXCL);
         return true;
       } catch { return false; }
     };
-    const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', picture });
+    const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', copy: copyMedia === true, media });
     converted = { file, copy, ...r };
     return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings });
   }
