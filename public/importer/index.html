@@ -56,28 +56,7 @@
         <ul>
           <li><b>Your boards, wiring and cables.</b> The same Arduino Mega, Grand Central, ESP32 and friends, the same USB COM ports,
             Ethernet and WiFi links, and the same pin numbers. Nothing is rewired.</li>
-          <li><b>Your Elements.</b> Pumps, valves, heating elements and such come into Skynet as <b>Devices</b>, using the same
-            hardwiring, the same Interfaces and the same assigned Pin / Port.
-            <ul>
-              <li>BruControl made a major change with <b>Firmware 46</b>: the Mega ports A0 to A15 became ports 54 to 69. If you have
-                Firmware 46, it imports fine. If you did not upgrade to Firmware 46, the older A0 to A15 import fine too. In Skynet
-                you can call those ports either way, because they are the same port.</li>
-              <li>Skynet has <b>subclasses of Devices</b> (Elements in BruControl). In BruControl an On/Off Pump and a Motorized Ball
-                Valve were both DO (digital output) ports. In Skynet they are also the general class DO, but with the subclasses
-                <b>DO:Pump</b> and <b>DO:Motorized Valve</b>.</li>
-              <li>You could build a Pump or Valve in Skynet almost the same way as in BruControl, but in Skynet you can push a button to
-                create a Pump or Valve, and it has many of the features your BruControl Pump or Valve had. The Skynet Pump or Valve
-                is the better choice, so a Pump or Valve is generally updated to a new Skynet one, because of its built-in features
-                (and less coding in a Process, your script).</li>
-            </ul></li>
-          <li><b>Your Workspaces</b> are created as Skynet <b>Tabs</b> in the browser. A Workspace and a Tab are very similar and
-            generally have the same attributes. Each is a container that holds <b>Devices</b> (your BruControl Elements) and
-            <b>Widgets</b> (your Timers, Switches and other application Elements).
-            <ul>
-              <li><b>Globals</b> are replaced by a Text Widget, a Value Widget and so on. Globals that were strictly variables become a
-                <b>gGlobal</b>: a variable with global scope (across Processes).</li>
-            </ul></li>
-          <li><b>Your scripts</b> each become a Process that runs the same way.</li>
+          <li><b>Your Elements, Workspaces and Scripts</b> all come over. Each one is explained below.</li>
           <li><b>Your pictures and sounds</b> from the BruControl Media folder.</li>
         </ul>
       </div>
@@ -105,6 +84,140 @@
           <li><b>Firmware.</b> Each board gets Skynet firmware once, over its USB cable, from inside Skynet. No Arduino IDE.</li>
         </ul>
       </div>
+    </div>
+
+    <div class="card topic">
+      <h2>Your Elements</h2>
+      <p>Pumps, Valves, Heating Elements and such come into Skynet as <b>Devices</b>, using the same hardwiring, the same Interfaces
+        and the same assigned Pin / Port.</p>
+      <p>BruControl made a major change with <b>Firmware 46</b>, where the Mega ports A0 to A15 were changed to ports 54 to 69. If you
+        have Firmware 46, it imports fine. If you did NOT upgrade to BruControl Firmware 46, the older A0 to A15 import fine too. In
+        Skynet you can refer to those ports either way, as they are the same.</p>
+      <p>Additionally, Skynet has <b>subclasses of Devices</b> (Elements in BruControl). In BruControl an On/Off Pump and a Motorized
+        Ball Valve were both DO type ports. They are also the general class DO in Skynet, but with the subclasses <b>DO:Pump</b> and
+        <b>DO:Motorized Valve</b>. While in Skynet you could build a Pump or Valve in almost the same way as in BruControl, in Skynet you
+        can push a button to create a Pump or Valve, and it has many of the features you had in your BruControl Pump or Valve, so the
+        Skynet Pump or Valve is the better choice. Generally a Pump or Valve will be updated to a new Skynet one, because of its
+        built-in features (and less coding in a Process, your Script).</p>
+    </div>
+
+    <div class="card topic">
+      <h2>Your Workspaces</h2>
+      <p>Your Workspaces are created as browser <b>Tabs</b>. A Workspace and a Tab are very similar and generally have the same
+        attributes. They are like a container that holds <b>Devices</b> (your BruControl Elements) and <b>Widgets</b> (your Timers,
+        Switches and similar application Elements). Globals are replaced by a Text Widget, a Value Widget and so on. Globals that
+        were strictly variables become a <b>gGlobal</b>, which is a variable with global scope (across Processes).</p>
+    </div>
+
+    <div class="card topic">
+      <h2>Your Scripts</h2>
+      <p>Your Scripts are translated to <b>Processes</b> in Skynet. The architecture is similar, with some differences, as Skynet
+        coding follows some more standard coding conventions. While similar, it is much easier in Skynet to write a Process. There are
+        some new commands that you can use. There are also other standard coding methods, like <code>for</code> and
+        <code>while</code>, that can be used. If you don't know those, don't worry, as you may never use them, and they will not be
+        in your new code.</p>
+    </div>
+
+    <div class="card topic">
+      <h2>Names</h2>
+      <p>Both BruControl and Skynet use a <b>Name</b> to control a Device (Element). In BruControl, once created, you could not change
+        the Name, but it is easy to do in Skynet, as it updates it everywhere (in Processes too!).</p>
+      <p>Skynet has a preferred <b>naming convention</b>, which the Oakbarn Brewery used. The naming convention lets you (the user)
+        know the Interface and port, plus the Type (Digital Output, Temperature Probe type, Hysteresis, PID and so on), then what it
+        is: the Label (displayname). The last part of a Name tells you the Tab (Workspace). While at first it may seem somewhat
+        convoluted, you may find it familiar and useful, but that is strictly up to you. You can give your own Name rather than the
+        suggested one when you add a new Device (Element).</p>
+      <p class="example">Example: <code>MB_A0_10KNTC_Mash~Tun_SP</code> &nbsp;=&nbsp; Interface <i>MB</i>, port <i>A0</i>, type
+        <i>10KNTC</i> (a 10K thermistor probe), Label <i>Mash~Tun</i>, Tab <i>SP</i>.</p>
+    </div>
+
+    <div class="card topic">
+      <h2>DisplayName is the Label</h2>
+      <p>The displayname is called the <b>Label</b> in Skynet. Label better says what it is. Unlike BruControl, the Label is an
+        independent field and must be filled in: in BruControl it was optional, in Skynet it is mandatory. Don't worry when importing:
+        if the BruControl displayname was blank, BruControl just showed the Element Name, so the Skynet import puts the BruControl
+        Name into the Label and sets its visible property to false.</p>
+      <p>Skynet keeps hidden and locked as separate settings (BruControl's <code>hiddenlocked</code> is not of much use in Skynet). In
+        Skynet <code>.visible</code> is true or false. When your Scripts or Elements are imported, visibility is updated to the new
+        format automatically.</p>
+    </div>
+
+    <div class="card topic">
+      <h2>Global Elements</h2>
+      <p>This is probably the most difficult and time-consuming part of importing into Skynet. Global Elements in BruControl served
+        <b>four separate purposes</b>, although a single Global could do all four:</p>
+      <ol>
+        <li><b>Database:</b> it was sent to the database every clock cycle. It made millions of database entries very fast. The Oakbarn
+          Brewery used a lot of Globals, and with the local database installed it would reach gigabytes in days, so the Oakbarn
+          Brewery never used the database.</li>
+        <li><b>API:</b> the only way to talk to the outside world. The Oakbarn Brewery used it to work with Node-RED.</li>
+        <li><b>An Element on a Workspace</b>, to display a value, text or a JPG file.</li>
+        <li><b>A Global variable with global scope:</b> not limited to a single Script, it could be used in any Script.</li>
+      </ol>
+      <p>Skynet handles the four purposes as <b>separate items</b>:</p>
+
+      <h3>1. Database</h3>
+      <p>Any Device (Element) or Widget (Timers and similar Elements) can be sent to the database. Each item has its own key and its own
+        frequency. You can still send every millisecond, but there are lots of choices (every second, so many seconds, every minute
+        and so on). You control how much data is sent, and even when it is sent. An item can also belong to one or more
+        <b>Groups</b>: it goes to the database while one of its Groups is started, and stops when the Group is stopped. A Mash Group
+        is a good example.</p>
+      <div class="cards two">
+        <div><b>In BruControl</b>, to send a Temperature Probe to the database you had to:
+          <ol><li>Create a Global Element.</li><li>Write a Script to keep that Global set to the Mash Temperature Probe value.</li>
+          <li>It went to the database all the time, making millions of database points.</li></ol></div>
+        <div><b>In Skynet</b> it is quite different:
+          <ol><li>Set the Mash Probe's database setting from Off to something like Every minute.</li>
+          <li>Create the Group Mash (only once) and put the Mash Probe in it. You can put other things in it too: an electronic pH
+            meter in the Mash could be recorded during the Mash as well.</li>
+          <li>Start the Group with <code>start_db_group Mash</code> in a Process.</li>
+          <li>The Probe (and pH meter) are recorded at the frequency you set (every minute). A 60 minute Mash gives only 60 data
+            points.</li>
+          <li>Stop the Group with <code>stop_db_group Mash</code> in a Process.</li></ol></div>
+      </div>
+
+      <h3>2. API</h3>
+      <p>This is now a separate attribute (property). Any item (Device or Widget) can be set up to talk to an outside program like
+        Node-RED. There is no need to create and set a Global in between, as in BruControl: the Device or Widget itself is read.</p>
+
+      <h3>3. Element displayed on a Workspace</h3>
+      <p>You may have used a Global to show something like the Mash Probe on more than one Workspace; the Oakbarn Brewery did, and
+        it also used Global Elements to display text or a picture (JPG) file. Those uses are available in Skynet, but not as a Global
+        type Element: there are <b>Text Widgets</b> to display text, <b>Value Widgets</b> to display a value, and <b>Picture
+        Widgets</b> to display a picture file. Generally the background scripting works the same in BruControl and Skynet, but in
+        Skynet you can change the background path (where on the computer the picture file is). Skynet accepts other formats than
+        .jpg and tries to make an SVG copy for display. The original file is never changed. An SVG keeps the picture sharp when it is
+        made bigger or smaller. <b>This will need your input when a Global is imported.</b></p>
+
+      <h3>4. Global variable</h3>
+      <p>In Skynet it is simply a variable with global scope, called a <b>gGlobal</b>. Its Kind shows in the start of its name
+        (<code>gS_</code> for a String, <code>gV_</code> for a Value and others). Don't get bogged down with this; it will become
+        clear later.</p>
+      <p>A gGlobal behaves just like a variable, with the same attributes, but with two very distinct differences:</p>
+      <ol><li>It can be used in <b>any Process</b> (Script). This is called global scope.</li>
+        <li>It is <b>non-volatile</b>: it keeps its value and attributes (properties) even when the computer is turned off.</li></ol>
+      <p>In BruControl you made a variable named GobblyGook with <code>new value GobblyGook</code>. In Skynet it is the same, and you
+        can also set it on the same line: <code>new value GobblyGook = 10</code>. In BruControl you needed a Global Element to have a
+        global variable; in Skynet a gGlobal is a variable with global scope, and you declare it in a Process with a different
+        declaration:</p>
+      <pre>new gGlobalValue gV_GobblyGook = 10
+new gV gV_GobblyGook = 10          (the short form)
+new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre>
+      <p>All three make the same gGlobal. When you type <code>gGlobalValue</code>, the <code>gV_</code> is filled in for you; you
+        type the rest of the name and, if you want, <code>= 10</code> to set its first value.</p>
+      <table class="words">
+        <tr><th>Declare</th><th>Short version</th><th>Name starts with</th></tr>
+        <tr><td><code>new gGlobalValue</code></td><td><code>new gV</code></td><td><code>gV_</code></td></tr>
+        <tr><td><code>new gGlobalString</code></td><td><code>new gS</code></td><td><code>gS_</code></td></tr>
+        <tr><td><code>new gGlobalTime</code></td><td><code>new gT</code></td><td><code>gT_</code></td></tr>
+        <tr><td><code>new gGlobalDateTime</code></td><td><code>new gD</code></td><td><code>gD_</code></td></tr>
+        <tr><td><code>new gGlobalBoolean</code></td><td><code>new gB</code></td><td><code>gB_</code></td></tr>
+      </table>
+      <p><b>Error:</b> <code>new value gS_GobblyGook</code> stops with an error, because <code>gS_</code> is for a String, not a
+        Value.</p>
+      <p>So there is a lot to digest in how Globals go from BruControl to Skynet, but we do them <b>one by one</b>, and you decide how
+        each is handled in Skynet. After a few questions, the Importer tells you what it thinks you should do, and you can accept it or
+        choose a different option.</p>
     </div>
 
     <div class="card">
