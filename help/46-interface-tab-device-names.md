@@ -32,13 +32,13 @@ Press **Create**. The Device is always made on the **Build Tab** first, the same
 
 The **Suggested Name** is filled in as you go:
 
-**Interface ID _ Port _ Device Type ID _ Label __ Tab ID**
+**Interface ID _ Port _ Device Type ID _ Label _ Tab ID** (one underscore between the parts; names made before 2026-11-05 keep their `__` before the Tab ID)
 
 The port is always in the name, and the Device Type ID comes third. There are **two** underscores before the Tab ID. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
-`MB_25_P_L_Vlv_Fly_Sparge__SP`
+`MB_25_P_L_Vlv_Fly_Sparge_SP`
 
-Analog pins are written the way BruControl numbers them, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun__SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT__HL`. A probe number can belong to one Device only.
+Analog pins are written the way BruControl numbers them, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT_HL`. A probe number can belong to one Device only.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 
@@ -49,18 +49,18 @@ How the Label is turned into the name part (the Label itself stays exactly as yo
 More rules:
 
 - **No spaces in Device names.**
-- If the name is already used, a number goes after the Label: `MB_25_Pump_Wort_2__BR`.
+- If the name is already used, a number goes after the Label: `MB_25_Pump_Wort_2_BR`.
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
-- A name with `~` in it works in a Process as it is: `MB_25_eVlv_Fly~Sparge__SP = true`.
+- A name with `~` in it works in a Process as it is: `MB_25_eVlv_Fly~Sparge_SP = true`.
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
-- **One Device per port, with one exception.** Two Devices can't use the same port on the same Interface, except outputs of different Device Types. Like in BruControl, you pick the Interface, then the Port, and then you can add more than one type on that Port. Example: one heater wired to port 5 can have `MB_05_Hys_HLT__BR` and `MB_05_PID_HLT__BR`.
+- **One Device per port, with one exception.** Two Devices can't use the same port on the same Interface, except outputs of different Device Types. Like in BruControl, you pick the Interface, then the Port, and then you can add more than one type on that Port. Example: one heater wired to port 5 can have `MB_05_Hys_HLT_BR` and `MB_05_PID_HLT_BR`.
 - **The last one turned on wins.** When you enable (or turn on) one of them, the others on that port are turned off at once, so only one drives the heater. Inputs, like a probe or a switch, never share a port.
 
 ## Pins kept for RTD and OneWire probes
 
 Some probes share pins on the board. On an Arduino Mega with the Skynet sketch:
 
-- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT__HL`. For a **thermocouple** the CS pin can be any free pin except 50, 51 and 52. For an **RTD** (PT100 / PT1000, MAX31865 board) on an Arduino Mega the CS pin can **only** be **D14-D17, D22-D39, D41-D43, D47-D49 or D53** (Skynet Rule 6.9). Those pins are not PWM, counter, SPI, OneWire (40) or Ethernet shield (4, 10) pins. The pin list in the New Device box and in the RTD's Properties shows only those pins, and the panel refuses any other pin with a message.
+- **RTD and thermocouple probes** (PT100, PT1000, MAX31855 / MAX31856 boards) all use the **SPI pins 50, 51 and 52**. Each board also has one pin of its own, its chip-select (CS) pin, and that is the Port in its name, for example `MB_48_RTD_HLT_HL`. For a **thermocouple** the CS pin can be any free pin except 50, 51 and 52. For an **RTD** (PT100 / PT1000, MAX31865 board) on an Arduino Mega the CS pin can **only** be **D14-D17, D22-D39, D41-D43, D47-D49 or D53** (Skynet Rule 6.9). Those pins are not PWM, counter, SPI, OneWire (40) or Ethernet shield (4, 10) pins. The pin list in the New Device box and in the RTD's Properties shows only those pins, and the panel refuses any other pin with a message.
 - **DS18B20 (OneWire) probes** all share one data pin, **pin 40**. Each probe gets its own virtual port 700-799 in its name instead.
 
 What the panel does:
@@ -103,7 +103,7 @@ A **DIN** gives one trigger per press, however long the button is held, and a se
 
 **Kept for later** (Skynet can't read these yet): `DHT11`, `DHT22`, `Hydro` (a Tilt or any other hydrometer).
 
-**Virtual ports.** Some Devices have no pin of their own, so, as in BruControl, they get a virtual port: hydrometers `200`, `201` ..., OneWire probes `700` to `799`. A Tilt would be named like `MB_200_Hydro_Red_Tilt__FE`.
+**Virtual ports.** Some Devices have no pin of their own, so, as in BruControl, they get a virtual port: hydrometers `200`, `201` ..., OneWire probes `700` to `799`. A Tilt would be named like `MB_200_Hydro_Red_Tilt_FE`.
 
 ## Thermistors
 
@@ -120,3 +120,14 @@ Interfaces and tabs from before get an ID by themselves the first time the Schem
 Only an **Admin** can edit a Schema: add or change Interfaces, Devices, Widgets and tabs, or move graphics in **Edit layout**. Operators run Processes and switch things; Viewers watch.
 
 See also [Devices and boards](03-devices) and [Login, users and passwords](10-login).
+
+## No free PWM pin
+
+A Device that needs true PWM (a PWM output, a PID or Deadband on a PWM pin) is offered only PWM pins; every other Device is offered only
+the pins that can't do PWM, so the PWM pins stay free. If the Interface has no free PWM pin left, a pop-up gives two choices:
+
+1. **➕ Add an Interface**: add another board, and the Add Device box comes back with it picked.
+2. **Use Pseudo PWM on a plain pin**: the Brain turns the pin fully on for the Device's % of every second and off for the rest (50 % = ½ s on,
+   ½ s off). A heating element on an SSR heats the same on average, but a pump or fan surges and slows each second and an LED blinks.
+   Its Properties say it is on Pseudo PWM. An Analog output can't use it.
+

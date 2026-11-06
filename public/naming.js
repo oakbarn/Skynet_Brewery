@@ -105,14 +105,18 @@ export const hydroPort = index => String(HYDRO_PORT_BASE + Math.max(1, Math.trun
 export const ONEWIRE_PORT_BASE = 700;
 export const oneWirePort = index => Number(index) >= 1 && Number(index) <= 100 ? String(ONEWIRE_PORT_BASE + Math.trunc(Number(index)) - 1) : '';
 
+// Fritz, 2026-11-05 (Rule 3.1 changed): "Single Underscores between parts of name": InterfaceID_Port_Type_Label_TabID.
+// Names made before keep their double __ before the Tab ID (Rule 3.5).
 export function suggestName({ iface, port, code, label, tab } = {}) {
-  const head = [iface, port, code, parseLabel(label)].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
-  return tab ? (head ? `${head}__${tab}` : tab) : head;
+  return [iface, port, code, parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
 }
-// A suggested name that is already used (an old Device, or a Widget) gets _2, _3 ... after the Label: MB_25_Pump_Wort_2__BR
-export function uniqueName(name, isTaken) {
+// A suggested name that is already used (an old Device, or a Widget) gets _2, _3 ... after the Label: MB_25_Pump_Wort_2_BR.
+// tab: the Tab ID at its end, so the number goes before it (an older name's __ before the Tab ID works too).
+export function uniqueName(name, isTaken, tab) {
   if (!name || !isTaken(name)) return name;
-  const cut = name.lastIndexOf('__'), head = cut > 0 ? name.slice(0, cut) : name, tail = cut > 0 ? name.slice(cut) : '';
+  const t = String(tab ?? '').trim(), old = name.lastIndexOf('__');
+  const cut = old > 0 ? old : t && name.endsWith('_' + t) && name.length > t.length + 1 ? name.length - t.length - 1 : -1;
+  const head = cut > 0 ? name.slice(0, cut) : name, tail = cut > 0 ? name.slice(cut) : '';
   let i = 2; while (isTaken(`${head}_${i}${tail}`)) i++;
   return `${head}_${i}${tail}`;
 }
@@ -281,7 +285,12 @@ export function busCheck(el, elements, devices) {
 export const PWM_PINS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '44', '45', '46'];
 export const COUNTER_PINS = ['2', '3', '18', '19', '20', '21'];
 const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0 and D1 are the USB link)
-const needsPwm = e => ['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm);
+// Pseudo PWM (Fritz, 2026-11-05): a PWM Device on a plain pin, switched fully on and off by the Brain (lib/hardware.js), needs no PWM pin.
+// An analog output can't: its 0-10 V module needs a real PWM signal.
+export const canPseudoPwm = e => e?.type === 'pwmOut' || (['pid', 'deadband'].includes(e?.type) && !!e.pwm);
+export const PSEUDO_PWM_PERIOD = 1000;      // ms: one on and off cycle
+export const pseudoPwmOn = (pct, now, period = PSEUDO_PWM_PERIOD) => { const p = Math.max(0, Math.min(100, Number(pct) || 0)); return p >= 100 || (p > 0 && (now % period) < period * p / 100); };
+const needsPwm = e => !(e.pseudoPwm && canPseudoPwm(e)) && (['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm));
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
 const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
 
@@ -329,8 +338,14 @@ export function freePins(el, elements, devices, analog) {
   const owPin = String((devices ?? []).find(d => d.name === el.device)?.oneWirePin ?? P.onewire);
   const special = (list, p) => list !== P.pins && list.includes(p);      // on a Pi every pin can do PWM and count, so none is kept for it
   const extras = p => [special(P.pwm, p) && 'pwm', special(P.counter, p) && 'counter', (P.spi.includes(p) || p === owPin || P.i2c.includes(p)) && 'bus'].filter(k => k && !need.includes(k)).length;
-  return pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
+  const free = pool.filter(p => { const t = { ...el, channel: p }; return !portClash(t, elements) && !busCheck(t, elements, devices)?.error; })
     .map((p, i) => [p, extras(p), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(x => x[0]);
+  // Fritz, 2026-11-05: "If The Device works best with true PWM, select only those Ports That are PWM. If works with Pseudo PWM fine,
+  // select NON PWM Ports." A Device that needs no true PWM is offered only the pins that can't do it (Rule 4.2); only when none of
+  // those is free are the PWM pins offered. (On a Pi every pin does PWM, so nothing is held back.)
+  if (pool !== P.pins || !special(P.pwm, P.pwm[0])) return free;
+  const plain = free.filter(p => !P.pwm.includes(p));
+  return plain.length ? plain : free;
 }
 function pinAdvice(el, mine, others, owPin, eth, P = PROFILES.mega) {
   const special = (list, p) => list !== P.pins && list.includes(p);
