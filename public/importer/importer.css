@@ -38,3 +38,4 @@ table.words th { background: var(--panel2); }
 #peekBody .counts { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 8px; }
 #peekBody .counts b { font-size: 18px; color: var(--accent); }
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--bad); padding: 8px 14px; border-radius: 8px; z-index: 50; max-width: 90vw; }
+.welcome p { font-size: 15px; max-width: 900px; }

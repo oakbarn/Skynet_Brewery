@@ -17,11 +17,12 @@
 
 <ol id="steps">
   <li data-step="1">Welcome</li>
-  <li data-step="2">Your BruControl config</li>
-  <li data-step="3" class="later">Boards</li>
-  <li data-step="4" class="later">Tabs and pictures</li>
-  <li data-step="5" class="later">Processes</li>
-  <li data-step="6" class="later">Save the Schema</li>
+  <li data-step="2">BruControl and Skynet</li>
+  <li data-step="3">Your BruControl config</li>
+  <li data-step="4" class="later">Boards</li>
+  <li data-step="5" class="later">Tabs and items</li>
+  <li data-step="6" class="later">Processes</li>
+  <li data-step="7" class="later">Save the Schema</li>
 </ol>
 
 <main>
@@ -31,7 +32,19 @@
     <p class="lead">This Importer turns your BruControl setup into a <b>Skynet Schema</b>, so your brewery comes up in Skynet with your
     boards, your Devices, your screens and your scripts. It only <b>reads</b> your BruControl files. BruControl and its files are
     never changed, so you can keep brewing with BruControl until you are ready.</p>
+    <div class="card welcome">
+      <p>Skynet Brewery is a brewery control panel that runs in a browser. Your BruControl brewery can move to Skynet with the same
+        boards and the same wiring.</p>
+      <p>The next pages show what stays the same and what is different, then help you pick your BruControl config file and bring it
+        in, one step at a time.</p>
+    </div>
+    <div class="buttons"><span class="spacer"></span><button class="primary" id="next1">Next ▶</button></div>
+  </section>
 
+  <!-- Step 2: what is the same and what is different -->
+  <section class="step hidden" id="step2">
+    <div class="buttons top"><button id="back2a">◀ Back</button><span class="spacer"></span><button class="primary" id="startBtnTop">Start ▶</button></div>
+    <h1>BruControl and Skynet</h1>
     <div class="cards">
       <div class="card">
         <h2>What stays the same</h2>
@@ -82,12 +95,12 @@
       <p class="muted">Nothing is saved or changed until the last step, and you can go Back at any time.</p>
     </div>
 
-    <div class="buttons"><span class="spacer"></span><button class="primary" id="startBtn">Start ▶</button></div>
+    <div class="buttons"><button id="back2">◀ Back</button><span class="spacer"></span><button class="primary" id="startBtn">Start ▶</button></div>
   </section>
 
-  <!-- Step 2: Starting dialog, pick the BruControl config file -->
-  <section class="step hidden" id="step2">
-    <div class="buttons top"><button id="back2a">◀ Back</button><span class="spacer"></span><button class="primary" id="next2a" disabled>Next ▶</button></div>
+  <!-- Step 3: Starting dialog, pick the BruControl config file -->
+  <section class="step hidden" id="step3">
+    <div class="buttons top"><button id="back3a">◀ Back</button><span class="spacer"></span><button class="primary" id="next3a" disabled>Next ▶</button></div>
     <h1>Pick your BruControl config file</h1>
     <p class="lead">BruControl saves its whole setup in one config file that ends in <code>.brucfg</code>. Pick the one you want to bring into Skynet.
     <b>One config file makes one Schema.</b> If you have more than one, import each one on its own; they are never combined.</p>
@@ -117,17 +130,17 @@
       <div id="peekBody"></div>
     </div>
 
-    <div class="buttons"><button id="back2">◀ Back</button><span class="spacer"></span><button class="primary" id="next2" disabled>Next ▶</button></div>
+    <div class="buttons"><button id="back3">◀ Back</button><span class="spacer"></span><button class="primary" id="next3" disabled>Next ▶</button></div>
   </section>
 
-  <!-- Step 3: not built yet -->
-  <section class="step hidden" id="step3">
-    <div class="buttons top"><button id="back3a">◀ Back</button></div>
+  <!-- Step 4: not built yet -->
+  <section class="step hidden" id="step4">
+    <div class="buttons top"><button id="back4a">◀ Back</button></div>
     <h1>Boards</h1>
     <p class="lead">You picked <b id="chosen"></b>.</p>
     <div class="card"><p>The next part of the Importer (reading the boards, Tabs, pictures and scripts) is being built now.
       Your pick is remembered, so the next version starts with this file.</p></div>
-    <div class="buttons"><button id="back3">◀ Back</button></div>
+    <div class="buttons"><button id="back4">◀ Back</button></div>
   </section>
 </main>
 

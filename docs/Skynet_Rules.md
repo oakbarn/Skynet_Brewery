@@ -1390,8 +1390,9 @@ the Panel. A Template or Rule is written for both the Panel and the Importer, an
 Rules must be written to both the Skynet Panel or the Import BruControl Program and vice versus"). It is a second shortcut,
 **Skynet BruControl Importer**, put in by the Windows Setup .exe, and opens in its own clean window (Rule 2.36) with no Brain,
 boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.7).
-- **It starts with a Welcome screen** that explains what stays the same and what is different between BruControl and Skynet,
-  and how the Importer guides the brewer through the import.
+- **It starts with Welcome pages** (Fritz, 2026-11-06: "Welcome is Page 1, Similarities and differences are Page 2"; more pages
+  may come): **Page 1** is just the welcome; **Page 2** explains what stays the same and what is different between BruControl
+  and Skynet, and how the Importer guides the brewer through the import.
 - **Then the Starting dialog** looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
   BruControl may keep a default config there too; it is listed and marked as BruControl's default. If no config file is there
   (or only the default one), the user is asked to **point to the folder** that holds theirs (Fritz, 2026-11-06). Clicking a file

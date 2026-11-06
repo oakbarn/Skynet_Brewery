@@ -26,7 +26,7 @@ function show(n) {
 
 const sizeText = b => b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
 
-function setNext() { for (const b of [$('#next2'), $('#next2a')]) b.disabled = !state.sel; }
+function setNext() { for (const b of [$('#next3'), $('#next3a')]) b.disabled = !state.sel; }
 
 function render(list) {
   state.folder = list.folder; state.files = list.files;
@@ -87,7 +87,7 @@ async function next() {
   try {
     await api('POST', '/api/choose', { file: state.sel });
     $('#chosen').textContent = state.files.find(f => f.path === state.sel)?.name ?? state.sel;
-    show(3);
+    show(4);
   } catch (e) { toast(e.message); }
 }
 
@@ -101,10 +101,12 @@ async function init() {
   show(1);
 }
 
-$('#startBtn').onclick = async () => { show(2); await look(state.start?.folder ?? '', false); if (state.sel) { const i = state.files.findIndex(f => f.path === state.sel); if (i >= 0) select(i); } };
+$('#next1').onclick = () => show(2);
 for (const id of ['#back2', '#back2a']) $(id).onclick = () => show(1);
-for (const id of ['#next2', '#next2a']) $(id).onclick = next;
+$('#startBtn').onclick = $('#startBtnTop').onclick = async () => { show(3); await look(state.start?.folder ?? '', false); if (state.sel) { const i = state.files.findIndex(f => f.path === state.sel); if (i >= 0) select(i); } };
 for (const id of ['#back3', '#back3a']) $(id).onclick = () => show(2);
+for (const id of ['#next3', '#next3a']) $(id).onclick = next;
+for (const id of ['#back4', '#back4a']) $(id).onclick = () => show(3);
 $('#lookBtn').onclick = () => look($('#folder').value);
 $('#folder').onkeydown = e => { if (e.key === 'Enter') look($('#folder').value); };
 $('#homeBtn').onclick = () => look(state.start?.defaultFolder ?? '');
