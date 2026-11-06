@@ -386,6 +386,23 @@ English. Get and Put are computer terms that only geeks understand", "Get and pu
 (dialogs, dropdowns, pop-ups, messages, Help) is spelled correctly and says it in plain English. When a computer word is
 needed, it follows in ( ) after the plain words, for example **Read Only (Get: outside programs like Node-Red can read it.)**.
 
+2.38 **Dialogs are kept as clean as possible: explanations go in hover help** (Fritz, 2026-11-06: "As a General Rule, Dialogs
+should be kept as clean as possible. Explanations of what it does or such need to be in a Hover Help. Maybe hover over the Label
+of the dropdown or field and pop up Help as long as the hover is there"). In every dialog of the Panel **and of the BruControl
+Import** (they share these Rules, Rule 15.4):
+1. A dialog shows **short field names and the fields themselves**. Sentences that explain what a field or the dialog does are
+   **not** written on the dialog.
+2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
+   a dropdown) and a small yellow help box shows the explanation **right away**. It **stays as long as the mouse is on the name**
+   and goes away as soon as the mouse moves off (or on a click, a key or a scroll). It never hides the field it explains.
+3. **Phones and tablets** (run mode, Rule 2.35) have no mouse: a **tap** on the name opens the small pop-up with Close
+   (Rule 18.16), as before. Tap-and-hold is not used, so it never clashes with holding a finger for Properties (Rule 2.9).
+4. What **stays on the dialog**: warnings the user must act on (⚠ The Label cannot be blank, Rule 18.28), what something is now
+   (the Suggested Name, OPEN / CLOSED), and the dialog's own Help ? (Rule 2.11), which still opens the full Help page.
+5. Words in the hover help follow Rule 2.37 (correct spelling, plain English).
+It is one shared helper (public/hoverhelp.js) that watches every dialog, so a new dialog only has to give each field its tip.
+(thread "Add hover help to clean dialogs", Help 147)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -1751,7 +1768,8 @@ says (Rule 18.10).
 
 18.16 **Short field names, the rest in a tip** (Fritz, 2026-11-04, his Pump example): a field's name is short ("Label",
 "Interface (board)"); the longer explanation is in its **tip**: hover the name (dotted underline) to see it, or tap it for a
-small pop-up with Close. The Add Device box has it now; other dialogs get it one at a time (Rule 18.10).
+small pop-up with Close. The Add Device box has it now; other dialogs get it one at a time (Rule 18.10). Since 2026-11-06
+the hover shows at once and stays while the mouse rests on the name (Rule 2.38).
 
 18.17 **Dropdowns of Interfaces and Tabs read "ID: Name"** (Fritz, 2026-11-04): an Interface as `BM: Brewery Mega`, a Tab as
 `BH: Brewhouse`, everywhere they are picked.
@@ -2247,3 +2265,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the Importer's page 3 has Browse for the config file (Windows' Open box in Documents\BruControl, .brucfg only); picture paths are imported even when the picture is not on the computer, and the brewer never makes a zip. Help 143 updated. (thread "Plan the BruControl config importer")
+- 2026-11-06: Added Rule 2.38 (dialogs kept as clean as possible: explanations go in hover help, shown at once while the mouse rests on a field's or dropdown's name and gone when it moves off; a tap on phones and tablets; for the Panel and the BruControl Import). Rule 18.16 points to it. Help 147; next free Help number 148. (thread "Add hover help to clean dialogs")
