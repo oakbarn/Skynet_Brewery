@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skynet BruControl Importer</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/importer/importer.css">
+</head>
+<body>
+<header id="top">
+  <div class="brand"><span class="dot on"></span> Skynet BruControl Importer</div>
+  <span class="muted" id="ver"></span>
+  <button class="right" id="closeBtn" title="Stop the Importer and close this window">✖ Close Importer</button>
+</header>
+
+<ol id="steps">
+  <li data-step="1">Welcome</li>
+  <li data-step="2">Your BruControl config</li>
+  <li data-step="3" class="later">Boards</li>
+  <li data-step="4" class="later">Tabs and pictures</li>
+  <li data-step="5" class="later">Processes</li>
+  <li data-step="6" class="later">Save the Schema</li>
+</ol>
+
+<main>
+  <!-- Step 1: Welcome -->
+  <section class="step" id="step1">
+    <h1>Welcome, BruControl brewer</h1>
+    <p class="lead">This Importer turns your BruControl setup into a <b>Skynet Schema</b>, so your brewery comes up in Skynet with your
+    boards, your Devices, your screens and your scripts. It only <b>reads</b> your BruControl files. BruControl and its files are
+    never changed, so you can keep brewing with BruControl until you are ready.</p>
+
+    <div class="cards">
+      <div class="card">
+        <h2>What stays the same</h2>
+        <ul>
+          <li><b>Your boards, wiring and cables.</b> The same Arduino Mega, Grand Central, ESP32 and friends, the same USB COM ports,
+            Ethernet and WiFi links, and the same pin numbers. Nothing is rewired.</li>
+          <li><b>Your Devices.</b> Pumps, valves, elements, probes and PWM outputs come over with their ports.</li>
+          <li><b>Your screens and scripts.</b> Every workspace becomes a Tab, and every script becomes a Process that runs the same way.</li>
+          <li><b>Your pictures and sounds</b> from the BruControl Media folder.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>What is different in Skynet</h2>
+        <ul>
+          <li><b>It runs in a browser.</b> The Brain (this PC, a mini PC or a Raspberry Pi) runs Skynet, and you reach it from any PC,
+            Mac, tablet or phone.</li>
+          <li><b>Some new words:</b>
+            <table class="words">
+              <tr><th>BruControl</th><th>Skynet</th></tr>
+              <tr><td>Configuration (.brucfg)</td><td>Schema</td></tr>
+              <tr><td>Workspace</td><td>Tab</td></tr>
+              <tr><td>Script</td><td>Process</td></tr>
+              <tr><td>Element with a port</td><td>Device</td></tr>
+              <tr><td>Element with no port (pipes, text, pictures)</td><td>Widget</td></tr>
+              <tr><td>Display name</td><td>Label</td></tr>
+              <tr><td>Global</td><td>gGlobal</td></tr>
+              <tr><td>Device (a board)</td><td>Interface</td></tr>
+            </table>
+          </li>
+          <li><b>Skynet pictures and Templates.</b> Pumps, valves, pipes and vessels use Skynet's own drawings, with pipes that show the flow.</li>
+          <li><b>Everything comes in the Skynet way.</b> Names, settings and script lines are changed to Skynet's words and style
+            (for example a 0-255 output becomes 0-100%). Each change is listed for you.</li>
+          <li><b>Firmware.</b> Each board gets Skynet firmware once, over its USB cable, from inside Skynet. No Arduino IDE.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>How we will guide you</h2>
+      <ol class="guide">
+        <li><b>Pick your BruControl config file.</b> We look in <code>Documents\BruControl</code> first, or a folder you choose.</li>
+        <li><b>Boards.</b> We show each BruControl board and its COM port or address, so you can check them.</li>
+        <li><b>Tabs and items, one question at a time.</b> Each workspace becomes a Tab. For each BruControl item we ask you a few
+          plain questions (is this a pump, a valve, a vessel? what kind?) so it becomes the right Skynet Device, Widget or Template.</li>
+        <li><b>Processes.</b> Your scripts are changed to Skynet Processes, and any line that needs a look is shown.</li>
+        <li><b>Save the Schema</b> and send it to your Skynet Brain, with a report of everything that changed.</li>
+      </ol>
+      <p class="muted">Nothing is saved or changed until the last step, and you can go Back at any time.</p>
+    </div>
+
+    <div class="buttons"><span class="spacer"></span><button class="primary" id="startBtn">Start ▶</button></div>
+  </section>
+
+  <!-- Step 2: Starting dialog, pick the BruControl config file -->
+  <section class="step hidden" id="step2">
+    <div class="buttons top"><button id="back2a">◀ Back</button><span class="spacer"></span><button class="primary" id="next2a" disabled>Next ▶</button></div>
+    <h1>Pick your BruControl config file</h1>
+    <p class="lead">BruControl saves its whole setup in one config file that ends in <code>.brucfg</code>. Pick the one you want to bring into Skynet.</p>
+
+    <div class="card">
+      <div class="folderRow">
+        <label>Folder</label>
+        <input id="folder" spellcheck="false" title="The folder to look in. Type or paste a folder and press Enter, or use Change folder.">
+        <button id="lookBtn" title="Look in the folder typed in the box">Look</button>
+        <button id="pickBtn" title="Pick a folder with Windows' Browse For Folder box">📁 Change folder…</button>
+        <button id="homeBtn" title="Go back to Documents\BruControl">⌂ Documents\BruControl</button>
+      </div>
+      <p id="folderNote" class="muted"></p>
+
+      <div class="tableWrap">
+        <table id="files">
+          <thead><tr><th></th><th>Config file</th><th>In folder</th><th>Saved</th><th>Size</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="empty" class="note hidden"></p>
+      <p class="muted small">Click a file to see what is in it. Double-click to pick it and go on.</p>
+    </div>
+
+    <div class="card hidden" id="peek">
+      <h2 id="peekName"></h2>
+      <div id="peekBody"></div>
+    </div>
+
+    <div class="buttons"><button id="back2">◀ Back</button><span class="spacer"></span><button class="primary" id="next2" disabled>Next ▶</button></div>
+  </section>
+
+  <!-- Step 3: not built yet -->
+  <section class="step hidden" id="step3">
+    <div class="buttons top"><button id="back3a">◀ Back</button></div>
+    <h1>Boards</h1>
+    <p class="lead">You picked <b id="chosen"></b>.</p>
+    <div class="card"><p>The next part of the Importer (reading the boards, Tabs, pictures and scripts) is being built now.
+      Your pick is remembered, so the next version starts with this file.</p></div>
+    <div class="buttons"><button id="back3">◀ Back</button></div>
+  </section>
+</main>
+
+<div id="toast" class="hidden"></div>
+<script type="module" src="/importer/importer.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # BruControl Importer: the plan
 
-Started 2026-11-06 for Fritz (thread "Plan the BruControl config importer"). **This is a plan only. No code is built until
-Fritz OKs it** (Rule 13.4: the importer waits for his go).
+Started 2026-11-06 for Fritz (thread "Plan the BruControl config importer"). Fritz said go on 2026-11-06: first the Welcome
+screen and the Starting dialog (built, Help 143), then the Oakbarn Schema, built from the Importer.
 
 ---
 
@@ -67,9 +67,12 @@ Importer to keep its own library of imported Schemas; that part would need a cha
 No other Rule is broken. Rule 15.1 (importing always updates to the Skynet way), 15.2 and 15.3 all apply to the Importer as
 they do to the Panel.
 
-## 5. Proposed new Rule (for Fritz to OK)
+## 5. The Rule (now Rule 15.4)
 
-> **15.4 One source for the Panel and the Importer.** The Skynet Brewery Panel and the Skynet BruControl Importer are built
+Fritz gave it on 2026-11-06 ("a Template or Rules must be written to both the Skynet Panel or the Import BruControl
+Program and vice versus"). It is in Skynet_Rules.md as Rule 15.4. The idea, in short:
+
+> **One source for the Panel and the Importer.** The Skynet Brewery Panel and the Skynet BruControl Importer are built
 > from the same repo and share one copy of the code, the Skynet Templates, the Skynet pictures and sounds, the Rules and the
 > Importing Norms. A Template, picture, standard or Rule is never made for only one of them: a change made for one is made for
 > both in the same PR, so an item the Importer makes is exactly the item the Panel makes. User Templates travel with the Schema
@@ -111,5 +114,4 @@ stay in the private project folder.
 
 1. Is `26-26-46 VGC UNI and MB Relay.brucfg` the Oakbarn Brewery?
 2. OK with "one program, two doors" (same Windows install, two shortcuts), instead of a fully separate program?
-3. OK to add proposed Rule 15.4?
 4. Open question 10 is still open: keep the strict Process check on import, or allow a BruControl-style lenient start?
