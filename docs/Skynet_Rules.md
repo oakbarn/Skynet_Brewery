@@ -1366,6 +1366,18 @@ cannot be changed safely stays as it was and is listed in the import report. Eac
 in docs/Importing_Norms.md. First norm: `.xposition` / `.yposition` become `.x_hPosition` /
 `.y_vPosition` (Rule 1.15), on the item and in every Process. (2026-10-28, thread "Start the
 Importing Norms document")
+**Exception for names, BruControl Importer** (Fritz, 2026-11-06: "the user during import can import his names ... I want it
+plain that the Skynet way is better in the end"). By default every imported name is changed to the Skynet naming convention
+(Rule 3.1). The user may instead **keep the BruControl names**, but only after two warnings, like Start Fresh (Rule 9.8):
+1. **"Do you really want to keep your BruControl names?"** It explains plainly why not: a Skynet name tells you the Interface,
+   port, type, Label and Tab at a glance; Skynet renames an item everywhere (Processes too), so nothing is lost by changing; new
+   Devices get Skynet names, so a kept BruControl name mixes two styles on the same Tab; and Help, samples and Templates all use the
+   Skynet way. **No (use the Skynet names) is the default.**
+2. A second, last chance to back out: **"Last chance: keep the BruControl names?"**, again with **No (back out, use the Skynet
+   names)** as the default.
+Only after both are confirmed are the BruControl names kept. Even then, characters a name may not have (Rule 3.4) and spaces are
+changed as always, and every item still gets its hidden key (Rule 3.10). Everything else that comes in is still changed to the
+Skynet way. Either choice can be changed later item by item, since Skynet renames everywhere.
 
 15.2 **Everything conforms to the latest standard. Backward compatibility is not needed.** When a
 standard changes, existing Schemas, Processes, names and files are changed to it (with backups),
@@ -2099,3 +2111,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
 - 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")
