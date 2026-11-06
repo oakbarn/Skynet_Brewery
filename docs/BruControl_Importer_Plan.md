@@ -171,5 +171,6 @@ How they are asked (the Rules for dialogs):
 3. **All In One systems** (Fritz, 2026-11-06): which models go in the list besides BrewZilla 3, BrewZilla 4 and Grainfather
    (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One skip the questions it already answers (Outlet,
    Thermowell, HERMS Coil, Heat Source), since each model is built the same way?
-4. **Order:** these questions come after Names (page 4) and before the items are placed, so the Vessels are made first and the
-   Devices are put on them?
+4. **Order: decided** (Fritz, 2026-11-06): these questions come **after Names**, "because in some follow ups we will associate
+   heater, Probes and valves eventually to what Device control is the HLT Heat for example." So the Vessels are made first, and
+   later steps link each imported heater, probe and valve to the Vessel it serves (this also answers question 2: yes, later).
