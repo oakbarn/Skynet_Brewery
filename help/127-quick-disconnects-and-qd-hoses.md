@@ -42,6 +42,9 @@ While you drag, a **green ring** shows where the end will go. Let go on:
   top of the vessel, and the hose end goes to the middle of the vessel's top.
 - **anywhere else**: the end is loose and no flow shows in the hose.
 
+When you let go, Skynet asks **"Is the real hose there now?"** (Rule 5.34). **OK** keeps it there; **Cancel** puts the end back
+where it was. A Process can move the hose too, with `Hose_1.connect = QD_1` (Help: *Connect a QD hose from a Process*).
+
 A message says where the end went. Every screen sees the move at once and it is kept (no Save layout needed).
 Operators and admins can move it; a viewer can't. A **locked** hose (🔒) does not move.
 
