@@ -56,6 +56,7 @@ export function graphicTopic(g) {
   if (!g) return null;
   switch (g.kind) {
     case 'vessel':
+      if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && (g.fittings || []).some(f => f.kind === 'valveTee')) return ['valve-tees-and-supply-manifolds'];      // Rule 5.35, Help 146
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && (g.fittings || []).some(f => f.kind === 'sightGlass')) return ['sight-glasses'];      // Rule 5.32, Help 139
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet' && plainFit(g.fittings)) return ['tc-pipe-fittings'];      // TC Pipe Fittings (Rule 5.25, Help 124)
       if (g.vesselType === 'bfit' && g.templateCls === 'skynet') return ['skynet-fittings'];
