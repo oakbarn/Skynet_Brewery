@@ -5748,7 +5748,7 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'bgnum') {      // Background #: 1, 2 or 3 picks .backpath, _2, _3 (Image Path 1-3); 0, blank or over 3 = none (Fritz, 2026-11-02)
     const inp = h('input', { 'data-k': key, 'data-kind': 'bgsel', type: 'text', inputmode: 'numeric', value: v ?? '', placeholder: '0', class: 'bgNum' });
-    return [h('label', {}, label), h('span', { class: 'nameRow' }, inp, h('span', { class: 'muted' }, '1, 2, 3   0, blank or over 3 = no background'))];
+    return [h('label', { class: 'tipLbl', 'data-help': 'Which Image Path shows: 1, 2 or 3. 0, blank or over 3 = no background.' }, label), inp];      // the hint is its hover help (Rule 2.38)
   }
   if (kind === 'imgopen') {    // Image Path N: OPEN picks a picture in a pop-up; or type a path in the box (a path that is not found shows blank)
     const inp = h('input', { 'data-k': key, 'data-kind': 'text', type: 'text', value: v ?? '', placeholder: '(none)', spellcheck: 'false', autocomplete: 'off' });
@@ -6084,11 +6084,46 @@ function fillPicPair(body, sel) {
   if (![...other.options].some(o => o.value === p)) other.insertBefore(h('option', { value: p }, p), other.lastChild);
   other.value = p; other.dispatchEvent(new Event('change'));      // shows its preview (does not bubble back here)
 }
+// Rule 2.38 (Fritz, 2026-11-06: "Dialogs should be kept as clean as possible ... Hover on all Dialogs"): before a dialog is drawn,
+// its explanations move into hover help, for every dialog at once (Rule 18.10's exception):
+//  - a note that explains goes into the tip of the field after it (or before it, at the end); notes at the top with no field
+//    near them go into the hover help of the dialog's title;
+//  - a long explanation in ( ) after a field's name ("Read only (a tap does nothing; a Process sets it)") becomes its tip;
+//  - what stays: warnings (⚠), what something is now (Suggested Name, OPEN / CLOSED), short headings, and a dialog that is only
+//    a message (no fields to fill in).
+const INPUT_KINDS = f => Array.isArray(f) && !['note', 'head', 'box', 'boxend', 'infonote', 'attrhead'].includes(f[2]) && !!f[1] && !f[6]?.inTitle;
+const KEEP_NOTE = t => /^\s*(⚠|🧪|Suggested|It is (OPEN|CLOSED)|Kind:|Name:|Clone of)/.test(t) || (t.length < 40 && !/\.\s*$/.test(t));
+const withTip = (f, tip) => { const g = [...f]; while (g.length < 6) g.push(g.length === 3 ? null : false); const x = g[6] || {}; g[6] = { ...x, tip: x.tip ? x.tip + ' ' + tip : tip }; return g; };
+function cleanFields(list, sink) {
+  const fs = list.map(f => {        // a long ( ) explanation after a name becomes its tip
+    if (!INPUT_KINDS(f) || typeof f[1] !== 'string' || f[6]?.tip) return f;
+    const m = /^(.+?)\s*\(([^()]{25,})\)\s*$/.exec(f[1]);
+    if (!m) return f;
+    const g = withTip(f, m[2].charAt(0).toUpperCase() + m[2].slice(1) + (/[.!?]$/.test(m[2]) ? '' : '.')); g[1] = m[1]; return g;
+  });
+  if (!fs.some(INPUT_KINDS)) return fs;      // only a message: its words are what it says
+  const out = [], top = [];
+  for (let i = 0; i < fs.length; i++) {
+    const f = fs[i];
+    if (f?.[2] === 'infonote') { top.push(f[1]); out.push([f[0], 'Properties and Attributes', 'infonote', f[3]]); continue; }
+    if (f?.[2] !== 'note' || typeof f[1] !== 'string' || f[6]?.keep || KEEP_NOTE(f[1])) { out.push(f); continue; }
+    const next = fs.slice(i + 1).findIndex(x => x?.[2] === 'note' ? false : INPUT_KINDS(x) || ['head', 'box', 'boxend'].includes(x?.[2]));
+    const nx = next >= 0 ? fs[i + 1 + next] : null;
+    if (nx && INPUT_KINDS(nx)) { fs[i + 1 + next] = withTip(nx, f[1]); continue; }
+    const pi = out.map(INPUT_KINDS).lastIndexOf(true);
+    if (pi >= 0) { out[pi] = withTip(out[pi], f[1]); continue; }
+    top.push(f[1]);
+  }
+  if (sink && top.length) sink.titleHelp = top.join(' ');
+  return out;
+}
 function bindForm(body, fields, obj, onChange) {
   // a 'box' field starts a framed group (Fritz's Text Widget Properties, 2026-10-29): the fields after it go inside, up to the next box or 'boxend'
   const build = () => {
     body.innerHTML = ''; let to = body;
-    for (const f of (typeof fields === 'function' ? fields(obj) : fields)) {
+    const sink = {}, list = cleanFields(typeof fields === 'function' ? fields(obj) : fields, sink);      // explanations into hover help (Rule 2.38)
+    if (sink.titleHelp) body.dataset.titleHelp = sink.titleHelp; else delete body.dataset.titleHelp;
+    for (const f of list) {
       if (f[2] === 'box') { to = h('div', { class: 'full dlgBox' }, ...(f[1] ? [h('div', { class: 'full dlgBoxTitle' }, f[1])] : [])); body.append(to); continue; }
       if (f[2] === 'boxend') { to = body; continue; }
       to.append(...field(f, obj));
@@ -6315,8 +6350,10 @@ function dialog(title, fields, obj, canDelete, topic, canCopy = false) {
     // the title is a hover help spot too: a snippet of its Help page (Fritz, 2026-11-06, Rule 2.38)
     const ttl = h('span', { class: 'dlgTtlText' }, title);
     $('#dlgTitle').replaceChildren(ttl);
-    if (topic) loadSnippet(topic).then(t => { if (t && ttl.isConnected) ttl.dataset.help = t; }).catch(() => { });
     bindForm($('#dlgBody'), fields, obj);
+    const extra = $('#dlgBody').dataset.titleHelp || '';      // the explanations that were at the top of the dialog
+    if (extra) ttl.dataset.help = extra;
+    if (topic) loadSnippet(topic).then(t => { if (t && ttl.isConnected) ttl.dataset.help = extra ? extra + '\n\n' + t : t; }).catch(() => { });
     if (topic) {      // the ? beside the title: closes the dialog (asking first when something was changed) and opens Help
       const d = $('#dlg'), before = formSnap();
       $('#dlgTitle').append(' ', helpIcon(topic, () => {

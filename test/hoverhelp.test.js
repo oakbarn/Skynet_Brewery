@@ -24,4 +24,5 @@ assert.ok(helpSnippet('# T\n\n' + 'word '.repeat(200)).length <= 322, 'kept shor
 assert.equal(helpSnippet(''), '');
 assert.equal(helpSnippet('# T\n\nTwo of them:\n\n| Widget | Shows |\n|---|---|\n| **Value** | a number |\n| **Time** | hh:mm |\n\nAdd one.'), 'Two of them: Value, Time.', 'a table after : gives its first column');
 assert.equal(helpSnippet('# T\n\nThree Widgets (Skynet Rule 1.23, Fritz 2026-11-05):\n\n- a Value\n- a Time\n\nMore.'), 'Three Widgets: a Value, a Time.', 'a list after : comes along; Rule notes are left out');
+assert.equal(helpSnippet('# T\n\n**Semi_Widgets_Devices** are a class.'), 'Semi_Widgets_Devices are a class.', 'underscores in names stay');
 console.log('hoverhelp ok');

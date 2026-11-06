@@ -405,6 +405,10 @@ Import** (they share these Rules, Rule 15.4):
    (the Suggested Name, OPEN / CLOSED), and the dialog's own Help ? (Rule 2.11), which still opens the full Help page.
 6. Words in the hover help follow Rule 2.37 (correct spelling, plain English).
 It is one shared helper (public/hoverhelp.js) that watches every dialog, so a new dialog only has to give each field its tip.
+**Every dialog at once** (Fritz, 2026-11-06: "Yes Hover on all Dialogs"; Rule 18.10's exception): when a dialog opens, a note that
+explains moves into the hover help of the field next to it, a long explanation in ( ) after a field's name moves into its hover help,
+and notes at the top go into the hover help of the dialog's title. Warnings (⚠), what something is now, short headings and a dialog that
+is only a message stay as they are. The **BruControl Import**'s buttons have hover help too.
 (thread "Add hover help to clean dialogs", Help 147)
 
 ## 3. Names and file names
@@ -2305,3 +2309,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 18.10 exception (Fritz): hover help goes on every dialog at once (a snippet of Help may be the hover text), and every Widget dialog gets the Pump drill-down look (Rule 18.29). (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.29: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 18.29: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")
