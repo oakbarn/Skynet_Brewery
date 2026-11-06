@@ -5585,31 +5585,21 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
     const ib = list === 'onoff' || pic || list === 'sounds' ? h('button', { type: 'button', class: 'gpickIcons', title: 'Pick from icons, like in Explorer', onclick: ev => { ev.preventDefault(); pickForSelect(s); } }, '🖼') : null;
     input = h('div', { class: 'gpick' }, ss, gs, s, ib, pv);
   }
-  else if (kind === 'dbgroups') {   // Database Groups (Rule 6.14, Fritz 2026-11-06): a switch per Group (an item can be in more than one),
-    // ✏ Change name beside each (every Process follows) and ➕ Add new Group… at the end
-    const on = new Set(Array.isArray(v) ? v : []), box = h('div', { class: 'dbGroups full', 'data-k': key, 'data-kind': kind });
-    const row = (g, checked) => {
-      const cb = h('input', { type: 'checkbox', value: g.id, ...(checked ? { checked: true } : {}) }), nm = h('span', {}, ' ' + g.name);
-      const ren = h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group, start_db_group or stop_db_group Old_Name follows (Update All)', onclick: guard(async ev => {
-        ev.preventDefault();
-        const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process line with ${g.name} (send_db_group, start_db_group, stop_db_group) is changed to it.`, g.name) || '').trim();
-        if (!to || to === g.name) return;
-        const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
-        g.name = r.group.name; nm.textContent = ' ' + g.name;
-        toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
-      }) }, '✏');
-      return h('div', { class: 'dbGroupRow' }, h('label', { class: 'toggle' }, h('span', { class: 'sw' }, cb, h('span', { class: 'swk' })), nm), ' ', ren);
-    };
-    const add = h('button', { type: 'button', onclick: guard(async ev => {
+  else if (kind === 'dbgroups') {   // Database Groups (Rule 6.14, Fritz 2026-11-06): an item can be in more than one Group.
+    // The box shows its Groups and 👥 Groups…, which opens the Group list (➕ Add new Group… at the top). A click on a Group shows
+    // the Group dialog with all its members; a double-click adds this Device or Widget to the Group and shows the members.
+    // The choice is kept in the hidden holder (data-groups) and saved with the Properties.
+    const holder = h('span', { class: 'hidden', 'data-k': key, 'data-kind': kind, 'data-groups': JSON.stringify(Array.isArray(v) ? v : []) });
+    const sum = h('span', { class: 'dbGroupSum' });
+    const show = () => { const ids = JSON.parse(holder.dataset.groups); const ns = ids.map(id => (S.config.dbGroups || []).find(g => g.id === id)?.name).filter(Boolean);
+      sum.textContent = ns.length ? ns.join(', ') : '(none: sent by its setting all the time)'; };
+    show();
+    const btn = h('button', { type: 'button', title: 'Pick the Database Groups this item belongs to', onclick: guard(async ev => {
       ev.preventDefault();
-      const name = (prompt('Name of the new Group (letters, digits and _, like Mash). A Process starts it with start_db_group Name and stops it with stop_db_group Name.') || '').trim();
-      if (!name) return;
-      const r = await api('POST', '/ui/dbgroups', { name });
-      S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
-      box.insertBefore(row(r.group, true), add);
-    }) }, '➕ Add new Group…');
-    box.append(...(S.config.dbGroups || []).map(g => row(g, on.has(g.id))), add);
-    return [h('div', { class: 'full' }, label), box];
+      const cur = await dbGroupPicker(obj?.name || 'this item', JSON.parse(holder.dataset.groups));
+      if (cur) { holder.dataset.groups = JSON.stringify(cur); show(); holder.dispatchEvent(new Event('change', { bubbles: true })); }
+    }) }, '👥 Groups…');
+    return [h('div', { class: 'full' }, label), h('div', { class: 'full dbGroups' }, sum, ' ', btn, holder)];
   }
   else if (kind === 'vlist') {     // a vessel list the user can add to
     const os = vList(opts); if (v && !os.includes(v)) os.push(v);
@@ -5783,7 +5773,7 @@ function readFields(obj, root = $('#dlgBody')) {
     else if (kind === 'yn') v = inp.value === 'yes';
     else if (kind === 'stpick') v = inp.value === '' || inp.value === '__add__' ? undefined : inp.dataset.num ? +inp.value : inp.value;
     else if (kind === 'multi') v = [...inp.selectedOptions].map(o => o.value);
-    else if (kind === 'dbgroups') { v = [...inp.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value); if (!v.length) v = undefined; }
+    else if (kind === 'dbgroups') { v = JSON.parse(inp.dataset.groups || '[]'); if (!v.length) v = undefined; }
     else if (kind === 'json') { if (inp.value.trim() === '') v = undefined; else { try { v = JSON.parse(inp.value); } catch { throw new Error(`${k}: not valid JSON`); } } }
     else v = inp.value === '' ? undefined : inp.value;
     if (v === undefined) delete obj[k]; else obj[k] = v;
@@ -6073,6 +6063,78 @@ const formSnap = () => JSON.stringify([...$$('#dlgBody input, #dlgBody select:no
 // Rule 18.11 (Fritz, 2026-11-02) in the Rule 18 pop-ups: Cancel (or Esc) with changes made asks first: discard them, or go back
 const discardOk = () => confirm('You changed something in this dialog.\n\nOK = discard the changes.\nCancel = go back (then press 💾 Save to keep them).');
 // a small dialog on top of the Properties (Rule 18 pop-ups): ✖ Cancel and 💾 Save at the top and the bottom; build(body) fills it
+// Database Groups (Rule 6.14, Fritz 2026-11-06). The Group list: ➕ Add new Group… at the top, then every Group (✔ = this item is
+// in it). A click shows the Group dialog with all its members; a double-click adds this item to the Group and shows the members.
+// Returns the Group keys this item is in after 💾 Save, or null for Cancel.
+const groupMembers = (id, me, mine) => [...new Set([...((editing && draft ? draft : S.config).elements || [])
+  .filter(e => e.name !== me && dbOf(e) && [...(e.database.groups || []), ...(e.database.group ? [e.database.group] : [])].includes(id)).map(e => e.name),
+  ...(mine ? [me] : [])])].sort((a, b) => a.localeCompare(b));
+const dbOf = e => e?.database && e.database.frequency && e.database.frequency !== 'none' ? e.database : null;
+async function dbGroupPicker(me, start) {
+  const cur = new Set(start.filter(id => (S.config.dbGroups || []).some(g => g.id === id)));
+  let list, timer = null;
+  const fill = (pick) => {
+    const gs = S.config.dbGroups || [];
+    list.replaceChildren(h('option', { value: '__add__' }, '➕ Add new Group…'),
+      ...gs.map(g => h('option', { value: g.id }, `${cur.has(g.id) ? '✔ ' : '    '}${g.name}  (${groupMembers(g.id, me, cur.has(g.id)).length} members)`)));
+    if (pick) list.value = pick; else list.selectedIndex = -1;
+  };
+  const addNew = async () => {          // Rule 18.14: build the new Group, come back, refresh the list, select it
+    const name = (prompt('Name of the new Group (letters, digits and _, like Mash). A Process starts it with start_db_group Name and stops it with stop_db_group Name.') || '').trim();
+    if (!name) return fill();
+    const r = await api('POST', '/ui/dbgroups', { name });
+    S.config.dbGroups = [...(S.config.dbGroups || []), r.group];
+    fill(r.group.id);
+  };
+  const open = async id => { const g = (S.config.dbGroups || []).find(x => x.id === id); if (g) { await dbGroupDialog(g, me, cur); fill(id); } };
+  const r = await layerDialog('Database Groups', body => {
+    list = h('select', { size: 10, class: 'dbGroupList', title: 'Click a Group to see its members; double-click to add this item to it' });
+    list.addEventListener('click', guard(async () => {
+      const id = list.value; if (!id) return;
+      if (id === '__add__') return addNew();
+      clearTimeout(timer); timer = setTimeout(() => { timer = null; open(id); }, 300);     // wait: it may be a double-click
+    }));
+    list.addEventListener('dblclick', guard(async () => {
+      clearTimeout(timer); timer = null;
+      const id = list.value; if (!id || id === '__add__') return;
+      cur.add(id); fill(id); await open(id);
+    }));
+    body.append(h('p', { class: 'muted' }, `Groups of ${me}. Click a Group to see all its members. Double-click a Group to add ${me} to it. `
+      + 'An item in a Group is sent to the database by its own setting only while one of its Groups is started (start_db_group Mash ... stop_db_group Mash); send_db always works.'), list);
+    fill();
+  });
+  return r === 'ok' ? [...cur] : null;
+}
+// The Group dialog: its Name (✏ Change name, every Process follows) and all its members
+async function dbGroupDialog(g, me, cur) {
+  await new Promise(res => {
+    const d = h('dialog', { class: 'miniDlg' }), body = h('div', { class: 'miniBody' });
+    const close = () => { d.close(); d.remove(); res(); };
+    const title = h('h3', {}, `Group ${g.name}`);
+    const draw = () => {
+      const ms = groupMembers(g.id, me, cur.has(g.id));
+      body.replaceChildren(h('div', { class: 'full dbGroupDlg' },
+        h('p', { class: 'muted' }, `start_db_group ${g.name} starts sending its members to the database by their own settings; stop_db_group ${g.name} stops it; send_db_group ${g.name} sends them all once, now.`),
+        h('div', {}, h('b', {}, `Members (${ms.length})`)),
+        ms.length ? h('select', { size: Math.min(10, Math.max(3, ms.length)), class: 'dbGroupList' }, ...ms.map(n => h('option', { value: n }, n === me ? `${n}  (this item)` : n)))
+          : h('p', { class: 'muted' }, 'No members yet.'),
+        h('div', { class: 'bar' },
+          h('button', { type: 'button', title: 'Change the Group Name; every Process with send_db_group, start_db_group or stop_db_group Old_Name follows (Update All)', onclick: guard(async () => {
+            const to = (prompt(`New Name for the Group ${g.name} (letters, digits and _). Every Process line with ${g.name} (send_db_group, start_db_group, stop_db_group) is changed to it.`, g.name) || '').trim();
+            if (!to || to === g.name) return;
+            const r = await api('POST', '/ui/dbgroups/rename', { id: g.id, name: to });
+            g.name = r.group.name; title.textContent = `Group ${g.name}`; draw();
+            toast(`Group renamed to ${g.name}` + (r.processes.length ? `; Processes changed: ${r.processes.map(x => x.name + (x.running ? ' (running: restart it)' : '')).join(', ')}` : ''));
+          }) }, '✏ Change name'),
+          cur.has(g.id) ? h('button', { type: 'button', onclick: () => { cur.delete(g.id); draw(); } }, `➖ Take ${me} out of this Group`)
+            : h('button', { type: 'button', onclick: () => { cur.add(g.id); draw(); } }, `➕ Add ${me} to this Group`))));
+    };
+    const bar = () => h('div', { class: 'bar' }, h('span', { class: 'spacer' }), h('button', { type: 'button', class: 'primary', onclick: close }, '✔ OK'));
+    d.append(title, bar(), body, bar()); draw();
+    d.addEventListener('cancel', ev => { ev.preventDefault(); close(); });
+    document.body.append(d); d.showModal();
+  });
+}
 function layerDialog(title, build, canDelete = false) {
   return new Promise(res => {
     const body = h('div', { class: 'miniBody' }), d = h('dialog', { class: 'miniDlg' });
@@ -7312,7 +7374,7 @@ function dbFields(it) {
     ...(f === 'clock' ? [['db_at', 'At clock time, e.g. 12 AM, 6:30 PM or 18:30', 'text']] : []),
     ...(f === 'datetime' ? [['db_at', 'Date and time, e.g. 2026-11-01T06:00', 'text']] : []),
     ...(f !== 'none' ? [['db_attribute', 'What to send', 'sel', [['', 'Its main value'], ...attrs.filter(a => a).map(a => [a.toLowerCase(), '.' + a])]],
-      ['db_groups', 'Database Groups (optional). In a Group, it is sent by the setting above ONLY while one of its Groups is started (start_db_group Mash ... stop_db_group Mash). On demand always works.', 'dbgroups']] : []),
+      ['db_groups', 'Database Groups (optional): in a Group, it is sent by the setting above only while one of its Groups is started. On demand always works.', 'dbgroups']] : []),
     ['api', '.API (outside programs: web API, MQTT and voice)', 'sel', Object.entries(API_LABEL)],
     // API_Name (Fritz, 2026-11-06, Rule 6.18): what a Voice Command says; Unique in the Schema; may be blank, with a warning
     ['apiName', 'API_Name (what a Voice Command says; must be Unique)', 'text', null, true],

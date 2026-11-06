@@ -1044,8 +1044,12 @@ with a value has a **Database and .API** box at the end of its Properties:
 - **Database Groups** (Fritz, 2026-11-05, rewritten 2026-11-06). **A Group is how a set of Devices and Widgets is sent to the
   Database or not.** A Process command starts sending a Group, and another Process command stops it:
   **`start_db_group Group_Name`** and **`stop_db_group Group_Name`**.
-  - **A single Device or Widget can belong to more than one Group** (Fritz, 2026-11-06). The Database and .API box has a switch
-    for each Group (each one is yes or no, so a switch, Rule 2.5), with **➕ Add new Group…** at the end.
+  - **A single Device or Widget can belong to more than one Group** (Fritz, 2026-11-06). The Database and .API box shows the
+    item's Groups and a **👥 Groups…** button (Fritz, 2026-11-06, a dialog change he commanded, Rule 18). It opens the **Group
+    list**: a list box of the existing Groups with **➕ Add new Group…** at the top (Rule 18.14: it makes the Group, comes back and
+    selects it); ✔ marks the Groups the item is in. **A click on a Group opens the Group dialog with all its members. A
+    double-click on a Group adds this Device or Widget to it** and opens the Group dialog with its members. The Group dialog also
+    has ✏ Change name and ➕ Add / ➖ Take this item out. The Group list's 💾 Save keeps the choice; it is saved with the Properties.
   - **An item assigned to a Database Group is only sent to the database while a Group it belongs to is started.** It is sent by
     its **own** Send to the database setting (Every 1 minute, On value change, When Clicked ...), so the item sets *how often*
     and the Group sets *when*. An item in no Group is sent by its setting all the time, as before. Every Group is stopped when
@@ -1054,13 +1058,13 @@ with a value has a **Database and .API** box at the end of its Properties:
     whatever its Groups, even when they are stopped. **`send_db_group Group_Name`** sends every item of the Group **once, now**,
     started or not.
   - **Example (Fritz):** you want a Mash Temperature Probe sent to the database **every minute**, but only during the Mash. Set
-    the probe's Send to the database to **Every minute** and switch on the Group **Mash**. At the beginning of the Mash a
+    the probe's Send to the database to **Every minute** and add it to the Group **Mash** (👥 Groups…, double-click Mash). At the beginning of the Mash a
     Process line `start_db_group Mash` starts the Group, and the probe reports to the database every minute. At the end of the
     Mash a Process line `stop_db_group Mash` stops it. The database only has that probe's data during the Mash.
   - A Group has a **meaningless hidden key** (the items point to it) and a **Group Name**. **✏ Change name** changes the Group
     Name and **every Process** follows (`send_db_group`, `start_db_group`, `stop_db_group`; Update All, like Rule 3.11).
   - **In a Group is no longer a Send to the database choice, and Once is gone** (Rule 15.2): each Schema's Once items and In a
-    Group items become **On demand** with their Group switched on, so `send_db_group` still sends them as before.
+    Group items become **On demand** still in their Group, so `send_db_group` still sends them as before.
 - Each reading is kept with its **time stamp** and the item's **hidden key** (Rule 3.10), so a renamed item keeps
   all its readings under today's name. The key never leaves the Brain. The database is SQLite on the Brain
   (free, SQL). An outside database (offload, reports and CSV from it, a "Database Not Available" pop-up) is later.
@@ -2154,3 +2158,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can also control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")
 - 2026-11-06: Rule 6.14 Database Groups rewritten (Fritz): a Device or Widget can belong to more than one Group; Grouping is how a set of items is sent to the Database or not; `start_db_group Group_Name` starts a Group and `stop_db_group Group_Name` stops it; an item in a Group is sent by its own setting only while one of its Groups is started; On demand (`send_db`) is always true; `send_db_group` sends the Group once. In a Group is no longer a Send to the database choice (old items become On demand in their Group). Fritz's Mash probe example added. Help 98 updated. (thread "Rewrite Database Group Rules")
 - 2026-11-06: Rule 6.14: Send to the database gets shortcut choices **Every second, Every minute, Every hour, Every day (at Midnight)**, listed just above Every N milliseconds (Fritz: "I know you can set these with the way it is but these are shortcuts"). Help 98 updated. (thread "Rewrite Database Group Rules")
+- 2026-11-06: Rule 6.14: the Database Groups switches are replaced by a **👥 Groups…** button and a Group list (➕ Add new Group… at the top); a click on a Group shows the Group dialog with all its members, a double-click adds the Device or Widget to the Group and shows its members (Fritz, dialog change commanded under Rule 18). Help 98 updated. (thread "Rewrite Database Group Rules")

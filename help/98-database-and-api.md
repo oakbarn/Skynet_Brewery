@@ -44,7 +44,12 @@ start_db_group Mash
 stop_db_group Mash
 ```
 
-- **A Device or Widget can belong to more than one Group.** Below **What to send** in its Database and .API box there is a switch for each Group; switch on every Group it belongs to. **➕ Add new Group…** at the end makes a new Group: type its Name (letters, digits and `_`, like `Mash`, `Boil` or `Readings`).
+- **A Device or Widget can belong to more than one Group.** Below **What to send** in its Database and .API box you see its Groups and a **👥 Groups…** button. It opens the **Group list**:
+  - **➕ Add new Group…** at the top makes a new Group: type its Name (letters, digits and `_`, like `Mash`, `Boil` or `Readings`). The new Group is then selected in the list.
+  - **Click** a Group to open the Group dialog with all its members.
+  - **Double-click** a Group to add this Device or Widget to it; the Group dialog opens with its members. A ✔ in the list marks the Groups it is in.
+  - In the Group dialog, **➖ Take it out of this Group** (or **➕ Add it**) changes your mind, and **✏ Change name** renames the Group.
+  - **💾 Save** in the Group list keeps your choice; it is saved when you Save the Properties.
 - **An item in a Group is only sent to the database while one of its Groups is started.** It is sent by its own **Send to the database** setting (Every 1 minute, On value change, When Clicked ...): the item says *how often*, the Group says *when*. An item in no Group is sent by its setting all the time.
 - **On demand always works.** `send_db Name` sends the item at once, even when its Groups are stopped.
 - `send_db_group Readings` sends every item of the Group **Readings** once, now, started or not (a brew day can send its readings at the end, for example).
@@ -52,16 +57,16 @@ stop_db_group Mash
 
 **Example: the Mash probe.** You want your Mash Temperature Probe in the database every minute, but only during the Mash.
 
-1. In the probe's Database and .API box, set **Send to the database** to **Every minute**, and switch on the Group **Mash** (➕ Add new Group… makes it the first time).
+1. In the probe's Database and .API box, set **Send to the database** to **Every minute**. Press **👥 Groups…** and double-click **Mash** (➕ Add new Group… makes it the first time).
 2. At the beginning of your Mash Process, add the line `start_db_group Mash`. From then on the probe reports to the database every minute.
 3. At the end of the Mash Process, add the line `stop_db_group Mash`.
 
 Your database only has that probe's data during the Mash. If the probe is also in the Group **Boil**, `start_db_group Boil` sends it during the boil too.
 
-- A Group has a hidden key that never changes; its items point to that key. **✏** beside a Group changes its Name, and **every Process** with `send_db_group`, `start_db_group` or `stop_db_group Old_Name` is changed to the new Name at once (Update All). A running Process keeps the old text until it is restarted.
+- A Group has a hidden key that never changes; its items point to that key. **✏ Change name** in the Group dialog changes its Name, and **every Process** with `send_db_group`, `start_db_group` or `stop_db_group Old_Name` is changed to the new Name at once (Update All). A running Process keeps the old text until it is restarted.
 - **Check** in the Process editor says when one of these lines names a Group that is not there.
 
-The old choices **Once** and **In a Group** are gone (Skynet Rule 6.14). When a Schema loads, every item that was set to Once or In a Group becomes **On demand** with its Group switched on (Once items get the Group named **Once**), so a Process line `send_db_group Once` still sends them as before.
+The old choices **Once** and **In a Group** are gone (Skynet Rule 6.14). When a Schema loads, every item that was set to Once or In a Group becomes **On demand** and stays in its Group (Once items get the Group named **Once**), so a Process line `send_db_group Once` still sends them as before.
 
 ### Time and hidden key
 
