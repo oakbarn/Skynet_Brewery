@@ -1504,7 +1504,8 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     place and size, until a later step brings it in; a hidden item's Placeholder stays hidden.
   - **Pictures** (Fritz, 2026-11-06: "Do not move any files and just use the Paths that exist"): every picture an item names
     is read from the path BruControl saved (any folder) and copied to the Panel's `media\Images\User` folder; nothing is
-    moved and a picture already there is never written over. A picture not on the computer is listed in the report.
+    moved and a picture already there is never written over. The item keeps its picture path even when the picture is not on
+    the computer (Fritz: "Import the path regardless"); it is listed in the report. The brewer never has to make a zip.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
   Processes, which travel beside it, as Processes are shared by every Schema). It is marked a **first draft** until the
@@ -1516,7 +1517,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 - **It starts with Welcome pages** (Fritz, 2026-11-06: "Welcome is Page 1, Similarities and differences are Page 2"; more pages
   may come): **Page 1** is just the welcome; **Page 2** explains what stays the same and what is different between BruControl
   and Skynet, and how the Importer guides the brewer through the import.
-- **Page 3 is the Starting dialog, the config file picker** (Fritz, 2026-11-06). It looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
+- **Page 3 is the Starting dialog, the config file picker** (Fritz, 2026-11-06). **Browse for the config file** opens Windows' Open box in Documents\BruControl, where BruControl keeps it, showing only `.brucfg` files (Fritz, 2026-11-06: "use a browse to get the desired .brucfg"). It looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
   BruControl may keep a default config there too; it is listed and marked as BruControl's default. If no config file is there
   (or only the default one), the user is asked to **point to the folder** that holds theirs (Fritz, 2026-11-06). Clicking a file
   shows what is in it.
@@ -2233,3 +2234,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.4: the Importer is a choice in the Windows Setup ("Will you import a BruControl configuration on this computer?"); Setup always makes the Brewing folder's Import subfolder (C:\Brewing\Import), also for BeerSmith or other programs; the Importer saves its Schema file there (Save the Schema) and the Panel opens it (Schema.json > Open a Schema file). Help 143 and Help 44 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the import is built step by step as a new import function (the older code is described in docs/BruControl_Old_Import_Method.md). Done so far: Names (Skynet names, or BruControl names after two warnings), the Import Copy (Brewing\Import\BruControl, only the copy is converted), Interfaces, Tabs without backgrounds, only the items with an Interface and a Port, and a Placeholder for everything else on a Tab. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")
+- 2026-11-06: Rule 15.4: the Importer's page 3 has Browse for the config file (Windows' Open box in Documents\BruControl, .brucfg only); picture paths are imported even when the picture is not on the computer, and the brewer never makes a zip. Help 143 updated. (thread "Plan the BruControl config importer")

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { defaultFolders, startFolder, findConfigs, isConfigName, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, isoLocal } from '../lib/importer.js';
+import { defaultFolders, startFolder, findConfigs, isConfigName, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isoLocal } from '../lib/importer.js';
 import { importerProfileDir, profileDir, openAppWindow } from '../lib/appwindow.js';
 
 // ONLY Documents\BruControl (the real Documents folder Windows reports); nowhere else (Fritz, 2026-11-06)
@@ -82,6 +82,11 @@ assert.ok(!importerProfileDir(env).includes(profileDir(env)), 'the Panel window 
 }
 
 fs.rmSync(dir, { recursive: true, force: true });
+// Browse for the config file: Windows' Open box in Documents\BruControl, .brucfg files only (Fritz, 2026-11-06)
+{
+  const ps = pickFileScript("C:\\Users\\Fritz's\\Documents\\BruControl");
+  assert.ok(ps.includes('OpenFileDialog') && ps.includes('*.brucfg') && ps.includes("$f.InitialDirectory = 'C:\\Users\\Fritz''s\\Documents\\BruControl'"));
+}
 console.log('importer tests passed');
 
 // ---- the Schema file: Importer -> Brewing\Import -> Panel (Fritz, 2026-11-06)

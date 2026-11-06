@@ -36,6 +36,9 @@ the Importer will guide you through. Click **Start ▶**.
 
 ## Page 3: Pick your BruControl config file
 
+**📄 Browse for the config file…** opens Windows' own Open box in **Documents\BruControl**, where BruControl keeps its
+config files, showing only `.brucfg` files: pick yours and it is chosen. You can also pick from the list:
+
 The Importer looks **only in Documents\BruControl** first (the real Documents folder, even when Windows keeps it on
 OneDrive). It lists every BruControl config file (`.brucfg`) there, newest first, with the date it was saved and its size.
 BruControl may keep a **default config** there too; it is listed last and marked *(BruControl default)*.
