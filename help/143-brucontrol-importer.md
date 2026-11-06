@@ -75,6 +75,12 @@ and it is not shown on the Tab.
   with ⬚ and the BruControl name, at the same place and size as in BruControl, so you can see what is still to come. A hidden
   item's Placeholder stays hidden.
 
+- your **pictures**: every picture an item uses is read from the folder BruControl saved for it (any folder: BruControl had a
+  Browse box, so they may be anywhere) and **copied** into the Panel's `media\Images\User` folder. Nothing is moved: your
+  pictures stay where they are. A picture that is not on this computer is listed with the name it gets in `Images\User`: copy
+  it there under that name (or put it back where BruControl had it and convert again) and it appears. A picture already in
+  `Images\User` is never written over.
+
 The list of new names and the notes for the report are at the bottom.
 
 ## Save the Schema

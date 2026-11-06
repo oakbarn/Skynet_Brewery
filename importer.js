@@ -22,6 +22,7 @@ const WIN = process.platform === 'win32';
 const SETTINGS = settingsFile();
 const MAX_CONFIG = 100 * 1024 * 1024;
 const IMPORT_DIR = importFolder(ROOT);     // C:\Brewing\Import (Fritz, 2026-11-06)
+const MEDIA_DIR = process.env.SKYNET_MEDIA_DIR || path.join(ROOT, 'media');     // the Panel's media folder (pictures go to Images\User)
 
 // Windows' real Documents folder (it may have been moved to OneDrive or another drive)
 function documentsFolder() {
@@ -97,7 +98,18 @@ async function api(req, res, p, q) {
     if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) first.' });
     if (fs.statSync(file).size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
     const copy = makeImportCopy(file, IMPORT_DIR);
-    const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet' });
+    // Pictures: read from the path BruControl saved, wherever it is, and COPIED to media\Images\User; nothing is moved
+    // (Fritz, 2026-11-06). A picture already in Images\User (an earlier import) is kept, never written over.
+    const picture = (from, to) => {
+      try {
+        if (!fs.statSync(from).isFile()) return false;
+        const dest = path.join(MEDIA_DIR, ...to.split('/'));
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        if (!fs.existsSync(dest)) fs.copyFileSync(from, dest, fs.constants.COPYFILE_EXCL);
+        return true;
+      } catch { return false; }
+    };
+    const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', picture });
     converted = { file, copy, ...r };
     return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings });
   }

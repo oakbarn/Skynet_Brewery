@@ -119,5 +119,8 @@ A name that starts with `VGC` made a digital output a **valve** and a PWM output
 3. **Tabs**: the workspaces, without backgrounds.
 4. **Items on a board port**: only the elements that have an Interface and a Port. Each is named the Skynet way (Rule 3.1), or keeps its BruControl name after two warnings (Rule 15.1). The DisplayName becomes the Label; a blank one gives Label = Name, with the Label not shown on the Tab.
 5. **Placeholders**: everything else on a Tab is a Placeholder, where BruControl had it, until a later step brings it in.
+6. **Pictures**: every picture an item names is read from the path BruControl saved (any folder) and copied to
+   `media/Images/User`; nothing is moved. Missing ones are listed. (The old method only rewrote the paths to `Images`
+   and left the copying to the brewer, with File Move.)
 
 Next steps are decided with Fritz.
