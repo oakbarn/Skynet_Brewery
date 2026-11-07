@@ -44,7 +44,7 @@ name reads like `MB_25_HE_HLT_BR`.
 
 | Kind | Label |
 |---|---|
-| Heating Element (on / off output: On/Off, Duty Cycle, Hysteresis, PID or Deadband) | hE_1 |
+| Heating Element (on / off output: On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise) | hE_1 |
 | PWM (Heating element power 0-100 %) | hE_PWM_1 |
 | The older control Devices: PID, Hysteresis, Duty Cycle, Deadband | hE_PID_1, hE_HYS_1, hE_DutyC_1, hE_DeadB_1 |
 
@@ -57,7 +57,7 @@ name reads like `MB_25_HE_HLT_BR`.
 4. **3. Tab** and **4. Name**.
 5. **Graphic**, **Path**, then **Orientation** and **Toggle** on one line.
 6. **Overlay** with **Database and .API ⬢**.
-7. **Heating method**: the method it starts with (On/Off, Duty Cycle, Hysteresis, PID or Deadband), its Temperature Probe and that
+7. **Heating method**: the method it starts with (On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise), its Temperature Probe and that
    method's settings. A click while brewing or a Process changes it: see [One Heating Element, pick how it heats](150-heating-method).
 8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out (**DO**).
 
