@@ -363,8 +363,15 @@ the program only shows it and measures distances on the screen. Three helpers, u
 - Order on the page: the picture (if any) on the left, the manifold questions on the right; answering a question draws the pipe
   on the picture side, and joining on the picture fills in the question. Either way works.
 - Shown before saving with the rest; Back changes any answer.
-- Open questions for Fritz: are Tap Water and Drain the right "ends" to offer besides vessels, pumps, valves and manifolds? Should
-  a hose and a hard pipe be asked separately, or always a pipe first (changeable later)?
+- **The ends** (Fritz, 2026-11-07: "Tap water and Drain ends are good. And maybe a QD"): besides a Vessel IP, a pump, a valve and
+  a Supply Manifold, an end can be **Tap Water** (the Tap Water Valve, Rule 5.33), **Drain**, or a **Quick Disconnect (QD)**
+  (Rule 5.28). A QD asks two more things:
+  - **Male or Female** (it mates with the other kind, on the hose or the manifold).
+  - **Open or Shut-off** (Fritz: "The Quickdisconnect is always open but could also be the type that is closed (a type of Kent
+    Fitting) when the other QD ... is NOT connected"). **Open** is the default: flow passes whether or not its mate is on.
+    **Shut-off** passes flow only while its mate is connected, as Skynet's QD Widget already does (Rule 5.28).
+    *For later:* the Open kind is new to the QD Widget, so Rule 5.28 gets that choice when this step is built.
+- Open question for Fritz: should a hose and a hard pipe be asked separately, or always a pipe first (changeable later)?
 
 ### Dialog 3: More Questions
 To come (Fritz, 2026-11-07: "New Dialog More Questions").
