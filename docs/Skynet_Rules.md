@@ -778,6 +778,8 @@ joined by elbows when a Schema loads (Rule 15.2); the samples and the default Sc
   point with no other pipe on it moves back onto the pipe end instead. A click or double-click that wobbles under 4 pixels is not a
   drag, and only the pipe ends a drag pulls off let go (an end already off its IP stays joined, so moving one thing never cuts a pipe
   somewhere else on the Tab).
+- **Move it alone** (Fritz, 2026-11-07, Rule 5.37): grabbing something with pipes on it first asks whether to move it with its pipes
+  (this Rule) or 🔓 Unlock its IPs so it moves alone; ↩ Put back (Ctrl+Z) undoes a move.
 
 5.20 **Where the IPs go** (Fritz, 2026-11-02, with two drawings): on every Device and Widget an IP sits at **the center of
 the opening**. On a TC pipe Widget (elbows, tees, reducers ...) and on any Device or Widget with TC ferrules, that is **the
@@ -1157,6 +1159,29 @@ pipe on Save", Help 87).
     Manifold, or a vessel opening it keeps its size.
 - **Pumps are not pipe fittings**: they keep the Pump Standard size with the Tab's pipe size (Rules 5.11, 5.27). A Thermowell sits on
   a vessel and keeps its size.
+
+5.37 **Grab pop-up: move it alone (🔓 Unlock its IPs), Swap places, and ↩ Put back** (Fritz, 2026-11-07: "I tried to replace the
+Pump in the 3 vessel with a Blichmann Pump I added and it was not easy and never succeeded as the pipes followed the old pump. When we
+grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of its pipes"; "That would apply to any Device, Pipe,
+Fitting or Widget, but the Option to Unlock as the user may not want to, and maybe a way to restore back to any pipe movements";
+"Not only the Pipes but locked fitting as well"; thread "Swap a pump without dragging its pipes", Help 153).
+- **The pop-up:** in Edit layout, the first time a Device, Widget, Fitting (or Vessel) with pipes joined to it is dragged, it stays
+  put and a pop-up asks: **🔓 Unlock its IPs** (each pipe end on it lets go where it is and gets an open end, so it then moves alone
+  and the pipes and fittings stay), **Move it with its pipes** (Rule 5.19 as before), **🔁 Swap places with...** or **Cancel**.
+  Unlocking is never done unless the user picks it. **Don't ask again** lasts until Edit layout is left. A Pipe joined to other
+  things offers **🔓 Unlock its ends** (it moves alone) or Cancel. A locked item stays locked (Rule 2.12): no pop-up.
+- **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
+  gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
+- **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the
+  🔨 Build Tab too) takes this one's X, Y, Width, Height, Tab and flips (the pump's Orientation), and every pipe end on this one's
+  inlet or outlet goes on the other's inlet or outlet; this one goes where the other was. Nothing else on either one changes.
+- **Dropped where something let go:** an open pipe end made by Unlock remembers where its IP was and which end (inlet, outlet ...).
+  An item dropped with the same end within 14 pixels of that spot joins it again at once (Rule 5.27 keeps every pump's IPs in the
+  same spots), and any other open end within 14 pixels of one of its IPs joins as on Save layout (Rule 5.19).
+- **↩ Put back** on the Edit layout bar, and **Ctrl+Z** (not in a text box): undoes the last move, resize, unlock or swap, up to 30
+  steps, back to how pipes, fittings and items were. It starts fresh each time Edit layout opens. Properties changes are not in it;
+  Exit without saving still undoes everything since the last Save layout.
+- **BruControl Import:** checked, not changed; it does not move things on a Tab. Schemas it makes get this in the Panel.
 
 ---
 
@@ -1609,7 +1634,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **152** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks). (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **154** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2550,3 +2575,4 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.1 (Fritz: "Once a Port Is Selected, it is taken. So the method of choosing a Port has to be addressed as well"): every Port picker offers only free Ports plus the Device's own; the older typed Pin boxes (and the Duty Cycle, Hysteresis, PID and Deadband Pin) now list only free Ports. Checked against the BruControl Import program: it keeps BruControl's ports, joins heating controls on one port and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 2.39 (new, Fritz: "We only need a few, and choose one that best matches the DevExpress ones"): Panel Looks (themes) Office Black (default, closest to BruControl's Office 2019 Black), Dark Gray, White and Skynet Night, each a few color picks; picked in Settings > Panel settings, saved with the Schema; new Tabs get the Look's Tab colors; Use this Look on every Tab with Put the Tabs back. A change from BruControl: its DevExpress themes are not public and would not work in a browser, so Skynet sets the Back and Text colors. Rule 11.1 next free Help is 152. Help 151 new, Help 09 updated. Checked against the BruControl Import program: it picks the closest Look from the BruControl theme, gives imported Tabs the Look's Tab colors, and lists Themes on its "What is different in Skynet" page. (thread "Add a few look-alike Panel themes")
 - 2026-11-07: Rule 2.40 (Fritz: our own gauges and timers without copying DevExpress): the Skynet Dial (arc, needle, digits 0-2 decimals, blue / green / red from the Setpoint with Cooler and Hotter ranges), Timer Digits (Back, Text Fore, Text Back colors, Fritz's frames in 3 shapes, hh:mm:ss or hh:mm, Seconds only in the last minute); the BruControl Import maps its gauges to them. Help 152; next free Help 153. (thread "Build our own temperature gauge and timer looks")
+- 2026-11-07: Rule 5.37 (new, Fritz: "when we grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of its pipes"; "any Device, Pipe, Fitting or Widget", "the Option to Unlock as the user may not want to", "a way to restore back to any pipe movements", "Not only the Pipes but locked fitting as well"): the grab pop-up (🔓 Unlock its IPs, Move it with its pipes, 🔁 Swap places with..., Cancel), works past locked pipes and fittings, open ends rejoin the same end of a pump or valve dropped in the old one's place, ↩ Put back and Ctrl+Z (30 steps). Rule 5.19 points to it. Rule 11.1 next free Help is 154. Help 153 new. Checked against the BruControl Import program: it does not move things on a Tab, so nothing changes there. (thread "Swap a pump without dragging its pipes")
