@@ -1,5 +1,5 @@
 //Skynet_Clean
-//About: Rinse, clean and rinse the brewery, then leave every valve open to dry. The last step of the Brew Day.
+//About: Rinse, clean and rinse the brewery, then open every valve on the Open List to dry (never a tap water valve). The last step of the Brew Day.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 step "Rinse"
@@ -19,6 +19,7 @@ step "Rinse again"
 ask "Drain the cleaner and rinse everything with clean water. Press Done when it is rinsed."
 step "Leave it to dry"
 all_pumps_off
+ask "Open the drains and turn off any tap water. Press Done when you are done."
+step "Open all valves"
 open_all_valves
-ask "Open the drains and leave the brewery to dry. Press Done when you are done."
-print "Clean done"
+print "Clean done: every valve on the Open List is open to dry (never a tap water valve)"

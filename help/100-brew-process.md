@@ -91,7 +91,7 @@ Every valve that a Process switches (Electro_Mechanical, such as a Motorized Bal
 - **On the Close all valves list** (on to start)
 - **On the Open all valves list** (on to start)
 
-Turn one off to leave that valve out. A **tap water valve** is always on the Close all list and never on the Open all list, so tap water can't be left running: its Properties say so and have no switches. A **Manual** valve is on neither list, because a Process asks for it by name.
+Turn one off to leave that valve out. A **tap water valve** is always on the Close all list and never on the Open all list, so tap water can't be left running: its Properties show On Close List on and On Open List off, both greyed out. The last step of **Clean** opens every valve on the Open List (never a tap water valve) so the brewery dries. A **Manual** valve is on neither list, because a Process asks for it by name.
 
 ## Writing your own Template
 

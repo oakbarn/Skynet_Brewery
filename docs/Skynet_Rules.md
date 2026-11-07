@@ -1365,8 +1365,10 @@ with a value has a **Database and .API** box at the end of its Properties:
 6.15 **Close all and Open all valve lists** (Fritz, 2026-10-30). Every valve a Process switches (Electro_Mechanical, such as a
 Motorized Ball Valve) has two switches, **On Close List** and **On Open List** (Fritz, 2026-11-05, renamed from Close all list / Open all list), both **on to start**.
 `close_all_valves` and `open_all_valves` in a Process (and PreBrew's house cleaning) use them; `all_pumps_off` turns every pump off.
-**A tap water valve is always on Close all and never on Open all**, and its Properties show this with no switches (the Brain puts it
-back on every save). A Manual valve is on neither list. (thread "Build the Standard Skynet Brew Process", Help 100)
+**A tap water valve is always on Close all and never on Open all**: its Properties show On Close List on and On Open List off,
+both greyed out (Fritz, 2026-11-07: "Tap Water Valves have the Open attribute as false and greyed out"), and the Brain puts it back
+on every save. A Schema from the BruControl Import is put right the same way when it is opened. **The last step of Clean is
+open_all_valves** (only the valves On Open List, so never tap water). A Manual valve is on neither list. (thread "Build the Standard Skynet Brew Process", Help 100)
 
 6.16 **Moving from BruControl needs no new hardware (Windows Brain only)** (Fritz, 2026-11-03). Every way a BruControl
 Windows PC connects to its boards has an equal way in Skynet, so a brewer moving from BruControl keeps the same boards, shields,
@@ -2687,3 +2689,6 @@ Not Placed) or the dialog closes.
   water and Hop Infuser valve; rcp_Hop_Stand, rcp_Hop_Stand_Temp, rcp_Hop_Stand_Minutes, rcp_Hop_Infuser; Default settings Hop
   stand temperature and time (Rule 2.42). Help 100. Checked against the BruControl Import program: no change (it does not build a
   Brew Process). (thread "Build Process and Schema Templates")
+- 2026-11-07: Rule 6.15 (Fritz): a tap water valve's Properties show On Close List on and On Open List off, greyed out; the last
+  step of Skynet_Clean is open_all_valves. Checked against the BruControl Import program: a Schema file it makes is put right the
+  same way when the panel opens it (Tap water valves on Close only). Help 100. (thread "Build Process and Schema Templates")
