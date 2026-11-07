@@ -1,17 +1,15 @@
 :root {
-  --bg: #12161c; --panel: #1b2129; --panel2: #232b35; --line: #34404d; --text: #e6ebf0; --muted: #8d9aa8;
-  --accent: #e8a33a; --ok: #3fbf6a; --bad: #e0524a; --warn: #e8c33a; --flow: #4fb3ff;
+  /* the Look (theme, Rule 2.39): Office Black here; public/themes.js sets the picked Look's colors over these */
+  --bg: #1f1f1f; --panel: #262626; --panel2: #363636; --line: #4a4a4a; --text: #f0f0f0; --muted: #ababab;
+  --accent: #3a86d4; --on-accent: #fafafa; --ok: #3fbf6a; --bad: #e0524a; --warn: #e8c33a; --flow: #4fb3ff;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --mono: ui-monospace, Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: light) {
-  :root { --bg: #eef1f4; --panel: #ffffff; --panel2: #f3f5f8; --line: #cfd6de; --text: #1b232c; --muted: #5d6b79; }
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.4 var(--font); }
 button, select, input, textarea { font: inherit; color: inherit; }
 button { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 11px; cursor: pointer; }
 button:hover { border-color: var(--accent); }
-button.primary { background: var(--accent); color: #1b1305; border-color: var(--accent); font-weight: 600; }
+button.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
 button.danger { color: var(--bad); }
 input, select, textarea { background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; padding: 4px 7px; }
 code { font-family: var(--mono); font-size: 0.92em; }
@@ -44,7 +42,7 @@ main { padding: 10px 14px; }
 #editBar select { width: auto; max-width: 12em; flex: 0 0 auto; field-sizing: content; }     /* as wide as its name (Chrome, Edge), at most 12em */
 #editBar .plus { color: #d21; font-weight: bold; }
 .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-.tabs button.active { background: var(--accent); color: #1b1305; border-color: var(--accent); }
+.tabs button.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .toggle { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 
 /* ===== workspace canvas ===== */
@@ -351,7 +349,7 @@ table.grid.empty tbody::after { content: "None yet"; display: block; padding: 6p
 .picBar { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 12px; }
 
 /* Media page (Explorer style) */
-.mdPickBtn { background: var(--accent); color: #1b1305; border: 1px solid var(--accent); border-radius: 6px; padding: 5px 11px; cursor: pointer; font-weight: 600; }
+.mdPickBtn { background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent); border-radius: 6px; padding: 5px 11px; cursor: pointer; font-weight: 600; }
 .mdReplace { font-size: 13px; }
 .mdAddress { display: flex; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 4px 6px; margin-bottom: 8px; flex-wrap: wrap; }
 .mdCrumbs { display: flex; flex-wrap: wrap; gap: 2px; flex: 1; min-width: 0; }
@@ -602,10 +600,8 @@ dialog.nameDlg .muted { font-size: 0.85em; }
 /* ===== Process editor: colors (public/colorize.js), tools row, color key, Recycle Bin ===== */
 :root { --hl-cmd: #5aa9ff; --hl-dev: #ff5ce1; --hl-wid: #4dd0e1; --hl-vk: #c58bff; --hl-vapi: #ff5c5c; --hl-proc: #a5c95a; --hl-op: #ffa040;
   --hl-str: #e0a070; --hl-num: #e6c35c; --hl-com: #5cc85c; --hl-lab: #b0bec5; --hl-attr: #9fb0bd; }
-@media (prefers-color-scheme: light) {
-  :root { --hl-cmd: #0000ff; --hl-dev: #d000d0; --hl-wid: #00838f; --hl-vk: #7b1fa2; --hl-vapi: #e00000; --hl-proc: #6b8e23; --hl-op: #d35400;
-    --hl-str: #a0522d; --hl-num: #9a6700; --hl-com: #008000; --hl-lab: #455a64; --hl-attr: #607d8b; }
-}
+:root[data-theme="light"] { --hl-cmd: #0000ff; --hl-dev: #d000d0; --hl-wid: #00838f; --hl-vk: #7b1fa2; --hl-vapi: #e00000; --hl-proc: #6b8e23; --hl-op: #d35400;
+  --hl-str: #a0522d; --hl-num: #9a6700; --hl-com: #008000; --hl-lab: #455a64; --hl-attr: #607d8b; }
 .hl-cmd { color: var(--hl-cmd); } .hl-dev { color: var(--hl-dev); } .hl-wid { color: var(--hl-wid); } .hl-vk { color: var(--hl-vk); }
 .hl-vapi { color: var(--hl-vapi); } .hl-proc { color: var(--hl-proc); } .hl-op { color: var(--hl-op); } .hl-str { color: var(--hl-str); }
 .hl-num { color: var(--hl-num); } .hl-com { color: var(--hl-com); } .hl-lab { color: var(--hl-lab); } .hl-attr { color: var(--hl-attr); }
@@ -854,7 +850,7 @@ button.hiddenTab { border-style: dotted; opacity: .8; }
 #dlgBody .dlgBox > select, #dlgBody .dlgBox > input { min-width: 0; max-width: 100%; }
 .dlgBoxTitle { font-weight: 700; font-size: 1.1em; }
 #dlgBody label.strong { font-weight: 700; }
-button.dlgCopy { background: var(--accent); color: #1b1305; border-color: var(--accent); font-weight: 800; letter-spacing: .03em; }
+button.dlgCopy { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 800; letter-spacing: .03em; }
 .infoNote { line-height: 1.4; }
 .infoIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #a34e00; background: #f28c1b; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
 .infoIcon:hover, .infoIcon:focus-visible { background: #ffa640; outline: 2px solid #000; outline-offset: 1px; }
@@ -1086,6 +1082,11 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 #ws .hmSpots { position: absolute; display: flex; gap: 3px; z-index: 6; pointer-events: auto; white-space: nowrap; }
 #ws .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); cursor: pointer; }
 #ws .hmBtn.cur { background: #e8a33c; border-color: #c4831f; color: #000; font-weight: 600; }
+
+/* ===== the Look (theme) picker, Settings > Panel settings (Rule 2.39) ===== */
+.lookPreview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -2px 0 6px; }
+.lookSw { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid; border-radius: 6px; align-items: center; }
+.lookSw > span { padding: 1px 7px; border-radius: 4px; font-size: 12px; font-weight: 600; }
 
 /* the Skynet Dial (Fritz, 2026-11-07, Rule 2.40): an arc with a needle and the reading in digits under it */
 .el.look-dial .vl { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 2px; }

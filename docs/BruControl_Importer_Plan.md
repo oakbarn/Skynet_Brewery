@@ -317,6 +317,96 @@ to where we can build the Device vessel and display it to the user before saving
   brewer can go Back to any question and change it; **Save** places it on the **Brewery Tab**.
 - Imported items that are now part of the Vessel (its heater, probe, valves) are linked to it; their Placeholders go away.
 
+### Connect your brewery: how valves and pumps join the vessels (plan only, Fritz 2026-11-07)
+Fritz, 2026-11-07: "One obvious issue is how valves and pumps are connected to the vessels. Can a uploaded Picture help in the
+building, but only within the program (no AI)"; "We can Also ask the User about his 'manifold Layout' what is connected to
+what." The Tartan test build (Tartan1, 2026-11-07) showed this is the biggest gap: 10 valves had nothing saying where they sit.
+
+A new Importer step, after the Vessel Devices are built and before the Schema is saved. Nothing here reads a picture with AI:
+the program only shows it and measures distances on the screen. Three helpers, used together:
+
+1. **Manifold questions (what is connected to what), built one piece at a time** (Fritz, 2026-11-07: "Build the manifold like
+   the knee bone is connected to the leg bone"). The manifold is walked as chains, like Dialog 2b: start at a Vessel outlet (or a
+   pump), ask **what is connected to it**, then **what is connected to that**, and so on (each link asks Hose or Pipe) until the
+   chain reaches an end (a Vessel IP, Tap Water, Drain, a QD, or Nothing). A Tee or Supply Manifold opens a branch that is walked
+   next. Every item already used shows as used, so nothing is joined twice, and a loose valve or pump left at the end gets its own
+   chain. **The page's explanation uses the rhyme** (Fritz, 2026-11-07: "put that little rhyme in the Explanation of how a
+   manifold is built"): *"The outlet's connected to the valve, the valve's connected to the pump, the pump's connected to the
+   hose ..."*, one piece at a time, the way the old song goes. The page shows a few lines of the song first (Fritz, 2026-11-07:
+   "show a few lines of that old song"; "Dem Bones", 1928, now public domain):
+   > *Toe bone connected to the foot bone,*
+   > *Foot bone connected to the heel bone,*
+   > *Heel bone connected to the ankle bone,*
+   > *Ankle bone connected to the leg bone ...*
+
+   A small **▶ Play** button beside it plays a few bars of the tune (Fritz, 2026-11-07: "if there is a free Copy of the song a
+   snippet that plays"). The song itself is free to use, but most **recordings** have their own copyright, so the Importer plays
+   the tune **from its own notes** (the browser makes the sound, no recording file). If a recording marked free to use (public
+   domain or CC0) is found later, Fritz decides whether to use it instead. It never plays by itself, only on the click.
+   *Or our own song file* (Fritz, 2026-11-07: "we could just make our own song file using an AI Childs voice"): the song is free
+   to use and the brewery verse is our own, so a short sung file made with an AI singing tool can replace the notes, if that
+   tool's terms allow its songs in a program we give away. Fritz makes or picks the file; it goes in `media/sounds/Skynet`.
+   **Song file: chosen** (Fritz, 2026-11-07): Fritz made the song **"Skynet - Outlet to Valve"** with Treblo, whose site says
+   its songs are free to use. It is 3 min 47 s and ships as an MP3 (plays on Windows, browsers and iPhones):
+   `media/sounds/Skynet/Skynet_Outlet_to_Valve.mp3`. It replaces the played notes. ▶ Play starts it and the button turns into
+   ■ Stop. Fritz also made a 19 second text-to-speech clip (free to use) of the rhyme, which can go beside it.
+
+   and then the brewery version:
+   > *Outlet connected to the valve,*
+   > *Valve connected to the pump,*
+   > *Pump connected to the hose,*
+   > *Hose connected to the mash tun ...*
+
+   Each link is one
+   short drill-down question, like Dialog 2b: **From** (a Vessel and its IP, a pump's in or out, another valve, a Supply Manifold, Tap Water, Drain, or Not
+   connected) and **To** (the same list). A pump also asks which way it pumps. A **Supply Manifold** (Rule 5.35) can be picked
+   for a row of valves on one pipe. Each answer starts with the best guess (helper 3), so the brewer only checks it. Answers
+   build the pipes and hoses between the IPs (Rule 5.29, 5.34); a missing answer leaves the item loose, never a wrong pipe.
+2. **A picture as a guide.** The brewer can pick a picture: the **background picture they used on that BruControl Tab** (filled
+   in automatically when there is one) or **a photo or drawing they upload**. It shows faded behind the Brewery Tab. The brewer
+   drags each vessel, pump and valve onto its place in the picture and **clicks one IP and then another** to join them, the same
+   joining the Panel uses for pipes (one source, Rule 15.4). The picture is only a guide: it is kept as the Tab background only if
+   the brewer says so.
+3. **Guesses from BruControl's screen.** Many BruControl brewers put their valve and pump buttons on top of a picture of their
+   brewery. Each item keeps its BruControl place, and the Importer suggests a connection when a valve or pump sits next to a
+   Vessel's IP, another valve or a drawn pipe picture (nearest within a short distance), plus the clues from names and Scripts
+   (a Script that opens M_V1 and runs M_HLT Pump together suggests one path). Each suggestion is marked **guess** until the
+   brewer OKs or changes it.
+4. **Ask a free AI, outside the Importer (the brewer's choice).** Fritz, 2026-11-07: "Could we provide a Link in the imported to
+   open a Free AI to analyse the Picture for the Manifold and Vessel layout". The Importer itself stays AI-free. A button
+   **Ask an AI about my picture…** does two things: it **copies a ready-made question** to the clipboard and **opens the free AI
+   site the brewer picks** (for example claude.ai, ChatGPT or Gemini) in their browser. The brewer adds their picture there and
+   pastes the question. The question lists the brewer's own vessel, pump and valve names and asks the AI to answer **only** in a
+   fixed form, one line per connection, for example `M_V5: From Mash Tun Center Bottom Outlet To M_Mash Pump In`. The brewer
+   copies the AI's answer and clicks **Paste the AI answer**: the Importer reads the lines (plain text matching, no AI), fills
+   in the manifold questions, and marks each one **from the AI, check it**. A line it can't read is listed, never guessed.
+   - **Privacy:** a note says plainly that the picture goes to that AI company under the brewer's own account, not to Skynet,
+     and that it is optional.
+   - Nothing is sent by the Importer: the brewer does the uploading and pasting.
+   - **Hot Side only** (Fritz, 2026-11-07: "That could give the Number of Vessels and a good guess on how they were connected,
+     at least for the Hot Side. I think for Fermentors we ask questions as they are likely in a different Room."). The question
+     asks the AI for the **number of hot side vessels** (HLT, Mash Tun, Boil Kettle and so on) as well as their connections;
+     the vessel count fills in Dialog 1's answer as a guess too, so this button is offered early, before the Vessel questions.
+- **Fermenters are asked, not pictured** (Fritz, 2026-11-07): they are usually in another room, so the picture, the AI and the
+  screen guesses cover the Hot Side only. For each fermenter the Importer asks plain questions instead: how it is cooled and
+  heated (glycol coil, jacket, chamber, wrap or none), which valves feed and return the glycol, which pumps (chiller, warm tank),
+  and which probe and pressure sensor are its own. Each answer starts with a guess from names and Scripts (for example Tartan's
+  "FV 2 // feed glycol", "FV 1 // return glycol").
+- Order on the page: the picture (if any) on the left, the manifold questions on the right; answering a question draws the pipe
+  on the picture side, and joining on the picture fills in the question. Either way works.
+- Shown before saving with the rest; Back changes any answer.
+- **The ends** (Fritz, 2026-11-07: "Tap water and Drain ends are good. And maybe a QD"): besides a Vessel IP, a pump, a valve and
+  a Supply Manifold, an end can be **Tap Water** (the Tap Water Valve, Rule 5.33), **Drain**, or a **Quick Disconnect (QD)**
+  (Rule 5.28). A QD asks two more things:
+  - **Male or Female** (it mates with the other kind, on the hose or the manifold).
+  - **Open or Shut-off** (Fritz: "The Quickdisconnect is always open but could also be the type that is closed (a type of Kent
+    Fitting) when the other QD ... is NOT connected"). **Open** is the default: flow passes whether or not its mate is on.
+    **Shut-off** passes flow only while its mate is connected, as Skynet's QD Widget already does (Rule 5.28).
+    *For later:* the Open kind is new to the QD Widget, so Rule 5.28 gets that choice when this step is built.
+- **Hose or Pipe is asked for each connection, as it is built** (Fritz, 2026-11-07: "Ask Hose or pip as it is being built. In my
+  manifold, I use both hoses and Pipes"). Each From / To answer (or each join on the picture) asks **Hose** or **Pipe**; a Hose
+  to a QD is a QD hose (Rules 5.28, 5.34). The guess is Pipe, unless one end is a QD (then Hose).
+
 ### Dialog 3: More Questions
 To come (Fritz, 2026-11-07: "New Dialog More Questions").
 

@@ -22,6 +22,10 @@ export const SKYNET_STYLES = {
   ],
   tab: [
     { id: 'sky_tab_default', name: 'Skynet Default', labelFore: '', labelBack: '', labelFont: '', labelSize: '', labelAlign: '', fore: '', back: '', font: '', size: '', align: '' },
+    // one for each Panel Look (Rule 2.39, public/themes.js): a new Tab gets its Look's Style, and "Use this Look on every Tab" sets it
+    { id: 'sky_tab_officeBlack', name: 'Skynet Office Black', labelFore: '#F0F0F0', labelBack: '#333333', labelFont: '', labelSize: '', labelAlign: '', fore: '#F0F0F0', back: '', font: '', size: '', align: '' },
+    { id: 'sky_tab_darkGray', name: 'Skynet Dark Gray', labelFore: '#F4F4F4', labelBack: '#555555', labelFont: '', labelSize: '', labelAlign: '', fore: '#F4F4F4', back: '', font: '', size: '', align: '' },
+    { id: 'sky_tab_white', name: 'Skynet White', labelFore: '#262626', labelBack: '#E1E1E1', labelFont: '', labelSize: '', labelAlign: '', fore: '#262626', back: '', font: '', size: '', align: '' },
     { id: 'sky_tab_tennyson', name: 'Tennyson', labelFore: '#000000', labelBack: '#c3c3c3', labelFont: '"Comic Sans MS", "Comic Sans", cursive', labelSize: '16', labelAlign: '', fore: '', back: '', font: '', size: '', align: '' },
   ],
 };
