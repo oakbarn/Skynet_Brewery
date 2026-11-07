@@ -644,6 +644,7 @@ PR #47; PR #91)
 
 5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
 (2026-10-04, PR #3)
+Since 2026-11-07 a pipe fitting, a valve or an inline Device with pipes on it takes the size of most of its pipes instead (Rule 5.36).
 Valves keep to this through the **Valve Standard** (Rule 5.29): every Skynet valve drawing is to the same scale in the same
 300 x 300 box.
 Pumps keep to this through the **Pump Standard** (Rule 5.27): every Skynet pump drawing is to the same scale in the same
@@ -1059,13 +1060,37 @@ supply manifolds", Help 146).
 - **Valve numbers** (Fritz, 2026-11-06: "When Building or editing a Manifold Supply the Valves need to be number corresponding to the
   Valve 1 in the dialog"): in Edit layout and on the Graphic of its Add box and Properties each valve shows its number (1, 2, 3), the
   same as **Valve 1**, **Valve 2**, **Valve 3** in the dialog and **V1**, **V2**, **V3** in its valves' Labels. Not shown in run mode.
+- **Size: it takes the size of its pipes** (Fritz, 2026-11-07: "any Pipe Fitting, even if a device should size to the majority of the
+  pipes or hoses"; Rule 5.36). This replaces "No Autosize to pipe (it is drawn at the Valve Standard size)" above: a Valve Tee or
+  Supply Manifold is sized like a tee, its tees as thick as most of the pipes and hoses on its IPs; its valves grow with it. With no
+  pipe on it, it keeps its size. It still has no Clone.
 - *Standard exceptions used* (Fritz: "the standard exceptions would apply if it fits"): unlike the Vessel Device it is **not locked**
   once saved, so a valve can always be swapped Manual / Motorized. A Motorized valve's Port (and the fitting's Interface) is greyed
   out once saved (Rule 18.13); to wire it again, make it Manual, Save, then Motorized again and pick the Port.
   *Replaced (2026-11-06):* its valves' Interface and Ports were set in the fitting's Properties, not in a Pump-style Add box; Flip
   Horizontal, Flip Vertical and Rotate in 45 degree steps.
 
+5.36 **Every pipe fitting sizes to its pipes when saving** (Fritz, 2026-11-07: "Have any pipe fitting etc size to the pipe when
+saving"; then "any Pipe Fitting, even if a device should size to the majority of the pipes or hoses"; thread "Size fittings to their
+pipe on Save", Help 87).
+- **The majority wins:** a fitting takes the size that **most of the pipes and hoses joined to it** have. On a **tie** (for example one
+  1" and one 1/2", as on a Reducer, or two of each on a cross) it takes the **bigger** size. With no pipe or hose on it, it keeps its size.
+- On **Save layout** every Tab is checked, and each time a Tab is drawn in Edit layout (so after 💾 Save in any Properties) that Tab
+  is. Sized this way, about their bend (Rule 5.25):
+  - every pipe fitting on **Autosize to pipe** (Rule 5.14: elbows, tees, crosses, U, reducers, check valves, Sight Glasses, IP
+    fittings, Manual Valves);
+  - **Valve Tees and Supply Manifolds** (Rule 5.35; they have no Autosize switch, so they always follow);
+  - **tees with a Temperature Probe** (Rule 5.30; no switch either, a Device dialog, Rule 18.10);
+  - **valves and inline Devices** (Motorized and other valve Devices, Proportional Valves, flow meters and flow switches): each is drawn
+    as it would be on a Tab whose 1/2" pipe is as thick as most of its pipes. With no pipe on it, the Tab's pipe size (Rule 5.11).
+  - an **End Cap**, which gets **Autosize to pipe** (Rule 5.14 lists it as a pipe fitting): on an opening of a TC Pipe Fitting it
+    takes the size of that fitting's ferrule (its box 1.5 x the fitting's pipe). On a Reducer (two sizes), a Valve Tee or Supply
+    Manifold, or a vessel opening it keeps its size.
+- **Pumps are not pipe fittings**: they keep the Pump Standard size with the Tab's pipe size (Rules 5.11, 5.27). A Thermowell sits on
+  a vessel and keeps its size.
+
 ---
+
 
 ## 6. Devices, connections and safety
 
@@ -2383,3 +2408,5 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 5.31: plugged IPs are hidden; only open IPs show (a Thermowell, Probe, End Cap or Heating Element plugs its opening; a built in Valve does not). The Panel now hides a Vessel Device IP with a built in Element, Probe or Thermowell, as it already did for an End Cap. The BruControl Import's Vessel questions (plan section 9) now ask about every other opening: Not there, Open (its own connection chain), or Plugged with a Thermowell, End Cap or Heating Element. Checked against both programs. Help 133 and 143 updated; no new Help number used. (thread "Ask about other Vessel openings in the import")
 - 2026-11-07: Rule 5.31: the Three Vessel sample's HLT, Mash tun and Boil kettle are now Vessel Devices built from the Main Template (Fritz: "change all the vessels to" "Vessels Devices"), their probes and heaters built into the Left and Right Element IPs; a built in Element that is a heat controller stays one. Help 133 updated; no new Help number used. Checked against the BruControl Import program: it does not use the samples, so nothing changes there. (thread "Change 3 Vessel sample to Vessel Devices")
 - 2026-11-07: Rule 15.4: the Setup question about the Importer now explains who should answer Yes (BruControl Brewers with a .brucfg file) and who should answer No; when Yes, the last Setup page offers a tick box "Open the BruControl Importer now". Checked against both programs: only the shared Setup changes. Help 143 updated. (thread "Reword Setup BruControl import question")
+- 2026-11-07: Added Rule 5.36 (Fritz: "Have any pipe fitting etc size to the pipe when saving"): on Save every pipe fitting on Autosize to pipe takes the size of its pipe, probe tees follow their pipe, End Caps get Autosize to pipe and match the fitting they close. Help 87 updated. (thread "Size fittings to their pipe on Save")
+- 2026-11-07: Rules 5.36, 5.35 and 5.11 changed (Fritz: "any Pipe Fitting, even if a device should size to the majority of the pipes or hoses"): a fitting takes the size most of its pipes and hoses have (a tie takes the bigger); Valve Tees, Supply Manifolds, valves and inline Devices size to their pipes too; pumps keep the Pump Standard. Help 87 and 146 updated. Checked against the BruControl Import program: it does not draw pipes or size anything, so nothing changes there. (thread "Size fittings to their pipe on Save")

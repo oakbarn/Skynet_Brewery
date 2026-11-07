@@ -40,3 +40,24 @@ const s3 = JSON.parse(fs.readFileSync(path.join(ROOT, 'samples', 'configs', 'thr
 for (const n of ['HLT_Vessel', 'MLT_Vessel', 'BK_Vessel']) { const v = s3.graphics.find(g => g.name === n); assert.ok(v?.vdevice && s3.elements.some(e => e.integratedIn === v.id && e.vpKind === 'thermowell'), `${n} shows its thermowell`); }
 assert.ok(app.includes("thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg'"), 'the short thermowell picture');
 console.log('probe tees ok');
+// Every pipe fitting sizes to its pipe when saving (Fritz, 2026-11-07, Rule 5.36): Save layout sizes every Tab, a Tab drawn in
+// Edit layout sizes itself; TC Pipe Fittings, probe tees and End Caps follow their pipe
+assert.ok(/for \(const w of draft\.workspaces\) sizeToPipes\(w\.name\);[^\n]*\n\s*const rejoined = rejoinEnds\(\);/.test(app), 'Save layout sizes every Tab first');
+assert.ok(app.includes('if (editing && draft) sizeToPipes(w.name);'), 'a Tab drawn in Edit layout sizes its fittings');
+const stp = app.slice(app.indexOf('function sizeToPipes('), app.indexOf('const CAP_BOX'));
+assert.ok(stp.includes('autoSizeUnit(g)') && stp.includes('sizeProbeTee(e, pw)') && stp.includes('sizeCap(c)'), 'fittings, probe tees and End Caps');
+assert.ok(/const autoSized = g => \(isPipeFit\(g\) \|\| isMv\(g\)[^\n]*\) && g\.autoSize !== false;/.test(app) && !/const autoSized[^\n]*isCap/.test(app), 'an End Cap has Autosize to pipe');
+assert.ok(app.includes('const FIT_PLACE = it => [AUTOSIZE_FIELD, '), 'Autosize to pipe in every pipe fitting\'s Properties');
+assert.ok(/isMf\(o\) \|\| \/Reducer\//.test(app), 'a cap on a Reducer or Valve Tee keeps its size');
+// the majority of the pipes or hoses wins, a tie takes the bigger (Fritz, 2026-11-07, Rule 5.36)
+const mw = app.slice(app.indexOf('function majorityWidth('), app.indexOf('\n}\n', app.indexOf('function majorityWidth(')) + 3);
+const majorityWidth = Function('pipeWidth', `${mw}; return majorityWidth;`)(p => p.w);
+assert.equal(majorityWidth([{ w: 10 }, { w: 10 }, { w: 20 }]), 10, 'two 1/2" and one 1": 1/2"');
+assert.equal(majorityWidth([{ w: 10 }, { w: 20 }]), 20, 'a tie takes the bigger');
+assert.equal(majorityWidth([]), 0, 'no pipe: keeps its size');
+const one = { w: 10 }; assert.equal(majorityWidth([one, one, { w: 20 }]), 20, 'one pipe on two IPs counts once');
+// Valve Tees, Supply Manifolds, valves and inline Devices size to their pipes too; pumps keep the Tab's pipe size
+assert.ok(app.includes('const autoSized = g => (isPipeFit(g) || isMv(g) || isMf(g)) && g.autoSize !== false;'), 'Valve Tees and Manifolds');
+assert.ok(app.includes("const followsPipe = e => hasIps(e) && e.subtype !== 'pump' && !isProbeTee(e) && !isThermowell(e);"), 'valves follow, pumps do not');
+assert.ok(app.includes('const k = elK(e), w = e.w || 120'), 'a Device is drawn for its pipes');
+for (const [n, b] of [['Valve_Tee', 0.183], ['Supply_Manifold_2', 0.0915], ['Supply_Manifold_3', 0.061]]) assert.equal(tpl(n).body, b, `${n} body`);
