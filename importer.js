@@ -10,7 +10,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme, readClues } from './lib/importer.js';
+import { findParts, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
 import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
@@ -38,7 +39,7 @@ const settings = loadSettings(SETTINGS);
 let boxOpen = false;      // a Windows Open or Browse For Folder box is showing
 let converted = null;      // the last converted Import Copy: { file, copy, conv, report }
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.bmp': 'image/bmp', '.webp': 'image/webp', '.mp3': 'audio/mpeg' };
 function sendFile(res, file) {
   fs.readFile(file, (err, buf) => {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }); return res.end('Not found'); }
@@ -71,6 +72,37 @@ function pickFolder(start) {
     ps.on('error', () => ok({ picked: '', none: true }));
     ps.on('close', () => ok({ picked: out.trim() }));
   });
+}
+
+// The brewer's Connect your brewery answers, checked against the parts this import found: only known vessels, pumps and valves,
+// only the known end kinds; anything else is dropped (a missing answer leaves the item loose, never a wrong pipe)
+function connectAnswers(sent, found) {
+  const parts = found?.parts ?? { vessels: [], pumps: [], valves: [] };
+  if (!sent || typeof sent !== 'object') return { parts, chains: found?.chains ?? [], fermenters: found?.fermenters ?? [], places: {} };
+  const vessels = Array.isArray(sent.vessels) ? sent.vessels.filter(v => v && /^[\w ~#-]{1,40}$/.test(v.key) && typeof v.name === 'string')
+    .map(v => ({ key: v.key, name: v.name.slice(0, 40), side: v.side === 'cold' ? 'cold' : 'hot' })) : parts.vessels;
+  const p2 = { ...parts, vessels };
+  const ids = new Set([...parts.pumps, ...parts.valves].map(i => i.id)), keys = new Set(vessels.map(v => v.key)), ats = new Set(OPENINGS.map(([k]) => k));
+  const end = e => {
+    if (!e || typeof e !== 'object') return null;
+    if (e.kind === 'vessel') return keys.has(e.key) && ats.has(e.at) ? { kind: 'vessel', key: e.key, at: e.at } : null;
+    if (e.kind === 'pump') return ids.has(e.id) ? { kind: 'pump', id: e.id, side: e.side === 'in' ? 'in' : 'out' } : null;
+    if (e.kind === 'valve') return ids.has(e.id) ? { kind: 'valve', id: e.id } : null;
+    if (e.kind === 'qd') return { kind: 'qd', sex: e.sex === 'female' ? 'female' : 'male', shut: !!e.shut, n: Math.max(1, Math.min(99, Number(e.n) || 1)) };
+    if (e.kind === 'manifold') return { kind: 'manifold', n: Math.max(1, Math.min(99, Number(e.n) || 1)) };
+    return ['tap', 'drain', 'none'].includes(e.kind) ? { kind: e.kind } : null;
+  };
+  const src = s => ['name', 'script', 'picture', 'ai', 'you', 'guess'].includes(s) ? s : 'you';
+  const chains = (Array.isArray(sent.chains) ? sent.chains : []).map(c => ({ start: end(c?.start),
+    steps: (Array.isArray(c?.steps) ? c.steps : []).map(s => ({ to: end(s?.to), by: s?.by === 'hose' ? 'hose' : 'pipe', source: src(s?.source), ...(s?.ok ? { ok: true } : {}) })).filter(s => s.to) }))
+    .filter(c => c.start && c.steps.length);
+  const one = v => (typeof v === 'string' && v.length < 200 ? v : '');
+  const fermenters = (Array.isArray(sent.fermenters) ? sent.fermenters : []).filter(f => keys.has(f?.vessel)).map(f => ({ vessel: f.vessel,
+    cooling: one(f.cooling), heating: one(f.heating), feed: one(f.feed), ret: one(f.ret), coolPump: one(f.coolPump), warmPump: one(f.warmPump),
+    probe: one(f.probe), pressure: one(f.pressure), source: f.source === 'you' ? 'you' : 'guess' }));
+  const places = {};
+  for (const [k, v] of Object.entries(sent.places && typeof sent.places === 'object' ? sent.places : {})) if (Number.isFinite(v?.x) && Number.isFinite(v?.y)) places[String(k).slice(0, 120)] = { x: Math.round(v.x * 1000) / 1000, y: Math.round(v.y * 1000) / 1000 };
+  return { parts: p2, chains, fermenters, places };
 }
 
 async function api(req, res, p, q) {
@@ -142,21 +174,40 @@ async function api(req, res, p, q) {
     r.conv.theme = look.key;
     for (const w of r.conv.workspaces ?? []) if (!w.color && !w.style) Object.assign(w, newTabLook(look.key));     // each Tab is new: the Look's Tab colors
     r.report.look = { bru: bt?.theme || '', file: bt?.file || '', key: look.key, name: look.name };
-    converted = { file, copy, ...r };
-    return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings });
+    // Connect your brewery (Fritz, 2026-11-07): the parts, and the first guesses from the names, the Scripts and the pictures
+    const clues = readClues(fs.readFileSync(copy, 'utf8'));
+    const parts = findParts(r.conv, clues.scripts);
+    const fermenters = guessFermenters(parts, r.conv, clues.scripts);
+    const pics = Object.fromEntries(Object.entries(clues.backgrounds).filter(([, b]) => { try { return fs.statSync(b.path).isFile(); } catch { return false; } }));
+    const chains = guessChains(parts, { backgrounds: pics, fermenters });
+    const connect = { parts, fermenters, chains, pictures: Object.fromEntries(Object.entries(pics).map(([t, b]) => [t, { w: b.w, h: b.h }])),
+      tabs: (r.conv.workspaces ?? []).map(w => ({ name: w.name, width: w.width, height: w.height })), openings: OPENINGS, cooling: COOLING, heating: HEATING, aiSites: AI_SITES };
+    converted = { file, copy, ...r, clues: { ...clues, backgrounds: pics }, connect };
+    return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings, connect });
+  }
+  // The guide picture for Connect your brewery: the background picture BruControl had on that workspace (it stays where it is)
+  if (p === '/api/picture' && m === 'GET') {
+    const b = converted?.clues?.backgrounds?.[q.get('tab') ?? ''];
+    if (!b) return json(res, 404, { error: 'That Tab had no background picture.' });
+    return sendFile(res, b.path);
   }
   // Save the Schema into Brewing\Import, for the Panel to open (Schema.json > Open a Schema file)
   if (p === '/api/save' && m === 'POST') {
-    const { file, name } = await body(req);
+    const { file, name, connect } = await body(req);
     if (!converted || converted.file !== file) return json(res, 400, { error: 'Go back to Names and click Next first, so the config file is converted.' });
     const out = buildSchemaFile(converted.conv, { name: name || path.basename(file), source: path.basename(file), draft: true, version: readVersion(ROOT).version || '' });
     out.importCopy = path.basename(converted.copy);
     out.importReport = { stage: 'new import, step 1: Interfaces, Tabs, items on a board port and Placeholders', names: converted.report.names, renames: converted.report.renames };
+    // Connect your brewery: what is connected to what, kept in the file for the step that builds the Vessels and draws the pipes
+    const cn = connectAnswers(connect, converted.connect);
+    out.connect = connectReport(cn);
+    const nLinks = out.connect.links.length, nLoose = out.connect.loose.length;
+    out.warnings = [...out.warnings, `Connect your brewery: ${nLinks} connection(s) between ${cn.parts.vessels.length} vessel(s), pumps and valves are kept in this file${nLoose ? `; ${nLoose} pump(s) or valve(s) are not joined yet` : ''}. The pipes and hoses are drawn when the Vessels are built (a later Import step).`];
     fs.mkdirSync(IMPORT_DIR, { recursive: true });
     const fname = importFileName(out.schema.name);
     fs.writeFileSync(path.join(IMPORT_DIR, fname), JSON.stringify(out, null, 2));
     return json(res, 200, { folder: IMPORT_DIR, file: fname, name: out.schema.name, tabs: out.schema.workspaces.length, items: out.schema.elements.length,
-      interfaces: out.schema.devices.length, placeholders: out.schema.graphics.length, warnings: out.warnings.length });
+      interfaces: out.schema.devices.length, placeholders: out.schema.graphics.length, warnings: out.warnings.length, links: out.connect.links.length, loose: out.connect.loose.length });
   }
   if (p === '/api/open-import' && m === 'POST') {
     if (!WIN) return json(res, 200, { ok: false });
@@ -186,6 +237,8 @@ const server = http.createServer(async (req, res) => {
     if (p === '/' || p === '/index.html') return sendFile(res, path.join(PUBLIC, 'importer', 'index.html'));
     if (p.startsWith('/importer/') && /^[\w./-]+$/.test(p) && !p.includes('..')) return sendFile(res, path.join(PUBLIC, p));
     // the Panel's own look, icon and hover help (one source, Rules 15.4 and 2.38)
+    // the Connect your brewery song and rhyme (Fritz's own files, free to use) from the Panel's media\sounds\Skynet
+    if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
     if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }

@@ -317,7 +317,11 @@ to where we can build the Device vessel and display it to the user before saving
   brewer can go Back to any question and change it; **Save** places it on the **Brewery Tab**.
 - Imported items that are now part of the Vessel (its heater, probe, valves) are linked to it; their Placeholders go away.
 
-### Connect your brewery: how valves and pumps join the vessels (plan only, Fritz 2026-11-07)
+### Connect your brewery: how valves and pumps join the vessels (BUILT 2026-11-07, page 6; Fritz said go)
+**Built** (Fritz, 2026-11-07: "Connect your brewery: GO"): `public/importer/connect.js` (chains, guesses, AI question and answer
+reader, shared by the page and the server) and `public/importer/connectpage.js` (the page). The answers are saved in the Schema
+file as `connect`; the pipes are drawn when the Vessel Build step is built. Keeping the guide picture as a Tab background waits
+for that step too.
 Fritz, 2026-11-07: "One obvious issue is how valves and pumps are connected to the vessels. Can a uploaded Picture help in the
 building, but only within the program (no AI)"; "We can Also ask the User about his 'manifold Layout' what is connected to
 what." The Tartan test build (Tartan1, 2026-11-07) showed this is the biggest gap: 10 valves had nothing saying where they sit.

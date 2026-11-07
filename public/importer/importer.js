@@ -1,7 +1,8 @@
 // MIT License Granted
 // Copyright (c) OakBarn Brewery 2026
 // Skynet BruControl Importer, in the window (Rule 15.4): 1 Welcome, 2 BruControl and Skynet, 3 pick the config file, 4 Names,
-// 5 Boards and Tabs (the Import Copy is converted), 7 Save the Schema.
+// 5 Boards and Tabs (the Import Copy is converted), 6 Connect your brewery (public/importer/connectpage.js), 8 Save the Schema.
+import { startConnect, connectState } from './connectpage.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -190,6 +191,7 @@ async function convert() {
   try {
     const r = await api('POST', '/api/convert', { file: state.sel, names, copyMedia: $('#copyMedia').checked });
     state.converted = true;
+    state.connect = r.connect;
     const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` class="${cls[i]}"` : ''}>${c}</td>`).join('') + '</tr>';
     box.innerHTML = `<div class="card"><p>Import Copy: <code>${esc(r.copy)}</code></p>
         <p>Names: <b>${r.names === 'bru' ? 'your BruControl names (kept after two warnings)' : 'Skynet names'}</b>.
@@ -216,20 +218,26 @@ for (const id of ['#next4', '#next4a']) $(id).onclick = convert;
 for (const id of ['#back5', '#back5a']) $(id).onclick = () => show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
+  startConnect(state.connect, { toast });
+  show(6);
+};
+for (const id of ['#back6', '#back6a']) $(id).onclick = () => show(5);
+for (const id of ['#next6', '#next6a']) $(id).onclick = () => {
   const f = state.files.find(x => x.path === state.sel);
   $('#schemaName').value = (f?.base || f?.name || 'Imported_Schema').replace(/\.(brucfg|config)$/i, '').replace(/\s+/g, '_');
   $('#importDir').textContent = state.start?.importFolder ?? '';
   $('#saveResult').classList.add('hidden');
-  show(7);
+  show(8);
 };
-for (const id of ['#back7', '#back7a']) $(id).onclick = () => show(5);
+for (const id of ['#back8', '#back8a']) $(id).onclick = () => show(6);
 $('#saveBtn').onclick = async () => {
   const b = $('#saveBtn'); b.disabled = true; b.textContent = 'Saving…';
   try {
-    const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value });
+    const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: connectState() });
     const box = $('#saveResult');
     box.innerHTML = `<p>✅ Saved <b>${esc(r.file)}</b> in <code>${esc(r.folder)}</code>.</p>
       <p>${r.interfaces} Interfaces, ${r.tabs} Tabs, ${r.items} items on a board port, ${r.placeholders} Placeholders${r.warnings ? `, ${r.warnings} notes for the report` : ''}.</p>
+      <p>Connect your brewery: ${r.links} connection(s) kept${r.loose ? `, ${r.loose} pump(s) or valve(s) not joined yet` : ''}. The pipes and hoses are drawn when the Vessels are built (a later Import step).</p>
       <p>Next: in the Skynet Panel, open <b>Schema.json</b> and click <b>Open a Schema file</b>.</p>
       ${state.start?.windows ? '<button id="openDir">📂 Open the Import folder</button>' : ''}`;
     box.classList.remove('hidden');
