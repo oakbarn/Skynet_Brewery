@@ -7,7 +7,7 @@ A brew day is a list of premade **major steps**, done in this order. The list ca
 | # | Major step | What it does |
 |---|---|---|
 | 1 | **PreBrew** | Load or check the Recipe, all pumps off and every valve closed, walk the brewery, lock the Equipment Profile. The same in every Schema. |
-| 2 | **Heat Strike** | Fill the Hot Liquor Tank and heat the strike water to the Recipe's strike temperature. |
+| 2 | **Heat Strike** | Fill the Hot Liquor Tank (the kettle on a 2 Vessel, the vessel on a 1 Vessel) and heat the strike water to the Recipe's strike temperature. |
 | 3 | **Strike** | Strike water into the mash tun, then the grain (dough in). |
 | 4 | **Mash** | Every mash step of the Recipe (up to its temperature, then its time), the mash out and the sparge. |
 | 5 | **Boil** | Up to the boil, then the Boil timer runs for the Recipe's boil time. The Recipe's hop alerts run on the Boil timer. |
@@ -36,9 +36,13 @@ Each major step uses one **Process Template**:
 
 **👁 View** shows any Template.
 
+Some steps have a Skynet Template for each kind of brewery: `Skynet_Heat_Strike_1_Vessel`, `Skynet_Strike_1_Vessel` and `Skynet_Mash_1_Vessel` for one vessel with a grain basket, the `_2_Vessel` ones for a kettle and a mash tun, and the plain Skynet ones for 3 vessels. A new Schema from a Skynet Template picks the right ones (Help 157).
+
 ## Which Device does each job
 
 Below the steps, the panel asks only for the jobs the picked Templates use: the Hot Liquor Tank heater and probe, the mash heater, probe, pump and timer, the boil heater, probe and timer, the whirlpool pump, the chiller pump, cooling water and wort probe, the Hop Infuser valve, the pump to the fermenter, the fermenter control and probe, and the cleaning pump. Each list holds only the Devices and Widgets that fit (a probe list shows only temperature probes, a pump list only pumps).
+
+**🎯 Click it on the Tab** next to a job goes to the Tab, lights up the items that fit that job and greys the rest: click the one that does the job, and you come back here with it picked (press **💾 Save** to keep it). **Cancel** or **Esc** changes nothing. The list is the backup.
 
 Leave a job on **(none: Skynet asks you to do it by hand)** and the Brew Day shows a pop-up for it instead, for example "Turn the Hot Liquor Tank heat on and set it to 163.2°F. Press Done when it is on."
 

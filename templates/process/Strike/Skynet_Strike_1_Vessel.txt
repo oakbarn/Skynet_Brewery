@@ -1,0 +1,14 @@
+//Skynet_Strike_1_Vessel
+//About: 1 Vessel: the grain into the basket a little at a time (dough in), then the recirculation on if there is a pump.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Dough in"
+ask "Add the grain (" + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ") to the basket slowly: add, stir, add, stir, and stir out every dough ball. Press Done when it is all in."
+@if Mash_Pump
+step "Recirculate"
+ask "Put the recirculation arm (or top screen) in place. Press Done when it is on."
+{{Mash_Pump}} = true
+@end
+@if Mash_Probe
+print "Mash temperature after dough in: " + {{Mash_Probe}} + rcp_Temp_Units
+@end

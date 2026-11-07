@@ -1,0 +1,5 @@
+{
+  "title": "3 Vessel",
+  "about": "Hot Liquor Tank, mash tun and brew kettle (like the Three Vessel sample and the OakBarn brewery), a mash pump and a kettle pump, HERMS coil in the HLT.",
+  "order": 5, "kind": "hot", "vessels": [{ "role": "HLT" }, { "role": "Mash Tun" }, { "role": "Brew Kettle" }], "pumps": 2, "recirc": "herms"
+}

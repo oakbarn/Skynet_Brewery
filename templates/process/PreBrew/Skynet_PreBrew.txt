@@ -1,5 +1,5 @@
 //Skynet_PreBrew
-//About: Load or check the Recipe, pumps off and every valve closed, the equipment checked and locked. The same in every Schema.
+//About: Load or check the Recipe, pick the chilling water, pumps off and every valve closed, the equipment checked and locked. The same in every Schema.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 step "Recipe"
@@ -9,6 +9,8 @@ if rcp_Loaded == false
   goto Recipe_Check
 endif
 ask "Check the Recipe \b" + rcp_Name + "\b on ☰ Menu > Recipe (clear it and import another if this is not today's beer).\nBatch " + rcp_Batch_Volume + " " + rcp_Volume_Units + ", grain " + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ", boil " + rcp_Boil_Time + ".\nPress Done when it is right."
+step "Chilling water"
+ask "Pick how you chill today:\n- just tap water (the most common)\n- tap water chilled by an ice bath\n- only ice water\n- tap water chilled by glycol\n- ice water chilled by glycol\nIf it uses ice, have the ice bath ready at the end of the boil. If it uses glycol, make sure the glycol is cold. Press Done when it is set."
 step "House cleaning: pumps off, valves closed"
 all_pumps_off
 sleep 1000
