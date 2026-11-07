@@ -52,8 +52,8 @@ V_BK_Out = false
 V_To_MLT = false
 V_To_BK = false
 V_To_Ferm = false
-HLT_Heat.enabled = false
-BK_Heat.enabled = false
+HLT_Heat = off
+BK_Heat = off
 Chiller_Water = false
 [SectionBrew100]
 step 1.00001 "SectionBrew100"
@@ -79,7 +79,7 @@ wait gblV_Brew_Status == 103
 sw_Advance_BrewStatus.visible = false
 send_db "w_Strike_Volume"
 HLT_Heat.target = gblV_Desired_Strike
-HLT_Heat.enabled = true
+HLT_Heat = on
 vSMsg = "Heating the HLT to the strike temperature, " + gblV_Desired_Strike + " °F."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
@@ -478,7 +478,7 @@ V_To_MLT = false
 V_To_BK = false
 V_To_Ferm = false
 sleep 1000
-HLT_Heat.enabled = false
+HLT_Heat = off
 [SectionBrew306]
 step 1.00016 "SectionBrew306"
 gblV_Brew_Status = 306
@@ -534,7 +534,7 @@ sw_Advance_BrewStatus.visible = false
 send_db "w_PreBoil_Volume"
 send_db "w_PreBoil_Gravity"
 BK_Heat.target = 215
-BK_Heat.enabled = true
+BK_Heat = on
 vSMsg = "Heating the kettle to a boil."
 gblS_Step_Text = vSMsg
 gblS_Advance_Label = "Wait.  Will Auto Advance"
@@ -841,7 +841,7 @@ goto "Boil_Loop"
 step 1.00021 "Boil Done"
 stop "tm_Step"
 gblS_Hop_Warning = ""
-BK_Heat.enabled = false
+BK_Heat = off
 start "alm_Step"
 [SectionBrew480]
 step 1.00022 "SectionBrew480"
