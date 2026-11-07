@@ -54,21 +54,30 @@ assert.equal(cleanVessel({ vwidget: 'yes' }).vwidget, undefined, 'only true make
 // Help
 assert.deepEqual(graphicTopic({ kind: 'vessel', vesselType: 'vessel', vwidget: true, template: 'Skynet_Vessel_Widget', templateCls: 'skynet' }), ['vessel-widget']);
 assert.ok(read('help/133-vessel-widget.md').includes('TC, NPT or BSP'), 'Help explains vessel IPs');
-// the Three Vessel sample
+// the Three Vessel sample: its vessels are Vessel Devices built from the Main Template (Fritz, 2026-11-07: "Vessels Devices"),
+// their probes and heaters built into the Left and Right Element IPs
 const c = JSON.parse(read('samples/configs/three-vessel-one-pump/config.json'));
-const want = { HLT_Vessel: ['outlet', 'thermowell', 'element'], MLT_Vessel: ['outlet', 'topInlet', 'thermowell'], BK_Vessel: ['outlet', 'topInlet', 'thermowell', 'element'] };
+const want = { HLT_Vessel: ['cBottomOutlet', 'lElement', 'rElement'], MLT_Vessel: ['cBottomOutlet', 'lSparge', 'lElement'], BK_Vessel: ['cBottomOutlet', 'lSparge', 'lElement', 'rElement'] };
+const parts = { HLT_Vessel: { lElement: ['HLT_Temp', 'thermowell'], rElement: ['HLT_Heat', 'element'] }, MLT_Vessel: { lElement: ['MLT_Temp', 'thermowell'] },
+  BK_Vessel: { lElement: ['BK_Temp', 'thermowell'], rElement: ['BK_Heat', 'element'] } };
 for (const [n, on] of Object.entries(want)) {
   const v = c.graphics.find(g => g.name === n);
-  assert.ok(v?.vwidget && v.template === 'Skynet_Vessel_Widget', `${n} is a Vessel Widget`);
+  assert.ok(v?.vwidget && v.vdevice && v.template === 'Skynet_Vessel_Widget', `${n} is a Vessel Device`);
   assert.deepEqual(Object.keys(v.ports).filter(k => v.ports[k].installed).sort(), [...on].sort(), `${n} Places`);
   const ips = c.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id).map(g => g.port).sort();
-  assert.deepEqual(ips, on.filter(k => !['thermowell', 'element'].includes(k)).sort(), `${n}: an IP for each Placed opening`);
+  assert.deepEqual(ips, [...on].sort(), `${n}: an IP for each Placed IP`);
+  for (const [k, [dev, kind]] of Object.entries(parts[n])) {
+    const e = c.elements.find(x => x.name === dev);
+    assert.deepEqual([e.integratedIn, e.integratedAs, e.vpKind], [v.id, 'ip:' + k, kind], `${dev} is built into ${n}`);
+  }
   for (const ip of c.graphics.filter(g => g.kind === 'ip' && g.attachTo === v.id))
     for (const p of c.graphics.filter(g => g.kind === 'pipe' && (g.from === ip.id || g.to === ip.id))) {
       const end = p.from === ip.id ? p.points[0] : p.points.at(-1);
       assert.deepEqual(end, [ip.x + 15, ip.y + 15], `${p.id} ends on ${ip.id}`);
     }
 }
+assert.equal(c.elements.find(e => e.name === 'HLT_Heat').type, 'hysteresis', 'the built in heaters stay heat controllers (the Processes set .target)');
+assert.ok(app.includes("HEAT_CTL_TYPES.includes(o.type) ? { type: o.type }"), 'a built in heat controller stays one');
 assert.ok(!c.graphics.some(g => ['img_HLT', 'img_MLT', 'img_BK'].includes(g.id)), 'the old pictures went');
 console.log('vessel widget ok');
 
