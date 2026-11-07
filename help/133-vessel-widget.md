@@ -66,6 +66,9 @@ of the vessel, it shows on the vessel at its IP, and it gets a small reading (On
 way the RIMS tube's do. It can't be deleted on its own. An Element, Probe or Thermowell fills its IP, so no flow goes through it;
 a Valve lets flow through only while it is on.
 
+**Plugged openings hide their IP.** An Element, Probe or Thermowell plugs its opening, just like an End Cap, so its IP is
+hidden and no pipe or hose can join it. Only the open IPs show. A Valve's IP still shows, because flow goes through it.
+
 **HERMS coil:** pick **Left** or **Right**. The coil is drawn under that side's **HERMS In** and **HERMS Out** IPs, shaped to fit
 them, and the two IPs become the coil's two ends: flow that goes in one comes out of the other.
 
