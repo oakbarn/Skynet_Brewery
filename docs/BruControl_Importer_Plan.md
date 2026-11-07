@@ -186,6 +186,27 @@ most common **Probe Location** are the Center Probe. (Fritz's drawing: project f
    - **Oakbarn Modified HERMS (BruControl).**
    - **Unheated.**
 
+### Dialog 2b: what is on each outlet (Fritz, 2026-11-07)
+"We need to ask about outlets and what is connected to them (Valves and Type), Pipe Fittings, and if a Valve what comes Next
+(elbow)." For each outlet or inlet the Vessel has (Center Outlet, Center Bottom Outlet, Tangential, Sparge or Steam Slayer,
+HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.2, 18.13):
+1. **What is connected:** Valve; Pipe Fitting; Probe tee or Thermowell (Rule 5.30); Sight Glass (Rule 5.32); Nothing.
+2. **If a Valve:** its **Type** (Manual Ball Valve, Motorized Ball Valve, Butterfly, and so on, from the Valve Standard) and,
+   when it is motorized, **which imported Device runs it** (a dropdown by BruControl name, an educated guess filled in).
+3. **What comes next** after it: Elbow 90; Elbow 45; Tee; Reducer; End Cap; Nothing (the TC Pipe Fittings, Rule 5.25). Each
+   answer can ask "what comes next" again, so a short run (outlet, valve, elbow ...) is built up.
+
+### Building the Vessel Device, shown before saving (Fritz, 2026-11-07)
+"Once the answers are done, create a Vessel Device with the Integral Components and Place On the Brewery Tab. Drill Down to get
+to where we can build the Device vessel and display it to the user before saving."
+- From the answers the Importer builds one **Vessel Device** (Rule 5.31, The Vessel Device) from the Vessel Master Template: each
+  answer turns its IP location on (Place) and puts the part there (Element, Probe, Thermowell, Sparge Arm or Steam Slayer,
+  HERMS Coil, Tangential Inlet, Outlets with their valves and fittings). The parts are integrated: they never unbundle.
+- It is sized from the Capacity (Vessel Rules, section 19) and named the Skynet way (Rule 3.1).
+- **Preview before saving:** the finished Vessel Device is drawn for the brewer, with its parts, before anything is saved. The
+  brewer can go Back to any question and change it; **Save** places it on the **Brewery Tab**.
+- Imported items that are now part of the Vessel (its heater, probe, valves) are linked to it; their Placeholders go away.
+
 ### Dialog 3: More Questions
 To come (Fritz, 2026-11-07: "New Dialog More Questions").
 
