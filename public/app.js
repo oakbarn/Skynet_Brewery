@@ -3879,9 +3879,9 @@ const PUMP = ['Pump, on / off (relay or SSR)', 'pump', 'Pump'];
 const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: 'Images/Skynet/Pumps/Pump_Sump_On.svg', imageOff: 'Images/Skynet/Pumps/Pump_Sump_Off.svg' }];
 // Fritz, 2026-11-05: one row for the Motorized Ball Valves; step 2 picks the Skynet one or the User Defined one (with pictures)
 const MBV = ['Motorized Ball Valve, open / closed (relay)', 'mbv', 'Valve'];
-const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
+const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'HE'];
 // Fritz, 2026-11-05: "instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build"
-const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'DO'];
+const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'HE'];
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
@@ -4117,7 +4117,7 @@ async function newDeviceDialog(e, hint, what) {
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
-  { const hm = heatMode(e); if (hm && !String(work.label ?? '').trim()) work.label = autoLabel('hE_' + hm); }     // a Heating Element (Fritz, 2026-11-05): hE_PID_1 ...
+  { const hm = heatMode(e); if (hm != null && !String(work.label ?? '').trim()) work.label = autoLabel(hm ? 'hE_' + hm : 'hE'); }     // a Heating Element: hE_1 (its method can change, Rule 6.19); the old control Devices hE_PID_1 ...
   if (pr && !String(work.label ?? '').trim()) work.label = probeAutoLabel(work.typeCode || defaultCode(e));       // a Temperature Probe: tP_1W_1, tP_RTD_1 ... (Rule 18.26)
   if (pwm && !String(work.label ?? '').trim()) work.label = autoLabel(pwmAutoLabel(e));      // PWM_1, 4_20_1, 0_10_1 ... (Fritz, 2026-11-05, Rule 18.25)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
@@ -5552,11 +5552,11 @@ const isPwmDev = e => ['pwmOut', 'analogOut'].includes(e?.type) && !e.kind && !e
 const isElemDev = e => e?.type === 'digitalOut' && e.subtype === 'element' && !e.kind && !e.template && !e.integratedIn;
 // Heating Element Labels fill in by control mode (Fritz, 2026-11-05, Rule 18.15): PID, HYS, DutyC, PWM, DO (on / off), DeadB
 const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
-const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? heatMethodCode(startMethod(e)) : e.type === 'pwmOut' ? 'PWM' : null);
+const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? '' : e.type === 'pwmOut' ? 'PWM' : null);
 const isSkyElem = e => e?.imageOff === ELEM_OFF;
 const elemTitle = e => isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e) || isElemDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, PWM / Analog out, Heating Element, Temperature Probe (Rule 18.26)
-const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'DO' : isProbeDev(e) ? '' : 'Valve';
+const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'HE' : isProbeDev(e) ? '' : 'Valve';
 // the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
 function autoLabel(type) {
   const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;

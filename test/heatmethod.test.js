@@ -111,7 +111,7 @@ console.log('heatmethod tests passed');
   const [h] = heat;
   assert.deepEqual([h.type, h.subtype, h.heatMethod], ['digitalOut', 'element', 'dutyCycle'], 'a Heating Element starting in the first one\'s method');
   assert.deepEqual(h.heatControls.map(c => [c.name, c.bruName, c.method]), [['M_HLT_Heat', 'M_HLT Heat', 'Duty Cycle'], ['HLT_PID', 'HLT PID', 'PID']]);
-  assert.equal(h.name, 'MP_42_DO_HLT_Heat_BH');
+  assert.equal(h.name, 'MP_42_HE_HLT_Heat_BH', 'a Heating Element is HE (Rule 3.1)');
   assert.ok(h.methodSpot_dutyCycle && h.methodSpot_pid, 'a one-click spot for Duty Cycle and for PID');
   const cl = conv.graphics.find(g => g.kind === 'clone');
   assert.deepEqual([cl.of, cl.x, cl.y], [h.name, 300, 20], 'the second placing is a Clone of it');
@@ -162,3 +162,12 @@ console.log('one port one Device tests passed');
   assert.match(app, /state: !!v0\.state && heatMethodKey\(v0\.method\) === e0\.cloneMethod/, 'a Method Clone is ON only in its method');
 }
 console.log('method spots tests passed');
+
+// the short way to switch the method (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC")
+{
+  const { compile } = await import('../lib/engine.js');
+  const st = compile('MB_25_HE_HLT_BR.HYS\nMB_25_HE_HLT_BR.DutyC\n"MB_25_HE_HLT_BR".PID\nMB_25_HE_HLT_BR.Deadband\nMB_25_HE_HLT_BR.DO').stmts.filter(s => s.op === 'assign');
+  assert.deepEqual(st.map(s => [s.target.name, s.target.prop, s.expr.v]), [['MB_25_HE_HLT_BR', 'method', 'Hysteresis'], ['MB_25_HE_HLT_BR', 'method', 'Duty Cycle'],
+    ['MB_25_HE_HLT_BR', 'method', 'PID'], ['MB_25_HE_HLT_BR', 'method', 'Deadband'], ['MB_25_HE_HLT_BR', 'method', 'On/Off']]);
+  assert.match(compile('MB_25_HE_HLT_BR.Steam').errors[0].msg, /Do not understand/);
+}

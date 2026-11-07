@@ -105,7 +105,7 @@ With PR #108: heating Devices (element, H_PWM, H_AO, gas valve, igniter, heat pa
 | Group | Type IDs |
 |---|---|
 | Temperature | 1W, RTD, TC, 10KNTC, 5KNTC, 50KNTC, 100KNT, NTC, LM35, TMP36 |
-| Direct On / Off output | DO, Pump, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
+| Direct On / Off output | DO, HE, Pump, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit |
 | PWM output | PWM, H_PWM, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr, P_LED |
 | Analog output | AO, H_AO, P_L_Vlv, P_H_Vlv, P_Pump, P_Fan, P_Mtr |
 | Digital input | DI, Float, DIN, PB, Toggle, Latch, FlowSw, Intlk, EStop, Leak, Count |
@@ -120,7 +120,7 @@ What each ID means:
 
 | ID | Meaning | ID | Meaning |
 |---|---|---|---|
-| 1W | DS18B20 OneWire probe | DO | Direct On/Off (relay, SSR, contactor; also an element on one) |
+| 1W | DS18B20 OneWire probe | DO | Direct On/Off (relay, SSR, contactor) |
 | RTD | PT100 / PT1000 on a MAX31865 board | Pump | Pump |
 | TC | Thermocouple on a MAX31855 / MAX31856 board | M_L_Vlv | Low Temperature Manual Valve |
 | 10KNTC | 10K NTC thermistor (BCS-462 / BruControl type) | eVlv | Electric Valve (motorized ball valve, low temperature; was E_L_Vlv) |
@@ -157,7 +157,7 @@ What each ID means:
 
 ### 4.1 Direct On / Off output (Relay, SSR, contactor)
 - **Add menu:** Devices: outputs > Relay module / SSR / contactor (on-off). Also Pump and Valve (below).
-- **Type IDs:** DO, Pump, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
+- **Type IDs:** DO, HE (Heating Element, Rule 3.1: `MB_25_HE_HLT_BR`; elements named before keep DO), Pump, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
 - **Port:** any free digital pin (plain pins offered first). One Device per port (Rule 6.1).
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
