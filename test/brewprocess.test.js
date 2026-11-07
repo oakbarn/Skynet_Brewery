@@ -55,7 +55,7 @@ const elements = [
 ];
 const allOn = { ...brewSetup({}), templates: Object.fromEntries(MAJOR_STEPS.map(s => [s.key, 'Skynet_' + s.key])) };
 for (const fields of [{}, { HLT_Heater: 'PID_HLT', HLT_Probe: 'T_HLT', Mash_Probe: 'T_Mash', Mash_Heater: 'PID_HLT', Mash_Timer: 'tm_Boil', Boil_Timer: 'tm_Boil', Chill_Pump: 'Pump_Chill', Wort_Probe: 'T_Mash',
-  Whirlpool_Pump: 'Pump_Chill', Transfer_Pump: 'Pump_Chill', Clean_Pump: 'Pump_Chill' }]) {
+  Whirlpool_Pump: 'Pump_Chill', Transfer_Pump: 'Pump_Chill', Clean_Pump: 'Pump_Chill', Chill_Water: 'V_HLT_Out', Hop_Infuser_Valve: 'V_HLT_Out' }]) {
   for (const setup of [{ ...brewSetup({}), fields }, { ...allOn, fields }]) {
     const out = buildBrewDay(setup, pt, elements), names = brewNames(setup);
     assert.deepEqual(out.map(x => x.name), names);
@@ -67,6 +67,14 @@ for (const fields of [{}, { HLT_Heater: 'PID_HLT', HLT_Probe: 'T_HLT', Mash_Prob
     });
   }
 }
+// the hop stand (Fritz, 2026-11-07): Whirlpool hops stop the chill at their temperature, cooling water off for their time;
+// Hop Rocket ones go through the Hop Infuser; with none, the Default settings
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool', time: 30, wpTempC: 80, hopRocket: true }], fermentables: [] }, mash: { steps: [] } } }, {});
+assert.equal(rv.rcp_Hop_Stand, true); assert.equal(rv.rcp_Hop_Stand_Temp, 176); assert.equal(rv.rcp_Hop_Stand_Minutes, 30); assert.equal(rv.rcp_Hop_Infuser, true);
+rv = recipeValues({ brewDefaults: { units: 'Metric', hopStandTempC: 75, hopStandMinutes: 15 }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool' }], fermentables: [] }, mash: { steps: [] } } }, {});
+assert.equal(rv.rcp_Hop_Stand_Temp, 75); assert.equal(rv.rcp_Hop_Stand_Minutes, 15); assert.equal(rv.rcp_Hop_Infuser, false);
+assert.equal(recipeValues({ brewDefaults: {} }, {}).rcp_Hop_Stand, false, 'no Recipe: no hop stand');
+for (const t of ['Chill', 'Whirlpool_and_Chill']) assert.match(pt.find(t, 'Skynet_' + t).text, /wait \{\{Wort_Probe\}\} <= rcp_Hop_Stand_Temp[\s\S]*sleep rcp_Hop_Stand_Minutes \* 60000[\s\S]*wait \{\{Wort_Probe\}\} <= rcp_Ferment_Temp/, t + ': chill to the hop stand, hold, then chill');
 // the premade list (Rule 16.1): Clean is last; Whirlpool and Chill is skipped to start (a Brew Day uses it or Chill)
 assert.deepEqual(MAJOR_STEPS.map(s => s.key), ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor', 'Ferment', 'Clean']);
 assert.deepEqual(brewNames(brewSetup({})), ['Brew_1_PreBrew', 'Brew_2_Heat_Strike', 'Brew_3_Strike', 'Brew_4_Mash', 'Brew_5_Boil', 'Brew_6_Chill', 'Brew_7_Transfer_to_Fermentor', 'Brew_8_Ferment', 'Brew_9_Clean']);

@@ -12,7 +12,7 @@ import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -2032,7 +2032,7 @@ function sevenSeg(text) {
 // The Setpoint is a number, or the Name of a Device or gGlobal: its target (a heater's Setpoint), else its value.
 const DIAL_TYPES = new Set(['temperature', 'analogIn', 'analogOut', 'pwmOut', 'pid', 'deadband', 'dutyCycle', 'valueWidget', 'gGlobal']);
 function dialReading(e, v) {
-  if (isHeatElem(e)) { const hm = heatMethodKey(v.method); return !v.state ? 0 : hm === 'dutyCycle' ? v.dutycycle : hm === 'pid' || hm === 'deadband' ? v.value : null; }     // a Heating Element: its output %
+  if (isHeatElem(e)) { const hm = heatMethodKey(v.method); return !v.state ? 0 : hm === 'dutyCycle' ? v.dutycycle : PERCENT_METHODS.includes(hm) ? v.value : null; }     // a Heating Element: its output %
   if (e.type === 'dutyCycle') return v.dutycycle;
   return typeof v.value === 'number' ? v.value : Number.isFinite(Number(v.value)) && v.value !== '' && v.value !== null ? Number(v.value) : null;
 }
@@ -2468,7 +2468,7 @@ function controlDialog(t) {
 // A Heating Element's pop-up while running (Fritz, 2026-11-07: "select the heating method via process or on the Device when
 // clicked", Rule 6.19). One button per heating method (the one in use is marked), the main setting of that method with - and +
 // (Duty cycle % or Target), then Set + ON, OFF, Set and Cancel. It asks before it turns on (Rule 2.33): nothing turns on until
-// Set + ON or ON is clicked. Hysteresis, PID and Deadband need a Temperature Probe (Properties), so they are greyed out without one.
+// Set + ON or ON is clicked. Hysteresis, PID, Deadband and Precise need a Temperature Probe (Properties), so they are greyed out without one.
 function heatDialog(t) {
   const title = S.values[t.name]?.label ?? t.name, d = $('#valDlg');
   const v = { ...(S.values[t.name] || {}) };
@@ -5599,7 +5599,7 @@ F.gGlobal = it => [['_kind', `Kind: ${S.gKinds[it.kind || 'value']?.label || it.
 const kindFields = (type, obj) => { const f = F[type]; return (typeof f === 'function' ? f(obj) : f || []).filter(x => !Array.isArray(x[4]) || x[4].includes(obj.kind || 'value')); };
 
 // Temperature and analog inputs: the settings depend on the sensor / signal picked
-const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
+const TEMP_COMMON = [['offset', 'Calibration offset (added to the reading)', 'num'], ['calLowRead', 'Two-point calibration: low point, it read', 'num'], ['calLowTrue', 'Low point, the truth (ice water: 32 °F / 0 °C)', 'num'], ['calHighRead', 'High point, it read', 'num'], ['calHighTrue', 'High point, the truth (boiling water at your altitude)', 'num'], ['units', 'Units (°F or °C)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON)', 'json']];
 const SENSOR_FIELDS = {
   ds18b20: [['probeIndex', 'OneWire probe number (Devices page > OneWire probe index)', 'probe'], ['device', 'Device (empty = any)', 'dev']],
   pt100: [['device', 'Device', 'dev'], ['channel', 'MAX31865 chip-select (CS) pin (Mega: D14-D17, D22-D39, D41-D43, D47-D49, D53)', 'pin', 'rtdcs'], ['wires', 'Probe wires', 'sel', ['2', '3', '4']], ['rref', 'Board reference resistor (ohm, empty = 430)', 'num']],
@@ -5784,8 +5784,14 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 const ELEM_OWN = (it, x = {}) => [['_ask', 'A Heating Element asks before it turns on (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
-// Hysteresis, PID or Deadband reads, and that method's settings. A Process (.method = "PID") or a click while running changes the
+// Hysteresis, PID, Deadband or Precise reads, and that method's settings. A Process (.method = "PID") or a click while running changes the
 // method; the settings of the other methods are kept, so switching back finds them as they were.
+// hover help for the Precise settings (Rule 2.38)
+const HEAT_TIPS = {
+  holdOutput: 'Precise: the output % the element needs just to stay at the Target (watch the % once it has settled and put that here). It starts there, so it reaches the Target without a big swing. 0 = it works it out by itself, more slowly.',
+  smoothing: 'Precise: the seconds it averages the probe over, so the probe\'s tiny steps do not make the heater twitch. 10 is a good start; more is calmer but slower to see a change. 0 = no smoothing.',
+  outTime: 'The heater is on for its output % of every window of this many seconds. With an SSR (solid state relay) 1 to 2 s is good; Precise carries what one window could not use to the next, so the power is exact.',
+};
 function heatFields(it, x = {}) {
   const m = startMethod(it), T = DEVICE_TIPS;
   const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
@@ -5793,7 +5799,9 @@ function heatFields(it, x = {}) {
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
     ['heatMethod', 'Heating method (it starts with)', 'sel', methodChoices(), true, false, { tip: T.heatMethod, ...x }],
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
-    ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, x]),
+    ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
+    // Precise can only hold as close as its probe sees (Fritz, 2026-11-07: "to get to .1 F or .1 C")
+    ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
     ['_spotHead', 'Other methods allowed (each one ticked gets a one-click spot on the Tab)', 'head', null, false, false, x],
     ...HEAT_METHODS.filter(([k]) => k !== m).map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
@@ -5935,8 +5943,15 @@ const hasProbePic = e => isProbeTee(e) || isThermowell(e);
 // where the probe's pin goes: the OneWire probe number (DS18B20), the chip-select pin (RTD, thermocouple) or the analog pin
 const probePort = e => isOneWire(e) ? ['probeIndex', 'Probe #', 'probe'] : ['channel', 'Available Ports', 'pinsel', ANALOG_TEMP.includes(e.sensor) ? 'analog' : 'digital'];
 // the Probe type ⬢ pop-up: the settings of its kind of probe (not the board or pin: those are on the dialog)
+// Two-point calibration (Fritz, 2026-11-07: precise control "using offsets to get to .1 F or .1 C"): what the probe read in ice
+// water and in boiling water, and what the truth was. lib/sensors.js twoPoint.
+const TWO_POINT_FIELDS = [['_c2', 'Put the probe in ice water (stirred, 32 °F / 0 °C), then in boiling water. Water boils about 1 °F lower for every 500 ft above sea level (212 °F at sea level, 202 °F at 5,000 ft). Write what it read and the true temperature. Leave them empty for none.', 'note'],
+  ['calLowRead', 'Low point: it read', 'num'], ['calLowTrue', 'Low point: the truth (ice water: 32 °F / 0 °C)', 'num'],
+  ['calHighRead', 'High point: it read', 'num'], ['calHighTrue', 'High point: the truth (boiling water at your altitude)', 'num']];
+const TWO_POINT_KEYS = ['calLowRead', 'calLowTrue', 'calHighRead', 'calHighTrue'];
+const TWO_POINT_POP = { title: 'Two-point calibration', fields: TWO_POINT_FIELDS };
 const PROBE_TYPE_POP = { title: 'Probe type settings', fields: o => [...(SENSOR_FIELDS[o.sensor || 'ds18b20'] || []).filter(f => !['device', 'channel', 'probeIndex'].includes(f[0])), ['sim', 'Simulator settings (JSON)', 'json']] };
-const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim'];
+const PROBE_SETTING_KEYS = ['wires', 'rref', 'tcType', 'r0', 'beta', 'series', 'wiring', 'vref', 'sim', ...TWO_POINT_KEYS];
 const PROBE_FLIP = [['', 'No flip'], ['h', 'Flip Horizontal'], ['v', 'Flip Vertical'], ['hv', 'Flip both']];
 const flipOf = e => (e.flipH ? 'h' : '') + (e.flipV ? 'v' : '');
 function flipFrom(w) { if (w._flip === undefined) return; w.flipH = w._flip.includes('h'); w.flipV = w._flip.includes('v'); if (!w.flipH) delete w.flipH; if (!w.flipV) delete w.flipV; delete w._flip; }
@@ -5947,6 +5962,7 @@ const PROBE_GRAPHIC_FIELDS = (it, x = {}) => !hasProbePic(it) ? [] : [['_pv', 'G
 const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(it), false, false, { tip: DEVICE_TIPS.pType, attr: PROBE_TYPE_POP, ...x }],
   ['units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']], false, false, { tip: DEVICE_TIPS.tpUnits, with: ['precision', 'Decimals', 'num'], ...x }],
   ['offset', 'Calibration offset', 'num', null, false, false, { tip: DEVICE_TIPS.pOffset, dbPop: true, ...x }],
+  ['_cal2', 'Two-point calibration', 'ro', TWO_POINT_KEYS.some(k => it[k] !== undefined && it[k] !== '') ? `${it.calLowRead ?? '-'} → ${it.calLowTrue ?? '-'}, ${it.calHighRead ?? '-'} → ${it.calHighTrue ?? '-'}` : 'none', false, false, { tip: DEVICE_TIPS.pCal2, attr: TWO_POINT_POP, ...x }],
   ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
 const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial']];
 function probeDeviceFields(it, item) {
@@ -6318,9 +6334,9 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target) or Deadband (steps its % toward the Target). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID or Deadband suit it best.',
-  heatProbe: 'The Temperature Probe that Hysteresis, PID and Deadband read to hold the Target.',
-  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID or Deadband suit it best.',
+  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target), Deadband (steps its % toward the Target) or Precise (a calm PID that holds a Target to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
+  heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Target. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
+  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
@@ -6358,6 +6374,7 @@ const DEVICE_TIPS = {
   pType: 'The kind of probe, picked first. The ⬢ beside it has its settings (wires, resistor, thermocouple type ...). To use another kind, delete it and add it again.',
   tpUnits: 'Units the reading shows in (°F or °C), and how many decimals.',
   pOffset: 'Added to every reading, to calibrate the probe (for example -0.4). The Database and .API ⬢ on its line sets what it sends to the database.',
+  pCal2: 'For readings right to 0.1 degree (Precise heating). A plain offset moves every reading the same; two points (ice water and boiling water) also fix a probe that is right at one end and off at the other. The ⬢ opens it. The offset is added after it.',
   // PWM / Analog out (Fritz, 2026-11-05, Rule 18.25)
   pGraphic: 'The picture of this output as it will show on the Tab. With no picture it shows its value (for example 45 %).',
   pPath: 'The picture file (optional). It is the same picture when on and off; the Overlay shows it is running.',
@@ -9949,6 +9966,8 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['waterProfile', 'Water Profile', 'sel', pick(S.waterProfiles, '(none)')],
     ['boilTime', 'Boil time (minutes)', 'num'],
+    ['_hsT', `Hop stand temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'}; empty = 180 °F / 82 °C): the chill stops here for the Whirlpool hops when a Recipe gives none`, 'num'],
+    ['hopStandMinutes', 'Hop stand time (minutes, cooling water off; empty = 20) when a Recipe gives none', 'num'],
     ['efficiency', 'Brewhouse efficiency (%)', 'num'],
     ['_w2g', `Water to grain ratio (${displayUnits(w).ratioUnit})`, 'num'],
     ['_grainT', `Grain temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'})`, 'num'],
@@ -10000,6 +10019,7 @@ function renderDefaultTab(box) {
   const du = displayUnits(d), offTo = c => du.tempUnit === 'F' ? c * 9 / 5 : c;
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   if (d.grainTempC !== undefined) d._grainT = Math.round(cTo(d.grainTempC, du.tempUnit) * 10) / 10;
+  if (d.hopStandTempC !== undefined) d._hsT = Math.round(cTo(d.hopStandTempC, du.tempUnit) * 10) / 10;
   if (d.strikeOffsetC !== undefined) d._strikeOff = Math.round(offTo(d.strikeOffsetC) * 10) / 10;
   const f = paneForm(fields, d, () => { }, !admin);
   // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
@@ -10014,8 +10034,9 @@ function renderDefaultTab(box) {
       const raw = { waterToGrain: d._w2g, grainTempC: d._grainT, strikeOffsetC: d._strikeOff }[k];
       if (raw === undefined) delete d[k]; else d[k] = Math.round(from() * 1000) / 1000;
     }
-    delete d._w2g; delete d._grainT; delete d._strikeOff;
-    for (const [k, t] of [['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
+    if (d._hsT === undefined || d._hsT === '' || d._hsT === null) delete d.hopStandTempC; else d.hopStandTempC = Math.round(toC(d._hsT, su.tempUnit) * 1000) / 1000;
+    delete d._w2g; delete d._grainT; delete d._strikeOff; delete d._hsT;
+    for (const [k, t] of [['hopStandMinutes', 'Hop stand time'], ['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);

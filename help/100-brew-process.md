@@ -11,13 +11,17 @@ A brew day is a list of premade **major steps**, done in this order. The list ca
 | 3 | **Strike** | Strike water into the mash tun, then the grain (dough in). |
 | 4 | **Mash** | Every mash step of the Recipe (up to its temperature, then its time), the mash out and the sparge. |
 | 5 | **Boil** | Up to the boil, then the Boil timer runs for the Recipe's boil time. The Recipe's hop alerts run on the Boil timer. |
-| 6 | **Whirlpool and Chill** | Whirlpool the hot wort for the Recipe's whirlpool time (the whirlpool hops), then chill it while it spins and let the trub settle. **Skipped to start.** |
-| 7 | **Chill** | Chill the wort to the pitching temperature. |
+| 6 | **Whirlpool and Chill** | Start the whirlpool, chill while it spins (with a hop stand when the Recipe has Whirlpool hops), then let the trub settle. **Skipped to start.** |
+| 7 | **Chill** | Chill the wort to the pitching temperature (with a hop stand when the Recipe has Whirlpool hops, see below). |
 | 8 | **Transfer to Fermentor** | Move the wort into the fermenter and take a gravity reading. |
 | 9 | **Ferment** | Pitch the yeast and hold the fermentation temperature. |
 | 10 | **Clean** | Rinse, clean and rinse the brewery, then open the valves and drains to dry. Always the last step. |
 
 **Whirlpool and Chill** and **Chill** do the same job, so a brew day uses one of them. To whirlpool, pick **Skynet_Whirlpool_and_Chill** for Whirlpool and Chill and **(skip this step)** for Chill.
+
+**The hop stand (both chill steps):** when the Recipe has Whirlpool (aroma) hops, the chill runs in two parts. It chills to the **hop stand temperature**, turns the cooling water off, has you add the Whirlpool hops and holds for the **hop stand time**, then turns the cooling water back on and chills to the pitching temperature. The temperature and time come from the first Whirlpool hop (its whirlpool temperature and minutes, or the Recipe's Whirlpool minutes); a Recipe that gives none uses ☰ Menu > **Default settings** > Hop stand temperature and Hop stand time (180 °F / 82 °C and 20 minutes to start).
+
+**Hop Infuser:** a Whirlpool hop marked **Hop Rocket** on the Recipe's Hops tab goes in the Hop Infuser instead of the kettle. The chill opens the **Hop Infuser valve** (or asks you to put the infuser in line), runs the wort through it, and takes it out of line when the chill is done.
 
 Any step can be set to **(skip this step)** in its dropdown. A skipped step is greyed out and makes no Process.
 
@@ -34,7 +38,7 @@ Each major step uses one **Process Template**:
 
 ## Which Device does each job
 
-Below the steps, the panel asks only for the jobs the picked Templates use: the Hot Liquor Tank heater and probe, the mash heater, probe, pump and timer, the boil heater, probe and timer, the whirlpool pump, the chiller pump and wort probe, the pump to the fermenter, the fermenter control and probe, and the cleaning pump. Each list holds only the Devices and Widgets that fit (a probe list shows only temperature probes, a pump list only pumps).
+Below the steps, the panel asks only for the jobs the picked Templates use: the Hot Liquor Tank heater and probe, the mash heater, probe, pump and timer, the boil heater, probe and timer, the whirlpool pump, the chiller pump, cooling water and wort probe, the Hop Infuser valve, the pump to the fermenter, the fermenter control and probe, and the cleaning pump. Each list holds only the Devices and Widgets that fit (a probe list shows only temperature probes, a pump list only pumps).
 
 Leave a job on **(none: Skynet asks you to do it by hand)** and the Brew Day shows a pop-up for it instead, for example "Turn the Hot Liquor Tank heat on and set it to 163.2°F. Press Done when it is on."
 
@@ -62,6 +66,8 @@ Templates read the Recipe through names that start with **`rcp_`**. They are rea
 | `rcp_Mash_Out_Temp`, `rcp_Sparge_Temp` | mash out (0 = none) and sparge water |
 | `rcp_Boil_Time`, `rcp_Boil_Start_Temp` | the boil (hh:mm:ss), and the temperature it counts as boiling |
 | `rcp_Whirlpool_Minutes` | how long the whirlpool runs (0 = none) |
+| `rcp_Hop_Stand`, `rcp_Hop_Stand_Temp`, `rcp_Hop_Stand_Minutes` | true when there are Whirlpool hops; where the chill stops for them and how long it holds |
+| `rcp_Hop_Infuser` | true when a Whirlpool hop goes through the Hop Infuser (Hop Rocket) |
 | `rcp_Ferment_Temp` | fermentation and pitching temperature |
 | `rcp_Temp_Units`, `rcp_Volume_Units`, `rcp_Weight_Units` | °F or °C, gal or L, lb or kg |
 
@@ -97,7 +103,7 @@ A Template is a Process with a few build lines that are used when the Brew Day i
 | `@if HLT_Heater` ... `@else` ... `@end` | lines used only when a Device is picked for that job (or, after `@else`, when none is) |
 | `@each_mash_step` ... `@end` | the lines once for each possible mash step; `{{n}}` is 1, 2, 3 ... |
 
-Job names: `HLT_Heater`, `HLT_Probe`, `Mash_Heater`, `Mash_Probe`, `Mash_Pump`, `Mash_Timer`, `Boil_Heater`, `Boil_Probe`, `Boil_Timer`, `Whirlpool_Pump`, `Chill_Pump`, `Wort_Probe`, `Transfer_Pump`, `Ferment_Heater`, `Ferment_Probe`, `Clean_Pump`.
+Job names: `HLT_Heater`, `HLT_Probe`, `Mash_Heater`, `Mash_Probe`, `Mash_Pump`, `Mash_Timer`, `Boil_Heater`, `Boil_Probe`, `Boil_Timer`, `Whirlpool_Pump`, `Chill_Pump`, `Chill_Water`, `Hop_Infuser_Valve`, `Wort_Probe`, `Transfer_Pump`, `Ferment_Heater`, `Ferment_Probe`, `Clean_Pump`.
 
 A line `//About: ...` near the top is the Template's description on the Brew Process screen.
 
