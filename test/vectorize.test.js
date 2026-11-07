@@ -29,4 +29,20 @@ pics.setMode('all'); assert.equal(pics.pick(burnerPng), path.join(d, 'Burner.svg
 pics.setMode('off'); assert.equal(pics.pick(bellPng), bellPng);
 assert.equal(pics.pick(bellPng, 'svg'), path.join(d, 'Bell.svg'));
 pics.stop();
+
+// A picture in another media folder (like C:\BruControl\Media): its SVG copy goes with the Brain, in the hidden media/.svg folder
+const brain = fs.mkdtempSync(path.join(os.tmpdir(), 'bpvb')), bru = fs.mkdtempSync(path.join(os.tmpdir(), 'bpvo'));
+fs.mkdirSync(path.join(bru, 'Pumps')); fs.copyFileSync(path.join(d, 'Bell.png'), path.join(bru, 'Pumps', 'Bell.png'));
+fs.copyFileSync(path.join(d, 'Bell.png'), path.join(bru, 'Mine.png')); fs.copyFileSync(path.join(d, 'Mine.svg'), path.join(bru, 'Mine.svg'));
+const two = new Pictures({ config: {}, writeConfig() {} }, () => [brain, bru]);
+await new Promise(res => { two.on('changed', res); two.convertAll(false); });
+const outside = path.join(bru, 'Pumps', 'Bell.png'), copy = two.svgPath(outside);
+assert.ok(copy.startsWith(path.join(brain, '.svg') + path.sep) && copy.endsWith(path.join('Pumps', 'Bell.svg')), 'copy is with the Brain: ' + copy);
+assert.ok(fs.existsSync(copy), 'copy was made with the Brain');
+assert.equal(fs.existsSync(path.join(bru, 'Pumps', 'Bell.svg')), false, 'nothing written into the other folder');
+assert.equal(two.pick(outside), copy, 'the Brain copy is shown');
+assert.equal(two.svgPath(path.join(bru, 'Mine.png')), path.join(bru, 'Mine.svg'), 'a hand-made SVG next to it is still used');
+assert.ok(two.status().pictures.find(p => p.path === 'Pumps/Bell.png').svg.startsWith('.svg/'));
+two.forget(outside); assert.equal(fs.existsSync(copy), false, 'copy removed when the picture goes');
+two.stop();
 console.log('vectorize tests passed');

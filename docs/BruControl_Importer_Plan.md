@@ -136,7 +136,7 @@ How they are asked (the Rules for dialogs):
 ### Before the questions: the Vessel Build page (Fritz, 2026-11-07)
 "This is totally new in Skynet. BruControl had a Picture and that was about the sum of a vessel. We need a good explanation
 of the Vessel Build before the Questions." So the first page of this step explains it, before Dialog 1. It has only Back and
-Next (top and bottom), a small drawing of a finished Vessel Device with its parts, and this text (draft for Fritz to check):
+Next (top and bottom), a small drawing of a finished Vessel Device with its parts, and this text (Fritz revised the end, 2026-11-07):
 
 > **Building your Vessels**
 >
@@ -154,8 +154,11 @@ Next (top and bottom), a small drawing of a finished Vessel Device with its part
 > Each answer is already filled in with our best guess, taken from your BruControl names, Workspaces and Scripts. Just check
 > each one and change what is wrong.
 >
-> When the answers are done, you see each finished vessel before anything is saved. You can go Back and change any answer.
-> **Save** puts the vessels on your **Brewery** Tab.
+> When the answers are done, you see each finished Vessel Device before anything is saved. You can go Back and change any
+> answer. The Vessel Device is the integrated valves, heaters and probes, so each part has its properties just like in
+> BruControl: a Valve like a BruControl Valve (Digital Output Element), a Heater like a BruControl Heater (PID, Hysteresis,
+> PWM and so on). But the Properties are **all integrated into a single Device**. **Save** puts the Vessel Device on your
+> **Brewery** Tab.
 >
 > Nothing in BruControl is changed.
 
@@ -217,9 +220,13 @@ There is no mention of supporting MQTT that they know of in the documentation").
 each BrewZilla 4, and Skynet talks to the RAPT API directly with that owner's API secret. MQTT is not part of RAPT; the
 RAPT-to-MQTT bridge is someone else's hobby program and only an option.
 
-**Chosen way for later** (Fritz, 2026-11-07: "We can use that MQTT Bridge for Voice Commands as well as reading and setting
-things"): use the RAPT-to-MQTT bridge. Through it Skynet reads and sets the BrewZilla 4, and voice commands reach it by its
-API_Name (Rule 6.18). Nothing is built until Fritz says go.
+**Chosen way for later** (Fritz, 2026-11-07: "for RAPT integration use the RAPT API at api.rapt.io first. Then the Bridge."):
+1. **First, the RAPT API** (api.rapt.io): Skynet talks to it directly with the owner's API secret, to read and set the
+   BrewZilla 4.
+2. **Then the Bridge** (RAPT-to-MQTT), second (Fritz: "We can use that MQTT Bridge for Voice Commands as well as reading and
+   setting things").
+
+Either way, voice commands reach the BrewZilla by its API_Name (Rule 6.18). Nothing is built until Fritz says go.
 
 So a connected All In One would become an Interface of its own kind (a cloud or Bluetooth link instead of a board). That is
 not part of this plan; it needs Fritz's go and its own Rule.
