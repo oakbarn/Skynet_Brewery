@@ -278,7 +278,7 @@ function drawWs() {
   for (const e of [...L().elements.filter(e => e.workspace === w.name && !isMfPart(e)), ...clones]) ws.append(buildEl(e));     // a Valve Tee's valves are drawn on it (Rule 5.35)
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
   if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
-  const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP
+  const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
@@ -10233,7 +10233,15 @@ function placeVesselParts(v) {
 // End Cap (Fritz, 2026-10-22): a Skynet fitting with no IP. Dropped on an opening (an IP with no pipe on it) it closes it:
 // that IP is hidden, no pipe can join it and no flow passes. It then moves with what it caps; drag it off to take it away.
 function isCap(g) { return isUnit(g) && isCapOnly(g); }
-function cappedIps() { return new Set(L().graphics.filter(g => isCap(g) && g.capOn).map(g => g.capOn)); }
+// the IPs that are plugged, so they are hidden and nothing can join them (Fritz, 2026-11-07: an opening plugged by a Thermowell, an
+// End Cap or a Heating Element is plugged and its IP is hidden; only open IPs show): an End Cap on it, or a Vessel Device's built in
+// Element, Probe or Thermowell on it (a built in Valve passes flow, so its IP still shows)
+function cappedIps() {
+  const out = new Set(L().graphics.filter(g => isCap(g) && g.capOn).map(g => g.capOn));
+  const plugs = new Set(L().elements.filter(e => isVPart(e) && e.vpKind !== 'valve').map(e => e.integratedIn + '|' + e.integratedAs.slice(3)));
+  if (plugs.size) for (const g of L().graphics) if (g.kind === 'ip' && g.attachTo && plugs.has(g.attachTo + '|' + g.port)) out.add(g.id);
+  return out;
+}
 function capOnto(c, ip) {
   const [cx, cy] = ipCenter(ip); Object.assign(c, { capOn: ip.id, labelVisible: false, workspace: ip.workspace, x: Math.round(cx - (c.w || 40) / 2), y: Math.round(cy - (c.h || 40) / 2) });
   const r = capFacing(ip); if (r === null) return;
