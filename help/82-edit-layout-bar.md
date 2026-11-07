@@ -50,7 +50,7 @@ Nothing else shows until the Label, Interface, Port and Tab are filled in (the L
 
 A **Widget** lives only in the app, with no board pin.
 
-- **Select Widget Type** and **Add Widget** work like the Device pair: Pictures and text, On-screen controls (switch, timer, alarm, sound player, shared variable), Vessels, Equipment, Fittings and IPs, gGlobal variables.
+- **Select Widget Type** and **Add Widget** work like the Device pair: Pictures and text, On-screen controls (switch, timer, alarm, sound player), Vessels, Equipment, Fittings and IPs, gGlobal variables.
 - **Picture ➕** and **Text ➕**: one click each.
 - **Manual Valve ➕**: a valve turned by hand. Tap it on the Tab to show open or closed.
 - **Override ➕** adds the [Override button](96-override-button) (one per Tab).

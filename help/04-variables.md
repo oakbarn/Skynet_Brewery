@@ -9,10 +9,11 @@ gKonstant and gAPI became one class, **gGlobal**, on 2026-10-30 (Fritz). Sending
 | Kind | Processes | On screen | Database and outside programs |
 |---|---|---|---|
 | **gGlobal** | ✓ | ✓ | When its Properties say so (**Database and .API** box) |
-| **Shared** | ✓ | – | – |
 
 - Use a **gGlobal** for settings, screen items and readings (pH, gravity, volumes). To log one, or let another program read or change it, set its **Database and .API** box.
-- Use a **Shared** variable to pass a value from one process to another.
+- To pass a value from one process to another, use a gGlobal with **Database** and **.API** both **Off**. Nothing outside the Processes can see it.
+
+The old **Shared variable** class is gone (Fritz, 2026-11-07). When an older Schema loads, each Shared variable becomes a gGlobal of the Kind that fits it (a number becomes gV_Global_Value, text gS_Global_String, true / false gB_Global_Boolean, a time gT_Global_Time, a date and time gD_Global_DateTime). It keeps its Name, its value and every Process that uses it, and its Database and .API are Off, so it still only passes values between Processes. See [Shared variables became gGlobals](149-shared-variables-became-gglobals).
 
 Every gGlobal is **non-volatile**: starting a Process never clears it, and its value is saved on the Brain's disk and comes back when the Brain restarts. See [gGlobals keep their values](118-gglobals-keep-their-values).
 

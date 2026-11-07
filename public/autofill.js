@@ -49,7 +49,7 @@ const PROCESS_ATTRS = ['running'];
 const TARGETS = { start: ['timer', 'alarm', 'soundPlayer'], stop: ['timer', 'alarm', 'soundPlayer', 'stepper'], reset: ['timer', 'stepper'], restart: [] };
 
 // the kind of each item, in the order a value list shows them
-const GROUP = e => e.type === 'shared' ? [0, 'variable'] : e.type === 'timer' ? [1, 'Timer'] : e.type === 'gGlobal' ? [2, 'gGlobal'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
+const GROUP = e => e.type === 'timer' ? [1, 'Timer'] : e.type === 'gGlobal' ? [2, 'gGlobal'] : DEVICE_TYPES.includes(e.type) ? [4, 'Device'] : [5, 'Widget'];
 
 // how well a name fits the letters typed: 0 = it starts with them, 1 = a part of it after a _ does, -1 = not at all
 export function fit(name, typed) {

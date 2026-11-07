@@ -86,7 +86,7 @@ Everything uses the **Topic name** from Settings (default `brewpanel`).
 | `brewpanel/cmd/script/<script>/start` or `/stop` | Start or stop one process |
 | `brewpanel/cmd/timer/<timer>/start`, `/stop`, `/reset` | Control a timer |
 
-Values are kept on the broker ("retained"), so a gadget that connects later gets the latest value straight away. **Shared variables are never shared**, the same as the web API.
+Values are kept on the broker ("retained"), so a gadget that connects later gets the latest value straight away. **A gGlobal whose .API is Off is never shared**, the same as the web API.
 
 Example from any computer with `mosquitto-clients`:
 
