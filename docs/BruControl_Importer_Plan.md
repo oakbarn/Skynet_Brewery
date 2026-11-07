@@ -193,8 +193,10 @@ HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.
 1. **What is connected:** Valve; Pipe Fitting; Probe tee or Thermowell (Rule 5.30); Sight Glass (Rule 5.32); Nothing.
 2. **If a Valve:** its **Type** (Manual Ball Valve, Motorized Ball Valve, Butterfly, and so on, from the Valve Standard) and,
    when it is motorized, **which imported Device runs it** (a dropdown by BruControl name, an educated guess filled in).
-3. **What comes next** after it: Elbow 90; Elbow 45; Tee; Reducer; End Cap; Nothing (the TC Pipe Fittings, Rule 5.25). Each
-   answer can ask "what comes next" again, so a short run (outlet, valve, elbow ...) is built up.
+3. **What comes next** after it: Elbow 90; Elbow 45; Tee; Reducer; End Cap; **None** (the TC Pipe Fittings, Rule 5.25). Each
+   answer asks "what comes next" again, so a short run (outlet, valve, elbow ...) is built up. **Every outlet chain ends with
+   None** (Fritz, 2026-11-07: "Basically have to have none at the end for the Outlet chain"): None is always in the list, and
+   picking it ends the chain.
 
 ### Building the Vessel Device, shown before saving (Fritz, 2026-11-07)
 "Once the answers are done, create a Vessel Device with the Integral Components and Place On the Brewery Tab. Drill Down to get
