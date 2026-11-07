@@ -267,6 +267,7 @@ class Board:
         self.watchdog_s, self.last_rx, self.tripped = 10.0, time.monotonic(), False
         self.state_file = os.path.join(HERE, 'pins.json')
         self.temps = {}                                 # DS18B20 ROM id -> deg F
+        self.fine = set()                               # DS18B20 probes already set to their finest (12-bit) steps
         self._start_up()
 
     # ---- start-up: remembered outputs OFF before anything else
@@ -487,6 +488,13 @@ class Board:
                 with open(os.path.join(d, 'id'), 'rb') as f:
                     rom = f.read(8).hex().upper()       # the same 16 hex digits the Mega reports
                 c = None
+                if d not in self.fine:                  # finest steps (12-bit, 0.0625 C) for Precise heating; some come set coarser
+                    self.fine.add(d)
+                    try:
+                        with open(os.path.join(d, 'resolution'), 'w') as f:
+                            f.write('12')
+                    except Exception:
+                        pass                            # an older kernel has no resolution file (or needs root): left as it is
                 if os.path.exists(os.path.join(d, 'temperature')):
                     with open(os.path.join(d, 'temperature')) as f:
                         c = int(f.read().strip()) / 1000

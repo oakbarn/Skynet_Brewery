@@ -3,7 +3,7 @@
 // One Heating Element, the heating method picked (Fritz, 2026-11-07: "The way I want to handle this is ONE device, but a to
 // select the heating method via process or on the Device when clicked", Rule 6.19). A Heating Element (a Digital Out with the
 // element subtype, on its own or built into a Vessel Device or RIMS tube) is ONE Device on its port. How it is controlled is
-// its .method: On/Off, Duty Cycle, Hysteresis, PID or Deadband. A Process changes it (hE_PID_1.method = "PID") and so does a
+// its .method: On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise (Fritz, 2026-11-07: "a method of precise control"). A Process changes it (hE_PID_1.method = "PID") and so does a
 // click on the Element while running. Used by the Brain (lib/store.js, lib/control.js, lib/hardware.js), the Panel and the
 // BruControl Importer, so all three mean the same thing.
 
@@ -14,12 +14,13 @@ export const HEAT_METHODS = [
   ['hysteresis', 'Hysteresis', 'HYS', 'on below the target, off at it'],
   ['pid', 'PID', 'PID', 'holds a target temperature'],
   ['deadband', 'Deadband', 'DeadB', 'steps its % toward the target'],
+  ['precise', 'Precise', 'PREC', 'holds a target to 0.1 degree'],
 ];
 export const HEAT_KEYS = HEAT_METHODS.map(m => m[0]);
-// Hysteresis, PID and Deadband read a temperature probe (the Element's Probe, .input)
-export const NEEDS_PROBE = ['hysteresis', 'pid', 'deadband'];
+// Hysteresis, PID, Deadband and Precise read a temperature probe (the Element's Probe, .input)
+export const NEEDS_PROBE = ['hysteresis', 'pid', 'deadband', 'precise'];
 // the methods that work out an output % (shown as "45 % ▸ 152")
-export const PERCENT_METHODS = ['pid', 'deadband'];
+export const PERCENT_METHODS = ['pid', 'deadband', 'precise'];
 
 export const isHeatElem = el => el?.type === 'digitalOut' && el.subtype === 'element';
 
@@ -29,7 +30,7 @@ export function heatMethodKey(v) {
   const s = squash(v);
   if (!s) return null;
   for (const [k, word, code] of HEAT_METHODS) if ([k, word, code].some(x => squash(x) === s)) return k;
-  return { onoff: 'onoff', on: 'onoff', digital: 'onoff', digitalout: 'onoff', duty: 'dutyCycle', hyst: 'hysteresis', dband: 'deadband' }[s] ?? null;
+  return { onoff: 'onoff', on: 'onoff', digital: 'onoff', digitalout: 'onoff', duty: 'dutyCycle', hyst: 'hysteresis', dband: 'deadband', prec: 'precise', precisepid: 'precise' }[s] ?? null;
 }
 export const heatMethodWord = k => HEAT_METHODS.find(m => m[0] === k)?.[1] ?? 'On/Off';
 export const heatMethodCode = k => HEAT_METHODS.find(m => m[0] === k)?.[2] ?? 'DO';
@@ -59,6 +60,13 @@ export const HEAT_SETTINGS = {
   deadband: [['target', 'target', 'Target', 0], ['deadbandoffset', 'deadbandOffset', 'Deadband offset', 0.5], ['innerbandoffset', 'innerBandOffset', 'Inner band offset', 2],
     ['initialoutput', 'initialOutput', 'Initial output %', 0], ['innerbanddrive', 'innerBandDrive', 'Inner band drive %', 1], ['outerbanddrive', 'outerBandDrive', 'Outer band drive %', 5],
     ['maxoutput', 'maxOutput', 'Max output %', 100], ['calctime', 'calcTime', 'Calc time (s)', 10], ['outtime', 'outTime', 'Output window (s)', 2]],
+  // Precise (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C", Rule 6.19): a
+  // PID made calm for a still's column or anything that must hold to 0.1 degree. Target, Kp, Ki, Kd and Max output are the PID's own
+  // (switching between the two carries on with the same numbers); Hold output is the % it needs to just stay at the Target (it starts
+  // there, so it does not have to build it up), Smoothing the seconds it averages the probe over. See lib/control.js _precise.
+  precise: [['target', 'target', 'Target', 0], ['kp', 'kp', 'Kp', 10], ['ki', 'ki', 'Ki', 0.1], ['kd', 'kd', 'Kd', 0], ['maxoutput', 'maxOutput', 'Max output %', 100],
+    ['holdoutput', 'holdOutput', 'Hold output % (what it needs to stay at the Target)', 0], ['smoothing', 'smoothing', 'Smoothing (s, averages the probe)', 10],
+    ['calctime', 'calcTime', 'Calc time (s)', 1], ['outtime', 'outTime', 'Output window (s)', 2]],
 };
 // every setting once (the first starting value wins; PID's Calc time 1 s is overridden by Deadband's own when it runs)
 export const ALL_HEAT_SETTINGS = (() => {
@@ -67,7 +75,25 @@ export const ALL_HEAT_SETTINGS = (() => {
   return [...m.values()];
 })();
 // The main setting of each method, shown on the click pop-up with + and -
-export const HEAT_MAIN = { dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'], deadband: ['target', 'Target'] };
+export const HEAT_MAIN = { dutyCycle: ['dutycycle', 'Duty cycle %'], hysteresis: ['target', 'Target'], pid: ['target', 'Target'], deadband: ['target', 'Target'], precise: ['target', 'Target'] };
+
+// How fine a probe can see (Fritz, 2026-11-07: a precise method "to get to .1 F or .1 C"). Precise can only hold as close as its
+// probe sees, so its Properties warn when the probe is too coarse. Returns { step (in the probe's own units), ok, text }.
+// DS18B20: 0.0625 °C steps at its finest (12-bit) setting; PT100 / PT1000 on a MAX31865: about 0.03 °C; MAX31856 thermocouple
+// board: about 0.01 °C (but a thermocouple drifts); MAX31855: 0.25 °C; a thermistor, LM35 or TMP36 on a 10-bit analog pin: about
+// 0.1 to 0.5 °C (much finer on an ADS1115 16-bit board).
+export function probeStep(probe) {
+  if (!probe) return null;
+  const s = probe.sensor || 'ds18b20', c = /c/i.test(String(probe.units ?? '')) && !/f/i.test(String(probe.units ?? ''));
+  const stepC = s === 'ds18b20' ? 0.0625 : s === 'pt100' || s === 'pt1000' ? 0.03 : s === 'thermocouple' ? (probe.tcChip === 'max31855' ? 0.25 : 0.01)
+    : probe.adc === 'ads1115' ? 0.02 : s === 'ntc' ? 0.2 : 0.5;
+  const step = c ? stepC : stepC * 9 / 5, u = c ? '°C' : '°F', ok = step <= 0.1;
+  const r = x => Math.round(x * 1000) / 1000;
+  const text = ok ? `Its probe sees steps of ${r(step)} ${u}, fine enough to hold 0.1 ${u}.`
+    : s === 'ds18b20' ? `Its probe (a DS18B20) sees steps of ${r(step)} ${u}: it holds about ±0.1 ${u}. For finer, use a PT100 probe on a MAX31865 board.`
+    : `Its probe sees steps of about ${r(step)} ${u}, too coarse to hold 0.1 ${u}. Use a PT100 probe on a MAX31865 board (or a DS18B20).`;
+  return { step, ok, text };
+}
 
 // A setting's starting value for this method (Calc time and Output window differ between PID and Deadband)
 export function heatDefault(method, prop) {
