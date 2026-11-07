@@ -45,7 +45,15 @@ BruControl may keep a **default config** there too; it is listed last and marked
 
 **Backups work too.** BruControl backups end in `.bak` (for example `default.brucfg.20260615.bak`). A backup is the same
 config file inside, so it imports the same way. Backups are listed after your own config files, marked *(backup of
-2026-06-15)*, and the Schema is named after it, for example `default_Backup_2026-06-15`.
+2026-06-15)*, and the Schema is named after it, for example `default_Backup_2026-06-15`. BruControl keeps its backups in
+**Documents\BruControl\Config Backup**; everything there is listed too (backups and any `.brucfg` you put there), with *Config Backup\* in front of the name.
+
+- **Typing a folder:** a full folder like `D:\Brewing` works. A short one like `\downloads` or `Downloads` means that folder
+  in your own Windows folder (`C:\Users\<you>\Downloads`).
+- **Browse and Change folder** open Windows' own box in front of the Importer. While it is open, a note says so; if you do not
+  see it, look on the taskbar.
+- **"The Importer has stopped"** at the top means its black window (**Skynet BruControl Importer**) was closed, so no button
+  can work. Close the Importer window and start it again from its shortcut. Keep the black window open while you import.
 
 - **No config file there, or only the default one?** The Importer asks you to point to the folder that holds yours: click
   **📁 Change folder…** and pick the folder, or type the folder in the box and press Enter (or click **Look**). Next time the

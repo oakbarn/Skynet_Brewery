@@ -106,10 +106,31 @@ fs.rmSync(dir, { recursive: true, force: true });
   assert.deepEqual(f.files.map(x => [x.name, x.isBackup, x.isDefault, x.backupDate, x.base]), [
     ['Oakbarn.brucfg', false, false, '', 'Oakbarn'], ['Oakbarn.brucfg.20260615.bak', true, false, '2026-06-15', 'Oakbarn_Backup_2026-06-15'],
     ['default.config', false, true, '', 'default']], 'own config, then backups, then the default one');
+  // BruControl's own "Config Backup" folder is listed too, backups only (Fritz, 2026-11-07)
+  fs.mkdirSync(path.join(d, 'Config Backup'));
+  fs.writeFileSync(path.join(d, 'Config Backup', 'Oakbarn.brucfg.20260601.bak'), '<Configuration/>');
+  fs.writeFileSync(path.join(d, 'Config Backup', 'Other.brucfg'), '<Configuration/>');
+  fs.utimesSync(path.join(d, 'Config Backup', 'Oakbarn.brucfg.20260601.bak'), Date.now() / 1000 - 999, Date.now() / 1000 - 999);
+  fs.utimesSync(path.join(d, 'Config Backup', 'Other.brucfg'), Date.now() / 1000 - 999, Date.now() / 1000 - 999);
+  assert.deepEqual(findConfigs(d).files.map(x => [x.sub, x.name]), [['', 'Oakbarn.brucfg'], ['Config Backup', 'Other.brucfg'], ['', 'Oakbarn.brucfg.20260615.bak'],
+    ['Config Backup', 'Oakbarn.brucfg.20260601.bak'], ['', 'default.config']], 'the Config Backup folder: its backups and any config file put there');
   const copy = makeImportCopy(path.join(d, 'Oakbarn.brucfg.20260615.bak'), path.join(d, 'Import'), { ms: new Date(2026, 10, 7, 3, 4, 5).getTime() });
   assert.equal(path.basename(copy), 'Oakbarn_Backup_2026-06-15_2026-11-07T030405.brucfg', 'the Import Copy of a backup is a plain .brucfg');
   assert.ok(pickFileScript('').includes('*.brucfg;*.bak'), 'Browse shows config files and backups');
   fs.rmSync(d, { recursive: true, force: true });
+}
+// The buttons on page 3 (Fritz, 2026-11-07: "do not work"): the Windows boxes open in front; \downloads means the user's Downloads
+{
+  const { resolveFolder } = await import('../lib/importer.js');
+  const there = new Set(['C:\\Users\\Fritz\\Downloads', 'C:\\Users\\Fritz\\Documents\\BruControl', 'D:\\Brew']);
+  const o = { home: 'C:\\Users\\Fritz', exists: p => there.has(p), join: path.win32.join };
+  assert.equal(resolveFolder('\\downloads', { ...o, exists: p => there.has(p.replace('downloads', 'Downloads')) }), 'C:\\Users\\Fritz\\downloads');
+  assert.equal(resolveFolder('Downloads', o), 'C:\\Users\\Fritz\\Downloads');
+  assert.equal(resolveFolder('Documents\\BruControl', o), 'C:\\Users\\Fritz\\Documents\\BruControl');
+  assert.equal(resolveFolder('D:\\Brew', o), 'D:\\Brew', 'a full path is kept');
+  assert.equal(resolveFolder('\\Nowhere', o), '\\Nowhere', 'not found: kept, and the page says it is not there');
+  assert.equal(resolveFolder('  "D:\\Brew"  ', o), 'D:\\Brew', 'quotes from Copy as path are taken off');
+  for (const ps of [pickFileScript(''), pickFolderScript('')]) assert.ok(ps.includes('$o.Show(); $o.Activate()') && ps.includes('$o.Close()'), 'the box opens in front');
 }
 console.log('importer tests passed');
 
