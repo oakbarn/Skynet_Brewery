@@ -133,35 +133,44 @@ How they are asked (the Rules for dialogs):
 - A choice of more than two things is a **dropdown**. A Yes / No is a **switch**. "Other" opens a text box for what it is.
 - Plain English, correct spelling (Rule 2.37).
 
-### Page A: Units (asked once)
+### Dialog 1: Units and Vessels (asked once; Fritz's revised list, 2026-11-07)
 1. **Units:** **Metric** (mL, kg, °C ...) or **US** (ounces, pounds, °F ...). Two choices. Every later question that has a size
-   uses it (Liters or Gallons, cm or inches).
+   uses it (Liters or Gallons).
+2. **How many Vessels do you have?** A number.
+3. **Function of each Vessel:** one line for each Vessel (Vessel 1, Vessel 2 ...), each with a dropdown:
+   HLT; HLT with HERMS; Mash Tun; Mash Tun with RIMS; Brew Kettle; **All In One** (a second dropdown: BrewZilla 3,
+   BrewZilla 4, Grainfather, and so on, None); Fermentor; Other (a text box for what it is).
 
-### Page B: Vessels
-2. **How many Vessels do you have?** A number. Pages C come once for each Vessel (Vessel 1, Vessel 2 ...).
+### Dialog 2: one for each Vessel ("Vessel N: HLT")
+1. **Capacity:** Liters (Metric) or Gallons (US). This is the Vessel's Gallons field (Rule 19.1).
+2. **Dead Space:** the same units as Capacity.
+3. **Outlet fitting:** TC 1.5; NPT; BSP; None.
+4. **Thermowell:** Center Above, Manual Thermometer; Center Above, BruControl Probe; None.
+5. **High Return:** Sparge Arm; Steam Slayer; Inlet; None.
+6. **Tangential Inlet:** Left; Right; None.
+7. **Outlet:** TC above Bottom; TC Bottom Outlet; BSP above Bottom; BSP Bottom Outlet; None.
+8. **HERMS Coil inside the Vessel:** Left Outlet and Inlet; Right Outlet and Inlet; Right Inlet, Left Outlet; Left Inlet,
+   Right Outlet; None.
+9. **Heat Source:** a dropdown. What comes under it depends on the choice:
+   - **BruControl Heating Element**
+     - **Element location:** Right; Left; Back Left; Back Right; None.
+     - **BruControl Element:** a dropdown of the imported heating Devices (Hysteresis, PID, Duty Cycle, Deadband and so on),
+       each shown by its **BruControl name**.
+     - **Temperature Probe:** a dropdown of the imported probes by their BruControl name. It is **filled in automatically** from
+       the properties of the BruControl Element picked (the probe that Element reads), and **always shown**, so the brewer
+       sees it and can change it.
+     - **Probe Location:** Center Above Outlet (most common); Left Element IP; and so on. Also filled in automatically when it
+       can be, and always shown.
+   - **Gas Burner, not smart.** Two switches: **BruControl controls the Gas Valve**; **BruControl controls the Igniter**.
+   - **Gas Burner with smart control.** Two switches: **BruControl controls the Gas Valve**; **BruControl turns on the Smart
+     control**.
+   - **Gas Burner, total manual control.**
+   - **BruControl RIMS Tube.**
+   - **Oakbarn Modified HERMS (BruControl).**
+   - **Unheated.**
 
-### Page C: one page for each Vessel
-3. **Function:** HLT; HLT with HERMS; Mash Tun; Mash Tun with RIMS; Brew Kettle; Fermentor; **All In One** (then a second
-   dropdown for which one: BrewZilla 3, BrewZilla 4, Grainfather, and so on, plus Other with a text box); Other (a text box for
-   what it is).
-4. **Capacity:** Liters (Metric) or Gallons (US). This is the Vessel's Gallons field (Rule 19.1).
-5. **Dead Space:** the same units as Capacity.
-6. **Outlet fitting:** TC 1.5; NPT; BSP; None.
-7. **Thermowell:** Center Above, Manual Thermometer; Center Above, BruControl Probe; None.
-8. **High Return:** Sparge Arm; Steam Slayer; Inlet; None.
-9. **Tangential Inlet:** Left; Right; None.
-10. **Outlet:** TC above Bottom; TC Bottom Outlet; BSP above Bottom; BSP Bottom Outlet; None.
-11. **HERMS Coil inside the Vessel:** Left Outlet and Inlet; Right Outlet and Inlet; Right Inlet, Left Outlet; Left Inlet,
-    Right Outlet; None.
-12. **Heat Source:**
-    - BruControl Heating Element
-    - Gas Burner, not smart. Then two switches: **BruControl controls the Gas Valve**; **BruControl controls the Igniter**.
-    - Gas Burner with smart control. Then two switches: **BruControl controls the Gas Valve**; **BruControl turns on the Smart
-      control**.
-    - Gas Burner, total manual control
-    - BruControl RIMS Tube
-    - Oakbarn Modified HERMS (BruControl)
-    - Unheated
+### Dialog 3: More Questions
+To come (Fritz, 2026-11-07: "New Dialog More Questions").
 
 ### Educated guesses, and the Scripts as clues (Fritz, 2026-11-06)
 "We can make an educated guess. We may also want to import his Scripts even if the User elects to use Skynet Templated
@@ -175,13 +184,14 @@ Processes as we may gain what a vessel is used for."
   stays the brewer's choice.
 
 ### Open questions for Fritz on this list
-1. **Two Outlet questions (6 and 10).** Suggestion: 6 is the outlet's **fitting** (TC 1.5, NPT, BSP) and 10 is **where** it is (above
-   the bottom or a bottom outlet). Then 10 could be just "Above Bottom; Bottom; None", since 6 already says TC or BSP.
-2. **"BruControl Probe" and "BruControl controls ..."**: when the answer says BruControl controls or reads it, should the
-   Importer then ask **which imported Device** it is (a dropdown of the items on a board port, for example the gas valve's relay)?
-3. **All In One systems** (Fritz, 2026-11-06): which models go in the list besides BrewZilla 3, BrewZilla 4 and Grainfather
-   (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One skip the questions it already answers (Outlet,
-   Thermowell, HERMS Coil, Heat Source), since each model is built the same way?
-4. **Order: decided** (Fritz, 2026-11-06): these questions come **after Names**, "because in some follow ups we will associate
-   heater, Probes and valves eventually to what Device control is the HLT Heat for example." So the Vessels are made first, and
-   later steps link each imported heater, probe and valve to the Vessel it serves (this also answers question 2: yes, later).
+1. **Two Outlet questions (2.3 and 2.7).** Suggestion: 2.3 is the outlet's **fitting** (TC 1.5, NPT, BSP) and 2.7 is **where** it is.
+   Then 2.7 could be just "Above Bottom; Bottom Outlet; None", since 2.3 already says TC or BSP.
+2. **Probe Location list:** besides "Center Above Outlet (most common)" and "Left Element IP", which places go in it? Suggestion:
+   Center Above Outlet; Left Element IP; Right Element IP; Back Left Element IP; Back Right Element IP; Thermowell; Outlet.
+3. **Gas Burners:** when BruControl controls the Gas Valve or the Igniter, pick that Device the same way (a dropdown of the
+   imported Devices by BruControl name), and the Temperature Probe too?
+4. **All In One:** which other models go in the list (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One
+   skip the questions its model already answers (Outlet, Thermowell, HERMS Coil, Element location)?
+5. **Order: decided** (Fritz, 2026-11-06): these dialogs come **after Names**, "because in some follow ups we will associate
+   heater, Probes and valves eventually to what Device control is the HLT Heat for example."
+
