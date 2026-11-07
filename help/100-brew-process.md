@@ -87,6 +87,8 @@ The Brew Process screen shows every value as it is now.
 | `close_all_valves` | closes every valve on the **Close all valves** list |
 | `open_all_valves` | opens every valve on the **Open all valves** list (how things are left after cleaning) |
 | `all_pumps_off` | turns every pump off |
+| `open_valve DigiBoil_Spigot` | opens any one valve. A Manual one (a Manual valve, a Manual Valve Widget, a DigiBoil or Brewzilla Spigot) pops up and waits until it is done by hand; a motorized one is switched at once. See [DigiBoil and Brewzilla](158-digiboil-and-brewzilla) |
+| `close_valve DigiBoil_Spigot` | closes any one valve, the same way |
 
 ## Close all and Open all valves
 

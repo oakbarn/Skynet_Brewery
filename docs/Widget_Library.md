@@ -424,6 +424,8 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 | Kettle_Tangential_Steam_Slayer / _Electric | Brew Kettle | + Tangential, Steam Slayer Right High (+ Element) |
 | Kettle_Brewzilla_Electric | All-in-one, electric | Outlet CB + Valve_90 (no thermowell) |
 | Kettle_DigiBoil_Electric | All-in-one, electric | Outlet CB + Valve_90 (no thermowell) |
+| Kettle_DigiBoil | Brew Kettle, its own heat set by hand (Rule 5.39) | Outlet CB with its BSP Spigot (Manual valve) built in; Controls: Power, Heater, set point and screen |
+| Kettle_Brewzilla_65L | All In One, its own heat and pump set by hand (Rule 5.39) | Outlet CB with its BSP Spigot, Pump out IP with its Manual valve; Controls: Pump, Heater 1, 2, 3, set point, screen On/Off and Run |
 | Kettle_Foundry_Electric | All-in-one, electric | Outlet Front Low + Valve_90 |
 | Kettle_Grainfather_Electric | All-in-one, electric | Outlet CB + Valve_90 |
 | Integrated_Electric_Kettle_Basic | Skynet_Integrated_Device | Outlet, Thermowell + probe and Element built in |
@@ -493,7 +495,7 @@ These are added from the same list as Devices but need no board pin.
 | Alarm (made before 2026-11-02, no subclass) | Sound file, Sound files 1-3, Sound file number, Sound (custom, default, none), Repeat sound, Text when sounding, Picture when sounding / quiet |
 | Sound Player | Sound file, Repeat sound. Lowest priority (5): pauses while any alarm sounds. Process: play / stop SoundPlayer |
 | Label | Text box only (no own settings) |
-| Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading |
+| Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading. The DigiBoil and 65 L Brewzilla Controls (Rule 5.39) also have power, heat2, heat3 and run, and a Process setting them pops up what to do by hand and waits |
 
 ### gGlobal variables (Processes and screen; database and outside programs when its Database and .API box says so)
 gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, Help 98). Settings: Kind, then by kind: Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Text when on / off, Read only on screen, Keep value on restart, then the **Database and .API** box.
