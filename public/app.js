@@ -645,7 +645,7 @@ async function addMf(tname, kind) {
     return why;
   };
   // Enter goes 1 Label, 2 Interface, each Motorized valve's Port, 4 Tab, Orientation, then ➕ Add Device (Rule 18.20)
-  const seqKeys = () => ['label', 'mfIface', ...keys.flatMap(k => [k + '_mfk', k + '_mfpin']), 'workspace', 'rot'];
+  const seqKeys = () => ['label', 'mfIface', ...keys.flatMap(k => [k + '_mfk', k + '_mfpin']), 'workspace', 'rot', '_flip'];
   const seqEl = k => { const x = body.querySelector(`[data-k="${k}"]`); return x && !x.disabled && x.offsetParent !== null ? x : null; };
   const seqNext = k => { const l = seqKeys(); for (let i = l.indexOf(k) + 1; i > 0 && i < l.length; i++) { const x = seqEl(l[i]); if (x) return x.focus(); } oks.filter(b => b.offsetParent !== null).pop()?.focus(); };
   let made = null;
@@ -691,6 +691,7 @@ async function addMf(tname, kind) {
           if (!g.labelColor) delete g.labelColor;
           if (+work.w > 0) g.w = +work.w; if (+work.h > 0) g.h = +work.h;
           if (+work.rot) g.rot = +work.rot;
+          flipFrom(work); if (work.flipH) g.flipH = true; if (work.flipV) g.flipV = true;
           applyMf(g, mfOf(work), work.workspace, g.label);
         } catch (err) { draft.graphics = draft.graphics.filter(x => x !== g && x.attachTo !== g.id); throw err; }
         placeUnitParts(g);
@@ -718,13 +719,14 @@ const MF_TIPS = {
   name: 'Its Name, the Suggested Name to start (ValveTee_1, Manifold2_1 ...); you may edit it to make it your own. Each valve has its own Name made from its Label (Rule 3.1), used in a Process.',
   graphic: 'How it looks on the Tab, with its valves as picked and their numbers.',
   path: 'The Skynet drawing of the tees: set by its Template (Rule 5.6). The valves are drawn to match it.',
-  orient: 'Horizontal (the valves hang down), Left Vertical 90 (turned a quarter clockwise: the valves point left) or Right Vertical 90 (a quarter the other way: the valves point right). No Flip (Fritz, 2026-11-06). The picture, its valves and its IPs follow.',
+  orient: 'Horizontal (the valves hang down), Left Vertical 90 (turned a quarter clockwise: the valves point left) or Right Vertical 90 (a quarter the other way: the valves point right). Flip: Flip Vertical puts the valves on the other side of the tees (on top when Horizontal), Flip Horizontal puts Valve 1 at the other end. The picture, its valves and its IPs follow.',
   xy: 'Where it is on the Tab, in pixels from the top left corner.', size: 'Its size in pixels. It keeps its shape as drawn (no Autosize).',
   type: 'A Skynet TC Pipe Fitting with its valve Devices built in (Rule 5.35).' };
 const MF_LABEL_POP = { title: 'Label attributes', fields: () => [['label', 'Label', 'text'], ['labelVisible', 'Visible (Show label)', 'yn', true], ['labelSize', 'Font size (px; empty = Default)', 'num'],
   ['labelColor', 'Fore color', 'color'], ['labelAlign', 'Label position', 'sel', LABEL_POS]] };
 const MF_KIND_SEL = [['manual', 'Manual'], ['motorized', 'Motorized']];
-// Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90" (the Valve Tee too)
+// Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90" (the Valve Tee too);
+// Fritz, 2026-11-07: "We need supply Manifolds to Flip Vertically Horizomtaly. Vaves on Top or Valves on Bottom": the three turns, and Flip
 const MF_ROTS = [0, 90, 270];
 const MF_ORIENT = [['0', 'Horizontal'], ['90', 'Left Vertical 90'], ['270', 'Right Vertical 90']];
 const mfSetPin = (item, k) => { const e = item && mfEl(item, k, draft.elements); return e && e.valveType !== 'manual' && (e.channel ?? '') !== '' ? e : null; };
@@ -740,6 +742,7 @@ const mfTypeText = it => 'Fitting with ' + mfKeys(it).map(k => { const m = it[k 
 function mfDrillFields(it, item, adding) {
   const T = MF_TIPS, keys = mfKeys(it), after = adding ? { after: true } : {};
   if (!MF_ROTS.includes(unitRot(it))) it.rot = '0'; else it.rot = String(unitRot(it));
+  if (it._flip === undefined) it._flip = flipOf(it);
   const setIface = !adding && keys.some(k => mfSetPin(item, k));
   return [['locked', '', 'lock', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: MF_LABEL_POP, tip: T.label }], ['labelVisible', 'Label Visible', 'yn', true, false, false, { tip: T.labelVisible }],
@@ -755,7 +758,7 @@ function mfDrillFields(it, item, adding) {
     ['name', '5. Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_pv', 'Graphic', 'mfpic', null, false, false, { tip: T.graphic, ...after }],
     ['_mpath', 'Path', 'ro', String(it.image || '').replace(/^Images\//, ''), false, false, { tip: T.path, ...after }],
-    ['rot', 'Orientation', 'vorient', MF_ORIENT, false, false, { tip: T.orient, ...after }],
+    ['rot', 'Orientation', 'vorient', MF_ORIENT, false, false, { tip: T.orient, with: ['_flip', 'Flip', 'sel', PROBE_FLIP], ...after }],
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy, ...after }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy, ...after }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size, ...after }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size, ...after }],
     ['_mtype', 'Device Type', 'ro', mfTypeText(it), false, false, { tip: T.type }]];
@@ -766,7 +769,8 @@ function mfPreview(obj) {
   const draw = () => {
     const root = box.closest('#dlgBody, .dlgBody, dialog') || document, q = k => root.querySelector(`[data-k="${k}"]`);
     const keys = mfKeys(obj), N = keys.length || 1, W = 110 * N, H = Math.round(W * 262 / (160 * N));
-    const g = { x: 0, y: 0, w: W, h: H, rot: +(q('rot')?.value ?? obj.rot ?? 0) || 0, fittings: obj.fittings };
+    const f = q('_flip')?.value ?? obj._flip ?? flipOf(obj);
+    const g = { x: 0, y: 0, w: W, h: H, rot: +(q('rot')?.value ?? obj.rot ?? 0) || 0, flipH: f.includes('h'), flipV: f.includes('v'), fittings: obj.fittings };
     const side = unitRot(g) % 180 === 90, diag = unitRot(g) % 90 === 45, D = Math.ceil(Math.hypot(W, H));
     const BW = side ? H : diag ? D : W, BH = side ? W : diag ? D : H, ox = (BW - W) / 2, oy = (BH - H) / 2;
     const pic = h('div', { style: `position:absolute;left:${ox}px;top:${oy}px;width:${W}px;height:${H}px;transform:${unitTransform(g)}` },
@@ -4580,9 +4584,14 @@ function turnSel(op) {
   if (k === 'kettle' && op !== 'h') return toast('A kettle stays upright: it can Flip Horizontal, never Flip Vertical or turn (Rule 5.5).', true);
   if (lockedRiders(g).length) return toast(`${g.label || g.name} has a 🔒 locked part, so it can't turn.`, true);
   if (isMf(g)) {         // Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90"
-    if (typeof op !== 'number') return toast(`${g.label || g.name} has no Flip: it turns Horizontal, Left Vertical 90 or Right Vertical 90 (Rule 5.35).`, true);
-    const i = MF_ROTS.indexOf(unitRot(g)), r = MF_ROTS[((i < 0 ? 0 : i) + (op > 0 ? 1 : -1) + MF_ROTS.length) % MF_ROTS.length];
-    delete g.flipH; delete g.flipV; delete g.turn; if (r) g.rot = r; else delete g.rot;
+    delete g.turn;
+    if (typeof op !== 'number') {          // Fritz, 2026-11-07: Flip, valves on top or on bottom; flipped as it looks on the Tab
+      const k = (op === 'v') === (unitRot(g) % 180 === 0) ? 'flipV' : 'flipH';
+      if (g[k]) delete g[k]; else g[k] = true;
+    } else {
+      const i = MF_ROTS.indexOf(unitRot(g)), r = MF_ROTS[((i < 0 ? 0 : i) + (op > 0 ? 1 : -1) + MF_ROTS.length) % MF_ROTS.length];
+      if (r) g.rot = r; else delete g.rot;
+    }
     placeUnitParts(g); renderWs(); letGoBentEnds(); return;
   }
   if (k === 'turn') { if (typeof op === 'number') g.rotate = String(((+g.rotate || 0) + op + 360) % 360); renderWs(); return; }
@@ -7032,7 +7041,7 @@ async function editItem(kind, id) {
         if (!String(work.label ?? '').trim()) work.label = item.label || mfNext(mfInfo(item).label, draft.graphics.filter(x => x !== item).map(x => x.label));
         const w = mfOf(work);
         for (const k of Object.keys(w)) delete work[k];
-        delete work.flipH; delete work.flipV; delete work._flip; if (!MF_ROTS.includes(+work.rot || 0)) work.rot = '0';      // no Flip, three Orientations (Fritz, 2026-11-06)
+        flipFrom(work); if (!MF_ROTS.includes(+work.rot || 0)) work.rot = '0';      // three Orientations (Fritz, 2026-11-06) and Flip (Fritz, 2026-11-07)
         applyMf({ ...item, ...work, id: item.id, fittings: item.fittings }, w, work.workspace || item.workspace, work.label);
       }
       if (isUnit(item)) {          // a Skynet Fitting: its IPs sit on its openings, wherever it is flipped or rotated
