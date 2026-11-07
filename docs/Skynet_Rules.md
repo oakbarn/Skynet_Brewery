@@ -1332,6 +1332,11 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
 is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband**.
+- **Built in Elements too** (Fritz, 2026-11-07: "The only thing that seems to be missing is the Element Method Field and the
+  Hotspots to switch Methods on the Screen when running"): an Element built into a Vessel Device, RIMS tube or kettle is a Heating
+  Element with the same Heating method field, allowed methods and spots. One still saved as an old separate control Device (the
+  Three Vessel sample's HLT_Heat was a Hysteresis) becomes one when the Schema loads, starting in that method; its name, settings
+  and Processes stay (Rule 3.5). A RIMS tube's Control picks the method its Element starts with.
 - **Only Heating Elements, today** (Fritz, 2026-11-07: "Heating Elements are the only thing I can Think of that could have a
   different method of control. The hard wiring from the Arduino to the end hardware prevents other hardware from having different
   methods of control"). The Rules about Devices with more than one Control Method (4.4, 6.19, `.method`) stay general, so another
@@ -1351,7 +1356,8 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** o
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
   Element on its Tab, or under its picture on a Vessel Device when it is built in, whenever **two or more** are allowed. **One
-  click** on one switches the Element to that method at once; the one in use is lit. With only the main method, none show. The
+  click** on one switches the Element to that method at once; the one in use is **red**, the others **yellow** (Fritz, 2026-11-07).
+  With only the main method, none show. The
   BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
   ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
 - **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, or DO, DutyC, HYS, PID, DeadB), or the
@@ -2550,3 +2556,4 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.1 (Fritz: "Once a Port Is Selected, it is taken. So the method of choosing a Port has to be addressed as well"): every Port picker offers only free Ports plus the Device's own; the older typed Pin boxes (and the Duty Cycle, Hysteresis, PID and Deadband Pin) now list only free Ports. Checked against the BruControl Import program: it keeps BruControl's ports, joins heating controls on one port and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 2.39 (new, Fritz: "We only need a few, and choose one that best matches the DevExpress ones"): Panel Looks (themes) Office Black (default, closest to BruControl's Office 2019 Black), Dark Gray, White and Skynet Night, each a few color picks; picked in Settings > Panel settings, saved with the Schema; new Tabs get the Look's Tab colors; Use this Look on every Tab with Put the Tabs back. A change from BruControl: its DevExpress themes are not public and would not work in a browser, so Skynet sets the Back and Text colors. Rule 11.1 next free Help is 152. Help 151 new, Help 09 updated. Checked against the BruControl Import program: it picks the closest Look from the BruControl theme, gives imported Tabs the Look's Tab colors, and lists Themes on its "What is different in Skynet" page. (thread "Add a few look-alike Panel themes")
 - 2026-11-07: Rule 2.40 (Fritz: our own gauges and timers without copying DevExpress): the Skynet Dial (arc, needle, digits 0-2 decimals, blue / green / red from the Setpoint with Cooler and Hotter ranges), Timer Digits (Back, Text Fore, Text Back colors, Fritz's frames in 3 shapes, hh:mm:ss or hh:mm, Seconds only in the last minute); the BruControl Import maps its gauges to them. Help 152; next free Help 153. (thread "Build our own temperature gauge and timer looks")
+- 2026-11-07: Rule 6.19 (Fritz: "The only thing that seems to be missing is the Element Method Field and the Hotspots to switch Methods on the Screen when running"): Elements built into a Vessel Device, RIMS tube or kettle that were old control Devices become Heating Elements on load, so they get the Heating method field and the spots; the Three Vessel sample's HLT (Hysteresis, with Duty Cycle and PID allowed) and Kettle (Hysteresis, with Duty Cycle) show them. Spots: the method in use is red, the others yellow (Fritz). Help 150 updated. Checked against the BruControl Import program: it already makes Heating Elements. (thread "Pick the heating method on one Element")

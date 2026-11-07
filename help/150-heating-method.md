@@ -33,11 +33,15 @@ When you build it (and later in its Properties), pick its **main heating method*
 methods allowed**, tick each other method it may use. **Only the main method and the ticked ones can be used**: the pop-up, the
 spots, Method Clones and Processes offer only those, and a Process asking for another one stops with a plain message.
 
+An Element **built into a Vessel Device or RIMS tube** works the same way: open its Properties (double-click it, or its ⚙) for
+its Heating method and the other methods allowed. Older Schemas whose built in Element was a separate Hysteresis or PID Device
+are changed to a Heating Element when they load, keeping its name and settings.
+
 ## One-click method spots
 
 When **two or more** methods are allowed, a small button for each shows **under the Element** on its Tab, or under its picture on
-a **Vessel Device** when it is built in. **One click** on one switches the Element to that method at once; the one in use is lit
-orange. With only the main method, no buttons show.
+a **Vessel Device** when it is built in. **One click** on one switches the Element to that method at once; the one in use is **red**, the others
+**yellow**. With only the main method, no buttons show.
 
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
 click on PID to hold the strike temperature. The BruControl Import sets Duty Cycle as the main method and ticks PID for you.
