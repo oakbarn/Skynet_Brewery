@@ -204,6 +204,11 @@ None of these talks MQTT by itself. Some have their own app connection, which a 
 | Anvil Foundry | None | The same |
 | Clawhammer | None found (a plain controller) | The same |
 
+**Test brewer** (Fritz, 2026-11-07): "One of my fellow Brewers has a Brewzilla 4 so we can Test it." When this is built, that
+brewer checks, in their own RAPT account: whether the account settings offer an **API secret** (a key for other programs) or
+the "My Integrations" Data Streams list the BrewZilla, and whether the readings (current and target temperature) can go out
+to a Custom address. They keep their RAPT password to themselves; a test uses only a key they make and can delete.
+
 So a connected All In One would become an Interface of its own kind (a cloud or Bluetooth link instead of a board). That is
 not part of this plan; it needs Fritz's go and its own Rule.
 
