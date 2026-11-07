@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
@@ -89,7 +89,7 @@ async function api(req, res, p, q) {
   if (p === '/api/pick-folder' && m === 'POST') { const { start } = await body(req); return json(res, 200, await pickFolder(start ?? '')); }
   if (p === '/api/peek' && m === 'GET') {
     const file = q.get('file') ?? '';
-    if (!isConfig(file)) return json(res, 400, { error: 'That is not a BruControl config file (.brucfg).' });
+    if (!isConfig(file)) return json(res, 400, { error: 'That is not a BruControl config file (.brucfg) or backup (.bak).' });
     try {
       const st = fs.statSync(file);
       if (st.size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
@@ -98,7 +98,7 @@ async function api(req, res, p, q) {
   }
   if (p === '/api/choose' && m === 'POST') {
     const { file } = await body(req);
-    if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) from the list.' });
+    if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) or backup (.bak) from the list.' });
     settings.file = file; saveSettings(SETTINGS, settings);
     return json(res, 200, { ok: true, file });
   }
@@ -106,8 +106,10 @@ async function api(req, res, p, q) {
   // board port and the Tabs; everything else is a Placeholder on its Tab. names: 'skynet' (default) or 'bru' (Rule 15.1).
   if (p === '/api/convert' && m === 'POST') {
     const { file, names, copyMedia } = await body(req);
-    if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) first.' });
+    if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) or backup (.bak) first.' });
     if (fs.statSync(file).size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
+    // any .bak can be picked, so check it really is a BruControl config file inside before the Import Copy is made
+    if (isBackupName(file) && !/<Configuration[\s>]/.test(fs.readFileSync(file, 'utf8').slice(0, 4096))) return json(res, 400, { error: 'That backup (.bak) is not a BruControl config file inside.' });
     const copy = makeImportCopy(file, IMPORT_DIR);
     // Pictures and sounds (Fritz, 2026-11-06): their paths are imported and the files stay where they were, so BruControl keeps
     // working. Only when asked (copyMedia) is each one COPIED, never moved, to media\Images\User or media\sounds\User, for a
