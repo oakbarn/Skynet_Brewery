@@ -340,6 +340,17 @@ the program only shows it and measures distances on the screen. Three helpers, u
    Vessel's IP, another valve or a drawn pipe picture (nearest within a short distance), plus the clues from names and Scripts
    (a Script that opens M_V1 and runs M_HLT Pump together suggests one path). Each suggestion is marked **guess** until the
    brewer OKs or changes it.
+4. **Ask a free AI, outside the Importer (the brewer's choice).** Fritz, 2026-11-07: "Could we provide a Link in the imported to
+   open a Free AI to analyse the Picture for the Manifold and Vessel layout". The Importer itself stays AI-free. A button
+   **Ask an AI about my picture…** does two things: it **copies a ready-made question** to the clipboard and **opens the free AI
+   site the brewer picks** (for example claude.ai, ChatGPT or Gemini) in their browser. The brewer adds their picture there and
+   pastes the question. The question lists the brewer's own vessel, pump and valve names and asks the AI to answer **only** in a
+   fixed form, one line per connection, for example `M_V5: From Mash Tun Center Bottom Outlet To M_Mash Pump In`. The brewer
+   copies the AI's answer and clicks **Paste the AI answer**: the Importer reads the lines (plain text matching, no AI), fills
+   in the manifold questions, and marks each one **from the AI, check it**. A line it can't read is listed, never guessed.
+   - **Privacy:** a note says plainly that the picture goes to that AI company under the brewer's own account, not to Skynet,
+     and that it is optional.
+   - Nothing is sent by the Importer: the brewer does the uploading and pasting.
 - Order on the page: the picture (if any) on the left, the manifold questions on the right; answering a question draws the pipe
   on the picture side, and joining on the picture fills in the question. Either way works.
 - Shown before saving with the rest; Back changes any answer.
