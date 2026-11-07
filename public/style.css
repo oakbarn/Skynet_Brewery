@@ -747,8 +747,8 @@ body.onWorkspace #top .menuCopy { display: none; }
 /* the Help icon (Fritz): a yellow circle with a black ?, beside Menu tab headings and Properties titles */
 .helpIcon { display: inline-flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; min-height: 0; padding: 0; margin-left: .35em; border-radius: 50%; border: 1px solid #b38f00; background: #ffd400; color: #000; font: 700 .85em/1 system-ui, sans-serif; vertical-align: middle; cursor: help; }
 /* the red circle with yellow tools (hammer and pick over a square) beside ☰ Menu: Edit layout on and off; a yellow ring while it is on */
-button.barEdit { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #0a1a3f; background: #001f5b; }      /* navy blue (Fritz, 2026-10-27) */
-button.barEdit:hover { background: #0b2f7a; }
+button.barEdit { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid #123e85; background: #2a6bd1; }      /* a lighter blue (Fritz, 2026-11-07: "It almost looks Black with the Navy Blue"; was navy #001f5b, 2026-10-27) */
+button.barEdit:hover { background: #3a7ce0; }
 button.barEdit:focus-visible { outline: 2px solid #000; outline-offset: 1px; }
 button.barEdit.on { box-shadow: 0 0 0 3px #ffd400; }
 /* Simulator / Real switch for the whole panel (Fritz, 2026-10-27): green = real boards, yellow stripes = simulator */
