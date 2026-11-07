@@ -199,7 +199,8 @@ HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.
    picking it ends the chain.
 4. **The end of the chain** (Fritz, 2026-11-07: "End could be a Pipe, Hose, Supply manifold or None"): **Pipe**; **Hose**
    (Quick Disconnect, Rule 5.34); **Supply Manifold** (Double or Triple, Rule 5.35); **None**. A Pipe, Hose or Manifold also
-   ends the chain.
+   ends the chain. **The Pipe, Hose or Supply Manifold itself is not added** (Fritz, 2026-11-07: "do not add the supply
+   manifold Hose or Pipe, just the Ip"): the chain ends with an **IP** there, where the brewer connects it on the Tab later.
 
 ### Building the Vessel Device, shown before saving (Fritz, 2026-11-07)
 "Once the answers are done, create a Vessel Device with the Integral Components and Place On the Brewery Tab. Drill Down to get
