@@ -946,6 +946,11 @@ Template"; thread "Build the Vessel Widget class", Help 133).
     are set in the Vessel's Properties, as the RIMS tube's element and probe are; each shows its reading or On / Off like the
     RIMS tube's and can't be deleted on its own.
   - A part fills its IP: an Element, Probe or Thermowell closes it (no flow); a Valve passes flow only while it is on.
+  - **Plugged IPs are hidden; only open IPs show** (Fritz, 2026-11-07, thread "Ask about other Vessel openings in the import"):
+    an opening plugged by a **Thermowell** (or a Probe, which has its Thermowell built in), an **End Cap** or a **Heating
+    Element** is a plug. Its IP is hidden and nothing (a pipe, a hose, a fitting) can join it. A built in Valve passes flow, so
+    its IP still shows. The same in both programs: the BruControl Import's Vessel questions ask about every other opening
+    (Not there, Open, or Plugged with a Thermowell, End Cap or Heating Element; docs/BruControl_Importer_Plan.md section 9).
   - **HERMS coil:** Left or Right. It goes on that side's HERMS In and HERMS Out IPs as **a layer under them**, drawn to fit them
     (the coil's look follows the Template's IPs), and the coil's ends **are** those two IPs, locked together: flow in one comes out
     the other.
@@ -2347,4 +2352,5 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.30: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 18.30: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")
+- 2026-11-07: Rule 5.31: plugged IPs are hidden; only open IPs show (a Thermowell, Probe, End Cap or Heating Element plugs its opening; a built in Valve does not). The Panel now hides a Vessel Device IP with a built in Element, Probe or Thermowell, as it already did for an End Cap. The BruControl Import's Vessel questions (plan section 9) now ask about every other opening: Not there, Open (its own connection chain), or Plugged with a Thermowell, End Cap or Heating Element. Checked against both programs. Help 133 and 143 updated; no new Help number used. (thread "Ask about other Vessel openings in the import")
 - 2026-11-07: Rule 5.31: the Three Vessel sample's HLT, Mash tun and Boil kettle are now Vessel Devices built from the Main Template (Fritz: "change all the vessels to" "Vessels Devices"), their probes and heaters built into the Left and Right Element IPs; a built in Element that is a heat controller stays one. Help 133 updated; no new Help number used. Checked against the BruControl Import program: it does not use the samples, so nothing changes there. (thread "Change 3 Vessel sample to Vessel Devices")
