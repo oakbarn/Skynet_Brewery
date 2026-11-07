@@ -37,7 +37,7 @@ function render(list) {
   const tb = $('#files tbody');
   tb.innerHTML = list.files.map((f, i) => `<tr data-i="${i}" class="${f.path === state.sel ? 'sel' : ''}">
     <td><input type="radio" name="cfg" ${f.path === state.sel ? 'checked' : ''} aria-label="Pick ${esc(f.name)}"></td>
-    <td>${esc(f.name)}${f.isDefault ? ' <span class="muted">(BruControl default)</span>' : ''}</td><td>${esc(f.modified)}</td><td>${sizeText(f.size)}</td></tr>`).join('');
+    <td>${esc(f.name)}${f.isDefault ? ' <span class="muted">(BruControl default)</span>' : ''}${f.isBackup ? ` <span class="muted" title="A backup BruControl made of a config file. It is the same config file inside and imports the same way.">(backup${f.backupDate ? ` of ${esc(f.backupDate)}` : ''})</span>` : ''}</td><td>${esc(f.modified)}</td><td>${sizeText(f.size)}</td></tr>`).join('');
   $('#files').classList.toggle('hidden', !list.files.length);
   // No config of the brewer's own here (none, or only BruControl's default one): ask them to point to their folder
   const empty = $('#empty'), own = list.files.filter(f => !f.isDefault).length;
@@ -127,7 +127,7 @@ $('#browseBtn').onclick = async () => {
     const dir = r.picked.replace(/[\\/][^\\/]*$/, '');
     await look(dir);
     const i = state.files.findIndex(f => f.path.toLowerCase() === r.picked.toLowerCase());
-    if (i >= 0) select(i); else toast('That is not a BruControl config file (.brucfg).');
+    if (i >= 0) select(i); else toast('That is not a BruControl config file (.brucfg) or backup (.bak).');
   } catch (e) { toast(e.message); }
 };
 $('#files tbody').onclick = e => { const tr = e.target.closest('tr'); if (tr) select(Number(tr.dataset.i)); };
@@ -191,7 +191,7 @@ for (const id of ['#back5', '#back5a']) $(id).onclick = () => show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
   const f = state.files.find(x => x.path === state.sel);
-  $('#schemaName').value = (f?.name ?? 'Imported_Schema').replace(/\.(brucfg|config)$/i, '').replace(/\s+/g, '_');
+  $('#schemaName').value = (f?.base || f?.name || 'Imported_Schema').replace(/\.(brucfg|config)$/i, '').replace(/\s+/g, '_');
   $('#importDir').textContent = state.start?.importFolder ?? '';
   $('#saveResult').classList.add('hidden');
   show(7);

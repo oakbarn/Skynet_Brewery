@@ -71,7 +71,7 @@
           <li><b>Some new words:</b>
             <table class="words">
               <tr><th>BruControl</th><th>Skynet</th></tr>
-              <tr><td>Configuration (.brucfg)</td><td>Schema</td></tr>
+              <tr><td>Configuration (.brucfg, or its backup .bak)</td><td>Schema</td></tr>
               <tr><td>Workspace</td><td>Tab</td></tr>
               <tr><td>Script</td><td>Process</td></tr>
               <tr><td>Element with a port</td><td>Device</td></tr>
@@ -249,10 +249,11 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <div class="buttons top"><button id="back3a">◀ Back</button><span class="spacer"></span><button class="primary" id="next3a" disabled>Next ▶</button></div>
     <h1>Pick your BruControl config file</h1>
     <p class="lead">BruControl saves its whole setup in one config file that ends in <code>.brucfg</code>. Pick the one you want to bring into Skynet.
+    A BruControl backup (a file that ends in <code>.bak</code>, like <code>default.brucfg.20260615.bak</code>) is the same file inside, so you can pick one of those too.
     <b>One config file makes one Schema.</b> If you have more than one, import each one on its own; they are never combined.</p>
 
     <div class="card">
-      <div class="buttons"><button class="primary" id="browseBtn" title="Windows' Open box, in Documents\BruControl, where BruControl keeps its config files">📄 Browse for the config file…</button>
+      <div class="buttons"><button class="primary" id="browseBtn" title="Windows' Open box, in Documents\BruControl, where BruControl keeps its config files and backups (.brucfg or .bak)">📄 Browse for the config file…</button>
         <span class="muted">Opens in Documents\BruControl, where BruControl keeps it. Or pick one from the list below.</span></div>
       <div class="folderRow">
         <label>Folder</label>

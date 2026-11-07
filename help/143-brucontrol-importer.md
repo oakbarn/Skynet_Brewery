@@ -37,11 +37,15 @@ the Importer will guide you through. Click **Start ▶**.
 ## Page 3: Pick your BruControl config file
 
 **📄 Browse for the config file…** opens Windows' own Open box in **Documents\BruControl**, where BruControl keeps its
-config files, showing only `.brucfg` files: pick yours and it is chosen. You can also pick from the list:
+config files, showing `.brucfg` files and BruControl's backups (`.bak`): pick yours and it is chosen. You can also pick from the list:
 
 The Importer looks **only in Documents\BruControl** first (the real Documents folder, even when Windows keeps it on
 OneDrive). It lists every BruControl config file (`.brucfg`) there, newest first, with the date it was saved and its size.
 BruControl may keep a **default config** there too; it is listed last and marked *(BruControl default)*.
+
+**Backups work too.** BruControl backups end in `.bak` (for example `default.brucfg.20260615.bak`). A backup is the same
+config file inside, so it imports the same way. Backups are listed after your own config files, marked *(backup of
+2026-06-15)*, and the Schema is named after it, for example `default_Backup_2026-06-15`.
 
 - **No config file there, or only the default one?** The Importer asks you to point to the folder that holds yours: click
   **📁 Change folder…** and pick the folder, or type the folder in the box and press Enter (or click **Look**). Next time the
@@ -74,7 +78,7 @@ and it is not shown on the Tab.
 ## Boards and Tabs
 
 **Next ▶** makes the **Import Copy**: your config file is copied into `C:\Brewing\Import\BruControl` (named
-*name*_*date*T*time*.brucfg) and only the copy is converted, so BruControl's own file is never changed. Then you see what comes in:
+*name*_*date*T*time*.brucfg, also when you picked a `.bak` backup) and only the copy is converted, so BruControl's own file is never changed. Then you see what comes in:
 
 - your **Interfaces** (BruControl boards), each with its Interface ID;
 - your **Tabs** (BruControl workspaces), each with its Tab ID. Tab backgrounds are left out for now;
