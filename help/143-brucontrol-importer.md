@@ -1,6 +1,6 @@
 # BruControl Importer
 
-The **Skynet BruControl Importer** turns a BruControl setup into a Skynet Schema (Skynet Rule 15.4; Fritz, 2026-11-06). It is
+The **Skynet BruControl Importer** turns a BruControl setup into a Skynet Schema (Skynet Rule 15.4; OakBarn Brewery, 2026-11-06). It is
 the second door of the same Skynet program: it uses the Panel's own Devices, Widgets, Templates, pictures and Rules, so what it
 makes is exactly what the Panel makes.
 
@@ -22,7 +22,7 @@ A short welcome: what the Importer does, and that it never changes BruControl or
 This page tells you what stays the same (your boards, wiring, Devices, screens, scripts, pictures), what is different
 in Skynet (it runs in a browser, some new words, Skynet pictures and Templates, everything comes in the Skynet way), and the steps
 the Importer will guide you through. Under **Your Scripts** it also tells you about the **Preset Schema Templates** (what
-BruControl called Configurations) that you can easily change, and why (Fritz: "I wanted to Brew, not write Code!").
+BruControl called Configurations) that you can easily change, and why (OakBarn Brewery: "I wanted to Brew, not write Code!").
 Click **Start ▶**.
 
 | BruControl | Skynet |
@@ -107,10 +107,10 @@ The list of new names and the notes for the report are at the bottom.
 ## Connect your brewery
 
 BruControl only knew your valves and pumps as buttons; it never knew which vessel they sit on or what they are joined to. This
-page asks **what is connected to what** (Fritz, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
+page asks **what is connected to what** (OakBarn Brewery, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
 bone". The page shows a few lines of the old song (*Dem Bones*) and the brewery version, with **▶ Play the song** (Skynet's own
-song, *Skynet - Outlet to Valve*, made by Fritz; it never plays by itself, and the button turns into **■ Stop**) and
-**▶ Hear it** beside the old song's lines (Fritz's own clip of them in a comic voice).
+song, *Skynet - Outlet to Valve*, made by OakBarn Brewery; it never plays by itself, and the button turns into **■ Stop**) and
+**▶ Hear it** beside the old song's lines (OakBarn Brewery's own clip of them in a comic voice).
 
 - **Your vessels.** Guessed from your names and Scripts (HLT, Mash Tun, Boil Kettle, Fermenter). Rename, remove or add one.
   The **Hot Side** vessels are joined here; a **Fermenter** (Cold Side) has its own questions.
@@ -158,7 +158,7 @@ always makes the Import folder, as BeerSmith or other programs may save their fi
 
 ## Next steps (being built)
 
-The import is built one step at a time with Fritz: next come the other BruControl items (each Placeholder becomes the right
+The import is built one step at a time with OakBarn Brewery: next come the other BruControl items (each Placeholder becomes the right
 Skynet Device, Widget or Template, with a few plain questions; for each Vessel these include its **other openings**: Not there,
 Open, or Plugged with a Thermowell, End Cap or Heating Element, where a plugged opening shows no IP), then Processes, with a report of every change (Rule 15.1).
 How the older import code did each part is in `docs/BruControl_Old_Import_Method.md`.
