@@ -378,9 +378,9 @@ SectionEnd
 ; away the shortcuts of an earlier install). On an update, the answer you gave last time is the default.
 Function AskImporter
   ${If} ${FileExists} "$INSTDIR\Skynet_Importer.bat"
-    MessageBox MB_YESNO|MB_ICONQUESTION "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDYES IDYES add IDNO leave
+    MessageBox MB_YESNO|MB_ICONQUESTION "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nIf you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No.$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDYES IDYES add IDNO leave
   ${Else}
-    MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDNO IDYES add IDNO leave
+    MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nIf you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No.$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDNO IDYES add IDNO leave
   ${EndIf}
   add:
     CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
