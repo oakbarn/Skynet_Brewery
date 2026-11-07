@@ -1,0 +1,33 @@
+//Skynet_Whirlpool_and_Chill
+//About: Whirlpool the hot wort for the Recipe's whirlpool time (whirlpool hops), then chill it while it spins. Use this or Chill.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Whirlpool"
+@if Whirlpool_Pump
+ask "Set the valves so the whirlpool pump takes wort from the kettle drain and sends it back in the whirlpool port. Press Done when they are set."
+{{Whirlpool_Pump}} = true
+@else
+ask "Stir the wort hard in one direction to start a whirlpool. Press Done when it is spinning."
+@end
+if rcp_Whirlpool_Minutes > 0
+  print "Whirlpool for " + rcp_Whirlpool_Minutes + " minutes"
+  sleep rcp_Whirlpool_Minutes * 60000
+endif
+step "Chill while it spins"
+ask "Hook up the chiller and open its cooling water. Press Done when the water runs."
+@if Chill_Pump
+{{Chill_Pump}} = true
+@end
+@if Wort_Probe
+wait {{Wort_Probe}} <= rcp_Ferment_Temp
+@else
+ask "Press Done when the wort is down to " + rcp_Ferment_Temp + rcp_Temp_Units + "."
+@end
+@if Chill_Pump
+{{Chill_Pump}} = false
+@end
+@if Whirlpool_Pump
+{{Whirlpool_Pump}} = false
+@end
+ask "Close the chiller water.\nLet the wort sit about 15 minutes so the trub settles in a cone in the middle. Press Done when it has settled."
+print "Wort chilled to " + rcp_Ferment_Temp + rcp_Temp_Units
