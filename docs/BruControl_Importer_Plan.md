@@ -339,6 +339,11 @@ the program only shows it and measures distances on the screen. Three helpers, u
    > *Heel bone connected to the ankle bone,*
    > *Ankle bone connected to the leg bone ...*
 
+   A small **▶ Play** button beside it plays a few bars of the tune (Fritz, 2026-11-07: "if there is a free Copy of the song a
+   snippet that plays"). The song itself is free to use, but most **recordings** have their own copyright, so the Importer plays
+   the tune **from its own notes** (the browser makes the sound, no recording file). If a recording marked free to use (public
+   domain or CC0) is found later, Fritz decides whether to use it instead. It never plays by itself, only on the click.
+
    and then the brewery version:
    > *Outlet connected to the valve,*
    > *Valve connected to the pump,*
