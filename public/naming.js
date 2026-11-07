@@ -7,8 +7,8 @@
 //   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
 
-// Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list (DO is a plain relay and
-// a heating element on a relay). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
+// Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is HE
+// (Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we could Use MB_25_HE_HLT_BR"). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
 const T = {
   // temperature
   '1W': 'DS18B20 (OneWire probe)', RTD: 'RTD: PT100 / PT1000 (MAX31865 board)', TC: 'Thermocouple (MAX31855 / MAX31856 board)',
@@ -16,7 +16,8 @@ const T = {
   '100KNT': '100K NTC thermistor (3D printer type)', NTC: 'NTC thermistor, other size', LM35: 'LM35 analog temperature sensor',
   TMP36: 'TMP36 analog temperature sensor',
   // heating
-  PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DBand: 'Deadband', DO: 'Direct On / Off (relay, SSR, contactor; also a heating element on one)',
+  PID: 'PID', DutyCy: 'Duty Cycle', Hys: 'Hysteresis', DBand: 'Deadband', DO: 'Direct On / Off (relay, SSR, contactor)',
+  HE: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
   Pump: 'Pump', M_L_Vlv: 'Low Temperature Manual Valve', eVlv: 'Electric Valve (motorized ball valve, low temperature)', M_H_Vlv: 'High Temperature Manual Valve',
@@ -40,7 +41,7 @@ export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
 const list = ids => ids.split(' ').map(id => [id, T[id]]);
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
-  digitalOut: list('DO Pump M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  digitalOut: list('DO HE Pump M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
   pwmOut: list('PWM H_PWM P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr P_LED'),
   analogOut: list('AO H_AO P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr'),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
@@ -69,7 +70,7 @@ export function defaultCode(el, hint) {
   const has = c => codes.some(x => x[0] === c);
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
-  else if (el.type === 'digitalOut') c = { pump: 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv' }[el.subtype];
+  else if (el.type === 'digitalOut') c = { pump: 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'HE' }[el.subtype];
   else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: el.type === 'pwmOut' ? 'H_PWM' : 'H_AO', propValve: 'P_L_Vlv', pump: 'P_Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];

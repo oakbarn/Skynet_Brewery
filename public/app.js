@@ -10,7 +10,7 @@ import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods } from './heatmethod.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -1800,11 +1800,19 @@ function placeDevIps(e) {
 // parent Device at the clone's place, and tapping it taps the parent. Clones are not used in Processes (Fritz), so the Brain
 // knows nothing of them. A pump or valve clone has its own IPs on its own Tab.
 const isClone = g => g?.kind === 'clone';
+// A Method Clone (Fritz, 2026-11-07: "We need a type of Clone if someone wanted the Device displayed like Tartan has one"; "Make it
+// part of the Rule for Devices that have more than One Control Method", Rule 4.4): a Clone of a Device with more than one Control
+// Method that stands for ONE of them (.method). It may sit on its parent's own Tab. One click on it switches the parent to its method
+// and opens the pop-up; it shows ON only while the parent is ON in its method. It has its own Label.
+const isMethodClone = (g, p = L().elements.find(e => e.name === g?.of)) => isClone(g) && !!controlMethods(p) && !!heatMethodKey(g.method);
 const clonesOf = (name, gs = L().graphics) => gs.filter(g => isClone(g) && g.of === name);
 function cloneEl(g) {
   const p = isClone(g) && L().elements.find(e => e.name === g.of);
   if (!p) return null;
   const e = { ...p, name: g.name, workspace: g.workspace, x: g.x, y: g.y, cloneOf: p.name, cloneId: g.id };
+  // a Method Clone (Rule 4.4, Fritz 2026-11-07): one tile of a Device with more than one Control Method, standing for one of them
+  const mk = isMethodClone(g, p) ? heatMethodKey(g.method) : null;
+  if (mk) { e.cloneMethod = mk; e.label = g.label || `${p.label || p.name} ${heatMethodWord(mk)}`; }
   for (const k of ['locked', 'visibility', 'hidden', 'integratedIn', 'integratedAs']) delete e[k];
   if (g.locked) e.locked = true;
   if (g.visibility === 'hidden') e.visibility = 'hidden';
@@ -1980,7 +1988,8 @@ function withLook(e, v) {
 const shownName = (e, v) => editing ? (e.label || e.name) : (v.label || e.name);
 function fillEl(n, e0) {
   // a clone shows its parent's values, with its own Visible (a Process moving the parent leaves the clone where it is)
-  const v0 = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {};
+  let v0 = e0.cloneOf ? { ...S.values[e0.cloneOf], visibility: e0.visibility === 'hidden' ? 'hidden' : 'visible', hidden: false, xposition: '', yposition: '' } : S.values[e0.name] || {};
+  if (e0.cloneMethod) v0 = { ...v0, label: e0.label, state: !!v0.state && heatMethodKey(v0.method) === e0.cloneMethod };      // a Method Clone: ON only in its method
   // In Edit layout the pictures follow the Properties you just saved (Fritz, 2026-11-05: a valve's new Orientation showed only after
   // Save layout): the Brain's .image / .imageOn / .imageOff / .imageOverlay are last Save layout's, so here they are the item's own
   // (as the Brain makes them, lib/store.js), as shownName does for the Label
@@ -2164,10 +2173,10 @@ const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator
 
 // One-click method spots (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it need
 // only one click to select Duty Cycle or a click somewhere else to select PID", Rule 6.19). A Heating Element shows a small button
-// for each heating method ticked in its Properties, under its picture on the Tab, or under its picture on a Vessel Device when it
+// for each heating method it is allowed (its main one and the ones ticked in its Properties), under its picture on the Tab, or under its picture on a Vessel Device when it
 // is built in. Only when MORE THAN ONE is ticked (Fritz, 2026-11-07: "Those hot spots only need to be there when there is more
 // than one control metod"). One click on one switches the Element to that method at once; the one in use is lit.
-const methodSpots = e => { const l = isHeatElem(e) ? HEAT_METHODS.filter(([k]) => e['methodSpot_' + k]) : []; return l.length > 1 ? l : []; };
+const methodSpots = e => { const ok = allowedMethods(e), l = HEAT_METHODS.filter(([k]) => ok.includes(k)); return l.length > 1 ? l : []; };      // every allowed method (Rule 6.19), when 2 or more
 function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots')) old.remove();
   for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
@@ -2238,6 +2247,17 @@ const elByName = n => S.config.elements.find(x => x.name === n) ?? S.config.elem
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
 const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
+// One click on a Method Clone (Rule 4.4): its parent switches to the Clone's method at once, then the pop-up opens on it
+async function methodCloneTap(g) {
+  if (!can('operator')) return toast('Your account is view only', true);
+  const p = L().elements.find(e => e.name === g.of); if (!p) return;
+  const k = heatMethodKey(g.method);
+  if (!allowedMethods(p).includes(k)) return toast(`${p.label || p.name} may not use ${heatMethodWord(k)}: tick it in its Properties`, true);
+  if (NEEDS_PROBE.includes(k) && !p.input) return toast(`${p.label || p.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
+  if (heatMethodKey(S.values[p.name]?.method) !== k) { await setProp(p.name, 'method', heatMethodWord(k)); S.values[p.name] = { ...(S.values[p.name] || {}), method: heatMethodWord(k), ...(k === 'onoff' ? { state: false } : {}) }; }
+  if (isHeatElem(p)) heatDialog(p);
+}
+
 async function doTap(e) {
   const act = tapAction(e);
   if (!['none', 'workspace'].includes(act) && !can('operator')) return toast('Your account is view only', true);
@@ -2293,6 +2313,8 @@ $('#ws').addEventListener('click', ev => {
   if (mfv) return toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35)
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
+  const mc = n.dataset.gid && L().graphics.find(g => g.id === n.dataset.gid && isMethodClone(g));
+  if (mc) return methodCloneTap(mc);
   const e = elByName(n.dataset.name); if (e) doTap(e);
 });
 
@@ -2384,7 +2406,7 @@ function heatDialog(t) {
     };
     d.append(h('div', { class: 'vdTitle' }, `${title}: ${v.state ? 'ON' : 'OFF'}, ${heatMethodWord(now)}` + (v.state && PERCENT_METHODS.includes(now) ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
       h('div', { class: 'muted' }, 'Heating method'),
-      h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.map(btn)),
+      h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.filter(([k]) => allowedMethods(t).includes(k) || k === now).map(btn)),
       ...(main ? [h('div', { class: 'muted' }, main[1]), h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+'))] : []),
       h('div', { class: 'muted' }, m === 'onoff' ? 'Switching to On/Off turns it OFF first; click ON for full power.' : 'A click on a method switches to it at once.'),
       h('div', { class: 'vdBtns' },
@@ -3858,9 +3880,9 @@ const PUMP = ['Pump, on / off (relay or SSR)', 'pump', 'Pump'];
 const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: 'Images/Skynet/Pumps/Pump_Sump_On.svg', imageOff: 'Images/Skynet/Pumps/Pump_Sump_Off.svg' }];
 // Fritz, 2026-11-05: one row for the Motorized Ball Valves; step 2 picks the Skynet one or the User Defined one (with pictures)
 const MBV = ['Motorized Ball Valve, open / closed (relay)', 'mbv', 'Valve'];
-const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'DO'];
+const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'HE'];
 // Fritz, 2026-11-05: "instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build"
-const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'DO'];
+const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'HE'];
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
@@ -3940,6 +3962,9 @@ function fillClones() {
   const sel = $('#cloneDev'), w = curWs(); if (!w || !draft) return fillPick(sel, '⧉ Clone Device', []);
   const here = new Set([...draft.elements.filter(e => e.workspace === w.name).map(e => e.name), ...draft.graphics.filter(g => isClone(g) && g.workspace === w.name).map(g => g.of)]);
   const left = new Set(draft.elements.filter(e => isDevice(e) && realTab(e.workspace) && !here.has(e.name)).sort((a, b) => a.name.localeCompare(b.name))), groups = [];
+  // a Method Clone (Rule 4.4): a Device with more than one Control Method can be cloned on any Tab, its own too, one tile per method
+  const multi = draft.elements.filter(e => controlMethods(e) && !e.integratedIn && realTab(e.workspace)).sort((a, b) => a.name.localeCompare(b.name));
+  if (multi.length) groups.push(['Method Clone (one tile per Control Method)', multi.map(e => [`${e.label || e.name}: a Method Clone   (Tab ${e.workspace})`, () => cloneHere(e.name, true)])]);
   for (const [group, fits] of CLONE_GROUPS) {
     const items = [...left].filter(fits); items.forEach(e => left.delete(e));
     if (items.length) groups.push([group, items.map(e => [`${e.name}   (Tab ${e.workspace})`, () => cloneHere(e.name)])]);
@@ -3947,9 +3972,11 @@ function fillClones() {
   fillPick(sel, '⧉ Clone Device', groups);
   if (!groups.length) sel.append(h('option', { value: 'none', disabled: true }, '(no Device on another Tab to clone here)'));
 }
-function cloneHere(name) {
+function cloneHere(name, byMethod) {
   const w = curWs(), p = draft.elements.find(e => e.name === name); if (!w || !p) return;
   const g = makeClone(p, w.name);
+  // a Method Clone starts on a method its parent and its other Method Clones do not stand for yet (changed in its Properties)
+  if (byMethod) { const used = new Set([startMethod(p), ...draft.graphics.filter(x => isClone(x) && x.of === p.name && x.method).map(x => heatMethodKey(x.method))]); g.method = heatMethodWord(allowedMethods(p).find(k => !used.has(k)) ?? allowedMethods(p).find(k => k !== startMethod(p))); }
   sel = { kind: 'gfx', id: g.id }; renderWs();
   toast(`${g.name} is a Clone of ${p.name}. Drag it into place.`);
 }
@@ -4091,7 +4118,7 @@ async function newDeviceDialog(e, hint, what) {
   // Fritz, 2026-11-05 (Rule 18.15 changed): some Devices start with their Label filled in as Type_n, n the next number not used yet
   // (a Motorized Ball Valve: mBV_1, mBV_2 ...); it can be changed, never left blank, and the focus starts on the next empty field
   if (mbv && !String(work.label ?? '').trim()) work.label = autoLabel('mBV');
-  { const hm = heatMode(e); if (hm && !String(work.label ?? '').trim()) work.label = autoLabel('hE_' + hm); }     // a Heating Element (Fritz, 2026-11-05): hE_PID_1 ...
+  { const hm = heatMode(e); if (hm != null && !String(work.label ?? '').trim()) work.label = autoLabel(hm ? 'hE_' + hm : 'hE'); }     // a Heating Element: hE_1 (its method can change, Rule 6.19); the old control Devices hE_PID_1 ...
   if (pr && !String(work.label ?? '').trim()) work.label = probeAutoLabel(work.typeCode || defaultCode(e));       // a Temperature Probe: tP_1W_1, tP_RTD_1 ... (Rule 18.26)
   if (pwm && !String(work.label ?? '').trim()) work.label = autoLabel(pwmAutoLabel(e));      // PWM_1, 4_20_1, 0_10_1 ... (Fritz, 2026-11-05, Rule 18.25)
   { const b = draft.workspaces.find(w => w.name === e.workspace); if (b?.build) work.workspace = draft.workspaces.find(w => w.name === b.from && !w.build)?.name || draft.workspaces.find(w => !w.build)?.name || e.workspace; }    // the Tab it was added from
@@ -5168,6 +5195,9 @@ const F = {
   // Cloned Devices: only Visible, Tab, X and Y are its own (and the lock); the rest is set in its parent's Properties
   clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
     ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Tapping the Clone is tapping the parent: turning it on or off (or Enabled, for a PID) turns the parent and every Clone. A reading (a temperature probe) is shown the same way as the parent.`, 'note'],
+    ...(controlMethods(L().elements.find(e => e.name === it.of)) ? [
+      ['method', 'Control Method this Clone stands for (blank = a plain Clone)', 'sel', [['', '(none: a plain Clone)'], ...allowedMethods(L().elements.find(e => e.name === it.of)).map(k => [heatMethodWord(k), heatMethodWord(k)])], false, false, { tip: 'A Method Clone (Rule 4.4): one click on it switches its parent to this method and opens its pop-up. It shows ON only while the parent is ON in this method.' }],
+      ['label', 'Label (blank = the parent\'s Label and the method)', 'text']] : []),
     ['visibility', 'Visible (off = hidden on its Tab only)', 'vis'], ['workspace', 'Tab (the Tab this Clone is on)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
   common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; never blank)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
     // the Image block (Fritz, 2026-10-29): Background #, Back Colour, and Image Path 1-3, each with OPEN and a box to type a path in
@@ -5491,9 +5521,9 @@ function heatFields(it, x = {}) {
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, x]),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
-    ['_spotHead', 'One-click method spots on the Tab (shown when 2 or more are on)', 'head', null, false, false, x],
-    ...HEAT_METHODS.map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
-    ['_heatNote', `A Process changes it: ${it.name || 'hE_1'}.method = "PID" (or On/Off, Duty Cycle, Hysteresis, Deadband). So does a click on it while running.`, 'note', null, false, false, x]];
+    ['_spotHead', 'Other methods allowed (each one ticked gets a one-click spot on the Tab)', 'head', null, false, false, x],
+    ...HEAT_METHODS.filter(([k]) => k !== m).map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
+    ['_heatNote', allowedMethods(it).length > 1 ? `A Process changes it: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m))}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m))}. So does a click on one of its spots, or on it while running. Only the methods allowed here can be used.` : 'Only its starting method is allowed. Tick another method above to switch between them by a click or a Process.', 'note', null, false, false, x]];
 }
 function elemDeviceFields(it, item) {
   const T = DEVICE_TIPS;
@@ -5523,11 +5553,11 @@ const isPwmDev = e => ['pwmOut', 'analogOut'].includes(e?.type) && !e.kind && !e
 const isElemDev = e => e?.type === 'digitalOut' && e.subtype === 'element' && !e.kind && !e.template && !e.integratedIn;
 // Heating Element Labels fill in by control mode (Fritz, 2026-11-05, Rule 18.15): PID, HYS, DutyC, PWM, DO (on / off), DeadB
 const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
-const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? heatMethodCode(startMethod(e)) : e.type === 'pwmOut' ? 'PWM' : null);
+const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? '' : e.type === 'pwmOut' ? 'PWM' : null);
 const isSkyElem = e => e?.imageOff === ELEM_OFF;
 const elemTitle = e => isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e) || isElemDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, PWM / Analog out, Heating Element, Temperature Probe (Rule 18.26)
-const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'DO' : isProbeDev(e) ? '' : 'Valve';
+const drillCode = e => isPumpDev(e) ? 'Pump' : isElemDev(e) ? 'HE' : isProbeDev(e) ? '' : 'Valve';
 // the next Type_n Label (Rule 18.15): one more than the highest n any Device or Widget already has with this Type (any case)
 function autoLabel(type) {
   const re = new RegExp(`^${type}_(\\d+)$`, 'i'), L0 = draft || S.config;
@@ -6010,7 +6040,7 @@ function fieldTip(name, text) {
 const DEVICE_TIPS = {
   heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target) or Deadband (steps its % toward the Target). One Element, one Device (Rule 6.19): a Process or a click while running can change it.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID and Deadband read to hold the Target.',
-  methodSpot: 'On: a small button for this heating method shows under the Element on its Tab (or under it on its Vessel Device), only when two or more are on. One click on it switches the Element to this method at once.',
+  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',

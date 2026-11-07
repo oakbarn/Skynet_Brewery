@@ -40,8 +40,13 @@ export const methodWords = () => HEAT_METHODS.map(m => m[1]).join(', ');
 // Every Device with more than one method of control (Fritz, 2026-11-07: "for things that have more than on method of control
 // to choose the one you want to use"): a Process picks one with .method. Today that is the Heating Element; a new kind of Device
 // with more than one way of control is added here, and .method, the Process editor's list and Help follow it.
-// Returns the words .method takes, or null for a Device with only one way of control.
-export const controlMethods = el => isHeatElem(el) ? HEAT_METHODS.map(m => m[1]) : null;
+// Only the methods its Build allows (Fritz, 2026-11-07: "we ask the primary Control Method, and then have check boxes of other
+// available Methods. Only Checked Methods are allowed. If a Method is Checked, it needs a Hot Spot or Icon on the Screen Display of
+// the device to switch between methods"): its starting method (heatMethod) and every method ticked in its Build (methodSpot_<key>).
+export const allowedMethods = el => isHeatElem(el) ? HEAT_KEYS.filter(k => k === startMethod(el) || el['methodSpot_' + k]) : [];
+export const allowedWords = el => allowedMethods(el).map(heatMethodWord).join(', ');
+// Returns the words .method takes, or null for a Device with only one way of control (one method allowed).
+export const controlMethods = el => { const l = allowedMethods(el); return l.length > 1 ? l.map(heatMethodWord) : null; };
 
 // The settings each method uses: [runtime name, Properties key, label, starting value]. The runtime names are the ones the
 // separate Duty Cycle, Hysteresis, PID and Deadband Devices have, so a Process line reads the same (hE_1.target = 152).
