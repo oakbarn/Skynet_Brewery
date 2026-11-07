@@ -110,5 +110,5 @@ vVSlot += 1
 goto "Next_Slot"
 [Slots_Done]
 gblVHop_Max = vVSlot
-shr_Hop_Slot = vVSlot
+gV_Hop_Slot = vVSlot
 print "Boil hop groups: " + vVSlot

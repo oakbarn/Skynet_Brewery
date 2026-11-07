@@ -15,6 +15,6 @@
 |---|---|---|
 | Reading values, silencing alarms, stopping Processes | Changing gGlobals whose .API is Get and Put and that are not read-only (same as the web API) | Switching outputs (heat, burners, pumps, valves), controlling timers, starting Processes |
 
-Hardware inputs and temperatures are read only, and Shared variables are never shared. The table on the settings page has **Voice can hear it** and **Can change it** for each item, and a list of Processes that voice and MQTT may start.
+Hardware inputs and temperatures are read only, and a gGlobal whose .API is Off is never shared. The table on the settings page has **Voice can hear it** and **Can change it** for each item, and a list of Processes that voice and MQTT may start.
 
 The full guide, with the topic list and Alexa setup, is `docs/MQTT_AND_VOICE.md`.

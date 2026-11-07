@@ -195,6 +195,15 @@ screen, never on a Tab; the `= 10` is its **first value** only, and afterwards t
 its value (Rule 1.22). A name already used by a Device or Widget, or by a gGlobal of another Kind, is an error. Any other name
 after `new value` is still a Process variable. (thread "Declare gGlobals inside a Process", Help 145)
 
+1.25 **Shared Variables are gGlobals** (Fritz, 2026-11-07: "a shared variable is a gGlobal Variable. we need to get rid of that
+class and turn them into gGlobal of the correct type"). There is **no Shared Variable class** any more, in the Panel or the
+BruControl Import. When an older Schema loads, each Shared Variable becomes a **gGlobal of the Kind that fits its data type**
+(Rule 1.19): a number gV_Global_Value, text gS_Global_String, true / false gB_Global_Boolean, a time gT_Global_Time, a date and
+time gD_Global_DateTime. It keeps its **Name**, hidden key, first value and saved value, so every Process that uses it still works;
+it is **never on a Tab**, and its **Database and .API are Off**, so it still only passes values between Processes. To pass a value
+between Processes now, make a gGlobal with Database and .API Off. Imported BruControl Globals are set one by one in the Importer's
+globals interview later (Fritz). (thread "Explain the Shared Variable Widget", Help 149)
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -1487,7 +1496,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **145** (143 is the BruControl Importer's, 144 API_Name). (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **150** (143 is the BruControl Importer's, 144 API_Name). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2411,6 +2420,7 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 18.30: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-07: Added Rule 18.31 (Fritz: "All dialogs for devices should follow the Pump Drill down sample"): every other Device's Properties, and every Device built into a Vessel Device, RIMS tube or Integrated kettle, follow the Pump's drill-down; double-clicking a built in part opens its Properties. Rule 18.10's exception extended to Devices. Help 148; next free Help number 149. Checked against the BruControl Import program: it has no Device dialogs, its Devices open in the Panel's. (thread "Make every Device dialog match Pump drill-down")
 - 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")
+- 2026-11-07: Added Rule 1.25 (Shared Variables are gGlobals: the class is removed; older ones become a gGlobal of the Kind that fits their data type, same Name, Database and .API Off). Checked against the BruControl Import program: it never makes Shared Variables and loads Schemas through the same code, so an older Schema it reads is changed the same way. Help 149 (148 is taken by an open PR); next free Help number 150. (thread "Explain the Shared Variable Widget")
 - 2026-11-07: Rule 5.31: plugged IPs are hidden; only open IPs show (a Thermowell, Probe, End Cap or Heating Element plugs its opening; a built in Valve does not). The Panel now hides a Vessel Device IP with a built in Element, Probe or Thermowell, as it already did for an End Cap. The BruControl Import's Vessel questions (plan section 9) now ask about every other opening: Not there, Open (its own connection chain), or Plugged with a Thermowell, End Cap or Heating Element. Checked against both programs. Help 133 and 143 updated; no new Help number used. (thread "Ask about other Vessel openings in the import")
 - 2026-11-07: Rule 5.31: the Three Vessel sample's HLT, Mash tun and Boil kettle are now Vessel Devices built from the Main Template (Fritz: "change all the vessels to" "Vessels Devices"), their probes and heaters built into the Left and Right Element IPs; a built in Element that is a heat controller stays one. Help 133 updated; no new Help number used. Checked against the BruControl Import program: it does not use the samples, so nothing changes there. (thread "Change 3 Vessel sample to Vessel Devices")
 - 2026-11-07: Rule 15.4: the Setup question about the Importer now explains who should answer Yes (BruControl Brewers with a .brucfg file) and who should answer No; when Yes, the last Setup page offers a tick box "Open the BruControl Importer now". Checked against both programs: only the shared Setup changes. Help 143 updated. (thread "Reword Setup BruControl import question")
