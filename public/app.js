@@ -8,6 +8,7 @@ import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './coloriz
 import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
+import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods } from './heatmethod.js';
@@ -147,6 +148,7 @@ async function load() {
   if (S.me.role === 'admin' && touchRun() && !load.told) { load.told = true; toast('📱 Phone or tablet: run mode. Editing and building are done on a computer (Rule 2.35)', false, 5000); }
   if (S.me.role === 'admin' && !touchRun()) load.told = false;
   $('#code').readOnly = !can('admin');
+  rememberTheme(applyTheme(document, S.config.theme).key);     // the Look of this Schema (Rule 2.39)
   $('#title').textContent = S.config.title || 'Skynet Brew Panel';
   document.title = S.config.title || 'Skynet Brew Panel';
   showPanelVer();
@@ -4866,6 +4868,12 @@ function addIpFit(fit, kind) {
   if (kind === 'tap') { g.image = TAP_PIC; g.label = tapLabel(draft.graphics); }       // the Tap Water Valve (Rule 5.33)
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
 }
+// a new Tab starts with the Look's Tab back color and Tab Style (Rule 2.39); a Tab Style picked on ☰ Menu > Default tab wins
+function tabLook() {
+  const l = newTabLook(S.config.theme);
+  if (S.config.brewDefaults?.tabStyle) delete l.style;
+  return l;
+}
 // a new Tab (New tab, and ➕ Add new Tab… in the Add Device box): its name checked, a unique 2 letter Tab ID. Returns it, or null.
 function makeTab() {
   const n = prompt('New tab name')?.trim(); if (!n) return null;
@@ -4873,7 +4881,8 @@ function makeTab() {
   if (draft.workspaces.some(w => w.name === n)) { toast('That name is used', true); return null; }
   const tp = S.config.brewDefaults?.tabProfile;
   const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
-  const w = { name: n, id, width: 1600, height: 900, ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
+  const w = { name: n, id, width: 1600, height: 900, ...tabLook(), ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
+  if (w.tabProfile && tabProfileOf(w)?.bgColor) delete w.color;      // its Tab Background Profile's color wins
   draft.workspaces.push(w); return w;
 }
 $('#addWs').onclick = () => {
@@ -8684,6 +8693,7 @@ function renderSettings() {
   const c = S.config;
   sampleCards($('#sampleList')).catch(e => toast(e.message, true));
   $('#setTitle').value = c.title || '';
+  renderLook();
   $('#setWarnPaths').checked = c.warnOffBrainPaths !== false;
   $('#setMedia').value = (c.mediaRoots || []).join('\n');
   $('#setKey').value = c.apiKey || '';
@@ -8806,6 +8816,44 @@ $('#recNew').onclick = guard(async () => {
 $('#nuAdd').onclick = guard(async () => {
   await api('POST', '/auth/users', { name: $('#nuName').value.trim(), password: $('#nuPass').value, role: $('#nuRole').value });
   $('#nuName').value = ''; $('#nuPass').value = ''; toast('User added'); renderUsers();
+});
+
+// ---------------------------------------------------------------- the Look (theme, Rule 2.39)
+// A few Looks, each just a few color picks (public/themes.js). Picking one shows it at once and saves it right away.
+function lookSwatches(t) {
+  const c = t.colors;
+  return h('span', { class: 'lookSw', style: `background:${c.back};border-color:${c.line}` },
+    h('span', { style: `background:${c.panel};color:${c.text}` }, 'Aa'),
+    h('span', { style: `background:${c.accent};color:${c.accentText}` }, 'OK'),
+    h('span', { style: `color:${c.labels}` }, 'label'));
+}
+function renderLook() {
+  const sel = $('#setLook'), cur = themeOf(S.config.theme);
+  sel.replaceChildren(...THEMES.map(t => h('option', { value: t.key, title: `Close to ${t.like}` }, t.name + (t.key === 'officeBlack' ? ' (default)' : ''))));
+  sel.value = cur.key;
+  $('#lookPreview').replaceChildren(lookSwatches(cur), h('span', { class: 'muted' }, ` Close to ${cur.like}.`));
+  const u = S.config.lookUndo;
+  $('#lookRestore').disabled = !u;
+  $('#lookRestore').title = u ? `Every Tab gets back the back color and Tab Style it had before "Use this Look on every Tab" (${themeOf(u.look).name}, ${new Date(u.when).toLocaleString()}).` : 'Nothing to put back: "Use this Look on every Tab" has not been used in this Schema.';
+}
+$('#lookForce').onclick = guard(async () => {
+  const t = themeOf(S.config.theme);
+  if (editing) return toast('Save or exit Edit layout first', true);
+  if (!confirm(`Give every Tab in this Schema the ${t.name} Tab colors (back color and Tab Style)?\n\nPictures and everything on the Tabs stay. The Tabs' colors now are kept, so "Put the Tabs back" can undo it.`)) return;
+  const r = await api('POST', '/ui/look/tabs', { action: 'apply' });
+  await load(); toast(`${r.tabs} Tabs now use the ${t.name} colors. "Put the Tabs back" undoes it.`);
+});
+$('#lookRestore').onclick = guard(async () => {
+  if (editing) return toast('Save or exit Edit layout first', true);
+  if (!confirm('Put every Tab back to the colors it had before "Use this Look on every Tab"?')) return;
+  const r = await api('POST', '/ui/look/tabs', { action: 'restore' });
+  await load(); toast(`${r.tabs} Tabs put back`);
+});
+$('#setLook').onchange = guard(async () => {
+  const t = themeOf($('#setLook').value);
+  rememberTheme(applyTheme(document, t.key).key);
+  await api('PUT', '/ui/settings', { theme: t.key });
+  S.config.theme = t.key; renderLook(); toast(`Look: ${t.name}`);
 });
 
 $('#saveSettings').onclick = guard(async () => {
@@ -11076,7 +11124,7 @@ async function placeEqItems(p, items) {
   let made = 0, updated = 0;
   for (const it of items) {
     const C = EQ[it.vesselType], tab = tabOfProfile(p.id)?.name || C.tab || 'Equipment';
-    if (!draft.workspaces.some(w => w.name === tab)) draft.workspaces.push({ name: tab, width: 1600, height: 900 });
+    if (!draft.workspaces.some(w => w.name === tab)) draft.workspaces.push({ name: tab, width: 1600, height: 900, ...tabLook() });
     let g = draft.graphics.find(x => x.kind === 'vessel' && x.profileItem === it.id);
     const old = g ? clone(g) : null;
     if (g && g.vesselType !== it.vesselType) {      // a different kind now: its old port IPs go

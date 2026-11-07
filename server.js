@@ -27,6 +27,7 @@ import { Control } from './lib/control.js';
 import { listSamples, loadSample } from './lib/samples.js';
 import { Schemas } from './lib/schemas.js';
 import { importFolder, listSchemaFiles, readSchemaFile } from './lib/importer.js';
+import { THEME_KEYS, forceLookOnTabs, restoreTabs } from './public/themes.js';
 import { EquipmentProfiles, withVolumes, lockedMsg as lockedMsgFor } from './lib/equipment.js';
 import { ProfileStore, PROFILE_KINDS } from './lib/profiles.js';
 import { readRecipeFile, cleanRecipe, RecipeStore, HopAlerts, recipeView } from './lib/recipe.js';
@@ -334,7 +335,7 @@ function needRole(p, m) {
   if (p.startsWith('/ui/brainmove')) return 'admin';   // Move Brain: every file, logins included, and the USB ports   // Get Skynet pictures: copies pictures from GitHub onto the Brain
   return m === 'GET' ? 'viewer' : 'admin';
 }
-const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/genpw.js', '/style.css', '/favicon.ico', '/favicon.svg']);
+const PUBLIC_FILES = new Set(['/login.html', '/login.js', '/eye.js', '/genpw.js', '/style.css', '/favicon.ico', '/favicon.svg', '/themeboot.js']);
 const clientIp = req => req.socket.remoteAddress ?? '';
 // HTTPS through a proxy on this computer (for example "tailscale serve")
 const viaHttps = req => req.headers['x-forwarded-proto'] === 'https' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(clientIp(req));
@@ -608,11 +609,22 @@ async function route(req, res) {
     if (tl !== undefined && tl !== null && !(+tl > 18 && +tl <= 200)) return fail(res, 400, 'Large text size must be more than 18 (normal text) and at most 200');
     for (const k of ['mediaRoots', 'apiKey', 'autostart', 'beerxml', 'title', 'chooseSample', 'vesselLists', 'warnOffBrainPaths', 'restartLimit', 'restartAlarm', 'brewDefaults', 'menuOrder']) if (k in body) store.config[k] = body[k];
     if ('userStyles' in body) store.config.userStyles = cleanUserStyles(body.userStyles);     // a Skynet Style can never be changed (public/styles.js)
+    if ('theme' in body) { if (!THEME_KEYS.includes(body.theme)) return fail(res, 400, 'That Look (theme) is not one of the Skynet Looks'); store.config.theme = body.theme; }
     if ('donation' in body) store.config.donation = cleanDonation(body.donation);
     if ('passwordRules' in body) store.config.passwordRules = cleanPasswordRules(body.passwordRules);
     store.writeConfig(); broadcast('config', {});
     if ('mediaRoots' in body) pictures.start();
     return ok(res);
+  }
+  // the Look on every Tab (Rule 2.39): apply keeps the Tabs' colors first (lookUndo), restore puts them back
+  if (p === '/ui/look/tabs' && m === 'POST') {
+    const b = await jsonBody(req);
+    let tabs;
+    if (b.action === 'apply') tabs = forceLookOnTabs(store.config, store.config.theme);
+    else if (b.action === 'restore') { if (!store.config.lookUndo) return fail(res, 400, 'Nothing to put back'); tabs = restoreTabs(store.config); }
+    else return fail(res, 400, 'Unknown action');
+    store.writeConfig(); broadcast('config', {});
+    return ok(res, { tabs });
   }
   // ---- The Brew Process (☰ Menu > Brew Process): everyone sees it, admins change it, operators start the Brew Day
   if (p === '/ui/brewprocess' && m === 'GET') {
