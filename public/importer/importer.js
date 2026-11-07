@@ -5,12 +5,28 @@
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-async function api(method, url, data) {
-  const r = await fetch(url, { method, headers: { 'X-Skynet-Importer': '1', ...(data ? { 'Content-Type': 'application/json' } : {}) }, body: data ? JSON.stringify(data) : undefined });
+// The Importer runs in the black "Skynet BruControl Importer" window. If that window is closed, nothing on this page can work
+// (Fritz, 2026-11-07: the buttons "do not work"), so the page says so plainly at the top instead of doing nothing.
+const STOPPED = 'The Importer has stopped, so the buttons cannot work. Its black window (Skynet BruControl Importer) was closed. ' +
+  'Close this window and start Skynet BruControl Importer again from its shortcut.';
+function stopped(on) { const b = document.querySelector('#stopped'); if (b) { b.textContent = STOPPED; b.classList.toggle('hidden', !on); } }
+async function api(method, url, data, { wait = 30000 } = {}) {
+  const ctl = new AbortController(), timer = wait ? setTimeout(() => ctl.abort(), wait) : 0;
+  let r;
+  try { r = await fetch(url, { method, signal: ctl.signal, headers: { 'X-Skynet-Importer': '1', ...(data ? { 'Content-Type': 'application/json' } : {}) }, body: data ? JSON.stringify(data) : undefined }); }
+  catch (e) {
+    if (e.name === 'AbortError') throw new Error('The Importer did not answer in time. Try again; if it keeps happening, close this window and start the Importer again.');
+    stopped(true); throw new Error(STOPPED);
+  } finally { clearTimeout(timer); }
+  stopped(false);
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || `Error ${r.status}`);
   return j;
 }
+// every few seconds: is the Importer still running?
+setInterval(() => { fetch('/api/ping', { headers: { 'X-Skynet-Importer': '1' } }).then(r => stopped(!r.ok)).catch(() => stopped(true)); }, 5000);
+// a message next to the folder buttons (the toast at the bottom is easy to miss)
+function folderMsg(msg) { const n = $('#folderNote'); n.textContent = msg; n.classList.toggle('note', !!msg); }
 let toastTimer;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('hidden'), 5000); }
 
@@ -33,11 +49,12 @@ function render(list) {
   state.folder = list.folder; state.files = list.files;
   $('#folder').value = list.folder;
   const home = state.start?.defaultFolder ?? '';
+  $('#folderNote').classList.remove('note');
   $('#folderNote').textContent = !list.exists ? '' : list.folder.toLowerCase() === home.toLowerCase() ? 'This is BruControl\'s usual folder.' : '';
   const tb = $('#files tbody');
   tb.innerHTML = list.files.map((f, i) => `<tr data-i="${i}" class="${f.path === state.sel ? 'sel' : ''}">
     <td><input type="radio" name="cfg" ${f.path === state.sel ? 'checked' : ''} aria-label="Pick ${esc(f.name)}"></td>
-    <td>${esc(f.name)}${f.isDefault ? ' <span class="muted">(BruControl default)</span>' : ''}${f.isBackup ? ` <span class="muted" title="A backup BruControl made of a config file. It is the same config file inside and imports the same way.">(backup${f.backupDate ? ` of ${esc(f.backupDate)}` : ''})</span>` : ''}</td><td>${esc(f.modified)}</td><td>${sizeText(f.size)}</td></tr>`).join('');
+    <td>${f.sub ? `<span class="muted">${esc(f.sub)}\\</span>` : ''}${esc(f.name)}${f.isDefault ? ' <span class="muted">(BruControl default)</span>' : ''}${f.isBackup ? ` <span class="muted" title="A backup BruControl made of a config file. It is the same config file inside and imports the same way.">(backup${f.backupDate ? ` of ${esc(f.backupDate)}` : ''})</span>` : ''}</td><td>${esc(f.modified)}</td><td>${sizeText(f.size)}</td></tr>`).join('');
   $('#files').classList.toggle('hidden', !list.files.length);
   // No config of the brewer's own here (none, or only BruControl's default one): ask them to point to their folder
   const empty = $('#empty'), own = list.files.filter(f => !f.isDefault).length;
@@ -55,8 +72,10 @@ function render(list) {
 }
 
 async function look(folder, remember = true) {
+  const btn = $('#lookBtn'); btn.disabled = true; btn.textContent = 'Looking…';
   try { render(remember ? await api('POST', '/api/folder', { folder }) : await api('GET', '/api/configs?folder=' + encodeURIComponent(folder))); }
-  catch (e) { toast(e.message); }
+  catch (e) { folderMsg(e.message); toast(e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Look'; }
 }
 
 async function select(i) {
@@ -113,22 +132,28 @@ $('#folder').onkeydown = e => { if (e.key === 'Enter') look($('#folder').value);
 $('#homeBtn').onclick = () => look(state.start?.defaultFolder ?? '');
 $('#pickBtn').onclick = async () => {
   try {
-    const r = await api('POST', '/api/pick-folder', { start: state.start?.lastFolder || state.folder });
+    folderMsg('The Browse For Folder box is open. If you do not see it, look on the taskbar.');
+    const r = await api('POST', '/api/pick-folder', { start: state.start?.lastFolder || state.folder }, { wait: 0 });
+    folderMsg('');
+    if (r.busy) return folderMsg('A Windows box is already open. Look for it on the taskbar, pick there or click Cancel.');
     if (r.none) return toast('Change folder works on Windows. Type the folder in the box and press Enter.');
     if (r.picked) look(r.picked);
-  } catch (e) { toast(e.message); }
+  } catch (e) { folderMsg(e.message); toast(e.message); }
 };
 // Browse for the config file with Windows' Open box (in Documents\BruControl); its folder is listed and the file picked
 $('#browseBtn').onclick = async () => {
   try {
-    const r = await api('POST', '/api/pick-file', { start: state.folder || state.start?.defaultFolder || '' });
+    folderMsg('The Open box is open. If you do not see it, look on the taskbar.');
+    const r = await api('POST', '/api/pick-file', { start: state.folder || state.start?.defaultFolder || '' }, { wait: 0 });
+    folderMsg('');
+    if (r.busy) return folderMsg('A Windows box is already open. Look for it on the taskbar, pick there or click Cancel.');
     if (r.none) return toast('Browse works on Windows. Type the folder in the box and press Enter.');
     if (!r.picked) return;
     const dir = r.picked.replace(/[\\/][^\\/]*$/, '');
     await look(dir);
     const i = state.files.findIndex(f => f.path.toLowerCase() === r.picked.toLowerCase());
     if (i >= 0) select(i); else toast('That is not a BruControl config file (.brucfg) or backup (.bak).');
-  } catch (e) { toast(e.message); }
+  } catch (e) { folderMsg(e.message); toast(e.message); }
 };
 $('#files tbody').onclick = e => { const tr = e.target.closest('tr'); if (tr) select(Number(tr.dataset.i)); };
 $('#files tbody').ondblclick = async e => { const tr = e.target.closest('tr'); if (!tr) return; await select(Number(tr.dataset.i)); next(); };
