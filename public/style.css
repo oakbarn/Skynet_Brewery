@@ -1108,3 +1108,7 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .jobPickBar { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 9000; background: #fffbe6; color: #222; border: 2px solid #f5a623;
   border-radius: 8px; padding: 8px 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.25); max-width: calc(100vw - 32px); flex-wrap: wrap; }
 .jobPickBar button { background: #fff; color: #222; border: 1px solid #999; }
+/* the Controls of a DigiBoil or 65 L Brewzilla (Rule 5.39): its name, then its switches, screen and valves; the Brewzilla's Run spot */
+.el.manual .mvRow.mvHead { justify-content: center; }
+.el.manual .mvRun { margin-top: 3px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--muted); background: #20262d; color: #cfe8ff; cursor: pointer; font-size: 12px; }
+.el.manual .mvRun.on { background: #164d2a; color: #b6ffcc; }
