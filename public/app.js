@@ -9558,7 +9558,7 @@ const MENU = [
   { key: 'boil', title: 'Boil Profile', tip: 'Total boil time and boil off', render: renderBrewProfileTab('boil') },
   { key: 'tab', title: 'Tab Background Profile', tip: 'A tab\'s background color, and the look new devices and widgets on it start with', render: renderBrewProfileTab('tab') },
   { key: 'valve', title: 'Valve Profile', tip: 'The pictures and orientation a new valve starts with', render: renderBrewProfileTab('valve') },
-  { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Ferment), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
+  { key: 'brewprocess', title: 'Brew Process', tip: 'The Standard Skynet Brew Process: a Process Template for each major step (PreBrew to Clean), the Devices that do each job, Build and Start the Brew Day', render: renderBrewProcessTab },
   { key: 'recipe', title: 'Recipe', tip: 'The Recipe for brew day: import a BeerSmith .bsmx or BeerXML file, or fill it in. Grains, Hops, Misc, Yeast, Water, Mash and the Hop Schedule', render: renderRecipeTab },
   { key: 'water', title: 'Water Profile', tip: 'Your water: its minerals, and how much distilled or RO water it is cut with', render: renderBrewProfileTab('water') },
   { key: 'fermentation', title: 'Fermentation', coming: 'Coming in a later stage (gravity, ABV, CO2, dates)' },
@@ -9966,6 +9966,8 @@ function renderDefaultTab(box) {
     ['boilProfile', 'Boil Profile', 'sel', pick(S.boilProfiles, '(none)')],
     ['waterProfile', 'Water Profile', 'sel', pick(S.waterProfiles, '(none)')],
     ['boilTime', 'Boil time (minutes)', 'num'],
+    ['_hsT', `Hop stand temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'}; empty = 180 °F / 82 °C): the chill stops here for the Whirlpool hops when a Recipe gives none`, 'num'],
+    ['hopStandMinutes', 'Hop stand time (minutes, cooling water off; empty = 20) when a Recipe gives none', 'num'],
     ['efficiency', 'Brewhouse efficiency (%)', 'num'],
     ['_w2g', `Water to grain ratio (${displayUnits(w).ratioUnit})`, 'num'],
     ['_grainT', `Grain temperature (${displayUnits(w).tempUnit === 'F' ? '°F' : '°C'})`, 'num'],
@@ -10017,6 +10019,7 @@ function renderDefaultTab(box) {
   const du = displayUnits(d), offTo = c => du.tempUnit === 'F' ? c * 9 / 5 : c;
   if (d.waterToGrain !== undefined) d._w2g = Math.round(ratioTo(d.waterToGrain, du.ratioUnit) * 100) / 100;
   if (d.grainTempC !== undefined) d._grainT = Math.round(cTo(d.grainTempC, du.tempUnit) * 10) / 10;
+  if (d.hopStandTempC !== undefined) d._hsT = Math.round(cTo(d.hopStandTempC, du.tempUnit) * 10) / 10;
   if (d.strikeOffsetC !== undefined) d._strikeOff = Math.round(offTo(d.strikeOffsetC) * 10) / 10;
   const f = paneForm(fields, d, () => { }, !admin);
   // Sound on: the same as the button at the top. It works at once on this screen and is not saved.
@@ -10031,8 +10034,9 @@ function renderDefaultTab(box) {
       const raw = { waterToGrain: d._w2g, grainTempC: d._grainT, strikeOffsetC: d._strikeOff }[k];
       if (raw === undefined) delete d[k]; else d[k] = Math.round(from() * 1000) / 1000;
     }
-    delete d._w2g; delete d._grainT; delete d._strikeOff;
-    for (const [k, t] of [['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
+    if (d._hsT === undefined || d._hsT === '' || d._hsT === null) delete d.hopStandTempC; else d.hopStandTempC = Math.round(toC(d._hsT, su.tempUnit) * 1000) / 1000;
+    delete d._w2g; delete d._grainT; delete d._strikeOff; delete d._hsT;
+    for (const [k, t] of [['hopStandMinutes', 'Hop stand time'], ['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
     for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
       if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
@@ -10204,7 +10208,8 @@ function renderSkynetPicsTab(box) {
 }
 
 // ---- Brew Process (Fritz, 2026-10-30, lib/brewprocess.js): a Process Template for each major step, the Device for each job,
-// then Build the Brew Day makes the Flow Processes Brew_1_PreBrew ... Brew_7_Ferment, each starting the next. No coding.
+// then Build the Brew Day makes the Flow Processes Brew_1_PreBrew, Brew_2_Heat_Strike ... (one for each step used, numbered
+// over those), each starting the next. A step can be skipped (Whirlpool and Chill or Chill: a Brew Day uses one). No coding.
 let BP = null, bpWork = null;
 async function loadBrewProcess() { BP = await api('GET', '/ui/brewprocess'); bpWork = clone(BP.setup); }
 function renderBrewProcessTab(box) {
@@ -10212,23 +10217,27 @@ function renderBrewProcessTab(box) {
   const admin = can('admin'), dis = admin ? {} : { disabled: true };
   const tplOf = (step, name) => BP.templates.find(t => t.step === step && t.name === name);
   box.append(h('h3', {}, 'Brew Process'),
-    h('p', { class: 'muted' }, 'A brew day in seven major steps. Each step uses a Process Template: a Skynet one (comes with Skynet, never changed) or a User one (your own copy). ' +
+    h('p', { class: 'muted' }, 'A brew day is a list of major steps. Each step uses a Process Template: a Skynet one (comes with Skynet, never changed) or a User one (your own copy), or is skipped. ' +
+      'Whirlpool and Chill and Chill do the same job: use one of them and skip the other. ' +
       'Pick the Devices that do each job below; Skynet asks you to do a job by hand when none is picked. Then Build the Brew Day, and Start it.'));
   const steps = h('table', { class: 'grid' }, h('thead', {}, h('tr', {}, h('th', {}, '#'), h('th', {}, 'Major step'), h('th', {}, 'Process Template'), h('th', {}, ''))));
   const tb = h('tbody'); steps.append(tb);
-  BP.steps.forEach((st, i) => {
+  let n = 0;
+  BP.steps.forEach(st => {
     const cur = bpWork.templates[st.key], list = BP.templates.filter(t => t.step === st.key);
     const sel = h('select', dis,
       h('optgroup', { label: 'Skynet Process Templates' }, ...list.filter(t => t.cls === 'skynet').map(t => h('option', { value: t.name, ...(t.name === cur ? { selected: true } : {}) }, t.name))),
       h('optgroup', { label: 'User Process Templates' }, ...list.filter(t => t.cls === 'user').map(t => h('option', { value: t.name, ...(t.name === cur ? { selected: true } : {}) }, t.name))),
-      h('option', { value: '__add__' }, '➕ Add new User Process Template…'));
+      h('option', { value: '__add__' }, '➕ Add new User Process Template…'),
+      h('option', { value: '', ...(cur === '' ? { selected: true } : {}) }, '(skip this step)'));
     sel.onchange = () => {
-      if (sel.value === '__add__') { sel.value = cur; return editProcessTemplate(st, cur, true); }
+      if (sel.value === '__add__') { sel.value = cur; return editProcessTemplate(st, cur || 'Skynet_' + st.key, true); }
       bpWork.templates[st.key] = sel.value; renderMenuPane();
     };
-    const t = tplOf(st.key, cur);
-    tb.append(h('tr', {}, h('td', {}, String(i + 1)), h('td', { title: st.about }, h('b', {}, st.title), h('div', { class: 'muted' }, t?.about || st.about)),
-      h('td', {}, sel), h('td', {}, h('button', { onclick: () => editProcessTemplate(st, cur, false) }, t?.cls === 'user' && admin ? '✏ Edit' : '👁 View'))));
+    const t = tplOf(st.key, cur), skip = cur === '';
+    if (!skip) n++;
+    tb.append(h('tr', skip ? { class: 'muted' } : {}, h('td', {}, skip ? '–' : String(n)), h('td', { title: st.about }, h('b', {}, st.title), h('div', { class: 'muted' }, skip ? 'Skipped. ' + st.about : t?.about || st.about)),
+      h('td', {}, sel), h('td', {}, skip ? '' : h('button', { onclick: () => editProcessTemplate(st, cur, false) }, t?.cls === 'user' && admin ? '✏ Edit' : '👁 View'))));
   });
   box.append(steps);
   // the jobs the picked Templates use
@@ -10251,16 +10260,17 @@ function renderBrewProcessTab(box) {
     h('table', { class: 'grid' }, h('tbody', {}, ...Object.keys(BP.recipeFields).filter(k => !/Units$/.test(k)).map(k => h('tr', {}, h('td', {}, h('code', {}, k)), h('td', {}, String(rv[k])), h('td', { class: 'muted' }, BP.recipeFields[k]))),
       ...Array.from({ length: rv.rcp_Mash_Steps }, (_, i) => h('tr', {}, h('td', {}, h('code', {}, `rcp_Mash_Step_${i + 1}_…`)), h('td', {}, `${rv[`rcp_Mash_Step_${i + 1}_Name`]}: ${rv[`rcp_Mash_Step_${i + 1}_Temp`]} for ${rv[`rcp_Mash_Step_${i + 1}_Time`]}`), h('td', { class: 'muted' }, 'Name, Temp and Time'))))));
   const save = async () => { BP.setup = await api('PUT', '/ui/brewprocess', bpWork); bpWork = clone(BP.setup); };
-  const built = BP.processes.length === BP.steps.length;
+  const names = BP.steps.filter(st => BP.setup.templates[st.key] !== '').map((st, i) => `Brew_${i + 1}_${st.key}`);
+  const built = names.length > 0 && names.every(x => BP.processes.includes(x));
   box.append(saveBar(
     admin ? h('button', { onclick: guard(async () => { await save(); toast('Brew Process saved'); }) }, '💾 Save') : '',
     admin ? h('button', { class: 'primary', onclick: guard(async () => {
-      if (built && !confirm('Build the Brew Day again? Brew_1_PreBrew ... Brew_7_Ferment are made new from the Templates (the ones they replace are kept as .bak).')) return;
-      await save(); const r = await api('POST', '/ui/brewprocess/build'); await loadBrewProcess(); renderMenuPane(); toast('Built: ' + r.built.join(', '));
+      if (built && !confirm(`Build the Brew Day again? ${names[0]} ... ${names[names.length - 1]} are made new from the Templates (the ones they replace are kept as .bak).`)) return;
+      await save(); const r = await api('POST', '/ui/brewprocess/build'); await loadBrewProcess(); renderMenuPane(); toast('Built: ' + r.built.join(', ') + (r.removed?.length ? '. Moved to the bin: ' + r.removed.join(', ') : ''));
     }) }, '🔨 Build the Brew Day') : '',
     h('span', { class: 'spacer' }),
     can('operator') ? h('button', { ...(built ? {} : { disabled: true, title: 'Build the Brew Day first' }), onclick: guard(async () => {
-      if (!confirm('Start the Brew Day now (Brew_1_PreBrew)?')) return;
+      if (!confirm(`Start the Brew Day now (${names[0]})?`)) return;
       await api('POST', '/ui/brewprocess/start'); toast('Brew Day started');
     }) }, '▶ Start Brew Day') : ''));
 }

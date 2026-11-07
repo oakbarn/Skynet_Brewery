@@ -10,4 +10,4 @@ step "Hold the fermentation temperature"
 {{Ferment_Heater}}.enabled = true
 @end
 unlock_Equipment
-print "Brew day done: " + rcp_Name + " is fermenting"
+print "Brewing done: " + rcp_Name + " is fermenting"

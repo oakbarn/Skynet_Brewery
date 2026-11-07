@@ -1,0 +1,75 @@
+//Skynet_Whirlpool_and_Chill
+//About: Start the whirlpool, then chill while it spins. With Whirlpool hops in the Recipe the chill stops at the hop stand temperature, the cooling water goes off for the hop stand, then the chill finishes. Whirlpool hops marked Hop Rocket go in the Hop Infuser, with the wort running through it. The trub settles at the end. Use this or Chill.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Whirlpool"
+ask "Hook up the chiller. Press Done when it is on."
+@if Whirlpool_Pump
+ask "Set the valves so the whirlpool pump takes wort from the kettle drain and sends it back in the whirlpool port. Press Done when they are set."
+{{Whirlpool_Pump}} = true
+@else
+ask "Stir the wort hard in one direction to start a whirlpool. Press Done when it is spinning."
+@end
+@if Chill_Pump
+{{Chill_Pump}} = true
+@end
+if rcp_Hop_Stand == true
+  step "Chill to the hop stand"
+@if Chill_Water
+{{Chill_Water}} = true
+@else
+ask "Open the chiller cooling water. Press Done when it runs."
+@end
+@if Wort_Probe
+  wait {{Wort_Probe}} <= rcp_Hop_Stand_Temp
+@else
+  ask "Press Done when the wort is down to " + rcp_Hop_Stand_Temp + rcp_Temp_Units + " for the hop stand."
+@end
+  step "Hop stand"
+@if Chill_Water
+{{Chill_Water}} = false
+@else
+ask "Turn the chiller cooling water off. Press Done when it is off."
+@end
+  if rcp_Hop_Infuser == true
+@if Hop_Infuser_Valve
+    {{Hop_Infuser_Valve}} = true
+@end
+    ask "Load the Whirlpool (aroma) hops into the Hop Infuser and run the wort through it (" + rcp_Hop_Stand_Temp + rcp_Temp_Units + "). Press Done when it flows through the hops."
+  else
+    ask "Add the Whirlpool (aroma) hops now, at " + rcp_Hop_Stand_Temp + rcp_Temp_Units + ". Press Done when they are in."
+  endif
+  print "Hop stand for " + rcp_Hop_Stand_Minutes + " minutes, cooling water off"
+  sleep rcp_Hop_Stand_Minutes * 60000
+endif
+step "Chill while it spins"
+@if Chill_Water
+{{Chill_Water}} = true
+@else
+ask "Open the chiller cooling water. Press Done when it runs."
+@end
+@if Wort_Probe
+wait {{Wort_Probe}} <= rcp_Ferment_Temp
+@else
+ask "Press Done when the wort is down to " + rcp_Ferment_Temp + rcp_Temp_Units + "."
+@end
+@if Chill_Pump
+{{Chill_Pump}} = false
+@end
+@if Chill_Water
+{{Chill_Water}} = false
+@else
+ask "Turn the chiller cooling water off. Press Done when it is off."
+@end
+@if Whirlpool_Pump
+{{Whirlpool_Pump}} = false
+@end
+ask "Let the wort sit about 15 minutes so the trub settles in a cone in the middle. Press Done when it has settled."
+if rcp_Hop_Infuser == true
+@if Hop_Infuser_Valve
+  {{Hop_Infuser_Valve}} = false
+@else
+  ask "Take the Hop Infuser out of line (or close its valves). Press Done when it is."
+@end
+endif
+print "Wort chilled to " + rcp_Ferment_Temp + rcp_Temp_Units

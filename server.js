@@ -9,7 +9,7 @@ import { spawn } from 'node:child_process';
 import { closeLauncherWindow } from './lib/closewindow.js';
 import { openAppWindow, closeAppWindow } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
-import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
+import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, brewNames, isBrewName, SKIP } from './lib/brewprocess.js';
 import { checkControlled } from './public/semi.js';
 import { controlMethods } from './public/heatmethod.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs, toBackpathText } from './lib/store.js';
@@ -630,11 +630,11 @@ async function route(req, res) {
   if (p === '/ui/brewprocess' && m === 'GET') {
     const v = recipeValues(store.config, { mash: brewProfiles.mash.list(), boil: brewProfiles.boil.list(), water: brewProfiles.water.list() });
     return ok(res, { steps: MAJOR_STEPS, fields: FIELDS, setup: brewSetup(store.config), templates: processTemplates.list(), recipeFields: RECIPE_FIELDS,
-      recipe: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, plain(x)])), processes: MAJOR_STEPS.map((_, i) => processName(i)).filter(n => engine.exists(n)) });
+      recipe: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, plain(x)])), processes: brewNames(brewSetup(store.config)).filter(n => engine.exists(n)) });
   }
   if (p === '/ui/brewprocess' && m === 'PUT') {
     const b = await jsonBody(req), cur = brewSetup(store.config);
-    for (const s of MAJOR_STEPS) { const n = b.templates?.[s.key]; if (n !== undefined) { if (!processTemplates.find(s.key, n)) return fail(res, 400, `${s.title}: no Process Template "${n}"`); cur.templates[s.key] = n; } }
+    for (const s of MAJOR_STEPS) { const n = b.templates?.[s.key]; if (n !== undefined) { if (n !== SKIP && !processTemplates.find(s.key, n)) return fail(res, 400, `${s.title}: no Process Template "${n}"`); cur.templates[s.key] = n; } }
     for (const f of Object.keys(FIELDS)) if (b.fields && f in b.fields) { if (b.fields[f]) cur.fields[f] = String(b.fields[f]); else delete cur.fields[f]; }
     store.config.brewProcess = cur; store.writeConfig(); broadcast('config', {});
     return ok(res, cur);
@@ -653,12 +653,17 @@ async function route(req, res) {
       store.config.processClasses[name] = 'flow';
       engine.write(name, text);
     }
+    // a Brew_ Process the list no longer has (a step skipped or renamed, or the numbers moved) goes to the bin, so only one
+    // chain of Brew_ Processes is left (it can be brought back from there)
+    const keep = new Set(out.map(x => x.name)), gone = [];
+    for (const n of engine.list().map(x => x.name ?? x).filter(isBrewName)) if (!keep.has(n) && !engine.running.has(n)) { engine.remove(n); gone.push(n); }
     store.writeConfig(); engine.renumber();
-    return ok(res, { built: out.map(x => x.name) });
+    return ok(res, { built: out.map(x => x.name), removed: gone });
   }
   if (p === '/ui/brewprocess/start' && m === 'POST') {
-    if (!engine.exists(processName(0))) return fail(res, 400, 'Build the Brew Day first (☰ Menu > Brew Process)');
-    engine.start(processName(0), me.name || 'user'); return ok(res);
+    const first = brewNames(brewSetup(store.config))[0];
+    if (!first || !engine.exists(first)) return fail(res, 400, 'Build the Brew Day first (☰ Menu > Brew Process)');
+    engine.start(first, me.name || 'user'); return ok(res);
   }
   // Simulation mode: everyone sees it, admins change it
   if (p === '/ui/sim' && m === 'GET') return ok(res, { ...sim.status(), upcoming: sim.upcoming() });
