@@ -166,6 +166,11 @@ What each ID means:
   - One-shot time in ms (0 = off); One-shot pulses OFF (off = pulses ON)
   - Pictures and texts when on / off
 - **Board sends:** `DO <pin> <0|1>`.
+- **Heating Element (Kind = element): one Device, the heating method picked** (Rule 6.19, Fritz 2026-11-07, Help 150). Its
+  **Heating method** is On/Off, Duty Cycle, Hysteresis, PID or Deadband: the one it starts with is in its Properties (with the
+  Temperature Probe and each method's settings); a Process (`hE_1.method = "PID"`) or a click while running changes it.
+  `.state` / `.enabled` = ON, `.output` = its pin now (read only), `.value` = a PID or Deadband's output %. Same for a Heating
+  Element built into a Vessel Device, RIMS tube or Integrated kettle. BruControl's two controls on one port import as one of these.
 
 ### 4.2 Pump
 - **Add menu:** Devices: outputs > Pump (relay output with inlet and outlet IPs for pipes).
