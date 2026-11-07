@@ -1110,6 +1110,8 @@ pipe on Save", Help 87).
 6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
 share a port (for example Hysteresis and PID on one heater). The last one turned on wins and the
 others turn off. (2026-10-23, PR #97)
+**A heating element is ONE Device** (Fritz, 2026-11-07, Rule 6.19): its heating method is picked, not made by a second Device on
+its port. The exception above stays only so older Schemas that already have two heaters on one port keep working.
 
 6.2 **Virtual ports:** OneWire probes 700-799 (one Device per probe); hydrometers 200, 201 and up.
 Analog pins use BruControl numbers (A0 = 54, A5 = 59). (2026-10-23, PR #97)
@@ -1260,6 +1262,28 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 - It replaces the "Voice Name" planned on 2026-10-30 (unique, starting as the Label): an API_Name starts blank.
 - It is not the item's Name (Rule 3.1): Processes keep using the Name. The BruControl Importer (Rule 15.4) carries it over later.
   (thread "Add unique API_Name for voice commands", Help 144)
+
+6.19 **One Heating Element, the heating method picked** (Fritz, 2026-11-07: "The way I want to handle this is ONE device, but a to
+select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
+Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
+is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband**.
+- **Properties:** under *Heating method*, the method it **starts with** (On/Off for one that has none), the **Temperature Probe** it
+  reads (Hysteresis, PID and Deadband need one) and that method's settings. The other methods' settings are kept.
+- **A click while running** opens its pop-up: one button per method (the one in use marked; the ones that need a probe greyed out
+  without one), the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
+  and **Cancel**. It still asks before it turns on (Rule 2.33).
+- **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, or DO, DutyC, HYS, PID, DeadB); its settings
+  by the same names the separate Devices had (`.target`, `.dutycycle`, `.kp` ...). `hE_1 = true` or `.enabled = true` turns it ON
+  in its method. `.value` is a PID or Deadband's output %; `.output` is its pin now (read only).
+- **Changing the method while it is ON** goes on at once in the new method, **except to On/Off**, which turns it **OFF** first, so it
+  never jumps to full power by itself.
+- It is On while ON (Rule 7.9), whatever its pin is doing; it shows what it is doing (60 %, 45 % ▸ 152, ON ▸ 152, idle ▸ 152).
+- **The BruControl Import** (Rule 15.4) makes BruControl's two (or more) heating controls on one port (Duty Cycle, Hysteresis, PID,
+  Deadband) **one Heating Element**, starting in the first one's method. Each old name still works in a Process, made safe
+  (`HLT PID` -> `HLT_PID`): `HLT_PID = true` switches it to PID and turns it ON. A second one placed on a Tab becomes a Clone of
+  it. A heating control alone on its port stays as it is.
+- Older Skynet Schemas with two heaters on one port keep working as they are (Rule 6.1's exception).
+  (thread "Pick the heating method on one Element", Help 150)
 
 ## 7. Pictures
 
@@ -2426,3 +2450,4 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 15.4: the Setup question about the Importer now explains who should answer Yes (BruControl Brewers with a .brucfg file) and who should answer No; when Yes, the last Setup page offers a tick box "Open the BruControl Importer now". Checked against both programs: only the shared Setup changes. Help 143 updated. (thread "Reword Setup BruControl import question")
 - 2026-11-07: Added Rule 5.36 (Fritz: "Have any pipe fitting etc size to the pipe when saving"): on Save every pipe fitting on Autosize to pipe takes the size of its pipe, probe tees follow their pipe, End Caps get Autosize to pipe and match the fitting they close. Help 87 updated. (thread "Size fittings to their pipe on Save")
 - 2026-11-07: Rules 5.36, 5.35 and 5.11 changed (Fritz: "any Pipe Fitting, even if a device should size to the majority of the pipes or hoses"): a fitting takes the size most of its pipes and hoses have (a tie takes the bigger); Valve Tees, Supply Manifolds, valves and inline Devices size to their pipes too; pumps keep the Pump Standard. Help 87 and 146 updated. Checked against the BruControl Import program: it does not draw pipes or size anything, so nothing changes there. (thread "Size fittings to their pipe on Save")
+- 2026-11-07: Added Rule 6.19 (Fritz: "ONE device, but a to select the heating method via process or on the Device when clicked"): a heating element is one Heating Element whose heating method (On/Off, Duty Cycle, Hysteresis, PID, Deadband) is picked in its Properties (where it starts), by a click while running, or by a Process (.method); switching to On/Off turns it off first. Rule 6.1 notes a heating element is one Device; its two-on-a-port exception stays only for older Schemas. Checked against the BruControl Import program: it now makes BruControl's heating controls on one port one Heating Element (old names still work in a Process, a second placing is a Clone). Help 150, Help 137 updated; next free Help number 151. (thread "Pick the heating method on one Element")

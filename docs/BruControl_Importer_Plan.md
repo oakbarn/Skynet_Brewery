@@ -336,3 +336,16 @@ Processes as we may gain what a vessel is used for."
 4. **Order: decided** (Fritz, 2026-11-06): these dialogs come **after Names**, "because in some follow ups we will associate
    heater, Probes and valves eventually to what Device control is the HLT Heat for example."
 
+
+## One Heating Element, the heating method picked (built, Rule 6.19)
+
+Fritz, 2026-11-07: "The way I want to handle this is ONE device, but a to select the heating method via process or on the Device
+when clicked". **Built now** in the import (lib/bruimport.js) and the Panel:
+- BruControl heating controls on the **same Interface and Port** (Duty Cycle, Hysteresis, PID, Deadband; a plain Digital Out on
+  that port too) become **one Heating Element** (Digital Out, Kind = element). It starts in the first one's heating method; a
+  Process or a click while running changes it (Help 150).
+- Each BruControl name is kept on it (`.heatControls`, made safe: `HLT PID` -> `HLT_PID`) with its method, so when Processes are
+  imported, `HLT_PID = true` switches the Element to PID and turns it ON, and `M_HLT_Heat = true` to Duty Cycle.
+- Where a second one was placed on a Tab, a **Clone** of the Heating Element is put there.
+- The import notes list each merge, for example *MP_42_DO_HLT_Heat_BH (Main Panel port 42: M_HLT Heat (Duty Cycle) or HLT PID (PID))*.
+- The Vessel Build dialogs' **BruControl Element** dropdown (above) then shows that one Heating Element.

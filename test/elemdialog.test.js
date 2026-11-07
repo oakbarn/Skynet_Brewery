@@ -30,11 +30,12 @@ console.log('elemdialog tests passed');
 // Fritz, 2026-11-05: Heating Element Labels fill in by control mode
 {
   const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
+  const { heatMethodCode, startMethod } = await import('../public/heatmethod.js');      // the method it starts with (Rule 6.19)
   const src = app.match(/const heatMode = (e => .*);/)[1];
   const heatMode = eval(src);
   assert.equal(heatMode({ type: 'pid' }), 'PID'); assert.equal(heatMode({ type: 'hysteresis' }), 'HYS');
   assert.equal(heatMode({ type: 'dutyCycle' }), 'DutyC'); assert.equal(heatMode({ type: 'deadband' }), 'DeadB');
-  assert.equal(heatMode({ type: 'digitalOut', subtype: 'element' }), 'DO'); assert.equal(heatMode({ type: 'pwmOut', subtype: 'element' }), 'PWM');
+  assert.equal(heatMode({ type: 'digitalOut', subtype: 'element' }), 'DO'); assert.equal(heatMode({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), 'PID', 'by the heating method it starts with'); assert.equal(heatMode({ type: 'pwmOut', subtype: 'element' }), 'PWM');
   assert.equal(heatMode({ type: 'digitalOut', subtype: 'pump' }), null); assert.equal(heatMode({ type: 'pid', integratedIn: 'x' }), null);
   assert.match(app, /work\.label = autoLabel\('hE_' \+ hm\)/);
   assert.match(app, /'pwmOut', 'PWM', \{ units: '%', subtype: 'element' \}/, 'the Heating Element list PWM row is a heating PWM');
