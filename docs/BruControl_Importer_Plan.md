@@ -133,6 +133,36 @@ How they are asked (the Rules for dialogs):
 - A choice of more than two things is a **dropdown**. A Yes / No is a **switch**. "Other" opens a text box for what it is.
 - Plain English, correct spelling (Rule 2.37).
 
+### Before the questions: the Vessel Build page (Fritz, 2026-11-07)
+"This is totally new in Skynet. BruControl had a Picture and that was about the sum of a vessel. We need a good explanation
+of the Vessel Build before the Questions." So the first page of this step explains it, before Dialog 1. It has only Back and
+Next (top and bottom), a small drawing of a finished Vessel Device with its parts, and this text (draft for Fritz to check):
+
+> **Building your Vessels**
+>
+> In BruControl, a vessel was a picture on a Workspace. The heater, the probe and the valves were separate items placed near
+> it, and nothing tied them together.
+>
+> In Skynet, each vessel is a **Vessel Device**: one item that has its parts built in. The heating element, the temperature
+> probe, the thermowell, the sparge arm or Steam Slayer, the HERMS coil, and the outlets with their valves and fittings each
+> sit in their own place on the vessel. They move with it and stay with it.
+>
+> Because Skynet knows how your vessels are built, it knows which heater and which probe belong to your HLT, where the wort
+> goes when a valve opens, and what the brewing steps should do.
+>
+> The next pages ask how each of your vessels is built: its size, its fittings, its heat source, and what is on each outlet.
+> Each answer is already filled in with our best guess, taken from your BruControl names, Workspaces and Scripts. Just check
+> each one and change what is wrong.
+>
+> When the answers are done, you see each finished vessel before anything is saved. You can go Back and change any answer.
+> **Save** puts the vessels on your **Brewery** Tab.
+>
+> Nothing in BruControl is changed.
+
+- The longer points (what an IP is, Integrated items never unbundle, Vessel sizes by Gallons) go in hover help on the
+  drawing, not on the page (clean dialogs, Rule 18.16).
+- The drawing is made from the Vessel Master Template (Rule 5.31), not a new picture in the Image Library.
+
 ### The Vessel IP locations (Fritz's drawing, 2026-11-07)
 "We are eventually going to build Vessels from his answers." Every answer about a fitting, element or probe names one of these
 places (IPs) on the Vessel, so the Importer can later build the Vessel from the answers:
