@@ -213,6 +213,9 @@ most common **Probe Location** are the Center Probe. (Fritz's drawing: project f
    - **Gas Burner, not smart.** Two switches: **BruControl controls the Gas Valve**; **BruControl controls the Igniter**.
    - **Gas Burner with smart control.** Two switches: **BruControl controls the Gas Valve**; **BruControl turns on the Smart
      control**.
+   - For both Gas Burners (Fritz, 2026-11-07: "If there is BruControl Valve Yes"): each switch that is on opens a dropdown
+     of the imported Devices by **BruControl name** (an educated guess filled in), the same way as the BruControl Element.
+     The **Temperature Probe** and **Probe Location** are asked the same way too, always shown.
    - **Gas Burner, total manual control.**
    - **BruControl RIMS Tube.**
    - **Oakbarn Modified HERMS (BruControl).**
@@ -265,8 +268,8 @@ Processes as we may gain what a vessel is used for."
 ### Open questions for Fritz on this list
 1. **Outlet questions: decided** (Fritz, 2026-11-07: "Drill Down is good"). One Outlet question (2.3): first the fitting,
    then where it is.
-2. **Gas Burners:** when BruControl controls the Gas Valve or the Igniter, pick that Device the same way (a dropdown of the
-   imported Devices by BruControl name), and the Temperature Probe too?
+2. **Gas Burners: decided** (Fritz, 2026-11-07: "If there is BruControl Valve Yes"). The Gas Valve, Igniter, Smart control and
+   Probe are each picked by BruControl name, like the Element.
 3. **All In One:** which other models go in the list (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One
    skip the questions its model already answers (Outlet, Thermowell, HERMS Coil, Element location)?
 4. **Order: decided** (Fritz, 2026-11-06): these dialogs come **after Names**, "because in some follow ups we will associate
