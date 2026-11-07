@@ -259,7 +259,7 @@ function renderWs() {
 function drawWs() {
   const w = curWs(); const ws = $('#ws');
   if (!w) return;
-  ws.querySelectorAll('.el,.gfx').forEach(n => n.remove());
+  ws.querySelectorAll('.el,.gfx,.flowHot').forEach(n => n.remove());
   ws.style.width = (w.width || 1600) + 'px'; ws.style.height = (w.height || 900) + 'px';
   ws.style.backgroundColor = w.color || tabProfileOf(w)?.bgColor || '';      // its own color, else its Tab Background Profile's
   // background image fills the workspace, or sits at bgX/bgY with size bgW x bgH (leaves room for side panels)
@@ -286,6 +286,7 @@ function drawWs() {
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
+  if (editing) for (const g of L().graphics.filter(g => g.workspace === w.name && isVDev(g))) ws.append(...flowHots(g, capped));      // Rule 2.41: a flow color hotspot where a pipe joins it
   drawMethodSpots(w);
   renderPipes(); fitZoom(); updLockBtn();
 }
@@ -523,6 +524,56 @@ function hermsCoil(w, hh, y1, y2, s) {
     + `<g stroke="#3b4148" stroke-width="${6 * s}"><path d="${leads}"/>${turns}</g><g stroke="#c9ced3" stroke-width="${3 * s}"><path d="${leads}"/>${turns}</g></g></svg>`;
   return 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27');
 }
+// A Properties hotspot (Fritz, 2026-11-07, Rule 5.38, Help 154): a small ⚙ in Edit layout; ONE click opens the Properties
+// (a double-click still works too, Rule 2.9). It never starts a drag, so a click on it can't move the vessel or its pipes.
+const VP_WHAT = { element: 'Heating Element', probe: 'Temperature Probe', thermowell: 'Temperature Probe (in its Thermowell)', valve: 'Valve' };
+function propsHotspot(cls, tip, open, style = '') {
+  const stop = ev => ev.stopPropagation();
+  return h('div', { class: 'propsHot ' + cls, title: tip, style, onpointerdown: stop, ondblclick: stop,
+    onclick: ev => { ev.stopPropagation(); ev.preventDefault(); open(); } }, '⚙');
+}
+// Flow Color hotspots on a Vessel Device (Fritz, 2026-11-07, Rule 2.41, Help 154): in Edit layout, each open IP of the vessel that
+// has a pipe or hose on it, or a pipe fitting (a valve, an elbow ...) joined to it, gets a small 🎨 where the pipe begins: on the IP,
+// or at the far end of the fitting joined to it, or at the outer end of a Valve built into it. One click opens the vessel's own
+// Out flow color (the same setting as in its Properties, Rule 5.21; Fritz: "Flow color is already working on the Vessel Device. I just
+// did not see where to change it").
+function flowHots(g, capped) {
+  const out = [];
+  for (const ip of L().graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.workspace === g.workspace && !capped.has(x.id))) {
+    if (!g.ports?.[ip.port]?.installed) continue;
+    const fits = L().graphics.filter(f => isBfit(f) && f.onVessel === g.id && f.onPort === ip.port);
+    let at = null;
+    if (fits.length) {        // a fitting joined to the opening: the hotspot goes on its far end, where the pipe begins
+      const ends = L().graphics.filter(x => x.kind === 'ip' && fits.some(f => f.id === x.attachTo) && x.port !== 'start');
+      const end = ends.find(x => pipesOn(x.id, g.workspace).length) || ends[0];
+      at = end ? ipCenter(end) : [(fits[0].x || 0) + (fits[0].w || 60), (fits[0].y || 0)];
+    } else if (pipesOn(ip.id, g.workspace).length || L().graphics.some(q => isQd(q) && q.qdOn === ip.id)) {
+      at = ipCenter(ip);
+      const part = vpEl(g, ip.port);       // a Valve built into the opening: at its outer end
+      if (part?.vpKind === 'valve') { const s = picWH(g)[0] / VW_W, right = at[0] > (g.x || 0) + (g.w || VW_W) / 2; at = [at[0] + (right ? 60 : -60) * s, at[1]]; }
+    }
+    if (!at) continue;
+    const cur = flowKey(g.flowColor) || '', name = ip.label || vPortLabel(g, ip.port, g.ports[ip.port]);
+    const n = propsHotspot('flowHot', `${g.label || g.name}, ${name}: one click changes the vessel's Out flow color, the color of the flow out of it (now ${cur ? flowName(cur) : 'None'}) (Rule 2.41)`,
+      () => flowPopup(g), `left:${at[0] + 6}px;top:${at[1] - 24}px;--fc:${flowHex(cur) || 'transparent'}`);
+    n.textContent = '🎨'; if (cur) n.classList.add('set');
+    out.push(n);
+  }
+  return out;
+}
+const flowName = k => (FLOW_COLORS.find(c => c[0] === k) || [k, k])[1];
+// the small Out flow color pop-up: the same picker, and the same setting, as Out flow color in the vessel's Properties
+function flowPopup(g) {
+  $('#vpop')?.remove();
+  const [lab, field] = fieldOne(['flowColor', 'Out flow color', 'flowc', 'vessel'], g), name = g.label || g.name;
+  const ok = h('button', { class: 'primary' }, '💾 Save'), cancel = h('button', {}, '✖ Cancel');
+  const box = h('div', { id: 'vpop', class: 'vpop', title: '' }, h('div', { class: 'vpop-head' }, `${name}: Out flow color`),
+    h('p', {}, 'Flow that begins at this vessel takes this color, through the pump and on to wherever it goes (Rule 5.21). It is the same Out flow color as in the vessel\'s Properties. Save layout keeps it.'),
+    h('div', { class: 'form' }, lab, field), h('div', { class: 'btns' }, cancel, ok));
+  cancel.onclick = () => box.remove();
+  ok.onclick = () => { const v = box.querySelector('[data-k="flowColor"]').value; if (v) g.flowColor = v; else delete g.flowColor; box.remove(); renderWs(); toast(`${name}: Out flow color ${v ? flowName(v) : 'None'} (Save layout keeps it)`); };
+  document.body.append(box);
+}
 // the pictures of its parts and its HERMS coil, on the vessel (at), s: its scale, W: its picture's width
 function vpParts(g, at, s, W) {
   const out = [];
@@ -543,6 +594,10 @@ function vpParts(g, at, s, W) {
     top ??= py - hh / 2;
     out.push(h('div', { class: `vwPart vpPart vp-${e.vpKind}`, 'data-dev': e.name, title: `${p.label || vpName(k)}: ${e.label || e.name} (${e.name}, built in)`,
       style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(pic)}");transform:scaleX(${fl})` }));
+    if (e.vpKind === 'element' || e.vpKind === 'valve') out.push(h('div', { class: 'vwPart vpOvl' + (turnsOn(e.name) ? ' on' : ''), 'data-dev': e.name,      // its On Overlay while it is on (Rule 7.8, Rule 2.41)
+      style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(e.imageOverlay || BOLT)}")` }));
+    if (editing) out.push(propsHotspot('vpHot vpHot-' + e.vpKind, `${e.label || e.name}: one click opens this built in ${VP_WHAT[e.vpKind] || 'part'}'s own Properties (Rule 5.38)`, () => editItem('el', e.name),
+      `left:${left + w / 2 - 9}px;top:${top - 9}px`));      // every built in part (Heating Element, Temperature Probe, Thermowell, Valve): on the middle of its top edge
   }
   return out;
 }
@@ -1057,6 +1112,7 @@ function buildVessel(g) {
   const lbl = g.label || (g.template ? g.name : '');       // a Tab_Vessel or Tab_Fitting: empty Label = its Name
   if (g.labelVisible !== false && lbl && !isPlainUnit(g)) n.append(widgetLabel({ ...g, label: lbl }, 'top'));     // a pipe fitting has no label
   if (editing) { editDeco(n, g); if (sel?.kind === 'gfx' && sel.id === g.id) n.classList.add('sel'); }
+  if (editing && isVDev(g)) n.append(propsHotspot('vdHot', `${g.label || g.name || 'Vessel'}: one click opens this Vessel Device's own Properties (Rule 5.38)`, () => editItem('gfx', g.id)));
   return n;
 }
 // ---- The Vessel Widget class (Fritz, 2026-11-05, Rule 5.31): a Skynet vessel whose Template has every spot Fritz can think of
@@ -2944,7 +3000,7 @@ function renderPipes() {
   // an IP glows while a pipe that starts or ends on it is flowing
   $$('#ws .gfx.ip').forEach(n => n.classList.toggle('live', liveIps.has(n.dataset.ipid || n.dataset.gid)));
   $$('#ws .gfx.vessel').forEach(n => n.classList.toggle('heating', !!n.dataset.heater && turnsOn(n.dataset.heater)));
-  $$('#ws .vpPart[data-dev]').forEach(n => n.classList.toggle('on', turnsOn(n.dataset.dev)));        // a Vessel Device's Element or Valve while it is on
+  $$('#ws .vpPart[data-dev], #ws .vpOvl[data-dev]').forEach(n => n.classList.toggle('on', turnsOn(n.dataset.dev)));        // a Vessel Device's Element or Valve while it is on
 }
 
 // ---------------------------------------------------------------- edit mode
