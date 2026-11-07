@@ -111,5 +111,6 @@ always makes the Import folder, as BeerSmith or other programs may save their fi
 ## Next steps (being built)
 
 The import is built one step at a time with Fritz: next come the other BruControl items (each Placeholder becomes the right
-Skynet Device, Widget or Template, with a few plain questions), then Processes, with a report of every change (Rule 15.1).
+Skynet Device, Widget or Template, with a few plain questions; for each Vessel these include its **other openings**: Not there,
+Open, or Plugged with a Thermowell, End Cap or Heating Element, where a plugged opening shows no IP), then Processes, with a report of every change (Rule 15.1).
 How the older import code did each part is in `docs/BruControl_Old_Import_Method.md`.

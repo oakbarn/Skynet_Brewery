@@ -263,11 +263,24 @@ not part of this plan; it needs Fritz's go and its own Rule.
    - **BruControl RIMS Tube.**
    - **Oakbarn Modified HERMS (BruControl).**
    - **Unheated.**
+9. **Other openings** (Fritz, 2026-11-07: "In the interview, we need to ask about any other openings (IPs)"). Asked last, after
+   the questions above, so it only lists the openings not already used by an answer: every other IP of the Vessel Master
+   Template (for example Left Sparge, Right HERMS In and Out, Back Left Element, Center Probe, Center Outlet). Each opening is
+   one line with a dropdown:
+   - **Not there**: the Vessel has no opening here (Place off, so nothing shows).
+   - **Open**: something connects to it. It gets its own connection chain in Dialog 2b, the same as an outlet.
+   - **Plugged with a Thermowell**: then a dropdown of the imported probes by BruControl name, or Manual Thermometer, or None.
+   - **Plugged with an End Cap.**
+   - **Plugged with a Heating Element**: then a dropdown of the imported heating Devices by BruControl name, as for the
+     Heat Source.
+
+   Each line starts with the educated guess (Not there, unless the BruControl names, Workspaces or Scripts show something
+   there). **A plugged opening's IP is hidden; only open IPs show** (Rule 5.31), on the preview and on the Brewery Tab.
 
 ### Dialog 2b: what is on each outlet (Fritz, 2026-11-07)
 "We need to ask about outlets and what is connected to them (Valves and Type), Pipe Fittings, and if a Valve what comes Next
 (elbow)." For each outlet or inlet the Vessel has (Center Outlet, Center Bottom Outlet, Left Tangential, Right Tangential,
-Sparge or Steam Slayer, HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.2, 18.13):
+Sparge or Steam Slayer, HERMS In/Out, and every **Open** opening from Dialog 2, question 9), a drill-down, one step at a time, like the Pump Add box (Rules 4.2, 18.13):
 1. **What is connected:** Valve; Pipe Fitting; Probe tee or Thermowell (Rule 5.30); Sight Glass (Rule 5.32); Nothing.
 2. **If a Valve:** its **Type** (Manual Ball Valve, Motorized Ball Valve, Butterfly, and so on, from the Valve Standard) and,
    when it is motorized, **which imported Device runs it** (a dropdown by BruControl name, an educated guess filled in).
@@ -282,13 +295,18 @@ Sparge or Steam Slayer, HERMS In/Out), a drill-down, one step at a time, like th
 5. **Tangentials** get the same chain as the outlets, one for each tangential the Vessel has: what is connected (usually a
    Valve), the valve Type and the Device that runs it, what comes next, and the end (Pipe, Hose, Supply Manifold or None, only
    an IP). The chain starts at the Left or Right Tangential IP.
+6. **Other open openings** (Dialog 2, question 9) get the same chain too, starting at that opening's IP.
+7. **A plug ends the chain** (Fritz, 2026-11-07): a Thermowell, an End Cap or a Heating Element put on an opening plugs it. The
+   chain ends there and that IP is hidden; only open IPs show (Rule 5.31).
 
 ### Building the Vessel Device, shown before saving (Fritz, 2026-11-07)
 "Once the answers are done, create a Vessel Device with the Integral Components and Place On the Brewery Tab. Drill Down to get
 to where we can build the Device vessel and display it to the user before saving."
 - From the answers the Importer builds one **Vessel Device** (Rule 5.31, The Vessel Device) from the Vessel Master Template: each
   answer turns its IP location on (Place) and puts the part there (Element, Probe, Thermowell, Sparge Arm or Steam Slayer,
-  HERMS Coil, Tangential Inlet, Outlets with their valves and fittings). The parts are integrated: they never unbundle.
+  HERMS Coil, Tangential Inlet, Outlets with their valves and fittings, and the other openings: open, or plugged with a
+  Thermowell, End Cap or Heating Element). The parts are integrated: they never unbundle. Plugged openings show no IP; only
+  the open IPs show, ready for pipes and hoses on the Tab.
 - It is sized from the Capacity (Vessel Rules, section 19) and named the Skynet way (Rule 3.1).
 - **Preview before saving:** the finished Vessel Device is drawn for the brewer, with its parts, before anything is saved. The
   brewer can go Back to any question and change it; **Save** places it on the **Brewery Tab**.
