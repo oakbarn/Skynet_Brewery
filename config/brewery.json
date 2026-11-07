@@ -659,10 +659,11 @@
       "dataType": "value"
     },
     {
-      "name": "shr_Hop_Slot",
-      "type": "shared",
-      "dataType": "value",
-      "label": "Hop slot (scripts only)",
+      "name": "gV_Hop_Slot",
+      "type": "gGlobal",
+      "kind": "value",
+      "api": "off",
+      "label": "Hop slot (Processes only)",
       "_key": "kc1b12587298a32b7"
     },
     {

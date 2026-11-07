@@ -211,8 +211,6 @@
     <p class="muted">A gGlobal is a variable that every Process can read and change. It is not on a Tab. Its Kind is picked when it is made and can't be changed: <b>gS_Global_String</b>, <b>gG_Global_Graphic</b>, <b>gV_Global_Value</b>, <b>gB_Global_Boolean</b>, <b>gT_Global_Time</b>, <b>gD_Global_DateTime</b>. Switch, Push Button, Pulse Button, List, Step and Long String are not gGlobals (they move to the new Semi_Widgets_Devices class); until then they are still added in <em>Tabs &gt; Edit layout &gt; Select Widget Type &gt; gGlobal variables</em>. Every kind below can be read and changed by every process. Any Device or Widget (gGlobals too) can send its readings to the database and be reached by outside programs: its Properties, <em>Database and .API</em> box.</p>
     <h3 id="sec-gglobal">gGlobal <span class="muted">(processes and screen; database and API when its Properties say so)</span></h3>
     <table class="grid"><thead><tr><th>Name</th><th>Kind</th><th>Value</th><th>Database</th><th>.API</th><th></th></tr></thead><tbody id="gBody"></tbody></table>
-    <h3 id="sec-shared">Shared variables <span class="muted">(processes only)</span></h3>
-    <table class="grid"><thead><tr><th>Name</th><th>Type</th><th>Value</th></tr></thead><tbody id="sharedBody"></tbody></table>
   </section>
 
   <!-- ===== Log ===== -->
@@ -530,7 +528,7 @@
         <label>Topic name<input id="mqBase" placeholder="brewpanel"></label>
       </div>
       <div class="checks"><label><input type="checkbox" class="swc" id="mqHa"> Announce to Home Assistant (needed for Alexa, Google Home and Siri)</label></div>
-      <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop processes. They can change gGlobals whose .API is Read &amp; Control and that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start processes that you tick below. Inputs from hardware are read only, and Shared variables are never shared.</p>
+      <p class="muted"><b>Safety:</b> MQTT and voice can always read values, silence alarms and stop processes. They can change gGlobals whose .API is Read &amp; Control and that are not read-only (the same as the web API). They can only switch outputs (heat, pumps, valves), change timers or start processes that you tick below. Inputs from hardware are read only, and a gGlobal whose .API is Off is never shared.</p>
       <table class="grid"><thead><tr><th>Device or Widget</th><th>Type</th><th>Voice can hear it</th><th>Can change it</th></tr></thead><tbody id="mqItems"></tbody></table>
       <div>Voice and MQTT may <b>start</b> these processes:</div>
       <div id="mqScripts" class="checks"></div>
