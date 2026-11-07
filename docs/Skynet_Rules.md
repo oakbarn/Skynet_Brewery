@@ -1060,7 +1060,20 @@ supply manifolds", Help 146).
   *Replaced (2026-11-06):* its valves' Interface and Ports were set in the fitting's Properties, not in a Pump-style Add box; Flip
   Horizontal, Flip Vertical and Rotate in 45 degree steps.
 
+5.36 **Every pipe fitting sizes to its pipe when saving** (Fritz, 2026-11-07: "Have any pipe fitting etc size to the pipe when
+saving"; thread "Size fittings to their pipe on Save", Help 87).
+- On **Save layout** every Tab is checked, and each time a Tab is drawn in Edit layout (so after 💾 Save in any Properties) that Tab
+  is: every pipe fitting on **Autosize to pipe** (Rule 5.14: elbows, tees, crosses, U, reducers, check valves, Sight Glasses, IP
+  fittings, Manual Valves) takes the size of the biggest pipe or hose joined to it, about its bend (Rule 5.25).
+- A **tee with a Temperature Probe** (Rule 5.30) follows its pipe the same way. It has no Autosize switch (a Device dialog; Rule 18.10).
+- An **End Cap** gets **Autosize to pipe** too (Rule 5.14 lists it as a pipe fitting): on an opening of a TC Pipe Fitting it takes
+  the size of that fitting's ferrule (its box 1.5 x the fitting's pipe). On a Reducer (two sizes), a Valve Tee or Supply Manifold, or
+  a vessel opening it keeps its size.
+- Something with no pipe on it keeps its size. Valve Tees and Supply Manifolds stay at the Valve Standard size (Rule 5.35), and pumps
+  and valves at the Pump and Valve Standard size with the Tab's pipe size (Rule 5.11), until Fritz says otherwise.
+
 ---
+
 
 ## 6. Devices, connections and safety
 
@@ -2348,3 +2361,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 18.30: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")
 - 2026-11-07: Rule 5.31: the Three Vessel sample's HLT, Mash tun and Boil kettle are now Vessel Devices built from the Main Template (Fritz: "change all the vessels to" "Vessels Devices"), their probes and heaters built into the Left and Right Element IPs; a built in Element that is a heat controller stays one. Help 133 updated; no new Help number used. Checked against the BruControl Import program: it does not use the samples, so nothing changes there. (thread "Change 3 Vessel sample to Vessel Devices")
+- 2026-11-07: Added Rule 5.36 (Fritz: "Have any pipe fitting etc size to the pipe when saving"): on Save every pipe fitting on Autosize to pipe takes the size of its pipe, probe tees follow their pipe, End Caps get Autosize to pipe and match the fitting they close. Help 87 updated. (thread "Size fittings to their pipe on Save")
