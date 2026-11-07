@@ -2324,7 +2324,8 @@ function controlDialog(t) {
 // (Duty cycle % or Target), then Set + ON, OFF, Set and Cancel. It asks before it turns on (Rule 2.33): nothing turns on until
 // Set + ON or ON is clicked. Hysteresis, PID and Deadband need a Temperature Probe (Properties), so they are greyed out without one.
 function heatDialog(t) {
-  const v = S.values[t.name] || {}, title = v.label ?? t.name, d = $('#valDlg');
+  const title = S.values[t.name]?.label ?? t.name, d = $('#valDlg');
+  const v = { ...(S.values[t.name] || {}) };
   let m = heatMethodKey(v.method) ?? startMethod(t);
   const draw = () => {
     d.innerHTML = '';
@@ -2342,14 +2343,16 @@ function heatDialog(t) {
     const now = heatMethodKey(v.method) ?? 'onoff';
     const btn = ([k, word]) => {
       const off = NEEDS_PROBE.includes(k) && !t.input;
-      return h('button', { type: 'button', class: 'big' + (k === m ? ' cur primary' : ''), ...(off ? { disabled: true, title: 'Needs a Temperature Probe: pick one in its Properties' } : {}), onclick: () => { m = k; draw(); } }, word);
+      // one click on a method switches to it at once (Fritz, 2026-11-07: "One Click on the dispayed device"); the pop-up stays open
+      // for its setting. To On/Off while ON turns it OFF first (Rule 6.19).
+      return h('button', { type: 'button', class: 'big' + (k === m ? ' cur primary' : ''), ...(off ? { disabled: true, title: 'Needs a Temperature Probe: pick one in its Properties' } : {}),
+        onclick: async () => { if (k === m) return; m = k; await setProp(t.name, 'method', heatMethodWord(k)); Object.assign(v, S.values[t.name] || {}); v.method = heatMethodWord(k); if (k === 'onoff') v.state = false; draw(); } }, word);
     };
     d.append(h('div', { class: 'vdTitle' }, `${title}: ${v.state ? 'ON' : 'OFF'}, ${heatMethodWord(now)}` + (v.state && PERCENT_METHODS.includes(now) ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
       h('div', { class: 'muted' }, 'Heating method'),
       h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.map(btn)),
       ...(main ? [h('div', { class: 'muted' }, main[1]), h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+'))] : []),
-      m !== 'onoff' && m !== now && v.state ? h('div', { class: 'muted' }, `It goes on in ${heatMethodWord(m)} at once.`) : '',
-      m === 'onoff' && now !== 'onoff' && v.state ? h('div', { class: 'muted' }, 'On/Off turns it OFF first; click ON for full power.') : '',
+      h('div', { class: 'muted' }, m === 'onoff' ? 'Switching to On/Off turns it OFF first; click ON for full power.' : 'A click on a method switches to it at once.'),
       h('div', { class: 'vdBtns' },
         h('button', { type: 'button', class: 'big onb' + (v.state ? ' cur' : ''), onclick: () => done(true) }, main ? 'Set + ON' : 'ON'),
         h('button', { type: 'button', class: 'big offb' + (!v.state ? ' cur' : ''), onclick: () => done(false) }, 'OFF'),

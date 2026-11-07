@@ -1274,8 +1274,9 @@ Element (a Digital Out with Kind = element, on its own or built into a Vessel De
 is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband**.
 - **Properties:** under *Heating method*, the method it **starts with** (On/Off for one that has none), the **Temperature Probe** it
   reads (Hysteresis, PID and Deadband need one) and that method's settings. The other methods' settings are kept.
-- **A click while running** opens its pop-up: one button per method (the one in use marked; the ones that need a probe greyed out
-  without one), the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
+- **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
+  method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
+  once**, the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
   and **Cancel**. It still asks before it turns on (Rule 2.33).
 - **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, or DO, DutyC, HYS, PID, DeadB); its settings
   by the same names the separate Devices had (`.target`, `.dutycycle`, `.kp` ...). `hE_1 = true` or `.enabled = true` turns it ON
