@@ -51,3 +51,9 @@ for (const n of ['Valve_Tee', 'Supply_Manifold_2', 'Supply_Manifold_3']) {
   assert.equal((svg.match(/<rect x="70" y="122" width="70" height="12"/g) || []).length, t.fittings.filter(f => f.kind === 'valveTee').length, `${n}: half a clamp on each branch ferrule`);
 }
 console.log('manifold drill-down ok');
+// Fritz, 2026-11-07: "We need supply Manifolds to Flip Vertically Horizomtaly. Vaves on Top or Valves on Bottom"
+assert.ok(app.includes("['rot', 'Orientation', 'vorient', MF_ORIENT, false, false, { tip: T.orient, with: ['_flip', 'Flip', 'sel', PROBE_FLIP]"), 'Flip on the Orientation line');
+assert.ok(app.includes("flipFrom(work); if (work.flipH) g.flipH = true; if (work.flipV) g.flipV = true;"), 'the Add box keeps the Flip');
+assert.ok(app.includes("flipFrom(work); if (!MF_ROTS.includes(+work.rot || 0)) work.rot = '0';"), 'the Properties keep the Flip');
+assert.ok(!app.includes('has no Flip: it turns Horizontal'), 'the Flip buttons on the Edit layout bar work');
+console.log('manifold flip ok');

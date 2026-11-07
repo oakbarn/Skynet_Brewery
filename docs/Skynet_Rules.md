@@ -1048,10 +1048,13 @@ supply manifolds", Help 146).
 - **Names and Labels:** the fitting is ValveTee_n, Manifold2_n or Manifold3_n; its **Label** starts as **valve_tee_n**, **manifold_2_n**
   or **manifold_3_n** and is never blank (Rule 18.15). Each valve's Label is `<fitting Label> V1`, `V2` ...; its Name is the suggested
   name (Rule 3.1), e.g. `MB_22_eVlv_manifold_2_1_V1_BR` or, Manual, `M_L_Vlv_manifold_2_1_V2_BR`.
-- **Orientation: no Flip, only three turns** (Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left
-  Vertical 90, Right Vertical 90"): **Horizontal** (the valves hang down), **Left Vertical 90** (turned a quarter clockwise, the valves
-  point left) and **Right Vertical 90** (a quarter the other way, the valves point right). The Valve Tee is the same. The Edit layout
-  bar's turn buttons step through these three and Flip says it has none (an exception to Rule 5.5). The valves and IPs turn with it.
+- **Orientation: three turns and Flip** (Fritz, 2026-11-06: "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left
+  Vertical 90, Right Vertical 90"; Fritz, 2026-11-07: "We need supply Manifolds to Flip Vertically Horizontally. Valves on Top or
+  Valves on Bottom"): **Horizontal** (the valves hang down), **Left Vertical 90** (turned a quarter clockwise, the valves point left)
+  and **Right Vertical 90** (a quarter the other way, the valves point right), with **Flip** on the same line: **No flip**, **Flip
+  Vertical** (the valves on the other side of the tees: on top when Horizontal), **Flip Horizontal** (Valve 1 at the other end) or
+  **Flip both**. The Valve Tee is the same. The Edit layout bar's turn buttons step through the three turns (no 45, an exception to
+  Rule 5.5) and its Flip H and Flip V buttons flip it as it looks on the Tab. The valves, their numbers and the IPs follow.
   No Autosize to pipe (it is drawn at the Valve Standard size) and no Clone. Dropped on a straight pipe in Edit layout, its run goes
   along the pipe (turned to one of the three) and the pipe is cut, as a tee's (Rule 5.25).
 - **The valve ends match the tee ends** (Fritz, 2026-11-06: "The valve ends need to match the Tee ends in the graphic"): each valve is
@@ -1069,6 +1072,7 @@ supply manifolds", Help 146).
   out once saved (Rule 18.13); to wire it again, make it Manual, Save, then Motorized again and pick the Port.
   *Replaced (2026-11-06):* its valves' Interface and Ports were set in the fitting's Properties, not in a Pump-style Add box; Flip
   Horizontal, Flip Vertical and Rotate in 45 degree steps.
+  *Replaced (2026-11-07):* "Orientation: no Flip, only three turns ... Flip says it has none".
 
 5.36 **Every pipe fitting sizes to its pipes when saving** (Fritz, 2026-11-07: "Have any pipe fitting etc size to the pipe when
 saving"; then "any Pipe Fitting, even if a device should size to the majority of the pipes or hoses"; thread "Size fittings to their
@@ -2031,9 +2035,9 @@ be kept as clean as possible"):
    **3. Valve 1**, **Valve 2**, **Valve 3**, each **Manual** or **Motorized**, a Motorized one with its **Available Ports** on the
    same line (two valves can't share a Port); **4. Tab** (➕ Add new Tab… and ➕ Add new Interface… work as Rule 18.14); then the
    **5. Name**, the **Graphic** (its valves as picked, with their numbers), its **Path** (greyed out, Rule 5.6), **Orientation**
-   (Rule 5.35's three), X, Y, Width, Height, and the **Device Type** greyed out last (e.g. Fitting with V1 DO: eVlv, V2 DO: M_L_Vlv).
+   (Rule 5.35's three, with **Flip** on its line), X, Y, Width, Height, and the **Device Type** greyed out last (e.g. Fitting with V1 DO: eVlv, V2 DO: M_L_Vlv).
    ➕ Add Device can always be pressed and says what is missing (Rule 18.15). Enter goes Label, Interface, each Valve and Port, Tab,
-   Orientation, ➕ Add Device (Rule 18.20).
+   Orientation, Flip, ➕ Add Device (Rule 18.20).
 2. Its **Properties** are the same with 🗑 Delete, ✖ Cancel and 💾 Save and the 🔓 lock in the title line. A valve saved Motorized
    shows its **Port** greyed out, and the **Interface** is greyed out while any valve has a saved Port (Rule 18.13).
 - *Replaced:* the Properties listed a note, Name, Label, a Valves heading, Flip Horizontal, Flip Vertical, Rotate and a Label and place
@@ -2396,6 +2400,7 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 15.4: the BruControl Importer copies every picture an item names, from the path BruControl saved (any folder), to media\Images\User; nothing is moved, missing pictures are listed. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 15.4: the Importer's page 3 has Browse for the config file (Windows' Open box in Documents\BruControl, .brucfg only); picture paths are imported even when the picture is not on the computer, and the brewer never makes a zip. Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Rule 5.35 changed and Rule 18.29 added (Fritz: "need their property dialog and the Build look and feel like the Pump Drill down. The valve ends need to match the Tee ends in the graphic"; "the Valves need to be number corresponding to the Valve 1 in the dialog"; "Supply Manifold No Flips just Rotate 3 Choices: Horizontal, Left Vertical 90, Right Vertical 90"): the Valve Tee and Supply Manifolds get the Pump's drill-down Add box and Properties, valve ends drawn with TC ferrules that match the tees, valve numbers in Edit layout and on the dialogs' Graphic, and only three Orientations with no Flip. Help 146 updated; no new Help number used. (thread "Add valve Tees and supply manifolds")
+- 2026-11-07: Rule 5.35 and Rule 18.29 changed (Fritz: "We need supply Manifolds to Flip Vertically Horizontally. Valves on Top or Valves on Bottom"): the Valve Tee and Supply Manifolds keep their three turns and now have Flip on the Orientation line (No flip, Flip Vertical, Flip Horizontal, Flip both); the Edit layout bar's Flip H and Flip V buttons work on them. Help 146 updated; no new Help number used. Checked against the BruControl Import program: it does not make Valve Tees or Supply Manifolds, so nothing changes there. (thread "Let Supply Manifolds flip valves top or bottom")
 - 2026-11-06: Rule 15.4 changed (Fritz): the Importer imports picture and sound paths and leaves the files where they were, so BruControl keeps working; copying them into media\Images\User and media\sounds\User (for a Pi or another computer) is an option, and the originals are never deleted. Importer page 2 and page 4, Help 143 updated. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 2.38 (dialogs kept as clean as possible: explanations go in hover help, shown at once while the mouse rests on a field's or dropdown's name and gone when it moves off; a tap on phones and tablets; for the Panel and the BruControl Import). Rule 18.16 points to it. Help 147; next free Help number 148. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Added Rule 18.30 (Widgets look like the Pump's drill-down, all Widgets by Fritz's command, one kind after another; first the Value, Time and DateTime Widgets). Help 134 updated. (thread "Add hover help to clean dialogs")

@@ -31,7 +31,7 @@ The **Add box** works like a Pump's (Skynet Rule 18.29). Hover the name of any f
    same line. Two valves can't share a Port.
 4. **Tab**: the Tab it goes on.
 
-Then the **Name** (ValveTee_1, Manifold2_1 or Manifold3_1 to start), the **Graphic**, its **Path**, the **Orientation**, X, Y, Width,
+Then the **Name** (ValveTee_1, Manifold2_1 or Manifold3_1 to start), the **Graphic**, its **Path**, the **Orientation** and **Flip**, X, Y, Width,
 Height and the **Device Type**. Press **➕ Add Device**: it goes on that Tab and its Properties open. Enter goes from field to field
 and last to ➕ Add Device.
 
@@ -63,9 +63,16 @@ Port, make it **Manual**, Save, then make it **Motorized** again and pick the Po
 
 ## Turning it and putting it in a pipe
 
-It has no Flip. Its **Orientation** has three choices: **Horizontal** (the valves hang down), **Left Vertical 90** (the valves point
-left) and **Right Vertical 90** (the valves point right). The Edit layout bar's turn buttons step through the same three. The valves,
-their numbers and the IPs turn with it.
+Its **Orientation** has three choices: **Horizontal** (the valves hang down), **Left Vertical 90** (the valves point left) and
+**Right Vertical 90** (the valves point right). **Flip** is on the same line:
+
+- **No flip**: as drawn (Horizontal: the valves on the bottom).
+- **Flip Vertical**: the valves on the other side of the tees (Horizontal: **the valves on top**).
+- **Flip Horizontal**: Valve 1 at the other end.
+- **Flip both**: both of these.
+
+On the Edit layout bar the turn buttons step through the three turns, and **Flip H** and **Flip V** flip it the way it looks on the
+Tab. The valves, their numbers and the IPs follow.
 
 Each valve is drawn with the same TC 1.5 ferrules as the tees: the top one is clamped to the tee's branch, and the bottom one is the
 valve's IP. Dropped on a straight pipe in Edit layout, its run goes along the pipe and the pipe is cut in two, one piece on each open
