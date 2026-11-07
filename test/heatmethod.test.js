@@ -175,3 +175,23 @@ console.log('method spots tests passed');
     ['MB_25_HE_HLT_BR', 'method', 'PID'], ['MB_25_HE_HLT_BR', 'method', 'Deadband'], ['MB_25_HE_HLT_BR', 'method', 'On/Off']]);
   assert.match(compile('MB_25_HE_HLT_BR.Steam').errors[0].msg, /Do not understand/);
 }
+
+// A built in Element that is still an old control Device becomes one Heating Element on load (Fritz, 2026-11-07: "The only thing
+// that seems to be missing is the Element Method Field and the Hotspots")
+{
+  const { assignIds } = await import('../public/naming.js');
+  const { controlMethods } = await import('../public/heatmethod.js');
+  const c = { devices: [], workspaces: [], elements: [
+    { name: 'HLT_Heat', type: 'hysteresis', target: 150, onOffset: 1, integratedIn: 'v_HLT', integratedAs: 'ip:rElement', vpKind: 'element' },
+    { name: 'RIMS_Heat', type: 'pid', kp: 9, integratedIn: 'r1', integratedAs: 'heat' },
+    { name: 'Own_PID', type: 'pid' }] };
+  assignIds(c);
+  assert.deepEqual([c.elements[0].type, c.elements[0].subtype, c.elements[0].heatMethod, c.elements[0].target, c.elements[0].name], ['digitalOut', 'element', 'hysteresis', 150, 'HLT_Heat']);
+  assert.equal(c.elements[1].heatMethod, 'pid'); assert.equal(c.elements[1].kp, 9);
+  assert.equal(c.elements[2].type, 'pid', 'a PID of its own (not built in) stays as it is');
+  const { readFileSync } = await import('node:fs');
+  const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url)));
+  const hlt = s.elements.find(e => e.name === 'HLT_Heat');
+  assert.deepEqual(controlMethods(hlt), ['Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
+}
+console.log('built in Element upgrade tests passed');

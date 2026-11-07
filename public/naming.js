@@ -6,6 +6,7 @@
 // Device name (Fritz, 2026-10-23): InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_eVlv_Fly~Sparge_In__SP
 //   from the Label "Fly/Sparge In". The Label itself is left as typed; only the name uses the parsed Label.
 import { boardOf, linkOf } from './links.js';
+import { TYPE_METHOD } from './heatmethod.js';
 
 // Device Type IDs (Fritz, 2026-10-23). Every ID means one thing; an ID can sit in more than one list. A Heating Element is HE
 // (Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we could Use MB_25_HE_HLT_BR"). Fritz's own IDs are kept as he wrote them; the ones added for him are 6 characters or fewer.
@@ -173,7 +174,15 @@ export function assignIds(c) {
   };
   fill(c.devices, cleanInterfaceId, defaultInterfaceId);
   fill(c.workspaces, cleanTabId, defaultTabId);
-  for (const e of c.elements ?? []) {          // Device Type IDs of PR #61 (PmP, VlV ...) -> the 2026-10-23 list (names are not changed)
+  for (const e of c.elements ?? []) {
+    // A heating element built into a Vessel Device, RIMS tube or kettle that is still an old separate control Device (Hysteresis,
+    // PID, Duty Cycle, Deadband, like the Three Vessel sample's HLT_Heat) is one Heating Element (Rule 6.19), starting with that
+    // method, so it has the Heating method field and the method spots (Fritz, 2026-11-07: "The only thing that seems to be missing
+    // is the Element Method Field and the Hotspots"). Its name, settings and Processes stay (Rule 3.5).
+    if (e.integratedIn && ['dutyCycle', 'hysteresis', 'pid', 'deadband'].includes(e.type) && (e.vpKind === 'element' || e.integratedAs === 'heat')) {
+      e.heatMethod ??= TYPE_METHOD[e.type]; e.type = 'digitalOut'; e.subtype = 'element'; changed = true;
+    }
+    // Device Type IDs of PR #61 (PmP, VlV ...) -> the 2026-10-23 list (names are not changed)
     const code = upgradeCode(e);
     if (code && code !== e.typeCode) { e.typeCode = code; changed = true; }
   }
