@@ -53,8 +53,8 @@ More rules:
 - An Admin can type a name of their own instead. It is checked: it must not be used by any other Device or Widget.
 - A name with `~` in it works in a Process as it is: `MB_25_eVlv_Fly~Sparge_SP = true`.
 - While a new Device is not saved yet, its name keeps following the suggestion if you change the Label, Device Type or Tab in its properties. Once you type your own name, it stays.
-- **One Device per port, with one exception.** Two Devices can't use the same port on the same Interface, except outputs of different Device Types. Like in BruControl, you pick the Interface, then the Port, and then you can add more than one type on that Port. Example: one heater wired to port 5 can have `MB_05_Hys_HLT_BR` and `MB_05_PID_HLT_BR`.
-- **The last one turned on wins.** When you enable (or turn on) one of them, the others on that port are turned off at once, so only one drives the heater. Inputs, like a probe or a switch, never share a port.
+- **One Interface Port, one Device** (Rule 6.1, Fritz 2026-11-07). Two Devices can't use the same port on the same Interface. This is different from BruControl, where one heater could have a Hysteresis and a PID on its port: in Skynet the heater is one Heating Element and you pick its heating method ([One Heating Element, pick how it heats](150-heating-method)).
+- **Older Schemas:** two Devices that already share a port keep working (the last one turned on wins, the others on that port are turned off) and can still be saved. No new ones can be made.
 
 ## Pins kept for RTD and OneWire probes
 

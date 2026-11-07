@@ -208,10 +208,14 @@ export function portKeys(el) {
   const pins = el.type === 'scale' ? String(el.channel ?? '').split(',') : el.type === 'stepper' ? [el.channel, el.dirPin, el.enablePin, el.pin2, el.pin3, el.pin4, el.homePin] : [el.channel];
   return [...new Set(pins.map(pinKey).filter(Boolean))].map(p => `${el.device}|${p}`);
 }
-// Fritz, 2026-10-23: outputs of different Device Types may share a port, e.g. MB_05_Hys_HLT__BR and MB_05_PID_HLT__BR on one
-// heater. The one turned on or enabled last wins: the others on that port are turned off (lib/store.js).
+// One Interface Port, one Device (Fritz, 2026-11-07, Rule 6.1: "a Limit of One Interface Port to one Device. Another Major
+// difference from BruControl"). A heater's ways of control are one Heating Element's methods (Rule 6.19), not more Devices.
+// Older Schemas made before that may still have outputs of different Device Types on one port (Fritz, 2026-10-23, e.g.
+// MB_05_Hys_HLT__BR and MB_05_PID_HLT__BR): they keep working (the one turned on last wins, lib/store.js), but a NEW Device
+// (named '\0new' while it is being picked) never shares a port, so the Available Ports lists never offer a used port.
 export const SHARED_PORT_TYPES = ['digitalOut', 'pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband'];
-const mayShare = (a, b) => SHARED_PORT_TYPES.includes(a.type) && SHARED_PORT_TYPES.includes(b.type) && (a.typeCode || a.type) !== (b.typeCode || b.type);
+const NEW = '\0new';
+const mayShare = (a, b) => a.name !== NEW && b.name !== NEW && SHARED_PORT_TYPES.includes(a.type) && SHARED_PORT_TYPES.includes(b.type) && (a.typeCode || a.type) !== (b.typeCode || b.type);
 // Devices that share a port with this one (other names)
 export function portSharers(el, elements) {
   const mine = new Set(portKeys(el)); if (!mine.size) return [];

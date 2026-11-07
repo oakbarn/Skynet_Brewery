@@ -47,6 +47,9 @@ hE_HLT_1.dutycycle = 70
   `.innerbandoffset`, `.initialoutput`, `.innerbanddrive`, `.outerbanddrive`, `.maxoutput`, `.calctime`, `.outtime` (Deadband).
   The same names the old separate Duty Cycle, Hysteresis, PID and Deadband Devices had.
 - `.value` is the output % a PID or Deadband works out. `.output` is its pin right now (read only).
+- **`.method` is the word for every Device with more than one method of control** (today the Heating Element). In the Process
+  editor, type `hE_HLT_1.method =` and the list shows its methods to pick from, in quotes. A Device with only one way of control
+  has no `.method`.
 
 ## In its Properties
 
@@ -62,4 +65,12 @@ BruControl controls one element with two Devices on the same port, for example *
 in a Process: `HLT_PID = true` switches it to PID and turns it ON; `M_HLT_Heat = true` switches it to Duty Cycle. Where the second
 one was placed on a Tab, it becomes a **Clone** of the Heating Element.
 
-Older Skynet Schemas that have two heaters on one port keep working as before (the last one turned on wins, Rule 6.1).
+## One Interface Port, one Device
+
+This is a big difference from BruControl (Rule 6.1): in Skynet **each port on an Interface has only one Device**. The Available
+Ports list never offers a port that is in use, and a Device can't be saved on one. To control a heater another way, change its
+heating method instead of adding a second Device.
+
+Older Skynet Schemas that already have two Devices on one port keep working as before (the last one turned on wins), and those
+two can still be saved; you just can't make new ones. Anything else BruControl had sharing a port (for example a pump's on/off
+and its PWM speed) is listed in the Import notes so you can keep one.

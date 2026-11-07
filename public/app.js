@@ -11,7 +11,7 @@ import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices } from './heatmethod.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -3949,7 +3949,14 @@ const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self
 const pinsOf = e => portKeys(e).map(k => k.split('|')[1]);
 function portError(e, self) {
   const els = (draft || S.config).elements.filter(x => x !== self), c = portClash(e, els);
-  if (c) return `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only outputs of different Device Types can share a port.`;
+  const iface = d => `${ifaceIdOf(d) ? ifaceIdOf(d) + '_ ' : ''}${d}`;
+  if (c) return `Port ${c.pin} on ${iface(c.device)} is already used by ${c.other}. One Interface Port, one Device (Rule 6.1).`;
+  // One Interface Port, one Device (Fritz, 2026-11-07, Rule 6.1): only two that already shared a port in the saved Schema (made
+  // before this Rule) may go on sharing it. A heater's other ways of control are its heating methods (Rule 6.19).
+  const was = self && S.config.elements.find(x => x.name === self.name), old = new Set(was ? portSharers(was, S.config.elements).map(x => x.name) : []);
+  const share = portSharers(e, els).find(o => !old.has(o.name));
+  if (share) return `Port ${pinsOf(e).find(p => pinsOf(share).includes(p)) ?? ''} on ${iface(e.device)} is already used by ${share.name}. One Interface Port, one Device (Rule 6.1).` +
+    (isHeatElem(e) || isHeatElem(share) || HEAT_CTL_TYPES.includes(share.type) ? ' To control a heater another way, pick its Heating method (Rule 6.19).' : '');
   const b = busCheck(e, els, S.config.devices);      // RTD / thermocouple SPI pins, the OneWire data pin, few PWM and counter pins (Fritz, 2026-10-23)
   if (b?.error) return b.error;
   const pin = pinsOf(e).find(Boolean);
