@@ -1,0 +1,32 @@
+# Hover help in dialogs
+
+Skynet keeps its dialogs as clean as possible (Skynet Rule 2.38; Fritz, 2026-11-06). A dialog shows short field names and the
+fields themselves. The explanation of a field is in its **hover help**.
+
+## See the help of a field
+
+- A field name with a **dotted underline** has hover help.
+- **Rest the mouse on the name** (of a field or a dropdown). A small yellow box shows what the field is for, instantly.
+- **Buttons** (Delete, Cancel, Save, ⬆, ⬢ ...) and the **dialog title** have hover help too. The title shows a short piece of its Help page.
+- The box **stays as long as the mouse is on the name**. Move the mouse off (or click, press a key or scroll) and it goes away.
+- **Click the name** to open the same help in a small pop-up with **Close**, if you want to keep it open while you read.
+
+## On a phone or tablet
+
+Phones and tablets are for running the brewery (Rule 2.35), and they have no mouse. **Tap the name** to open the small pop-up
+with **Close**.
+
+## What stays on the dialog
+
+- Warnings you must act on, like **⚠ The Label cannot be blank.**
+- What something is now, like the Suggested Name, or a valve that is OPEN or CLOSED.
+- The yellow **?** in the title, which opens the full Help page.
+
+The **BruControl Import** works the same way.
+
+## Widget dialogs
+
+Every Widget's Properties look like the Pump's (Skynet Rule 18.30): the 🔓 lock, Visible and Hidden Locked in the title line, then
+**1. Label** (⬆ a bigger box, ⬢ its font, size and colors) and Label Visible, **2. Tab**, **3. Name**, the Widget's own fields with
+the extras behind a ⬢, its place and size, and the **Widget Type** greyed out last. A new Widget is named
+**wgt_Type_Label_TabID**, for example **wgt_DT_DateTime_1_BR** (Rule 3.14).
