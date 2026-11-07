@@ -12,7 +12,7 @@ Press **Picture ➕** on the Edit layout bar (or **Add Widget > Pictures and tex
 
 Nothing else shows until the Label and the Picture are done. **Enter** goes Label, Picture, then **➕ Add Widget**. Pressing ➕ Add Widget too early says what is still missing.
 
-Then the rest shows: the **Name** (the Suggested Name, **pic_** and the Label, for example pic_Kettle_Element; you may type your own), the **Graphic** (the picture as it will show), **Turns on with** with **Toggle** on the same line, the **Overlay**, **Text on picture**, X, Y, Width and Height, and the **Widget Type** (Picture) greyed out.
+Then the rest shows: the **Name** (the Suggested Name **wgt_PIX_Label_TabID**, for example wgt_PIX_Kettle_Element_BR; it follows the Label and the Tab until you type your own), the **Graphic** (the picture as it will show), **Turns on with** with **Toggle** on the same line, the **Overlay**, **Text on picture**, X, Y, Width and Height, and the **Widget Type** (Picture) greyed out.
 
 ## Picture Widget Properties
 
