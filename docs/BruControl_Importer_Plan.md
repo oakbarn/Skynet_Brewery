@@ -351,6 +351,15 @@ the program only shows it and measures distances on the screen. Three helpers, u
    - **Privacy:** a note says plainly that the picture goes to that AI company under the brewer's own account, not to Skynet,
      and that it is optional.
    - Nothing is sent by the Importer: the brewer does the uploading and pasting.
+   - **Hot Side only** (Fritz, 2026-11-07: "That could give the Number of Vessels and a good guess on how they were connected,
+     at least for the Hot Side. I think for Fermentors we ask questions as they are likely in a different Room."). The question
+     asks the AI for the **number of hot side vessels** (HLT, Mash Tun, Boil Kettle and so on) as well as their connections;
+     the vessel count fills in Dialog 1's answer as a guess too, so this button is offered early, before the Vessel questions.
+- **Fermenters are asked, not pictured** (Fritz, 2026-11-07): they are usually in another room, so the picture, the AI and the
+  screen guesses cover the Hot Side only. For each fermenter the Importer asks plain questions instead: how it is cooled and
+  heated (glycol coil, jacket, chamber, wrap or none), which valves feed and return the glycol, which pumps (chiller, warm tank),
+  and which probe and pressure sensor are its own. Each answer starts with a guess from names and Scripts (for example Tartan's
+  "FV 2 // feed glycol", "FV 1 // return glycol").
 - Order on the page: the picture (if any) on the left, the manifold questions on the right; answering a question draws the pipe
   on the picture side, and joining on the picture fills in the question. Either way works.
 - Shown before saving with the rest; Back changes any answer.
