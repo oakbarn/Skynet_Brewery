@@ -7,6 +7,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48 64x64 256x256">
 <link rel="stylesheet" href="style.css">
+<script src="themeboot.js"></script>
 </head>
 <body class="onWorkspace">
 <header id="top">
@@ -483,6 +484,9 @@
     </div>
     <div class="form admin-only">
       <label>Title <input id="setTitle"></label>
+      <label title="How the whole Panel looks: its back color, boxes, text and labels. Office Black is the closest to BruControl's own Office 2019 Black. Saved right away for this Schema.">Look (theme) <select id="setLook"></select></label>
+      <div id="lookPreview" class="lookPreview"></div>
+      <div class="bar"><button id="lookForce" title="Give every Tab in this Schema the Look's Tab colors: its back color, and the Label and text colors (Tab Style). New Tabs get them by themselves. The colors the Tabs have now are kept, so it can be undone.">Use this Look on every Tab</button><button id="lookRestore" title="Put every Tab back to the colors it had before.">Put the Tabs back</button></div>
       <label>Media folders (one per line). Images and sounds are given as paths inside these folders.<textarea id="setMedia" rows="3"></textarea></label>
       <label>API key (leave empty for none). Needed in header <code>X-API-Key</code> for outside programs to change a Device or Widget whose .API is Read &amp; Control (<code>/api/items</code>). Ten wrong keys from one address shut it out for 15 minutes.<input id="setKey"></label>
       <label>BeerXML mapping (JSON)<textarea id="setBeer" rows="12" spellcheck="false"></textarea></label>

@@ -25,6 +25,8 @@ Try a brew day without touching any hardware, with time running faster or skippi
 ## Panel settings (admins)
 
 - **Title**: the name at the top of the screen.
+- **Look (theme)**: how the whole Panel looks (Office Black, Dark Gray, White or Skynet Night), saved right away. **Use this Look
+  on every Tab** gives every Tab the Look's colors, and **Put the Tabs back** undoes it. See [Panel Looks (themes)](151-panel-looks).
 - **Media folders**: where pictures and sounds are kept, one per line.
 - **API key**: the password other programs (Node-RED and the like) must send. See [API](11-api).
 - **BeerXML mapping**: which variables a BeerSmith recipe fills.
