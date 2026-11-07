@@ -16,6 +16,9 @@ assert.ok(!onCloseAll(v({ valveType: 'manual' })) && !onOpenAll(v({ valveType: '
 assert.ok(!onCloseAll({ type: 'digitalOut', subtype: 'pump' }), 'pumps are not valves');
 const tap = v({ tapwater: true, closeAll: false, openAll: true }); fixValveLists(tap);
 assert.ok(!('closeAll' in tap) && !('openAll' in tap), 'a saved tap water valve keeps no list switches');
+const shown = v({ tapwater: true, _tapClose: true, _tapOpen: false }); fixValveLists(shown);
+assert.ok(!('_tapClose' in shown) && !('_tapOpen' in shown), 'the greyed out switches of a tap water valve are never kept');
+assert.match(fs.readFileSync('templates/process/Clean/Skynet_Clean.txt', 'utf8').trim(), /open_all_valves\nprint [^\n]*$/, 'Clean ends by opening all valves (the Open List)');
 
 // ---- the build lines
 const F = { HLT_Heater: 'PID_HLT', HLT_Probe: '' };
