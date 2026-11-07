@@ -1342,7 +1342,7 @@
    "probeIndex": 1,
    "label": "HLT",
    "x": 625,
-   "y": 145,
+   "y": 80,
    "w": 170,
    "h": 74,
    "units": "°F",
@@ -1353,7 +1353,10 @@
     "heater": "HLT_Heat",
     "heatRate": 1.2,
     "maxTemp": 212
-   }
+   },
+   "integratedIn": "v_HLT",
+   "integratedAs": "ip:lElement",
+   "vpKind": "thermowell"
   },
   {
    "name": "MLT_Temp",
@@ -1364,7 +1367,7 @@
    "probeIndex": 2,
    "label": "Mash",
    "x": 985,
-   "y": 145,
+   "y": 80,
    "w": 170,
    "h": 74,
    "units": "°F",
@@ -1380,7 +1383,10 @@
     ],
     "followLoss": 11,
     "loss": 0.0002
-   }
+   },
+   "integratedIn": "v_MLT",
+   "integratedAs": "ip:lElement",
+   "vpKind": "thermowell"
   },
   {
    "name": "BK_Temp",
@@ -1391,7 +1397,7 @@
    "probeIndex": 3,
    "label": "Kettle",
    "x": 1345,
-   "y": 145,
+   "y": 80,
    "w": 170,
    "h": 74,
    "units": "°F",
@@ -1412,7 +1418,10 @@
     "cooler": "Chiller_Water",
     "coolRate": 6,
     "coolTo": 58
-   }
+   },
+   "integratedIn": "v_BK",
+   "integratedAs": "ip:lElement",
+   "vpKind": "thermowell"
   },
   {
    "name": "HLT_Heat",
@@ -1426,12 +1435,15 @@
    "onOffset": 1,
    "enabled": false,
    "x": 625,
-   "y": 230,
+   "y": 165,
    "w": 170,
    "h": 60,
    "onText": "HEAT",
    "offText": "idle",
-   "look": "dark"
+   "look": "dark",
+   "integratedIn": "v_HLT",
+   "integratedAs": "ip:rElement",
+   "vpKind": "element"
   },
   {
    "name": "BK_Heat",
@@ -1445,12 +1457,15 @@
    "onOffset": 1,
    "enabled": false,
    "x": 1345,
-   "y": 230,
+   "y": 165,
    "w": 170,
    "h": 60,
    "onText": "HEAT",
    "offText": "idle",
-   "look": "dark"
+   "look": "dark",
+   "integratedIn": "v_BK",
+   "integratedAs": "ip:rElement",
+   "vpKind": "element"
   },
   {
    "name": "Pump_1",
@@ -1699,7 +1714,7 @@
    "template": "Skynet_Vessel_Widget",
    "templateCls": "skynet",
    "vwidget": true,
-   "probeStyle": "thermowell",
+   "probeStyle": "front",
    "vtype": "Brew Kettle",
    "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
    "bundled": true,
@@ -1708,55 +1723,142 @@
     "type": "TC",
     "size": 1.5
    },
-   "probe": "HLT_Temp",
    "ports": {
-    "outlet": {
+    "rSparge": {
+     "installed": false,
+     "position": "VW R Sparge",
+     "standard": "TC 1.5",
+     "label": "Right Sparge"
+    },
+    "rHermsIn": {
+     "installed": false,
+     "position": "VW R HERMS In",
+     "standard": "TC 1.5",
+     "label": "Right HERMS In"
+    },
+    "rHermsOut": {
+     "installed": false,
+     "position": "VW R HERMS Out",
+     "standard": "TC 1.5",
+     "label": "Right HERMS Out"
+    },
+    "rElement": {
      "installed": true,
-     "position": "VW Center Bottom",
-     "standard": "TC 1.5"
+     "position": "VW R Element",
+     "standard": "TC 2",
+     "label": "Right Element"
     },
-    "outlet2": {
+    "lSparge": {
      "installed": false,
-     "position": "VW Right Middle",
-     "standard": "TC 1.5"
+     "position": "VW L Sparge",
+     "standard": "TC 1.5",
+     "label": "Left Sparge"
     },
-    "tangential": {
+    "lHermsIn": {
      "installed": false,
-     "position": "VW Left Low",
-     "standard": "TC 1.5"
+     "position": "VW L HERMS In",
+     "standard": "TC 1.5",
+     "label": "Left HERMS In"
     },
-    "topInlet": {
+    "lHermsOut": {
      "installed": false,
-     "position": "VW Left High",
-     "standard": "TC 1.5"
+     "position": "VW L HERMS Out",
+     "standard": "TC 1.5",
+     "label": "Left HERMS Out"
     },
-    "sparge": {
-     "installed": false,
-     "position": "VW Lid Center",
-     "standard": "TC 1.5"
+    "lElement": {
+     "installed": true,
+     "position": "VW L Element",
+     "standard": "TC 1.5",
+     "label": "Left Element"
     },
-    "cip": {
+    "lBackElement": {
      "installed": false,
-     "position": "VW Lid Right",
-     "standard": "TC 1.5"
+     "position": "VW L Back Element",
+     "standard": "TC 1.5",
+     "label": "Left Back Element"
     },
-    "steamSlayer": {
+    "rBackElement": {
      "installed": false,
-     "position": "VW Right High",
-     "standard": "TC 1.5"
+     "position": "VW R Back Element",
+     "standard": "TC 1.5",
+     "label": "Right Back Element"
+    },
+    "cProbe": {
+     "installed": false,
+     "position": "VW C Probe",
+     "standard": "TC 1.5",
+     "label": "Center Probe"
+    },
+    "lTangential": {
+     "installed": false,
+     "position": "VW L Tangential",
+     "standard": "TC 1.5",
+     "label": "Left Tangential"
+    },
+    "rTangential": {
+     "installed": false,
+     "position": "VW R Tangential",
+     "standard": "TC 1.5",
+     "label": "Right Tangential"
+    },
+    "cOutlet": {
+     "installed": false,
+     "position": "VW C Outlet",
+     "standard": "TC 1.5",
+     "label": "Center Outlet"
+    },
+    "cBottomOutlet": {
+     "installed": true,
+     "position": "VW C Bottom Outlet",
+     "standard": "TC 1.5",
+     "label": "Center Bottom Outlet"
     },
     "thermowell": {
-     "installed": true,
-     "position": "VW Left Thermowell",
+     "installed": false,
+     "position": "VW Center Probe",
      "standard": "TC 1.5"
     },
     "element": {
-     "installed": true,
-     "position": "VW Right Element",
+     "installed": false,
+     "position": "VW R Element",
      "standard": "TC 2"
     }
    },
-   "heater": "HLT_Heat"
+   "vdevice": true,
+   "volume": 10
+  },
+  {
+   "id": "ip_hlt_lElement",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_HLT",
+   "port": "lElement",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 585,
+   "y": 236,
+   "label": "Left Element"
+  },
+  {
+   "id": "ip_hlt_rElement",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_HLT",
+   "port": "rElement",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 805,
+   "y": 236,
+   "label": "Right Element"
   },
   {
    "id": "ip_h_out",
@@ -1766,13 +1868,13 @@
    "h": 30,
    "color": "#e8a33a",
    "attachTo": "v_HLT",
-   "port": "outlet",
+   "port": "cBottomOutlet",
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
    "x": 695,
    "y": 328,
-   "label": "Outlet (TC 1.5)"
+   "label": "Center Bottom Outlet"
   },
   {
    "id": "v_MLT",
@@ -1791,7 +1893,7 @@
    "template": "Skynet_Vessel_Widget",
    "templateCls": "skynet",
    "vwidget": true,
-   "probeStyle": "thermowell",
+   "probeStyle": "front",
    "vtype": "Brew Kettle",
    "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
    "bundled": true,
@@ -1800,54 +1902,126 @@
     "type": "TC",
     "size": 1.5
    },
-   "probe": "MLT_Temp",
    "ports": {
-    "outlet": {
+    "rSparge": {
+     "installed": false,
+     "position": "VW R Sparge",
+     "standard": "TC 1.5",
+     "label": "Right Sparge"
+    },
+    "rHermsIn": {
+     "installed": false,
+     "position": "VW R HERMS In",
+     "standard": "TC 1.5",
+     "label": "Right HERMS In"
+    },
+    "rHermsOut": {
+     "installed": false,
+     "position": "VW R HERMS Out",
+     "standard": "TC 1.5",
+     "label": "Right HERMS Out"
+    },
+    "rElement": {
+     "installed": false,
+     "position": "VW R Element",
+     "standard": "TC 1.5",
+     "label": "Right Element"
+    },
+    "lSparge": {
      "installed": true,
-     "position": "VW Center Bottom",
-     "standard": "TC 1.5"
+     "position": "VW L Sparge",
+     "standard": "TC 1.5",
+     "label": "Left Sparge"
     },
-    "outlet2": {
+    "lHermsIn": {
      "installed": false,
-     "position": "VW Right Middle",
-     "standard": "TC 1.5"
+     "position": "VW L HERMS In",
+     "standard": "TC 1.5",
+     "label": "Left HERMS In"
     },
-    "tangential": {
+    "lHermsOut": {
      "installed": false,
-     "position": "VW Left Low",
-     "standard": "TC 1.5"
+     "position": "VW L HERMS Out",
+     "standard": "TC 1.5",
+     "label": "Left HERMS Out"
     },
-    "topInlet": {
+    "lElement": {
      "installed": true,
-     "position": "VW Left High",
-     "standard": "TC 1.5"
+     "position": "VW L Element",
+     "standard": "TC 1.5",
+     "label": "Left Element"
     },
-    "sparge": {
+    "lBackElement": {
      "installed": false,
-     "position": "VW Lid Center",
-     "standard": "TC 1.5"
+     "position": "VW L Back Element",
+     "standard": "TC 1.5",
+     "label": "Left Back Element"
     },
-    "cip": {
+    "rBackElement": {
      "installed": false,
-     "position": "VW Lid Right",
-     "standard": "TC 1.5"
+     "position": "VW R Back Element",
+     "standard": "TC 1.5",
+     "label": "Right Back Element"
     },
-    "steamSlayer": {
+    "cProbe": {
      "installed": false,
-     "position": "VW Right High",
-     "standard": "TC 1.5"
+     "position": "VW C Probe",
+     "standard": "TC 1.5",
+     "label": "Center Probe"
+    },
+    "lTangential": {
+     "installed": false,
+     "position": "VW L Tangential",
+     "standard": "TC 1.5",
+     "label": "Left Tangential"
+    },
+    "rTangential": {
+     "installed": false,
+     "position": "VW R Tangential",
+     "standard": "TC 1.5",
+     "label": "Right Tangential"
+    },
+    "cOutlet": {
+     "installed": false,
+     "position": "VW C Outlet",
+     "standard": "TC 1.5",
+     "label": "Center Outlet"
+    },
+    "cBottomOutlet": {
+     "installed": true,
+     "position": "VW C Bottom Outlet",
+     "standard": "TC 1.5",
+     "label": "Center Bottom Outlet"
     },
     "thermowell": {
-     "installed": true,
-     "position": "VW Left Thermowell",
+     "installed": false,
+     "position": "VW Center Probe",
      "standard": "TC 1.5"
     },
     "element": {
      "installed": false,
-     "position": "VW Right Element",
+     "position": "VW R Element",
      "standard": "TC 2"
     }
-   }
+   },
+   "vdevice": true,
+   "volume": 10
+  },
+  {
+   "id": "ip_mlt_lElement",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_MLT",
+   "port": "lElement",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 945,
+   "y": 236,
+   "label": "Left Element"
   },
   {
    "id": "ip_m_out",
@@ -1857,13 +2031,13 @@
    "h": 30,
    "color": "#e8a33a",
    "attachTo": "v_MLT",
-   "port": "outlet",
+   "port": "cBottomOutlet",
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1055,
    "y": 328,
-   "label": "Outlet (TC 1.5)"
+   "label": "Center Bottom Outlet"
   },
   {
    "id": "ip_m_in",
@@ -1873,13 +2047,13 @@
    "h": 30,
    "color": "#e8a33a",
    "attachTo": "v_MLT",
-   "port": "topInlet",
+   "port": "lSparge",
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
    "x": 945,
-   "y": 60,
-   "label": "Top Inlet (TC 1.5)"
+   "y": 91,
+   "label": "Left Sparge"
   },
   {
    "id": "v_BK",
@@ -1898,7 +2072,7 @@
    "template": "Skynet_Vessel_Widget",
    "templateCls": "skynet",
    "vwidget": true,
-   "probeStyle": "thermowell",
+   "probeStyle": "front",
    "vtype": "Brew Kettle",
    "image": "Images/Skynet/Vessels/Skynet_Vessel_Widget.svg",
    "bundled": true,
@@ -1907,55 +2081,142 @@
     "type": "TC",
     "size": 1.5
    },
-   "probe": "BK_Temp",
    "ports": {
-    "outlet": {
+    "rSparge": {
+     "installed": false,
+     "position": "VW R Sparge",
+     "standard": "TC 1.5",
+     "label": "Right Sparge"
+    },
+    "rHermsIn": {
+     "installed": false,
+     "position": "VW R HERMS In",
+     "standard": "TC 1.5",
+     "label": "Right HERMS In"
+    },
+    "rHermsOut": {
+     "installed": false,
+     "position": "VW R HERMS Out",
+     "standard": "TC 1.5",
+     "label": "Right HERMS Out"
+    },
+    "rElement": {
      "installed": true,
-     "position": "VW Center Bottom",
-     "standard": "TC 1.5"
+     "position": "VW R Element",
+     "standard": "TC 2",
+     "label": "Right Element"
     },
-    "outlet2": {
-     "installed": false,
-     "position": "VW Right Middle",
-     "standard": "TC 1.5"
-    },
-    "tangential": {
-     "installed": false,
-     "position": "VW Left Low",
-     "standard": "TC 1.5"
-    },
-    "topInlet": {
+    "lSparge": {
      "installed": true,
-     "position": "VW Left High",
-     "standard": "TC 1.5"
+     "position": "VW L Sparge",
+     "standard": "TC 1.5",
+     "label": "Left Sparge"
     },
-    "sparge": {
+    "lHermsIn": {
      "installed": false,
-     "position": "VW Lid Center",
-     "standard": "TC 1.5"
+     "position": "VW L HERMS In",
+     "standard": "TC 1.5",
+     "label": "Left HERMS In"
     },
-    "cip": {
+    "lHermsOut": {
      "installed": false,
-     "position": "VW Lid Right",
-     "standard": "TC 1.5"
+     "position": "VW L HERMS Out",
+     "standard": "TC 1.5",
+     "label": "Left HERMS Out"
     },
-    "steamSlayer": {
+    "lElement": {
+     "installed": true,
+     "position": "VW L Element",
+     "standard": "TC 1.5",
+     "label": "Left Element"
+    },
+    "lBackElement": {
      "installed": false,
-     "position": "VW Right High",
-     "standard": "TC 1.5"
+     "position": "VW L Back Element",
+     "standard": "TC 1.5",
+     "label": "Left Back Element"
+    },
+    "rBackElement": {
+     "installed": false,
+     "position": "VW R Back Element",
+     "standard": "TC 1.5",
+     "label": "Right Back Element"
+    },
+    "cProbe": {
+     "installed": false,
+     "position": "VW C Probe",
+     "standard": "TC 1.5",
+     "label": "Center Probe"
+    },
+    "lTangential": {
+     "installed": false,
+     "position": "VW L Tangential",
+     "standard": "TC 1.5",
+     "label": "Left Tangential"
+    },
+    "rTangential": {
+     "installed": false,
+     "position": "VW R Tangential",
+     "standard": "TC 1.5",
+     "label": "Right Tangential"
+    },
+    "cOutlet": {
+     "installed": false,
+     "position": "VW C Outlet",
+     "standard": "TC 1.5",
+     "label": "Center Outlet"
+    },
+    "cBottomOutlet": {
+     "installed": true,
+     "position": "VW C Bottom Outlet",
+     "standard": "TC 1.5",
+     "label": "Center Bottom Outlet"
     },
     "thermowell": {
-     "installed": true,
-     "position": "VW Left Thermowell",
+     "installed": false,
+     "position": "VW Center Probe",
      "standard": "TC 1.5"
     },
     "element": {
-     "installed": true,
-     "position": "VW Right Element",
+     "installed": false,
+     "position": "VW R Element",
      "standard": "TC 2"
     }
    },
-   "heater": "BK_Heat"
+   "vdevice": true,
+   "volume": 10
+  },
+  {
+   "id": "ip_bk_lElement",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_BK",
+   "port": "lElement",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1305,
+   "y": 236,
+   "label": "Left Element"
+  },
+  {
+   "id": "ip_bk_rElement",
+   "kind": "ip",
+   "workspace": "Brewhouse",
+   "w": 30,
+   "h": 30,
+   "color": "#e8a33a",
+   "attachTo": "v_BK",
+   "port": "rElement",
+   "labelVisible": false,
+   "labelAlign": "below",
+   "labelSize": 12,
+   "x": 1525,
+   "y": 236,
+   "label": "Right Element"
   },
   {
    "id": "ip_b_out",
@@ -1965,13 +2226,13 @@
    "h": 30,
    "color": "#e8a33a",
    "attachTo": "v_BK",
-   "port": "outlet",
+   "port": "cBottomOutlet",
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1415,
    "y": 328,
-   "label": "Outlet (TC 1.5)"
+   "label": "Center Bottom Outlet"
   },
   {
    "id": "ip_b_in",
@@ -1981,13 +2242,13 @@
    "h": 30,
    "color": "#e8a33a",
    "attachTo": "v_BK",
-   "port": "topInlet",
+   "port": "lSparge",
    "labelVisible": false,
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1305,
-   "y": 60,
-   "label": "Top Inlet (TC 1.5)"
+   "y": 91,
+   "label": "Left Sparge"
   },
   {
    "id": "t_hlt",
@@ -2463,7 +2724,7 @@
     ],
     [
      890,
-     93
+     124
     ]
    ],
    "width": 10,
@@ -2479,11 +2740,11 @@
    "points": [
     [
      908,
-     75
+     106
     ],
     [
      960,
-     75
+     106
     ]
    ],
    "width": 10,
@@ -2547,7 +2808,7 @@
     ],
     [
      1260,
-     93
+     124
     ]
    ],
    "width": 10,
@@ -2563,11 +2824,11 @@
    "points": [
     [
      1278,
-     75
+     106
     ],
     [
      1320,
-     75
+     106
     ]
    ],
    "width": 10,
@@ -3650,7 +3911,7 @@
     "end": "1,0.29"
    },
    "x": 882,
-   "y": 67,
+   "y": 98,
    "bundled": true
   },
   {
@@ -3666,7 +3927,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 875,
-   "y": 78,
+   "y": 109,
    "label": "Start (vessel side) (TC 1.5)"
   },
   {
@@ -3682,7 +3943,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 893,
-   "y": 60,
+   "y": 91,
    "label": "End (TC 1.5)"
   },
   {
@@ -3819,7 +4080,7 @@
     "end": "1,0.29"
    },
    "x": 1252,
-   "y": 67,
+   "y": 98,
    "bundled": true
   },
   {
@@ -3835,7 +4096,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1245,
-   "y": 78,
+   "y": 109,
    "label": "Start (vessel side) (TC 1.5)"
   },
   {
@@ -3851,7 +4112,7 @@
    "labelAlign": "below",
    "labelSize": 12,
    "x": 1263,
-   "y": 60,
+   "y": 91,
    "label": "End (TC 1.5)"
   }
  ],

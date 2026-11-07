@@ -470,7 +470,9 @@ function applyVParts(g, vp, tab, label) {
   const want = Object.entries(EQ_VW.ports).filter(([k, d]) => d.vw && vp[k + '_part'] && !vpHermsOn({ herms: vp.vHerms }, k));
   if (want.length && none(vp.vpIface)) throw new Error('Pick the Interface (board) the parts on its IPs are wired to');
   for (const [k, d] of want) {
-    const kind = vp[k + '_part'], o = old.find(e => e.integratedAs === 'ip:' + k), proto = vpProto(kind, vp[k + '_ptk']);
+    const kind = vp[k + '_part'], o = old.find(e => e.integratedAs === 'ip:' + k);
+    // an Element that is already a heat controller (Hysteresis, PID ..., like the Three Vessel sample's HLT_Heat) stays one, as the RIMS tube's does
+    const proto = kind === 'element' && o?.vpKind === 'element' && HEAT_CTL_TYPES.includes(o.type) ? { type: o.type } : vpProto(kind, vp[k + '_ptk']);
     const e = { ...(o ? clone(o) : { w: 130, h: 60, enabled: false }), device: vp.vpIface, workspace: tab, integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind };
     for (const x of [...TEMP_KEYS, 'wires', 'series', 'subtype']) delete e[x];
     Object.assign(e, clone(proto));
