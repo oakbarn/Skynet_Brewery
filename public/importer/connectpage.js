@@ -250,7 +250,7 @@ function readAi() {
   renderChains(); renderPicture();
 }
 
-// ---- the song (Fritz's own, made with Treblo, free to use) and the spoken rhyme: they never play by themselves
+// ---- the song (Fritz's own, made with Treblo, free to use) and the old song's lines in Fritz's comic voice clip: they never play by themselves
 function playToggle(id, other) {
   const a = $(id), o = $(other);
   if (!a.paused) { a.pause(); a.currentTime = 0; return; }
@@ -260,7 +260,7 @@ function playToggle(id, other) {
 function soundButtons() {
   const set = () => {
     $('#songBtn').textContent = $('#song').paused ? '▶ Play the song' : '■ Stop the song';
-    $('#voiceBtn').textContent = $('#voice').paused ? '▶ Hear the rhyme' : '■ Stop';
+    $('#voiceBtn').textContent = $('#voice').paused ? '▶ Hear it' : '■ Stop';
   };
   for (const id of ['#song', '#voice']) for (const ev of ['play', 'pause', 'ended']) $(id).addEventListener(ev, set);
   set();

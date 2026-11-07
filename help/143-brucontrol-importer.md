@@ -108,7 +108,7 @@ BruControl only knew your valves and pumps as buttons; it never knew which vesse
 page asks **what is connected to what** (Fritz, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
 bone". The page shows a few lines of the old song (*Dem Bones*) and the brewery version, with **▶ Play the song** (Skynet's own
 song, *Skynet - Outlet to Valve*, made by Fritz; it never plays by itself, and the button turns into **■ Stop**) and
-**▶ Hear the rhyme**.
+**▶ Hear it** beside the old song's lines (Fritz's own clip of them in a comic voice).
 
 - **Your vessels.** Guessed from your names and Scripts (HLT, Mash Tun, Boil Kettle, Fermenter). Rename, remove or add one.
   The **Hot Side** vessels are joined here; a **Fermenter** (Cold Side) has its own questions.
