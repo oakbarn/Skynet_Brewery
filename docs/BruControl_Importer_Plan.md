@@ -194,7 +194,9 @@ most common **Probe Location** are the Center Probe. (Fritz's drawing: project f
 3. **Outlet fitting:** TC 1.5; NPT; BSP; None.
 4. **Thermowell:** Center Above, Manual Thermometer; Center Above, BruControl Probe; None.
 5. **High Return:** Sparge Arm; Steam Slayer; Inlet; None.
-6. **Tangential Inlet:** Left; Right; None.
+6. **Tangential Inlet:** Left; Right; Left and Right; None. It uses the Left or Right Tangential IP from the drawing (both IPs
+   for Left and Right). Each tangential then gets its own connection chain in Dialog 2b (Fritz, 2026-11-07: "If I forgot ask
+   about tangentials").
 7. **Outlet:** TC above Bottom; TC Bottom Outlet; BSP above Bottom; BSP Bottom Outlet; None.
 8. **HERMS Coil inside the Vessel:** Left Outlet and Inlet; Right Outlet and Inlet; Right Inlet, Left Outlet; Left Inlet,
    Right Outlet; None.
@@ -218,8 +220,8 @@ most common **Probe Location** are the Center Probe. (Fritz's drawing: project f
 
 ### Dialog 2b: what is on each outlet (Fritz, 2026-11-07)
 "We need to ask about outlets and what is connected to them (Valves and Type), Pipe Fittings, and if a Valve what comes Next
-(elbow)." For each outlet or inlet the Vessel has (Center Outlet, Center Bottom Outlet, Tangential, Sparge or Steam Slayer,
-HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.2, 18.13):
+(elbow)." For each outlet or inlet the Vessel has (Center Outlet, Center Bottom Outlet, Left Tangential, Right Tangential,
+Sparge or Steam Slayer, HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.2, 18.13):
 1. **What is connected:** Valve; Pipe Fitting; Probe tee or Thermowell (Rule 5.30); Sight Glass (Rule 5.32); Nothing.
 2. **If a Valve:** its **Type** (Manual Ball Valve, Motorized Ball Valve, Butterfly, and so on, from the Valve Standard) and,
    when it is motorized, **which imported Device runs it** (a dropdown by BruControl name, an educated guess filled in).
@@ -231,6 +233,9 @@ HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.
    (Quick Disconnect, Rule 5.34); **Supply Manifold** (Double or Triple, Rule 5.35); **None**. A Pipe, Hose or Manifold also
    ends the chain. **The Pipe, Hose or Supply Manifold itself is not added** (Fritz, 2026-11-07: "do not add the supply
    manifold Hose or Pipe, just the Ip"): the chain ends with an **IP** there, where the brewer connects it on the Tab later.
+5. **Tangentials** get the same chain as the outlets, one for each tangential the Vessel has: what is connected (usually a
+   Valve), the valve Type and the Device that runs it, what comes next, and the end (Pipe, Hose, Supply Manifold or None, only
+   an IP). The chain starts at the Left or Right Tangential IP.
 
 ### Building the Vessel Device, shown before saving (Fritz, 2026-11-07)
 "Once the answers are done, create a Vessel Device with the Integral Components and Place On the Brewery Tab. Drill Down to get
