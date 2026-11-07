@@ -4054,7 +4054,8 @@ function skyDevPreset(name) {
 // The Close all / Open all valve lists (Rule 6.15): close_all_valves and open_all_valves in a Process, and the Brew Process's
 // PreBrew. On both by default; a tap water valve is always on Close all and never on Open all; a Manual valve is on neither.
 const VALVE_LIST_FIELDS = it => it.valveType === 'manual' ? [['_vl', 'A Manual valve is not on the Close all or Open all valves lists: a Process asks for it by name.', 'note']]
-  : it.tapwater ? [['_vl', 'Close all valves list: always on. Open all valves list: never. (A tap water valve, Rule 6.15: these can\'t be changed.)', 'note']]
+  : it.tapwater ? [['_tapClose', 'On the Close all valves list (always, for a tap water valve)', 'bool', true, false, false, { disabled: true }], ['_tapOpen', 'On the Open all valves list (never, for a tap water valve)', 'bool', true, false, false, { disabled: true }],
+    ['_vl', 'A tap water valve is always on the Close all valves list and never on the Open all valves list (Rule 6.15): these can\'t be changed.', 'note']]
     : [['closeAll', 'On the Close all valves list (close_all_valves in a Process, PreBrew house cleaning)', 'bool', true], ['openAll', 'On the Open all valves list (open_all_valves, e.g. after cleaning)', 'bool', true]];
 // where the Tap water source can be: Top / Bottom on a vertical valve, Left / Right on a horizontal or 45 degree one
 const tapKey = e => `${e.orientation}|${!!e.flipH}|${!!e.flipV}`;
@@ -5867,7 +5868,9 @@ const MBV_TOGGLE = it => ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false
 const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, ...x }]];
 // a valve's own (Rule 18.22): Tap water (Rule 6.15) and the Close all / Open all valves lists
 // Fritz, 2026-11-05: short names (On Close List, On Open List) and the three switches on one line, in the Add box too
-const MBV_OWN = (it, x = {}) => [it.tapwater ? ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, ...x }]
+// Fritz, 2026-11-07: a Tap water valve shows On Close List on and On Open List off, both greyed out (Rule 6.15)
+const MBV_OWN = (it, x = {}) => [it.tapwater ? ((it._tapClose = true), (it._tapOpen = false), ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap,
+      with: [['_tapClose', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }], ['_tapOpen', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vTapLists, disabled: true }]], ...x }])
     : ['tapwater', 'Tap water valve', 'bool', undefined, true, false, { tip: DEVICE_TIPS.vTap, with: [['closeAll', 'On Close List', 'bool', true, false, false, { tip: DEVICE_TIPS.vCloseAll }], ['openAll', 'On Open List', 'bool', true, false, false, { tip: DEVICE_TIPS.vOpenAll }]], ...x }],
   ...(it.tapwater ? [it.template ? ['tapSource', 'Tap end', 'sel', tapChoices(it), false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }] : ['tapwaterOut', 'Tap water flows out of', 'sel', TAP_OUT, false, false, { tip: DEVICE_TIPS.vTapEnd, ...x }],
     ['_vl', 'A tap water valve is always on the Close List and never on the Open List (Rule 6.15).', 'note', null, false, false, x]] : [])];
@@ -6264,6 +6267,7 @@ function fieldsOf(item) {
 const PICK_TIP = 'Double-click to open the Properties of the one picked';
 function field(f, obj) {
   const out = fieldOne(f, obj);
+  if (f[6]?.disabled && out[1]) for (const i of [out[1], ...out[1].querySelectorAll('input, select')]) if ('disabled' in i) i.disabled = true;     // shown, greyed out, never changed
   // Rule 18 (General Dialog Rules, Fritz 2026-11-02): f[6] = { up: 2 or 30, attr: { title, fields } }. The red Up Arrow ⬆ opens the
   // String Entry Dialog (2 or 30 lines); the red hexagon ⬢ opens the Attribute Pop Up Dialog for that field's attributes.
   const x = f[6];
@@ -6275,6 +6279,7 @@ function field(f, obj) {
     const more = Array.isArray(x.with[0]) ? x.with : [x.with], first = out[1], parts = [first];
     for (const w of more) {
       const o2 = fieldOne(w, obj);
+      if (w[6]?.disabled && o2[1]) for (const i of [o2[1], ...o2[1].querySelectorAll('input, select')]) if ('disabled' in i) i.disabled = true;     // shown, greyed out, never changed
       if (o2[1]?._fill && first.matches?.('select')) first.addEventListener('change', () => o2[1]._fill(first.value));
       const lbl = h('span', { class: 'pairLbl' }, w[1]);
       if (w[6]?.tip) { lbl.classList.add('tipLbl'); lbl.dataset.help = w[6].tip; lbl.addEventListener('click', () => fieldTip(w[1], w[6].tip)); }
@@ -6365,6 +6370,7 @@ const DEVICE_TIPS = {
   vTap: 'On: this valve lets tap water in when it is open, no pump needed (Rule 6.15). It is always on the Close all valves list.',
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
   vOpenAll: 'On: open_all_valves in a Process (for example after cleaning) opens this valve (Rule 6.15).',
+  vTapLists: 'A tap water valve is always on the Close List and never on the Open List, so open_all_valves (the last step of Clean) never lets tap water run (Rule 6.15). These can\'t be changed.',
   vTapEnd: 'Which end the tap water comes in at; it flows out of the other end.',
   // the Temperature Probe (Fritz, 2026-11-05, Rule 18.26)
   pNum: 'Probe #: the OneWire probe number of this DS18B20 (Devices page > OneWire probes). All DS18B20 probes share one data pin.',
