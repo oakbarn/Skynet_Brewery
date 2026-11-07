@@ -317,6 +317,35 @@ to where we can build the Device vessel and display it to the user before saving
   brewer can go Back to any question and change it; **Save** places it on the **Brewery Tab**.
 - Imported items that are now part of the Vessel (its heater, probe, valves) are linked to it; their Placeholders go away.
 
+### Connect your brewery: how valves and pumps join the vessels (plan only, Fritz 2026-11-07)
+Fritz, 2026-11-07: "One obvious issue is how valves and pumps are connected to the vessels. Can a uploaded Picture help in the
+building, but only within the program (no AI)"; "We can Also ask the User about his 'manifold Layout' what is connected to
+what." The Tartan test build (Tartan1, 2026-11-07) showed this is the biggest gap: 10 valves had nothing saying where they sit.
+
+A new Importer step, after the Vessel Devices are built and before the Schema is saved. Nothing here reads a picture with AI:
+the program only shows it and measures distances on the screen. Three helpers, used together:
+
+1. **Manifold questions (what is connected to what).** For each imported valve and pump, one short drill-down question, like
+   Dialog 2b: **From** (a Vessel and its IP, a pump's in or out, another valve, a Supply Manifold, Tap Water, Drain, or Not
+   connected) and **To** (the same list). A pump also asks which way it pumps. A **Supply Manifold** (Rule 5.35) can be picked
+   for a row of valves on one pipe. Each answer starts with the best guess (helper 3), so the brewer only checks it. Answers
+   build the pipes and hoses between the IPs (Rule 5.29, 5.34); a missing answer leaves the item loose, never a wrong pipe.
+2. **A picture as a guide.** The brewer can pick a picture: the **background picture they used on that BruControl Tab** (filled
+   in automatically when there is one) or **a photo or drawing they upload**. It shows faded behind the Brewery Tab. The brewer
+   drags each vessel, pump and valve onto its place in the picture and **clicks one IP and then another** to join them, the same
+   joining the Panel uses for pipes (one source, Rule 15.4). The picture is only a guide: it is kept as the Tab background only if
+   the brewer says so.
+3. **Guesses from BruControl's screen.** Many BruControl brewers put their valve and pump buttons on top of a picture of their
+   brewery. Each item keeps its BruControl place, and the Importer suggests a connection when a valve or pump sits next to a
+   Vessel's IP, another valve or a drawn pipe picture (nearest within a short distance), plus the clues from names and Scripts
+   (a Script that opens M_V1 and runs M_HLT Pump together suggests one path). Each suggestion is marked **guess** until the
+   brewer OKs or changes it.
+- Order on the page: the picture (if any) on the left, the manifold questions on the right; answering a question draws the pipe
+  on the picture side, and joining on the picture fills in the question. Either way works.
+- Shown before saving with the rest; Back changes any answer.
+- Open questions for Fritz: are Tap Water and Drain the right "ends" to offer besides vessels, pumps, valves and manifolds? Should
+  a hose and a hard pipe be asked separately, or always a pipe first (changeable later)?
+
 ### Dialog 3: More Questions
 To come (Fritz, 2026-11-07: "New Dialog More Questions").
 
