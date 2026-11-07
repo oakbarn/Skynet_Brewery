@@ -105,7 +105,7 @@ Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema fi
 ## Installing the Importer
 
 The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Under the question it says: "If you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the **Skynet BruControl
-Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. Setup
+Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. If you answered Yes, the last Setup page has a tick box, **Open the BruControl Importer now**. Setup
 always makes the Import folder, as BeerSmith or other programs may save their files there too.
 
 ## Next steps (being built)
