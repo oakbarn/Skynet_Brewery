@@ -76,8 +76,9 @@ for (const [n, on] of Object.entries(want)) {
       assert.deepEqual(end, [ip.x + 15, ip.y + 15], `${p.id} ends on ${ip.id}`);
     }
 }
-assert.equal(c.elements.find(e => e.name === 'HLT_Heat').type, 'hysteresis', 'the built in heaters stay heat controllers (the Processes set .target)');
-assert.ok(app.includes("HEAT_CTL_TYPES.includes(o.type) ? { type: o.type }"), 'a built in heat controller stays one');
+// the built in heaters are Heating Elements starting in Hysteresis (Rule 6.19), so they have the Heating method field and spots;
+// the Processes still set .target and .enabled
+{ const hlt = c.elements.find(e => e.name === 'HLT_Heat'); assert.deepEqual([hlt.type, hlt.subtype, hlt.heatMethod], ['digitalOut', 'element', 'hysteresis']); }
 assert.ok(!c.graphics.some(g => ['img_HLT', 'img_MLT', 'img_BK'].includes(g.id)), 'the old pictures went');
 console.log('vessel widget ok');
 
