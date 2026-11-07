@@ -217,6 +217,10 @@ There is no mention of supporting MQTT that they know of in the documentation").
 each BrewZilla 4, and Skynet talks to the RAPT API directly with that owner's API secret. MQTT is not part of RAPT; the
 RAPT-to-MQTT bridge is someone else's hobby program and only an option.
 
+**Chosen way for later** (Fritz, 2026-11-07: "We can use that MQTT Bridge for Voice Commands as well as reading and setting
+things"): use the RAPT-to-MQTT bridge. Through it Skynet reads and sets the BrewZilla 4, and voice commands reach it by its
+API_Name (Rule 6.18). Nothing is built until Fritz says go.
+
 So a connected All In One would become an Interface of its own kind (a cloud or Bluetooth link instead of a board). That is
 not part of this plan; it needs Fritz's go and its own Rule.
 
