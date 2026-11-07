@@ -343,6 +343,9 @@ the program only shows it and measures distances on the screen. Three helpers, u
    snippet that plays"). The song itself is free to use, but most **recordings** have their own copyright, so the Importer plays
    the tune **from its own notes** (the browser makes the sound, no recording file). If a recording marked free to use (public
    domain or CC0) is found later, Fritz decides whether to use it instead. It never plays by itself, only on the click.
+   *Or our own song file* (Fritz, 2026-11-07: "we could just make our own song file using an AI Childs voice"): the song is free
+   to use and the brewery verse is our own, so a short sung file made with an AI singing tool can replace the notes, if that
+   tool's terms allow its songs in a program we give away. Fritz makes or picks the file; it goes in `media/sounds/Skynet`.
 
    and then the brewery version:
    > *Outlet connected to the valve,*
