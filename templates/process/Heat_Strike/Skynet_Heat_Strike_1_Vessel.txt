@@ -1,0 +1,19 @@
+//Skynet_Heat_Strike_1_Vessel
+//About: 1 Vessel: fill the All In One with all the water and heat it to the strike temperature, with the grain basket in.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Fill the vessel"
+ask "Put the grain basket in, and fill the vessel with " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of water (all of it for a full volume mash). Press Done when it is in."
+step "Heat the strike water"
+@if HLT_Heater
+{{HLT_Heater}}.target = rcp_Strike_Temp
+{{HLT_Heater}}.enabled = true
+@else
+ask "Turn the heat on and set it to " + rcp_Strike_Temp + rcp_Temp_Units + ". Press Done when it is on."
+@end
+@if HLT_Probe
+wait {{HLT_Probe}} >= rcp_Strike_Temp
+@else
+ask "Press Done when the water reaches " + rcp_Strike_Temp + rcp_Temp_Units + "."
+@end
+print "Strike water at " + rcp_Strike_Temp + rcp_Temp_Units

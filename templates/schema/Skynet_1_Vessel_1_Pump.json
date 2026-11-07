@@ -1,0 +1,17 @@
+{
+  "title": "1 Vessel + 1 Pump",
+  "about": "One electric vessel with a pump that recirculates the mash, whirlpools and pumps to the fermentor.",
+  "order": 2,
+  "kind": "hot",
+  "vessels": [
+    {
+      "role": "All In One"
+    }
+  ],
+  "pumps": 1,
+  "process": {
+    "Heat_Strike": "Skynet_Heat_Strike_1_Vessel",
+    "Strike": "Skynet_Strike_1_Vessel",
+    "Mash": "Skynet_Mash_1_Vessel"
+  }
+}

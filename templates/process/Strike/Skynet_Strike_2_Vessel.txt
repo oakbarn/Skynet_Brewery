@@ -1,0 +1,27 @@
+//Skynet_Strike_2_Vessel
+//About: 2 Vessel: strike water from the kettle into the mash tun, then the grain a little at a time (dough in) and a vorlauf.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Grain ready"
+ask "Have the grain (" + rcp_Total_Grain_Weight + " " + rcp_Weight_Units + ") milled and ready to add. Press Done when it is ready."
+step "Strike water to the mash tun"
+@if Mash_Pump
+ask "Set the valves from the kettle to the mash tun. Press Done when they are set."
+{{Mash_Pump}} = true
+ask "Press Done when the kettle is empty (" + rcp_Strike_Volume + " " + rcp_Volume_Units + " in the mash tun)."
+{{Mash_Pump}} = false
+close_all_valves
+@else
+ask "Move " + rcp_Strike_Volume + " " + rcp_Volume_Units + " of strike water from the kettle into the mash tun. Press Done when it is in."
+@end
+step "Dough in"
+ask "Add the grain slowly: add, stir, add, stir, and stir out every dough ball. Press Done when it is all in."
+@if Mash_Pump
+ask "Set the valves so the pump recirculates the mash tun. Press Done when they are set."
+{{Mash_Pump}} = true
+@end
+step "Vorlauf"
+ask "Recirculate the first cloudy runnings back on top of the mash until they run clear. Press Done when it runs clear."
+@if Mash_Probe
+print "Mash temperature after dough in: " + {{Mash_Probe}} + rcp_Temp_Units
+@end

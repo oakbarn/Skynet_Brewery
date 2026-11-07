@@ -1,7 +1,9 @@
 //Skynet_Boil
-//About: Heat to the boil, then run the boil timer for the Recipe's boil time (hop alerts run on the Boil timer).
+//About: Pre-boil gravity, up to the boil and the hot break, then the boil timer for the Recipe's boil time (hop alerts run on it), with the chiller sanitized near the end.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
+step "Pre-boil gravity"
+ask "Take a pre-boil gravity reading of the wort in the kettle and write it down. Press Done when you have it."
 step "Up to the boil"
 @if Boil_Heater
 {{Boil_Heater}}.target = rcp_Boil_Start_Temp + 5
@@ -12,12 +14,16 @@ ask "Turn the boil kettle heat on full. Press Done when it is on."
 @if Boil_Probe
 wait {{Boil_Probe}} >= rcp_Boil_Start_Temp
 @end
-ask "Watch for the hot break and keep it from boiling over. Press Done when it is at a rolling boil."
+step "Hot break"
+ask "Watch for the hot break and keep it from boiling over. Press Done only when it is at a rolling boil: the boil timer starts then."
 step "Boil"
 @if Boil_Timer
 {{Boil_Timer}}.countdown = true
 {{Boil_Timer}} = rcp_Boil_Time
 start {{Boil_Timer}}
+wait {{Boil_Timer}} <= 00:17:00
+step "Sanitize the chiller"
+ask "About 17 minutes left: put the chiller in the boil (or run hot wort through it) to sanitize it, and add the yeast nutrient and Whirlfloc at 15 minutes. Press Done when it is in."
 wait {{Boil_Timer}} <= 00:00:00
 stop {{Boil_Timer}}
 @else
