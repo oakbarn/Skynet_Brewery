@@ -81,13 +81,13 @@ Press **OK** to keep your pin anyway, or **Cancel** to go back and pick another 
 
 ## Device Type IDs
 
-Every Device Type ID is unique. Some are in more than one list (`DO` is a plain relay and also a heating element on a relay).
+Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in the PWM and the analog lists). A Heating Element is `HE`, e.g. `MB_25_HE_HLT_BR`, whatever heating method it uses; elements named before keep `DO`.
 
 **Temperature:** `1W` DS18B20, `RTD` PT100 / PT1000, `TC` thermocouple, `10KNTC` 10K NTC thermistor (BCS-462 and BruControl type), `5KNTC`, `50KNTC`, `100KNT` (100K, the 3D printer type), `NTC` any other thermistor, `LM35`, `TMP36`.
 
-**Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `DO` direct on / off, `H_PWM` heating PWM, `H_AO` element on a 0-10 V power controller (SCR / SSVR).
+**Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `HE` Heating Element (on / off output, its method picked by a click or a Process), `H_PWM` heating PWM, `H_AO` element on a 0-10 V power controller (SCR / SSVR).
 
-**Direct on / off:** `DO`, `Pump`, `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature; names made before 2026-11-05 keep `E_L_Vlv`), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
+**Direct on / off:** `DO`, `HE` Heating Element, `Pump`, `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature; names made before 2026-11-05 keep `E_L_Vlv`), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
 
 **Direct inputs:** `DI` plain, `Float` (true while the float is made, false with no voltage), `DIN` momentary push button, `PB` push button (ON only while held), `Toggle`, `Latch` (ON until reset), `FlowSw` flow switch, `Intlk` door / lid / safety interlock, `EStop` emergency stop, `Leak` leak sensor, `Count` pulse counter.
 

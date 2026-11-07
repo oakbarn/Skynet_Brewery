@@ -27,15 +27,30 @@ It still asks before it turns on (Rule 2.33): nothing turns on until you click *
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID or Deadband, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
 
+## Its main method and the other methods allowed
+
+When you build it (and later in its Properties), pick its **main heating method**, the one it starts with. Then, under **Other
+methods allowed**, tick each other method it may use. **Only the main method and the ticked ones can be used**: the pop-up, the
+spots, Method Clones and Processes offer only those, and a Process asking for another one stops with a plain message.
+
 ## One-click method spots
 
-In its Properties, under **One-click method spots on the Tab**, switch on the methods you want a button for. When **two or more**
-are on, a small button for each shows **under the Element** on its Tab, or under its picture on a **Vessel Device** when it is
-built in. **One click** on one switches the Element to that method at once; the one in use is lit orange. With only one (or none)
-switched on, no buttons show.
+When **two or more** methods are allowed, a small button for each shows **under the Element** on its Tab, or under its picture on
+a **Vessel Device** when it is built in. **One click** on one switches the Element to that method at once; the one in use is lit
+orange. With only the main method, no buttons show.
 
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
-click on PID to hold the strike temperature. The BruControl Import switches these on for you.
+click on PID to hold the strike temperature. The BruControl Import sets Duty Cycle as the main method and ticks PID for you.
+
+## Method Clones: one tile per method
+
+To show one Element as separate tiles, like BruControl's *M_HLT Heat* and *HLT PID* side by side, add a **Method Clone** (Rule 4.4):
+in Edit layout, open **⧉ Clone Device** and pick the Element under **Method Clone**. It can go on the Element's own Tab. In its
+Properties pick the **Control Method** it stands for and, if you like, its own **Label**.
+
+- **One click** on the tile switches the Element to that method at once and opens its pop-up.
+- The tile shows **ON** only while the Element is ON **in that method**; otherwise it shows OFF.
+- The Element itself still shows what it is doing in whatever method it is using.
 
 ## From a Process
 
@@ -47,6 +62,20 @@ hE_HLT_1 = true
 hE_HLT_1.method = "Duty Cycle"
 hE_HLT_1.dutycycle = 70
 ```
+
+**The short way:** the method's short code after a dot, on a line of its own, switches it, the same as `.method =`:
+
+```
+MB_25_HE_HLT_BR.HYS
+MB_25_HE_HLT_BR.DutyC
+```
+
+The codes are **DO** (On/Off), **DutyC** (Duty Cycle), **HYS** (Hysteresis), **PID** and **DeadB** (Deadband). The Process editor offers them after the name.
+
+## Its name
+
+A Heating Element's Device Type is **HE**, so its name reads like `MB_25_HE_HLT_BR` (Interface, Port, HE, Label, Tab), whatever method it is using.
+It is wired straight to its port, going to an SSR or contactor, or to a DAC. Elements named before keep DO in their names.
 
 - `.method` is **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB
   work too). Reading it gives the word, for example `if hE_HLT_1.method == "PID"`.
@@ -74,7 +103,8 @@ same settings.
 BruControl controls one element with two Devices on the same port, for example **M_HLT Heat** (Duty Cycle) and **HLT PID** on port
 42. The BruControl Import makes them **one Heating Element**. It starts in the first one's method, and both old names still work
 in a Process: `HLT_PID = true` switches it to PID and turns it ON; `M_HLT_Heat = true` switches it to Duty Cycle. Where the second
-one was placed on a Tab, it becomes a **Clone** of the Heating Element.
+one was placed on a Tab, it becomes a **Method Clone** of the Heating Element standing for its method, with its BruControl Label
+(*HLT PID*), so the Tab looks as it did in BruControl.
 
 ## One Interface Port, one Device
 

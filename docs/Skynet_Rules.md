@@ -428,6 +428,11 @@ keep their double `__` before the Tab ID (Rule 3.5); a taken name gets _2, _3 ..
 *Replaced:* `InterfaceID_Port_DeviceTypeID_Label__TabID`, two underscores before the Tab ID (2026-10-23). The panel suggests the name; an Admin may type another.
 Full details (Type IDs, virtual ports, what happens to odd characters) are in the Device Library.
 (2026-10-23, PR #97)
+**A Heating Element's Type ID is `HE`** (Fritz, 2026-11-07: "they are added from a DDLB so we know it is a Heating Element. So we
+could Use MB_25_HE_HLT_BR"), e.g. `MB_25_HE_HLT_BR`, whatever heating method it is using (Rule 6.19); the method is not in its
+name or Label, since it can change while brewing. A Heating Element is wired straight to its port, going to an SSR (or a
+contactor) or to a DAC. Elements named before keep `DO` (Rule 3.5). The BruControl Import names them the same way.
+*Replaced:* a Heating Element on a relay had `DO`, like a plain relay (2026-10-23).
 *Replaced:* the 2026-10-21 format `InterfaceID_Port_Type_DisplayName_TabID` from PR #61.
 
 3.2 **Interface ID** = 1 to 4 letters, unique. **Tab ID** = exactly 2 letters, unique. **Only an
@@ -569,6 +574,15 @@ Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a re
 only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
 rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
 per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+- **Method Clones: Devices with more than one Control Method** (Fritz, 2026-11-07: "We need a type of Clone if someone wanted the
+  Device displayed like Tartan has one"; "Make it part of the Rule for Devices that have more than One Control Method"). A Clone of
+  a Device with more than one Control Method (today the Heating Element, Rule 6.19) may stand for **one** of its methods: its
+  **Control Method** and its own **Label** are the Clone's own too (blank Label = the parent's Label and the method, for example
+  *HLT Element PID*). It may sit on its parent's **own Tab** (the ⧉ Clone Device list has a *Method Clone* group for these
+  Devices, on any Tab). **One click** on it switches the parent to its method at once and opens the parent's pop-up; it shows
+  **ON only while the parent is ON in its method** (otherwise OFF). A Clone with no Control Method picked is a plain Clone. So a
+  Tab can show one Element as tiles side by side, like BruControl's *M_HLT Heat* (Duty Cycle) and *HLT PID*. The BruControl
+  Import makes each joined control's second placing a Method Clone with its BruControl Label.
 
 4.5 **The Edit layout bar has three rows** (Fritz's layout, 2026-10-28, Help 82):
 - **Row 1, Devices:** **Select Device Type** (the major kinds: On/Off, Pumps, Valves, Heating Element,
@@ -1111,6 +1125,10 @@ pipe on Save", Help 87).
 Major difference from BruControl"). No two Devices share a port on an Interface, whatever their Device Types. A heater's ways of
 control are one Heating Element's heating methods (Rule 6.19), not more Devices. The Available Ports lists never offer a port in
 use, and saving a Device on a used port is refused and says which Device has it.
+- **Once a Port is picked, it is taken** (Fritz, 2026-11-07: "Once a Port Is Selected, it is taken. So the method of choosing a
+  Port has to be addressed as well"): every way of choosing a Port (the Add box, Properties, a Vessel Device's or a Valve Tee's
+  parts, a RIMS tube, and the older typed Pin boxes, whose list now holds only free Ports) offers only the free Ports on that
+  Interface that fit the Device, plus the Device's own. A Port picked by one Device drops off every other list.
 - **Older Schemas:** two Devices that already shared a port in a saved Schema (made under the old exception below) keep working
   as before, the last one turned on wins and the others turn off, and can still be saved; no new sharing can be made.
 - **BruControl:** the Import makes heating controls on one port one Heating Element (Rule 6.19); anything else still sharing a port
@@ -1272,19 +1290,31 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
 is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband**.
-- **Properties:** under *Heating method*, the method it **starts with** (On/Off for one that has none), the **Temperature Probe** it
-  reads (Hysteresis, PID and Deadband need one) and that method's settings. The other methods' settings are kept.
+- **Only Heating Elements, today** (Fritz, 2026-11-07: "Heating Elements are the only thing I can Think of that could have a
+  different method of control. The hard wiring from the Arduino to the end hardware prevents other hardware from having different
+  methods of control"). The Rules about Devices with more than one Control Method (4.4, 6.19, `.method`) stay general, so another
+  kind could be added later only if Fritz says so.
+- **Properties (and its Build):** under *Heating method*, its **main method**, the one it **starts with** (On/Off for one that has
+  none), the **Temperature Probe** it reads (Hysteresis, PID and Deadband need one) and that method's settings, then **tick boxes
+  for the other methods it may use**. **Only the main method and the ticked ones are allowed** (Fritz, 2026-11-07: "we ask the
+  primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
+  Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
+  its Method Clones, the Process editor and the Brain offer only those; a Process asking for another gets a plain error. One with
+  nothing ticked has one way of control. The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
   once**, the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
   and **Cancel**. It still asks before it turns on (Rule 2.33).
 - **One-click method spots** (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
-  there is more than one control metod"): in Properties each method can be ticked as a spot. When **two or more** are ticked, a
-  small button for each shows under the Element on its Tab, or under its picture on a Vessel Device when it is built in. **One
-  click** on one switches the Element to that method at once; the one in use is lit. With fewer than two ticked, none show. The
-  BruControl Import ticks the methods of the controls it joined (port 42: Duty Cycle and PID). This needs no Clone (Rule 4.4).
-- **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, or DO, DutyC, HYS, PID, DeadB); its settings
+  there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
+  Element on its Tab, or under its picture on a Vessel Device when it is built in, whenever **two or more** are allowed. **One
+  click** on one switches the Element to that method at once; the one in use is lit. With only the main method, none show. The
+  BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
+  ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
+- **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, or DO, DutyC, HYS, PID, DeadB), or the
+  short way on a line of its own (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC"): `MB_25_HE_HLT_BR.HYS`,
+  `.DutyC`, `.PID`, `.DeadB` or `.DO` switches it to that method, the same as `.method =`. Its settings
   by the same names the separate Devices had (`.target`, `.dutycycle`, `.kp` ...). `hE_1 = true` or `.enabled = true` turns it ON
   in its method. `.value` is a PID or Deadband's output %; `.output` is its pin now (read only).
 - **Changing the method while it is ON** goes on at once in the new method, **except to On/Off**, which turns it **OFF** first, so it
@@ -1980,10 +2010,10 @@ like Pump", Help 137):
 3. The Add box is titled with the element and works as the Pump's and the Motorized Ball Valve's (Rules 4.2, 18.13, 18.15-18.17,
    18.20, 18.23): 1 Label ⬢ and Label Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**,
    **Orientation** (Right / Left) with **Toggle** on its line, **Overlay** (None to start: the on picture glows) with **Database and
-   .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**DO**). **No Cover.** It still asks before it
-   turns on (Rule 2.33). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in by its control mode as **hE_Mode_n**: PID
-   **hE_PID_1**, Hysteresis **hE_HYS_1**, Duty Cycle **hE_DutyC_1**, PWM **hE_PWM_1**, On/Off **hE_DO_1**, Deadband **hE_DeadB_1** (n the
-   next number not used yet for that mode). *The hE_ start and the _n end wait on Fritz's OK.*
+   .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**HE**, Rule 3.1). **No Cover.** It still asks before it
+   turns on (Rule 2.33). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in as **hE_n** (**hE_1**, hE_2 ...), with no
+   method in it, since its method can change (Rule 6.19, 2026-11-07); a heating PWM is **hE_PWM_1**, and the older control Devices
+   keep **hE_PID_1**, **hE_HYS_1**, **hE_DutyC_1**, **hE_DeadB_1** (n the next number not used yet). *The hE_ start and the _n end wait on Fritz's OK.*
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover; the Interface and Port are greyed out for good (Rule 18.13).
 5. **Vessel Device Template: Choose, then Build.** In the Heating Element list it takes the place of *Electric kettle, basic*
    (which stays in the full Add Device list, Devices: Skynet). **Choose** a Vessel Template that has an Element Port (the Vessel
@@ -2043,9 +2073,9 @@ like Pump", Help 74). A Widget has no Interface or Port (Rule 1.2) and is made o
 2. The opening pattern (Rule 18.15 for a Widget): **1 Label** ⬢ and **Label Visible** (starts at No), **2 Picture** (the picture it
    shows, from the Picture list with the 🖼 icon picker), **3 Tab** greyed out as **🔨 Build Tab**. Nothing else shows until the
    Label and the Picture are done; ➕ Add Widget can always be pressed and says what is missing. Enter goes Label, Picture,
-   ➕ Add Widget (Rule 18.20). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in by its control mode as **hE_Mode_n**: PID
-   **hE_PID_1**, Hysteresis **hE_HYS_1**, Duty Cycle **hE_DutyC_1**, PWM **hE_PWM_1**, On/Off **hE_DO_1**, Deadband **hE_DeadB_1** (n the
-   next number not used yet for that mode). *The hE_ start and the _n end wait on Fritz's OK.*
+   ➕ Add Widget (Rule 18.20). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in as **hE_n** (**hE_1**, hE_2 ...), with no
+   method in it, since its method can change (Rule 6.19, 2026-11-07); a heating PWM is **hE_PWM_1**, and the older control Devices
+   keep **hE_PID_1**, **hE_HYS_1**, **hE_DutyC_1**, **hE_DeadB_1** (n the next number not used yet). *The hE_ start and the _n end wait on Fritz's OK.*
 3. Then **4 Name** (the Suggested Name **wgt_PIX_Label_TabID**, Rule 3.14, e.g. wgt_PIX_Kettle_Element_BR; it may be edited),
    the **Graphic**, **Turns on with** (Rule 7.11) with **Toggle** (On/Off, Push button, None: what a tap does) on its line,
    **Overlay** (greyed out while Turns on with is None) with a ⬢ for the second picture (Picture when on, optional, Rule 7.8) and
@@ -2472,3 +2502,7 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.19: `.method` is the one Process word for choosing the method of control of every Device with more than one (today the Heating Element); the Process editor lists the methods after `name.method =`. Help 150 updated. Checked against the BruControl Import program: it uses the same Process words. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.1 changed (Fritz: "a Limit of One Interface Port to one Device. Another Major difference from BruControl"): one Interface Port, one Device, of any Device Type; the old exception (different Device Types may share a port) is gone for anything new; two that already shared a port in an older Schema keep working and can still be saved. Help 150 and the BruControl Import's "What is different" page updated. Checked against the BruControl Import program: it joins heating controls on one port into one Heating Element and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.19: one-click method spots: each heating method can be ticked in a Heating Element's Properties; with two or more ticked a small button for each shows under it (on its Tab or its Vessel Device) and one click switches to that method; the method buttons in its pop-up also switch at once. The BruControl Import ticks the joined controls' methods. Help 150 updated. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 4.4 changed (Fritz: "Make it part of the Rule for Devices that have more than One Control Method"): Method Clones: a Clone of a Device with more than one Control Method may stand for one method (its Control Method and Label are its own), may be on its parent's own Tab, switches the parent to its method with one click, and shows ON only while the parent is ON in that method. Help 71 and Help 150 updated. Checked against the BruControl Import program: a joined control's second placing is now a Method Clone with its BruControl Label. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 3.1: a Heating Element's Type ID is HE (Fritz: "So we could Use MB_25_HE_HLT_BR"), not DO; its Label fills in as hE_1 without the method (Rules 18.24, 18.15); elements named before keep DO (Rule 3.5). Rule 6.19: the short Process way MB_25_HE_HLT_BR.HYS (.DutyC, .PID, .DeadB, .DO) switches its method. Help 137, 150, 46 and the Device Library updated. Checked against the BruControl Import program: it names joined elements MP_42_HE_HLT_Heat_BH. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 6.19 (Fritz: "we ask the primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed"): a Heating Element's main method plus ticked other methods; only those are allowed (pop-up, spots, Method Clones, Process editor, Brain); each allowed method gets a one-click spot when two or more are allowed. Help 150 updated. Checked against the BruControl Import program: it sets the main method and ticks the others, and its first page explains One Interface Port, one Device and the Heating Element (Fritz: "We need to explain that in the Beginning of the BruControl Import"). (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 6.1 (Fritz: "Once a Port Is Selected, it is taken. So the method of choosing a Port has to be addressed as well"): every Port picker offers only free Ports plus the Device's own; the older typed Pin boxes (and the Duty Cycle, Hysteresis, PID and Deadband Pin) now list only free Ports. Checked against the BruControl Import program: it keeps BruControl's ports, joins heating controls on one port and lists any other shared port in its notes. (thread "Pick the heating method on one Element")

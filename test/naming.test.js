@@ -76,6 +76,9 @@ assert.equal(upgradeCode({ type: 'digitalOut', subtype: 'valve', typeCode: 'E_L_
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), 'M_L_Vlv');
 assert.equal(defaultCode({ type: 'digitalOut', subtype: 'pump' }), 'Pump');
 assert.equal(defaultCode({ type: 'digitalOut' }), 'DO');
+// a Heating Element is HE (Fritz, 2026-11-07): MB_25_HE_HLT_BR
+assert.equal(defaultCode({ type: 'digitalOut', subtype: 'element' }), 'HE');
+assert.equal(suggestName({ iface: 'MB', port: '25', code: defaultCode({ type: 'digitalOut', subtype: 'element' }), label: 'HLT', tab: 'BR' }), 'MB_25_HE_HLT_BR');
 assert.equal(defaultCode({ type: 'pwmOut' }), 'PWM');
 assert.equal(defaultCode({ type: 'pwmOut', subtype: 'element' }), 'H_PWM');
 assert.equal(defaultCode({ type: 'analogOut', subtype: 'propValve' }), 'P_L_Vlv');
