@@ -79,5 +79,5 @@ valve's IP. Dropped on a straight pipe in Edit layout, its run goes along the pi
 end, the same as a tee. It keeps its own size, so it has no Autosize to pipe.
 
 **Its size** (Skynet Rule 5.36, Fritz, 2026-11-07): it now sizes to its pipes like a tee. Its tees take the size most of the pipes
-and hoses on its IPs have (a tie takes the bigger), and its valves grow or shrink with it. With no pipe on it, it keeps its size.
+and hoses on its IPs have (a tie takes the bigger), and its valves grow or shrink with it. With no pipe on it, it takes the Default pipe size (☰ Menu > Default settings, [Help 155](155-default-settings)).
 This replaces "It keeps its own size, so it has no Autosize to pipe" above.
