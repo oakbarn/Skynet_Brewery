@@ -40,7 +40,6 @@ export function elementTopic(e) {
     case 'gGlobal':       // the six variable Kinds have their own page (Fritz, 2026-11-02); the on-screen kinds stay on Variables
       if (['string', 'graphic', 'value', 'bool', 'time', 'datetime'].includes(e.kind ?? 'value')) return ['gglobal-kinds'];
       return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];
-    case 'shared': return ['variables', 'which-kind-to-use'];
     case 'picture': return ['picture-widget', 'turns-on-with'];
     case 'switch': case 'pushButton': case 'pulseButton': case 'led': return ['semi-widgets-devices'];     // Rule 1.20 (Fritz, 2026-11-02)
     case 'label': case 'manual': return ['tabs', 'changing-the-layout-admins'];
@@ -114,7 +113,7 @@ export const TAB_SPOT = ['tab-background'];      // an empty spot on a tab, and 
 export const DB_TRIGGER = ['database-and-api', 'database'];
 export const RIGHT_CLICK_PAGE = ['right-click-help'];
 export const ALL_TOPICS = () => [...MENU_ALL(), ...Object.values(VIEWS), DEVICE, TAB_SPOT, DB_TRIGGER, RIGHT_CLICK_PAGE,
-  ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gGlobal', 'shared', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
+  ...['digitalOut', 'stepper', 'alarm', 'soundPlayer', 'timer', 'gGlobal', 'picture', 'label', 'temperature'].map(type => elementTopic({ type, sensor: 'ds18b20' })),
   elementTopic({ type: 'alarm', alarmClass: 'basic' }),
   elementTopic({ type: 'digitalOut', subtype: 'valve', valveType: 'manual' }), elementTopic({ type: 'digitalOut', subtype: 'valve', tapwater: true }),
   elementTopic({ type: 'gGlobal', kind: 'list' }), elementTopic({ type: 'analogOut', subtype: 'propValve' }),

@@ -1188,8 +1188,8 @@ const pressOverride = guard(async () => {
   toast(r.processes?.length ? `Override: ${r.processes.join(', ')} ${r.processes.length === 1 ? 'moves' : 'move'} on` : 'Override: no Process is running');
 });
 
-// variable classes: shared and gGlobal (gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
-const isVarEl = e => ['shared', 'gGlobal'].includes(e?.type);
+// variable class: gGlobal (Shared Variables became gGlobals on 2026-11-07, Fritz; gKonstant and gAPI became one class, gGlobal, on 2026-10-30; the old Global class is retired: lib/globals.js)
+const isVarEl = e => e?.type === 'gGlobal';
 // Value, Time and DateTime Widgets (Fritz, 2026-11-05, Rule 1.23): one value on a Tab, set by a tap; its data type comes from its type
 const DATA_W = { valueWidget: { dt: 'value', word: 'Value', w: 170, h: 56 }, timeWidget: { dt: 'time', word: 'Time', w: 170, h: 56 }, dateTimeWidget: { dt: 'datetime', word: 'DateTime', w: 230, h: 56 } };
 const isDataW = e => !!e && e.type in DATA_W;
@@ -1368,7 +1368,7 @@ function elGeom(e) {
 }
 // A proportional valve opens 0-100 %. It is an analog output (0-10 V / 4-20 mA) or a PWM output; until those output types exist
 // it can also be a gGlobal value holding the percent. It passes flow whenever it is above 0 % open.
-const PROP_TYPES = ['analogOut', 'pwmOut', 'gGlobal', 'shared'];
+const PROP_TYPES = ['analogOut', 'pwmOut', 'gGlobal'];
 // Every Device or Widget with an on / off state has .imageOn and .imageOff; the Tab swaps them by itself (Fritz, 2026-10-22)
 const STATE_PICS = new Set(['pwmOut', 'analogOut', 'dutyCycle', 'hysteresis', 'pid', 'deadband', 'timer', 'stepper', 'flowMeter', 'soundPlayer']);
 const ONOFF_PICS = [['imageOn', 'Picture when on', 'gpick'], ['imageOff', 'Picture when off', 'gpick']];
@@ -1997,9 +1997,6 @@ function fillEl(n, e0) {
   const pic = slotImage(e, v);
   let on = false, img = pic, text = '';
   switch (e.type) {
-    case 'shared':
-      if (e.dataType === 'bool') { on = !!v.value; text = on ? (e.onText ?? 'TRUE') : (e.offText ?? 'FALSE'); break; }
-      text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'gGlobal':
       switch (vkKind(e)) {
         case 'graphic': img = v.value || img; text = ''; break;            // the value IS the picture path
@@ -2185,7 +2182,6 @@ function tapAction(e) {
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'soundPlayer': return 'toggle';
-    case 'shared': return e.readOnly ? 'none' : 'dialog';
     case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return e.readOnly ? 'none' : 'dialog';
     case 'gGlobal':
       if (e.readOnly) return 'none';
@@ -3583,7 +3579,7 @@ const ADD_MENU = [
     ['Pulse Button (one 100 ms ON per tap)', 'pulseButton', 'pl_'], ['LED (a light that shows ON or OFF)', 'led', 'led_', { look: 'indicator', hideName: false }],
   ]],
   ['Widgets (app only, no board pin)', [
-    ['Picture Widget', 'picture'], ['Shared variable', 'shared'],
+    ['Picture Widget', 'picture'],
     ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
@@ -3614,7 +3610,6 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (!D.visible) e.visibility = 'hidden';
   if (D.wrap) e.wrap = true;
-  if (type === 'shared') e.dataType = 'value';
   if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = d.word + '_' + i; e.dataType = d.dt; if (type === 'valueWidget') e.precision = 2; }     // a Label from the start (Rule 18.15)
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
@@ -5091,7 +5086,7 @@ const F = {
     ['nameFontFamily', 'Name font', 'sel', FONTS], ['nameFontSize', 'Name font size (px; empty = Default)', 'num'],
     ['nameColor', 'Name color (over Fore color)', 'color'], ['nameBg', 'Name background color', 'color'], ['valueColor', 'Value color (over Fore color)', 'color'], ['valueBg', 'Value background color', 'color'],
     ['nameFont', 'Name font, more (JSON, e.g. {"bold":true,"italic":true})', 'json'], ['valueFont', 'Value font (JSON)', 'json'], ['nameAlign', 'Name alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['valueAlign', 'Value alignment', 'sel', [['', '(default)'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]],
-  shared: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool']],
+  global: [['dataType', 'Data type', 'sel', ['value', 'string', 'bool', 'time', 'datetime']], ['initial', 'Initial value', 'text'], ['precision', 'Decimals', 'num'], ['units', 'Units', 'gpick', 'units'], ['step', '+ / - step', 'num'], ['min', 'Lowest allowed', 'num'], ['max', 'Highest allowed', 'num'], ['readOnly', 'Read only on screen', 'bool']],
   digitalOut: it => [['subtype', 'Kind (pumps and valves have IPs for pipes)', 'sel', [['plain', 'plain'], ['pump', 'pump'], ['valve', 'valve'], ['element', 'element (electric heating element)']], true], ...(it.subtype === 'valve' ? [['valveType', 'Valve type', 'sel', [['electric', 'Electro_Mechanical (switched by its pin)'], ['manual', 'Manual (turned by hand: a Process shows a pop-up and waits for Done)']]],
     ['orientation', 'Orientation (where its two pipe ends are)', 'sel', [['', '(by its shape)'], ['h', 'Horizontal'], ['v', 'Vertical'], ['l45', '45 degrees Left'], ['r45', '45 degrees Right']]],
     ...IP_AT_FIELDS,
@@ -5209,7 +5204,6 @@ F.vesselNew = it => [...(it.template ? [['_t', `Tab_Vessel, made from the Vessel
   ['_look', 'Label and place', 'note'], ['labelVisible', 'Show label', 'yn', true], ['labelAlign', 'Label position', 'sel', LABEL_POS], ['labelColor', 'Label color', 'color'], ['labelBg', 'Label back color', 'color'], ['labelSize', 'Label size (px; empty = the Name font size on the Default tab)', 'num'],
   ['workspace', 'Tab (pipes only join IPs on the same tab)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize; X and Y still move it)', 'lock'],
   ['bundled', 'Bundled with its IPs (move as one unit; no editing until switched off)', 'bool']];
-F.global = F.shared;   // the few Globals kept until Fritz decides use the same settings
 // field [key, label, kind, opts, onlyForKinds]
 const NUMK = ['value'], BOOLK = ['bool', 'switch', 'pushbutton', 'momentary'], PLAINK = ['string', 'value', 'time', 'datetime', 'bool', 'switch'];
 // the Kind is set when it is made and never changes (Fritz, 2026-11-02): a wrong Kind is deleted and made again
@@ -6937,7 +6931,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { valueWidget: 'Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle', shared: 'Shared variable' };
+const TYPE_TITLE = { valueWidget: 'Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -7940,7 +7934,7 @@ function renderConsole() {
 $('#consoleAll').onchange = renderConsole;
 $('#clearConsole').onclick = () => { S.console = []; renderConsole(); };
 
-// ---------------------------------------------------------------- variables page: gGlobal, shared
+// ---------------------------------------------------------------- variables page: gGlobal
 // .database (Fritz, 2026-10-30): when any Device or Widget sends its readings to the brew database (lib/logger.js)
 const LOG_LABEL = { none: 'Off', ondemand: 'On demand (a send_db line, Log now or the API)', change: 'On value change', clicked: 'When Clicked (each time someone sets it on its Tab)', process: 'When a Process starts',
   datetime: 'At a date and time (once)', clock: 'At clock time (every day)', second: 'Every second', minute: 'Every minute', hour: 'Every hour', midnight: 'Every day (at Midnight)', ms: 'Every N milliseconds', seconds: 'Every N seconds', minutes: 'Every N minutes', hours: 'Every N hours',
@@ -8041,7 +8035,7 @@ function varRow(e) {
 }
 function renderGlobals() {
   const of = t => S.config.elements.filter(e => e.type === t).sort((a, b) => a.name.localeCompare(b.name));
-  for (const [id, type] of [['#gBody', 'gGlobal'], ['#sharedBody', 'shared']]) {
+  for (const [id, type] of [['#gBody', 'gGlobal']]) {
     const tb = $(id); tb.innerHTML = '';
     tb.append(...of(type).map(e => varRow(e)));
     tb.closest('table').classList.toggle('empty', !of(type).length);
@@ -9269,7 +9263,7 @@ function showMoving(service) {
 // for that role, the same as on the page.
 const PAGE_PARTS = {
   scripts: [['Find in all Processes', '#findAllBtn'], ['Recycle Bin (deleted Processes)', '#binBtn'], ['Color key', '#colorKey']],
-  globals: [['gGlobal', '#sec-gglobal'], ['Shared variables', '#sec-shared']],
+  globals: [['gGlobal', '#sec-gglobal']],
   log: [['Download CSV', '#sec-csv'], ['Show readings', '#sec-readings']],
   devices: [['Interfaces (boards)', '#sec-interfaces'], ['Add Interface', '#sec-addInterface'], ['OneWire probe index', '#sec-probeIndex'], ['OneWire probes seen', '#sec-probesSeen']],
   import: [['BeerSmith recipe', '#sec-beersmith'], ['BruControl Schema', '#sec-brucontrol']],

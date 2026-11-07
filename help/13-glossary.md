@@ -50,7 +50,7 @@
 
 **Schema**: the whole setup of your brewery in the panel: Tabs, Devices, Widgets, pipes and settings (other programs call it a setup or configuration). The samples are ready-made Schemas, and a BruControl configuration file is imported as a Schema. It is saved in the `config` folder.
 
-**Shared variable**: a variable for passing values between processes. Not on screen, not in the API or the database.
+**Shared variable**: an old class, now a gGlobal (Fritz, 2026-11-07). Older ones become gGlobals when they load: see [Shared variables became gGlobals](149-shared-variables-became-gglobals).
 
 **Simulation mode**: every board is replaced by the simulator and time can run faster or skip ahead, to try a brew day without touching hardware. See [Simulation mode](20-simulation).
 
