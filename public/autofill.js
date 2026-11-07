@@ -99,7 +99,7 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     const el = elOf(name), proc = isProc(name);
     if (!el && !proc && !declared.has(name)) return null;
     const props = attr ? [] : el ? [...new Set([el.main, ...el.attrs].filter(Boolean))] : proc ? PROCESS_ATTRS : [];
-    const pHint = p => p === el?.main ? 'the same as the name alone' : el?.bools?.includes(p) ? 'true or false' : '';
+    const pHint = p => p === el?.main ? 'the same as the name alone' : el?.bools?.includes(p) ? 'true or false' : p === 'method' && el?.methods ? 'how it is controlled: ' + el.methods.join(', ') : '';
     const out = [];
     const isValue = /\S/.test(before) && /(==|!=|<=|>=|<|>|=|\+|-|\*|\/|\bnot)\s*$/i.test(before);
     const lineStart = !/\S/.test(before);
@@ -163,6 +163,8 @@ export function suggest(line, words = {}, above = '', all = above, forced = fals
     if (el && attr === el.main) attr = '';
     if (el?.bools?.includes(attr) || declared.get(op[1] ?? op[2]) === 'bool') for (const [k, h] of ON_OFF) add(k, h);
     if (el?.type === 'timer' && attr === 'type') { add('countdown', ''); add('countup', ''); }
+    // name.method = : the ways this Device can be controlled (Rule 6.19), for example "PID" or "Duty Cycle" on a Heating Element
+    if (attr === 'method' && el?.methods) { for (const m of el.methods) add(`"${m}"`, 'method of control', m); if (!w) return done(); }
     // Hose_1.connect = : the Quick Disconnects, Vessels and IPs on the hose's Tab (Rule 5.34)
     if (attr === 'connect' && el?.connect) { for (const [n, h] of el.connect) add(quote(n), h, n); if (!w) return done(); }
     if (!w && !forced) return done();

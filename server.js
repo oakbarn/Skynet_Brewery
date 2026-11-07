@@ -11,6 +11,7 @@ import { openAppWindow, closeAppWindow } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, processName } from './lib/brewprocess.js';
 import { checkControlled } from './public/semi.js';
+import { controlMethods } from './public/heatmethod.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs, toBackpathText } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
 import { CLASSES, addSteps } from './lib/scaffold.js';
@@ -308,7 +309,7 @@ function cleanDonation(d = {}) {
 // Only names go out: never a hidden key (Rule 3.10). Clones are graphics, not elements, so they are never offered (Rule 4.4).
 function processWords() {
   return {
-    elements: [...[...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el) })),
+    elements: [...[...store.list(), ...store.manualValves(), ...store.textWidgets()].map(el => ({ name: el.name, type: el.type, main: mainProp(el), attrs: attrsOf(el), bools: boolAttrs(el), ...(controlMethods(el) ? { methods: controlMethods(el) } : {}) })),
       // pipes and hoses have one Process attribute, .flow_Color; tab.flow_Color is the Tab on the screen (Rule 5.21)
       ...(store.config?.graphics ?? []).filter(g => (g.kind === 'pipe' || (g.kind === 'ip' && (!g.fitting || g.fitting === 'point'))) && g.name).map(g => isQdHose(g)
         // a Quick Disconnect hose also has .connect (Rule 5.34): after "Hose_1.connect =" the list shows where it can go

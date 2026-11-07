@@ -10,7 +10,8 @@ import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices } from './heatmethod.js';
+import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -282,6 +283,7 @@ function drawWs() {
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
+  drawMethodSpots(w);
   renderPipes(); fitZoom(); updLockBtn();
 }
 
@@ -2015,6 +2017,11 @@ function fillEl(n, e0) {
       text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
+      // a Heating Element run by a control method (Rule 6.19): what it is doing, like the PID's own "45 %  ▸ 152"
+      if (isHeatElem(e) && on && v.method && heatMethodKey(v.method) !== 'onoff') {
+        const hm = heatMethodKey(v.method);
+        text = hm === 'dutyCycle' ? `${fmtVal({}, v.dutycycle)} %` : hm === 'hysteresis' ? `${v.output ? (e.onText ?? 'ON') : 'idle'}  ▸ ${fmtVal({}, v.target)}` : `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}`;
+      }
       if (e.type === 'digitalIn' && e.mode === 'counter') text = `${v.count ?? 0}${e.units ? ' ' + e.units : ''}`;
       img = (on ? v.imageon : v.imageoff) || pic; break;
     case 'temperature': case 'analogIn': text = v.fault ? 'FAULT' : (e.prefix ?? '') + fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
@@ -2155,7 +2162,40 @@ function imgMissing(url, node) {
 }
 const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator';
 
+// One-click method spots (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it need
+// only one click to select Duty Cycle or a click somewhere else to select PID", Rule 6.19). A Heating Element shows a small button
+// for each heating method ticked in its Properties, under its picture on the Tab, or under its picture on a Vessel Device when it
+// is built in. Only when MORE THAN ONE is ticked (Fritz, 2026-11-07: "Those hot spots only need to be there when there is more
+// than one control metod"). One click on one switches the Element to that method at once; the one in use is lit.
+const methodSpots = e => { const l = isHeatElem(e) ? HEAT_METHODS.filter(([k]) => e['methodSpot_' + k]) : []; return l.length > 1 ? l : []; };
+function drawMethodSpots(w) {
+  for (const old of $$('#ws .hmSpots')) old.remove();
+  for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
+    const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
+      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}` }, word)));
+    const part = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
+    if (part) { box.style.left = part.style.left; box.style.top = `${parseFloat(part.style.top) + parseFloat(part.style.height) + 2}px`; part.parentNode.append(box); }
+    else if (!e.integratedIn) { box.style.left = `${e.x ?? 0}px`; box.style.top = `${(e.y ?? 0) + (e.h ?? 60) + 2}px`; $('#ws').append(box); }
+    else continue;
+    litSpots(e.name);
+  }
+}
+function litSpots(name) {
+  const m = heatMethodKey(S.values[name]?.method);
+  for (const b of $$(`#ws .hmSpots[data-dev="${CSS.escape(name)}"] .hmBtn`)) b.classList.toggle('cur', b.dataset.k === m);
+}
+$('#ws').addEventListener('click', ev => {
+  const b = ev.target.closest('.hmBtn'); if (!b) return;
+  ev.stopPropagation(); ev.preventDefault();
+  if (editing) return;
+  if (!can('operator')) return toast('Your account is view only', true);
+  const name = b.closest('.hmSpots').dataset.dev, k = b.dataset.k, e = elByName(name);
+  if (NEEDS_PROBE.includes(k) && !e?.input) return toast(`${e?.label || name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
+  setProp(name, 'method', heatMethodWord(k));
+}, true);
+
 function updateEl(name) {
+  litSpots(name);
   const n = $(`#ws .el[data-name="${CSS.escape(name)}"]`);
   const e = elNamed(name);
   if (n && e) fillEl(n, e);
@@ -2173,7 +2213,8 @@ async function setProp(name, prop, value) { try { await api('POST', '/ui/set', {
 function tapAction(e) {
   if (e.tap && e.tap !== 'default') return e.tap;
   switch (e.type) {
-    case 'digitalOut': case 'switch': return 'toggle';
+    case 'digitalOut': return isHeatElem(e) ? 'heat' : 'toggle';      // a Heating Element: its pop-up picks the heating method (Rule 6.19)
+    case 'switch': return 'toggle';
     case 'pushButton': return 'hold';           // Semi_Widgets_Devices: ON only while held
     case 'pulseButton': return 'pulse';         // one 100 ms ON per tap
     case 'led': return 'none';                  // a light: a Process or its Device controlled sets it
@@ -2212,6 +2253,7 @@ async function doTap(e) {
     return;
   }
   const t = elByName(targetName); if (!t) return toast(`No Device or Widget "${targetName}"`, true);
+  if (isHeatElem(t) && (act === 'heat' || act === 'toggle' || act === 'dialog')) return heatDialog(t);
   if (act === 'toggle' && isBoolEl(t)) {
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
@@ -2309,6 +2351,51 @@ function controlDialog(t) {
       h('button', { type: 'button', class: 'big primary', onclick: () => done() }, 'Set')),
     h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => d.close() }, 'Cancel')));
   d.showModal(); setTimeout(() => { inp.focus(); inp.select(); }, 50);
+}
+
+// A Heating Element's pop-up while running (Fritz, 2026-11-07: "select the heating method via process or on the Device when
+// clicked", Rule 6.19). One button per heating method (the one in use is marked), the main setting of that method with - and +
+// (Duty cycle % or Target), then Set + ON, OFF, Set and Cancel. It asks before it turns on (Rule 2.33): nothing turns on until
+// Set + ON or ON is clicked. Hysteresis, PID and Deadband need a Temperature Probe (Properties), so they are greyed out without one.
+function heatDialog(t) {
+  const title = S.values[t.name]?.label ?? t.name, d = $('#valDlg');
+  const v = { ...(S.values[t.name] || {}) };
+  let m = heatMethodKey(v.method) ?? startMethod(t);
+  const draw = () => {
+    d.innerHTML = '';
+    const main = HEAT_MAIN[m];
+    const inp = main ? h('input', { class: 'vdInput', value: fmtVal({}, v[main[0]]), inputmode: 'decimal', 'aria-label': main[1] }) : null;
+    const bump = k => { inp.value = String(+((parseFloat(inp.value) || 0) + k).toFixed(4)); };
+    const done = async on => {
+      let x;
+      if (inp) { x = parseFloat(inp.value); if (!Number.isFinite(x)) return toast('Enter a number', true); }
+      d.close();
+      if (heatMethodKey(v.method) !== m) await setProp(t.name, 'method', heatMethodWord(m));
+      if (inp) await setProp(t.name, main[0], x);
+      if (on !== undefined) await setProp(t.name, 'state', on);
+    };
+    const now = heatMethodKey(v.method) ?? 'onoff';
+    const btn = ([k, word]) => {
+      const off = NEEDS_PROBE.includes(k) && !t.input;
+      // one click on a method switches to it at once (Fritz, 2026-11-07: "One Click on the dispayed device"); the pop-up stays open
+      // for its setting. To On/Off while ON turns it OFF first (Rule 6.19).
+      return h('button', { type: 'button', class: 'big' + (k === m ? ' cur primary' : ''), ...(off ? { disabled: true, title: 'Needs a Temperature Probe: pick one in its Properties' } : {}),
+        onclick: async () => { if (k === m) return; m = k; await setProp(t.name, 'method', heatMethodWord(k)); Object.assign(v, S.values[t.name] || {}); v.method = heatMethodWord(k); if (k === 'onoff') v.state = false; draw(); } }, word);
+    };
+    d.append(h('div', { class: 'vdTitle' }, `${title}: ${v.state ? 'ON' : 'OFF'}, ${heatMethodWord(now)}` + (v.state && PERCENT_METHODS.includes(now) ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
+      h('div', { class: 'muted' }, 'Heating method'),
+      h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.map(btn)),
+      ...(main ? [h('div', { class: 'muted' }, main[1]), h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+'))] : []),
+      h('div', { class: 'muted' }, m === 'onoff' ? 'Switching to On/Off turns it OFF first; click ON for full power.' : 'A click on a method switches to it at once.'),
+      h('div', { class: 'vdBtns' },
+        h('button', { type: 'button', class: 'big onb' + (v.state ? ' cur' : ''), onclick: () => done(true) }, main ? 'Set + ON' : 'ON'),
+        h('button', { type: 'button', class: 'big offb' + (!v.state ? ' cur' : ''), onclick: () => done(false) }, 'OFF'),
+        h('button', { type: 'button', class: 'big primary', onclick: () => done() }, 'Set')),
+      h('div', { class: 'vdBtns' }, h('button', { type: 'button', class: 'big', onclick: () => d.close() }, 'Cancel')));
+    if (inp) inp.addEventListener('keydown', ke => { if (ke.key === 'Enter') { ke.preventDefault(); done(); } });
+  };
+  draw();
+  d.showModal();
 }
 
 // Manual vessel widget (BrewZilla, DigiBoil and other appliances with their own controller): no board pin.
@@ -3899,7 +3986,14 @@ const nameTaken = (n, self) => (draft || S.config).elements.some(x => x !== self
 const pinsOf = e => portKeys(e).map(k => k.split('|')[1]);
 function portError(e, self) {
   const els = (draft || S.config).elements.filter(x => x !== self), c = portClash(e, els);
-  if (c) return `Port ${c.pin} on ${ifaceIdOf(c.device) ? ifaceIdOf(c.device) + '_ ' : ''}${c.device} is already used by ${c.other}. Only outputs of different Device Types can share a port.`;
+  const iface = d => `${ifaceIdOf(d) ? ifaceIdOf(d) + '_ ' : ''}${d}`;
+  if (c) return `Port ${c.pin} on ${iface(c.device)} is already used by ${c.other}. One Interface Port, one Device (Rule 6.1).`;
+  // One Interface Port, one Device (Fritz, 2026-11-07, Rule 6.1): only two that already shared a port in the saved Schema (made
+  // before this Rule) may go on sharing it. A heater's other ways of control are its heating methods (Rule 6.19).
+  const was = self && S.config.elements.find(x => x.name === self.name), old = new Set(was ? portSharers(was, S.config.elements).map(x => x.name) : []);
+  const share = portSharers(e, els).find(o => !old.has(o.name));
+  if (share) return `Port ${pinsOf(e).find(p => pinsOf(share).includes(p)) ?? ''} on ${iface(e.device)} is already used by ${share.name}. One Interface Port, one Device (Rule 6.1).` +
+    (isHeatElem(e) || isHeatElem(share) || HEAT_CTL_TYPES.includes(share.type) ? ' To control a heater another way, pick its Heating method (Rule 6.19).' : '');
   const b = busCheck(e, els, S.config.devices);      // RTD / thermocouple SPI pins, the OneWire data pin, few PWM and counter pins (Fritz, 2026-10-23)
   if (b?.error) return b.error;
   const pin = pinsOf(e).find(Boolean);
@@ -5385,6 +5479,22 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 };
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 const ELEM_OWN = (it, x = {}) => [['_ask', 'A Heating Element asks before it turns on (Rule 2.33).', 'note', null, false, false, x]];
+// One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
+// Hysteresis, PID or Deadband reads, and that method's settings. A Process (.method = "PID") or a click while running changes the
+// method; the settings of the other methods are kept, so switching back finds them as they were.
+function heatFields(it, x = {}) {
+  const m = startMethod(it), T = DEVICE_TIPS;
+  const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
+  if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
+  return [['_heatHead', 'Heating method', 'head', null, false, false, x],
+    ['heatMethod', 'Heating method (it starts with)', 'sel', methodChoices(), true, false, { tip: T.heatMethod, ...x }],
+    ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
+    ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, x]),
+    ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
+    ['_spotHead', 'One-click method spots on the Tab (shown when 2 or more are on)', 'head', null, false, false, x],
+    ...HEAT_METHODS.map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
+    ['_heatNote', `A Process changes it: ${it.name || 'hE_1'}.method = "PID" (or On/Off, Duty Cycle, Hysteresis, Deadband). So does a click on it while running.`, 'note', null, false, false, x]];
+}
 function elemDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
@@ -5393,7 +5503,7 @@ function elemDeviceFields(it, item) {
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Heating Element follows it until you type a name of your own)' : ''), 'note'],
-    ...ELEM_GRAPHIC_FIELDS(it), ...ELEM_OVERLAY(it), ...ELEM_OWN(it),
+    ...ELEM_GRAPHIC_FIELDS(it), ...ELEM_OVERLAY(it), ...ELEM_OWN(it), ...heatFields(it),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
@@ -5413,7 +5523,7 @@ const isPwmDev = e => ['pwmOut', 'analogOut'].includes(e?.type) && !e.kind && !e
 const isElemDev = e => e?.type === 'digitalOut' && e.subtype === 'element' && !e.kind && !e.template && !e.integratedIn;
 // Heating Element Labels fill in by control mode (Fritz, 2026-11-05, Rule 18.15): PID, HYS, DutyC, PWM, DO (on / off), DeadB
 const HEAT_MODES = { pid: 'PID', hysteresis: 'HYS', dutyCycle: 'DutyC', deadband: 'DeadB' };
-const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? 'DO' : e.type === 'pwmOut' ? 'PWM' : null);
+const heatMode = e => e?.integratedIn || e?.template ? null : HEAT_MODES[e?.type] || (e?.subtype !== 'element' || e.kind ? null : e.type === 'digitalOut' ? heatMethodCode(startMethod(e)) : e.type === 'pwmOut' ? 'PWM' : null);
 const isSkyElem = e => e?.imageOff === ELEM_OFF;
 const elemTitle = e => isSkyElem(e) ? 'Skynet Heating Element' : 'User Defined Heating Element';
 const isDrillDev = e => isPumpDev(e) || isMbvDev(e) || isPwmDev(e) || isElemDev(e) || isProbeDev(e);      // the Pump's drill-down: Pump, Motorized Ball Valve, PWM / Analog out, Heating Element, Temperature Probe (Rule 18.26)
@@ -5782,7 +5892,7 @@ function genDeviceFields(it, item, f) {
       ...(onPic ? [['imageOn', 'Path (on)', 'gpick', null, false, false, { tip: 'A second picture while it is on (optional: the Overlay is the preferred way, Rule 7.8).' }]] : []),
       ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: 'Drawn on top of its picture while it is On (Rule 7.8). The ⬢ beside it holds Database and .API.', dbPop: true, ...(out ? { with: ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.toggle }] } : {}) }]] : []),
     ...(!pics && out && !part ? [['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.toggle }]] : []),
-    ...own, ...dbLine,
+    ...own, ...(isHeatElem(it) ? heatFields(it) : []), ...dbLine,
     ...(part ? [] : [['_txt', 'Text attributes', 'attrhead', null, false, false, { attr: GEN_TEXT_POP }],
       ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
       ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]]),
@@ -5898,6 +6008,9 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
+  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target) or Deadband (steps its % toward the Target). One Element, one Device (Rule 6.19): a Process or a click while running can change it.',
+  heatProbe: 'The Temperature Probe that Hysteresis, PID and Deadband read to hold the Target.',
+  methodSpot: 'On: a small button for this heating method shows under the Element on its Tab (or under it on its Vessel Device), only when two or more are on. One click on it switches the Element to this method at once.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
