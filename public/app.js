@@ -1339,6 +1339,14 @@ function sizeInches(p) {
   return +p.size > 0 ? +p.size : 0.5;
 }
 const pipeWidth = p => pipeSize(p.workspace) * sizeInches(p) / 0.5;
+// The Default pipe size and hose size (☰ Menu > Default settings; Fritz, 2026-11-07: "setting a Default Pipe size and have all the
+// devices with Ips conform to that size", Rules 2.42 and 5.36): a new pipe or hose starts at it, and a Device, Pipe Fitting or other
+// item with IPs that has no pipe on it is drawn for the Default pipe size. 1/2" when not set.
+const defPipeIn = () => +S.config.brewDefaults?.defPipeSize > 0 ? +S.config.brewDefaults.defPipeSize : 0.5;
+const defHoseIn = () => +S.config.brewDefaults?.defHoseSize > 0 ? +S.config.brewDefaults.defHoseSize : 0.5;
+const defaultWidth = wsn => pipeSize(wsn) * defPipeIn() / 0.5;       // how thick a pipe of the Default pipe size is on this Tab
+// a new Tab's size and pipe thickness (☰ Menu > Default settings; empty = 1600 x 900 and 10)
+const newTabSize = () => { const d = S.config.brewDefaults || {}; return { width: +d.newTabWidth || 1600, height: +d.newTabHeight || 900, ...(+d.newTabPipe > 0 && +d.newTabPipe !== 10 ? { pipeSize: +d.newTabPipe } : {}) }; };
 const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
   : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
@@ -1351,12 +1359,12 @@ function majorityWidth(pipes) {
   for (const [w, c] of count) if (c > n || (c === n && w > best)) { best = w; n = c; }
   return best;
 }
-// A fitting takes the size most of the pipes and hoses joined to it have (Rule 5.36; the tab's 1/2" size when nothing is joined yet).
+// A fitting takes the size most of the pipes and hoses joined to it have (Rule 5.36; the Default pipe size when nothing is joined yet).
 // It is 5 x that pipe thickness, which makes its drawn arms exactly as thick as the pipe.
 function sizeFitting(g) {
   if (!autoSized(g)) return;
   const on = [g.id, ...(isMv(g) ? eqPorts(g).map(q => q.id) : [])].flatMap(id => pipesOn(id, g.workspace));     // a Manual Valve: the pipes on its two ends
-  const S = 5 * majorityWidth(on) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
+  const S = 5 * majorityWidth(on) || 5 * defaultWidth(g.workspace), [cx, cy] = ipCenter(g);      // no pipe on it: the Default pipe size
   g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
@@ -1413,13 +1421,15 @@ const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['di
 // Their width / height are the size at pipe size 10; at any other pipe size they grow or shrink about their centre.
 // A valve or an inline Device (a flow meter ...) is a pipe fitting too (Fritz, 2026-11-07: "any Pipe Fitting, even if a device should
 // size to the majority of the pipes or hoses", Rule 5.36): it is drawn for the pipe size most of the pipes and hoses on its IPs have,
-// as it would be on a Tab whose 1/2" pipe is that thick. A pump is not a pipe fitting and keeps the Tab's pipe size (Rule 5.11);
-// a tee with a Temperature Probe sizes itself (sizeProbeTee) and a Thermowell sits on a vessel.
-const followsPipe = e => hasIps(e) && e.subtype !== 'pump' && !isProbeTee(e) && !isThermowell(e);
+// as it would be on a Tab whose 1/2" pipe is that thick. Since 2026-11-07 pumps do too (Fritz: "have all the devices with Ips conform
+// to that size", Rule 5.36), and with no pipe on it a Device is drawn for the Default pipe size (☰ Menu > Default settings).
+// A tee with a Temperature Probe sizes itself (sizeProbeTee) and a Thermowell sits on a vessel.
+const followsPipe = e => hasIps(e) && !isProbeTee(e) && !isThermowell(e);
 function elK(e) {
   if (!hasIps(e)) return 1;
-  const w = followsPipe(e) ? majorityWidth(['in', 'out'].flatMap(k => pipesOn(`dev:${e.name}:${k}`, e.workspace))) : 0;
-  return (w || pipeSize(e.workspace)) / 10;
+  if (!followsPipe(e)) return pipeSize(e.workspace) / 10;
+  const w = majorityWidth(['in', 'out'].flatMap(k => pipesOn(`dev:${e.name}:${k}`, e.workspace)));
+  return (w || defaultWidth(e.workspace)) / 10;
 }
 function elGeom(e) {
   const k = elK(e), w = e.w || 120, hh = e.h || 60;
@@ -3736,7 +3746,7 @@ function finishPipe(to) {
   const pts = (drawPts || []).filter((q, i, all) => !i || q[0] !== all[i - 1][0] || q[1] !== all[i - 1][1]), from = drawFrom, hose = drawHose, qd = drawHose && drawQd;   // a double-click adds its point twice
   stopDrawing();
   if (pts.length < 2) return;
-  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowWhen: [], baseVisible: true, size: '0.5' };
+  const g = { id: newId(), kind: 'pipe', workspace: wsName, points: pts, color: hose ? '#c9ced3' : '#8a8f96', flowWhen: [], baseVisible: true, size: String(hose ? defHoseIn() : defPipeIn()) };     // the Default pipe or hose size
   if (hose) g.hose = true; else g.straight = true;
   g.from = from || endCoupling(pts, 0, 1);
   if (qd) {        // a Quick Disconnect hose (Rule 5.28): its free end needs no coupling; it may end in the top of a vessel
@@ -5116,7 +5126,7 @@ function makeTab() {
   if (draft.workspaces.some(w => w.name === n)) { toast('That name is used', true); return null; }
   const tp = S.config.brewDefaults?.tabProfile;
   const id = defaultTabId(n, draft.workspaces.map(w => w.id));       // 2 letters, unique; changed in Tab settings
-  const w = { name: n, id, width: 1600, height: 900, ...tabLook(), ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
+  const w = { name: n, id, ...newTabSize(), ...tabLook(), ...(tp && tabProfileOf({ tabProfile: tp }) ? { tabProfile: tp } : {}) };
   if (w.tabProfile && tabProfileOf(w)?.bgColor) delete w.color;      // its Tab Background Profile's color wins
   draft.workspaces.push(w); return w;
 }
@@ -5142,7 +5152,7 @@ $('#addHiddenWs').onclick = () => {
   if (!editing) return;
   let i = 1; while (draft.workspaces.some(w => w.name === HIDDEN_TAB + i)) i++;
   const n = HIDDEN_TAB + i, id = defaultTabId(n, draft.workspaces.map(w => w.id));
-  draft.workspaces.push({ name: n, id, width: 1600, height: 900 }); wsName = n; renderTabs(); renderWs();
+  draft.workspaces.push({ name: n, id, ...newTabSize() }); wsName = n; renderTabs(); renderWs();
   toast(`Hidden Tab ${n} added. It shows only in Edit layout; the things on it still work in the background.`);
 };
 
@@ -9520,7 +9530,7 @@ const profileName = id => S.profiles.find(p => p.id === id)?.name;
 const unitOf = (f, units) => units === 'Metric' ? f[3] : f[2];
 const MENU = [
   { key: 'zoom', title: 'Zoom', tip: 'How big the tabs show, and Full screen', render: renderZoomTab },
-  { key: 'default', title: 'Default', tip: 'What new Recipes start with, and the order of the Menu', render: renderDefaultTab },
+  { key: 'default', title: 'Default settings', tip: 'Every default in one place: the Default pipe size, new Tabs, new Recipes, text, sound, phones, a list of the defaults set elsewhere, and the order of the Menu', render: renderDefaultTab },
   { key: 'equipment', title: 'Equipment Profile', tip: 'Each Tab\'s equipment, its losses and its piping', render: renderEquipTab },
   { key: 'vessel', title: 'Vessel', tip: 'One vessel (or chiller, coil, filter): size, heat, probe, ports', render: renderVesselTab },
   { key: 'vtemplates', title: 'Vessel Templates', tip: 'Ready-made vessels (Skynet and your own): small icons, double-click for the settings, Add to Tab', render: renderTemplatesTab('vessel', 'vessel') },
@@ -9889,11 +9899,49 @@ function paneForm(fields, obj, onChange, ro) {
 }
 const saveBar = (...items) => h('div', { class: 'bar' }, ...items);
 
-// ---- Default tab: what new Recipes start with, and the order of the Menu
+// ---- Default settings tab (Fritz, 2026-11-07: "create that default settings tab (accessed by the Hamburger Menu Only) and let me look
+// at all the Defaults", Rule 2.42): the defaults set here, a list of the defaults set somewhere else, and the order of the Menu.
+// Only ☰ Menu opens it. It belongs to the panel (every Schema), not to one Schema.
+const sizePick = list => list.map(([v, inch, mm]) => [v, `${inch.replace(/ +\(most common\)/, '')} / ${mm}${v === '0.5' ? '  (Skynet default)' : ''}`]);
+// the defaults that are set somewhere else, to look at here (what, its default, where it is changed)
+function otherDefaults() {
+  const look = themeOf(S.config.theme), b = S.config.brewDefaults || {};
+  return [
+    ['Look (theme)', `${look.name} (Skynet default: Office Black)`, 'Settings > Panel settings > Look (theme)', 'Rule 2.39'],
+    ['A new Tab\'s back color and text colors', `From the Look: ${look.tabBack || 'the Skynet Night blue gray'}, Tab Style ${look.tabStyle}${b.tabStyle ? ' (the Tab Style above wins)' : ''}`, 'Settings > Panel settings > Look (theme), or Tab Style above', 'Rule 2.39'],
+    ['Pump size', 'The Pump Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The pump\'s Width and Height', 'Rules 5.27, 5.36'],
+    ['Valve size', 'The Valve Standard: drawn 150 x 150 for a 1/2" pipe, then the size of its pipes (the Default pipe size with none)', 'The valve\'s Width and Height', 'Rules 5.29, 5.36'],
+    ['Pipe fittings', 'Autosize to pipe on', 'Each fitting\'s Properties', 'Rule 5.14'],
+    ['On overlay (powered valves and pumps)', 'The steady red and yellow bolt', 'Each Device\'s Properties', 'Rule 7.15'],
+    ['Glow ring on a new pump', 'Green', 'The pump\'s Properties', 'Rules 7.15, 18.13'],
+    ['Pump cover color', 'None', 'The pump\'s Properties', 'Rule 7.13'],
+    ['Flow color (In and Out)', 'None', 'Each vessel, pipe and hose', 'Rule 5.21'],
+    ['Skynet Dial', 'Cooler and Hotter range 2; Cold, OK, Hot = Blue, Green, Red', 'The item\'s Text attributes ⬢', 'Rule 2.40'],
+    ['Pulse button', '100 ms', 'Fixed', 'Rule 1.9'],
+    ['Push button lockout', '3 seconds', 'The button\'s Properties', 'Rule 6.7'],
+    ['Lost board link', 'Outputs turn off after 10 seconds', 'The Interface settings', 'Rule 6.3'],
+    ['Simulator: a wait on a reading', 'Counted as reached after 60 clock seconds', 'Settings > Simulation', 'Rule 10.4'],
+    ['Simulator bar', 'Opens at 25× speed with Auto skip on', 'The Simulator bar', 'Rule 10.7'],
+    ['How a Tab shows', 'Fit screen (no up and down scrolling)', 'Zoom tab', 'Rule 2.15'],
+    ['Interface of a new Device', 'The one the last new Device went on, else the first', 'The Add Device box', 'Rule 4.2'],
+    ['A new Schema (not a copy)', 'One pretend Mega on the Simulator', 'Interface settings', 'Rule 10.5'],
+    ['Setup: keep users when updating', 'Update and keep everything', 'Setup (the installer)', 'Rules 9.8, 10.1'],
+    ['BruControl Import: names', 'Skynet names (keeping BruControl names takes two warnings)', 'The Importer, page 4', 'Rule 15.1'],
+    ['BruControl Import: Look', 'The Skynet Look closest to the BruControl theme, else Office Black', 'Settings > Panel settings > Look (theme)', 'Rule 2.39'],
+  ];
+}
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, ...(S.config.brewDefaults || {}) };
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...(S.config.brewDefaults || {}) };
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
-  const fields = w => [['_d', 'Every default is set here. A new Recipe starts with the first ones, and you can change each one in the Recipe.', 'note'],
+  const fields = w => [['_d', 'Every default is set here, for every Schema. What is set somewhere else is listed at the bottom, with where to change it.', 'note'],
+    ['_ps', 'Pipes, hoses and sizes', 'head'],
+    ['defPipeSize', 'Default pipe size: a new pipe starts at it, and every Device, Pipe Fitting and item with IPs (pumps too) with no pipe on it is drawn for it. With pipes on it, it takes the size most of them have (Rule 5.36)', 'sel', sizePick(PIPE_SIZES)],
+    ['defHoseSize', 'Default hose size: a new hose starts at it', 'sel', sizePick(HOSE_SIZES)],
+    ['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab (px; empty = 10). Each Tab can change it in Tab settings', 'num'],
+    ['newTabWidth', 'Width of a new Tab (px; empty = 1600)', 'num'],
+    ['newTabHeight', 'Height of a new Tab (px; empty = 900)', 'num'],
+    ['_r', 'New Recipes', 'head'],
+    ['_rn', 'A new Recipe starts with these, and you can change each one in the Recipe.', 'note'],
     ['units', 'Units', 'sel', Object.entries(UNIT_SYSTEMS), true],
     ['batchSize', `Batch size (${volUnit(w.units)}, into the fermenter)`, 'num'],
     ['equipmentProfile', 'Equipment Profile', 'sel', pick(S.profiles, '(the Tab\'s own)')],
@@ -9969,6 +10017,8 @@ function renderDefaultTab(box) {
     delete d._w2g; delete d._grainT; delete d._strikeOff;
     for (const [k, t] of [['boilTime', 'Boil time'], ['hopWarnMinutes', 'Warning before each hop drop'], ['alertMergeMinutes', 'Alerts this close together']]) if (d[k] !== undefined && !(+d[k] >= 0 && +d[k] <= 600)) throw new Error(`${t} must be 0 to 600 minutes`);
     if (d.textLarge !== undefined && !(+d.textLarge > TEXT_NORMAL && +d.textLarge <= 200)) throw new Error(`Large text size must be more than ${TEXT_NORMAL} (normal text) and at most 200`);
+    for (const [k, t, min, max] of [['newTabPipe', 'How thick a 1/2" pipe is drawn on a new Tab', 2, 100], ['newTabWidth', 'Width of a new Tab', 200, 20000], ['newTabHeight', 'Height of a new Tab', 200, 20000]])
+      if (d[k] !== undefined && d[k] !== '' && !(+d[k] >= min && +d[k] <= max)) throw new Error(`${t} must be from ${min} to ${max} pixels (or empty)`);
     for (const [k, t, min] of [['nameFontSize', 'Name font size', 6], ['textWidth', 'Width', 10], ['textHeight', 'Height', 10], ['textX', 'X position', 0], ['textY', 'Y position', 0]])
       if (d[k] !== undefined && !(+d[k] >= min && +d[k] <= 5000)) throw new Error(`${t} must be from ${min} to 5000 pixels (or empty)`);
     await api('PUT', '/ui/settings', { brewDefaults: d }); S.config.brewDefaults = d; showMenuBar(document.body.classList.contains('menuBarOn')); setTextLarge(); renderWs(); toast('Defaults saved'); });
@@ -9978,7 +10028,10 @@ function renderDefaultTab(box) {
       n.onchange = guard(() => setMenuOrder(m.key, +n.value));
       return h('tr', {}, h('td', {}, n), h('td', {}, m.title), h('td', { class: 'muted' }, m.coming || m.tip));
     })));
-  box.append(h('h3', {}, 'Default'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+  const others = h('table', { class: 'grid menuOrder' }, h('thead', {}, h('tr', {}, h('th', {}, 'Default'), h('th', {}, 'Now'), h('th', {}, 'Changed on'), h('th', {}, 'Rule'))),
+    h('tbody', {}, ...otherDefaults().map(([what, now, where, rule]) => h('tr', {}, h('td', {}, what), h('td', {}, now), h('td', { class: 'muted' }, where), h('td', { class: 'muted' }, rule)))));
+  box.append(h('h3', {}, 'Default settings'), h('div', { class: 'menuNarrow' }, soundNow, f.box, admin ? saveBar(h('span', { class: 'spacer' }), h('button', { class: 'primary', onclick: save }, 'Save')) : ''),
+    h('h3', {}, 'Defaults set somewhere else (to look at)'), h('p', { class: 'muted' }, 'These are not changed here. Each one says where it is changed.'), others,
     h('h3', {}, 'Order of the Menu'), h('p', { class: 'muted' }, 'Type a new number to move a Menu tab there. The others are numbered again to make room, and the Menu sorts itself.'), order);
 }
 
@@ -10730,12 +10783,12 @@ function refreshSkyFits() {
 }
 // Autosize to pipe on a Skynet pipe fitting (Fritz, 2026-10-28): once a pipe is joined to one of its IPs, it is sized so its
 // body is as thick as most of the pipes on it (Rule 5.36) (the Skynet fitting pictures draw the body 28 % of the picture). Its Template's
-// shape is kept (an Instrument Tee stays wide and low) and it grows or shrinks about its middle. With no pipe on it, it keeps
-// its size.
+// shape is kept (an Instrument Tee stays wide and low) and it grows or shrinks about its middle. With no pipe on it, it takes the
+// Default pipe size (☰ Menu > Default settings, Rule 5.36), except on a vessel opening, where it keeps its size.
 const FIT_BODY = 0.28;
 function autoSizeUnit(g) {
   const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
-  const pw = majorityWidth(ips.flatMap(ip => pipesOn(ip.id, g.workspace))); if (!pw) return;      // most of its pipes (Rule 5.36)
+  const pw = majorityWidth(ips.flatMap(ip => pipesOn(ip.id, g.workspace))) || (g.onVessel ? 0 : defaultWidth(g.workspace)); if (!pw) return;      // most of its pipes, else the Default pipe size (Rule 5.36)
   const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90];
   let w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
   if (isSightGlass(g)) { hh = Math.round(pw / SG_BODY); w = Math.round(hh * sgRatio(g.sgLength)); }       // a Sight Glass: as thick as its pipe, as long as its Length (Rule 5.32)
@@ -10751,12 +10804,12 @@ function autoSizeUnit(g) {
 // saved: TC Pipe Fittings Widgets and Sight Glasses on Autosize to pipe (autoSizeUnit), tees with a Temperature Probe (they have
 // no Autosize switch: they always follow their pipe, as when dropped on one, Rule 5.30), and End Caps on Autosize to pipe, which
 // take the size of the fitting whose opening they close. IP fittings and Manual Valves size themselves when drawn (sizeFitting).
-// Something with no pipe on it keeps its size.
+// Something with no pipe on it takes the Default pipe size (☰ Menu > Default settings), a fitting on a vessel opening keeps its size.
 function sizeToPipes(wsn) {
   if (!draft) return;
   for (const g of draft.graphics.filter(g => g.workspace === wsn && (isPlainUnit(g) || isMf(g)) && !isCap(g) && autoSized(g))) autoSizeUnit(g);
   for (const e of draft.elements.filter(e => e.workspace === wsn && isProbeTee(e))) {
-    const pw = majorityWidth(devIps(e).flatMap(q => pipesOn(q.id, wsn)));
+    const pw = majorityWidth(devIps(e).flatMap(q => pipesOn(q.id, wsn))) || defaultWidth(wsn);     // no pipe on it: the Default pipe size
     if (pw) sizeProbeTee(e, pw);
   }
   for (const c of draft.graphics.filter(c => c.workspace === wsn && isCap(c) && c.capOn && autoSized(c))) sizeCap(c);
@@ -11392,7 +11445,7 @@ async function placeEqItems(p, items) {
   let made = 0, updated = 0;
   for (const it of items) {
     const C = EQ[it.vesselType], tab = tabOfProfile(p.id)?.name || C.tab || 'Equipment';
-    if (!draft.workspaces.some(w => w.name === tab)) draft.workspaces.push({ name: tab, width: 1600, height: 900, ...tabLook() });
+    if (!draft.workspaces.some(w => w.name === tab)) draft.workspaces.push({ name: tab, ...newTabSize(), ...tabLook() });
     let g = draft.graphics.find(x => x.kind === 'vessel' && x.profileItem === it.id);
     const old = g ? clone(g) : null;
     if (g && g.vesselType !== it.vesselType) {      // a different kind now: its old port IPs go
