@@ -487,6 +487,26 @@ thread "Add a Properties hotspot on Vessel Devices", Help 154).
   phones and tablets do not edit (Rule 2.35).
 - **BruControl Import:** checked, not changed. It has no Device dialogs; a Vessel Device it makes gets the hotspots in the Panel.
 
+2.42 **Default settings: every default in one place, opened only from ☰ Menu** (Fritz, 2026-11-07: "We need to create that default
+settings tab (accessed by the Hamburger Menu Only) and let me look at all the Defaults"; thread "Build a Default settings page",
+Help 155).
+- The ☰ Menu tab that was called **Default** is now called **Default settings** (the Rules' "☰ Menu > Default tab" means it). It opens
+  only from ☰ Menu. Its settings belong to the panel, so they are the same for every Schema. Admins change them; others look.
+- **Pipes, hoses and sizes** (new, at the top): the **Default pipe size** (1/2" unless changed) and the **Default hose size**. A new
+  pipe or hose starts at its size. Every Device, Pipe Fitting and item with IPs (pumps too) that has no pipe on it is drawn for the
+  Default pipe size (Rule 5.36). Also a new Tab's **Width** and **Height** (empty = 1600 x 900) and how thick a 1/2" pipe is drawn on
+  a new Tab (empty = 10; each Tab still changes it in Tab settings, Rule 5.11).
+- Then the defaults it already had: new Recipes, how amounts show, hop alerts, new Tabs and valves, Menu Bar, Sound, On startup,
+  Text, Phones and tablets.
+- **Defaults set somewhere else (to look at)**: a list of the defaults that are changed in another place (the Look, a new Tab's
+  colors, the Pump and Valve Standards, the On overlay, flow colors, the Skynet Dial, button times, the Simulator, Setup, the BruControl
+  Import ...), each with its value now, where it is changed and its Rule. Nothing is changed in this list. **Whenever a new default
+  is added anywhere, it is added here too**, as a setting or to this list.
+- Then the **Order of the Menu**, as before.
+- **BruControl Import:** checked. It makes Schemas; these settings are the panel's, so an imported Schema loaded in the Panel uses
+  them. It draws no pipes, so its pumps and valves (with no pipe on them) are drawn for the Default pipe size. Its Tabs keep the
+  sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39).
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -734,7 +754,7 @@ PR #47; PR #91)
 
 5.11 **Everything is drawn to scale:** fittings and Devices with IPs grow with the Tab's pipe size.
 (2026-10-04, PR #3)
-Since 2026-11-07 a pipe fitting, a valve or an inline Device with pipes on it takes the size of most of its pipes instead (Rule 5.36).
+Since 2026-11-07 a pipe fitting, a valve, a pump or an inline Device with pipes on it takes the size of most of its pipes instead, and with no pipe on it the Default pipe size (☰ Menu > Default settings; Rules 2.42, 5.36).
 Valves keep to this through the **Valve Standard** (Rule 5.29): every Skynet valve drawing is to the same scale in the same
 300 x 300 box.
 Pumps keep to this through the **Pump Standard** (Rule 5.27): every Skynet pump drawing is to the same scale in the same
@@ -1182,8 +1202,15 @@ pipe on Save", Help 87).
   - an **End Cap**, which gets **Autosize to pipe** (Rule 5.14 lists it as a pipe fitting): on an opening of a TC Pipe Fitting it
     takes the size of that fitting's ferrule (its box 1.5 x the fitting's pipe). On a Reducer (two sizes), a Valve Tee or Supply
     Manifold, or a vessel opening it keeps its size.
-- **Pumps are not pipe fittings**: they keep the Pump Standard size with the Tab's pipe size (Rules 5.11, 5.27). A Thermowell sits on
-  a vessel and keeps its size.
+- **Pumps follow too** (Fritz, 2026-11-07: "Yes have Devices, Pipe Fittings, to default to a size ... I Think setting a Default Pipe
+  size and have all the devices with Ips conform to that size is a better method"): a pump is drawn to the Pump Standard (Rule 5.27)
+  for the size most of its pipes have, as a valve is. A Thermowell sits on a vessel and keeps its size.
+- **The Default pipe size** (☰ Menu > Default settings, Rule 2.42): **anything with IPs that has no pipe on it** (a Device, pump,
+  valve, pipe fitting, Valve Tee, probe tee ...) **takes the Default pipe size** instead of keeping its size, so a new pump or
+  fitting already matches the brewery's pipes. A fitting sitting on a vessel opening with no pipe keeps its size. New pipes and hoses
+  start at the Default pipe and hose size.
+  *Replaced (2026-11-07):* "Pumps are not pipe fittings: they keep the Pump Standard size with the Tab's pipe size (Rules 5.11,
+  5.27)", and "With no pipe or hose on it, it keeps its size".
 
 5.37 **Grab pop-up: move it alone (🔓 Unlock its IPs), Swap places, and ↩ Put back** (Fritz, 2026-11-07: "I tried to replace the
 Pump in the 3 vessel with a Blichmann Pump I added and it was not easy and never succeeded as the pipes followed the old pump. When we
@@ -2608,6 +2635,7 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 2.14 changed again (Fritz: "Work Icon B"): the Edit layout button (the Work icon) is shade B, a medium blue #1D56B0, a bit darker than #2A6BD1 but still far from the old navy #001F5B; the mouse-over color is #2A6BD1. Help 75 updated. Checked against the BruControl Import program: it has no Edit layout button, so nothing changes there. (thread "Change Work icon to shade B")
 - 2026-11-07: Rule 2.14 changed (Fritz: "For the work Icon make the background a Lighter blue. It almost looks Black with the Navy Blue"): the Edit layout button (Fritz calls it the Work icon) is a lighter blue, #2A6BD1, instead of navy #001F5B. Help 02, 75 and 82 updated. Checked against the BruControl Import program: it has no Edit layout button. (thread "Add a Properties hotspot on Vessel Devices")
 - 2026-11-07: Added Rule 2.41 (Fritz: "A Hotspot on a Vessel device to bring up its property dialog", plus the same for a built in Heating Element, Temperature Probe and Valve, a Flow Color hotspot, and the On Overlay): in Edit layout a ⚙ in a Vessel Device's top right corner opens its Properties with one click, each built in part has its own ⚙ for its own Properties, and a 🎨 where a pipe begins at an opening (or at the end of the fitting or built in Valve on it) opens the vessel's Out flow color (the setting already in its Properties); built in Heating Elements and Valves show the On Overlay while on (they had only a glow, or nothing); double-click still works (Rule 2.9). Help 154 (153 is PR #262's); next free Help number 155. Checked against the BruControl Import program: it has no Device dialogs, its Vessel Devices get the hotspots in the Panel. (thread "Add a Properties hotspot on Vessel Devices")
+- 2026-11-07: Added Rule 2.42 and changed Rules 5.36 and 5.11 (Fritz: "create that default settings tab (accessed by the Hamburger Menu Only) and let me look at all the Defaults"; "setting a Default Pipe size and have all the devices with Ips conform to that size is a better method"): ☰ Menu > Default is now **Default settings**, with a Default pipe size and hose size, a new Tab's width, height and pipe thickness, and a look-only list of the defaults set elsewhere; pumps now size to their pipes like valves; anything with IPs and no pipe takes the Default pipe size (a Rule change, not an exception). Help 155; Help 87 and 146 updated; next free Help number 156. Checked against the BruControl Import program: its Schemas use the panel's Default settings when loaded; it draws no pipes, so its pumps and valves are drawn for the Default pipe size. (thread "Build a Default settings page")
 - 2026-11-07: Rule 2.39 (new, Fritz: "We only need a few, and choose one that best matches the DevExpress ones"): Panel Looks (themes) Office Black (default, closest to BruControl's Office 2019 Black), Dark Gray, White and Skynet Night, each a few color picks; picked in Settings > Panel settings, saved with the Schema; new Tabs get the Look's Tab colors; Use this Look on every Tab with Put the Tabs back. A change from BruControl: its DevExpress themes are not public and would not work in a browser, so Skynet sets the Back and Text colors. Rule 11.1 next free Help is 152. Help 151 new, Help 09 updated. Checked against the BruControl Import program: it picks the closest Look from the BruControl theme, gives imported Tabs the Look's Tab colors, and lists Themes on its "What is different in Skynet" page. (thread "Add a few look-alike Panel themes")
 - 2026-11-07: Rule 2.40 (Fritz: our own gauges and timers without copying DevExpress): the Skynet Dial (arc, needle, digits 0-2 decimals, blue / green / red from the Setpoint with Cooler and Hotter ranges), Timer Digits (Back, Text Fore, Text Back colors, Fritz's frames in 3 shapes, hh:mm:ss or hh:mm, Seconds only in the last minute); the BruControl Import maps its gauges to them. Help 152; next free Help 153. (thread "Build our own temperature gauge and timer looks")
 - 2026-11-07: Rule 6.19 (Fritz: "The only thing that seems to be missing is the Element Method Field and the Hotspots to switch Methods on the Screen when running"): Elements built into a Vessel Device, RIMS tube or kettle that were old control Devices become Heating Elements on load, so they get the Heating method field and the spots; the Three Vessel sample's HLT (Hysteresis, with Duty Cycle and PID allowed) and Kettle (Hysteresis, with Duty Cycle) show them. Spots: the method in use is red, the others yellow (Fritz). Help 150 updated. Checked against the BruControl Import program: it already makes Heating Elements. (thread "Pick the heating method on one Element")

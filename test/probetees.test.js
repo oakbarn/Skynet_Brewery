@@ -56,8 +56,17 @@ assert.equal(majorityWidth([{ w: 10 }, { w: 10 }, { w: 20 }]), 10, 'two 1/2" and
 assert.equal(majorityWidth([{ w: 10 }, { w: 20 }]), 20, 'a tie takes the bigger');
 assert.equal(majorityWidth([]), 0, 'no pipe: keeps its size');
 const one = { w: 10 }; assert.equal(majorityWidth([one, one, { w: 20 }]), 20, 'one pipe on two IPs counts once');
-// Valve Tees, Supply Manifolds, valves and inline Devices size to their pipes too; pumps keep the Tab's pipe size
+// Valve Tees, Supply Manifolds, valves, inline Devices and (since 2026-11-07) pumps size to their pipes too, and with no pipe on
+// them to the Default pipe size (☰ Menu > Default settings, Rules 2.42 and 5.36)
 assert.ok(app.includes('const autoSized = g => (isPipeFit(g) || isMv(g) || isMf(g)) && g.autoSize !== false;'), 'Valve Tees and Manifolds');
-assert.ok(app.includes("const followsPipe = e => hasIps(e) && e.subtype !== 'pump' && !isProbeTee(e) && !isThermowell(e);"), 'valves follow, pumps do not');
+assert.ok(app.includes("const followsPipe = e => hasIps(e) && !isProbeTee(e) && !isThermowell(e);"), 'valves and pumps follow');
+assert.ok(app.includes('return (w || defaultWidth(e.workspace)) / 10;'), 'a Device with no pipe: the Default pipe size');
+assert.ok(app.includes('5 * majorityWidth(on) || 5 * defaultWidth(g.workspace)'), 'an IP fitting with no pipe: the Default pipe size');
+assert.ok(app.includes('|| (g.onVessel ? 0 : defaultWidth(g.workspace)); if (!pw) return;'), 'a TC fitting with no pipe: the Default pipe size, on a vessel it keeps its size');
+assert.ok(app.includes("size: String(hose ? defHoseIn() : defPipeIn()) };"), 'a new pipe or hose starts at the Default size');
+assert.ok(/\['defPipeSize', 'Default pipe size/.test(app) && /\['defHoseSize', 'Default hose size/.test(app), 'the Default settings tab has them');
+assert.ok(app.includes("{ key: 'default', title: 'Default settings',"), 'the Menu tab is called Default settings');
+assert.ok(app.includes("h('h3', {}, 'Defaults set somewhere else (to look at)')"), 'the defaults set elsewhere are listed');
 assert.ok(app.includes('const k = elK(e), w = e.w || 120'), 'a Device is drawn for its pipes');
 for (const [n, b] of [['Valve_Tee', 0.183], ['Supply_Manifold_2', 0.0915], ['Supply_Manifold_3', 0.061]]) assert.equal(tpl(n).body, b, `${n} body`);
+assert.ok(fs.existsSync(new URL('../help/155-default-settings.md', import.meta.url)), 'Help 155');
