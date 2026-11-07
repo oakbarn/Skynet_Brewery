@@ -371,7 +371,9 @@ the program only shows it and measures distances on the screen. Three helpers, u
     Fitting) when the other QD ... is NOT connected"). **Open** is the default: flow passes whether or not its mate is on.
     **Shut-off** passes flow only while its mate is connected, as Skynet's QD Widget already does (Rule 5.28).
     *For later:* the Open kind is new to the QD Widget, so Rule 5.28 gets that choice when this step is built.
-- Open question for Fritz: should a hose and a hard pipe be asked separately, or always a pipe first (changeable later)?
+- **Hose or Pipe is asked for each connection, as it is built** (Fritz, 2026-11-07: "Ask Hose or pip as it is being built. In my
+  manifold, I use both hoses and Pipes"). Each From / To answer (or each join on the picture) asks **Hose** or **Pipe**; a Hose
+  to a QD is a QD hose (Rules 5.28, 5.34). The guess is Pipe, unless one end is a QD (then Hose).
 
 ### Dialog 3: More Questions
 To come (Fritz, 2026-11-07: "New Dialog More Questions").
