@@ -278,7 +278,7 @@ function drawWs() {
   for (const e of [...L().elements.filter(e => e.workspace === w.name && !isMfPart(e)), ...clones]) ws.append(buildEl(e));     // a Valve Tee's valves are drawn on it (Rule 5.35)
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
   if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
-  const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP
+  const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
@@ -3028,6 +3028,8 @@ window.addEventListener('pointerup', () => {
 $('#ws').addEventListener('dblclick', ev => {
   if (!editing) return;
   if (drawPts) { if (drawHose) finishPipe(); else drawStraight(ev); return; }
+  const vpart = ev.target.closest('.vpPart[data-dev]');      // a part built into a Vessel Device: its own Properties (Fritz, 2026-11-07)
+  if (vpart) return editItem('el', vpart.dataset.dev);
   const pip = ev.target.closest('.devip');
   const node = ev.target.closest('.el,.gfx');
   const pipe = ev.target.closest('#pipes g');
@@ -5731,6 +5733,59 @@ function timerWidgetFields() {
     ...wgtPlace()];
 }
 const dataWidgetType = it => ['_wt', 'Widget Type', 'ro', DATA_W[it.type].word, false, false, { tip: DATAW_TIPS.type }];
+// ---- Every other Device: the Pump's drill-down (Fritz, 2026-11-07: "All dialogs for devices should follow the Pump Drill down sample",
+// "Check All Devices and insure the Properties follow the PUMP Drill Down model", Rule 18.31). The Devices with a dialog of their own
+// above keep it; every other Device (a plain relay, a Motorized Butterfly Valve, a Proportional Valve, Duty Cycle, Hysteresis, PID,
+// Deadband, the digital inputs, the sensors and analog inputs, the flow meter, the steppers, the scale) and every Device built into
+// something (a Vessel Device's parts, a RIMS tube's or an Integrated kettle's element and probe, Rule 5.7) gets the same layout:
+// the lock, Visible and Hidden Locked in the title line; 1 Label ⬆ ⬢ and Label Visible; 2 Interface with its Port on the same line,
+// greyed out for good (Rule 18.13); 3 Tab (a built-in Device: what it is built into, greyed out); 4 Name and the Suggested Name;
+// the Graphic, Path and Overlay with Database and .API ⬢ when it has pictures; its own set (Rule 18.22); X, Y, Width, Height; and
+// the Device Type last. The rest of its look is in the ⬢ pop-ups, as the Pump's is. Explanations are in the hover help (Rule 2.38).
+const isBuiltIn = e => !!e?.integratedIn;
+// a built-in probe says what it is (Thermowell: DS18B20), as a Temperature Probe's Properties do (Rule 18.26)
+const genTitle = e => isBuiltIn(e) && e.type === 'temperature' ? `${e.vpKind === 'thermowell' ? 'Thermowell' : 'Temperature Probe'}: ${probeKindName(e)}` : elTitle(e);
+const isGenDrill = e => isDevice(e) && !e.cloneId && (isBuiltIn(e) || !isDrillDev(e));
+const builtInHost = e => { const g = (draft || S.config).graphics.find(x => x.id === e.integratedIn); return g ? g.label || g.name || g.id : e.integratedIn; };
+// what the Pump's drill-down shows elsewhere or drops (it is in the ⬢ pop-ups): not part of a Device's own set
+const GEN_SHOWN = new Set(['name', 'label', 'hideName', 'workspace', 'x', 'y', 'w', 'h', 'locked', 'visibility', 'hidden', 'device', 'channel', 'probeIndex',
+  'imageOff', 'imageOn', 'imageOverlay', 'typeCode', 'background', 'bgColor', 'backpath', 'backpath_2', 'backpath_3', 'look', 'digits', 'fontSize', 'tap',
+  'tapTarget', 'confirm', 'foreColor', 'backColor', 'align', 'wrap', 'nameFontFamily', 'nameFontSize', 'nameColor', 'nameBg', 'nameFont', 'nameAlign', 'nameBold',
+  'valueColor', 'valueBg', 'valueFont', 'valueAlign', 'border', 'hideValue', '_tb', '_ovn', '_hint', '_sug']);
+const GEN_TEXT_POP = { title: 'Text attributes (its Value or On / Off text)', fields: DEV_TEXT_POP.fields };
+function genDeviceFields(it, item, f) {
+  const T = DEVICE_TIPS, part = isBuiltIn(it), dbKeys = new Set(dbFields(it).map(x => x[0]));
+  const portF = f.find(x => x[0] === 'probeIndex') || f.find(x => x[0] === 'channel');
+  const port = !portF ? null : portF[2] === 'pin' ? ['channel', 'Available Ports', 'pinsel', portF[3] === 'analog' ? 'analog' : 'digital'] : [portF[0], portF[0] === 'probeIndex' ? 'Probe #' : 'Port', ...portF.slice(2, 4)];
+  const hasIface = f.some(x => x[0] === 'device');
+  const pics = !part && f.some(x => x[0] === 'imageOff'), onPic = pics && f.some(x => x[0] === 'imageOn');
+  const out = it.type === 'digitalOut' && (!skyDev(it) || f.some(x => x[0] === 'tap'));      // a Skynet Template's Toggle only where it lets you set it (Rule 5.16)
+  const pinPop = f.some(x => x[0] === 'activeLow') && f.some(x => x[0] === 'oneShot');      // Invert and One-shot in the Interface's ⬢ (the Pump's Pin attributes)
+  const skip = new Set([...GEN_SHOWN, ...dbKeys, ...(pinPop ? ['activeLow', 'oneShot', 'oneShotDirection'] : []), ...(part ? ['subtype', 'valveType', 'sensor', 'flipH', 'flipV', 'rot', 'orientation', '_orient', 'inline'] : [])]);
+  const own = part && it.type === 'temperature' ? [...PROBE_OWN(it), ['info', 'Reading now', 'info']]
+    : f.filter(x => !skip.has(x[0]) && !['box', 'boxend'].includes(x[2]) && !(x[2] === 'note' && /^_(sky|sug|hint|ovn)$/.test(x[0])));
+  const dbLine = !dbKeys.size || pics || own.some(x => x[6]?.dbPop) ? [] : [['_dbHead', 'Database and .API', 'attrhead', null, false, false, { attr: DB_POP }]];
+  const typeF = typeCodes(it).length > 1 && !part ? PWM_TYPE(it) : ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: T.type }];
+  return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
+    ...f.filter(x => x[0] === '_sky'),
+    ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
+    ...(hasIface ? [['device', '2. Interface (board)', 'dev', 'addnewid', false, false, { set: true, tip: T.iface + (port ? ' ' + (port[0] === 'probeIndex' ? T.pNum : T.port) : ''), ...(port ? { with: port } : {}), ...(pinPop ? { attr: DEV_PORT_POP } : {}) }]] : []),
+    part ? ['_host', '3. Built into', 'ro', builtInHost(it), false, false, { tip: 'This Device is built into it (Rule 5.7): it moves, shows and is deleted with it, and its Interface and Port are set in its Properties.' }]
+      : ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
+    ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
+    ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
+    ...(pics ? [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic }],
+      [...(f.find(x => x[0] === 'imageOff') || ['imageOff', 'Path', 'gpick']).slice(0, 1), onPic ? 'Path (off)' : 'Path', 'gpick', null, false, false, { tip: 'The picture file it shows on the Tab.' }],
+      ...(onPic ? [['imageOn', 'Path (on)', 'gpick', null, false, false, { tip: 'A second picture while it is on (optional: the Overlay is the preferred way, Rule 7.8).' }]] : []),
+      ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: 'Drawn on top of its picture while it is On (Rule 7.8). The ⬢ beside it holds Database and .API.', dbPop: true, ...(out ? { with: ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.toggle }] } : {}) }]] : []),
+    ...(!pics && out && !part ? [['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.toggle }]] : []),
+    ...own, ...dbLine,
+    ...(part ? [] : [['_txt', 'Text attributes', 'attrhead', null, false, false, { attr: GEN_TEXT_POP }],
+      ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
+      ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]]),
+    typeF];
+}
+
 function fieldsFor(item) {
   let fs = fieldsOf(item);
   if (STATE_PICS.has(item.type) && !fs.some(f => f[0] === 'imageOn')) fs = [...fs, ...ONOFF_PICS];
@@ -5972,7 +6027,8 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'stpick') return [h('label', {}, label), stepperPick(key, opts, v)];
   if (kind === 'probe') input = h('select', { 'data-k': key, 'data-kind': 'num' }, h('option', { value: '' }, '(none)'),
-    ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)));
+    ...(S.config.probes || []).map(p => h('option', { value: p.index, ...(Number(v) === p.index ? { selected: true } : {}) }, `#${p.index} ${p.name || ''}${p.rom ? '  ' + p.rom : '  (no probe yet)'}`)),
+    ...(v !== undefined && v !== '' && !(S.config.probes || []).some(p => p.index === Number(v)) ? [h('option', { value: v, selected: true }, `#${v}`)] : []));      // its own probe # stays, even when the Devices page does not list it yet
   else if (kind === 'vis') {      // Visible as a switch, kept as BruControl's visibility = visible / hidden
     input = h('label', { class: 'sw' }, h('input', { type: 'checkbox', 'data-k': key, 'data-kind': 'vis', ...(v === 'hidden' ? {} : { checked: true }) }), h('span', { class: 'swk' }));
   }
@@ -6888,6 +6944,8 @@ async function editItem(kind, id) {
     if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
     if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
+    const oldF = () => { const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)]; return skyDev(it) ? skyDevFields(it, f) : f; };
+    if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)
     if (isPumpDev(it)) return [...pumpDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Pump Device Properties (Fritz's screen 9, Rule 18.21)
     if (isElemDev(it)) return [...elemDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Heating Element: the same drill-down (Fritz, 2026-11-05)
     if (isMbvDev(it)) return [...mbvDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];
@@ -6897,6 +6955,7 @@ async function editItem(kind, id) {
     if (it.type === 'soundPlayer') return soundPlayerFields();      // the other Widgets: the Pump's drill-down look (Rule 18.30)
     if (SEMI_KINDS[it.type] && !it.cloneId) return semiWidgetFields(it.type, it);
     if (it.type === 'label') return labelWidgetFields();         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.27)
+    if (isGenDrill(it)) return genDeviceFields(it, item, oldF());      // every other Device: the Pump's drill-down (Fritz, 2026-11-07, Rule 18.31)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];
     if (prefixOf(it)) f.splice(1, 0, ['_hint', `Suggested name prefix: ${prefixOf(it)}  (a hint, not required)`, 'note']);
     if (isDevice(it)) f.splice(1, 0, ['_sug', `Suggested name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and port)'}` + (autoNamed.has(item) ? '  (this new Device follows it until you type a name of your own)' : ''), 'note'],
@@ -6926,7 +6985,7 @@ async function editItem(kind, id) {
     nm.value = almSug = almSuggest(item, ev.target.value);
   };
   $('#dlgBody').addEventListener('input', almFollow); $('#dlgBody').addEventListener('change', almFollow);
-  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) ? drillTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
+  let r = await dialog(kind === 'el' ? (item.type === 'timer' ? 'Timer Widget Properties' : item.type === 'alarm' && item.alarmClass ? `Alarm Widget Properties: ${isAlmBasic(item) ? 'Basic Skynet Alarm' : 'User Alarm'}` : isDrillDev(item) && !isBuiltIn(item) ? drillTitle(item) : isGenDrill(item) ? genTitle(item) : elTitle(item)) : type === 'ip' ? (isMv(item) ? 'Manual Valve Widget' : isIpFit(item) ? `Pipe fitting Widget: ${FITTINGS[item.fitting]}` : 'IP Widget (Initial Point)') : isPlainUnit(item) ? `TC Pipe Fittings Widget: ${(item.template || '').replace(/_/g, ' ')}` : mf ? mfInfo(item).what : bf ? 'Tab_Fitting' : isV && item.vwidget && !item.integrated ? 'Vessel Widget Properties' : isV && item.template ? 'Tab_Vessel' : isV ? eqClass(item).title : type === 'vessel' ? 'Vessel / equipment Widget' : type === 'pipe' ? (item.hose ? (item.qd ? 'Quick Disconnect Hose' : 'Hose') : 'Pipe') : type === 'text' ? 'Text Widget Properties' : type === 'override' ? 'Override Button Widget Properties' : type === 'clone' ? `Clone of ${item.of}` : type, fields, work, true, kind === 'el' ? elementTopic(item) : graphicTopic(item), type === 'text' || type === 'timer' || type === 'override' || (type === 'alarm' && !!item.alarmClass)).finally(() => { if (vwPeek) { vwPeek = null; renderWs(); } if (rims) $('#dlgBody').removeEventListener('change', rimsRefresh); if (vdev) $('#dlgBody').removeEventListener('change', vpRefresh); if (mf) $('#dlgBody').removeEventListener('change', mfRefresh); $('#dlgBody').removeEventListener('input', almFollow); $('#dlgBody').removeEventListener('change', almFollow); });
   try {
     if (r === 'delete') {
       const host = kind === 'el' && item.integratedIn && draft.graphics.find(g => g.id === item.integratedIn && !g.loose);
@@ -7088,7 +7147,8 @@ async function editItem(kind, id) {
       }
       if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
-      if ((isDrillDev(item) || isDataW(item) || isPicW(item)) && !String(work.label ?? '').trim()) work.label = work.name || item.name;     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
+      if ((isDrillDev(item) || isDataW(item) || isPicW(item)) && !String(work.label ?? '').trim()) work.label = work.name || item.name;
+      if (isGenDrill(item) && !String(work.label ?? '').trim()) work.label = item.label || work.name || item.name;      // every Device (Rule 18.31)     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && (isDevice(work) || !!widgetTypeId(work));      // a new Widget follows its suggestion too (Rule 3.14)
       if (follow) work.name = nameSuggestion(work, item) || work.name; else autoNamed.delete(item);
@@ -10280,7 +10340,15 @@ function placeVesselParts(v) {
 // End Cap (Fritz, 2026-10-22): a Skynet fitting with no IP. Dropped on an opening (an IP with no pipe on it) it closes it:
 // that IP is hidden, no pipe can join it and no flow passes. It then moves with what it caps; drag it off to take it away.
 function isCap(g) { return isUnit(g) && isCapOnly(g); }
-function cappedIps() { return new Set(L().graphics.filter(g => isCap(g) && g.capOn).map(g => g.capOn)); }
+// the IPs that are plugged, so they are hidden and nothing can join them (Fritz, 2026-11-07: an opening plugged by a Thermowell, an
+// End Cap or a Heating Element is plugged and its IP is hidden; only open IPs show): an End Cap on it, or a Vessel Device's built in
+// Element, Probe or Thermowell on it (a built in Valve passes flow, so its IP still shows)
+function cappedIps() {
+  const out = new Set(L().graphics.filter(g => isCap(g) && g.capOn).map(g => g.capOn));
+  const plugs = new Set(L().elements.filter(e => isVPart(e) && e.vpKind !== 'valve').map(e => e.integratedIn + '|' + e.integratedAs.slice(3)));
+  if (plugs.size) for (const g of L().graphics) if (g.kind === 'ip' && g.attachTo && plugs.has(g.attachTo + '|' + g.port)) out.add(g.id);
+  return out;
+}
 function capOnto(c, ip) {
   const [cx, cy] = ipCenter(ip); Object.assign(c, { capOn: ip.id, labelVisible: false, workspace: ip.workspace, x: Math.round(cx - (c.w || 40) / 2), y: Math.round(cy - (c.h || 40) / 2) });
   const r = capFacing(ip); if (r === null) return;

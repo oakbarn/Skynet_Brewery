@@ -60,6 +60,9 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !insertmacro MUI_PAGE_DIRECTORY
 Page custom UpdateChoicePage UpdateChoiceLeave
 !insertmacro MUI_PAGE_INSTFILES
+; Finish page: a tick box "Open the BruControl Importer now", only when the Importer was added (Fritz, 2026-11-07)
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW FinishShow
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE FinishLeave
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -74,6 +77,8 @@ Var RadioFresh
 Var OldPanel
 Var Stamp
 Var BrewDir
+Var ImporterAdded
+Var OpenImporter
 
 ; ---------------------------------------------------------------- Node.js
 ; Puts 1 in $R9 when a new enough Node.js is on this computer.
@@ -378,9 +383,9 @@ SectionEnd
 ; away the shortcuts of an earlier install). On an update, the answer you gave last time is the default.
 Function AskImporter
   ${If} ${FileExists} "$INSTDIR\Skynet_Importer.bat"
-    MessageBox MB_YESNO|MB_ICONQUESTION "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDYES IDYES add IDNO leave
+    MessageBox MB_YESNO|MB_ICONQUESTION "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nIf you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No.$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDYES IDYES add IDNO leave
   ${Else}
-    MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDNO IDYES add IDNO leave
+    MessageBox MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2 "Will you import a BruControl configuration on this computer?$\r$\n$\r$\nIf you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No.$\r$\n$\r$\nYes: add the Skynet BruControl Importer (a Desktop and Start menu shortcut). It turns a BruControl config file into a Skynet Schema and saves it in $BrewDir\Import.$\r$\nNo: leave it out. You can run this Setup again to add it later." /SD IDNO IDYES add IDNO leave
   ${EndIf}
   add:
     CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
@@ -389,6 +394,7 @@ Function AskImporter
     ; and one in the Import folder, where its Schema files go (Fritz, 2026-11-06)
     CreateShortCut "$BrewDir\Import\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
     DetailPrint "Added the Skynet BruControl Importer"
+    StrCpy $ImporterAdded 1
     Return
   leave:
     Delete "$INSTDIR\Skynet_Importer.bat"
@@ -399,6 +405,26 @@ FunctionEnd
 
 Function StartPanel
   ExecShell "open" "$INSTDIR\Skynet_Brewer.bat"
+FunctionEnd
+
+; The Finish page's "Open the BruControl Importer now" tick box. It sits under "Show the install notes" (130u = the
+; Modern UI's 110u for that box + 20u) and is only there when you answered Yes to the BruControl question.
+Function FinishShow
+  StrCpy $OpenImporter ""
+  ${If} $ImporterAdded == 1
+    ${NSD_CreateCheckbox} 120u 130u 195u 10u "Open the BruControl Importer now"
+    Pop $OpenImporter
+    SetCtlColors $OpenImporter "${MUI_TEXTCOLOR}" "${MUI_BGCOLOR}"
+  ${EndIf}
+FunctionEnd
+
+Function FinishLeave
+  ${If} $OpenImporter != ""
+    ${NSD_GetState} $OpenImporter $0
+    ${If} $0 == ${BST_CHECKED}
+      ExecShell "open" "$INSTDIR\Skynet_Importer.bat"
+    ${EndIf}
+  ${EndIf}
 FunctionEnd
 
 ; ---------------------------------------------------------------- Uninstall
