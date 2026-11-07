@@ -1814,6 +1814,20 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     folder), even when the file is not on the computer (it is listed in the report). The option copies every picture to
     `media\Images\User` and every sound to `media\sounds\User`, and the items use the copies; a copy already there is never
     written over. The brewer never has to make a zip.
+  - **Connect your brewery** (page 6, Fritz 2026-11-07: "Build the manifold like the knee bone is connected to the leg bone").
+    The Importer asks **what is connected to what**, as chains: a vessel opening (or a pump or valve), then what it is connected
+    to, then what that is connected to, until an end (a vessel opening, Tap Water, Drain, a QD with Male/Female and Open/Shut-off,
+    or Not connected); a Supply Manifold (Rule 5.35) can be a piece. **Each connection asks Hose or Pipe** (Pipe is the guess, Hose
+    for a QD). The first answers are **guesses** from the names, the Scripts (always read as clues) and, on a BruControl Tab with
+    a background picture, where a valve sits next to a pump; each is marked until the brewer OKs or changes it, and a missing
+    answer leaves the item loose, never a wrong pipe. **A picture as a guide** (the Tab's BruControl background or the brewer's
+    own photo, kept on that computer and not saved) lets the brewer drag the pieces and click two to join them. **No AI in the
+    Importer:** "Ask an AI about my picture" only copies a ready-made question and opens a free AI site the brewer picks; the
+    brewer pastes the AI's answer back and the Importer reads it by plain text matching, marking each line from the AI. The
+    **Hot Side** is pictured; **Fermenters are asked** (cooling, warming, glycol feed and return valves, pumps, probe, pressure).
+    The page has the rhyme and Fritz's own song (*Skynet - Outlet to Valve*, free to use, `media/sounds/Skynet`; ▶ Play / ■ Stop,
+    never by itself). The answers are saved in the Schema file (`connect`); the pipes and hoses are drawn when the Vessels are
+    built (a later step).
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
   Processes, which travel beside it, as Processes are shared by every Schema). It is marked a **first draft** until the
@@ -2592,6 +2606,7 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
 - 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
+- 2026-11-07: Rule 15.4: the BruControl Importer has page 6, **Connect your brewery**: what is connected to what as chains, Hose or Pipe for each connection, guesses from the names, Scripts and BruControl picture, a picture as a guide, an optional free AI outside the Importer (copy the question, paste the answer back), Fermenter questions, and Fritz's song. Help 143 updated, no new Help number used. Checked against the Skynet Panel: it keeps the answers in the Schema file only; nothing in the Panel changes until the Vessel step draws the pipes. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Import's Browse box and file list also take BruControl backups (`.bak`, the same config file inside), marked *backup* with their date; Help 143 updated, no new Help number used. Checked against the Skynet Panel: it only opens the Importer's `.json` Schema files, so nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Import also lists the backups (and any config file put there) in Documents\BruControl\Config Backup; its Windows boxes open in front of its window; a folder typed without a drive (like `\downloads`) means that folder in the user's own folder; the page says plainly when the Importer has stopped (its black window was closed). Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")

@@ -102,6 +102,40 @@ and it is not shown on the Tab.
 
 The list of new names and the notes for the report are at the bottom.
 
+## Connect your brewery
+
+BruControl only knew your valves and pumps as buttons; it never knew which vessel they sit on or what they are joined to. This
+page asks **what is connected to what** (Fritz, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
+bone". The page shows a few lines of the old song (*Dem Bones*) and the brewery version, with **▶ Play the song** (Skynet's own
+song, *Skynet - Outlet to Valve*, made by Fritz; it never plays by itself, and the button turns into **■ Stop**) and
+**▶ Hear the rhyme**.
+
+- **Your vessels.** Guessed from your names and Scripts (HLT, Mash Tun, Boil Kettle, Fermenter). Rename, remove or add one.
+  The **Hot Side** vessels are joined here; a **Fermenter** (Cold Side) has its own questions.
+- **What is connected to what.** Each **chain** starts at a vessel opening (or a pump or valve), then says what that piece is
+  **connected to**, then what *that* is connected to, until it reaches an **end**: a vessel opening, **Tap Water**, a
+  **Drain**, a **Quick Disconnect (QD)** or **Not connected**. A QD also asks **Male or Female** and **Open or Shut-off**; a
+  **Supply Manifold** asks which one. Each connection asks **by Pipe** or **by Hose** (Pipe is the guess, Hose for a QD).
+  After a pump, the next piece leaves from its **Out**.
+- **The first guesses** come from your names (a vessel's outlet to its own valve, then its own pump, for example *HLT Center
+  Bottom Outlet > M_HLT PV2 > M_HLT Pump In*; a whirlpool pump back into the Boil Kettle) and, on a BruControl Tab with a
+  background picture, from a valve that sits right next to a pump. Each one is marked **guess** until you click **✓**.
+- **Not joined yet** lists every pump and valve no answer uses. A missing answer leaves it loose, never a wrong pipe.
+- **A picture as a guide.** Pick the background picture you had on a BruControl Tab, or **📷 Use a photo or drawing** of your
+  brewery (it stays on this computer). Drag each vessel, pump and valve onto its place, then **click one and then another** to
+  join them. The picture is only a guide: it is not saved and nothing reads it.
+- **Ask an AI about my picture (your choice).** The Importer itself never uses an AI. **🤖 Copy the question and open it**
+  copies a ready-made question (it lists your own vessel, pump and valve names) and opens the free AI site you pick (Claude,
+  ChatGPT or Gemini). Add your picture there and paste the question. Copy the AI's answer back into the box and click **Read
+  the AI answer**: each line it can read becomes a connection marked **from the AI, check it**; a line it cannot read is listed,
+  never guessed. Your picture goes to that AI company under your own account, not to Skynet.
+- **Fermenters** are asked, not pictured (they are usually in another room): how it is cooled (glycol coil, jacket, chamber,
+  wrap or not cooled) and warmed, which valves feed and return the glycol, which pumps cool and warm it, and its probe and
+  pressure sensor. Each starts with a guess from the names and Script notes (for example *"FV 2 // feed glycol"*).
+
+The answers are saved in the Schema file. The pipes and hoses themselves are drawn when the Vessels are built (a later Import
+step).
+
 ## Save the Schema
 
 **Save the Schema** saves what the Importer made as one Skynet Schema file (`.json`) in the **Import folder**:
