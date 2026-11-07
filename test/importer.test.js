@@ -87,6 +87,30 @@ fs.rmSync(dir, { recursive: true, force: true });
   const ps = pickFileScript("C:\\Users\\Fritz's\\Documents\\BruControl");
   assert.ok(ps.includes('OpenFileDialog') && ps.includes('*.brucfg') && ps.includes("$f.InitialDirectory = 'C:\\Users\\Fritz''s\\Documents\\BruControl'"));
 }
+// BruControl backups (.bak) are the same config file inside (Fritz, 2026-11-07)
+{
+  const { isBackupName, backupDate, configBase, isDefaultConfig, makeImportCopy } = await import('../lib/importer.js');
+  assert.ok(isConfigName('default.brucfg.20260615.bak') && isConfigName('Oakbarn.BAK') && isBackupName('x.brucfg.20260615.bak'));
+  assert.ok(!isDefaultConfig('default.brucfg.20260615.bak'), 'a backup is not BruControl\'s default config');
+  assert.equal(backupDate('default.brucfg.20260615.bak'), '2026-06-15');
+  assert.equal(backupDate('Oakbarn.bak'), '');
+  assert.equal(configBase('default.brucfg.20260615.bak'), 'default_Backup_2026-06-15');
+  assert.equal(configBase('Oakbarn.brucfg.bak'), 'Oakbarn_Backup');
+  assert.equal(configBase('Oakbarn.brucfg'), 'Oakbarn');
+  assert.equal(safeName('default.brucfg.20260615.bak'), 'default_Backup_2026-06-15');
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'bak-'));
+  fs.writeFileSync(path.join(d, 'Oakbarn.brucfg'), '<Configuration/>');
+  fs.writeFileSync(path.join(d, 'Oakbarn.brucfg.20260615.bak'), '<Configuration/>');
+  fs.writeFileSync(path.join(d, 'default.config'), '<Configuration/>');
+  const f = findConfigs(d);
+  assert.deepEqual(f.files.map(x => [x.name, x.isBackup, x.isDefault, x.backupDate, x.base]), [
+    ['Oakbarn.brucfg', false, false, '', 'Oakbarn'], ['Oakbarn.brucfg.20260615.bak', true, false, '2026-06-15', 'Oakbarn_Backup_2026-06-15'],
+    ['default.config', false, true, '', 'default']], 'own config, then backups, then the default one');
+  const copy = makeImportCopy(path.join(d, 'Oakbarn.brucfg.20260615.bak'), path.join(d, 'Import'), { ms: new Date(2026, 10, 7, 3, 4, 5).getTime() });
+  assert.equal(path.basename(copy), 'Oakbarn_Backup_2026-06-15_2026-11-07T030405.brucfg', 'the Import Copy of a backup is a plain .brucfg');
+  assert.ok(pickFileScript('').includes('*.brucfg;*.bak'), 'Browse shows config files and backups');
+  fs.rmSync(d, { recursive: true, force: true });
+}
 console.log('importer tests passed');
 
 // ---- the Schema file: Importer -> Brewing\Import -> Panel (Fritz, 2026-11-06)
