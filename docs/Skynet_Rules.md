@@ -260,7 +260,8 @@ and it stays locked. A bundled vessel's Properties have X and Y too. Pipe ends l
 finger opens Properties. A switch on ☰ Menu > Default can allow it. (2026-10-21, PR #59)
 
 2.14 **Edit layout button** (hammer and pick over a square) sits beside ☰ Menu on the Tabs bar, for
-Admins. Its background is **navy blue**. (2026-10-22, PR #82 and PR #98; navy blue 2026-10-27)
+Admins. Its background is a **lighter blue** (RGB 42 107 209, #2A6BD1). (2026-10-22, PR #82 and PR #98; navy blue 2026-10-27;
+*changed* 2026-11-07, Fritz: "For the work Icon make the background a Lighter blue. It almost looks Black with the Navy Blue")
 
 2.15 **No up and down scrolling** on a Tab: "Fit screen" is the default. (2026-10-04, PR #12)
 
@@ -461,6 +462,28 @@ JustGage) and Fritz picked **Skynet's own drawings** (SVG), from his own idea pi
 3. **The BruControl Import** gives each gauge the closest look: a round or bar gauge becomes the Skynet Dial with BruControl's lowest
    and highest numbers and decimals, a digit gauge LCD digits; the DevExpress style name is kept only as a record.
 (thread "Build our own temperature gauge and timer looks", Help 152)
+
+2.41 **Properties hotspots on a Vessel Device** (Fritz, 2026-11-07: "A Hotspot on a Vessel device to bring up its property dialog";
+"And if not done, the same Method for a Heating Element integrated to the Vessel Device"; "And a Temp Probe and Valve Hot spots";
+thread "Add a Properties hotspot on Vessel Devices", Help 154).
+- In **Edit layout**, a **Vessel Device** (Rule 5.31) has a small **⚙ hotspot** in its **top right corner**. **One click** on it
+  opens the **Vessel Device's own Properties**, even where its built in parts cover the vessel.
+- Each part **built into** it, a **Heating Element**, **Temperature Probe** (or Thermowell with its probe) or **Valve**, has its own
+  **⚙ hotspot** on the middle of its top edge; one click opens **that part's own Properties** (the Pump drill-down, Rule 18.31).
+- **Flow Color hotspot** (Fritz: "A hot spot to change the flow color on a pipe connected to the Vessel ... if a valve or
+  pipefitting is at the end of the integrated Vessel Device, the Hot spot needs to be at the end"): each open IP of a Vessel Device
+  with a pipe or hose on it, or a pipe fitting joined to it, has a small **🎨 hotspot** where the pipe begins: on the IP, at the
+  far end of the fitting joined to it, or at the outer end of a Valve built into it. One click shows a small pop-up with the
+  vessel's **Out flow color** (Fritz: "Flow color is already working on the Vessel Device. I just did not see where to change it":
+  it is the same setting as Out flow color in the vessel's Properties, Rule 5.21); Save layout keeps it. A ring round the 🎨
+  shows the color picked.
+- **On Overlay on built in parts** (Fritz: "Do the Heating Elements in an Integrated Vessel Device have the On Overlay?"): a
+  Heating Element or Valve built into a Vessel Device shows the **On Overlay** (Rule 7.8, the red and yellow lightning bolt) while
+  it is on; a Heating Element still glows as well (Rule 7.9: a heater is on while Enabled).
+- An addition to Rule 2.9, not a change: **double-click still opens Properties** as before. A click on a hotspot never starts a drag
+  (Rule 5.19), and hover help says what it opens (Rule 2.38). Hotspots show **only in Edit layout** (Properties are changed there);
+  phones and tablets do not edit (Rule 2.35).
+- **BruControl Import:** checked, not changed. It has no Device dialogs; a Vessel Device it makes gets the hotspots in the Panel.
 
 ## 3. Names and file names
 
@@ -778,6 +801,8 @@ joined by elbows when a Schema loads (Rule 15.2); the samples and the default Sc
   point with no other pipe on it moves back onto the pipe end instead. A click or double-click that wobbles under 4 pixels is not a
   drag, and only the pipe ends a drag pulls off let go (an end already off its IP stays joined, so moving one thing never cuts a pipe
   somewhere else on the Tab).
+- **Move it alone** (Fritz, 2026-11-07, Rule 5.37): grabbing something with pipes on it first asks whether to move it with its pipes
+  (this Rule) or 🔓 Unlock its IPs so it moves alone; ↩ Put back (Ctrl+Z) undoes a move.
 
 5.20 **Where the IPs go** (Fritz, 2026-11-02, with two drawings): on every Device and Widget an IP sits at **the center of
 the opening**. On a TC pipe Widget (elbows, tees, reducers ...) and on any Device or Widget with TC ferrules, that is **the
@@ -1157,6 +1182,29 @@ pipe on Save", Help 87).
     Manifold, or a vessel opening it keeps its size.
 - **Pumps are not pipe fittings**: they keep the Pump Standard size with the Tab's pipe size (Rules 5.11, 5.27). A Thermowell sits on
   a vessel and keeps its size.
+
+5.37 **Grab pop-up: move it alone (🔓 Unlock its IPs), Swap places, and ↩ Put back** (Fritz, 2026-11-07: "I tried to replace the
+Pump in the 3 vessel with a Blichmann Pump I added and it was not easy and never succeeded as the pipes followed the old pump. When we
+grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of its pipes"; "That would apply to any Device, Pipe,
+Fitting or Widget, but the Option to Unlock as the user may not want to, and maybe a way to restore back to any pipe movements";
+"Not only the Pipes but locked fitting as well"; thread "Swap a pump without dragging its pipes", Help 153).
+- **The pop-up:** in Edit layout, the first time a Device, Widget, Fitting (or Vessel) with pipes joined to it is dragged, it stays
+  put and a pop-up asks: **🔓 Unlock its IPs** (each pipe end on it lets go where it is and gets an open end, so it then moves alone
+  and the pipes and fittings stay), **Move it with its pipes** (Rule 5.19 as before), **🔁 Swap places with...** or **Cancel**.
+  Unlocking is never done unless the user picks it. **Don't ask again** lasts until Edit layout is left. A Pipe joined to other
+  things offers **🔓 Unlock its ends** (it moves alone) or Cancel. A locked item stays locked (Rule 2.12): no pop-up.
+- **Locked pipes and fittings:** an item that could not move because a locked pipe or fitting would move with it (the 🔒 toast)
+  gets the pop-up instead, with Unlock its IPs only: it moves alone and the locked things stay where they are.
+- **🔁 Swap places with...** (pumps, valves, Proportional Valves and Manual Valves): the other one of the same kind (any Tab, the
+  🔨 Build Tab too) takes this one's X, Y, Width, Height, Tab and flips (the pump's Orientation), and every pipe end on this one's
+  inlet or outlet goes on the other's inlet or outlet; this one goes where the other was. Nothing else on either one changes.
+- **Dropped where something let go:** an open pipe end made by Unlock remembers where its IP was and which end (inlet, outlet ...).
+  An item dropped with the same end within 14 pixels of that spot joins it again at once (Rule 5.27 keeps every pump's IPs in the
+  same spots), and any other open end within 14 pixels of one of its IPs joins as on Save layout (Rule 5.19).
+- **↩ Put back** on the Edit layout bar, and **Ctrl+Z** (not in a text box): undoes the last move, resize, unlock or swap, up to 30
+  steps, back to how pipes, fittings and items were. It starts fresh each time Edit layout opens. Properties changes are not in it;
+  Exit without saving still undoes everything since the last Save layout.
+- **BruControl Import:** checked, not changed; it does not move things on a Tab. Schemas it makes get this in the Panel.
 
 ---
 
@@ -1616,7 +1664,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **152** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks). (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **154** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2555,7 +2603,10 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 3.1: a Heating Element's Type ID is HE (Fritz: "So we could Use MB_25_HE_HLT_BR"), not DO; its Label fills in as hE_1 without the method (Rules 18.24, 18.15); elements named before keep DO (Rule 3.5). Rule 6.19: the short Process way MB_25_HE_HLT_BR.HYS (.DutyC, .PID, .DeadB, .DO) switches its method. Help 137, 150, 46 and the Device Library updated. Checked against the BruControl Import program: it names joined elements MP_42_HE_HLT_Heat_BH. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.19 (Fritz: "we ask the primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed"): a Heating Element's main method plus ticked other methods; only those are allowed (pop-up, spots, Method Clones, Process editor, Brain); each allowed method gets a one-click spot when two or more are allowed. Help 150 updated. Checked against the BruControl Import program: it sets the main method and ticks the others, and its first page explains One Interface Port, one Device and the Heating Element (Fritz: "We need to explain that in the Beginning of the BruControl Import"). (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.1 (Fritz: "Once a Port Is Selected, it is taken. So the method of choosing a Port has to be addressed as well"): every Port picker offers only free Ports plus the Device's own; the older typed Pin boxes (and the Duty Cycle, Hysteresis, PID and Deadband Pin) now list only free Ports. Checked against the BruControl Import program: it keeps BruControl's ports, joins heating controls on one port and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 2.14 changed (Fritz: "For the work Icon make the background a Lighter blue. It almost looks Black with the Navy Blue"): the Edit layout button (Fritz calls it the Work icon) is a lighter blue, #2A6BD1, instead of navy #001F5B. Help 02, 75 and 82 updated. Checked against the BruControl Import program: it has no Edit layout button. (thread "Add a Properties hotspot on Vessel Devices")
+- 2026-11-07: Added Rule 2.41 (Fritz: "A Hotspot on a Vessel device to bring up its property dialog", plus the same for a built in Heating Element, Temperature Probe and Valve, a Flow Color hotspot, and the On Overlay): in Edit layout a ⚙ in a Vessel Device's top right corner opens its Properties with one click, each built in part has its own ⚙ for its own Properties, and a 🎨 where a pipe begins at an opening (or at the end of the fitting or built in Valve on it) opens the vessel's Out flow color (the setting already in its Properties); built in Heating Elements and Valves show the On Overlay while on (they had only a glow, or nothing); double-click still works (Rule 2.9). Help 154 (153 is PR #262's); next free Help number 155. Checked against the BruControl Import program: it has no Device dialogs, its Vessel Devices get the hotspots in the Panel. (thread "Add a Properties hotspot on Vessel Devices")
 - 2026-11-07: Rule 2.39 (new, Fritz: "We only need a few, and choose one that best matches the DevExpress ones"): Panel Looks (themes) Office Black (default, closest to BruControl's Office 2019 Black), Dark Gray, White and Skynet Night, each a few color picks; picked in Settings > Panel settings, saved with the Schema; new Tabs get the Look's Tab colors; Use this Look on every Tab with Put the Tabs back. A change from BruControl: its DevExpress themes are not public and would not work in a browser, so Skynet sets the Back and Text colors. Rule 11.1 next free Help is 152. Help 151 new, Help 09 updated. Checked against the BruControl Import program: it picks the closest Look from the BruControl theme, gives imported Tabs the Look's Tab colors, and lists Themes on its "What is different in Skynet" page. (thread "Add a few look-alike Panel themes")
 - 2026-11-07: Rule 2.40 (Fritz: our own gauges and timers without copying DevExpress): the Skynet Dial (arc, needle, digits 0-2 decimals, blue / green / red from the Setpoint with Cooler and Hotter ranges), Timer Digits (Back, Text Fore, Text Back colors, Fritz's frames in 3 shapes, hh:mm:ss or hh:mm, Seconds only in the last minute); the BruControl Import maps its gauges to them. Help 152; next free Help 153. (thread "Build our own temperature gauge and timer looks")
 - 2026-11-07: Rule 6.19 (Fritz: "The only thing that seems to be missing is the Element Method Field and the Hotspots to switch Methods on the Screen when running"): Elements built into a Vessel Device, RIMS tube or kettle that were old control Devices become Heating Elements on load, so they get the Heating method field and the spots; the Three Vessel sample's HLT (Hysteresis, with Duty Cycle and PID allowed) and Kettle (Hysteresis, with Duty Cycle) show them. Spots: the method in use is red, the others yellow (Fritz). Help 150 updated. Checked against the BruControl Import program: it already makes Heating Elements. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.19 (Fritz: "I prefer on and Off rather than enabled"; "So even a Hystersis element would be Turned On or Turned Off and not use enabled"): a Heating Element is turned On or Off (`hE_1 = on` / `= off`) in every method; .enabled is no longer offered (old lines still work); the Three Vessel sample Processes say = on / = off. Checked against the BruControl Import program: its first page says so; when Scripts come over, a heating Element's Enabled becomes On / Off. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 5.37 (new, Fritz: "when we grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of its pipes"; "any Device, Pipe, Fitting or Widget", "the Option to Unlock as the user may not want to", "a way to restore back to any pipe movements", "Not only the Pipes but locked fitting as well"): the grab pop-up (🔓 Unlock its IPs, Move it with its pipes, 🔁 Swap places with..., Cancel), works past locked pipes and fittings, open ends rejoin the same end of a pump or valve dropped in the old one's place, ↩ Put back and Ctrl+Z (30 steps). Rule 5.19 points to it. Rule 11.1 next free Help is 154. Help 153 new. Checked against the BruControl Import program: it does not move things on a Tab, so nothing changes there. (thread "Swap a pump without dragging its pipes")
