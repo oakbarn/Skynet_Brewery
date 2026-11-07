@@ -269,7 +269,7 @@ function drawWs() {
   ws.classList.toggle('editing', editing); ws.classList.toggle('nomove', noMove());
   if (editing && draft && !drawPts) joinLooseEnds(w.name);     // a loose pipe end on another pipe joins it (a tee or an elbow)
   if (editing && draft) tcFitJoints(w.name);         // IP elbows, tees and crosses become TC Pipe Fittings Widgets (Rule 5.25)
-  if (editing && draft) for (const g of draft.graphics.filter(g => g.workspace === w.name && isPlainUnit(g) && autoSized(g))) autoSizeUnit(g);
+  if (editing && draft) sizeToPipes(w.name);       // every pipe fitting takes the size of its pipe (Rule 5.36)
   const isEqFit = g => eqClass(g) && !eqClass(g).tab;     // pipe fittings sit above the elements, vessels below them
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'vessel' && !isEqFit(g))) ws.append(buildVessel(g));
   for (const g of L().graphics.filter(g => gTab(g) === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));     // a Process can move a Text Widget to another Tab (.tab)
@@ -1217,7 +1217,7 @@ const sgPic = g => 'data:image/svg+xml,' + encodeURIComponent(sightGlassSvg((g.w
 const sgFromLength = g => { g.sgLength = sgLength(g.sgLength); g.w = Math.round((g.h || SG_H) * sgRatio(g.sgLength)); };
 // the Label a new Sight Glass starts with (Rule 18.15; Fritz, 2026-11-05): site_glass_n, the next number not used as a Label or Name
 const sgLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('site_glass_' + n)) n++; return 'site_glass_' + n; };
-const autoSized = g => (isPipeFit(g) || isMv(g)) && !isCap(g) && g.autoSize !== false;
+const autoSized = g => (isPipeFit(g) || isMv(g)) && g.autoSize !== false;      // an End Cap too: it takes the size of the opening it closes (Rule 5.36)
 const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of the pipes joined to it; switch it off to type Width and Height)', 'bool', true, true];
 // Manual Valve Widget (Fritz, 2026-10-28): a pipe fitting you turn by hand, and a pseudo Device. Its .state (true = open) only
 // changes with a click on it on its Tab, at any time. A Process line ManualValve_1.state = true does not change it: it puts up
@@ -4980,6 +4980,7 @@ function renameNote(r) {
 }
 const saveLayout = guard(async () => {
   if (!(await saveBuild())) return;           // the Build Tab is never saved: what is on it goes to a Tab or a Template first
+  for (const w of draft.workspaces) sizeToPipes(w.name);       // every pipe fitting on every Tab takes the size of its pipe (Rule 5.36)
   const rejoined = rejoinEnds();              // pipe ends a few pixels off an IP join it again (Rule 5.19)
   // renamed items are found on the Brain by their hidden keys (lib/keys.js), so no list of renames is sent
   const r = await api('PUT', '/ui/layout', { workspaces: draft.workspaces, elements: draft.elements, graphics: draft.graphics, updateVersion: $('#updateVersion').checked });
@@ -5166,7 +5167,7 @@ const PIPE_FIXED = it => { const b = pipeBox(it);
   return [['_fx', 'Not editable', 'head'], ['name', 'Name (given by Skynet; a Process uses it, e.g. ' + (it.name || 'Pipe_1') + '.flow_Color = Mash)', 'ro'],
     ...(PIPE_HIDE_FIXED ? [] : [['_x', 'X', 'ro', () => b.x ?? ''], ['_y', 'Y', 'ro', () => b.y ?? ''], ['_w', 'Width', 'ro', () => b.w ?? ''], ['_h', 'Height', 'ro', () => b.h ?? '']])]; };
 // where a pipe fitting (or Manual Valve) is and how big: Autosize to pipe first, then X, Y, Width, Height and the lock
-const FIT_PLACE = it => [...(isCap(it) ? [] : [AUTOSIZE_FIELD]), ...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
+const FIT_PLACE = it => [AUTOSIZE_FIELD, ...(it.onVessel || it.capOn || it.qdOn ? [] : [['x', 'X (pixels from the left)', 'num'], ['y', 'Y (pixels from the top)', 'num']]),
   ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock']];
 // a Vessel's Out flow color (Fritz, 2026-11-03, Rule 5.21): flow that begins at its openings takes this color, over all else
 const VESSEL_FLOW = it => isKettle(it) ? [['_vf', 'Out flow', 'head'], ['flowColor', 'Out flow color (flow that begins at this vessel takes this color, over every other flow color; None = it does not color the flow)', 'flowc', 'vessel']] : [];
@@ -10190,6 +10191,33 @@ function autoSizeUnit(g) {
   Object.assign(g, { w, h: hh, x: Math.round(cx - w / 2), y: Math.round(cy - hh / 2) });
   if (b0) { const b1 = tcBend(g, t); g.x = +(g.x + b0[0] - b1[0]).toFixed(2); g.y = +(g.y + b0[1] - b1[1]).toFixed(2); }
   placeUnitParts(g);
+}
+// Every pipe fitting takes the size of its pipe (Fritz, 2026-11-07: "Have any pipe fitting etc size to the pipe when saving";
+// Rule 5.36). Done each time a Tab is drawn in Edit layout (so after every Properties Save) and for every Tab when the layout is
+// saved: TC Pipe Fittings Widgets and Sight Glasses on Autosize to pipe (autoSizeUnit), tees with a Temperature Probe (they have
+// no Autosize switch: they always follow their pipe, as when dropped on one, Rule 5.30), and End Caps on Autosize to pipe, which
+// take the size of the fitting whose opening they close. IP fittings and Manual Valves size themselves when drawn (sizeFitting).
+// Something with no pipe on it keeps its size.
+function sizeToPipes(wsn) {
+  if (!draft) return;
+  for (const g of draft.graphics.filter(g => g.workspace === wsn && isPlainUnit(g) && !isCap(g) && autoSized(g))) autoSizeUnit(g);
+  for (const e of draft.elements.filter(e => e.workspace === wsn && isProbeTee(e))) {
+    const pw = Math.max(0, ...devIps(e).flatMap(q => pipesOn(q.id, wsn)).map(pipeWidth));
+    if (pw) sizeProbeTee(e, pw);
+  }
+  for (const c of draft.graphics.filter(c => c.workspace === wsn && isCap(c) && c.capOn && autoSized(c))) sizeCap(c);
+}
+// An End Cap on an opening of a TC Pipe Fitting is as big as that fitting's ferrule: its box is 1.5 x the fitting's pipe (a TC
+// ferrule is about 1.3 x its pipe and the cap is drawn 88 % of its box). A Reducer has two sizes, a Valve Tee or Supply Manifold is
+// drawn at the Valve Standard size (Rule 5.35) and a vessel opening has no pipe
+// size of its own, so a cap on one of those keeps its size.
+const CAP_BOX = 1.5;
+function sizeCap(c) {
+  const ip = draft.graphics.find(x => x.id === c.capOn), o = ip?.attachTo && draft.graphics.find(g => g.id === ip.attachTo);
+  if (!o || !isUnit(o) || isCap(o) || isMf(o) || /Reducer/.test(o.template || '')) return;
+  const t = tplOf('fitting', o.template), S = Math.round((o.w || 90) * (t?.body || FIT_BODY) * CAP_BOX);
+  if (!S || (S === c.w && S === c.h)) return;
+  c.w = c.h = S; capOnto(c, ip);
 }
 // orientation as a 2x2 matrix [a, b, c, d] (flip first, then rotate, as unitTransform), and back
 function orientM(g) { const r = unitRot(g) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r), x = g.flipH ? -1 : 1, y = g.flipV ? -1 : 1; return [c * x, -s * y, s * x, c * y]; }

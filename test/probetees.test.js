@@ -40,3 +40,12 @@ const s3 = JSON.parse(fs.readFileSync(path.join(ROOT, 'samples', 'configs', 'thr
 for (const n of ['HLT_Vessel', 'MLT_Vessel', 'BK_Vessel']) { const v = s3.graphics.find(g => g.name === n); assert.ok(v?.vdevice && s3.elements.some(e => e.integratedIn === v.id && e.vpKind === 'thermowell'), `${n} shows its thermowell`); }
 assert.ok(app.includes("thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg'"), 'the short thermowell picture');
 console.log('probe tees ok');
+// Every pipe fitting sizes to its pipe when saving (Fritz, 2026-11-07, Rule 5.36): Save layout sizes every Tab, a Tab drawn in
+// Edit layout sizes itself; TC Pipe Fittings, probe tees and End Caps follow their pipe
+assert.ok(/for \(const w of draft\.workspaces\) sizeToPipes\(w\.name\);[^\n]*\n\s*const rejoined = rejoinEnds\(\);/.test(app), 'Save layout sizes every Tab first');
+assert.ok(app.includes('if (editing && draft) sizeToPipes(w.name);'), 'a Tab drawn in Edit layout sizes its fittings');
+const stp = app.slice(app.indexOf('function sizeToPipes('), app.indexOf('const CAP_BOX'));
+assert.ok(stp.includes('autoSizeUnit(g)') && stp.includes('sizeProbeTee(e, pw)') && stp.includes('sizeCap(c)'), 'fittings, probe tees and End Caps');
+assert.ok(app.includes('const autoSized = g => (isPipeFit(g) || isMv(g)) && g.autoSize !== false;'), 'an End Cap has Autosize to pipe');
+assert.ok(app.includes('const FIT_PLACE = it => [AUTOSIZE_FIELD, '), 'Autosize to pipe in every pipe fitting\'s Properties');
+assert.ok(/isMf\(o\) \|\| \/Reducer\//.test(app), 'a cap on a Reducer or Valve Tee keeps its size');

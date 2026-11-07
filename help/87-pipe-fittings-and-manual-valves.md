@@ -18,7 +18,8 @@ A pipe fitting has no settings but:
 - It has **no label**, **no Type** and **no Connection Standard**. Its Skynet name (Tee_1, Elbow_1, bndl1_Tee_BR ...) shows in its Properties and when you hold the mouse over it.
 - **Turn or flip it with the turn buttons** on the Edit layout bar (they show while it is picked). They are no longer in its Properties.
 - **Pipe fittings have no Clone**: not on the Tab, and not in the Template pop-up of a Skynet pipe fitting Template. Add another one instead.
-- An **End Cap** has X, Y, Width and Height but no Autosize (it sits on an opening, not on a pipe).
+- An **End Cap** has **Autosize to pipe** too: on an opening of a pipe fitting it takes the size of that fitting's ferrule. On a Reducer, a Valve Tee or Supply Manifold, or a vessel opening it keeps its size.
+- **Everything sizes to its pipe when you save** (Skynet Rule 5.36): pressing **Save layout**, or 💾 Save in a fitting's or a pipe's Properties, makes every pipe fitting on Autosize to pipe match the biggest pipe joined to it, on every Tab. Change a pipe to 1" and Save, and its elbows and tees grow to 1". A **tee with a Temperature Probe** follows its pipe the same way (it has no Autosize switch). Something with no pipe on it keeps its size.
 - A **check valve** is a pipe fitting too: flow only goes one way, and its orientation (the arrow on its picture) shows which way. Turn or flip it to point the arrow.
 - A valve or flow meter in a fitting is a **Device**, and a tee with a thermowell (or a thermowell on a vessel IP) is a kind of **Temperature Probe**, so those keep their own settings for now: see [Skynet fittings](60-skynet-fittings).
 
