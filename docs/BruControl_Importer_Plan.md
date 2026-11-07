@@ -198,7 +198,7 @@ None of these talks MQTT by itself. Some have their own app connection, which a 
 
 | Model | How it connects | What Skynet might do, later |
 |---|---|---|
-| BrewZilla 4 (Gen 4) | Wi-Fi and Bluetooth to the KegLand RAPT cloud | RAPT has a published cloud API: read for sure, control to be checked |
+| BrewZilla 4 (Gen 4) | Wi-Fi and Bluetooth to the KegLand RAPT cloud (internet and a RAPT account) | The RAPT web page shows and controls it (Target, Heating %, Pump %), but no API for other programs is documented for it yet; ask KegLand. RAPT moved to a new system on 2026-09-21 |
 | Grainfather G30, G40, G70 (Connect controller) | Bluetooth to the Grainfather app | Hobby projects (Python, Node-Red) already read and control it over Bluetooth |
 | BrewZilla 3, Robobrew | None (buttons on the controller) | Nothing; BruControl or Skynet boards would have to take over the heat and pump |
 | Anvil Foundry | None | The same |
