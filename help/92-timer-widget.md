@@ -1,6 +1,6 @@
 # Timer Widget
 
-A **Timer Widget** counts up or down in hours, minutes and seconds. Add one in Edit layout with **Select Widget Type > Timer** (it is made on the 🔨 Build Tab first, like every new Widget). Double-click it in Edit layout to open its **Timer Widget Properties**. They follow the same pattern as the [Text Widget](91-text-widget): Delete, **COPY**, Cancel and Save at the top, the Name with an orange **?**, and framed boxes. **A Timer Widget has no pictures.**
+A **Timer Widget** counts up or down in hours, minutes and seconds. Add one in Edit layout with **Select Widget Type > Timer** (it is made on the 🔨 Build Tab first, like every new Widget). Double-click it in Edit layout to open its **Timer Widget Properties**, in the same look as the Pump's (Skynet Rule 18.30). **A Timer Widget has no pictures.**
 
 ## Styles
 
@@ -14,18 +14,15 @@ The ▶ ■ ↺ **Set** buttons under the digits start, stop, reset and set it.
 
 ## Timer Widget Properties
 
-- **Name**: once saved it is locked 🔒; **✏ Change name** changes it and every Process that uses it follows.
-- The orange **?** opens a pop-up with the Timer Widget's Properties and Attributes (Close at the top and the bottom).
-- **COPY** saves your changes, then makes a copy (`Timer_1` becomes `Timer_2` ...) on the 🔨 Build Tab and opens its Properties.
+Rest the mouse on a field's name to see what it is for (hover help).
 
-### Timer box
-**Type** (Count up or Count down), **Reset value** and **Start value** (hh:mm:ss), and **Running when the Brain starts**.
-
-### Label box
-The title bar: **Label** (empty = the Name), **Visible** (Show label), **Font size**, **Font**, **Fore color**, **Back color** (Default = the Style's), **Alignment**.
-
-### Properties box
-**Visible**, **Hidden Locked**, **Style**, **Tab**, **X Horizontal**, **Y Vertical**, **Width**, **Height** and **Lock position**.
+- **The title line:** the 🔓 lock, **Visible** and **Hidden Locked**.
+- **1. Label** (the title bar) with ⬆ (a bigger box) and ⬢ (its font, size, colors and alignment), then **Label Visible**.
+- **2. Tab** and **3. Name**. A new Timer is named **wgt_TMR_** + the Label + the Tab ID, for example **wgt_TMR_Mash_BR** (Rule 3.14).
+  Once saved the name is locked 🔒; **✏ Change name** changes it and every Process that uses it follows.
+- **Count** (Count up or Count down), **Start value** and **Reset value** (hh:mm:ss).
+- **Running at start** (it is already counting when the Brain starts), with **Database and .API ⬢** on its line.
+- **Style** (see above), **X**, **Y**, **Width** and **Height**, and the **Widget Type** greyed out last.
 
 ## In a Process
 
