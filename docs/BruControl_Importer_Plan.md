@@ -332,7 +332,20 @@ the program only shows it and measures distances on the screen. Three helpers, u
    next. Every item already used shows as used, so nothing is joined twice, and a loose valve or pump left at the end gets its own
    chain. **The page's explanation uses the rhyme** (Fritz, 2026-11-07: "put that little rhyme in the Explanation of how a
    manifold is built"): *"The outlet's connected to the valve, the valve's connected to the pump, the pump's connected to the
-   hose ..."*, one piece at a time, the way the old song goes ("the knee bone's connected to the leg bone"). Each link is one
+   hose ..."*, one piece at a time, the way the old song goes. The page shows a few lines of the song first (Fritz, 2026-11-07:
+   "show a few lines of that old song"; "Dem Bones", 1928, now public domain):
+   > *Toe bone connected to the foot bone,*
+   > *Foot bone connected to the heel bone,*
+   > *Heel bone connected to the ankle bone,*
+   > *Ankle bone connected to the leg bone ...*
+
+   and then the brewery version:
+   > *Outlet connected to the valve,*
+   > *Valve connected to the pump,*
+   > *Pump connected to the hose,*
+   > *Hose connected to the mash tun ...*
+
+   Each link is one
    short drill-down question, like Dialog 2b: **From** (a Vessel and its IP, a pump's in or out, another valve, a Supply Manifold, Tap Water, Drain, or Not
    connected) and **To** (the same list). A pump also asks which way it pumps. A **Supply Manifold** (Rule 5.35) can be picked
    for a row of valves on one pipe. Each answer starts with the best guess (helper 3), so the brewer only checks it. Answers
