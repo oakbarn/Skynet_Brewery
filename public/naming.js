@@ -382,3 +382,23 @@ export function cloneName(parent, taken, keep) {
   return `${parent}_Clone_${n}`;
 }
 export const cloneNumber = name => +(/_Clone_(\d+)$/.exec(name ?? '')?.[1] ?? 0) || undefined;
+
+// Widget names (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID, one underscore between the parts, e.g. wgt_DT_DateTime_1_BR.
+// The Type is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Fritz picked them; Picture is PIX).
+// Vessels, pipes, fittings and Clones keep their own names; names already made never change by themselves (Rule 3.5).
+export const WIDGET_TYPE_IDS = {
+  picture: 'PIX', text: 'TXT', label: 'LBL', valueWidget: 'VAL', timeWidget: 'TM', dateTimeWidget: 'DT', timer: 'TMR',
+  soundPlayer: 'SND', switch: 'SW', pushButton: 'PB', pulseButton: 'PL', led: 'LED', manualValve: 'MV', tapValve: 'TWV',
+  alarm: 'ALM', override: 'OVR',
+};
+// the Type of a Widget: by its type (an element) or its kind (a Text, an Override); a Manual Valve is an IP fitting (tap: a Tap
+// Water Valve, TWV)
+export function widgetTypeId(e, tap = false) {
+  if (!e) return '';
+  if (e.fitting === 'manualValve') return tap ? WIDGET_TYPE_IDS.tapValve : WIDGET_TYPE_IDS.manualValve;
+  if (e.cloneId || e.cloneOf) return '';
+  return WIDGET_TYPE_IDS[e.type] || WIDGET_TYPE_IDS[e.kind] || '';
+}
+export function suggestWidgetName({ code, label, tab } = {}) {
+  return ['wgt', code, parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
+}

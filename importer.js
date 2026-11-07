@@ -166,8 +166,8 @@ const server = http.createServer(async (req, res) => {
     }
     if (p === '/' || p === '/index.html') return sendFile(res, path.join(PUBLIC, 'importer', 'index.html'));
     if (p.startsWith('/importer/') && /^[\w./-]+$/.test(p) && !p.includes('..')) return sendFile(res, path.join(PUBLIC, p));
-    // the Panel's own look and icon (one source, Rule 15.4)
-    if (['/style.css', '/favicon.svg', '/favicon.ico'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
+    // the Panel's own look, icon and hover help (one source, Rules 15.4 and 2.38)
+    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }
 });

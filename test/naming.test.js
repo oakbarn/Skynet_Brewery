@@ -188,3 +188,17 @@ assert.equal(store.config.workspaces[1].id, 'BO', 'a tab saved without an ID get
 fs.rmSync(dir, { recursive: true, force: true });
 
 console.log('naming tests passed');
+
+// Widget names (Fritz, 2026-11-06, Rule 3.14): wgt_Type_Label_TabID
+{
+  const { widgetTypeId, suggestWidgetName, WIDGET_TYPE_IDS } = await import('../public/naming.js');
+  assert.equal(suggestWidgetName({ code: 'DT', label: 'DateTime_1', tab: 'BR' }), 'wgt_DT_DateTime_1_BR', "Fritz's example");
+  assert.equal(suggestWidgetName({ code: 'PIX', label: 'Kettle Element', tab: '' }), 'wgt_PIX_Kettle_Element', 'no Tab ID yet on the Build Tab');
+  assert.equal(widgetTypeId({ type: 'picture' }), 'PIX', 'Fritz: Picture is PIX');
+  for (const [t, c] of [['text', 'TXT'], ['valueWidget', 'VAL'], ['timeWidget', 'TM'], ['timer', 'TMR'], ['soundPlayer', 'SND'], ['switch', 'SW'], ['pushButton', 'PB'], ['pulseButton', 'PL'], ['led', 'LED'], ['alarm', 'ALM']]) assert.equal(widgetTypeId({ type: t }), c);
+  assert.equal(widgetTypeId({ kind: 'override' }), 'OVR'); assert.equal(widgetTypeId({ kind: 'text' }), 'TXT');
+  assert.equal(widgetTypeId({ kind: 'ip', fitting: 'manualValve' }), 'MV'); assert.equal(widgetTypeId({ kind: 'ip', fitting: 'manualValve' }, true), 'TWV');
+  assert.equal(widgetTypeId({ type: 'digitalOut' }), '', 'a Device is named by Rule 3.1');
+  assert.equal(widgetTypeId({ type: 'switch', cloneOf: 'sw_1' }), '', 'a Clone keeps its own name');
+  assert.equal(Object.keys(WIDGET_TYPE_IDS).length, 16);
+}
