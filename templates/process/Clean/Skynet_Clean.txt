@@ -1,0 +1,24 @@
+//Skynet_Clean
+//About: Rinse, clean and rinse the brewery, then leave every valve open to dry. The last step of the Brew Day.
+//MIT License Granted for all Scripts and Configurations
+//Copyright © OakBarn Brewery 2026
+step "Rinse"
+all_pumps_off
+ask "Rinse the vessels, hoses and chiller with water to get the grain, hops and trub out. Press Done when they are rinsed."
+step "Clean"
+ask "Fill the vessel you clean from with hot water and cleaner (the cleaner's label says how much and how hot). Press Done when it is ready."
+@if Clean_Pump
+ask "Set the valves and hoses so the cleaning pump sends the cleaner through the vessels, pipes and chiller and back. Press Done when they are set."
+{{Clean_Pump}} = true
+sleep 1200000
+{{Clean_Pump}} = false
+@else
+ask "Scrub the vessels and run the cleaner through the pipes, pump and chiller. Press Done when it is all clean."
+@end
+step "Rinse again"
+ask "Drain the cleaner and rinse everything with clean water. Press Done when it is rinsed."
+step "Leave it to dry"
+all_pumps_off
+open_all_valves
+ask "Open the drains and leave the brewery to dry. Press Done when you are done."
+print "Clean done"

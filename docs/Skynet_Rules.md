@@ -1838,18 +1838,23 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 
 ## 16. The Brew Process
 
-16.1 **The Standard Skynet Brew Process** (Fritz, 2026-10-30): a brew day is seven **major steps** in this order: **PreBrew,
-Heat Strike, Add Grain, Mash, Boil, Cool, Ferment**, each with its own minor steps (`step "..."`). The goal is a novice brewing,
-not coding. It is ☰ Menu > **Brew Process**. (thread "Build the Standard Skynet Brew Process", Help 100)
+16.1 **The Standard Skynet Brew Process** (Fritz, 2026-10-30; changed 2026-11-07): a brew day is a **list of premade major
+steps**, each with its own minor steps (`step "..."`). The list is not a fixed count: Skynet can add or drop steps later. Today it
+is, in this order: **PreBrew, Heat Strike, Strike, Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Ferment,
+Clean**. **Clean is always last.** Any step can be skipped. **Whirlpool and Chill** and **Chill** do the same job, so a brew day
+uses one of them (Chill to start, Whirlpool and Chill skipped). Strike was called Add Grain; Cool was split into Chill and
+Transfer to Fermentor, and a saved Brew Process changes over by itself. The goal is a novice brewing, not coding. It is
+☰ Menu > **Brew Process**. (threads "Build the Standard Skynet Brew Process" and "Build Process and Schema Templates", Help 100)
 
 16.2 **Process Templates:** each major step uses one. **Skynet Process Templates** (`Skynet_PreBrew` ...) come with Skynet and are
 never changed or deleted by a user (as Rule 5.16). **User Process Templates** are a user's own, usually a copy of a Skynet one
 (➕ Add new User Process Template…); their names never start with Skynet. **PreBrew is the same in every Schema.**
 
 16.3 **The user picks, Skynet writes the code.** The Brew Process asks only which Device does each job the picked Templates use
-(HLT heater and probe, mash heater, probe, pump and timer, boil heater, probe and timer, chiller pump, wort probe, fermenter
-control and probe). A job left on "(none)" becomes a pop-up asking the brewer to do it by hand. **Build the Brew Day** makes
-the Flow Processes `Brew_1_PreBrew` ... `Brew_7_Ferment`, each starting the next; building again keeps the old ones as .bak.
+(HLT heater and probe, mash heater, probe, pump and timer, boil heater, probe and timer, whirlpool pump, chiller pump, wort probe,
+pump to the fermenter, fermenter control and probe, cleaning pump). A job left on "(none)" becomes a pop-up asking the brewer to do it by hand. **Build the Brew Day** makes
+one Flow Process for each step used, numbered over those steps (`Brew_1_PreBrew` ... `Brew_9_Clean`), each starting the next;
+building again keeps the old ones as .bak, and a Brew_ Process the list no longer has goes to the bin.
 
 16.4 **Recipe values are `rcp_` names, read only in a Process**, in the panel's units (`rcp_Strike_Temp`, `rcp_Boil_Time`,
 `rcp_Mash_Step_1_Temp` ...). They are read when the Process runs, so a new Recipe needs no new build. While no Recipe is loaded
@@ -2642,3 +2647,8 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.19 (Fritz: "I prefer on and Off rather than enabled"; "So even a Hystersis element would be Turned On or Turned Off and not use enabled"): a Heating Element is turned On or Off (`hE_1 = on` / `= off`) in every method; .enabled is no longer offered (old lines still work); the Three Vessel sample Processes say = on / = off. Checked against the BruControl Import program: its first page says so; when Scripts come over, a heating Element's Enabled becomes On / Off. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 5.37 (new, Fritz: "when we grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of its pipes"; "any Device, Pipe, Fitting or Widget", "the Option to Unlock as the user may not want to", "a way to restore back to any pipe movements", "Not only the Pipes but locked fitting as well"): the grab pop-up (🔓 Unlock its IPs, Move it with its pipes, 🔁 Swap places with..., Cancel), works past locked pipes and fittings, open ends rejoin the same end of a pump or valve dropped in the old one's place, ↩ Put back and Ctrl+Z (30 steps). Rule 5.19 points to it. Rule 11.1 next free Help is 154. Help 153 new. Checked against the BruControl Import program: it does not move things on a Tab, so nothing changes there. (thread "Swap a pump without dragging its pipes")
 - 2026-11-07: Rule 6.19 (Fritz: "Add that in the Hover Help"): the Heating method field and the allowed method ticks explain in their hover help which methods suit an SSR, a contactor or a DAC; Help 150 has the same as a table. No wiring question is asked. Checked against the BruControl Import program: no change (it has no Device dialogs). (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 16.1 changed (Fritz): the Brew Process is a list of premade major steps that can grow or shrink, not seven.
+  Now PreBrew, Heat Strike, Strike (was Add Grain), Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Ferment,
+  Clean (always last); any step can be skipped; Whirlpool and Chill or Chill. Rule 16.3 Process names follow the steps used.
+  Help 100. Checked against the BruControl Import program: no change (it does not build a Brew Process).
+  (thread "Build Process and Schema Templates")
