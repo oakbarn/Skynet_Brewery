@@ -411,6 +411,7 @@ void setup() {
   LINK.begin(115200);
 #endif
   probes.begin();
+  probes.setResolution(12);                               // finest steps, 0.0625 C (0.11 F), for Precise heating; some come set coarser
   probes.setWaitForConversion(false);                     // do not block while probes convert
   lastRx = millis();
 }
