@@ -86,10 +86,22 @@
           <li><b>Everything comes in the Skynet way.</b> Names, settings and script lines are changed to Skynet's words and style
             (for example a 0-255 output becomes 0-100%). Each change is listed for you.</li>
           <li><b>Firmware.</b> Each board gets Skynet firmware once, over its USB cable, from inside Skynet. No Arduino IDE.</li>
-          <li><b>One Interface Port, one Device.</b> In BruControl one heating element often had two Elements on the same port, for
-            example a Duty Cycle and a PID. In Skynet it is <b>one Heating Element</b>, and you pick how it heats (On/Off, Duty Cycle,
-            Hysteresis, PID or Deadband) with a click while brewing or from a Process. The Import joins them for you, and your old
-            names still work in a Process.</li>
+          <li><b>One Interface Port, one Device.</b> This is a big difference from BruControl. In BruControl one heating element
+            often had two or more Elements on the same port, for example <i>M_HLT Heat</i> (Duty Cycle) and <i>HLT PID</i> on port 42.
+            In Skynet a port has only one Device, so that heating element becomes <b>one Heating Element</b>:
+            <ul>
+              <li>It has a <b>main heating method</b> (the one it starts with) and <b>tick boxes for the other methods it may
+                use</b> (On/Off, Duty Cycle, Hysteresis, PID or Deadband). Only the main method and the ticked ones can be used.</li>
+              <li>Each allowed method gets a small <b>one-click spot</b> under the Element on its Tab (or under it on its Vessel), so
+                one click switches it, for example from Duty Cycle to PID. A Process can switch it too, for example
+                <code>MP_42_HE_HLT_Heat_BH.PID</code>.</li>
+              <li>Heating Elements are the only Devices with more than one method: the wiring of everything else fixes how it is
+                controlled.</li>
+              <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_HE_HLT_Heat_BH</code>.</li>
+              <li>The Import does this for you: the first Element on the port sets the main method, the others are ticked, and if
+                BruControl showed both on a Tab, the second becomes a <b>Method Clone</b> tile with its BruControl Label. Your
+                old names (<i>HLT_PID</i>) still work in a Process.</li>
+            </ul></li>
         </ul>
       </div>
     </div>

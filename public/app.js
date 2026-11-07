@@ -10,7 +10,7 @@ import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods } from './heatmethod.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -2173,10 +2173,10 @@ const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator
 
 // One-click method spots (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it need
 // only one click to select Duty Cycle or a click somewhere else to select PID", Rule 6.19). A Heating Element shows a small button
-// for each heating method ticked in its Properties, under its picture on the Tab, or under its picture on a Vessel Device when it
+// for each heating method it is allowed (its main one and the ones ticked in its Properties), under its picture on the Tab, or under its picture on a Vessel Device when it
 // is built in. Only when MORE THAN ONE is ticked (Fritz, 2026-11-07: "Those hot spots only need to be there when there is more
 // than one control metod"). One click on one switches the Element to that method at once; the one in use is lit.
-const methodSpots = e => { const l = isHeatElem(e) ? HEAT_METHODS.filter(([k]) => e['methodSpot_' + k]) : []; return l.length > 1 ? l : []; };
+const methodSpots = e => { const ok = allowedMethods(e), l = HEAT_METHODS.filter(([k]) => ok.includes(k)); return l.length > 1 ? l : []; };      // every allowed method (Rule 6.19), when 2 or more
 function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots')) old.remove();
   for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
@@ -2252,6 +2252,7 @@ async function methodCloneTap(g) {
   if (!can('operator')) return toast('Your account is view only', true);
   const p = L().elements.find(e => e.name === g.of); if (!p) return;
   const k = heatMethodKey(g.method);
+  if (!allowedMethods(p).includes(k)) return toast(`${p.label || p.name} may not use ${heatMethodWord(k)}: tick it in its Properties`, true);
   if (NEEDS_PROBE.includes(k) && !p.input) return toast(`${p.label || p.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
   if (heatMethodKey(S.values[p.name]?.method) !== k) { await setProp(p.name, 'method', heatMethodWord(k)); S.values[p.name] = { ...(S.values[p.name] || {}), method: heatMethodWord(k), ...(k === 'onoff' ? { state: false } : {}) }; }
   if (isHeatElem(p)) heatDialog(p);
@@ -2405,7 +2406,7 @@ function heatDialog(t) {
     };
     d.append(h('div', { class: 'vdTitle' }, `${title}: ${v.state ? 'ON' : 'OFF'}, ${heatMethodWord(now)}` + (v.state && PERCENT_METHODS.includes(now) ? ` (output ${fmtVal({ precision: 1 }, v.value)} %)` : '')),
       h('div', { class: 'muted' }, 'Heating method'),
-      h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.map(btn)),
+      h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.filter(([k]) => allowedMethods(t).includes(k) || k === now).map(btn)),
       ...(main ? [h('div', { class: 'muted' }, main[1]), h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+'))] : []),
       h('div', { class: 'muted' }, m === 'onoff' ? 'Switching to On/Off turns it OFF first; click ON for full power.' : 'A click on a method switches to it at once.'),
       h('div', { class: 'vdBtns' },
@@ -3975,7 +3976,7 @@ function cloneHere(name, byMethod) {
   const w = curWs(), p = draft.elements.find(e => e.name === name); if (!w || !p) return;
   const g = makeClone(p, w.name);
   // a Method Clone starts on a method its parent and its other Method Clones do not stand for yet (changed in its Properties)
-  if (byMethod) { const used = new Set([startMethod(p), ...draft.graphics.filter(x => isClone(x) && x.of === p.name && x.method).map(x => heatMethodKey(x.method))]); g.method = heatMethodWord(HEAT_METHODS.map(m => m[0]).find(k => !used.has(k)) ?? 'pid'); }
+  if (byMethod) { const used = new Set([startMethod(p), ...draft.graphics.filter(x => isClone(x) && x.of === p.name && x.method).map(x => heatMethodKey(x.method))]); g.method = heatMethodWord(allowedMethods(p).find(k => !used.has(k)) ?? allowedMethods(p).find(k => k !== startMethod(p))); }
   sel = { kind: 'gfx', id: g.id }; renderWs();
   toast(`${g.name} is a Clone of ${p.name}. Drag it into place.`);
 }
@@ -5195,7 +5196,7 @@ const F = {
   clone: it => [['_nm', `Name: ${it.name} (made by Skynet, cannot be changed). A Clone is not used in Processes: a Process uses its parent.`, 'note'],
     ['_of', `Clone of ${it.of}${L().elements.find(e => e.name === it.of)?.workspace ? ' (on the Tab ' + L().elements.find(e => e.name === it.of).workspace + ')' : ''}. Everything else is the parent's: its pictures, look, size, Interface, port and value. Change those in the parent's Properties. Tapping the Clone is tapping the parent: turning it on or off (or Enabled, for a PID) turns the parent and every Clone. A reading (a temperature probe) is shown the same way as the parent.`, 'note'],
     ...(controlMethods(L().elements.find(e => e.name === it.of)) ? [
-      ['method', 'Control Method this Clone stands for (blank = a plain Clone)', 'sel', [['', '(none: a plain Clone)'], ...HEAT_METHODS.map(m => [m[1], m[1]])], false, false, { tip: 'A Method Clone (Rule 4.4): one click on it switches its parent to this method and opens its pop-up. It shows ON only while the parent is ON in this method.' }],
+      ['method', 'Control Method this Clone stands for (blank = a plain Clone)', 'sel', [['', '(none: a plain Clone)'], ...allowedMethods(L().elements.find(e => e.name === it.of)).map(k => [heatMethodWord(k), heatMethodWord(k)])], false, false, { tip: 'A Method Clone (Rule 4.4): one click on it switches its parent to this method and opens its pop-up. It shows ON only while the parent is ON in this method.' }],
       ['label', 'Label (blank = the parent\'s Label and the method)', 'text']] : []),
     ['visibility', 'Visible (off = hidden on its Tab only)', 'vis'], ['workspace', 'Tab (the Tab this Clone is on)', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['locked', 'Lock position (no drag)', 'lock']],
   common: [['name', 'Name', 'text'], ['label', 'Label (shown on the tab; never blank)', 'text'], ['hideName', 'Show label', 'show'], ['workspace', 'Tab', 'ws'], ['x', 'X', 'num'], ['y', 'Y', 'num'], ['w', 'Width', 'num'], ['h', 'Height', 'num'], ['locked', 'Lock position (no drag or resize)', 'lock'],
@@ -5520,9 +5521,9 @@ function heatFields(it, x = {}) {
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, x]),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
-    ['_spotHead', 'One-click method spots on the Tab (shown when 2 or more are on)', 'head', null, false, false, x],
-    ...HEAT_METHODS.map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
-    ['_heatNote', `A Process changes it: ${it.name || 'hE_1'}.method = "PID" (or On/Off, Duty Cycle, Hysteresis, Deadband). So does a click on it while running.`, 'note', null, false, false, x]];
+    ['_spotHead', 'Other methods allowed (each one ticked gets a one-click spot on the Tab)', 'head', null, false, false, x],
+    ...HEAT_METHODS.filter(([k]) => k !== m).map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
+    ['_heatNote', allowedMethods(it).length > 1 ? `A Process changes it: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m))}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m))}. So does a click on one of its spots, or on it while running. Only the methods allowed here can be used.` : 'Only its starting method is allowed. Tick another method above to switch between them by a click or a Process.', 'note', null, false, false, x]];
 }
 function elemDeviceFields(it, item) {
   const T = DEVICE_TIPS;
@@ -6039,7 +6040,7 @@ function fieldTip(name, text) {
 const DEVICE_TIPS = {
   heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target) or Deadband (steps its % toward the Target). One Element, one Device (Rule 6.19): a Process or a click while running can change it.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID and Deadband read to hold the Target.',
-  methodSpot: 'On: a small button for this heating method shows under the Element on its Tab (or under it on its Vessel Device), only when two or more are on. One click on it switches the Element to this method at once.',
+  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
