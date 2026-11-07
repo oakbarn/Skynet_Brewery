@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
@@ -34,6 +34,7 @@ function documentsFolder() {
 }
 const CANDIDATES = defaultFolders(process.env, documentsFolder());
 const settings = loadSettings(SETTINGS);
+let boxOpen = false;      // a Windows Open or Browse For Folder box is showing
 let converted = null;      // the last converted Import Copy: { file, copy, conv, report }
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png' };
@@ -73,20 +74,29 @@ function pickFolder(start) {
 
 async function api(req, res, p, q) {
   const m = req.method;
+  if (p === '/api/ping' && m === 'GET') return json(res, 200, { ok: true });     // the window checks the Importer is still running
   if (p === '/api/start' && m === 'GET') {
     // Always Documents\BruControl first (Fritz, 2026-11-06); the person points elsewhere when their config is not there
     const home = CANDIDATES[0] ?? '';
     return json(res, 200, { version: readVersion(ROOT).version || '', windows: WIN, importFolder: IMPORT_DIR, defaultFolder: home, folder: home, lastFolder: settings.folder ?? '', file: settings.file ?? '' });
   }
-  if (p === '/api/configs' && m === 'GET') return json(res, 200, findConfigs(q.get('folder') ?? ''));
+  if (p === '/api/configs' && m === 'GET') return json(res, 200, findConfigs(resolveFolder(q.get('folder') ?? '')));
   if (p === '/api/folder' && m === 'POST') {
     const { folder } = await body(req);
     if (typeof folder !== 'string' || !folder.trim()) return json(res, 400, { error: 'No folder given.' });
-    settings.folder = folder.trim(); saveSettings(SETTINGS, settings);
-    return json(res, 200, findConfigs(settings.folder));
+    const list = findConfigs(resolveFolder(folder));
+    // only a folder that is there is remembered; a settings file that cannot be written never stops the Look
+    if (list.exists) { settings.folder = list.folder; try { saveSettings(SETTINGS, settings); } catch { /* not remembered */ } }
+    return json(res, 200, list);
   }
-  if (p === '/api/pick-file' && m === 'POST') { const { start } = await body(req); return json(res, 200, await pickFile(start || CANDIDATES[0] || '')); }
-  if (p === '/api/pick-folder' && m === 'POST') { const { start } = await body(req); return json(res, 200, await pickFolder(start ?? '')); }
+  // One Windows box at a time: a second click while one is open says so, instead of opening another one behind it
+  if ((p === '/api/pick-file' || p === '/api/pick-folder') && m === 'POST') {
+    const { start } = await body(req);
+    if (boxOpen) return json(res, 200, { picked: '', busy: true });
+    boxOpen = true;
+    try { return json(res, 200, p === '/api/pick-file' ? await pickFile(resolveFolder(start) || CANDIDATES[0] || '') : await pickFolder(resolveFolder(start ?? ''))); }
+    finally { boxOpen = false; }
+  }
   if (p === '/api/peek' && m === 'GET') {
     const file = q.get('file') ?? '';
     if (!isConfig(file)) return json(res, 400, { error: 'That is not a BruControl config file (.brucfg) or backup (.bak).' });
