@@ -73,3 +73,6 @@ assert.equal(store.get('gGV_Late').type, 'gGlobal');
 assert.equal(store.getProp('gGV_Late', 'value'), 7, 'saved value kept');
 assert.deepEqual([...told], [['vKV_Late', 'gGV_Late']]);
 console.log('gstandard tests passed');
+
+// Shared Variables are gGlobals too (Rule 1.25)
+await import('./sharedvar.test.js');
