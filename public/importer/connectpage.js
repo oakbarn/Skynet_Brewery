@@ -89,7 +89,7 @@ function renderChains() {
       const tag = s.source && s.source !== 'you' && !s.ok ? `<span class="cnTag" title="Click ✓ when it is right">${esc(SOURCE[s.source] ?? 'guess')}</span><button data-ok="${ci}:${si}" title="It is right">✓</button>` : '';
       return `<div class="cnStep">${lead}<span class="cnArrow">connected to</span>
         <select data-to="${ci}:${si}" title="What the piece above is connected to">${endOptions(s.to)}</select>${extras(s.to, `${ci}:${si}`)}
-        <select data-by="${ci}:${si}" title="Joined by a Hose or a Pipe (asked for each connection, Fritz 2026-11-07)"><option value="pipe"${s.by !== 'hose' ? ' selected' : ''}>by Pipe</option><option value="hose"${s.by === 'hose' ? ' selected' : ''}>by Hose</option></select>
+        <select data-by="${ci}:${si}" title="Joined by a Hose or a Pipe (asked for each connection)"><option value="pipe"${s.by !== 'hose' ? ' selected' : ''}>by Pipe</option><option value="hose"${s.by === 'hose' ? ' selected' : ''}>by Hose</option></select>
         ${tag}<button data-del="${ci}:${si}" title="Remove this piece and the ones after it">✖</button></div>`;
     }).join('');
     const last = c.steps.at(-1)?.to ?? c.start;
