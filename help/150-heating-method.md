@@ -27,6 +27,16 @@ It still asks before it turns on (Rule 2.33): nothing turns on until you click *
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID or Deadband, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
 
+## Which methods suit your wiring
+
+How the element is wired decides which methods make sense (the hover help on the Heating method field says this too):
+
+| Wired to | What it does | Good methods |
+|---|---|---|
+| **SSR** (solid state relay) | Switches the element fully on or off, as fast as needed | All of them |
+| **Contactor** (a switch that clicks) | Switches it on or off, but wears out if switched quickly | On/Off, Hysteresis (or a long cycle time) |
+| **DAC** (0-10 V signal to a power controller) | Sets the power anywhere from 0 to 100 % | PID, Deadband |
+
 ## Its main method and the other methods allowed
 
 When you build it (and later in its Properties), pick its **main heating method**, the one it starts with. Then, under **Other
