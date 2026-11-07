@@ -474,7 +474,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - A click on a valve on its Tab opens or closes it. Motorized valves are on Close all / Open all.
 - **Add box and Properties:** the Pump's drill-down (Rule 18.29): 1 Label, 2 Interface, 3 Valve 1 / 2 / 3 (Manual or Motorized, Available Ports on its line), 4 Tab, then Name, Graphic, Path, Orientation, X, Y, Width, Height, Device Type. A saved Motorized valve's Port and the Interface are greyed out (make it Manual, Save, then Motorized to wire it again).
 - **Valve numbers** 1, 2, 3 on the valves in Edit layout and on the dialog Graphic, matching Valve 1, 2, 3.
-- **Orientation:** Horizontal, Left Vertical 90, Right Vertical 90; no Flip. No Autosize, no Clone. Dropped on a straight pipe it cuts the pipe like a tee.
+- **Orientation:** Horizontal, Left Vertical 90, Right Vertical 90, with Flip (No flip, Flip Vertical: valves on top when Horizontal, Flip Horizontal, Flip both; Fritz 2026-11-07). No Autosize, no Clone. Dropped on a straight pipe it cuts the pipe like a tee.
 
 ---
 
@@ -509,3 +509,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-05: Added 5.3 Vessel Device (built from a Vessel Widget Template; parts built into its IPs, HERMS coil, locked once built and saved; Skynet Rule 5.31).
 - 2026-11-06: Added 5.4 Valve Tee and Supply Manifolds (Double, Triple): Long Tees with a valve Device built into each branch, each Manual or Motorized on its own (Skynet Rule 5.35, Help 146). (thread "Add valve Tees and supply manifolds")
 - 2026-11-06: 5.4 Valve Tee and Supply Manifolds: the Pump's drill-down Add box and Properties (Rule 18.29), valve ends with TC ferrules matching the tees, valve numbers, three Orientations and no Flip. (thread "Add valve Tees and supply manifolds")
+- 2026-11-07: 5.4 Valve Tee and Supply Manifolds: Flip added on the Orientation line (valves on top or bottom). (thread "Let Supply Manifolds flip valves top or bottom")
