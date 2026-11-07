@@ -5241,11 +5241,11 @@ const F = {
     ['autoTare', 'Auto tare: zero itself when the volume reads empty and steady', 'bool', true], ['autoTareBand', 'Counts as empty below (gal / L; empty = 0.05 gal or 0.2 L)', 'num'], ['autoTareSeconds', 'Steady for (seconds, empty = 10)', 'num'],
     ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"fillWhen":"Pump_1","drainWhen":"Valve_2","rate":20}', 'json'], ['info', 'Raw reading now', 'info']],
   flowMeter: [['device', 'Device', 'dev'], ['channel', 'Pulse pin (Mega: 2, 3, 18, 19, 20 or 21)', 'pin', 'interrupt'], ['pulsesPerUnit', 'Pulses per unit (from the meter\'s data sheet)', 'num'], ['units', 'Units (gal, L …)', 'gpick', 'units'], ['precision', 'Decimals', 'num'], ['sim', 'Simulator settings (JSON), e.g. {"rate":2,"when":"Pump_1"}', 'json']],
-  dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
-  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
-  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
+  dutyCycle: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['dutyCycle', 'Duty cycle %', 'num'], ['interval', 'Cycle time (ms)', 'num']],
+  hysteresis: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['onOffset', 'ON offset (positive = heat: on below target - offset; negative = cool)', 'num'], ['onDelay', 'ON delay (seconds)', 'num']],
+  pid: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'], ['kp', 'Kp', 'num'], ['ki', 'Ki', 'num'], ['kd', 'Kd', 'num'], ['maxOutput', 'Max output %', 'num'], ['maxIntegral', 'Max integral %', 'num'], ['calcTime', 'Calculation time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
   // Deadband (as in BruControl, Fritz 2026-11-05, Rule 6.17): Calc Time sets how often the output % steps; ± offsets around the Target
-  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'num'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'],
+  deadband: [['device', 'Device', 'dev'], ['channel', 'Pin', 'pin', 'digital'], ['activeLow', 'Active low', 'bool'], ['enabled', 'Enabled at start', 'bool'], ['input', 'Input (sensor Device)', 'elem'], ['target', 'Target', 'num'],
     ['deadbandOffset', 'Deadband Offset (± around the Target: inside it the output is left alone)', 'num'], ['innerBandOffset', 'Inner Band Offset (± around the Target: inside it the output moves by the Inner Band Drive)', 'num'],
     ['initialOutput', 'Initial Output % (when Enabled)', 'num'], ['innerBandDrive', 'Inner Band Drive (% change each Calc Time)', 'num'], ['outerBandDrive', 'Outer Band Drive (% change each Calc Time, outside the Inner Band)', 'num'],
     ['maxOutput', 'Max output %', 'num'], ['calcTime', 'Calc Time (s)', 'num'], ['outTime', 'Output window (s)', 'num'], ['reversed', 'Reversed (cooling)', 'bool'], ['pwm', 'PWM output (off = time-proportioned on/off)', 'bool']],
@@ -6169,6 +6169,19 @@ function fieldOne([key, label, kind, opts, rerender], obj) {
   }
   if (kind === 'pin') {      // free text with a list of Mega 2560 pins: A0-A15 and their BruControl numbers 54-69 mean the same pin
     input = h('input', { 'data-k': key, 'data-kind': kind, type: 'text', value: v ?? '', list: 'pins-' + opts, autocomplete: 'off', placeholder: opts === 'analog' ? 'A0' : '22' });
+    // Once a Port is picked it is taken (Fritz, 2026-11-07: "Once a Port Is Selected, it is taken. So the method of choosing a
+    // Port has to be addressed as well", Rule 6.1): a Device's Port list offers only the free Ports on its Interface, and its own
+    if (key === 'channel' && obj && isDevice(obj)) {
+      const dl = h('datalist', { id: 'pins-own-' + Math.random().toString(36).slice(2) }); input.setAttribute('list', dl.id);
+      const fill = () => {
+        const dev = input.closest('dialog, form, .dlgBody, body')?.querySelector('[data-k="device"]')?.value ?? obj.device;
+        const ps = dev ? freePins({ ...obj, device: dev, name: '\0new' }, (draft || S.config).elements.filter(x => x.name !== obj.name), S.config.devices, opts === 'analog') : [];
+        const own = String(v ?? ''), b = boardOfDevice({ device: dev }, S.config.devices);
+        dl.replaceChildren(...[...(own && !ps.map(String).includes(own) && dev === obj.device ? [own] : []), ...ps].map(p => { const t = pinLabel(p, b); return h('option', { value: p, label: t }, t); }));
+      };
+      fill(); input.addEventListener('focus', fill);
+      return [h('label', {}, label, dl), input];
+    }
     return [h('label', {}, label), input];
   }
   if (kind === 'stpick') return [h('label', {}, label), stepperPick(key, opts, v)];
