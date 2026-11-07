@@ -420,6 +420,28 @@ and notes at the top go into the hover help of the dialog's title. Warnings (⚠
 is only a message stay as they are. The **BruControl Import**'s buttons have hover help too.
 (thread "Add hover help to clean dialogs", Help 147)
 
+2.39 **Panel Looks (themes)** (Fritz, 2026-11-07: "We only need a few, and choose one that best matches the DevExpress ones"; "We
+could also just set the Back color and the fore and Back of texts and labels to almost do the same thing"). BruControl's themes
+(Settings > Environment > Theme, for example Office 2019 Black with palette Default) are paid DevExpress themes: they are not
+public and would not work in a browser regardless, so Skynet gets the same effect by setting the Back color and the Text and Label
+colors. **This is a change from BruControl** (Fritz: "Again a Change from BruControl"), and the BruControl Import says so on its
+"What is different in Skynet" page.
+1. Skynet has **a few Looks of its own**, each just a few color picks (Back color, Tabs and boxes, Buttons and typing boxes,
+   lines, Text, Labels and hints, the picked button and the text on it): **Office Black** (the **default**, the closest to
+   BruControl's Office 2019 Black), **Dark Gray**, **White** (boxes are White, RGB 250 250 250, Rule 2.7) and **Skynet Night** (the
+   first Skynet look). Only Skynet's own colors, no DevExpress files. The list is public/themes.js, used by the Panel and the Import.
+2. Admins pick it on **Settings > Panel settings > Look (theme)**; it shows at once and is saved right away. It belongs to the
+   **Schema**. Every browser shows it, and the sign-in and Help pages start in it.
+3. **A new Tab** starts with the Look's Tab colors: a back color and the Look's Skynet Tab Style (Skynet Office Black, Skynet Dark
+   Gray, Skynet White) for its Label and text colors (Fritz: "add some defaults for any new tab Built"). A Tab Style picked on
+   ☰ Menu > Default tab, and a Tab Background Profile's color, win.
+4. **Use this Look on every Tab** gives every Tab of the Schema the Look's back color and Tab Style; first it keeps each Tab's
+   colors, so **Put the Tabs back** restores them (Fritz: "a means to force all tabs in a Schema to the defaults but a way to
+   restore if the user did not like the new forced look"). Only the last one can be put back. Pictures and items stay as they are.
+5. **The BruControl Import** looks for the BruControl theme in BruControl's own settings files (read only) and picks the closest
+   Look (Black, Dark, High Contrast = Office Black; Dark Gray = Dark Gray; White, Light, Colorful, Blue = White); not found = Office
+   Black. Each imported Tab gets the Look's Tab colors. (thread "Add a few look-alike Panel themes", Help 151)
+
 2.40 **Skynet's own gauges and timer digits** (Fritz, 2026-11-07: "Can we create our own templates for Temperature Gauges and
 Timers similar to the DevExpress ones without violating copyright laws"). BruControl's gauges are DevExpress drawings (paid,
 closed); Skynet **never copies their pictures, code or style names**. Free gauge libraries were checked (Canvas Gauges, SteelSeries,
@@ -1587,7 +1609,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **150** (143 is the BruControl Importer's, 144 API_Name). (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **152** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2526,4 +2548,5 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 3.1: a Heating Element's Type ID is HE (Fritz: "So we could Use MB_25_HE_HLT_BR"), not DO; its Label fills in as hE_1 without the method (Rules 18.24, 18.15); elements named before keep DO (Rule 3.5). Rule 6.19: the short Process way MB_25_HE_HLT_BR.HYS (.DutyC, .PID, .DeadB, .DO) switches its method. Help 137, 150, 46 and the Device Library updated. Checked against the BruControl Import program: it names joined elements MP_42_HE_HLT_Heat_BH. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.19 (Fritz: "we ask the primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed"): a Heating Element's main method plus ticked other methods; only those are allowed (pop-up, spots, Method Clones, Process editor, Brain); each allowed method gets a one-click spot when two or more are allowed. Help 150 updated. Checked against the BruControl Import program: it sets the main method and ticks the others, and its first page explains One Interface Port, one Device and the Heating Element (Fritz: "We need to explain that in the Beginning of the BruControl Import"). (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.1 (Fritz: "Once a Port Is Selected, it is taken. So the method of choosing a Port has to be addressed as well"): every Port picker offers only free Ports plus the Device's own; the older typed Pin boxes (and the Duty Cycle, Hysteresis, PID and Deadband Pin) now list only free Ports. Checked against the BruControl Import program: it keeps BruControl's ports, joins heating controls on one port and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 2.39 (new, Fritz: "We only need a few, and choose one that best matches the DevExpress ones"): Panel Looks (themes) Office Black (default, closest to BruControl's Office 2019 Black), Dark Gray, White and Skynet Night, each a few color picks; picked in Settings > Panel settings, saved with the Schema; new Tabs get the Look's Tab colors; Use this Look on every Tab with Put the Tabs back. A change from BruControl: its DevExpress themes are not public and would not work in a browser, so Skynet sets the Back and Text colors. Rule 11.1 next free Help is 152. Help 151 new, Help 09 updated. Checked against the BruControl Import program: it picks the closest Look from the BruControl theme, gives imported Tabs the Look's Tab colors, and lists Themes on its "What is different in Skynet" page. (thread "Add a few look-alike Panel themes")
 - 2026-11-07: Rule 2.40 (Fritz: our own gauges and timers without copying DevExpress): the Skynet Dial (arc, needle, digits 0-2 decimals, blue / green / red from the Setpoint with Cooler and Hotter ranges), Timer Digits (Back, Text Fore, Text Back colors, Fritz's frames in 3 shapes, hh:mm:ss or hh:mm, Seconds only in the last minute); the BruControl Import maps its gauges to them. Help 152; next free Help 153. (thread "Build our own temperature gauge and timer looks")
