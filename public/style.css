@@ -437,9 +437,17 @@ body.role-viewer .op-only { display: none !important; }
 /* the Vessel Widget class (Rule 5.31): its Probe and Element pictures, and in Edit layout a faint mark for each spot not Placed */
 #ws .gfx.vessel .vwPart { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
 #ws .gfx.vessel .vwPart.vpPart { pointer-events: auto; cursor: pointer; }      /* a Vessel Device's part: double-click for its Properties */
+/* the Properties hotspot (Rule 5.38): one click opens the Vessel Device's, or its built in Heating Element's, Properties */
+#ws .propsHot { position: absolute; width: 18px; height: 18px; font-size: 13px; line-height: 18px; text-align: center; border-radius: 50%; background: rgba(255,255,255,.9); color: #333; box-shadow: 0 0 0 1px rgba(0,0,0,.35); cursor: pointer; pointer-events: auto; z-index: 6; user-select: none; }
+#ws .propsHot:hover { background: #ffd54a; }
+#ws .gfx.vessel .vdHot { right: 2px; top: 2px; }
+#ws .propsHot.flowHot { z-index: 7; font-size: 11px; box-shadow: 0 0 0 2px var(--fc, transparent), 0 0 0 3px rgba(0,0,0,.4); }
+#ws .propsHot.flowHot:not(.set) { box-shadow: 0 0 0 1px rgba(0,0,0,.35); }
 #ws .gfx.vessel .vwPart.vwOff { opacity: .3; outline: 1px dashed rgba(255,255,255,.7); }
 #ws .gfx.vessel.heating .vwElem:not(.vwOff) { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
 /* a Vessel Device (Rule 5.31 exception): its HERMS coil sits under its IPs; an Element glows and a Valve shows green while on */
+#ws .gfx.vessel .vwPart.vpOvl { display: none; background-size: contain; background-position: center; pointer-events: none; z-index: 5; }      /* a built in Element's or Valve's On Overlay (Rule 7.8) */
+#ws .gfx.vessel .vwPart.vpOvl.on { display: block; }
 #ws .vpPart.vp-element.on { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
 #ws .vpPart.vp-valve.on { filter: drop-shadow(0 0 5px #2ecc40); }
 #ws .gfx.vessel .vwGhost { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px dashed rgba(232,163,58,.8); background: rgba(232,163,58,.12); pointer-events: auto; }
