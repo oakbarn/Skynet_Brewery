@@ -176,6 +176,18 @@ Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no ba
 | Label box | The black title bar: Label, Visible (Show label), Font size, Font, Fore / Back color, Alignment |
 | Properties box | Visible, Hidden Locked, **Style**, Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
 | Style | Skynet Styles 🔒 (never changed by a user): Skynet Orange Timer (seven-segment 00:00:00 on an orange-red panel, grey bezel; the default), Skynet Green LCD, Skynet Blue Timer, Skynet Red LED digits, Skynet Plain text. ➕ Add new User Style… / ✏ Edit for User Styles (Look, Digits, Panel, Bezel, Title bar colors) |
+| Timer Digits (Rule 2.40, 2026-11-07, Help 152) | **Digits**: hh:mm:ss or hh:mm. **Seconds only in the last minute**: counting down, shows just SS under one minute. A User Style also has **Back color** (round the panel), **Text Fore color** (digits), **Text Back color** (panel), **Frame** (Rounded corners / Square corners / Square top, rounded bottom: Fritz's own Timer frames, drawn by Skynet) and **Frame color** |
+
+### Skynet Dial (a Look, Rule 2.40, 2026-11-07, Help 152)
+Skynet's own temperature gauge (Fritz's pick: an arc with a needle and the reading in digits under it), drawn by Skynet as SVG. Not a Widget of its own: a **Look** (`look: dial`) a Temperature Probe picks with **Display > Skynet Dial**, and any Device that shows a number picks in its Text attributes ⬢ (analog in, PWM / analog out, Duty Cycle, PID, Deadband, a Heating Element's output %). A Process: `name.valueType = "Dial"`.
+
+| Setting | Notes |
+|---|---|
+| Lowest / Highest (`dialMin` / `dialMax`) | The ends of the arc. Empty = 0-220 °F, -20-110 °C, else 0-100 |
+| Setpoint (`dialSp`) | A number, or the Name of a Device or gGlobal (its target, else its value). Empty = no Setpoint: a blue-to-red arc |
+| Cooler range / Hotter range (`dialCool` / `dialHot`) | How far below / above the Setpoint is still OK (empty = 2 each) |
+| Cold / OK / Hot color | The reading's color: Blue below the Cooler range, Red above the Hotter range, Green between (names + swatch + Custom) |
+| Decimals | The item's own Decimals, 0 to 2 |
 
 ### Override button Widget (`kind: override`, 2026-10-30, Help 96)
 One press: every running Process (not Loopers) moves on 100 ms later. A wait or sleep it is held in is passed, and the loop it sits in (the next goto back up) is left; the next wait runs as normal. Manual valves still wait. **Only one on a Tab**; it can be on several Tabs (COPY, Save Build ...), each with its own Label and look. No name, no background picture, no Process attributes. Operator or Admin to press.

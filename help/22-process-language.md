@@ -157,7 +157,7 @@ BK_Temp.valueColor = ""
 
 - Colors are a name (Red, Black, ...) or a code like `#ffffff`. `nameBackColor` is the same as `nameBg`, and `valueBackColor` the same as `valueBg`.
 - Placement is one of TopLeft, TopCenter, TopRight, MiddleLeft, MiddleCenter, MiddleRight, BottomLeft, BottomCenter, BottomRight.
-- `valueType` is `LED`, `Text` or `Gauge`. Something with an ON / OFF state (a pump, valve, switch) can only be `LED` or `Text`.
+- `valueType` is `LED`, `Text`, `Gauge` (LCD digits) or `Dial` (the Skynet Dial: an arc with a needle and the reading under it, Help 152). Something with an ON / OFF state (a pump, valve, switch) can only be `LED` or `Text`.
 - `""` puts back the look set in its properties.
 
 Every text box also has `.foreColor`, `.backColor`, `.alignment` (Left, Center, Right), `.width`, `.height`, `.x_hPosition` and `.y_vPosition`, for example `Pump_1.foreColor = "Red"` or `Text_1.x_hPosition = 400`. A Text added with **+ Text** has a name too (`Text_1`). See [Text boxes](49-text-boxes).
