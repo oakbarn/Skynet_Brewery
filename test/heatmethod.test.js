@@ -115,6 +115,7 @@ console.log('heatmethod tests passed');
   assert.ok(h.methodSpot_dutyCycle && h.methodSpot_pid, 'a one-click spot for Duty Cycle and for PID');
   const cl = conv.graphics.find(g => g.kind === 'clone');
   assert.deepEqual([cl.of, cl.x, cl.y], [h.name, 300, 20], 'the second placing is a Clone of it');
+  assert.deepEqual([cl.method, cl.label], ['PID', 'HLT PID'], 'a Method Clone standing for PID, with its BruControl Label (Rule 4.4)');
   assert.equal(conv.elements.find(e => e.channel === 30).type, 'pid', 'a PID alone on its port stays as it is');
   assert.equal(report.heaters.length, 1);
   assert.equal(report.placeholders, 0, 'a Clone is not a Placeholder');
@@ -157,5 +158,7 @@ console.log('one port one Device tests passed');
   const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /return l\.length > 1 \? l : \[\];/, 'spots only when more than one method is ticked');
   assert.match(app, /setProp\(name, 'method', heatMethodWord\(k\)\);\n\}, true\);/, 'one click switches the method');
+  assert.match(app, /const isMethodClone = \(g, p = [^\n]+controlMethods\(p\)/, 'Method Clones only for Devices with more than one Control Method');
+  assert.match(app, /state: !!v0\.state && heatMethodKey\(v0\.method\) === e0\.cloneMethod/, 'a Method Clone is ON only in its method');
 }
 console.log('method spots tests passed');
