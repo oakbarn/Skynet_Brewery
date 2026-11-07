@@ -1,10 +1,10 @@
-// The Standard Skynet Brew Process (Fritz, 2026-10-30): Process Templates for the seven major steps, rcp_ Recipe values,
+// The Standard Skynet Brew Process (Fritz, 2026-10-30; the step list 2026-11-07): Process Templates for the major steps, rcp_ Recipe values,
 // ask "...", the Close all / Open all valve lists (a tap water valve is always on Close all, never on Open all)
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 import { Store, onCloseAll, onOpenAll, fixValveLists } from '../lib/store.js';
 import { Engine, compile } from '../lib/engine.js';
-import { ProcessTemplates, MAJOR_STEPS, expand, usedFields, recipeValues, recipeValue, isKnownRecipeName, strikeTemp, brewSetup, buildBrewDay, processName } from '../lib/brewprocess.js';
+import { ProcessTemplates, MAJOR_STEPS, expand, usedFields, recipeValues, recipeValue, isKnownRecipeName, strikeTemp, brewSetup, buildBrewDay, brewNames, usedSteps } from '../lib/brewprocess.js';
 
 // ---- the valve lists
 const v = (o = {}) => ({ type: 'digitalOut', subtype: 'valve', ...o });
@@ -43,7 +43,7 @@ assert.equal(rv.rcp_Sparge_Type, 'fly', 'every Skynet_Field can be read'); asser
 rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'IPA', mashProfile: 'm1', boilTime: 60, ingredients: { fermentables: [] }, mash: { steps: [] } } }, prof);
 assert.equal(rv.rcp_Mash_Steps, 2, 'the Mash Profile picked on the Recipe wins'); assert.equal(rv.rcp_Mash_Out_Temp, 168);
 
-// ---- the Skynet Process Templates build into seven Flow Processes that compile
+// ---- the Skynet Process Templates build into Flow Processes that compile (one for each step used)
 const root = path.resolve('templates/process');
 const d = fs.mkdtempSync(path.join(os.tmpdir(), 'brewproc'));
 const pt = new ProcessTemplates(root, path.join(d, 'user'));
@@ -53,15 +53,41 @@ const elements = [
   { name: 'PID_HLT', type: 'pid' }, { name: 'T_HLT', type: 'temperature' }, { name: 'T_Mash', type: 'temperature' }, { name: 'tm_Boil', type: 'timer' },
   { name: 'Pump_Chill', type: 'digitalOut', subtype: 'pump' }, { name: 'V_Tap', ...v({ tapwater: true }) }, { name: 'V_HLT_Out', ...v() },
 ];
-for (const fields of [{}, { HLT_Heater: 'PID_HLT', HLT_Probe: 'T_HLT', Mash_Probe: 'T_Mash', Mash_Heater: 'PID_HLT', Mash_Timer: 'tm_Boil', Boil_Timer: 'tm_Boil', Chill_Pump: 'Pump_Chill', Wort_Probe: 'T_Mash' }]) {
-  const out = buildBrewDay({ ...brewSetup({}), fields }, pt, elements);
-  assert.deepEqual(out.map(x => x.name), MAJOR_STEPS.map((_, i) => processName(i)));
-  out.forEach((x, i) => {
-    const c = compile(x.text);
-    assert.deepEqual(c.errors, [], `${x.name} compiles`);
-    if (i < 6) assert.match(x.text, new RegExp(`start ${processName(i + 1)}\\n$`), 'each starts the next');
-  });
+const allOn = { ...brewSetup({}), templates: Object.fromEntries(MAJOR_STEPS.map(s => [s.key, 'Skynet_' + s.key])) };
+for (const fields of [{}, { HLT_Heater: 'PID_HLT', HLT_Probe: 'T_HLT', Mash_Probe: 'T_Mash', Mash_Heater: 'PID_HLT', Mash_Timer: 'tm_Boil', Boil_Timer: 'tm_Boil', Chill_Pump: 'Pump_Chill', Wort_Probe: 'T_Mash',
+  Whirlpool_Pump: 'Pump_Chill', Transfer_Pump: 'Pump_Chill', Clean_Pump: 'Pump_Chill', Chill_Water: 'V_HLT_Out', Hop_Infuser_Valve: 'V_HLT_Out' }]) {
+  for (const setup of [{ ...brewSetup({}), fields }, { ...allOn, fields }]) {
+    const out = buildBrewDay(setup, pt, elements), names = brewNames(setup);
+    assert.deepEqual(out.map(x => x.name), names);
+    out.forEach((x, i) => {
+      const c = compile(x.text);
+      assert.deepEqual(c.errors, [], `${x.name} compiles`);
+      if (i < out.length - 1) assert.match(x.text, new RegExp(`start ${names[i + 1]}\\n$`), 'each starts the next');
+      else assert.doesNotMatch(x.text, /^start /m, 'the last starts nothing');
+    });
+  }
 }
+// the hop stand (Fritz, 2026-11-07): Whirlpool hops stop the chill at their temperature, cooling water off for their time;
+// Hop Rocket ones go through the Hop Infuser; with none, the Default settings
+rv = recipeValues({ brewDefaults: { units: 'US' }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool', time: 30, wpTempC: 80, hopRocket: true }], fermentables: [] }, mash: { steps: [] } } }, {});
+assert.equal(rv.rcp_Hop_Stand, true); assert.equal(rv.rcp_Hop_Stand_Temp, 176); assert.equal(rv.rcp_Hop_Stand_Minutes, 30); assert.equal(rv.rcp_Hop_Infuser, true);
+rv = recipeValues({ brewDefaults: { units: 'Metric', hopStandTempC: 75, hopStandMinutes: 15 }, recipe: { name: 'x', boilTime: 60, ingredients: { hops: [{ use: 'whirlpool' }], fermentables: [] }, mash: { steps: [] } } }, {});
+assert.equal(rv.rcp_Hop_Stand_Temp, 75); assert.equal(rv.rcp_Hop_Stand_Minutes, 15); assert.equal(rv.rcp_Hop_Infuser, false);
+assert.equal(recipeValues({ brewDefaults: {} }, {}).rcp_Hop_Stand, false, 'no Recipe: no hop stand');
+for (const t of ['Chill', 'Whirlpool_and_Chill']) assert.match(pt.find(t, 'Skynet_' + t).text, /wait \{\{Wort_Probe\}\} <= rcp_Hop_Stand_Temp[\s\S]*sleep rcp_Hop_Stand_Minutes \* 60000[\s\S]*wait \{\{Wort_Probe\}\} <= rcp_Ferment_Temp/, t + ': chill to the hop stand, hold, then chill');
+// the premade list (Rule 16.1): Clean is last; Whirlpool and Chill is skipped to start (a Brew Day uses it or Chill)
+assert.deepEqual(MAJOR_STEPS.map(s => s.key), ['PreBrew', 'Heat_Strike', 'Strike', 'Mash', 'Boil', 'Whirlpool_and_Chill', 'Chill', 'Transfer_to_Fermentor', 'Ferment', 'Clean']);
+assert.deepEqual(brewNames(brewSetup({})), ['Brew_1_PreBrew', 'Brew_2_Heat_Strike', 'Brew_3_Strike', 'Brew_4_Mash', 'Brew_5_Boil', 'Brew_6_Chill', 'Brew_7_Transfer_to_Fermentor', 'Brew_8_Ferment', 'Brew_9_Clean']);
+const wp = brewSetup({ brewProcess: { templates: { Whirlpool_and_Chill: 'Skynet_Whirlpool_and_Chill', Chill: '' } } });
+assert.equal(brewNames(wp)[5], 'Brew_6_Whirlpool_and_Chill'); assert.equal(usedSteps(wp).length, 9);
+assert.throws(() => buildBrewDay({ templates: Object.fromEntries(MAJOR_STEPS.map(s => [s.key, ''])), fields: {} }, pt, elements), /Every step is skipped/);
+// a Brew Process saved before the new list: Add Grain is Strike, Cool is Chill; a User Cool also did the transfer
+let old = brewSetup({ brewProcess: { templates: { Add_Grain: 'Skynet_Add_Grain', Cool: 'Skynet_Cool' } } });
+assert.equal(old.templates.Strike, 'Skynet_Strike'); assert.equal(old.templates.Chill, 'Skynet_Chill'); assert.equal(old.templates.Transfer_to_Fermentor, 'Skynet_Transfer_to_Fermentor');
+old = brewSetup({ brewProcess: { templates: { Cool: 'My_Cool' } } });
+assert.equal(old.templates.Chill, 'My_Cool'); assert.equal(old.templates.Transfer_to_Fermentor, '');
+const ud = path.join(d, 'olduser'); fs.mkdirSync(path.join(ud, 'Cool'), { recursive: true }); fs.writeFileSync(path.join(ud, 'Cool', 'My_Cool.txt'), 'ask "x"\n');
+assert.ok(new ProcessTemplates(root, ud).find('Chill', 'My_Cool'), 'a User Cool Template moves to Chill'); assert.ok(!fs.existsSync(path.join(ud, 'Cool')));
 assert.throws(() => buildBrewDay({ ...brewSetup({}), fields: { HLT_Probe: 'PID_HLT' } }, pt, elements), /not a temperature/);
 // User Process Templates
 pt.saveUser('Mash', 'My_Mash', '//About: mine\nask "stir"\n');
