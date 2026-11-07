@@ -186,7 +186,26 @@ most common **Probe Location** are the Center Probe. (Fritz's drawing: project f
 2. **How many Vessels do you have?** A number.
 3. **Function of each Vessel:** one line for each Vessel (Vessel 1, Vessel 2 ...), each with a dropdown:
    HLT; HLT with HERMS; Mash Tun; Mash Tun with RIMS; Brew Kettle; **All In One** (a second dropdown: BrewZilla 3,
-   BrewZilla 4, Grainfather, and so on, None); Fermentor; Other (a text box for what it is).
+   BrewZilla 4, Robobrew, Grainfather G30, Grainfather G40, Grainfather G70, Anvil Foundry, Clawhammer, Other, None);
+   Fermentor; Other (a text box for what it is).
+   - **An All In One skips the questions its model already answers** (Fritz, 2026-11-07: "Yes"), such as the Outlet,
+     Thermowell, HERMS Coil and Element location. Those answers come from the model and are shown, so the brewer can still
+     change them. "Other" or "None" asks every question.
+
+### All In One models that can talk to other programs (looked up 2026-11-07, for later)
+Fritz asked: "Can any model talk with MQTT? That might make a difference if Skynet could Get and Put for an All In One."
+None of these talks MQTT by itself. Some have their own app connection, which a bridge (for example Node-Red) could pass on:
+
+| Model | How it connects | What Skynet might do, later |
+|---|---|---|
+| BrewZilla 4 (Gen 4) | Wi-Fi and Bluetooth to the KegLand RAPT cloud | RAPT has a published cloud API: read for sure, control to be checked |
+| Grainfather G30, G40, G70 (Connect controller) | Bluetooth to the Grainfather app | Hobby projects (Python, Node-Red) already read and control it over Bluetooth |
+| BrewZilla 3, Robobrew | None (buttons on the controller) | Nothing; BruControl or Skynet boards would have to take over the heat and pump |
+| Anvil Foundry | None | The same |
+| Clawhammer | None found (a plain controller) | The same |
+
+So a connected All In One would become an Interface of its own kind (a cloud or Bluetooth link instead of a board). That is
+not part of this plan; it needs Fritz's go and its own Rule.
 
 ### Dialog 2: one for each Vessel ("Vessel N: HLT")
 1. **Capacity:** Liters (Metric) or Gallons (US). This is the Vessel's Gallons field (Rule 19.1).
@@ -270,8 +289,8 @@ Processes as we may gain what a vessel is used for."
    then where it is.
 2. **Gas Burners: decided** (Fritz, 2026-11-07: "If there is BruControl Valve Yes"). The Gas Valve, Igniter, Smart control and
    Probe are each picked by BruControl name, like the Element.
-3. **All In One:** which other models go in the list (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One
-   skip the questions its model already answers (Outlet, Thermowell, HERMS Coil, Element location)?
+3. **All In One: decided** (Fritz, 2026-11-07: "Yes"). The longer model list is in Dialog 1, and a model skips what it
+   already answers. Talking to a connected model (MQTT, Get and Put) is a later idea (see the table above).
 4. **Order: decided** (Fritz, 2026-11-06): these dialogs come **after Names**, "because in some follow ups we will associate
    heater, Probes and valves eventually to what Device control is the HLT Heat for example."
 
