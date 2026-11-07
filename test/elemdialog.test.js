@@ -6,7 +6,7 @@ import { elementTopic } from '../public/helpmap.js';
 
 const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
 assert.match(app, /\['heat', 'Heating Element', \[ELEMENT,[\s\S]{0,200}am\('RIMS tube'\), VESSEL_ELEMENT\]\]/, 'Vessel Device Template in place of the Electric kettle, basic');
-assert.match(app, /const VESSEL_ELEMENT = \['Vessel Device Template[^']*', 'vesselElement', 'DO'\]/);
+assert.match(app, /const VESSEL_ELEMENT = \['Vessel Device Template[^']*', 'vesselElement', 'HE'\]/);
 assert.match(app, /const ELEM_MODELS = \[\['Skynet Heating Element', 'sky'[^\]]*\], \['User Defined Heating Element/, 'step 2 picks the element');
 assert.match(app, /if \(pick === 'vesselElement'\) \{[\s\S]{0,200}pickElemVessel\(\)/, 'choose the Vessel first');
 assert.match(app, /if \(elemVessel\) return elemVesselBuild\(elemVessel, e\);/, 'then Build');
@@ -35,9 +35,9 @@ console.log('elemdialog tests passed');
   const heatMode = eval(src);
   assert.equal(heatMode({ type: 'pid' }), 'PID'); assert.equal(heatMode({ type: 'hysteresis' }), 'HYS');
   assert.equal(heatMode({ type: 'dutyCycle' }), 'DutyC'); assert.equal(heatMode({ type: 'deadband' }), 'DeadB');
-  assert.equal(heatMode({ type: 'digitalOut', subtype: 'element' }), 'DO'); assert.equal(heatMode({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), 'PID', 'by the heating method it starts with'); assert.equal(heatMode({ type: 'pwmOut', subtype: 'element' }), 'PWM');
+  assert.equal(heatMode({ type: 'digitalOut', subtype: 'element' }), ''); assert.equal(heatMode({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), '', 'no method in the Label: hE_1 (its method can change)'); assert.equal(heatMode({ type: 'pwmOut', subtype: 'element' }), 'PWM');
   assert.equal(heatMode({ type: 'digitalOut', subtype: 'pump' }), null); assert.equal(heatMode({ type: 'pid', integratedIn: 'x' }), null);
-  assert.match(app, /work\.label = autoLabel\('hE_' \+ hm\)/);
+  assert.match(app, /work\.label = autoLabel\(hm \? 'hE_' \+ hm : 'hE'\)/);
   assert.match(app, /'pwmOut', 'PWM', \{ units: '%', subtype: 'element' \}/, 'the Heating Element list PWM row is a heating PWM');
   console.log('heating labels tests passed');
 }

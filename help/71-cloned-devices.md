@@ -48,3 +48,10 @@ A Clone is **not used in Processes**. A Process uses the parent's name, and ever
 - Deleting a Clone deletes only the Clone.
 - Deleting the parent Device deletes its Clones too (the box names them first).
 - Deleting a Tab deletes the Clones on it, and the Clones of Devices that were on it.
+
+## Method Clones (Devices with more than one Control Method)
+
+A Device with more than one Control Method, like a Heating Element (On/Off, Duty Cycle, Hysteresis, PID, Deadband), can have
+**Method Clones** (Rule 4.4): each one is a tile that stands for one method, with its own Label. They can go on the Device's own
+Tab: **⧉ Clone Device > Method Clone**. One click on a Method Clone switches the Device to its method; it shows ON only while the
+Device is ON in that method. See [One Heating Element, pick how it heats](150-heating-method).
