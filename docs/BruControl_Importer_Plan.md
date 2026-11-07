@@ -133,6 +133,23 @@ How they are asked (the Rules for dialogs):
 - A choice of more than two things is a **dropdown**. A Yes / No is a **switch**. "Other" opens a text box for what it is.
 - Plain English, correct spelling (Rule 2.37).
 
+### The Vessel IP locations (Fritz's drawing, 2026-11-07)
+"We are eventually going to build Vessels from his answers." Every answer about a fitting, element or probe names one of these
+places (IPs) on the Vessel, so the Importer can later build the Vessel from the answers:
+
+| Where | Places (top to bottom) |
+|---|---|
+| Left side | Left Sparge or Steam Slayer; Left HERMS In/Out (upper); Left HERMS In/Out (lower); Left Element |
+| Right side | Right Sparge or Steam Slayer; Right HERMS In/Out (upper); Right HERMS In/Out (lower); Right Element |
+| Back (inside) | Back Left Element; Back Right Element |
+| Low | Left Tangential; Right Tangential |
+| Center | Center Probe (above the outlet); Center Outlet; Center Bottom Outlet |
+
+So the answers map like this: **High Return** (Sparge Arm, Steam Slayer, Inlet) uses a Sparge or Steam Slayer IP; **HERMS Coil**
+uses the two HERMS IPs on its side; **Element location** is Left, Right, Back Left or Back Right Element; **Tangential Inlet**
+is Left or Right Tangential; **Outlet** is Center Outlet (above the bottom) or Center Bottom Outlet; **Thermowell** and the
+most common **Probe Location** are the Center Probe. (Fritz's drawing: project file importer/Vessel_IP_Template_Fritz_2026-11-07.png.)
+
 ### Dialog 1: Units and Vessels (asked once; Fritz's revised list, 2026-11-07)
 1. **Units:** **Metric** (mL, kg, °C ...) or **US** (ounces, pounds, °F ...). Two choices. Every later question that has a size
    uses it (Liters or Gallons).
@@ -159,8 +176,8 @@ How they are asked (the Rules for dialogs):
      - **Temperature Probe:** a dropdown of the imported probes by their BruControl name. It is **filled in automatically** from
        the properties of the BruControl Element picked (the probe that Element reads), and **always shown**, so the brewer
        sees it and can change it.
-     - **Probe Location:** Center Above Outlet (most common); Left Element IP; and so on. Also filled in automatically when it
-       can be, and always shown.
+     - **Probe Location:** Center Probe, above the outlet (most common); Left Element; Right Element; Back Left Element; Back
+       Right Element; Left or Right HERMS In/Out (the IP locations above). Filled in automatically when it can be, always shown.
    - **Gas Burner, not smart.** Two switches: **BruControl controls the Gas Valve**; **BruControl controls the Igniter**.
    - **Gas Burner with smart control.** Two switches: **BruControl controls the Gas Valve**; **BruControl turns on the Smart
      control**.
@@ -186,12 +203,10 @@ Processes as we may gain what a vessel is used for."
 ### Open questions for Fritz on this list
 1. **Two Outlet questions (2.3 and 2.7).** Suggestion: 2.3 is the outlet's **fitting** (TC 1.5, NPT, BSP) and 2.7 is **where** it is.
    Then 2.7 could be just "Above Bottom; Bottom Outlet; None", since 2.3 already says TC or BSP.
-2. **Probe Location list:** besides "Center Above Outlet (most common)" and "Left Element IP", which places go in it? Suggestion:
-   Center Above Outlet; Left Element IP; Right Element IP; Back Left Element IP; Back Right Element IP; Thermowell; Outlet.
-3. **Gas Burners:** when BruControl controls the Gas Valve or the Igniter, pick that Device the same way (a dropdown of the
+2. **Gas Burners:** when BruControl controls the Gas Valve or the Igniter, pick that Device the same way (a dropdown of the
    imported Devices by BruControl name), and the Temperature Probe too?
-4. **All In One:** which other models go in the list (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One
+3. **All In One:** which other models go in the list (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One
    skip the questions its model already answers (Outlet, Thermowell, HERMS Coil, Element location)?
-5. **Order: decided** (Fritz, 2026-11-06): these dialogs come **after Names**, "because in some follow ups we will associate
+4. **Order: decided** (Fritz, 2026-11-06): these dialogs come **after Names**, "because in some follow ups we will associate
    heater, Probes and valves eventually to what Device control is the HLT Heat for example."
 
