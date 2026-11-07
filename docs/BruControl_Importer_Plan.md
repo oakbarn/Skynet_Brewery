@@ -248,6 +248,11 @@ not part of this plan; it needs Fritz's go and its own Rule.
      - **Element location:** Right; Left; Back Left; Back Right; None.
      - **BruControl Element:** a dropdown of the imported heating Devices (Hysteresis, PID, Duty Cycle, Deadband and so on),
        each shown by its **BruControl name**.
+       **One physical Element, more than one way to control it** (Fritz, 2026-11-07: "It is one Physical Element, so there are not
+       2, just the way it is controlled Duty Cycle or PID"). BruControl controls on the **same Interface and Port** (for example
+       "M_HLT Heat" Duty Cycle and "HLT PID" on port 42, Rule 6.1) are **one Element**: the dropdown shows them as one entry
+       (for example *Main Panel port 42: M_HLT Heat (Duty Cycle) or HLT PID (PID)*), and every control on that port is linked to
+       that one Element, as its ways of being controlled. It is never two Elements.
      - **Temperature Probe:** a dropdown of the imported probes by their BruControl name. It is **filled in automatically** from
        the properties of the BruControl Element picked (the probe that Element reads), and **always shown**, so the brewer
        sees it and can change it.
