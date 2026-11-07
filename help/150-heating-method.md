@@ -14,10 +14,11 @@ via process or on the Device when clicked").
 
 ## Click it while brewing
 
-Click the Heating Element on its Tab. The pop-up shows:
+**One click** on the Heating Element on its Tab opens its pop-up. It shows:
 
-1. **Heating method**: one button for each. The one it uses now is marked. Hysteresis, PID and Deadband are greyed out until the
-   Element has a **Temperature Probe** (in its Properties).
+1. **Heating method**: one button for each. The one it uses now is marked. **One click on a method switches to it at once**
+   (no Set needed); the pop-up stays open for its setting. Hysteresis, PID and Deadband are greyed out until the Element has a
+   **Temperature Probe** (in its Properties).
 2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Target**.
 3. **Set + ON** (or **ON** for On/Off), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
 
