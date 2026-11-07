@@ -1408,7 +1408,16 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 6.19 **One Heating Element, the heating method picked** (Fritz, 2026-11-07: "The way I want to handle this is ONE device, but a to
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
-is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband**.
+is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, **Deadband** or **Precise**.
+- **Precise** (Fritz, 2026-11-07: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; for a
+  still's column, which a BruControl PID could not hold): a calm PID that holds a Target to 0.1 degree. It shares the PID's
+  Target, Kp, Ki, Kd and Max output, and adds **Hold output %** (the % it needs to stay at the Target; it starts there),
+  **Smoothing** (seconds it averages the probe over) and an exact Output window (the part of a window too short to switch is
+  carried to the next). Its I part does not grow while the output is at 0 or Max or the reading is already heading for the Target, and its D part works on the smoothed
+  reading. Its Properties say whether its probe can see 0.1 (a DS18B20 sees 0.11 °F steps, a PT100 0.05 °F; a thermistor on an
+  analog pin cannot). Every **Temperature Probe** also has a **Two-point calibration** (ice water and boiling water at your
+  altitude; the Calibration offset is added after it), and the boards set DS18B20 probes to their finest (12-bit) steps.
+  Help 156.
 - **Built in Elements too** (Fritz, 2026-11-07: "The only thing that seems to be missing is the Element Method Field and the
   Hotspots to switch Methods on the Screen when running"): an Element built into a Vessel Device, RIMS tube or kettle is a Heating
   Element with the same Heating method field, allowed methods and spots. One still saved as an old separate control Device (the
@@ -1419,7 +1428,7 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** o
   methods of control"). The Rules about Devices with more than one Control Method (4.4, 6.19, `.method`) stay general, so another
   kind could be added later only if Fritz says so.
 - **Properties (and its Build):** under *Heating method*, its **main method**, the one it **starts with** (On/Off for one that has
-  none), the **Temperature Probe** it reads (Hysteresis, PID and Deadband need one) and that method's settings, then **tick boxes
+  none), the **Temperature Probe** it reads (Hysteresis, PID, Deadband and Precise need one) and that method's settings, then **tick boxes
   for the other methods it may use**. **Only the main method and the ticked ones are allowed** (Fritz, 2026-11-07: "we ask the
   primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
   Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
@@ -1437,12 +1446,12 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** o
   With only the main method, none show. The
   BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
   ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
-- **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, or DO, DutyC, HYS, PID, DeadB), or the
+- **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, Precise, or DO, DutyC, HYS, PID, DeadB, PREC), or the
   short way on a line of its own (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC"): `MB_25_HE_HLT_BR.HYS`,
-  `.DutyC`, `.PID`, `.DeadB` or `.DO` switches it to that method, the same as `.method =`. Its settings
+  `.DutyC`, `.PID`, `.DeadB`, `.PREC` or `.DO` switches it to that method, the same as `.method =`. Its settings
   by the same names the separate Devices had (`.target`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
   enabled"; "So even a Hystersis element would be Turned On or Turned Off and not use enabled"): `hE_1 = on` (or `= true`) turns it ON
-  in its method. `.value` is a PID or Deadband's output %; `.output` is its pin now (read only).
+  in its method. `.value` is a PID, Deadband or Precise output %; `.pv` the smoothed reading Precise holds; `.output` is its pin now (read only).
 - **Changing the method while it is ON** goes on at once in the new method, **except to On/Off**, which turns it **OFF** first, so it
   never jumps to full power by itself.
 - It is On while ON (Rule 7.9), whatever its pin is doing; it shows what it is doing (60 %, 45 % ▸ 152, ON ▸ 152, idle ▸ 152).
@@ -1693,7 +1702,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **154** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back). (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **157** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back, 154 Properties hot spots, 155 Default settings, 156 Precise heating). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1843,7 +1852,12 @@ steps**, each with its own minor steps (`step "..."`). The list is not a fixed c
 is, in this order: **PreBrew, Heat Strike, Strike, Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Ferment,
 Clean**. **Clean is always last.** Any step can be skipped. **Whirlpool and Chill** and **Chill** do the same job, so a brew day
 uses one of them (Chill to start, Whirlpool and Chill skipped). Strike was called Add Grain; Cool was split into Chill and
-Transfer to Fermentor, and a saved Brew Process changes over by itself. The goal is a novice brewing, not coding. It is
+Transfer to Fermentor, and a saved Brew Process changes over by itself. **Hop stand** (Fritz, 2026-11-07: "two Steps in the Whirlpool and
+Chill or just the chill regarding when to drop Aroma Hops"): with Whirlpool hops in the Recipe, either chill step chills to the hop
+stand temperature, turns the cooling water off, has the hops added and holds for the hop stand time, then chills on. The Recipe's
+first Whirlpool hop gives the temperature and time, else ☰ Menu > Default settings (180 °F / 82 °C, 20 minutes). **Hop Infuser**
+("the Option of a Hop Infuser during any chill"): a Whirlpool hop marked Hop Rocket goes in the Hop Infuser, and the chill runs
+the wort through it (its valve is a job, or a pop-up asks). The goal is a novice brewing, not coding. It is
 ☰ Menu > **Brew Process**. (threads "Build the Standard Skynet Brew Process" and "Build Process and Schema Templates", Help 100)
 
 16.2 **Process Templates:** each major step uses one. **Skynet Process Templates** (`Skynet_PreBrew` ...) come with Skynet and are
@@ -1851,7 +1865,7 @@ never changed or deleted by a user (as Rule 5.16). **User Process Templates** ar
 (➕ Add new User Process Template…); their names never start with Skynet. **PreBrew is the same in every Schema.**
 
 16.3 **The user picks, Skynet writes the code.** The Brew Process asks only which Device does each job the picked Templates use
-(HLT heater and probe, mash heater, probe, pump and timer, boil heater, probe and timer, whirlpool pump, chiller pump, wort probe,
+(HLT heater and probe, mash heater, probe, pump and timer, boil heater, probe and timer, whirlpool pump, chiller pump, chiller cooling water, Hop Infuser valve, wort probe,
 pump to the fermenter, fermenter control and probe, cleaning pump). A job left on "(none)" becomes a pop-up asking the brewer to do it by hand. **Build the Brew Day** makes
 one Flow Process for each step used, numbered over those steps (`Brew_1_PreBrew` ... `Brew_9_Clean`), each starting the next;
 building again keeps the old ones as .bak, and a Brew_ Process the list no longer has goes to the bin.
@@ -2647,8 +2661,14 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.19 (Fritz: "I prefer on and Off rather than enabled"; "So even a Hystersis element would be Turned On or Turned Off and not use enabled"): a Heating Element is turned On or Off (`hE_1 = on` / `= off`) in every method; .enabled is no longer offered (old lines still work); the Three Vessel sample Processes say = on / = off. Checked against the BruControl Import program: its first page says so; when Scripts come over, a heating Element's Enabled becomes On / Off. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 5.37 (new, Fritz: "when we grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of its pipes"; "any Device, Pipe, Fitting or Widget", "the Option to Unlock as the user may not want to", "a way to restore back to any pipe movements", "Not only the Pipes but locked fitting as well"): the grab pop-up (🔓 Unlock its IPs, Move it with its pipes, 🔁 Swap places with..., Cancel), works past locked pipes and fittings, open ends rejoin the same end of a pump or valve dropped in the old one's place, ↩ Put back and Ctrl+Z (30 steps). Rule 5.19 points to it. Rule 11.1 next free Help is 154. Help 153 new. Checked against the BruControl Import program: it does not move things on a Tab, so nothing changes there. (thread "Swap a pump without dragging its pipes")
 - 2026-11-07: Rule 6.19 (Fritz: "Add that in the Hover Help"): the Heating method field and the allowed method ticks explain in their hover help which methods suit an SSR, a contactor or a DAC; Help 150 has the same as a table. No wiring question is asked. Checked against the BruControl Import program: no change (it has no Device dialogs). (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 6.19: new heating method **Precise** (Fritz: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; OK'd "Proceed"): a calm PID (shared PID settings plus Hold output %, Smoothing, no wind-up, D on the smoothed reading, exact Output window) that holds to 0.1 degree; Properties warn when its probe is too coarse; every Temperature Probe gets a Two-point calibration (ice and boil); the Mega and Pi set DS18B20 probes to 12-bit; a DS18B20 set to °C now reads in °C. Process word PREC. Rule 11.1 next free Help is 157. Help 156 new; Help 150, 137 updated. Checked against the BruControl Import program: BruControl has no Precise method, so a PID imports as PID; its first page lists Precise among the methods that can be ticked; the probe calibration is the same in both programs. (thread "Build precise temperature control to 0.1 degree")
 - 2026-11-07: Rule 16.1 changed (Fritz): the Brew Process is a list of premade major steps that can grow or shrink, not seven.
   Now PreBrew, Heat Strike, Strike (was Add Grain), Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Ferment,
   Clean (always last); any step can be skipped; Whirlpool and Chill or Chill. Rule 16.3 Process names follow the steps used.
   Help 100. Checked against the BruControl Import program: no change (it does not build a Brew Process).
   (thread "Build Process and Schema Templates")
+- 2026-11-07: Rule 16.1 (Fritz): the hop stand in Whirlpool and Chill and in Chill (chill to the hop stand temperature, cooling
+  water off for the hop stand time, then chill on), and the Hop Infuser for Hop Rocket Whirlpool hops. New jobs Chiller cooling
+  water and Hop Infuser valve; rcp_Hop_Stand, rcp_Hop_Stand_Temp, rcp_Hop_Stand_Minutes, rcp_Hop_Infuser; Default settings Hop
+  stand temperature and time (Rule 2.42). Help 100. Checked against the BruControl Import program: no change (it does not build a
+  Brew Process). (thread "Build Process and Schema Templates")
