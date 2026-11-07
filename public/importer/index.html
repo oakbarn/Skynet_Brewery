@@ -22,8 +22,9 @@
   <li data-step="3">Your BruControl config</li>
   <li data-step="4">Names</li>
   <li data-step="5">Boards and Tabs</li>
-  <li data-step="6" class="later">Processes</li>
-  <li data-step="7">Save the Schema</li>
+  <li data-step="6">Connect your brewery</li>
+  <li data-step="7" class="later">Processes</li>
+  <li data-step="8">Save the Schema</li>
 </ol>
 
 <main>
@@ -346,9 +347,75 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <div class="buttons"><button id="back5">◀ Back</button><span class="spacer"></span><button class="primary" id="next5">Next ▶</button></div>
   </section>
 
-  <!-- Step 7: save the Schema into Brewing\Import for the Panel -->
-  <section class="step hidden" id="step7">
-    <div class="buttons top"><button id="back7a">◀ Back</button></div>
+  <!-- Step 6: Connect your brewery (Fritz, 2026-11-07): what is connected to what, built one piece at a time -->
+  <section class="step hidden" id="step6">
+    <div class="buttons top"><button id="back6a">◀ Back</button><span class="spacer"></span><button class="primary" id="next6a">Next ▶</button></div>
+    <h1>Connect your brewery</h1>
+    <p class="lead">BruControl only knew your valves and pumps as buttons. It never knew which vessel they sit on, or what they are
+      joined to. Here you tell Skynet <b>what is connected to what</b>, one piece at a time. We made a first guess from your names and
+      your Scripts; check each one and change what is wrong.</p>
+
+    <div class="card rhyme">
+      <h2>How a manifold is built</h2>
+      <div class="cards two">
+        <div><p class="muted small">The old song (<i>Dem Bones</i>, 1928): <button id="voiceBtn" class="small" title="Hear these lines in a comic voice (Fritz's own clip)">▶ Hear it</button></p>
+          <p class="verse"><i>Toe bone connected to the foot bone,<br>Foot bone connected to the heel bone,<br>Heel bone connected to the ankle bone,<br>Ankle bone connected to the leg bone ...</i></p></div>
+        <div><p class="muted small">Your brewery is built the same way:</p>
+          <p class="verse"><i>Outlet connected to the valve,<br>Valve connected to the pump,<br>Pump connected to the hose,<br>Hose connected to the mash tun ...</i></p></div>
+      </div>
+      <p>Start at a vessel's outlet (or a pump), say <b>what is connected to it</b>, then <b>what is connected to that</b>, and so on,
+        until you reach an end: a vessel, Tap Water, a Drain, a Quick Disconnect (QD) or nothing. For each piece say whether it is joined
+        by a <b>Hose</b> or a <b>Pipe</b>.</p>
+      <div class="buttons"><button id="songBtn" title="Play Skynet's own song about building a manifold (3 min 47 s). It never plays by itself.">▶ Play the song</button></div>
+    </div>
+
+    <div class="card">
+      <h2>Your vessels</h2>
+      <p class="small muted">Guessed from your names and Scripts. The Hot Side (HLT, Mash Tun, Boil Kettle) is joined below; a
+        Fermenter is on the Cold Side and has its own questions.</p>
+      <div id="cnVessels"></div>
+      <div class="buttons"><button id="cnAddVessel" title="Add a vessel the guess missed">➕ Add a vessel</button></div>
+    </div>
+
+    <div class="cnCols">
+      <div class="card" id="cnPicCard">
+        <h2>A picture as a guide</h2>
+        <div class="folderRow"><label for="cnPicPick">Picture</label><select id="cnPicPick" title="A picture of your brewery to join the pieces on. It is only a guide and is not saved."></select>
+          <label class="btnlike" title="A photo or drawing of your brewery from this computer. It stays on this computer.">📷 Use a photo or drawing…<input type="file" id="cnPicFile" accept="image/*" hidden></label></div>
+        <p class="small muted">Drag each vessel, pump and valve onto its place. <b>Click one, then another</b> to join them. The picture is
+          only a guide: it is not saved and nothing reads it.</p>
+        <div id="cnPic"><img id="cnPicImg" alt=""><svg id="cnLines"></svg><div id="cnChips"></div></div>
+        <h3>Ask an AI about my picture (your choice)</h3>
+        <p class="small">The Importer itself never uses an AI. This button <b>copies a ready-made question</b> and <b>opens the free AI site you
+          pick</b>. There, add your picture of the Hot Side and paste the question. Then copy the AI's answer back here.
+          <span class="muted">Your picture goes to that AI company under your own account, not to Skynet.</span></p>
+        <div class="folderRow"><select id="cnAiSite" title="The free AI site to open"></select>
+          <button id="cnAskAi" title="Copy the question and open the AI site">🤖 Copy the question and open it</button></div>
+        <textarea id="cnAiText" rows="5" spellcheck="false" placeholder="Paste the AI's answer here, then click Read the AI answer"></textarea>
+        <div class="buttons"><button id="cnReadAi" title="Read the AI's lines into the connections below. Each one is marked from the AI, check it.">Read the AI answer</button>
+          <span id="cnAiNote" class="small"></span></div>
+      </div>
+
+      <div class="card" id="cnChainCard">
+        <h2>What is connected to what</h2>
+        <div id="cnChains"></div>
+        <div class="buttons"><button id="cnNewChain" title="Start a new chain at a vessel opening, a pump or a valve">➕ Start a new chain</button></div>
+        <div id="cnLoose"></div>
+      </div>
+    </div>
+
+    <div class="card" id="cnFermCard">
+      <h2>Fermenters</h2>
+      <p class="small muted">Fermenters are usually in another room, so they are asked, not pictured.</p>
+      <div id="cnFerm"></div>
+    </div>
+
+    <div class="buttons"><button id="back6">◀ Back</button><span class="spacer"></span><button class="primary" id="next6">Next ▶</button></div>
+  </section>
+
+  <!-- Step 8: save the Schema into Brewing\Import for the Panel -->
+  <section class="step hidden" id="step8">
+    <div class="buttons top"><button id="back8a">◀ Back</button></div>
     <h1>Save the Schema</h1>
     <p class="lead">One config file makes one Schema. It is saved as one file in the <b>Import</b> folder of your Brewing folder, where
       the Skynet Panel can open it (Schema.json &gt; <b>Open a Schema file</b>).</p>
@@ -360,7 +427,7 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
       <div class="buttons"><span class="spacer"></span><button class="primary" id="saveBtn">💾 Save the Schema</button></div>
       <div id="saveResult" class="hidden"></div>
     </div>
-    <div class="buttons"><button id="back7">◀ Back</button></div>
+    <div class="buttons"><button id="back8">◀ Back</button></div>
   </section>
 </main>
 
@@ -369,5 +436,7 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
 <div id="toast" class="hidden"></div>
 <script type="module" src="/hoverhelp.js"></script>
 <script type="module" src="/importer/importer.js"></script>
+<audio id="song" preload="none" src="/sounds/Skynet/Skynet_Outlet_to_Valve.mp3"></audio>
+<audio id="voice" preload="none" src="/sounds/Skynet/Skynet_Manifold_Rhyme_Voice.mp3"></audio>
 </body>
 </html>
