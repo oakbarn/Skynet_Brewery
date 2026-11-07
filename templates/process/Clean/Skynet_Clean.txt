@@ -1,19 +1,19 @@
 //Skynet_Clean
-//About: Rinse, clean and rinse the brewery, then open every valve on the Open List to dry (never a tap water valve). The last step of the Brew Day.
+//About: Rinse, clean (PBW for at least an hour through every pipe and the chiller) and rinse the brewery, then open every valve on the Open List to dry (never a tap water valve). The last step of the Brew Day.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 step "Rinse"
 all_pumps_off
-ask "Rinse the vessels, hoses and chiller with water to get the grain, hops and trub out. Press Done when they are rinsed."
+ask "Rinse the vessels, hoses and chiller with water to get the grain, hops and trub out. Back flush the chiller for about 2 minutes. Press Done when they are rinsed."
 step "Clean"
-ask "Fill the vessel you clean from with hot water and cleaner (the cleaner's label says how much and how hot). Press Done when it is ready."
+ask "Fill the vessel you clean from with hot water and cleaner (PBW: about 2 tablespoons for each 5 gallons, or what its label says). Press Done when it is ready."
 @if Clean_Pump
-ask "Set the valves and hoses so the cleaning pump sends the cleaner through the vessels, pipes and chiller and back. Press Done when they are set."
+ask "Set the valves and hoses so the cleaning pump sends the cleaner through the vessels, pipes, HERMS coil and chiller and back. Press Done when they are set."
 {{Clean_Pump}} = true
-sleep 1200000
+sleep 3600000
 {{Clean_Pump}} = false
 @else
-ask "Scrub the vessels and run the cleaner through the pipes, pump and chiller. Press Done when it is all clean."
+ask "Scrub the vessels and run the cleaner through the pipes, pump and chiller for at least an hour. Press Done when it is all clean."
 @end
 step "Rinse again"
 ask "Drain the cleaner and rinse everything with clean water. Press Done when it is rinsed."

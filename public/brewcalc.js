@@ -20,6 +20,7 @@ export const VESSEL_TYPES = {
   HLT: ['gas', 'electric', 'other'],
   'Brew Kettle': ['gas', 'electric', 'other'],
   'Mash Tun': ['gas', 'electric', 'rims', 'herms', 'other', 'unheated'],
+  'All In One': ['electric', 'gas', 'rims', 'other'],      // heats the water, mashes and boils in one vessel (Fritz, 2026-11-07)
   RIMS: ['gas', 'electric', 'other'],
   HERMS: ['gas', 'electric', 'other'],
   Fermenter: [],

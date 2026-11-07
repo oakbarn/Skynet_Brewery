@@ -1893,6 +1893,23 @@ make, or review it.
 
 16.5 **`ask "text"`** in a Process shows a pop-up on every screen with ✔ Done and waits until an operator or Admin presses it.
 
+16.6 **Schema Templates** (Fritz, 2026-11-06/07): Schema dropdown > Add new Schema > Start from **A Skynet Schema Template**.
+Answer a few questions, and the Schema is ready to brew. The **Brewhouse Tab Templates** are **1 Vessel, 1 Vessel + 1 Pump,
+2 Vessel + 1 Pump, 2 Vessel + 2 Pumps, 3 Vessel** (the last hot side one), plus the **OakBarn Brewery** (every OakBarn vessel and
+pump). The **Fermentor Template** is on its own: a Fermentor Tab, each fermentor with its probe and a glycol valve. The questions are
+each vessel (a Vessel Template, or a general type HLT, Mash Tun, Brew Kettle, All In One at the **bottom** of the list) and its
+heat, the pumps, recirculation, chiller, whirlpool, valves, Supply Manifold and its valves, and the number of fermentors. **Every
+question has a default on ☰ Menu > Default settings** (Rule 2.42). The new Schema **starts in Simulator Mode but uses the user's
+real Interface**, each Device on its next free Port (never two on one Port). Each Brewhouse Tab Template uses the **Process
+Templates made for it** (`Skynet_Heat_Strike_1_Vessel`, `Skynet_Mash_2_Vessel` ...; the 3 Vessel uses the Skynet ones). The
+Skynet Process Templates follow the OakBarn brew day (chilling water choice, grain ready, vorlauf, first wort, a slow sparge,
+pre-boil gravity, hot break, sanitize the chiller about 17 minutes before the end, trub settle, OG, PBW for an hour). Pipes are
+not drawn. Making a Schema by copying one is still there (Start from: A copy of). Help 157.
+
+16.7 **Click to pick a job** (Fritz, 2026-11-07: "Click if possible"): each Brew Process job has 🎯 **Click it on the Tab**. It
+goes to the Tab, lights the items that fit the job and greys the rest; one click picks it (no item is switched). The list stays as
+the backup. Help 100 and 157.
+
 ---
 
 ## 17. Recipes
@@ -2692,3 +2709,8 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.15 (Fritz): a tap water valve's Properties show On Close List on and On Open List off, greyed out; the last
   step of Skynet_Clean is open_all_valves. Checked against the BruControl Import program: a Schema file it makes is put right the
   same way when the panel opens it (Tap water valves on Close only). Help 100. (thread "Build Process and Schema Templates")
+- 2026-11-07: Rules 16.6 and 16.7 new (Fritz): Schema Templates (1 Vessel, 1 Vessel + 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2
+  Pumps, 3 Vessel, OakBarn, Fermentor on its own), Process Templates for the 1 and 2 Vessel models, the Skynet ones filled out from
+  the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
+  program: no change (it does not use Schema Templates or the Brew Process; making a Schema from a BruControl file stays in the
+  Importer). (thread "Build Process and Schema Templates")

@@ -738,12 +738,22 @@ async function route(req, res) {
   // Schemas: everyone sees the list, admins load, add, rename and delete
   const schemaView = () => ({ active: store.config.schema, list: schemas.list() });
   if (p === '/ui/schemas' && m === 'GET') return ok(res, schemaView());
+  // Schema Templates (templates/schema, Rule 16.6): the questions' starting points, and the real Interfaces they can use
+  if (p === '/ui/schematemplates' && m === 'GET') {
+    const dir = path.join(ROOT, 'templates', 'schema');
+    const list = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')).map(f => { try { return { name: f.slice(0, -5), ...JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) }; } catch { return null; } }).filter(Boolean) : [];
+    return ok(res, { templates: list.sort((a, b) => (a.order ?? 99) - (b.order ?? 99)), interfaces: schemas.realInterfaces() });
+  }
   if (p === '/ui/schemas' && m === 'POST') {
-    const b = await jsonBody(req); schemas.create(b.name, { empty: !!b.empty });
+    const b = await jsonBody(req);
+    const real = b.iface ? schemas.realInterfaces().find(d => d.name === b.iface) : null;
+    if (b.iface && !real) return fail(res, 400, `There is no Interface called "${b.iface}"`);
+    schemas.create(b.name, { empty: !!b.empty });
+    if (real) schemas.useInterface(real);
     // a new empty Schema (not a copy) has only its simulated New_Mega_2560_N: the whole panel goes to Simulator mode (Fritz, 2026-10-27)
     const wasSim = sim.cfg.on;
     if (b.empty && !wasSim) sim.save({ on: true });
-    return ok(res, { ...schemaView(), simulator: !!b.empty, wasSim, iface: b.empty ? store.config.devices[0]?.name : undefined });
+    return ok(res, { ...schemaView(), simulator: !!b.empty, wasSim, iface: b.empty ? store.config.devices[0]?.name : undefined, real: !!real });
   }
   // the Equipment Profile of one Tab of the loaded Schema (b.tab: the Tab's name), and its Default Layout
   if (p === '/ui/schema/profile' && m === 'PUT') { const b = await jsonBody(req); const r = schemas.setProfile(b.tab, b.id || null, { layout: b.layout }); return ok(res, { ...schemaView(), ...r }); }

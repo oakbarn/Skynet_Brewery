@@ -22,6 +22,7 @@ import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarn
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowcolor.js';
+import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -252,7 +253,7 @@ function renderWs() {
   if (previewing && !(editing && curWs()?.build)) { previewing = false; if (editing) $('#editHint').textContent = curWs()?.build ? BUILD_HINT : ''; }
   document.body.classList.toggle('previewing', previewing); $('#ws').classList.toggle('preview', previewing);
   $('#previewBuild').textContent = previewing ? '✏ Back to building' : '👁 Preview';
-  if (!previewing) return drawWs();
+  if (!previewing) { drawWs(); return markJobPick(); }
   editing = false;
   try { drawWs(); } finally { editing = true; }
 }
@@ -9429,6 +9430,151 @@ async function newSchemaInterface(iface, wasSim) {
   });
   if (iface && S.config.devices.some(d => d.name === iface)) await addInterfaceDialog({ name: iface }, { edit: true, title: `Your new Interface: ${iface}` });
 }
+// ---- New Schema from a Skynet Schema Template (Fritz, 2026-11-06/07, Rule 16.6, Help 157). The Brewhouse Tab Template (1 Vessel,
+// 1 Vessel + 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2 Pumps, 3 Vessel) or the Fermentor Template on its own (templates/schema); then each vessel (a Vessel Template, or a general type at the bottom of the list) and its heat, the
+// pumps, recirculation, chiller, whirlpool, valves and a Supply Manifold. Every answer starts from ☰ Menu > Default settings.
+// Skynet makes the Schema on the brewer's real Interface (its free Ports), in Simulator Mode, sets every Brew Process job and builds
+// the Brew Day. public/schemabuild.js works out what to make; this puts it on the Tab. Pipes are left to the brewer.
+async function newSchemaFromTemplate(name) {
+  const [ST] = await Promise.all([api('GET', '/ui/schematemplates'), TPL ? TPL : loadTemplates()]);
+  if (!ST.templates.length) throw new Error('No Skynet Schema Templates found (templates/schema)');
+  const b = S.config.brewDefaults || {};
+  const stOf = n => ST.templates.find(t => t.name === n) || ST.templates[ST.templates.length - 1];
+  // 1: how many vessels (the Schema Template), the Interface, the Tab
+  const w1 = { template: stOf(nsDefault(b, 'ns_template')).name, iface: ST.interfaces[0]?.name ?? '', tab: nsDefault(b, 'ns_tab') };
+  if (await dialog(`New Schema "${name}": from a Skynet Schema Template`, [
+    ['template', 'Brewhouse Tab Template (number of vessels and pumps)', 'sel', ST.templates.map(t => [t.name, t.title])],
+    ['_t', ST.templates.map(t => `${t.title}: ${t.about}`).join('\n'), 'note'],
+    ['iface', 'Interface (your board). Each Device takes its next free Port on it', 'sel', [...ST.interfaces.map(d => [d.name, `${d.name}${d.schema ? '  (in ' + d.schema + ')' : ''}`]), ['', '(none yet: a pretend Mega on the Simulator)']]],
+    ['tab', 'Name of the Tab it goes on (the Fermentor Template has its own Fermentor Tab)', 'text'],
+    ['_s', 'The new Schema starts in Simulator Mode: nothing real is switched until you press 🔌 Real.', 'note']], w1) !== 'ok') return;
+  readFields(w1);
+  const st = stOf(w1.template), a = { ...startAnswers(st, b), name, tab: String(w1.tab || 'Brewhouse').trim() || 'Brewhouse' }, hot = a.vessels.length > 0;
+  // 2: each vessel, its heat, and the rest
+  const vt = TPL.vessel.filter(t => (t.vesselType || 'vessel') === 'vessel' && !t.integrated && t.name !== GENERAL_TEMPLATE);
+  const w2 = {};
+  a.vessels.forEach((v, i) => { w2['v' + i] = v.pick; w2['h' + i] = v.heat; });
+  Object.assign(w2, { fermentors: String(a.fermentors), pumps: String(a.pumps), recirc: a.recirc, chiller: a.chiller, whirlpool: a.whirlpool, valves: a.valves, manifold: a.manifold, manifoldKind: a.manifoldKind });
+  const hasMash = a.vessels.some(v => ['Mash Tun', 'All In One'].includes(v.role));
+  const q2 = [];
+  a.vessels.forEach((v, i) => q2.push(
+    ['v' + i, `Vessel ${i + 1}: ${v.label || v.role}`, 'sel', [...(vt.some(t => t.name === v.pick) || v.pick.startsWith('@') ? [] : [[v.pick, `${v.pick}  (this Template's own)`]]), ...vt.map(t => [t.name, `${t.name}  (${t.vtype || 'Vessel'})`]), ...GENERAL_TYPES.map(g => [generalPick(g), `${g}  (general type: a Skynet Vessel Widget)`])]],
+    ['h' + i, `Vessel ${i + 1}: heat`, 'sel', Object.entries(HEATS)]));
+  if (hot) q2.push(['pumps', `Pumps (the ${st.title} has ${st.pumps || 'none'})`, 'sel', [['0', 'None'], ['1', '1'], ['2', '2 (one for the mash, one for the kettle side)'], ...Array.from({ length: Math.max(3, st.pumps || 0) - 2 }, (_, i) => [String(i + 3), String(i + 3) + (a.pumpLabels?.length === i + 3 ? ` (${a.pumpLabels.join(', ')})` : '')])]],
+    ...(hasMash ? [['recirc', 'Mash recirculation', 'sel', Object.entries(RECIRCS)]] : []),
+    ['chiller', 'Chiller', 'sel', Object.entries(CHILLERS)],
+    ['whirlpool', 'Whirlpool while chilling (the Brew Day uses Whirlpool and Chill instead of Chill)', 'bool'],
+    ['valves', 'Valves', 'sel', Object.entries(VALVES)],
+    ['manifold', 'Supply Manifold', 'sel', Object.entries(MANIFOLDS)],
+    ['manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)]);
+  q2.push(['fermentors', hot ? 'Fermentors (on their own Fermentor Tab)' : 'Fermentors', 'sel', [...(hot ? [['0', 'None']] : []), ...[1, 2, 3, 4, 5, 6].map(n => [String(n), String(n)])]]);
+  if (await dialog(`New Schema "${name}": ${st.title}`, q2, w2) !== 'ok') return;
+  readFields(w2);
+  a.vessels = a.vessels.map((v, i) => ({ ...v, pick: w2['v' + i], heat: w2['h' + i] }));
+  Object.assign(a, { fermentors: +w2.fermentors || 0 });
+  if (hot) Object.assign(a, { pumps: +w2.pumps || 0, recirc: hasMash ? w2.recirc : 'none', chiller: w2.chiller, whirlpool: !!w2.whirlpool, valves: w2.valves, manifold: w2.manifold, manifoldKind: w2.manifoldKind });
+  const iface = w1.iface ? ST.interfaces.find(d => d.name === w1.iface) : null;
+  const { schema, ...real } = iface || {};
+  const plan = planSchema(a, { iface: iface ? real : null });
+  const metric = (b.units || 'US') === 'Metric';
+  for (const e of plan.elements) if (e.type === 'temperature') e.units = metric ? '°C' : '°F';
+  // what it makes, before it is made
+  const rows = plan.elements.filter(e => e.device !== undefined).map(e => `${e.label}: ${e.name}`);
+  const hotV = plan.vessels.filter(v => !v.tab), fV = plan.vessels.filter(v => v.tab);
+  if (await dialog(`New Schema "${name}": ready to make`, [['_m', (hotV.length ? `On the ${plan.tab} Tab: ${hotV.map(v => v.label).join(', ')}` +
+    (plan.equipment.length ? `, ${plan.equipment.map(x => x.label).join(', ')}` : '') + (plan.manifold ? `, a ${MANIFOLDS[plan.manifold.template]}` : '') + '. ' : '') +
+    (fV.length ? `On the ${plan.fTab} Tab: ${fV.map(v => v.label).join(', ')}.` : ''), 'note'],
+    ['_d', `Devices on ${plan.devices[0].name}, each on its next free Port (change one in its Properties):\n` + rows.join('; ') + '.', 'note'],
+    ['_p', 'Then the Brew Process is set up with these Devices and the Brew Day is built. Pipes are not drawn: pipe the equipment the way yours is (Edit layout > Draw pipe).', 'note']], {}) !== 'ok') return;
+  // make the Schema, on the real Interface (or the pretend Mega), in Simulator Mode
+  const r = await api('POST', '/ui/schemas', { name, empty: true, iface: iface?.name || '' });
+  await afterSchemaSwitch(`Schema "${name}" made and loaded`);
+  setEditing(true); if (!draft) throw new Error('Edit layout did not open: make the Schema from a computer, not a phone');
+  const ifName = draft.devices?.[0]?.name || plan.devices[0].name;
+  for (const e of plan.elements) if (e.device !== undefined) e.device = ifName;
+  const newTabs = [{ name: plan.tab, id: plan.tabId, width: plan.width, height: plan.height, ...tabLook() }];
+  if (plan.fTab && plan.fTab !== plan.tab) newTabs.push({ name: plan.fTab, id: plan.fTabId, width: 1600, height: 900, ...tabLook() });
+  draft.workspaces = [...newTabs, ...draft.workspaces.filter(x => x.name !== 'Main' && !newTabs.some(n => n.name === x.name))];
+  wsName = plan.tab;
+  const taken = () => [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean);
+  const free = n => { let x = n, i = 2; while (taken().some(t => t.toLowerCase() === x.toLowerCase())) x = `${n}_${i++}`; return x; };
+  for (const v of plan.vessels) {
+    const t = tplOf('vessel', v.template) || tplOf('vessel', GENERAL_TEMPLATE); if (!t) continue;
+    const g = placeTabVessel(t, v.tab || plan.tab, free(`${v.short}_Vessel`));
+    Object.assign(g, { label: v.label, vtype: v.vtype });        // layoutSchema places it (with its fittings and IPs)
+  }
+  for (const x of plan.equipment) {
+    const t = x.template && tplOf('vessel', x.template);
+    const g = t && !t.integrated ? placeTabVessel(t, plan.tab, free(x.label.replace(/\s+/g, '_'))) : eqWidget(x.kind, plan.tab, free(x.label.replace(/\s+/g, '_')));
+    Object.assign(g, { label: x.label });
+  }
+  draft.elements.push(...plan.elements);
+  const placed = { v: [], e: [] };
+  for (const v of plan.vessels) placed.v.push(draft.graphics.find(g => g.workspace === (v.tab || plan.tab) && g.label === v.label && g.kind === 'vessel'));
+  for (const x of plan.equipment) placed.e.push(draft.graphics.find(g => g.workspace === plan.tab && g.label === x.label && g.kind === 'vessel'));
+  let mfG = null;
+  if (plan.manifold) {
+    const t = tplOf('fitting', plan.manifold.template);
+    if (t) {
+      const g = placeTabFitting(t, plan.tab, free(MF_TPLS[t.name]?.prefix + '_1'), null), keys = mfKeys(g), mf = { mfIface: ifName };
+      Object.assign(g, { label: mfNext(mfInfo(g).label, draft.graphics.map(x => x.label)), labelVisible: false, x: plan.manifold.x, y: plan.manifold.y });
+      const pins = plan.manifold.kind === 'motorized' ? freePins({ type: 'digitalOut', subtype: 'valve', device: ifName }, draft.elements, draft.devices) : [];
+      keys.forEach((k, i) => { mf[k + '_mfk'] = plan.manifold.kind; if (plan.manifold.kind === 'motorized') mf[k + '_mfpin'] = pins[i] ?? ''; });
+      applyMf(g, mf, plan.tab, g.label, true); placeUnitParts(g); mfG = g;
+    }
+  }
+  layoutSchema(plan, placed, mfG);
+  renderTabs(); renderWs();
+  await saveLayout();
+  // the Brew Process: every job picked, Whirlpool and Chill or Chill, then Build the Brew Day
+  await api('PUT', '/ui/brewprocess', { templates: plan.templates, fields: plan.fields });
+  const built = await api('POST', '/ui/brewprocess/build'); BP = null;
+  toast(`Schema "${name}" is ready: ${plan.elements.length} Devices and Widgets, Brew Day built (${built.built.length} Processes). Pipe the equipment, check each job in ☰ Menu > Brew Process (🎯 click it on the Tab), then ▶ Start Brew Day.`, false, 12000);
+  if (r.simulator && !r.real) await newSchemaInterface(r.iface, r.wasSim);
+}
+// the new Schema's Tab: the vessels side by side (each its own size), each one's probe, heater and valve under it, the chiller
+// and RIMS tube to their right with their parts under them, then a row of pumps (and the Supply Manifold), then the timers
+function layoutSchema(plan, placed, mf) {
+  const GAP = 50, M = 40;
+  let x = M, top = 60, bottom = 0, fx = M, fBottom = 0;
+  // a vessel moves with everything on it: its IPs, fittings, the fittings' own IPs and caps, its built-in Devices
+  const kids = id => [...draft.graphics.filter(q => q.id !== id && (q.attachTo === id || q.onVessel === id || q.capOn === id)), ...draft.elements.filter(e => e.integratedIn === id)];
+  const shift = (o, dx, dy, seen) => { if (seen.has(o)) return; seen.add(o); o.x = (o.x || 0) + dx; o.y = (o.y || 0) + dy; if (o.id) for (const k of kids(o.id)) shift(k, dx, dy, seen); };
+  const move = (g, nx, ny) => { const dx = nx - (g.x || 0), dy = ny - (g.y || 0); if (dx || dy) shift(g, dx, dy, new Set()); };
+  const low = (g, seen = new Set()) => { if (seen.has(g)) return 0; seen.add(g); return Math.max((g.y || 0) + (g.h || 0), ...(g.id ? kids(g.id).map(k => low(k, seen)) : [])); };   // its lowest part
+  plan.vessels.forEach((v, i) => { const g = placed.v[i]; if (!g) return;
+    if (v.tab) { move(g, fx, top); fx += Math.max(g.w, 180) + GAP; fBottom = Math.max(fBottom, low(g)); return; }     // the Fermentor Tab
+    move(g, x, top); x += g.w + GAP; bottom = Math.max(bottom, low(g)); });
+  if (!bottom) bottom = fBottom;
+  plan.equipment.forEach((q, i) => {
+    const g = placed.e[i]; if (!g) return;
+    if (q.kind === 'herms' && q.in) { const hlt = placed.v[plan.vessels.findIndex(v => v.label === q.in)]; if (hlt) { move(g, Math.round(hlt.x + (hlt.w - g.w) / 2), Math.round(top + (hlt.h - g.h) / 2)); return; } }
+    move(g, x, top + 40); x += Math.max(g.w, 180) + GAP; bottom = Math.max(bottom, low(g));
+  });
+  const row0 = bottom + 50, rowH = 90;
+  let pumpsY = row0 + rowH * 2 + 30, right = x;
+  for (const e of plan.elements) {
+    const p = e.place; delete e.place; if (!p) continue;
+    const at = p.at === 'v' ? placed.v[p.i] : p.at === 'e' ? placed.e[p.i] : null;
+    if (at && p.at === 'v' && plan.vessels[p.i]?.tab) { e.x = at.x + p.col * 180; e.y = fBottom + 50 + p.row * rowH; continue; }
+    if (at) { e.x = at.x + p.col * (180); e.y = row0 + p.row * rowH; }
+    else if (p.at === 'pumps') { e.x = M + p.i * 190; e.y = pumpsY; }
+    else if (p.at === 'timers') { e.x = M + p.i * 270; e.y = pumpsY + 190; }
+    right = Math.max(right, (e.x || 0) + (e.w || 0) + M);
+  }
+  if (mf) move(mf, M + Math.max(1, plan.elements.filter(e => e.subtype === 'pump').length) * 190 + 40, pumpsY);
+  const ws = draft.workspaces.find(w => w.name === plan.tab);
+  if (ws) { ws.width = Math.max(1600, right, mf ? mf.x + mf.w + M : 0); ws.height = Math.max(900, pumpsY + 190 + 104 + M); }
+  const fw = plan.fTab && plan.fTab !== plan.tab && draft.workspaces.find(w => w.name === plan.fTab);
+  if (fw) { fw.width = Math.max(1600, fx + M); fw.height = Math.max(900, fBottom + 50 + rowH * 2 + M); }
+}
+// an equipment widget (RIMS tube, HERMS coil, chiller) with no Template, as Add equipment makes it, but straight on a Tab
+function eqWidget(kind, tab, name) {
+  const C = EQ[kind] || EQ.vessel;
+  const g = { id: newId(), kind: 'vessel', vesselType: EQ[kind] ? kind : 'vessel', workspace: tab, x: 60, y: 60, w: C.size[0], h: C.size[1],
+    name, vtype: C.types[0], label: C.types[0], image: C.image, labelAlign: 'above', labelSize: 16, labelVisible: true, ports: eqDefaultPorts(kind) };
+  draft.graphics.push(g); return g;
+}
 const schemaPicked = guard(async ev => {
   const v = ev.target.value, act = S.schemas.active, back = () => renderSchemaPick();
   try {
@@ -9437,10 +9583,11 @@ const schemaPicked = guard(async ev => {
     if (v === '__new') {
       const w = { name: '', start: 'copy' };
       if (await dialog('Add new Schema', [['name', 'Name of the new Schema', 'text'],
-        ['start', 'Start from', 'sel', [['copy', `A copy of "${act?.name}"`], ['empty', 'An empty Schema (a Main tab and the Equipment tab)']]],
+        ['start', 'Start from', 'sel', [['copy', `A copy of "${act?.name}"`], ['empty', 'An empty Schema (a Main tab and the Equipment tab)'], ['template', 'A Skynet Schema Template (answer a few questions, and it is ready to brew)']]],
         ['_n', `The new Schema is loaded at once. "${act?.name}" is kept just as it is and stays in this list.`, 'note']], w) !== 'ok') return;
       readFields(w);
       if (!okToSwitch(w.name, 'Making and loading')) return;
+      if (w.start === 'template') return newSchemaFromTemplate(w.name);
       const r = await api('POST', '/ui/schemas', { name: w.name, empty: w.start === 'empty' });
       await afterSchemaSwitch(`Schema "${w.name}" made and loaded`);
       if (r.simulator) await newSchemaInterface(r.iface, r.wasSim);
@@ -9954,7 +10101,7 @@ function otherDefaults() {
   ];
 }
 function renderDefaultTab(box) {
-  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...(S.config.brewDefaults || {}) };
+  const admin = can('admin'), d = { units: 'US', hideMenuBar: true, textVisible: true, textWrap: true, defPipeSize: '0.5', defHoseSize: '0.5', ...NS_DEFAULTS, ...(S.config.brewDefaults || {}) };
   const pick = (list, none) => [['', none], ...list.map(x => [x.id, x.name])];
   const fields = w => [['_d', 'Every default is set here, for every Schema. What is set somewhere else is listed at the bottom, with where to change it.', 'note'],
     ['_ps', 'Pipes, hoses and sizes', 'head'],
@@ -9989,6 +10136,19 @@ function renderDefaultTab(box) {
     ['hopAlertSound', 'Sound before each hop alert (a sound in your media folders, for example sounds/alarm_beep.wav; empty = none)', 'text'],
     ['speakAlerts', 'Say each hop alert out loud (its voice file in media/Audio/Hops, or the browser\'s own voice)', 'bool', true],
     ['voiceName', 'Browser voice (empty = the browser\'s usual voice)', 'sel', [['', '(the usual voice)'], ...(window.speechSynthesis?.getVoices() || []).map(v => [v.name, `${v.name} (${v.lang})`])]],
+    ['_ns', 'New Schema from a Skynet Template', 'head'],
+    ['_nsn', 'The answers the questions start with when you add a new Schema from a Skynet Schema Template (Schema dropdown > Add new Schema > Start from). You can change each one there.', 'note'],
+    ['ns_template', 'Brewhouse Tab Template (number of vessels and pumps)', 'sel', [['Skynet_1_Vessel', '1 Vessel'], ['Skynet_1_Vessel_1_Pump', '1 Vessel + 1 Pump'], ['Skynet_2_Vessel_1_Pump', '2 Vessel + 1 Pump'],
+      ['Skynet_2_Vessel_2_Pumps', '2 Vessel + 2 Pumps'], ['Skynet_3_Vessel', '3 Vessel'], ['Skynet_Fermentor', 'Fermentor (on its own)']]],
+    ['ns_fermentors', 'Fermentors on their own Fermentor Tab', 'sel', [['0', 'None'], ...[1, 2, 3, 4, 5, 6].map(n => [String(n), String(n)])]],
+    ['ns_tab', 'Name of the Tab it goes on', 'text'],
+    ...GENERAL_TYPES.map(t => ['ns_heat_' + t, `Heat of a ${t}`, 'sel', Object.entries(HEATS)]),
+    ['ns_recirc', 'Mash recirculation', 'sel', Object.entries(RECIRCS)],
+    ['ns_chiller', 'Chiller', 'sel', Object.entries(CHILLERS)],
+    ['ns_whirlpool', 'Whirlpool while chilling', 'bool'],
+    ['ns_valves', 'Valves', 'sel', Object.entries(VALVES)],
+    ['ns_manifold', 'Supply Manifold', 'sel', Object.entries(MANIFOLDS)],
+    ['ns_manifoldKind', 'Supply Manifold valves', 'sel', Object.entries(MANIFOLD_KINDS)],
     ['_t', 'New tabs and valves', 'head'],
     ['tabProfile', 'Tab Background Profile for a new tab', 'sel', pick(S.tabProfiles, '(none)')],
     ['tabStyle', 'Tab Style (the look of every Tab that has no Tab Style of its own)', 'stylesel', 'tab'],
@@ -10249,14 +10409,16 @@ function renderBrewProcessTab(box) {
   // the jobs the picked Templates use
   const used = [...new Set(BP.steps.flatMap(st => tplOf(st.key, bpWork.templates[st.key])?.fields || []))];
   const els = S.config.elements || [];
-  const fits = f => els.filter(e => BP.fields[f].types.includes(e.type) && (!BP.fields[f].subtype || e.subtype === BP.fields[f].subtype));
+  const heaterJob = f => ['pid', 'hysteresis', 'dutyCycle', 'deadband'].every(t => BP.fields[f].types.includes(t));     // a Heating Element fits a heater job (Rule 6.19)
+  const fits = f => els.filter(e => (BP.fields[f].types.includes(e.type) && (!BP.fields[f].subtype || e.subtype === BP.fields[f].subtype)) || (heaterJob(f) && e.type === 'digitalOut' && e.subtype === 'element'));
   const ft = h('tbody');
   for (const f of Object.keys(BP.fields).filter(k => used.includes(k))) {
     const sel = h('select', dis, h('option', { value: '' }, '(none: Skynet asks you to do it by hand)'),
       ...fits(f).map(e => h('option', { value: e.name, ...(e.name === bpWork.fields[f] ? { selected: true } : {}) }, (e.label && e.label !== e.name ? `${e.label}  (${e.name})` : e.name))));
     if (bpWork.fields[f] && !fits(f).some(e => e.name === bpWork.fields[f])) sel.append(h('option', { value: bpWork.fields[f], selected: true }, `${bpWork.fields[f]} (not in this Schema)`));
     sel.onchange = () => { bpWork.fields[f] = sel.value; };
-    ft.append(h('tr', {}, h('td', {}, BP.fields[f].title), h('td', {}, sel)));
+    const pickBtn = admin && fits(f).length ? h('button', { title: 'Go to the Tab and click the item that does this job (the list is the backup)', onclick: () => startJobPick(f, fits(f).map(e => e.name)) }, '🎯 Click it on the Tab') : '';
+    ft.append(h('tr', {}, h('td', {}, BP.fields[f].title), h('td', {}, sel), h('td', {}, pickBtn)));
   }
   box.append(h('h3', {}, 'Which Device does each job'), h('table', { class: 'grid' }, ft));
   // Recipe values the Templates read (rcp_ names, read only)
@@ -10280,6 +10442,50 @@ function renderBrewProcessTab(box) {
       await api('POST', '/ui/brewprocess/start'); toast('Brew Day started');
     }) }, '▶ Start Brew Day') : ''));
 }
+// Click to pick (Fritz, 2026-11-07, Rule 16.3): 🎯 on a Brew Process job goes to the Tab with the items that fit that job, lights
+// them up and greys the rest; one click on a lit item picks it, and the Brew Process page comes back with it picked (Save keeps
+// it). Esc or Cancel goes back with nothing changed. The list on the page stays as the backup (a brewery with 25+ valves).
+let jobPick = null;
+function startJobPick(f, names) {
+  const els = S.config.elements || [], here = els.filter(e => names.includes(e.name));
+  const tabs = [...new Set(here.map(e => e.workspace).filter(Boolean))];
+  const cur = bpWork.fields[f] && els.find(e => e.name === bpWork.fields[f]);
+  jobPick = { f, names: new Set(names) };
+  leaveMenuTab();
+  wsName = cur?.workspace && tabs.includes(cur.workspace) ? cur.workspace : tabs.includes(wsName) ? wsName : tabs[0] || wsName;
+  renderTabs(); renderWs(); markJobPick();
+  const bar = h('div', { id: 'jobPickBar', class: 'jobPickBar' },
+    h('b', {}, `Click the item for: ${BP.fields[f].title}`),
+    h('span', { class: 'muted' }, tabs.length > 1 ? `  (items that fit are on ${tabs.join(', ')}: use the Tabs)` : ''),
+    h('button', { onclick: () => endJobPick(null) }, 'Cancel'));
+  $('#jobPickBar')?.remove(); document.body.append(bar);
+}
+// light up the items that fit (each time the Tab is drawn again)
+function markJobPick() {
+  if (!jobPick) return;
+  for (const n of $$('#ws .el[data-name], #ws .mfValve[data-dev]')) {
+    const name = n.dataset.name || n.dataset.dev, ok = jobPick.names.has(name) && !n.dataset.clone;
+    n.classList.toggle('jobFit', ok); n.classList.toggle('jobNoFit', !ok);
+  }
+}
+function endJobPick(name) {
+  const p = jobPick; if (!p) return;
+  jobPick = null; $('#jobPickBar')?.remove();
+  for (const n of $$('#ws .jobFit, #ws .jobNoFit')) n.classList.remove('jobFit', 'jobNoFit');
+  if (name) bpWork.fields[p.f] = name;
+  openMenuTab('brewprocess');
+  if (name) toast(`${BP.fields[p.f].title}: ${name}. Press 💾 Save to keep it.`);
+}
+// a click while picking only picks (it never switches anything)
+for (const t of ['pointerdown', 'click']) $('#ws').addEventListener(t, ev => {
+  if (!jobPick || editing) return;
+  ev.preventDefault(); ev.stopPropagation();
+  if (t !== 'click') return;
+  const n = ev.target.closest('.el[data-name], .mfValve[data-dev]'), name = n && (n.dataset.name || n.dataset.dev);
+  if (name && jobPick.names.has(name) && !n.dataset.clone) endJobPick(name);
+  else toast('That one does not fit this job: click a lit item, or Cancel', true);
+}, true);
+window.addEventListener('keydown', ev => { if (jobPick && ev.key === 'Escape') endJobPick(null); });
 // view a Process Template, or make / change a User one (Skynet ones are never changed: Rule 5.16)
 async function editProcessTemplate(st, name, copy) {
   const t = await api('GET', `/ui/brewprocess/template/${st.key}/${name}`);
