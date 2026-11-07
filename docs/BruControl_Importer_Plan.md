@@ -442,5 +442,8 @@ when clicked". **Built now** in the import (lib/bruimport.js) and the Panel:
 - Each BruControl name is kept on it (`.heatControls`, made safe: `HLT PID` -> `HLT_PID`) with its method, so when Processes are
   imported, `HLT_PID = true` switches the Element to PID and turns it ON, and `M_HLT_Heat = true` to Duty Cycle.
 - Where a second one was placed on a Tab, a **Clone** of the Heating Element is put there.
-- The import notes list each merge, for example *MP_42_DO_HLT_Heat_BH (Main Panel port 42: M_HLT Heat (Duty Cycle) or HLT PID (PID))*.
+- The import notes list each merge, for example *MP_42_HE_HLT_Heat_BH (Main Panel port 42: M_HLT Heat (Duty Cycle) or HLT PID (PID))*.
 - The Vessel Build dialogs' **BruControl Element** dropdown (above) then shows that one Heating Element.
+- **On and Off, not Enabled** (Fritz, 2026-11-07: "I prefer on and Off rather than enabled"): BruControl turned a PID or
+  Hysteresis on and off with its Enabled property. When Scripts are imported, a heating Element's `.Enabled = true` becomes
+  `= on` and `.Enabled = false` becomes `= off` (whatever its method); the first page of the Import says so.

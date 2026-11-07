@@ -12,7 +12,7 @@ import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
 import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
@@ -478,8 +478,8 @@ function applyVParts(g, vp, tab, label) {
   if (want.length && none(vp.vpIface)) throw new Error('Pick the Interface (board) the parts on its IPs are wired to');
   for (const [k, d] of want) {
     const kind = vp[k + '_part'], o = old.find(e => e.integratedAs === 'ip:' + k);
-    // an Element that is already a heat controller (Hysteresis, PID ..., like the Three Vessel sample's HLT_Heat) stays one, as the RIMS tube's does
-    const proto = kind === 'element' && o?.vpKind === 'element' && HEAT_CTL_TYPES.includes(o.type) ? { type: o.type } : vpProto(kind, vp[k + '_ptk']);
+    // a built in Element is one Heating Element (Rule 6.19); an old control Device is made one on load (naming.js assignIds)
+    const proto = vpProto(kind, vp[k + '_ptk']);
     const e = { ...(o ? clone(o) : { w: 130, h: 60, enabled: false }), device: vp.vpIface, workspace: tab, integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind };
     for (const x of [...TEMP_KEYS, 'wires', 'series', 'subtype']) delete e[x];
     Object.assign(e, clone(proto));
@@ -4720,7 +4720,7 @@ const elSettings = type => (Array.isArray(F[type]) ? F[type] : []).filter(([k]) 
 const intEls = g => ({ heat: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'heat'), temp: draft.elements.find(e => e.integratedIn === g.id && e.integratedAs === 'temp') });
 function rimsWork(g) {
   const { heat, temp } = g ? intEls(g) : {}, devs = S.config.devices || [];
-  return { iface: heat?.device ?? temp?.device ?? (devs.length === 1 ? devs[0].name : ''), heatCtl: heat?.type || 'pid', heatPin: heat?.channel ?? '',
+  return { iface: heat?.device ?? temp?.device ?? (devs.length === 1 ? devs[0].name : ''), heatCtl: (isHeatElem(heat) ? { onoff: 'pid', dutyCycle: 'dutyCycle', hysteresis: 'hysteresis', pid: 'pid', deadband: 'pid' }[startMethod(heat)] : heat?.type) || 'pid', heatPin: heat?.channel ?? '',
     tempKind: temp ? tempKey(temp) : tempKinds()[0][0], tempPin: temp?.channel ?? '', tempProbe: temp?.probeIndex ?? '',
     ...Object.fromEntries(elSettings(heat?.type || 'pid').map(([k]) => ['el_' + k, heat?.[k]])) };
 }
@@ -4762,6 +4762,8 @@ function applyRims(g, w, tab, label) {
   const heat = { ...(h0 ? clone(h0) : { w: 130, h: 60, enabled: false }), type: w.heatCtl, device: w.iface, channel: w.heatPin, workspace: tab, integratedIn: g.id, integratedAs: 'heat' };
   if (heat.type === 'pwmOut') heat.subtype = 'element'; else delete heat.subtype;
   for (const [k] of elSettings(heat.type)) if ('el_' + k in w) { const v = w['el_' + k]; if (v === undefined || v === '') delete heat[k]; else heat[k] = v; }
+  // its Control is the method a Heating Element starts with (Rule 6.19): one Heating Element, not a separate PID or Hysteresis Device
+  if (HEAT_CTL_TYPES.includes(heat.type)) { heat.heatMethod = TYPE_METHOD[heat.type]; heat.type = 'digitalOut'; heat.subtype = 'element'; }
   heat.typeCode = h0?.type === heat.type && h0.typeCode ? h0.typeCode : defaultCode(heat); heat.label ??= base + ' Heat';
   const temp = { ...(t0 ? clone(t0) : { w: 130, h: 60, units: '°F', precision: 1 }), type: 'temperature', device: w.iface, workspace: tab, integratedIn: g.id, integratedAs: 'temp' };
   for (const k of [...TEMP_KEYS, 'wires', 'series']) delete temp[k];
@@ -4774,7 +4776,7 @@ function applyRims(g, w, tab, label) {
   if (heat.name.toLowerCase() === temp.name.toLowerCase()) temp.name += '_2';
   if (!ow && pinsOf(temp).some(p => pinsOf(heat).includes(p))) throw new Error('The heating element and the temperature probe need two different Ports');
   for (const [e, old] of [[heat, h0], [temp, t0]]) { const err = portError(e, old || e); if (err) throw new Error(err); }
-  if (['pid', 'hysteresis'].includes(heat.type)) heat.input = temp.name;         // it holds the temperature its own probe reads
+  if (['pid', 'hysteresis'].includes(heat.type) || isHeatElem(heat)) heat.input = temp.name;         // it holds the temperature its own probe reads
   if (!h0 || !t0) { const [x, y] = [g.x || 0, (g.y || 0) + (g.h || 50) + 20]; if (!h0) Object.assign(heat, { x, y }); if (!t0) Object.assign(temp, { x: x + 150, y }); }
   for (const [e, old] of [[heat, h0], [temp, t0]]) {
     if (old) {
