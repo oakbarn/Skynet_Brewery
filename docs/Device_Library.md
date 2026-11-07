@@ -32,8 +32,8 @@ Example: `MB_25_eVlv_Fly~Sparge_In_SP` (Interface MB, pin 25, Type ID eVlv, Labe
 - Existing Devices are never renamed by themselves (that would break Processes).
 
 ### Ports
-- **One Device per port** on an Interface.
-- **Exception:** outputs of *different* Device Types may share a port (for example `MB_05_Hys_HLT_BR` and `MB_05_PID_HLT_BR` on one heater). The one turned on or enabled last wins; the others on that port are turned off. Output types that can share: Direct On/Off, PWM, Analog output, Duty Cycle, Hysteresis, PID.
+- **One Interface Port, one Device** (Rule 6.1, Fritz 2026-11-07), of any Device Type. A heater's ways of control are one Heating Element's heating methods (Rule 6.19, 4.1 below).
+- **Older Schemas** made under the old exception (outputs of different Device Types on one port, for example `MB_05_Hys_HLT_BR` and `MB_05_PID_HLT_BR`) keep working: the one turned on or enabled last wins. No new sharing can be made.
 - **Virtual ports** (no real pin):
   - **OneWire probes (DS18B20): 700 to 799.** Probe number 1 = port 700, probe 2 = 701 ... One Device per probe number.
   - **Hydrometers (Tilt or any other): 200, 201 ...** Reserved; Hydro Devices are not built yet.
@@ -158,7 +158,7 @@ What each ID means:
 ### 4.1 Direct On / Off output (Relay, SSR, contactor)
 - **Add menu:** Devices: outputs > Relay module / SSR / contactor (on-off). Also Pump and Valve (below).
 - **Type IDs:** DO, Pump, M_L_Vlv, eVlv, M_H_Vlv, E_H_Vlv, G_Vlv, Mtr, LED, Light, E_Alm, Fan, Chill, HtPad, Ignit.
-- **Port:** any digital pin (plain pins offered first). Can share a port with a different output type.
+- **Port:** any free digital pin (plain pins offered first). One Device per port (Rule 6.1).
 - **Settings:**
   - Kind: plain, pump, valve, element (electric heating element). Pumps and valves have IPs for pipes.
   - Interface, Pin (for example 22, or A5 = 59)
@@ -166,6 +166,11 @@ What each ID means:
   - One-shot time in ms (0 = off); One-shot pulses OFF (off = pulses ON)
   - Pictures and texts when on / off
 - **Board sends:** `DO <pin> <0|1>`.
+- **Heating Element (Kind = element): one Device, the heating method picked** (Rule 6.19, Fritz 2026-11-07, Help 150). Its
+  **Heating method** is On/Off, Duty Cycle, Hysteresis, PID or Deadband: the one it starts with is in its Properties (with the
+  Temperature Probe and each method's settings); a Process (`hE_1.method = "PID"`) or a click while running changes it.
+  `.state` / `.enabled` = ON, `.output` = its pin now (read only), `.value` = a PID or Deadband's output %. Same for a Heating
+  Element built into a Vessel Device, RIMS tube or Integrated kettle. BruControl's two controls on one port import as one of these.
 
 ### 4.2 Pump
 - **Add menu:** Devices: outputs > Pump (relay output with inlet and outlet IPs for pipes).

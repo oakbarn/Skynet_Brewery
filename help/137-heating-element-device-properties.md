@@ -58,7 +58,9 @@ Every Heating Element's Label starts filled in, with the next free number. You c
 4. **3. Tab** and **4. Name**.
 5. **Graphic**, **Path**, then **Orientation** and **Toggle** on one line.
 6. **Overlay** with **Database and .API ⬢**.
-7. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out (**DO**).
+7. **Heating method**: the method it starts with (On/Off, Duty Cycle, Hysteresis, PID or Deadband), its Temperature Probe and that
+   method's settings. A click while brewing or a Process changes it: see [One Heating Element, pick how it heats](150-heating-method).
+8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out (**DO**).
 
-Heating elements built into a RIMS tube or an Integrated kettle keep their present dialog (Rule 18.10). PID, Hysteresis, Deadband
-and Duty Cycle heaters keep theirs too.
+Heating elements built into a RIMS tube or an Integrated kettle keep their present dialog (Rule 18.10), with the Heating method
+added (Rule 6.19). The old separate PID, Hysteresis, Deadband and Duty Cycle heaters keep theirs too.
