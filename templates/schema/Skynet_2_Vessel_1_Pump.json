@@ -1,0 +1,20 @@
+{
+  "title": "2 Vessel + 1 Pump",
+  "about": "A kettle that heats the strike and sparge water and then boils, and a mash tun. One pump does every job.",
+  "order": 3,
+  "kind": "hot",
+  "vessels": [
+    {
+      "role": "Brew Kettle"
+    },
+    {
+      "role": "Mash Tun"
+    }
+  ],
+  "pumps": 1,
+  "process": {
+    "Heat_Strike": "Skynet_Heat_Strike_2_Vessel",
+    "Strike": "Skynet_Strike_2_Vessel",
+    "Mash": "Skynet_Mash_2_Vessel"
+  }
+}

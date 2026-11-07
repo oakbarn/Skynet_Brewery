@@ -1,0 +1,20 @@
+{
+  "title": "2 Vessel + 2 Pumps",
+  "about": "A kettle and a mash tun, a pump for the mash and a pump for the kettle side (whirlpool, chill, fermentor).",
+  "order": 4,
+  "kind": "hot",
+  "vessels": [
+    {
+      "role": "Brew Kettle"
+    },
+    {
+      "role": "Mash Tun"
+    }
+  ],
+  "pumps": 2,
+  "process": {
+    "Heat_Strike": "Skynet_Heat_Strike_2_Vessel",
+    "Strike": "Skynet_Strike_2_Vessel",
+    "Mash": "Skynet_Mash_2_Vessel"
+  }
+}

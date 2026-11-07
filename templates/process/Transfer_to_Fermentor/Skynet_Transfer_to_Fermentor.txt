@@ -1,9 +1,11 @@
 //Skynet_Transfer_to_Fermentor
-//About: Move the wort into the sanitized fermenter and take a gravity reading.
+//About: Let the trub settle, get the fermenters ready, move the wort into the sanitized fermenter and take a gravity reading (OG).
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
-step "To the fermenter"
-ask "Hook a sanitized hose from the kettle to the sanitized fermenter. Press Done when it is on."
+step "Let the trub settle"
+ask "Let the hops and trub settle in the middle of the kettle for about 15 minutes. Press Done when it has settled."
+step "Fermenters ready"
+ask "Sanitize the fermenter, close its hand valves, and hook a sanitized hose from the kettle (or chiller) to it. Press Done when it is ready."
 @if Transfer_Pump
 ask "Set the valves from the kettle to the fermenter. Press Done when they are set."
 {{Transfer_Pump}} = true
@@ -14,5 +16,5 @@ ask "Move the wort into the fermenter (about " + rcp_Batch_Volume + " " + rcp_Vo
 @end
 close_all_valves
 step "Gravity reading"
-ask "Take a gravity reading of the wort and write it down. Press Done when you have it."
+ask "Take a gravity reading of the wort (the OG) and write it down. Press Done when you have it."
 print "Wort in the fermenter: " + rcp_Name

@@ -1,0 +1,5 @@
+{
+  "title": "Fermentor",
+  "about": "Its own Fermentor Tab: each fermentor with its temperature probe and a glycol (cooling) valve that holds the fermentation temperature.",
+  "order": 10, "kind": "fermentor", "fermentors": 1
+}

@@ -1,5 +1,5 @@
 //Skynet_Mash
-//About: Every mash step of the Recipe (temperature, then its time), the mash out, and the sparge.
+//About: 3 Vessel: every mash step of the Recipe (temperature, then its time), the mash out, the first wort to the kettle, and the sparge from the Hot Liquor Tank.
 //MIT License Granted for all Scripts and Configurations
 //Copyright © OakBarn Brewery 2026
 @if Mash_Pump
@@ -46,8 +46,10 @@ endif
 @if Mash_Pump
 {{Mash_Pump}} = false
 @end
+step "First wort"
+ask "Put any first wort hops in the boil kettle now. Then set the valves to run the first wort from the mash tun to the kettle. Press Done when it is running."
 step "Sparge"
-ask "Sparge with water at " + rcp_Sparge_Temp + rcp_Temp_Units + " and collect " + rcp_Boil_Volume + " " + rcp_Volume_Units + " of wort in the boil kettle. Press Done when the kettle has it all."
+ask "Sparge with water at " + rcp_Sparge_Temp + rcp_Temp_Units + " from the Hot Liquor Tank, slowly (at least 10 minutes), and collect " + rcp_Boil_Volume + " " + rcp_Volume_Units + " of wort in the boil kettle. Turn the kettle heat on once the wort covers the heating element. Press Done when the kettle has it all."
 @if HLT_Heater
 {{HLT_Heater}}.enabled = false
 @end

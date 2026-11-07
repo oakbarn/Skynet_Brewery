@@ -1,0 +1,17 @@
+{
+  "title": "1 Vessel",
+  "about": "One electric vessel that heats the water, mashes and boils (like a BrewZilla or Grainfather), no pump: you lift the grain basket and chill in the kettle.",
+  "order": 1,
+  "kind": "hot",
+  "vessels": [
+    {
+      "role": "All In One"
+    }
+  ],
+  "pumps": 0,
+  "process": {
+    "Heat_Strike": "Skynet_Heat_Strike_1_Vessel",
+    "Strike": "Skynet_Strike_1_Vessel",
+    "Mash": "Skynet_Mash_1_Vessel"
+  }
+}
