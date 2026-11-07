@@ -212,6 +212,11 @@ commands work with that key, and that it still works after RAPT's move to its ne
 SetHeatingEnabled, SetHeatingUtilisation, SetPumpEnabled, SetPumpUtilisation, SetPIDEnabled, SetPID; sign in at
 id.rapt.io/connect/token (from the community client fkolacek/kegland_rapt_api_client, not from KegLand's own docs).
 
+**One account per BrewZilla** (Fritz, 2026-11-07: "They are not sure a two RAPT accounts can share the same Brewzilla 4.
+There is no mention of supporting MQTT that they know of in the documentation"). So the plan assumes one RAPT account owns
+each BrewZilla 4, and Skynet talks to the RAPT API directly with that owner's API secret. MQTT is not part of RAPT; the
+RAPT-to-MQTT bridge is someone else's hobby program and only an option.
+
 So a connected All In One would become an Interface of its own kind (a cloud or Bluetooth link instead of a board). That is
 not part of this plan; it needs Fritz's go and its own Rule.
 
