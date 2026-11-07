@@ -330,7 +330,10 @@ the program only shows it and measures distances on the screen. Three helpers, u
    pump), ask **what is connected to it**, then **what is connected to that**, and so on (each link asks Hose or Pipe) until the
    chain reaches an end (a Vessel IP, Tap Water, Drain, a QD, or Nothing). A Tee or Supply Manifold opens a branch that is walked
    next. Every item already used shows as used, so nothing is joined twice, and a loose valve or pump left at the end gets its own
-   chain. Each link is one short drill-down question, like Dialog 2b: **From** (a Vessel and its IP, a pump's in or out, another valve, a Supply Manifold, Tap Water, Drain, or Not
+   chain. **The page's explanation uses the rhyme** (Fritz, 2026-11-07: "put that little rhyme in the Explanation of how a
+   manifold is built"): *"The outlet's connected to the valve, the valve's connected to the pump, the pump's connected to the
+   hose ..."*, one piece at a time, the way the old song goes ("the knee bone's connected to the leg bone"). Each link is one
+   short drill-down question, like Dialog 2b: **From** (a Vessel and its IP, a pump's in or out, another valve, a Supply Manifold, Tap Water, Drain, or Not
    connected) and **To** (the same list). A pump also asks which way it pumps. A **Supply Manifold** (Rule 5.35) can be picked
    for a row of valves on one pipe. Each answer starts with the best guess (helper 3), so the brewer only checks it. Answers
    build the pipes and hoses between the IPs (Rule 5.29, 5.34); a missing answer leaves the item loose, never a wrong pipe.
