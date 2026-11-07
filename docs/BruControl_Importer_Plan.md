@@ -197,6 +197,9 @@ HERMS In/Out), a drill-down, one step at a time, like the Pump Add box (Rules 4.
    answer asks "what comes next" again, so a short run (outlet, valve, elbow ...) is built up. **Every outlet chain ends with
    None** (Fritz, 2026-11-07: "Basically have to have none at the end for the Outlet chain"): None is always in the list, and
    picking it ends the chain.
+4. **The end of the chain** (Fritz, 2026-11-07: "End could be a Pipe, Hose, Supply manifold or None"): **Pipe**; **Hose**
+   (Quick Disconnect, Rule 5.34); **Supply Manifold** (Double or Triple, Rule 5.35); **None**. A Pipe, Hose or Manifold also
+   ends the chain.
 
 ### Building the Vessel Device, shown before saving (Fritz, 2026-11-07)
 "Once the answers are done, create a Vessel Device with the Integral Components and Place On the Brewery Tab. Drill Down to get
