@@ -54,3 +54,31 @@ table.words th { background: var(--panel2); }
 #ask { background: var(--panel); color: inherit; border: 1px solid var(--warn); border-radius: 10px; max-width: 620px; }
 #ask::backdrop { background: rgba(0, 0, 0, 0.5); }
 #ask h2 { margin-top: 0; }
+/* page 6, Connect your brewery */
+.rhyme .verse { margin: 4px 0 8px; line-height: 1.5; }
+.cnCols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.cnCols .card { margin: 0; }
+@media (max-width: 900px) { .cnCols { grid-template-columns: 1fr; } }
+.cnTable { border-collapse: collapse; margin: 6px 0; }
+.cnTable th, .cnTable td { border: 1px solid var(--line); padding: 3px 8px; text-align: left; }
+.cnChain { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin: 8px 0; background: var(--panel2); }
+.cnStep { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; }
+.cnStep + .cnStep { padding-left: 18px; }
+.cnArrow { color: var(--muted); font-size: 12px; }
+.cnArrow::before { content: "↳ "; }
+.cnStep select { max-width: 280px; }
+.cnStep .num { width: 52px; }
+.cnTag { font-size: 11px; padding: 1px 6px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 30%, transparent); }
+.cnLooseList { display: flex; flex-wrap: wrap; gap: 6px; }
+.btnlike { cursor: pointer; border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; background: var(--panel2); }
+#cnPic { position: relative; width: 100%; aspect-ratio: 4 / 3; border: 1px dashed var(--line); border-radius: 8px; overflow: hidden; margin: 8px 0; background: var(--panel2); touch-action: none; }
+#cnPicImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; opacity: 0.45; pointer-events: none; }
+#cnLines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#cnLines line { stroke: var(--accent); stroke-width: 3; }
+#cnLines line.hose { stroke-dasharray: 6 4; }
+#cnChips { position: absolute; inset: 0; }
+.cnChip { position: absolute; transform: translate(-50%, -50%); font-size: 11px; padding: 2px 6px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); white-space: nowrap; cursor: grab; user-select: none; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.cnChip.vessel { font-weight: 600; border-color: var(--accent); }
+.cnChip.loose { border-style: dashed; }
+.cnChip.picked { outline: 3px solid var(--accent); }
+#cnAiText { width: 100%; font-family: var(--mono); box-sizing: border-box; }
