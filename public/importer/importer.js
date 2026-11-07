@@ -199,6 +199,7 @@ async function convert() {
         ${r.interfaces.map(d => row([esc(d.name), esc(d.id), d.items], ['', '', 'n'])).join('')}</table></div>
       <div><h3>Placeholders</h3><table><tr><th>BruControl kind</th><th>How many</th></tr>
         ${Object.entries(r.byKind).map(([k, n]) => row([esc(k), n], ['', 'n'])).join('') || row(['(none)', ''])}</table></div></div>
+      ${r.look ? `<p>Look (theme): <b>${esc(r.look.name)}</b>, ${r.look.bru ? `the closest to your BruControl theme <b>${esc(r.look.bru)}</b>` : 'the closest to BruControl\'s own Office 2019 Black (your BruControl theme was not found)'}. Change it in the Panel under Settings &gt; Panel settings &gt; Look.</p>` : ''}
       <h3>Tabs (workspaces)</h3><table><tr><th>Tab</th><th>ID</th><th>Items</th><th>Placeholders</th></tr>
         ${r.tabs.map(t => row([esc(t.name), esc(t.id), t.items, t.placeholders], ['', '', 'n', 'n'])).join('')}</table>
       ${r.media.pictures + r.media.sounds ? `<h3>Pictures and Sounds</h3><p><b>${r.media.pictures}</b> pictures and <b>${r.media.sounds}</b> sounds are imported by their path.

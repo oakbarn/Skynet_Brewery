@@ -10,7 +10,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme } from './lib/importer.js';
+import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
@@ -135,6 +136,12 @@ async function api(req, res, p, q) {
       } catch { return false; }
     };
     const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', copy: copyMedia === true, media });
+    // the Look (Rule 2.39): the Skynet Look closest to the BruControl theme, Office Black when it is not found
+    const bt = findBruControlTheme([...CANDIDATES, path.dirname(file)]);
+    const look = themeOf(bruThemeToLook(bt?.theme));
+    r.conv.theme = look.key;
+    for (const w of r.conv.workspaces ?? []) if (!w.color && !w.style) Object.assign(w, newTabLook(look.key));     // each Tab is new: the Look's Tab colors
+    r.report.look = { bru: bt?.theme || '', file: bt?.file || '', key: look.key, name: look.name };
     converted = { file, copy, ...r };
     return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings });
   }
@@ -179,7 +186,7 @@ const server = http.createServer(async (req, res) => {
     if (p === '/' || p === '/index.html') return sendFile(res, path.join(PUBLIC, 'importer', 'index.html'));
     if (p.startsWith('/importer/') && /^[\w./-]+$/.test(p) && !p.includes('..')) return sendFile(res, path.join(PUBLIC, p));
     // the Panel's own look, icon and hover help (one source, Rules 15.4 and 2.38)
-    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
+    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }
 });
