@@ -2823,14 +2823,14 @@ function letGoBentEnds(skip = null) {
 // REJOIN_PX of an IP joins it again. A straight pipe joins only if it stays Horizontal, Vertical or 45; if not, a free IP point
 // with no other pipe on it moves back onto the pipe end instead. Returns how many ends joined.
 const REJOIN_PX = 14;
-function rejoinEnds() {
+function rejoinEnds(only = null) {
   if (!draft) return 0;
   let n = 0;
   for (const p of draft.graphics.filter(g => g.kind === 'pipe' && (g.points || []).length >= 2)) {
     for (const k of ['from', 'to']) {
       const own = p[k] && ownCoupling(p[k], p); if (!own) continue;
       const pts = p.points, i = k === 'from' ? 0 : pts.length - 1, j = k === 'from' ? 1 : pts.length - 2, e = pts[i], other = k === 'from' ? p.to : p.from;
-      const near = allIps(p.workspace).filter(q => q.id !== own.id && q.id !== other).map(q => ({ id: q.id, c: q.c || ipPoint(q.id, p.workspace) }))
+      const near = allIps(p.workspace).filter(q => q.id !== own.id && q.id !== other && (!only || only.has(q.id))).map(q => ({ id: q.id, c: q.c || ipPoint(q.id, p.workspace) }))
         .filter(q => q.c && Math.hypot(q.c[0] - e[0], q.c[1] - e[1]) <= REJOIN_PX).sort((a, b) => Math.hypot(a.c[0] - e[0], a.c[1] - e[1]) - Math.hypot(b.c[0] - e[0], b.c[1] - e[1]));
       for (const q of near) {
         if (!p.straight || pts.length !== 2 || onAngle(q.c, pts[j], 0.5)) pts[i] = [...q.c];
@@ -2846,6 +2846,144 @@ function rejoinEnds() {
   }
   return n;
 }
+// ---- Grab pop-up (Fritz, 2026-11-07, Rule 5.37: "when we grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves
+// independently of its pipes"; "That would apply to any Device, Pipe, Fitting or Widget, but the Option to Unlock as the user may not
+// want to, and maybe a way to restore back to any pipe movements"; "Not only the Pipes but locked fitting as well").
+// The first time something with pipes joined to it is dragged in Edit layout, it stays put and a pop-up asks: move it with its pipes
+// (as before, Rule 5.19), 🔓 Unlock its IPs (its pipe ends let go and stay where they are, so it moves alone, even when a locked pipe
+// or fitting is joined to it), or 🔁 Swap places with another pump or valve (it takes the other's place and pipes). ↩ Put back
+// (Ctrl+Z) undoes the last move, unlock or swap. Dropped with an IP on an open pipe end, the pipe joins it again at once.
+const grabWith = new Set();      // items the user said to move with their pipes (until Edit layout is left)
+let grabNoAsk = false;           // "Don't ask again until I leave Edit layout"
+// the IPs that are part of an item and move with it
+function grabIpIds(it) {
+  if (!it) return [];
+  if (!it.kind) return hasIps(it) ? devIps(it).map(q => q.id) : [];
+  if (isClone(it)) { const de = cloneEl(it); return de && hasIps(de) ? devIps(de).map(q => q.id) : []; }
+  if (it.kind === 'ip') return it.fitting === 'coupling' ? [] : [it.id, ...eqPorts(it).map(q => q.id)];
+  if (it.kind === 'vessel') return [...eqPorts(it).map(q => q.id), ...bundleParts(it).filter(g => g.kind === 'ip').map(g => g.id)];
+  return eqPorts(it).map(q => q.id);
+}
+// the pipe ends joined to an item: [{ p, k }] (k = 'from' or 'to'). A pipe's own: the ends on something else (not its own open ends).
+function grabJoins(it) {
+  if (!it || !draft) return [];
+  if (it.kind === 'pipe') return ['from', 'to'].filter(k => it[k] && !ownCoupling(it[k], it)).map(k => ({ p: it, k }));
+  const ids = new Set(grabIpIds(it)), out = [];
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace && (g.points || []).length >= 2))
+    for (const k of ['from', 'to']) if (ids.has(p[k])) out.push({ p, k });
+  return out;
+}
+// let go of those pipe ends where they are: each gets an open end (a coupling); a Quick Disconnect hose's free end just lets go.
+// The open end remembers where the IP was and which end it was (in, out ...), so a pump or valve put in that place joins it again.
+const ipEnd = id => typeof id === 'string' && id.includes(':') ? id.slice(id.lastIndexOf(':') + 1) : null;
+function unlockJoins(joins) {
+  for (const { p, k } of joins) {
+    const n = p.points.length, was = p[k], at = ipPoint(was, p.workspace);
+    if (isQdHose(p) && k === 'to') { p.to = null; delete p.qdAuto; continue; }
+    p[k] = k === 'from' ? endCoupling(p.points, 0, 1) : endCoupling(p.points, n - 1, n - 2);
+    const g = draft.graphics.find(x => x.id === p[k]);
+    if (g && at) { g.wasAt = at.map(Math.round); if (ipEnd(was)) g.wasEnd = ipEnd(was); }
+  }
+}
+// an item dropped where something let go of its pipes: each open end whose IP was within REJOIN_PX of the same end of this item
+// (the inlet on an inlet ...) joins it again, as it was (Rule 5.37). Returns how many joined.
+function rejoinLetGo(it) {
+  const ids = grabIpIds(it); if (!ids.length) return 0;
+  let n = 0;
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe' && g.workspace === it.workspace)) for (const k of ['from', 'to']) {
+    const g = p[k] && ownCoupling(p[k], p); if (!g?.wasAt) continue;
+    const id = ids.find(x => (!g.wasEnd || ipEnd(x) === g.wasEnd) && (c => c && Math.hypot(c[0] - g.wasAt[0], c[1] - g.wasAt[1]) <= REJOIN_PX)(ipPoint(x, it.workspace)));
+    if (!id) continue;
+    p[k] = id; draft.graphics = draft.graphics.filter(x => x !== g); n++;
+  }
+  return n;
+}
+// a pump or valve can swap places with another of the same kind, on any Tab
+function swapKind(it) {
+  if (!it || it.locked) return null;
+  if (!it.kind) return hasIps(it) && ['pump', 'valve', 'propValve'].includes(it.subtype) && !isInline(it) ? 'dev:' + it.subtype : null;
+  return isMv(it) ? (isTapMv(it) ? 'tapMv' : 'mv') : null;
+}
+const swapLabel = it => it.kind ? (it.name || it.label || 'Manual Valve') : it.name;
+function swapChoices(it) {
+  const k = swapKind(it); if (!k) return [];
+  return [...draft.elements, ...draft.graphics].filter(o => o !== it && swapKind(o) === k).sort((a, b) => (a.workspace === it.workspace ? 0 : 1) - (b.workspace === it.workspace ? 0 : 1));
+}
+// a takes b's place, size, Tab and flips, and b takes a's; every pipe end on a's IPs goes on b's IP of the same end, and the other way
+function swapPlaces(a, b) {
+  const ia = grabIpIds(a), ib = grabIpIds(b), end = id => id.slice(id.lastIndexOf(':') + 1);
+  const map = new Map();
+  for (const id of ia) { const o = ib.find(x => end(x) === end(id) && x !== b.id); if (o) map.set(id, o); }
+  for (const id of ib) { const o = ia.find(x => end(x) === end(id) && x !== a.id); if (o) map.set(id, o); }
+  for (const p of draft.graphics.filter(g => g.kind === 'pipe')) for (const k of ['from', 'to']) if (map.has(p[k])) p[k] = map.get(p[k]);
+  for (const k of ['x', 'y', 'w', 'h', 'workspace', 'flipH', 'flipV', ...(a.kind ? ['rotate'] : [])]) {
+    const va = a[k], vb = b[k];
+    if (vb === undefined) delete a[k]; else a[k] = vb;
+    if (va === undefined) delete b[k]; else b[k] = va;
+  }
+}
+// the undo list: a copy of the layout before each move, unlock or swap (Fritz: "a way to restore back to any pipe movements")
+let undoList = [];
+const UNDO_MAX = 30;
+function pushUndo(why) {
+  if (!editing || !draft) return;
+  undoList.push({ why, d: clone(draft), ws: wsName });
+  if (undoList.length > UNDO_MAX) undoList.shift();
+  updUndoBtn();
+}
+function updUndoBtn() {
+  const b = $('#undoMove'); if (!b) return;
+  const last = undoList[undoList.length - 1];
+  b.disabled = !last;
+  b.title = last ? `↩ Put back: undo the last change (${last.why}). Ctrl+Z does it too. Up to ${UNDO_MAX} steps.` : '↩ Put back: undoes the last move, unlock or swap (Ctrl+Z). Nothing to put back yet.';
+}
+function undoLast() {
+  if (!editing || drag || drawPts) return;
+  const u = undoList.pop(); if (!u) { updUndoBtn(); return toast('Nothing to put back yet', true); }
+  draft = u.d; sel = null;
+  if (u.ws !== wsName && draft.workspaces.some(w => w.name === u.ws)) { wsName = u.ws; renderTabs(); }
+  renderWs(); updUndoBtn(); toast(`↩ Put back: ${u.why}`);
+}
+// the pop-up. it = what was grabbed; locked = the locked things that stop it moving with its pipes
+function grabPopup(it, locked = []) {
+  const joins = grabJoins(it), who = it.kind === 'pipe' ? (it.name || (it.hose ? 'This hose' : 'This pipe')) : lockName(it);
+  const nPipes = new Set(joins.map(j => j.p)).size, pipeWord = it.kind === 'pipe' ? `${joins.length} end${joins.length > 1 ? 's' : ''} joined to other things`
+    : `${nPipes} pipe${nPipes > 1 ? 's' : ''} joined to it`;
+  const close = () => d.close();
+  const btn = (text, title, fn, cls = 'big') => h('button', { type: 'button', class: cls, title, onclick: () => { fn(); close(); } }, text);
+  const unlock = btn(it.kind === 'pipe' ? '🔓 Unlock its ends' : '🔓 Unlock its IPs', it.kind === 'pipe' ? 'Its ends let go of what they are joined to and stay open, so the pipe moves alone. Then grab it again.'
+    : 'Its pipe ends let go and stay where they are (open ends), so it moves alone and the pipes and fittings stay. Then grab it again and move it. ↩ Put back (Ctrl+Z) joins them again.', () => {
+    pushUndo(`unlock ${who}`); unlockJoins(joins); grabWith.delete(it.id || it.name); renderWs();
+    toast(`🔓 ${who}: ${joins.length} pipe end${joins.length > 1 ? 's' : ''} let go. Grab it again and move it. Drop an IP back on an open end to join it again; ↩ Put back (Ctrl+Z) undoes it.`, false, 7000);
+  }, 'big primary');
+  const withBtn = locked.length || it.kind === 'pipe' ? null : btn('Move it with its pipes', 'As before (Rule 5.19): a pipe with an open end moves along, a pipe end slides along its own line, and a pipe moved off to the side lets go. Then grab it again.', () => {
+    grabWith.add(it.id || it.name); toast(`Grab ${who} again and move it with its pipes.`);
+  });
+  const others = swapChoices(it);
+  const pick = others.length ? h('select', { title: 'Pick the pump or valve to swap with. It takes this one\'s place, size and pipes; this one goes where it was (on its Tab).' },
+    h('option', { value: '' }, '🔁 Swap places with...'), ...others.map((o, i) => h('option', { value: String(i) }, `${swapLabel(o)}${o.workspace !== it.workspace ? ` (on ${o.workspace})` : ''}`))) : null;
+  if (pick) pick.onchange = () => {
+    const o = others[+pick.value]; if (!o) return;
+    const off = offEnds();
+    pushUndo(`swap ${swapLabel(it)} and ${swapLabel(o)}`); swapPlaces(it, o); close(); renderWs(); letGoBentEnds(off);
+    toast(`🔁 ${swapLabel(o)} is now where ${swapLabel(it)} was, on its pipes. ↩ Put back (Ctrl+Z) undoes it.`, false, 7000);
+  };
+  const ask = h('input', { type: 'checkbox' });
+  ask.onchange = () => { grabNoAsk = ask.checked; };
+  const cancel = () => h('button', { type: 'button', class: 'big', title: 'Nothing changes', onclick: close }, 'Cancel');
+  const d = h('dialog', { class: 'infoDlg grabDlg', 'data-nomenu': true },
+    h('div', { class: 'bar' }, h('h3', {}, `Move ${who}?`), h('span', { class: 'spacer' }), cancel()),
+    h('p', {}, `${who} has ${pipeWord}.`),
+    locked.length ? h('p', { class: 'warn' }, `🔒 ${locked.slice(0, 3).map(lockName).join(', ')}${locked.length > 3 ? ` and ${locked.length - 3} more` : ''} ${locked.length > 1 ? 'are' : 'is'} locked, so it can only move alone.`) : null,
+    h('div', { class: 'vdBtns' }, unlock, withBtn),
+    pick ? h('div', { class: 'vdBtns' }, pick) : null,
+    locked.length || it.kind === 'pipe' ? null : h('label', { class: 'toggle', title: 'Moves go on with their pipes without asking, until you leave Edit layout' }, h('span', { class: 'sw' }, ask, h('span', { class: 'swk' })), ' Don\'t ask again'),
+    h('div', { class: 'bar' }, h('span', { class: 'spacer' }), cancel()));
+  d.addEventListener('close', () => d.remove());
+  document.body.append(d); d.showModal();
+}
+// ask before this drag moves pipes? (not for a resize, a phone, or something the user already said to move with its pipes)
+const grabAsks = it => !grabNoAsk && !grabWith.has(it.id || it.name) && grabJoins(it).length > 0;
 // A hose is a pipe that bends: a smooth curve through its points (Catmull-Rom spline drawn as Bezier curves)
 function hoseD(pts) {
   if (!pts.length) return '';
@@ -2958,6 +3096,7 @@ function setEditing(on) {
   if (on && menuTab) leaveMenuTab();         // Edit layout works on the screen tabs
   previewing = false;
   editing = on; sel = null; drawPts = null; drawCursor = null; drawFrom = null;
+  undoList = []; grabWith.clear(); grabNoAsk = false; updUndoBtn();      // ↩ Put back and the grab pop-up start fresh (Rule 5.37)
   if (on) nameAll(S.config.graphics);       // older pipes and fittings get their Skynet names (saved with the next layout save)
   draft = on ? clone(S.config) : null;
   if (on) { const up = uprightKettles(draft.graphics); if (up.length) setTimeout(() => toast(`Set upright: ${up.join(', ')}. Kettles flip Horizontal only, never Vertical (Rule 5.5). Save layout keeps it.`), 300); }
@@ -2995,6 +3134,13 @@ function editInfoPopup() {
   document.body.append(d); d.showModal();
 }
 $('#editInfo').addEventListener('click', editInfoPopup);
+$('#undoMove').addEventListener('click', undoLast);
+// Ctrl+Z in Edit layout puts back the last move, unlock or swap (Rule 5.37); in a text box it stays the browser's own undo
+document.addEventListener('keydown', ev => {
+  if (!editing || !(ev.ctrlKey || ev.metaKey) || ev.shiftKey || ev.key.toLowerCase() !== 'z') return;
+  if (ev.target.closest?.('input, textarea, select, [contenteditable="true"], dialog') || document.querySelector('dialog[open]')) return;
+  ev.preventDefault(); undoLast();
+});
 
 let drag = null, lastPipeTap = null, hitUnit = null;
 $('#ws').addEventListener('pointerdown', ev => {
@@ -3024,6 +3170,7 @@ $('#ws').addEventListener('pointerdown', ev => {
     startLongPress(ev, 'gfx', hit.dataset.gid); sel = { kind: 'gfx', id: hit.dataset.gid };
     const pipe = findItem('gfx', sel.id);
     drag = noMove() ? null : pipe.locked ? lockedDrag(pipe, p) : startPipeMove(pipe, p);
+    if (drag?.mode === 'pipe' && grabAsks(pipe)) drag.ask = true;      // its ends on other things: ask first (Rule 5.37)
     renderWs(); return;
   }
   if (!node) { sel = null; renderWs(); startLongPress(ev, 'tab'); return; }   // empty spot: hold a finger for Tab settings
@@ -3042,9 +3189,14 @@ $('#ws').addEventListener('pointerdown', ev => {
     if (ps.length === 1 && ps[0].straight && !ps[0].locked) { drag = startPipeMove(ps[0], p); ev.preventDefault(); return; }
   }
   const riders = lockedRiders(item);
-  if (riders.length) { drag = lockedDrag(item, p, riders); ev.preventDefault(); return; }
+  if (riders.length) {            // a locked pipe or fitting would move with it: it can still move alone, with its IPs unlocked (Rule 5.37)
+    drag = lockedDrag(item, p, riders);
+    if (grabJoins(item).length && !lockedRiders(item, true).length) { drag.ask = true; drag.riders = riders; }
+    ev.preventDefault(); return;
+  }
   drag = { mode: !pip && !bundle && (!item.bundled || isUnit(item) || isSkyV(item)) && ev.target.classList.contains('rs') ? 'resize' : 'move', dir: ev.target.dataset?.rs || 'se', item, node, start: p, orig: { x: item.x || 0, y: item.y || 0, w: item.w || 120, h: item.h || 60 } };
   if (item.kind === 'vessel') drag.ports = bundleParts(item).map(g => ({ g, x: g.x || 0, y: g.y || 0 }));
+  if (drag.mode === 'move' && grabAsks(item)) drag.ask = true;      // pipes joined to it: ask first (Rule 5.37)
   // a fitting carries the straight pipes that hang off it with an open end: they keep their length and move along
   if (item.kind === 'ip') drag.stubs = [item.id, ...eqPorts(item).map(q => q.id)].flatMap(id => pipesOn(id, item.workspace).filter(pp => pp.straight).map(pp => ({ p: pp, pts: clone(pp.points), end: ownCoupling(pp.from === id ? pp.to : pp.from, pp) }))).filter(q => q.end).map(q => ({ ...q, ex: q.end.x, ey: q.end.y }));
   node.setPointerCapture?.(ev.pointerId);
@@ -3060,11 +3212,13 @@ $('#ws').addEventListener('pointermove', ev => {
   if (!drag) return;
   if (drag.mode === 'locked') {        // a locked item (or one that would carry a locked one) was dragged: say why it stays
     const q = canvasPt(ev);
-    if (Math.hypot(q[0] - drag.start[0], q[1] - drag.start[1]) > 5) { toast(drag.why, true); drag = null; }
+    if (Math.hypot(q[0] - drag.start[0], q[1] - drag.start[1]) > 5) { const d0 = drag; drag = null; if (d0.ask) { cancelLongPress(); grabPopup(d0.item, d0.riders); } else toast(d0.why, true); }
     return;
   }
   // a click or double-click that wobbles a few pixels is not a drag (Fritz, 2026-11-05: opening an IP moved it off its pipes)
   if (!drag.moved && downAt && drag.mode !== 'point' && Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) < DRAG_DEAD_PX) return;
+  if (!drag.moved && drag.ask) { const it = drag.item; drag = null; cancelLongPress(); grabPopup(it); return; }    // Rule 5.37: ask first, it stays put
+  if (!drag.moved) pushUndo(`${drag.mode === 'resize' ? 'resize' : 'move'} ${lockName(drag.item)}`);     // ↩ Put back (Rule 5.37)
   if (!drag.moved) drag.offBefore = offEnds();      // pipe ends already off their IPs before this drag are not this drag's doing
   drag.moved = true;
   const p = canvasPt(ev), dx = p[0] - drag.start?.[0], dy = p[1] - drag.start?.[1];
@@ -3151,6 +3305,7 @@ window.addEventListener('pointerup', () => {
   if (drag?.mode === 'resize' && drag.moved && isVW(drag.item)) { vSizeTab(draft.workspaces.find(w => w.name === drag.item.workspace), true); renderWs(); }    // the Master Vessel Sizer: every Vessel on the Tab follows
   if (drag?.moved && ['move', 'resize', 'pipe'].includes(drag.mode)) letGoBentEnds(drag.offBefore);     // Rule 5.19: a pipe never bends to follow (first, so a valve moved off its pipes can cut the pipe it is dropped on)
   if (drag?.mode === 'move' && drag.moved && !drag.item?.kind) { const w = wellOnIp(drag.item); if (w) { renderWs(); toast(w.text, !w.ok, 6000); } }   // a thermowell or probe on an IP: Rule 5.30
+  if (drag?.mode === 'move' && drag.moved) { const ids = new Set(grabIpIds(drag.item)); if (ids.size && rejoinLetGo(drag.item) + rejoinEnds(ids)) renderWs(); }    // its IP dropped on an open pipe end joins it (Rule 5.37)
   if (drag?.mode === 'move' && drag.moved) { const r = splitPipeFor(drag.item); if (r) { if (r.ok) renderWs(); toast(r.text, !r.ok, 6000); } }   // put on a pipe: Rule 5.26
   if (drag?.mode === 'point' && drag.moved && isQdHose(drag.item) && drag.i === drag.item.points.length - 1) {     // a QD hose's free end (Rule 5.28)
     const t = qdTarget(drag.item, drag.item.points[drag.i]); drag.item.to = t?.id ?? null; if (t) drag.item.points[drag.i] = [...t.c];
@@ -4754,13 +4909,13 @@ $('#turnR45').onclick = () => turnSel(45);
 // Lock holds in Edit layout too (Fritz, 2026-10-22): only unlocked items move. An unlocked item also stays put when moving it
 // would carry or bend a 🔒 locked one: a vessel's ports and joined fittings, a straight pipe's own end couplings, a pipe or hose joined to it.
 const lockName = o => o.name || o.label || (o.kind === 'pipe' ? (o.hose ? 'a hose' : 'a pipe') : o.kind === 'ip' ? 'an IP' : 'an item');
-function lockedRiders(item) {
+function lockedRiders(item, noPipes = false) {     // noPipes: only what moves with it when its pipes have let go (Rule 5.37)
   const out = [], add = g => { if (g?.locked && g !== item && !out.includes(g)) out.push(g); };
   if (item.kind === 'pipe') { if (item.straight) for (const k of ['from', 'to']) add(ownCoupling(item[k], item)); return out; }
   const parts = item.kind === 'vessel' ? bundleParts(item) : [];
   parts.forEach(add);
   const ids = item.kind ? [item.id, ...eqPorts(item).map(q => q.id), ...parts.map(g => g.id)] : hasIps(item) ? devIps(item).map(q => q.id) : [];
-  for (const id of ids) for (const pp of pipesOn(id, item.workspace)) { add(pp); if (pp.straight) add(ownCoupling(pp.from === id ? pp.to : pp.from, pp)); }
+  if (!noPipes) for (const id of ids) for (const pp of pipesOn(id, item.workspace)) { add(pp); if (pp.straight) add(ownCoupling(pp.from === id ? pp.to : pp.from, pp)); }
   return out;
 }
 function lockedDrag(item, p, riders) {
