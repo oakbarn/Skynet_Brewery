@@ -438,6 +438,7 @@ body.role-viewer .op-only { display: none !important; }
 #ws .gfx.vessel.heating .twell.elmark { background: #ff7a00; box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 0 12px 4px #ff7a00; }
 /* the Vessel Widget class (Rule 5.31): its Probe and Element pictures, and in Edit layout a faint mark for each spot not Placed */
 #ws .gfx.vessel .vwPart { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
+#ws .gfx.vessel .vwPart.vpPart { pointer-events: auto; cursor: pointer; }      /* a Vessel Device's part: double-click for its Properties */
 #ws .gfx.vessel .vwPart.vwOff { opacity: .3; outline: 1px dashed rgba(255,255,255,.7); }
 #ws .gfx.vessel.heating .vwElem:not(.vwOff) { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
 /* a Vessel Device (Rule 5.31 exception): its HERMS coil sits under its IPs; an Element glows and a Valve shows green while on */
