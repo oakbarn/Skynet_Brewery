@@ -442,6 +442,26 @@ colors. **This is a change from BruControl** (Fritz: "Again a Change from BruCon
    Look (Black, Dark, High Contrast = Office Black; Dark Gray = Dark Gray; White, Light, Colorful, Blue = White); not found = Office
    Black. Each imported Tab gets the Look's Tab colors. (thread "Add a few look-alike Panel themes", Help 151)
 
+2.40 **Skynet's own gauges and timer digits** (Fritz, 2026-11-07: "Can we create our own templates for Temperature Gauges and
+Timers similar to the DevExpress ones without violating copyright laws"). BruControl's gauges are DevExpress drawings (paid,
+closed); Skynet **never copies their pictures, code or style names**. Free gauge libraries were checked (Canvas Gauges, SteelSeries,
+JustGage) and Fritz picked **Skynet's own drawings** (SVG), from his own idea pictures (made as public images):
+1. **The Skynet Dial** (his "top left #1"): an arc with a needle and the reading in digits under it, **0 to 2 decimals** (the item's
+   Decimals). It is a **Look** (`dial`): a Temperature Probe picks it with **Display** (Number, LCD digits, LED digits, Skynet Dial),
+   any other Device that shows a number in its Text attributes ⬢; a Process with `name.valueType = "Dial"`. Its ⬢ holds **Lowest**,
+   **Highest**, **Setpoint** (a number, or the Name of a Device or gGlobal to follow), **Cooler range** and **Hotter range** (the user
+   sets each; empty = 2) and the **Cold, OK and Hot colors** (Default Blue, Green, Red; Rule 2.7). Fritz: "if n degrees lower than
+   Setpoint the color is blue, n degrees hotter than set point Red, and green if between the Cooler and Hotter Range". With no
+   Setpoint the arc runs blue to red.
+2. **Timer Digits** (Fritz: "a Timer Digits similar to this. Colors would be the Back and the Text Fore and Back with a Fritz created
+   Overlay choice"): a Timer User Style has **Back color**, **Text Fore color** (the digits), **Text Back color** (the panel) and a
+   **Frame**: Fritz's own Timer frames (Timer_Overlay pictures, made by him in Paint), drawn by Skynet in his 3 shapes (**Rounded
+   corners**, **Square corners**, **Square top, rounded bottom**) with a **Frame color**. Each Timer has **Digits** (hh:mm:ss or
+   hh:mm) and **Seconds only in the last minute** (counting down, it shows just SS once under one minute is left).
+3. **The BruControl Import** gives each gauge the closest look: a round or bar gauge becomes the Skynet Dial with BruControl's lowest
+   and highest numbers and decimals, a digit gauge LCD digits; the DevExpress style name is kept only as a record.
+(thread "Build our own temperature gauge and timer looks", Help 152)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2529,3 +2549,4 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.19 (Fritz: "we ask the primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed"): a Heating Element's main method plus ticked other methods; only those are allowed (pop-up, spots, Method Clones, Process editor, Brain); each allowed method gets a one-click spot when two or more are allowed. Help 150 updated. Checked against the BruControl Import program: it sets the main method and ticks the others, and its first page explains One Interface Port, one Device and the Heating Element (Fritz: "We need to explain that in the Beginning of the BruControl Import"). (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.1 (Fritz: "Once a Port Is Selected, it is taken. So the method of choosing a Port has to be addressed as well"): every Port picker offers only free Ports plus the Device's own; the older typed Pin boxes (and the Duty Cycle, Hysteresis, PID and Deadband Pin) now list only free Ports. Checked against the BruControl Import program: it keeps BruControl's ports, joins heating controls on one port and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 2.39 (new, Fritz: "We only need a few, and choose one that best matches the DevExpress ones"): Panel Looks (themes) Office Black (default, closest to BruControl's Office 2019 Black), Dark Gray, White and Skynet Night, each a few color picks; picked in Settings > Panel settings, saved with the Schema; new Tabs get the Look's Tab colors; Use this Look on every Tab with Put the Tabs back. A change from BruControl: its DevExpress themes are not public and would not work in a browser, so Skynet sets the Back and Text colors. Rule 11.1 next free Help is 152. Help 151 new, Help 09 updated. Checked against the BruControl Import program: it picks the closest Look from the BruControl theme, gives imported Tabs the Look's Tab colors, and lists Themes on its "What is different in Skynet" page. (thread "Add a few look-alike Panel themes")
+- 2026-11-07: Rule 2.40 (Fritz: our own gauges and timers without copying DevExpress): the Skynet Dial (arc, needle, digits 0-2 decimals, blue / green / red from the Setpoint with Cooler and Hotter ranges), Timer Digits (Back, Text Fore, Text Back colors, Fritz's frames in 3 shapes, hh:mm:ss or hh:mm, Seconds only in the last minute); the BruControl Import maps its gauges to them. Help 152; next free Help 153. (thread "Build our own temperature gauge and timer looks")

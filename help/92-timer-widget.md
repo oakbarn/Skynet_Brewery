@@ -7,7 +7,7 @@ A **Timer Widget** counts up or down in hours, minutes and seconds. Add one in E
 A Timer Widget has **no pictures and no background**. Its look is its **Style**, picked from the **Style** list in its Properties:
 
 - **Skynet Styles** 🔒 come with Skynet and **can never be changed by a user**: **Skynet Orange Timer** (big seven-segment digits `00:00:00` on an orange-red panel in a grey bezel, with the Label as a black title bar; the one a new Timer gets), **Skynet Green LCD**, **Skynet Blue Timer**, **Skynet Red LED digits** (the older LED look) and **Skynet Plain text**.
-- **➕ Add new User Style…** (at the end of the list) makes your own Style, starting from the one picked now: a Name (never "Skynet ..."), the Look (seven-segment digits on a panel, LED digits or plain text), and the Digits, Panel, Bezel, Title bar text and Title bar colors. **✏ Edit** beside the list changes or deletes a User Style; it is greyed out for a Skynet Style.
+- **➕ Add new User Style…** (at the end of the list) makes your own Style, starting from the one picked now: a Name (never "Skynet ..."), the Look (seven-segment digits on a panel, LED digits or plain text), the **Back color** (round the panel), **Text Fore color** (the digits), **Text Back color** (the panel), the **Frame** (Rounded corners, Square corners, or Square top with a rounded bottom, from Fritz's own Timer frames) with its **Frame color**, and the Title bar text and Title bar colors ([Skynet Dial and Timer Digits](152-skynet-dial-and-timer-digits)). **✏ Edit** beside the list changes or deletes a User Style; it is greyed out for a Skynet Style.
 - A User Style belongs to the Schema, so every Timer in it can use it.
 
 The ▶ ■ ↺ **Set** buttons under the digits start, stop, reset and set it.
@@ -22,7 +22,10 @@ Rest the mouse on a field's name to see what it is for (hover help).
   Once saved the name is locked 🔒; **✏ Change name** changes it and every Process that uses it follows.
 - **Count** (Count up or Count down), **Start value** and **Reset value** (hh:mm:ss).
 - **Running at start** (it is already counting when the Brain starts), with **Database and .API ⬢** on its line.
-- **Style** (see above), **X**, **Y**, **Width** and **Height**, and the **Widget Type** greyed out last.
+- **Style** (see above).
+- **Digits**: **hh:mm:ss** (01:30:00) or **hh:mm** (01:30).
+- **Seconds only in the last minute**: on, a Timer counting down shows just the seconds (**45**) once less than one minute is left.
+- **X**, **Y**, **Width** and **Height**, and the **Widget Type** greyed out last.
 
 ## In a Process
 
