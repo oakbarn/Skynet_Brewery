@@ -191,16 +191,16 @@ most common **Probe Location** are the Center Probe. (Fritz's drawing: project f
 ### Dialog 2: one for each Vessel ("Vessel N: HLT")
 1. **Capacity:** Liters (Metric) or Gallons (US). This is the Vessel's Gallons field (Rule 19.1).
 2. **Dead Space:** the same units as Capacity.
-3. **Outlet fitting:** TC 1.5; NPT; BSP; None.
+3. **Outlet:** a drill-down (Fritz, 2026-11-07: "Drill Down is good"). First the **fitting**: TC 1.5; NPT; BSP; None.
+   If it is not None, then **where it is**: Above Bottom (Center Outlet IP); Bottom Outlet (Center Bottom Outlet IP).
 4. **Thermowell:** Center Above, Manual Thermometer; Center Above, BruControl Probe; None.
 5. **High Return:** Sparge Arm; Steam Slayer; Inlet; None.
 6. **Tangential Inlet:** Left; Right; Left and Right; None. It uses the Left or Right Tangential IP from the drawing (both IPs
    for Left and Right). Each tangential then gets its own connection chain in Dialog 2b (Fritz, 2026-11-07: "If I forgot ask
    about tangentials").
-7. **Outlet:** TC above Bottom; TC Bottom Outlet; BSP above Bottom; BSP Bottom Outlet; None.
-8. **HERMS Coil inside the Vessel:** Left Outlet and Inlet; Right Outlet and Inlet; Right Inlet, Left Outlet; Left Inlet,
+7. **HERMS Coil inside the Vessel:** Left Outlet and Inlet; Right Outlet and Inlet; Right Inlet, Left Outlet; Left Inlet,
    Right Outlet; None.
-9. **Heat Source:** a dropdown. What comes under it depends on the choice:
+8. **Heat Source:** a dropdown. What comes under it depends on the choice:
    - **BruControl Heating Element**
      - **Element location:** Right; Left; Back Left; Back Right; None.
      - **BruControl Element:** a dropdown of the imported heating Devices (Hysteresis, PID, Duty Cycle, Deadband and so on),
@@ -263,8 +263,8 @@ Processes as we may gain what a vessel is used for."
   stays the brewer's choice.
 
 ### Open questions for Fritz on this list
-1. **Two Outlet questions (2.3 and 2.7).** Suggestion: 2.3 is the outlet's **fitting** (TC 1.5, NPT, BSP) and 2.7 is **where** it is.
-   Then 2.7 could be just "Above Bottom; Bottom Outlet; None", since 2.3 already says TC or BSP.
+1. **Outlet questions: decided** (Fritz, 2026-11-07: "Drill Down is good"). One Outlet question (2.3): first the fitting,
+   then where it is.
 2. **Gas Burners:** when BruControl controls the Gas Valve or the Igniter, pick that Device the same way (a dropdown of the
    imported Devices by BruControl name), and the Temperature Probe too?
 3. **All In One:** which other models go in the list (for example Anvil Foundry, Clawhammer, Robobrew)? Does an All In One
