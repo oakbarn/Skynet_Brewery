@@ -1705,7 +1705,7 @@ Sparge** (122 °F 15 min, 146 °F 30 min, 158 °F 20 min, mash out 168 °F, fly 
 ## 18. General Dialog Rules
 
 Fritz's **New General Dialog Rules** (2026-11-02, thread "Add the New General Dialog Rules"). His drawing of the layout is
-[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23), the **Heating Element** (Rule 18.24), the **PWM / Analog out** (Rule 18.25), the **Temperature Probes** (Rule 18.26), the **Picture Widget** (Rule 18.27), the **Valve Tees and Supply Manifolds** (Rule 18.29) and the **Value, Time and DateTime Widgets** (Rule 18.30).
+[docs/General_Properties_Dialog_Format.png](General_Properties_Dialog_Format.png) (a Text Widget as the example). Changed so far: the Alarm Widget, the **Pump Device** (Rule 18.12), the **Motorized Ball Valve** (Rule 18.23), the **Heating Element** (Rule 18.24), the **PWM / Analog out** (Rule 18.25), the **Temperature Probes** (Rule 18.26), the **Picture Widget** (Rule 18.27), the **Valve Tees and Supply Manifolds** (Rule 18.29), the **Value, Time and DateTime Widgets** (Rule 18.30) and **every other Device** (Rule 18.31).
 
 18.1 **The Up Arrow icon** (a red up arrow ⬆) beside a field opens a **String Entry Dialog**: a bigger box to type the
 string in, with ✖ Cancel and 💾 Save. There are two sizes: **2 lines** and **30 lines**. Word wrap and the Rich Text
@@ -1750,7 +1750,8 @@ commands it**. Until a dialog is changed, it keeps its present layout (Rules 2.2
 is changed, it follows Rule 15.3 (the old way is changed everywhere Skynet ships it).
 *Exception (Fritz, 2026-11-06: "Yes Hover on all Dialogs. You can take a snippet of help and have it in the Hover Dialog"):* moving
 explanations into hover help (Rule 2.38) is done to **every dialog at once**, since it changes no field. The hover help may be a short
-piece of the Help page. And "Widgets follow Pump Drill Down look" is Fritz's command for **every Widget dialog** (Rule 18.30).
+piece of the Help page. And "Widgets follow Pump Drill Down look" is Fritz's command for **every Widget dialog** (Rule 18.30), and
+"All dialogs for devices should follow the Pump Drill down sample" (Fritz, 2026-11-07) is his command for **every Device dialog** (Rule 18.31).
 
 18.11 **Cancel warns before throwing away changes.** In every dialog with ✖ Cancel and 💾 Save, if anything was changed and
 Cancel is pressed, a warning asks whether to really discard the changes or go back and save. With no changes, Cancel just
@@ -2026,6 +2027,30 @@ Value, Time and DateTime Widgets: the lock, Visible and Hidden Locked in the tit
 **3 Name**; the Start value; a Value Widget's **Units ⬢** (Decimals, Step, Lowest, Highest); **Read only** with **Database and .API ⬢**
 on its line; **Fore color ⬢** (Back color, Alignment); X, Y, Width, Height; and the **Widget Type** greyed out last. Every explanation
 is in the hover help of the field's name (Rule 2.38). (Help 134)
+
+18.31 **Every Device looks like the Pump's drill-down** (Fritz, 2026-11-07: "All dialogs for devices should follow the Pump Drill
+down sample"; "Check All Devices and insure the Properties follow the PUMP Drill Down model", thread "Make every Device dialog match
+Pump drill-down", Help 148). Fritz's word is the command for every Device dialog (Rule 18.10). The Devices that already had the
+drill-down keep theirs (the Pump, Motorized Ball Valve, Heating Element, PWM / Analog out, Temperature Probes, Valve Tees and Supply
+Manifolds, Vessel Device). **Every other Device's Properties** now have the same layout: a plain relay / SSR / contactor output, the
+Skynet Motorized Butterfly Valve, the Skynet KLD20T and User Defined Proportional Valves, the heating element PWM, Duty Cycle,
+Hysteresis, PID and Deadband, the digital inputs (Switch, Push, Toggle and Pulse buttons, Latching input, Pulse counter, Float,
+Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), the Flow meter, the Steppers and the Vessel scale:
+1. The lock, **Visible** and **Hidden Locked** in the title line; 🗑 Delete, ✖ Cancel, 💾 Save top and bottom (Rule 2.17).
+2. **1. Label ⬆ ⬢** and **Label Visible**; **2. Interface** with its **Port** (or **Probe #**) on the same line, greyed out for
+   good (Rule 18.13), with **Invert** and **One-shot** in its ⬢ where it has them (the Pump's Pin attributes); **3. Tab**;
+   **4. Name** and the Suggested Name (Rule 3.1).
+3. With pictures: the **Graphic**, **Path** (and **Path (on)** when it has a second picture), and **Overlay** with **Toggle**
+   (an output) and **Database and .API ⬢** on its line. With no pictures: **Database and .API ⬢** on a line of its own.
+4. Its own set (Rule 18.22): what that kind of Device needs (a PID's Input, Target, Kp ...; a sensor's Signal, Units ...).
+5. **Text attributes ⬢** (its Value or On / Off text and its look), **X, Y, Width, Height**, and the **Device Type** last.
+- **A Device built into something** (a Vessel Device's Thermowell, Probe, Heating Element or Valve; a RIMS tube's or an Integrated
+  kettle's element and probe, Rule 5.7) gets the same layout, with **3. Built into** (greyed out) in place of the Tab, no Graphic and
+  no X, Y, Width, Height (it moves with what it is built into); a built in probe shows its Probe type ⬢, Units, Calibration offset and
+  Reading now as a Temperature Probe does (Rule 18.26). Double-clicking the part's picture on the Vessel or its reading opens it.
+- What a Device already has set is kept (its look, pin settings and so on); only the dialog changed. Every explanation is in the
+  hover help (Rule 2.38).
+- **BruControl Import:** it has no Device dialogs of its own; the Devices it brings in open in these Properties in the Panel.
 ---
 
 ## 19. Vessel Rules
@@ -2353,6 +2378,7 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 18.10 exception (Fritz): hover help goes on every dialog at once (a snippet of Help may be the hover text), and every Widget dialog gets the Pump drill-down look (Rule 18.30). (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.30: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 18.30: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
+- 2026-11-07: Added Rule 18.31 (Fritz: "All dialogs for devices should follow the Pump Drill down sample"): every other Device's Properties, and every Device built into a Vessel Device, RIMS tube or Integrated kettle, follow the Pump's drill-down; double-clicking a built in part opens its Properties. Rule 18.10's exception extended to Devices. Help 148; next free Help number 149. Checked against the BruControl Import program: it has no Device dialogs, its Devices open in the Panel's. (thread "Make every Device dialog match Pump drill-down")
 - 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")
 - 2026-11-07: Rule 5.31: plugged IPs are hidden; only open IPs show (a Thermowell, Probe, End Cap or Heating Element plugs its opening; a built in Valve does not). The Panel now hides a Vessel Device IP with a built in Element, Probe or Thermowell, as it already did for an End Cap. The BruControl Import's Vessel questions (plan section 9) now ask about every other opening: Not there, Open (its own connection chain), or Plugged with a Thermowell, End Cap or Heating Element. Checked against both programs. Help 133 and 143 updated; no new Help number used. (thread "Ask about other Vessel openings in the import")
 - 2026-11-07: Rule 5.31: the Three Vessel sample's HLT, Mash tun and Boil kettle are now Vessel Devices built from the Main Template (Fritz: "change all the vessels to" "Vessels Devices"), their probes and heaters built into the Left and Right Element IPs; a built in Element that is a heat controller stays one. Help 133 updated; no new Help number used. Checked against the BruControl Import program: it does not use the samples, so nothing changes there. (thread "Change 3 Vessel sample to Vessel Devices")
