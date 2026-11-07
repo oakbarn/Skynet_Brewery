@@ -82,3 +82,4 @@ table.words th { background: var(--panel2); }
 .cnChip.loose { border-style: dashed; }
 .cnChip.picked { outline: 3px solid var(--accent); }
 #cnAiText { width: 100%; font-family: var(--mono); box-sizing: border-box; }
+.quote { font-style: italic; border-left: 4px solid var(--accent); padding: 4px 10px; max-width: 980px; }

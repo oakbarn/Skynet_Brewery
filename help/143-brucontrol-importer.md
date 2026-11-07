@@ -21,7 +21,9 @@ A short welcome: what the Importer does, and that it never changes BruControl or
 
 This page tells you what stays the same (your boards, wiring, Devices, screens, scripts, pictures), what is different
 in Skynet (it runs in a browser, some new words, Skynet pictures and Templates, everything comes in the Skynet way), and the steps
-the Importer will guide you through. Click **Start ▶**.
+the Importer will guide you through. Under **Your Scripts** it also tells you about the **Preset Schema Templates** (what
+BruControl called Configurations) that you can easily change, and why (Fritz: "I wanted to Brew, not write Code!").
+Click **Start ▶**.
 
 | BruControl | Skynet |
 |---|---|
