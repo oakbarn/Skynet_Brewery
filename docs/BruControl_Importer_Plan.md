@@ -325,8 +325,12 @@ what." The Tartan test build (Tartan1, 2026-11-07) showed this is the biggest ga
 A new Importer step, after the Vessel Devices are built and before the Schema is saved. Nothing here reads a picture with AI:
 the program only shows it and measures distances on the screen. Three helpers, used together:
 
-1. **Manifold questions (what is connected to what).** For each imported valve and pump, one short drill-down question, like
-   Dialog 2b: **From** (a Vessel and its IP, a pump's in or out, another valve, a Supply Manifold, Tap Water, Drain, or Not
+1. **Manifold questions (what is connected to what), built one piece at a time** (Fritz, 2026-11-07: "Build the manifold like
+   the knee bone is connected to the leg bone"). The manifold is walked as chains, like Dialog 2b: start at a Vessel outlet (or a
+   pump), ask **what is connected to it**, then **what is connected to that**, and so on (each link asks Hose or Pipe) until the
+   chain reaches an end (a Vessel IP, Tap Water, Drain, a QD, or Nothing). A Tee or Supply Manifold opens a branch that is walked
+   next. Every item already used shows as used, so nothing is joined twice, and a loose valve or pump left at the end gets its own
+   chain. Each link is one short drill-down question, like Dialog 2b: **From** (a Vessel and its IP, a pump's in or out, another valve, a Supply Manifold, Tap Water, Drain, or Not
    connected) and **To** (the same list). A pump also asks which way it pumps. A **Supply Manifold** (Rule 5.35) can be picked
    for a row of valves on one pipe. Each answer starts with the best guess (helper 3), so the brewer only checks it. Answers
    build the pipes and hoses between the IPs (Rule 5.29, 5.34); a missing answer leaves the item loose, never a wrong pipe.
