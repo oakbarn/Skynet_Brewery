@@ -1554,7 +1554,8 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 - **It is a choice when installing** (Fritz, 2026-11-06). The Windows Setup asks "Will you import a BruControl configuration
   on this computer?" with this under it (Fritz, 2026-11-07): "If you are a BruControl Brewer and want to import a BruControl
   .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the Importer's shortcuts (Desktop, Start menu and the Import folder); No leaves them out (Setup can be run again to add it). On an update the
-  last answer is the default.
+  last answer is the default. When the answer was Yes, the last Setup page has a tick box, **Open the BruControl Importer now**
+  (Fritz, 2026-11-07).
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
   their files there too. An uninstall never deletes it.
@@ -2349,4 +2350,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 18.30: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")
 - 2026-11-07: Rule 5.31: the Three Vessel sample's HLT, Mash tun and Boil kettle are now Vessel Devices built from the Main Template (Fritz: "change all the vessels to" "Vessels Devices"), their probes and heaters built into the Left and Right Element IPs; a built in Element that is a heat controller stays one. Help 133 updated; no new Help number used. Checked against the BruControl Import program: it does not use the samples, so nothing changes there. (thread "Change 3 Vessel sample to Vessel Devices")
-- 2026-11-07: Rule 15.4: the Setup question about the Importer now explains who should answer Yes (BruControl Brewers with a .brucfg file) and who should answer No. (thread "Reword Setup BruControl import question")
+- 2026-11-07: Rule 15.4: the Setup question about the Importer now explains who should answer Yes (BruControl Brewers with a .brucfg file) and who should answer No; when Yes, the last Setup page offers a tick box "Open the BruControl Importer now". Checked against both programs: only the shared Setup changes. Help 143 updated. (thread "Reword Setup BruControl import question")
