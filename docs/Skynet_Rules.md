@@ -1286,18 +1286,28 @@ Widget with a value has an **API_Name** String, **only on its Database and .API 
 select the heating method via process or on the Device when clicked"). One physical heating element is **one Device**: a Heating
 Element (a Digital Out with Kind = element, on its own or built into a Vessel Device, RIMS tube or Integrated kettle). How it heats
 is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband**.
-- **Properties:** under *Heating method*, the method it **starts with** (On/Off for one that has none), the **Temperature Probe** it
-  reads (Hysteresis, PID and Deadband need one) and that method's settings. The other methods' settings are kept.
+- **Only Heating Elements, today** (Fritz, 2026-11-07: "Heating Elements are the only thing I can Think of that could have a
+  different method of control. The hard wiring from the Arduino to the end hardware prevents other hardware from having different
+  methods of control"). The Rules about Devices with more than one Control Method (4.4, 6.19, `.method`) stay general, so another
+  kind could be added later only if Fritz says so.
+- **Properties (and its Build):** under *Heating method*, its **main method**, the one it **starts with** (On/Off for one that has
+  none), the **Temperature Probe** it reads (Hysteresis, PID and Deadband need one) and that method's settings, then **tick boxes
+  for the other methods it may use**. **Only the main method and the ticked ones are allowed** (Fritz, 2026-11-07: "we ask the
+  primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
+  Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
+  its Method Clones, the Process editor and the Brain offer only those; a Process asking for another gets a plain error. One with
+  nothing ticked has one way of control. The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
   once**, the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
   and **Cancel**. It still asks before it turns on (Rule 2.33).
 - **One-click method spots** (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
-  there is more than one control metod"): in Properties each method can be ticked as a spot. When **two or more** are ticked, a
-  small button for each shows under the Element on its Tab, or under its picture on a Vessel Device when it is built in. **One
-  click** on one switches the Element to that method at once; the one in use is lit. With fewer than two ticked, none show. The
-  BruControl Import ticks the methods of the controls it joined (port 42: Duty Cycle and PID). This needs no Clone (Rule 4.4).
+  there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
+  Element on its Tab, or under its picture on a Vessel Device when it is built in, whenever **two or more** are allowed. **One
+  click** on one switches the Element to that method at once; the one in use is lit. With only the main method, none show. The
+  BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
+  ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
 - **A Process:** `hE_1.method = "PID"` (On/Off, Duty Cycle, Hysteresis, PID, Deadband, or DO, DutyC, HYS, PID, DeadB), or the
   short way on a line of its own (Fritz, 2026-11-07: "MB_25_HE_HLT_BR.HYS or MB_25_HE_HLT_BR.DutyC"): `MB_25_HE_HLT_BR.HYS`,
   `.DutyC`, `.PID`, `.DeadB` or `.DO` switches it to that method, the same as `.method =`. Its settings
@@ -2490,3 +2500,4 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.19: one-click method spots: each heating method can be ticked in a Heating Element's Properties; with two or more ticked a small button for each shows under it (on its Tab or its Vessel Device) and one click switches to that method; the method buttons in its pop-up also switch at once. The BruControl Import ticks the joined controls' methods. Help 150 updated. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 4.4 changed (Fritz: "Make it part of the Rule for Devices that have more than One Control Method"): Method Clones: a Clone of a Device with more than one Control Method may stand for one method (its Control Method and Label are its own), may be on its parent's own Tab, switches the parent to its method with one click, and shows ON only while the parent is ON in that method. Help 71 and Help 150 updated. Checked against the BruControl Import program: a joined control's second placing is now a Method Clone with its BruControl Label. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 3.1: a Heating Element's Type ID is HE (Fritz: "So we could Use MB_25_HE_HLT_BR"), not DO; its Label fills in as hE_1 without the method (Rules 18.24, 18.15); elements named before keep DO (Rule 3.5). Rule 6.19: the short Process way MB_25_HE_HLT_BR.HYS (.DutyC, .PID, .DeadB, .DO) switches its method. Help 137, 150, 46 and the Device Library updated. Checked against the BruControl Import program: it names joined elements MP_42_HE_HLT_Heat_BH. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 6.19 (Fritz: "we ask the primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed"): a Heating Element's main method plus ticked other methods; only those are allowed (pop-up, spots, Method Clones, Process editor, Brain); each allowed method gets a one-click spot when two or more are allowed. Help 150 updated. Checked against the BruControl Import program: it sets the main method and ticks the others, and its first page explains One Interface Port, one Device and the Heating Element (Fritz: "We need to explain that in the Beginning of the BruControl Import"). (thread "Pick the heating method on one Element")

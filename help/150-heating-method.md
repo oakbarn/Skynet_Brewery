@@ -27,15 +27,20 @@ It still asks before it turns on (Rule 2.33): nothing turns on until you click *
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID or Deadband, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
 
+## Its main method and the other methods allowed
+
+When you build it (and later in its Properties), pick its **main heating method**, the one it starts with. Then, under **Other
+methods allowed**, tick each other method it may use. **Only the main method and the ticked ones can be used**: the pop-up, the
+spots, Method Clones and Processes offer only those, and a Process asking for another one stops with a plain message.
+
 ## One-click method spots
 
-In its Properties, under **One-click method spots on the Tab**, switch on the methods you want a button for. When **two or more**
-are on, a small button for each shows **under the Element** on its Tab, or under its picture on a **Vessel Device** when it is
-built in. **One click** on one switches the Element to that method at once; the one in use is lit orange. With only one (or none)
-switched on, no buttons show.
+When **two or more** methods are allowed, a small button for each shows **under the Element** on its Tab, or under its picture on
+a **Vessel Device** when it is built in. **One click** on one switches the Element to that method at once; the one in use is lit
+orange. With only the main method, no buttons show.
 
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
-click on PID to hold the strike temperature. The BruControl Import switches these on for you.
+click on PID to hold the strike temperature. The BruControl Import sets Duty Cycle as the main method and ticks PID for you.
 
 ## Method Clones: one tile per method
 

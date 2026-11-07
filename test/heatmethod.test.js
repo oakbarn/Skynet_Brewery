@@ -21,7 +21,7 @@ const d = fs.mkdtempSync(path.join(os.tmpdir(), 'heatmethod'));
 const cfg = path.join(d, 'c.json');
 fs.writeFileSync(cfg, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
   { name: 'Temp', type: 'temperature', sensor: 'simulated' },
-  { name: 'hE_PID_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 42, input: 'Temp', heatMethod: 'pid', target: 152, kp: 20, ki: 0, kd: 0,
+  { name: 'hE_PID_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 42, input: 'Temp', heatMethod: 'pid', target: 152, kp: 20, ki: 0, kd: 0, methodSpot_dutyCycle: true, methodSpot_hysteresis: true, methodSpot_onoff: true,
     heatControls: [{ name: 'HLT_PID', method: 'PID' }, { name: 'M_HLT_Heat', method: 'Duty Cycle' }] },
 ] }));
 const store = new Store(cfg, path.join(d, 'data')); store.load();
@@ -70,6 +70,7 @@ store.setProp('hE_PID_1', 'state', true);
 assert.deepEqual(sent, ['DO 42 1'], 'On/Off: the pin is .state');
 store.setProp('hE_PID_1', 'state', false);
 assert.throws(() => store.setProp('hE_PID_1', 'method', 'Steam'), /On\/Off, Duty Cycle, Hysteresis, PID, Deadband/);
+assert.throws(() => store.setProp('hE_PID_1', 'method', 'Deadband'), /may only use On\/Off, Duty Cycle, Hysteresis, PID \(tick Deadband/, 'Deadband is not ticked');
 
 // the old names merged into it (Rule 6.19): HLT_PID = true switches it to PID and turns it ON
 assert.ok(store.has('HLT_PID'));
@@ -130,8 +131,11 @@ console.log('heatmethod import tests passed');
   const { suggest } = await import('../public/autofill.js');
   const { controlMethods } = await import('../public/heatmethod.js');
   const { attrsOf } = await import('../lib/store.js');
-  const el = { type: 'digitalOut', subtype: 'element', name: 'hE_HLT_1' };
+  const el = { type: 'digitalOut', subtype: 'element', name: 'hE_HLT_1', heatMethod: 'dutyCycle', methodSpot_onoff: true, methodSpot_hysteresis: true, methodSpot_pid: true, methodSpot_deadband: true };
   assert.deepEqual(controlMethods(el), ['On/Off', 'Duty Cycle', 'Hysteresis', 'PID', 'Deadband']);
+  // only the main method and the ticked ones are allowed (Fritz, 2026-11-07: "Only Checked Methods are allowed")
+  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid', methodSpot_dutyCycle: true }), ['Duty Cycle', 'PID']);
+  assert.equal(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), null, 'one method allowed: one way of control');
   assert.equal(controlMethods({ type: 'digitalOut', subtype: 'pump' }), null, 'a Pump has one way of control');
   assert.ok(attrsOf(el).includes('method'));
   const words = { elements: [{ name: 'hE_HLT_1', type: 'digitalOut', main: 'state', attrs: attrsOf(el), bools: [''], methods: controlMethods(el) }], processes: [], tabs: [] };
