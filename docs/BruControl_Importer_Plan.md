@@ -198,16 +198,19 @@ None of these talks MQTT by itself. Some have their own app connection, which a 
 
 | Model | How it connects | What Skynet might do, later |
 |---|---|---|
-| BrewZilla 4 (Gen 4) | Wi-Fi and Bluetooth to the KegLand RAPT cloud (internet and a RAPT account) | The RAPT web page shows and controls it (Target, Heating %, Pump %), but no API for other programs is documented for it yet; ask KegLand. RAPT moved to a new system on 2026-09-21 |
+| BrewZilla 4 (Gen 4) | Wi-Fi and Bluetooth to the KegLand RAPT cloud (internet and a RAPT account) | **Get and Put both possible.** The RAPT API (api.rapt.io, made by KegLand) reads the temperature and target temperature and can set the Target, turn the heater and pump on or off, set Heating % and Pump %, and set the PID. Needs internet, a RAPT account and an API secret. A hobby MQTT bridge (RAPT-to-MQTT) already exists |
 | Grainfather G30, G40, G70 (Connect controller) | Bluetooth to the Grainfather app | Hobby projects (Python, Node-Red) already read and control it over Bluetooth |
 | BrewZilla 3, Robobrew | None (buttons on the controller) | Nothing; BruControl or Skynet boards would have to take over the heat and pump |
 | Anvil Foundry | None | The same |
 | Clawhammer | None found (a plain controller) | The same |
 
 **Test brewer** (Fritz, 2026-11-07): "One of my fellow Brewers has a Brewzilla 4 so we can Test it." When this is built, that
-brewer checks, in their own RAPT account: whether the account settings offer an **API secret** (a key for other programs) or
-the "My Integrations" Data Streams list the BrewZilla, and whether the readings (current and target temperature) can go out
-to a Custom address. They keep their RAPT password to themselves; a test uses only a key they make and can delete.
+brewer makes an **API secret** (a key for other programs) in their own RAPT account; they keep their RAPT password to
+themselves and can delete the key after. Things to check in the test: how often the temperature updates, whether the Put
+commands work with that key, and that it still works after RAPT's move to its new system (2026-09-21). The API pages
+(computer terms): GET /api/BrewZillas/GetBrewZillas, GetBrewZilla, GetTelemetry; POST SetTargetTemperature,
+SetHeatingEnabled, SetHeatingUtilisation, SetPumpEnabled, SetPumpUtilisation, SetPIDEnabled, SetPID; sign in at
+id.rapt.io/connect/token (from the community client fkolacek/kegland_rapt_api_client, not from KegLand's own docs).
 
 So a connected All In One would become an Interface of its own kind (a cloud or Bluetooth link instead of a board). That is
 not part of this plan; it needs Fritz's go and its own Rule.
