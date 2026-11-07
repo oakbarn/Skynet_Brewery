@@ -10,7 +10,7 @@ A pipe fitting has no settings but:
 
 | Setting | What it does |
 |---|---|
-| **Autosize to pipe** | On (the default): the fitting takes the size of the pipes joined to its IPs, so its body is as thick as the biggest pipe on it. **Width and Height are greyed out** while it is on. A Skynet pipe fitting with no pipe on it yet keeps its size. |
+| **Autosize to pipe** | On (the default): the fitting takes the size of the pipes joined to its IPs, so its body is as thick as most of the pipes on it (a tie takes the bigger). **Width and Height are greyed out** while it is on. A Skynet pipe fitting with no pipe on it yet keeps its size. |
 | **X, Y** | Where it is, in pixels from the left and from the top (`.x_hPosition`, `.y_vPosition`). |
 | **Width, Height** | How big it is. Switch **Autosize to pipe** off first; then you can type them, or drag its grab points in Edit layout. |
 | 🔒 Lock | Locks it in place, as on every item. |
@@ -19,7 +19,7 @@ A pipe fitting has no settings but:
 - **Turn or flip it with the turn buttons** on the Edit layout bar (they show while it is picked). They are no longer in its Properties.
 - **Pipe fittings have no Clone**: not on the Tab, and not in the Template pop-up of a Skynet pipe fitting Template. Add another one instead.
 - An **End Cap** has **Autosize to pipe** too: on an opening of a pipe fitting it takes the size of that fitting's ferrule. On a Reducer, a Valve Tee or Supply Manifold, or a vessel opening it keeps its size.
-- **Everything sizes to its pipe when you save** (Skynet Rule 5.36): pressing **Save layout**, or 💾 Save in a fitting's or a pipe's Properties, makes every pipe fitting on Autosize to pipe match the biggest pipe joined to it, on every Tab. Change a pipe to 1" and Save, and its elbows and tees grow to 1". A **tee with a Temperature Probe** follows its pipe the same way (it has no Autosize switch). Something with no pipe on it keeps its size.
+- **Everything sizes to its pipes when you save** (Skynet Rule 5.36): pressing **Save layout**, or 💾 Save in a fitting's or a pipe's Properties, sizes every pipe fitting on every Tab to the size **most of the pipes and hoses joined to it** have. On a tie (one 1" and one 1/2") it takes the bigger one. Change a pipe run to 1" and Save, and its elbows and tees grow to 1". The same goes for **Valve Tees and Supply Manifolds**, **tees with a Temperature Probe**, **valves** and **flow meters**, which have no Autosize switch. **Pumps** are not pipe fittings: they keep the Tab's pipe size. Something with no pipe on it keeps its size.
 - A **check valve** is a pipe fitting too: flow only goes one way, and its orientation (the arrow on its picture) shows which way. Turn or flip it to point the arrow.
 - A valve or flow meter in a fitting is a **Device**, and a tee with a thermowell (or a thermowell on a vessel IP) is a kind of **Temperature Probe**, so those keep their own settings for now: see [Skynet fittings](60-skynet-fittings).
 

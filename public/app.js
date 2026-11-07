@@ -1217,7 +1217,7 @@ const sgPic = g => 'data:image/svg+xml,' + encodeURIComponent(sightGlassSvg((g.w
 const sgFromLength = g => { g.sgLength = sgLength(g.sgLength); g.w = Math.round((g.h || SG_H) * sgRatio(g.sgLength)); };
 // the Label a new Sight Glass starts with (Rule 18.15; Fritz, 2026-11-05): site_glass_n, the next number not used as a Label or Name
 const sgLabel = all => { const used = new Set(all.flatMap(x => [x.label, x.name])); let n = 1; while (used.has('site_glass_' + n)) n++; return 'site_glass_' + n; };
-const autoSized = g => (isPipeFit(g) || isMv(g)) && g.autoSize !== false;      // an End Cap too: it takes the size of the opening it closes (Rule 5.36)
+const autoSized = g => (isPipeFit(g) || isMv(g) || isMf(g)) && g.autoSize !== false;      // an End Cap (the size of the opening it closes) and a Valve Tee or Supply Manifold too (Rules 5.35, 5.36)
 const AUTOSIZE_FIELD = ['autoSize', 'Autosize to pipe (on = it takes the size of the pipes joined to it; switch it off to type Width and Height)', 'bool', true, true];
 // Manual Valve Widget (Fritz, 2026-10-28): a pipe fitting you turn by hand, and a pseudo Device. Its .state (true = open) only
 // changes with a click on it on its Tab, at any time. A Process line ManualValve_1.state = true does not change it: it puts up
@@ -1277,12 +1277,21 @@ const pipeWidth = p => pipeSize(p.workspace) * sizeInches(p) / 0.5;
 const sizeText = p => p.size === 'custom' ? (+p.sizeCustom > 0 ? p.sizeCustom + (p.sizeUnits === 'mm' ? ' mm' : '"') : '1/2"')
   : (sizeChoices(p).find(c => c[0] === String(p.size || '0.5'))?.[1] || '1/2"').replace(/ +\(most common\)/, '');
 const pipesOn = (ipId, ws) => L().graphics.filter(p => p.kind === 'pipe' && p.workspace === ws && (p.from === ipId || p.to === ipId));
-// A fitting takes the size of the largest pipe or hose joined to it (the tab's 1/2" size when nothing is joined yet).
+// The pipe thickness a fitting takes (Fritz, 2026-11-07: "should size to the majority of the pipes or hoses", Rule 5.36): the size
+// most of the pipes and hoses joined to it have. On a tie (one 1" and one 1/2", as on a Reducer) it takes the bigger. 0 = none joined.
+function majorityWidth(pipes) {
+  const count = new Map();
+  for (const p of new Set(pipes)) { const w = +pipeWidth(p).toFixed(2); count.set(w, (count.get(w) || 0) + 1); }
+  let best = 0, n = 0;
+  for (const [w, c] of count) if (c > n || (c === n && w > best)) { best = w; n = c; }
+  return best;
+}
+// A fitting takes the size most of the pipes and hoses joined to it have (Rule 5.36; the tab's 1/2" size when nothing is joined yet).
 // It is 5 x that pipe thickness, which makes its drawn arms exactly as thick as the pipe.
 function sizeFitting(g) {
   if (!autoSized(g)) return;
   const on = [g.id, ...(isMv(g) ? eqPorts(g).map(q => q.id) : [])].flatMap(id => pipesOn(id, g.workspace));     // a Manual Valve: the pipes on its two ends
-  const S = 5 * Math.max(0, ...on.map(pipeWidth)) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
+  const S = 5 * majorityWidth(on) || 5 * pipeSize(g.workspace), [cx, cy] = ipCenter(g);
   g.w = g.h = S; g.x = cx - S / 2; g.y = cy - S / 2;
 }
 // Skynet gives every pipe, hose, fitting and IP widget a fixed name (Fritz: Pipe_1, Pipe_2, Elbow_1 ...). It is shown in
@@ -1337,8 +1346,18 @@ const hasIps = e => e && !isVPart(e) && !isMfPart(e) && ((e.type === 'digitalOut
 const isInline = e => e && (e.type === 'flowMeter' || (e.inline === true && ['digitalIn', 'analogIn'].includes(e.type)) || isProbeTee(e));
 // Devices with IPs (pumps, valves, proportional valves, inline sensors) are drawn in proportion to the tab's pipe size.
 // Their width / height are the size at pipe size 10; at any other pipe size they grow or shrink about their centre.
+// A valve or an inline Device (a flow meter ...) is a pipe fitting too (Fritz, 2026-11-07: "any Pipe Fitting, even if a device should
+// size to the majority of the pipes or hoses", Rule 5.36): it is drawn for the pipe size most of the pipes and hoses on its IPs have,
+// as it would be on a Tab whose 1/2" pipe is that thick. A pump is not a pipe fitting and keeps the Tab's pipe size (Rule 5.11);
+// a tee with a Temperature Probe sizes itself (sizeProbeTee) and a Thermowell sits on a vessel.
+const followsPipe = e => hasIps(e) && e.subtype !== 'pump' && !isProbeTee(e) && !isThermowell(e);
+function elK(e) {
+  if (!hasIps(e)) return 1;
+  const w = followsPipe(e) ? majorityWidth(['in', 'out'].flatMap(k => pipesOn(`dev:${e.name}:${k}`, e.workspace))) : 0;
+  return (w || pipeSize(e.workspace)) / 10;
+}
 function elGeom(e) {
-  const k = hasIps(e) ? pipeSize(e.workspace) / 10 : 1, w = e.w || 120, hh = e.h || 60;
+  const k = elK(e), w = e.w || 120, hh = e.h || 60;
   if (k === 1) return e;
   const cx = (e.x || 0) + w / 2, cy = (e.y || 0) + hh / 2;
   return { x: cx - w * k / 2, y: cy - hh * k / 2, w: w * k, h: hh * k };
@@ -2935,7 +2954,7 @@ $('#ws').addEventListener('pointermove', ev => {
     place(drag.node, de.kind ? de : elGeom(de)); if (hasIps(de)) placeDevIps(de); if (isMv(de)) placeEqIps(de); if (de.kind === 'ip' || hasIps(de)) renderPipes();
   }
   else if (drag.mode === 'resize') {
-    const k = !drag.item.kind && hasIps(drag.item) ? pipeSize(drag.item.workspace) / 10 : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
+    const k = !drag.item.kind ? elK(drag.item) : 1;   // dragging the corner of a scaled device: store its size at pipe size 10
     resizeBy(drag, dx, dy, k); place(drag.node, drag.item.kind ? drag.item : elGeom(drag.item)); if (hasIps(drag.item)) placeDevIps(drag.item); placeEqIps(drag.item); if (isUnit(drag.item) || isSkyV(drag.item)) placeUnitParts(drag.item); if (drag.item.kind === 'ip' || hasIps(drag.item) || eqPorts(drag.item).length || isUnit(drag.item) || isSkyV(drag.item)) renderPipes(); }
   if (drag.mode === 'move' || drag.mode === 'resize') showGeo(ev, drag.item);
   if (drag.mode === 'point') { if (isQdHose(drag.item) && drag.i === drag.item.points.length - 1) drag.item.to = null; drag.item.points[drag.i] = [snap(p[0]), snap(p[1])]; renderPipes(); }
@@ -10175,13 +10194,13 @@ function refreshSkyFits() {
   return n;
 }
 // Autosize to pipe on a Skynet pipe fitting (Fritz, 2026-10-28): once a pipe is joined to one of its IPs, it is sized so its
-// body is as thick as the biggest pipe on it (the Skynet fitting pictures draw the body 28 % of the picture). Its Template's
+// body is as thick as most of the pipes on it (Rule 5.36) (the Skynet fitting pictures draw the body 28 % of the picture). Its Template's
 // shape is kept (an Instrument Tee stays wide and low) and it grows or shrinks about its middle. With no pipe on it, it keeps
 // its size.
 const FIT_BODY = 0.28;
 function autoSizeUnit(g) {
   const ips = draft.graphics.filter(x => x.kind === 'ip' && x.attachTo === g.id && x.port);
-  const pw = Math.max(0, ...ips.flatMap(ip => pipesOn(ip.id, g.workspace)).map(pipeWidth)); if (!pw) return;
+  const pw = majorityWidth(ips.flatMap(ip => pipesOn(ip.id, g.workspace))); if (!pw) return;      // most of its pipes (Rule 5.36)
   const t = tplOf('fitting', g.template), [tw, th] = t?.size || [90, 90];
   let w = Math.round(pw / (t?.body || FIT_BODY)), hh = Math.round(w * th / tw);    // body: how thick the pipe is on its picture (a 2 to 1 reducer's big end is 55 %)
   if (isSightGlass(g)) { hh = Math.round(pw / SG_BODY); w = Math.round(hh * sgRatio(g.sgLength)); }       // a Sight Glass: as thick as its pipe, as long as its Length (Rule 5.32)
@@ -10200,9 +10219,9 @@ function autoSizeUnit(g) {
 // Something with no pipe on it keeps its size.
 function sizeToPipes(wsn) {
   if (!draft) return;
-  for (const g of draft.graphics.filter(g => g.workspace === wsn && isPlainUnit(g) && !isCap(g) && autoSized(g))) autoSizeUnit(g);
+  for (const g of draft.graphics.filter(g => g.workspace === wsn && (isPlainUnit(g) || isMf(g)) && !isCap(g) && autoSized(g))) autoSizeUnit(g);
   for (const e of draft.elements.filter(e => e.workspace === wsn && isProbeTee(e))) {
-    const pw = Math.max(0, ...devIps(e).flatMap(q => pipesOn(q.id, wsn)).map(pipeWidth));
+    const pw = majorityWidth(devIps(e).flatMap(q => pipesOn(q.id, wsn)));
     if (pw) sizeProbeTee(e, pw);
   }
   for (const c of draft.graphics.filter(c => c.workspace === wsn && isCap(c) && c.capOn && autoSized(c))) sizeCap(c);
