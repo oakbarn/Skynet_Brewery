@@ -35,8 +35,8 @@ assert.ok(/if \(isThermowell\(e\)\)[^\n]*\n\s*return \[\{ id: `dev:\$\{e\.name\}
 assert.ok(fs.existsSync(path.join(ROOT, 'media', 'Images', 'Skynet', 'Other_Equipment', 'Skynet_TC15_Thermowell_Front.svg')), 'the front view picture');
 assert.ok(app.includes('if (isProbeTee(it)) return probeTeeOnPipe(it) || teeOnHose(it);'), 'a probe tee cuts a pipe or a hose');
 assert.ok(app.includes('if (isTcFit(it)) return tcFitOnPipe(it) || teeOnHose(it);'), 'a tee cuts a hose');
-// the Three Vessel sample shows its probes: since Rule 5.31 each vessel is a Vessel Widget whose Placed Thermowell is drawn on it
+// the Three Vessel sample shows its probes: each vessel is a Vessel Device with a Thermowell built into its Left Element IP
 const s3 = JSON.parse(fs.readFileSync(path.join(ROOT, 'samples', 'configs', 'three-vessel-one-pump', 'config.json'), 'utf8'));
-for (const n of ['HLT_Vessel', 'MLT_Vessel', 'BK_Vessel']) assert.ok(s3.graphics.some(g => g.name === n && g.vwidget && g.probeStyle === 'thermowell' && g.ports.thermowell.installed), `${n} shows its thermowell`);
+for (const n of ['HLT_Vessel', 'MLT_Vessel', 'BK_Vessel']) { const v = s3.graphics.find(g => g.name === n); assert.ok(v?.vdevice && s3.elements.some(e => e.integratedIn === v.id && e.vpKind === 'thermowell'), `${n} shows its thermowell`); }
 assert.ok(app.includes("thermowell: 'Images/Skynet/Other_Equipment/Skynet_TC15_Thermowell_Short.svg'"), 'the short thermowell picture');
 console.log('probe tees ok');

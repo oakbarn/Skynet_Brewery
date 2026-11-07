@@ -915,7 +915,7 @@ Help 132).
   40 x 40), its IP in the middle. Dragged off, it shows from the side again.
 - **A plain Temperature Probe dropped with its middle on a front facing IP has an implicit Thermowell**: it becomes a Thermowell seen
   from the front. Dragged off again, it is the plain probe it was (its look and size come back).
-- In the samples, the Three Vessel sample shows a Short Thermowell picture on each vessel beside its reading (since Rule 5.31, drawn by its Vessel Widget).
+- In the samples, the Three Vessel sample shows a Short Thermowell picture on each vessel beside its reading (a Thermowell built into its Vessel Device, Rule 5.31).
 
 5.31 **The Vessel Widget class: one Master Template with every spot, each with a Place slider** (Fritz, 2026-11-05: "New Class
 Vessel Widget. Start making it with the Vessels you have on 3 Vessel Sample. There will be Skynet Templates that will have IPs pre
@@ -969,8 +969,11 @@ Template"; thread "Build the Vessel Widget class", Help 133).
   their own, and Bundle them into a User Bundled Template (Rule 5.7).
 - A Placed Probe or Element links a Device the Schema already has. *Waiting on Fritz's pick (Rule 5.7: "A Skynet Vessel Widget has
   no Devices, only built-in IPs"):* a Placed Probe making its own Device (Interface, Port, Probe Type), and the Element likewise.
-- The Three Vessel sample's HLT, Mash tun and Boil kettle are Vessel Widgets (Outlet and Thermowell Placed; the Element on the HLT
-  and Boil kettle; the Top Inlet on the Mash tun and Boil kettle).
+- The Three Vessel sample's HLT, Mash tun and Boil kettle are **Vessel Devices** built from the Main Template (Fritz, 2026-11-07:
+  "On the 3 Vessel sample, change all the vessels to" "Vessels Devices"): Center Bottom Outlet Placed on all three; a Thermowell
+  with its probe built into the Left Element IP of each; the Heating Element built into the Right Element IP of the HLT and Boil
+  kettle; the Left Sparge IP (the pipe in at the top) on the Mash tun and Boil kettle. Their probes and heaters keep their names
+  and Ports, and a heater that is a heat controller (Hysteresis, PID ...) stays one, as on the RIMS tube.
 
 5.32 **Sight Glasses are TC Pipe Fittings with a Length** (Fritz, 2026-11-05: "Create 2 Sight Glass Pipe Fitting, One Caged and one
 not. Length attribute to stretch length"; thread "Add caged and plain sight glass fittings", Help 139).
@@ -2344,3 +2347,4 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Rule 2.38: hover help shows instantly; buttons and dialog titles have hover help too (a title shows a snippet of its Help page). Rule 18.30: the Timer Widget done. Help 92 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 18.30: the Text, Override, Sound Player, Switch, Push Button, Pulse Button, LED, Label and Manual Valve Widgets get the Pump drill-down look. Help 147 updated. (thread "Add hover help to clean dialogs")
 - 2026-11-06: Rule 2.38: every dialog at once: notes and long ( ) explanations move into hover help when a dialog opens; top notes go into the title's hover help; the BruControl Import's buttons have hover help. (thread "Add hover help to clean dialogs")
+- 2026-11-07: Rule 5.31: the Three Vessel sample's HLT, Mash tun and Boil kettle are now Vessel Devices built from the Main Template (Fritz: "change all the vessels to" "Vessels Devices"), their probes and heaters built into the Left and Right Element IPs; a built in Element that is a heat controller stays one. Help 133 updated; no new Help number used. Checked against the BruControl Import program: it does not use the samples, so nothing changes there. (thread "Change 3 Vessel sample to Vessel Devices")

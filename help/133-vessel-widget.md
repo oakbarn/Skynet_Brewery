@@ -80,9 +80,12 @@ You can still add your own Devices and Widgets to a Vessel Widget, and **Bundle*
 
 ## In the samples
 
-The **Three Vessel** sample's Hot liquor tank, Mash tun and Boil kettle are Vessel Widgets: each one has its Outlet, a Thermowell
-and, on the HLT and the Boil kettle, the Element Port Placed. The Mash tun and the Boil kettle have their Top Inlet Placed too.
-They were built before the IP Template drawing, so they keep their first spots (Outlet, Top Inlet and the side Thermowell).
+The **Three Vessel** sample's Hot liquor tank, Mash tun and Boil kettle are **Vessel Devices** built from the Main Template
+(locked, like a RIMS tube). Each one has its **Center Bottom Outlet** Placed (piped to its outlet valve) and a **Thermowell with
+its Temperature Probe** built into its **Left Element** IP. The Hot liquor tank and the Boil kettle have their **Heating Element**
+built into the **Right Element** IP, and the Mash tun and the Boil kettle have their **Left Sparge** IP Placed for the pipe in at
+the top. The probes and elements are the same Devices as before (HLT_Temp, HLT_Heat and so on), with the same Ports, so the brew
+day Processes work as they did.
 
 ## Size
 
