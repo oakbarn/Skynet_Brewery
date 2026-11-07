@@ -37,6 +37,16 @@ switched on, no buttons show.
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
 click on PID to hold the strike temperature. The BruControl Import switches these on for you.
 
+## Method Clones: one tile per method
+
+To show one Element as separate tiles, like BruControl's *M_HLT Heat* and *HLT PID* side by side, add a **Method Clone** (Rule 4.4):
+in Edit layout, open **⧉ Clone Device** and pick the Element under **Method Clone**. It can go on the Element's own Tab. In its
+Properties pick the **Control Method** it stands for and, if you like, its own **Label**.
+
+- **One click** on the tile switches the Element to that method at once and opens its pop-up.
+- The tile shows **ON** only while the Element is ON **in that method**; otherwise it shows OFF.
+- The Element itself still shows what it is doing in whatever method it is using.
+
 ## From a Process
 
 ```
@@ -74,7 +84,8 @@ same settings.
 BruControl controls one element with two Devices on the same port, for example **M_HLT Heat** (Duty Cycle) and **HLT PID** on port
 42. The BruControl Import makes them **one Heating Element**. It starts in the first one's method, and both old names still work
 in a Process: `HLT_PID = true` switches it to PID and turns it ON; `M_HLT_Heat = true` switches it to Duty Cycle. Where the second
-one was placed on a Tab, it becomes a **Clone** of the Heating Element.
+one was placed on a Tab, it becomes a **Method Clone** of the Heating Element standing for its method, with its BruControl Label
+(*HLT PID*), so the Tab looks as it did in BruControl.
 
 ## One Interface Port, one Device
 

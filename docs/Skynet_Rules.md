@@ -569,6 +569,15 @@ Device, or one with Enabled (a PID), turns the parent on or off; a Clone of a re
 only shows it, in the parent's format. **Clones are not used in Processes.** Clones follow a parent
 rename; deleting the parent deletes its Clones. A Clone is not a new Device, so Rule 6.1 (one Device
 per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on several Tabs")
+- **Method Clones: Devices with more than one Control Method** (Fritz, 2026-11-07: "We need a type of Clone if someone wanted the
+  Device displayed like Tartan has one"; "Make it part of the Rule for Devices that have more than One Control Method"). A Clone of
+  a Device with more than one Control Method (today the Heating Element, Rule 6.19) may stand for **one** of its methods: its
+  **Control Method** and its own **Label** are the Clone's own too (blank Label = the parent's Label and the method, for example
+  *HLT Element PID*). It may sit on its parent's **own Tab** (the ⧉ Clone Device list has a *Method Clone* group for these
+  Devices, on any Tab). **One click** on it switches the parent to its method at once and opens the parent's pop-up; it shows
+  **ON only while the parent is ON in its method** (otherwise OFF). A Clone with no Control Method picked is a plain Clone. So a
+  Tab can show one Element as tiles side by side, like BruControl's *M_HLT Heat* (Duty Cycle) and *HLT PID*. The BruControl
+  Import makes each joined control's second placing a Method Clone with its BruControl Label.
 
 4.5 **The Edit layout bar has three rows** (Fritz's layout, 2026-10-28, Help 82):
 - **Row 1, Devices:** **Select Device Type** (the major kinds: On/Off, Pumps, Valves, Heating Element,
@@ -2471,3 +2480,4 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.19: `.method` is the one Process word for choosing the method of control of every Device with more than one (today the Heating Element); the Process editor lists the methods after `name.method =`. Help 150 updated. Checked against the BruControl Import program: it uses the same Process words. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.1 changed (Fritz: "a Limit of One Interface Port to one Device. Another Major difference from BruControl"): one Interface Port, one Device, of any Device Type; the old exception (different Device Types may share a port) is gone for anything new; two that already shared a port in an older Schema keep working and can still be saved. Help 150 and the BruControl Import's "What is different" page updated. Checked against the BruControl Import program: it joins heating controls on one port into one Heating Element and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.19: one-click method spots: each heating method can be ticked in a Heating Element's Properties; with two or more ticked a small button for each shows under it (on its Tab or its Vessel Device) and one click switches to that method; the method buttons in its pop-up also switch at once. The BruControl Import ticks the joined controls' methods. Help 150 updated. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 4.4 changed (Fritz: "Make it part of the Rule for Devices that have more than One Control Method"): Method Clones: a Clone of a Device with more than one Control Method may stand for one method (its Control Method and Label are its own), may be on its parent's own Tab, switches the parent to its method with one click, and shows ON only while the parent is ON in that method. Help 71 and Help 150 updated. Checked against the BruControl Import program: a joined control's second placing is now a Method Clone with its BruControl Label. (thread "Pick the heating method on one Element")
