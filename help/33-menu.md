@@ -23,9 +23,11 @@ A Menu tab only shows once you pick it. It opens next to your screen tabs, with 
 
 Everyone can look at the Menu tabs. Only an Admin can change them (an Operator can lock and unlock the Equipment Profile).
 
-## The Default settings tab
+**The Default tab is now called Default settings** (2026-11-07). At its top are the **Default pipe size** and **hose size** and a new Tab's size, and near the bottom a list of the defaults set somewhere else. See [Default settings](155-default-settings).
 
-**Every default is set here** (it was called the Default tab; see [Default settings](155-default-settings)). At the top: the **Default pipe size** and **hose size**, and a new Tab's size. Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). **Large text size** is how big `\L` large text in a Process string is (more than 18, see [Codes inside text](22-process-language)). **Text**: the Defaults of every text box (Visible, Fore color, Back color, Alignment, Word wrap, Name font and Name font size, and the size and place of new items, see [Text boxes](49-text-boxes)). Whether **phones and tablets can move and resize things** in Edit layout (off at first, see [Phones and tablets](45-phones-and-tablets)). Press **Save**.
+## The Default tab
+
+**Every default is set here.** Whether the Menu Bar is hidden on Tabs (see [The Menu Bar](40-menu-bar)). What a new Recipe starts with: the Units, the Batch size, the Equipment Profile, the Mash Profile and the Boil Profile (each one can be changed in the Recipe itself). The Tab Background Profile a new tab gets, and the Valve Profile picked first for a new valve. **On startup**: the Zoom and Full screen the panel starts with (see [Zoom and Full screen](41-zoom-and-full-screen)). **Large text size** is how big `\L` large text in a Process string is (more than 18, see [Codes inside text](22-process-language)). **Text**: the Defaults of every text box (Visible, Fore color, Back color, Alignment, Word wrap, Name font and Name font size, and the size and place of new items, see [Text boxes](49-text-boxes)). Whether **phones and tablets can move and resize things** in Edit layout (off at first, see [Phones and tablets](45-phones-and-tablets)). Press **Save**.
 
 **Sound** (at the top of the Default tab and under the defaults):
 
