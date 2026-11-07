@@ -7,7 +7,8 @@ import { attachAutofill } from './autofill.js';
 import { classify, toHtml, processXml, notepadPlusPlus, LEGEND } from './colorize.js';
 import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
-import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf } from './styles.js';
+import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
+import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods } from './heatmethod.js';
@@ -1959,6 +1960,22 @@ function sevenSeg(text) {
   return `<svg class="seg7" viewBox="0 -2 ${x} ${H + 4}" preserveAspectRatio="xMidYMid meet" aria-label="${String(text).replace(/[<&"]/g, '')}">${out.join('')}</svg>`;
 }
 
+// The Skynet Dial (Fritz, 2026-11-07, Rule 2.40): which items can show it, what number it shows, and its Setpoint.
+// The Setpoint is a number, or the Name of a Device or gGlobal: its target (a heater's Setpoint), else its value.
+const DIAL_TYPES = new Set(['temperature', 'analogIn', 'analogOut', 'pwmOut', 'pid', 'deadband', 'dutyCycle', 'valueWidget', 'gGlobal']);
+function dialReading(e, v) {
+  if (isHeatElem(e)) { const hm = heatMethodKey(v.method); return !v.state ? 0 : hm === 'dutyCycle' ? v.dutycycle : hm === 'pid' || hm === 'deadband' ? v.value : null; }     // a Heating Element: its output %
+  if (e.type === 'dutyCycle') return v.dutycycle;
+  return typeof v.value === 'number' ? v.value : Number.isFinite(Number(v.value)) && v.value !== '' && v.value !== null ? Number(v.value) : null;
+}
+function dialSetpoint(e) {
+  const sp = String(e.dialSp ?? '').trim();
+  if (!sp) return null;
+  if (Number.isFinite(Number(sp))) return Number(sp);
+  const o = S.values[sp] || S.values[(S.config.elements.find(x => x.name.toLowerCase() === sp.toLowerCase()) || {}).name] || {};
+  for (const k of ['target', 'setpoint', 'value']) if (typeof o[k] === 'number') return o[k];
+  return null;
+}
 function fmtVal(e, v) {
   if (v === undefined || v === null) return '';
   if (typeof v === 'number' && +e.digits > 0) {          // a Gauge: the whole number part padded to its digits (with figure spaces)
@@ -2046,7 +2063,7 @@ function fillEl(n, e0) {
     case 'dutyCycle': on = !!v.enabled; text = v.enabled ? `${fmtVal({}, v.dutycycle)} %` : (e.offText ?? 'OFF'); break;
     case 'hysteresis': on = !!v.enabled; text = v.enabled ? `${v.state ? (e.onText ?? 'ON') : (e.offText ?? 'OFF')}  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
     case 'pid': case 'deadband': on = !!v.enabled; text = v.enabled ? `${fmtVal({ precision: 0 }, v.value)} %  ▸ ${fmtVal({}, v.target)}` : (e.offText ?? 'OFF'); break;
-    case 'timer': text = v.value ?? '00:00:00'; on = !!v.running; break;
+    case 'timer': text = timerDigits(v.value ?? '00:00:00', { format: e.timerFormat, ssLastMinute: !!e.ssLastMinute, countdown: (v.type ?? e.timerType) === 'countdown' }); on = !!v.running; break;     // hh:mm:ss or hh:mm, SS in the last minute (Rule 2.40)
     case 'alarm': text = v.active ? (e.activeText ?? 'ALARM') + (v.playing || !hasSoundNow(e, v) ? '' : '  (waiting)') : (e.idleText ?? ''); n.classList.toggle('active', !!v.active);
       img = (v.active ? v.imageon : v.imageoff) || pic; n.classList.toggle('img-alarm', !!(v.imageon || pic));
       if (isAlmBasic(e)) { img = ''; text = ''; }       // the Basic Skynet Alarm is its layers (almLayers), no text
@@ -2093,18 +2110,23 @@ function fillEl(n, e0) {
     if (ovl) fitOverlay(n, ov, img, stretchPic(e, v));
   }
   if (e.type === 'label') n.classList.add('text');
+  const dial = e.look === 'dial' && (DIAL_TYPES.has(e.type) || isHeatElem(e));
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
+  n.classList.toggle('look-dial', dial);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
-  setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
+  if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
+  else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
   // A Timer's look is its Style (Skynet or User, public/styles.js); a Process's .fore / .back go over it
   const ts = e.type === 'timer' ? styleOf('timer', e0, S.config.userStyles) : null, tmLook = ts?.look === 'timer';
   n.classList.toggle('look-timer', tmLook);
   if (ts) n.classList.toggle('look-led', ts.look === 'led');
   if (tmLook) {
-    const panel = h('div', { class: 'tmPanel' }); panel.innerHTML = sevenSeg(text);
+    const panel = h('div', { class: 'tmPanel frame-' + (TIMER_FRAMES.some(f => f[0] === ts.frame) ? ts.frame : 'round') }); panel.innerHTML = sevenSeg(text);
     const pc = firstSet(v.backcolor, ts.panel); if (pc) panel.style.background = pc;
     if (ts.bezel) panel.style.borderColor = ts.bezel;
+    n.style.setProperty('--tmBack', ts.back || '');      // the Back color round the panel (Timer Digits, Rule 2.40)
+    n.classList.toggle('tmBack', !!ts.back);
     panel.style.setProperty('--seg', firstSet(v.forecolor, ts.digits, '#ffffff'));
     vl.replaceChildren(panel); vl.style.backgroundColor = '';
     nm.style.color = e.nameColor || ts.titleFore || '#ffffff'; nm.style.backgroundColor = e.nameBg || ts.titleBack || '#000000';
@@ -4627,7 +4649,7 @@ function useTabProfile(e) {
   if (type === 'gauge') { if (p.digits) e.digits = p.digits; if (p.precision !== undefined) e.precision = p.precision; }
 }
 // LED: a lit dot for something ON / OFF, red LED digits for a value; Text: plain; Gauge: LCD digits
-const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : 'normal';
+const lookFor = (type, e) => type === 'led' ? (hasStateEl(e) ? 'indicator' : 'led') : type === 'gauge' ? 'lcd' : type === 'dial' ? 'dial' : 'normal';
 // Fritz (2026-10-23): every new Device, Widget or Template is made on the 🔨 Build Tab first; Save Build ... sends it to a Tab
 // Fritz, 2026-11-05 (Rule 18.27): Picture ➕ makes a Picture Widget through its Add Widget box (it made a plain still picture; those
 // already on a Tab keep working, and a Picture Widget that turns on with None is a still picture)
@@ -5455,10 +5477,30 @@ const DEV_PORT_POP = { title: 'Pin attributes', fields: [['activeLow', 'Invert (
 const DEV_PIC_POP = { title: 'Picture attributes', fields: [['imageOverlay', 'On overlay (on top while it is on)', 'gpick', 'overlays'], ['imageOn', 'Picture when on (a second picture, optional)', 'gpick'], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
 const DEV_GRAPHIC_POP = { title: 'Graphic Dialog: the other background pictures', fields: [['background', 'Background # (1, 2 or 3 picks Image Path 1-3)', 'bgnum'],
   ['backpath_2', 'Image Path 2', 'imgopen', 2], ['backpath_3', 'Image Path 3', 'imgopen', 3], ['bgColor', 'Back Colour (behind the picture)', 'color']] };
+// the Skynet Dial's settings (Fritz, 2026-11-07, Rule 2.40), in the ⬢ pop-up beside Display (or Look)
+const DIAL_TIP = {
+  look: 'How the reading shows on the Tab: a Number, LCD or LED digits, or the Skynet Dial (an arc with a needle and the reading in digits under it). The ⬢ beside it holds the Dial settings.',
+  min: 'The lowest number on the Dial. Empty = 0 °F, -20 °C, or 0 for anything else.',
+  max: 'The highest number on the Dial. Empty = 220 °F, 110 °C, or 100 for anything else.',
+  sp: 'The target. Type a number (170), or the Name of a Device or gGlobal to follow: a heater\'s Setpoint, or its value. Empty = no Setpoint: the arc goes from blue to red.',
+  cool: `How far below the Setpoint is still OK (empty = ${DIAL_DEFAULTS.cool}). Lower than that, the reading is the Cold color.`,
+  hot: `How far above the Setpoint is still OK (empty = ${DIAL_DEFAULTS.hot}). Higher than that, the reading is the Hot color.`,
+  cold: 'The reading\'s color when it is too cold (below the Setpoint by more than the Cooler range). Default = Blue.',
+  ok: 'The reading\'s color when it is between the Cooler and Hotter ranges. Default = Green.',
+  hotc: 'The reading\'s color when it is too hot (above the Setpoint by more than the Hotter range). Default = Red.',
+};
+const DIAL_FIELDS = [['_dlh', 'Skynet Dial (Look = Skynet Dial)', 'head'],
+  ['dialMin', 'Lowest', 'num', null, false, false, { tip: DIAL_TIP.min }], ['dialMax', 'Highest', 'num', null, false, false, { tip: DIAL_TIP.max }],
+  ['dialSp', 'Setpoint', 'text', null, false, false, { tip: DIAL_TIP.sp }],
+  ['dialCool', 'Cooler range', 'num', null, false, false, { tip: DIAL_TIP.cool }], ['dialHot', 'Hotter range', 'num', null, false, false, { tip: DIAL_TIP.hot }],
+  ['dialColdColor', 'Cold color', 'color', null, false, false, { tip: DIAL_TIP.cold }], ['dialOkColor', 'OK color', 'color', null, false, false, { tip: DIAL_TIP.ok }],
+  ['dialHotColor', 'Hot color', 'color', null, false, false, { tip: DIAL_TIP.hotc }]];
+const DIAL_POP = { title: 'Skynet Dial settings', fields: DIAL_FIELDS.slice(1) };
+const LOOKS = ['normal', 'led', 'lcd', 'dark', 'button', 'indicator', ['dial', 'Skynet Dial']];
 const DEV_TEXT_POP = { title: 'On / Off text attributes', fields: [['hideValue', 'Hide the On / Off text', 'bool'], ['fontSize', 'Font size (px; empty = Default)', 'num'], ['valueColor', 'Fore color', 'color'], ['valueBg', 'Back color', 'color'],
   ['valueAlign', 'Alignment', 'sel', [['', 'Default'], 'TopLeft', 'TopCenter', 'TopRight', 'MiddleLeft', 'MiddleCenter', 'MiddleRight', 'BottomLeft', 'BottomCenter', 'BottomRight']],
   ['_all', 'All its text (the Label and the On / Off text)', 'head'], ['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
-  ['wrap', 'Word wrap as needed', 'bool'], ['look', 'Look', 'sel', ['normal', 'led', 'lcd', 'dark', 'button', 'indicator']], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]] };
+  ['wrap', 'Word wrap as needed', 'bool'], ['look', 'Look', 'sel', LOOKS, false, false, { tip: DIAL_TIP.look }], ['border', 'Border', 'sel', ['default', 'hidden', 'visible']]] };
 const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap target (Device, Widget, Process or Tab; empty = itself)', 'text'], ['confirm', 'Ask before changing (ON / OFF buttons)', 'bool']] };
 // Fritz, 2026-11-04 (Rule 18.19): the pump's Graphic shown on the dialog with its Orientation; changing the Orientation flips the
 // Graphic here and the pump on the Tab. A Skynet pump drawing's Graphic is set (no path, Rule 5.6); a User pump has one path,
@@ -5672,7 +5714,9 @@ const PROBE_GRAPHIC_FIELDS = (it, x = {}) => !hasProbePic(it) ? [] : [['_pv', 'G
   ['rot', 'Orientation', 'vorient', EL_ROTATE, false, false, { tip: DEVICE_TIPS.pOrient, with: ['_flip', 'Flip', 'sel', PROBE_FLIP], ...x }]];
 const PROBE_OWN = (it, x = {}) => [['_ptype', 'Probe type', 'ro', probeKindName(it), false, false, { tip: DEVICE_TIPS.pType, attr: PROBE_TYPE_POP, ...x }],
   ['units', 'Units', 'sel', [['°F', '°F'], ['°C', '°C']], false, false, { tip: DEVICE_TIPS.tpUnits, with: ['precision', 'Decimals', 'num'], ...x }],
-  ['offset', 'Calibration offset', 'num', null, false, false, { tip: DEVICE_TIPS.pOffset, dbPop: true, ...x }]];
+  ['offset', 'Calibration offset', 'num', null, false, false, { tip: DEVICE_TIPS.pOffset, dbPop: true, ...x }],
+  ['look', 'Display', 'sel', PROBE_LOOKS, false, false, { tip: DIAL_TIP.look, attr: DIAL_POP, ...x }]];
+const PROBE_LOOKS = [['', 'Number'], ['lcd', 'LCD digits'], ['led', 'LED digits'], ['dial', 'Skynet Dial']];
 function probeDeviceFields(it, item) {
   const T = DEVICE_TIPS;
   it._flip = flipOf(it);
@@ -5864,7 +5908,9 @@ const TIMER_TIPS = {
   start: 'The time it shows when it is made or reset by the Brain, in hh:mm:ss.',
   reset: 'The time a reset puts it back to, in hh:mm:ss.',
   running: 'On: it is already counting when the Brain starts.',
-  style: 'Its look. Skynet Styles 🔒 can\'t be changed; ➕ Add new User Style… makes one of your own.',
+  style: 'Its look. Skynet Styles 🔒 can\'t be changed; ➕ Add new User Style… makes one of your own, with its Back, Text Fore and Text Back colors and its Frame (shape and color).',
+  format: 'How the time shows: hours, minutes and seconds (01:30:00), or just hours and minutes (01:30).',
+  ss: 'On: a Timer counting down shows only the seconds (45) once less than one minute is left.',
 };
 function timerWidgetFields() {
   const T = TIMER_TIPS;
@@ -5873,6 +5919,8 @@ function timerWidgetFields() {
     ['initial', 'Start value', 'text', null, false, false, { tip: T.start }], ['resetValue', 'Reset value', 'text', null, false, false, { tip: T.reset }],
     ['initRunning', 'Running at start', 'bool', null, false, false, { tip: T.running, dbPop: true }],      // Database and .API ⬢ on its line
     ['style', 'Style', 'stylesel', 'timer', false, false, { tip: T.style }],
+    ['timerFormat', 'Digits', 'sel', [['', 'hh:mm:ss'], ['hm', 'hh:mm']], false, false, { tip: T.format }],
+    ['ssLastMinute', 'Seconds only in the last minute', 'bool', null, false, false, { tip: T.ss }],
     ...wgtPlace()];
 }
 const dataWidgetType = it => ['_wt', 'Widget Type', 'ro', DATA_W[it.type].word, false, false, { tip: DATAW_TIPS.type }];
@@ -5895,7 +5943,7 @@ const GEN_SHOWN = new Set(['name', 'label', 'hideName', 'workspace', 'x', 'y', '
   'imageOff', 'imageOn', 'imageOverlay', 'typeCode', 'background', 'bgColor', 'backpath', 'backpath_2', 'backpath_3', 'look', 'digits', 'fontSize', 'tap',
   'tapTarget', 'confirm', 'foreColor', 'backColor', 'align', 'wrap', 'nameFontFamily', 'nameFontSize', 'nameColor', 'nameBg', 'nameFont', 'nameAlign', 'nameBold',
   'valueColor', 'valueBg', 'valueFont', 'valueAlign', 'border', 'hideValue', '_tb', '_ovn', '_hint', '_sug']);
-const GEN_TEXT_POP = { title: 'Text attributes (its Value or On / Off text)', fields: DEV_TEXT_POP.fields };
+const GEN_TEXT_POP = { title: 'Text attributes (its Value or On / Off text)', fields: [...DEV_TEXT_POP.fields, ...DIAL_FIELDS] };
 function genDeviceFields(it, item, f) {
   const T = DEVICE_TIPS, part = isBuiltIn(it), dbKeys = new Set(dbFields(it).map(x => x[0]));
   const portF = f.find(x => x[0] === 'probeIndex') || f.find(x => x[0] === 'channel');
@@ -6646,9 +6694,14 @@ function styleEditor(kind, st, from) {
   return new Promise(res => {
     const keys = KIND_KEYS[kind], timer = kind === 'timer';
     const isNew = !st, work = st ? clone(st) : { id: 'u_' + newId().replace(/[^A-Za-z0-9]/g, '').slice(0, 20), name: '', ...(timer ? { look: from?.look || 'timer' } : {}), ...Object.fromEntries(keys.map(k => [k, from?.[k] || ''])) };
+    if (timer && !work.frame) work.frame = 'round';
     const body = h('div', { class: 'styleBody' });
     bindForm(body, timer ? [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'], ['look', 'Look', 'sel', [['timer', 'Seven-segment digits on a panel'], ['led', 'LED digits'], ['normal', 'Plain text']]],
-      ['digits', 'Digits color', 'color'], ['panel', 'Panel color (Default = the orange-red glow)', 'color'], ['bezel', 'Bezel (frame) color', 'color'], ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
+      ['back', 'Back color', 'color', null, false, false, { tip: 'The color round the digits panel, under the title bar. Default = as it is now.' }],
+      ['digits', 'Text Fore color', 'color', null, false, false, { tip: 'The color of the digits.' }], ['panel', 'Text Back color', 'color', null, false, false, { tip: 'The color of the panel behind the digits. Default = the orange-red glow.' }],
+      ['frame', 'Frame', 'sel', TIMER_FRAMES, false, false, { tip: 'The shape of the frame round the panel (Fritz\'s Timer frames): rounded corners, square corners, or square at the top and rounded at the bottom.' }],
+      ['bezel', 'Frame color', 'color', null, false, false, { tip: 'The color of the frame.' }],
+      ['titleFore', 'Title bar text color', 'color'], ['titleBack', 'Title bar color', 'color']]
       : [['name', 'Name (your own; never "Skynet ...")', 'text', null, false, 'b'],
         ['_lb', 'Label (the title of a Device or Widget)', 'head'], ['labelFore', 'Fore color', 'color'], ['labelBack', 'Back color', 'color'], ['labelFont', 'Font', 'sel', FONTS], ['labelSize', 'Font size (px; empty = as now)', 'num'], ['labelAlign', 'Alignment', 'sel', TB_ALIGN_CHOICES],
         ['_dv', 'The Device or Widget', 'head'], ['fore', 'Fore color', 'color'], ['back', 'Back color', 'color'], ['font', 'Font', 'sel', FONTS], ['size', 'Font size (px; empty = as now)', 'num'], ['align', 'Alignment', 'sel', TB_ALIGN_CHOICES],
@@ -6662,6 +6715,7 @@ function styleEditor(kind, st, from) {
       if (/^skynet\b/i.test(name)) { err.textContent = 'Only Skynet Styles start with "Skynet". Pick another name.'; return; }
       if ([...SKYNET_STYLES[kind], ...list].some(x => x.id !== work.id && x.name.toLowerCase() === name.toLowerCase())) { err.textContent = `There is already a Style called ${name}.`; return; }
       const item = { id: work.id, name, ...(timer ? { look: work.look || 'timer' } : {}), ...Object.fromEntries(keys.map(k => [k, String(work[k] ?? '')])) };
+      if (timer && !item.frame) item.frame = 'round';
       const all = { ...(S.config.userStyles || {}), [kind]: isNew ? [...list, item] : list.map(x => x.id === item.id ? item : x) };
       try { await api('PUT', '/ui/settings', { userStyles: all }); S.config.userStyles = all; out = item; d.close(); } catch (e) { err.textContent = e.message; }
     };
@@ -6721,7 +6775,8 @@ const INFO = {
   timer: { title: 'Timer Widget', properties: [
     ['Name', ', and a Label shown as its title bar (Visible = Show label), with its own font, size, colors and alignment.'],
     ['Timer', ': Count up or Count down, a Reset value, a Start value, and Running when the Brain starts.'],
-    ['Style', ': its look, from a list. Skynet Styles come with Skynet and can never be changed; ➕ Add new User Style… makes your own (✏ changes it).'],
+    ['Style', ': its look, from a list. Skynet Styles come with Skynet and can never be changed; ➕ Add new User Style… makes your own (✏ changes it): Back, Text Fore and Text Back colors, and the Frame (rounded, square, or square top) with its color.'],
+    ['Digits', ': hh:mm:ss or hh:mm, and Seconds only in the last minute (a Timer counting down shows just SS when less than a minute is left).'],
     ['No pictures and no background', ' (Fritz, 2026-10-29).'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.'],
     ['▶ ■ ↺ Set', ' buttons under the digits start, stop, reset and set it.']],

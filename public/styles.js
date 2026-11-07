@@ -8,13 +8,17 @@
 //   look:   timer = seven-segment digits on a panel, led = LED digits, normal = plain text
 //   digits: the digit color   panel: the panel color ('' = the orange-red glow)   bezel: the frame round the panel
 //   titleFore / titleBack: the Label's title bar (the Label box in its Properties wins over them)
+//   Timer Digits (Fritz, 2026-11-07, Rule 2.40): back = the Back color round the panel ('' = as now), digits = Text Fore,
+//   panel = Text Back, and the Frame (Fritz's own Timer_Overlay pictures, drawn by Skynet): frame = its shape
+//   (round = rounded corners, square, squaretop = square at the top, rounded at the bottom), bezel = its color
+export const TIMER_FRAMES = [['round', 'Rounded corners'], ['square', 'Square corners'], ['squaretop', 'Square top, rounded bottom']];
 export const SKYNET_STYLES = {
   timer: [
-    { id: 'sky_timer_orange', name: 'Skynet Orange Timer', look: 'timer', digits: '#ffffff', panel: '', bezel: '#9a9a9a', titleFore: '#ffffff', titleBack: '#000000' },
-    { id: 'sky_timer_green', name: 'Skynet Green LCD', look: 'timer', digits: '#7cff4f', panel: '#0d2a0d', bezel: '#9a9a9a', titleFore: '#ffffff', titleBack: '#000000' },
-    { id: 'sky_timer_blue', name: 'Skynet Blue Timer', look: 'timer', digits: '#ffffff', panel: '#0b3d91', bezel: '#c9ced3', titleFore: '#ffffff', titleBack: '#0b1f44' },
-    { id: 'sky_timer_red', name: 'Skynet Red LED digits', look: 'led', digits: '', panel: '', bezel: '', titleFore: '', titleBack: '' },
-    { id: 'sky_timer_plain', name: 'Skynet Plain text', look: 'normal', digits: '', panel: '', bezel: '', titleFore: '', titleBack: '' },
+    { id: 'sky_timer_orange', name: 'Skynet Orange Timer', look: 'timer', digits: '#ffffff', panel: '', bezel: '#9a9a9a', titleFore: '#ffffff', titleBack: '#000000', back: '', frame: 'round' },
+    { id: 'sky_timer_green', name: 'Skynet Green LCD', look: 'timer', digits: '#7cff4f', panel: '#0d2a0d', bezel: '#9a9a9a', titleFore: '#ffffff', titleBack: '#000000', back: '', frame: 'round' },
+    { id: 'sky_timer_blue', name: 'Skynet Blue Timer', look: 'timer', digits: '#ffffff', panel: '#0b3d91', bezel: '#c9ced3', titleFore: '#ffffff', titleBack: '#0b1f44', back: '', frame: 'round' },
+    { id: 'sky_timer_red', name: 'Skynet Red LED digits', look: 'led', digits: '', panel: '', bezel: '', titleFore: '', titleBack: '', back: '', frame: '' },
+    { id: 'sky_timer_plain', name: 'Skynet Plain text', look: 'normal', digits: '', panel: '', bezel: '', titleFore: '', titleBack: '', back: '', frame: '' },
   ],
   tab: [
     { id: 'sky_tab_default', name: 'Skynet Default', labelFore: '', labelBack: '', labelFont: '', labelSize: '', labelAlign: '', fore: '', back: '', font: '', size: '', align: '' },
@@ -22,7 +26,7 @@ export const SKYNET_STYLES = {
   ],
 };
 export const STYLE_KINDS = Object.keys(SKYNET_STYLES);
-export const KIND_KEYS = { timer: ['digits', 'panel', 'bezel', 'titleFore', 'titleBack'], tab: ['labelFore', 'labelBack', 'labelFont', 'labelSize', 'labelAlign', 'fore', 'back', 'font', 'size', 'align'] };
+export const KIND_KEYS = { timer: ['digits', 'panel', 'bezel', 'titleFore', 'titleBack', 'back', 'frame'], tab: ['labelFore', 'labelBack', 'labelFont', 'labelSize', 'labelAlign', 'fore', 'back', 'font', 'size', 'align'] };
 export const STYLE_KEYS = KIND_KEYS.timer;
 export const isSkynetStyle = id => STYLE_KINDS.some(k => SKYNET_STYLES[k].some(s => s.id === id));
 
@@ -51,8 +55,21 @@ export function cleanUserStyles(input) {
       if (!name || /^skynet\b/i.test(name) || seen.has(name.toLowerCase()) || !/^u_[A-Za-z0-9]{1,40}$/.test(id) || isSkynetStyle(id)) continue;
       seen.add(name.toLowerCase());
       const look = kind !== 'timer' ? {} : { look: ['timer', 'led', 'normal'].includes(s.look) ? s.look : 'timer' };
-      out[kind].push({ id, name, ...look, ...Object.fromEntries(KIND_KEYS[kind].map(k => [k, String(s[k] ?? '').trim().slice(0, 60)])) });
+      const keys = Object.fromEntries(KIND_KEYS[kind].map(k => [k, String(s[k] ?? '').trim().slice(0, 60)]));
+      if (kind === 'timer' && !TIMER_FRAMES.some(f => f[0] === keys.frame)) keys.frame = 'round';
+      out[kind].push({ id, name, ...look, ...keys });
     }
   }
   return out;
+}
+
+// Timer digits (Fritz, 2026-11-07, Rule 2.40): what a Timer shows for its time. hh:mm:ss, or hh:mm (format 'hm'); with
+// "Seconds only in the last minute" on, a Timer counting down shows just the seconds (SS) once under one minute is left.
+export function timerDigits(text, { format = 'hms', ssLastMinute = false, countdown = false } = {}) {
+  const t = String(text ?? '').trim(), m = /^(-?)(\d+):(\d{1,2}):(\d{1,2})/.exec(t);
+  if (!m) return t || (format === 'hm' ? '00:00' : '00:00:00');
+  const secs = (+m[2]) * 3600 + (+m[3]) * 60 + (+m[4]);
+  if (ssLastMinute && countdown && !m[1] && secs < 60) return String(secs).padStart(2, '0');
+  const hh = m[2].padStart(2, '0'), mm = m[3].padStart(2, '0'), ss = m[4].padStart(2, '0');
+  return m[1] + (format === 'hm' ? `${hh}:${mm}` : `${hh}:${mm}:${ss}`);
 }
