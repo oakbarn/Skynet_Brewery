@@ -97,3 +97,19 @@ assert.ok(app.includes('const hasIps = e => e && !isVPart(e) &&'), 'a built-in v
 assert.ok(read('help/133-vessel-widget.md').includes('## The Vessel Device'), 'Help explains the Vessel Device');
 assert.ok(read('docs/Skynet_Rules.md').includes('**The Vessel Device** (*one exception* to Rules 5.7 and this Rule'), 'the exception is in the Rules');
 console.log('vessel device ok');
+
+// Plugged IPs are hidden (Fritz, 2026-11-07): an End Cap, or a Vessel Device's built in Element, Probe or Thermowell, plugs its IP;
+// only open IPs show (a built in Valve passes flow, so its IP still shows)
+{
+  const src = app.match(/function cappedIps\(\) \{[\s\S]*?\n\}/)[0];
+  const graphics = [
+    { id: 'v1', kind: 'vessel', vdevice: true },
+    { id: 'a', kind: 'ip', attachTo: 'v1', port: 'lElement' }, { id: 'b', kind: 'ip', attachTo: 'v1', port: 'rElement' },
+    { id: 'c', kind: 'ip', attachTo: 'v1', port: 'cProbe' }, { id: 'd', kind: 'ip', attachTo: 'v1', port: 'cOutlet' },
+    { id: 'e', kind: 'ip', attachTo: 'v1', port: 'lTangential' }, { id: 'f', kind: 'ip' }, { id: 'cap', kind: 'cap', capOn: 'f' }];
+  const elements = [{ integratedIn: 'v1', integratedAs: 'ip:lElement', vpKind: 'thermowell' }, { integratedIn: 'v1', integratedAs: 'ip:rElement', vpKind: 'element' },
+    { integratedIn: 'v1', integratedAs: 'ip:cProbe', vpKind: 'probe' }, { integratedIn: 'v1', integratedAs: 'ip:cOutlet', vpKind: 'valve' }];
+  const cappedIps = new Function('L', 'isCap', 'isVPart', src + '; return cappedIps;')(() => ({ graphics, elements }), g => g.kind === 'cap', e => String(e?.integratedAs || '').startsWith('ip:'));
+  assert.deepEqual([...cappedIps()].sort(), ['a', 'b', 'c', 'f'], 'Thermowell, Element, Probe and End Cap plug their IPs; the Valve and the open Tangential show');
+}
+console.log('vwidget ok (plugged IPs)');
