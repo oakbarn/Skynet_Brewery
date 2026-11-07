@@ -121,3 +121,32 @@ console.log('heatmethod tests passed');
   assert.deepEqual(report.renames.filter(r => r.to === h.name).map(r => r.from), ['M_HLT Heat', 'HLT PID'], 'both BruControl names lead to it');
 }
 console.log('heatmethod import tests passed');
+
+// The Process editor offers the methods of control after ".method =" (Fritz, 2026-11-07: "add something in the Process method for
+// things that have more than on method of control to chhose the one you want to use")
+{
+  const { suggest } = await import('../public/autofill.js');
+  const { controlMethods } = await import('../public/heatmethod.js');
+  const { attrsOf } = await import('../lib/store.js');
+  const el = { type: 'digitalOut', subtype: 'element', name: 'hE_HLT_1' };
+  assert.deepEqual(controlMethods(el), ['On/Off', 'Duty Cycle', 'Hysteresis', 'PID', 'Deadband']);
+  assert.equal(controlMethods({ type: 'digitalOut', subtype: 'pump' }), null, 'a Pump has one way of control');
+  assert.ok(attrsOf(el).includes('method'));
+  const words = { elements: [{ name: 'hE_HLT_1', type: 'digitalOut', main: 'state', attrs: attrsOf(el), bools: [''], methods: controlMethods(el) }], processes: [], tabs: [] };
+  const list = suggest('hE_HLT_1.method = ', words, 'hE_HLT_1.method = ', 'hE_HLT_1.method = ', false)?.list.map(i => i.text);
+  assert.deepEqual(list, ['"On/Off"', '"Duty Cycle"', '"Hysteresis"', '"PID"', '"Deadband"']);
+  const m = suggest('hE_HLT_1 ', words, 'hE_HLT_1 ', 'hE_HLT_1 ', true)?.list.find(i => i.text === '.method = ');
+  assert.ok(m, '.method = is offered after the name'); assert.match(m.hint, /how it is controlled: On\/Off, Duty Cycle/);
+}
+console.log('heatmethod Process editor tests passed');
+
+// One Interface Port, one Device (Fritz, 2026-11-07, Rule 6.1): a new Device is never offered a port in use, of any Device Type
+{
+  const { freePins, portClash } = await import('../public/naming.js');
+  const devices = [{ name: 'MB', type: 'serial', board: 'mega' }];
+  const els = [{ name: 'hE_PID_1', type: 'digitalOut', subtype: 'element', device: 'MB', channel: 42 }];
+  assert.ok(!freePins({ type: 'pid', device: 'MB', name: '\0new' }, els, devices).map(String).includes('42'), 'port 42 is not offered to a new PID');
+  assert.ok(portClash({ type: 'pid', device: 'MB', channel: 42, name: '\0new' }, els), 'a new Device on a used port clashes');
+  assert.equal(portClash({ type: 'pid', device: 'MB', channel: 42, name: 'Old_PID' }, els), null, 'two that shared in an older Schema keep working');
+}
+console.log('one port one Device tests passed');

@@ -1107,11 +1107,16 @@ pipe on Save", Help 87).
 
 ## 6. Devices, connections and safety
 
-6.1 **One Device per port** on an Interface. **Exception:** outputs of different Device Types may
-share a port (for example Hysteresis and PID on one heater). The last one turned on wins and the
-others turn off. (2026-10-23, PR #97)
-**A heating element is ONE Device** (Fritz, 2026-11-07, Rule 6.19): its heating method is picked, not made by a second Device on
-its port. The exception above stays only so older Schemas that already have two heaters on one port keep working.
+6.1 **One Interface Port, one Device** (Fritz, 2026-11-07: "That means the is a Limit of One Interface Port to one Device. Another
+Major difference from BruControl"). No two Devices share a port on an Interface, whatever their Device Types. A heater's ways of
+control are one Heating Element's heating methods (Rule 6.19), not more Devices. The Available Ports lists never offer a port in
+use, and saving a Device on a used port is refused and says which Device has it.
+- **Older Schemas:** two Devices that already shared a port in a saved Schema (made under the old exception below) keep working
+  as before, the last one turned on wins and the others turn off, and can still be saved; no new sharing can be made.
+- **BruControl:** the Import makes heating controls on one port one Heating Element (Rule 6.19); anything else still sharing a port
+  (for example a pump's on/off and its PWM speed) is listed in the Import notes so the brewer can keep one.
+*Replaced:* (2026-10-23, PR #97) "Exception: outputs of different Device Types may share a port (for example Hysteresis and PID on
+one heater). The last one turned on wins and the others turn off."
 
 6.2 **Virtual ports:** OneWire probes 700-799 (one Device per probe); hydrometers 200, 201 and up.
 Analog pins use BruControl numbers (A0 = 54, A5 = 59). (2026-10-23, PR #97)
@@ -1282,7 +1287,12 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** o
   Deadband) **one Heating Element**, starting in the first one's method. Each old name still works in a Process, made safe
   (`HLT PID` -> `HLT_PID`): `HLT_PID = true` switches it to PID and turns it ON. A second one placed on a Tab becomes a Clone of
   it. A heating control alone on its port stays as it is.
-- Older Skynet Schemas with two heaters on one port keep working as they are (Rule 6.1's exception).
+- Older Skynet Schemas with two heaters on one port keep working as they are (Rule 6.1, older Schemas).
+- **`.method` is the one Process word for choosing the method of control** of **every** Device that has more than one (Fritz,
+  2026-11-07: "We need to add something in the Process method for things that have more than on method of control to chhose the
+  one you want to use"). Today that is the Heating Element; any later Device with more than one way of control uses `.method` too.
+  In the Process editor, typing `name.method =` lists that Device's methods (for example "PID", "Duty Cycle"), and `.method`
+  shows its choices beside it. A Device with only one way of control has no `.method`.
   (thread "Pick the heating method on one Element", Help 150)
 
 ## 7. Pictures
@@ -2451,3 +2461,5 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Added Rule 5.36 (Fritz: "Have any pipe fitting etc size to the pipe when saving"): on Save every pipe fitting on Autosize to pipe takes the size of its pipe, probe tees follow their pipe, End Caps get Autosize to pipe and match the fitting they close. Help 87 updated. (thread "Size fittings to their pipe on Save")
 - 2026-11-07: Rules 5.36, 5.35 and 5.11 changed (Fritz: "any Pipe Fitting, even if a device should size to the majority of the pipes or hoses"): a fitting takes the size most of its pipes and hoses have (a tie takes the bigger); Valve Tees, Supply Manifolds, valves and inline Devices size to their pipes too; pumps keep the Pump Standard. Help 87 and 146 updated. Checked against the BruControl Import program: it does not draw pipes or size anything, so nothing changes there. (thread "Size fittings to their pipe on Save")
 - 2026-11-07: Added Rule 6.19 (Fritz: "ONE device, but a to select the heating method via process or on the Device when clicked"): a heating element is one Heating Element whose heating method (On/Off, Duty Cycle, Hysteresis, PID, Deadband) is picked in its Properties (where it starts), by a click while running, or by a Process (.method); switching to On/Off turns it off first. Rule 6.1 notes a heating element is one Device; its two-on-a-port exception stays only for older Schemas. Checked against the BruControl Import program: it now makes BruControl's heating controls on one port one Heating Element (old names still work in a Process, a second placing is a Clone). Help 150, Help 137 updated; next free Help number 151. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 6.19: `.method` is the one Process word for choosing the method of control of every Device with more than one (today the Heating Element); the Process editor lists the methods after `name.method =`. Help 150 updated. Checked against the BruControl Import program: it uses the same Process words. (thread "Pick the heating method on one Element")
+- 2026-11-07: Rule 6.1 changed (Fritz: "a Limit of One Interface Port to one Device. Another Major difference from BruControl"): one Interface Port, one Device, of any Device Type; the old exception (different Device Types may share a port) is gone for anything new; two that already shared a port in an older Schema keep working and can still be saved. Help 150 and the BruControl Import's "What is different" page updated. Checked against the BruControl Import program: it joins heating controls on one port into one Heating Element and lists any other shared port in its notes. (thread "Pick the heating method on one Element")
