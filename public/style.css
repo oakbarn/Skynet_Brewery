@@ -1077,3 +1077,7 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 #ws .gfx.vessel .mfNum, .mfPrev .mfNum { position: absolute; transform: translate(-50%, -50%); min-width: 22px; height: 22px; padding: 0 4px; border-radius: 11px; background: #f1c40f; color: #111;
   border: 2px solid #111; font: bold 14px/18px sans-serif; text-align: center; pointer-events: none; box-sizing: border-box; z-index: 2; }
 .mfPrev { position: relative; margin: 6px 0; }
+/* One-click method spots under a Heating Element (Rule 6.19): one click switches it to that heating method; the one in use is lit */
+#ws .hmSpots { position: absolute; display: flex; gap: 3px; z-index: 6; pointer-events: auto; white-space: nowrap; }
+#ws .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); cursor: pointer; }
+#ws .hmBtn.cur { background: #e8a33c; border-color: #c4831f; color: #000; font-weight: 600; }

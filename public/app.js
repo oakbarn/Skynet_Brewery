@@ -283,6 +283,7 @@ function drawWs() {
   for (const g of L().graphics.filter(g => g.workspace === w.name && g.kind === 'ip' && !capped.has(g.id))) ws.append(buildIp(g));
   for (const e of [...L().elements.filter(e => e.workspace === w.name), ...clones].filter(hasIps)) for (const q of devIps(e)) ws.append(buildDevIp(e, q));
   for (const g of L().graphics.filter(g => g.workspace === w.name && eqPorts(g).length)) for (const q of eqPorts(g)) ws.append(buildEqIp(g, q));
+  drawMethodSpots(w);
   renderPipes(); fitZoom(); updLockBtn();
 }
 
@@ -2161,7 +2162,40 @@ function imgMissing(url, node) {
 }
 const simDev = d => !d || S.devices.find(x => x.name === d)?.type === 'simulator';
 
+// One-click method spots (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it need
+// only one click to select Duty Cycle or a click somewhere else to select PID", Rule 6.19). A Heating Element shows a small button
+// for each heating method ticked in its Properties, under its picture on the Tab, or under its picture on a Vessel Device when it
+// is built in. Only when MORE THAN ONE is ticked (Fritz, 2026-11-07: "Those hot spots only need to be there when there is more
+// than one control metod"). One click on one switches the Element to that method at once; the one in use is lit.
+const methodSpots = e => { const l = isHeatElem(e) ? HEAT_METHODS.filter(([k]) => e['methodSpot_' + k]) : []; return l.length > 1 ? l : []; };
+function drawMethodSpots(w) {
+  for (const old of $$('#ws .hmSpots')) old.remove();
+  for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
+    const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
+      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}` }, word)));
+    const part = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
+    if (part) { box.style.left = part.style.left; box.style.top = `${parseFloat(part.style.top) + parseFloat(part.style.height) + 2}px`; part.parentNode.append(box); }
+    else if (!e.integratedIn) { box.style.left = `${e.x ?? 0}px`; box.style.top = `${(e.y ?? 0) + (e.h ?? 60) + 2}px`; $('#ws').append(box); }
+    else continue;
+    litSpots(e.name);
+  }
+}
+function litSpots(name) {
+  const m = heatMethodKey(S.values[name]?.method);
+  for (const b of $$(`#ws .hmSpots[data-dev="${CSS.escape(name)}"] .hmBtn`)) b.classList.toggle('cur', b.dataset.k === m);
+}
+$('#ws').addEventListener('click', ev => {
+  const b = ev.target.closest('.hmBtn'); if (!b) return;
+  ev.stopPropagation(); ev.preventDefault();
+  if (editing) return;
+  if (!can('operator')) return toast('Your account is view only', true);
+  const name = b.closest('.hmSpots').dataset.dev, k = b.dataset.k, e = elByName(name);
+  if (NEEDS_PROBE.includes(k) && !e?.input) return toast(`${e?.label || name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
+  setProp(name, 'method', heatMethodWord(k));
+}, true);
+
 function updateEl(name) {
+  litSpots(name);
   const n = $(`#ws .el[data-name="${CSS.escape(name)}"]`);
   const e = elNamed(name);
   if (n && e) fillEl(n, e);
@@ -5457,6 +5491,8 @@ function heatFields(it, x = {}) {
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, x]),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
+    ['_spotHead', 'One-click method spots on the Tab (shown when 2 or more are on)', 'head', null, false, false, x],
+    ...HEAT_METHODS.map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
     ['_heatNote', `A Process changes it: ${it.name || 'hE_1'}.method = "PID" (or On/Off, Duty Cycle, Hysteresis, Deadband). So does a click on it while running.`, 'note', null, false, false, x]];
 }
 function elemDeviceFields(it, item) {
@@ -5974,6 +6010,7 @@ function fieldTip(name, text) {
 const DEVICE_TIPS = {
   heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target) or Deadband (steps its % toward the Target). One Element, one Device (Rule 6.19): a Process or a click while running can change it.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID and Deadband read to hold the Target.',
+  methodSpot: 'On: a small button for this heating method shows under the Element on its Tab (or under it on its Vessel Device), only when two or more are on. One click on it switches the Element to this method at once.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',

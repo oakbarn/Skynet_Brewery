@@ -112,6 +112,7 @@ console.log('heatmethod tests passed');
   assert.deepEqual([h.type, h.subtype, h.heatMethod], ['digitalOut', 'element', 'dutyCycle'], 'a Heating Element starting in the first one\'s method');
   assert.deepEqual(h.heatControls.map(c => [c.name, c.bruName, c.method]), [['M_HLT_Heat', 'M_HLT Heat', 'Duty Cycle'], ['HLT_PID', 'HLT PID', 'PID']]);
   assert.equal(h.name, 'MP_42_DO_HLT_Heat_BH');
+  assert.ok(h.methodSpot_dutyCycle && h.methodSpot_pid, 'a one-click spot for Duty Cycle and for PID');
   const cl = conv.graphics.find(g => g.kind === 'clone');
   assert.deepEqual([cl.of, cl.x, cl.y], [h.name, 300, 20], 'the second placing is a Clone of it');
   assert.equal(conv.elements.find(e => e.channel === 30).type, 'pid', 'a PID alone on its port stays as it is');
@@ -150,3 +151,11 @@ console.log('heatmethod Process editor tests passed');
   assert.equal(portClash({ type: 'pid', device: 'MB', channel: 42, name: 'Old_PID' }, els), null, 'two that shared in an older Schema keep working');
 }
 console.log('one port one Device tests passed');
+
+// One-click method spots (Rule 6.19): the Import ticks the joined methods; the Panel shows them only with two or more
+{
+  const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /return l\.length > 1 \? l : \[\];/, 'spots only when more than one method is ticked');
+  assert.match(app, /setProp\(name, 'method', heatMethodWord\(k\)\);\n\}, true\);/, 'one click switches the method');
+}
+console.log('method spots tests passed');

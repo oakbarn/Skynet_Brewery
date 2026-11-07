@@ -27,6 +27,16 @@ It still asks before it turns on (Rule 2.33): nothing turns on until you click *
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID or Deadband, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
 
+## One-click method spots
+
+In its Properties, under **One-click method spots on the Tab**, switch on the methods you want a button for. When **two or more**
+are on, a small button for each shows **under the Element** on its Tab, or under its picture on a **Vessel Device** when it is
+built in. **One click** on one switches the Element to that method at once; the one in use is lit orange. With only one (or none)
+switched on, no buttons show.
+
+Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
+click on PID to hold the strike temperature. The BruControl Import switches these on for you.
+
 ## From a Process
 
 ```
