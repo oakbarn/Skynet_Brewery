@@ -80,7 +80,8 @@ function connectAnswers(sent, found) {
   const parts = found?.parts ?? { vessels: [], pumps: [], valves: [] };
   if (!sent || typeof sent !== 'object') return { parts, chains: found?.chains ?? [], fermenters: found?.fermenters ?? [], places: {} };
   const vessels = Array.isArray(sent.vessels) ? sent.vessels.filter(v => v && /^[\w ~#-]{1,40}$/.test(v.key) && typeof v.name === 'string')
-    .map(v => ({ key: v.key, name: v.name.slice(0, 40), side: v.side === 'cold' ? 'cold' : 'hot' })) : parts.vessels;
+    .map(v => ({ key: v.key, name: v.name.slice(0, 40), side: v.side === 'cold' ? 'cold' : 'hot',
+      ...(typeof v.template === 'string' && /^[\w-]{1,80}$/.test(v.template) ? { template: v.template } : {}) })) : parts.vessels;
   const p2 = { ...parts, vessels };
   const ids = new Set([...parts.pumps, ...parts.valves].map(i => i.id)), keys = new Set(vessels.map(v => v.key)), ats = new Set(OPENINGS.map(([k]) => k));
   const end = e => {
@@ -90,11 +91,13 @@ function connectAnswers(sent, found) {
     if (e.kind === 'valve') return ids.has(e.id) ? { kind: 'valve', id: e.id } : null;
     if (e.kind === 'qd') return { kind: 'qd', sex: e.sex === 'female' ? 'female' : 'male', shut: !!e.shut, n: Math.max(1, Math.min(99, Number(e.n) || 1)) };
     if (e.kind === 'manifold') return { kind: 'manifold', n: Math.max(1, Math.min(99, Number(e.n) || 1)) };
+    if (e.kind === 'tee') return { kind: 'tee', n: Math.max(1, Math.min(999, Number(e.n) || 1)) };
     return ['tap', 'drain', 'none'].includes(e.kind) ? { kind: e.kind } : null;
   };
   const src = s => ['name', 'script', 'picture', 'ai', 'you', 'guess'].includes(s) ? s : 'you';
   const chains = (Array.isArray(sent.chains) ? sent.chains : []).map(c => ({ start: end(c?.start),
-    steps: (Array.isArray(c?.steps) ? c.steps : []).map(s => ({ to: end(s?.to), by: s?.by === 'hose' ? 'hose' : 'pipe', source: src(s?.source), ...(s?.ok ? { ok: true } : {}) })).filter(s => s.to) }))
+    steps: (Array.isArray(c?.steps) ? c.steps : []).map(s => ({ to: end(s?.to), by: s?.by === 'hose' ? 'hose' : 'pipe', source: src(s?.source), ...(s?.ok ? { ok: true } : {}),
+      ...(s?.by !== 'hose' && (s?.dir === 'left' || s?.dir === 'right') ? { dir: s.dir } : {}), ...(s?.fit === 'elbow' || s?.fit === 'tee' ? { fit: s.fit } : {}) })).filter(s => s.to) }))
     .filter(c => c.start && c.steps.length);
   const one = v => (typeof v === 'string' && v.length < 200 ? v : '');
   const fermenters = (Array.isArray(sent.fermenters) ? sent.fermenters : []).filter(f => keys.has(f?.vessel)).map(f => ({ vessel: f.vessel,
@@ -155,7 +158,7 @@ async function api(req, res, p, q) {
     if (isBackupName(file) && !/<Configuration[\s>]/.test(fs.readFileSync(file, 'utf8').slice(0, 4096))) return json(res, 400, { error: 'That backup (.bak) is not a BruControl config file inside.' });
     const copy = makeImportCopy(file, IMPORT_DIR);
     // Pictures and sounds (Fritz, 2026-11-06): their paths are imported and the files stay where they were, so BruControl keeps
-    // working. Only when asked (copyMedia) is each one COPIED, never moved, to media\Images\User or media\sounds\User, for a
+    // working. Each one is also COPIED, never moved (always, OakBarn Brewery 2026-11-08: "just make the copies"), to media\Images\User or media\sounds\User, for a
     // move to a Pi or another computer. A copy already there is kept, never written over.
     const media = (from, to) => {
       try {
@@ -167,7 +170,7 @@ async function api(req, res, p, q) {
         return true;
       } catch { return false; }
     };
-    const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', copy: copyMedia === true, media });
+    const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', copy: copyMedia !== false, media });
     // the Look (Rule 2.39): the Skynet Look closest to the BruControl theme, Office Black when it is not found
     const bt = findBruControlTheme([...CANDIDATES, path.dirname(file)]);
     const look = themeOf(bruThemeToLook(bt?.theme));
@@ -184,6 +187,19 @@ async function api(req, res, p, q) {
       tabs: (r.conv.workspaces ?? []).map(w => ({ name: w.name, width: w.width, height: w.height })), openings: OPENINGS, cooling: COOLING, heating: HEATING, aiSites: AI_SITES };
     converted = { file, copy, ...r, clues: { ...clues, backgrounds: pics }, connect };
     return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings, connect });
+  }
+  // Every Skynet vessel format (the Vessel Templates), for "which template matches your vessel the best" (OakBarn Brewery, 2026-11-08)
+  if (p === '/api/vessel-templates' && m === 'GET') {
+    const dir = path.join(ROOT, 'templates', 'vessel'), out = [];
+    for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.json')).sort()) {
+      try {
+        const t = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+        if ((t.vesselType || 'vessel') !== 'vessel') continue;             // vessels only, not chillers, coils or filters
+        out.push({ id: f.slice(0, -5), name: f.slice(0, -5).replace(/_/g, ' '), image: t.image ? '/media/' + t.image : '', vtype: t.vtype || '',
+          electric: /electric/i.test(f) || !!t.integrated, integrated: !!t.integrated, widget: !!t.vwidget });
+      } catch { /* a broken Template is left out */ }
+    }
+    return json(res, 200, out);
   }
   // The guide picture for Connect your brewery: the background picture BruControl had on that workspace (it stays where it is)
   if (p === '/api/picture' && m === 'GET') {
@@ -245,7 +261,7 @@ const server = http.createServer(async (req, res) => {
     // the Panel's own look, icon and hover help (one source, Rules 15.4 and 2.38)
     // the Connect your brewery song and rhyme (Fritz's own files, free to use) from the Panel's media\sounds\Skynet
     // the Skynet drawings of a vessel, a pump and a valve for the picture screen (read only, Skynet's own pictures)
-    if (/^\/media\/Images\/Skynet\/(Vessels|Pumps|Valves|Other_Equipment)\/[\w.-]+\.svg$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
+    if (/^\/media\/Images\/Skynet\/[\w-]+\/[\w.-]+\.(svg|png)$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
     if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
     if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');

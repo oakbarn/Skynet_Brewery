@@ -144,3 +144,14 @@ await import('./chart.test.js');
   ch[1].steps[0].to = { kind: 'drain' };
   assert.match(setFit(ch, 0, 1, 'elbow'), /remove the branch first/, 'a joined branch is kept');
 }
+
+// which template matches your vessel the best: the first guess from the name (OakBarn Brewery, 2026-11-08)
+{
+  const { guessVesselTemplate } = await import('../public/importer/connect.js');
+  const t = ['HLT', 'Mash_Tun', 'Brew_Kettle', 'Fermenter', 'Generic_Brew_Vessel_Widget'].map(id => ({ id }));
+  assert.equal(guessVesselTemplate({ key: 'HLT', name: 'HLT' }, t), 'HLT');
+  assert.equal(guessVesselTemplate({ key: 'MT', name: 'Mash Tun' }, t), 'Mash_Tun');
+  assert.equal(guessVesselTemplate({ key: 'BK', name: 'Boil Kettle' }, t), 'Brew_Kettle');
+  assert.equal(guessVesselTemplate({ key: 'F1', name: 'FV 1', side: 'cold' }, t), 'Fermenter');
+  assert.equal(guessVesselTemplate({ key: 'X', name: 'Big pot' }, t), 'Generic_Brew_Vessel_Widget');
+}
