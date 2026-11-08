@@ -11,13 +11,12 @@ Every page works the same way, and every answer is kept a moment after you give 
 | ✔ | tick it to copy the Display Name into the Label box |
 | Label | your own words for it (HLT, Mash Tun ...). It is the Label in Skynet and part of its suggested name. Never blank |
 | Show | ticked: the Label is shown with it on the Tab. It starts as BruControl showed the name |
-| Skynet Name with DisplayName | the suggested Skynet name made with the Display Name |
-| Skynet Name with Label | the suggested Skynet name made with your Label; it changes as you type |
+| Skynet Name | the suggested Skynet name made with your Label; it changes as you type. Until you type a Label it is made with the Display Name, greyed |
 
 There is no "tick them all" box, on purpose. Each item must be looked at: a BruControl name is often a code only its builder
 knows, like `M_6_B_1`, while its Label should say what it is in your brewery, like *HLT*.
 
-No box may be left blank. Every list starts at **Pick one…**; when no choice fits, pick **User defined** and type your own words.
+No box may be left blank (except **Watts**, which is optional). Every list starts at **Pick one…**; when no choice fits, pick **User defined** and type your own words.
 **Accept ▶** marks a blank box in red and tells you how many there are.
 
 ## The Widget pages
@@ -34,7 +33,8 @@ the Skynet Widget that does the same job:
 | Chart | Chart Widget ([Help 159](159-chart-widget)) |
 | Inspector | none: it stays a grey Placeholder |
 
-The first page lists every kind of Skynet Widget and how many of yours become one. Then there is one page for each kind found.
+The first page lists every kind of Skynet Widget and how many of yours become one. Then there is one page for each kind found on
+the Tabs you are importing, so *Timers (1 of 1)* when Timers are the only kind.
 A Widget's suggested name is `wgt_`, its kind, the Label and the Tab ID, for example `wgt_TMR_Mash~Timer_BR`.
 
 ## The item pages
@@ -48,8 +48,8 @@ One page each, in this order: **Pumps, Heating Elements, Temperature Probes, Val
 
 | Page | It asks |
 |---|---|
-| Pumps | Pump model, Power, Control Type |
-| Heating Elements | Watts, Volts, Control Type |
+| Pumps | Pump model, Power (filled in for you when the model is made for one voltage, like *Topsflo TD5 (24 V DC)*), Control Type |
+| Heating Elements | Watts (optional), Volts, Control Type |
 | Temperature Probes | Probe type: the Skynet probe types (OneWire, RTD, Thermocouple, the NTC thermistors, LM35, TMP36) |
 | Valves | Valve type (the Skynet valves), Connection, Size, Voltage |
 | Flow Meters | Meter type (Hall effect, turbine, oval gear, magnetic, ultrasonic, thermal mass, vortex), Pulses per Gallon or Liter |
@@ -67,7 +67,9 @@ NPT adapter and a female TC on each end is a **TC** valve, because it joins the 
 ## Control Type (Pumps and Heating Elements)
 
 Each numbered column is one way to control it: **1 On/Off, 2 Speed (PWM), 3 Duty Cycle, 4 Hysteresis, 5 PID, 6 Deadband,
-7 Precise.** Tick every one it may use. On/Off is always ticked. Then pick the **Primary** one, the method it starts with, by its
+7 Precise.** Tick every one it may use. A pump's On/Off is always ticked. A Heating Element always has its On/Off button to turn
+it on, so its first column is **On/Off Only**: tick it when nothing else controls it, and the other columns are greyed; untick it
+to pick them. Then pick the **Primary** one, the method it starts with, by its
 column number.
 
 A method that is not recommended unticks itself and says why, with a **Use it anyway** button:
