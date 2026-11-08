@@ -87,7 +87,7 @@ Every Device Type ID is unique. Some are in more than one list (`P_Pump` is in t
 
 **Heating elements:** `PID`, `DutyCy` duty cycle, `Hys` hysteresis, `HE` Heating Element (on / off output, its method picked by a click or a Process), `H_PWM` heating PWM, `H_AO` element on a 0-10 V power controller (SCR / SSVR).
 
-**Direct on / off:** `DO`, `HE` Heating Element, `Pump`, `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature; names made before 2026-11-05 keep `E_L_Vlv`), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
+**Direct on / off:** `DO`, `HE` Heating Element, `Pump`, `CPMP` Cool / Warm Pump (one pump a temperature switches, with a Method, [Help 164](164-cool-warm-pump)), `M_L_Vlv` low temperature manual valve, `eVlv` electric valve (motorized ball valve, low temperature; names made before 2026-11-05 keep `E_L_Vlv`), `M_H_Vlv` high temperature manual valve, `E_H_Vlv` high temperature electric valve, `G_Vlv` solenoid gas valve, `Mtr` motor, `LED`, `Light`, `E_Alm` electric alarm, `Fan`, `Chill` chiller / glycol / fridge compressor, `HtPad` fermenter heat wrap or pad, `Ignit` burner igniter.
 
 **Direct inputs:** `DI` plain, `Float` (true while the float is made, false with no voltage), `DIN` momentary push button, `PB` push button (ON only while held), `Toggle`, `Latch` (ON until reset), `FlowSw` flow switch, `Intlk` door / lid / safety interlock, `EStop` emergency stop, `Leak` leak sensor, `Count` pulse counter.
 

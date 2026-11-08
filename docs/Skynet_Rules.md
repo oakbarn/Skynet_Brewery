@@ -1644,6 +1644,18 @@ help on its Heating method, Help 137 and 150, the BruControl Import's Heating El
 **"⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
 Electrician."** Any later page or dialog about wiring gets the same words.
 
+6.21 **One Cool / Warm Pump, its method picked** (OakBarn Brewery, 2026-11-08: "Cool and Warm pumps: One Port, One Device, with a
+Method field"; "the suggested type is plain, e.g. MB_D5_CPMP_Cool~Pump_FR"). A pump that a temperature switches (a glycol pump that
+cools a fermenter, or a pump that brings warm water) is **ONE Pump Device on its port** (One Port, One Device, Rule 6.1), never a
+pump plus a separate Hysteresis Device. Its **Device Type ID is CPMP** (Cool / Warm Pump), so its suggested name reads plainly, for
+example `MB_D5_CPMP_Cool~Pump_FR`. It has a **Method** field, as a Heating Element has (Rule 6.19), with a pump's own methods only:
+**On/Off** (a click or a Process) or **Hysteresis** (its Temperature Probe, `.input`, and a Target: a **minus On offset cools**, a
+**plus On offset warms**). A Process changes it with `.method` and reads `.target`, `.onoffset` and `.ondelay`, the same words a
+Heating Element uses. Methods that switch a motor many times a minute (Duty Cycle, PID, Deadband, Precise) are not offered for it.
+- **Both programs:** the Panel shows the Method, Probe, Target and offsets in the Pump's Properties and the Brain runs it like a
+  Heating Element's Hysteresis. The BruControl Importer makes a BruControl pump that had a Hysteresis (or another control) on its port,
+  alone or beside its on/off output, one CPMP Pump that starts in that method, with its settings and probe, and lists it in the report.
+
 ## 7. Pictures
 
 7.1 **All Skynet pictures are SVG only.** (2026-10-22) Fritz's PNG drawings are redrawn as SVG and
@@ -2052,6 +2064,38 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     The page has the rhyme and Fritz's own song (*Skynet - Outlet to Valve*, free to use, `media/sounds/Skynet`; ▶ Play / ■ Stop,
     never by itself). The answers are saved in the Schema file (`connect`); the pipes and hoses are drawn when the Vessels are
     built (a later step).
+- **The fix list of 2026-11-08** (OakBarn Brewery, thread "Fix the Importer pages"):
+  - **Answers are kept** ("Make the user's answers and settings persistent, so they can close and come back later"): every answer
+    is saved a moment after it is made, by config file, in `Brewing\Import\progress.json`. Picking the same file again offers
+    **Carry on where I left off** or **Start again** (which asks first).
+  - **Page 2** gives the Process example (`MB_42_HE_HLT~Heat_BH.PID`) with hover help on each part of the name, made from the
+    brewer's own HLT Heating Element when one is found; the Electrical warning (Rule 6.20) in red on white; One Port, One Device; the
+    Default Tab and Properties. Every bold word has hover help.
+  - **Names:** Skynet names are picked and the choice is greyed out: it is made much later in the Import.
+  - **The Interfaces found** each have an **Import** box (the ones with items ticked); the old Interface question on the summary is gone.
+  - **Every box the brewer fills in** is grey with black text, and **no box may be left blank**: a blank one is marked red and named in a message.
+  - **The items on each Interface** have Display Name, a tick box (copies it to the Label), Label, **Show** (ticked as BruControl showed
+    the name), **Skynet Name with DisplayName** and **Skynet Name with Label** (it changes as the Label is typed). There is no
+    "tick them all" box, on purpose: each item must be looked at (a code like `M_6_B_1` should become words like HLT).
+  - **The Widget pages** come after the Tabs: every Skynet Widget type with how many of the brewer's BruControl Application Elements
+    become one, then a page per kind found. A BruControl **Timer** becomes a Timer Widget, an **Alarm** an Alarm Widget, a **Toggle
+    Switch** a Switch Widget, a **Script** element a Value Widget (joined to its Process when Processes come in), a **Chart** a Chart
+    Widget (Rule 1.26). An **Inspector** has no Skynet Widget and stays a Placeholder. They follow the same Display Name, Label and Show columns.
+  - **The item pages** (one per kind: Pumps, Heating Elements, Temperature Probes, Valves, Flow Meters, **pH Meters, Pressure Sensors
+    (PSI), Hydrometers, Volume Meters, Floats, Digital Inputs**, Other items) each start with How many, have the same Display Name,
+    Label and Show columns, a **Belongs on** dropdown that moves an item to its right page, and on every empty line a dropdown of the
+    items no page has taken yet. **No answer can stay "Not sure"**: every list starts at Pick one… and ends with **User defined**
+    (its own words box). Probes list the Skynet probe types; Valves list the Skynet valves, a **Connection** (TC, NPT or BSP: how the
+    valve is built into the manifold, so a BSP valve with BSP to NPT adapters and female TCs is TC), **Sizes** up to 4 inch with
+    millimeters and the metric sizes, whatever units were picked, and a **Voltage**. Flow meters list Hall effect, turbine, oval gear,
+    magnetic, ultrasonic, thermal mass and vortex.
+  - **Control Type** on Pumps and Heating Elements: one numbered column per method (On/Off, Speed (PWM), Duty Cycle, Hysteresis, PID,
+    Deadband, Precise) with a tick box, and a last column that picks the **Primary** method by its number. On/Off is always ticked
+    (Rule 6.19). A method that is not recommended (Duty Cycle, PID, Deadband or Precise on a pump; Speed on a heater) unticks itself and
+    says why, with **Use it anyway**. A Heating Element and a Cool / Warm Pump (Rule 6.21) start in the Primary method, with a spot for each other one ticked.
+  - **Vessels:** the Heater column is **Heater Element**; **HERMS Coil** is a dropdown with the Panel's choices: None, Left, Right,
+    Outlet Left & Inlet Right, Outlet Right & Inlet Left.
+  - **The Importer has its own icon**, clinking beer mugs (listed as CC0 on SVG Repo), in its window and on its shortcuts; the Panel keeps its own.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
   Processes, which travel beside it, as Processes are shared by every Schema). It is marked a **first draft** until the
@@ -2657,6 +2701,8 @@ Not Placed) or the dialog closes.
 
 ## Change log
 
+- 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.
+- 2026-11-08: Rule 15.4, the Importer fix list (OakBarn Brewery): answers kept to come back later, Interfaces Import box, no blank boxes, Show and the two Skynet Name columns, the Widget pages (BruControl Timers, Alarms, Toggle Switches, Scripts become Skynet Widgets), new item pages (pH, Pressure, Hydrometers, Volume, Floats, Digital Inputs), no "Not sure", User defined, valve Connection, Sizes and Voltage, more flow meters, Control Type columns with Primary, Heater Element and the Panel's HERMS Coil choices, the clinking beer mugs icon. Help 143 updated, Help 165. Checked against the Skynet Panel: the CPMP Type ID and the Pump's Method (Rule 6.21) are the only Panel changes. (thread "Fix the Importer pages")
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Build Page is actually a Build Tab Page"): Connect your brewery has one Build Tab page per ticked Tab in BruControl order, each explaining the Build Tab choices (with a pop-up of every choice's hover help) and adding manual parts to the manifold, and opening the Panel's own Build Tab on that Tab. Help 143 updated. Checked against the Skynet Panel: in its Build-page mode only, it opens on the Tab the Importer names. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Connect to your Brewery will use the same Build page as in Skynet Panel"; "The Only thing I see is the Process Icon needs to be greyed Out"): Connect your brewery has 🔨 Open the Build page, the Skynet Panel's own Build page on the imported Schema, with no board connected and Processes greyed out; what is built comes into the saved Schema. Help 143 updated. Checked against the Skynet Panel: the Panel gets a Build-page mode used only when the Importer starts it (SKYNET_IMPORT_BUILD); a normal Panel is unchanged. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Globals will be dealt with later. For now, only list them"): the Importer only lists BruControl Globals (name and Tab) on the Boards and Tabs summary; they get no Placeholder and the Beer.xml question on a Globals-only Tab is gone. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")

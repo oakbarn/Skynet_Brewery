@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skynet BruControl Importer</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+<link rel="icon" href="/importer/importer-icon.svg" type="image/svg+xml" sizes="any">
+<link rel="icon" href="/importer/importer-icon.ico" sizes="16x16 24x24 32x32 48x48 64x64 128x128 256x256">
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="/importer/importer.css">
 <script src="/themeboot.js"></script>
@@ -99,18 +100,43 @@
               <li>It has a <b>main heating method</b> (the one it starts with) and <b>tick boxes for the other methods it may
                 use</b> (On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise). Only the main method and the ticked ones can be used.</li>
               <li>Each allowed method gets a small <b>one-click spot</b> under the Element on its Tab (or under it on its Vessel), so
-                one click switches it, for example from Duty Cycle to PID. A Process can switch it too, for example
-                <code>MP_42_HE_HLT~Heat_BH.PID</code>.</li>
+                one click switches it, for example from Duty Cycle to PID.</li>
+              <li>A <b>Process</b> (BruControl Script) can command the method switched at will, for example
+                <code class="exName" data-ex="method">MB_42_HE_HLT~Heat_BH.PID</code> commands the Heating Element
+                <code class="exName" data-ex="name">MB_42_HE_HLT~Heat_BH</code> to switch to PID mode of control.
+                <b>What is <span class="exName" data-ex="name">MB_42_HE_HLT~Heat_BH</span>?</b> Rest the mouse on it and a help box explains
+                <b>Suggested Skynet Names</b>. In a nutshell, it reads as a <b>Heating Element</b> type Device (a BruControl PID,
+                Hysteresis, PWM or Duty Cycle Element) that is on the <b class="exIf">MB</b> <b>Interface</b> (a BruControl Device,
+                an Arduino Mega or the like), on <b>Port</b> (Pin) <b class="exPort">42</b>, that has a <b>Label</b> (BruControl
+                DisplayName) of <b class="exLabel">HLT Heat</b>, and is on the <b class="exTab">BH</b> <b>Tab</b> (BruControl Workspace).
+                Rest the mouse on any of these bold words for more. Don't worry too much about the Suggested Name for now: using it is
+                your choice.</li>
               <li>It is simply turned <b>On</b> or <b>Off</b>, whatever its method. BruControl turned a PID or Hysteresis on and off
                 with <i>Enabled</i>; Skynet does not use that word.</li>
-              <li><b>⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.</b></li>
-              <li>Heating Elements are the only Devices with more than one method: the wiring of everything else fixes how it is
-                controlled.</li>
+              <li class="killWarn"><b>⚠ Electricity can kill.</b> OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.</li>
+              <li><b>Heating Elements</b> (the HYS, PID and other BruControl Elements assigned to the same <b>Port</b> (Pin) of an
+                <b>Interface</b> (Arduino; a BruControl Device)) are all rolled into a <b>single Device</b> (a BruControl Element).
+                In Skynet, <b>One Port, One Device</b> is the Rule. You can still use the different <b>Modes of Control</b> (PID,
+                Hysteresis, Duty Cycle, Deadband, Direct On/Off) as in BruControl, but in Skynet you have one Device and just change its
+                <b>Method</b> with a click or a <b>Process</b> (BruControl Script). The same goes for a <b>Cool Pump</b> or <b>Warm
+                Pump</b> switched by a temperature: one Pump with a Method.</li>
               <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_HE_HLT~Heat_BH</code>.</li>
               <li>The Import does this for you: the first Element on the port sets the main method, the others are ticked, and if
                 BruControl showed both on a Tab, the second becomes a <b>Method Clone</b> tile with its BruControl Label. Your
                 old names (<i>HLT_PID</i>) still work in a Process.</li>
             </ul></li>
+          <li><b>Default settings (the Default Tab).</b> BruControl's <i>Environment</i> pane becomes the <b>Default settings</b> in Skynet
+            (<i>☰ Menu &gt; Default settings</i>, once called the Default tab): the one place to see every default. Skynet has many more
+            defaults than BruControl had: the Default pipe and hose size, the size of a new Tab, new Recipes, text, sound, phones, start-up
+            zoom and full screen, and the order of the Menu. What you set there is used whenever something new is made.</li>
+          <li><b>Properties.</b> Properties in Skynet and BruControl are very similar, with one distinct difference. In BruControl a
+            Property could be about a Workspace or about what an Element could do (like its DisplayName or its visibility). Some could
+            only be set in a BruControl dialog (such as the alignment of the DisplayName), while others could also be changed by a
+            Script (<code>myElement visibility = visible</code>). In Skynet they may still be called Properties, but the name
+            <b>attribute</b> better describes what can be controlled with code (a Skynet <b>Process</b>, a BruControl Script). And
+            unlike BruControl, Skynet can change the alignment of the <b>Label</b> (BruControl DisplayName) with a Process attribute
+            (<code>mySkynetDevice.label_alignment = top_centered</code>). Don't get bogged down in coding yet: we will visit the coding
+            quicksand much later.</li>
           <li><b>Themes (the Look).</b> BruControl's <i>Settings &gt; Environment &gt; Theme</i> (for example <i>Office 2019 Black</i>,
             palette <i>Default</i>) are paid DevExpress themes. They are not public, and they would not work in a browser anyway.
             Skynet gets the same effect by setting the <b>Back color</b> and the <b>Text and Label colors</b>, so it has a few
@@ -338,6 +364,9 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <div class="buttons top"><button id="back4a">◀ Back</button><span class="spacer"></span><button class="primary" id="next4a">Next ▶</button></div>
     <h1>Names</h1>
     <p class="lead">You picked <b id="chosen"></b>. First your units, then how your items should be named in Skynet.</p>
+    <div class="card resume hidden" id="resume"><p><b>You were part way through importing this file</b> <span id="resumeWhen" class="small muted"></span>.
+      Your answers were kept, so you can carry on where you left off.</p>
+      <div class="buttons"><button class="primary" id="resumeYes">▶ Carry on where I left off</button><span class="spacer"></span><button id="resumeNo">Start again</button></div></div>
     <h2>Units</h2>
     <div class="card" id="unitsCard">
       <p>Which units does your brewery use? Every temperature, size and volume in the next steps uses them.</p>
@@ -347,12 +376,13 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     </div>
     <h2>Names</h2>
     <div class="card">
-      <label class="choice"><input type="radio" name="names" value="skynet" checked> <b>Skynet names (recommended)</b></label>
+      <label class="choice"><input type="radio" name="names" value="skynet" checked disabled> <b>Skynet names (recommended)</b></label>
       <p class="small">Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for example
         <code>MB_28_do_ManualAlarm_B1</code> becomes <code>BR_28_DO_Manually_BB</code>. Your BruControl DisplayName becomes the
         Label, the name shown on the Tab.</p>
-      <label class="choice"><input type="radio" name="names" value="bru"> Keep my BruControl names</label>
+      <label class="choice"><input type="radio" name="names" value="bru" disabled> Keep my BruControl names</label>
       <p class="small">Allowed, but not the Skynet way. Two warnings come first. Spaces and characters a name may not have still change.</p>
+      <p class="small"><b>This choice is made much later in the Import.</b> For now every item gets its Skynet name.</p>
     </div>
     <h2>Pictures and Sounds</h2>
     <div class="card">

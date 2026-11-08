@@ -163,22 +163,38 @@ await import('./chart.test.js');
     { name: 'MP_9_PWM_M~HLT~PV2_MD', label: 'M HLT PV2', type: 'pwmOut', bru: { name: 'M_HLT PV2' } }] };
   const d = findVesselDetails(conv, [{ name: 's', text: 'if HLT herms then' }], [{ key: 'HLT', name: 'HLT' }, { key: 'BK', name: 'Boil Kettle' }]);
   assert.deepEqual(d.HLT.heaters.map(h => h.label), ['M_HLT Heat']); assert.equal(d.HLT.probe.label, 'M_HLT Temp');
-  assert.equal(d.HLT.herms, 'no', 'HERMS starts unticked'); assert.ok(d.HLT.found.herms, 'a Script mentions it'); assert.equal(d.HLT.outlet, 'bottom'); assert.equal(d.HLT.motorValve, 'MP_9_PWM_M~HLT~PV2_MD', 'its own motorized valve'); assert.equal(d.HLT.manualValve, 'none');
+  assert.equal(d.HLT.herms, 'none', 'HERMS starts at None'); assert.ok(d.HLT.found.herms, 'a Script mentions it'); assert.equal(d.HLT.outlet, 'bottom'); assert.equal(d.HLT.motorValve, 'MP_9_PWM_M~HLT~PV2_MD', 'its own motorized valve'); assert.equal(d.HLT.manualValve, 'none');
   assert.equal(d.BK.tangential, 'yes', 'a whirlpool pump means a tangential inlet on the Boil Kettle'); assert.equal(d.BK.sparge, 'none');
 }
 // the item pages (OakBarn Brewery, 2026-11-08): each item on a port has one kind, with first guesses; only known answers are saved
 {
   const { itemKind, guessPartDetails, cleanPartDetails, PART_PAGES } = await import('../public/importer/connect.js');
-  assert.deepEqual(PART_PAGES.map(p => p.kind), ['pump', 'heater', 'probe', 'valve', 'flow', 'other']);
+  // the new pages (OakBarn Brewery, 2026-11-08): pH, Pressure, Hydrometers, Volume, Floats and Digital Inputs
+  assert.deepEqual(PART_PAGES.map(p => p.kind), ['pump', 'heater', 'probe', 'valve', 'flow', 'ph', 'pressure', 'hydro', 'volume', 'float', 'din', 'other']);
+  // no list may stay "Not sure": every list starts at Pick one… (blank, so it must be picked) and every type list has User defined
+  for (const p of PART_PAGES) for (const f of p.fields) if (f.list) { assert.equal(f.list[0][0], '', `${p.kind} ${f.k} starts at Pick one`); assert.ok(!f.list.some(([, n]) => /not sure/i.test(n)), `${p.kind} ${f.k} has no Not sure`); }
+  assert.ok(PART_PAGES.find(p => p.kind === 'valve').fields.some(f => f.k === 'connection'), 'valves ask the connection (TC, NPT, BSP)');
+  const sizes = PART_PAGES.find(p => p.kind === 'valve').fields.find(f => f.k === 'size').list;
+  assert.ok(sizes.some(([k]) => k === '4') && sizes.some(([, n]) => /mm/.test(n)), 'valve sizes up to 4 inch, with mm');
   const pump = { type: 'digitalOut', subtype: 'pump', bru: { name: 'M_120VAC Chugger Pump' } };
   assert.equal(itemKind(pump), 'pump');
-  assert.deepEqual(guessPartDetails(pump, 'pump'), { model: 'chugger', power: 'ac120', speed: 'onoff' });
+  assert.deepEqual(guessPartDetails(pump, 'pump'), { model: 'chugger', power: 'ac120', methods: ['onoff'], primary: 'onoff' });
+  // a Cool / Warm Pump (Rule 6.21) starts on Hysteresis
+  assert.deepEqual(guessPartDetails({ type: 'digitalOut', subtype: 'pump', heatMethod: 'hysteresis', bru: { name: 'Cool Pump' } }, 'pump').methods, ['onoff', 'hysteresis']);
   assert.equal(itemKind({ type: 'digitalOut', subtype: 'element', bru: { name: 'HLT Heat' } }), 'heater');
   assert.equal(itemKind({ type: 'temperature', bru: { name: 'HLT Temp' } }), 'probe');
-  assert.equal(guessPartDetails({ type: 'temperature' }, 'probe').probe, 'onewire');
+  assert.equal(guessPartDetails({ type: 'temperature' }, 'probe').probe, '1W');
   assert.equal(itemKind({ type: 'digitalOut', bru: { name: 'M_HLT PV2 valve' } }), 'valve');
   assert.equal(itemKind({ type: 'flowMeter', bru: { name: 'Flow 1' } }), 'flow');
+  assert.equal(itemKind({ type: 'analogIn', bru: { name: 'S_FM3 Flow' } }), 'flow', 'an analog flow meter by its name');
+  assert.equal(itemKind({ type: 'analogIn', bru: { name: 'S_FM3 Temp' } }), 'probe', 'its temperature is a probe');
+  assert.equal(itemKind({ type: 'analogIn', bru: { name: 'S_PH Meter' } }), 'ph');
+  assert.equal(itemKind({ type: 'analogIn', bru: { name: 'S_Fermentation PSI' } }), 'pressure');
+  assert.equal(itemKind({ type: 'digitalIn', bru: { name: 'HLT Float' } }), 'float');
+  assert.equal(itemKind({ type: 'digitalIn', bru: { name: 'Door' } }), 'din');
   assert.equal(itemKind({ type: 'digitalOut', bru: { name: 'Lamp' } }), 'other');
-  assert.deepEqual(cleanPartDetails('heater', { watts: '5500', volts: 'ac240', junk: 1 }), { watts: 5500, volts: 'ac240' });
-  assert.deepEqual(cleanPartDetails('pump', { model: 'nope', speed: 'variable' }), { speed: 'variable' });
+  assert.deepEqual(cleanPartDetails('heater', { watts: '5500', volts: 'ac240', junk: 1 }), { watts: 5500, volts: 'ac240', methods: ['onoff'], primary: 'onoff' });
+  assert.deepEqual(cleanPartDetails('pump', { model: 'nope', methods: ['pwm', 'bad'], primary: 'pwm' }), { methods: ['onoff', 'pwm'], primary: 'pwm' });
+  assert.deepEqual(cleanPartDetails('probe', { probe: 'user', probeUser: ' My own probe ' }), { probe: 'user', probeUser: 'My own probe' }, 'User defined keeps its words');
+  assert.deepEqual(cleanPartDetails('pump', { methods: ['pid'], primary: 'pid', override: ['pid'] }).override, ['pid'], 'a method used anyway is recorded');
 }

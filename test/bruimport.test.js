@@ -28,8 +28,17 @@ assert.equal(c.devices.length, 1); assert.equal(c.devices[0].port, 'COM5'); asse
 assert.deepEqual(c.workspaces.map(w => [w.name, w.id]), [['Brew House', 'BH']]);
 assert.equal(c.workspaces[0].background, undefined, 'no Tab backgrounds for now');
 // only the items with an Interface and a Port that this step knows
-assert.deepEqual(c.elements.map(e => e.bru.name), ['Lamp Red', 'MB_61_Wort']);
-const [pump, wort] = c.elements;
+assert.deepEqual(c.elements.filter(e => e.device).map(e => e.bru.name), ['Lamp Red', 'MB_61_Wort']);
+// BruControl Application Elements become Skynet Widgets (OakBarn Brewery, 2026-11-08), named the Skynet way (Rule 3.14)
+{ const tmw = c.elements.find(e => e.bru.name === 'tm_Mash'), alm = c.elements.find(e => e.bru.name === 'alm_Hops');
+  assert.deepEqual([tmw.type, tmw.name, tmw.workspace, tmw.x, tmw.y, tmw.w, tmw.h], ['timer', 'wgt_TMR_tm_Mash_BH', 'Brew House', 400, 100, 120, 50]);
+  assert.equal(tmw.hideName, true, 'no DisplayName: the Label is not shown');
+  assert.equal(alm.type, 'alarm'); assert.equal(alm.sound, 'C:\\BruControl\\Media\\hops.wav');
+  assert.deepEqual(r.report.appItems.map(x => [x.page, x.widget]), [['Timers', 'Timer Widget'], ['Alarms', 'Alarm Widget']]);
+  const q = importBruControl(xml, { labels: { e4: 'Mash Timer' }, shows: { e4: true } });
+  const t2 = q.conv.elements.find(e => e.bru.name === 'tm_Mash');
+  assert.equal(t2.name, 'wgt_TMR_Mash~Timer_BH', 'the Label from the Widget page'); assert.equal(t2.hideName, undefined, 'Show ticked'); }
+const [pump, wort] = c.elements.filter(e => e.device);
 assert.equal(pump.type, 'digitalOut'); assert.equal(pump.device, 'Main Brewery'); assert.equal(pump.channel, 28);
 assert.equal(pump.label, 'Red Lamp'); assert.equal(pump.hideName, undefined);
 assert.equal(pump.name, 'MB_28_DO_Red~Lamp_BH', 'Skynet name, Rule 3.1');
@@ -50,20 +59,20 @@ assert.equal(wort.label, 'MB_61_Wort', 'a blank DisplayName: Label = Name'); ass
 assert.equal(wort.name, 'MB_61_AI_MB~61~Wort_BH'.replace(/~/g, '_'));
 assert.equal(c.scripts.length, 0, 'Processes come later');
 // a Placeholder for everything else, where BruControl had it; a hidden one stays hidden
-assert.equal(c.graphics.length, 4);
-const tm = c.graphics.find(g => g.placeholder.bruName === 'tm_Mash');
-assert.deepEqual([tm.kind, tm.workspace, tm.x, tm.y, tm.w, tm.h], ['text', 'Brew House', 400, 100, 120, 50]);
-assert.ok(tm.text.startsWith(PLACEHOLDER_MARK) && tm.text.includes('tm_Mash'));
+assert.equal(c.graphics.length, 2);
+const tm = c.graphics.find(g => g.placeholder.bruName === 'gblV_x');
+assert.deepEqual([tm.kind, tm.workspace, tm.x, tm.y, tm.w, tm.h], ['text', 'Brew House', 5, 5, 60, 30]);
+assert.ok(tm.text.startsWith(PLACEHOLDER_MARK) && tm.text.includes('gblV_x'));
 assert.equal(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').visible, false);
 assert.equal(c.graphics.find(g => g.placeholder.bruName === 'Flow').placeholder.why, 'CounterInPort pins come later');
 assert.equal(c.workspaces[0].height, 940, 'the Tab fits its items');
-assert.equal(r.report.items, 2); assert.equal(r.report.placeholders, 4);
-assert.deepEqual(r.report.renames.map(x => x.from), ['Lamp Red', 'MB_61_Wort']);
+assert.equal(r.report.items, 2); assert.equal(r.report.widgets, 2); assert.equal(r.report.placeholders, 2);
+assert.deepEqual(r.report.renames.map(x => x.from), ['Lamp Red', 'MB_61_Wort', 'tm_Mash', 'alm_Hops']);
 
 // pictures and sounds (Fritz, 2026-11-06): their paths are imported and the files stay where they were (any folder) ...
 assert.equal(pump.backpath, 'C:\\BruControl\\Media\\pump_off.png'); assert.equal(pump.backpath_2, 'E:\\Other\\pump_on.png'); assert.equal(pump.background, 2);
 assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').placeholder.pictures, ['D:\\My Pictures\\Brew\\hops.png'], 'a Placeholder with a picture on another path');
-assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'alm_Hops').placeholder.sounds, ['C:\\BruControl\\Media\\hops.wav']);
+assert.deepEqual(c.elements.find(e => e.bru.name === 'alm_Hops').sounds, ['C:\\BruControl\\Media\\hops.wav', '', ''], 'the Alarm Widget keeps its sound');
 // ... checked, never copied, unless asked
 const asked = [];
 const p1 = importBruControl(xml, { media: (from, to) => { asked.push([from, to]); return !from.startsWith('E:'); } });
@@ -73,7 +82,7 @@ assert.deepEqual(p1.report.media, { copy: false, pictures: 3, sounds: 1, found: 
 const copied = [];
 const p2 = importBruControl(xml, { copy: true, media: (from, to) => { copied.push([from, to]); return true; } });
 assert.deepEqual(copied, [['C:\\BruControl\\Media\\pump_off.png', 'Images/User/pump_off.png'], ['E:\\Other\\pump_on.png', 'Images/User/pump_on.png'],
-  ['C:\\BruControl\\Media\\hops.wav', 'sounds/User/hops.wav'], ['D:\\My Pictures\\Brew\\hops.png', 'Images/User/hops.png']]);
+  ['D:\\My Pictures\\Brew\\hops.png', 'Images/User/hops.png'], ['C:\\BruControl\\Media\\hops.wav', 'sounds/User/hops.wav']]);
 assert.equal(p2.conv.elements[0].backpath, 'Images/User/pump_off.png');
 const nm = pictureNamer();
 assert.equal(nm('C:\\A\\x.png'), 'Images/User/x.png'); assert.equal(nm('D:\\B\\x.png'), 'Images/User/x_2.png', 'same file name, other folder');
@@ -81,7 +90,7 @@ assert.equal(nm('c:\\a\\X.PNG'), 'Images/User/x.png', 'the same picture once');
 
 // keep the BruControl names (Rule 15.1): spaces and characters a name may not have still change
 const k = importBruControl(xml, { names: 'bru' });
-assert.deepEqual(k.conv.elements.map(e => e.name), ['Lamp_Red', 'MB_61_Wort']);
+assert.deepEqual(k.conv.elements.map(e => e.name), ['Lamp_Red', 'MB_61_Wort', 'tm_Mash', 'alm_Hops']);
 assert.ok(k.conv.warnings.some(w => /kept your BruControl names/.test(w)));
 assert.throws(() => importBruControl('<x/>'), /not a BruControl config file/);
 

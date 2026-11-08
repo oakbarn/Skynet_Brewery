@@ -55,59 +55,147 @@ export function findParts(conv, scripts = []) {
 // ---- The item pages (OakBarn Brewery, 2026-11-08: "before the Vessels getting the Details of all The Elements that are an Interface
 // Element and divide them in to pages: Pumps, Heaters, Probes, Valves, Flow ... Always begin with How Many and if you found 3, and the
 // User Says 5, add two empty slots with the Name Pump 4, Pump 5"). Each item on a board port has one kind; each page asks a few details.
-// Pump models: the AC pumps the Panel has pictures for, and the DC (12 V and 24 V) list in docs/DC_Brewing_Pumps.md.
-export const PUMP_MODELS = [['', 'Not sure'], ['march809', 'March 809 (AC)'], ['march815', 'March 815 (AC)'], ['chugger', 'Chugger (AC)'],
+// No answer may stay "Not sure" (OakBarn Brewery, 2026-11-08): every list starts at "Pick one…" and must be picked, and every list
+// of types ends with "User defined", which asks for its own words. Pump models: the AC pumps the Panel has pictures for, and the
+// DC (12 V and 24 V) list in docs/DC_Brewing_Pumps.md.
+export const PICK = ['', 'Pick one…'], USER = ['user', 'User defined (type it)'];
+export const PUMP_MODELS = [PICK, ['march809', 'March 809 (AC)'], ['march815', 'March 815 (AC)'], ['chugger', 'Chugger (AC)'],
   ['riptide', 'Blichmann RipTide (AC)'], ['mkii', 'KegLand MKII (AC)'], ['td5', 'Topsflo TD5 (24 V DC)'], ['march809dc', 'March 809 DC (12 or 24 V DC)'],
   ['hbmp20', 'DDMETER HB-MP20 (12 V DC)'], ['jt1000', 'BrewTaurus JT-1000B-24 (24 V DC)'], ['bayite', 'bayite BYT-7A006 (12 V DC)'],
   ['solar12', 'Solar hot-water pump (12 V DC)'], ['penguin', 'Penguin Chillers glycol pump (12 or 24 V DC)'], ['gf30', 'Grainfather GF30 cooling pump (12 V DC)'],
-  ['submersible', 'Small submersible pump (12 or 24 V DC)'], ['other', 'Other']];
+  ['submersible', 'Small submersible pump (12 or 24 V DC)'], USER];
+const VOLTS = [PICK, ['dc5', '5 V DC'], ['dc12', '12 V DC'], ['dc24', '24 V DC'], ['ac120', '120 V AC'], ['ac240', '240 V AC'], USER];
+// the Skynet probe types (public/naming.js, Device Type IDs for a temperature probe)
+const PROBES = [PICK, ['1W', 'OneWire (DS18B20)'], ['RTD', 'RTD (PT100 or PT1000)'], ['TC', 'Thermocouple (MAX31855 / MAX31856 board)'], ['10KNTC', '10K NTC thermistor (BCS-462 / BruControl type)'],
+  ['5KNTC', '5K NTC thermistor'], ['50KNTC', '50K NTC thermistor'], ['100KNT', '100K NTC thermistor (3D printer type)'], ['NTC', 'Other NTC thermistor'], ['LM35', 'LM35 (analog)'], ['TMP36', 'TMP36 (analog)'], USER];
+// the Skynet valves (docs/Device_Library.md 4.3 to 4.6a)
+const VALVES = [PICK, ['mbv', 'Skynet Motorized Ball Valve'], ['mbfv', 'Skynet Motorized Butterfly Valve'], ['mbvUser', 'User Defined Motorized Ball Valve'],
+  ['hot', 'High Temperature Electric Valve'], ['kld20t', 'Skynet KLD20T Proportional Valve (0-100 %)'], ['propUser', 'User Defined Proportional Valve (0-100 %)'],
+  ['solenoid', 'Solenoid Valve (liquid)'], ['gas', 'Solenoid Gas Valve'], USER];
+// how the valve is built into the manifold: its connection to the pipes, not the thread on the valve itself
+const CONNECTIONS = [PICK, ['tc', 'TC (Tri-Clamp)'], ['npt', 'NPT (US tapered thread)'], ['bsp', 'BSP (British thread)'], USER];
+// sizes up to 4 inch, in inches with millimeters, and the metric (DN) sizes, whatever units were picked (OakBarn Brewery, 2026-11-08)
+const SIZES = [PICK, ...[['1/8', 0.125], ['1/4', 0.25], ['3/8', 0.375], ['1/2', 0.5], ['3/4', 0.75], ['1', 1], ['1 1/4', 1.25], ['1 1/2', 1.5], ['2', 2], ['2 1/2', 2.5], ['3', 3], ['4', 4]]
+  .map(([t, n]) => [String(n), `${t} inch (${Math.round(n * 25.4 * 10) / 10} mm)`]),
+  ...[6, 8, 10, 15, 20, 25, 32, 40, 50, 65, 80, 100].map(n => ['mm' + n, `${n} mm (DN${n})`]), USER];
+const FLOW_METERS = [PICK, ['hall', 'Hall effect (paddle wheel, like the YF-S201)'], ['turbine', 'Turbine'], ['ovalGear', 'Oval gear (positive displacement)'],
+  ['magnetic', 'Magnetic (mag meter)'], ['ultrasonic', 'Ultrasonic'], ['thermal', 'Thermal mass'], ['vortex', 'Vortex'], USER];
+const PH_METERS = [PICK, ['ph4502', 'Analog pH board (PH-4502C or similar)'], ['gravity', 'DFRobot Gravity pH'], ['atlas', 'Atlas Scientific EZO pH (I2C or serial)'], ['handheld', 'Hand-held pH meter (read by hand)'], USER];
+const SIGNALS = [PICK, ['v5', 'Analog 0-5 V'], ['v33', 'Analog 0-3.3 V'], ['v10', 'Analog 0-10 V'], ['ma', '4-20 mA'], ['i2c', 'I2C'], ['serial', 'Serial (UART)'], ['none', 'None (read by hand)'], USER];
+const PRESSURE = [PICK, ['transducer', 'Pressure transducer (0.5-4.5 V)'], ['transmitter', 'Pressure transmitter (4-20 mA)'], ['i2c', 'I2C pressure sensor'], ['switch', 'Pressure switch (on / off)'], ['spunding', 'Spunding valve with a sensor'], USER];
+const HYDROS = [PICK, ['tilt', 'Tilt'], ['ispindel', 'iSpindel'], ['rapt', 'RAPT Pill'], ['plaato', 'Plaato'], ['floatH', 'Glass hydrometer (read by hand)'], ['refract', 'Refractometer (read by hand)'], USER];
+const VOLUMES = [PICK, ['scale', 'Load cells (a scale)'], ['ultrasonic', 'Ultrasonic level sensor'], ['pressureLevel', 'Pressure (liquid height) sensor'], ['float', 'Float level sensor (many steps)'], ['flowTotal', 'Flow meter total'], ['sight', 'Sight glass (read by hand)'], USER];
+const FLOATS = [PICK, ['floatTop', 'Float switch, high level'], ['floatLow', 'Float switch, low level'], ['capacitive', 'Capacitive level switch'], ['optical', 'Optical level switch'], USER];
+const CONTACT = [PICK, ['no', 'Normally Open (closes when it is made)'], ['nc', 'Normally Closed (opens when it is made)']];
+const DIN_TYPES = [PICK, ['DI', 'Direct Input (plain)'], ['DIN', 'DIN momentary push button (one trigger per press)'], ['PB', 'Push button (ON only while held)'], ['Toggle', 'Toggle button (press ON, press again OFF)'],
+  ['Latch', 'Latching input (ON until reset)'], ['FlowSw', 'Flow switch'], ['Intlk', 'Door / lid / safety interlock'], ['EStop', 'Emergency stop'], ['Leak', 'Leak sensor'], ['Count', 'Pulse counter'], USER];
+// The Control Type columns (OakBarn Brewery, 2026-11-08: "Speed becomes Control Type"): one numbered column per control method,
+// each with a tick box, and a last column that picks the Primary method by its number. A method that is not recommended for the
+// kind of item unticks itself and says why, with a button to use it anyway. On/Off is always allowed (Rule 6.19).
+export const METHOD_COLS = [['onoff', 'On/Off'], ['pwm', 'Speed (PWM)'], ['dutyCycle', 'Duty Cycle'], ['hysteresis', 'Hysteresis'], ['pid', 'PID'], ['deadband', 'Deadband'], ['precise', 'Precise']];
+const PUMP_WHY = 'A pump is not run this way. This method switches the pump on and off many times a minute to hold a number: it wears out the motor and its relay, and a pump does not hold a temperature by itself. Use On/Off, Speed (PWM) or Hysteresis (a Cool / Warm Pump, Rule 6.21).';
+export const NOT_RECOMMENDED = {
+  pump: { dutyCycle: PUMP_WHY, pid: PUMP_WHY, deadband: PUMP_WHY, precise: PUMP_WHY },
+  heater: { pwm: 'A heating element has no speed. Speed (PWM) is for a pump, a fan or a motor. A heater on a PWM pin is run by Duty Cycle, PID, Deadband or Precise, which work out its % for you.' },
+};
 export const PART_PAGES = [
-  { kind: 'pump', title: 'Pumps', one: 'Pump', fields: [
+  { kind: 'pump', title: 'Pumps', one: 'Pump', methods: true, fields: [
     { k: 'model', name: 'Pump model', list: PUMP_MODELS },
-    { k: 'power', name: 'Power', list: [['', 'Not sure'], ['ac120', '120 V AC'], ['ac240', '240 V AC'], ['dc12', '12 V DC'], ['dc24', '24 V DC']] },
-    { k: 'speed', name: 'Speed', list: [['onoff', 'On or Off only'], ['variable', 'Variable speed (PWM)']] }] },
-  { kind: 'heater', title: 'Heaters', one: 'Heater', fields: [
+    { k: 'power', name: 'Power', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], ['dc12', '12 V DC'], ['dc24', '24 V DC'], USER] }] },
+  { kind: 'heater', title: 'Heating Elements', one: 'Heating Element', methods: true, fields: [
     { k: 'watts', name: 'Watts', number: true },
-    { k: 'volts', name: 'Volts', list: [['', 'Not sure'], ['ac120', '120 V AC'], ['ac240', '240 V AC']] }] },
+    { k: 'volts', name: 'Volts', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], USER] }] },
   { kind: 'probe', title: 'Temperature Probes', one: 'Probe', fields: [
-    { k: 'probe', name: 'Probe type', list: [['', 'Not sure'], ['onewire', 'OneWire (DS18B20)'], ['ntc', 'Thermistor (10K NTC)'], ['pt100', 'PT100 (RTD)'], ['other', 'Other']] }] },
+    { k: 'probe', name: 'Probe type', list: PROBES }] },
   { kind: 'valve', title: 'Valves', one: 'Valve', fields: [
-    { k: 'valve', name: 'Valve type', list: [['', 'Not sure'], ['mbv', 'Motorized Ball Valve'], ['solenoid', 'Solenoid Valve'], ['other', 'Other']] },
-    { k: 'size', name: 'Size', list: [['', 'Not sure'], ['0.5', '1/2 inch'], ['0.75', '3/4 inch'], ['1', '1 inch'], ['1.5', '1 1/2 inch'], ['other', 'Other']] }] },
+    { k: 'valve', name: 'Valve type', list: VALVES },
+    { k: 'connection', name: 'Connection', list: CONNECTIONS, help: 'How the valve is built into your manifold: the connection it has to the pipes, not the thread on the valve itself. A BSP valve with a BSP to NPT adapter and a female TC on each end is a TC valve, because it joins the manifold with Tri-Clamps.' },
+    { k: 'size', name: 'Size', list: SIZES },
+    { k: 'volts', name: 'Voltage', list: VOLTS }] },
   { kind: 'flow', title: 'Flow Meters', one: 'Flow Meter', fields: [
+    { k: 'meter', name: 'Meter type', list: FLOW_METERS },
     { k: 'pulses', name: 'Pulses per Gallon or Liter', number: true }] },
+  { kind: 'ph', title: 'pH Meters', one: 'pH Meter', fields: [
+    { k: 'meter', name: 'pH meter type', list: PH_METERS },
+    { k: 'signal', name: 'Signal to the board', list: SIGNALS }] },
+  { kind: 'pressure', title: 'Pressure Sensors (PSI)', one: 'Pressure Sensor', fields: [
+    { k: 'sensor', name: 'Sensor type', list: PRESSURE },
+    { k: 'range', name: 'Highest pressure it reads (psi or bar)', number: true }] },
+  { kind: 'hydro', title: 'Hydrometers', one: 'Hydrometer', fields: [
+    { k: 'hydro', name: 'Hydrometer type', list: HYDROS }] },
+  { kind: 'volume', title: 'Volume Meters', one: 'Volume Meter', fields: [
+    { k: 'meter', name: 'How it measures', list: VOLUMES },
+    { k: 'most', name: 'Most it reads (Gallons or Liters)', number: true }] },
+  { kind: 'float', title: 'Floats', one: 'Float', fields: [
+    { k: 'float', name: 'Float type', list: FLOATS },
+    { k: 'contact', name: 'Contact', list: CONTACT }] },
+  { kind: 'din', title: 'Digital Inputs (DIN)', one: 'Digital Input', fields: [
+    { k: 'input', name: 'Input type', list: DIN_TYPES }] },
   { kind: 'other', title: 'Other items', one: 'Item', fields: [] }];
 // the kind of an item on a board port, for the item pages
+const PH = /(^|[^a-z])ph([^a-z]|$)/i, PRESS = /psi|pressure|press(^|[^a-z])|spund|\bbar\b/i, FLOWW = /flow|(^|[^a-z])fm ?\d/i, HYDRO = /tilt|hydrometer|ispindel|rapt|plaato|gravity/i;
+const VOLW = /volume|level|(^|[^a-z])vol([^a-z]|$)|scale|load ?cell/i, FLOATW = /float/i;
 export function itemKind(e) {
   if (!e) return 'other';
   const t = textOf(e);
   if (e.subtype === 'pump' || (e.subtype !== 'element' && PUMP.test(t) && PUMP_TYPES.has(e.type))) return 'pump';
   if (e.subtype === 'element' || HEAT_TYPES.has(e.type)) return 'heater';
+  if (e.type === 'flowMeter' || (FLOWW.test(t) && /analogIn|digitalIn/.test(e.type) && !/temp/i.test(t))) return 'flow';
   if (isProbe(e)) return 'probe';
   if (VALVE.test(t) && !NOT_VALVE.test(t) && VALVE_TYPES.has(e.type)) return 'valve';
-  if (e.type === 'flowMeter') return 'flow';
+  if (e.type === 'analogIn' && PH.test(t)) return 'ph';
+  if (e.type === 'analogIn' && PRESS.test(t)) return 'pressure';
+  if (HYDRO.test(t) && /analogIn|digitalIn/.test(e.type)) return 'hydro';
+  if ((e.type === 'analogIn' || e.type === 'scale') && VOLW.test(t)) return 'volume';
+  if (e.type === 'digitalIn' && FLOATW.test(t)) return 'float';
+  if (e.type === 'digitalIn') return 'din';
   return 'other';
 }
 // the first guesses for an item's details (each one can be changed)
 export function guessPartDetails(e, kind) {
   const t = textOf(e);
-  if (kind === 'pump') return {
-    model: /chu+g+er/i.test(t) ? 'chugger' : /riptide/i.test(t) ? 'riptide' : /march ?815/i.test(t) ? 'march815' : /march/i.test(t) ? 'march809' : /mkii|mk ?2/i.test(t) ? 'mkii' : /td5|topsflo/i.test(t) ? 'td5' : '',
-    power: /240 ?v?ac/i.test(t) ? 'ac240' : /120 ?v?ac/i.test(t) ? 'ac120' : /24 ?v?dc/i.test(t) ? 'dc24' : /12 ?v?dc/i.test(t) ? 'dc12' : '',
-    speed: e.type === 'pwmOut' ? 'variable' : 'onoff' };
-  if (kind === 'heater') { const w = /(\d{3,5}) ?w\b/i.exec(t); return { watts: w ? Number(w[1]) : '', volts: /240/.test(t) ? 'ac240' : /120/.test(t) ? 'ac120' : '' }; }
-  if (kind === 'probe') return { probe: e.type === 'temperature' ? 'onewire' : /pt ?100|rtd/i.test(t) ? 'pt100' : /ntc|thermistor/i.test(t) ? 'ntc' : '' };
-  if (kind === 'valve') return { valve: /solenoid/i.test(t) ? 'solenoid' : /mbv|motor|ball/i.test(t) ? 'mbv' : '', size: '' };
-  if (kind === 'flow') return { pulses: '' };
+  if (kind === 'pump') {
+    const m = e.heatMethod === 'hysteresis' ? 'hysteresis' : e.type === 'pwmOut' ? 'pwm' : 'onoff';
+    return {
+      model: /chu+g+er/i.test(t) ? 'chugger' : /riptide/i.test(t) ? 'riptide' : /march ?815/i.test(t) ? 'march815' : /march/i.test(t) ? 'march809' : /mkii|mk ?2/i.test(t) ? 'mkii' : /td5|topsflo/i.test(t) ? 'td5' : '',
+      power: /240 ?v?ac/i.test(t) ? 'ac240' : /120 ?v?ac/i.test(t) ? 'ac120' : /24 ?v?dc/i.test(t) ? 'dc24' : /12 ?v?dc/i.test(t) ? 'dc12' : '',
+      methods: [...new Set(['onoff', m])], primary: m };
+  }
+  if (kind === 'heater') {
+    const w = /(\d{3,5}) ?w\b/i.exec(t), start = e.heatMethod || 'onoff';
+    const ms = ['onoff', ...METHOD_COLS.map(([k]) => k).filter(k => k === start || e['methodSpot_' + k])];
+    return { watts: w ? Number(w[1]) : '', volts: /240/.test(t) ? 'ac240' : /120/.test(t) ? 'ac120' : '', methods: [...new Set(ms)], primary: start };
+  }
+  if (kind === 'probe') return { probe: e.type === 'temperature' ? '1W' : /pt ?100|rtd/i.test(t) ? 'RTD' : /ntc|thermistor/i.test(t) ? '10KNTC' : '' };
+  if (kind === 'valve') return { valve: /solenoid/i.test(t) ? 'solenoid' : /butterfly/i.test(t) ? 'mbfv' : e.type === 'pwmOut' || /(^|[^a-z])pv ?\d/i.test(t) ? 'propUser' : /mbv|motor|ball|(^|[^a-z])v\d/i.test(t) ? 'mbv' : '',
+    connection: /npt/i.test(t) ? 'npt' : /bsp/i.test(t) ? 'bsp' : /(^|[^a-z])tc([^a-z]|$)|tri ?clamp/i.test(t) ? 'tc' : '', size: '', volts: /24 ?v/i.test(t) ? 'dc24' : /12 ?v/i.test(t) ? 'dc12' : '' };
+  if (kind === 'flow') return { meter: /hall|yf-?s/i.test(t) ? 'hall' : '', pulses: '' };
+  if (kind === 'ph') return { meter: /atlas|ezo/i.test(t) ? 'atlas' : '', signal: e.type === 'analogIn' ? 'v5' : '' };
+  if (kind === 'pressure') return { sensor: e.type === 'analogIn' ? 'transducer' : e.type === 'digitalIn' ? 'switch' : '', range: '' };
+  if (kind === 'hydro') return { hydro: /tilt/i.test(t) ? 'tilt' : /ispindel/i.test(t) ? 'ispindel' : /rapt/i.test(t) ? 'rapt' : '' };
+  if (kind === 'volume') return { meter: e.type === 'scale' || /scale|load/i.test(t) ? 'scale' : '', most: '' };
+  if (kind === 'float') return { float: /low|bottom/i.test(t) ? 'floatLow' : /high|top/i.test(t) ? 'floatTop' : '', contact: '' };
+  if (kind === 'din') return { input: { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[e.mode] ?? (FLOATW.test(t) ? '' : '') };
   return {};
 }
-// keep only known answers (for the saved Schema)
+// keep only known answers (for the saved Schema); a User defined answer keeps its words (<key>User)
 export function cleanPartDetails(kind, d) {
   const page = PART_PAGES.find(x => x.kind === kind), out = {};
   for (const f of page?.fields ?? []) {
     const v = d?.[f.k];
     if (f.number) { const n = Number(v); if (v !== '' && v != null && Number.isFinite(n) && n >= 0 && n < 1e6) out[f.k] = n; }
-    else if (f.list.some(([k]) => k === v)) out[f.k] = v;
+    else if (v && f.list.some(([k]) => k === v)) {
+      out[f.k] = v;
+      if (v === 'user') { const w = String(d?.[f.k + 'User'] ?? '').trim().slice(0, 60); if (w) out[f.k + 'User'] = w; }
+    }
+  }
+  if (page?.methods) {
+    const keys = METHOD_COLS.map(([k]) => k);
+    const ms = [...new Set(['onoff', ...(Array.isArray(d?.methods) ? d.methods : []).filter(k => keys.includes(k))])];
+    out.methods = keys.filter(k => ms.includes(k));
+    out.primary = ms.includes(d?.primary) ? d.primary : 'onoff';
+    const ov = (Array.isArray(d?.override) ? d.override : []).filter(k => ms.includes(k) && NOT_RECOMMENDED[kind]?.[k]);
+    if (ov.length) out.override = ov;
   }
   return out;
 }
@@ -151,7 +239,7 @@ export function findVesselDetails(conv, scripts = [], vessels = []) {
     delete d.spargeArm; delete d.steamSlayer; delete d.found.spargeArm; delete d.found.steamSlayer;
     // HERMS Coil is a tick box that starts unticked (OakBarn Brewery, 2026-11-08); a Script that mentions one only says so
     if (d.herms === 'yes') d.found.herms = true;
-    d.herms = 'no';
+    d.herms = 'none';
     // Outlet (OakBarn Brewery, 2026-11-08): None, Center Low or Bottom Drain; a Hot Side vessel starts at Bottom Drain, the opening the
     // first guesses on Connect your brewery leave from
     d.outlet = v.side === 'cold' ? 'none' : 'bottom';

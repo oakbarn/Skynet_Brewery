@@ -138,3 +138,13 @@ body.wideStep main { max-width: 1500px; }
 .hoverList th { text-align: left; white-space: nowrap; padding-right: 1em; vertical-align: top; }
 .hoverList td { padding-bottom: .4em; }
 #ask .hoverList { max-height: 60vh; display: block; overflow: auto; }
+/* Electricity can kill (OakBarn Brewery, 2026-11-08): red text on white */
+.killWarn { background: #ffffff; color: #c00000; border: 2px solid #c00000; border-radius: 6px; padding: 6px 10px; margin: 6px 0; list-style: none; font-weight: 600; }
+.killWarn b { color: #c00000; }
+/* hover help on the bold words (OakBarn Brewery, 2026-11-08) */
+[data-help].gloss { border-bottom: 1px dotted currentColor; cursor: help; }
+/* every box the brewer types in or picks from: grey back, black text (OakBarn Brewery, 2026-11-08) */
+main input[type=text], main input[type=number], main input:not([type]), main select, main textarea, dialog input[type=text], dialog select {
+  background: #d9d9d9 !important; color: #000000 !important; border: 1px solid #8a8a8a; }
+main select option { background: #ffffff; color: #000000; }
+main input.blankLabel, main input.blankField, main select.blankField { border: 2px solid #d9534f !important; }

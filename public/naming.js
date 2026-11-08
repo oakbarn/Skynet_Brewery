@@ -21,7 +21,7 @@ const T = {
   HE: 'Heating Element (on a relay, SSR or contactor; its heating method is picked by a click or a Process, Rule 6.19)',
   H_PWM: 'Heating PWM (element on a PWM output)', H_AO: 'Heating element on a 0-10 V power controller (SCR / SSVR)',
   // direct on / off
-  Pump: 'Pump', M_L_Vlv: 'Low Temperature Manual Valve', eVlv: 'Electric Valve (motorized ball valve, low temperature)', M_H_Vlv: 'High Temperature Manual Valve',
+  Pump: 'Pump', CPMP: 'Cool / Warm Pump (one pump that a temperature switches; its method is picked: On/Off or Hysteresis, Rule 6.21)', M_L_Vlv: 'Low Temperature Manual Valve', eVlv: 'Electric Valve (motorized ball valve, low temperature)', M_H_Vlv: 'High Temperature Manual Valve',
   E_H_Vlv: 'High Temperature Electric Valve', G_Vlv: 'Solenoid Gas Valve', Mtr: 'Motor', LED: 'LED', Light: 'Light', E_Alm: 'Electric Alarm',
   Fan: 'Fan', Chill: 'Chiller / glycol / fridge compressor', HtPad: 'Fermenter heat wrap or pad', Ignit: 'Burner igniter',
   // direct input
@@ -42,7 +42,7 @@ export const TYPE_NAMES = { ...T, ...RESERVED_TYPE_IDS };
 const list = ids => ids.split(' ').map(id => [id, T[id]]);
 export const TYPE_CODES = {
   temperature: list('1W RTD TC 10KNTC 5KNTC 50KNTC 100KNT NTC LM35 TMP36'),
-  digitalOut: list('DO HE Pump M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
+  digitalOut: list('DO HE Pump CPMP M_L_Vlv eVlv M_H_Vlv E_H_Vlv G_Vlv Mtr LED Light E_Alm Fan Chill HtPad Ignit'),
   pwmOut: list('PWM H_PWM P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr P_LED'),
   analogOut: list('AO H_AO P_L_Vlv P_H_Vlv P_Pump P_Fan P_Mtr'),
   digitalIn: list('DI Float DIN PB Toggle Latch FlowSw Intlk EStop Leak Count'),
@@ -71,7 +71,7 @@ export function defaultCode(el, hint) {
   const has = c => codes.some(x => x[0] === c);
   let c = '';
   if (el.type === 'temperature') c = tempCode(el);
-  else if (el.type === 'digitalOut') c = { pump: 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'HE' }[el.subtype];
+  else if (el.type === 'digitalOut') c = { pump: el.heatMethod ? 'CPMP' : 'Pump', valve: el.valveType === 'manual' ? 'M_L_Vlv' : 'eVlv', element: 'HE' }[el.subtype];
   else if (el.type === 'pwmOut' || el.type === 'analogOut') c = { element: el.type === 'pwmOut' ? 'H_PWM' : 'H_AO', propValve: 'P_L_Vlv', pump: 'P_Pump' }[el.subtype];
   else if (el.type === 'digitalIn') c = BY_HINT[hint] || { momentary: 'DIN', latch: 'Latch', toggle: 'Toggle', counter: 'Count' }[el.mode];
   else c = BY_HINT[hint];

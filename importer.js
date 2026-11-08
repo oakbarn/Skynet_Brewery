@@ -17,6 +17,7 @@ import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
 import { importBruControl } from './lib/bruimport.js';     // the NEW import function, built step by step (Fritz, 2026-11-06)
+import { isHeatElem, isCoolPump, HEAT_KEYS, PUMP_METHOD_KEYS } from './public/heatmethod.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(ROOT, 'public');
@@ -33,6 +34,8 @@ const MEDIA_DIR = process.env.SKYNET_MEDIA_DIR || path.join(ROOT, 'media');     
 // imported Tabs, Devices and Widgets are put in that folder first; what is built there comes back into the Schema when it is saved.
 const BUILD_PORT = Number(process.env.IMPORTER_BUILD_PORT ?? PORT + 1);
 const BUILD_DIR = path.join(IMPORT_DIR, 'build');
+const PROGRESS = path.join(IMPORT_DIR, 'progress.json');      // the answers so far, by config file (come back later)
+function readProgress() { try { const j = JSON.parse(fs.readFileSync(PROGRESS, 'utf8')); return j && typeof j === 'object' ? j : {}; } catch { return {}; } }
 const BUILD_CONFIG = path.join(BUILD_DIR, 'config', 'brewery.json');
 const build = { child: null, key: '' };
 const SCHEMA_KEYS = ['devices', 'workspaces', 'elements', 'graphics', 'probes', 'autostart'];
@@ -129,7 +132,7 @@ function pickFolder(start) {
 function vesselDetails(d) {
   const yn = x => (x === 'yes' ? 'yes' : 'no'), id = x => (x && typeof x.id === 'string' ? { id: x.id.slice(0, 120), label: String(x.label ?? x.id).slice(0, 80) } : null);
   const size = x => { const n = Number(x); return Number.isFinite(n) && n > 0 && n < 100000 ? Math.round(n * 1000) / 1000 : undefined; };
-  return { volume: size(d.volume), vheight: size(d.vheight), diameter: size(d.diameter), tangential: yn(d.tangential), outlet: ['low', 'bottom'].includes(d.outlet) ? d.outlet : 'none', sparge: ['left', 'right'].includes(d.sparge) ? d.sparge : 'none', herms: yn(d.herms),
+  return { volume: size(d.volume), vheight: size(d.vheight), diameter: size(d.diameter), tangential: yn(d.tangential), outlet: ['low', 'bottom'].includes(d.outlet) ? d.outlet : 'none', sparge: ['left', 'right'].includes(d.sparge) ? d.sparge : 'none', herms: ['left', 'right', 'outLeftInRight', 'outRightInLeft'].includes(d.herms) ? d.herms : 'none',
     manualValve: ['ball', 'butterfly'].includes(d.manualValve) ? d.manualValve : 'none',
     motorValve: typeof d.motorValve === 'string' ? d.motorValve.slice(0, 120) : '',
     heaters: (Array.isArray(d.heaters) ? d.heaters : []).map(id).filter(Boolean).slice(0, 8), heater: id(d.heater), probe: id(d.probe) };
@@ -178,6 +181,17 @@ function partsAnswers(parts, conv) {
   }
   return out;
 }
+// the Control Type columns (OakBarn Brewery, 2026-11-08): a Heating Element (Rule 6.19) or a Cool / Warm Pump (Rule 6.21) starts with
+// its Primary method, and every other method ticked gets its one-click spot; the rest are kept in itemDetails for the record
+function applyMethods(elements, details) {
+  const by = new Map((elements ?? []).map(e => [e.name, e]));
+  for (const kind of ['heater', 'pump']) for (const it of details?.[kind]?.items ?? []) {
+    const el = by.get(it.name); if (!el || !Array.isArray(it.methods)) continue;
+    const keys = isHeatElem(el) ? HEAT_KEYS : isCoolPump(el) ? PUMP_METHOD_KEYS : null; if (!keys) continue;
+    if (keys.includes(it.primary)) el.heatMethod = it.primary;
+    for (const k of keys) if (k !== 'onoff') { if (it.methods.includes(k)) el['methodSpot_' + k] = true; else delete el['methodSpot_' + k]; }
+  }
+}
 async function api(req, res, p, q) {
   const m = req.method;
   if (p === '/api/ping' && m === 'GET') return json(res, 200, { ok: true });     // the window checks the Importer is still running
@@ -221,7 +235,7 @@ async function api(req, res, p, q) {
   // Make the Import Copy of the config file and convert the copy (Fritz, 2026-11-06). The first pass brings in the items on a
   // board port and the Tabs; everything else is a Placeholder on its Tab. names: 'skynet' (default) or 'bru' (Rule 15.1).
   if (p === '/api/convert' && m === 'POST') {
-    const { file, names, copyMedia, ids, units, labels } = await body(req);
+    const { file, names, copyMedia, ids, units, labels, shows } = await body(req);
     if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) or backup (.bak) first.' });
     if (fs.statSync(file).size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
     // any .bak can be picked, so check it really is a BruControl config file inside before the Import Copy is made
@@ -243,7 +257,9 @@ async function api(req, res, p, q) {
     const r = importBruControl(fs.readFileSync(copy, 'utf8'), { names: names === 'bru' ? 'bru' : 'skynet', copy: copyMedia !== false, media,
       ids: ids && typeof ids === 'object' ? Object.fromEntries(Object.entries(ids).filter(([k, v]) => typeof v === 'string' && /^[A-Za-z]{1,4}$/.test(v.trim())).slice(0, 50)) : {},
       // the user's own Labels from the items page, by BruControl element ID (OakBarn Brewery, 2026-11-08)
-      labels: labels && typeof labels === 'object' ? Object.fromEntries(Object.entries(labels).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.trim().slice(0, 40)]).slice(0, 2000)) : {} });
+      labels: labels && typeof labels === 'object' ? Object.fromEntries(Object.entries(labels).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'string' && v.trim()).map(([k, v]) => [k, v.trim().slice(0, 40)]).slice(0, 2000)) : {},
+      // the Show boxes (OakBarn Brewery, 2026-11-08): ticked = the Label is shown on the Tab, by BruControl element ID
+      shows: shows && typeof shows === 'object' ? Object.fromEntries(Object.entries(shows).filter(([k, v]) => /^[\w-]{1,64}$/.test(k) && typeof v === 'boolean').slice(0, 2000)) : {} });
     // the Look (Rule 2.39): the Skynet Look closest to the BruControl theme, Office Black when it is not found
     const bt = findBruControlTheme([...CANDIDATES, path.dirname(file)]);
     const look = themeOf(bruThemeToLook(bt?.theme));
@@ -268,6 +284,26 @@ async function api(req, res, p, q) {
     converted = { file, copy, ...r, clues: { ...clues, backgrounds: pics }, connect };
     return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings, connect });
   }
+  // The answers so far (OakBarn Brewery, 2026-11-08: "Make the user's answers and settings persistent, so they can close and come back
+  // later"): kept in Brewing\Import\progress.json by config file, and offered again when that file is picked
+  if (p === '/api/progress' && m === 'GET') {
+    const all = readProgress(), f = q.get('file') ?? '';
+    return json(res, 200, all[f.toLowerCase()] ?? {});
+  }
+  if (p === '/api/progress' && m === 'POST') {
+    const { file, data, clear } = await body(req);
+    if (typeof file !== 'string' || !isConfig(file)) return json(res, 400, { error: 'No config file given.' });
+    const all = readProgress(), key = file.toLowerCase();
+    if (clear) delete all[key];
+    else if (data && typeof data === 'object') all[key] = { saved: new Date().toISOString(), data };
+    // only the 20 newest are kept
+    const keep = Object.entries(all).sort((a, b) => String(b[1].saved).localeCompare(String(a[1].saved))).slice(0, 20);
+    const text = JSON.stringify(Object.fromEntries(keep));
+    if (text.length > 8e6) return json(res, 400, { error: 'The answers are too big to keep.' });
+    fs.mkdirSync(IMPORT_DIR, { recursive: true });
+    fs.writeFileSync(PROGRESS, text);
+    return json(res, 200, { ok: true });
+  }
   // Every Skynet vessel format (the Vessel Templates), for "which template matches your vessel the best" (OakBarn Brewery, 2026-11-08)
   if (p === '/api/vessel-templates' && m === 'GET') {
     const dir = path.join(ROOT, 'templates', 'vessel'), out = [];
@@ -289,13 +325,13 @@ async function api(req, res, p, q) {
   }
   // Save the Schema into Brewing\Import, for the Panel to open (Schema.json > Open a Schema file)
   if (p === '/api/save' && m === 'POST') {
-    const { file, name, connect, keepEmpty, keepTabs, tabsPicked, parts } = await body(req);
+    const { file, name, connect, keepEmpty, keepTabs, tabsPicked, parts, keepIfs } = await body(req);
     if (!converted || converted.file !== file) return json(res, 400, { error: 'Go back to Names and click Next first, so the config file is converted.' });
     // an Interface (board) with no items comes in only when its tick box was ticked (Fritz, 2026-11-08)
     // what was built on the Build page comes back in (its Tabs, Devices and Widgets), when it was made from this same Import Copy
     const built = readBuild(converted.copy);
     const base = built ? { ...converted.conv, ...Object.fromEntries(SCHEMA_KEYS.map(k => [k, built[k] ?? []])) } : converted.conv;
-    const { conv: conv1, dropped } = dropEmptyInterfaces(base, keepEmpty);
+    const { conv: conv1, dropped } = Array.isArray(keepIfs) ? dropEmptyInterfaces(base, keepIfs, { all: true }) : dropEmptyInterfaces(base, keepEmpty);
     // a Tab with no items comes in only when ticked; its Placeholders stay out with it (Fritz, 2026-11-08)
     // and since 2026-11-08 every Tab has an Import Tab box (empty ones start unticked), so an unticked Tab with items stays out too
     const { conv, dropped: tabsOut, holdersDropped, itemsDropped } = dropEmptyTabs(conv1, keepTabs, { all: tabsPicked === true });
@@ -308,6 +344,7 @@ async function api(req, res, p, q) {
     out.connect.units = converted.conv.units || 'US';
     // the item pages' answers (OakBarn Brewery, 2026-11-08): per kind, how many, each found item's details, and the empty slots added
     out.itemDetails = partsAnswers(parts, conv);      // US or Metric, asked at the start: the vessels' sizes use it
+    applyMethods(out.schema.elements, out.itemDetails);
     const nLinks = out.connect.links.length, nLoose = out.connect.loose.length;
     if (tabsOut.length) out.warnings = [...out.warnings, `${tabsOut.length} Tab(s) were left unticked and not imported${itemsDropped ? `, with their ${itemsDropped} item(s)` : ''}${holdersDropped ? `${itemsDropped ? ' and' : ', with their'} ${holdersDropped} Placeholder(s)` : ''}: ${tabsOut.join(', ')}.`];
     if (dropped.length) out.warnings = [...out.warnings, `${dropped.length} Interface(s) (board(s)) with no items were not imported: ${dropped.join(', ')}.`];
@@ -363,7 +400,7 @@ const server = http.createServer(async (req, res) => {
     // the Skynet drawings of a vessel, a pump and a valve for the picture screen (read only, Skynet's own pictures)
     if (/^\/media\/Images\/Skynet\/[\w-]+\/[\w.-]+\.(svg|png)$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
     if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
-    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
+    if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/naming.js', '/links.js', '/heatmethod.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');
   } catch (e) { json(res, 500, { error: e.message }); }
 });
