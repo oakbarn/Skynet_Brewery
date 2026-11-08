@@ -17,7 +17,8 @@ via process or on the Device when clicked").
 
 ## Click it while brewing
 
-**One click** on the Heating Element on its Tab opens its pop-up. It shows:
+**One click** on the Heating Element on its Tab turns it **ON or OFF** at once, in the method it is in, like a Pump (Skynet Rule
+2.33). Its pop-up opens from a **method spot** (below), or **Heating method…** in its Temperature Probe's SetPoint pop-up. The pop-up shows:
 
 1. **Heating method**: one button for each. The one it uses now is marked. **One click on a method switches to it at once**
    (no Set needed); the pop-up stays open for its setting. Hysteresis, PID, Deadband and Precise are greyed out until the Element has a
@@ -25,7 +26,9 @@ via process or on the Device when clicked").
 2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Target**.
 3. **Set + ON** (or **ON** for On/Off), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
 
-It still asks before it turns on (Rule 2.33): nothing turns on until you click **Set + ON** or **ON**.
+Nothing in the pop-up turns on until you click **Set + ON** or **ON**, with one exception: in **Duty Cycle** the % is its On and
+Off too. A Duty cycle % of **0 turns the Element Off**, and **above 0 turns it On** if it was Off, whether you set it here or a
+Process sets it (Skynet Rule 6.19).
 
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID, Deadband or Precise, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
@@ -70,7 +73,8 @@ To show one Element as separate tiles, like BruControl's *M_HLT Heat* and *HLT P
 in Edit layout, open **⧉ Clone Device** and pick the Element under **Method Clone**. It can go on the Element's own Tab. In its
 Properties pick the **Control Method** it stands for and, if you like, its own **Label**.
 
-- **One click** on the tile switches the Element to that method at once and opens its pop-up.
+- **One click** on the tile acts just as a click on the Element, all in unison, with no pop-up: showing ON, it turns the Element
+  Off; showing OFF, it switches the Element to that method and turns it On.
 - The tile shows **ON** only while the Element is ON **in that method**; otherwise it shows OFF.
 - The Element itself still shows what it is doing in whatever method it is using.
 
@@ -102,6 +106,8 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
 - `.method` is **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB
   work too). Reading it gives the word, for example `if hE_HLT_1.method == "PID"`.
 - `hE_HLT_1 = on` turns it **On** in its method; `hE_HLT_1 = off` turns it **Off**. Every method works this way, Hysteresis and PID too. (BruControl used *Enabled* for this; an old `.enabled` line still works, but Skynet says On and Off.)
+- **Picking a method never turns it On**: a method spot, the pop-up's method buttons or a Process only change the method. Turning
+  it On or Off is its picture, its On/Off button or spot, a Clone, or a Duty cycle % (Skynet Rule 6.19).
 - Changing the method **while it is ON** goes on at once in the new method, **except** to **On/Off**: that turns it OFF first, so
   an Element never jumps from 40 % to full power by itself. Turn it ON again for full power.
 - Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.target`, `.onoffset`, `.ondelay` (Hysteresis);
