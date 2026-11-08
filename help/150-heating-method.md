@@ -16,8 +16,7 @@ via process or on the Device when clicked").
 ## Click it while brewing
 
 **One click** on the Heating Element on its Tab turns it **ON or OFF** at once, in the method it is in, like a Pump (Skynet Rule
-2.33). Its pop-up opens from a **Method Clone**, a **method spot** (below), or **Heating method…** in its Temperature Probe's
-SetPoint pop-up. The pop-up shows:
+2.33). Its pop-up opens from a **method spot** (below), or **Heating method…** in its Temperature Probe's SetPoint pop-up. The pop-up shows:
 
 1. **Heating method**: one button for each. The one it uses now is marked. **One click on a method switches to it at once**
    (no Set needed); the pop-up stays open for its setting. Hysteresis, PID, Deadband and Precise are greyed out until the Element has a
@@ -65,7 +64,8 @@ To show one Element as separate tiles, like BruControl's *M_HLT Heat* and *HLT P
 in Edit layout, open **⧉ Clone Device** and pick the Element under **Method Clone**. It can go on the Element's own Tab. In its
 Properties pick the **Control Method** it stands for and, if you like, its own **Label**.
 
-- **One click** on the tile switches the Element to that method at once and opens its pop-up.
+- **One click** on the tile acts just as a click on the Element, all in unison, with no pop-up: showing ON, it turns the Element
+  Off; showing OFF, it switches the Element to that method and turns it On.
 - The tile shows **ON** only while the Element is ON **in that method**; otherwise it shows OFF.
 - The Element itself still shows what it is doing in whatever method it is using.
 

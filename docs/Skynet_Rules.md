@@ -235,12 +235,12 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
   gets **When tapped: none**, so a click on it does nothing. That is the user's own choice for that item and is kept.
 - **Made the same on 2026-11-08** (OakBarn Brewery's go): a **Heating Element on its own on a Tab** (and a Picture Widget that follows
   one) turns On or Off with one click (Rule 2.33 changed); a **Valve built into a Vessel Device** opens or closes with one click on
-  its picture.
+  its picture; a **Method Clone** acts as its parent, all in unison, with no pop-up (Rule 4.4 changed).
 - **Not yet the same** (reported, not changed; each waits for OakBarn Brewery's go):
   1. The older **Duty Cycle, Hysteresis, PID and Deadband Devices** (from before one Heating Element, Rule 6.19) open their number
      pop-up on one click instead of turning On or Off.
-  2. Pop-ups still used to turn a Heating Element On: a **Method Clone** switches the method and opens the pop-up (Set + ON), and a
-     **method spot** clicked while the Element is Off does the same (PR #276).
+  2. A pop-up still used to turn a Heating Element On: a **method spot** clicked while the Element is Off switches the method and
+     opens the pop-up (Set + ON) (PR #276). (A Method Clone no longer does: one click on it acts as on its parent, Rule 4.4.)
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -705,8 +705,10 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   a Device with more than one Control Method (today the Heating Element, Rule 6.19) may stand for **one** of its methods: its
   **Control Method** and its own **Label** are the Clone's own too (blank Label = the parent's Label and the method, for example
   *HLT Element PID*). It may sit on its parent's **own Tab** (the ⧉ Clone Device list has a *Method Clone* group for these
-  Devices, on any Tab). **One click** on it switches the parent to its method at once and opens the parent's pop-up; it shows
-  **ON only while the parent is ON in its method** (otherwise OFF). A Clone with no Control Method picked is a plain Clone. So a
+  Devices, on any Tab). It shows **ON only while the parent is ON in its method** (otherwise OFF). **One click acts as on the
+  parent, all in unison, with no pop-up** (changed 2026-11-08, OakBarn Brewery: "Clones act just as if it was the Parent That all
+  act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"): shown ON, it turns the parent Off; shown OFF, it switches the
+  parent to its method and turns it On. *Replaced:* one click switched the method and opened the parent's pop-up (2026-11-07). A Clone with no Control Method picked is a plain Clone. So a
   Tab can show one Element as tiles side by side, like BruControl's *M_HLT Heat* (Duty Cycle) and *HLT PID*. The BruControl
   Import makes each joined control's second placing a Method Clone with its BruControl Label.
 
@@ -1479,7 +1481,7 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
   once**, the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
   and **Cancel**. *Changed 2026-11-08 (Rule 2.33):* one click on the Element itself now turns it ON or OFF at once; the pop-up opens
-  from a Method Clone, a method spot or its Temperature Probe's SetPoint pop-up (Rule 2.43, **Heating method…**).
+  from a method spot or its Temperature Probe's SetPoint pop-up (Rule 2.43, **Heating method…**).
 - **One-click method spots** (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
@@ -2449,6 +2451,7 @@ Not Placed) or the dialog closes.
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
 - 2026-11-08: Added Rule 2.44 (OakBarn Brewery: "make things act the same. Like Click the Graphic for On or Off ... What you do every day One Click away"): outside Edit layout one click on a picture of something that turns On and Off turns it On or Off at once, wherever it is; one click on a temperature a Heating Element holds opens its SetPoint (Rule 2.43); one click on something set to a number opens its pop-up; double-click still opens Properties. Lists three things that don't follow it yet (a Heating Element on its own on a Tab, a Valve built into a Vessel Device, the older Duty Cycle, Hysteresis, PID and Deadband Devices). Checked against the BruControl Import program: no change, everything it makes gets these clicks in the Panel. (thread "Add the one-click rule to the Rules")
+- 2026-11-08: Changed Rule 4.4 (OakBarn Brewery: "Clones act just as if it was the Parent That all act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"): one click on a Method Clone acts as on its parent with no pop-up: shown ON it turns the parent Off, shown OFF it switches the parent to its method and turns it On. Rule 2.44's list updated; Help 71 and 150 updated. Checked against the BruControl Import program: no change, the Method Clones it makes get this click in the Panel. (thread "Add the one-click rule to the Rules")
 - 2026-11-08: Changed Rule 2.33 (OakBarn Brewery: "Change the Rule Individual elements toggle on off. I really do not like the popup to turn any thing on"; "Valve in a Vessels Device Graphic toggle on off"): one click on any Heating Element (on its own, followed by a Picture Widget, or built into a Vessel Device) turns it ON or OFF at once in its method; every Schema's Heating Elements stop asking once when the panel starts; a new one does not ask. One click on the picture of a Valve built into a Vessel Device opens or closes it. Rule 2.44's list and Rule 6.19 updated; Help 120, 137 and 150 updated. Checked against the BruControl Import program: no change, its Heating Elements and Vessel Valves get these clicks in the Panel. (thread "Add the one-click rule to the Rules")
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.

@@ -2346,15 +2346,19 @@ const elByName = n => S.config.elements.find(x => x.name === n) ?? S.config.elem
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
 const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
-// One click on a Method Clone (Rule 4.4): its parent switches to the Clone's method at once, then the pop-up opens on it
+// One click on a Method Clone (Rule 4.4) acts as one on its parent, all in unison (Fritz, 2026-11-08: "Clones act just as if it was
+// the Parent That all act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"), no pop-up: shown ON (the parent ON in its
+// method), it turns the parent OFF; shown OFF, it switches the parent to its method and turns it ON.
 async function methodCloneTap(g) {
   if (!can('operator')) return toast('Your account is view only', true);
   const p = L().elements.find(e => e.name === g.of); if (!p) return;
   const k = heatMethodKey(g.method);
   if (!allowedMethods(p).includes(k)) return toast(`${p.label || p.name} may not use ${heatMethodWord(k)}: tick it in its Properties`, true);
   if (NEEDS_PROBE.includes(k) && !p.input) return toast(`${p.label || p.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
-  if (heatMethodKey(S.values[p.name]?.method) !== k) { await setProp(p.name, 'method', heatMethodWord(k)); S.values[p.name] = { ...(S.values[p.name] || {}), method: heatMethodWord(k), ...(k === 'onoff' ? { state: false } : {}) }; }
-  if (isHeatElem(p)) heatDialog(p);
+  const inMethod = heatMethodKey(S.values[p.name]?.method) === k;
+  if (inMethod && S.values[p.name]?.state) return setProp(p.name, 'state', false);
+  if (!inMethod) { await setProp(p.name, 'method', heatMethodWord(k)); S.values[p.name] = { ...(S.values[p.name] || {}), method: heatMethodWord(k) }; }
+  return setProp(p.name, 'state', true);
 }
 
 async function doTap(e) {
