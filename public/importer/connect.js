@@ -57,9 +57,9 @@ export function vesselOf(item, vessels) {
 }
 
 // ---- the ends of a link. kind: vessel (key, at = an opening), pump (id, side in/out), valve (id), tap, drain,
-// qd (sex male/female, shut true = Shut-off), manifold (n), none
+// qd (sex male/female, shut true = Shut-off), manifold (n), tee (n: Tee 1, 2 ...), none
 export const endKey = e => !e ? '' : e.kind === 'vessel' ? `vessel:${e.key}:${e.at}` : e.kind === 'pump' || e.kind === 'valve' ? `${e.kind}:${e.id}`
-  : e.kind === 'qd' ? `qd:${e.sex || 'male'}:${e.shut ? 'shut' : 'open'}:${e.n ?? 1}` : e.kind === 'manifold' ? `manifold:${e.n ?? 1}` : e.kind;
+  : e.kind === 'qd' ? `qd:${e.sex || 'male'}:${e.shut ? 'shut' : 'open'}:${e.n ?? 1}` : e.kind === 'manifold' ? `manifold:${e.n ?? 1}` : e.kind === 'tee' ? `tee:${e.n ?? 1}` : e.kind;
 export const isFinal = e => ['vessel', 'tap', 'drain', 'qd', 'none'].includes(e?.kind);
 export function endText(e, parts) {
   if (!e) return '';
@@ -72,6 +72,7 @@ export function endText(e, parts) {
     case 'drain': return 'Drain';
     case 'qd': return `QD ${e.n ?? 1} (${e.sex === 'female' ? 'Female' : 'Male'}, ${e.shut ? 'Shut-off' : 'Open'})`;
     case 'manifold': return `Supply Manifold ${e.n ?? 1}`;
+    case 'tee': return `Tee ${e.n ?? 1}`;
     default: return 'Not connected';
   }
 }
@@ -160,6 +161,62 @@ export function chainsFromLinks(links) {
 // Hose or Pipe: the guess is Pipe, unless one end is a QD (then Hose) (Fritz, 2026-11-07)
 export const guessBy = (a, b) => a?.kind === 'qd' || b?.kind === 'qd' ? 'hose' : 'pipe';
 // One more link: it carries on the chain that ends where it starts, or starts a new chain; chains that now meet are joined
+// How a piece is joined (OakBarn Brewery, 2026-11-08: "Join Left Right vertical or hose as choices"): a Pipe straight down (the
+// next piece below), a Pipe to the left or to the right (the next piece beside it), or a Hose. Kept as by = pipe or hose, with
+// dir = left or right for a Pipe that runs across (no dir = down), so older answers still read.
+export const JOINS = [['pipe', 'Vertical pipe'], ['left', 'Pipe to the left'], ['right', 'Pipe to the right'], ['hose', 'Hose']];
+export const joinOf = s => s?.by === 'hose' ? 'hose' : s?.dir === 'left' || s?.dir === 'right' ? s.dir : 'pipe';
+export function setJoin(s, j) {
+  if (j === 'hose') { s.by = 'hose'; delete s.dir; }
+  else { s.by = 'pipe'; if (j === 'left' || j === 'right') s.dir = j; else delete s.dir; }
+  return s;
+}
+// Add a tee after a piece (OakBarn Brewery, 2026-11-08: "the ability to add tees"): the line goes on through the tee, and a branch
+// starts at the tee as its own chain (joined to nothing yet, to the right). Returns the tee.
+export function addTee(chains, ci, si) {
+  const c = chains[ci]; if (!c) return null;
+  const ns = chains.flatMap(x => [x.start, ...x.steps.map(t => t.to)]).filter(e => e?.kind === 'tee').map(e => e.n || 1);
+  const tee = { kind: 'tee', n: ns.length ? Math.max(...ns) + 1 : 1 };
+  c.steps.splice(si + 1, 0, { to: tee, by: 'pipe', source: 'you' });
+  chains.splice(ci + 1, 0, { start: { ...tee }, steps: [{ to: { kind: 'none' }, by: 'pipe', dir: 'right', source: 'you' }] });
+  return tee;
+}
+// Left or Right needs a fitting (OakBarn Brewery, 2026-11-08: "Right or left add an elbow or Tee, need user input as to type"):
+// an Elbow (fit = elbow, the usual) turns the pipe; a Tee puts a real Tee in the line there: the pipe runs left or right into the
+// Tee, the Tee goes on down to the next piece, and its third opening starts a branch (its own chain). Back to Elbow takes the Tee
+// out again, unless its branch is joined to something (then the answer is why not).
+export function setFit(chains, ci, si, fit) {
+  const c = chains[ci], s = c?.steps[si]; if (!s) return '';
+  if (fit === 'tee' && s.to?.kind !== 'tee') {
+    const old = s.to; addTee(chains, ci, si - 1 < 0 ? -1 : si - 1);
+    const t = c.steps[si]; t.by = 'pipe'; if (s.dir) t.dir = s.dir; t.fit = 'tee';
+    const next = c.steps[si + 1]; next.to = old; delete next.dir; next.by = s.by === 'hose' ? 'hose' : 'pipe'; next.source = s.source; delete next.fit;
+    return '';
+  }
+  if (fit === 'elbow' && s.to?.kind === 'tee') {
+    const n = s.to.n || 1, bi = chains.findIndex(x => x.start?.kind === 'tee' && (x.start.n || 1) === n);
+    if (bi >= 0 && chains[bi].steps.some(t => t.to?.kind !== 'none')) return `Tee ${n} has a branch joined to something: remove the branch first.`;
+    if (bi >= 0) chains.splice(bi, 1);
+    const next = c.steps[si + 1];
+    if (next) { c.steps.splice(si, 2, { ...next, dir: s.dir, by: 'pipe', fit: 'elbow' }); if (!s.dir) delete c.steps[si].dir; }
+    else { c.steps[si] = { to: { kind: 'none' }, by: 'pipe', dir: s.dir, fit: 'elbow', source: 'you' }; }
+    return '';
+  }
+  s.fit = fit === 'tee' ? 'tee' : 'elbow';
+  return '';
+}
+// The vessel a chain belongs to, for the list one vessel at a time (OakBarn Brewery, 2026-11-08): the vessel it starts at; a branch
+// from a tee belongs where its tee is; otherwise the first vessel it reaches; '' when none (the Other chains).
+export function chainVessel(chains, ci, hot = null, seen = new Set()) {
+  const c = chains[ci]; if (!c || seen.has(ci)) return ''; seen.add(ci);
+  const ok = e => e?.kind === 'vessel' && (!hot || hot.includes(e.key));
+  if (ok(c.start)) return c.start.key;
+  if (c.start?.kind === 'tee') {
+    const pi = chains.findIndex((x, i) => i !== ci && x.steps.some(t => t.to?.kind === 'tee' && (t.to.n || 1) === (c.start.n || 1)));
+    if (pi >= 0) return chainVessel(chains, pi, hot, seen);
+  }
+  return c.steps.map(t => t.to).find(ok)?.key ?? '';
+}
 // remove one link (Fritz, 2026-11-08: a picked line and the Delete key); a link in the middle splits its chain in two
 export function removeLink(chains, ci, si) {
   const c = chains[ci]; if (!c?.steps[si]) return;
@@ -257,13 +314,15 @@ export function connectReport(state) {
 // vessels." Things joined by a Pipe stack down the same column, with room to grab a pipe between them; a Hose step moves one column
 // over. Pieces joined to nothing go in rows at the bottom. pieces: [{ key, kind, end }] with the vessels in left-to-right order.
 // Returns { [key]: { x, y } } as parts of the picture's width and height (0 to 1).
+// the key of a piece on the picture: a vessel, a pump, a valve or a tee
+export const pieceKey = e => e?.kind === 'vessel' ? 'vessel:' + e.key : e?.kind === 'tee' ? 'tee:' + (e.n || 1) : e?.id;
 export function layoutPieces(pieces, chains = [], { set = false } = {}) {
   const vessels = pieces.filter(p => p.kind === 'vessel'), n = vessels.length, cols = Math.max(2, 2 * n);
   const colX = c => (Math.max(0, Math.min(cols - 1, c)) + 0.5) / cols;
   const out = {}, colOf = {}, rowOf = {}, ROW = 0.12, TOP = 0.1;
   const first = set ? 1 : 0, last = set ? cols - 2 : cols - 1;
   vessels.forEach((v, i) => { const c = n === 1 ? first : first + i * (last - first) / (n - 1); colOf[v.key] = c; rowOf[v.key] = 0; });
-  const keyOf = e => e?.kind === 'vessel' ? 'vessel:' + e.key : e?.id;
+  const keyOf = pieceKey;
   const known = new Set(pieces.map(p => p.key));
   const used = new Map();                       // "col|row" taken
   const take = (c, r) => { while (used.has(`${Math.round(c * 2)}|${r}`)) r++; used.set(`${Math.round(c * 2)}|${r}`, true); return r; };
@@ -271,16 +330,21 @@ export function layoutPieces(pieces, chains = [], { set = false } = {}) {
   // walk each chain from the first piece that has a place; pieces before it are put above it, after it below it
   for (let pass = 0; pass < 4; pass++) {
     for (const c of chains) {
-      const ends = [c.start, ...c.steps.map(s => s.to)], by = [null, ...c.steps.map(s => s.by)];
+      const ends = [c.start, ...c.steps.map(s => s.to)], by = [null, ...c.steps.map(joinOf)];
       let a = ends.findIndex(e => keyOf(e) in colOf);
       if (a < 0) continue;
       for (let i = a + 1; i < ends.length; i++) {
         const k = keyOf(ends[i]), pk = keyOf(ends[i - 1]); if (!known.has(k) || k in colOf || !(pk in colOf)) continue;
+        // Left and Right: beside it on the same row; a Pipe down: under it; a Hose: one column over, under it
+        const side = by[i] === 'left' ? -1 : by[i] === 'right' ? 1 : 0;
+        if (side) { const c0 = Math.max(0, Math.min(cols - 1, colOf[pk] + side)); colOf[k] = c0; rowOf[k] = take(c0, rowOf[pk]); continue; }
         const c0 = colOf[pk] + (by[i] === 'hose' ? (colOf[pk] + 1 < cols ? 1 : -1) : 0);
         colOf[k] = c0; rowOf[k] = take(c0, rowOf[pk] + 1);
       }
       for (let i = a - 1; i >= 0; i--) {
         const k = keyOf(ends[i]), nk = keyOf(ends[i + 1]); if (!known.has(k) || k in colOf || !(nk in colOf)) continue;
+        const side = by[i + 1] === 'left' ? 1 : by[i + 1] === 'right' ? -1 : 0;
+        if (side) { const c0 = Math.max(0, Math.min(cols - 1, colOf[nk] + side)); colOf[k] = c0; rowOf[k] = take(c0, Math.max(1, rowOf[nk])); continue; }
         const c0 = colOf[nk] + (by[i + 1] === 'hose' ? (colOf[nk] + 1 < cols ? 1 : -1) : 0);
         colOf[k] = c0; rowOf[k] = take(c0, Math.max(1, rowOf[nk] + 1));
       }

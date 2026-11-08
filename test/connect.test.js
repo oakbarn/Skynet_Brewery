@@ -121,3 +121,26 @@ await import('./chart.test.js');
   assert.match(pipePath({ x: 0, y: 0 }, { x: 50, y: 10 }), /H20\.0 L30\.0 10\.0 H50\.0$/);
   assert.match(hosePath({ x: 0, y: 0 }, { x: 100, y: 0 }), /^M0\.0 0\.0 C/);
 }
+
+// one vessel at a time; Left, Right, Vertical or Hose; an Elbow or a Tee (OakBarn Brewery, 2026-11-08)
+{
+  const { joinOf, setJoin, setFit, addTee, chainVessel, layoutPieces, endText } = await import('../public/importer/connect.js');
+  const s = { by: 'pipe' };
+  assert.equal(joinOf(s), 'pipe'); setJoin(s, 'left'); assert.equal(joinOf(s), 'left'); setJoin(s, 'hose'); assert.equal(joinOf(s), 'hose'); assert.equal(s.dir, undefined);
+  const ch = [{ start: { kind: 'vessel', key: 'HLT', at: 'cBottomOutlet' }, steps: [{ to: { kind: 'valve', id: 'V1' }, by: 'pipe' }, { to: { kind: 'pump', id: 'P1', side: 'in' }, by: 'pipe', dir: 'right' }] },
+    { start: { kind: 'valve', id: 'V9' }, steps: [{ to: { kind: 'none' }, by: 'pipe' }] }];
+  setFit(ch, 0, 1, 'tee');
+  assert.deepEqual(ch[0].steps.map(t => t.to.kind), ['valve', 'tee', 'pump'], 'the Tee goes in the line');
+  assert.equal(ch[0].steps[1].dir, 'right'); assert.equal(ch[0].steps[2].dir, undefined, 'the Tee goes on down');
+  assert.equal(ch[1].start.kind, 'tee', 'its branch is a chain'); assert.equal(endText(ch[1].start), 'Tee 1');
+  assert.equal(chainVessel(ch, 1), 'HLT', 'a branch belongs to its Tee\'s vessel'); assert.equal(chainVessel(ch, 2), '', 'no vessel: Other chains');
+  const L = layoutPieces([{ key: 'vessel:HLT', kind: 'vessel' }, { key: 'V1', kind: 'valve' }, { key: 'P1', kind: 'pump' }, { key: 'tee:1', kind: 'tee' }], ch);
+  assert.ok(L['tee:1'].x > L.V1.x && L['tee:1'].y === L.V1.y, 'Pipe to the right: beside it on the same row');
+  assert.ok(L.P1.x === L['tee:1'].x && L.P1.y > L['tee:1'].y, 'then down under the Tee');
+  setFit(ch, 0, 1, 'elbow');
+  assert.deepEqual(ch[0].steps.map(t => t.to.kind), ['valve', 'pump'], 'back to an Elbow takes the Tee out');
+  assert.equal(ch[0].steps[1].dir, 'right'); assert.equal(ch.length, 2, 'and its empty branch');
+  const t = addTee(ch, 0, 0); assert.equal(t.n, 1); assert.equal(ch[0].steps[1].to.kind, 'tee');
+  ch[1].steps[0].to = { kind: 'drain' };
+  assert.match(setFit(ch, 0, 1, 'elbow'), /remove the branch first/, 'a joined branch is kept');
+}

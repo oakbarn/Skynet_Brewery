@@ -158,6 +158,13 @@ song, *Skynet - Outlet to Valve*, made by OakBarn Brewery; it never plays by its
 - **The list on its own screen.** **Next ▶ (the list)** on the picture screen shows **What is connected to what** as large as the
   window; its **◀ Back (the picture)** goes straight back to the picture, so you can move quickly between the two. **Next ▶**
   there returns to this page at the Fermenters (**📋 Open the list screen** opens it from the page; **Esc** closes either screen).
+- **One vessel at a time.** The list has a button for each Hot Side vessel, **Other chains** (chains that reach no vessel) and
+  **All**. **Save, next vessel ▶** marks the vessel done (✓) and shows the next one; every answer is kept as you go.
+- **How each piece is joined:** **Vertical pipe** (the next piece is under it), **Pipe to the left**, **Pipe to the right** (the
+  next piece is beside it) or **Hose**. A pipe to the left or right asks for its fitting: **with an Elbow**, or **with a Tee**, which
+  puts a real Tee in the line: the pipe runs into the Tee, the Tee goes on down to the next piece, and its third opening starts
+  a **branch** (its own chain, under it). **⊤ Tee** adds a Tee after any piece the same way. Back to an Elbow takes the Tee out
+  again, unless its branch is joined to something. Until you drag a piece, the picture follows these answers.
 - **Ask an AI about my picture (your choice).** The Importer itself never uses an AI. **🤖 Copy the question and open it**
   copies a ready-made question (it lists your own vessel, pump and valve names) and opens the free AI site you pick (Claude,
   ChatGPT or Gemini). Add your picture there and paste the question. Copy the AI's answer back into the box and click **Read

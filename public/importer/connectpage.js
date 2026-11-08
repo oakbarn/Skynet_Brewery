@@ -2,7 +2,7 @@
 // Copyright (c) OakBarn Brewery 2026
 // The Importer's page 6, Connect your brewery (Rule 15.4, Fritz 2026-11-07). The rules of the chains, the guesses and reading an
 // AI's answer are in connect.js (shared with the Importer's server); this file only draws the page and keeps the brewer's answers.
-import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink, layoutPieces, pipePath, hosePath } from './connect.js';
+import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink, layoutPieces, pipePath, hosePath, JOINS, joinOf, setJoin, setFit, addTee, chainVessel, pieceKey } from './connect.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -56,9 +56,11 @@ function endOptions(sel, { start = false } = {}) {
   const v = S.parts.vessels.filter(x => x.side === 'hot').map(x => `<optgroup label="${esc(x.name)}">${OPENINGS.map(([k, n]) => opt({ kind: 'vessel', key: x.key, at: k }, `${x.name} ${n}`)).join('')}</optgroup>`).join('');
   const p = `<optgroup label="Pumps">${S.parts.pumps.map(i => opt({ kind: 'pump', id: i.id }, `${i.label} ${start ? 'Out' : 'In'}${mark(i)}`)).join('')}</optgroup>`;
   const va = `<optgroup label="Valves">${S.parts.valves.map(i => opt({ kind: 'valve', id: i.id }, i.label + mark(i))).join('')}</optgroup>`;
+  const tees = [...new Set(S.chains.flatMap(c => [c.start, ...c.steps.map(s => s.to)]).filter(e => e?.kind === 'tee').map(e => e.n || 1))].sort((a, b) => a - b);
+  const te = tees.length ? `<optgroup label="Tees">${tees.map(n => opt({ kind: 'tee', n }, `Tee ${n}`)).join('')}</optgroup>` : '';
   const qd = sel?.kind === 'qd' ? sel : { kind: 'qd' }, mf = sel?.kind === 'manifold' ? sel : { kind: 'manifold' };
   const ends = `<optgroup label="Ends">${opt({ kind: 'tap' }, 'Tap Water')}${opt({ kind: 'drain' }, 'Drain')}${opt(qd, 'Quick Disconnect (QD)')}${opt(mf, 'Supply Manifold')}${start ? '' : opt({ kind: 'none' }, 'Not connected')}</optgroup>`;
-  return v + p + va + ends;
+  return v + p + va + te + ends;
 }
 function endFromKey(k, old) {
   const [kind, a, b] = k.split(':');
@@ -67,6 +69,7 @@ function endFromKey(k, old) {
   if (kind === 'valve') return { kind, id: k.slice(6) };
   if (kind === 'qd') return { kind, sex: old?.kind === 'qd' ? old.sex : 'male', shut: old?.kind === 'qd' ? old.shut : false, n: old?.kind === 'qd' ? old.n : nextN('qd') };
   if (kind === 'manifold') return { kind, n: old?.kind === 'manifold' ? old.n : nextN('manifold') };
+  if (kind === 'tee') return { kind, n: Number(a) || 1 };
   return { kind };
 }
 function nextN(kind) { const ns = S.chains.flatMap(c => [c.start, ...c.steps.map(s => s.to)]).filter(e => e?.kind === kind).map(e => e.n || 1); return ns.length ? Math.max(...ns) + 1 : 1; }
@@ -79,23 +82,42 @@ function extras(e, path) {
   return '';
 }
 const SOURCE = { name: 'guess from the names', script: 'guess from the Scripts', picture: 'guess from the BruControl picture', ai: 'from the AI, check it', guess: 'guess' };
+// One vessel at a time (OakBarn Brewery, 2026-11-08): a button for each Hot Side vessel, Other chains (no vessel) and All. The chains
+// of the vessel picked are shown; "Save, next vessel" marks it done (✓) and goes on to the next one. Every answer is kept as you go.
+function hotKeys() { return S.parts.vessels.filter(v => v.side === 'hot').map(v => v.key); }
+function listPage() {
+  const pages = [...hotKeys(), 'other', 'all'];
+  if (!pages.includes(S.listV)) S.listV = pages[0];
+  return pages;
+}
+function pagerHtml(pages) {
+  const name = k => k === 'other' ? 'Other chains' : k === 'all' ? 'All' : S.parts.vessels.find(v => v.key === k)?.name ?? k;
+  return `<div class="cnPager">${pages.map(k => `<button data-page="${esc(k)}" class="${k === S.listV ? 'primary' : ''}" title="${k === 'all' ? 'Every chain at once' : k === 'other' ? 'Chains that reach no vessel' : 'Only what is joined to this vessel'}">${S.doneV?.[k] ? '✓ ' : ''}${esc(name(k))}</button>`).join('')}</div>`;
+}
+const FIT_TIP = 'A pipe that turns left or right needs a fitting: an Elbow, or a Tee (the Tee goes on down, and its third opening starts a branch)';
 function renderChains() {
-  const box = $('#cnChains');
-  if (!S.chains.length) box.innerHTML = '<p class="muted">Nothing is joined yet. Start a new chain, join pieces on the picture, or read an AI answer.</p>';
-  else box.innerHTML = S.chains.map((c, ci) => {
+  const box = $('#cnChains'), pages = listPage(), hot = hotKeys(), page = S.listV;
+  const show = S.chains.map((c, ci) => page === 'all' || chainVessel(S.chains, ci, hot) === (page === 'other' ? '' : page));
+  const vi = hot.indexOf(page), nextV = vi >= 0 ? (hot[vi + 1] ?? 'other') : '';
+  const nextName = nextV === 'other' ? 'Other chains' : S.parts.vessels.find(v => v.key === nextV)?.name;
+  const foot = nextV ? `<div class="buttons"><span class="spacer"></span><button class="primary" data-nextv="${esc(nextV)}" title="Keep these answers, mark this vessel done and go on to the next one">Save, next vessel ▶ (${esc(nextName)})</button></div>` : '';
+  if (!S.chains.length) box.innerHTML = pagerHtml(pages) + '<p class="muted">Nothing is joined yet. Start a new chain, join pieces on the picture, or read an AI answer.</p>';
+  else box.innerHTML = pagerHtml(pages) + (show.some(Boolean) ? '' : `<p class="muted">Nothing is joined to ${page === 'other' ? 'no vessel' : 'this vessel'} yet. Start a new chain below.</p>`) + S.chains.map((c, ci) => {
+    if (!show[ci]) return '';
     const rows = c.steps.map((s, si) => {
       const prev = si ? c.steps[si - 1].to : c.start;
       const lead = prev?.kind === 'pump' ? `<span class="muted small">${esc(endText({ ...prev, side: 'out' }, S.parts))}</span> ` : '';
       const tag = s.source && s.source !== 'you' && !s.ok ? `<span class="cnTag" title="Click ✓ when it is right">${esc(SOURCE[s.source] ?? 'guess')}</span><button data-ok="${ci}:${si}" title="It is right">✓</button>` : '';
       return `<div class="cnStep">${lead}<span class="cnArrow">connected to</span>
         <select data-to="${ci}:${si}" title="What the piece above is connected to">${endOptions(s.to)}</select>${extras(s.to, `${ci}:${si}`)}
-        <select data-by="${ci}:${si}" title="Joined by a Hose or a Pipe (asked for each connection)"><option value="pipe"${s.by !== 'hose' ? ' selected' : ''}>by Pipe</option><option value="hose"${s.by === 'hose' ? ' selected' : ''}>by Hose</option></select>
-        ${tag}<button data-del="${ci}:${si}" title="Remove this piece and the ones after it">✖</button></div>`;
+        <select data-by="${ci}:${si}" title="How it is joined: a Pipe straight down, a Pipe to the left or right (with an Elbow or a Tee), or a Hose">${JOINS.map(([k, n]) => `<option value="${k}"${joinOf(s) === k ? ' selected' : ''}>${n}</option>`).join('')}</select>
+        ${['left', 'right'].includes(joinOf(s)) ? `<select data-fit="${ci}:${si}" title="${FIT_TIP}"><option value="elbow"${s.to?.kind !== 'tee' ? ' selected' : ''}>with an Elbow</option><option value="tee"${s.to?.kind === 'tee' ? ' selected' : ''}>with a Tee</option></select>` : ''}
+        ${tag}<button data-tee="${ci}:${si}" title="Add a Tee after this piece: the line goes on through it, and a branch starts at it">⊤ Tee</button><button data-del="${ci}:${si}" title="Remove this piece and the ones after it">✖</button></div>`;
     }).join('');
     const last = c.steps.at(-1)?.to ?? c.start;
     return `<div class="cnChain"><div class="cnStep"><b>Start</b> <select data-start="${ci}" title="Where this chain starts">${endOptions(c.start, { start: true })}</select>${extras(c.start, `${ci}:s`)}</div>${rows}
       ${isFinal(last) ? `<p class="small muted">Ends at ${esc(endText(last, S.parts))}.</p>` : `<button data-more="${ci}" title="Add the next piece">➕ What is connected to that?</button>`}</div>`;
-  }).join('');
+  }).join('') + foot;
   const loose = looseItems(S.parts, S.chains, S.fermenters);
   $('#cnLoose').innerHTML = loose.length ? `<h3>Not joined yet (${loose.length})</h3><p class="small muted">Each one left gets its own chain. A missing answer leaves it loose, never a wrong pipe.</p>
     <div class="cnLooseList">${loose.map(i => `<button data-loose="${esc(i.id)}" title="Start a chain at ${esc(i.label)}">${i.kind === 'pump' ? '⚙' : '⧓'} ${esc(i.label)}</button>`).join('')}</div>` : '<p class="small">✅ Every pump and valve is joined.</p>';
@@ -107,11 +129,13 @@ function chainChange(e) {
   if (d.start !== undefined) { const c = S.chains[d.start]; c.start = endFromKey(t.value, c.start); if (c.start.kind === 'pump') c.start.side = 'out'; }
   else if (d.to) { const [ci, si] = at(d.to), s = S.chains[ci].steps[si]; s.to = endFromKey(t.value, s.to); if (s.to.kind === 'pump') s.to.side = 'in'; s.source = 'you'; s.by = s.to.kind === 'qd' ? 'hose' : s.by;
     if (isFinal(s.to)) S.chains[ci].steps.splice(si + 1); }
-  else if (d.by) { const [ci, si] = at(d.by), s = S.chains[ci].steps[si]; s.by = t.value; s.source = 'you'; }
+  else if (d.by) { const [ci, si] = at(d.by), s = S.chains[ci].steps[si]; setJoin(s, t.value); s.source = 'you'; }
+  else if (d.fit) { const [ci, si] = at(d.fit), why = setFit(S.chains, ci, si, t.value); if (why) say(why); }
   else if (d.x) {
     const [ci, si] = at(d.x), c = S.chains[ci], end = si === 's' ? c.start : c.steps[si].to;
     if (d.f === 'sex') end.sex = t.value; else if (d.f === 'shut') end.shut = t.value === 'shut'; else end.n = Math.max(1, Math.min(99, Number(t.value) || 1));
   } else return;
+  if (!Object.keys(S.places).length) S.layout = null;      // nothing dragged yet: the picture follows the answers
   renderChains(); renderPicture();
 }
 function chainClick(e) {
@@ -119,7 +143,10 @@ function chainClick(e) {
   if (d.more !== undefined) { const c = S.chains[d.more], last = c.steps.at(-1)?.to ?? c.start; c.steps.push({ to: { kind: 'none' }, by: guessBy(last, null), source: 'you' }); }
   else if (d.del) { const [ci, si] = at(d.del); S.chains[ci].steps.splice(si); if (!S.chains[ci].steps.length) S.chains.splice(ci, 1); }
   else if (d.ok) { const [ci, si] = at(d.ok); S.chains[ci].steps[si].ok = true; }
-  else if (d.loose) { const i = items().find(x => x.id === d.loose); S.chains.push({ start: i.kind === 'pump' ? { kind: 'pump', id: i.id, side: 'out' } : { kind: 'valve', id: i.id }, steps: [{ to: { kind: 'none' }, by: 'pipe', source: 'you' }] }); }
+  else if (d.tee) { const [ci, si] = at(d.tee), t = addTee(S.chains, ci, si); say(`Tee ${t.n} added: the line goes on through it, and its branch is the new chain under it.`); if (!Object.keys(S.places).length) S.layout = null; }
+  else if (d.page) { S.listV = d.page; }
+  else if (d.nextv) { S.doneV = { ...S.doneV, [S.listV]: true }; S.listV = d.nextv; $('#cnChainCard').scrollTop = 0; }
+  else if (d.loose) { const i = items().find(x => x.id === d.loose); S.chains.push({ start: i.kind === 'pump' ? { kind: 'pump', id: i.id, side: 'out' } : { kind: 'valve', id: i.id }, steps: [{ to: { kind: 'none' }, by: 'pipe', source: 'you' }] }); S.listV = 'other'; }
   else return;
   renderChains(); renderPicture();
 }
@@ -176,7 +203,9 @@ function basePieces() {
   const pumps = S.parts.pumps.filter(i => !ferm.has(i.id)), valves = S.parts.valves.filter(i => !ferm.has(i.id));
   return [...hot.map(v => ({ key: 'vessel:' + v.key, kind: 'vessel', label: v.name, end: { kind: 'vessel', key: v.key } })),
     ...pumps.map(p => ({ key: p.id, kind: 'pump', label: p.label, end: { kind: 'pump', id: p.id }, item: p })),
-    ...valves.map(p => ({ key: p.id, kind: 'valve', label: p.label, end: { kind: 'valve', id: p.id }, item: p }))];
+    ...valves.map(p => ({ key: p.id, kind: 'valve', label: p.label, end: { kind: 'valve', id: p.id }, item: p })),
+    ...[...new Set(S.chains.flatMap(c => [c.start, ...c.steps.map(s => s.to)]).filter(e => e?.kind === 'tee').map(e => e.n || 1))]
+      .map(n => ({ key: 'tee:' + n, kind: 'tee', label: 'Tee ' + n, end: { kind: 'tee', n } }))];
 }
 function pieces() {
   const base = basePieces();
@@ -197,14 +226,14 @@ function renderPicture() {
   drawLines();
 }
 const CHIP_PICS = { vessel: '/media/Images/Skynet/Vessels/Skynet_Generic_Brew_Vessel_Widget.svg', pump: '/media/Images/Skynet/Pumps/Pump_Red_Rip_Off.svg',
-  valve: '/media/Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg' };
+  valve: '/media/Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg', tee: '/media/Images/Skynet/Other_Equipment/Skynet_TC15_EqualTee.svg' };
 // a line for each connection between two pieces on the picture
 function drawLines() {
   const svg = $('#cnLines'); if (!svg || !S) return;
   const r = $('#cnPic').getBoundingClientRect(), W = r.width || 800, H = r.height || 600;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const pos = new Map(pieces().map(p => [p.key, { x: p.at.x * W, y: p.at.y * H }]));
-  const key = e => e?.kind === 'vessel' ? 'vessel:' + e.key : e?.id;
+  const key = pieceKey;
   const lines = [];
   // blue = a Pipe (and its fittings), yellow = a Hose (Fritz, 2026-11-08); each has a wide see-through line on top to click
   S.chains.forEach((c, ci) => { let a = c.start; c.steps.forEach((s, si) => {
@@ -230,7 +259,7 @@ function lineClick(e) {
 function lineRight(e) {
   const at = lineAt(e); if (!at) return;
   e.preventDefault();
-  const s = S.chains[at[0]].steps[at[1]]; s.by = s.by === 'hose' ? 'pipe' : 'hose'; s.source = 'you';
+  const s = S.chains[at[0]].steps[at[1]]; setJoin(s, s.by === 'hose' ? 'pipe' : 'hose'); s.source = 'you';
   say(`That connection is now a ${s.by === 'hose' ? 'Hose' : 'Pipe'}.`);
   renderChains();
 }
@@ -333,7 +362,7 @@ function wire() {
   $('#cnChains').addEventListener('click', chainClick);
   $('#cnLoose').addEventListener('click', chainClick);
   $('#cnNewChain').onclick = () => {
-    const v = S.parts.vessels.find(x => x.side === 'hot');
+    const v = S.parts.vessels.find(x => x.side === 'hot' && x.key === S.listV) ?? S.parts.vessels.find(x => x.side === 'hot');
     S.chains.push({ start: v ? { kind: 'vessel', key: v.key, at: 'cBottomOutlet' } : { kind: 'tap' }, steps: [{ to: { kind: 'none' }, by: 'pipe', source: 'you' }] });
     renderChains();
   };
