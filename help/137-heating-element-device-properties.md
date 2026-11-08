@@ -1,5 +1,7 @@
 # Heating Element Device Properties
 
+> **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
+
 Adding a **Heating Element** works the same way as adding a Pump (see [Pump Device Properties](115-pump-device-properties)) and a
 Motorized Ball Valve (see [Motorized Ball Valve Device Properties](128-motorized-ball-valve-device-properties)): **a Heating Element
 has no Cover**. (Skynet Rule 18.24)

@@ -1,6 +1,7 @@
 // Skynet Brew Panel - server
 // Run:  node --no-warnings server.js   then open http://<this computer>:8080 in any browser
 import http from 'node:http';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -70,15 +71,23 @@ const SCRIPTS = path.resolve(process.env.BREWPANEL_SCRIPTS ?? path.join(ROOT, 's
 const PUBLIC = path.join(ROOT, 'public');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
 const HELP = path.resolve(process.env.BREWPANEL_HELP ?? path.join(ROOT, 'help'));
+// The BruControl Importer's Build page (OakBarn Brewery, 2026-11-08: "Connect to your Brewery will use the same Build page as in
+// Skynet Panel"; "The Only thing I see is the Process Icon needs to be greyed Out"). The Importer starts this same Panel with
+// SKYNET_IMPORT_BUILD=1 on its own folder in Brewing\Import\build: no board is connected, no Brain Move or first-start copies, and
+// Processes greyed out. Signing in: the Importer makes a random one-time key (SKYNET_IMPORT_KEY, at least 32 characters) and opens
+// the page with it once; the page then keeps it in its own cookie. Without that key nobody is signed in.
+const IMPORT_BUILD = process.env.SKYNET_IMPORT_BUILD === '1';
+const IMPORT_KEY = IMPORT_BUILD && String(process.env.SKYNET_IMPORT_KEY ?? '').length >= 32 ? String(process.env.SKYNET_IMPORT_KEY) : '';
+const IMPORT_COOKIE = 'skynet_import_build';
 
 // Move Brain (Rule 9.9, lib/brainmove.js): a Brain Move file brought in from the old Brain is put in place first, before anything
 // is read. This Brain's own config, data, scripts and media go to backups/before_brain_move_<date>.
 const MOVE_DIRS = { config: path.dirname(CONFIG), data: DATA, scripts: SCRIPTS, media: path.join(path.dirname(CONFIG), '..', 'media') };
 let moved = null;
-try { moved = applyPendingMove(ROOT, MOVE_DIRS); } catch (e) { moved = { lines: [`Brain Move failed: ${e.message}`], failed: true }; }
+if (!IMPORT_BUILD) try { moved = applyPendingMove(ROOT, MOVE_DIRS); } catch (e) { moved = { lines: [`Brain Move failed: ${e.message}`], failed: true }; }
 if (moved) for (const l of moved.lines) console.log(l);
 // A release has its samples in defaults/: a folder you don't have yet (first start) gets a copy; yours are never touched
-const seeded = seedDefaults(ROOT);
+const seeded = IMPORT_BUILD ? [] : seedDefaults(ROOT);
 if (seeded.length) console.log(`First start: copied the samples into ${seeded.join(', ')}`);
 // A configuration saved before the Global class was retired is converted once (backups in config/backups and *.before-globals.bak)
 const retired = retireGlobalsOnDisk({ configPath: CONFIG, scriptsDir: SCRIPTS, dataDir: DATA });
@@ -121,7 +130,7 @@ store.on('safeRenamed', map => {   // ... and its names with < > : " / \ | ? * (
     if (out !== text) { engine.backup(name); engine.write(name, out); }
   }
 });
-const hw = new Hardware(store);
+const hw = new Hardware(store, { off: IMPORT_BUILD });      // the Importer's Build page never connects a board
 const auth = new Auth(DATA);
 auth.passwordRules = () => store.config.passwordRules;    // Settings > Password rules
 const passwordRulesView = () => ({ ...auth.rules(), text: describePasswordRules(auth.rules()), choices: Object.fromEntries(Object.entries(PW_CHARSETS).map(([k, v]) => [k, v.text])), limits: PW_LIMITS });
@@ -371,7 +380,15 @@ async function route(req, res) {
   if (m === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE', 'Access-Control-Allow-Headers': 'Content-Type,X-API-Key' }); return res.end(); }
 
   const token = parseCookies(req.headers.cookie)[COOKIE];
-  const me = auth.check(token);
+  // the Importer's Build page: signed in only with the Importer's one-time key (compared in constant time), never with a password
+  const importMe = () => { const k = parseCookies(req.headers.cookie)[IMPORT_COOKIE]; return IMPORT_KEY && k && k.length === IMPORT_KEY.length && crypto.timingSafeEqual(Buffer.from(k), Buffer.from(IMPORT_KEY)) ? { name: 'Importer', role: 'admin' } : null; };
+  if (IMPORT_BUILD && req.url.startsWith('/import-build?key=')) {
+    const k = new URL(req.url, 'http://x').searchParams.get('key') ?? '';
+    if (!IMPORT_KEY || k.length !== IMPORT_KEY.length || !crypto.timingSafeEqual(Buffer.from(k), Buffer.from(IMPORT_KEY))) { res.writeHead(403); return res.end('Forbidden'); }
+    const tab = new URL(req.url, 'http://x').searchParams.get('tab') ?? '';      // the Importer's Build Tab page for one Tab
+    res.writeHead(302, { 'Set-Cookie': `${IMPORT_COOKIE}=${k}; Path=/; HttpOnly; SameSite=Strict`, Location: tab ? `/#tab=${encodeURIComponent(tab)}` : '/' }); return res.end();
+  }
+  const me = IMPORT_BUILD ? importMe() : auth.check(token);
   const ip = clientIp(req);
 
   // ===== Sign in / out, first-time setup, users =====
@@ -514,7 +531,7 @@ async function route(req, res) {
   }
   if (p === '/ui/state' && m === 'GET') {
     const config = me.role === 'admin' ? browserConfig() : { ...browserConfig(), apiKey: undefined };
-    return ok(res, { me, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
+    return ok(res, { me, importBuild: IMPORT_BUILD, roles: ROLES, config, mqtt: mqttView(), donateLink: DONATE_LINK, panelVersion: PANEL_VERSION, passwordRules: passwordRulesView(), values: store.snapshot(), scripts: engine.list(), devices: hw.list(), types: ELEMENT_TYPES, gKinds: G_KINDS, apiModes: API_MODES, processClasses: CLASSES, words: processWords(), valves: engine.valveList(), flow: engine.flowView(), logModes: LOG_MODES, sim: sim.status(), closable: CLOSABLE, simSpeeds: SPEEDS, jumpWhen: JUMP_WHEN, console: engine.console.slice(-300) });
   }
   if (p === '/ui/version/latest' && m === 'GET') return ok(res, await versionCheck.latest());
   if (p === '/ui/set' && m === 'POST') {
@@ -873,6 +890,11 @@ async function route(req, res) {
   }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
+  // a Chart Widget's lines (Rule 1.26): /ui/chart?names=A,B&from=ms&to=ms&points=400
+  if (p === '/ui/chart' && m === 'GET') {
+    const sp = url.searchParams, names = (sp.get('names') || '').split(',').map(x => x.trim()).filter(Boolean).slice(0, 2);
+    return ok(res, logger.chartSeries({ names, from: sp.get('from'), to: sp.get('to'), points: sp.get('points') }));
+  }
   // Log page > Download CSV: pick values (or a saved CSV set) and a time span; the file is named after them
   if (p === '/ui/log/export.csv' && m === 'GET') {
     const sp = url.searchParams, names = (sp.get('names') || '').split(',').map(s => s.trim()).filter(Boolean), tz = Number(sp.get('tz')) || 0;
@@ -1111,12 +1133,12 @@ server.listen(PORT, () => {
   if (auth.needsSetup()) console.log('No users yet: open the panel from a computer or phone on your home network to create the admin account.');
   for (const n of store.config.autostart ?? []) { try { engine.start(n, 'autostart'); } catch (e) { console.error(e.message); } }
   // Windows: the panel opens in its own clean window, whatever .bat started it (Rule 2.36, lib/appwindow.js)
-  if (CLOSABLE) { const how = openAppWindow(`http://localhost:${PORT}`, { port: PORT }); if (how !== 'none') console.log(how === 'app' ? 'Opened the panel in its own window.' : 'Opened the panel in your browser (no Edge or Chrome found).'); }
-  minimizeWindow();
+  if (CLOSABLE && !IMPORT_BUILD) { const how = openAppWindow(`http://localhost:${PORT}`, { port: PORT }); if (how !== 'none') console.log(how === 'app' ? 'Opened the panel in its own window.' : 'Opened the panel in your browser (no Edge or Chrome found).'); }
+  if (!IMPORT_BUILD) minimizeWindow();
 });
 // Skynet Brewer double-clicked while the panel is already running (its window was closed with its X): open the window again
 server.on('error', e => {
-  if (e.code === 'EADDRINUSE' && CLOSABLE && process.platform === 'win32') {
+  if (e.code === 'EADDRINUSE' && CLOSABLE && !IMPORT_BUILD && process.platform === 'win32') {
     console.log(`The panel is already running on port ${PORT}. Opening its window again.`);
     openAppWindow(`http://localhost:${PORT}`, { port: PORT, list: () => [] });
     setTimeout(() => process.exit(0), 1500);
@@ -1141,7 +1163,7 @@ const CLOSABLE = !process.env.INVOCATION_ID;
 // closeWindow: closed from ☰ Menu, so on Windows its Command Prompt window closes too, whatever .bat started it (Rule 2.25)
 function shutdown({ closeWindow = false } = {}) {
   console.log('Stopping...'); auth.flush(); engine.stopAll(); control.stop(); store.persistNow(); mqtt.stop(); hw.stop(); pictures.stop(); logger.close();
-  closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched
+  if (!IMPORT_BUILD) closeAppWindow();   // the panel's own clean window closes with it (Rule 2.36); the normal browser is never touched (the Importer's Build page leaves the real panel's window alone)
   if (closeWindow) closeLauncherWindow();
   process.exit(0);
 }

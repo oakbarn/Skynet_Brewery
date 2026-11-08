@@ -178,5 +178,10 @@ assert.throws(() => store.setProp('Kettle', 'value', 1), /cannot be set by a pro
   assert.equal(hw2.devices.get('M').status, 'connected'); assert.equal(hw2.devices.get('M').info, 'ETH1 0.2');
   assert.equal(store.getProp('Float', 'state'), true, 'input read over ethernet (inverted)');
   hw2.stop(); board.close();
+  // the BruControl Importer's Build page (OakBarn Brewery, 2026-11-08): no board is ever opened
+  const hw3 = new Hardware(store, { off: true });
+  hw3.add({ name: 'M3', type: 'ethernet', host: '127.0.0.1', port: 1 });
+  assert.equal(hw3.devices.get('M3').status, 'disabled', 'the Build page never connects a board');
+  hw3.stop?.();
 }
 console.log('devices test: all passed');

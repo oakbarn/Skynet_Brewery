@@ -29,8 +29,9 @@ table.words th { background: var(--panel2); }
 #files { width: 100%; border-collapse: collapse; }
 #files th, #files td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
 #files td:nth-child(2) { white-space: normal; font-weight: 600; }
-#files tbody tr { cursor: pointer; }
-#files tbody tr:hover { background: var(--panel2); }
+#files tbody tr[data-i] { cursor: pointer; }
+#files tbody tr.group th { background: var(--panel2); font-size: .9em; padding-top: 10px; }
+#files tbody tr[data-i]:hover { background: var(--panel2); }
 #files tbody tr.sel { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 .note { background: var(--panel2); border-left: 4px solid var(--warn); padding: 8px 10px; border-radius: 4px; }
 #peekBody table { border-collapse: collapse; margin: 6px 0 10px; }
@@ -51,6 +52,9 @@ table.words th { background: var(--panel2); }
 #convBody table { border-collapse: collapse; margin: 6px 0 10px; }
 #convBody th, #convBody td { border: 1px solid var(--line); padding: 3px 8px; text-align: left; }
 #convBody td.n { text-align: right; }
+#convBody td.c { text-align: center; }
+#convBody tr.ask td { background: var(--panel2); white-space: normal; }
+#convBody tr.ask button { margin: 0 6px 6px 0; }
 #ask { background: var(--panel); color: inherit; border: 1px solid var(--warn); border-radius: 10px; max-width: 620px; }
 #ask::backdrop { background: rgba(0, 0, 0, 0.5); }
 #ask h2 { margin-top: 0; }
@@ -71,14 +75,66 @@ table.words th { background: var(--panel2); }
 .cnTag { font-size: 11px; padding: 1px 6px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 30%, transparent); }
 .cnLooseList { display: flex; flex-wrap: wrap; gap: 6px; }
 .btnlike { cursor: pointer; border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; background: var(--panel2); }
-#cnPic { position: relative; width: 100%; aspect-ratio: 4 / 3; border: 1px dashed var(--line); border-radius: 8px; overflow: hidden; margin: 8px 0; background: var(--panel2); touch-action: none; }
+#cnStage { display: none; }
+#cnStage.full { display: flex; flex-direction: column; position: fixed; inset: 0; z-index: 200; background: #000; padding: 8px; box-sizing: border-box; }
+body.cnFullOpen { overflow: hidden; }
+/* the list on its own screen too, with Back (the picture) and Next (OakBarn Brewery, 2026-11-08) */
+.cnListBar { display: none; }
+#cnChainCard.full { position: fixed; inset: 0; z-index: 200; margin: 0; border-radius: 0; overflow: auto; padding-top: 0; }
+#cnChainCard.full .cnListBar { display: flex; align-items: center; gap: 8px; position: sticky; top: 0; z-index: 1; background: var(--panel); padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+#cnChainCard.full > h2, #cnChainCard.full #cnOpenList { display: none; }
+#cnChainCard.full #cnChains { max-width: 900px; }
+.cnStageBar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: #eee; padding: 0 4px 8px; }
+.cnStageBar .spacer { flex: 1; }
+#cnPic { position: relative; flex: 1; min-height: 0; width: 100%; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: #000; touch-action: none; }
 #cnPicImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; opacity: 0.45; pointer-events: none; }
 #cnLines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-#cnLines line { stroke: var(--accent); stroke-width: 3; }
-#cnLines line.hose { stroke-dasharray: 6 4; }
-#cnChips { position: absolute; inset: 0; }
-.cnChip { position: absolute; transform: translate(-50%, -50%); font-size: 11px; padding: 2px 6px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); white-space: nowrap; cursor: grab; user-select: none; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
-.cnChip.vessel { font-weight: 600; border-color: var(--accent); }
-.cnChip.loose { border-style: dashed; }
-.cnChip.picked { outline: 3px solid var(--accent); }
+#cnLines path { fill: none; stroke-linejoin: round; }
+#cnLines .hit { stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
+#cnLines .pipe { stroke: #2F7DE1; stroke-width: 4; }
+#cnLines .hose { stroke: #FFD400; stroke-width: 4; }
+#cnLines .sel { stroke-width: 7; filter: drop-shadow(0 0 3px #fff); }
+#cnChips { position: absolute; inset: 0; pointer-events: none; }
+.cnChip { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #eee;
+  padding: 2px 4px; border-radius: 8px; border: 2px solid transparent; cursor: grab; pointer-events: auto; user-select: none; max-width: 150px; text-align: center; }
+.cnChip img { pointer-events: none; display: block; }
+.cnChip span { background: rgba(0,0,0,.75); padding: 0 4px; border-radius: 4px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cnChip.vessel img { width: 110px; height: 110px; }
+.cnChip.vessel span { font-size: 15px; font-weight: 600; }
+.cnChip.pump img { width: 56px; height: 56px; }
+.cnChip.valve img { width: 30px; height: 30px; }
+.cnChip.tee img { width: 34px; height: 34px; }
+.cnBuild { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 6px; }
+.cnTpls { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; max-height: 430px; overflow: auto; padding: 2px; }
+.cnTpl { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; background: #000; border: 2px solid #333; border-radius: 8px; cursor: pointer; color: #ddd; font-size: 11px; line-height: 1.2; }
+.cnTpl img { width: 84px; height: 84px; object-fit: contain; }
+.cnTpl.on { border-color: #FFD400; }
+.cnTplPick { display: inline-flex; align-items: center; gap: 6px; }
+.cnTplPick img { width: 26px; height: 26px; object-fit: contain; }
+.cnTable tr.on td { background: rgba(255, 212, 0, .08); }
+.cnPager { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.cnChip.loose span { border: 1px dashed #777; }
+.cnChip.picked { border-color: #FFD400; }
 #cnAiText { width: 100%; font-family: var(--mono); box-sizing: border-box; }
+.quote { font-style: italic; border-left: 4px solid var(--accent); padding: 4px 10px; max-width: 980px; }
+
+/* page 5 drill-down (OakBarn Brewery, 2026-11-08): the IDs are greyed on the read-only Interfaces page */
+.greyId { color: #8a8a8a; }
+.ifId { width: 4.5em; text-transform: uppercase; font-weight: 600; }
+.idHelp ol { margin: 4px 0 8px; }
+/* the Vessels step (OakBarn Brewery, 2026-11-08): small number boxes, the table scrolls sideways on a narrow window */
+.vesWrap { overflow-x: auto; }
+.vesTable input.num { width: 4.5em; }
+.vesTable td, .vesTable th { padding: 4px 6px; }
+.vesTable select { max-width: 11em; }
+body.wideStep main { max-width: 1500px; }
+.vesTable input.vName { width: 9em; }
+/* the vessels are named, sided, added and removed on the Vessels step now (OakBarn Brewery, 2026-11-08); here only their template */
+#cnVessels .cnTable, #cnAddVessel { display: none; }
+.noDisplay { color: #8a8a8a; font-style: italic; }
+.itemTable .itemLabel { width: 12em; }
+.itemTable .itemLabel.blankLabel { border: 2px solid #d9534f; }
+.partTable select.pf { min-width: 9em; } .partTable .pName { width: 12em; } .howMany input { width: 5em; }
+.hoverList th { text-align: left; white-space: nowrap; padding-right: 1em; vertical-align: top; }
+.hoverList td { padding-bottom: .4em; }
+#ask .hoverList { max-height: 60vh; display: block; overflow: auto; }
