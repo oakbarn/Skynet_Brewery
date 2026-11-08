@@ -32,7 +32,7 @@ assert.deepEqual(c.elements.map(e => e.bru.name), ['Pump Red', 'MB_61_Wort']);
 const [pump, wort] = c.elements;
 assert.equal(pump.type, 'digitalOut'); assert.equal(pump.device, 'Main Brewery'); assert.equal(pump.channel, 28);
 assert.equal(pump.label, 'Red Pump'); assert.equal(pump.hideName, undefined);
-assert.equal(pump.name, 'MB_28_DO_Red_Pump_BH', 'Skynet name, Rule 3.1');
+assert.equal(pump.name, 'MB_28_DO_Red~Pump_BH', 'Skynet name, Rule 3.1');
 assert.equal(wort.label, 'MB_61_Wort', 'a blank DisplayName: Label = Name'); assert.equal(wort.hideName, true, '... not shown on the Tab');
 assert.equal(wort.name, 'MB_61_AI_MB~61~Wort_BH'.replace(/~/g, '_'));
 assert.equal(c.scripts.length, 0, 'Processes come later');

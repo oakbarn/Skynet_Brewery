@@ -510,7 +510,9 @@ Help 155).
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
-"Single Underscores between parts of name"; example `MB_A0_10KNTC_Mash~Tun_SP`). Spaces in the Label become `_`. Names made before
+"Single Underscores between parts of name"; example `MB_A0_10KNTC_Mash~Tun_SP`). **Spaces in the Label become `~`** (Fritz, 2026-11-07: "I like the ~ instead of a _ in
+the label part of the name. Make that the rule"), so `_` only ever separates the parts: Label *Mash Tun* gives `Mash~Tun`. Names made
+before keep their `_` (Rule 3.5). Names made before
 keep their double `__` before the Tab ID (Rule 3.5); a taken name gets _2, _3 ... before the Tab ID.
 *Replaced:* `InterfaceID_Port_DeviceTypeID_Label__TabID`, two underscores before the Tab ID (2026-10-23). The panel suggests the name; an Admin may type another.
 Full details (Type IDs, virtual ports, what happens to odd characters) are in the Device Library.
@@ -596,7 +598,7 @@ widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
 **PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
-**OVR** Override (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `_`, as in Rule 3.1; a taken name
+**OVR** Override (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
 > To a Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
 fittings and Clones keep their own names. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
@@ -634,7 +636,7 @@ which has a **default** (the Interface the last new Device went on, or else the 
 **Available Ports**: a Device that works best with **true PWM** is offered only PWM pins; any other Device (on/off, or pseudo PWM done
 in software) is offered only the pins that **can't** do PWM, so the PWM pins are kept for the Devices that need them (only when none
 of those is free are the PWM pins offered; on a Pi every pin does PWM). Once the Label (never blank), Interface and Port are set (and
-the Tab), the Suggested Name is built (Rule 3.1); spaces in a Label become `_` in the name. This is in the one Add Device box every
+the Tab), the Suggested Name is built (Rule 3.1); spaces in a Label become `~` in the name (Rule 3.1). This is in the one Add Device box every
 Device uses (Pump, Motorized Ball Valve, Heating Element, PWM / Analog out, Temperature Probe ...).
 **No free PWM pin** (Fritz, 2026-11-05: "If No PWM Pin is available for a True PWM, 2 choices for User 1. Add Interface, 2 Use Pseudo PWM
 with explanation of degradation"): when a true PWM Device's Interface has no free PWM pin, a pop-up gives **1. ➕ Add an Interface**
@@ -2644,7 +2646,8 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
 - 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
-- 2026-11-07: Rule 15.4: the Importer's page 2, Your Scripts, adds Fritz's words on the Preset Schema Templates ("I wanted to Brew, not write Code!"); its Names card has Fritz's wording of the naming convention (Rule 3.1), saying a space in a Name becomes `_` (the example was fixed from `Mash~Tun` to `Mash_Tun`, matching public/naming.js). Help 143 updated. Checked against the Skynet Panel: wording only, nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-07: Rules 3.1, 3.14 and 4.2 changed (Fritz: "I like the ~ instead of a _ in the label part of the name. Make that the rule"): a space in the Label part of a suggested Device or Widget name becomes `~` (was `_`), so `_` only separates the parts (`MB_A0_10KNTC_Mash~Tun_SP`). Names made before keep their `_` (Rule 3.5). Checked against both programs: one shared code path (public/naming.js) makes the Panel's and the Importer's names; Help 3, 46, 55, 72, the Device Library and the Importer's page 2 updated. A BruControl name kept on purpose (Rule 15.1) still gets `_` for its spaces, as it is not a Skynet name. (thread "Import from BruControl .bak backups")
+- 2026-11-07: Rule 15.4: the Importer's page 2, Your Scripts, adds Fritz's words on the Preset Schema Templates ("I wanted to Brew, not write Code!"); its Names card has Fritz's wording of the naming convention (Rule 3.1). Help 143 updated. Checked against the Skynet Panel: wording only, nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Importer has page 6, **Connect your brewery**: what is connected to what as chains, Hose or Pipe for each connection, guesses from the names, Scripts and BruControl picture, a picture as a guide, an optional free AI outside the Importer (copy the question, paste the answer back), Fermenter questions, and Fritz's song. Help 143 updated, no new Help number used. Checked against the Skynet Panel: it keeps the answers in the Schema file only; nothing in the Panel changes until the Vessel step draws the pipes. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Import's Browse box and file list also take BruControl backups (`.bak`, the same config file inside), marked *backup* with their date; Help 143 updated, no new Help number used. Checked against the Skynet Panel: it only opens the Importer's `.json` Schema files, so nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Import also lists the backups (and any config file put there) in Documents\BruControl\Config Backup; its Windows boxes open in front of its window; a folder typed without a drive (like `\downloads`) means that folder in the user's own folder; the page says plainly when the Importer has stopped (its black window was closed). Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
