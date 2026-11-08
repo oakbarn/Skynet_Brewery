@@ -1,6 +1,6 @@
 # Pipe fittings and Manual Valves
 
-Fritz, 2026-10-28: pipe fittings are kept simple, and a Manual Valve is a Widget of its own. This works the same on the 🔨 Build Tab and on every Tab.
+OakBarn Brewery, 2026-10-28: pipe fittings are kept simple, and a Manual Valve is a Widget of its own. This works the same on the 🔨 Build Tab and on every Tab.
 
 ## Pipe fittings
 
@@ -28,10 +28,11 @@ A pipe fitting has no settings but:
 A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a pseudo Device. Add one with **Manual Valve ➕** on the Edit layout bar. Skynet names it **ManualValve_1**, ManualValve_2 ...
 
 - Its **.state** is true (open) or false (closed). A closed Manual Valve stops flow in the pipes on it; an open one lets it pass the way it was going.
-- **One click on it on its Tab opens or closes it, at any time.** That is the only way its .state changes. Operators and Admins can click it; Viewers can't. Every screen shows the change.
+- **A click on it on its Tab opens or closes it, at any time.** That is the only way its .state changes. Operators and Admins can click it; Viewers can't. Every screen shows the change.
+- It is a **Confirmation Widget** (2026-11-08, Skynet Rule 1.28, Help 162 Confirmation Widgets): its **.confirmation** switch in its Properties is on. A click shows a pop-up, **✋ OPEN Kettle drain by hand, then press Done**: open the real valve, then press **Done**, and only then does it show open. **Cancel** leaves it as it was. Switch .confirmation off and a click opens or closes it at once.
 - While it is open, the **open overlay** (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, a green ring and a tick) is drawn on top of it.
 - It has **two IPs**, one at each pipe end, so a pipe joins each side of it (Skynet Rule 5.24, Help 123).
-- Its Properties: a note with its name and state, **Label** (used in the "by hand" message) and **Show label**, then **Autosize to pipe**, **X**, **Y**, **Width**, **Height** and 🔒 Lock.
+- Its Properties: a note with its name and state, **Label** (used in the "by hand" message) and **Show label**, **.confirmation**, then **Autosize to pipe**, **X**, **Y**, **Width**, **Height** and 🔒 Lock.
 
 ### A Manual Valve in a Process
 
@@ -40,10 +41,18 @@ ManualValve_1.state = true
 ManualValve_1 = false
 ```
 
-A Process line like this **does not open or close the valve**. It shows a bar at the top of every screen: **✋ OPEN Kettle drain by hand, then click it on the Brew Tab to confirm**, and the valve blinks on its Tab. The Process waits. Turn the real valve, then click the Manual Valve on the Tab: once it shows open, the Process goes on with the next line. If it already shows what the Process asks for, nothing is asked.
+A Process line like this **does not open or close the valve** by itself. With **.confirmation** on (as it starts), it shows a pop-up on every screen: **✋ OPEN Kettle drain by hand**, with **Done: it is open**. The Process waits; open the valve, press Done, and the valve shows open and the Process goes on. (A click on the valve on its Tab, with its own Done, does the same.)
+
+With .confirmation off, it shows a bar at the top of every screen: **✋ OPEN Kettle drain by hand, then click it on the Brew Tab to confirm**, and the valve blinks on its Tab. The Process waits. Turn the real valve, then click the Manual Valve on the Tab: once it shows open, the Process goes on with the next line. If it already shows what the Process asks for, nothing is asked.
 
 - **Go to Brew** on the bar takes you to the valve's Tab.
 - Stopping the Process takes the bar away.
 - A Process can read it: `if ManualValve_1 == true`.
 
-The older **Valve type Manual** on a valve Device still works as before (pop-up and **Done**): see [Manual valves](29-manual-valves).
+The older **Valve type Manual** on a valve Device still works as before (pop-up and **Done**): see [Manual valves](29-manual-valves). It has the **.confirmation** switch too (on): a click on it asks for Done the same way.
+
+## The Manual Pump Widget
+
+A **Manual Pump** (2026-11-08, Skynet Rule 5.15a) is a pump plugged into a wall outlet, that you switch by hand: no Interface or Port turns it. Add one from **Select Device Type > Pumps** or **Select Widget Type > Semi_Widgets_Devices**, then pick the pump from the same list as **Add Pump** (or the Sump pump). It looks and joins pipes like a Pump Device (the same drawing, inlet and outlet IPs, Cover and Overlay). Its name is **wgt_MP_** + Label + Tab ID, for example `wgt_MP_Pump~1_BR`.
+
+It is a Confirmation Widget too: a click on it, or a Process line such as `wgt_MP_Pump~1_BR.state = true`, shows **✋ TURN ON Pump 1 by hand, then press Done**. Switch the pump on, press **Done**, and it shows ON (a Process waits until then).
