@@ -2675,29 +2675,31 @@ and Edit layout included, and its slider is hidden in the Vessel's Properties. A
 Not Placed) or the dialog closes.
 
 19.5 **The Vessel Device Builder** (OakBarn Brewery, 2026-11-08: "time to Build the Vessel Device Template. We will Build in the
-Skynet Panel First and bring it over to the Importer the same or with some items greyed out"; thread "Build the Vessel Device
-Builder", Help 166). **Vessel > 🔨 Build a Vessel Device** on the Edit layout bar (and Add Widget > Vessels) opens a step by step
-dialog in the Pump drill-down look (Rule 18.31), one question a page, with **◀ Back** and **Next ▶** (what was typed is kept):
-1. **Name:** the Label (never blank), what it is (HLT, Mash Tun, Brew Kettle, All In One, Fermenter, Other), the Tab it goes on, and
-   the **Interface** its built in parts are wired to.
-2. **Size:** Units, Gallons (Liters), Proportional or Diameter with its Diameter and Height (Rules 19.1, 19.2).
-3. **Outlet:** None, Center Outlet or Center Bottom Outlet, and the valve on it: None, Manual Ball, Manual Butterfly or Motorized
-   Ball Valve. A **Motorized Ball Valve is built into the outlet** (its Port is asked). A **Manual Valve is a Widget of its own**
-   (Rule 5.15: only a click opens or closes it), so it is put just below the outlet, ready to be piped, not built in.
-4. **Inlets:** Tangential Inlet (None, Left, Right) and Sparge Arm / Steam Slayer (None, Upper Left, Upper Right).
-5. **Heating:** how many Heating Elements (None to 4; more than one is fine, Rule 6.20), each on its spot (Right Element, Left
-   Element, Right Back Element, Left Back Element) with its Port. Each is one Heating Element with a Method (Rule 6.19).
-6. **Temperature:** None, a Thermowell with its probe on a side spot, or a Front probe on the Center Probe spot; the probe type
-   and its Port (or OneWire probe number). Its Heating Elements read this probe.
-7. **HERMS Coil:** None, Left or Right.
-8. **Check and Build:** a small picture of the vessel with a dot on every IP it uses, and a line for each thing on it.
-   **🔨 Build** puts the **Vessel Device** (Rule 5.31) made from the Skynet_Vessel_Widget Main Template on the 🔨 Build Tab: the
-   IPs it uses are Placed, every other spot is Not Placed (Rule 19.4), and its parts are built into their IPs. Two parts can't
-   share a spot or a Port; each page says plainly what is still missing before Next.
-It can still be changed in its Properties on the Build Tab; once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout
-is saved, its IPs and parts are locked (Rule 5.31, no way back). **BruControl Import:** its Vessels page will ask these same
-pages later, with the items OakBarn Brewery picks greyed out (not built yet); the questions live in one shared file
-(public/vesselbuilder.js) so both programs ask them the same way.
+Skynet Panel First and bring it over to the Importer"; then the full design: "This replaces the Interview on The Importer"; "the end
+result will be the same look and feel Skynet Panel or Importer"; thread "Build the Vessel Device Builder", Help 166).
+**Vessel > 🔨 Build a Vessel Device** on the Edit layout bar (and Add Widget > Vessels) is the same interview in both programs
+(the questions are in one shared file, public/vesselbuilder.js):
+1. **The Question Dialog first:** Label (never blank), **General Type** (HLT, Mash Tun, Brew Kettle, All In One, Whirlpool,
+   Fermentor, Bright Tank; **Other** lets the user type one, kept in the list as **USER: Hop Pot Strainer**), the Tab, Units,
+   **Volume**, **Height** and **Diameter** (both empty = the plain vessel shape, Rule 19.2), **Bottom Drain** (None, Center Low,
+   Center Bottom Drain), **Tangential Inlet** (None, Left, Right), **Sparge Arm / Steam Slayer** (None, Right (High), Left (High)),
+   **Thermowell / Probe** (None, Center, Left, Right, Back Left, Back Right), **Heating Element** (None, Left, Right, Back Left,
+   Back Right; a second one may be added) and **HERMS Coil** (None, Left, Right).
+2. A Thermowell / Probe and a Heating Element **make no IP of their own**: they go on a spot, and on an IP they close it like an
+   End Cap (its IP is hidden). Two can't share a spot.
+3. **🔨 Build** puts the vessel on **one side of the 🔨 Build Tab** with its Heating Element, Thermowell and HERMS coil shown and
+   the IPs of its Drain, Tangential, Sparge / Steam Slayer and HERMS; every spot not used is Not Placed (Rule 19.4). The
+   **Vessel Builder** panel is on **the other side**, with a dialog only for what was chosen.
+4. **Heater and Probe pickers:** a dropdown of the existing Heating Elements (or Temperature Probes) not built into anything, and
+   **➕ Add new**, which runs the usual Add dialogs. The one picked is **built into the vessel** (Rule 5.31) and keeps its name and
+   Port; its readout sits on the vessel like the Three Vessel sample's HLT and its picture gets a hot spot. Until one is picked the
+   spot shows faintly, closed, and its hot spot opens the picker.
+5. *To come, in this order:* the Drain, Tangential and Sparge Arm / Steam Slayer pieces (up to 3 integrated pieces: Valve, Elbow,
+   Tee, Priming Tee; valves picked from the existing ones, ➕ Add new Motorized Valve or ➕ Add Manual Valve Widget; the Steam
+   Slayer adds a 2" to 1.5" Reducer; the Sparge Arm is drawn inside the vessel), **Pick** (double-click a spot on a blank vessel),
+   the crossed HERMS coil choices, the **Integrate** button that saves a **Vessel Device Template** for the Add Vessel list, the
+   standard Templates, and the BruControl Import using the same interview (a prebuilt Template may be picked first).
+Once **💾 Save Build ... > To a Tab** has put it on a Tab and the layout is saved, its IPs and parts are locked (Rule 5.31).
 
 ## Open questions (not Rules yet)
 
@@ -3096,4 +3098,4 @@ pages later, with the items OakBarn Brewery picks greyed out (not built yet); th
   to °C when turned off); new Process commands open_valve and close_valve for any valve; Schema Template heat choice "Its own, set
   by hand", used by the OakBarn Template. Rule 11.1 next free Help is 159. Help 158 new; Help 100, 157, 62 updated. Checked against
   the BruControl Import program: no change (BruControl has no such items). (thread "Add DigiBoil manual vessel widget")
-- 2026-11-08: Added Rule 19.5, the Vessel Device Builder (OakBarn Brewery: "time to Build the Vessel Device Template. We will Build in the Skynet Panel First and bring it over to the Importer the same or with some items greyed out"): Vessel > 🔨 Build a Vessel Device asks Name, Size, Outlet and its valve, Inlets, Heating Elements, Temperature probe and HERMS Coil one page at a time, then builds the Vessel Device on the 🔨 Build Tab. A Manual Valve stays a Widget of its own on the outlet (Rule 5.15). Help 166; next free Help number 167. Checked against the BruControl Import program: not changed yet; its Vessels page will use the same pages later with items greyed out. (thread "Build the Vessel Device Builder")
+- 2026-11-08: Added Rule 19.5, the Vessel Device Builder (OakBarn Brewery): the Question Dialog (General Type with USER: types, Volume, Height, Diameter, Drain, Tangential, Sparge Arm / Steam Slayer, Thermowell / Probe, Heating Element, HERMS Coil), then the vessel on the 🔨 Build Tab with the Vessel Builder panel beside it and its Heater and Probe pickers. It replaces the BruControl Import's Vessels interview (the same look and feel in both programs; the Importer side comes later). Help 166; next free Help number 167. (thread "Build the Vessel Device Builder")
