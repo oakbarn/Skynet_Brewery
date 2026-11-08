@@ -465,3 +465,11 @@ Globals step is built it does what page 2 promises:
   imports a Beer.xml or BeerSmith .bsmx itself, with no code. Clues: API turned on, names or Scripts about recipe, hops, grain,
   mash steps, BeerSmith or XML, and Scripts that only copy those Globals. The brewer confirms; the dropped Globals and Scripts are
   listed in the report.
+
+## The Importer icon (2026-11-08)
+
+OakBarn Brewery picked **clinking beer mugs** for the Skynet BruControl Importer: its window (`public/importer/importer-icon.svg` and
+`.ico`) and its Setup shortcuts (`install/windows/importer.ico`). The drawing is listed as **CC0** (public domain) on SVG Repo
+(svgrepo.com, "clinking beer mugs"); it is from Google's Noto emoji set. It is the Importer's icon only: it is not in the Image
+Library, and the Skynet Panel keeps its own icon.
+

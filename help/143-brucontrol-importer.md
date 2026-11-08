@@ -78,7 +78,14 @@ file…**; **⌂ Documents\BruControl** goes back to BruControl's own folder.
 size and volume in the next steps uses them. When your BruControl probes show which one BruControl used (°F or °C), it is picked
 for you and the question asks you to confirm it.
 
-Then pick how your items are named in Skynet:
+**Coming back later.** Every answer you give is kept a moment after you give it. If you close the Importer and come back, pick
+the same config file: the Names page then offers **▶ Carry on where I left off**, or **Start again** (it asks first).
+
+Every box you fill in is **grey with black text**, and **no box may be left blank**: a blank one is marked red when you press
+**Accept ▶**, and a message says how many there are.
+
+How your items are named in Skynet (this choice is greyed out for now: **it is made much later in the Import**, and every item
+gets its Skynet name):
 
 - **Skynet names (recommended).** Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for
   example `MB_28_do_ManualAlarm_B1` becomes `BR_28_DO_Manually_BB`.
@@ -101,9 +108,10 @@ and it is not shown on the Tab.
 *name*_*date*T*time*.brucfg, also when you picked a `.bak` backup) and only the copy is converted, so BruControl's own file is never changed.
 Then you confirm what comes in, in small steps:
 
-1. **The Interfaces (boards) we found.** Read only: each Interface with its **ID** (greyed, it is explained next), how many items,
-   its **Interface Type** (Arduino MEGA, ESP32 ...), its **Connection** (TCP address and Port, or the serial COM port) and whether it is
-   **Enabled**. **Next ▶**.
+1. **The Interfaces (boards) we found.** Each Interface with its **ID** (greyed, it is explained next), how many items,
+   its **Interface Type** (Arduino MEGA, ESP32 ...), its **Connection** (TCP address and Port, or the serial COM port), whether it is
+   **Enabled**, and an **Import** box: an Interface with items starts ticked, an empty one unticked. Untick one to leave it out, with
+   its items. **Next ▶**.
 2. **The ID column: new in Skynet.** Skynet gives every Interface an **ID** of up to four letters. It is the first part of the
    **suggested Skynet name** of every Device on that board: *Interface ID*_*Port*_*Type ID*_*Label*_*Tab ID*, one `_` between the
    parts, a space in the Label becomes `~` (Rule 3.1), for example `MP_45_DO_M~HLT~Pump_MD`; a name that would be the same as another
@@ -112,9 +120,16 @@ Then you confirm what comes in, in small steps:
 3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found
    (Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
+3a. **Your Widgets.** BruControl's Application Elements (the things not wired to a board) become Skynet Widgets: a Timer a
+   **Timer Widget**, an Alarm an **Alarm Widget**, a Toggle Switch a **Switch Widget**, a Script element a **Value Widget**, a Chart
+   a **Chart Widget**. The first page lists every kind of Skynet Widget and how many of yours become one; then there is a page for
+   each kind found, with the same Display Name, tick, Label and Show columns as the items below. A BruControl Inspector has no Skynet
+   Widget and stays a Placeholder. See [Help 165](165-importer-item-and-widget-pages).
 4. **The items on each Interface.** One table per Interface (board): every item wired to one of its ports, by port, with its
    BruControl name, its **Display Name** (with no Display Name, the BruControl name is shown greyed), a **tick box** and a **Label** box,
-   what it becomes in Skynet (Pump, Heating Element, Analog Input ...), its suggested Skynet name and its Tab. An item on a Tab you
+   a **Show** box (ticked when BruControl showed the name), what it becomes in Skynet (Pump, Cool / Warm Pump, Heating Element, Analog
+   Input ...), its **Skynet Name with DisplayName**, its **Skynet Name with Label** (it changes as you type the Label) and its Tab.
+   There is no "tick them all" box, on purpose: look at each item, because a BruControl name like `M_6_B_1` should become words like HLT. An item on a Tab you
    left out is marked *left out*.
    - **Labels.** BruControl's Display Name settings come over as the item's **Label** in Skynet. The Label can be shown on the Tab just
      like the Display Name was in BruControl, and it is the Label part of the suggested Skynet name. Use the words you use when you
@@ -127,19 +142,21 @@ Then you confirm what comes in, in small steps:
    - Skynet names are the preferred way to name things in Skynet.
    - **Accept ▶** is at the bottom of the page. No Label may be blank: a message says how many are, and marks them in red. When they
      are all filled in, the suggested Skynet names are made again with your Labels, and each Label is the item's Label in the new Schema.
-5. **Your Pumps, Heaters, Temperature Probes, Valves, Flow Meters and Other items.** One page for each kind, in that order. Each
-   page starts with **How many ... do you have?**, filled in with how many were found. If you have more, type how many: an empty
-   line is added for each one, named for example *Pump 7* and *Pump 8* when 6 were found (you can rename it). Then the details of
-   each one: Pumps have their model (AC pumps and the 12 V and 24 V DC pumps), Power and Speed; Heaters their Watts and Volts;
-   Probes their type (OneWire, Thermistor, PT100); Valves their type and size; Flow Meters their pulses per Gallon or Liter.
-   Details filled in are guesses from the names; change any that are wrong. **Accept ▶** goes to the next page. The answers are kept
-   in the Schema. An extra one you add has no Interface Port, so it will become a **Confirmation Widget** (Rule 1.28): Skynet asks
-   you to do it by hand and confirm it is done.
+5. **The item pages:** Pumps, Heating Elements, Temperature Probes, Valves, Flow Meters, pH Meters, Pressure Sensors (PSI),
+   Hydrometers, Volume Meters, Floats, Digital Inputs and Other items, one page each, in that order. Each page starts with **How many
+   ... do you have?**; if you have more than were found, an empty line is added for each one (for example *Pump 7*), and an empty line
+   can be filled with an item no page has taken yet. Each line has the Display Name, tick, Label and Show columns, a **Belongs on**
+   dropdown that moves it to its right page, and its details. Nothing can stay at **Pick one…**: if no choice fits, pick **User
+   defined** and type your own words. Pumps and Heating Elements have the **Control Type** columns: tick each way it may be controlled
+   and pick the **Primary** one by its column number. A method that is not recommended unticks itself and says why, with **Use it
+   anyway**. Valves ask their type, **Connection** (TC, NPT or BSP: how the valve is built into your manifold), **Size** and
+   **Voltage**. Everything is in [Help 165](165-importer-item-and-widget-pages). An extra one you add has no Interface Port, so it will
+   become a **Confirmation Widget** (Rule 1.28): Skynet asks you to do it by hand and confirm it is done.
 6. **Your vessels.** It starts with the vessels found, where you rename one, set its **Side**, remove one (✖) or **➕ Add a
    vessel**. For each one, type its **Volume** and measure its **Height** and **Diameter** (Gallons and inches, or
-   Liters and centimeters, from the Units question). Then what the import could tell about it from your names and Scripts: its **Heater** (a list of every BruControl heating element found; the guess is the one named for the vessel),
+   Liters and centimeters, from the Units question). Then what the import could tell about it from your names and Scripts: its **Heater Element** (a list of every BruControl heating element found; the guess is the one named for the vessel),
    its **Thermowell with Probe** (a list of every BruControl probe found; the guess is the one named for the vessel), its **Outlet** (None, Center Low or Bottom Drain; Bottom Drain to start), a **Tangential Inlet** tick box (a whirlpool pump means one on the Boil Kettle), **Sparge Arm / Steam
-   Slayer** (one answer: None, Upper Left or Upper Right) and a **HERMS Coil** tick box (unticked to start). What was found in your names or Scripts is
+   Slayer** (one answer: None, Upper Left or Upper Right) and a **HERMS Coil** (the Panel's choices: None, Left, Right, Outlet Left & Inlet Right, Outlet Right & Inlet Left; None to start). What was found in your names or Scripts is
    marked *found*; it is a guess, change it if it is wrong; its **Motorized Ball Valve**
    (a list of every motorized valve found; the guess is the one named for the vessel). Everything is shown by its **BruControl name**
    during these steps, so you know each one; the Skynet names are still what is saved (Rule 15.1). **Manual Valves** are not in
@@ -163,7 +180,9 @@ Then you confirm what comes in, in small steps:
 - your **Charts**: each BruControl Chart becomes a Skynet **Chart Widget** ([Help 159](159-chart-widget)) with the same span,
   refresh, grid lines, colors and channels, and each item it draws is sent to the database so its line fills;
 - the **items on a board port** (BruControl elements that have an Interface and a Port). For now only these come in;
-- a **Placeholder** for every other item on a Tab (Timers, Alarms, switches, script pictures ...). It is a grey box
+- your **Widgets** (Timers, Alarms, Toggle Switches, Scripts), from the Widget pages; a pump BruControl ran by a temperature control
+  is one **Cool / Warm Pump** (Device Type ID CPMP, [Help 164](164-cool-warm-pump));
+- a **Placeholder** for every other item on a Tab (an Inspector, a Counter port ...). It is a grey box
   with ⬚ and the BruControl name, at the same place and size as in BruControl, so you can see what is still to come. A hidden
   item's Placeholder stays hidden.
 

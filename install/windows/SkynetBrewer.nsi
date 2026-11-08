@@ -390,10 +390,10 @@ Function AskImporter
   ${EndIf}
   add:
     CopyFiles /SILENT "$INSTDIR\install\windows\Skynet_Importer.bat" "$INSTDIR\Skynet_Importer.bat"
-    CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
-    CreateShortCut "$DESKTOP\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+    CreateShortCut "$SMPROGRAMS\Skynet Brewer\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\importer.ico" 0
+    CreateShortCut "$DESKTOP\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\importer.ico" 0
     ; and one in the Import folder, where its Schema files go (Fritz, 2026-11-06)
-    CreateShortCut "$BrewDir\Import\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\skynet.ico" 0
+    CreateShortCut "$BrewDir\Import\Skynet BruControl Importer.lnk" "$INSTDIR\Skynet_Importer.bat" "" "$INSTDIR\install\windows\importer.ico" 0
     DetailPrint "Added the Skynet BruControl Importer"
     StrCpy $ImporterAdded 1
     Return

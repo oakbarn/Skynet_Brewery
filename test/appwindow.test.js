@@ -66,3 +66,12 @@ console.log('appwindow tests passed');
   assert.match(fs.readFileSync(new URL('../server.js', import.meta.url), 'utf8'), /PUBLIC_FILES = new Set\([^)]*'\/favicon\.svg'/, 'the icon must show before sign-in');
   console.log('beer mug icon tests passed');
 }
+// The Importer's own icon, clinking beer mugs (OakBarn Brewery, 2026-11-08): its window and its Setup shortcuts
+{
+  const fs = await import('node:fs');
+  for (const f of ['public/importer/importer-icon.svg', 'public/importer/importer-icon.ico', 'install/windows/importer.ico']) assert.ok(fs.existsSync(new URL(`../${f}`, import.meta.url)), `${f} missing`);
+  assert.match(fs.readFileSync(new URL('../public/importer/index.html', import.meta.url), 'utf8'), /<link rel="icon" href="\/importer\/importer-icon\.svg"/);
+  const nsi = fs.readFileSync(new URL('../install/windows/SkynetBrewer.nsi', import.meta.url), 'utf8');
+  assert.ok(nsi.split('\n').filter(l => /Skynet BruControl Importer\.lnk/.test(l) && /CreateShortCut/.test(l)).every(l => l.includes('importer.ico')), 'every Importer shortcut has the mugs');
+  console.log('importer icon tests passed');
+}

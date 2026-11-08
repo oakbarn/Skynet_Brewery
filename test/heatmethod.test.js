@@ -198,3 +198,29 @@ console.log('method spots tests passed');
   assert.deepEqual(controlMethods(hlt), ['On/Off', 'Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
 }
 console.log('built in Element upgrade tests passed');
+
+// The Cool / Warm Pump (OakBarn Brewery, 2026-11-08, Rule 6.21): one Pump with a Method, On/Off or Hysteresis; a minus On offset cools
+{
+  const { isCoolPump, allowedMethods } = await import('../public/heatmethod.js');
+  const { defaultCode } = await import('../public/naming.js');
+  const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'coolpump'));
+  const cfg2 = path.join(d2, 'c.json');
+  fs.writeFileSync(cfg2, JSON.stringify({ devices: [{ name: 'MB', type: 'simulator' }], elements: [
+    { name: 'Ferm_Temp', type: 'temperature', sensor: 'simulated' },
+    { name: 'MB_5_CPMP_Cool~Pump_FR', type: 'digitalOut', subtype: 'pump', device: 'MB', channel: 5, input: 'Ferm_Temp', heatMethod: 'hysteresis', target: 66, onOffset: -1 }] }));
+  const s2 = new Store(cfg2, path.join(d2, 'data')); s2.load();
+  const c2 = new Control(s2);
+  const pumpEl = s2.get('MB_5_CPMP_Cool~Pump_FR'), gp = p => s2.getProp('MB_5_CPMP_Cool~Pump_FR', p);
+  assert.ok(isCoolPump(pumpEl)); assert.ok(!isHeatElem(pumpEl), 'it is a Pump, not a Heating Element');
+  assert.equal(defaultCode(pumpEl), 'CPMP'); assert.equal(defaultCode({ type: 'digitalOut', subtype: 'pump' }), 'Pump', 'a plain pump stays Pump');
+  assert.deepEqual(allowedMethods(pumpEl), ['onoff', 'hysteresis']);
+  assert.equal(gp('method'), 'Hysteresis');
+  s2.setProp('MB_5_CPMP_Cool~Pump_FR', 'state', true);
+  let t2 = 0;
+  s2.setProp('Ferm_Temp', 'value', 68); c2.tick(t2 += 1000);
+  assert.equal(gp('output'), true, 'warmer than the Target: the glycol pump runs');
+  s2.setProp('Ferm_Temp', 'value', 65.5); c2.tick(t2 += 1000);
+  assert.equal(gp('output'), false, 'at the Target: it stops');
+  assert.throws(() => s2.setProp('MB_5_CPMP_Cool~Pump_FR', 'method', 'PID'), /may only use/, 'a pump is never run by PID');
+  console.log('cool / warm pump ok');
+}
