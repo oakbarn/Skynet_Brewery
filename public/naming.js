@@ -304,7 +304,8 @@ const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0
 export const canPseudoPwm = e => e?.type === 'pwmOut' || (['pid', 'deadband'].includes(e?.type) && !!e.pwm);
 export const PSEUDO_PWM_PERIOD = 1000;      // ms: one on and off cycle
 export const pseudoPwmOn = (pct, now, period = PSEUDO_PWM_PERIOD) => { const p = Math.max(0, Math.min(100, Number(pct) || 0)); return p >= 100 || (p > 0 && (now % period) < period * p / 100); };
-const needsPwm = e => !(e.pseudoPwm && canPseudoPwm(e)) && (['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm));
+// a Pump with Speed control PWM (Fritz, 2026-11-08) needs a true PWM pin too
+const needsPwm = e => !(e.pseudoPwm && canPseudoPwm(e)) && (['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm) || (e.type === 'digitalOut' && e.subtype === 'pump' && !!e.pwm));
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
 const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
 
@@ -319,6 +320,8 @@ const PROFILES = {
 };
 export const pinProfile = board => PROFILES[board] || PROFILES.mega;
 const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => d.name === el.device)));
+// can this Device's Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin). A PWM Pump on another pin runs On/Off only.
+export const canTruePwm = (el, devices) => profileOf(el, devices).pwm.includes(String(el?.channel ?? ''));
 // How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins
 export function pinLabel(p, board) {
   p = String(p);

@@ -1,7 +1,7 @@
 # DC Brewing Pumps (12 V and 24 V)
 
 A list of low-voltage (DC) pumps that home and craft brewers use, so the Skynet Panel can get these pump types.
-This is the list only. Nothing in the Panel changes until OakBarn Brewery reviews it and says which ones to add.
+OakBarn Brewery said Go to every idea in section 5 (2026-11-08): they are built (Rule 18.32, Help 162).
 
 Searched 2026-11-08. Numbers are what each maker or store page says (see Sources at the end). Pages often
 disagree a little, so treat flow and lift as "about".
@@ -61,26 +61,27 @@ These run straight off house power (AC). The Panel already has pictures for most
 | Blichmann RipTide | 120 V AC |
 | BrewZilla Gen 4 built-in pump | 220 to 240 V AC, 6 W |
 
-## 5. What this could mean for the Skynet Panel (for review, not built)
+## 5. What the Skynet Panel does with them (Rule 18.32, Help 162)
 
-Ideas only, to talk over before anything is built:
+All a Go (2026-11-08). Built, except where it says it waits:
 
 1. **A "Power" setting on every Pump**: AC house power, DC 12 V, or DC 24 V. A DC pump is still turned On or Off
    with one click (Rule 2.33), like every other Pump.
 2. **Speed control for brushless DC pumps**: some (for example the Topsflo TD5) can be run slower. If wanted, a DC
    pump could have a "Speed %" that uses the PWM output the Panel already has.
-3. **A "Use" setting**: Hot wort, or Cold (glycol / chiller). The BruControl Importer could then guess that a pump
-   named "Cool" or "Glycol" is a cold pump.
-4. **Pictures**: the Topsflo TD5 and March 809 pictures already exist. New drawings (for example a small solar-style
-   12 V pump or a Penguin glycol pump) would only be made if OakBarn Brewery asks, and they are not added to the Image
+3. **A "Use" setting**: Hot wort, or Cold (glycol / chiller). The BruControl Importer guessing that a pump named "Cool" or
+   "Glycol" is a cold pump waits for the Importer review.
+4. **Pictures**: the Topsflo TD5 and March 809 pictures already exist. Every pump in the list can be picked as the **Model**, so its
+   facts show even with another picture. New drawings (for example a small solar-style
+   12 V pump or a Penguin glycol pump) are only made if OakBarn Brewery asks, and they are not added to the Image
    Library unless asked.
-5. **Wiring note for the Help page**: a 12 V or 24 V pump is never wired straight to a board pin. The board's output
-   switches a relay or a switch module (MOSFET) that carries the pump's own 12 V or 24 V power. The electrical warning
-   of Rule 6.20 (waiting in an open PR) would go on this page too ("OakBarn Brewery and Skynet are not electricians... Consult a Licensed
-   Electrician").
+5. **Wiring note** (Help 162 and the Pump's Properties): a 12 V or 24 V pump is never wired straight to a board pin. The
+   board's output switches a relay or a switch module (MOSFET) that carries the pump's own 12 V or 24 V power. With the
+   electrical warning of Rule 6.20: "OakBarn Brewery and Skynet are not electricians... Consult a Licensed Electrician".
+6. **Facts at your fingertips**: hold the mouse on a pump to see its model, power, use, speed, flow, lift, hottest liquid and ports.
 
-Both programs (the Skynet Panel and the BruControl Import) would need any new Pump settings, since they share the same
-Rules, Devices and Widgets.
+Both programs (the Skynet Panel and the BruControl Import) share these Pump settings. The manual BrewZilla 3 pump is a Pump Widget,
+built in its own thread.
 
 ## Sources
 

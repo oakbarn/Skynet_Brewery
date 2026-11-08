@@ -12,8 +12,9 @@ import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
+import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
 import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
-import { isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
+import { canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
 import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
@@ -1906,6 +1907,11 @@ const refOf = n => n.dataset.clone ? ['gfx', n.dataset.gid] : n.dataset.name ? [
 
 function buildEl(e) {
   const n = h('div', { class: 'el ' + e.type + (btnKind(e) ? ' k-' + btnKind(e) : '') + (e.cloneId ? ' clone' : ''), 'data-name': e.name, ...(e.cloneId ? { 'data-clone': e.cloneOf, 'data-gid': e.cloneId, title: `Clone of ${e.cloneOf}` } : {}) }, h('div', { class: 'nm' }), h('div', { class: 'vl' }));
+  // a Pump's facts at your fingertips (Fritz, 2026-11-08, Rule 18.32): hold the mouse on it to see its power, flow, lift ...
+  if (e.subtype === 'pump' && e.type === 'digitalOut') {
+    const facts = () => { const sp = S.values[e.cloneOf || e.name]?.speed; n.title = [e.label || e.name, ...factLines(sp === undefined ? e : { ...e, speed: sp })].join('\n') + (e.cloneId ? `\nClone of ${e.cloneOf}` : ''); };
+    facts(); n.addEventListener('mouseenter', facts);      // the Speed % as it is now (a Process may change it)
+  }
   if (vkKind(e) === 'switch') n.append(h('div', { class: 'slider' }, h('div', { class: 'knob' })));
   if (btnKind(e) === 'pushbutton' || btnKind(e) === 'momentary') n.append(h('div', { class: 'ledbtn' }));
   if (vkKind(e) === 'list') {        // gGlobal List: pick the Text, the element gets that choice's Value
@@ -4352,7 +4358,7 @@ async function newDeviceDialog(e, hint, what) {
     ['name', n() + 'Name', 'text', null, false, false, { tip: T.name, ...after }],
     ['_sugNote', 'Suggested Name. You may edit it to make it your own.', 'note', null, false, false, after],
     // a Pump (Fritz's Add Pump drawing, 2026-11-04): its Cover, X and Y here too
-    ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after)] : []),
+    ...(isPumpDev(e) ? [...PUMP_GRAPHIC_FIELDS(e, after), ...PUMP_COVER_TOGGLE({ ...e, cover: 'None' }, after).slice(0, 1), ...PUMP_OVERLAY(e, after), ...PUMP_TYPE_FIELDS(e, after, true)] : []),
     ...(mbv ? [...MBV_GRAPHIC_FIELDS(e, after), ...MBV_TOGGLE_OVERLAY(e, after), ...MBV_OWN({ ...e, tapwater: false }, after)] : []),        // no Cover on a valve
     ...(pr ? [...PROBE_GRAPHIC_FIELDS(e, after), ...PROBE_OWN(e, after)] : []),        // no Cover, Toggle or Overlay on a probe
     ...(pwm ? [...PWM_GRAPHIC_FIELDS(e, after), ...PWM_OVERLAY(e, after), ...PWM_OWN(e, after)] : []),        // PWM / Analog out (Rule 18.25)
@@ -4481,7 +4487,7 @@ async function newDeviceDialog(e, hint, what) {
         if (name !== sug && !confirm(OWN_NAME_WARNING(name, sug))) { work.name = name; continue; }
         if (work.pseudoPwm && canPseudoPwm(e)) e.pseudoPwm = true;       // a plain pin, switched by the Brain (Fritz, 2026-11-05)
         for (const k of ['label', 'hideName', 'device', 'channel', 'probeIndex', 'typeCode', 'workspace', ...(dd ? [...(pwm ? [] : ['tap']), 'imageOff', 'imageOverlay', 'flipH', 'flipV', 'nameFontSize', 'nameFontFamily', 'nameBold', 'nameColor', 'nameBg', 'nameAlign'] : []),
-          ...(isPumpDev(e) ? ['cover'] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
+          ...(isPumpDev(e) ? ['cover', ...PUMP_TYPE_KEYS] : []), ...(elem && !isSkyElem(e) ? ['imageOn'] : []), ...(mbv ? ['tapwater', 'closeAll', 'openAll'] : []), ...(pwm ? ['initial', 'precision', 'signal', 'units', 'rangeLow', 'rangeHigh'] : []), ...(pr ? ['units', 'precision', 'offset', ...PROBE_SETTING_KEYS] : []), ...(mbv && !e.template ? ['imageOn', 'orientation', 'ipInX', 'ipInY', 'ipOutX', 'ipOutY'] : [])]) if (work[k] === undefined || work[k] === '') delete e[k]; else e[k] = work[k];
         if (pr) {        // Orientation (Rotate) and Flip: the box turns with the picture (Rule 5.30)
           const before = { ...e }; flipFrom(work);
           for (const k of ['flipH', 'flipV']) if (work[k]) e[k] = true; else delete e[k];
@@ -5757,6 +5763,33 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
 const OVERLAY_CHOICES = v => [['', 'None (No Overlay)'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
 const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f => f[2] !== 'box' && f[2] !== 'boxend') };
+// DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 162): "any of the Pumps can be controlled (On/Off or PWM if
+// it can) and the voltage, Lift, GPM etc are all good info to have at your fingertips." Model with its facts ⬢, Power with Use, and
+// Speed control with Speed %. An AC pump is On/Off only.
+const PUMP_MODEL_CHOICES = (v, it) => [['', (f => f ? `From the drawing (${f.name})` : '(not set)')(it && !it.pumpModel ? factsOf(it) : null)], ...PUMP_FACTS.map(f => [f.key, f.name]), ['other', 'Other (type its facts in the ⬢)'], ...(v && v !== 'other' && !pumpFacts(v) ? [[v, v]] : [])];
+const PUMP_FACTS_POP = { title: 'Pump facts', fields: o => {
+  const f = factsOf(o), dflt = k => f?.[k] ? ` · model: ${f[k]}` : '';
+  return [['_pfn', f ? `${f.name}${f.body ? '. Body: ' + f.body : ''}.${f.note ? ' ' + f.note : ''} Leave a box empty to use the model's fact.` : 'No model picked: type what you know.', 'note', null, false, false, { keep: true }],
+    ['pumpFlow', 'Flow' + dflt('flow'), 'text', null, false, false, { tip: 'How much it moves with nothing in the way (GPM or L/min).' }],
+    ['pumpLift', 'Lift' + dflt('lift'), 'text', null, false, false, { tip: 'How high it pushes liquid straight up before the flow stops (the head, ft or m).' }],
+    ['pumpHottest', 'Hottest liquid' + dflt('hottest'), 'text', null, false, false, { tip: 'The hottest liquid it is made for.' }],
+    ['pumpPorts', 'Ports' + dflt('ports'), 'text', null, false, false, { tip: 'Its inlet and outlet: thread, tri-clamp or barb, and size.' }]];
+} };
+function PUMP_TYPE_FIELDS(it, x = {}, add = false) {
+  const T = DEVICE_TIPS;
+  if (it.pwm === true) it.pwm = 'pwm';
+  const pw = powerOf(it), ac = !add && /^ac/.test(pw);
+  return [['pumpModel', 'Model', 'sel', PUMP_MODEL_CHOICES(it.pumpModel, it), true, false, { tip: T.pumpModel, attr: PUMP_FACTS_POP, ...x }],
+    ['power', 'Power', 'sel', PUMP_POWERS.map(([k, t]) => [k, k === '' && factsOf(it)?.power ? `From the model (${PUMP_POWERS.find(p => p[0] === factsOf(it).power)[1]})` : t]), true, false,
+      { tip: T.pumpPower, with: ['pumpUse', 'Use', 'sel', PUMP_USES.map(([k, t]) => [k, k === '' && factsOf(it)?.use === 'cold' ? 'From the model (Cold)' : t]), false, false, { tip: T.pumpUse }], ...x }],
+    ...(ac ? [['_pac', 'An AC pump is turned On and Off only (no Speed %).', 'note', null, false, false, x]]
+      : [['pwm', 'Speed control', 'sel', PUMP_SPEEDS, true, false, { tip: T.pumpSpeedCtl, ...(it.pwm || add ? { with: ['speed', 'Speed %', 'num', null, false, false, { tip: T.pumpSpeed }] } : {}), ...x }],
+        ...(!add && it.pwm && it.device && it.channel !== undefined && it.channel !== '' && !pwmPinOk(it) ? [['_ppin', `⚠ Port ${it.channel} cannot do true PWM, so the pump will only run full speed or off. PWM speed needs a PWM Port (a Mega: D2-D13 or D44-D46; a Raspberry Pi: any). The Port is set when the pump is added (Rule 18.13).`, 'note', null, false, false, x]] : [])]),
+    ['_pwarn', '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.', 'note', null, false, false, x]];
+}
+const PUMP_TYPE_KEYS = ['pumpModel', 'power', 'pumpUse', 'pwm', 'speed', 'pumpFlow', 'pumpLift', 'pumpHottest', 'pumpPorts'];
+// can this Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin)
+const pwmPinOk = it => canTruePwm(it, S.config.devices || []);
 // Pump Device Properties (Fritz's screen 9, 2026-11-04, Rule 18.21): only these, besides the Universal Properties (Rule 1.21).
 // The lock, Visible and Hidden Locked are in the title line.
 function pumpDeviceFields(it, item) {
@@ -5767,7 +5800,7 @@ function pumpDeviceFields(it, item) {
     ['workspace', '3. Tab', 'ws', 'addnewid', false, false, { tip: T.tab }],
     ['name', '4. Name', 'text', null, false, false, { tip: T.name }],
     ['_sug', `Suggested Name: ${deviceSuggestion(it, item) || '(type a Label and pick the Interface and Port)'}` + (autoNamed.has(item) ? '  (this new Pump follows it until you type a name of your own)' : ''), 'note'],
-    ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it),
+    ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it), ...PUMP_TYPE_FIELDS(it),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
@@ -6358,6 +6391,11 @@ const DEVICE_TIPS = {
   path: 'The picture file of a User pump: one path only, and you may change it.',
   pathSet: 'The picture of a Skynet pump drawing. It is set and cannot be changed (a User pump has its own path).',
   overlay: 'Drawn on top of the pump while it is On: the steady red and yellow lightning bolt to start; the flashing bolt and others are choices, (none) for no overlay.',
+  pumpModel: 'Which pump this is. Its facts (power, flow, lift, hottest liquid, ports) show when you hold the mouse on the pump. A Skynet pump drawing picks its model by itself. The ⬢ beside it holds the facts; type your own to change one.',
+  pumpPower: 'What the pump runs on: AC house power (120 V or 240 V) or DC (12 V or 24 V, from a power brick). Only a DC pump can have its speed set (PWM). Never wire a pump straight to a board pin: the pin switches a relay or a switch module (MOSFET) that carries the pump\'s own power.',
+  pumpUse: 'Hot: wort and hot water (brew day). Cold: glycol or ice water (cooling a fermenter).',
+  pumpSpeedCtl: 'On/Off only: the pin turns the pump on and off. PWM speed: a DC pump on a PWM pin (with a MOSFET module) runs at its Speed % while it is On. A brushless DC pump with its own driver may not like PWM: try it at a slow speed first.',
+  pumpSpeed: 'How fast it runs while it is On, 0 to 100 % (empty = 100). A Process can change it: Pump_Name.speed = 60.',
   toggle: 'What a tap on the pump does: On/Off turns it on or off with one click; Push button is on only while held.',
   // the Motorized Ball Valve (Fritz, 2026-11-05, Rule 18.23)
   vGraphic: 'The picture of this valve as it will show on the Tab, closed, turned to its Orientation.',
