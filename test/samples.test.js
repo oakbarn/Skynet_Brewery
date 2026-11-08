@@ -56,7 +56,22 @@ for (const sm of list) {
   for (const e of c.elements) if (e.input) assert.ok(store.has(e.input));
 }
 
+// The Three Vessel sample is the test bed and follows the latest standard (Fritz, 2026-11-08): Device names
+// InterfaceID_Port_TypeID_Label_TabID (Rule 3.1), Widget names wgt_Type_Label_TabID (Rule 3.14), a space in the Label is ~.
+// gGlobals keep their names (the Rule 1.16 prefix change is on hold; Beer.xml import fills them by name).
+{
+  const c3 = JSON.parse(fs.readFileSync(path.join(SAMPLES, 'three-vessel-one-pump', 'config.json'), 'utf8'));
+  for (const e of c3.elements) {
+    if (e.type === 'gGlobal') continue;
+    const dev = ['temperature', 'digitalOut'].includes(e.type);
+    assert.match(e.name, dev ? /^BM_\d+_(1W|HE|Pump|Chill|eVlv)_[A-Za-z0-9~]+_BR$/ : /^wgt_[A-Z]+_[A-Za-z0-9~]+_(BR|RE|RP)$/, `three-vessel-one-pump: ${e.name} has a Skynet name`);
+  }
+  for (const g of c3.graphics.filter(g => g.kind === 'text')) assert.match(g.name ?? '', /^wgt_TXT_[A-Za-z0-9~]+_(BR|RE|RP)$/, `three-vessel-one-pump: Text ${g.id} has a Skynet name`);
+}
+
 // ---- run each brew day, fast
+const OLD_NAMES = { testing: 'sw_Status_Testing', advance: 'sw_Advance_BrewStatus', alarms: ['alm_Hops', 'alm_Step', 'alm_Warning'] };
+const NAMES = { 'three-vessel-one-pump': { testing: 'wgt_SW_Testing_BR', advance: 'wgt_SW_Advance_BR', alarms: ['wgt_ALM_Hop~alarm_BR', 'wgt_ALM_Step~alarm_BR', 'wgt_ALM_Warning_BR'] } };
 async function brewDay(id, tweak) {
   const { store, engine, hw } = scratch();
   loadSample(SAMPLES, id, { store, engine, hw });
@@ -64,13 +79,15 @@ async function brewDay(id, tweak) {
   const tick = setInterval(() => store.tickTimers(0.05), 50);
   const sim = setInterval(() => hw._simulate(), 50);
   tweak(store);
-  store.setProp('sw_Status_Testing', 'state', true);
+  // the Three Vessel sample has the Skynet names (Rule 3.14, Fritz 2026-11-08: "bring anything on 3 Vessel up to latest standard")
+  const n = NAMES[id] ?? OLD_NAMES;
+  store.setProp(n.testing, 'state', true);
   const seen = [];
   const brewer = setInterval(() => {                       // clicks whatever the panel asks for
     const st = store.getProp('gblV_Brew_Status', 'value');
     if (!seen.includes(st)) seen.push(st);
-    if (store.getProp('sw_Advance_BrewStatus', 'visibility') === 'visible' && !store.getProp('sw_Advance_BrewStatus', 'state')) store.setProp('sw_Advance_BrewStatus', 'state', true, 'ui');
-    for (const a of ['alm_Hops', 'alm_Step', 'alm_Warning']) if (store.getProp(a, 'active')) store.setProp(a, 'active', false, 'ui');
+    if (store.getProp(n.advance, 'visibility') === 'visible' && !store.getProp(n.advance, 'state')) store.setProp(n.advance, 'state', true, 'ui');
+    for (const a of n.alarms) if (store.getProp(a, 'active')) store.setProp(a, 'active', false, 'ui');
   }, 120);
   engine.start('BrewDay_Flow', 'user');
   const t0 = Date.now();
