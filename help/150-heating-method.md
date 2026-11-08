@@ -56,7 +56,8 @@ are changed to a Heating Element when they load, keeping its name and settings.
 When **two or more** methods are allowed, a small button for each shows **under the Element** on its Tab, or under its picture on
 a **Vessel Device** when it is built in. **One click** on one switches the Element to that method at once; the one in use is **red**, the others
 **yellow**. While it is ON, a dark **Turn Off** button shows at the end of the row: one click turns it Off.
-A click on the Element's picture on its Vessel Device (or on its tile) opens its pop-up, with **ON** and **OFF** too.
+**One click on the Element's picture** on its Vessel Device turns it **On or Off** at once, in the method it is in, like a Pump.
+A click on its **box** (the tile with its reading) opens its pop-up, with **ON**, **OFF** and its method.
 When the Element is **Off**, a click on a method spot switches it and opens the pop-up: click **Set + ON** to start it.
 Several Elements can be On at the same time (for example on different AC circuits). With only the main method, no buttons show.
 
