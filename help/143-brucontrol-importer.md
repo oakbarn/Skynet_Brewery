@@ -97,7 +97,11 @@ and it is not shown on the Tab.
 **Next ▶** makes the **Import Copy**: your config file is copied into `C:\Brewing\Import\BruControl` (named
 *name*_*date*T*time*.brucfg, also when you picked a `.bak` backup) and only the copy is converted, so BruControl's own file is never changed. Then you see what comes in:
 
-- your **Interfaces** (BruControl boards), each with its Interface ID;
+- your **Interfaces** (BruControl boards), each with its Interface ID and how many items it has. An Interface with **no
+  items (0)** is **not** imported, unless you tick its **Import** box; then it **will** be imported;
+- the **Look (theme)**: the Skynet Theme that most closely matches the theme set in BruControl (for Office 2019, **Skynet
+  Office Black**). BruControl themes do not work in browsers, so Skynet has its own small set of Skynet Themes, and you can
+  build your own User Theme. A new Skynet Theme for a Tab (old Workspace) can be chosen at any time;
 - your **Tabs** (BruControl workspaces), each with its Tab ID. Tab backgrounds are left out for now;
 - the **items on a board port** (BruControl elements that have an Interface and a Port). For now only these come in;
 - a **Placeholder** for every other item on a Tab (Timers, Alarms, switches, Globals, script pictures ...). It is a grey box

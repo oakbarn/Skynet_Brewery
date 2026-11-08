@@ -174,3 +174,14 @@ assert.equal(importFileName('Oakbarn', new Date(2026, 10, 6, 18, 5, 9).getTime()
   fs.rmSync(sdir, { recursive: true, force: true });
 }
 console.log('importer Schema file tests passed');
+
+// Interfaces with no items come in only when ticked (Fritz, 2026-11-08)
+{
+  const { dropEmptyInterfaces } = await import('../lib/importer.js');
+  const conv = { devices: [{ name: 'Main' }, { name: 'LV1' }, { name: 'Test' }], elements: [{ device: 'Main' }] };
+  const r = dropEmptyInterfaces(conv, ['Test']);
+  assert.deepEqual(r.conv.devices.map(d => d.name), ['Main', 'Test']);
+  assert.deepEqual(r.dropped, ['LV1']);
+  assert.equal(conv.devices.length, 3, 'the converted file is not changed');
+  assert.deepEqual(dropEmptyInterfaces(conv).dropped, ['LV1', 'Test'], 'none ticked: every empty one left out');
+}
