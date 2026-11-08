@@ -6,6 +6,7 @@
 // Step 1 Welcome, step 2 pick the BruControl config file. The import steps come next.
 // It only READS BruControl's files and never changes them. It listens on this computer only (127.0.0.1).
 import http from 'node:http';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -25,6 +26,38 @@ const SETTINGS = settingsFile();
 const MAX_CONFIG = 100 * 1024 * 1024;
 const IMPORT_DIR = importFolder(ROOT);     // C:\Brewing\Import (Fritz, 2026-11-06)
 const MEDIA_DIR = process.env.SKYNET_MEDIA_DIR || path.join(ROOT, 'media');     // the Panel's media folder (copies go to Images\User, sounds\User)
+
+// ---- The Build page (OakBarn Brewery, 2026-11-08: "Connect to your Brewery will use the same Build page as in Skynet Panel"; "The
+// Only thing I see is the Process Icon needs to be greyed Out"). The Importer starts the Skynet Panel itself (server.js) on its own
+// port and its own folder, Brewing\Import\build, with SKYNET_IMPORT_BUILD=1: no board is connected and Processes are greyed out. The
+// imported Tabs, Devices and Widgets are put in that folder first; what is built there comes back into the Schema when it is saved.
+const BUILD_PORT = Number(process.env.IMPORTER_BUILD_PORT ?? PORT + 1);
+const BUILD_DIR = path.join(IMPORT_DIR, 'build');
+const BUILD_CONFIG = path.join(BUILD_DIR, 'config', 'brewery.json');
+const build = { child: null, key: '' };
+const SCHEMA_KEYS = ['devices', 'workspaces', 'elements', 'graphics', 'probes', 'autostart'];
+function readBuild(copy) {
+  try { const c = JSON.parse(fs.readFileSync(BUILD_CONFIG, 'utf8')); return c.importFor === copy ? c : null; } catch { return null; }
+}
+function writeBuild(conv, copy) {
+  fs.mkdirSync(path.dirname(BUILD_CONFIG), { recursive: true });
+  const c = { title: 'BruControl Importer: Build page', port: BUILD_PORT, mediaRoots: [MEDIA_DIR], theme: conv.theme, units: conv.units, importFor: copy };
+  for (const k of SCHEMA_KEYS) c[k] = conv[k] ?? [];
+  fs.writeFileSync(BUILD_CONFIG, JSON.stringify(c, null, 2));
+}
+const buildUp = () => new Promise(ok => { const r = http.get({ host: '127.0.0.1', port: BUILD_PORT, path: '/login.html', timeout: 1000 }, x => { x.resume(); ok(true); }); r.on('error', () => ok(false)); r.on('timeout', () => { r.destroy(); ok(false); }); });
+async function startBuild() {
+  if (build.child && build.child.exitCode === null && await buildUp()) return;
+  build.key = crypto.randomBytes(32).toString('hex');
+  build.child = spawn(process.execPath, ['--no-warnings', path.join(ROOT, 'server.js')], { cwd: ROOT, stdio: 'ignore', windowsHide: true,
+    env: { ...process.env, SKYNET_IMPORT_BUILD: '1', SKYNET_IMPORT_KEY: build.key, PORT: String(BUILD_PORT), SKYNET_WINDOW: 'none', SKYNET_MINIMIZE: '',
+      BREWPANEL_CONFIG: BUILD_CONFIG, BREWPANEL_DATA: path.join(BUILD_DIR, 'data'), BREWPANEL_SCRIPTS: path.join(BUILD_DIR, 'scripts') } });
+  build.child.on('error', () => {});
+  for (let i = 0; i < 60; i++) { if (await buildUp()) return; await new Promise(r => setTimeout(r, 250)); }
+  throw new Error('The Build page did not start. Close the Importer and try again.');
+}
+const stopBuild = () => { try { build.child?.kill(); } catch { /* already gone */ } build.child = null; };
+process.on('exit', stopBuild);
 
 // Windows' real Documents folder (it may have been moved to OneDrive or another drive)
 function documentsFolder() {
@@ -243,7 +276,10 @@ async function api(req, res, p, q) {
     const { file, name, connect, keepEmpty, keepTabs, tabsPicked, parts } = await body(req);
     if (!converted || converted.file !== file) return json(res, 400, { error: 'Go back to Names and click Next first, so the config file is converted.' });
     // an Interface (board) with no items comes in only when its tick box was ticked (Fritz, 2026-11-08)
-    const { conv: conv1, dropped } = dropEmptyInterfaces(converted.conv, keepEmpty);
+    // what was built on the Build page comes back in (its Tabs, Devices and Widgets), when it was made from this same Import Copy
+    const built = readBuild(converted.copy);
+    const base = built ? { ...converted.conv, ...Object.fromEntries(SCHEMA_KEYS.map(k => [k, built[k] ?? []])) } : converted.conv;
+    const { conv: conv1, dropped } = dropEmptyInterfaces(base, keepEmpty);
     // a Tab with no items comes in only when ticked; its Placeholders stay out with it (Fritz, 2026-11-08)
     // and since 2026-11-08 every Tab has an Import Tab box (empty ones start unticked), so an unticked Tab with items stays out too
     const { conv, dropped: tabsOut, holdersDropped, itemsDropped } = dropEmptyTabs(conv1, keepTabs, { all: tabsPicked === true });
@@ -272,9 +308,20 @@ async function api(req, res, p, q) {
     spawn('explorer.exe', [IMPORT_DIR], { detached: true, stdio: 'ignore' }).on('error', () => {}).unref();
     return json(res, 200, { ok: true });
   }
+  // open the Build page: the imported Tabs, Devices and Widgets in the Skynet Panel's own Build page (kept while the same file is imported)
+  if (p === '/api/build/open' && m === 'POST') {
+    if (!converted) return json(res, 400, { error: 'Go back to Names and click Next first, so the config file is converted.' });
+    const { keepTabs, tabsPicked } = await body(req);
+    if (!readBuild(converted.copy)) {
+      const { conv } = dropEmptyTabs(converted.conv, keepTabs, { all: tabsPicked === true });
+      stopBuild(); writeBuild(conv, converted.copy);
+    }
+    await startBuild();
+    return json(res, 200, { url: `http://localhost:${BUILD_PORT}/import-build?key=${build.key}` });
+  }
   if (p === '/api/close' && m === 'POST') {
     json(res, 200, { ok: true });
-    setTimeout(() => { closeAppWindow({ profile: importerProfileDir() }); process.exit(0); }, 300);
+    setTimeout(() => { stopBuild(); closeAppWindow({ profile: importerProfileDir() }); process.exit(0); }, 300);
     return;
   }
   json(res, 404, { error: 'Not found' });

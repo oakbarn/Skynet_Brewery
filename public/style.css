@@ -1110,3 +1110,6 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .jobPickBar { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 9000; background: #fffbe6; color: #222; border: 2px solid #f5a623;
   border-radius: 8px; padding: 8px 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.25); max-width: calc(100vw - 32px); flex-wrap: wrap; }
 .jobPickBar button { background: #fff; color: #222; border: 1px solid #999; }
+
+/* the BruControl Importer's Build page: Processes greyed out (OakBarn Brewery, 2026-11-08) */
+body.importBuild #views button:disabled, body.importBuild #procTab:disabled { opacity: .4; cursor: not-allowed; }
