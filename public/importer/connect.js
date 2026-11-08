@@ -33,7 +33,9 @@ const NOT_VALVE = /switch|block|ssr|outlet|relay|24 ?vdc|120 ?vac/i;     // a po
 const COOL = /cool|chill|glycol/i, WARM = /warm|heat/i;
 
 const textOf = e => `${e.bru?.name ?? ''} ${e.label ?? ''}`;
-const itemOf = (e, kind) => ({ id: e.name, kind, label: e.label || e.name, bru: e.bru?.name || e.name, tab: e.workspace, x: e.x, y: e.y, w: e.w, h: e.h });
+// shown by its BruControl name during the interview (OakBarn Brewery, 2026-11-08: "use the Brucontrol names from the start until we
+// get further in the interview"), so the brewer knows each one; the Skynet name is still its name in the Schema (Rule 15.1)
+const itemOf = (e, kind) => ({ id: e.name, kind, label: e.bru?.name || e.label || e.name, bru: e.bru?.name || e.name, tab: e.workspace, x: e.x, y: e.y, w: e.w, h: e.h });
 
 // The parts of the brewery this page joins: the vessels (guessed from the names and Scripts), the pumps and the valves.
 // conv = the converted config (lib/bruimport.js); scripts = [{ name, text }] (read only as clues, Fritz 2026-11-06)
@@ -49,6 +51,56 @@ export function findParts(conv, scripts = []) {
   const all = [...els.map(textOf), ...scripts.map(s => `${s.name} ${s.text}`)].join('\n');
   const vessels = VESSEL_KINDS.filter(k => k.re.test(all)).map(k => ({ key: k.key, name: k.name, side: k.side }));
   return { vessels, pumps, valves };
+}
+// ---- The Vessels page (OakBarn Brewery, 2026-11-08): each vessel found, with what the import could tell about it, from the names
+// of its items and the Scripts: its heaters, its probe (a thermowell with a probe), a Tangential inlet (or a whirlpool), a Steam
+// Slayer, a Sparge Arm, a HERMS Coil. Manual valves are never in BruControl, so they are asked: None, Manual Ball Valve or Manual
+// Butterfly Valve, None to start. Every found answer is a guess the brewer can change.
+export const MANUAL_VALVES = [['none', 'None'], ['ball', 'Manual Ball Valve'], ['butterfly', 'Manual Butterfly Valve']];
+export const VESSEL_PARTS = [['tangential', 'Tangential Inlet', /tangent|whirl ?pool/i], ['steamSlayer', 'Steam Slayer', /steam ?slayer/i],
+  ['spargeArm', 'Sparge Arm', /sparge/i], ['herms', 'HERMS Coil', /herms/i]];
+const HEAT_TYPES = new Set(['hysteresis', 'pid', 'dutyCycle', 'deadband']);
+// every BruControl probe found (a temperature item, or an analog input named like a probe), for the Thermowell dropdown
+const isProbe = e => e.type === 'temperature' || (e.type === 'analogIn' && /temp|probe|rtd|ntc|pt ?100/i.test(textOf(e)));
+export function findProbes(conv) {
+  return (conv?.elements ?? []).filter(isProbe).map(e => ({ id: e.name, label: e.bru?.name || e.label || e.name }));
+}
+// every BruControl heating element found (a PID, Hysteresis, Duty Cycle or Deadband, or a Heating Element), for the Heater dropdown
+export function findHeaters(conv) {
+  return (conv?.elements ?? []).filter(e => e.subtype === 'element' || HEAT_TYPES.has(e.type)).map(e => ({ id: e.name, label: e.bru?.name || e.label || e.name }));
+}
+export function findVesselDetails(conv, scripts = [], vessels = []) {
+  const els = conv?.elements ?? [];
+  const out = {};
+  for (const v of vessels) {
+    const re = VESSEL_KINDS.find(k => k.key === v.key)?.re ?? word(v.name.replace(/[^\w ]/g, ''));
+    const mine = els.filter(e => re.test(textOf(e)));
+    const lines = [...mine.map(textOf), ...scripts.flatMap(s => `${s.name}\n${s.text}`.split(/\r?\n/)).filter(l => re.test(l))].join('\n');
+    const lab = e => e.bru?.name || e.label || e.name;      // the BruControl name during the interview
+    const heaters = mine.filter(e => e.subtype === 'element' || HEAT_TYPES.has(e.type)).map(e => ({ id: e.name, label: lab(e) }));
+    const probe = mine.find(e => e.type === 'temperature') ?? mine.find(isProbe);
+    // Motorized Ball Valve (OakBarn Brewery, 2026-11-08): picked from every motorized valve found; the guess is the vessel's own valve
+    const valve = mine.find(e => VALVE.test(textOf(e)) && !NOT_VALVE.test(textOf(e)) && VALVE_TYPES.has(e.type) && !e.integratedIn);
+    const d = { heaters, probe: probe ? { id: probe.name, label: lab(probe) } : null, manualValve: 'none', motorValve: valve?.name ?? '',
+      heater: heaters[0] ?? null,
+      found: { ...(valve ? { motorValve: true } : {}), ...(probe ? { probe: true } : {}), ...(heaters.length ? { heater: true } : {}) } };
+    for (const [k, , rx] of VESSEL_PARTS) { d[k] = rx.test(lines) ? 'yes' : 'no'; if (d[k] === 'yes') d.found[k] = true; }
+    // Sparge Arm and Steam Slayer are one answer, where it sits (OakBarn Brewery, 2026-11-08): None, Upper Left or Upper Right; a found one
+    // starts at Upper Right (change it when it is on the left)
+    d.sparge = d.spargeArm === 'yes' || d.steamSlayer === 'yes' ? 'right' : 'none';
+    if (d.sparge !== 'none') d.found.sparge = true;
+    delete d.spargeArm; delete d.steamSlayer; delete d.found.spargeArm; delete d.found.steamSlayer;
+    // HERMS Coil is a tick box that starts unticked (OakBarn Brewery, 2026-11-08); a Script that mentions one only says so
+    if (d.herms === 'yes') d.found.herms = true;
+    d.herms = 'no';
+    // Outlet (OakBarn Brewery, 2026-11-08): None, Center Low or Bottom Drain; a Hot Side vessel starts at Bottom Drain, the opening the
+    // first guesses on Connect your brewery leave from
+    d.outlet = v.side === 'cold' ? 'none' : 'bottom';
+    // a whirlpool pump puts its wort back into the Boil Kettle through a tangential inlet
+    if (v.key === 'BK' && d.tangential === 'no' && els.some(e => /whirl ?pool/i.test(textOf(e)))) { d.tangential = 'yes'; d.found.tangential = true; }
+    out[v.key] = d;
+  }
+  return out;
 }
 // which vessel an item belongs to, by its name (M_HLT Pump -> HLT), or ''
 export function vesselOf(item, vessels) {

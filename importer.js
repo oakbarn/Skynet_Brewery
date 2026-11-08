@@ -11,7 +11,7 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme, readClues, dropEmptyInterfaces, dropEmptyTabs } from './lib/importer.js';
-import { findParts, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
+import { findParts, findVesselDetails, findProbes, findHeaters, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
 import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
@@ -76,12 +76,21 @@ function pickFolder(start) {
 
 // The brewer's Connect your brewery answers, checked against the parts this import found: only known vessels, pumps and valves,
 // only the known end kinds; anything else is dropped (a missing answer leaves the item loose, never a wrong pipe)
+// the Vessels page answers (OakBarn Brewery, 2026-11-08): yes or no for each part, a manual valve kind, the heaters and probe found
+function vesselDetails(d) {
+  const yn = x => (x === 'yes' ? 'yes' : 'no'), id = x => (x && typeof x.id === 'string' ? { id: x.id.slice(0, 120), label: String(x.label ?? x.id).slice(0, 80) } : null);
+  return { tangential: yn(d.tangential), outlet: ['low', 'bottom'].includes(d.outlet) ? d.outlet : 'none', sparge: ['left', 'right'].includes(d.sparge) ? d.sparge : 'none', herms: yn(d.herms),
+    manualValve: ['ball', 'butterfly'].includes(d.manualValve) ? d.manualValve : 'none',
+    motorValve: typeof d.motorValve === 'string' ? d.motorValve.slice(0, 120) : '',
+    heaters: (Array.isArray(d.heaters) ? d.heaters : []).map(id).filter(Boolean).slice(0, 8), heater: id(d.heater), probe: id(d.probe) };
+}
 function connectAnswers(sent, found) {
   const parts = found?.parts ?? { vessels: [], pumps: [], valves: [] };
   if (!sent || typeof sent !== 'object') return { parts, chains: found?.chains ?? [], fermenters: found?.fermenters ?? [], places: {} };
   const vessels = Array.isArray(sent.vessels) ? sent.vessels.filter(v => v && /^[\w ~#-]{1,40}$/.test(v.key) && typeof v.name === 'string')
     .map(v => ({ key: v.key, name: v.name.slice(0, 40), side: v.side === 'cold' ? 'cold' : 'hot',
-      ...(typeof v.template === 'string' && /^[\w-]{1,80}$/.test(v.template) ? { template: v.template } : {}) })) : parts.vessels;
+      ...(typeof v.template === 'string' && /^[\w-]{1,80}$/.test(v.template) ? { template: v.template } : {}),
+      ...(v.details && typeof v.details === 'object' ? { details: vesselDetails(v.details) } : {}) })) : parts.vessels;
   const p2 = { ...parts, vessels };
   const ids = new Set([...parts.pumps, ...parts.valves].map(i => i.id)), keys = new Set(vessels.map(v => v.key)), ats = new Set(OPENINGS.map(([k]) => k));
   const end = e => {
@@ -181,10 +190,12 @@ async function api(req, res, p, q) {
     // Connect your brewery (Fritz, 2026-11-07): the parts, and the first guesses from the names, the Scripts and the pictures
     const clues = readClues(fs.readFileSync(copy, 'utf8'));
     const parts = findParts(r.conv, clues.scripts);
+    const details = findVesselDetails(r.conv, clues.scripts, parts.vessels);
+    for (const v of parts.vessels) v.details = details[v.key];
     const fermenters = guessFermenters(parts, r.conv, clues.scripts);
     const pics = Object.fromEntries(Object.entries(clues.backgrounds).filter(([, b]) => { try { return fs.statSync(b.path).isFile(); } catch { return false; } }));
     const chains = guessChains(parts, { backgrounds: pics, fermenters });
-    const connect = { parts, fermenters, chains, pictures: Object.fromEntries(Object.entries(pics).map(([t, b]) => [t, { w: b.w, h: b.h }])),
+    const connect = { parts, probes: findProbes(r.conv), heaters: findHeaters(r.conv), fermenters, chains, pictures: Object.fromEntries(Object.entries(pics).map(([t, b]) => [t, { w: b.w, h: b.h }])),
       tabs: (r.conv.workspaces ?? []).map(w => ({ name: w.name, width: w.width, height: w.height })), openings: OPENINGS, cooling: COOLING, heating: HEATING, aiSites: AI_SITES };
     converted = { file, copy, ...r, clues: { ...clues, backgrounds: pics }, connect };
     return json(res, 200, { copy, ...r.report, warnings: r.conv.warnings, connect });
