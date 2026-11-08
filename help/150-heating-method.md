@@ -43,7 +43,8 @@ How the element is wired decides which methods make sense (the hover help on the
 ## Its main method and the other methods allowed
 
 When you build it (and later in its Properties), pick its **main heating method**, the one it starts with. Then, under **Other
-methods allowed**, tick each other method it may use. **Only the main method and the ticked ones can be used**: the pop-up, the
+methods allowed**, tick each other method it may use. **On/Off** (full power) is always allowed and always has its spot, so it
+has no switch there. **Only the main method and the ticked ones can be used**: the pop-up, the
 spots, Method Clones and Processes offer only those, and a Process asking for another one stops with a plain message.
 
 An Element **built into a Vessel Device or RIMS tube** works the same way: open its Properties (double-click it, or its ⚙) for

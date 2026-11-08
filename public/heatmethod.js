@@ -44,7 +44,9 @@ export const methodWords = () => HEAT_METHODS.map(m => m[1]).join(', ');
 // Only the methods its Build allows (Fritz, 2026-11-07: "we ask the primary Control Method, and then have check boxes of other
 // available Methods. Only Checked Methods are allowed. If a Method is Checked, it needs a Hot Spot or Icon on the Screen Display of
 // the device to switch between methods"): its starting method (heatMethod) and every method ticked in its Build (methodSpot_<key>).
-export const allowedMethods = el => isHeatElem(el) ? HEAT_KEYS.filter(k => k === startMethod(el) || el['methodSpot_' + k]) : [];
+// On/Off (full power) is always allowed and always has its spot: it is not a choice (Fritz, 2026-11-08: "It should not be a choice.
+// Always displayed").
+export const allowedMethods = el => isHeatElem(el) ? HEAT_KEYS.filter(k => k === 'onoff' || k === startMethod(el) || el['methodSpot_' + k]) : [];
 export const allowedWords = el => allowedMethods(el).map(heatMethodWord).join(', ');
 // Returns the words .method takes, or null for a Device with only one way of control (one method allowed).
 export const controlMethods = el => { const l = allowedMethods(el); return l.length > 1 ? l.map(heatMethodWord) : null; };
