@@ -23,6 +23,14 @@ export const NEEDS_PROBE = ['hysteresis', 'pid', 'deadband', 'precise'];
 export const PERCENT_METHODS = ['pid', 'deadband', 'precise'];
 
 export const isHeatElem = el => el?.type === 'digitalOut' && el.subtype === 'element';
+// The Cool / Warm Pump (OakBarn Brewery, 2026-11-08, Rule 6.21): a pump that a temperature switches (a glycol pump that cools a
+// fermenter, or a pump that brings warm water) is ONE Device on its port too (One Port, One Device), a Pump with a Method field,
+// Type ID CPMP (MB_D5_CPMP_Cool~Pump_FR). Its methods are a pump's own: On/Off, or Hysteresis that cools (- On offset) or warms
+// (+ On offset) to a Target read by its Probe. The same .method, Target and spots as a Heating Element, so a Process reads the same.
+export const isCoolPump = el => el?.type === 'digitalOut' && el.subtype === 'pump' && (!!el.heatMethod || el.typeCode === 'CPMP');
+export const PUMP_METHOD_KEYS = ['onoff', 'hysteresis'];
+// a Device whose control is picked by .method: the Heating Element and the Cool / Warm Pump
+export const isMethodDevice = el => isHeatElem(el) || isCoolPump(el);
 
 // "PID", "pid", "Duty Cycle", "dutycycle", "DutyC", "HYS", "On/Off", "on off", "DO" ... -> the key (null when it is none of them)
 const squash = s => String(s ?? '').toLowerCase().replace(/[\s_/\-]+/g, '');
@@ -46,7 +54,7 @@ export const methodWords = () => HEAT_METHODS.map(m => m[1]).join(', ');
 // the device to switch between methods"): its starting method (heatMethod) and every method ticked in its Build (methodSpot_<key>).
 // On/Off (full power) is always allowed and always has its spot: it is not a choice (Fritz, 2026-11-08: "It should not be a choice.
 // Always displayed").
-export const allowedMethods = el => isHeatElem(el) ? HEAT_KEYS.filter(k => k === 'onoff' || k === startMethod(el) || el['methodSpot_' + k]) : [];
+export const allowedMethods = el => isMethodDevice(el) ? (isCoolPump(el) ? PUMP_METHOD_KEYS : HEAT_KEYS).filter(k => k === 'onoff' || k === startMethod(el) || el['methodSpot_' + k]) : [];
 export const allowedWords = el => allowedMethods(el).map(heatMethodWord).join(', ');
 // Returns the words .method takes, or null for a Device with only one way of control (one method allowed).
 export const controlMethods = el => { const l = allowedMethods(el); return l.length > 1 ? l.map(heatMethodWord) : null; };

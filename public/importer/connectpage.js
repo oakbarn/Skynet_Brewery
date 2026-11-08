@@ -13,7 +13,7 @@ export function connectState() {
   return S ? { vessels: S.parts.vessels, chains: S.chains, fermenters: S.fermenters, places: S.places } : null;
 }
 
-export function startConnect(data, { toast } = {}) {
+export function startConnect(data, { toast, saved = null } = {}) {
   say = toast || say;
   if (!data) return;
   // a new conversion starts again from its guesses; Back and Next keep the brewer's answers
@@ -24,6 +24,15 @@ export function startConnect(data, { toast } = {}) {
     S.vv = data.vv; syncFerm();
   }
   if (!S || S.from !== data) S = { vv: data.vv, from: data, parts: structuredClone(data.parts), chains: structuredClone(data.chains), fermenters: structuredClone(data.fermenters), places: {}, pictures: data.pictures ?? {}, tabs: data.tabs ?? [] };
+  // the answers kept from last time (OakBarn Brewery, 2026-11-08: come back later): the chains, fermenters, places and templates picked
+  if (saved && S.from === data && !S.restored) {
+    S.restored = true;
+    if (Array.isArray(saved.chains)) S.chains = structuredClone(saved.chains);
+    if (Array.isArray(saved.fermenters)) S.fermenters = structuredClone(saved.fermenters);
+    if (saved.places && typeof saved.places === 'object') S.places = structuredClone(saved.places);
+    const tpl = new Map((saved.vessels ?? []).map(v => [v.key, v.template]));
+    for (const v of S.parts.vessels) if (tpl.get(v.key)) v.template = tpl.get(v.key);
+  }
   wire();
   pictureChoices();
   renderAll();
