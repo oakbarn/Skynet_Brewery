@@ -23,6 +23,7 @@ import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS,
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowcolor.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
+import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -280,7 +281,7 @@ function drawWs() {
   for (const g of L().graphics.filter(g => gTab(g) === w.name && !['pipe', 'ip', 'vessel', 'clone'].includes(g.kind))) ws.append(buildGfx(g));     // a Process can move a Text Widget to another Tab (.tab)
   if (!editing) { mvJoinEnds(L(), w.name); centerOnPipes(L(), w.name); }      // valves and pumps on their pipes (Rule 5.23); Edit layout does it once when it opens
   const clones = L().graphics.filter(g => g.workspace === w.name && isClone(g)).map(cloneEl).filter(Boolean);
-  for (const e of [...L().elements.filter(e => e.workspace === w.name && !isMfPart(e)), ...clones]) ws.append(buildEl(e));     // a Valve Tee's valves are drawn on it (Rule 5.35)
+  for (const e of [...L().elements.filter(e => e.workspace === w.name && !isMfPart(e) && !isAvPart(e)), ...clones]) ws.append(buildEl(e));     // a Valve Tee's valves are drawn on it (Rule 5.35)
   for (const g of L().graphics.filter(g => g.workspace === w.name && isEqFit(g))) ws.append(buildVessel(g));
   if (editing) for (const g of draft.graphics.filter(g => g.workspace === w.name && g.autoFit)) autoFit(g);
   const capped = cappedIps();          // an opening closed by an End Cap shows the cap, not its IP; a plugged Vessel Device IP is hidden
@@ -357,7 +358,7 @@ const EQ = {
       // number is the port center's height above the bottom ('Fat ...' = the Brew_Vessel_Big_Mac_Widget, which has its own box)
       outlet: pt('Outlet', [['Center Bottom', 0.5, 1], ['Bottom Drain', 0.9, 0.92], ['Front Low', 0.5, 0.86], ['Front Bottom Center', 0.467, 0.879], ['Center Bottom 1 in', 0.492, 0.934], ['Fat Center Bottom 1 in', 0.494, 0.946], ['VW Center Bottom', 0.5, 0.931]], { on: true }),
       // a second drain, for example above the element so it always stays under water (Fritz's Big Fatty, 2026-10-22)
-      outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92], ['VW Right Middle', 0.923, 0.641]]),
+      outlet2: pt('Second Outlet', [['Front Middle', 0.5, 0.75], ['Front Low', 0.5, 0.86], ['Bottom Drain', 0.9, 0.92], ['VW Right Middle', 0.923, 0.641], ['Brewzilla Pump Out', 0.045, 0.523]]),
       // the Vessel Widget's ('VW ...' positions, Skynet_Vessel_Widget.svg, 260 x 320; Fritz, 2026-11-05): a return or fill pipe in at the top
       topInlet: pt('Top Inlet', [['VW Left High', 0.077, 0.094], ['Left High', 0, 0.15], ['Right High', 1, 0.15]]),
       tangential: pt('Tangential', [['Bottom Left', 0, 0.8], ['Bottom Right', 1, 0.8], ['Center', 0.5, 0.8], ['Back', 0.65, 0.75], ['Left 4 in', 0.18, 0.816], ['Fat Left 4 in', 0.103, 0.851], ['VW Left Low', 0.077, 0.625]]),
@@ -901,6 +902,30 @@ function applyMf(g, w, tab, label, loose = false) {
   }
 }
 
+// ---- Hand-set appliances (Fritz, 2026-11-07, Rule 5.39, Help 158, public/appliance.js): the DigiBoil and the 65 L Brewzilla heat
+// (and the Brewzilla pumps) by themselves; Skynet does not switch any of it. Each one comes with its parts built in
+// (integratedIn = the vessel, never un-bundled): its Controls, a Manual vessel Widget with its switches, its set point and its screen
+// (integratedAs 'av:controls'), and a Manual valve Device (Valve type Manual, no Port) for each valve: the Spigot on its outlet and, on
+// the Brewzilla, the valve on the out side of its pump (integratedAs 'av:spigot', 'av:pumpOut'). The valves are not drawn on their
+// own: they sit in the vessel's IP, which is shut while the valve is closed. A Process line DigiBoil_Controls.setpoint = 152, .heat = on,
+// open_valve DigiBoil_Spigot ... shows a pop-up and waits for Done.
+const isAvPart = e => String(e?.integratedAs || '').startsWith('av:') && e.integratedAs !== 'av:controls';      // a built-in valve (its Controls are drawn)
+const avOn = (v, port) => { const a = APPLIANCES[v?.appliance]; const k = a?.valves.find(x => x[2] === port)?.[0]; return k ? L().elements.find(e => e.integratedIn === v.id && e.integratedAs === 'av:' + k) : null; };
+const avParts = g => (draft || S.config).elements.filter(e => e.integratedIn === g.id && String(e.integratedAs || '').startsWith('av:'));
+function applianceParts(g, tab) {
+  const a = APPLIANCES[g.appliance]; if (!a || avParts(g).length) return;
+  const base = String(g.name || a.name).replace(/_Vessel(_\d+)?$/, '') || 'Appliance', label = g.label || a.name;
+  const free = n => { let x = n, i = 2; while ((draft.elements.some(e => e.name.toLowerCase() === x.toLowerCase()) || draft.graphics.some(q => (q.name || '').toLowerCase() === x.toLowerCase()))) x = `${n}_${i++}`; return x; };
+  const metric = (S.config.brewDefaults?.units || 'US') === 'Metric';
+  draft.elements.push({ name: free(`${base}_Controls`), type: 'manual', appliance: g.appliance, label, workspace: tab, integratedIn: g.id, integratedAs: 'av:controls',
+    x: Math.round(g.x || 0), y: Math.round((g.y || 0) + (g.h || 350) + 30), w: 220, h: a.switches.length > 2 ? 250 : 200, units: metric ? '°C' : '°F', volumeUnits: metric ? 'L' : 'gal', noPump: !a.switches.some(([k]) => k === 'pump'), setpoint: 0 });
+  for (const [k, words] of a.valves) {
+    const word = k === 'spigot' ? 'Spigot' : 'Pump_Out';
+    draft.elements.push({ name: free(`${base}_${word}`), type: 'digitalOut', subtype: 'valve', valveType: 'manual', label: `${label} ${words.replace(/ \(.*$/, '')}`, workspace: tab,
+      integratedIn: g.id, integratedAs: 'av:' + k, tap: 'toggle', x: Math.round(g.x || 0), y: Math.round(g.y || 0), w: 40, h: 40 });
+  }
+}
+
 // on / off pictures offered for Digital Outputs; users add their own (any picture path in the media folders)
 const ONOFF_GRAPHICS = [['LED green', 'Images/Skynet/Lights_LEDs/led_green.svg'], ['LED red', 'Images/Skynet/Lights_LEDs/led_red.svg'], ['LED off (grey)', 'Images/Skynet/Lights_LEDs/led_off.svg'],
   ['Lightning bolt on', 'Images/Skynet/Lights_LEDs/bolt_on.svg'], ['Lightning bolt off', 'Images/Skynet/Lights_LEDs/bolt_off.svg'],
@@ -1413,7 +1438,7 @@ function buildIp(g) {
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && !isVPart(e) && !isMfPart(e) && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
+const hasIps = e => e && !isVPart(e) && !isMfPart(e) && !isAvPart(e) && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
 // (a part built into a Vessel Device's IP has no IPs of its own: it sits in the vessel's IP, Rule 5.31 exception)
 // Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
 // "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
@@ -2514,6 +2539,7 @@ function heatDialog(t) {
 // Manual vessel widget (BrewZilla, DigiBoil and other appliances with their own controller): no board pin.
 // A script says what to set by hand (setpoint, heat, pump, timer, message) and waits for the brewer to confirm here.
 function fillManual(n, e, v) {
+  if (isAppliance(e.appliance)) return fillAppliance(n, e, v);
   const u = e.units || '°F', rows = n.querySelector('.mvRows'), pic = n.querySelector('.mvPic');
   const img = (v.heat ? (e.imageOn || e.image) : (e.imageOff || e.image)) || '';
   pic.style.backgroundImage = img ? `url("${media(img)}")` : '';
@@ -2528,7 +2554,45 @@ function fillManual(n, e, v) {
     ...(v.volume ? [row('Volume', `${fmtVal({ precision: 2 }, v.volume)} ${e.volumeUnits || 'gal'}`)] : []));
   n.classList.toggle('waiting', !!v.waiting);
 }
+// The Controls of a DigiBoil or 65 L Brewzilla (Fritz, 2026-11-07, Rule 5.39): each of its switches, its screen (set point, what it
+// reads, the Brewzilla's On/Off button and its ▶ Run spot) and its valves, the way they were last set by hand. A set point in °F shows
+// its °C too: the screen goes back to °C every time it is turned off.
+const avValves = e => { const g = L().graphics.find(x => x.id === e.integratedIn); return g ? (APPLIANCES[e.appliance]?.valves || []).map(([k, words]) => [L().elements.find(x => x.integratedIn === g.id && x.integratedAs === 'av:' + k), words]).filter(([x]) => x) : []; };
+function fillAppliance(n, e, v) {
+  const a = APPLIANCES[e.appliance], u = e.units || '°F', rows = n.querySelector('.mvRows'), pic = n.querySelector('.mvPic');
+  pic.classList.add('hidden');      // the vessel beside it is the picture
+  const row = (k, val, cls = '') => h('div', { class: 'mvRow ' + cls }, h('span', {}, k), h('b', {}, val));
+  const onOff = (k, run) => v[k] ? 'ON' : 'OFF';
+  rows.innerHTML = '';
+  rows.append(...((e.label || e.name) === a.name ? [] : [h('div', { class: 'mvRow mvHead' }, h('b', {}, a.name))]),
+    ...a.switches.map(([k, words]) => row(words.replace(/ switch$/, ''), onOff(k), v[k] ? (k === 'pump' ? 'run' : 'hot') : '')),
+    ...(a.screen.onOff ? [row('Screen', onOff('power'), v.power ? 'run' : '')] : []),
+    row('Set point', v.setpoint ? setpointWords(v.setpoint, u) : 'not set'),
+    ...(v.reading ? [row('Screen reads', `${fmtVal({ precision: 1 }, v.reading)} ${u}`)] : []),
+    ...avValves(e).map(([x, words]) => row(words.replace(/ \(.*$/, ''), isOn(x.name) ? 'OPEN' : 'CLOSED', isOn(x.name) ? 'run' : '')),
+    ...(a.screen.run ? [h('button', { type: 'button', class: 'mvRun' + (v.run ? ' on' : ''), title: `The Run spot on the ${a.name} screen: click when you have pressed Run on the real one (Rule 5.39)`,
+      onpointerdown: ev => ev.stopPropagation(), ondblclick: ev => ev.stopPropagation(),
+      onclick: ev => { ev.stopPropagation(); if (editing || !can('operator')) return; setProp(e.name, 'run', !v.run); } }, v.run ? '■ Running: press Run to stop' : '▶ Run')] : []));
+  n.classList.toggle('waiting', (S.valves || []).some(q => q.ask && q.process && q.label && q.label.includes(e.label || e.name)));
+}
+// a click on its Controls in run mode: say what you set by hand (Skynet can't see it)
+async function applianceDialog(t) {
+  const a = APPLIANCES[t.appliance], v = S.values[t.name] || {}, lbl = v.label ?? t.label ?? t.name, title = lbl === a.name ? lbl : `${lbl} (${a.name})`, u = t.units || '°F';
+  const r = await choose(title + ': what did you set by hand?', [
+    ...a.switches.map(([k, words]) => [`${words}: turned ${v[k] ? 'OFF' : 'ON'}`, 'sw:' + k]),
+    ...(a.screen.onOff ? [[`Screen On/Off button: turned ${v.power ? 'OFF' : 'ON'}`, 'sw:power']] : []),
+    ...(a.screen.run ? [[v.run ? 'Pressed Run to stop it' : 'Pressed Run', 'sw:run']] : []),
+    ...avValves(t).map(([x, words]) => [`${words.replace(/ \(.*$/, '')}: ${isOn(x.name) ? 'closed' : 'opened'}`, 'mv:' + x.name]),
+    [`Set point: changed (${u})`, 'setpoint'], ['Enter the temperature its screen shows', 'reading']]);
+  if (!r) return;
+  if (r.startsWith('sw:')) { const k = r.slice(3); return setProp(t.name, k, !v[k]); }
+  if (r.startsWith('mv:')) { const x = r.slice(3); return setProp(x, 'state', !isOn(x)); }
+  const x = parseFloat(prompt(r === 'setpoint' ? `New set point of the ${title} in ${u}${/c/i.test(u.replace(/[^A-Za-z]/g, '')) ? '' : ' (its screen may show °C: type the °F number here)'}:`
+    : `Temperature on the ${title} screen (${u}):`, '') || '');
+  if (Number.isFinite(x)) { await setProp(t.name, r, x); if (r === 'setpoint') toast(`${title}: set point ${setpointWords(x, u)}`); }
+}
 async function manualDialog(t) {
+  if (isAppliance(t.appliance)) return applianceDialog(t);
   const v = S.values[t.name] || {}, title = v.label ?? t.name;
   const r = await choose(v.waiting ? `${title}: ${v.message || 'confirm when done'}` : title,
     [...(v.waiting ? [['Done ✓', 'ok']] : []), ['Enter the temperature it shows', 'reading'], ['Enter the volume in it', 'volume']]);
@@ -2730,6 +2794,7 @@ function ipNode(id, ws) {
     const v = L().graphics.find(x => x.id === g.attachTo), c = eqClass(v)?.ports[g.port]?.circuit;
     if (isVDev(v)) { const r = vpFlow(v, g.port); if (r) return r; }       // a Vessel Device: its HERMS coil, or a part built into the IP
     if (isMf(v)) { const r = mfFlow(v, g.port); if (r) return r; }         // a Valve Tee or Supply Manifold: a closed valve shuts its IP (Rule 5.35)
+    if (isAppliance(v?.appliance)) { const av = avOn(v, g.port); if (av && !isOn(av.name)) return { closed: true }; }   // its Spigot or Pump out valve (Rule 5.39)
     if (isBfit(v) && bfitClosed(v)) return { closed: true };       // a closed valve in a Tab_Fitting
     if (c) return { key: `eq:${v.id}:${c}`, pass: true };
   }
@@ -5292,7 +5357,7 @@ async function saveBuildTemplate({ name, skynet }) {
       if (!on) throw new Error('A User Bundled vessel Template must be built on a Skynet Vessel Widget: Add equipment > Vessel > Widget, pick a Skynet Vessel Widget, build and Bundle it on the Build Tab, then save it here.');
       t.base = on;
     }
-    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'sizeMethod', 'diameter', 'vheight']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
+    for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'appliance', 'sizeMethod', 'diameter', 'vheight']) if (g[k] !== undefined && g[k] !== '') t[k] = clone(g[k]); else delete t[k];
     if (EQ[g.vesselType]?.ports.in2) t.liquidPorts = g.ports?.in2?.installed ? 4 : 2;
     for (const [k, p] of Object.entries(base.ports || {})) if (!g.ports?.[k]) t.ports[k] = p;     // ports the Tab item doesn't have stay as they were
     for (const [k, p] of Object.entries(g.ports || {})) {
@@ -11541,7 +11606,7 @@ function placeTabVessel(t, tab, name) {
   const C = vClassOf(t), n = draft.graphics.filter(x => eqClass(x) && x.workspace === tab).length;
   const g = { id: newId(), kind: 'vessel', vesselType: EQ[t.vesselType] ? t.vesselType : 'vessel', workspace: tab, x: 60 + (n % 5) * 280, y: 60 + Math.floor(n / 5) * 340, w: (t.size || C.size)[0], h: (t.size || C.size)[1],
     labelAlign: 'above', labelSize: 16, labelVisible: true, name, template: t.name, templateCls: t.cls, image: t.image || C.image, bundled: true, ports: {} };
-  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'vwidget', 'probeStyle', 'sizeMethod', 'diameter', 'vheight']) if (t[k] !== undefined) g[k] = clone(t[k]);
+  for (const k of ['vtype', 'otherType', 'units', 'volume', 'deadspace', 'extraTrub', 'maxVolume', 'minVolume', 'heatKind', 'otherHeat', 'std', 'notes', 'integrated', 'appliance', 'vwidget', 'probeStyle', 'sizeMethod', 'diameter', 'vheight']) if (t[k] !== undefined) g[k] = clone(t[k]);
   if (t.vwidget && g.volume === undefined) g.volume = g.units === 'Metric' ? 37.9 : 10;      // 10 gallons to start (Rule 5.32)
   if (t.vwidget) [g.w, g.h] = vBox(g, vScaleFor(draft.workspaces.find(w => w.name === tab)?.from || tab));      // its size from its Gallons
   for (const [k, d] of Object.entries(C.ports)) {
@@ -11558,6 +11623,7 @@ function placeTabVessel(t, tab, name) {
     placeTabFitting({ ...ft, std: ft.std || t.std }, tab, q.bundleName && !taken().includes(q.bundleName) ? q.bundleName : bundleName(ft.name, t.name, taken()), { vessel: g, port: k });
   }
   placeUnitParts(g);
+  if (isAppliance(t.appliance)) applianceParts(g, tab);     // a DigiBoil or Brewzilla: its switches, screen and valves (Rule 5.39)
   return g;
 }
 // a Tab_Fitting, alone on a Tab or joined to a port of a Tab_Vessel (it then runs out from that port, away from the vessel)
