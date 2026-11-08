@@ -109,8 +109,8 @@ Then you confirm what comes in, in small steps:
    parts, a space in the Label becomes `~` (Rule 3.1), for example `MP_45_DO_M~HLT~Pump_MD`; a name that would be the same as another
    gets `_2` before its Tab ID, so every name is unique. The Importer chose the IDs for you; you may change them (up to 4 letters,
    **2 are preferred**, each one different). **Accept ▶** uses them in every name and goes on.
-3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found (Globals,
-   Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
+3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found
+   (Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
 4. **The items on each Interface.** One table per Interface (board): every item wired to one of its ports, by port, with its
    BruControl name, its **Display Name** (with no Display Name, the BruControl name is shown greyed), a **tick box** and a **Label** box,
@@ -154,17 +154,16 @@ Then you confirm what comes in, in small steps:
   build your own User Theme. A new Skynet Theme for a Tab (old Workspace) can be chosen at any time;
 - your **Tabs** (BruControl workspaces), each with its Tab ID. Tab backgrounds are left out for now. Tabs with items **will**
   be imported. A Tab with no items has a box: it **must** be ticked to be imported; left unticked, it is **not** imported, and
-  neither are its Placeholders. A Tab with no items and no Placeholders is a good one to leave out. When every Placeholder on a
-  Tab is a BruControl Global, the page asks whether those Globals are used to import a Beer.xml recipe (for example with
-  Node-RED): if Yes, leave it unticked, since Skynet imports recipes without Globals; if they are used for something else (for
-  example sending readings to the Database), tick it and they are dealt with when the Globals are imported;
+  neither are its Placeholders. A Tab with no items and no Placeholders is a good one to leave out;
+- your **Globals** are **only listed** for now, on the summary (each Global with its Tab). They are not imported, they get no
+  Placeholder, and nothing is asked about them: Globals will be dealt with in a later step;
 - your **pumps** become Skynet **Pump Devices** with the Skynet pump drawing (the Pump Standard), so any Skynet pump can be
   swapped in later; your **heating controls** keep their settings (Target, Kp, Ki, Kd ...) and their temperature probe, so a
   click on that probe opens its SetPoint; anything BruControl marked as not user controlled does nothing when clicked;
 - your **Charts**: each BruControl Chart becomes a Skynet **Chart Widget** ([Help 159](159-chart-widget)) with the same span,
   refresh, grid lines, colors and channels, and each item it draws is sent to the database so its line fills;
 - the **items on a board port** (BruControl elements that have an Interface and a Port). For now only these come in;
-- a **Placeholder** for every other item on a Tab (Timers, Alarms, switches, Globals, script pictures ...). It is a grey box
+- a **Placeholder** for every other item on a Tab (Timers, Alarms, switches, script pictures ...). It is a grey box
   with ⬚ and the BruControl name, at the same place and size as in BruControl, so you can see what is still to come. A hidden
   item's Placeholder stays hidden.
 

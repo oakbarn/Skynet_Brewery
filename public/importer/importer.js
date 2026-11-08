@@ -234,13 +234,8 @@ function tabsHtml(r) {
     <table class="tabTable"><tr><th>Tab</th><th>ID</th><th>Items</th>${kinds.map(k => `<th title="${esc(k)}">${esc(kindName(k))}</th>`).join('')}<th>Import Tab</th></tr>
     ${r.tabs.map(t => row([esc(t.name), esc(t.id), t.items, ...kinds.map(k => t.kinds?.[k] ?? 0),
         `<input type="checkbox" class="keepTab" data-name="${esc(t.name)}"${keep.has(t.name) ? ' checked' : ''} title="${t.always ? 'Ticked: this Tab is imported with its items and Placeholders. Untick it to leave the whole Tab out.' : 'This Tab has no items. Tick it to import it with its Placeholders; unticked, it is not imported.'}" aria-label="Import the Tab ${esc(t.name)}">`],
-        ['', '', 'n', ...kinds.map(() => 'n'), 'c'])
-      + (t.globalsOnly && !t.always ? `<tr class="ask"><td colspan="${kinds.length + 4}"><p class="small">Every Placeholder on <b>${esc(t.name)}</b> is a BruControl Global.
-            <b>Are these Globals used to import a Beer.xml recipe (for example with Node-RED)?</b> Skynet imports a Beer.xml or BeerSmith file
-            with no Globals, so then leave this Tab unticked: the Tab and those Globals are not imported. If they are used for something else
-            (for example sending readings to the Database), tick it: they are imported and dealt with when the Globals are imported.</p>
-            <button type="button" class="askNo" data-name="${esc(t.name)}">Yes, a recipe import: leave it out</button>
-            <button type="button" class="askYes" data-name="${esc(t.name)}">No, something else: import it</button></td></tr>` : '')).join('')}</table></div>`;
+        ['', '', 'n', ...kinds.map(() => 'n'), 'c'])).join('')}</table>
+    ${r.globals?.length ? `<p class="small">Your <b>${r.globals.length}</b> BruControl Globals are not on this list: they are only listed (on the summary), and dealt with in a later step.</p>` : ''}</div>`;
 }
 // The Vessels step (OakBarn Brewery, 2026-11-08): each vessel found, with what the import could tell about it in columns, and a Manual
 // Valves column the import cannot know (None to start). The answers go with the vessel into the Schema file.
@@ -519,6 +514,9 @@ function sub5(which) {
         ${r.interfaces.some(d => !d.items) ? '<p class="small">An Interface with no items (0) is <b>not</b> imported. Tick its box and it <b>will</b> be imported.</p>' : ''}</div>
       <div><h3>Placeholders</h3><table><tr><th>BruControl kind</th><th>How many</th></tr>
         ${Object.entries(r.byKind).map(([k, n]) => row([esc(k), n], ['', 'n'])).join('') || row(['(none)', ''])}</table></div></div>
+      ${r.globals?.length ? `<div class="card"><h3>Your BruControl Globals (${r.globals.length}): listed only</h3><p class="small">Globals will be dealt
+        with in a later step. For now they are only listed here: they are not imported and nothing is asked about them.</p>
+        <details><summary>Show the list</summary><table><tr><th>Global</th><th>Tab</th></tr>${r.globals.map(g => row([esc(g.name), esc(g.tab)])).join('')}</table></details></div>` : ''}
       ${r.look ? `<p>Look (theme): <b>Skynet ${esc(r.look.name)}</b> was chosen as it most closely matched ${r.look.bru ? `the <b>${esc(r.look.bru)}</b> theme set in BruControl` : 'BruControl\'s own Office 2019 theme (your BruControl theme was not found)'}.
         BruControl themes do not work in browsers, so Skynet has its own small set of Skynet Themes. You can also build your own User Theme
         in Skynet if none of ours do what you want. A new Skynet Theme for a Tab (old Workspace) can be chosen at any time, and that screen
@@ -535,13 +533,6 @@ function sub5(which) {
   }
 }
 for (const id of ['#next4', '#next4a']) $(id).onclick = () => convert();
-// the Globals-only Tab question (Fritz, 2026-11-08): Yes (a recipe import) leaves it unticked, No ticks it
-$('#convBody').addEventListener('click', e => {
-  const b = e.target.closest('.askYes, .askNo'); if (!b) return;
-  const box = [...document.querySelectorAll('#convBody .keepTab')].find(c => c.dataset.name === b.dataset.name);
-  if (box) box.checked = b.classList.contains('askYes');
-  for (const x of b.parentElement.querySelectorAll('button')) x.classList.toggle('primary', x === b);
-});
 for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'parts' ? (state.partPage > 0 ? (state.partPage--, sub5('parts')) : sub5('items'))
   : state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? (state.partPage = PART_PAGES.length - 1, sub5('parts')) : state.sub5 === 'items' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
