@@ -1,0 +1,24 @@
+{
+  "vesselType": "vessel",
+  "vtype": "Brew Kettle",
+  "image": "Images/Skynet/Vessels/Vessel_DigiBoil.svg",
+  "heatKind": "other",
+  "otherHeat": "Its own heater and controller (set by hand)",
+  "appliance": "digiboil",
+  "std": {
+    "type": "BSPMRc",
+    "size": 0.5
+  },
+  "size": [
+    180,
+    346
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom",
+      "label": "BSP spigot"
+    }
+  },
+  "notes": "A DigiBoil (Fritz, 2026-11-07, Rule 5.39): it heats itself and Skynet does not switch any of it. Built in: its Power switch and Heater switch, its temperature set point and screen (a Manual vessel Widget, DigiBoil_Controls), and the small silver spigot with BSP threads on its outlet, a Manual valve (DigiBoil_Spigot). A Process sets them and a pop-up asks you to do it by hand; its screen goes back to °C every time it is turned off, so a set point in °F is given in °C too."
+}

@@ -37,6 +37,8 @@ These have the element built in, so they only come as electric Templates. Their 
 |---|---|
 | **Kettle_Brewzilla_Electric** | Tall, recirculation arm up the left side, tap at the bottom middle |
 | **Kettle_DigiBoil_Electric** | Tall with a domed lid, tap at the bottom middle |
+| **Kettle_DigiBoil** | A DigiBoil set by hand: Power and Heater switches, set point and screen, BSP Spigot. See [DigiBoil and Brewzilla](158-digiboil-and-brewzilla) |
+| **Kettle_Brewzilla_65L** | A 65 L Brewzilla set by hand: Pump and 3 Heater switches, set point and screen with On/Off and Run, BSP Spigot and Pump out valve. See [DigiBoil and Brewzilla](158-digiboil-and-brewzilla) |
 | **Kettle_Grainfather_Electric** | Tall on a black base, recirculation arm up the right side and over the lid, outlet at the bottom middle |
 | **Kettle_Foundry_Electric** | Wide and short with a black lid, drain valve on the front near the bottom |
 

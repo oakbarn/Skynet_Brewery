@@ -22,11 +22,11 @@ Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properti
 ### Device names
 `InterfaceID_Port_DeviceTypeID_Label_TabID` (one underscore between the parts, Fritz 2026-11-05; names made before keep their `__` before the Tab ID)
 
-Example: `MB_25_eVlv_Fly~Sparge_In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
+Example: `MB_25_eVlv_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
 
 - **Interface ID:** 1 to 4 letters, unique (for example MB). An Admin can change it.
 - **Tab ID:** exactly 2 letters, unique (for example SP). Two underscores go before it.
-- **Label in the name:** spaces become `_`; the characters `< > : " / \ | ? * . ,` become `~`; emoji and control characters are dropped. The Label itself stays as you typed it.
+- **Label in the name:** spaces become `~` (2026-11-07, so `_` only separates the parts); the characters `< > : " / \ | ? * . ,` become `~`; emoji and control characters are dropped. The Label itself stays as you typed it.
 - **Port in the name:** analog pins use BruControl numbers (A0 = 54 ... A15 = 69, so A5 = 59). A OneWire probe uses its virtual port (700+). An ADS1115 channel is ADS0 to ADS3.
 - **Unique:** a name already in use gets `_2`, `_3` ... after the Label. No spaces in Device names.
 - Existing Devices are never renamed by themselves (that would break Processes).

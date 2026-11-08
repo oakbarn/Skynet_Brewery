@@ -58,7 +58,7 @@ a **Vessel Device** when it is built in. **One click** on one switches the Eleme
 **yellow**. While it is ON, a dark **Turn Off** button shows at the end of the row: one click turns it Off.
 **One click on the Element's picture** on its Vessel Device turns it **On or Off** at once, in the method it is in, like a Pump.
 A click on its **box** (the tile with its reading) opens its pop-up, with **ON**, **OFF** and its method.
-When the Element is **Off**, a click on a method spot switches it and opens the pop-up: click **Set + ON** to start it.
+When the Element is **Off**, a click on a method spot only switches its method; it stays Off until you turn it On.
 Several Elements can be On at the same time (for example on different AC circuits). With only the main method, no buttons show.
 
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one

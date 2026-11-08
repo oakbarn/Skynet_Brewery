@@ -13,7 +13,7 @@ Open the **Schema** dropdown, pick **Add new Schema**, give it a name, and set *
 | **2 Vessel + 1 Pump** | A kettle that heats the strike and sparge water and then boils, and a mash tun. One pump does every job. | the 2 Vessel ones |
 | **2 Vessel + 2 Pumps** | The same, with a mash pump and a kettle pump. | the 2 Vessel ones |
 | **3 Vessel** | Hot Liquor Tank (with a HERMS coil), mash tun and brew kettle, a mash pump and a kettle pump. The last hot side Template. | the Skynet ones |
-| **OakBarn Brewery** | Every vessel and pump of the OakBarn Brewery: Radiator, Big Mac, Mash Tun, Brew Kettle, Little Mac, Brewzilla, DigiBoil, and the Red, Yellow, Green, Blue and White pumps. Take out what you do not have. | the Skynet ones |
+| **OakBarn Brewery** | Every vessel and pump of the OakBarn Brewery: Radiator, Big Mac, Mash Tun, Brew Kettle, Little Mac, the 65 L Brewzilla and the DigiBoil (both [set by hand](158-digiboil-and-brewzilla)), and the Red, Yellow, Green, Blue and White pumps. Take out what you do not have. | the Skynet ones |
 | **Fermentor** | On its own: only a Fermentor Tab, and a Brew Process that only ferments. | Ferment |
 
 Then pick the **Interface** (your board). Each Device takes the next free Port on it. The new Schema starts in **Simulator Mode**: nothing real is switched until you press **🔌 Real**.
