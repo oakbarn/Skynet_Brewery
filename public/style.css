@@ -438,7 +438,8 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 #ws .gfx.vessel.heating .twell.elmark { background: #ff7a00; box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 0 12px 4px #ff7a00; }
 /* the Vessel Widget class (Rule 5.31): its Probe and Element pictures, and in Edit layout a faint mark for each spot not Placed */
 #ws .gfx.vessel .vwPart { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
-#ws .gfx.vessel .vwPart.vpPart { pointer-events: auto; cursor: pointer; }      /* a Vessel Device's part: double-click for its Properties */
+#ws .gfx.vessel .vwPart.vpPart { pointer-events: auto; cursor: pointer; }
+#ws .gfx.vessel .vwPart.vwProbe:not(.vwOff) { pointer-events: auto; cursor: pointer; }      /* a Vessel's own Probe: one click opens its SetPoint (Rule 2.43) */      /* a Vessel Device's part: double-click for its Properties */
 /* the Properties hotspot (Rule 5.38): one click opens the Vessel Device's, or its built in Heating Element's, Properties */
 #ws .propsHot { position: absolute; width: 18px; height: 18px; font-size: 13px; line-height: 18px; text-align: center; border-radius: 50%; background: rgba(255,255,255,.9); color: #333; box-shadow: 0 0 0 1px rgba(0,0,0,.35); cursor: pointer; pointer-events: auto; z-index: 6; user-select: none; }
 #ws .propsHot:hover { background: #ffd54a; }
