@@ -34,6 +34,7 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.re
 const state = { start: null, folder: '', files: [], sel: '' };
 
 function show(n) {
+  document.body.classList.remove('wideStep');
   for (const s of document.querySelectorAll('.step')) s.classList.toggle('hidden', s.id !== 'step' + n);
   for (const li of document.querySelectorAll('#steps li')) {
     const k = Number(li.dataset.step);
@@ -112,6 +113,14 @@ async function next() {
     await api('POST', '/api/choose', { file: state.sel });
     state.converted = false;
     $('#chosen').textContent = state.files.find(f => f.path === state.sel)?.name ?? state.sel;
+    // Units (OakBarn Brewery, 2026-11-08): asked at the start; when BruControl's probes show what it used, the question confirms it
+    $('#unitsNote').textContent = '';
+    try {
+      const u = (await api('GET', '/api/peek?file=' + encodeURIComponent(state.sel))).units ?? {};
+      if (u.guess) document.querySelector(`input[name=units][value=${u.guess}]`).checked = true;
+      $('#unitsNote').textContent = u.guess ? `Your BruControl probes use ${u.guess === 'US' ? '°F (Fahrenheit)' : '°C (Celsius)'}, so ${u.guess} is picked. Please confirm it, or change it.`
+        : 'Your BruControl file does not say which units it used. Please pick one.';
+    } catch { /* the question still stands */ }
     show(4);
   } catch (e) { toast(e.message); }
 }
@@ -199,7 +208,8 @@ async function convert(ids = null) {
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
   sub5('busy');
   try {
-    const r = await api('POST', '/api/convert', { file: state.sel, names, copyMedia: true, ...(ids ? { ids } : {}) });
+    state.units = document.querySelector('input[name=units]:checked')?.value === 'Metric' ? 'Metric' : 'US';
+    const r = await api('POST', '/api/convert', { file: state.sel, names, units: state.units, copyMedia: true, ...(ids ? { ids } : {}) });
     state.converted = true;
     state.connect = r.connect;
     state.r = r;
@@ -241,10 +251,14 @@ function vesselsHtml() {
   const yn = (v, k) => `<select class="vd" data-v="${esc(v.key)}" data-k="${k}" title="${v.details?.found?.[k] ? 'Found in your names or Scripts (a guess): change it if it is wrong' : 'Not found in your names or Scripts: change it if your vessel has one'}">
     <option value="no"${v.details?.[k] !== 'yes' ? ' selected' : ''}>No</option><option value="yes"${v.details?.[k] === 'yes' ? ' selected' : ''}>Yes${v.details?.found?.[k] ? ' (found)' : ''}</option></select>`;
   return `<div class="card"><p>These are the vessels the Importer found in your BruControl names and Scripts, with what it could tell about each one.
+      Type each vessel's <b>Volume</b>, and measure its <b>Height</b> and <b>Diameter</b> (in ${state.units === 'Metric' ? 'Liters and centimeters' : 'Gallons and inches'}).
       Everything is shown by its <b>BruControl name</b> for now. <b>(found)</b> means a name or a Script points to it; it is a guess, so change anything that is wrong. <b>Manual valves</b> are not in
       BruControl at all (nothing controls them), so pick the kind on each vessel, or leave it at None. Then <b>Accept</b>.</p>
-    <table class="vesTable"><tr><th>Vessel</th><th>Side</th><th>Heater</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
+    <div class="vesWrap"><table class="vesTable"><tr><th>Vessel</th><th>Side</th><th>Volume (${state.units === 'Metric' ? 'L' : 'gal'})</th><th>Height (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Diameter (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Heater</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
     ${vs.map(v => row([`<b>${esc(v.name)}</b>`, v.side === 'cold' ? 'Cold Side' : 'Hot Side',
+      // the vessel's size (OakBarn Brewery, 2026-11-08): its Volume, and its Height and Diameter measured, in the units picked at the start
+      ...[['volume', 'How much it holds'], ['vheight', 'Its height, measured'], ['diameter', 'Its diameter (across), measured']].map(([k, tip]) =>
+        `<input type="number" class="vd num" data-v="${esc(v.key)}" data-k="${k}" min="0" step="any" value="${esc(v.details?.[k] ?? '')}" title="${tip}, in ${k === 'volume' ? (state.units === 'Metric' ? 'Liters' : 'Gallons') : (state.units === 'Metric' ? 'centimeters' : 'inches')}" aria-label="${esc(v.name)} ${k === 'vheight' ? 'height' : k}">`),
       // Heater: a dropdown of every BruControl heating element found (OakBarn Brewery, 2026-11-08)
       `<select class="vd" data-v="${esc(v.key)}" data-k="heater" title="The BruControl heating element in this vessel${v.details?.found?.heater ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.heaters ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.heater?.id === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.heater?.id === x.id && v.details?.found?.heater ? ' (found)' : ''}</option>`).join('')}</select>`,
       // Thermowell: a dropdown of every BruControl probe found (OakBarn Brewery, 2026-11-08)
@@ -256,10 +270,11 @@ function vesselsHtml() {
       // HERMS Coil: a tick box, unticked to start (OakBarn Brewery, 2026-11-08)
       `<input type="checkbox" class="vd" data-v="${esc(v.key)}" data-k="herms"${v.details?.herms === 'yes' ? ' checked' : ''} title="Tick it if this vessel has a HERMS coil inside${v.details?.found?.herms ? ' (a Script mentions HERMS)' : ''}" aria-label="${esc(v.name)} has a HERMS coil">${v.details?.found?.herms ? ' <span class="small muted">in a Script</span>' : ''}`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="motorValve" title="The motorized ball valve on this vessel, from every motorized valve found${v.details?.found?.motorValve ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.parts?.valves ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.motorValve === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.motorValve === x.id && v.details?.found?.motorValve ? ' (found)' : ''}</option>`).join('')}</select>`,
-      `<select class="vd" data-v="${esc(v.key)}" data-k="manualValve" title="Manual valves are not in BruControl: pick the kind this vessel has">${MANUAL.map(([k, n]) => `<option value="${k}"${(v.details?.manualValve || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`])).join('')}</table></div>`;
+      `<select class="vd" data-v="${esc(v.key)}" data-k="manualValve" title="Manual valves are not in BruControl: pick the kind this vessel has">${MANUAL.map(([k, n]) => `<option value="${k}"${(v.details?.manualValve || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`])).join('')}</table></div></div>`;
 }
 function sub5(which) {
   state.sub5 = which;
+  document.body.classList.toggle('wideStep', which === 'vessels');      // the wide Vessels table gets the whole window
   // the page's own Back and Next walk the small steps; on the ID step Next is Accept
   for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
   $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : 'Boards and Tabs';

@@ -58,6 +58,10 @@ assert.deepEqual(s.interfaces, [
 assert.deepEqual(s.tabs, [{ name: 'Brew', items: 2 }, { name: 'Fermentation', items: 2 }]);
 assert.equal(s.items, 4); assert.equal(s.processes, 1); assert.equal(s.globals, 4, 'the Globals list and the Global Variable elements');
 assert.throws(() => summarize('<x/>'), /not a BruControl config file/);
+// US or Metric from BruControl's probe ports (OakBarn Brewery, 2026-11-08)
+assert.equal(summarize('<Configuration><Devices><Device><Ports><DevicePort><Unit>Fahrenheit</Unit></DevicePort></Ports></Device></Devices></Configuration>').units.guess, 'US');
+assert.equal(summarize('<Configuration><Devices><Device><Ports><DevicePort><Unit>Celsius</Unit></DevicePort></Ports></Device></Devices></Configuration>').units.guess, 'Metric');
+assert.equal(summarize('<Configuration></Configuration>').units.guess, '');
 
 // the Importer keeps only its own small settings (last folder and file), never Schemas (Rule 1.7)
 assert.equal(settingsFile(env, 'win32'), 'C:\\Users\\Fritz\\AppData\\Local\\SkynetBrewer\\Importer\\settings.json');

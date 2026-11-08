@@ -74,7 +74,11 @@ file…**; **⌂ Documents\BruControl** goes back to BruControl's own folder.
 
 ## Names
 
-Pick how your items are named in Skynet:
+**Units** come first: **US** (Gallons, °F, inches, pounds) or **Metric** (Liters, °C, centimeters, kilograms). Every temperature,
+size and volume in the next steps uses them. When your BruControl probes show which one BruControl used (°F or °C), it is picked
+for you and the question asks you to confirm it.
+
+Then pick how your items are named in Skynet:
 
 - **Skynet names (recommended).** Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for
   example `MB_28_do_ManualAlarm_B1` becomes `BR_28_DO_Manually_BB`.
@@ -108,7 +112,8 @@ Then you confirm what comes in, in small steps:
 3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found (Globals,
    Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
-4. **Your vessels.** Each vessel found, with what the import could tell about it from your names and Scripts: its **Heater** (a list of every BruControl heating element found; the guess is the one named for the vessel),
+4. **Your vessels.** Each vessel found: type its **Volume** and measure its **Height** and **Diameter** (Gallons and inches, or
+   Liters and centimeters, from the Units question). Then what the import could tell about it from your names and Scripts: its **Heater** (a list of every BruControl heating element found; the guess is the one named for the vessel),
    its **Thermowell with Probe** (a list of every BruControl probe found; the guess is the one named for the vessel), its **Outlet** (None, Center Low or Bottom Drain; Bottom Drain to start), a **Tangential Inlet** tick box (a whirlpool pump means one on the Boil Kettle), **Sparge Arm / Steam
    Slayer** (one answer: None, Upper Left or Upper Right) and a **HERMS Coil** tick box (unticked to start). What was found in your names or Scripts is
    marked *found*; it is a guess, change it if it is wrong; its **Motorized Ball Valve**
