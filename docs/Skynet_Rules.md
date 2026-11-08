@@ -2343,7 +2343,7 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
 
 18.32 **DC pumps: Model, Power, Use, Speed and the pump's facts** (Fritz, 2026-11-08: "All of the Suggestions on the Pump MD are a
 Go. I think that any of the Pumps can be controlled (On/Off or PWM if it can) and the voltage, Lift, GPM etc are all good info to
-have at your fingertips", [docs/DC_Brewing_Pumps.md](DC_Brewing_Pumps.md), Help 162). Every Pump's Add box and Properties have,
+have at your fingertips", [docs/DC_Brewing_Pumps.md](DC_Brewing_Pumps.md), Help 163). Every Pump's Add box and Properties have,
 below the Overlay:
 - **Model** (the pump list in public/pumps.js; a Skynet pump drawing picks its own; **Other** for a pump not listed) with a **⬢**
   holding the **Pump facts** (Flow, Lift, Hottest liquid, Ports: the model's, or typed by the brewer).
@@ -2559,7 +2559,7 @@ Not Placed) or the dialog closes.
 - 2026-11-02: Rule 5.14 changed (Fritz): pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label, besides `.x`, `.y`, `.width`, `.height` and Autosize to pipe. Open question 14 answered. (thread "Set universal properties standard")
 - 2026-11-02: Rule 12.2 changed (Fritz): Beer money can go to at most 2 PayPal accounts; locked now with only Fritz's, unlocked only when he gives the second, then locked again. (thread "Expand Buy a Beer and Patron support")
 - 2026-11-08: Rule 18.32 new and Rule 18.21 changed (Fritz): DC pumps. Every Pump has Model (with its facts ⬢), Power with Use, and Speed
-  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 162, docs/DC_Brewing_Pumps.md.
+  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 163, docs/DC_Brewing_Pumps.md.
 - 2026-11-02: Added Rule 12.3 (Fritz): Patron payments are split by percent between several PayPal accounts (Option A, Pay Out); Rule 12.2 covers Buy a Beer only. (thread "Expand Buy a Beer and Patron support")
 - 2026-11-02: Rule 12.3: a Patron account or percent change needs every Prime Developer's approval (100%, Fritz). (thread "Expand Buy a Beer and Patron support")
 - 2026-11-03: Rule 4.5 updated from Fritz's Edit layout bar picture ("Fix 1"): row 1 order Picture, Text, Manual Valve, Override, Add equipment, Vessel; 👻 Hidden Tab gets an orange ? pop-up holding the Edit layout hint (taken off row 3); the switch is now Update Schema Version. Help 82 updated; no new Help number used. (thread "Fix the Edit layout bar from screenshot")

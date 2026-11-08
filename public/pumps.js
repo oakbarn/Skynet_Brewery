@@ -1,4 +1,4 @@
-// Pump types and pump facts (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 162): "any of the Pumps can be controlled
+// Pump types and pump facts (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 163): "any of the Pumps can be controlled
 // (On/Off or PWM if it can) and the voltage, Lift, GPM etc are all good info to have at your fingertips."
 // Used by the Panel (Pump Properties, the pump's hover facts) and the Brain (a PWM pump's pin). Facts are what the maker or a big
 // store says (see the document's Sources); they are a guide, not a promise.

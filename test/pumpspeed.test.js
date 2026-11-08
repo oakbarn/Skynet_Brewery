@@ -1,4 +1,4 @@
-// DC pumps (Fritz, 2026-11-08, Rule 18.32, Help 162): any Pump can be On/Off, or PWM if it can. A Pump with Speed control PWM
+// DC pumps (Fritz, 2026-11-08, Rule 18.32, Help 163): any Pump can be On/Off, or PWM if it can. A Pump with Speed control PWM
 // (.pwm) runs its pin as PWM at its Speed % while On, 0 while Off. my_Pump.speed = 60 changes it. Its facts (power, flow, lift ...)
 // come from its model.
 import assert from 'node:assert/strict';
