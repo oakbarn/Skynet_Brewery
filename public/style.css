@@ -1124,3 +1124,8 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .el.manual .mvRow.mvHead { justify-content: center; }
 .el.manual .mvRun { margin-top: 3px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--muted); background: #20262d; color: #cfe8ff; cursor: pointer; font-size: 12px; }
 .el.manual .mvRun.on { background: #164d2a; color: #b6ffcc; }
+/* the Vessel Device Builder's Check page (Rule 19.5): the vessel with a dot on every IP it uses */
+#dlgBody .vbPreview { position: relative; width: 180px; justify-self: center; margin-top: 6px; }
+#dlgBody .vbPreview img { width: 100%; display: block; }
+#dlgBody .vbPreview .vbDot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #e8a33a; border: 2px solid #222; box-sizing: border-box; }
+#dlgBody .vbPreview .vbDot.vbPart { background: #1D56B0; }
