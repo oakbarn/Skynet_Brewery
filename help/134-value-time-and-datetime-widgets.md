@@ -11,6 +11,9 @@ Three Widgets that show **one value on a Tab** for you to look at (Skynet Rule 1
 Add one in **Edit layout > Add Widget > Value, Time and DateTime Widgets**. Like every Widget it lives only in the app (no PLC
 port), has a **Label** that is never blank, and opens its Properties on a double-click.
 
+A **Code Value Widget** is a Value Widget that also runs a few lines of Process code each time you set it, for example to send
+the Value to a heater's Setpoint: see [Code Value Widget](161-code-value-widget).
+
 ## Setting it
 
 On its Tab, a tap opens a box to type the new value (a Value Widget also has **−** and **+**, by its Step), then **Set**.

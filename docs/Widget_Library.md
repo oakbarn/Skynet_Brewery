@@ -182,6 +182,9 @@ Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no ba
 | Style | Skynet Styles 🔒 (never changed by a user): Skynet Orange Timer (seven-segment 00:00:00 on an orange-red panel, grey bezel; the default), Skynet Green LCD, Skynet Blue Timer, Skynet Red LED digits, Skynet Plain text. ➕ Add new User Style… / ✏ Edit for User Styles (Look, Digits, Panel, Bezel, Title bar colors) |
 | Timer Digits (Rule 2.40, 2026-11-07, Help 152) | **Digits**: hh:mm:ss or hh:mm. **Seconds only in the last minute**: counting down, shows just SS under one minute. A User Style also has **Back color** (round the panel), **Text Fore color** (digits), **Text Back color** (panel), **Frame** (Rounded corners / Square corners / Square top, rounded bottom: Fritz's own Timer frames, drawn by Skynet) and **Frame color** |
 
+### Code Value Widget (`codeValueWidget`; 2026-11-08, Rule 1.27, Help 161)
+A Value Widget with a **Format** (Number with Units and Decimals, Time hh:mm:ss, or DateTime) and a **Code** attribute: Process code that runs once each time a person sets the Value (a tap and Set, or the .API), never when a Process sets it. `{value}` in the Code is the Value, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}`. Normal Label (never blank); name `wgt_CV_Label_TabID`. Properties as the Value Widget, plus Format (after 3 Name) and Code (before X). Keeps its value when the Brain restarts; a restart does not run the Code.
+
 ### Skynet Dial (a Look, Rule 2.40, 2026-11-07, Help 152)
 Skynet's own temperature gauge (Fritz's pick: an arc with a needle and the reading in digits under it), drawn by Skynet as SVG. Not a Widget of its own: a **Look** (`look: dial`) a Temperature Probe picks with **Display > Skynet Dial**, and any Device that shows a number picks in its Text attributes ⬢ (analog in, PWM / analog out, Duty Cycle, PID, Deadband, a Heating Element's output %). A Process: `name.valueType = "Dial"`.
 
@@ -547,4 +550,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-05: Picture Widget: Add Widget box and Properties follow the Pump drill-down (Rule 18.27, Help 74); Picture ➕ makes a Picture Widget. (thread "Build Picture Widget dialog like Pump")
 - 2026-11-05: Sight_Glass and Sight_Glass_Caged TC Pipe Fittings (Rule 5.32, Help 139): a Length setting in inches stretches the glass; Label starts as site_glass_n. (thread "Add caged and plain sight glass fittings")
 - 2026-11-06: Tap Water Valve, a Manual Valve Widget with a household hose bib picture, one IP on its hose outlet, a tap water source while open, Label tap_water_n (Rule 5.33, Help 141). (thread "Add hose bib Manual Valve Widget")
+- 2026-11-08: Code Value Widget (Rule 1.27, Help 161): a Value Widget in a chosen Format whose Code attribute runs Process code with {value} each time a person sets it. (thread "Build a Code Value Widget")
 - 2026-11-06: Pointer to the Valve Tee and Supply Manifolds (Rule 5.35): on the Elbows, Tees … list, but they are Skynet_Integrated_Devices (Device Library 5.4). (thread "Add valve Tees and supply manifolds")

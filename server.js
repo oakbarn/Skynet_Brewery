@@ -12,6 +12,7 @@ import { openAppWindow, closeAppWindow } from './lib/appwindow.js';
 import { DONATE_LINK } from './lib/donation.js';
 import { ProcessTemplates, MAJOR_STEPS, FIELDS, RECIPE_FIELDS, brewSetup, buildBrewDay, recipeValues, brewNames, isBrewName, SKIP } from './lib/brewprocess.js';
 import { checkControlled } from './public/semi.js';
+import { isCodeValue } from './public/codevalue.js';
 import { controlMethods } from './public/heatmethod.js';
 import { Store, fixValveLists, cleanName, ELEMENT_TYPES, G_KINDS, API_MODES, apiOf, INPUT_PROPS, mainProp, attrsOf, boolAttrs, toBackpathText } from './lib/store.js';
 import { modernize, removeSpacesOnDisk, visibilityOnDisk } from './lib/modernize.js';
@@ -217,6 +218,15 @@ store.on('change', (name, prop, v) => {
   (pending[name] ??= {})[prop] = plain(v);
 });
 setInterval(flush, 150);
+
+// Code Value Widget (OakBarn Brewery, 2026-11-08, Rule 1.27): a person set its Value (a tap and Set, or the .API), so its Code
+// runs once with {value} = that Value. A Process setting the Value does not run it (no endless loops).
+function runWidgetCode(name, prop, by) {
+  const el = store.get(name);
+  if (!isCodeValue(el) || String(prop ?? 'value').toLowerCase() !== 'value') return;
+  try { engine.runWidgetCode(el.name, by); } catch (e) { engine.print(`${el.name} (code)`, 'NOT RUN - ' + e.message); }
+}
+const codeAfterApi = r => { if (r?.attribute) runWidgetCode(r.name, r.attribute, 'api'); else if (r?.set && 'value' in r.set) runWidgetCode(r.name, 'value', 'api'); return r; };
 
 // Push Buttons (gGlobal) are on only while a finger or mouse holds them. The browser repeats "down"
 // every 0.5 s while held; if it goes quiet (closed tab, lost WiFi) the button lets go by itself.
@@ -482,7 +492,7 @@ async function route(req, res) {
     if (p === '/api/items' && m === 'GET') return ok(res, apiList(store));
     if (p === '/api/items' && (m === 'POST' || m === 'PUT')) {      // { name: value, ... }: several at once
       const body = await jsonBody(req); const done = [], errors = [];
-      for (const [n, v] of Object.entries(body)) { try { apiSaid(apiPut(store, n, null, v), ip); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); } }
+      for (const [n, v] of Object.entries(body)) { try { apiSaid(codeAfterApi(apiPut(store, n, null, v)), ip); done.push(n); } catch (e) { errors.push(`${n}: ${e.message}`); } }
       return ok(res, { ok: !errors.length, set: done, errors });
     }
     let g = /^\/api\/items\/([^/]+)(?:\/([^/]+))?$/.exec(p);
@@ -491,7 +501,7 @@ async function route(req, res) {
       if (m === 'PUT' || m === 'POST') {
         const t = await readBody(req); let v = t;
         try { const j = JSON.parse(t); v = (j && typeof j === 'object' && !Array.isArray(j) && !g[2]) ? j : (j && typeof j === 'object' && 'value' in j) ? j.value : j; } catch { }
-        try { return ok(res, apiSaid(apiPut(store, g[1], g[2], v), ip)); } catch (e) { return fail(res, e.status ?? 400, e.message); }
+        try { return ok(res, apiSaid(codeAfterApi(apiPut(store, g[1], g[2], v)), ip)); } catch (e) { return fail(res, e.status ?? 400, e.message); }
       }
     }
     g = /^\/api\/log\/(.+)$/.exec(p);         // send its reading to the database now
@@ -540,6 +550,7 @@ async function route(req, res) {
     if (!el) return fail(res, 404, `No element "${name}"`);
     if (INPUT_PROPS[el.type]?.includes(String(prop).toLowerCase()) && el.device && hw.devices.get(el.device)?.type !== 'simulator') return fail(res, 400, `"${name}" is a hardware input`);
     store.setProp(name, prop, value, 'ui');
+    runWidgetCode(name, prop, 'user');      // a Code Value Widget runs its Code (Rule 1.27)
     logger.clicked(name, prop);      // "When Clicked" (Rule 6.14): set on its Tab, so it goes to the database now
     return ok(res);
   }

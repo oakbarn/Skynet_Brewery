@@ -43,3 +43,4 @@ store = new Store(cfg, path.join(d, 'data')); store.load();
 assert.equal(store.getProp('w_Strike', 'value'), 8);
 clearTimeout(store._persistTimer);
 console.log('value widgets ok');
+await import('./codevalue.test.js');      // the Code Value Widget (Rule 1.27)
