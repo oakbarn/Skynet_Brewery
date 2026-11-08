@@ -39,6 +39,13 @@ assert.equal(pump.name, 'MB_28_DO_Red~Lamp_BH', 'Skynet name, Rule 3.1');
   assert.ok(q.report.tabs.every(t => t.kinds && typeof t.kinds === 'object'), 'each Tab counts its Placeholders by kind');
   assert.equal(q.report.interfaces[0].id, 'MZ');
   assert.ok(q.report.portItems.every(e => e.device && e.name && 'port' in e), 'every item on a port is listed for its Interface'); assert.match(q.report.interfaces[0].connection, /^Serial: COM5/); }
+// the user's own Labels from the items page (OakBarn Brewery, 2026-11-08), by BruControl element ID, make the names again
+{ const id = pump.bru.id, q = importBruControl(xml, { labels: { [id]: 'Hot Liquor' } });
+  assert.equal(q.conv.elements[0].label, 'Hot Liquor'); assert.equal(q.conv.elements[0].name, 'MB_28_DO_Hot~Liquor_BH');
+  const it = q.report.portItems.find(e => e.bruId === id); assert.equal(it.display, 'Red Lamp', 'the Display Name is still shown');
+  assert.equal(q.report.labelExamples.length, 3, 'a Heater, a Probe and a Valve');
+  assert.ok(q.report.labelExamples.every(x => /_HLT_/.test(x.name)), 'every example uses HLT as its Label');
+  assert.equal(new Set(q.report.labelExamples.map(x => x.name)).size, 3, '... and the three names are all different'); }
 assert.equal(wort.label, 'MB_61_Wort', 'a blank DisplayName: Label = Name'); assert.equal(wort.hideName, true, '... not shown on the Tab');
 assert.equal(wort.name, 'MB_61_AI_MB~61~Wort_BH'.replace(/~/g, '_'));
 assert.equal(c.scripts.length, 0, 'Processes come later');

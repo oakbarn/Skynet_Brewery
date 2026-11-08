@@ -113,9 +113,20 @@ Then you confirm what comes in, in small steps:
    Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
 4. **The items on each Interface.** One table per Interface (board): every item wired to one of its ports, by port, with its
-   BruControl name, its **Display Name** (with no Display Name, the Name is shown greyed), a **tick box** and a **Label** box (both blank to start, for you to fill in),
-   what it becomes in Skynet (Pump, Heating Element, Analog Input ...), its Skynet name and its Tab. Read only;
-   an item on a Tab you left out is marked *left out*. **Next ▶**.
+   BruControl name, its **Display Name** (with no Display Name, the BruControl name is shown greyed), a **tick box** and a **Label** box,
+   what it becomes in Skynet (Pump, Heating Element, Analog Input ...), its suggested Skynet name and its Tab. An item on a Tab you
+   left out is marked *left out*.
+   - **Labels.** BruControl's Display Name settings come over as the item's **Label** in Skynet. The Label can be shown on the Tab just
+     like the Display Name was in BruControl, and it is the Label part of the suggested Skynet name. Use the words you use when you
+     describe your brewery (HLT, Mash Tun, Boil Kettle).
+   - Every tick box and Label box starts blank. **Tick** a box to copy that item's Display Name into its Label box, then change it if you like.
+   - A Label can have spaces; in the suggested Skynet name a space becomes `~` (*Mash Tun* is `Mash~Tun`).
+   - A Label does not have to be different from the others: a Heater, a Temperature Probe and a Valve can all be **HLT**, and their
+     suggested names are still all different (for example `MB_25_HE_HLT_BR`, `MB_A0_10KNTC_HLT_BR`, `MB_30_MBV_HLT_BR`). The page shows
+     three examples made from your own items when it can find them, or made-up samples.
+   - Skynet names are the preferred way to name things in Skynet.
+   - **Accept ▶** is at the bottom of the page. No Label may be blank: a message says how many are, and marks them in red. When they
+     are all filled in, the suggested Skynet names are made again with your Labels, and each Label is the item's Label in the new Schema.
 5. **Your vessels.** It starts with the vessels found, where you rename one, set its **Side**, remove one (✖) or **➕ Add a
    vessel**. For each one, type its **Volume** and measure its **Height** and **Diameter** (Gallons and inches, or
    Liters and centimeters, from the Units question). Then what the import could tell about it from your names and Scripts: its **Heater** (a list of every BruControl heating element found; the guess is the one named for the vessel),
