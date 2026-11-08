@@ -539,7 +539,7 @@ for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (state.sub5 === 'if') return sub5('id');
   if (['id', 'tabs', 'items', 'parts', 'vessels'].includes(state.sub5)) return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
-  startConnect(state.connect, { toast });
+  startConnect(state.connect, { toast }); state.buildPage = 0; drawBuildPages();
   show(6);
 };
 for (const id of ['#back6', '#back6a']) $(id).onclick = () => show(5);
@@ -581,12 +581,53 @@ $('#closeBtn').onclick = async () => {
 };
 init();
 
-// the Skynet Panel's own Build page, for Connect your brewery (OakBarn Brewery, 2026-11-08): it opens in its own window
-$('#openBuild').onclick = async () => {
-  const b = $('#openBuild'); b.disabled = true; $('#buildNote').textContent = 'Starting the Build page…';
-  try {
-    const r = await api('POST', '/api/build/open', { keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs });
-    const w = window.open(r.url, 'skynetBuild');
-    $('#buildNote').textContent = w ? 'The Build page is open in its own window. Close it when you are done; your work is kept.' : 'Your browser blocked the window: allow pop-ups for the Importer, then click again.';
-  } catch (e) { $('#buildNote').textContent = e.message; } finally { b.disabled = false; }
-};
+// The Build Tab pages (OakBarn Brewery, 2026-11-08: "Build Page is actually a Build Tab Page. So we would need to build for every
+// Workspace (Tab), in order as they are in BruControl ... Only ones that are Ticked to Import"; "a good explanation ... about the choices
+// on a Build Tab first for the user to read and then a Popup that shows Hover Help. Also about Adding the Manual things into a
+// Manifold"). One page per ticked Tab, in BruControl order; each opens the Panel's Build Tab on that Tab.
+const buildTabs = () => { const keep = state.keepTabs; return (state.r?.tabs ?? []).filter(t => !keep || keep.has(t.name)); };
+function drawBuildPages() {
+  const tabs = buildTabs(), box = $('#buildPages'); if (!box) return;
+  if (!tabs.length) { box.innerHTML = '<p class="small muted">No Tabs are ticked to import, so there is nothing to build.</p>'; return; }
+  state.buildPage = Math.min(state.buildPage ?? 0, tabs.length - 1);
+  const t = tabs[state.buildPage];
+  box.innerHTML = `<div class="cnPager"><button id="bpPrev"${state.buildPage ? '' : ' disabled'}>◀ Previous Tab</button>
+      <b>Build Tab page ${state.buildPage + 1} of ${tabs.length}: ${esc(t.name)} (${esc(t.id)})</b>
+      <button id="bpNext"${state.buildPage < tabs.length - 1 ? '' : ' disabled'}>Next Tab ▶</button></div>
+    <h3>Before you build: the choices on a Build Tab</h3>
+    <p>Press the yellow <b>Edit layout</b> button (next to Menu) to see them. The top row <b>adds things</b>: <b>Add Device</b> and its
+      shortcuts (<b>Pumps</b>, <b>Valves</b>, <b>Probe</b>, <b>Heating Element</b>, <b>PWM</b>) for things wired to a board, a <b>Vessel</b>,
+      a <b>Clone</b> of a Device on another Tab, and <b>Add Widget</b>, <b>Picture</b>, <b>Text</b>, <b>Manual Valve</b>, <b>Value</b>,
+      <b>Time</b> and more for things on the screen only. The second row <b>joins and arranges</b>: <b>Draw pipe</b>, <b>Draw hose</b>,
+      <b>Draw QD hose</b>, <b>Elbows, Tees ...</b>, <b>Add equipment</b> (chillers, coils, RIMS tube), <b>Put back</b>, <b>Lock</b>, and
+      <b>Tab settings</b>. A new thing is made on the 🔨 <b>Build Tab</b> first; <b>Save Build</b> puts it on this Tab. <b>Save layout</b>
+      keeps your work. Double-click anything for its Properties.</p>
+    <p><button id="bpHover">❓ Show every Build Tab choice and its hover help</button></p>
+    <h3>Build your manifold as it really is</h3>
+    <p>BruControl only had the parts wired to a board. <b>You can (and should) build your manifold the way it is in your brewery</b>,
+      and add the parts you turn or move by hand:</p>
+    <ul><li><b>Manual valves</b>: <b>Manual Valve ➕</b> (a ball or butterfly valve you turn by hand).</li>
+      <li><b>Tees and elbows</b>: <b>Elbows, Tees ...</b>, then join them with <b>Draw pipe</b> or <b>Draw hose</b>.</li>
+      <li><b>Quick Disconnect hoses</b>: <b>Draw QD hose</b>; the free end is moved to a vessel or another QD.</li>
+      <li><b>Manual pumps</b> and other things done by hand: these become <b>Confirmation Widgets</b> (Skynet Rule 1.28, Help 162): Skynet
+        asks you to do it by hand and confirm. They are coming in the Panel; for now add the pump with <b>Pumps</b> and leave its board
+        port empty.</li></ul>
+    <p class="small muted">Your Vessels and the items on this Tab will be placed for you once the Vessel Templates are built (the Vessel
+      Device Builder, the next Importer step). For now this Tab shows its items where they were in BruControl.</p>
+    <p><button class="primary" id="openBuild">🔨 Open the Build Tab for ${esc(t.name)}</button> <span id="buildNote" class="small muted"></span></p>`;
+  $('#bpPrev').onclick = () => { state.buildPage--; drawBuildPages(); };
+  $('#bpNext').onclick = () => { state.buildPage++; drawBuildPages(); };
+  $('#bpHover').onclick = async () => {
+    let list = []; try { list = await api('GET', '/api/build/buttons'); } catch { /* shown empty */ }
+    tell('The Build Tab choices', `<p class="small">This is the hover help each one shows in the Panel (rest the mouse on it).</p>
+      <table class="hoverList">${list.map(x => `<tr><th>${esc(x.label)}</th><td>${esc(x.help)}</td></tr>`).join('')}</table>`);
+  };
+  $('#openBuild').onclick = async () => {
+    const b = $('#openBuild'); b.disabled = true; $('#buildNote').textContent = 'Starting the Build Tab…';
+    try {
+      const r = await api('POST', '/api/build/open', { keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs });
+      const w = window.open(`${r.url}&tab=${encodeURIComponent(t.name)}`, 'skynetBuild');
+      $('#buildNote').textContent = w ? 'Open in its own window. Close it when you are done; your work is kept.' : 'Your browser blocked the window: allow pop-ups for the Importer, then click again.';
+    } catch (e) { $('#buildNote').textContent = e.message; } finally { b.disabled = false; }
+  };
+}

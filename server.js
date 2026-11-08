@@ -385,7 +385,8 @@ async function route(req, res) {
   if (IMPORT_BUILD && req.url.startsWith('/import-build?key=')) {
     const k = new URL(req.url, 'http://x').searchParams.get('key') ?? '';
     if (!IMPORT_KEY || k.length !== IMPORT_KEY.length || !crypto.timingSafeEqual(Buffer.from(k), Buffer.from(IMPORT_KEY))) { res.writeHead(403); return res.end('Forbidden'); }
-    res.writeHead(302, { 'Set-Cookie': `${IMPORT_COOKIE}=${k}; Path=/; HttpOnly; SameSite=Strict`, Location: '/' }); return res.end();
+    const tab = new URL(req.url, 'http://x').searchParams.get('tab') ?? '';      // the Importer's Build Tab page for one Tab
+    res.writeHead(302, { 'Set-Cookie': `${IMPORT_COOKIE}=${k}; Path=/; HttpOnly; SameSite=Strict`, Location: tab ? `/#tab=${encodeURIComponent(tab)}` : '/' }); return res.end();
   }
   const me = IMPORT_BUILD ? importMe() : auth.check(token);
   const ip = clientIp(req);

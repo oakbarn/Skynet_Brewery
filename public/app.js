@@ -163,6 +163,12 @@ async function load() {
   document.title = S.config.title || 'Skynet Brew Panel';
   showPanelVer();
   setTextLarge();
+  // the Importer's Build Tab pages (OakBarn Brewery, 2026-11-08): the Importer opens one imported Tab at a time (#tab=Name)
+  if (S.importBuild && !load.hashTab) {
+    load.hashTab = true;
+    const pick = () => { const n = decodeURIComponent((location.hash.match(/^#tab=(.+)$/) ?? [])[1] ?? ''); if (n && S.config.workspaces.some(w => w.name === n)) { wsName = n; return true; } return false; };
+    pick(); addEventListener('hashchange', () => { if (pick()) { setView('workspace'); renderTabs(); renderWs(); } });
+  }
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
     ...['mash', 'boil', 'water', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);

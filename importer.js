@@ -56,6 +56,22 @@ async function startBuild() {
   for (let i = 0; i < 60; i++) { if (await buildUp()) return; await new Promise(r => setTimeout(r, 250)); }
   throw new Error('The Build page did not start. Close the Importer and try again.');
 }
+// the Edit layout bar of the Panel's Build Tab, each choice with its own hover help (the Panel's text, so they always match)
+const BAR_NAMES = { devKind: 'Select Device Type', devAdd: 'Add Device', vesselPick: 'Vessel', cloneDev: '⧉ Clone Device', wgtKind: 'Select Widget Type',
+  wgtAdd: 'Add Widget', addBoolean: 'Boolean ➕', addIpType: 'Elbows, Tees ...', addVesselType: 'Add equipment ➕' };
+function buildButtons() {
+  let html = ''; try { html = fs.readFileSync(path.join(PUBLIC, 'index.html'), 'utf8'); } catch { return []; }
+  const a = html.indexOf('id="editBar"'), b = html.indexOf('id="editInfo"', a);
+  if (a < 0 || b < 0) return [];
+  const out = [], seg = html.slice(a, b), re = /<(button|select)\b([^>]*)>([\s\S]*?)<\/\1>/g, attr = (s, k) => (new RegExp(`\\b${k}="([^"]*)"`).exec(s) ?? [])[1] ?? '';
+  for (let x; (x = re.exec(seg));) {
+    const at = x[2], title = attr(at, 'title'); if (!title) continue;
+    const id = attr(at, 'id'), head = attr(at, 'data-head');
+    const label = BAR_NAMES[id] || head || x[3].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    if (label) out.push({ label, help: title.replace(/&amp;/g, '&').replace(/&gt;/g, '>').replace(/&lt;/g, '<') });
+  }
+  return out;
+}
 const stopBuild = () => { try { build.child?.kill(); } catch { /* already gone */ } build.child = null; };
 process.on('exit', stopBuild);
 
@@ -319,6 +335,8 @@ async function api(req, res, p, q) {
     await startBuild();
     return json(res, 200, { url: `http://localhost:${BUILD_PORT}/import-build?key=${build.key}` });
   }
+  // the Build Tab buttons and their hover help, read from the Panel's own page (public/index.html), for the pop-up on each Build Tab page
+  if (p === '/api/build/buttons' && m === 'GET') return json(res, 200, buildButtons());
   if (p === '/api/close' && m === 'POST') {
     json(res, 200, { ok: true });
     setTimeout(() => { stopBuild(); closeAppWindow({ profile: importerProfileDir() }); process.exit(0); }, 300);
