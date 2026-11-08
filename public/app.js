@@ -5821,7 +5821,7 @@ function heatFields(it, x = {}) {
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
     ['_spotHead', 'Other methods allowed (each one ticked gets a one-click spot on the Tab)', 'head', null, false, false, x],
-    ...HEAT_METHODS.filter(([k]) => k !== m).map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),
+    ...HEAT_METHODS.filter(([k]) => k !== m && k !== 'onoff').map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),      // On/Off is always allowed, not a choice
     ['_heatNote', allowedMethods(it).length > 1 ? `A Process changes it: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m))}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m))}. So does a click on one of its spots, or on it while running. Only the methods allowed here can be used.` : 'Only its starting method is allowed. Tick another method above to switch between them by a click or a Process.', 'note', null, false, false, x]];
 }
 function elemDeviceFields(it, item) {

@@ -134,8 +134,9 @@ console.log('heatmethod import tests passed');
   const el = { type: 'digitalOut', subtype: 'element', name: 'hE_HLT_1', heatMethod: 'dutyCycle', methodSpot_onoff: true, methodSpot_hysteresis: true, methodSpot_pid: true, methodSpot_deadband: true };
   assert.deepEqual(controlMethods(el), ['On/Off', 'Duty Cycle', 'Hysteresis', 'PID', 'Deadband']);
   // only the main method and the ticked ones are allowed (Fritz, 2026-11-07: "Only Checked Methods are allowed")
-  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid', methodSpot_dutyCycle: true }), ['Duty Cycle', 'PID']);
-  assert.equal(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), null, 'one method allowed: one way of control');
+  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid', methodSpot_dutyCycle: true }), ['On/Off', 'Duty Cycle', 'PID']);
+  assert.deepEqual(controlMethods({ type: 'digitalOut', subtype: 'element', heatMethod: 'pid' }), ['On/Off', 'PID'], 'On/Off is always allowed, not a choice (Fritz, 2026-11-08)');
+  assert.equal(controlMethods({ type: 'digitalOut', subtype: 'element' }), null, 'On/Off only: one way of control');
   assert.equal(controlMethods({ type: 'digitalOut', subtype: 'pump' }), null, 'a Pump has one way of control');
   assert.ok(attrsOf(el).includes('method'));
   const words = { elements: [{ name: 'hE_HLT_1', type: 'digitalOut', main: 'state', attrs: attrsOf(el), bools: [''], methods: controlMethods(el) }], processes: [], tabs: [] };
@@ -194,6 +195,6 @@ console.log('method spots tests passed');
   const { readFileSync } = await import('node:fs');
   const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url)));
   const hlt = s.elements.find(e => e.name === 'HLT_Heat');
-  assert.deepEqual(controlMethods(hlt), ['Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
+  assert.deepEqual(controlMethods(hlt), ['On/Off', 'Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
 }
 console.log('built in Element upgrade tests passed');

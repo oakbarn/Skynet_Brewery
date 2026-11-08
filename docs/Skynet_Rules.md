@@ -1435,7 +1435,8 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
   Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
   its Method Clones, the Process editor and the Brain offer only those; a Process asking for another gets a plain error. One with
-  nothing ticked has one way of control. The other methods' settings are kept.
+  nothing ticked has one way of control. **On/Off is always allowed and always has its spot; it is not a tick box** (Fritz,
+  2026-11-08: "It should not be a choice. Always displayed"). The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
   once**, the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
@@ -2729,3 +2730,4 @@ Not Placed) or the dialog closes.
 - 2026-11-08: Rule 6.19 (Fritz: "it switches between All tree methods fine, but no Turn Off!"): the method spots get a Turn Off button while the Element is ON, and a click on a built in Element's picture on its Vessel Device opens its pop-up with ON and OFF. Help 150 updated. Checked against the BruControl Import program: no change (its joined Elements get the same spots in the Panel). (thread "Pick the heating method on one Element")
 - 2026-11-08: Rule 6.19 (Fritz: "The buttons change color but nothing else"; "I use more than a single element as they are on different AC Circuits"): a method spot clicked while the Element is OFF also opens its pop-up to turn it ON; nothing stops two Elements being ON at once. (thread "Pick the heating method on one Element")
 - 2026-11-08: Added Rule 6.20 (Fritz): the electrical warning "Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician." in a Heating Element's Properties, its wiring hover help, Help 137 and 150, and the BruControl Import's first page. Checked against the BruControl Import program: its first page shows it. (thread "Pick the heating method on one Element")
+- 2026-11-08: Rule 6.19 (Fritz: "I found and On/Off Button slider on the Heat Element Proerties ... It should not be a choice. Always displayed"): On/Off is always allowed with its spot always shown; its switch is gone from the Heating Element's Properties. Help 150 updated. Checked against the BruControl Import program: no change. (thread "Pick the heating method on one Element")
