@@ -160,6 +160,12 @@ export function chainsFromLinks(links) {
 // Hose or Pipe: the guess is Pipe, unless one end is a QD (then Hose) (Fritz, 2026-11-07)
 export const guessBy = (a, b) => a?.kind === 'qd' || b?.kind === 'qd' ? 'hose' : 'pipe';
 // One more link: it carries on the chain that ends where it starts, or starts a new chain; chains that now meet are joined
+// remove one link (Fritz, 2026-11-08: a picked line and the Delete key); a link in the middle splits its chain in two
+export function removeLink(chains, ci, si) {
+  const c = chains[ci]; if (!c?.steps[si]) return;
+  const before = c.steps.slice(0, si), after = c.steps.slice(si + 1), rest = after.length ? [{ start: c.steps[si].to, steps: after }] : [];
+  chains.splice(ci, 1, ...(before.length ? [{ ...c, steps: before }] : []), ...rest);
+}
 export function addLink(chains, l) {
   const step = { to: l.to, by: l.by || guessBy(l.from, l.to), source: l.source || 'you' };
   const c = chains.find(x => { const last = x.steps.at(-1)?.to ?? x.start; return !isFinal(last) && sameItem(last, l.from); });

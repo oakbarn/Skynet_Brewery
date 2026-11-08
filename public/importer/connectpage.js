@@ -2,11 +2,11 @@
 // Copyright (c) OakBarn Brewery 2026
 // The Importer's page 6, Connect your brewery (Rule 15.4, Fritz 2026-11-07). The rules of the chains, the guesses and reading an
 // AI's answer are in connect.js (shared with the Importer's server); this file only draws the page and keeps the brewer's answers.
-import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer } from './connect.js';
+import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink } from './connect.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-let S = null, say = () => {}, picked = null, picSrc = '';
+let S = null, say = () => {}, picked = null, picSrc = '', lineSel = null;      // lineSel: [chain, step] of the clicked line
 
 // What the page sends to Save: the vessels, the chains, the Fermenter answers and where each piece sits on the guide picture
 export function connectState() {
@@ -193,8 +193,40 @@ function drawLines() {
   const pos = new Map(pieces().map(p => [p.key, p.at]));
   const key = e => e?.kind === 'vessel' ? 'vessel:' + e.key : e?.id;
   const lines = [];
-  for (const c of S.chains) { let a = c.start; for (const s of c.steps) { const p = pos.get(key(a)), q = pos.get(key(s.to)); if (p && q) lines.push(`<line x1="${p.x * 100}%" y1="${p.y * 100}%" x2="${q.x * 100}%" y2="${q.y * 100}%" class="${s.by === 'hose' ? 'hose' : 'pipe'}"/>`); a = s.to; } }
+  // blue = a Pipe (and its fittings), yellow = a Hose (Fritz, 2026-11-08); each has a wide see-through line on top to click
+  S.chains.forEach((c, ci) => { let a = c.start; c.steps.forEach((s, si) => {
+    const p = pos.get(key(a)), q = pos.get(key(s.to));
+    if (p && q) {
+      const xy = `x1="${p.x * 100}%" y1="${p.y * 100}%" x2="${q.x * 100}%" y2="${q.y * 100}%"`, on = lineSel?.[0] === ci && lineSel?.[1] === si;
+      lines.push(`<line ${xy} class="${s.by === 'hose' ? 'hose' : 'pipe'}${on ? ' sel' : ''}"/><line ${xy} class="hit" data-ci="${ci}" data-si="${si}"><title>${s.by === 'hose' ? 'Hose' : 'Pipe'}: click to pick it (Delete removes it); right-click turns a Pipe into a Hose and back</title></line>`);
+    }
+    a = s.to;
+  }); });
   svg.innerHTML = lines.join('');
+}
+// a line on the picture (Fritz, 2026-11-08): a click picks it, the Delete key removes it, a right-click turns a Pipe into a Hose
+// and back. Removing a link in the middle of a chain splits it in two.
+function lineAt(e) { const l = e.target.closest?.('line.hit'); return l ? [Number(l.dataset.ci), Number(l.dataset.si)] : null; }
+function lineClick(e) {
+  const at = lineAt(e); if (!at) return;
+  lineSel = lineSel && lineSel[0] === at[0] && lineSel[1] === at[1] ? null : at; picked = null;
+  if (lineSel) { const c = S.chains[at[0]], a = at[1] ? c.steps[at[1] - 1].to : c.start; say(`Picked: ${endText(a, S.parts)} to ${endText(c.steps[at[1]].to, S.parts)}. Press Delete to remove it.`); }
+  renderPicture();
+}
+function lineRight(e) {
+  const at = lineAt(e); if (!at) return;
+  e.preventDefault();
+  const s = S.chains[at[0]].steps[at[1]]; s.by = s.by === 'hose' ? 'pipe' : 'hose'; s.source = 'you';
+  say(`That connection is now a ${s.by === 'hose' ? 'Hose' : 'Pipe'}.`);
+  renderChains();
+}
+function lineKey(e) {
+  if (!lineSel || !['Delete', 'Backspace'].includes(e.key) || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName ?? '')) return;
+  if ($('#cnPic')?.offsetParent === null) return;          // only while this page shows
+  e.preventDefault();
+  removeLink(S.chains, ...lineSel); lineSel = null;
+  say('That connection is removed.');
+  renderChains();
 }
 // click one piece, then another: they are joined (the first is connected to the second). A vessel is left from its Center Bottom
 // Outlet and entered at its Right Sparge, the usual spots; change the opening in the list when it is another one.
@@ -227,6 +259,7 @@ function chipUp() {
   if (!drag) return;
   const d = drag; drag = null;
   if (d.moved) return;
+  lineSel = null;
   if (!picked) picked = d.key;
   else if (picked === d.key) picked = null;
   else { join(picked, d.key); picked = null; }
@@ -299,6 +332,9 @@ function wire() {
     r.readAsDataURL(f);
   };
   const chips = $('#cnChips');
+  const lines = $('#cnLines');
+  lines.addEventListener('click', lineClick); lines.addEventListener('contextmenu', lineRight);
+  document.addEventListener('keydown', lineKey);
   chips.addEventListener('pointerdown', chipDown); chips.addEventListener('pointermove', chipMove); chips.addEventListener('pointerup', chipUp);
   $('#cnAiSite').innerHTML = AI_SITES.map(([u, n]) => `<option value="${esc(u)}">${esc(n)}</option>`).join('');
   $('#cnAskAi').onclick = askAi;

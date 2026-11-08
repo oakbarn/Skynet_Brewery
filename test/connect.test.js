@@ -95,5 +95,13 @@ assert.deepEqual(clues.scripts, [{ name: 'Mash', text: '"M_V1" State = on' }]);
 assert.deepEqual(clues.backgrounds, { Brewhouse: { path: 'C:\\Pics\\brewery.jpg', w: 1800, h: 900 } });
 console.log('connect tests passed');
 
+// a line removed on the picture: a link in the middle splits its chain (Fritz, 2026-11-08)
+{
+  const { removeLink } = await import('../public/importer/connect.js');
+  const cs = [{ start: { kind: 'vessel', key: 'HLT', at: 'cBottomOutlet' }, steps: [{ to: { kind: 'valve', id: 'A' } }, { to: { kind: 'valve', id: 'B' } }, { to: { kind: 'tap' } }] }];
+  removeLink(cs, 0, 1);
+  assert.equal(cs.length, 2); assert.deepEqual(cs[0].steps.map(s => s.to.id), ['A']); assert.deepEqual(cs[1].start, { kind: 'valve', id: 'B' }); assert.equal(cs[1].steps[0].to.kind, 'tap');
+  removeLink(cs, 0, 0); assert.equal(cs.length, 1, 'a chain with no links left is gone');
+}
 // the Chart Widget tests run here too, so package.json stays as it is (no clash with other open PRs)
 await import('./chart.test.js');
