@@ -507,6 +507,21 @@ Help 155).
   them. It draws no pipes, so its pumps and valves (with no pipe on them) are drawn for the Default pipe size. Its Tabs keep the
   sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39).
 
+2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
+Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
+reading or its Skynet Dial), a **Thermowell**, a **probe tee**, a **Probe or Thermowell built into a Vessel Device**, a Vessel's own
+Probe spot, or a **Picture Widget** that shows a probe, opens the **SetPoint pop-up** of the Heating Element that holds that
+temperature: the one whose Temperature Probe it is (older Hysteresis, PID and Deadband Devices too; a Vessel's own Probe goes to the
+Vessel's Heater first). Two or more: a short list asks which. None: a short note says so (a simulated probe still opens its
+Simulated reading pop-up). The pop-up shows the reading, whose Setpoint it is (ON or OFF, method), the Setpoint with − and +, then
+**Set + ON**, **OFF**, **Set**, **Heating method…** (the Rule 6.19 pop-up) and **Cancel**. It still asks before it turns on
+(Rule 2.33). Only Hysteresis, PID, Deadband and Precise hold a Setpoint: on On/Off or Duty Cycle, Set switches it to the first
+allowed method that does. A Tap set by hand (When tapped) still wins. Operators and admins only. Double-click still opens Properties
+(Rule 2.9).
+- **BruControl Import:** checked, not changed. Its probes and Heating Elements are the Panel's own, so they get this click in the
+  Panel; the Import keeps the probe it reads as each Heating Element's Temperature Probe. (thread "Open SetPoint dialog from
+  temperature widgets", Help 160)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -2714,3 +2729,4 @@ Not Placed) or the dialog closes.
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
   program: no change (it does not use Schema Templates or the Brew Process; making a Schema from a BruControl file stays in the
   Importer). (thread "Build Process and Schema Templates")
+- 2026-11-08: Added Rule 2.43 (Fritz: "Click on a Thermowell or Probe or Display of a Temperature NOT in edit Mode, Bring up SetPoint Dialog"): outside Edit layout one click on a Temperature Probe, Thermowell, probe tee, a probe built into a Vessel, or a picture showing a probe opens the SetPoint pop-up of the Heating Element that reads it. Help 160; next free Help number 161. Checked against the BruControl Import program: not changed, its probes and Heating Elements get this click in the Panel. (thread "Open SetPoint dialog from temperature widgets")
