@@ -15,7 +15,9 @@ via process or on the Device when clicked").
 
 ## Click it while brewing
 
-**One click** on the Heating Element on its Tab opens its pop-up. It shows:
+**One click** on the Heating Element on its Tab turns it **ON or OFF** at once, in the method it is in, like a Pump (Skynet Rule
+2.33). Its pop-up opens from a **Method Clone**, a **method spot** (below), or **Heating method…** in its Temperature Probe's
+SetPoint pop-up. The pop-up shows:
 
 1. **Heating method**: one button for each. The one it uses now is marked. **One click on a method switches to it at once**
    (no Set needed); the pop-up stays open for its setting. Hysteresis, PID, Deadband and Precise are greyed out until the Element has a
@@ -23,7 +25,7 @@ via process or on the Device when clicked").
 2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Target**.
 3. **Set + ON** (or **ON** for On/Off), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
 
-It still asks before it turns on (Rule 2.33): nothing turns on until you click **Set + ON** or **ON**.
+Nothing in the pop-up turns on until you click **Set + ON** or **ON**.
 
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID, Deadband or Precise, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
