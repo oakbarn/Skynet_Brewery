@@ -336,7 +336,15 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
   <section class="step hidden" id="step4">
     <div class="buttons top"><button id="back4a">◀ Back</button><span class="spacer"></span><button class="primary" id="next4a">Next ▶</button></div>
     <h1>Names</h1>
-    <p class="lead">You picked <b id="chosen"></b>. How should your items be named in Skynet?</p>
+    <p class="lead">You picked <b id="chosen"></b>. First your units, then how your items should be named in Skynet.</p>
+    <h2>Units</h2>
+    <div class="card" id="unitsCard">
+      <p>Which units does your brewery use? Every temperature, size and volume in the next steps uses them.</p>
+      <label class="choice"><input type="radio" name="units" value="US" checked> <b>US</b>: Gallons, °F (Fahrenheit), inches, pounds</label>
+      <label class="choice"><input type="radio" name="units" value="Metric"> <b>Metric</b>: Liters, °C (Celsius), centimeters, kilograms</label>
+      <p class="small" id="unitsNote"></p>
+    </div>
+    <h2>Names</h2>
     <div class="card">
       <label class="choice"><input type="radio" name="names" value="skynet" checked> <b>Skynet names (recommended)</b></label>
       <p class="small">Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for example

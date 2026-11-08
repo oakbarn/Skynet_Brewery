@@ -122,3 +122,9 @@ body.cnFullOpen { overflow: hidden; }
 .greyId { color: #8a8a8a; }
 .ifId { width: 4.5em; text-transform: uppercase; font-weight: 600; }
 .idHelp ol { margin: 4px 0 8px; }
+/* the Vessels step (OakBarn Brewery, 2026-11-08): small number boxes, the table scrolls sideways on a narrow window */
+.vesWrap { overflow-x: auto; }
+.vesTable input.num { width: 4.5em; }
+.vesTable td, .vesTable th { padding: 4px 6px; }
+.vesTable select { max-width: 11em; }
+body.wideStep main { max-width: 1500px; }

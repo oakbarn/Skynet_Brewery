@@ -79,7 +79,8 @@ function pickFolder(start) {
 // the Vessels page answers (OakBarn Brewery, 2026-11-08): yes or no for each part, a manual valve kind, the heaters and probe found
 function vesselDetails(d) {
   const yn = x => (x === 'yes' ? 'yes' : 'no'), id = x => (x && typeof x.id === 'string' ? { id: x.id.slice(0, 120), label: String(x.label ?? x.id).slice(0, 80) } : null);
-  return { tangential: yn(d.tangential), outlet: ['low', 'bottom'].includes(d.outlet) ? d.outlet : 'none', sparge: ['left', 'right'].includes(d.sparge) ? d.sparge : 'none', herms: yn(d.herms),
+  const size = x => { const n = Number(x); return Number.isFinite(n) && n > 0 && n < 100000 ? Math.round(n * 1000) / 1000 : undefined; };
+  return { volume: size(d.volume), vheight: size(d.vheight), diameter: size(d.diameter), tangential: yn(d.tangential), outlet: ['low', 'bottom'].includes(d.outlet) ? d.outlet : 'none', sparge: ['left', 'right'].includes(d.sparge) ? d.sparge : 'none', herms: yn(d.herms),
     manualValve: ['ball', 'butterfly'].includes(d.manualValve) ? d.manualValve : 'none',
     motorValve: typeof d.motorValve === 'string' ? d.motorValve.slice(0, 120) : '',
     heaters: (Array.isArray(d.heaters) ? d.heaters : []).map(id).filter(Boolean).slice(0, 8), heater: id(d.heater), probe: id(d.probe) };
@@ -160,7 +161,7 @@ async function api(req, res, p, q) {
   // Make the Import Copy of the config file and convert the copy (Fritz, 2026-11-06). The first pass brings in the items on a
   // board port and the Tabs; everything else is a Placeholder on its Tab. names: 'skynet' (default) or 'bru' (Rule 15.1).
   if (p === '/api/convert' && m === 'POST') {
-    const { file, names, copyMedia, ids } = await body(req);
+    const { file, names, copyMedia, ids, units } = await body(req);
     if (!isConfig(file) || !fs.existsSync(file)) return json(res, 400, { error: 'Pick a BruControl config file (.brucfg) or backup (.bak) first.' });
     if (fs.statSync(file).size > MAX_CONFIG) return json(res, 400, { error: 'That file is too big to be a BruControl config file.' });
     // any .bak can be picked, so check it really is a BruControl config file inside before the Import Copy is made
@@ -186,6 +187,8 @@ async function api(req, res, p, q) {
     const look = themeOf(bruThemeToLook(bt?.theme));
     r.conv.theme = look.key;
     for (const w of r.conv.workspaces ?? []) if (!w.color && !w.style) Object.assign(w, newTabLook(look.key));     // each Tab is new: the Look's Tab colors
+    r.conv.units = units === 'Metric' ? 'Metric' : 'US';      // asked at the start (OakBarn Brewery, 2026-11-08)
+    r.report.units = r.conv.units;
     r.report.look = { bru: bt?.theme || '', file: bt?.file || '', key: look.key, name: look.name };
     // Connect your brewery (Fritz, 2026-11-07): the parts, and the first guesses from the names, the Scripts and the pictures
     const clues = readClues(fs.readFileSync(copy, 'utf8'));
@@ -234,6 +237,7 @@ async function api(req, res, p, q) {
     // Connect your brewery: what is connected to what, kept in the file for the step that builds the Vessels and draws the pipes
     const cn = connectAnswers(connect, converted.connect);
     out.connect = connectReport(cn);
+    out.connect.units = converted.conv.units || 'US';      // US or Metric, asked at the start: the vessels' sizes use it
     const nLinks = out.connect.links.length, nLoose = out.connect.loose.length;
     if (tabsOut.length) out.warnings = [...out.warnings, `${tabsOut.length} Tab(s) were left unticked and not imported${itemsDropped ? `, with their ${itemsDropped} item(s)` : ''}${holdersDropped ? `${itemsDropped ? ' and' : ', with their'} ${holdersDropped} Placeholder(s)` : ''}: ${tabsOut.join(', ')}.`];
     if (dropped.length) out.warnings = [...out.warnings, `${dropped.length} Interface(s) (board(s)) with no items were not imported: ${dropped.join(', ')}.`];
