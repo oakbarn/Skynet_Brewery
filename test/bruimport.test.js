@@ -13,7 +13,7 @@ const xml = `\uFEFF<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.or
   <DevicePort i:type="AnalogInPort"><ID>p2</ID><Number>61</Number></DevicePort>
   <DevicePort i:type="CounterInPort"><ID>p3</ID><Number>2</Number></DevicePort></Ports></Device></Devices>
 <Workspaces><Workspace><Name>Brew House</Name><BackgroundImagePath>C:\\BruControl\\Media\\back.png</BackgroundImagePath><Elements>
- <Element i:type="DeviceElement"><ID>e1</ID><Name>Pump Red</Name><DisplayName>Red Pump</DisplayName><Appearance><BackgroundImageIndex>2</BackgroundImageIndex><BackgroundImages><d:string>C:\\BruControl\\Media\\pump_off.png</d:string><d:string>E:\\Other\\pump_on.png</d:string><d:string i:nil="true"/></BackgroundImages></Appearance><PortID>p1</PortID><X>10</X><Y>20</Y><Width>100</Width><Height>60</Height></Element>
+ <Element i:type="DeviceElement"><ID>e1</ID><Name>Lamp Red</Name><DisplayName>Red Lamp</DisplayName><Appearance><BackgroundImageIndex>2</BackgroundImageIndex><BackgroundImages><d:string>C:\\BruControl\\Media\\pump_off.png</d:string><d:string>E:\\Other\\pump_on.png</d:string><d:string i:nil="true"/></BackgroundImages></Appearance><PortID>p1</PortID><X>10</X><Y>20</Y><Width>100</Width><Height>60</Height></Element>
  <Element i:type="DeviceElement"><ID>e2</ID><Name>MB_61_Wort</Name><DisplayName i:nil="true"/><PortID>p2</PortID><X>200</X><Y>20</Y><Width>100</Width><Height>60</Height></Element>
  <Element i:type="DeviceElement"><ID>e3</ID><Name>Flow</Name><PortID>p3</PortID><X>0</X><Y>900</Y><Width>50</Width><Height>20</Height></Element>
  <Element i:type="TimerElement"><ID>e4</ID><Name>tm_Mash</Name><X>400</X><Y>100</Y><Width>120</Width><Height>50</Height></Element>
@@ -28,11 +28,11 @@ assert.equal(c.devices.length, 1); assert.equal(c.devices[0].port, 'COM5'); asse
 assert.deepEqual(c.workspaces.map(w => [w.name, w.id]), [['Brew House', 'BH']]);
 assert.equal(c.workspaces[0].background, undefined, 'no Tab backgrounds for now');
 // only the items with an Interface and a Port that this step knows
-assert.deepEqual(c.elements.map(e => e.bru.name), ['Pump Red', 'MB_61_Wort']);
+assert.deepEqual(c.elements.map(e => e.bru.name), ['Lamp Red', 'MB_61_Wort']);
 const [pump, wort] = c.elements;
 assert.equal(pump.type, 'digitalOut'); assert.equal(pump.device, 'Main Brewery'); assert.equal(pump.channel, 28);
-assert.equal(pump.label, 'Red Pump'); assert.equal(pump.hideName, undefined);
-assert.equal(pump.name, 'MB_28_DO_Red~Pump_BH', 'Skynet name, Rule 3.1');
+assert.equal(pump.label, 'Red Lamp'); assert.equal(pump.hideName, undefined);
+assert.equal(pump.name, 'MB_28_DO_Red~Lamp_BH', 'Skynet name, Rule 3.1');
 assert.equal(wort.label, 'MB_61_Wort', 'a blank DisplayName: Label = Name'); assert.equal(wort.hideName, true, '... not shown on the Tab');
 assert.equal(wort.name, 'MB_61_AI_MB~61~Wort_BH'.replace(/~/g, '_'));
 assert.equal(c.scripts.length, 0, 'Processes come later');
@@ -45,7 +45,7 @@ assert.equal(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').visible, f
 assert.equal(c.graphics.find(g => g.placeholder.bruName === 'Flow').placeholder.why, 'CounterInPort pins come later');
 assert.equal(c.workspaces[0].height, 940, 'the Tab fits its items');
 assert.equal(r.report.items, 2); assert.equal(r.report.placeholders, 4);
-assert.deepEqual(r.report.renames.map(x => x.from), ['Pump Red', 'MB_61_Wort']);
+assert.deepEqual(r.report.renames.map(x => x.from), ['Lamp Red', 'MB_61_Wort']);
 
 // pictures and sounds (Fritz, 2026-11-06): their paths are imported and the files stay where they were (any folder) ...
 assert.equal(pump.backpath, 'C:\\BruControl\\Media\\pump_off.png'); assert.equal(pump.backpath_2, 'E:\\Other\\pump_on.png'); assert.equal(pump.background, 2);
@@ -68,7 +68,7 @@ assert.equal(nm('c:\\a\\X.PNG'), 'Images/User/x.png', 'the same picture once');
 
 // keep the BruControl names (Rule 15.1): spaces and characters a name may not have still change
 const k = importBruControl(xml, { names: 'bru' });
-assert.deepEqual(k.conv.elements.map(e => e.name), ['Pump_Red', 'MB_61_Wort']);
+assert.deepEqual(k.conv.elements.map(e => e.name), ['Lamp_Red', 'MB_61_Wort']);
 assert.ok(k.conv.warnings.some(w => /kept your BruControl names/.test(w)));
 assert.throws(() => importBruControl('<x/>'), /not a BruControl config file/);
 
@@ -80,3 +80,28 @@ assert.equal(copy, path.join(tmp, 'Import', 'BruControl', 'My_Brewery_2026-11-06
 assert.equal(fs.readFileSync(copy, 'utf8'), xml);
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log('bruimport tests passed');
+
+// the newest standard (OakBarn Brewery, 2026-11-08): a pump is a Skynet Pump Device (Rule 5.27), a control keeps its settings and
+// its probe (.input, for the SetPoint click, Rule 2.43), "not user controlled" means a click does nothing (Rule 2.44)
+{
+  const xml = `<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><Devices><Device><Name>Main</Name><Interface>Serial</Interface><Ports>
+<DevicePort i:type="DigitalOutPort"><ID>d1</ID><Number>45</Number></DevicePort><DevicePort i:type="AnalogInPort"><ID>t1</ID><Number>54</Number></DevicePort>
+<DevicePort i:type="PIDPort"><ID>p1</ID><Number>42</Number><InputPortID>t1</InputPortID><Kp>30</Kp><Ki>1</Ki><Target>170</Target><MaxOutput>100</MaxOutput></DevicePort>
+<DevicePort i:type="DigitalOutPort"><ID>d2</ID><Number>43</Number></DevicePort></Ports></Device></Devices>
+<Workspaces><Workspace><Name>Brew</Name><Elements>
+<Element i:type="DeviceElement"><DisplayName>HLT Pump</DisplayName><ID>e1</ID><Name>M_HLT Pump</Name><UserControl>true</UserControl><Width>100</Width><Height>60</Height><X>0</X><Y>0</Y><PortID>d1</PortID></Element>
+<Element i:type="DeviceElement"><DisplayName>HLT Temp</DisplayName><ID>e2</ID><Name>M_HLT Temp</Name><UserControl>false</UserControl><Width>100</Width><Height>60</Height><X>0</X><Y>100</Y><PortID>t1</PortID></Element>
+<Element i:type="DeviceElement"><DisplayName>HLT PID</DisplayName><ID>e3</ID><Name>HLT PID</Name><UserControl>true</UserControl><Width>100</Width><Height>60</Height><X>0</X><Y>200</Y><PortID>p1</PortID></Element>
+<Element i:type="DeviceElement"><DisplayName>Priority</DisplayName><ID>e4</ID><Name>Priority</Name><UserControl>false</UserControl><Width>100</Width><Height>60</Height><X>0</X><Y>300</Y><PortID>d2</PortID></Element>
+</Elements></Workspace></Workspaces></Configuration>`;
+  const r = importBruControl(xml, { names: 'skynet' }), by = n => r.conv.elements.find(e => e.bru.name === n);
+  const pump = by('M_HLT Pump');
+  assert.equal(pump.subtype, 'pump'); assert.equal(pump.w, 150); assert.equal(pump.h, 150);
+  assert.match(pump.imageOff, /^Images\/Skynet\/Pumps\//); assert.equal(pump.tap, 'toggle');
+  const pid = by('HLT PID');
+  assert.equal(pid.input, by('M_HLT Temp').name, 'the probe by its Skynet name');
+  assert.equal(pid.kp, 30); assert.equal(pid.target, 170); assert.equal(pid.maxOutput, 100);
+  assert.equal(by('Priority').tap, 'none', 'not user controlled: a click does nothing');
+  assert.equal(by('M_HLT Temp').tap, undefined, 'a probe keeps its SetPoint click');
+  console.log('bruimport newest standard tests passed');
+}
