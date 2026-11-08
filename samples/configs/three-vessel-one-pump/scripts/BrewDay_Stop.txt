@@ -4,21 +4,21 @@
 //Stops the brew day and turns everything off.
 stop "BrewDay_Flow"
 stop "looper_Advance_Switch"
-stop "tm_Step"
-stop "tm_BrewDay"
-alm_Hops = false
-alm_Step = false
-sw_Advance_BrewStatus.visible = false
-Pump_1 = false
-V_HLT_Out = false
-V_MLT_Out = false
-V_BK_Out = false
-V_To_MLT = false
-V_To_BK = false
-V_To_Ferm = false
-HLT_Heat = off
-BK_Heat = off
-Chiller_Water = false
+stop "wgt_TMR_Step~timer_BR"
+stop "wgt_TMR_Brew~day_BR"
+wgt_ALM_Hop~alarm_BR = false
+wgt_ALM_Step~alarm_BR = false
+wgt_SW_Advance_BR.visible = false
+BM_22_Pump_Pump_BR = false
+BM_24_eVlv_HLT~out_BR = false
+BM_25_eVlv_Mash~tun~out_BR = false
+BM_26_eVlv_Kettle~out_BR = false
+BM_27_eVlv_To~mash~tun_BR = false
+BM_28_eVlv_To~kettle_BR = false
+BM_29_eVlv_To~fermenter_BR = false
+BM_8_HE_HLT~element_BR = off
+BM_9_HE_Kettle~element_BR = off
+BM_30_Chill_Chiller~water_BR = false
 gblV_Brew_Status = 0
 gblS_Advance_Label = "Stopped"
 gblS_Advance_Label.background = 8

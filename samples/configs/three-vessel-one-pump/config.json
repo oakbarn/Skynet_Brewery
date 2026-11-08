@@ -64,7 +64,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "sw_Advance_BrewStatus",
+   "name": "wgt_SW_Advance_BR",
    "type": "switch",
    "x": 390,
    "y": 148,
@@ -94,7 +94,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "tm_Step",
+   "name": "wgt_TMR_Step~timer_BR",
    "type": "timer",
    "x": 0,
    "y": 216,
@@ -106,7 +106,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "tm_BrewDay",
+   "name": "wgt_TMR_Brew~day_BR",
    "type": "timer",
    "x": 265,
    "y": 216,
@@ -134,7 +134,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "alm_Hops",
+   "name": "wgt_ALM_Hop~alarm_BR",
    "type": "alarm",
    "x": 390,
    "y": 328,
@@ -149,7 +149,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "alm_Step",
+   "name": "wgt_ALM_Step~alarm_BR",
    "type": "alarm",
    "x": 260,
    "y": 400,
@@ -164,7 +164,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "alm_Warning",
+   "name": "wgt_ALM_Warning_BR",
    "type": "alarm",
    "x": 130,
    "y": 400,
@@ -179,7 +179,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "sw_Status_Testing",
+   "name": "wgt_SW_Testing_BR",
    "type": "switch",
    "x": 0,
    "y": 400,
@@ -195,7 +195,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "btn_Start_Brew_Day",
+   "name": "wgt_LBL_Start~Brew~Day_BR",
    "type": "label",
    "x": 0,
    "y": 480,
@@ -213,7 +213,7 @@
   },
   {
    "workspace": "Brewhouse",
-   "name": "btn_Stop_Brew_Day",
+   "name": "wgt_LBL_Stop~all~off_BR",
    "type": "label",
    "x": 210,
    "y": 480,
@@ -231,7 +231,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "w_Strike_Volume",
+   "name": "wgt_VAL_Strike~volume_RP",
    "type": "valueWidget",
    "x": 0,
    "y": 30,
@@ -253,7 +253,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "w_Mash_pH",
+   "name": "wgt_VAL_Mash~pH_RP",
    "type": "valueWidget",
    "x": 175,
    "y": 30,
@@ -275,7 +275,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "w_PreBoil_Volume",
+   "name": "wgt_VAL_Pre~boil~volume_RP",
    "type": "valueWidget",
    "x": 350,
    "y": 30,
@@ -297,7 +297,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "w_PreBoil_Gravity",
+   "name": "wgt_VAL_Pre~boil~gravity_RP",
    "type": "valueWidget",
    "x": 0,
    "y": 88,
@@ -319,7 +319,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "w_PostBoil_Volume",
+   "name": "wgt_VAL_Post~boil~volume_RP",
    "type": "valueWidget",
    "x": 175,
    "y": 88,
@@ -341,7 +341,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "w_OG",
+   "name": "wgt_VAL_Original~gravity_RP",
    "type": "valueWidget",
    "x": 350,
    "y": 88,
@@ -363,7 +363,7 @@
   },
   {
    "workspace": "Reporting",
-   "name": "w_Fermenter_Volume",
+   "name": "wgt_VAL_Into~fermenter_RP",
    "type": "valueWidget",
    "x": 0,
    "y": 146,
@@ -1334,7 +1334,7 @@
    "kind": "bool"
   },
   {
-   "name": "HLT_Temp",
+   "name": "BM_700_1W_HLT_BR",
    "type": "temperature",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
@@ -1350,7 +1350,7 @@
    "look": "lcd",
    "sim": {
     "start": 62,
-    "heater": "HLT_Heat",
+    "heater": "BM_8_HE_HLT~element_BR",
     "heatRate": 1.2,
     "maxTemp": 212
    },
@@ -1359,7 +1359,7 @@
    "vpKind": "thermowell"
   },
   {
-   "name": "MLT_Temp",
+   "name": "BM_701_1W_Mash_BR",
    "type": "temperature",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
@@ -1375,11 +1375,11 @@
    "look": "lcd",
    "sim": {
     "start": 62,
-    "follow": "HLT_Temp",
+    "follow": "BM_700_1W_HLT_BR",
     "followWhen": [
-     "Pump_1",
-     "V_HLT_Out",
-     "V_To_MLT"
+     "BM_22_Pump_Pump_BR",
+     "BM_24_eVlv_HLT~out_BR",
+     "BM_27_eVlv_To~mash~tun_BR"
     ],
     "followLoss": 11,
     "loss": 0.0002
@@ -1389,7 +1389,7 @@
    "vpKind": "thermowell"
   },
   {
-   "name": "BK_Temp",
+   "name": "BM_702_1W_Kettle_BR",
    "type": "temperature",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
@@ -1405,17 +1405,17 @@
    "look": "lcd",
    "sim": {
     "start": 62,
-    "heater": "BK_Heat",
+    "heater": "BM_9_HE_Kettle~element_BR",
     "heatRate": 1.2,
     "maxTemp": 212,
-    "follow": "MLT_Temp",
+    "follow": "BM_701_1W_Mash_BR",
     "followWhen": [
-     "Pump_1",
-     "V_MLT_Out",
-     "V_To_BK"
+     "BM_22_Pump_Pump_BR",
+     "BM_25_eVlv_Mash~tun~out_BR",
+     "BM_28_eVlv_To~kettle_BR"
     ],
     "followLoss": 1,
-    "cooler": "Chiller_Water",
+    "cooler": "BM_30_Chill_Chiller~water_BR",
     "coolRate": 6,
     "coolTo": 58
    },
@@ -1424,7 +1424,7 @@
    "vpKind": "thermowell"
   },
   {
-   "name": "HLT_Heat",
+   "name": "BM_8_HE_HLT~element_BR",
    "type": "digitalOut",
    "subtype": "element",
    "heatMethod": "hysteresis",
@@ -1433,7 +1433,7 @@
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
    "channel": 8,
-   "input": "HLT_Temp",
+   "input": "BM_700_1W_HLT_BR",
    "label": "HLT element",
    "target": 150,
    "onOffset": 1,
@@ -1450,7 +1450,7 @@
    "vpKind": "element"
   },
   {
-   "name": "BK_Heat",
+   "name": "BM_9_HE_Kettle~element_BR",
    "type": "digitalOut",
    "subtype": "element",
    "heatMethod": "hysteresis",
@@ -1458,7 +1458,7 @@
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
    "channel": 9,
-   "input": "BK_Temp",
+   "input": "BM_702_1W_Kettle_BR",
    "label": "Kettle element",
    "target": 150,
    "onOffset": 1,
@@ -1475,7 +1475,7 @@
    "vpKind": "element"
   },
   {
-   "name": "Pump_1",
+   "name": "BM_22_Pump_Pump_BR",
    "type": "digitalOut",
    "subtype": "pump",
    "workspace": "Brewhouse",
@@ -1495,7 +1495,7 @@
    "flipH": true
   },
   {
-   "name": "Chiller_Water",
+   "name": "BM_30_Chill_Chiller~water_BR",
    "type": "digitalOut",
    "workspace": "Brewhouse",
    "device": "Brewery Mega",
@@ -1507,11 +1507,10 @@
    "h": 60,
    "look": "dark",
    "onText": "COOLING",
-   "offText": "off",
-   "confirm": true
+   "offText": "off"
   },
   {
-   "name": "V_HLT_Out",
+   "name": "BM_24_eVlv_HLT~out_BR",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Brewhouse",
@@ -1533,7 +1532,7 @@
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
   },
   {
-   "name": "V_MLT_Out",
+   "name": "BM_25_eVlv_Mash~tun~out_BR",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Brewhouse",
@@ -1555,7 +1554,7 @@
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
   },
   {
-   "name": "V_BK_Out",
+   "name": "BM_26_eVlv_Kettle~out_BR",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Brewhouse",
@@ -1577,7 +1576,7 @@
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
   },
   {
-   "name": "V_To_MLT",
+   "name": "BM_27_eVlv_To~mash~tun_BR",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Brewhouse",
@@ -1599,7 +1598,7 @@
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
   },
   {
-   "name": "V_To_BK",
+   "name": "BM_28_eVlv_To~kettle_BR",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Brewhouse",
@@ -1621,7 +1620,7 @@
    "imageOverlay": "Images/Skynet/On_Off/Overlay_Bolt.svg"
   },
   {
-   "name": "V_To_Ferm",
+   "name": "BM_29_eVlv_To~fermenter_BR",
    "type": "digitalOut",
    "subtype": "valve",
    "workspace": "Brewhouse",
@@ -1654,7 +1653,8 @@
    "h": 24,
    "text": "Readings (tap to enter; they go to the database)",
    "fontSize": 15,
-   "bold": true
+   "bold": true,
+   "name": "wgt_TXT_Readings_RP"
   },
   {
    "id": "t_rec",
@@ -1666,7 +1666,8 @@
    "h": 36,
    "text": "Recipe: Import > BeerXML (BeerSmith: File > Export > BeerXML) fills this tab, or tap a box to type it.",
    "fontSize": 18,
-   "bold": true
+   "bold": true,
+   "name": "wgt_TXT_Recipe~import_RE"
   },
   {
    "id": "t_mash",
@@ -1678,7 +1679,8 @@
    "h": 30,
    "text": "Mash",
    "fontSize": 18,
-   "bold": true
+   "bold": true,
+   "name": "wgt_TXT_Mash_RE"
   },
   {
    "id": "t_hops",
@@ -1690,7 +1692,8 @@
    "h": 30,
    "text": "Hops",
    "fontSize": 15,
-   "bold": true
+   "bold": true,
+   "name": "wgt_TXT_Hops_RE"
   },
   {
    "id": "t_hopuse",
@@ -1701,7 +1704,8 @@
    "w": 740,
    "h": 24,
    "text": "use: -888 start of boil, 919 boil, -444 first wort, -333 mash, -999 whirlpool, -111 dry hop",
-   "fontSize": 13
+   "fontSize": 13,
+   "name": "wgt_TXT_Hop~use~codes_RE"
   },
   {
    "id": "v_HLT",
@@ -2266,7 +2270,8 @@
    "w": 220,
    "h": 32,
    "fontSize": 18,
-   "bold": true
+   "bold": true,
+   "name": "wgt_TXT_Hot~liquor~tank_BR"
   },
   {
    "id": "t_mlt",
@@ -2278,7 +2283,8 @@
    "w": 200,
    "h": 32,
    "fontSize": 18,
-   "bold": true
+   "bold": true,
+   "name": "wgt_TXT_Mash~tun_BR"
   },
   {
    "id": "t_bk",
@@ -2290,7 +2296,8 @@
    "w": 200,
    "h": 32,
    "fontSize": 18,
-   "bold": true
+   "bold": true,
+   "name": "wgt_TXT_Boil~kettle_BR"
   },
   {
    "id": "ip_ferm",
@@ -2308,7 +2315,7 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "ip_h_out",
-   "to": "dev:V_HLT_Out:in",
+   "to": "dev:BM_24_eVlv_HLT~out_BR:in",
    "points": [
     [
      710,
@@ -2328,7 +2335,7 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "ip_m_out",
-   "to": "dev:V_MLT_Out:in",
+   "to": "dev:BM_25_eVlv_Mash~tun~out_BR:in",
    "points": [
     [
      1070,
@@ -2348,7 +2355,7 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "ip_b_out",
-   "to": "dev:V_BK_Out:in",
+   "to": "dev:BM_26_eVlv_Kettle~out_BR:in",
    "points": [
     [
      1430,
@@ -2367,7 +2374,7 @@
    "id": "p_Brewhouse_4",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "dev:V_HLT_Out:out",
+   "from": "dev:BM_24_eVlv_HLT~out_BR:out",
    "to": "gmw2lvfnr451",
    "points": [
     [
@@ -2409,7 +2416,7 @@
    "id": "p_Brewhouse_5",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "dev:V_MLT_Out:out",
+   "from": "dev:BM_25_eVlv_Mash~tun~out_BR:out",
    "to": "gmw2lvfnqu29",
    "points": [
     [
@@ -2429,7 +2436,7 @@
    "id": "p_Brewhouse_6",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "dev:V_BK_Out:out",
+   "from": "dev:BM_26_eVlv_Kettle~out_BR:out",
    "to": "gmw2lvfnsw9p",
    "points": [
     [
@@ -2556,7 +2563,7 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "gmw2lvfns1n4",
-   "to": "dev:Pump_1:in",
+   "to": "dev:BM_22_Pump_Pump_BR:in",
    "points": [
     [
      879,
@@ -2577,7 +2584,7 @@
    "id": "p_Brewhouse_9",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "dev:Pump_1:out",
+   "from": "dev:BM_22_Pump_Pump_BR:out",
    "to": "gmw2lvfnqrtx",
    "points": [
     [
@@ -2598,7 +2605,7 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "gmw2lvfnqzjc",
-   "to": "dev:V_To_Ferm:in",
+   "to": "dev:BM_29_eVlv_To~fermenter_BR:in",
    "points": [
     [
      1208,
@@ -2617,7 +2624,7 @@
    "id": "p_Brewhouse_11",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "dev:V_To_Ferm:out",
+   "from": "dev:BM_29_eVlv_To~fermenter_BR:out",
    "to": "gmw2lvfntr04",
    "points": [
     [
@@ -2700,7 +2707,7 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "gmw2lvfnu209",
-   "to": "dev:V_To_MLT:out",
+   "to": "dev:BM_27_eVlv_To~mash~tun_BR:out",
    "points": [
     [
      890,
@@ -2721,7 +2728,7 @@
    "id": "p_Brewhouse_14",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "dev:V_To_MLT:in",
+   "from": "dev:BM_27_eVlv_To~mash~tun_BR:in",
    "to": "gmw2lvfnu3rj",
    "points": [
     [
@@ -2784,7 +2791,7 @@
    "kind": "pipe",
    "workspace": "Brewhouse",
    "from": "gmw2lvfnu1oy",
-   "to": "dev:V_To_BK:out",
+   "to": "dev:BM_28_eVlv_To~kettle_BR:out",
    "points": [
     [
      1260,
@@ -2805,7 +2812,7 @@
    "id": "p_Brewhouse_16",
    "kind": "pipe",
    "workspace": "Brewhouse",
-   "from": "dev:V_To_BK:in",
+   "from": "dev:BM_28_eVlv_To~kettle_BR:in",
    "to": "gmw2lvfnvgm9",
    "points": [
     [

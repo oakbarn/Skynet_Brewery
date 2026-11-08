@@ -191,7 +191,7 @@ console.log('method spots tests passed');
   assert.equal(c.elements[2].type, 'pid', 'a PID of its own (not built in) stays as it is');
   const { readFileSync } = await import('node:fs');
   const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url)));
-  const hlt = s.elements.find(e => e.name === 'HLT_Heat');
+  const hlt = s.elements.find(e => e.name === 'BM_8_HE_HLT~element_BR');
   assert.deepEqual(controlMethods(hlt), ['Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
 }
 console.log('built in Element upgrade tests passed');
