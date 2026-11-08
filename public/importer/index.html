@@ -100,12 +100,12 @@
                 use</b> (On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise). Only the main method and the ticked ones can be used.</li>
               <li>Each allowed method gets a small <b>one-click spot</b> under the Element on its Tab (or under it on its Vessel), so
                 one click switches it, for example from Duty Cycle to PID. A Process can switch it too, for example
-                <code>MP_42_HE_HLT_Heat_BH.PID</code>.</li>
+                <code>MP_42_HE_HLT~Heat_BH.PID</code>.</li>
               <li>It is simply turned <b>On</b> or <b>Off</b>, whatever its method. BruControl turned a PID or Hysteresis on and off
                 with <i>Enabled</i>; Skynet does not use that word.</li>
               <li>Heating Elements are the only Devices with more than one method: the wiring of everything else fixes how it is
                 controlled.</li>
-              <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_HE_HLT_Heat_BH</code>.</li>
+              <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_HE_HLT~Heat_BH</code>.</li>
               <li>The Import does this for you: the first Element on the port sets the main method, the others are ticked, and if
                 BruControl showed both on a Tab, the second becomes a <b>Method Clone</b> tile with its BruControl Label. Your
                 old names (<i>HLT_PID</i>) still work in a Process.</li>
@@ -165,14 +165,14 @@
         <b>Interface</b> and <b>Port</b>, then the <b>Type</b> (Digital Output, Temperature Probe type, Heating Element, Valve and so
         on), then what it is: the <b>Label</b> (displayname), which you give it in most cases. The last part of a Name tells you the
         <b>Tab</b> (Workspace). At first it may seem a bit complicated, but you may find it familiar and useful; that is up to you.
-        You can give your own Name instead of the suggested one when you add a new Device (Element). <b>Names cannot have spaces</b>,
-        so every space in a Name becomes an underscore <code>_</code>.</p>
+        You can give your own Name instead of the suggested one when you add a new Device (Element). <b>Names cannot have spaces</b>:
+        the underscore <code>_</code> separates the parts of a Name, and a space in the Label part becomes a tilde <code>~</code>.</p>
       <p><b>When importing</b>, your BruControl Names are changed to the Skynet naming convention, like everything else that comes
         in (Skynet Rule 15.1). Every change is listed in the import report, and Processes are updated to the new Names. You may choose
         to keep your BruControl Names instead, but we will ask you twice, because <b>the Skynet way is better in the end</b>: one look at
         a Name tells you the Interface, port, type, Label and Tab, and every new Device you add will have a Skynet Name anyway.</p>
-      <p class="example">Example: <code>MB_A0_10KNTC_Mash_Tun_SP</code> &nbsp;=&nbsp; Interface <i>MB</i>, port <i>A0</i>, type
-        <i>10KNTC</i> (a 10K thermistor probe), Label <i>Mash Tun</i> (its space is now <code>_</code>), Tab <i>SP</i>.</p>
+      <p class="example">Example: <code>MB_A0_10KNTC_Mash~Tun_SP</code> &nbsp;=&nbsp; Interface <i>MB</i>, port <i>A0</i>, type
+        <i>10KNTC</i> (a 10K thermistor probe), Label <i>Mash Tun</i> (its space is now <code>~</code>), Tab <i>SP</i>.</p>
     </div>
 
     <div class="card topic">

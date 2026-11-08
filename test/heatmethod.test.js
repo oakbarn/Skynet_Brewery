@@ -112,7 +112,7 @@ console.log('heatmethod tests passed');
   const [h] = heat;
   assert.deepEqual([h.type, h.subtype, h.heatMethod], ['digitalOut', 'element', 'dutyCycle'], 'a Heating Element starting in the first one\'s method');
   assert.deepEqual(h.heatControls.map(c => [c.name, c.bruName, c.method]), [['M_HLT_Heat', 'M_HLT Heat', 'Duty Cycle'], ['HLT_PID', 'HLT PID', 'PID']]);
-  assert.equal(h.name, 'MP_42_HE_HLT_Heat_BH', 'a Heating Element is HE (Rule 3.1)');
+  assert.equal(h.name, 'MP_42_HE_HLT~Heat_BH', 'a Heating Element is HE (Rule 3.1)');
   assert.ok(h.methodSpot_dutyCycle && h.methodSpot_pid, 'a one-click spot for Duty Cycle and for PID');
   const cl = conv.graphics.find(g => g.kind === 'clone');
   assert.deepEqual([cl.of, cl.x, cl.y], [h.name, 300, 20], 'the second placing is a Clone of it');
