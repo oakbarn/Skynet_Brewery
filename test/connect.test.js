@@ -94,3 +94,6 @@ const clues = readClues(xml);
 assert.deepEqual(clues.scripts, [{ name: 'Mash', text: '"M_V1" State = on' }]);
 assert.deepEqual(clues.backgrounds, { Brewhouse: { path: 'C:\\Pics\\brewery.jpg', w: 1800, h: 900 } });
 console.log('connect tests passed');
+
+// the Chart Widget tests run here too, so package.json stays as it is (no clash with other open PRs)
+await import('./chart.test.js');
