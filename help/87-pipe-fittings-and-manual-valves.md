@@ -29,7 +29,7 @@ A **Manual Valve** is a special Widget: a pipe fitting you turn by hand, and a p
 
 - Its **.state** is true (open) or false (closed). A closed Manual Valve stops flow in the pipes on it; an open one lets it pass the way it was going.
 - **A click on it on its Tab opens or closes it, at any time.** That is the only way its .state changes. Operators and Admins can click it; Viewers can't. Every screen shows the change.
-- It is a **Confirmation Widget** (2026-11-08, Skynet Rule 1.28, Help 162 Confirmation Widgets): its **.confirmation** switch in its Properties is on. A click shows a pop-up, **✋ OPEN Kettle drain by hand, then press Done**: open the real valve, then press **Done**, and only then does it show open. **Cancel** leaves it as it was. Switch .confirmation off and a click opens or closes it at once.
+- It is a **Confirmation Widget** (2026-11-08, Skynet Rule 1.28, [Confirmation Widgets](162-confirmation-widgets)): its **.confirmation** switch in its Properties is on. A click shows a pop-up, **✋ OPEN Kettle drain by hand, then press Done**: open the real valve, then press **Done**, and only then does it show open. **Cancel** leaves it as it was. Switch .confirmation off and a click opens or closes it at once.
 - While it is open, the **open overlay** (Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, a green ring and a tick) is drawn on top of it.
 - It has **two IPs**, one at each pipe end, so a pipe joins each side of it (Skynet Rule 5.24, Help 123).
 - Its Properties: a note with its name and state, **Label** (used in the "by hand" message) and **Show label**, **.confirmation**, then **Autosize to pipe**, **X**, **Y**, **Width**, **Height** and 🔒 Lock.
