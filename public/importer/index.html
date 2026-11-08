@@ -61,9 +61,9 @@
             Ethernet and WiFi links, and the same pin numbers. Nothing is rewired.</li>
           <li><b>Your Elements, Workspaces and Scripts</b> all come over. Each one is explained below.</li>
           <li><b>Pictures and Sounds:</b> the picture paths and sounds are imported. The files stay where they were, so BruControl
-            continues to work normally. You do have the option of copying those files to a new folder that consolidates all the
-            picture files and sound files, so if you move to a Pi or another computer, those files will be available. They are
-            never deleted in their original spot, just copies made.</li>
+            continues to work normally. You can also copy those files into one folder with subfolders (recommended), so if you
+            move to a Pi or another computer, those files will be available. They are never deleted in their original spot, just
+            copies made. New pictures and sounds you add in Skynet always go into its media folders.</li>
         </ul>
       </div>
       <div class="card">
@@ -348,10 +348,11 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <h2>Pictures and Sounds</h2>
     <div class="card">
       <p>The picture paths and sounds are imported. <b>The files stay where they were</b>, so BruControl continues to work normally.</p>
-      <label class="choice"><input type="checkbox" id="copyMedia"> Also copy my pictures and sounds into one folder</label>
+      <label class="choice"><input type="checkbox" id="copyMedia" checked> <b>Also copy my pictures and sounds into one folder with subfolders (Recommended)</b></label>
       <p class="small">Copies every picture into <code>media\Images\User</code> and every sound into <code>media\sounds\User</code> of the
         Skynet Panel, so they are all together if you move to a Pi or another computer. They are never deleted in their original
         spot, just copies made.</p>
+      <p class="small">New pictures and sounds you add in Skynet are always put in these media folders, whatever you pick here.</p>
     </div>
     <div class="buttons"><button id="back4">◀ Back</button><span class="spacer"></span><button class="primary" id="next4">Next ▶</button></div>
   </section>

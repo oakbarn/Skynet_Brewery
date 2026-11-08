@@ -82,10 +82,12 @@ Pick how your items are named in Skynet:
   BruControl names?"** and then **"Last chance"**. **No** (use the Skynet names) is the default both times. Spaces and
   characters a name may not have still change.
 
-**Pictures and Sounds:** the picture paths and sounds are imported, and the files stay where they were. You may also tick
-**Also copy my pictures and sounds into one folder**: every picture is then copied into `media\Images\User` and every sound
+**Pictures and Sounds:** the picture paths and sounds are imported, and the files stay where they were, so BruControl
+continues to work normally. The tick box **Also copy my pictures and sounds into one folder with subfolders (Recommended)**
+is ticked to start with: every picture is then copied into `media\Images\User` and every sound
 into `media\sounds\User` of the Skynet Panel, so they are all together if you move to a Pi or another computer, and the items
 use the copies. They are never deleted in their original spot, just copies made, and a copy already there is never written over.
+Untick it to keep only the paths. New pictures and sounds you add in Skynet are always put in its media folders.
 
 Your BruControl **DisplayName** becomes the **Label**, the name shown on the Tab. A blank DisplayName: the Label is the Name,
 and it is not shown on the Tab.
