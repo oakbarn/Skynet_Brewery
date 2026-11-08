@@ -117,3 +117,8 @@ body.cnFullOpen { overflow: hidden; }
 .cnChip.picked { border-color: #FFD400; }
 #cnAiText { width: 100%; font-family: var(--mono); box-sizing: border-box; }
 .quote { font-style: italic; border-left: 4px solid var(--accent); padding: 4px 10px; max-width: 980px; }
+
+/* page 5 drill-down (OakBarn Brewery, 2026-11-08): the IDs are greyed on the read-only Interfaces page */
+.greyId { color: #8a8a8a; }
+.ifId { width: 4.5em; text-transform: uppercase; font-weight: 600; }
+.idHelp ol { margin: 4px 0 8px; }

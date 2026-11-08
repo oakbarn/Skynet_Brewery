@@ -187,15 +187,75 @@ async function namesChoice() {
     'Yes, keep my BruControl names', 'No, back out and use the Skynet names')) return back();
   return 'bru';
 }
-async function convert() {
-  const names = await namesChoice();
+// Page 5 is a drill-down (OakBarn Brewery, 2026-11-08: "Steer the Importer to a Drill Down type question where the User Confirms what
+// is imported in small steps"): 5a the Interfaces found (read only), 5b the new ID column (the IDs can be changed, then Accept),
+// 5c the rest (Tabs, Look, Pictures and Sounds, the notes). Changed IDs convert the Import Copy again with them.
+const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` class="${cls[i]}"` : ''}>${c}</td>`).join('') + '</tr>';
+async function convert(ids = null) {
+  const names = ids ? state.names : await namesChoice();
+  state.names = names;
   show(5);
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
+  sub5('busy');
   try {
-    const r = await api('POST', '/api/convert', { file: state.sel, names, copyMedia: true });
+    const r = await api('POST', '/api/convert', { file: state.sel, names, copyMedia: true, ...(ids ? { ids } : {}) });
     state.converted = true;
     state.connect = r.connect;
-    const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` class="${cls[i]}"` : ''}>${c}</td>`).join('') + '</tr>';
+    state.r = r;
+    sub5(ids ? 'sum' : 'if');
+  } catch (e) { state.converted = false; box.innerHTML = `<p class="note">${esc(e.message)}</p>`; }
+}
+function sub5(which) {
+  state.sub5 = which;
+  // the page's own Back and Next walk the small steps; on the ID step Next is Accept
+  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = which === 'id' ? 'Accept ▶' : 'Next ▶'; }
+  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : 'Boards and Tabs';
+  if (which === 'busy') return;
+  const r = state.r, box = $('#convBody');
+  if (which === 'if') {
+    box.innerHTML = `<div class="card"><p>These are the Interfaces (boards) in your BruControl config file. Nothing can be changed on this page;
+      it only shows what was found. The <b>ID</b> column is new in Skynet and is explained on the next page.</p>
+      <table class="ifTable"><tr><th>Interface</th><th>ID</th><th>Items</th><th>Interface Type</th><th>Interface Connection</th><th>Enabled</th></tr>
+      ${r.interfaces.map(d => row([esc(d.name), `<span class="greyId">${esc(d.id)}</span>`, d.items, esc(d.typeName || ''), esc(d.connection || ''), d.enabled ? '✓' : '✗'], ['', '', 'n', '', '', 'c'])).join('')}</table></div>`;
+    return;
+  }
+  if (which === 'id') {
+    const ex = r.renames.find(x => /_\d+_/.test(x.to))?.to || 'MP_45_DO_M~HLT~Pump_MD';
+    box.innerHTML = `<div class="cards two"><div class="card"><table class="ifTable"><tr><th>Interface</th><th>ID</th></tr>
+      ${r.interfaces.map(d => row([esc(d.name), `<input class="ifId" data-name="${esc(d.name)}" value="${esc(d.id)}" maxlength="4" size="5" spellcheck="false" title="Up to 4 letters (A to Z); 2 is best" aria-label="ID for ${esc(d.name)}">`])).join('')}</table>
+      <p class="small" id="idNote"></p></div>
+      <div class="card idHelp"><p><b>The ID column is something new in Skynet.</b> Skynet gives every Interface (board) a short <b>ID</b> of up to
+        four letters. The ID becomes the first part of the <b>suggested Skynet name</b> of every Device on that board, so you can tell at a
+        glance which board a Device is wired to.</p>
+        <p>The suggested Skynet name is always unique, and it is built from five parts, with one <code>_</code> between them:</p>
+        <ol><li><b>Interface ID</b>: the board, for example <code>MP</code> for Main Panel.</li>
+          <li><b>Port</b>: the pin it is wired to, for example <code>45</code> or <code>A0</code>.</li>
+          <li><b>Type ID</b>: what kind of Device it is, for example <code>DO</code> (a digital output), <code>HE</code> (a Heating Element), <code>10KNTC</code> (a probe).</li>
+          <li><b>Label</b>: your own name for it, the BruControl DisplayName. A space becomes <code>~</code>, so <i>Mash Tun</i> is <code>Mash~Tun</code>.</li>
+          <li><b>Tab ID</b>: the two letters of the Tab (old Workspace) it is on.</li></ol>
+        <p>For example <code>${esc(ex)}</code>. If two names would come out the same, the second gets <code>_2</code> before its Tab ID, so no two are ever alike.</p>
+        <p><b>The Importer chose these IDs for you.</b> You may change them: up to 4 letters, but <b>2 are preferred</b>, because a short ID keeps every
+        name short. Each ID must be different. Accept them, or change them and then Accept, before going on. After this, an ID is best left as it is,
+        because it is part of every Device name on that board.</p></div></div>
+`;
+    const check = () => {
+      const vals = [...box.querySelectorAll('.ifId')].map(i => i.value.trim().toUpperCase());
+      const bad = vals.some(v => !/^[A-Z]{1,4}$/.test(v)), dup = new Set(vals).size !== vals.length, long = vals.some(v => v.length > 2);
+      $('#idNote').innerHTML = bad ? '<span class="note">Use 1 to 4 letters (A to Z), no numbers or spaces.</span>' : dup ? '<span class="note">Each ID must be different.</span>'
+        : long ? 'An ID longer than 2 letters is allowed; 2 letters keep the names shorter.' : '';
+      for (const id of ['#next5', '#next5a']) $(id).disabled = bad || dup;
+    };
+    box.oninput = e => { if (e.target.classList.contains('ifId')) { e.target.value = e.target.value.toUpperCase(); check(); } };
+    check();
+    state.accept = () => {
+      const ids = {}; let changed = false;
+      for (const i of box.querySelectorAll('.ifId')) { const v = i.value.trim().toUpperCase(); ids[i.dataset.name] = v; if (v !== r.interfaces.find(d => d.name === i.dataset.name)?.id) changed = true; }
+      if (changed) convert(ids); else sub5('sum');
+    };
+    return;
+  }
+  for (const id of ['#next5', '#next5a']) $(id).disabled = false;
+  {
     box.innerHTML = `<div class="card"><p>Import Copy: <code>${esc(r.copy)}</code></p>
         <p>Names: <b>${r.names === 'bru' ? 'your BruControl names (kept after two warnings)' : 'Skynet names'}</b>.
         <b>${r.items}</b> items on a board port come in. <b>${r.placeholders}</b> other items are a <b>Placeholder</b> on their Tab, where
@@ -230,9 +290,9 @@ async function convert() {
       ${r.renames.length ? `<details><summary>New names (${r.renames.length})</summary><table><tr><th>BruControl</th><th>Skynet</th></tr>
         ${r.renames.map(x => row([esc(x.from), esc(x.to)])).join('')}</table></details>` : ''}
       ${r.warnings.length ? `<h3>Notes for the report</h3><ul>${r.warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}`;
-  } catch (e) { state.converted = false; box.innerHTML = `<p class="note">${esc(e.message)}</p>`; }
+  }
 }
-for (const id of ['#next4', '#next4a']) $(id).onclick = convert;
+for (const id of ['#next4', '#next4a']) $(id).onclick = () => convert();
 // the Globals-only Tab question (Fritz, 2026-11-08): Yes (a recipe import) leaves it unticked, No ticks it
 $('#convBody').addEventListener('click', e => {
   const b = e.target.closest('.askYes, .askNo'); if (!b) return;
@@ -240,8 +300,10 @@ $('#convBody').addEventListener('click', e => {
   if (box) box.checked = b.classList.contains('askYes');
   for (const x of b.parentElement.querySelectorAll('button')) x.classList.toggle('primary', x === b);
 });
-for (const id of ['#back5', '#back5a']) $(id).onclick = () => show(4);
+for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
+  if (state.sub5 === 'if') return sub5('id');
+  if (state.sub5 === 'id') return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
   startConnect(state.connect, { toast });
   show(6);
