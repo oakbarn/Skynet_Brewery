@@ -1,6 +1,6 @@
 // Rule 2.38 (Fritz, 2026-11-06): explanations live in hover help. Pure parts here (the hover was checked in a browser)
 import assert from 'node:assert/strict';
-import { helpOf, placeBubble, helpSnippet, HOVER_DELAY_MS, GAP } from '../public/hoverhelp.js';
+import { helpOf, placeBubble, helpSnippet, HOVER_DELAY_MS, GAP, helpTarget, FIELD } from '../public/hoverhelp.js';
 
 assert.equal(HOVER_DELAY_MS, 0, 'Fritz: help is always available instantly');
 // data-help first; a tip label's old title moves to data-help so the browser's own tooltip does not show too
@@ -26,3 +26,12 @@ assert.equal(helpSnippet('# T\n\nTwo of them:\n\n| Widget | Shows |\n|---|---|\n
 assert.equal(helpSnippet('# T\n\nThree Widgets (Skynet Rule 1.23, Fritz 2026-11-05):\n\n- a Value\n- a Time\n\nMore.'), 'Three Widgets: a Value, a Time.', 'a list after : comes along; Rule notes are left out');
 assert.equal(helpSnippet('# T\n\n**Semi_Widgets_Devices** are a class.'), 'Semi_Widgets_Devices are a class.', 'underscores in names stay');
 console.log('hoverhelp ok');
+// a dropdown or a typing box never shows hover help over itself: it would cover its own list of choices (OakBarn Brewery, 2026-11-08)
+{
+  const fake = (isField, helpEl) => ({ closest: sel => sel === FIELD ? (isField ? {} : null) : helpEl });
+  assert.equal(helpTarget(fake(true, { dataset: { help: 'x' } })), null, 'a select with help: none over it');
+  const th = { dataset: { help: 'How the valve is built in' } };
+  assert.equal(helpTarget(fake(false, th)), th, 'its column heading still has it');
+  assert.ok(/select/.test(FIELD) && /textarea/.test(FIELD) && /checkbox/.test(FIELD), 'tick boxes keep theirs');
+  console.log('hover help never covers a field: ok');
+}
