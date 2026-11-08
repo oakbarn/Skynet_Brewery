@@ -134,3 +134,4 @@ body.wideStep main { max-width: 1500px; }
 .noDisplay { color: #8a8a8a; font-style: italic; }
 .itemTable .itemLabel { width: 12em; }
 .itemTable .itemLabel.blankLabel { border: 2px solid #d9534f; }
+.partTable select.pf { min-width: 9em; } .partTable .pName { width: 12em; } .howMany input { width: 5em; }

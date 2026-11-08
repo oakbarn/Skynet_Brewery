@@ -11,7 +11,7 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme, readClues, dropEmptyInterfaces, dropEmptyTabs } from './lib/importer.js';
-import { findParts, findVesselDetails, findProbes, findHeaters, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
+import { findParts, itemKind, guessPartDetails, cleanPartDetails, PART_PAGES, findVesselDetails, findProbes, findHeaters, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
 import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
 import { readVersion } from './lib/version.js';
@@ -118,6 +118,17 @@ function connectAnswers(sent, found) {
   return { parts: p2, chains, fermenters, places };
 }
 
+// the item pages' answers, kept only when they make sense (OakBarn Brewery, 2026-11-08)
+function partsAnswers(parts, conv) {
+  const names = new Set((conv.elements ?? []).map(e => e.name)), out = {};
+  for (const page of PART_PAGES) {
+    const a = parts?.[page.kind]; if (!a || typeof a !== 'object') continue;
+    const items = (Array.isArray(a.items) ? a.items : []).filter(i => names.has(i?.name)).slice(0, 500).map(i => ({ name: i.name, ...cleanPartDetails(page.kind, i) }));
+    const extras = (Array.isArray(a.extras) ? a.extras : []).slice(0, 100).map((x, n) => ({ name: String(x?.name ?? '').trim().slice(0, 40) || `${page.one} ${items.length + n + 1}`, ...cleanPartDetails(page.kind, x) }));
+    out[page.kind] = { count: items.length + extras.length, items, extras };
+  }
+  return out;
+}
 async function api(req, res, p, q) {
   const m = req.method;
   if (p === '/api/ping' && m === 'GET') return json(res, 200, { ok: true });     // the window checks the Importer is still running
@@ -189,6 +200,9 @@ async function api(req, res, p, q) {
     const look = themeOf(bruThemeToLook(bt?.theme));
     r.conv.theme = look.key;
     for (const w of r.conv.workspaces ?? []) if (!w.color && !w.style) Object.assign(w, newTabLook(look.key));     // each Tab is new: the Look's Tab colors
+    // the item pages (Pumps, Heaters, Probes, Valves, Flow Meters, Other): each item's kind and first guesses (OakBarn Brewery, 2026-11-08)
+    { const byName = new Map((r.conv.elements ?? []).map(e => [e.name, e]));
+      for (const it of r.report.portItems ?? []) { const el = byName.get(it.name); it.kind = itemKind(el); it.guess = guessPartDetails(el ?? {}, it.kind); } }
     r.conv.units = units === 'Metric' ? 'Metric' : 'US';      // asked at the start (OakBarn Brewery, 2026-11-08)
     r.report.units = r.conv.units;
     r.report.look = { bru: bt?.theme || '', file: bt?.file || '', key: look.key, name: look.name };
@@ -226,7 +240,7 @@ async function api(req, res, p, q) {
   }
   // Save the Schema into Brewing\Import, for the Panel to open (Schema.json > Open a Schema file)
   if (p === '/api/save' && m === 'POST') {
-    const { file, name, connect, keepEmpty, keepTabs, tabsPicked } = await body(req);
+    const { file, name, connect, keepEmpty, keepTabs, tabsPicked, parts } = await body(req);
     if (!converted || converted.file !== file) return json(res, 400, { error: 'Go back to Names and click Next first, so the config file is converted.' });
     // an Interface (board) with no items comes in only when its tick box was ticked (Fritz, 2026-11-08)
     const { conv: conv1, dropped } = dropEmptyInterfaces(converted.conv, keepEmpty);
@@ -239,7 +253,9 @@ async function api(req, res, p, q) {
     // Connect your brewery: what is connected to what, kept in the file for the step that builds the Vessels and draws the pipes
     const cn = connectAnswers(connect, converted.connect);
     out.connect = connectReport(cn);
-    out.connect.units = converted.conv.units || 'US';      // US or Metric, asked at the start: the vessels' sizes use it
+    out.connect.units = converted.conv.units || 'US';
+    // the item pages' answers (OakBarn Brewery, 2026-11-08): per kind, how many, each found item's details, and the empty slots added
+    out.itemDetails = partsAnswers(parts, conv);      // US or Metric, asked at the start: the vessels' sizes use it
     const nLinks = out.connect.links.length, nLoose = out.connect.loose.length;
     if (tabsOut.length) out.warnings = [...out.warnings, `${tabsOut.length} Tab(s) were left unticked and not imported${itemsDropped ? `, with their ${itemsDropped} item(s)` : ''}${holdersDropped ? `${itemsDropped ? ' and' : ', with their'} ${holdersDropped} Placeholder(s)` : ''}: ${tabsOut.join(', ')}.`];
     if (dropped.length) out.warnings = [...out.warnings, `${dropped.length} Interface(s) (board(s)) with no items were not imported: ${dropped.join(', ')}.`];
