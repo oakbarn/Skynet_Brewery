@@ -155,3 +155,14 @@ await import('./chart.test.js');
   assert.equal(guessVesselTemplate({ key: 'F1', name: 'FV 1', side: 'cold' }, t), 'Fermenter');
   assert.equal(guessVesselTemplate({ key: 'X', name: 'Big pot' }, t), 'Generic_Brew_Vessel_Widget');
 }
+
+// the Vessels page: what the import can tell about each vessel; manual valves start at None (OakBarn Brewery, 2026-11-08)
+{
+  const { findVesselDetails } = await import('../public/importer/connect.js');
+  const conv = { elements: [{ name: 'a', label: 'M_HLT Heat', type: 'pid' }, { name: 'b', label: 'M_HLT Temp', type: 'analogIn' }, { name: 'c', label: 'M_Whirlpool', type: 'digitalOut' },
+    { name: 'MP_9_PWM_M~HLT~PV2_MD', label: 'M HLT PV2', type: 'pwmOut', bru: { name: 'M_HLT PV2' } }] };
+  const d = findVesselDetails(conv, [{ name: 's', text: 'if HLT herms then' }], [{ key: 'HLT', name: 'HLT' }, { key: 'BK', name: 'Boil Kettle' }]);
+  assert.deepEqual(d.HLT.heaters.map(h => h.label), ['M_HLT Heat']); assert.equal(d.HLT.probe.label, 'M_HLT Temp');
+  assert.equal(d.HLT.herms, 'no', 'HERMS starts unticked'); assert.ok(d.HLT.found.herms, 'a Script mentions it'); assert.equal(d.HLT.outlet, 'bottom'); assert.equal(d.HLT.motorValve, 'MP_9_PWM_M~HLT~PV2_MD', 'its own motorized valve'); assert.equal(d.HLT.manualValve, 'none');
+  assert.equal(d.BK.tangential, 'yes', 'a whirlpool pump means a tangential inlet on the Boil Kettle'); assert.equal(d.BK.sparge, 'none');
+}

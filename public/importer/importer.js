@@ -230,11 +230,39 @@ function tabsHtml(r) {
             <button type="button" class="askNo" data-name="${esc(t.name)}">Yes, a recipe import: leave it out</button>
             <button type="button" class="askYes" data-name="${esc(t.name)}">No, something else: import it</button></td></tr>` : '')).join('')}</table></div>`;
 }
+// The Vessels step (OakBarn Brewery, 2026-11-08): each vessel found, with what the import could tell about it in columns, and a Manual
+// Valves column the import cannot know (None to start). The answers go with the vessel into the Schema file.
+const SPARGE = [['none', 'None'], ['left', 'Upper Left'], ['right', 'Upper Right']];
+const OUTLET = [['none', 'None'], ['low', 'Center Low'], ['bottom', 'Bottom Drain']];
+const MANUAL = [['none', 'None'], ['ball', 'Manual Ball Valve'], ['butterfly', 'Manual Butterfly Valve']];
+function vesselsHtml() {
+  const vs = state.connect?.parts?.vessels ?? [];
+  if (!vs.length) return '<div class="card"><p>No vessels were found in your names or Scripts. You can add them on the Connect your brewery page.</p></div>';
+  const yn = (v, k) => `<select class="vd" data-v="${esc(v.key)}" data-k="${k}" title="${v.details?.found?.[k] ? 'Found in your names or Scripts (a guess): change it if it is wrong' : 'Not found in your names or Scripts: change it if your vessel has one'}">
+    <option value="no"${v.details?.[k] !== 'yes' ? ' selected' : ''}>No</option><option value="yes"${v.details?.[k] === 'yes' ? ' selected' : ''}>Yes${v.details?.found?.[k] ? ' (found)' : ''}</option></select>`;
+  return `<div class="card"><p>These are the vessels the Importer found in your BruControl names and Scripts, with what it could tell about each one.
+      Everything is shown by its <b>BruControl name</b> for now. <b>(found)</b> means a name or a Script points to it; it is a guess, so change anything that is wrong. <b>Manual valves</b> are not in
+      BruControl at all (nothing controls them), so pick the kind on each vessel, or leave it at None. Then <b>Accept</b>.</p>
+    <table class="vesTable"><tr><th>Vessel</th><th>Side</th><th>Heater</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
+    ${vs.map(v => row([`<b>${esc(v.name)}</b>`, v.side === 'cold' ? 'Cold Side' : 'Hot Side',
+      // Heater: a dropdown of every BruControl heating element found (OakBarn Brewery, 2026-11-08)
+      `<select class="vd" data-v="${esc(v.key)}" data-k="heater" title="The BruControl heating element in this vessel${v.details?.found?.heater ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.heaters ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.heater?.id === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.heater?.id === x.id && v.details?.found?.heater ? ' (found)' : ''}</option>`).join('')}</select>`,
+      // Thermowell: a dropdown of every BruControl probe found (OakBarn Brewery, 2026-11-08)
+      `<select class="vd" data-v="${esc(v.key)}" data-k="probe" title="The BruControl probe in this vessel's thermowell${v.details?.found?.probe ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.probes ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.probe?.id === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.probe?.id === x.id && v.details?.found?.probe ? ' (found)' : ''}</option>`).join('')}</select>`,
+      `<select class="vd" data-v="${esc(v.key)}" data-k="outlet" title="Where the vessel's outlet is: Center Low (above the bottom) or a Bottom Drain">${OUTLET.map(([k, n]) => `<option value="${k}"${(v.details?.outlet || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`,
+      // Tangential: a tick box; Sparge Arm or Steam Slayer: one answer, where it sits (OakBarn Brewery, 2026-11-08)
+      `<input type="checkbox" class="vd" data-v="${esc(v.key)}" data-k="tangential"${v.details?.tangential === 'yes' ? ' checked' : ''} title="${v.details?.found?.tangential ? 'Found in your names or Scripts (a guess): untick it if it is wrong' : 'Tick it if this vessel has a tangential inlet'}" aria-label="${esc(v.name)} has a tangential inlet">${v.details?.found?.tangential ? ' <span class="small muted">found</span>' : ''}`,
+      `<select class="vd" data-v="${esc(v.key)}" data-k="sparge" title="A Sparge Arm or a Steam Slayer, and where it sits">${SPARGE.map(([k, n]) => `<option value="${k}"${(v.details?.sparge || 'none') === k ? ' selected' : ''}>${n}${(v.details?.sparge || 'none') === k && v.details?.found?.sparge ? ' (found)' : ''}</option>`).join('')}</select>`,
+      // HERMS Coil: a tick box, unticked to start (OakBarn Brewery, 2026-11-08)
+      `<input type="checkbox" class="vd" data-v="${esc(v.key)}" data-k="herms"${v.details?.herms === 'yes' ? ' checked' : ''} title="Tick it if this vessel has a HERMS coil inside${v.details?.found?.herms ? ' (a Script mentions HERMS)' : ''}" aria-label="${esc(v.name)} has a HERMS coil">${v.details?.found?.herms ? ' <span class="small muted">in a Script</span>' : ''}`,
+      `<select class="vd" data-v="${esc(v.key)}" data-k="motorValve" title="The motorized ball valve on this vessel, from every motorized valve found${v.details?.found?.motorValve ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.parts?.valves ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.motorValve === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.motorValve === x.id && v.details?.found?.motorValve ? ' (found)' : ''}</option>`).join('')}</select>`,
+      `<select class="vd" data-v="${esc(v.key)}" data-k="manualValve" title="Manual valves are not in BruControl: pick the kind this vessel has">${MANUAL.map(([k, n]) => `<option value="${k}"${(v.details?.manualValve || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`])).join('')}</table></div>`;
+}
 function sub5(which) {
   state.sub5 = which;
   // the page's own Back and Next walk the small steps; on the ID step Next is Accept
-  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = which === 'id' || which === 'tabs' ? 'Accept ▶' : 'Next ▶'; }
-  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : 'Boards and Tabs';
+  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
+  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : 'Boards and Tabs';
   if (which === 'busy') return;
   const r = state.r, box = $('#convBody');
   if (which === 'if') {
@@ -281,7 +309,19 @@ function sub5(which) {
   }
   if (which === 'tabs') {
     box.innerHTML = tabsHtml(r);
-    state.accept = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); sub5('sum'); };
+    state.accept = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); sub5('vessels'); };
+    return;
+  }
+  if (which === 'vessels') {
+    box.innerHTML = vesselsHtml();
+    box.onchange = e => {
+      const t = e.target; if (!t.classList.contains('vd')) return;
+      const v = state.connect.parts.vessels.find(x => x.key === t.dataset.v); if (!v) return;
+      const val = t.type === 'checkbox' ? (t.checked ? 'yes' : 'no') : t.dataset.k === 'probe' ? (state.connect.probes ?? []).find(x => x.id === t.value) ?? null
+        : t.dataset.k === 'heater' ? (state.connect.heaters ?? []).find(x => x.id === t.value) ?? null : t.value;
+      v.details = { ...(v.details ?? {}), [t.dataset.k]: val };
+    };
+    state.accept = () => { box.onchange = null; sub5('sum'); };
     return;
   }
   for (const id of ['#next5', '#next5a']) $(id).disabled = false;
@@ -319,10 +359,10 @@ $('#convBody').addEventListener('click', e => {
   if (box) box.checked = b.classList.contains('askYes');
   for (const x of b.parentElement.querySelectorAll('button')) x.classList.toggle('primary', x === b);
 });
-for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
+for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (state.sub5 === 'if') return sub5('id');
-  if (state.sub5 === 'id' || state.sub5 === 'tabs') return state.accept();
+  if (['id', 'tabs', 'vessels'].includes(state.sub5)) return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
   startConnect(state.connect, { toast });
   show(6);
@@ -336,10 +376,16 @@ for (const id of ['#next6', '#next6a']) $(id).onclick = () => {
   show(8);
 };
 for (const id of ['#back8', '#back8a']) $(id).onclick = () => show(6);
+// the Vessels step answers ride with each vessel (by its key) into the Schema file
+function withDetails(c) {
+  if (!c) return c;
+  const d = new Map((state.connect?.parts?.vessels ?? []).map(v => [v.key, v.details]));
+  return { ...c, vessels: c.vessels.map(v => (d.get(v.key) ? { ...v, details: d.get(v.key) } : v)) };
+}
 $('#saveBtn').onclick = async () => {
   const b = $('#saveBtn'); b.disabled = true; b.textContent = 'Saving…';
   try {
-    const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: connectState(),
+    const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: withDetails(connectState()),
       keepEmpty: [...document.querySelectorAll('#convBody .keepEmpty:checked')].map(c => c.dataset.name),
       keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs });
     const box = $('#saveResult');

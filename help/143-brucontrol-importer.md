@@ -108,7 +108,15 @@ Then you confirm what comes in, in small steps:
 3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found (Globals,
    Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
-4. **Boards and Tabs:** everything else that comes in:
+4. **Your vessels.** Each vessel found, with what the import could tell about it from your names and Scripts: its **Heater** (a list of every BruControl heating element found; the guess is the one named for the vessel),
+   its **Thermowell with Probe** (a list of every BruControl probe found; the guess is the one named for the vessel), its **Outlet** (None, Center Low or Bottom Drain; Bottom Drain to start), a **Tangential Inlet** tick box (a whirlpool pump means one on the Boil Kettle), **Sparge Arm / Steam
+   Slayer** (one answer: None, Upper Left or Upper Right) and a **HERMS Coil** tick box (unticked to start). What was found in your names or Scripts is
+   marked *found*; it is a guess, change it if it is wrong; its **Motorized Ball Valve**
+   (a list of every motorized valve found; the guess is the one named for the vessel). Everything is shown by its **BruControl name**
+   during these steps, so you know each one; the Skynet names are still what is saved (Rule 15.1). **Manual Valves** are not in
+   BruControl, so pick None, Manual Ball Valve or Manual Butterfly Valve (None to start). **Accept ▶** goes on; the answers are saved
+   with each vessel, and the next page uses them to build each vessel into a Vessel Device.
+5. **Boards and Tabs:** everything else that comes in:
 
 - your **Interfaces** (BruControl boards), each with its Interface ID and how many items it has. An Interface with **no
   items (0)** is **not** imported, unless you tick its **Import** box; then it **will** be imported;
