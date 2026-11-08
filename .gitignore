@@ -21,3 +21,4 @@ scripts/Recycle_Bin/
 # Made while the panel or the tests run: config backup and Schema files
 config/*.bak
 config/schemas/
+Import/
