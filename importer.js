@@ -245,7 +245,7 @@ const server = http.createServer(async (req, res) => {
     // the Panel's own look, icon and hover help (one source, Rules 15.4 and 2.38)
     // the Connect your brewery song and rhyme (Fritz's own files, free to use) from the Panel's media\sounds\Skynet
     // the Skynet drawings of a vessel, a pump and a valve for the picture screen (read only, Skynet's own pictures)
-    if (/^\/media\/Images\/Skynet\/(Vessels|Pumps|Valves)\/[\w.-]+\.svg$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
+    if (/^\/media\/Images\/Skynet\/(Vessels|Pumps|Valves|Other_Equipment)\/[\w.-]+\.svg$/.test(p)) return sendFile(res, path.join(ROOT, ...p.slice(1).split('/')));
     if (/^\/sounds\/Skynet\/[\w.-]+\.mp3$/.test(p)) return sendFile(res, path.join(ROOT, 'media', ...p.slice(1).split('/')));
     if (['/style.css', '/favicon.svg', '/favicon.ico', '/hoverhelp.js', '/themes.js', '/themeboot.js'].includes(p)) return sendFile(res, path.join(PUBLIC, p.slice(1)));
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found');

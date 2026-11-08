@@ -103,6 +103,8 @@ body.cnFullOpen { overflow: hidden; }
 .cnChip.vessel span { font-size: 15px; font-weight: 600; }
 .cnChip.pump img { width: 56px; height: 56px; }
 .cnChip.valve img { width: 30px; height: 30px; }
+.cnChip.tee img { width: 34px; height: 34px; }
+.cnPager { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
 .cnChip.loose span { border: 1px dashed #777; }
 .cnChip.picked { border-color: #FFD400; }
 #cnAiText { width: 100%; font-family: var(--mono); box-sizing: border-box; }
