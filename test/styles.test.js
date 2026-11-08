@@ -35,7 +35,7 @@ assert.deepEqual(t.tab.map(s => s.name), ['Mine'], 'a User Style can not take a 
 assert.equal(t.tab[0].look, undefined, 'a Tab Style has no look');
 assert.equal(t.tab[0].labelBack, '#eee');
 assert.equal(t.tab[0].labelAlign + t.tab[0].align, 'CenterRight', 'Alignment for the Label and the item');
-for (const id of ['two-vessel-one-pump', 'three-vessel-one-pump', 'brewzilla-brew-day']) {
+for (const id of ['three-vessel-one-pump']) {      // the other samples wait in Sandbox/ (Rule 16.8)
   const c = JSON.parse(fs.readFileSync(new URL(`../samples/configs/${id}/config.json`, import.meta.url)));
   assert.equal(c.workspaces.find(w => w.name === 'Recipe').style, 'sky_tab_tennyson', `${id}: the Recipe Tab is Tennyson`);
 }

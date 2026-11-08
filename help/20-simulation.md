@@ -54,4 +54,4 @@ The panel can work out when each step of a Process will happen, for example *00:
 
 **Make time jumps from this** fills the Time jumps table for that Process: after it starts, it skips to a few seconds before each timed step, one after the other. Check the rows, then click **Save simulation settings**.
 
-Try it with the **Demo_Mash_Steps** Process: a 60 minute mash with a pH check at 10 minutes and a stir at 30.
+Try it with the **BrewDay_Flow** Process of the Three vessels, one pump sample: its mash, boil and hop times all become jumps.

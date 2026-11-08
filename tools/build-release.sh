@@ -14,8 +14,9 @@ STAGE="$OUT/stage/BrewPanel"
 rm -rf "$OUT/stage"
 mkdir -p "$STAGE"
 
-# Only the files git knows about (tracked, or new and not ignored), so data/, node_modules and backups stay out
-git ls-files -z --cached --others --exclude-standard | grep -zEv '^(release/|\.github/|\.gitignore$)' | while IFS= read -r -d '' f; do
+# Only the files git knows about (tracked, or new and not ignored), so data/, node_modules and backups stay out.
+# Delete/ (retired files, Rule 15.3) and Sandbox/ (Schemas set aside, Rule 16.8) are never shipped either.
+git ls-files -z --cached --others --exclude-standard | grep -zEv '^(release/|\.github/|\.gitignore$|Delete/|Sandbox/)' | while IFS= read -r -d '' f; do
   [ -e "$f" ] || continue
   mkdir -p "$STAGE/$(dirname "$f")"
   cp -p "$f" "$STAGE/$f"

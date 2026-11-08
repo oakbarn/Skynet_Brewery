@@ -5,7 +5,7 @@
 // Pipes are not drawn: the brewer pipes the equipment the way it really is.
 //
 // This file only works out WHAT to make (plan), so the server and the tests can check it. public/app.js puts it on the Tab.
-import { suggestName, uniqueName, defaultCode, freePins, oneWirePort, defaultTabId } from './naming.js';
+import { suggestName, suggestWidgetName, uniqueName, defaultCode, freePins, oneWirePort, defaultTabId } from './naming.js';
 
 // the general vessel types, at the bottom of each vessel's list (Fritz, 2026-11-07: "just General Type as a Choice (HLT, Brew
 // Kettle, All In One etc.) but at the Bottom of the DDLB List"). Each one is a Skynet Vessel Widget with that type.
@@ -105,13 +105,14 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     // its probe (DS18B20 on the OneWire bus), shown under the vessel
     const probe = add({ place: { at: 'v', i, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: cx, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' });
     job(ROLE_JOBS[role]?.probe ?? [], probe.name);
-    // its heat: a Heating Element (Hysteresis to start, Rule 6.19) or a burner on a gas valve
+    // its heat: one Heating Element on one Port (Hysteresis to start, Rule 6.19), an electric element or a burner on a gas valve.
+    // It is turned On or Off, never "Enabled" (Rule 6.19), and starts Off.
     const heat = role === 'Mash Tun' && a.recirc !== 'none' ? 'none' : v.heat;
     if (heat === 'electric' || heat === 'gas') {
       const el = heat === 'electric'
-        ? { type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', label: `${s} element`, onText: 'HEAT', offText: 'idle', look: 'dark' }
-        : { type: 'hysteresis', label: `${s} burner`, onText: 'FLAME', offText: 'off', look: 'dark' };
-      const h = add({ ...el, place: { at: 'v', i, row: 1, col: 0 }, device: '', input: probe.name, target: 150, onOffset: 1, enabled: false, x: cx, y: 500, w: 170, h: 60 });
+        ? { label: `${s} element`, onText: 'HEAT', offText: 'idle' }
+        : { label: `${s} burner`, onText: 'FLAME', offText: 'off' };
+      const h = add({ type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', ...el, look: 'dark', place: { at: 'v', i, row: 1, col: 0 }, device: '', input: probe.name, target: 150, onOffset: 1, x: cx, y: 500, w: 170, h: 60 });
       probe.sim = { start: 62, heater: h.name, heatRate: 1.2, maxTemp: 212 };
       job((ROLE_JOBS[role]?.heater ?? []).filter(j => !(role === 'All In One' && j === 'Mash_Heater' && a.recirc !== 'none')), h.name);
     }
@@ -127,7 +128,7 @@ export function planSchema(a, { iface, taken = [] } = {}) {
   if (a.recirc === 'rims') {
     equipment.push({ kind: 'rims', template: 'RIMS_Tube', label: 'RIMS tube', x, y: 120 });
     const p = add({ place: { at: 'e', i: equipment.length - 1, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: 'RIMS temp', x, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' });
-    const h = add({ place: { at: 'e', i: equipment.length - 1, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'pid', label: 'RIMS element', device: '', input: p.name, target: 152, enabled: false, onText: 'HEAT', offText: 'idle', look: 'dark', x, y: 500, w: 170, h: 60 });
+    const h = add({ place: { at: 'e', i: equipment.length - 1, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'pid', label: 'RIMS element', device: '', input: p.name, target: 152, onText: 'HEAT', offText: 'idle', look: 'dark', x, y: 500, w: 170, h: 60 });
     p.sim = { start: 62, heater: h.name, heatRate: 2, maxTemp: 212 };
     fields.Mash_Heater = h.name; fields.Mash_Probe ||= p.name;
     x += 240;
@@ -148,27 +149,27 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     Object.assign(fields, { Whirlpool_Pump: p2, Chill_Pump: p2, Transfer_Pump: p2, Clean_Pump: p1 });
     for (const [j, l] of Object.entries(a.pumpJobs ?? {})) { const p = pumps.find(x => x.label === l); if (p) fields[j] = p.name; }
   }
-  // the chiller, and its cooling water (a valve when the valves are motorized)
+  // the chiller, and its cooling water (a valve when the valves are motorized). One click turns it on, no pop-up (Rule 2.44).
   const ch = { immersion: { kind: 'ccoil', template: 'Immersion_Chiller', label: 'Immersion chiller' }, plate: { kind: 'pchiller', template: 'Plate_Chiller', label: 'Plate chiller' },
     counterflow: { kind: 'pchiller', template: 'Counterflow_Chiller', label: 'Counterflow chiller' } }[hot ? a.chiller : ''] ?? null;
   if (ch) equipment.push({ ...ch, x, y: 160 });
   // the wort out of the chiller has its own probe (OakBarn: "WORT OUT"), so the chill steps know when to stop
   if (ch) fields.Wort_Probe = add({ place: { at: 'e', i: equipment.length - 1, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: 'Wort out temp', x, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' }).name;
-  if (ch && a.valves === 'motorized') fields.Chill_Water = add({ place: { at: 'e', i: equipment.length - 1, row: 1, col: 0 }, type: 'digitalOut', label: 'Chiller water', device: '', x, y: 420, w: 170, h: 60, look: 'dark', onText: 'COOLING', offText: 'off', confirm: true }).name;
-  // the timers the Brew Process runs on (Widgets: no Port)
-  const timer = (n, label, xx) => add({ place: { at: 'timers', i: xx > 100 ? 1 : 0 }, type: 'timer', name: n, label, timerType: 'countdown', look: 'led', x: xx, y: 780, w: 250, h: 104 });
+  if (ch && a.valves === 'motorized') fields.Chill_Water = add({ place: { at: 'e', i: equipment.length - 1, row: 1, col: 0 }, type: 'digitalOut', label: 'Chiller water', device: '', x, y: 420, w: 170, h: 60, look: 'dark', onText: 'COOLING', offText: 'off' }).name;
+  // the timers the Brew Process runs on (Widgets: no Port), named wgt_TMR_Label_TabID (Rule 3.14)
+  const timer = (label, xx) => add({ place: { at: 'timers', i: xx > 100 ? 1 : 0 }, type: 'timer', name: suggestWidgetName({ code: 'TMR', label, tab: tabId }), label, timerType: 'countdown', look: 'led', x: xx, y: 780, w: 250, h: 104 });
   if (hot) {
-    fields.Mash_Timer = timer('tm_Mash', 'Mash timer', 60).name;
-    fields.Boil_Timer = timer('tm_Boil', 'Boil timer', 330).name;
+    fields.Mash_Timer = timer('Mash timer', 60).name;
+    fields.Boil_Timer = timer('Boil timer', 330).name;
   }
-  // the fermentors, on their own Tab: each one's probe and its glycol (cooling) valve, a Hysteresis that turns on above the Target
-  // (a minus ON offset, Rule 6.19). Fermentor 1 does the Ferment step's jobs.
+  // the fermentors, on their own Tab: each one's probe and its glycol (cooling) valve, one Heating Element on one Port in Hysteresis
+  // that turns on above the Target (a minus On offset cools, Rule 6.19). Fermentor 1 does the Ferment step's jobs.
   for (let i = 0; i < nF; i++) {
     const s = `FV${i + 1}`;
     vessels.push({ template: 'Fermenter', role: 'Fermentor', vtype: 'Fermenter', label: `Fermentor ${i + 1}`, short: s, tab: fTab, x: 60 + i * 260, y: 80 });
     const vi = vessels.length - 1;
     const probe = add({ place: { at: 'v', i: vi, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: 60, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' }, fTab, fTabId);
-    const g = add({ place: { at: 'v', i: vi, row: 1, col: 0 }, type: 'hysteresis', label: `${s} glycol`, device: '', input: probe.name, target: 66, onOffset: -1, enabled: false, onText: 'COOL', offText: 'idle', look: 'dark', x: 60, y: 500, w: 170, h: 60 }, fTab, fTabId);
+    const g = add({ place: { at: 'v', i: vi, row: 1, col: 0 }, type: 'digitalOut', subtype: 'element', heatMethod: 'hysteresis', label: `${s} glycol`, device: '', input: probe.name, target: 66, onOffset: -1, onText: 'COOL', offText: 'idle', look: 'dark', x: 60, y: 500, w: 170, h: 60 }, fTab, fTabId);
     if (i === 0) { fields.Ferment_Probe = probe.name; fields.Ferment_Heater = g.name; }
   }
   const manifold = hot && a.manifold && a.manifold !== 'none' ? { template: a.manifold, kind: a.manifoldKind === 'motorized' ? 'motorized' : 'manual', x: Math.max(60, x - 120), y: 600 } : null;
