@@ -275,7 +275,9 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <div class="card">
       <h2>How we will guide you</h2>
       <ol class="guide">
-        <li><b>Pick your BruControl config file.</b> We look in <code>Documents\BruControl</code> first, or a folder you choose.</li>
+        <li><b>Pick your BruControl config file.</b> We look in <code>Documents\BruControl\Config Backup</code> first and list
+          its backup files (<code>.bak</code>). Below them we list the config files (<code>.brucfg</code>) in <code>Documents\BruControl</code>.
+          You can also pick another folder that has a BruControl <code>.bak</code> or <code>.brucfg</code> file.</li>
         <li><b>Boards.</b> We show each BruControl board and its COM port or address, so you can check them.</li>
         <li><b>Tabs and items, one question at a time.</b> Each workspace becomes a Tab. For each BruControl item we ask you a few
           plain questions (is this a pump, a valve, a vessel? what kind?) so it becomes the right Skynet Device, Widget or Template.</li>
@@ -283,6 +285,7 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
         <li><b>Save the Schema</b> and send it to your Skynet Brain, with a report of everything that changed.</li>
       </ol>
       <p class="muted">Nothing is saved or changed until the last step, and you can go Back at any time.</p>
+      <p class="muted">Your <code>.bak</code> or <code>.brucfg</code> file is only read. Nothing is done to it, so it is unchanged after you import it.</p>
     </div>
 
     <div class="buttons"><button id="back2">◀ Back</button><span class="spacer"></span><button class="primary" id="startBtn">Start ▶</button></div>
@@ -295,6 +298,8 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <p class="lead">BruControl saves its whole setup in one config file that ends in <code>.brucfg</code>. Pick the one you want to bring into Skynet.
     A BruControl backup (a file that ends in <code>.bak</code>, like <code>default.brucfg.20260615.bak</code>) is the same file inside, so you can pick one of those too.
     <b>One config file makes one Schema.</b> If you have more than one, import each one on its own; they are never combined.</p>
+    <p class="muted">The list shows BruControl's backups (<code>.bak</code>) from <code>Documents\BruControl\Config Backup</code> first, newest first,
+    then the config files (<code>.brucfg</code>) in <code>Documents\BruControl</code>. The file you pick is only read and is never changed.</p>
 
     <div class="card">
       <div class="buttons"><button class="primary" id="browseBtn" title="Windows' Open box, in Documents\BruControl, where BruControl keeps its config files and backups (.brucfg or .bak)">📄 Browse for the config file…</button>
@@ -304,7 +309,7 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
         <input id="folder" spellcheck="false" title="The folder to look in. Type or paste a folder and press Enter, or use Change folder.">
         <button id="lookBtn" title="Look in the folder typed in the box">Look</button>
         <button id="pickBtn" title="Pick a folder with Windows' Browse For Folder box">📁 Change folder…</button>
-        <button id="homeBtn" title="Go back to Documents\BruControl">⌂ Documents\BruControl</button>
+        <button id="homeBtn" title="Look in Documents\BruControl again: its .brucfg config files, and the .bak backups in its Config Backup folder">⌂ Documents\BruControl</button>
       </div>
       <p id="folderNote" class="muted"></p>
 

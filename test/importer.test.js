@@ -104,16 +104,16 @@ fs.rmSync(dir, { recursive: true, force: true });
   fs.writeFileSync(path.join(d, 'default.config'), '<Configuration/>');
   const f = findConfigs(d);
   assert.deepEqual(f.files.map(x => [x.name, x.isBackup, x.isDefault, x.backupDate, x.base]), [
-    ['Oakbarn.brucfg', false, false, '', 'Oakbarn'], ['Oakbarn.brucfg.20260615.bak', true, false, '2026-06-15', 'Oakbarn_Backup_2026-06-15'],
-    ['default.config', false, true, '', 'default']], 'own config, then backups, then the default one');
+    ['Oakbarn.brucfg.20260615.bak', true, false, '2026-06-15', 'Oakbarn_Backup_2026-06-15'], ['Oakbarn.brucfg', false, false, '', 'Oakbarn'],
+    ['default.config', false, true, '', 'default']], 'backups first, then config files, then the default one');
   // BruControl's own "Config Backup" folder is listed too, backups only (Fritz, 2026-11-07)
   fs.mkdirSync(path.join(d, 'Config Backup'));
   fs.writeFileSync(path.join(d, 'Config Backup', 'Oakbarn.brucfg.20260601.bak'), '<Configuration/>');
   fs.writeFileSync(path.join(d, 'Config Backup', 'Other.brucfg'), '<Configuration/>');
   fs.utimesSync(path.join(d, 'Config Backup', 'Oakbarn.brucfg.20260601.bak'), Date.now() / 1000 - 999, Date.now() / 1000 - 999);
   fs.utimesSync(path.join(d, 'Config Backup', 'Other.brucfg'), Date.now() / 1000 - 999, Date.now() / 1000 - 999);
-  assert.deepEqual(findConfigs(d).files.map(x => [x.sub, x.name]), [['', 'Oakbarn.brucfg'], ['Config Backup', 'Other.brucfg'], ['', 'Oakbarn.brucfg.20260615.bak'],
-    ['Config Backup', 'Oakbarn.brucfg.20260601.bak'], ['', 'default.config']], 'the Config Backup folder: its backups and any config file put there');
+  assert.deepEqual(findConfigs(d).files.map(x => [x.sub, x.name]), [['', 'Oakbarn.brucfg.20260615.bak'], ['Config Backup', 'Oakbarn.brucfg.20260601.bak'],
+    ['', 'Oakbarn.brucfg'], ['Config Backup', 'Other.brucfg'], ['', 'default.config']], 'the Config Backup folder: its backups and any config file put there');
   const copy = makeImportCopy(path.join(d, 'Oakbarn.brucfg.20260615.bak'), path.join(d, 'Import'), { ms: new Date(2026, 10, 7, 3, 4, 5).getTime() });
   assert.equal(path.basename(copy), 'Oakbarn_Backup_2026-06-15_2026-11-07T030405.brucfg', 'the Import Copy of a backup is a plain .brucfg');
   assert.ok(pickFileScript('').includes('*.brucfg;*.bak'), 'Browse shows config files and backups');
