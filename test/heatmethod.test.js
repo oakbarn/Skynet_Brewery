@@ -190,8 +190,8 @@ console.log('method spots tests passed');
   assert.equal(c.elements[1].heatMethod, 'pid'); assert.equal(c.elements[1].kp, 9);
   assert.equal(c.elements[2].type, 'pid', 'a PID of its own (not built in) stays as it is');
   const { readFileSync } = await import('node:fs');
-  const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url)));
-  const hlt = s.elements.find(e => e.name === 'BM_8_HE_HLT~element_BR');
+  const s = JSON.parse(readFileSync(new URL('../samples/configs/three-vessel-one-pump/config.json', import.meta.url), 'utf8').replaceAll('BM_8_HE_HLT~element_BR', 'HLT_Heat'));   // its Skynet name (Rule 3.1) read as the old one here
+  const hlt = s.elements.find(e => e.name === 'HLT_Heat');
   assert.deepEqual(controlMethods(hlt), ['Duty Cycle', 'Hysteresis', 'PID'], 'the Three Vessel sample HLT: Hysteresis, with Duty Cycle and PID ticked, so it has spots');
 }
 console.log('built in Element upgrade tests passed');
