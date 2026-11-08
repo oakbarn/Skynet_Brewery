@@ -247,15 +247,20 @@ const OUTLET = [['none', 'None'], ['low', 'Center Low'], ['bottom', 'Bottom Drai
 const MANUAL = [['none', 'None'], ['ball', 'Manual Ball Valve'], ['butterfly', 'Manual Butterfly Valve']];
 function vesselsHtml() {
   const vs = state.connect?.parts?.vessels ?? [];
-  if (!vs.length) return '<div class="card"><p>No vessels were found in your names or Scripts. You can add them on the Connect your brewery page.</p></div>';
+  const add = '<div class="buttons"><button type="button" id="vAdd" title="Add a vessel the Importer missed">➕ Add a vessel</button></div>';
+  if (!vs.length) return `<div class="card"><p>No vessels were found in your names or Scripts. Add each one of yours.</p>${add}</div>`;
   const yn = (v, k) => `<select class="vd" data-v="${esc(v.key)}" data-k="${k}" title="${v.details?.found?.[k] ? 'Found in your names or Scripts (a guess): change it if it is wrong' : 'Not found in your names or Scripts: change it if your vessel has one'}">
     <option value="no"${v.details?.[k] !== 'yes' ? ' selected' : ''}>No</option><option value="yes"${v.details?.[k] === 'yes' ? ' selected' : ''}>Yes${v.details?.found?.[k] ? ' (found)' : ''}</option></select>`;
   return `<div class="card"><p>These are the vessels the Importer found in your BruControl names and Scripts, with what it could tell about each one.
       Type each vessel's <b>Volume</b>, and measure its <b>Height</b> and <b>Diameter</b> (in ${state.units === 'Metric' ? 'Liters and centimeters' : 'Gallons and inches'}).
       Everything is shown by its <b>BruControl name</b> for now. <b>(found)</b> means a name or a Script points to it; it is a guess, so change anything that is wrong. <b>Manual valves</b> are not in
       BruControl at all (nothing controls them), so pick the kind on each vessel, or leave it at None. Then <b>Accept</b>.</p>
-    <div class="vesWrap"><table class="vesTable"><tr><th>Vessel</th><th>Side</th><th>Volume (${state.units === 'Metric' ? 'L' : 'gal'})</th><th>Height (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Diameter (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Heater</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
-    ${vs.map(v => row([`<b>${esc(v.name)}</b>`, v.side === 'cold' ? 'Cold Side' : 'Hot Side',
+    <div class="vesWrap"><table class="vesTable"><tr><th>Vessel</th><th>Side</th><th></th><th>Volume (${state.units === 'Metric' ? 'L' : 'gal'})</th><th>Height (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Diameter (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Heater</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
+    ${vs.map(v => row([
+      // the start of this page is the old Your vessels table (OakBarn Brewery, 2026-11-08): rename, Side, remove, Add a vessel
+      `<input class="vd vName" data-v="${esc(v.key)}" data-k="name" value="${esc(v.name)}" maxlength="40" title="The vessel's name" aria-label="Vessel name">`,
+      `<select class="vd" data-v="${esc(v.key)}" data-k="side" title="Hot Side vessels are joined on Connect your brewery; a Fermenter (Cold Side) has its own questions"><option value="hot"${v.side !== 'cold' ? ' selected' : ''}>Hot Side</option><option value="cold"${v.side === 'cold' ? ' selected' : ''}>Cold Side (Fermenter)</option></select>`,
+      `<button type="button" class="vDel" data-v="${esc(v.key)}" title="Remove this vessel (the guess was wrong)" aria-label="Remove ${esc(v.name)}">✖</button>`,
       // the vessel's size (OakBarn Brewery, 2026-11-08): its Volume, and its Height and Diameter measured, in the units picked at the start
       ...[['volume', 'How much it holds'], ['vheight', 'Its height, measured'], ['diameter', 'Its diameter (across), measured']].map(([k, tip]) =>
         `<input type="number" class="vd num" data-v="${esc(v.key)}" data-k="${k}" min="0" step="any" value="${esc(v.details?.[k] ?? '')}" title="${tip}, in ${k === 'volume' ? (state.units === 'Metric' ? 'Liters' : 'Gallons') : (state.units === 'Metric' ? 'centimeters' : 'inches')}" aria-label="${esc(v.name)} ${k === 'vheight' ? 'height' : k}">`),
@@ -270,14 +275,44 @@ function vesselsHtml() {
       // HERMS Coil: a tick box, unticked to start (OakBarn Brewery, 2026-11-08)
       `<input type="checkbox" class="vd" data-v="${esc(v.key)}" data-k="herms"${v.details?.herms === 'yes' ? ' checked' : ''} title="Tick it if this vessel has a HERMS coil inside${v.details?.found?.herms ? ' (a Script mentions HERMS)' : ''}" aria-label="${esc(v.name)} has a HERMS coil">${v.details?.found?.herms ? ' <span class="small muted">in a Script</span>' : ''}`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="motorValve" title="The motorized ball valve on this vessel, from every motorized valve found${v.details?.found?.motorValve ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.parts?.valves ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.motorValve === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.motorValve === x.id && v.details?.found?.motorValve ? ' (found)' : ''}</option>`).join('')}</select>`,
-      `<select class="vd" data-v="${esc(v.key)}" data-k="manualValve" title="Manual valves are not in BruControl: pick the kind this vessel has">${MANUAL.map(([k, n]) => `<option value="${k}"${(v.details?.manualValve || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`])).join('')}</table></div></div>`;
+      `<select class="vd" data-v="${esc(v.key)}" data-k="manualValve" title="Manual valves are not in BruControl: pick the kind this vessel has">${MANUAL.map(([k, n]) => `<option value="${k}"${(v.details?.manualValve || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`])).join('')}</table></div>${add}</div>`;
+}
+// The items on each Interface (OakBarn Brewery, 2026-11-08: "Insert a New Page after the Tab Page for the Elements associated with an
+// Interface are all Listed"): one table per Interface (board), each item by its port, with its BruControl name, what it becomes in
+// Skynet, its Skynet name and its Tab. Read only; an item on a Tab left out on the Tabs step is marked so.
+const TYPE_TEXT = { digitalOut: 'Digital Output', digitalIn: 'Digital Input', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output',
+  temperature: 'Temperature Probe', hysteresis: 'Hysteresis', pid: 'PID', dutyCycle: 'Duty Cycle', deadband: 'Deadband', flowMeter: 'Flow Meter',
+  scale: 'Scale', stepper: 'Stepper', switch: 'Switch', chart: 'Chart' };
+const typeText = e => e.subtype === 'pump' ? 'Pump' : e.subtype === 'element' ? 'Heating Element' : TYPE_TEXT[e.type] ?? e.type;
+const itemKey = e => `${e.device}|${e.port}|${e.bru}`;
+function itemsHtml(r) {
+  const keep = state.keepTabs ?? new Set(r.tabs.map(t => t.name));
+  const all = r.portItems ?? [];
+  return `<div class="card"><p>Every item wired to a port of an Interface (board), listed by Interface and port. They are shown by their
+      <b>BruControl name</b>, with its <b>Display Name</b> (a greyed one means there was no Display Name,
+      so the Name is used), and the <b>Skynet name</b> each one gets. An item on a Tab you left out on the Tabs step is not imported.
+      Each item also has a <b>tick box</b> and a blank <b>Label</b> box for you to fill in. Then <b>Next</b>.</p></div>
+    ${r.interfaces.map(d => {
+      const list = all.filter(e => e.device === d.name).sort((a, b) => String(a.port).localeCompare(String(b.port), undefined, { numeric: true }));
+      return `<div class="card"><h3>${esc(d.name)} <span class="muted small">(ID ${esc(d.id)}, ${list.length} item${list.length === 1 ? '' : 's'})</span></h3>
+        ${list.length ? `<table class="itemTable"><tr><th>Port</th><th>BruControl name</th><th>Display Name</th><th title="Tick an item">✔</th><th>Label</th><th>Skynet type</th><th>Skynet name</th><th>Tab</th></tr>
+        ${list.map(e => row([esc(e.port), esc(e.bru),
+          // Display Name (OakBarn Brewery, 2026-11-08): the DisplayName when there is one; none: the Name, greyed.
+          e.noDisplay ? `<span class="noDisplay" title="No Display Name in BruControl: the Name is shown greyed instead">${esc(e.bru)}</span>` : esc(e.label),
+          // Then a tick box and a Label box, all blank to start (OakBarn Brewery, 2026-11-08); kept while you move between the steps.
+          `<input type="checkbox" class="itemTick" data-item="${esc(itemKey(e))}"${state.itemPicks?.[itemKey(e)]?.tick ? ' checked' : ''}>`,
+          `<input type="text" class="itemLabel" data-item="${esc(itemKey(e))}" value="${esc(state.itemPicks?.[itemKey(e)]?.label ?? '')}">`,
+          esc(typeText(e)), `<code>${esc(e.name)}</code>`, keep.has(e.tab) ? esc(e.tab) : `${esc(e.tab)} <span class="note small">left out</span>`], ['n'])).join('')}</table>`
+          : '<p class="small muted">No items on this Interface.</p>'}</div>`;
+    }).join('')}`;
 }
 function sub5(which) {
+  $('#convBody').oninput = null; $('#convBody').onchange = null;
   state.sub5 = which;
   document.body.classList.toggle('wideStep', which === 'vessels');      // the wide Vessels table gets the whole window
   // the page's own Back and Next walk the small steps; on the ID step Next is Accept
   for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
-  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : 'Boards and Tabs';
+  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : which === 'items' ? 'The items on each Interface' : 'Boards and Tabs';
   if (which === 'busy') return;
   const r = state.r, box = $('#convBody');
   if (which === 'if') {
@@ -324,7 +359,18 @@ function sub5(which) {
   }
   if (which === 'tabs') {
     box.innerHTML = tabsHtml(r);
-    state.accept = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); sub5('vessels'); };
+    state.accept = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); sub5('items'); };
+    return;
+  }
+  if (which === 'items') {
+    box.innerHTML = itemsHtml(r);
+    state.itemPicks ??= {};
+    box.oninput = box.onchange = ev => {
+      const t = ev.target, k = t.dataset?.item; if (!k) return;
+      const p = state.itemPicks[k] ??= { tick: false, label: '' };
+      if (t.classList.contains('itemTick')) p.tick = t.checked;
+      if (t.classList.contains('itemLabel')) p.label = t.value;
+    };
     return;
   }
   if (which === 'vessels') {
@@ -332,11 +378,25 @@ function sub5(which) {
     box.onchange = e => {
       const t = e.target; if (!t.classList.contains('vd')) return;
       const v = state.connect.parts.vessels.find(x => x.key === t.dataset.v); if (!v) return;
+      state.connect.vv = (state.connect.vv ?? 0) + 1;          // the Connect page picks up the change
+      if (t.dataset.k === 'name') { v.name = t.value.trim() || v.name; return; }
+      if (t.dataset.k === 'side') { v.side = t.value === 'cold' ? 'cold' : 'hot'; return; }
       const val = t.type === 'checkbox' ? (t.checked ? 'yes' : 'no') : t.dataset.k === 'probe' ? (state.connect.probes ?? []).find(x => x.id === t.value) ?? null
         : t.dataset.k === 'heater' ? (state.connect.heaters ?? []).find(x => x.id === t.value) ?? null : t.value;
       v.details = { ...(v.details ?? {}), [t.dataset.k]: val };
     };
-    state.accept = () => { box.onchange = null; sub5('sum'); };
+    box.onclick = e => {
+      const vs = state.connect.parts.vessels;
+      if (e.target.closest('#vAdd')) {
+        let n = vs.length + 1; while (vs.some(v => v.key === 'V' + n)) n++;
+        vs.push({ key: 'V' + n, name: 'Vessel ' + n, side: 'hot', details: { outlet: 'bottom', sparge: 'none', tangential: 'no', herms: 'no', manualValve: 'none', motorValve: '', heater: null, probe: null, found: {} } });
+      } else if (e.target.closest('.vDel')) {
+        const i = vs.findIndex(v => v.key === e.target.closest('.vDel').dataset.v); if (i >= 0) vs.splice(i, 1);
+      } else return;
+      state.connect.vv = (state.connect.vv ?? 0) + 1;
+      box.innerHTML = vesselsHtml();
+    };
+    state.accept = () => { box.onchange = null; box.onclick = null; sub5('sum'); };
     return;
   }
   for (const id of ['#next5', '#next5a']) $(id).disabled = false;
@@ -374,9 +434,10 @@ $('#convBody').addEventListener('click', e => {
   if (box) box.checked = b.classList.contains('askYes');
   for (const x of b.parentElement.querySelectorAll('button')) x.classList.toggle('primary', x === b);
 });
-for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
+for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? sub5('items') : state.sub5 === 'items' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (state.sub5 === 'if') return sub5('id');
+  if (state.sub5 === 'items') return sub5('vessels');
   if (['id', 'tabs', 'vessels'].includes(state.sub5)) return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
   startConnect(state.connect, { toast });
