@@ -200,11 +200,15 @@ async function convert() {
         <p>Names: <b>${r.names === 'bru' ? 'your BruControl names (kept after two warnings)' : 'Skynet names'}</b>.
         <b>${r.items}</b> items on a board port come in. <b>${r.placeholders}</b> other items are a <b>Placeholder</b> on their Tab, where
         BruControl had them, until the next steps bring them in. Tab backgrounds are left out for now.</p></div>
-      <div class="cards two"><div><h3>Interfaces (boards)</h3><table><tr><th>Interface</th><th>ID</th><th>Items</th></tr>
-        ${r.interfaces.map(d => row([esc(d.name), esc(d.id), d.items], ['', '', 'n'])).join('')}</table></div>
+      <div class="cards two"><div><h3>Interfaces (boards)</h3><table><tr><th>Interface</th><th>ID</th><th>Items</th><th>Import</th></tr>
+        ${r.interfaces.map(d => row([esc(d.name), esc(d.id), d.items, d.items ? '✓' : `<input type="checkbox" class="keepEmpty" data-name="${esc(d.name)}" title="This Interface (board) has no items. Tick it to import it anyway; unticked, it is not imported." aria-label="Import ${esc(d.name)} anyway">`], ['', '', 'n', 'c'])).join('')}</table>
+        ${r.interfaces.some(d => !d.items) ? '<p class="small">An Interface with no items (0) is <b>not</b> imported. Tick its box and it <b>will</b> be imported.</p>' : ''}</div>
       <div><h3>Placeholders</h3><table><tr><th>BruControl kind</th><th>How many</th></tr>
         ${Object.entries(r.byKind).map(([k, n]) => row([esc(k), n], ['', 'n'])).join('') || row(['(none)', ''])}</table></div></div>
-      ${r.look ? `<p>Look (theme): <b>${esc(r.look.name)}</b>, ${r.look.bru ? `the closest to your BruControl theme <b>${esc(r.look.bru)}</b>` : 'the closest to BruControl\'s own Office 2019 Black (your BruControl theme was not found)'}. Change it in the Panel under Settings &gt; Panel settings &gt; Look.</p>` : ''}
+      ${r.look ? `<p>Look (theme): <b>Skynet ${esc(r.look.name)}</b> was chosen as it most closely matched ${r.look.bru ? `the <b>${esc(r.look.bru)}</b> theme set in BruControl` : 'BruControl\'s own Office 2019 theme (your BruControl theme was not found)'}.
+        BruControl themes do not work in browsers, so Skynet has its own small set of Skynet Themes. You can also build your own User Theme
+        in Skynet if none of ours do what you want. A new Skynet Theme for a Tab (old Workspace) can be chosen at any time, and that screen
+        will use that theme.</p>` : ''}
       <h3>Tabs (workspaces)</h3><table><tr><th>Tab</th><th>ID</th><th>Items</th><th>Placeholders</th></tr>
         ${r.tabs.map(t => row([esc(t.name), esc(t.id), t.items, t.placeholders], ['', '', 'n', 'n'])).join('')}</table>
       ${r.media.pictures + r.media.sounds ? `<h3>Pictures and Sounds</h3><p><b>${r.media.pictures}</b> pictures and <b>${r.media.sounds}</b> sounds are imported by their path.
@@ -236,7 +240,8 @@ for (const id of ['#back8', '#back8a']) $(id).onclick = () => show(6);
 $('#saveBtn').onclick = async () => {
   const b = $('#saveBtn'); b.disabled = true; b.textContent = 'Saving…';
   try {
-    const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: connectState() });
+    const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: connectState(),
+      keepEmpty: [...document.querySelectorAll('#convBody .keepEmpty:checked')].map(c => c.dataset.name) });
     const box = $('#saveResult');
     box.innerHTML = `<p>✅ Saved <b>${esc(r.file)}</b> in <code>${esc(r.folder)}</code>.</p>
       <p>${r.interfaces} Interfaces, ${r.tabs} Tabs, ${r.items} items on a board port, ${r.placeholders} Placeholders${r.warnings ? `, ${r.warnings} notes for the report` : ''}.</p>
