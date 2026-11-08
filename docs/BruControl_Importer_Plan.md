@@ -451,3 +451,17 @@ when clicked". **Built now** in the import (lib/bruimport.js) and the Panel:
 - **On and Off, not Enabled** (Fritz, 2026-11-07: "I prefer on and Off rather than enabled"): BruControl turned a PID or
   Hysteresis on and off with its Enabled property. When Scripts are imported, a heating Element's `.Enabled = true` becomes
   `= on` and `.Enabled = false` becomes `= off` (whatever its method); the first page of the Import says so.
+
+## Globals, one by one (plan; the step is built later, on Fritz's go)
+Fritz, 2026-11-06: "GLOBALS IMPORT LATER ... very involved"; 2026-11-08: the differences page (page 2) now explains it. When the
+Globals step is built it does what page 2 promises:
+- **One Global at a time.** A few plain questions, then the Importer says what it thinks (Text, Value or Picture Widget, a gGlobal
+  of the right Kind, a Database Group, the item's own `.api`), and the brewer accepts it or picks another option. Guesses come from
+  how BruControl used it (hidden and locked = probably just a global variable).
+- **Kinds checked:** a gGlobal's name says its Kind (`gS_`, `gV_` ...); a value going into a `gS_` is listed and explained, never
+  forced (Rule 1.19).
+- **Recipe import Globals are dropped** (Fritz, 2026-11-08): "if Skynet determines (with your Help) that the Globals were used for
+  Node-Red import of an xml file, they and the associated Scripts will NOT be imported as they are not needed anymore!" Skynet
+  imports a Beer.xml or BeerSmith .bsmx itself, with no code. Clues: API turned on, names or Scripts about recipe, hops, grain,
+  mash steps, BeerSmith or XML, and Scripts that only copy those Globals. The brewer confirms; the dropped Globals and Scripts are
+  listed in the report.
