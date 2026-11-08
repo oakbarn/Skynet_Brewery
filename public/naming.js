@@ -91,12 +91,13 @@ export function upgradeCode(el) {
 }
 
 // Label -> the part of a name (Fritz, 2026-10-23): control characters and emoji are dropped, spaces at the ends trimmed,
-// < > : " / \ | ? * . , each become ~ and spaces become _
+// < > : " / \ | ? * . , each become ~, and so do spaces (OakBarn Brewery, 2026-11-07: "I like the ~ instead of a _ in the label
+// part of the name"): the _ only ever separates the parts of a name
 // Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners; © ® ™ stay
 const PICTO = /\p{Extended_Pictographic}/u, EMOJI_PART = /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u200D\uFE0E\uFE0F\u20E3]/u;
 const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0) >= 0x2190);
 export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
-  .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '_');
+  .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '~');
 
 // Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). Used in its name when Hydro Devices are built.
@@ -304,7 +305,8 @@ const MEGA_PINS = [...Array(54).keys()].slice(2).map(String);      // D2-D53 (D0
 export const canPseudoPwm = e => e?.type === 'pwmOut' || (['pid', 'deadband'].includes(e?.type) && !!e.pwm);
 export const PSEUDO_PWM_PERIOD = 1000;      // ms: one on and off cycle
 export const pseudoPwmOn = (pct, now, period = PSEUDO_PWM_PERIOD) => { const p = Math.max(0, Math.min(100, Number(pct) || 0)); return p >= 100 || (p > 0 && (now % period) < period * p / 100); };
-const needsPwm = e => !(e.pseudoPwm && canPseudoPwm(e)) && (['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm));
+// a Pump with Speed control PWM (Fritz, 2026-11-08) needs a true PWM pin too
+const needsPwm = e => !(e.pseudoPwm && canPseudoPwm(e)) && (['pwmOut', 'analogOut'].includes(e.type) || (['pid', 'deadband'].includes(e.type) && e.pwm) || (e.type === 'digitalOut' && e.subtype === 'pump' && !!e.pwm));
 const needsCounter = e => e.type === 'flowMeter' || e.typeCode === 'Count';
 const KEPT = { pwm: 'a PWM pin', counter: 'a counter (interrupt) pin', spi: 'one of the SPI pins that RTD and thermocouple boards need', onewire: 'the OneWire data pin for DS18B20 probes' };
 
@@ -319,6 +321,8 @@ const PROFILES = {
 };
 export const pinProfile = board => PROFILES[board] || PROFILES.mega;
 const profileOf = (el, devices) => pinProfile(boardOf((devices ?? []).find(d => d.name === el.device)));
+// can this Device's Port make true PWM? (a Mega: D2-D13, D44-D46; a Pi: every pin). A PWM Pump on another pin runs On/Off only.
+export const canTruePwm = (el, devices) => profileOf(el, devices).pwm.includes(String(el?.channel ?? ''));
 // How a pin is shown in the pin picker: D5 (PWM) on a Mega, GPIO17 on a Pi, A3 = pin 57 (BruControl) for Mega analog pins
 export function pinLabel(p, board) {
   p = String(p);
@@ -403,7 +407,7 @@ export const cloneNumber = name => +(/_Clone_(\d+)$/.exec(name ?? '')?.[1] ?? 0)
 export const WIDGET_TYPE_IDS = {
   picture: 'PIX', text: 'TXT', label: 'LBL', valueWidget: 'VAL', timeWidget: 'TM', dateTimeWidget: 'DT', timer: 'TMR',
   soundPlayer: 'SND', switch: 'SW', pushButton: 'PB', pulseButton: 'PL', led: 'LED', manualValve: 'MV', tapValve: 'TWV',
-  alarm: 'ALM', override: 'OVR',
+  alarm: 'ALM', override: 'OVR', chart: 'CHT',
 };
 // the Type of a Widget: by its type (an element) or its kind (a Text, an Override); a Manual Valve is an IP fitting (tap: a Tap
 // Water Valve, TWV)
@@ -411,6 +415,7 @@ export function widgetTypeId(e, tap = false) {
   if (!e) return '';
   if (e.fitting === 'manualValve') return tap ? WIDGET_TYPE_IDS.tapValve : WIDGET_TYPE_IDS.manualValve;
   if (e.cloneId || e.cloneOf) return '';
+  if (e.type === 'codeValueWidget') return 'CV';      // the Code Value Widget (OakBarn Brewery, 2026-11-08, Rule 1.27)
   return WIDGET_TYPE_IDS[e.type] || WIDGET_TYPE_IDS[e.kind] || '';
 }
 // the Manual Pump Widget (Rule 5.15a, public/confirm.js): wgt_MP_Pump~7_BR. Added on its own line (not listed with the others, so

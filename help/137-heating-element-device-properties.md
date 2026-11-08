@@ -1,5 +1,7 @@
 # Heating Element Device Properties
 
+> **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
+
 Adding a **Heating Element** works the same way as adding a Pump (see [Pump Device Properties](115-pump-device-properties)) and a
 Motorized Ball Valve (see [Motorized Ball Valve Device Properties](128-motorized-ball-valve-device-properties)): **a Heating Element
 has no Cover**. (Skynet Rule 18.24)
@@ -20,7 +22,7 @@ has no Cover**. (Skynet Rule 18.24)
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
 4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**
-   are now greyed out and set (they are the wiring). A Heating Element always asks before it turns on (Rule 2.33).
+   are now greyed out and set (they are the wiring). On the Tab, one click on it turns it ON or OFF at once, like a Pump (Rule 2.33).
 
 ## Vessel Device Template: choose, then Build
 

@@ -180,6 +180,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #dlgBody { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin-bottom: 12px; }
 #dlgBody .full { grid-column: 1 / -1; }
 #dlgBody textarea { min-height: 5em; }
+#dlgBody textarea[data-k="code"], dialog textarea[data-k="code"] { width: 100%; box-sizing: border-box; min-height: 6em; font-family: ui-monospace, Consolas, monospace; resize: vertical; }      /* Code Value Widget Code (Rule 1.27) */
 #dlgBody > select, #dlgBody > input { min-width: 0; max-width: 100%; }     /* a long choice (stepper drivers) must not push the labels off the dialog */
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 50; max-width: 90vw; }
 #toast.show { opacity: 1; }
@@ -420,6 +421,8 @@ body.role-viewer .op-only { display: none !important; }
 .codeBox .saved input { flex: none; }
 .codeBox .saved input { width: 22px; height: 22px; }
 .codeBox button:disabled { opacity: .45; cursor: not-allowed; }
+/* the BruControl Importer's Build page: Processes greyed out (OakBarn Brewery, 2026-11-08) */
+body.importBuild #views button:disabled, body.importBuild #procTab:disabled { opacity: .4; cursor: not-allowed; }
 @media print {
   body.loginPage { background: #fff; color: #000; }
   .codeBox { border: 1px solid #000; }
@@ -436,7 +439,8 @@ body.role-viewer .op-only { display: none !important; }
 #ws .gfx.vessel.heating .twell.elmark { background: #ff7a00; box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 0 12px 4px #ff7a00; }
 /* the Vessel Widget class (Rule 5.31): its Probe and Element pictures, and in Edit layout a faint mark for each spot not Placed */
 #ws .gfx.vessel .vwPart { position: absolute; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
-#ws .gfx.vessel .vwPart.vpPart { pointer-events: auto; cursor: pointer; }      /* a Vessel Device's part: double-click for its Properties */
+#ws .gfx.vessel .vwPart.vpPart { pointer-events: auto; cursor: pointer; }
+#ws .gfx.vessel .vwPart.vwProbe:not(.vwOff) { pointer-events: auto; cursor: pointer; }      /* a Vessel's own Probe: one click opens its SetPoint (Rule 2.43) */      /* a Vessel Device's part: double-click for its Properties */
 /* the Properties hotspot (Rule 5.38): one click opens the Vessel Device's, or its built in Heating Element's, Properties */
 #ws .propsHot { position: absolute; width: 18px; height: 18px; font-size: 13px; line-height: 18px; text-align: center; border-radius: 50%; background: rgba(255,255,255,.9); color: #333; box-shadow: 0 0 0 1px rgba(0,0,0,.35); cursor: pointer; pointer-events: auto; z-index: 6; user-select: none; }
 #ws .propsHot:hover { background: #ffd54a; }
@@ -1091,6 +1095,9 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 /* Fritz, 2026-11-07: the method in use is Red, the others Yellow (orange is the Element's own glow while on) */
 #ws .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid #c9a800; background: #ffd400; color: #000; cursor: pointer; }
 #ws .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fff; font-weight: 600; }
+/* Turn Off: only while the Element is ON (Rule 6.19) */
+#ws .hmBtn.hmOff { background: #37474f; border-color: #1c262b; color: #fff; font-weight: 600; margin-left: 4px; }
+#ws .hmBtn[hidden] { display: none; }
 
 /* ===== the Look (theme) picker, Settings > Panel settings (Rule 2.39) ===== */
 .lookPreview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -2px 0 6px; }
@@ -1098,9 +1105,14 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .lookSw > span { padding: 1px 7px; border-radius: 4px; font-size: 12px; font-weight: 600; }
 
 /* the Skynet Dial (Fritz, 2026-11-07, Rule 2.40): an arc with a needle and the reading in digits under it */
-.el.look-dial .vl { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 2px; }
+/* Fritz, 2026-11-08: "Have the Dial take up most of the Black Box". The Label floats in the top left corner over the box, so the
+   Dial gets the whole box (no row kept for the Label and no padding); a round Dial's corners are empty, so the Label fits there */
+.el.look-dial > .nm { position: absolute; top: 0; left: 0; max-width: 100%; z-index: 1; box-sizing: border-box; pointer-events: none; }
+.el.look-dial .vl { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 1px; }
 .el.look-dial .vl .dial { width: 100%; height: 100%; font-family: var(--font); overflow: visible; }
 .el.look-dial .vl .dial .dialVal { font-variant-numeric: tabular-nums; }
+.el.chartW .vl { padding: 0; min-height: 0; font-weight: 400; font-size: 10px; }
+.el.chartW .vl .chartSvg { display: block; }
 
 /* Click to pick a Brew Process job (Rule 16.3): the items that fit are lit, the rest greyed */
 #ws .jobFit { outline: 3px solid #f5a623; outline-offset: 3px; cursor: crosshair; border-radius: 6px; }
@@ -1108,3 +1120,7 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
 .jobPickBar { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 9000; background: #fffbe6; color: #222; border: 2px solid #f5a623;
   border-radius: 8px; padding: 8px 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.25); max-width: calc(100vw - 32px); flex-wrap: wrap; }
 .jobPickBar button { background: #fff; color: #222; border: 1px solid #999; }
+/* the Controls of a DigiBoil or 65 L Brewzilla (Rule 5.39): its name, then its switches, screen and valves; the Brewzilla's Run spot */
+.el.manual .mvRow.mvHead { justify-content: center; }
+.el.manual .mvRun { margin-top: 3px; padding: 3px 6px; border-radius: 6px; border: 1px solid var(--muted); background: #20262d; color: #cfe8ff; cursor: pointer; font-size: 12px; }
+.el.manual .mvRun.on { background: #164d2a; color: #b6ffcc; }

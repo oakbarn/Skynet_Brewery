@@ -94,3 +94,91 @@ const clues = readClues(xml);
 assert.deepEqual(clues.scripts, [{ name: 'Mash', text: '"M_V1" State = on' }]);
 assert.deepEqual(clues.backgrounds, { Brewhouse: { path: 'C:\\Pics\\brewery.jpg', w: 1800, h: 900 } });
 console.log('connect tests passed');
+
+// a line removed on the picture: a link in the middle splits its chain (Fritz, 2026-11-08)
+{
+  const { removeLink } = await import('../public/importer/connect.js');
+  const cs = [{ start: { kind: 'vessel', key: 'HLT', at: 'cBottomOutlet' }, steps: [{ to: { kind: 'valve', id: 'A' } }, { to: { kind: 'valve', id: 'B' } }, { to: { kind: 'tap' } }] }];
+  removeLink(cs, 0, 1);
+  assert.equal(cs.length, 2); assert.deepEqual(cs[0].steps.map(s => s.to.id), ['A']); assert.deepEqual(cs[1].start, { kind: 'valve', id: 'B' }); assert.equal(cs[1].steps[0].to.kind, 'tap');
+  removeLink(cs, 0, 0); assert.equal(cs.length, 1, 'a chain with no links left is gone');
+}
+// the Chart Widget tests run here too, so package.json stays as it is (no clash with other open PRs)
+await import('./chart.test.js');
+// the picture screen's tidy start and its Set button (OakBarn Brewery, 2026-11-08)
+{
+  const { layoutPieces, pipePath, hosePath } = await import('../public/importer/connect.js');
+  const ps = [{ key: 'vessel:HLT', kind: 'vessel' }, { key: 'vessel:MLT', kind: 'vessel' }, { key: 'vessel:BK', kind: 'vessel' }, { key: 'V1', kind: 'valve' }, { key: 'P1', kind: 'pump' }, { key: 'X', kind: 'valve' }];
+  const ch = [{ start: { kind: 'vessel', key: 'HLT' }, steps: [{ to: { kind: 'valve', id: 'V1' }, by: 'pipe' }, { to: { kind: 'pump', id: 'P1' }, by: 'hose' }] }];
+  const a = layoutPieces(ps, ch), col = x => Math.round(x * 6 - 0.5);
+  assert.equal(col(a['vessel:HLT'].x), 0); assert.equal(col(a['vessel:BK'].x), 5, 'the first and last columns');
+  assert.equal(a.V1.x, a['vessel:HLT'].x, 'joined by a Pipe: the same column'); assert.ok(a.V1.y > a['vessel:HLT'].y, '... below it');
+  assert.equal(col(a.P1.x), 1, 'a Hose step moves one column over');
+  assert.ok(a.X.y > 0.85, 'joined to nothing: the bottom row');
+  const b = layoutPieces(ps, ch, { set: true });
+  assert.equal(col(b['vessel:HLT'].x), 1); assert.equal(col(b['vessel:BK'].x), 4, 'Set: one column in from each side');
+  assert.match(pipePath({ x: 0, y: 0 }, { x: 10, y: 50 }), /^M0\.0 0\.0 V20\.0 L10\.0 30\.0 V50\.0$/, 'down, 45 degrees, down');
+  assert.match(pipePath({ x: 0, y: 0 }, { x: 50, y: 10 }), /H20\.0 L30\.0 10\.0 H50\.0$/);
+  assert.match(hosePath({ x: 0, y: 0 }, { x: 100, y: 0 }), /^M0\.0 0\.0 C/);
+}
+
+// one vessel at a time; Left, Right, Vertical or Hose; an Elbow or a Tee (OakBarn Brewery, 2026-11-08)
+{
+  const { joinOf, setJoin, setFit, addTee, chainVessel, layoutPieces, endText } = await import('../public/importer/connect.js');
+  const s = { by: 'pipe' };
+  assert.equal(joinOf(s), 'pipe'); setJoin(s, 'left'); assert.equal(joinOf(s), 'left'); setJoin(s, 'hose'); assert.equal(joinOf(s), 'hose'); assert.equal(s.dir, undefined);
+  const ch = [{ start: { kind: 'vessel', key: 'HLT', at: 'cBottomOutlet' }, steps: [{ to: { kind: 'valve', id: 'V1' }, by: 'pipe' }, { to: { kind: 'pump', id: 'P1', side: 'in' }, by: 'pipe', dir: 'right' }] },
+    { start: { kind: 'valve', id: 'V9' }, steps: [{ to: { kind: 'none' }, by: 'pipe' }] }];
+  setFit(ch, 0, 1, 'tee');
+  assert.deepEqual(ch[0].steps.map(t => t.to.kind), ['valve', 'tee', 'pump'], 'the Tee goes in the line');
+  assert.equal(ch[0].steps[1].dir, 'right'); assert.equal(ch[0].steps[2].dir, undefined, 'the Tee goes on down');
+  assert.equal(ch[1].start.kind, 'tee', 'its branch is a chain'); assert.equal(endText(ch[1].start), 'Tee 1');
+  assert.equal(chainVessel(ch, 1), 'HLT', 'a branch belongs to its Tee\'s vessel'); assert.equal(chainVessel(ch, 2), '', 'no vessel: Other chains');
+  const L = layoutPieces([{ key: 'vessel:HLT', kind: 'vessel' }, { key: 'V1', kind: 'valve' }, { key: 'P1', kind: 'pump' }, { key: 'tee:1', kind: 'tee' }], ch);
+  assert.ok(L['tee:1'].x > L.V1.x && L['tee:1'].y === L.V1.y, 'Pipe to the right: beside it on the same row');
+  assert.ok(L.P1.x === L['tee:1'].x && L.P1.y > L['tee:1'].y, 'then down under the Tee');
+  setFit(ch, 0, 1, 'elbow');
+  assert.deepEqual(ch[0].steps.map(t => t.to.kind), ['valve', 'pump'], 'back to an Elbow takes the Tee out');
+  assert.equal(ch[0].steps[1].dir, 'right'); assert.equal(ch.length, 2, 'and its empty branch');
+  const t = addTee(ch, 0, 0); assert.equal(t.n, 1); assert.equal(ch[0].steps[1].to.kind, 'tee');
+  ch[1].steps[0].to = { kind: 'drain' };
+  assert.match(setFit(ch, 0, 1, 'elbow'), /remove the branch first/, 'a joined branch is kept');
+}
+
+// which template matches your vessel the best: the first guess from the name (OakBarn Brewery, 2026-11-08)
+{
+  const { guessVesselTemplate } = await import('../public/importer/connect.js');
+  const t = ['HLT', 'Mash_Tun', 'Brew_Kettle', 'Fermenter', 'Generic_Brew_Vessel_Widget'].map(id => ({ id }));
+  assert.equal(guessVesselTemplate({ key: 'HLT', name: 'HLT' }, t), 'HLT');
+  assert.equal(guessVesselTemplate({ key: 'MT', name: 'Mash Tun' }, t), 'Mash_Tun');
+  assert.equal(guessVesselTemplate({ key: 'BK', name: 'Boil Kettle' }, t), 'Brew_Kettle');
+  assert.equal(guessVesselTemplate({ key: 'F1', name: 'FV 1', side: 'cold' }, t), 'Fermenter');
+  assert.equal(guessVesselTemplate({ key: 'X', name: 'Big pot' }, t), 'Generic_Brew_Vessel_Widget');
+}
+
+// the Vessels page: what the import can tell about each vessel; manual valves start at None (OakBarn Brewery, 2026-11-08)
+{
+  const { findVesselDetails } = await import('../public/importer/connect.js');
+  const conv = { elements: [{ name: 'a', label: 'M_HLT Heat', type: 'pid' }, { name: 'b', label: 'M_HLT Temp', type: 'analogIn' }, { name: 'c', label: 'M_Whirlpool', type: 'digitalOut' },
+    { name: 'MP_9_PWM_M~HLT~PV2_MD', label: 'M HLT PV2', type: 'pwmOut', bru: { name: 'M_HLT PV2' } }] };
+  const d = findVesselDetails(conv, [{ name: 's', text: 'if HLT herms then' }], [{ key: 'HLT', name: 'HLT' }, { key: 'BK', name: 'Boil Kettle' }]);
+  assert.deepEqual(d.HLT.heaters.map(h => h.label), ['M_HLT Heat']); assert.equal(d.HLT.probe.label, 'M_HLT Temp');
+  assert.equal(d.HLT.herms, 'no', 'HERMS starts unticked'); assert.ok(d.HLT.found.herms, 'a Script mentions it'); assert.equal(d.HLT.outlet, 'bottom'); assert.equal(d.HLT.motorValve, 'MP_9_PWM_M~HLT~PV2_MD', 'its own motorized valve'); assert.equal(d.HLT.manualValve, 'none');
+  assert.equal(d.BK.tangential, 'yes', 'a whirlpool pump means a tangential inlet on the Boil Kettle'); assert.equal(d.BK.sparge, 'none');
+}
+// the item pages (OakBarn Brewery, 2026-11-08): each item on a port has one kind, with first guesses; only known answers are saved
+{
+  const { itemKind, guessPartDetails, cleanPartDetails, PART_PAGES } = await import('../public/importer/connect.js');
+  assert.deepEqual(PART_PAGES.map(p => p.kind), ['pump', 'heater', 'probe', 'valve', 'flow', 'other']);
+  const pump = { type: 'digitalOut', subtype: 'pump', bru: { name: 'M_120VAC Chugger Pump' } };
+  assert.equal(itemKind(pump), 'pump');
+  assert.deepEqual(guessPartDetails(pump, 'pump'), { model: 'chugger', power: 'ac120', speed: 'onoff' });
+  assert.equal(itemKind({ type: 'digitalOut', subtype: 'element', bru: { name: 'HLT Heat' } }), 'heater');
+  assert.equal(itemKind({ type: 'temperature', bru: { name: 'HLT Temp' } }), 'probe');
+  assert.equal(guessPartDetails({ type: 'temperature' }, 'probe').probe, 'onewire');
+  assert.equal(itemKind({ type: 'digitalOut', bru: { name: 'M_HLT PV2 valve' } }), 'valve');
+  assert.equal(itemKind({ type: 'flowMeter', bru: { name: 'Flow 1' } }), 'flow');
+  assert.equal(itemKind({ type: 'digitalOut', bru: { name: 'Lamp' } }), 'other');
+  assert.deepEqual(cleanPartDetails('heater', { watts: '5500', volts: 'ac240', junk: 1 }), { watts: 5500, volts: 'ac240' });
+  assert.deepEqual(cleanPartDetails('pump', { model: 'nope', speed: 'variable' }), { speed: 'variable' });
+}

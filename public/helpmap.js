@@ -28,7 +28,7 @@ export function elementTopic(e) {
     case 'digitalOut':
       if (e.subtype === 'valve' && e.valveType === 'manual') return ['manual-valves'];
       if (e.subtype === 'valve' && e.tapwater) return ['tap-water-valves'];
-      if (e.subtype === 'pump' && !e.kind) return ['pump-device-properties'];
+      if (e.subtype === 'pump' && !e.kind) return ['pump-device-properties', 'dc-pumps-pump-speed-and-pump-facts'];      // Rule 18.32, Help 163
       if (e.subtype === 'element' && !e.kind && !e.template) return ['heating-element-device-properties'];      // the Pump's drill-down (Fritz, 2026-11-05, Help 137)      // the drill-down (Fritz, 2026-11-03, Rule 18.12)
       return DEVICE;
     case 'deadband': return ['deadband-device'];      // as in BruControl (Fritz, 2026-11-05, Rule 6.17, Help 126)
@@ -36,7 +36,9 @@ export function elementTopic(e) {
     case 'alarm': return e.alarmClass ? ['alarm-widget'] : ['alarms-and-sound'];      // the Alarm Widget subclasses (Fritz, 2026-11-02)
     case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
     case 'timer': return ['timer-widget'];
+    case 'chart': return ['chart-widget'];      // Rule 1.26 (Fritz, 2026-11-08)
     case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return ['value-time-and-datetime-widgets'];     // Rule 1.23 (Fritz, 2026-11-05)      // Timer Widget Properties (Fritz, 2026-10-29)
+    case 'codeValueWidget': return ['code-value-widget'];      // Rule 1.27 (OakBarn Brewery, 2026-11-08)
     case 'gGlobal':       // the six variable Kinds have their own page (Fritz, 2026-11-02); the on-screen kinds stay on Variables
       if (['string', 'graphic', 'value', 'bool', 'time', 'datetime'].includes(e.kind ?? 'value')) return ['gglobal-kinds'];
       return e.kind === 'list' ? ['variables', 'gglobal-list-a-dropdown-on-a-tab'] : ['variables', 'gglobal-kinds'];

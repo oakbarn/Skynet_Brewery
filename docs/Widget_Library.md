@@ -19,6 +19,7 @@ A reference list of every Widget in the Skynet Brew Panel and all its settings (
 | Width, Height | Size in pixels. |
 | Lock position | No drag or resize. (Lock icon in Properties.) |
 | Database and .API | Every Widget with a value (not pictures, Labels, manual vessels or the Manual Valve Widget). **Send to the database**: Off, On demand, On value change, When a Process starts, Once, At a date and time, At clock time, Every N ms / seconds / minutes / hours / days, Every 00:00:00; **What to send** (main value or another attribute). **.API**: Off, Get only, Get and Put (Skynet Rule 6.14, Help 98). Always user settable. |
+| .confirmation | A switch (2026-11-08, Rule 1.28, Help 162). Ticked: a **Confirmation Widget**, for something done **by hand** (no Interface controls it): commanding it On shows a pop-up asking the person to do it and confirm; it shows On only once confirmed, and a Process waits. On for Manual Valves, Manual Pumps and moving a QD Hose; off for everything else unless ticked. |
 
 Properties open with a double-click. Delete, Cancel, Save are at the top and bottom of every Properties dialog.
 
@@ -178,6 +179,9 @@ Process attributes: `.text` (`.value` = `.text`), `.label`, `.label_visible`, `.
 ### Value, Time and DateTime Widgets (`valueWidget`, `timeWidget`, `dateTimeWidget`; 2026-11-05, Rule 1.23, Help 134)
 Show one value on a Tab (a number, hh:mm:ss, or a date and time); a tap sets it unless Read only; every Process reads and sets it by its Name. Names start `w_Value_N`, `w_Time_N`, `w_DateTime_N`; the Label is never blank. Value box: Start value (Value Widget: Units, Decimals, Step, Lowest, Highest), Read only, Fore / Back color, Alignment; Label box; Properties box; Database and .API (When Clicked, Database Groups ...). Keeps its value when the Brain restarts.
 
+### Chart Widget (`chart`, 2026-11-08, Rule 1.26, Help 159)
+A line graph over time of brew database readings for up to two Devices or Widgets (Channel 1 left axis, Channel 2 right axis). Name `wgt_CHT_Label_TabID`. Properties (and Process attributes) match a BruControl Chart: Span seconds, Refresh interval, Grid lines across / up and down, Time axis color; per Channel: Device or Widget, Auto scale, Axis lowest / highest, Line color, Axis color. 610 x 190 to start, 1 hour Span. The BruControl Importer makes one from each BruControl Chart.
+
 ### Timer Widget (Timer Widget Properties, 2026-10-29, Help 92)
 Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no background.**
 
@@ -188,6 +192,9 @@ Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no ba
 | Properties box | Visible, Hidden Locked, **Style**, Tab, X Horizontal, Y Vertical, Width, Height, Lock position |
 | Style | Skynet Styles 🔒 (never changed by a user): Skynet Orange Timer (seven-segment 00:00:00 on an orange-red panel, grey bezel; the default), Skynet Green LCD, Skynet Blue Timer, Skynet Red LED digits, Skynet Plain text. ➕ Add new User Style… / ✏ Edit for User Styles (Look, Digits, Panel, Bezel, Title bar colors) |
 | Timer Digits (Rule 2.40, 2026-11-07, Help 152) | **Digits**: hh:mm:ss or hh:mm. **Seconds only in the last minute**: counting down, shows just SS under one minute. A User Style also has **Back color** (round the panel), **Text Fore color** (digits), **Text Back color** (panel), **Frame** (Rounded corners / Square corners / Square top, rounded bottom: Fritz's own Timer frames, drawn by Skynet) and **Frame color** |
+
+### Code Value Widget (`codeValueWidget`; 2026-11-08, Rule 1.27, Help 161)
+A Value Widget with a **Format** (Number with Units and Decimals, Time hh:mm:ss, or DateTime) and a **Code** attribute: Process code that runs once each time a person sets the Value (a tap and Set, or the .API), never when a Process sets it. `{value}` in the Code is the Value, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}`. Normal Label (never blank); name `wgt_CV_Label_TabID`. Properties as the Value Widget, plus Format (after 3 Name) and Code (before X). Keeps its value when the Brain restarts; a restart does not run the Code.
 
 ### Skynet Dial (a Look, Rule 2.40, 2026-11-07, Help 152)
 Skynet's own temperature gauge (Fritz's pick: an arc with a needle and the reading in digits under it), drawn by Skynet as SVG. Not a Widget of its own: a **Look** (`look: dial`) a Temperature Probe picks with **Display > Skynet Dial**, and any Device that shows a number picks in its Text attributes ⬢ (analog in, PWM / analog out, Duty Cycle, PID, Deadband, a Heating Element's output %). A Process: `name.valueType = "Dial"`.
@@ -435,6 +442,8 @@ All TC 1.5 unless noted; 217 x 235 except Big Mac.
 | Kettle_Tangential_Steam_Slayer / _Electric | Brew Kettle | + Tangential, Steam Slayer Right High (+ Element) |
 | Kettle_Brewzilla_Electric | All-in-one, electric | Outlet CB + Valve_90 (no thermowell) |
 | Kettle_DigiBoil_Electric | All-in-one, electric | Outlet CB + Valve_90 (no thermowell) |
+| Kettle_DigiBoil | Brew Kettle, its own heat set by hand (Rule 5.39) | Outlet CB with its BSP Spigot (Manual valve) built in; Controls: Power, Heater, set point and screen |
+| Kettle_Brewzilla_65L | All In One, its own heat and pump set by hand (Rule 5.39) | Outlet CB with its BSP Spigot, Pump out IP with its Manual valve; Controls: Pump, Heater 1, 2, 3, set point, screen On/Off and Run |
 | Kettle_Foundry_Electric | All-in-one, electric | Outlet Front Low + Valve_90 |
 | Kettle_Grainfather_Electric | All-in-one, electric | Outlet CB + Valve_90 |
 | Integrated_Electric_Kettle_Basic | Skynet_Integrated_Device | Outlet, Thermowell + probe and Element built in |
@@ -504,7 +513,7 @@ These are added from the same list as Devices but need no board pin.
 | Alarm (made before 2026-11-02, no subclass) | Sound file, Sound files 1-3, Sound file number, Sound (custom, default, none), Repeat sound, Text when sounding, Picture when sounding / quiet |
 | Sound Player | Sound file, Repeat sound. Lowest priority (5): pauses while any alarm sounds. Process: play / stop SoundPlayer |
 | Label | Text box only (no own settings) |
-| Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading |
+| Manual vessel (BrewZilla, DigiBoil by hand) | Temperature units, Volume units, Set point decimals, Set point at start, Has no pump, Picture when heating / not heating. Processes set setpoint, heat, pump, timer, message, waiting; the brewer confirms or types a reading. The DigiBoil and 65 L Brewzilla Controls (Rule 5.39) also have power, heat2, heat3 and run, and a Process setting them pops up what to do by hand and waits |
 
 ### gGlobal variables (Processes and screen; database and outside programs when its Database and .API box says so)
 gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, Help 98). Settings: Kind, then by kind: Initial value, Decimals, Units, + / - step, Lowest / Highest allowed, Text when on / off, Read only on screen, Keep value on restart, then the **Database and .API** box.
@@ -552,5 +561,6 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-05: Picture Widget: Add Widget box and Properties follow the Pump drill-down (Rule 18.27, Help 74); Picture ➕ makes a Picture Widget. (thread "Build Picture Widget dialog like Pump")
 - 2026-11-05: Sight_Glass and Sight_Glass_Caged TC Pipe Fittings (Rule 5.32, Help 139): a Length setting in inches stretches the glass; Label starts as site_glass_n. (thread "Add caged and plain sight glass fittings")
 - 2026-11-06: Tap Water Valve, a Manual Valve Widget with a household hose bib picture, one IP on its hose outlet, a tap water source while open, Label tap_water_n (Rule 5.33, Help 141). (thread "Add hose bib Manual Valve Widget")
+- 2026-11-08: Code Value Widget (Rule 1.27, Help 161): a Value Widget in a chosen Format whose Code attribute runs Process code with {value} each time a person sets it. (thread "Build a Code Value Widget")
 - 2026-11-06: Pointer to the Valve Tee and Supply Manifolds (Rule 5.35): on the Elbows, Tees … list, but they are Skynet_Integrated_Devices (Device Library 5.4). (thread "Add valve Tees and supply manifolds")
 - 2026-11-08: Manual Pump Widget (`manualPump`, Rule 5.15a) and the `.confirmation` switch on the Manual Valve Widget (on), Manual valve Devices (on), Switch and LED (off) (Rule 1.28). (thread "Build Confirmation Widgets in the Panel")

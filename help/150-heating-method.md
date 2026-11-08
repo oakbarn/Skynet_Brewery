@@ -1,5 +1,7 @@
 # One Heating Element, pick how it heats
 
+> **⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.** (Rule 6.20)
+
 A heating element is **one Device**, however you control it. How it heats is its **heating method**, and you can change that
 while brewing, with a click or from a Process (Skynet Rule 6.19; Fritz, 2026-11-07: "ONE device, but select the heating method
 via process or on the Device when clicked").
@@ -15,7 +17,8 @@ via process or on the Device when clicked").
 
 ## Click it while brewing
 
-**One click** on the Heating Element on its Tab opens its pop-up. It shows:
+**One click** on the Heating Element on its Tab turns it **ON or OFF** at once, in the method it is in, like a Pump (Skynet Rule
+2.33). Its pop-up opens from a **method spot** (below), or **Heating method…** in its Temperature Probe's SetPoint pop-up. The pop-up shows:
 
 1. **Heating method**: one button for each. The one it uses now is marked. **One click on a method switches to it at once**
    (no Set needed); the pop-up stays open for its setting. Hysteresis, PID, Deadband and Precise are greyed out until the Element has a
@@ -23,7 +26,9 @@ via process or on the Device when clicked").
 2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Target**.
 3. **Set + ON** (or **ON** for On/Off), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
 
-It still asks before it turns on (Rule 2.33): nothing turns on until you click **Set + ON** or **ON**.
+Nothing in the pop-up turns on until you click **Set + ON** or **ON**, with one exception: in **Duty Cycle** the % is its On and
+Off too. A Duty cycle % of **0 turns the Element Off**, and **above 0 turns it On** if it was Off, whether you set it here or a
+Process sets it (Skynet Rule 6.19).
 
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID, Deadband or Precise, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.
@@ -41,7 +46,8 @@ How the element is wired decides which methods make sense (the hover help on the
 ## Its main method and the other methods allowed
 
 When you build it (and later in its Properties), pick its **main heating method**, the one it starts with. Then, under **Other
-methods allowed**, tick each other method it may use. **Only the main method and the ticked ones can be used**: the pop-up, the
+methods allowed**, tick each other method it may use. **On/Off** (full power) is always allowed and always has its spot, so it
+has no switch there. **Only the main method and the ticked ones can be used**: the pop-up, the
 spots, Method Clones and Processes offer only those, and a Process asking for another one stops with a plain message.
 
 An Element **built into a Vessel Device or RIMS tube** works the same way: open its Properties (double-click it, or its ⚙) for
@@ -52,7 +58,11 @@ are changed to a Heating Element when they load, keeping its name and settings.
 
 When **two or more** methods are allowed, a small button for each shows **under the Element** on its Tab, or under its picture on
 a **Vessel Device** when it is built in. **One click** on one switches the Element to that method at once; the one in use is **red**, the others
-**yellow**. With only the main method, no buttons show.
+**yellow**. While it is ON, a dark **Turn Off** button shows at the end of the row: one click turns it Off.
+**One click on the Element's picture** on its Vessel Device turns it **On or Off** at once, in the method it is in, like a Pump.
+A click on its **box** (the tile with its reading) opens its pop-up, with **ON**, **OFF** and its method.
+When the Element is **Off**, a click on a method spot only switches its method; it stays Off until you turn it On.
+Several Elements can be On at the same time (for example on different AC circuits). With only the main method, no buttons show.
 
 Example: Tartan's HLT Element on Main Panel port 42 shows **Duty Cycle** and **PID**: one click on Duty Cycle for the boil, one
 click on PID to hold the strike temperature. The BruControl Import sets Duty Cycle as the main method and ticks PID for you.
@@ -63,7 +73,8 @@ To show one Element as separate tiles, like BruControl's *M_HLT Heat* and *HLT P
 in Edit layout, open **⧉ Clone Device** and pick the Element under **Method Clone**. It can go on the Element's own Tab. In its
 Properties pick the **Control Method** it stands for and, if you like, its own **Label**.
 
-- **One click** on the tile switches the Element to that method at once and opens its pop-up.
+- **One click** on the tile acts just as a click on the Element, all in unison, with no pop-up: showing ON, it turns the Element
+  Off; showing OFF, it switches the Element to that method and turns it On.
 - The tile shows **ON** only while the Element is ON **in that method**; otherwise it shows OFF.
 - The Element itself still shows what it is doing in whatever method it is using.
 
@@ -95,6 +106,8 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
 - `.method` is **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB
   work too). Reading it gives the word, for example `if hE_HLT_1.method == "PID"`.
 - `hE_HLT_1 = on` turns it **On** in its method; `hE_HLT_1 = off` turns it **Off**. Every method works this way, Hysteresis and PID too. (BruControl used *Enabled* for this; an old `.enabled` line still works, but Skynet says On and Off.)
+- **Picking a method never turns it On**: a method spot, the pop-up's method buttons or a Process only change the method. Turning
+  it On or Off is its picture, its On/Off button or spot, a Clone, or a Duty cycle % (Skynet Rule 6.19).
 - Changing the method **while it is ON** goes on at once in the new method, **except** to **On/Off**: that turns it OFF first, so
   an Element never jumps from 40 % to full power by itself. Turn it ON again for full power.
 - Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.target`, `.onoffset`, `.ondelay` (Hysteresis);

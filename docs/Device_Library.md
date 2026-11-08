@@ -22,11 +22,11 @@ Press **Create** and the Device goes on the 🔨 **Build Tab**, and its Properti
 ### Device names
 `InterfaceID_Port_DeviceTypeID_Label_TabID` (one underscore between the parts, Fritz 2026-11-05; names made before keep their `__` before the Tab ID)
 
-Example: `MB_25_eVlv_Fly~Sparge_In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
+Example: `MB_25_eVlv_Fly~Sparge~In_SP` (Interface MB, pin 25, Type ID eVlv, Label "Fly/Sparge In", Tab SP).
 
 - **Interface ID:** 1 to 4 letters, unique (for example MB). An Admin can change it.
 - **Tab ID:** exactly 2 letters, unique (for example SP). Two underscores go before it.
-- **Label in the name:** spaces become `_`; the characters `< > : " / \ | ? * . ,` become `~`; emoji and control characters are dropped. The Label itself stays as you typed it.
+- **Label in the name:** spaces become `~` (2026-11-07, so `_` only separates the parts); the characters `< > : " / \ | ? * . ,` become `~`; emoji and control characters are dropped. The Label itself stays as you typed it.
 - **Port in the name:** analog pins use BruControl numbers (A0 = 54 ... A15 = 69, so A5 = 59). A OneWire probe uses its virtual port (700+). An ADS1115 channel is ADS0 to ADS3.
 - **Unique:** a name already in use gets `_2`, `_3` ... after the Label. No spaces in Device names.
 - Existing Devices are never renamed by themselves (that would break Processes).
@@ -178,6 +178,7 @@ What each ID means:
 - Same settings as 4.1 with Kind = pump. Turning it on makes flow run from its inlet IP to its outlet IP. Pumps have no orientation setting.
 - **Skynet pump pictures** (Pumps group, Help 104): March 809 and 815 (poly 90° inlet, poly center inlet, stainless center inlet), Chugger (stainless 90° inlet and center inlet), Blichmann Riptide (stainless, cover off), Topsflo TD5 and KegLand MKII (poly, plus MKII stainless). Drawn from the real pumps with no cover; with one of them the IN and OUT IPs sit on the tips of the real inlet and outlet ports.
 - **Pump Standard** (Rule 5.27, Fritz 2026-11-05, Help 130): every Skynet pump picture (these drawings, their Covers and the older Riptide-style color pictures) is drawn to scale in the same 300 x 300 box and shown 150 x 150, with the inlet IP at (285, 150) and the outlet IP at (243, 56) of the box (Orientation Left mirrors them). Port tubes are drawn longer where needed to reach the spots, so one pump can replace another in the same place and stay joined. The sump pump keeps its own box.
+- **DC pumps, speed and facts** (Rule 18.32, Fritz 2026-11-08, Help 163): every Pump has **Model** (`pumpModel`, the list in public/pumps.js and docs/DC_Brewing_Pumps.md; a Skynet drawing picks its own; `other`), the **Pump facts** ⬢ (`pumpFlow`, `pumpLift`, `pumpHottest`, `pumpPorts`; empty = the model's), **Power** (`power`: ac120, ac240, dc12, dc24; empty = the model's), **Use** (`pumpUse`: empty = Hot, `cold`), **Speed control** (`pwm`: empty = On/Off only, `pwm` = PWM speed on a true PWM Port) and **Speed %** (`speed`, 0-100, empty = 100; a Process: `Pump.speed = 60`). An AC pump is On/Off only. Holding the mouse on a Pump shows its facts.
 - **Cover overlay** (Rule 7.13, Help 111): **.cover** = None (default), Red, Yellow, Blue, Green, Purple, Orange, White or User; **.coverColor** = the User cover's color (any RGB). One cover per color fits every pump (2026-11-05). Drawn between the pump picture and the On overlay, on the Skynet no-cover pump drawings only.
 - **Properties dialog: the drill-down** (Rule 18.12, Help 115, Fritz 2026-11-03): Visible, Hidden Locked and the lock at the top;
   **Pump Properties ⬢** (Tab, X, Y, Width, Height, Delete); **Label ⬆ ⬢**, Show label, Name; Interface, **Pin ⬢**, **When tapped ⬢**,
@@ -515,3 +516,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-06: Added 5.4 Valve Tee and Supply Manifolds (Double, Triple): Long Tees with a valve Device built into each branch, each Manual or Motorized on its own (Skynet Rule 5.35, Help 146). (thread "Add valve Tees and supply manifolds")
 - 2026-11-06: 5.4 Valve Tee and Supply Manifolds: the Pump's drill-down Add box and Properties (Rule 18.29), valve ends with TC ferrules matching the tees, valve numbers, three Orientations and no Flip. (thread "Add valve Tees and supply manifolds")
 - 2026-11-07: 5.4 Valve Tee and Supply Manifolds: Flip added on the Orientation line (valves on top or bottom). (thread "Let Supply Manifolds flip valves top or bottom")
+- 2026-11-08: 4.2 Pump: Model with Pump facts, Power, Use, Speed control and Speed % (PWM), hover facts (Rule 18.32, Help 163). (thread "List DC brewing pumps for the Panel")
