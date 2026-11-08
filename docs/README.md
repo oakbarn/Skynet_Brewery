@@ -13,6 +13,7 @@ The master copies live in the project folder (docs/); these are kept in step wit
 | [Image Library](Image_Library.md) | Every Skynet picture, by group. The pictures are in [media/Images/Skynet](../media/Images/Skynet/). |
 | [Minimum equipment and limitations](Minimum_Equipment_and_Limitations.md) | The smallest system, how far it grows, and what the panel cannot do yet. |
 | [Hardware shopping list](Skynet_Brewery_Shopping_List.md) | What to buy to run the panel, with rough prices. |
+| [DC Brewing Pumps](DC_Brewing_Pumps.md) | 12 V and 24 V pumps brewers use (flow, lift, ports), for adding DC pump types to the Panel. List only, waiting for review. |
 | [Existing Alarms](ExistingAlarms.md) | Every old-style Alarm in the sample Schemas (Name, Schema, Tab), to change to the new Basic format one by one. |
 | [Importing Norms](Importing_Norms.md) | Every change an import makes to bring a BruControl Schema (or anything old) up to the Skynet way. |
 | [BruControl Importer Plan](BruControl_Importer_Plan.md) | The plan for the Windows BruControl Importer: one program with the Panel, what we need from a BruControl brewer, proposed Rule 15.4. Waiting for Fritz's OK. |
