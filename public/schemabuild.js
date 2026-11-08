@@ -19,7 +19,7 @@ const ROLE_JOBS = {
   'All In One': { heater: ['HLT_Heater', 'Mash_Heater', 'Boil_Heater'], probe: ['HLT_Probe', 'Mash_Probe', 'Boil_Probe'] },
 };
 const SHORT = { HLT: 'HLT', 'Mash Tun': 'MLT', 'Brew Kettle': 'BK', 'All In One': 'AIO' };
-export const HEATS = { electric: 'Electric (Heating Element)', gas: 'Gas (burner on a gas valve)', none: 'None' };
+export const HEATS = { electric: 'Electric (Heating Element)', gas: 'Gas (burner on a gas valve)', own: 'Its own, set by hand (DigiBoil, Brewzilla: Skynet does not switch it)', none: 'None' };
 export const RECIRCS = { none: 'None', rims: 'RIMS tube', herms: 'HERMS coil (in the HLT)' };
 export const CHILLERS = { immersion: 'Immersion coil', plate: 'Plate chiller', counterflow: 'Counterflow chiller' };
 export const VALVES = { hand: 'Hand valves (Skynet asks you to turn them)', motorized: 'Motorized valves (one on each vessel outlet)' };
@@ -99,6 +99,9 @@ export function planSchema(a, { iface, taken = [] } = {}) {
     const label = v.label || { HLT: 'Hot Liquor Tank', 'Mash Tun': 'Mash Tun', 'Brew Kettle': 'Brew Kettle', 'All In One': 'All In One' }[role] || `Vessel ${i + 1}`;
     vessels.push({ template: general ? GENERAL_TEMPLATE : v.pick, role, vtype: role, label, x, y: 80, short: s });
     const cx = x;
+    // its own heat, set by hand (a DigiBoil or a 65 L Brewzilla, Rule 5.39): no probe and no heater of Skynet's. Its Controls and its
+    // valves come built into its Vessel Template; it does no Brew Process heating job.
+    if (v.heat === 'own') { x += W; return; }
     // its probe (DS18B20 on the OneWire bus), shown under the vessel
     const probe = add({ place: { at: 'v', i, row: 0, col: 0 }, type: 'temperature', sensor: 'ds18b20', label: `${s} temp`, x: cx, y: 420, w: 170, h: 74, units: '°F', precision: 1, look: 'lcd', device: '' });
     job(ROLE_JOBS[role]?.probe ?? [], probe.name);

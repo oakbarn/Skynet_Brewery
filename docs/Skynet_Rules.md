@@ -1235,6 +1235,33 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   Exit without saving still undoes everything since the last Save layout.
 - **BruControl Import:** checked, not changed; it does not move things on a Tab. Schemas it makes get this in the Panel.
 
+5.39 **Hand-set appliance vessels: the DigiBoil and the 65 L Brewzilla** (Fritz, 2026-11-07: "a DigiBoil Widget Vessel. It has its
+own Heating but no control from Skynet at all"; "The 65 L Brewzilla Widget has 4 switches one Intergrated Bottom Drain Pump, 3
+Heater"; thread "Add DigiBoil manual vessel widget", Help 158).
+- Two Skynet Vessel Templates: **Kettle_DigiBoil** and **Kettle_Brewzilla_65L**. Each heats itself (and the Brewzilla pumps
+  itself); Skynet does not switch any of it. Their parts are built in and never un-bundled (Integrated items):
+  - **DigiBoil:** 2 manual switches, **Power** and **Heater**; one Manual valve in its outlet, the small silver **Spigot with BSP
+    threads**; one manual **Temperature Set Point and Display Screen**.
+  - **65 L Brewzilla:** 4 manual switches, the bottom drain **Pump**, **Heater 1**, **Heater 2**, **Heater 3**; one Manual valve in
+    its outlet (the **BSP Spigot**) and one on the **out side of its pump manifold** (an IP of its own, Pump out); one manual
+    **Temperature Set Point and Display Screen** that has an **On/Off button** and a **Run** hot spot.
+- The switches and screen are its **Controls**, a Manual vessel Widget beside it (Name_Controls, for example DigiBoil_Controls).
+  The valves are Manual valve Devices (Valve type Manual, no Port; DigiBoil_Spigot, Brewzilla_Pump_Out). A closed valve shuts its IP.
+- **A Process sets them, a person does it:** `DigiBoil_Controls.setpoint = 152`, `.power`, `.heat`, `.heat2`, `.heat3`, `.pump`
+  (`.power` is the Brewzilla screen's On/Off button) and `.run` (the Brewzilla Run spot) show what was asked on its Controls,
+  pop up what to do by hand, and the Process waits for ✔ Done (like `ask`, Rule 16.5). Already set that way: no pop-up.
+- **°C pop-up:** both screens go back to °C every time they are turned off. When the panel works in °F (its Controls' units), the
+  set point pop-up gives the °C too: "Set the DigiBoil temperature set point to 152 °F (that is 66.7 °C)". In °C only the °C shows.
+- **`open_valve Name` / `close_valve Name`**: a Process command for **any one valve**. A Manual one (a Manual valve, a Manual
+  Valve Widget, a built-in Spigot or Pump out valve, a Supply Manifold's Manual valve) pops up "OPEN ... by hand" and waits, as
+  in Rule 5.13; a motorized one is switched at once. `Valve.state = true` still works as before.
+- A click on its Controls in run mode records what you set by hand (a switch, a valve, a new set point, what its screen reads).
+- **Schema Templates (Rule 16.6):** a new heat choice, **Its own, set by hand**: Skynet makes no probe or heater for that vessel and it
+  does no Brew Process heating job. The OakBarn Template uses the DigiBoil and the 65 L Brewzilla this way. The older
+  Kettle_DigiBoil_Electric and Kettle_Brewzilla_Electric Templates stay for brewers who switch theirs from Skynet.
+- Older Manual vessel Widgets (no appliance) work as before: no pop-up.
+- **BruControl Import:** checked, not changed. BruControl has no DigiBoil or Brewzilla items; its Manual valves import as before.
+
 ---
 
 
@@ -1704,7 +1731,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **157** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back, 154 Properties hot spots, 155 Default settings, 156 Precise heating). (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **159** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back, 154 Properties hot spots, 155 Default settings, 156 Precise heating, 157 Schema Templates, 158 DigiBoil and Brewzilla by hand). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -2714,3 +2741,9 @@ Not Placed) or the dialog closes.
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
   program: no change (it does not use Schema Templates or the Brew Process; making a Schema from a BruControl file stays in the
   Importer). (thread "Build Process and Schema Templates")
+- 2026-11-07: Rule 5.39 new (Fritz): hand-set appliance vessels, the DigiBoil (Power and Heater switches, Spigot with BSP threads,
+  set point and screen) and the 65 L Brewzilla (Pump, Heater 1, 2, 3 switches, Spigot, Pump out valve, set point and screen with
+  On/Off and Run); a Process asks for each by hand and waits for Done; a set point in °F is given in °C too (their screens go back
+  to °C when turned off); new Process commands open_valve and close_valve for any valve; Schema Template heat choice "Its own, set
+  by hand", used by the OakBarn Template. Rule 11.1 next free Help is 159. Help 158 new; Help 100, 157, 62 updated. Checked against
+  the BruControl Import program: no change (BruControl has no such items). (thread "Add DigiBoil manual vessel widget")
