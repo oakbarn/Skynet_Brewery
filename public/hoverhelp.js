@@ -28,7 +28,11 @@ export function placeBubble(r, box, view) {
   return { left: Math.round(left), top: Math.round(Math.max(4, top)) };
 }
 
-const helpTarget = t => t?.closest?.('[data-help], .tipLbl, dialog [title], [data-hover-titles] [title]') || null;      // the BruControl Import's pages: data-hover-titles on its body
+// A box you type in or pick from never shows hover help over itself (OakBarn Brewery, 2026-11-08: "The Hover Help for Connection
+// covers the DDLB so no Choice can be made"): its open list of choices would be covered. Its help is on its name (Rule 2.38: "Hover
+// over the Label of the dropdown or field"), a column heading, or a tick box; a box with focus never shows one either.
+export const FIELD = 'select, option, optgroup, datalist, textarea, input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=reset])';
+export const helpTarget = t => t?.closest?.(FIELD) ? null : t?.closest?.('[data-help], .tipLbl, dialog [title], [data-hover-titles] [title]') || null;      // the BruControl Import's pages: data-hover-titles on its body
 
 function start(doc = globalThis.document) {
   if (!doc || doc._hoverHelp) return;
