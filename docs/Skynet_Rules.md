@@ -2726,10 +2726,10 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.15 (Fritz): a tap water valve's Properties show On Close List on and On Open List off, greyed out; the last
   step of Skynet_Clean is open_all_valves. Checked against the BruControl Import program: a Schema file it makes is put right the
   same way when the panel opens it (Tap water valves on Close only). Help 100. (thread "Build Process and Schema Templates")
+- 2026-11-08: Rule 18.32 new and Rule 18.21 changed (Fritz): DC pumps. Every Pump has Model (with its facts ⬢), Power with Use, and Speed
+  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 162, docs/DC_Brewing_Pumps.md.
 - 2026-11-07: Rules 16.6 and 16.7 new (Fritz): Schema Templates (1 Vessel, 1 Vessel + 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2
   Pumps, 3 Vessel, OakBarn, Fermentor on its own), Process Templates for the 1 and 2 Vessel models, the Skynet ones filled out from
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
   program: no change (it does not use Schema Templates or the Brew Process; making a Schema from a BruControl file stays in the
   Importer). (thread "Build Process and Schema Templates")
-- 2026-11-08: Rule 18.32 new and Rule 18.21 changed (Fritz): DC pumps. Every Pump has Model (with its facts ⬢), Power with Use, and Speed
-  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 162, docs/DC_Brewing_Pumps.md.
