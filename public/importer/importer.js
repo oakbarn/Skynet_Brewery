@@ -200,20 +200,21 @@ async function namesChoice() {
 // is imported in small steps"): 5a the Interfaces found (read only), 5b the new ID column (the IDs can be changed, then Accept),
 // 5c the rest (Tabs, Look, Pictures and Sounds, the notes). Changed IDs convert the Import Copy again with them.
 const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` class="${cls[i]}"` : ''}>${c}</td>`).join('') + '</tr>';
-async function convert(ids = null) {
-  const names = ids ? state.names : await namesChoice();
+// again: the names are made again ({ to: the step to land on }) with state.ids and state.labels; none: a fresh convert
+async function convert(again = null) {
+  const names = again ? state.names : await namesChoice();
   state.names = names;
-  if (!ids) state.keepTabs = null;
+  if (!again) { state.keepTabs = null; state.ids = null; state.labels = null; state.itemPicks = null; }
   show(5);
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
   sub5('busy');
   try {
     state.units = document.querySelector('input[name=units]:checked')?.value === 'Metric' ? 'Metric' : 'US';
-    const r = await api('POST', '/api/convert', { file: state.sel, names, units: state.units, copyMedia: true, ...(ids ? { ids } : {}) });
+    const r = await api('POST', '/api/convert', { file: state.sel, names, units: state.units, copyMedia: true, ...(state.ids ? { ids: state.ids } : {}), ...(state.labels ? { labels: state.labels } : {}) });
     state.converted = true;
     state.connect = r.connect;
     state.r = r;
-    sub5(ids ? 'tabs' : 'if');
+    sub5(again?.to ?? 'if');
   } catch (e) { state.converted = false; box.innerHTML = `<p class="note">${esc(e.message)}</p>`; }
 }
 // The Tabs step (OakBarn Brewery, 2026-11-08: "Layout the Tab ... different Place Holder type ... a Check box and accept Button"): one row
@@ -284,34 +285,63 @@ const TYPE_TEXT = { digitalOut: 'Digital Output', digitalIn: 'Digital Input', pw
   temperature: 'Temperature Probe', hysteresis: 'Hysteresis', pid: 'PID', dutyCycle: 'Duty Cycle', deadband: 'Deadband', flowMeter: 'Flow Meter',
   scale: 'Scale', stepper: 'Stepper', switch: 'Switch', chart: 'Chart' };
 const typeText = e => e.subtype === 'pump' ? 'Pump' : e.subtype === 'element' ? 'Heating Element' : TYPE_TEXT[e.type] ?? e.type;
-const itemKey = e => `${e.device}|${e.port}|${e.bru}`;
+const itemKey = e => e.bruId || `${e.device}|${e.port}|${e.bru}`;
+const shownName = e => e.noDisplay ? e.bru : (e.display || e.bru);      // what the Display Name column shows, and what the tick copies
 function itemsHtml(r) {
   const keep = state.keepTabs ?? new Set(r.tabs.map(t => t.name));
   const all = r.portItems ?? [];
-  return `<div class="card"><p>Every item wired to a port of an Interface (board), listed by Interface and port. They are shown by their
-      <b>BruControl name</b>, with its <b>Display Name</b> (a greyed one means there was no Display Name,
-      so the Name is used), and the <b>Skynet name</b> each one gets. An item on a Tab you left out on the Tabs step is not imported.
-      Each item also has a <b>tick box</b> and a blank <b>Label</b> box for you to fill in. Then <b>Next</b>.</p></div>
+  const ex = r.labelExamples ?? [];
+  // the Labels text (OakBarn Brewery, 2026-11-08)
+  return `<div class="card"><p>Every item wired to a port of an Interface (board), listed by Interface and port, with its <b>BruControl name</b>,
+      its <b>Display Name</b> (a greyed one means there was no Display Name, so the BruControl name is shown), the <b>Skynet type</b>, the
+      suggested <b>Skynet name</b> and its <b>Tab</b>. An item on a Tab you left out on the Tabs step is not imported.</p>
+      <h3>Labels</h3>
+      <p>In BruControl each item had a <b>Display Name</b>, the words shown with it on the screen. The Importer brings over the Display Name
+      settings and puts them in the item's <b>Label</b> in Skynet. The Label can be shown on the Tab just like the Display Name was in BruControl,
+      and it is also the <b>Label part of the suggested Skynet name</b>.</p>
+      <p>Give every item a Label using <b>the words you use when you describe your brewery</b> to someone, like HLT, Mash Tun or Boil Kettle.
+      Tick an item's box to copy its Display Name into its Label box, then change it if you like.</p>
+      <ul>
+        <li>A Label can have <b>spaces</b>. In the suggested Skynet name a space becomes <code>~</code>, so <i>Mash Tun</i> is <code>Mash~Tun</code>.</li>
+        <li>A Label <b>does not have to be different</b> from the others. A Heater, a Temperature Probe and a Valve can all have the Label
+        <b>HLT</b>. The Label is only one part of the suggested name, so the three names are still all different:
+        <ul>${ex.map(x => `<li>${esc(x.what)}: <code>${esc(x.name)}</code> <span class="small muted">${x.sample ? '(a made-up sample)' : `(made from your ${esc(x.from)})`}</span></li>`).join('')}</ul></li>
+        <li><b>Skynet names are the preferred way to name things in Skynet</b>: each one tells you the board, the port, the kind of item,
+        the Label and the Tab at a glance.</li>
+        <li><b>No Label may be blank.</b> When every Label is filled in, press <b>Accept</b> at the bottom of the page. The suggested Skynet
+        names are then made again with your Labels.</li>
+      </ul></div>
     ${r.interfaces.map(d => {
       const list = all.filter(e => e.device === d.name).sort((a, b) => String(a.port).localeCompare(String(b.port), undefined, { numeric: true }));
       return `<div class="card"><h3>${esc(d.name)} <span class="muted small">(ID ${esc(d.id)}, ${list.length} item${list.length === 1 ? '' : 's'})</span></h3>
-        ${list.length ? `<table class="itemTable"><tr><th>Port</th><th>BruControl name</th><th>Display Name</th><th title="Tick an item">✔</th><th>Label</th><th>Skynet type</th><th>Skynet name</th><th>Tab</th></tr>
-        ${list.map(e => row([esc(e.port), esc(e.bru),
-          // Display Name (OakBarn Brewery, 2026-11-08): the DisplayName when there is one; none: the Name, greyed.
-          e.noDisplay ? `<span class="noDisplay" title="No Display Name in BruControl: the Name is shown greyed instead">${esc(e.bru)}</span>` : esc(e.label),
-          // Then a tick box and a Label box, all blank to start (OakBarn Brewery, 2026-11-08); kept while you move between the steps.
-          `<input type="checkbox" class="itemTick" data-item="${esc(itemKey(e))}"${state.itemPicks?.[itemKey(e)]?.tick ? ' checked' : ''}>`,
-          `<input type="text" class="itemLabel" data-item="${esc(itemKey(e))}" value="${esc(state.itemPicks?.[itemKey(e)]?.label ?? '')}">`,
-          esc(typeText(e)), `<code>${esc(e.name)}</code>`, keep.has(e.tab) ? esc(e.tab) : `${esc(e.tab)} <span class="note small">left out</span>`], ['n'])).join('')}</table>`
+        ${list.length ? `<table class="itemTable"><tr><th>Port</th><th>BruControl name</th><th>Display Name</th><th title="Tick to copy the Display Name into the Label box">✔</th><th>Label</th><th>Skynet type</th><th>Skynet name</th><th>Tab</th></tr>
+        ${list.map(e => { const k = esc(itemKey(e)), pick = state.itemPicks?.[itemKey(e)], out = !keep.has(e.tab);
+          return row([esc(e.port), esc(e.bru),
+          // Display Name (OakBarn Brewery, 2026-11-08): the DisplayName when there is one; none: the BruControl name, greyed.
+          e.noDisplay ? `<span class="noDisplay" title="No Display Name in BruControl: the BruControl name is shown greyed instead">${esc(e.bru)}</span>` : esc(shownName(e)),
+          // Then a tick box (copies the Display Name into the Label box) and a Label box, blank to start; kept while you move between the steps
+          `<input type="checkbox" class="itemTick" data-item="${k}" data-copy="${esc(shownName(e))}"${pick?.tick ? ' checked' : ''} title="Copy the Display Name into the Label box" aria-label="Copy the Display Name of ${esc(e.bru)}">`,
+          `<input type="text" class="itemLabel" data-item="${k}"${out ? ' data-out="1"' : ''} maxlength="40" value="${esc(pick?.label ?? '')}" title="${out ? 'This item is on a Tab you left out, so it is not imported' : 'Your Label for this item: the words you use for it'}" aria-label="Label of ${esc(e.bru)}">`,
+          esc(typeText(e)), `<code>${esc(e.name)}</code>`, out ? `${esc(e.tab)} <span class="note small">left out</span>` : esc(e.tab)], ['n']); }).join('')}</table>`
           : '<p class="small muted">No items on this Interface.</p>'}</div>`;
     }).join('')}`;
+}
+// a message box with one OK button (an error the user must fix first)
+function tell(title, html) {
+  return new Promise(ok => {
+    const d = $('#ask'); $('#askTitle').textContent = title; $('#askText').innerHTML = html;
+    $('#askYes').classList.add('hidden'); $('#askNo').textContent = 'OK'; $('#askNo').onclick = () => d.close('ok');
+    d.onclose = () => { $('#askYes').classList.remove('hidden'); ok(); };
+    d.returnValue = ''; d.showModal(); $('#askNo').focus();
+  });
 }
 function sub5(which) {
   $('#convBody').oninput = null; $('#convBody').onchange = null;
   state.sub5 = which;
   document.body.classList.toggle('wideStep', which === 'vessels');      // the wide Vessels table gets the whole window
   // the page's own Back and Next walk the small steps; on the ID step Next is Accept
-  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
+  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'items', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
+  $('#next5a').classList.toggle('hidden', which === 'busy' || which === 'items');      // the items page: Accept at the bottom, after the Labels
   $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : which === 'items' ? 'The items on each Interface' : 'Boards and Tabs';
   if (which === 'busy') return;
   const r = state.r, box = $('#convBody');
@@ -353,7 +383,7 @@ function sub5(which) {
     state.accept = () => {
       const ids = {}; let changed = false;
       for (const i of box.querySelectorAll('.ifId')) { const v = i.value.trim().toUpperCase(); ids[i.dataset.name] = v; if (v !== r.interfaces.find(d => d.name === i.dataset.name)?.id) changed = true; }
-      if (changed) convert(ids); else sub5('tabs');
+      if (changed) { state.ids = ids; convert({ to: 'tabs' }); } else sub5('tabs');
     };
     return;
   }
@@ -368,8 +398,25 @@ function sub5(which) {
     box.oninput = box.onchange = ev => {
       const t = ev.target, k = t.dataset?.item; if (!k) return;
       const p = state.itemPicks[k] ??= { tick: false, label: '' };
-      if (t.classList.contains('itemTick')) p.tick = t.checked;
-      if (t.classList.contains('itemLabel')) p.label = t.value;
+      if (t.classList.contains('itemTick')) {
+        p.tick = t.checked;
+        // ticking copies the Display Name into the Label box (OakBarn Brewery, 2026-11-08)
+        if (t.checked) { const l = t.closest('tr').querySelector('.itemLabel'); l.value = p.label = t.dataset.copy; l.classList.remove('blankLabel'); }
+      }
+      if (t.classList.contains('itemLabel')) { p.label = t.value; if (t.value.trim()) t.classList.remove('blankLabel'); }
+    };
+    // Accept: no Label may be blank (on the Tabs being imported); then the names are made again with the Labels
+    state.accept = async () => {
+      const boxes = [...box.querySelectorAll('.itemLabel:not([data-out])')], blank = boxes.filter(b => !b.value.trim());
+      boxes.forEach(b => b.classList.toggle('blankLabel', !b.value.trim()));
+      if (blank.length) {
+        await tell('Some Labels are blank', `<p>${blank.length} item${blank.length === 1 ? ' has' : 's have'} no Label. Blank Labels are not allowed:
+          every item needs one, because it is part of its suggested Skynet name.</p><p>The blank boxes are marked in red. Type a Label, or tick the
+          box to copy the Display Name.</p>`);
+        blank[0].focus(); return;
+      }
+      state.labels = Object.fromEntries(boxes.map(b => [b.dataset.item, b.value.trim()]));
+      convert({ to: 'vessels' });
     };
     return;
   }
@@ -437,8 +484,7 @@ $('#convBody').addEventListener('click', e => {
 for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? sub5('items') : state.sub5 === 'items' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (state.sub5 === 'if') return sub5('id');
-  if (state.sub5 === 'items') return sub5('vessels');
-  if (['id', 'tabs', 'vessels'].includes(state.sub5)) return state.accept();
+  if (['id', 'tabs', 'items', 'vessels'].includes(state.sub5)) return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
   startConnect(state.connect, { toast });
   show(6);

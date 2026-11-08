@@ -1841,7 +1841,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     OakBarn Brewery 2026-11-08: "Layout the Tab ... different Place Holder type, a Check box and accept Button"; "The Empty Tabs Unchecked";
     "allow user to check Uncheck": a Tab with items starts ticked, an empty one unticked, and any box can be ticked or unticked; an unticked
     Tab stays out with everything on it), then **the items on each Interface** (read only: one table per board, every item by its
-    port with its BruControl name, Display Name (none: the Name, greyed), a tick box and a Label box (both blank to start), Skynet type, Skynet name and Tab; OakBarn Brewery 2026-11-08), then **the vessels** (it starts with
+    port with its BruControl name, Display Name (none: the Name, greyed), a tick box (unticked; ticking copies the Display Name into the Label) and a Label box (blank to start; it is the Label in the new Schema and the Label part of the suggested name, spaces become ~, need not be different; no Label may be blank at Accept, which is at the bottom), Skynet type, Skynet name and Tab; OakBarn Brewery 2026-11-08), then **the vessels** (it starts with
     the old Your vessels table: rename, Side, ✖, Add a vessel; moved here from Connect your brewery) (each one found, with its **Volume**, **Height** and **Diameter** typed in the units picked, and columns for its Heater (a dropdown of every BruControl heating element found), Thermowell with Probe (a dropdown of every
     BruControl probe found),
     an Outlet dropdown (None, Center Low, Bottom Drain), a Tangential Inlet tick box, Sparge Arm / Steam Slayer (one dropdown: None,
