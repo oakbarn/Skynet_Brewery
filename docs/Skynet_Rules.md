@@ -2145,6 +2145,7 @@ Pump Properties ⬢, Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind, Picture 
 from its dialog (what a Pump already has set is kept). The On / Off text is shown with an **Overlay** instead (Rule 7.13).
 *Replaced:* for the Pump, Rule 18.12's list of fields (2026-11-03).
 *Replaced (Rule 18.13):* the Interface and Port each had **✏ Change** to change them on purpose (2026-11-04).
+*Changed (Fritz, 2026-11-08, Rule 18.32):* the Model ⬢, Power with Use, and Speed control with Speed % are added below the Overlay.
 
 18.22 **Each Device and Widget has only its own Properties** (Fritz, 2026-11-04): besides the Universal Properties (Rule 1.21),
 a Device or Widget may have a limited set of attributes and Properties, only the ones that fit it (the Pump: Rule 18.21). Other
@@ -2339,6 +2340,22 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
   hover help (Rule 2.38).
 - **BruControl Import:** it has no Device dialogs of its own; the Devices it brings in open in these Properties in the Panel.
 ---
+
+18.32 **DC pumps: Model, Power, Use, Speed and the pump's facts** (Fritz, 2026-11-08: "All of the Suggestions on the Pump MD are a
+Go. I think that any of the Pumps can be controlled (On/Off or PWM if it can) and the voltage, Lift, GPM etc are all good info to
+have at your fingertips", [docs/DC_Brewing_Pumps.md](DC_Brewing_Pumps.md), Help 162). Every Pump's Add box and Properties have,
+below the Overlay:
+- **Model** (the pump list in public/pumps.js; a Skynet pump drawing picks its own; **Other** for a pump not listed) with a **⬢**
+  holding the **Pump facts** (Flow, Lift, Hottest liquid, Ports: the model's, or typed by the brewer).
+- **Power** (AC 120 V, AC 240 V, DC 12 V, DC 24 V; empty = the model's) with **Use** (Hot, or Cold for glycol and ice water) on its line.
+- **Speed control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line. An AC pump is On/Off only. A PWM
+  pump needs a true PWM Port (Rule 4.2's pin lists): its Add box lists only PWM Ports, and its Properties warn when the Port cannot.
+- The electrical warning (Rule 6.20).
+One click still turns a Pump On or Off (Rule 2.33); a PWM pump runs at its Speed % while On. A Process sets `Pump.speed = 60`.
+Holding the mouse on a Pump shows its facts. New pump drawings are made only when OakBarn Brewery asks (Rule 7.7); the manual
+BrewZilla 3 pump is a Pump Widget, built in its own thread.
+- **BruControl Import:** it shares the Pump; an imported Pump starts On/Off only with no Model. Guessing a Cold pump from its name
+  ("Cool", "Glycol") and joining a BruControl pump's on/off and PWM speed on one Port into one PWM Pump wait for the Importer review.
 
 ## 19. Vessel Rules
 
@@ -2714,3 +2731,5 @@ Not Placed) or the dialog closes.
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
   program: no change (it does not use Schema Templates or the Brew Process; making a Schema from a BruControl file stays in the
   Importer). (thread "Build Process and Schema Templates")
+- 2026-11-08: Rule 18.32 new and Rule 18.21 changed (Fritz): DC pumps. Every Pump has Model (with its facts ⬢), Power with Use, and Speed
+  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 162, docs/DC_Brewing_Pumps.md.
