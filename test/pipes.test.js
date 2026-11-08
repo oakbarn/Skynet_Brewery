@@ -144,3 +144,9 @@ test('a tee dropped over an open end makes the pipe shorter; over a joined end i
   assert.deepEqual(r.pieces, [{ from: 'e', to: 'B', pts: [[230, 200], [400, 200]] }]);
   assert.equal(fitOnPipe([180, 200], [400, 200], BEND, TEE).ok, false);
 });
+// A turned elbow or tee is drawn once (Fritz, 2026-11-08: "extra Gray parts that are not part of an elbow or a Tee"): its turned
+// picture only, never a second unturned copy as the box's background behind it.
+test('a Skynet pipe fitting is drawn once', async () => {
+  const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /else if \(g\.image && !isUnit\(\{ \.\.\.g, loose: false \}\)\) n\.style\.backgroundImage/);
+});
