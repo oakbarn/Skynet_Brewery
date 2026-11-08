@@ -195,4 +195,7 @@ console.log('importer Schema file tests passed');
   assert.deepEqual(r.conv.workspaces.map(w => w.name), ['Main', 'HV', 'Far'], 'a Tab with a Clone always comes in');
   assert.deepEqual(r.dropped, ['GV']); assert.equal(r.holdersDropped, 1);
   assert.deepEqual(r.conv.graphics.map(g => g.id), ['ph_2', 'cl_1']);
+  // every Tab has an Import Tab box (OakBarn Brewery, 2026-11-08): an unticked Tab with items stays out too, with its items
+  const a = dropEmptyTabs(conv, ['HV'], { all: true });
+  assert.deepEqual(a.conv.workspaces.map(w => w.name), ['HV']); assert.equal(a.itemsDropped, 1); assert.equal(a.conv.elements.length, 0);
 }

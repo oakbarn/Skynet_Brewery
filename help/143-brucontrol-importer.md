@@ -105,7 +105,10 @@ Then you confirm what comes in, in small steps:
    parts, a space in the Label becomes `~` (Rule 3.1), for example `MP_45_DO_M~HLT~Pump_MD`; a name that would be the same as another
    gets `_2` before its Tab ID, so every name is unique. The Importer chose the IDs for you; you may change them (up to 4 letters,
    **2 are preferred**, each one different). **Accept ▶** uses them in every name and goes on.
-3. **Boards and Tabs:** everything else that comes in:
+3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found (Globals,
+   Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
+   or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
+4. **Boards and Tabs:** everything else that comes in:
 
 - your **Interfaces** (BruControl boards), each with its Interface ID and how many items it has. An Interface with **no
   items (0)** is **not** imported, unless you tick its **Import** box; then it **will** be imported;
