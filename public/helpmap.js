@@ -36,6 +36,7 @@ export function elementTopic(e) {
     case 'alarm': return e.alarmClass ? ['alarm-widget'] : ['alarms-and-sound'];      // the Alarm Widget subclasses (Fritz, 2026-11-02)
     case 'soundPlayer': return ['alarms-and-sound', 'sound-player'];
     case 'timer': return ['timer-widget'];
+    case 'codeValueWidget': return ['code-value-widget', 'value-time-and-datetime-widgets'];      // Rule 1.27 (OakBarn Brewery, 2026-11-08)
     case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return ['value-time-and-datetime-widgets'];     // Rule 1.23 (Fritz, 2026-11-05)      // Timer Widget Properties (Fritz, 2026-10-29)
     case 'gGlobal':       // the six variable Kinds have their own page (Fritz, 2026-11-02); the on-screen kinds stay on Variables
       if (['string', 'graphic', 'value', 'bool', 'time', 'datetime'].includes(e.kind ?? 'value')) return ['gglobal-kinds'];

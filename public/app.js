@@ -22,6 +22,7 @@ import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarn
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
 import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowcolor.js';
+import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
@@ -1254,7 +1255,10 @@ const pressOverride = guard(async () => {
 const isVarEl = e => e?.type === 'gGlobal';
 // Value, Time and DateTime Widgets (Fritz, 2026-11-05, Rule 1.23): one value on a Tab, set by a tap; its data type comes from its type
 const DATA_W = { valueWidget: { dt: 'value', word: 'Value', w: 170, h: 56 }, timeWidget: { dt: 'time', word: 'Time', w: 170, h: 56 }, dateTimeWidget: { dt: 'datetime', word: 'DateTime', w: 230, h: 56 } };
+// the Code Value Widget (OakBarn Brewery, 2026-11-08, Rule 1.27, public/codevalue.js): a Value Widget in a chosen Format that runs its Code
+DATA_W.codeValueWidget = { dt: 'value', word: 'Code Value', lbl: 'CodeValue', w: 200, h: 56, menu: 'Code Value Widget (shows a value; a tap sets it and runs its Code)' };
 const isDataW = e => !!e && e.type in DATA_W;
+const dataWDt = e => isCodeValue(e) ? cvDataType(e) : DATA_W[e.type].dt;      // what it holds: a Code Value Widget's Format
 const vkKind = e => e?.type === 'gGlobal' ? (e.kind || 'value') : null;
 // the button look of a Push Button or Pulse Button (Semi_Widgets_Devices, public/semi.js): the same as the gGlobal ones
 const semiLook = e => ['pushButton', 'pulseButton'].includes(e?.type) ? SEMI_KINDS[e.type].look : null;
@@ -2031,7 +2035,7 @@ function sevenSeg(text) {
 
 // The Skynet Dial (Fritz, 2026-11-07, Rule 2.40): which items can show it, what number it shows, and its Setpoint.
 // The Setpoint is a number, or the Name of a Device or gGlobal: its target (a heater's Setpoint), else its value.
-const DIAL_TYPES = new Set(['temperature', 'analogIn', 'analogOut', 'pwmOut', 'pid', 'deadband', 'dutyCycle', 'valueWidget', 'gGlobal']);
+const DIAL_TYPES = new Set(['temperature', 'analogIn', 'analogOut', 'pwmOut', 'pid', 'deadband', 'dutyCycle', 'valueWidget', 'codeValueWidget', 'gGlobal']);
 function dialReading(e, v) {
   if (isHeatElem(e)) { const hm = heatMethodKey(v.method); return !v.state ? 0 : hm === 'dutyCycle' ? v.dutycycle : PERCENT_METHODS.includes(hm) ? v.value : null; }     // a Heating Element: its output %
   if (e.type === 'dutyCycle') return v.dutycycle;
@@ -2108,7 +2112,7 @@ function fillEl(n, e0) {
       }
       n.classList.toggle('longtext', vkKind(e) === 'longstring');
       break;
-    case 'valueWidget': case 'timeWidget': case 'dateTimeWidget':
+    case 'valueWidget': case 'codeValueWidget': case 'timeWidget': case 'dateTimeWidget':
       text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
     case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led':
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
@@ -2323,7 +2327,7 @@ function tapAction(e) {
     case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'soundPlayer': return 'toggle';
-    case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return e.readOnly ? 'none' : 'dialog';
+    case 'valueWidget': case 'codeValueWidget': case 'timeWidget': case 'dateTimeWidget': return e.readOnly ? 'none' : 'dialog';
     case 'gGlobal':
       if (e.readOnly) return 'none';
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
@@ -2556,7 +2560,7 @@ function valueDialog(t) {
   if (numDev) t = { ...t, dataType: 'value', units: t.type === 'pwmOut' ? '%' : t.units,
     min: t.type === 'pwmOut' ? 0 : t.type === 'analogOut' ? (t.rangeLow ?? 0) : t.min, max: t.type === 'pwmOut' ? 100 : t.type === 'analogOut' ? (t.rangeHigh ?? 100) : t.max };
   const d = $('#valDlg'); d.innerHTML = '';
-  if (isDataW(t)) t = { ...t, dataType: DATA_W[t.type].dt };
+  if (isDataW(t)) t = { ...t, dataType: dataWDt(t) };
   const num = t.dataType === 'value', k = vkKind(t);
   const inp = t.dataType === 'string' && k !== 'graphic'
     ? h('textarea', { class: 'vdInput', rows: k === 'longstring' ? 12 : 3 }, v.value ?? '')
@@ -3965,7 +3969,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   const e = { name: base + i, type, workspace: wsName, x: D.x, y: D.y, w: type === 'label' ? D.width : type === 'flowMeter' || type === 'stepper' ? 190 : type === 'timer' ? 260 : 130, h: type === 'timer' ? 120 : type === 'label' ? D.height : 60, ...clone(preset || {}), ...clone(extra || {}) };
   if (!D.visible) e.visibility = 'hidden';
   if (D.wrap) e.wrap = true;
-  if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = d.word + '_' + i; e.dataType = d.dt; if (type === 'valueWidget') e.precision = 2; }     // a Label from the start (Rule 18.15)
+  if (isDataW(e)) { const d = DATA_W[type]; e.w = d.w; e.h = d.h; e.label = (d.lbl ?? d.word) + '_' + i; e.dataType = d.dt; if (type === 'valueWidget' || type === 'codeValueWidget') e.precision = 2; if (type === 'codeValueWidget') { e.format = 'value'; e.code = ''; } }     // a Label from the start (Rule 18.15)
   if (kind) e.kind = kind;
   if (kind === 'switch') { e.w = 110; e.h = 70; }
   if (SEMI_KINDS[type] && !kind) { e.w = SEMI_KINDS[type].w; e.h = SEMI_KINDS[type].h; }
@@ -4149,7 +4153,7 @@ const DEV_TYPES = () => [
 ].map(([k, t, rows]) => [k, t, rows.filter(Boolean).map(r => [r[0], typeof r[1] === 'function' ? r[1] : () => addThing(r[1], r[2], r[3], r[0])])]);
 const WGT_TYPES = () => [
   ['pictext', 'Pictures and text', [['Picture Widget', () => addThing('picture')], ['Text', () => addText()], ['Label', () => addThing('label')]]],
-  ['dataw', 'Value, Time and DateTime Widgets', Object.entries(DATA_W).map(([t, d]) => [`${d.word} Widget (shows a ${d.word.toLowerCase()}; a tap sets it)`, () => addThing(t, 'w_' + d.word)])],
+  ['dataw', 'Value, Time and DateTime Widgets', Object.entries(DATA_W).map(([t, d]) => [d.menu ?? `${d.word} Widget (shows a ${d.word.toLowerCase()}; a tap sets it)`, () => addThing(t, 'w_' + (d.lbl ?? d.word))])],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
   ['semi', 'Semi_Widgets_Devices (Switch, buttons, LED, Manual Valve)', [...amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
     ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')],
@@ -4197,7 +4201,7 @@ $('#devKind').onchange = $('#wgtKind').onchange = () => fillAddType();
 for (const s of $$('#editBar select.typePick')) s.addEventListener('change', () => pickRun(s));
 $('#addManualValve').onclick = () => addIpFit('manualValve');
 // Value ➕, Time ➕, DateTime ➕ (Rule 4.5, Fritz 2026-11-05): one click, the same as Select Widget Type > Value, Time and DateTime Widgets
-for (const [id, t] of [['#addValueW', 'valueWidget'], ['#addTimeW', 'timeWidget'], ['#addDateTimeW', 'dateTimeWidget']]) $(id).onclick = guard(() => addThing(t, 'w_' + DATA_W[t].word));
+for (const [id, t] of [['#addValueW', 'valueWidget'], ['#addCodeValueW', 'codeValueWidget'], ['#addTimeW', 'timeWidget'], ['#addDateTimeW', 'dateTimeWidget']]) $(id).onclick = guard(() => addThing(t, 'w_' + (DATA_W[t].lbl ?? DATA_W[t].word)));
 // ⧉ Clone Device (Fritz, 2026-10-27): the only way to make a Clone. It works on any Tab, the Build Tab too. The list holds the
 // Devices already placed on a Tab (not the ones on this Tab), grouped by type: Pumps, Valves ... Picking one puts its Clone on
 // this Tab with a name Skynet makes; its Visible, X and Y are its own. The list is filled each time it is opened.
@@ -6036,7 +6040,7 @@ const DATAW_TIPS = {
   label: 'The name shown on the Tab, for example Strike Volume. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   tab: 'The Tab this Widget is on.',
-  name: 'Made from the Label and the Tab: wgt_VAL_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID (wgt_DT_DateTime_1_BR). A Process uses it, for example wgt_VAL_Strike_BR = 5.2. It must be unique.',
+  name: 'Made from the Label and the Tab: wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID (wgt_DT_DateTime_1_BR). A Process uses it, for example wgt_VAL_Strike_BR = 5.2. It must be unique.',
   start: 'The value it shows when it is made. It keeps its value when the Brain restarts.',
   units: 'Shown after the number, for example gal, pH or °F. The ⬢ beside it sets the Decimals, the Step for − and +, the Lowest and the Highest.',
   readOnly: 'On: a tap does nothing; only a Process sets it. Off: a tap and Set changes it.',
@@ -6044,21 +6048,25 @@ const DATAW_TIPS = {
   xy: 'Where it goes on the Tab, in pixels from the top left corner.',
   size: 'Its size on the Tab in pixels.',
   type: 'A Widget lives only in the app: it has no Interface or Port (Rule 1.2).',
+  format: 'How the Value is shown and typed: a Number (with Units and Decimals), a Time (hh:mm:ss) or a DateTime (mm/dd/yyyy hh:mm:ss).',
+  code: 'Process code (the same words as a Process) that runs once each time a person sets the Value: a tap and Set on the Tab, or the .API. {value} stands for the Value of the Widget, for example MB_25_HE_Brew~Kettle_BR.target = {value}. A Process setting the Value does not run it. Problems show in the Console.',
 };
 const DATAW_ALIGN = [['', 'Default (Centered)'], ['MiddleLeft', 'Left justified'], ['MiddleCenter', 'Centered'], ['MiddleRight', 'Right justified']];
 const DATAW_NUM_POP = { title: 'Number settings', fields: [['precision', 'Decimals', 'num'], ['step', 'Step for − and + (1 when empty)', 'num'], ['min', 'Lowest (empty = none)', 'num'], ['max', 'Highest (empty = none)', 'num']] };
 const DATAW_LOOK_POP = { title: 'Value look', fields: [['foreColor', 'Fore color', 'color'], ['backColor', 'Back color', 'color'], ['valueAlign', 'Alignment', 'sel', DATAW_ALIGN]] };
 function dataWidgetFields(it) {
-  const val = it.type === 'valueWidget', T = DATAW_TIPS;
-  const start = { valueWidget: 'Start value', timeWidget: 'Start value (hh:mm:ss)', dateTimeWidget: 'Start value (mm/dd/yyyy hh:mm:ss)' }[it.type];
+  const cv = isCodeValue(it), dt = dataWDt(it), val = dt === 'value', T = DATAW_TIPS;
+  const start = { value: 'Start value', time: 'Start value (hh:mm:ss)', datetime: 'Start value (mm/dd/yyyy hh:mm:ss)' }[dt];
   return [['locked', '', 'lock', null, false, false, { inTitle: true }], ['visibility', 'Visible', 'vis', null, false, false, { inTitle: true }], ['hidden', 'Hidden Locked', 'bool', null, false, false, { inTitle: true }],
     ['label', '1. Label', 'text', null, false, false, { up: 2, attr: LABEL_POP, tip: T.label }], ['hideName', 'Label Visible', 'show', null, false, false, { tip: T.labelVisible }],
     ['workspace', '2. Tab', 'ws', null, false, false, { tip: T.tab }],
     ['name', '3. Name', 'text', null, false, false, { tip: T.name }],
+    ...(cv ? [['format', 'Format', 'sel', CV_FORMATS, true, false, { tip: T.format }]] : []),      // a Code Value Widget (Rule 1.27)
     ['initial', start, val ? 'num' : 'text', null, false, false, { tip: T.start }],
     ...(val ? [['units', 'Units', 'text', null, false, false, { tip: T.units, attr: DATAW_NUM_POP }]] : []),
     ['readOnly', 'Read only', 'bool', null, false, false, { tip: T.readOnly, dbPop: true }],      // Database and .API ⬢ on its line, as the Pump's Overlay
     ['foreColor', 'Fore color', 'color', null, false, false, { tip: T.colors, attr: DATAW_LOOK_POP }],
+    ...(cv ? [['code', 'Code (runs when the Value is set)', 'area', null, false, false, { tip: T.code }]] : []),
     ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
     ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }]];
 }
@@ -7023,8 +7031,9 @@ const INFO = {
     example: 'wait Kettle_Temp >= 152' },
   dataw: { title: 'Value, Time and DateTime Widgets', properties: [
     ['What they are', ': Widgets that show one value on a Tab (a Value, a Time hh:mm:ss, or a Date and Time) for you to look at. A tap and Set changes it, unless it is Read only.'],
-    ['Name', ' (wgt_VAL_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
+    ['Name', ' (wgt_VAL_, wgt_CV_, wgt_TM_ or wgt_DT_ + the Label + the Tab ID, Rule 3.14) and a Label (never blank, Rule 18.15) with its own font, size, colors and alignment.'],
     ['Value', ': a Start value; a Value Widget also has Units, Decimals, a +/- Step, a Lowest and a Highest.'],
+    ['Code Value Widget', ': a Value Widget with a Format (Number, Time or DateTime) and a Code: Process code that runs once each time a person sets the Value, with {value} for the Value, for example MB_25_HE_Brew~Kettle_BR.target = {value} (Rule 1.27).'],
     ['Any Process', ' reads and sets it by its Name (w_Value_1 = 5.2, w_Value_1.value), like every Device and Widget. It keeps its value when the Brain restarts.'],
     ['Database and .API', ': When Clicked sends it each time someone sets it on its Tab; in a Database Group it is sent only while one of its Groups is started.'],
     ['All Widgets have', ' Position (.x and .y), Size (.width and .height), Visibility (.visible and .hiddenlock), Lock and Tab properties.']] },
@@ -7398,7 +7407,7 @@ function openTabProps(name) {
   sel = null; renderTabs(); renderWs(); editWorkspace();
 }
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
-const TYPE_TITLE = { valueWidget: 'Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
+const TYPE_TITLE = { valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
@@ -7687,11 +7696,21 @@ async function editItem(kind, id) {
     if (type === 'ip' && !isFitting(item) && !pickedPort) attachIp(item);   // typed a new X / Y: re-check which vessel it sits on
     if (type === 'ip' && before0 !== item.fitting) delete item.autoFit;   // a type picked by hand is kept
     giveName(item, draft.graphics);         // a new fitting type gets a matching name (IP_2 turned into a tee becomes Tee_1)
+    if (kind === 'el' && isCodeValue(item)) { item.dataType = cvDataType(item); checkWidgetCode(item); }      // Rule 1.27
     if (kind === 'el') sel = { kind, id: item.name };
     renderTabs(); renderWs();
     if (kindChanged) editItem(kind, item.name);          // show the settings for the new kind
     if (copy) (kind === 'el' ? copyElement(item) : copyGraphic(item));
   } catch (e) { toast(e.message, true); }
+}
+
+// A Code Value Widget's Code is checked like a Process when its Properties are saved (Rule 1.27): a problem shows at once,
+// and the Widget is still saved, so it can be fixed later. {value} is checked as a number.
+function checkWidgetCode(it) {
+  if (!String(it.code ?? '').trim()) return;
+  api('POST', '/ui/scripts/check', codeWithValue(it.code, '0'), true)
+    .then(r => { const e = r.errors?.[0]; if (e) toast(`${it.label || it.name}: the Code has a problem on line ${e.line}: ${e.msg}`, true); })
+    .catch(() => { });
 }
 
 async function editWorkspace() {

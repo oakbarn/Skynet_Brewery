@@ -180,6 +180,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
 #dlgBody { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 6px 10px; align-items: center; margin-bottom: 12px; }
 #dlgBody .full { grid-column: 1 / -1; }
 #dlgBody textarea { min-height: 5em; }
+#dlgBody textarea[data-k="code"], dialog textarea[data-k="code"] { width: 100%; box-sizing: border-box; min-height: 6em; font-family: ui-monospace, Consolas, monospace; resize: vertical; }      /* Code Value Widget Code (Rule 1.27) */
 #dlgBody > select, #dlgBody > input { min-width: 0; max-width: 100%; }     /* a long choice (stepper drivers) must not push the labels off the dialog */
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 50; max-width: 90vw; }
 #toast.show { opacity: 1; }

@@ -411,6 +411,7 @@ export function widgetTypeId(e, tap = false) {
   if (!e) return '';
   if (e.fitting === 'manualValve') return tap ? WIDGET_TYPE_IDS.tapValve : WIDGET_TYPE_IDS.manualValve;
   if (e.cloneId || e.cloneOf) return '';
+  if (e.type === 'codeValueWidget') return 'CV';      // the Code Value Widget (OakBarn Brewery, 2026-11-08, Rule 1.27)
   return WIDGET_TYPE_IDS[e.type] || WIDGET_TYPE_IDS[e.kind] || '';
 }
 export function suggestWidgetName({ code, label, tab } = {}) {
