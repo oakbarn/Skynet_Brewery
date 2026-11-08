@@ -239,8 +239,9 @@ outside Edit layout, one click or tap does the same kind of thing on every Devic
 - **Not yet the same** (reported, not changed; each waits for OakBarn Brewery's go):
   1. The older **Duty Cycle, Hysteresis, PID and Deadband Devices** (from before one Heating Element, Rule 6.19) open their number
      pop-up on one click instead of turning On or Off.
-  2. A pop-up still used to turn a Heating Element On: a **method spot** clicked while the Element is Off switches the method and
-     opens the pop-up (Set + ON) (PR #276). (A Method Clone no longer does: one click on it acts as on its parent, Rule 4.4.)
+  2. PR #276 (not merged yet) makes a **method spot** clicked while the Element is Off open the pop-up (Set + ON). That breaks
+     Rule 6.19 ("Picking a method never turns it On", no pop-up), so it is taken out here once #276 is in. (A Method Clone is a Clone,
+     not a method pick: one click on it acts as on its parent, Rule 4.4.)
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -1499,6 +1500,10 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   by the same names the separate Devices had (`.target`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
   enabled"; "So even a Hystersis element would be Turned On or Turned Off and not use enabled"): `hE_1 = on` (or `= true`) turns it ON
   in its method. `.value` is a PID, Deadband or Precise output %; `.pv` the smoothed reading Precise holds; `.output` is its pin now (read only).
+- **Picking a method never turns it On** (OakBarn Brewery, 2026-11-08: "Selecting a Different Method when a Heating Element does not
+  turn it on, On off is By the On Off Button. When a Heating element is On, It simply switches to the new control method and stays
+  on"). A method spot, the pop-up's method buttons or a Process `.method` only change the method, with no pop-up; turning it On or
+  Off is its picture, its On/Off spot or button, a Clone, a Duty cycle % (below) or a Process.
 - **Changing the method while it is ON** goes on at once in the new method, **except to On/Off**, which turns it **OFF** first, so it
   never jumps to full power by itself.
 - It is On while ON (Rule 7.9), whatever its pin is doing; it shows what it is doing (60 %, 45 % ▸ 152, ON ▸ 152, idle ▸ 152).
@@ -2454,6 +2459,7 @@ Not Placed) or the dialog closes.
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
 - 2026-11-08: Added Rule 2.44 (OakBarn Brewery: "make things act the same. Like Click the Graphic for On or Off ... What you do every day One Click away"): outside Edit layout one click on a picture of something that turns On and Off turns it On or Off at once, wherever it is; one click on a temperature a Heating Element holds opens its SetPoint (Rule 2.43); one click on something set to a number opens its pop-up; double-click still opens Properties. Lists three things that don't follow it yet (a Heating Element on its own on a Tab, a Valve built into a Vessel Device, the older Duty Cycle, Hysteresis, PID and Deadband Devices). Checked against the BruControl Import program: no change, everything it makes gets these clicks in the Panel. (thread "Add the one-click rule to the Rules")
+- 2026-11-08: Rule 6.19 (OakBarn Brewery: "Selecting a Different Method when a Heating Element does not turn it on, On off is By the On Off Button"): picking a method (a spot, the pop-up's buttons, a Process) only changes the method, with no pop-up, and never turns it On; while On it goes on in the new method. Help 150. Checked against the BruControl Import program: no change. (thread "Add the one-click rule to the Rules")
 - 2026-11-08: Rule 6.19 (OakBarn Brewery: "Duty Cycle % is good. 0 turns it off. Above zero turns it on if it was off"): in Duty Cycle, setting the % to 0 turns the Element Off and above 0 turns it On (pop-up, Process or .API). Help 150. Checked against the BruControl Import program: no change, it only sets the starting %, and loading a Schema never turns an Element on. (thread "Add the one-click rule to the Rules")
 - 2026-11-08: Changed Rule 4.4 (OakBarn Brewery: "Clones act just as if it was the Parent That all act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"): one click on a Method Clone acts as on its parent with no pop-up: shown ON it turns the parent Off, shown OFF it switches the parent to its method and turns it On. Rule 2.44's list updated; Help 71 and 150 updated. Checked against the BruControl Import program: no change, the Method Clones it makes get this click in the Panel. (thread "Add the one-click rule to the Rules")
 - 2026-11-08: Changed Rule 2.33 (OakBarn Brewery: "Change the Rule Individual elements toggle on off. I really do not like the popup to turn any thing on"; "Valve in a Vessels Device Graphic toggle on off"): one click on any Heating Element (on its own, followed by a Picture Widget, or built into a Vessel Device) turns it ON or OFF at once in its method; every Schema's Heating Elements stop asking once when the panel starts; a new one does not ask. One click on the picture of a Valve built into a Vessel Device opens or closes it. Rule 2.44's list and Rule 6.19 updated; Help 120, 137 and 150 updated. Checked against the BruControl Import program: no change, its Heating Elements and Vessel Valves get these clicks in the Panel. (thread "Add the one-click rule to the Rules")
