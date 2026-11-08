@@ -1,6 +1,6 @@
 # BruControl Importer
 
-The **Skynet BruControl Importer** turns a BruControl setup into a Skynet Schema (Skynet Rule 15.4; Fritz, 2026-11-06). It is
+The **Skynet BruControl Importer** turns a BruControl setup into a Skynet Schema (Skynet Rule 15.4; OakBarn Brewery, 2026-11-06). It is
 the second door of the same Skynet program: it uses the Panel's own Devices, Widgets, Templates, pictures and Rules, so what it
 makes is exactly what the Panel makes.
 
@@ -21,7 +21,9 @@ A short welcome: what the Importer does, and that it never changes BruControl or
 
 This page tells you what stays the same (your boards, wiring, Devices, screens, scripts, pictures), what is different
 in Skynet (it runs in a browser, some new words, Skynet pictures and Templates, everything comes in the Skynet way), and the steps
-the Importer will guide you through. Click **Start ▶**.
+the Importer will guide you through. Under **Your Scripts** it also tells you about the **Preset Schema Templates** (what
+BruControl called Configurations) that you can easily change, and why (OakBarn Brewery: "I wanted to Brew, not write Code!").
+Click **Start ▶**.
 
 | BruControl | Skynet |
 |---|---|
@@ -40,13 +42,18 @@ the Importer will guide you through. Click **Start ▶**.
 config files, showing `.brucfg` files and BruControl's backups (`.bak`): pick yours and it is chosen. You can also pick from the list:
 
 The Importer looks **only in Documents\BruControl** first (the real Documents folder, even when Windows keeps it on
-OneDrive). It lists every BruControl config file (`.brucfg`) there, newest first, with the date it was saved and its size.
+OneDrive). The list has two parts. First come BruControl's **backups** (`.bak`) from
+**Documents\BruControl\Config Backup**, newest first. Below them come the **config files** (`.brucfg`) in Documents\BruControl,
+newest first. Each shows the date it was saved and its size. The file you pick is only read; nothing is done to it, so it is
+unchanged after the import.
 BruControl may keep a **default config** there too; it is listed last and marked *(BruControl default)*.
 
 **Backups work too.** BruControl backups end in `.bak` (for example `default.brucfg.20260615.bak`). A backup is the same
-config file inside, so it imports the same way. Backups are listed after your own config files, marked *(backup of
+config file inside, so it imports the same way. Backups are listed first, marked *(backup of
 2026-06-15)*, and the Schema is named after it, for example `default_Backup_2026-06-15`. BruControl keeps its backups in
 **Documents\BruControl\Config Backup**; everything there is listed too (backups and any `.brucfg` you put there), with *Config Backup\* in front of the name.
+To look somewhere else, use **📁 Change folder…** (any folder with a `.bak` or `.brucfg` file) or **📄 Browse for the config
+file…**; **⌂ Documents\BruControl** goes back to BruControl's own folder.
 
 - **Typing a folder:** a full folder like `D:\Brewing` works. A short one like `\downloads` or `Downloads` means that folder
   in your own Windows folder (`C:\Users\<you>\Downloads`).
@@ -67,7 +74,11 @@ config file inside, so it imports the same way. Backups are listed after your ow
 
 ## Names
 
-Pick how your items are named in Skynet:
+**Units** come first: **US** (Gallons, °F, inches, pounds) or **Metric** (Liters, °C, centimeters, kilograms). Every temperature,
+size and volume in the next steps uses them. When your BruControl probes show which one BruControl used (°F or °C), it is picked
+for you and the question asks you to confirm it.
+
+Then pick how your items are named in Skynet:
 
 - **Skynet names (recommended).** Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for
   example `MB_28_do_ManualAlarm_B1` becomes `BR_28_DO_Manually_BB`.
@@ -75,10 +86,11 @@ Pick how your items are named in Skynet:
   BruControl names?"** and then **"Last chance"**. **No** (use the Skynet names) is the default both times. Spaces and
   characters a name may not have still change.
 
-**Pictures and Sounds:** the picture paths and sounds are imported, and the files stay where they were. You may also tick
-**Also copy my pictures and sounds into one folder**: every picture is then copied into `media\Images\User` and every sound
+**Pictures and Sounds:** the picture paths and sounds are imported, and the files stay where they were, so BruControl
+continues to work normally. A copy of each one is always made too (it is not a question): every picture is copied into `media\Images\User` and every sound
 into `media\sounds\User` of the Skynet Panel, so they are all together if you move to a Pi or another computer, and the items
 use the copies. They are never deleted in their original spot, just copies made, and a copy already there is never written over.
+New pictures and sounds you add in Skynet are always put in its media folders.
 
 Your BruControl **DisplayName** becomes the **Label**, the name shown on the Tab. A blank DisplayName: the Label is the Name,
 and it is not shown on the Tab.
@@ -86,12 +98,72 @@ and it is not shown on the Tab.
 ## Boards and Tabs
 
 **Next ▶** makes the **Import Copy**: your config file is copied into `C:\Brewing\Import\BruControl` (named
-*name*_*date*T*time*.brucfg, also when you picked a `.bak` backup) and only the copy is converted, so BruControl's own file is never changed. Then you see what comes in:
+*name*_*date*T*time*.brucfg, also when you picked a `.bak` backup) and only the copy is converted, so BruControl's own file is never changed.
+Then you confirm what comes in, in small steps:
 
-- your **Interfaces** (BruControl boards), each with its Interface ID;
-- your **Tabs** (BruControl workspaces), each with its Tab ID. Tab backgrounds are left out for now;
+1. **The Interfaces (boards) we found.** Read only: each Interface with its **ID** (greyed, it is explained next), how many items,
+   its **Interface Type** (Arduino MEGA, ESP32 ...), its **Connection** (TCP address and Port, or the serial COM port) and whether it is
+   **Enabled**. **Next ▶**.
+2. **The ID column: new in Skynet.** Skynet gives every Interface an **ID** of up to four letters. It is the first part of the
+   **suggested Skynet name** of every Device on that board: *Interface ID*_*Port*_*Type ID*_*Label*_*Tab ID*, one `_` between the
+   parts, a space in the Label becomes `~` (Rule 3.1), for example `MP_45_DO_M~HLT~Pump_MD`; a name that would be the same as another
+   gets `_2` before its Tab ID, so every name is unique. The Importer chose the IDs for you; you may change them (up to 4 letters,
+   **2 are preferred**, each one different). **Accept ▶** uses them in every name and goes on.
+3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found
+   (Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
+   or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
+4. **The items on each Interface.** One table per Interface (board): every item wired to one of its ports, by port, with its
+   BruControl name, its **Display Name** (with no Display Name, the BruControl name is shown greyed), a **tick box** and a **Label** box,
+   what it becomes in Skynet (Pump, Heating Element, Analog Input ...), its suggested Skynet name and its Tab. An item on a Tab you
+   left out is marked *left out*.
+   - **Labels.** BruControl's Display Name settings come over as the item's **Label** in Skynet. The Label can be shown on the Tab just
+     like the Display Name was in BruControl, and it is the Label part of the suggested Skynet name. Use the words you use when you
+     describe your brewery (HLT, Mash Tun, Boil Kettle).
+   - Every tick box and Label box starts blank. **Tick** a box to copy that item's Display Name into its Label box, then change it if you like.
+   - A Label can have spaces; in the suggested Skynet name a space becomes `~` (*Mash Tun* is `Mash~Tun`).
+   - A Label does not have to be different from the others: a Heater, a Temperature Probe and a Valve can all be **HLT**, and their
+     suggested names are still all different (for example `MB_25_HE_HLT_BR`, `MB_A0_10KNTC_HLT_BR`, `MB_30_MBV_HLT_BR`). The page shows
+     three examples made from your own items when it can find them, or made-up samples.
+   - Skynet names are the preferred way to name things in Skynet.
+   - **Accept ▶** is at the bottom of the page. No Label may be blank: a message says how many are, and marks them in red. When they
+     are all filled in, the suggested Skynet names are made again with your Labels, and each Label is the item's Label in the new Schema.
+5. **Your Pumps, Heaters, Temperature Probes, Valves, Flow Meters and Other items.** One page for each kind, in that order. Each
+   page starts with **How many ... do you have?**, filled in with how many were found. If you have more, type how many: an empty
+   line is added for each one, named for example *Pump 7* and *Pump 8* when 6 were found (you can rename it). Then the details of
+   each one: Pumps have their model (AC pumps and the 12 V and 24 V DC pumps), Power and Speed; Heaters their Watts and Volts;
+   Probes their type (OneWire, Thermistor, PT100); Valves their type and size; Flow Meters their pulses per Gallon or Liter.
+   Details filled in are guesses from the names; change any that are wrong. **Accept ▶** goes to the next page. The answers are kept
+   in the Schema. An extra one you add has no Interface Port, so it will become a **Confirmation Widget** (Rule 1.28): Skynet asks
+   you to do it by hand and confirm it is done.
+6. **Your vessels.** It starts with the vessels found, where you rename one, set its **Side**, remove one (✖) or **➕ Add a
+   vessel**. For each one, type its **Volume** and measure its **Height** and **Diameter** (Gallons and inches, or
+   Liters and centimeters, from the Units question). Then what the import could tell about it from your names and Scripts: its **Heater** (a list of every BruControl heating element found; the guess is the one named for the vessel),
+   its **Thermowell with Probe** (a list of every BruControl probe found; the guess is the one named for the vessel), its **Outlet** (None, Center Low or Bottom Drain; Bottom Drain to start), a **Tangential Inlet** tick box (a whirlpool pump means one on the Boil Kettle), **Sparge Arm / Steam
+   Slayer** (one answer: None, Upper Left or Upper Right) and a **HERMS Coil** tick box (unticked to start). What was found in your names or Scripts is
+   marked *found*; it is a guess, change it if it is wrong; its **Motorized Ball Valve**
+   (a list of every motorized valve found; the guess is the one named for the vessel). Everything is shown by its **BruControl name**
+   during these steps, so you know each one; the Skynet names are still what is saved (Rule 15.1). **Manual Valves** are not in
+   BruControl, so pick None, Manual Ball Valve or Manual Butterfly Valve (None to start). **Accept ▶** goes on; the answers are saved
+   with each vessel, and the next page uses them to build each vessel into a Vessel Device.
+7. **Boards and Tabs:** everything else that comes in:
+
+- your **Interfaces** (BruControl boards), each with its Interface ID and how many items it has. An Interface with **no
+  items (0)** is **not** imported, unless you tick its **Import** box; then it **will** be imported;
+- the **Look (theme)**: the Skynet Theme that most closely matches the theme set in BruControl (for Office 2019, **Skynet
+  Office Black**). BruControl themes do not work in browsers, so Skynet has its own small set of Skynet Themes, and you can
+  build your own User Theme. A new Skynet Theme for a Tab (old Workspace) can be chosen at any time;
+- your **Tabs** (BruControl workspaces), each with its Tab ID. Tab backgrounds are left out for now. Tabs with items **will**
+  be imported. A Tab with no items has a box: it **must** be ticked to be imported; left unticked, it is **not** imported, and
+  neither are its Placeholders. A Tab with no items and no Placeholders is a good one to leave out;
+- your **Globals** are **only listed** for now, on the summary (each Global with its Tab). They are not imported, they get no
+  Placeholder, and nothing is asked about them: Globals will be dealt with in a later step;
+- your **pumps** become Skynet **Pump Devices** with the Skynet pump drawing (the Pump Standard), so any Skynet pump can be
+  swapped in later; your **heating controls** keep their settings (Target, Kp, Ki, Kd ...) and their temperature probe, so a
+  click on that probe opens its SetPoint; anything BruControl marked as not user controlled does nothing when clicked;
+- your **Charts**: each BruControl Chart becomes a Skynet **Chart Widget** ([Help 159](159-chart-widget)) with the same span,
+  refresh, grid lines, colors and channels, and each item it draws is sent to the database so its line fills;
 - the **items on a board port** (BruControl elements that have an Interface and a Port). For now only these come in;
-- a **Placeholder** for every other item on a Tab (Timers, Alarms, switches, Globals, script pictures ...). It is a grey box
+- a **Placeholder** for every other item on a Tab (Timers, Alarms, switches, script pictures ...). It is a grey box
   with ⬚ and the BruControl name, at the same place and size as in BruControl, so you can see what is still to come. A hidden
   item's Placeholder stays hidden.
 
@@ -104,14 +176,35 @@ The list of new names and the notes for the report are at the bottom.
 
 ## Connect your brewery
 
+### The Build Tab pages
+
+Each Tab you are importing gets its own **Build Tab page**, one at a time, in the order the Tabs were in BruControl (for example
+MD, then ME). A Tab you left unticked has no page. **◀ Previous Tab** and **Next Tab ▶** move between them. Each page has:
+
+- **Before you build: the choices on a Build Tab**: what the Edit layout bar does, row by row, and
+  **❓ Show every Build Tab choice and its hover help**, a pop-up with each choice and the hover help it shows in the Panel.
+- **Build your manifold as it really is**: add the parts you turn or move by hand: **Manual Valve ➕**, **Elbows, Tees ...** joined with
+  **Draw pipe** or **Draw hose**, **Draw QD hose**, and manual pumps (they become Confirmation Widgets, [Help 162](162-confirmation-widgets)).
+- **🔨 Open the Build Tab for** that Tab: the **Skynet Panel's own Build Tab**, on that Tab, in its own window. It is the same Panel
+  you build with every day. Only two things are different: **no board is connected**, and **Processes are greyed out** (your Scripts
+  become Processes in a later Importer step).
+
+Close the window when you are done: your work is kept in `Brewing\Import\build`, and it comes into your Schema when you save it on
+the last page. If you import a different file, the Build Tabs start again from that file. Your Vessels and each Tab's items will be
+placed for you once the Vessel Templates are built (the Vessel Device Builder, a later step).
+
 BruControl only knew your valves and pumps as buttons; it never knew which vessel they sit on or what they are joined to. This
-page asks **what is connected to what** (Fritz, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
+page asks **what is connected to what** (OakBarn Brewery, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
 bone". The page shows a few lines of the old song (*Dem Bones*) and the brewery version, with **▶ Play the song** (Skynet's own
-song, *Skynet - Outlet to Valve*, made by Fritz; it never plays by itself, and the button turns into **■ Stop**) and
-**▶ Hear it** beside the old song's lines (Fritz's own clip of them in a comic voice).
+song, *Skynet - Outlet to Valve*, made by OakBarn Brewery; it never plays by itself, and the button turns into **■ Stop**) and
+**▶ Hear it** beside the old song's lines (OakBarn Brewery's own clip of them in a comic voice).
 
 - **Your vessels.** Guessed from your names and Scripts (HLT, Mash Tun, Boil Kettle, Fermenter). Rename, remove or add one.
   The **Hot Side** vessels are joined here; a **Fermenter** (Cold Side) has its own questions.
+- **Build your vessels**, one at a time: **which template matches your vessel the best?** Every Skynet vessel format is shown
+  as its picture (the Panel's own Vessel Templates); click the one that looks most like your vessel. The first pick is a guess
+  from the name. **Save, next vessel ▶** goes on to the next one. Your vessel then looks like that template on the picture
+  screen, and the answer is saved with it, so its Vessel Device can be built from it.
 - **What is connected to what.** Each **chain** starts at a vessel opening (or a pump or valve), then says what that piece is
   **connected to**, then what *that* is connected to, until it reaches an **end**: a vessel opening, **Tap Water**, a
   **Drain**, a **Quick Disconnect (QD)** or **Not connected**. A QD also asks **Male or Female** and **Open or Shut-off**; a
@@ -122,8 +215,26 @@ song, *Skynet - Outlet to Valve*, made by Fritz; it never plays by itself, and t
   background picture, from a valve that sits right next to a pump. Each one is marked **guess** until you click **✓**.
 - **Not joined yet** lists every pump and valve no answer uses. A missing answer leaves it loose, never a wrong pipe.
 - **A picture as a guide.** Pick the background picture you had on a BruControl Tab, or **📷 Use a photo or drawing** of your
-  brewery (it stays on this computer). Drag each vessel, pump and valve onto its place, then **click one and then another** to
-  join them. The picture is only a guide: it is not saved and nothing reads it.
+  brewery (it stays on this computer); the picture's back is always black. Drag each vessel, pump and valve onto its place,
+  then **click one** (it gets a yellow border) **and then another**, and a line joins them. A **blue** line is a **Pipe** (with its
+  fittings), a **yellow** line is a **Hose**: **right-click** a line to change it. **Click** a line to pick it and press **Delete** to
+  remove it (a line in the middle of a chain splits the chain in two). The picture is only a guide: it is not saved and nothing reads it.
+  **🖼 Open the picture screen** shows it as large as the window. The vessels look like Skynet vessels, the pumps like pumps and
+  the valves like valves. A Pipe runs only across, up and down, or at 45 degrees; a Hose hangs in a curve. Pieces joined by Pipe
+  are stacked in a column under their vessel, a Hose moves over a column, with room to grab each line. It starts with twice as
+  many columns as vessels: the left most vessel in the first column, the right most in the last, the others spaced between.
+  **Set** moves the left most vessel one column right and the right most one column left, leaving a column between all the
+  vessels; **↺ Start** puts every piece back where it started.
+- **The list on its own screen.** **Next ▶ (the list)** on the picture screen shows **What is connected to what** as large as the
+  window; its **◀ Back (the picture)** goes straight back to the picture, so you can move quickly between the two. **Next ▶**
+  there returns to this page at the Fermenters (**📋 Open the list screen** opens it from the page; **Esc** closes either screen).
+- **One vessel at a time.** The list has a button for each Hot Side vessel, **Other chains** (chains that reach no vessel) and
+  **All**. **Save, next vessel ▶** marks the vessel done (✓) and shows the next one; every answer is kept as you go.
+- **How each piece is joined:** **Vertical pipe** (the next piece is under it), **Pipe to the left**, **Pipe to the right** (the
+  next piece is beside it) or **Hose**. A pipe to the left or right asks for its fitting: **with an Elbow**, or **with a Tee**, which
+  puts a real Tee in the line: the pipe runs into the Tee, the Tee goes on down to the next piece, and its third opening starts
+  a **branch** (its own chain, under it). **⊤ Tee** adds a Tee after any piece the same way. Back to an Elbow takes the Tee out
+  again, unless its branch is joined to something. Until you drag a piece, the picture follows these answers.
 - **Ask an AI about my picture (your choice).** The Importer itself never uses an AI. **🤖 Copy the question and open it**
   copies a ready-made question (it lists your own vessel, pump and valve names) and opens the free AI site you pick (Claude,
   ChatGPT or Gemini). Add your picture there and paste the question. Copy the AI's answer back into the box and click **Read
@@ -156,7 +267,7 @@ always makes the Import folder, as BeerSmith or other programs may save their fi
 
 ## Next steps (being built)
 
-The import is built one step at a time with Fritz: next come the other BruControl items (each Placeholder becomes the right
+The import is built one step at a time with OakBarn Brewery: next come the other BruControl items (each Placeholder becomes the right
 Skynet Device, Widget or Template, with a few plain questions; for each Vessel these include its **other openings**: Not there,
 Open, or Plugged with a Thermowell, End Cap or Heating Element, where a plugged opening shows no IP), then Processes, with a report of every change (Rule 15.1).
 How the older import code did each part is in `docs/BruControl_Old_Import_Method.md`.

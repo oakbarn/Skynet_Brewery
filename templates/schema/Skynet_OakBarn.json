@@ -1,6 +1,6 @@
 {
   "title": "OakBarn Brewery",
-  "about": "Fritz's own OakBarn Brewery: the Radiator (HLT with the HERMS bath), Big Mac, the Mash Tun, Brew Kettle, Little Mac, Brewzilla and DigiBoil, the Red, Yellow, Green, Blue and White pumps, a plate chiller and motorized valves. Use it as it is, or take out what you do not have.",
+  "about": "Fritz's own OakBarn Brewery: the Radiator (HLT with the HERMS bath), Big Mac, the Mash Tun, Brew Kettle, Little Mac, the 65 L Brewzilla and the DigiBoil (both set by hand: Skynet asks you, a pop-up gives the °C), the Red, Yellow, Green, Blue and White pumps, a plate chiller and motorized valves. Use it as it is, or take out what you do not have.",
   "order": 6,
   "kind": "hot",
   "vessels": [
@@ -41,17 +41,17 @@
     },
     {
       "role": "All In One",
-      "template": "Kettle_Brewzilla_Electric",
+      "template": "Kettle_Brewzilla_65L",
       "label": "Brewzilla",
       "short": "Brewzilla",
-      "heat": "electric"
+      "heat": "own"
     },
     {
       "role": "Brew Kettle",
-      "template": "Kettle_DigiBoil_Electric",
+      "template": "Kettle_DigiBoil",
       "label": "DigiBoil",
       "short": "DigiBoil",
-      "heat": "electric"
+      "heat": "own"
     }
   ],
   "pumps": 5,
