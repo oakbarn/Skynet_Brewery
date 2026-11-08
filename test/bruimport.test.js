@@ -36,6 +36,7 @@ assert.equal(pump.name, 'MB_28_DO_Red~Lamp_BH', 'Skynet name, Rule 3.1');
 // the brewer's own Interface ID from the ID page (OakBarn Brewery, 2026-11-08) goes into every name on that board
 { const q = importBruControl(xml, { ids: { 'Main Brewery': 'mz' } });
   assert.equal(q.conv.devices[0].id, 'MZ'); assert.equal(q.conv.elements[0].name, 'MZ_28_DO_Red~Lamp_BH');
+  assert.ok(q.report.tabs.every(t => t.kinds && typeof t.kinds === 'object'), 'each Tab counts its Placeholders by kind');
   assert.equal(q.report.interfaces[0].id, 'MZ'); assert.match(q.report.interfaces[0].connection, /^Serial: COM5/); }
 assert.equal(wort.label, 'MB_61_Wort', 'a blank DisplayName: Label = Name'); assert.equal(wort.hideName, true, '... not shown on the Tab');
 assert.equal(wort.name, 'MB_61_AI_MB~61~Wort_BH'.replace(/~/g, '_'));

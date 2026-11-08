@@ -194,6 +194,7 @@ const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` c
 async function convert(ids = null) {
   const names = ids ? state.names : await namesChoice();
   state.names = names;
+  if (!ids) state.keepTabs = null;
   show(5);
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
   sub5('busy');
@@ -202,14 +203,38 @@ async function convert(ids = null) {
     state.converted = true;
     state.connect = r.connect;
     state.r = r;
-    sub5(ids ? 'sum' : 'if');
+    sub5(ids ? 'tabs' : 'if');
   } catch (e) { state.converted = false; box.innerHTML = `<p class="note">${esc(e.message)}</p>`; }
+}
+// The Tabs step (OakBarn Brewery, 2026-11-08: "Layout the Tab ... different Place Holder type ... a Check box and accept Button"): one row
+// per Tab with its Items and a column for each kind of Placeholder found (Timers, Globals ...), and an Import box. A Tab with items is
+// always imported (its box is ticked and cannot be cleared); an empty one is imported only when ticked. Accept goes on.
+const KIND_NAMES = { Timer: 'Timers', GlobalVariable: 'Globals', Alarm: 'Alarms', Label: 'Labels', Image: 'Pictures', Picture: 'Pictures', Chart: 'Charts',
+  Script: 'Scripts', Button: 'Buttons', Switch: 'Switches', Text: 'Text', Gauge: 'Gauges' };
+const kindName = k => KIND_NAMES[k] ?? (/^Device \((.+)\)$/.test(k) ? k.replace(/^Device \((.+)\)$/, (m, x) => x === 'CounterPort' ? 'Counter Devices' : x + ' Devices') : k);
+function tabsHtml(r) {
+  const kinds = Object.keys(r.byKind ?? {}).sort((a, b) => (r.byKind[b] - r.byKind[a]) || a.localeCompare(b));
+  const keep = state.keepTabs ?? new Set(r.tabs.filter(t => t.always).map(t => t.name));      // Tabs with items start ticked, empty ones unticked
+  return `<div class="card"><p>These are your BruControl Workspaces, which are <b>Tabs</b> in Skynet. <b>Items</b> are the Devices and Widgets
+      that come in now; the other columns count the <b>Placeholders</b> of each kind (grey boxes that keep their place until a later step brings
+      them in). Every Tab has an <b>Import Tab</b> box: a Tab with items starts <b>ticked</b>, an empty Tab starts <b>unticked</b>. You can tick or untick
+      any of them; an unticked Tab is not imported, with everything on it. A Tab with nothing on it is a good one to leave out. Then <b>Accept</b>.</p>
+    <table class="tabTable"><tr><th>Tab</th><th>ID</th><th>Items</th>${kinds.map(k => `<th title="${esc(k)}">${esc(kindName(k))}</th>`).join('')}<th>Import Tab</th></tr>
+    ${r.tabs.map(t => row([esc(t.name), esc(t.id), t.items, ...kinds.map(k => t.kinds?.[k] ?? 0),
+        `<input type="checkbox" class="keepTab" data-name="${esc(t.name)}"${keep.has(t.name) ? ' checked' : ''} title="${t.always ? 'Ticked: this Tab is imported with its items and Placeholders. Untick it to leave the whole Tab out.' : 'This Tab has no items. Tick it to import it with its Placeholders; unticked, it is not imported.'}" aria-label="Import the Tab ${esc(t.name)}">`],
+        ['', '', 'n', ...kinds.map(() => 'n'), 'c'])
+      + (t.globalsOnly && !t.always ? `<tr class="ask"><td colspan="${kinds.length + 4}"><p class="small">Every Placeholder on <b>${esc(t.name)}</b> is a BruControl Global.
+            <b>Are these Globals used to import a Beer.xml recipe (for example with Node-RED)?</b> Skynet imports a Beer.xml or BeerSmith file
+            with no Globals, so then leave this Tab unticked: the Tab and those Globals are not imported. If they are used for something else
+            (for example sending readings to the Database), tick it: they are imported and dealt with when the Globals are imported.</p>
+            <button type="button" class="askNo" data-name="${esc(t.name)}">Yes, a recipe import: leave it out</button>
+            <button type="button" class="askYes" data-name="${esc(t.name)}">No, something else: import it</button></td></tr>` : '')).join('')}</table></div>`;
 }
 function sub5(which) {
   state.sub5 = which;
   // the page's own Back and Next walk the small steps; on the ID step Next is Accept
-  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = which === 'id' ? 'Accept ▶' : 'Next ▶'; }
-  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : 'Boards and Tabs';
+  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = which === 'id' || which === 'tabs' ? 'Accept ▶' : 'Next ▶'; }
+  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : 'Boards and Tabs';
   if (which === 'busy') return;
   const r = state.r, box = $('#convBody');
   if (which === 'if') {
@@ -250,8 +275,13 @@ function sub5(which) {
     state.accept = () => {
       const ids = {}; let changed = false;
       for (const i of box.querySelectorAll('.ifId')) { const v = i.value.trim().toUpperCase(); ids[i.dataset.name] = v; if (v !== r.interfaces.find(d => d.name === i.dataset.name)?.id) changed = true; }
-      if (changed) convert(ids); else sub5('sum');
+      if (changed) convert(ids); else sub5('tabs');
     };
+    return;
+  }
+  if (which === 'tabs') {
+    box.innerHTML = tabsHtml(r);
+    state.accept = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); sub5('sum'); };
     return;
   }
   for (const id of ['#next5', '#next5a']) $(id).disabled = false;
@@ -270,18 +300,7 @@ function sub5(which) {
         BruControl themes do not work in browsers, so Skynet has its own small set of Skynet Themes. You can also build your own User Theme
         in Skynet if none of ours do what you want. A new Skynet Theme for a Tab (old Workspace) can be chosen at any time, and that screen
         will use that theme.</p>` : ''}
-      <h3>Tabs (workspaces)</h3>
-      <p class="small">Tabs with items <b>will</b> be imported (✓). A Tab with a box <b>must</b> be ticked to be imported; left unticked, it
-        is <b>not</b> imported, and neither are its Placeholders. A Tab with no items and no Placeholders is a good one to leave out.</p>
-      <table><tr><th>Tab</th><th>ID</th><th>Items</th><th>Placeholders</th><th>Import</th></tr>
-        ${r.tabs.map(t => row([esc(t.name), esc(t.id), t.items, t.placeholders, t.always ? '✓'
-          : `<input type="checkbox" class="keepTab" data-name="${esc(t.name)}" title="This Tab has no items. Tick it to import it with its Placeholders; unticked, it is not imported." aria-label="Import the Tab ${esc(t.name)}">`], ['', '', 'n', 'n', 'c'])
-          + (t.globalsOnly && !t.always ? `<tr class="ask"><td colspan="5"><p class="small">Every Placeholder on <b>${esc(t.name)}</b> is a BruControl Global.
-            <b>Are these Globals used to import a Beer.xml recipe (for example with Node-RED)?</b> Skynet imports a Beer.xml or BeerSmith file
-            with no Globals, so then leave this Tab unticked: the Tab and those Globals are not imported. If they are used for something else
-            (for example sending readings to the Database), tick it: they are imported and dealt with when the Globals are imported.</p>
-            <button type="button" class="askNo" data-name="${esc(t.name)}">Yes, a recipe import: leave it out</button>
-            <button type="button" class="askYes" data-name="${esc(t.name)}">No, something else: import it</button></td></tr>` : '')).join('')}</table>
+      <p>Tabs: <b>${r.tabs.filter(t => state.keepTabs?.has(t.name)).length}</b> of ${r.tabs.length} are imported (picked on the Tabs step).</p>
       ${r.media.pictures + r.media.sounds ? `<h3>Pictures and Sounds</h3><p><b>${r.media.pictures}</b> pictures and <b>${r.media.sounds}</b> sounds are imported by their path.
         ${r.media.copy ? 'They were <b>copied</b> to <code>media\\Images\\User</code> and <code>media\\sounds\\User</code>; the originals stay where they were.'
           : 'The files stay where they were, so BruControl keeps working.'}${r.media.missing.length ? ` <b>${r.media.missing.length}</b> are not on this computer; their path is kept.` : ''}</p>
@@ -300,10 +319,10 @@ $('#convBody').addEventListener('click', e => {
   if (box) box.checked = b.classList.contains('askYes');
   for (const x of b.parentElement.querySelectorAll('button')) x.classList.toggle('primary', x === b);
 });
-for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
+for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (state.sub5 === 'if') return sub5('id');
-  if (state.sub5 === 'id') return state.accept();
+  if (state.sub5 === 'id' || state.sub5 === 'tabs') return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
   startConnect(state.connect, { toast });
   show(6);
@@ -322,7 +341,7 @@ $('#saveBtn').onclick = async () => {
   try {
     const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: connectState(),
       keepEmpty: [...document.querySelectorAll('#convBody .keepEmpty:checked')].map(c => c.dataset.name),
-      keepTabs: [...document.querySelectorAll('#convBody .keepTab:checked')].map(c => c.dataset.name) });
+      keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs });
     const box = $('#saveResult');
     box.innerHTML = `<p>✅ Saved <b>${esc(r.file)}</b> in <code>${esc(r.folder)}</code>.</p>
       <p>${r.interfaces} Interfaces, ${r.tabs} Tabs, ${r.items} items on a board port, ${r.placeholders} Placeholders${r.warnings ? `, ${r.warnings} notes for the report` : ''}.</p>
