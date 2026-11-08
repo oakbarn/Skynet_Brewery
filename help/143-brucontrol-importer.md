@@ -108,6 +108,9 @@ and it is not shown on the Tab.
   Tab is a BruControl Global, the page asks whether those Globals are used to import a Beer.xml recipe (for example with
   Node-RED): if Yes, leave it unticked, since Skynet imports recipes without Globals; if they are used for something else (for
   example sending readings to the Database), tick it and they are dealt with when the Globals are imported;
+- your **pumps** become Skynet **Pump Devices** with the Skynet pump drawing (the Pump Standard), so any Skynet pump can be
+  swapped in later; your **heating controls** keep their settings (Target, Kp, Ki, Kd ...) and their temperature probe, so a
+  click on that probe opens its SetPoint; anything BruControl marked as not user controlled does nothing when clicked;
 - your **Charts**: each BruControl Chart becomes a Skynet **Chart Widget** ([Help 159](159-chart-widget)) with the same span,
   refresh, grid lines, colors and channels, and each item it draws is sent to the database so its line fills;
 - the **items on a board port** (BruControl elements that have an Interface and a Port). For now only these come in;
