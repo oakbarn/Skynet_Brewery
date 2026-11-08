@@ -49,4 +49,6 @@ const app = fs.readFileSync(new URL('../public/app.js', import.meta.url), 'utf8'
 for (const c of PUMP_COVER_CHOICES.filter(c => !['None', 'User'].includes(c))) assert.match(app, new RegExp(`${c}: '#[0-9a-f]{6}'`), `${c} has its color`);
 assert.match(app, /White: '#fafafa'/, 'White is RGB 250 250 250');
 console.log('pump cover tests passed');
+// DC pumps, pump speed and facts (Rule 18.32), run from here so package.json's one test line is not changed
+await import('./pumpspeed.test.js');
 process.exit(0);
