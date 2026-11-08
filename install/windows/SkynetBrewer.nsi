@@ -61,7 +61,8 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !insertmacro MUI_PAGE_DIRECTORY
 Page custom UpdateChoicePage UpdateChoiceLeave
 !insertmacro MUI_PAGE_INSTFILES
-; Finish page: a tick box "Open the BruControl Importer now", only when the Importer was added (Fritz, 2026-11-07)
+; Finish page: "Start the BruControl Importer now" beside "Start Skynet Brewer now", only when the Importer was added.
+; Only one of the two can be ticked; Start Skynet Brewer is ticked to begin with (OakBarn Brewery, 2026-11-08)
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW FinishShow
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE FinishLeave
 !insertmacro MUI_PAGE_FINISH
@@ -408,14 +409,34 @@ Function StartPanel
   ExecShell "open" "$INSTDIR\Skynet_Brewer.bat"
 FunctionEnd
 
-; The Finish page's "Open the BruControl Importer now" tick box. It sits under "Show the install notes" (130u = the
+; The Finish page's "Start the BruControl Importer now" tick box. It sits under "Show the install notes" (130u = the
 ; Modern UI's 110u for that box + 20u) and is only there when you answered Yes to the BruControl question.
+; It and "Start Skynet Brewer now" are one or the other: ticking one unticks the other, so only one program starts.
 Function FinishShow
   StrCpy $OpenImporter ""
   ${If} $ImporterAdded == 1
-    ${NSD_CreateCheckbox} 120u 130u 195u 10u "Open the BruControl Importer now"
+    ${NSD_CreateCheckbox} 120u 130u 195u 10u "Start the BruControl Importer now"
     Pop $OpenImporter
     SetCtlColors $OpenImporter "${MUI_TEXTCOLOR}" "${MUI_BGCOLOR}"
+    ${NSD_OnClick} $OpenImporter FinishImporterClick
+    ${NSD_OnClick} $mui.FinishPage.Run FinishRunClick
+  ${EndIf}
+FunctionEnd
+
+Function FinishImporterClick
+  Pop $0
+  ${NSD_GetState} $OpenImporter $0
+  ${If} $0 == ${BST_CHECKED}
+    ${NSD_Uncheck} $mui.FinishPage.Run
+  ${EndIf}
+FunctionEnd
+
+Function FinishRunClick
+  Pop $0
+  ${NSD_GetState} $mui.FinishPage.Run $0
+  ${If} $0 == ${BST_CHECKED}
+  ${AndIf} $OpenImporter != ""
+    ${NSD_Uncheck} $OpenImporter
   ${EndIf}
 FunctionEnd
 
@@ -423,6 +444,8 @@ Function FinishLeave
   ${If} $OpenImporter != ""
     ${NSD_GetState} $OpenImporter $0
     ${If} $0 == ${BST_CHECKED}
+      ; the Importer only: make sure Skynet Brewer does not start too
+      ${NSD_Uncheck} $mui.FinishPage.Run
       ExecShell "open" "$INSTDIR\Skynet_Importer.bat"
     ${EndIf}
   ${EndIf}

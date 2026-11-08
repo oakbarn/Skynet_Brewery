@@ -21,6 +21,13 @@ table.words th { background: var(--panel2); }
 #steps li.now { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 #steps li.done { color: var(--ok); }
 #steps li.later { opacity: 0.6; }
+#steps li.jump { cursor: pointer; text-decoration: underline dotted; }
+#steps li.jump:hover { background: var(--panel); }
+/* the small steps of Boards and Tabs, to jump to */
+.jump5 { display: flex; flex-wrap: wrap; gap: 2px 4px; margin: 0 0 8px; font-size: 0.85rem; }
+.jump5 > * { padding: 2px 8px; border-radius: 12px; }
+.jump5 a { color: var(--accent); }
+.jump5 .now { background: var(--accent); color: var(--on-accent); }
 
 .folderRow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .folderRow label { font-weight: 600; }
