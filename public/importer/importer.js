@@ -580,3 +580,13 @@ $('#closeBtn').onclick = async () => {
   document.body.innerHTML = '<main><h1>The Importer is closed.</h1><p>You can close this window.</p></main>';
 };
 init();
+
+// the Skynet Panel's own Build page, for Connect your brewery (OakBarn Brewery, 2026-11-08): it opens in its own window
+$('#openBuild').onclick = async () => {
+  const b = $('#openBuild'); b.disabled = true; $('#buildNote').textContent = 'Starting the Build page…';
+  try {
+    const r = await api('POST', '/api/build/open', { keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs });
+    const w = window.open(r.url, 'skynetBuild');
+    $('#buildNote').textContent = w ? 'The Build page is open in its own window. Close it when you are done; your work is kept.' : 'Your browser blocked the window: allow pop-ups for the Importer, then click again.';
+  } catch (e) { $('#buildNote').textContent = e.message; } finally { b.disabled = false; }
+};

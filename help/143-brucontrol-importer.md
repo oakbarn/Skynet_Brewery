@@ -176,6 +176,18 @@ The list of new names and the notes for the report are at the bottom.
 
 ## Connect your brewery
 
+### The Build page
+
+**🔨 Open the Build page** opens your imported Tabs, Devices and Widgets in the **Skynet Panel's own Build page**, in its own window.
+It is the same Panel you build with every day: Edit layout, Add Device, Add Widget, Vessels, pipes, hoses and Save layout all work
+the same. Only two things are different:
+
+- **No board is connected**: the Panel there never talks to your Arduino or ESP32 boards.
+- **Processes are greyed out**: your Scripts become Processes in a later Importer step.
+
+Close the window when you are done: your work is kept in `Brewing\Import\build`, and it comes into your Schema when you save it on
+the last page. If you import a different file, the Build page starts again from that file.
+
 BruControl only knew your valves and pumps as buttons; it never knew which vessel they sit on or what they are joined to. This
 page asks **what is connected to what** (OakBarn Brewery, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
 bone". The page shows a few lines of the old song (*Dem Bones*) and the brewery version, with **▶ Play the song** (Skynet's own

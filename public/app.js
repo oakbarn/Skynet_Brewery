@@ -148,6 +148,13 @@ async function load() {
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + myRole());
   document.body.classList.toggle('touchRun', S.me.role === 'admin' && touchRun());
+  // the BruControl Importer's Build page (OakBarn Brewery, 2026-11-08: "the Process Icon needs to be greyed Out"): the same Panel,
+  // no board connected, Processes greyed out (they are a later Importer step)
+  if (S.importBuild) {
+    document.body.classList.add('importBuild');
+    for (const b of document.querySelectorAll('#views button[data-view="scripts"], #procTab')) { b.disabled = true; b.title = 'Processes are greyed out on the BruControl Importer\'s Build page: your Scripts become Processes in a later Importer step'; }
+    $('#title').textContent = 'BruControl Importer: Build page';
+  }
   if (S.me.role === 'admin' && touchRun() && !load.told) { load.told = true; toast('📱 Phone or tablet: run mode. Editing and building are done on a computer (Rule 2.35)', false, 5000); }
   if (S.me.role === 'admin' && !touchRun()) load.told = false;
   $('#code').readOnly = !can('admin');
