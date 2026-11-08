@@ -690,6 +690,14 @@ const toggleMfValve = guard(async name => {
   if (!can('operator')) throw new Error('Only an operator or an admin can open or close a valve');
   await setProp(e.name, 'state', !isOn(e.name));
 });
+// A Valve built into a Vessel Device: one click on its picture opens or closes it, like a valve Device (Fritz, 2026-11-08: "Valve in a
+// Vessels Device Graphic toggle on off", Rule 2.44). Not in Edit layout, where a click selects and double-click opens its Properties.
+$('#ws').addEventListener('click', ev => {
+  if (editing) return;
+  const vv = ev.target.closest('.vpPart.vp-valve[data-dev]'); if (!vv) return;
+  ev.stopPropagation(); ev.preventDefault();
+  toggleMfValve(vv.dataset.dev);
+}, true);
 // what a valve's IP passes (ipNode): shut while its valve is closed (null: its IP is open, flow goes through the tees)
 function mfFlow(g, k) {
   if (!mfKeys(g).includes(k)) return null;
@@ -2415,21 +2423,37 @@ const elByName = n => S.config.elements.find(x => x.name === n) ?? S.config.elem
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
 const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
-// One click on a Method Clone (Rule 4.4): its parent switches to the Clone's method at once, then the pop-up opens on it
+// One click on a Method Clone (Rule 4.4) acts as one on its parent, all in unison (Fritz, 2026-11-08: "Clones act just as if it was
+// the Parent That all act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"), no pop-up: shown ON (the parent ON in its
+// method), it turns the parent OFF; shown OFF, it switches the parent to its method and turns it ON.
 async function methodCloneTap(g) {
   if (!can('operator')) return toast('Your account is view only', true);
   const p = L().elements.find(e => e.name === g.of); if (!p) return;
   const k = heatMethodKey(g.method);
   if (!allowedMethods(p).includes(k)) return toast(`${p.label || p.name} may not use ${heatMethodWord(k)}: tick it in its Properties`, true);
   if (NEEDS_PROBE.includes(k) && !p.input) return toast(`${p.label || p.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
-  if (heatMethodKey(S.values[p.name]?.method) !== k) { await setProp(p.name, 'method', heatMethodWord(k)); S.values[p.name] = { ...(S.values[p.name] || {}), method: heatMethodWord(k), ...(k === 'onoff' ? { state: false } : {}) }; }
-  if (isHeatElem(p)) heatDialog(p);
+  const inMethod = heatMethodKey(S.values[p.name]?.method) === k;
+  if (inMethod && S.values[p.name]?.state) return setProp(p.name, 'state', false);
+  if (!inMethod) { await setProp(p.name, 'method', heatMethodWord(k)); S.values[p.name] = { ...(S.values[p.name] || {}), method: heatMethodWord(k) }; }
+  return setProp(p.name, 'state', true);
 }
 
 async function doTap(e) {
   const act = tapAction(e);
   if (!['none', 'workspace'].includes(act) && !can('operator')) return toast('Your account is view only', true);
   const targetName = e.tapTarget || (e.type === 'picture' ? e.follow : e.name);
+  // a Heating Element: one click turns it ON or OFF at once in the method it is in, like a Pump (Fritz, 2026-11-08: "Change the Rule
+  // Individual elements toggle on off. I really do not like the popup to turn any thing on", Rules 2.33, 2.44). Only an Element set to
+  // Ask before changing by hand still asks (ON / OFF buttons). Its method spots and its Temperature Probe's click (Rule 2.43) set the rest.
+  const ht = ['heat', 'toggle', 'dialog'].includes(act) && elByName(targetName);
+  if (isHeatElem(ht)) {
+    const t = ht;
+    const cur = !!S.values[t.name]?.state, k = heatMethodKey(S.values[t.name]?.method) ?? startMethod(t);
+    let on = !cur;
+    if (e.confirm || t.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; on = r; }
+    if (on && NEEDS_PROBE.includes(k) && !t.input) return toast(`${t.label || t.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
+    return setProp(t.name, 'state', on);
+  }
   if (act === 'none' || act === 'hold') return;          // push and hold buttons work on press / release (below)
   if (act === 'pulse') { const t = elByName(targetName); if (t && isBoolEl(t)) setProp(t.name, boolProp(t), true); return; }
   if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
@@ -2556,8 +2580,8 @@ function controlDialog(t) {
 
 // A Heating Element's pop-up while running (Fritz, 2026-11-07: "select the heating method via process or on the Device when
 // clicked", Rule 6.19). One button per heating method (the one in use is marked), the main setting of that method with - and +
-// (Duty cycle % or Target), then Set + ON, OFF, Set and Cancel. It asks before it turns on (Rule 2.33): nothing turns on until
-// Set + ON or ON is clicked. Hysteresis, PID, Deadband and Precise need a Temperature Probe (Properties), so they are greyed out without one.
+// (Duty cycle % or Target), then Set + ON, OFF, Set and Cancel. Nothing in this pop-up turns on until Set + ON or ON is clicked;
+// a click on the Element itself turns it ON or OFF at once (Rule 2.33). Hysteresis, PID, Deadband and Precise need a Temperature Probe (Properties), so they are greyed out without one.
 function heatDialog(t) {
   const title = S.values[t.name]?.label ?? t.name, d = $('#valDlg');
   const v = { ...(S.values[t.name] || {}) };
@@ -4039,7 +4063,7 @@ const PRESETS = {
       : { type: 'gGlobal', kind: 'value', initial: '0', min: 0, max: 100, step: 5, units: '%', precision: 0, ...look };
   },
   // a heating element switched on and off by a relay or SSR (Fritz, 2026-10-27: Elements in the ➕ Add box)
-  element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', confirm: true, onText: 'ON', offText: 'OFF' },
+  element: { type: 'digitalOut', subtype: 'element', w: 90, h: 90, imageOn: 'Images/Skynet/Other_Equipment/BigMacRElementOn.svg', imageOff: 'Images/Skynet/Other_Equipment/BigMacRElementOff.svg', hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF' },
   valve: { type: 'digitalOut', subtype: 'valve', ipIn: 'top', ipOut: 'bottom', w: 150, h: 150, imageOff: 'Images/Skynet/Valves/Valve_Motor_Ball_ClosedV_RC.svg', imageOverlay: BOLT, hideName: true, hideValue: true, tap: 'toggle', onText: 'OPEN', offText: 'CLOSED' },
 };
 // Arduino Mega 2560 pin lists for the pin picker. Analog pins are shown as A0-A15 with BruControl's number (54-69); either can be typed.
@@ -5974,7 +5998,7 @@ function pumpDeviceFields(it, item) {
 // ---- Heating Element Device Properties (Fritz, 2026-11-05: "Same with Heating Element"): the Pump's Add box and Properties
 // (Rules 18.13-18.21) without a Cover, as the Motorized Ball Valve's (Rule 18.23). A Skynet Heating Element's Path is set (Rule 5.6); a
 // User Defined one has Path (off) and Path (on). Orientation Right / Left with Toggle on its line; Overlay with Database and .API ⬢.
-// It still asks before it turns on (Rule 2.33).
+// One click turns it ON or OFF at once, like a Pump (Rule 2.33).
 const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
   const T = DEVICE_TIPS, tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.eToggle }];
   return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.eGraphic, ...x }],
@@ -5985,7 +6009,7 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 // The electrical warning (Fritz, 2026-11-08, Rule 6.20): wherever wiring, elements or AC circuits come up
 const ELEC_WARN = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
-const ELEM_OWN = (it, x = {}) => [['_ask', 'A Heating Element asks before it turns on (Rule 2.33).', 'note', null, false, false, x]];
+const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns it ON or OFF at once, in the method it is in (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
 // Hysteresis, PID, Deadband or Precise reads, and that method's settings. A Process (.method = "PID") or a click while running changes the
 // method; the settings of the other methods are kept, so switching back finds them as they were.
@@ -6624,7 +6648,7 @@ const DEVICE_TIPS = {
   ePath: 'The picture of your Heating Element when it is off.',
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
-  eToggle: 'What a tap on the Heating Element does: On/Off turns it on or off (it asks first); Push button is on only while held.',
+  eToggle: 'What a tap on the Heating Element does: On/Off turns it on or off at once, in the method it is in; Push button is on only while held.',
   eOverlay: 'Drawn on top of the Heating Element while it is on: None to start (its on picture glows); the bolts are choices (Rule 7.15).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {

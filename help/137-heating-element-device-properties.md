@@ -22,7 +22,7 @@ has no Cover**. (Skynet Rule 18.24)
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
 4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**
-   are now greyed out and set (they are the wiring). A Heating Element always asks before it turns on (Rule 2.33).
+   are now greyed out and set (they are the wiring). On the Tab, one click on it turns it ON or OFF at once, like a Pump (Rule 2.33).
 
 ## Vessel Device Template: choose, then Build
 
