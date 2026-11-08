@@ -2320,7 +2320,8 @@ function tapAction(e) {
     case 'led': return 'none';                  // a light: a Process or its Device controlled sets it
     case 'digitalIn': return ['latch', 'toggle', 'counter'].includes(e.mode) || (e.mode === 'momentary' && simDev(e.device)) ? 'dialog' : simDev(e.device) ? 'toggle' : 'none';
     case 'pwmOut': case 'analogOut': case 'scale': case 'stepper': return 'dialog';
-    case 'analogIn': case 'temperature': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
+    case 'temperature': return 'setpoint';     // the SetPoint pop-up of the Heating Element that holds what it reads (Rule 2.43)
+    case 'analogIn': return simDev(e.device) && !e.sim ? 'dialog' : 'none';
     case 'alarm': return 'acknowledge';
     case 'soundPlayer': return 'toggle';
     case 'valueWidget': case 'timeWidget': case 'dateTimeWidget': return e.readOnly ? 'none' : 'dialog';
@@ -2364,6 +2365,7 @@ async function doTap(e) {
     return;
   }
   const t = elByName(targetName); if (!t) return toast(`No Device or Widget "${targetName}"`, true);
+  if (t.type === 'temperature') return probeTap(t);      // a Probe, a Thermowell, or a picture that shows one (Rule 2.43)
   if (isHeatElem(t) && (act === 'heat' || act === 'toggle' || act === 'dialog')) return heatDialog(t);
   if (act === 'toggle' && isBoolEl(t)) {
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
@@ -2403,6 +2405,10 @@ $('#ws').addEventListener('click', ev => {
   const mfv = ev.target.closest('.mfValve');
   if (mfv) return toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35)
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
+  const vp = ev.target.closest('.vpPart.vp-probe[data-dev], .vpPart.vp-thermowell[data-dev]');      // a Probe built into a Vessel Device (Rule 2.43)
+  if (vp) { const p = elByName(vp.dataset.dev); if (p) return probeTap(p); }
+  const vw = ev.target.closest('.gfx.vessel .vwProbe, .gfx.vessel .twell:not(.elmark)');          // a Vessel's own Probe spot: its Probe, its heater first
+  if (vw) { const g = L().graphics.find(x => x.id === vw.closest('.gfx')?.dataset.gid), p = g?.probe && elByName(g.probe); if (p) return probeTap(p, g.heater); }
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const mc = n.dataset.gid && L().graphics.find(g => g.id === n.dataset.gid && isMethodClone(g));
   if (mc) return methodCloneTap(mc);
@@ -2509,6 +2515,66 @@ function heatDialog(t) {
   };
   draw();
   d.showModal();
+}
+
+// ---- The SetPoint pop-up (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a Temperature NOT in edit Mode, Bring
+// up SetPoint Dialog", Rule 2.43, Help 160). A click on a Temperature Probe, a Thermowell, a Probe built into a Vessel, or a
+// picture or Dial that shows one opens the SetPoint of the Heating Element that holds that temperature (the one whose Temperature
+// Probe it is; older Hysteresis, PID and Deadband Devices too). Two or more: it asks which. None: it says so (a simulated probe
+// still opens its Simulated reading pop-up).
+const SP_OLD = ['hysteresis', 'pid', 'deadband'];
+const SP_METHODS = ['hysteresis', 'pid', 'deadband', 'precise'];      // the heating methods that hold a Setpoint (Target)
+function heatersOf(probe, first) {
+  const out = [], add = e => { if (e && !out.includes(e) && (isHeatElem(e) || SP_OLD.includes(e.type))) out.push(e); };
+  if (first) add(elByName(first));
+  for (const e of S.config.elements) if (e.input === probe.name) add(e);
+  return out;
+}
+async function probeTap(p, first) {
+  if (!can('operator')) return toast('Your account is view only', true);
+  const pl = S.values[p.name]?.label ?? p.label ?? p.name, hs = heatersOf(p, first);
+  if (!hs.length) {
+    if (simDev(p.device) && !p.sim) return valueDialog(p);
+    return toast(`${pl}: no Heating Element holds this temperature. Pick this probe as the Temperature Probe in a Heating Element's Properties.`, true, 6000);
+  }
+  const t = hs.length === 1 ? hs[0] : await choose(`${pl}: whose Setpoint?`, hs.map(e => [S.values[e.name]?.label ?? e.label ?? e.name, e]));
+  if (t) setpointDialog(p, t);
+}
+function setpointDialog(p, t) {
+  const d = $('#valDlg'); d.innerHTML = '';
+  const pv = S.values[p.name] || {}, v = S.values[t.name] || {}, he = isHeatElem(t);
+  const tl = v.label ?? t.label ?? t.name, pl = pv.label ?? p.label ?? p.name, u = p.units || '°F';
+  const onNow = he ? !!v.state : !!v.enabled;
+  const now = he ? (heatMethodKey(v.method) ?? startMethod(t)) : t.type;
+  // the method it uses for the Setpoint: the one in use if it holds a Setpoint, else the first allowed one that does
+  const m = !he ? t.type : SP_METHODS.includes(now) ? now : allowedMethods(t).find(k => SP_METHODS.includes(k));
+  const inp = h('input', { class: 'vdInput', value: fmtVal({}, typeof v.target === 'number' ? v.target : typeof t.target === 'number' ? t.target : Math.round(pv.value ?? 0)), inputmode: 'decimal', 'aria-label': 'Setpoint' });
+  const bump = k => { inp.value = String(+((parseFloat(inp.value) || 0) + k).toFixed(4)); };
+  const done = async on => {
+    const x = parseFloat(inp.value); if (!Number.isFinite(x)) return toast('Enter a number', true);
+    d.close();
+    if (he && m && m !== now) await setProp(t.name, 'method', heatMethodWord(m));
+    await setProp(t.name, 'target', x);
+    if (on !== undefined) await setProp(t.name, he ? 'state' : 'enabled', on);
+  };
+  const reading = pv.fault ? 'FAULT' : `${fmtVal(p, pv.value)} ${u}`;
+  const word = he ? heatMethodWord(now) : { hysteresis: 'Hysteresis', pid: 'PID', deadband: 'Deadband' }[t.type];
+  const note = !m ? `${tl} has no heating method that holds a Setpoint. Tick Hysteresis, PID, Deadband or Precise in its Properties.`
+    : he && m !== now ? `${tl} is on ${heatMethodWord(now)} now. Set switches it to ${heatMethodWord(m)}.` : '';
+  d.append(h('div', { class: 'vdTitle' }, `${pl}: ${reading}`),
+    h('div', { class: 'muted' }, `Setpoint of ${tl} (${onNow ? 'ON' : 'OFF'}, ${word})`),
+    ...(m ? [h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+'))] : []),
+    ...(note ? [h('div', { class: 'muted' }, note)] : []),
+    ...(m ? [h('div', { class: 'vdBtns' },
+      h('button', { type: 'button', class: 'big onb' + (onNow ? ' cur' : ''), title: 'Sets the Setpoint and turns it ON', onclick: () => done(true) }, 'Set + ON'),
+      h('button', { type: 'button', class: 'big offb' + (!onNow ? ' cur' : ''), title: 'Sets the Setpoint and turns it OFF', onclick: () => done(false) }, 'OFF'),
+      h('button', { type: 'button', class: 'big primary', title: 'Sets the Setpoint; ON or OFF stays as it is', onclick: () => done() }, 'Set'))] : []),
+    h('div', { class: 'vdBtns' },
+      ...(he ? [h('button', { type: 'button', class: 'big', title: 'Opens the Heating Element pop-up: its heating method, Duty cycle and ON / OFF', onclick: () => { d.close(); heatDialog(t); } }, 'Heating method…')] : []),
+      ...(simDev(p.device) && !p.sim ? [h('button', { type: 'button', class: 'big', title: 'Simulator: sets what this probe reads', onclick: () => { d.close(); valueDialog(p); } }, 'Simulated reading…')] : []),
+      h('button', { type: 'button', class: 'big', onclick: () => d.close() }, 'Cancel')));
+  inp.addEventListener('keydown', ke => { if (ke.key === 'Enter') { ke.preventDefault(); done(); } });
+  d.showModal(); if (m) setTimeout(() => { inp.focus(); inp.select(); }, 50);
 }
 
 // Manual vessel widget (BrewZilla, DigiBoil and other appliances with their own controller): no board pin.
