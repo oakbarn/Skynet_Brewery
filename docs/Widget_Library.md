@@ -19,6 +19,7 @@ A reference list of every Widget in the Skynet Brew Panel and all its settings (
 | Width, Height | Size in pixels. |
 | Lock position | No drag or resize. (Lock icon in Properties.) |
 | Database and .API | Every Widget with a value (not pictures, Labels, manual vessels or the Manual Valve Widget). **Send to the database**: Off, On demand, On value change, When a Process starts, Once, At a date and time, At clock time, Every N ms / seconds / minutes / hours / days, Every 00:00:00; **What to send** (main value or another attribute). **.API**: Off, Get only, Get and Put (Skynet Rule 6.14, Help 98). Always user settable. |
+| .confirmation | A switch (2026-11-08, Rule 1.28, Help 162). Ticked: a **Confirmation Widget**, for something done **by hand** (no Interface controls it): commanding it On shows a pop-up asking the person to do it and confirm; it shows On only once confirmed, and a Process waits. On for Manual Valves, Manual Pumps and moving a QD Hose; off for everything else unless ticked. |
 
 Properties open with a double-click. Delete, Cancel, Save are at the top and bottom of every Properties dialog.
 
@@ -166,6 +167,9 @@ Process attributes: `.text` (`.value` = `.text`), `.label`, `.label_visible`, `.
 
 ### Value, Time and DateTime Widgets (`valueWidget`, `timeWidget`, `dateTimeWidget`; 2026-11-05, Rule 1.23, Help 134)
 Show one value on a Tab (a number, hh:mm:ss, or a date and time); a tap sets it unless Read only; every Process reads and sets it by its Name. Names start `w_Value_N`, `w_Time_N`, `w_DateTime_N`; the Label is never blank. Value box: Start value (Value Widget: Units, Decimals, Step, Lowest, Highest), Read only, Fore / Back color, Alignment; Label box; Properties box; Database and .API (When Clicked, Database Groups ...). Keeps its value when the Brain restarts.
+
+### Chart Widget (`chart`, 2026-11-08, Rule 1.26, Help 159)
+A line graph over time of brew database readings for up to two Devices or Widgets (Channel 1 left axis, Channel 2 right axis). Name `wgt_CHT_Label_TabID`. Properties (and Process attributes) match a BruControl Chart: Span seconds, Refresh interval, Grid lines across / up and down, Time axis color; per Channel: Device or Widget, Auto scale, Axis lowest / highest, Line color, Axis color. 610 x 190 to start, 1 hour Span. The BruControl Importer makes one from each BruControl Chart.
 
 ### Timer Widget (Timer Widget Properties, 2026-10-29, Help 92)
 Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no background.**

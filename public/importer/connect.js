@@ -33,7 +33,9 @@ const NOT_VALVE = /switch|block|ssr|outlet|relay|24 ?vdc|120 ?vac/i;     // a po
 const COOL = /cool|chill|glycol/i, WARM = /warm|heat/i;
 
 const textOf = e => `${e.bru?.name ?? ''} ${e.label ?? ''}`;
-const itemOf = (e, kind) => ({ id: e.name, kind, label: e.label || e.name, bru: e.bru?.name || e.name, tab: e.workspace, x: e.x, y: e.y, w: e.w, h: e.h });
+// shown by its BruControl name during the interview (OakBarn Brewery, 2026-11-08: "use the Brucontrol names from the start until we
+// get further in the interview"), so the brewer knows each one; the Skynet name is still its name in the Schema (Rule 15.1)
+const itemOf = (e, kind) => ({ id: e.name, kind, label: e.bru?.name || e.label || e.name, bru: e.bru?.name || e.name, tab: e.workspace, x: e.x, y: e.y, w: e.w, h: e.h });
 
 // The parts of the brewery this page joins: the vessels (guessed from the names and Scripts), the pumps and the valves.
 // conv = the converted config (lib/bruimport.js); scripts = [{ name, text }] (read only as clues, Fritz 2026-11-06)
@@ -50,6 +52,115 @@ export function findParts(conv, scripts = []) {
   const vessels = VESSEL_KINDS.filter(k => k.re.test(all)).map(k => ({ key: k.key, name: k.name, side: k.side }));
   return { vessels, pumps, valves };
 }
+// ---- The item pages (OakBarn Brewery, 2026-11-08: "before the Vessels getting the Details of all The Elements that are an Interface
+// Element and divide them in to pages: Pumps, Heaters, Probes, Valves, Flow ... Always begin with How Many and if you found 3, and the
+// User Says 5, add two empty slots with the Name Pump 4, Pump 5"). Each item on a board port has one kind; each page asks a few details.
+// Pump models: the AC pumps the Panel has pictures for, and the DC (12 V and 24 V) list in docs/DC_Brewing_Pumps.md.
+export const PUMP_MODELS = [['', 'Not sure'], ['march809', 'March 809 (AC)'], ['march815', 'March 815 (AC)'], ['chugger', 'Chugger (AC)'],
+  ['riptide', 'Blichmann RipTide (AC)'], ['mkii', 'KegLand MKII (AC)'], ['td5', 'Topsflo TD5 (24 V DC)'], ['march809dc', 'March 809 DC (12 or 24 V DC)'],
+  ['hbmp20', 'DDMETER HB-MP20 (12 V DC)'], ['jt1000', 'BrewTaurus JT-1000B-24 (24 V DC)'], ['bayite', 'bayite BYT-7A006 (12 V DC)'],
+  ['solar12', 'Solar hot-water pump (12 V DC)'], ['penguin', 'Penguin Chillers glycol pump (12 or 24 V DC)'], ['gf30', 'Grainfather GF30 cooling pump (12 V DC)'],
+  ['submersible', 'Small submersible pump (12 or 24 V DC)'], ['other', 'Other']];
+export const PART_PAGES = [
+  { kind: 'pump', title: 'Pumps', one: 'Pump', fields: [
+    { k: 'model', name: 'Pump model', list: PUMP_MODELS },
+    { k: 'power', name: 'Power', list: [['', 'Not sure'], ['ac120', '120 V AC'], ['ac240', '240 V AC'], ['dc12', '12 V DC'], ['dc24', '24 V DC']] },
+    { k: 'speed', name: 'Speed', list: [['onoff', 'On or Off only'], ['variable', 'Variable speed (PWM)']] }] },
+  { kind: 'heater', title: 'Heaters', one: 'Heater', fields: [
+    { k: 'watts', name: 'Watts', number: true },
+    { k: 'volts', name: 'Volts', list: [['', 'Not sure'], ['ac120', '120 V AC'], ['ac240', '240 V AC']] }] },
+  { kind: 'probe', title: 'Temperature Probes', one: 'Probe', fields: [
+    { k: 'probe', name: 'Probe type', list: [['', 'Not sure'], ['onewire', 'OneWire (DS18B20)'], ['ntc', 'Thermistor (10K NTC)'], ['pt100', 'PT100 (RTD)'], ['other', 'Other']] }] },
+  { kind: 'valve', title: 'Valves', one: 'Valve', fields: [
+    { k: 'valve', name: 'Valve type', list: [['', 'Not sure'], ['mbv', 'Motorized Ball Valve'], ['solenoid', 'Solenoid Valve'], ['other', 'Other']] },
+    { k: 'size', name: 'Size', list: [['', 'Not sure'], ['0.5', '1/2 inch'], ['0.75', '3/4 inch'], ['1', '1 inch'], ['1.5', '1 1/2 inch'], ['other', 'Other']] }] },
+  { kind: 'flow', title: 'Flow Meters', one: 'Flow Meter', fields: [
+    { k: 'pulses', name: 'Pulses per Gallon or Liter', number: true }] },
+  { kind: 'other', title: 'Other items', one: 'Item', fields: [] }];
+// the kind of an item on a board port, for the item pages
+export function itemKind(e) {
+  if (!e) return 'other';
+  const t = textOf(e);
+  if (e.subtype === 'pump' || (e.subtype !== 'element' && PUMP.test(t) && PUMP_TYPES.has(e.type))) return 'pump';
+  if (e.subtype === 'element' || HEAT_TYPES.has(e.type)) return 'heater';
+  if (isProbe(e)) return 'probe';
+  if (VALVE.test(t) && !NOT_VALVE.test(t) && VALVE_TYPES.has(e.type)) return 'valve';
+  if (e.type === 'flowMeter') return 'flow';
+  return 'other';
+}
+// the first guesses for an item's details (each one can be changed)
+export function guessPartDetails(e, kind) {
+  const t = textOf(e);
+  if (kind === 'pump') return {
+    model: /chu+g+er/i.test(t) ? 'chugger' : /riptide/i.test(t) ? 'riptide' : /march ?815/i.test(t) ? 'march815' : /march/i.test(t) ? 'march809' : /mkii|mk ?2/i.test(t) ? 'mkii' : /td5|topsflo/i.test(t) ? 'td5' : '',
+    power: /240 ?v?ac/i.test(t) ? 'ac240' : /120 ?v?ac/i.test(t) ? 'ac120' : /24 ?v?dc/i.test(t) ? 'dc24' : /12 ?v?dc/i.test(t) ? 'dc12' : '',
+    speed: e.type === 'pwmOut' ? 'variable' : 'onoff' };
+  if (kind === 'heater') { const w = /(\d{3,5}) ?w\b/i.exec(t); return { watts: w ? Number(w[1]) : '', volts: /240/.test(t) ? 'ac240' : /120/.test(t) ? 'ac120' : '' }; }
+  if (kind === 'probe') return { probe: e.type === 'temperature' ? 'onewire' : /pt ?100|rtd/i.test(t) ? 'pt100' : /ntc|thermistor/i.test(t) ? 'ntc' : '' };
+  if (kind === 'valve') return { valve: /solenoid/i.test(t) ? 'solenoid' : /mbv|motor|ball/i.test(t) ? 'mbv' : '', size: '' };
+  if (kind === 'flow') return { pulses: '' };
+  return {};
+}
+// keep only known answers (for the saved Schema)
+export function cleanPartDetails(kind, d) {
+  const page = PART_PAGES.find(x => x.kind === kind), out = {};
+  for (const f of page?.fields ?? []) {
+    const v = d?.[f.k];
+    if (f.number) { const n = Number(v); if (v !== '' && v != null && Number.isFinite(n) && n >= 0 && n < 1e6) out[f.k] = n; }
+    else if (f.list.some(([k]) => k === v)) out[f.k] = v;
+  }
+  return out;
+}
+// ---- The Vessels page (OakBarn Brewery, 2026-11-08): each vessel found, with what the import could tell about it, from the names
+// of its items and the Scripts: its heaters, its probe (a thermowell with a probe), a Tangential inlet (or a whirlpool), a Steam
+// Slayer, a Sparge Arm, a HERMS Coil. Manual valves are never in BruControl, so they are asked: None, Manual Ball Valve or Manual
+// Butterfly Valve, None to start. Every found answer is a guess the brewer can change.
+export const MANUAL_VALVES = [['none', 'None'], ['ball', 'Manual Ball Valve'], ['butterfly', 'Manual Butterfly Valve']];
+export const VESSEL_PARTS = [['tangential', 'Tangential Inlet', /tangent|whirl ?pool/i], ['steamSlayer', 'Steam Slayer', /steam ?slayer/i],
+  ['spargeArm', 'Sparge Arm', /sparge/i], ['herms', 'HERMS Coil', /herms/i]];
+const HEAT_TYPES = new Set(['hysteresis', 'pid', 'dutyCycle', 'deadband']);
+// every BruControl probe found (a temperature item, or an analog input named like a probe), for the Thermowell dropdown
+const isProbe = e => e.type === 'temperature' || (e.type === 'analogIn' && /temp|probe|rtd|ntc|pt ?100/i.test(textOf(e)));
+export function findProbes(conv) {
+  return (conv?.elements ?? []).filter(isProbe).map(e => ({ id: e.name, label: e.bru?.name || e.label || e.name }));
+}
+// every BruControl heating element found (a PID, Hysteresis, Duty Cycle or Deadband, or a Heating Element), for the Heater dropdown
+export function findHeaters(conv) {
+  return (conv?.elements ?? []).filter(e => e.subtype === 'element' || HEAT_TYPES.has(e.type)).map(e => ({ id: e.name, label: e.bru?.name || e.label || e.name }));
+}
+export function findVesselDetails(conv, scripts = [], vessels = []) {
+  const els = conv?.elements ?? [];
+  const out = {};
+  for (const v of vessels) {
+    const re = VESSEL_KINDS.find(k => k.key === v.key)?.re ?? word(v.name.replace(/[^\w ]/g, ''));
+    const mine = els.filter(e => re.test(textOf(e)));
+    const lines = [...mine.map(textOf), ...scripts.flatMap(s => `${s.name}\n${s.text}`.split(/\r?\n/)).filter(l => re.test(l))].join('\n');
+    const lab = e => e.bru?.name || e.label || e.name;      // the BruControl name during the interview
+    const heaters = mine.filter(e => e.subtype === 'element' || HEAT_TYPES.has(e.type)).map(e => ({ id: e.name, label: lab(e) }));
+    const probe = mine.find(e => e.type === 'temperature') ?? mine.find(isProbe);
+    // Motorized Ball Valve (OakBarn Brewery, 2026-11-08): picked from every motorized valve found; the guess is the vessel's own valve
+    const valve = mine.find(e => VALVE.test(textOf(e)) && !NOT_VALVE.test(textOf(e)) && VALVE_TYPES.has(e.type) && !e.integratedIn);
+    const d = { heaters, probe: probe ? { id: probe.name, label: lab(probe) } : null, manualValve: 'none', motorValve: valve?.name ?? '',
+      heater: heaters[0] ?? null,
+      found: { ...(valve ? { motorValve: true } : {}), ...(probe ? { probe: true } : {}), ...(heaters.length ? { heater: true } : {}) } };
+    for (const [k, , rx] of VESSEL_PARTS) { d[k] = rx.test(lines) ? 'yes' : 'no'; if (d[k] === 'yes') d.found[k] = true; }
+    // Sparge Arm and Steam Slayer are one answer, where it sits (OakBarn Brewery, 2026-11-08): None, Upper Left or Upper Right; a found one
+    // starts at Upper Right (change it when it is on the left)
+    d.sparge = d.spargeArm === 'yes' || d.steamSlayer === 'yes' ? 'right' : 'none';
+    if (d.sparge !== 'none') d.found.sparge = true;
+    delete d.spargeArm; delete d.steamSlayer; delete d.found.spargeArm; delete d.found.steamSlayer;
+    // HERMS Coil is a tick box that starts unticked (OakBarn Brewery, 2026-11-08); a Script that mentions one only says so
+    if (d.herms === 'yes') d.found.herms = true;
+    d.herms = 'no';
+    // Outlet (OakBarn Brewery, 2026-11-08): None, Center Low or Bottom Drain; a Hot Side vessel starts at Bottom Drain, the opening the
+    // first guesses on Connect your brewery leave from
+    d.outlet = v.side === 'cold' ? 'none' : 'bottom';
+    // a whirlpool pump puts its wort back into the Boil Kettle through a tangential inlet
+    if (v.key === 'BK' && d.tangential === 'no' && els.some(e => /whirl ?pool/i.test(textOf(e)))) { d.tangential = 'yes'; d.found.tangential = true; }
+    out[v.key] = d;
+  }
+  return out;
+}
 // which vessel an item belongs to, by its name (M_HLT Pump -> HLT), or ''
 export function vesselOf(item, vessels) {
   const t = `${item.bru} ${item.label}`;
@@ -57,9 +168,9 @@ export function vesselOf(item, vessels) {
 }
 
 // ---- the ends of a link. kind: vessel (key, at = an opening), pump (id, side in/out), valve (id), tap, drain,
-// qd (sex male/female, shut true = Shut-off), manifold (n), none
+// qd (sex male/female, shut true = Shut-off), manifold (n), tee (n: Tee 1, 2 ...), none
 export const endKey = e => !e ? '' : e.kind === 'vessel' ? `vessel:${e.key}:${e.at}` : e.kind === 'pump' || e.kind === 'valve' ? `${e.kind}:${e.id}`
-  : e.kind === 'qd' ? `qd:${e.sex || 'male'}:${e.shut ? 'shut' : 'open'}:${e.n ?? 1}` : e.kind === 'manifold' ? `manifold:${e.n ?? 1}` : e.kind;
+  : e.kind === 'qd' ? `qd:${e.sex || 'male'}:${e.shut ? 'shut' : 'open'}:${e.n ?? 1}` : e.kind === 'manifold' ? `manifold:${e.n ?? 1}` : e.kind === 'tee' ? `tee:${e.n ?? 1}` : e.kind;
 export const isFinal = e => ['vessel', 'tap', 'drain', 'qd', 'none'].includes(e?.kind);
 export function endText(e, parts) {
   if (!e) return '';
@@ -72,6 +183,7 @@ export function endText(e, parts) {
     case 'drain': return 'Drain';
     case 'qd': return `QD ${e.n ?? 1} (${e.sex === 'female' ? 'Female' : 'Male'}, ${e.shut ? 'Shut-off' : 'Open'})`;
     case 'manifold': return `Supply Manifold ${e.n ?? 1}`;
+    case 'tee': return `Tee ${e.n ?? 1}`;
     default: return 'Not connected';
   }
 }
@@ -160,6 +272,68 @@ export function chainsFromLinks(links) {
 // Hose or Pipe: the guess is Pipe, unless one end is a QD (then Hose) (Fritz, 2026-11-07)
 export const guessBy = (a, b) => a?.kind === 'qd' || b?.kind === 'qd' ? 'hose' : 'pipe';
 // One more link: it carries on the chain that ends where it starts, or starts a new chain; chains that now meet are joined
+// How a piece is joined (OakBarn Brewery, 2026-11-08: "Join Left Right vertical or hose as choices"): a Pipe straight down (the
+// next piece below), a Pipe to the left or to the right (the next piece beside it), or a Hose. Kept as by = pipe or hose, with
+// dir = left or right for a Pipe that runs across (no dir = down), so older answers still read.
+export const JOINS = [['pipe', 'Vertical pipe'], ['left', 'Pipe to the left'], ['right', 'Pipe to the right'], ['hose', 'Hose']];
+export const joinOf = s => s?.by === 'hose' ? 'hose' : s?.dir === 'left' || s?.dir === 'right' ? s.dir : 'pipe';
+export function setJoin(s, j) {
+  if (j === 'hose') { s.by = 'hose'; delete s.dir; }
+  else { s.by = 'pipe'; if (j === 'left' || j === 'right') s.dir = j; else delete s.dir; }
+  return s;
+}
+// Add a tee after a piece (OakBarn Brewery, 2026-11-08: "the ability to add tees"): the line goes on through the tee, and a branch
+// starts at the tee as its own chain (joined to nothing yet, to the right). Returns the tee.
+export function addTee(chains, ci, si) {
+  const c = chains[ci]; if (!c) return null;
+  const ns = chains.flatMap(x => [x.start, ...x.steps.map(t => t.to)]).filter(e => e?.kind === 'tee').map(e => e.n || 1);
+  const tee = { kind: 'tee', n: ns.length ? Math.max(...ns) + 1 : 1 };
+  c.steps.splice(si + 1, 0, { to: tee, by: 'pipe', source: 'you' });
+  chains.splice(ci + 1, 0, { start: { ...tee }, steps: [{ to: { kind: 'none' }, by: 'pipe', dir: 'right', source: 'you' }] });
+  return tee;
+}
+// Left or Right needs a fitting (OakBarn Brewery, 2026-11-08: "Right or left add an elbow or Tee, need user input as to type"):
+// an Elbow (fit = elbow, the usual) turns the pipe; a Tee puts a real Tee in the line there: the pipe runs left or right into the
+// Tee, the Tee goes on down to the next piece, and its third opening starts a branch (its own chain). Back to Elbow takes the Tee
+// out again, unless its branch is joined to something (then the answer is why not).
+export function setFit(chains, ci, si, fit) {
+  const c = chains[ci], s = c?.steps[si]; if (!s) return '';
+  if (fit === 'tee' && s.to?.kind !== 'tee') {
+    const old = s.to; addTee(chains, ci, si - 1 < 0 ? -1 : si - 1);
+    const t = c.steps[si]; t.by = 'pipe'; if (s.dir) t.dir = s.dir; t.fit = 'tee';
+    const next = c.steps[si + 1]; next.to = old; delete next.dir; next.by = s.by === 'hose' ? 'hose' : 'pipe'; next.source = s.source; delete next.fit;
+    return '';
+  }
+  if (fit === 'elbow' && s.to?.kind === 'tee') {
+    const n = s.to.n || 1, bi = chains.findIndex(x => x.start?.kind === 'tee' && (x.start.n || 1) === n);
+    if (bi >= 0 && chains[bi].steps.some(t => t.to?.kind !== 'none')) return `Tee ${n} has a branch joined to something: remove the branch first.`;
+    if (bi >= 0) chains.splice(bi, 1);
+    const next = c.steps[si + 1];
+    if (next) { c.steps.splice(si, 2, { ...next, dir: s.dir, by: 'pipe', fit: 'elbow' }); if (!s.dir) delete c.steps[si].dir; }
+    else { c.steps[si] = { to: { kind: 'none' }, by: 'pipe', dir: s.dir, fit: 'elbow', source: 'you' }; }
+    return '';
+  }
+  s.fit = fit === 'tee' ? 'tee' : 'elbow';
+  return '';
+}
+// The vessel a chain belongs to, for the list one vessel at a time (OakBarn Brewery, 2026-11-08): the vessel it starts at; a branch
+// from a tee belongs where its tee is; otherwise the first vessel it reaches; '' when none (the Other chains).
+export function chainVessel(chains, ci, hot = null, seen = new Set()) {
+  const c = chains[ci]; if (!c || seen.has(ci)) return ''; seen.add(ci);
+  const ok = e => e?.kind === 'vessel' && (!hot || hot.includes(e.key));
+  if (ok(c.start)) return c.start.key;
+  if (c.start?.kind === 'tee') {
+    const pi = chains.findIndex((x, i) => i !== ci && x.steps.some(t => t.to?.kind === 'tee' && (t.to.n || 1) === (c.start.n || 1)));
+    if (pi >= 0) return chainVessel(chains, pi, hot, seen);
+  }
+  return c.steps.map(t => t.to).find(ok)?.key ?? '';
+}
+// remove one link (Fritz, 2026-11-08: a picked line and the Delete key); a link in the middle splits its chain in two
+export function removeLink(chains, ci, si) {
+  const c = chains[ci]; if (!c?.steps[si]) return;
+  const before = c.steps.slice(0, si), after = c.steps.slice(si + 1), rest = after.length ? [{ start: c.steps[si].to, steps: after }] : [];
+  chains.splice(ci, 1, ...(before.length ? [{ ...c, steps: before }] : []), ...rest);
+}
 export function addLink(chains, l) {
   const step = { to: l.to, by: l.by || guessBy(l.from, l.to), source: l.source || 'you' };
   const c = chains.find(x => { const last = x.steps.at(-1)?.to ?? x.start; return !isFinal(last) && sameItem(last, l.from); });
@@ -232,6 +406,23 @@ export function readAiAnswer(text, parts) {
   return out;
 }
 
+// ---- Build each vessel into a Vessel Device (OakBarn Brewery, 2026-11-08: "Start with a dialog to build the imported vessels into a
+// Vessel Device ... which template matches your vessel the best and have all our sample vessel formats"). The first guess comes
+// from the vessel's name and side; the brewer picks the template that looks most like the real one. templates: [{ id, vtype }]
+export function guessVesselTemplate(v, templates = []) {
+  const has = id => templates.some(t => t.id === id) ? id : '';
+  const n = `${v?.key ?? ''} ${v?.name ?? ''}`;
+  if (v?.side === 'cold' || /ferm|fv\b|conical|unitank/i.test(n)) return has('Fermenter');
+  if (/\bhlt\b|hot liquor/i.test(n)) return has('HLT');
+  if (/mash|\bmlt\b|\bmt\b/i.test(n)) return has('Mash_Tun');
+  if (/boil|kettle|\bbk\b/i.test(n)) return has('Brew_Kettle');
+  if (/brewzilla|robobrew/i.test(n)) return has('Kettle_Brewzilla_Electric');
+  if (/grainfather/i.test(n)) return has('Kettle_Grainfather_Electric');
+  if (/foundry/i.test(n)) return has('Kettle_Foundry_Electric');
+  if (/digiboil/i.test(n)) return has('Kettle_DigiBoil_Electric');
+  return has('Generic_Brew_Vessel_Widget') || templates[0]?.id || '';
+}
+
 // ---- what is saved in the Schema file: the chains as they are, plus each link with the names spelled out
 export function connectReport(state) {
   const { parts, chains = [], fermenters = [] } = state;
@@ -243,4 +434,68 @@ export function connectReport(state) {
     loose: looseItems(parts, chains, fermenters).map(i => i.id),
     places: state.places ?? {},
   };
+}
+
+// ---- The picture screen's tidy start (OakBarn Brewery, 2026-11-08): "When first starting create twice as many columns as there are
+// vessels. Move the left most [vessel] to the leftmost Column, then the Right most to the last column. Place other vessel in Between.
+// Have a Set Button and move Left Most 1 Column right and Right one Column left. Space others trying to leave a column between all
+// vessels." Things joined by a Pipe stack down the same column, with room to grab a pipe between them; a Hose step moves one column
+// over. Pieces joined to nothing go in rows at the bottom. pieces: [{ key, kind, end }] with the vessels in left-to-right order.
+// Returns { [key]: { x, y } } as parts of the picture's width and height (0 to 1).
+// the key of a piece on the picture: a vessel, a pump, a valve or a tee
+export const pieceKey = e => e?.kind === 'vessel' ? 'vessel:' + e.key : e?.kind === 'tee' ? 'tee:' + (e.n || 1) : e?.id;
+export function layoutPieces(pieces, chains = [], { set = false } = {}) {
+  const vessels = pieces.filter(p => p.kind === 'vessel'), n = vessels.length, cols = Math.max(2, 2 * n);
+  const colX = c => (Math.max(0, Math.min(cols - 1, c)) + 0.5) / cols;
+  const out = {}, colOf = {}, rowOf = {}, ROW = 0.12, TOP = 0.1;
+  const first = set ? 1 : 0, last = set ? cols - 2 : cols - 1;
+  vessels.forEach((v, i) => { const c = n === 1 ? first : first + i * (last - first) / (n - 1); colOf[v.key] = c; rowOf[v.key] = 0; });
+  const keyOf = pieceKey;
+  const known = new Set(pieces.map(p => p.key));
+  const used = new Map();                       // "col|row" taken
+  const take = (c, r) => { while (used.has(`${Math.round(c * 2)}|${r}`)) r++; used.set(`${Math.round(c * 2)}|${r}`, true); return r; };
+  for (const v of vessels) take(colOf[v.key], 0);
+  // walk each chain from the first piece that has a place; pieces before it are put above it, after it below it
+  for (let pass = 0; pass < 4; pass++) {
+    for (const c of chains) {
+      const ends = [c.start, ...c.steps.map(s => s.to)], by = [null, ...c.steps.map(joinOf)];
+      let a = ends.findIndex(e => keyOf(e) in colOf);
+      if (a < 0) continue;
+      for (let i = a + 1; i < ends.length; i++) {
+        const k = keyOf(ends[i]), pk = keyOf(ends[i - 1]); if (!known.has(k) || k in colOf || !(pk in colOf)) continue;
+        // Left and Right: beside it on the same row; a Pipe down: under it; a Hose: one column over, under it
+        const side = by[i] === 'left' ? -1 : by[i] === 'right' ? 1 : 0;
+        if (side) { const c0 = Math.max(0, Math.min(cols - 1, colOf[pk] + side)); colOf[k] = c0; rowOf[k] = take(c0, rowOf[pk]); continue; }
+        const c0 = colOf[pk] + (by[i] === 'hose' ? (colOf[pk] + 1 < cols ? 1 : -1) : 0);
+        colOf[k] = c0; rowOf[k] = take(c0, rowOf[pk] + 1);
+      }
+      for (let i = a - 1; i >= 0; i--) {
+        const k = keyOf(ends[i]), nk = keyOf(ends[i + 1]); if (!known.has(k) || k in colOf || !(nk in colOf)) continue;
+        const side = by[i + 1] === 'left' ? 1 : by[i + 1] === 'right' ? -1 : 0;
+        if (side) { const c0 = Math.max(0, Math.min(cols - 1, colOf[nk] + side)); colOf[k] = c0; rowOf[k] = take(c0, Math.max(1, rowOf[nk])); continue; }
+        const c0 = colOf[nk] + (by[i + 1] === 'hose' ? (colOf[nk] + 1 < cols ? 1 : -1) : 0);
+        colOf[k] = c0; rowOf[k] = take(c0, Math.max(1, rowOf[nk] + 1));
+      }
+    }
+  }
+  const maxRow = Math.max(0, ...Object.values(rowOf));
+  const loose = pieces.filter(p => !(p.key in colOf)), perRow = Math.max(4, cols * 2), looseRows = Math.ceil(loose.length / perRow);
+  const room = 0.95 - TOP - looseRows * 0.08, step = Math.min(ROW, maxRow ? room / maxRow : ROW);
+  for (const k of Object.keys(colOf)) out[k] = { x: colX(colOf[k]), y: TOP + rowOf[k] * step };
+  loose.forEach((p, i) => { out[p.key] = { x: ((i % perRow) + 0.5) / perRow, y: 0.95 - (looseRows - 1 - Math.floor(i / perRow)) * 0.08 }; });
+  return out;
+}
+
+// A Pipe runs only across, up and down, or at 45 degrees (OakBarn Brewery, 2026-11-08): straight, then 45 degrees, then straight.
+// Points in pixels; returns an SVG path.
+export function pipePath(p, q) {
+  const dx = q.x - p.x, dy = q.y - p.y, ax = Math.abs(dx), ay = Math.abs(dy), sx = Math.sign(dx), sy = Math.sign(dy);
+  const f = n => n.toFixed(1);
+  if (ay >= ax) { const s = (ay - ax) / 2; return `M${f(p.x)} ${f(p.y)} V${f(p.y + sy * s)} L${f(q.x)} ${f(p.y + sy * (s + ax))} V${f(q.y)}`; }
+  const s = (ax - ay) / 2; return `M${f(p.x)} ${f(p.y)} H${f(p.x + sx * s)} L${f(p.x + sx * (s + ay))} ${f(q.y)} H${f(q.x)}`;
+}
+// A Hose hangs in a soft curve, like a hose
+export function hosePath(p, q) {
+  const d = Math.hypot(q.x - p.x, q.y - p.y), sag = Math.min(120, d * 0.35), f = n => n.toFixed(1);
+  return `M${f(p.x)} ${f(p.y)} C${f(p.x)} ${f(p.y + sag)} ${f(q.x)} ${f(q.y + sag)} ${f(q.x)} ${f(q.y)}`;
 }
