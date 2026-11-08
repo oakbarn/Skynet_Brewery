@@ -94,7 +94,18 @@ and it is not shown on the Tab.
 ## Boards and Tabs
 
 **Next ▶** makes the **Import Copy**: your config file is copied into `C:\Brewing\Import\BruControl` (named
-*name*_*date*T*time*.brucfg, also when you picked a `.bak` backup) and only the copy is converted, so BruControl's own file is never changed. Then you see what comes in:
+*name*_*date*T*time*.brucfg, also when you picked a `.bak` backup) and only the copy is converted, so BruControl's own file is never changed.
+Then you confirm what comes in, in small steps:
+
+1. **The Interfaces (boards) we found.** Read only: each Interface with its **ID** (greyed, it is explained next), how many items,
+   its **Interface Type** (Arduino MEGA, ESP32 ...), its **Connection** (TCP address and Port, or the serial COM port) and whether it is
+   **Enabled**. **Next ▶**.
+2. **The ID column: new in Skynet.** Skynet gives every Interface an **ID** of up to four letters. It is the first part of the
+   **suggested Skynet name** of every Device on that board: *Interface ID*_*Port*_*Type ID*_*Label*_*Tab ID*, one `_` between the
+   parts, a space in the Label becomes `~` (Rule 3.1), for example `MP_45_DO_M~HLT~Pump_MD`; a name that would be the same as another
+   gets `_2` before its Tab ID, so every name is unique. The Importer chose the IDs for you; you may change them (up to 4 letters,
+   **2 are preferred**, each one different). **Accept ▶** uses them in every name and goes on.
+3. **Boards and Tabs:** everything else that comes in:
 
 - your **Interfaces** (BruControl boards), each with its Interface ID and how many items it has. An Interface with **no
   items (0)** is **not** imported, unless you tick its **Import** box; then it **will** be imported;
