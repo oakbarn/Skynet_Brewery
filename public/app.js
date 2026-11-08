@@ -10402,6 +10402,12 @@ function paneClose(close) {
 const closePage = () => setView(view === 'help' && helpFrom && helpFrom !== 'help' ? helpFrom : 'workspace');
 $('#hpTools').append(paneClose(closePage));
 $('#fmClose').append(paneClose(closePage));
+// the Process editor has a Close button and a boxed ✕ too, always working: back to the Tabs (the Build Tab if you came from there).
+// Changes not saved yet stay in the editor, but it asks first so nothing is lost by mistake.
+$('#procClose').append(paneClose(() => {
+  if (dirty && !confirm('This Process has changes that are not saved. Close the Process editor anyway? (The changes stay in the editor until you Save or open another Process.)')) return;
+  setView('workspace');
+}));
 // a ? beside each heading of the Menu tab showing (again after a form redraws itself)
 function menuHelpIcons(box) {
   if (!menuTab || !box.closest('#menuPane')) return;
