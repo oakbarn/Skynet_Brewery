@@ -1910,6 +1910,27 @@ not drawn. Making a Schema by copying one is still there (Start from: A copy of)
 goes to the Tab, lights the items that fit the job and greys the rest; one click picks it (no item is switched). The list stays as
 the backup. Help 100 and 157.
 
+16.8 **Build Rule: every Template follows the current Rules, and the 3 Vessel 1 Pump sample is the test bed** (OakBarn Brewery,
+2026-11-08: "All Templates Conform to new rules. If the do not they are updated to the new rule"; "Any device or Widget or Item in
+3 Vessel 1 Pump Sample get updated to the new standards or rules. That is the Test Bed").
+- **Templates:** every Skynet Template (Device, Fitting, Vessel, Schema and Process Templates) follows the Rules as they are now.
+  When a Rule changes or a new one comes, every Template it touches is changed to it **in the same change** (as Rule 15.3).
+  **A Process Template is always brought up to the new Rule**, even while the Brew Process is not being tested yet.
+- **The test bed:** every Device, Widget and item in the **3 Vessel 1 Pump** sample (`samples/configs/three-vessel-one-pump`) is
+  kept to the newest standard. It is also the Schema a new panel starts with (`config/brewery.json`).
+- **Old Heating Elements** (OakBarn Brewery, 2026-11-08: "Old Heater Elements if on a Template need to be updated to new standard
+  One Port One Device. But only in Templates and 3 Vessel Schema"): an old Duty Cycle, Hysteresis, PID or Deadband Device in a
+  Template or in the test bed becomes **one Heating Element on one Port** (Rule 6.19), turned On or Off (`= on` / `= off`), never
+  Enabled. A gas burner and a fermentor's glycol valve are Heating Elements too (a minus On offset cools).
+- **The Sandbox:** for now, every other Schema Skynet had (the Two vessels, one pump and BrewZilla brew day samples and the old
+  default Schema "Skynet Brew Panel" with its Processes) waits in the repo's **`Sandbox/`** folder, untouched and not brought up
+  to new Rules, to be put back later (most likely rebuilt as Schema Templates). `Sandbox/README.md` lists what came from where.
+  The panel does not use `Sandbox/`, and it is left out of the release zip and the installer (so is `Delete/`, Rule 15.3).
+- **The OakBarn Brewery Scripts:** all 175 BruControl Scripts of the OakBarn Brewery configuration are kept in
+  [docs/OakBarn_Scripts](OakBarn_Scripts/README.md). **They are read only when OakBarn Brewery says so, or after asking
+  permission.** The one standing exception: a Process Template that is not finished yet is built on them.
+(thread "Keep templates and test bed to new Rules")
+
 ---
 
 ## 17. Recipes
@@ -2696,6 +2717,14 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 5.37 (new, Fritz: "when we grab a Device or Widget, maybe a Pop up to Unlock IPs so it moves independently of its pipes"; "any Device, Pipe, Fitting or Widget", "the Option to Unlock as the user may not want to", "a way to restore back to any pipe movements", "Not only the Pipes but locked fitting as well"): the grab pop-up (🔓 Unlock its IPs, Move it with its pipes, 🔁 Swap places with..., Cancel), works past locked pipes and fittings, open ends rejoin the same end of a pump or valve dropped in the old one's place, ↩ Put back and Ctrl+Z (30 steps). Rule 5.19 points to it. Rule 11.1 next free Help is 154. Help 153 new. Checked against the BruControl Import program: it does not move things on a Tab, so nothing changes there. (thread "Swap a pump without dragging its pipes")
 - 2026-11-07: Rule 6.19 (Fritz: "Add that in the Hover Help"): the Heating method field and the allowed method ticks explain in their hover help which methods suit an SSR, a contactor or a DAC; Help 150 has the same as a table. No wiring question is asked. Checked against the BruControl Import program: no change (it has no Device dialogs). (thread "Pick the heating method on one Element")
 - 2026-11-07: Rule 6.19: new heating method **Precise** (Fritz: "a method of precise control built if possible using offsets to get to .1 F or .1 C"; OK'd "Proceed"): a calm PID (shared PID settings plus Hold output %, Smoothing, no wind-up, D on the smoothed reading, exact Output window) that holds to 0.1 degree; Properties warn when its probe is too coarse; every Temperature Probe gets a Two-point calibration (ice and boil); the Mega and Pi set DS18B20 probes to 12-bit; a DS18B20 set to °C now reads in °C. Process word PREC. Rule 11.1 next free Help is 157. Help 156 new; Help 150, 137 updated. Checked against the BruControl Import program: BruControl has no Precise method, so a PID imports as PID; its first page lists Precise among the methods that can be ticked; the probe calibration is the same in both programs. (thread "Build precise temperature control to 0.1 degree")
+- 2026-11-08: Rule 16.8 new (OakBarn Brewery), the Build Rule: every Template follows the current Rules (a Process Template
+  always), and the 3 Vessel 1 Pump sample is the test bed, kept to the newest standard and now the Schema a new panel starts with.
+  Old heaters in the Schema Templates (gas burner, fermentor glycol) became one Heating Element on one Port (Rule 6.19); the
+  Process Templates turn Heating Elements On / Off instead of Enabled; the Schema Template chiller water has no pop-up (one click);
+  its timers are named wgt_TMR_ (Rule 3.14); the test bed's HLT and Mash tun have their right Vessel type. The other Schemas moved
+  to `Sandbox/`; the OakBarn Brewery BruControl Scripts are in docs/OakBarn_Scripts (read only with permission). Checked against the
+  BruControl Import program: no change (it does not ship sample Schemas, Schema Templates or Process Templates; it makes Heating
+  Elements the Rule 6.19 way already). (thread "Keep templates and test bed to new Rules")
 - 2026-11-07: Rule 16.1 changed (Fritz): the Brew Process is a list of premade major steps that can grow or shrink, not seven.
   Now PreBrew, Heat Strike, Strike (was Add Grain), Mash, Boil, Whirlpool and Chill, Chill, Transfer to Fermentor, Ferment,
   Clean (always last); any step can be skipped; Whirlpool and Chill or Chill. Rule 16.3 Process names follow the steps used.

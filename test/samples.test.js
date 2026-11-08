@@ -10,7 +10,8 @@ import { listSamples, loadSample, simulated } from '../lib/samples.js';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SAMPLES = path.join(ROOT, 'samples', 'configs');
 const list = listSamples(SAMPLES);
-assert.deepEqual(list.map(s => s.id), ['two-vessel-one-pump', 'three-vessel-one-pump', 'brewzilla-brew-day']);
+// only the 3 Vessel 1 Pump sample (the test bed) ships; the others wait in Sandbox/ (Fritz, 2026-11-08, Rule 16.8)
+assert.deepEqual(list.map(s => s.id), ['three-vessel-one-pump']);
 
 // a sample's Interfaces always come in on the simulator, keeping the real connection to switch to later (Fritz, 2026-10-28)
 assert.deepEqual(simulated([{ name: 'M', type: 'serial', port: 'COM3' }, { name: 'S', type: 'simulator', realType: 'tcp' }]),
@@ -109,7 +110,7 @@ const fast = store => {   // short recipe; heaters very quick
   store.setProp('gblV_TimeHop1_Min_R1', 'value', 12); store.setProp('gblV_TimeHop2_Min_R1', 'value', 6); store.setProp('gblV_TimeHop3_Min_R1', 'value', 1);
   for (const e of store.list('temperature')) if (e.sim) { e.sim.heatRate = 40; e.sim.coolRate = 200; e.sim.followRate = 0.9; }
 };
-for (const id of ['brewzilla-brew-day', 'two-vessel-one-pump', 'three-vessel-one-pump']) {
+for (const id of ['three-vessel-one-pump']) {
   const r = await brewDay(id, fast);
   for (const st of [100, 150, 400, 500, 600, 700, 999]) assert.ok(r.seen.includes(st), `${id}: never reached step ${st} (${r.seen})`);
   assert.deepEqual(r.hops, [1, 2, 3, 4, 5], `${id}: hops marked added`);

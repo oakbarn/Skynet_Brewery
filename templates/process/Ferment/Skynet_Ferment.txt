@@ -7,7 +7,7 @@ ask "Pitch the yeast " + rcp_Yeast_Name + " at " + rcp_Ferment_Temp + rcp_Temp_U
 step "Hold the fermentation temperature"
 @if Ferment_Heater
 {{Ferment_Heater}}.target = rcp_Ferment_Temp
-{{Ferment_Heater}}.enabled = true
+{{Ferment_Heater}} = on
 @end
 unlock_Equipment
 print "Brewing done: " + rcp_Name + " is fermenting"
