@@ -142,8 +142,10 @@ song, *Skynet - Outlet to Valve*, made by OakBarn Brewery; it never plays by its
   background picture, from a valve that sits right next to a pump. Each one is marked **guess** until you click **✓**.
 - **Not joined yet** lists every pump and valve no answer uses. A missing answer leaves it loose, never a wrong pipe.
 - **A picture as a guide.** Pick the background picture you had on a BruControl Tab, or **📷 Use a photo or drawing** of your
-  brewery (it stays on this computer). Drag each vessel, pump and valve onto its place, then **click one and then another** to
-  join them. The picture is only a guide: it is not saved and nothing reads it.
+  brewery (it stays on this computer); the picture's back is always black. Drag each vessel, pump and valve onto its place,
+  then **click one** (it gets a yellow border) **and then another**, and a line joins them. A **blue** line is a **Pipe** (with its
+  fittings), a **yellow** line is a **Hose**: **right-click** a line to change it. **Click** a line to pick it and press **Delete** to
+  remove it (a line in the middle of a chain splits the chain in two). The picture is only a guide: it is not saved and nothing reads it.
 - **Ask an AI about my picture (your choice).** The Importer itself never uses an AI. **🤖 Copy the question and open it**
   copies a ready-made question (it lists your own vessel, pump and valve names) and opens the free AI site you pick (Claude,
   ChatGPT or Gemini). Add your picture there and paste the question. Copy the AI's answer back into the box and click **Read
