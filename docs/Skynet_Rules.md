@@ -1872,8 +1872,8 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     An **Interface (board) with no items** is **not** imported unless the brewer ticks its **Import** box on the convert page
     (Fritz, 2026-11-08); the ones left out are named in the report.
     A **Tab with no items** is **not** imported, with its Placeholders, unless its box is ticked (Fritz, 2026-11-08); a Tab with
-    items starts ticked and comes in unless the brewer unticks it (then it stays out with its items). When every Placeholder on a Tab is a BruControl Global, the page asks whether those Globals
-    import a Beer.xml recipe (Node-RED): Yes suggests leaving it unticked; No ticks it, and the Globals wait for the Globals step.
+    items starts ticked and comes in unless the brewer unticks it (then it stays out with its items). BruControl **Globals are only listed** for now (OakBarn Brewery, 2026-11-08: "Globals will be dealt with later. For now, only
+    list them"): each with its Tab, on the summary and in the import report; no Placeholder, no import and no question.
     Each BruControl **Chart** becomes a Chart Widget (Rule 1.26). An imported Schema follows the newest standard (Fritz,
     2026-11-08): a pump is a Skynet Pump Device (Rule 5.27); a control keeps its settings and its probe (.input, Rules 6.19, 2.43);
     an item BruControl marked not user controlled gets When tapped: none (Rule 2.44), except a probe.
@@ -2469,6 +2469,7 @@ Not Placed) or the dialog closes.
 
 ## Change log
 
+- 2026-11-08: Rule 15.4 (OakBarn Brewery: "Globals will be dealt with later. For now, only list them"): the Importer only lists BruControl Globals (name and Tab) on the Boards and Tabs summary; they get no Placeholder and the Beer.xml question on a Globals-only Tab is gone. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Added Rule 1.28, Confirmation Widgets (OakBarn Brewery), and the `.confirmation` attribute that puts a Widget in the class (Help 162): Manual Valves, Manual Pumps and moving a QD Hose ask the person to confirm they did it by hand; a named exception to Rule 2.44's no pop-up to turn anything On, since they turn nothing on. The Importer's item pages (Pumps, Heaters, Probes, Valves, Flow Meters, Other) start with How many; extra ones added there will become Confirmation Widgets. Checked against both programs: the Panel gets the Widget class (to be built); the Importer makes them. (thread "Import from BruControl .bak backups")
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.

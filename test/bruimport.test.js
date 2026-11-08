@@ -18,7 +18,7 @@ const xml = `\uFEFF<?xml version="1.0"?><Configuration xmlns:i="http://www.w3.or
  <Element i:type="DeviceElement"><ID>e3</ID><Name>Flow</Name><PortID>p3</PortID><X>0</X><Y>900</Y><Width>50</Width><Height>20</Height></Element>
  <Element i:type="TimerElement"><ID>e4</ID><Name>tm_Mash</Name><X>400</X><Y>100</Y><Width>120</Width><Height>50</Height></Element>
  <Element i:type="AlarmElement"><ID>e6</ID><Name>alm_Hops</Name><SoundFile>C:\\BruControl\\Media\\hops.wav</SoundFile><X>600</X><Y>10</Y><Width>80</Width><Height>40</Height></Element>
- <Element i:type="GlobalVariableElement"><ID>e5</ID><Name>gblV_x</Name><Appearance><BackgroundImageIndex>1</BackgroundImageIndex><BackgroundImages><d:string>D:\\My Pictures\\Brew\\hops.png</d:string></BackgroundImages><Visibility>Hidden</Visibility></Appearance><X>5</X><Y>5</Y><Width>10</Width><Height>10</Height></Element>
+ <Element i:type="LabelElement"><ID>e5</ID><Name>gblV_x</Name><Appearance><BackgroundImageIndex>1</BackgroundImageIndex><BackgroundImages><d:string>D:\\My Pictures\\Brew\\hops.png</d:string></BackgroundImages><Visibility>Hidden</Visibility></Appearance><X>5</X><Y>5</Y><Width>10</Width><Height>10</Height></Element>
 </Elements></Workspace></Workspaces>
 <Processes><Process><Name>scrMash</Name><Script>sleep 1</Script></Process></Processes></Configuration>`;
 
@@ -62,7 +62,7 @@ assert.deepEqual(r.report.renames.map(x => x.from), ['Lamp Red', 'MB_61_Wort']);
 
 // pictures and sounds (Fritz, 2026-11-06): their paths are imported and the files stay where they were (any folder) ...
 assert.equal(pump.backpath, 'C:\\BruControl\\Media\\pump_off.png'); assert.equal(pump.backpath_2, 'E:\\Other\\pump_on.png'); assert.equal(pump.background, 2);
-assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').placeholder.pictures, ['D:\\My Pictures\\Brew\\hops.png'], 'a Global with a picture on another path');
+assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'gblV_x').placeholder.pictures, ['D:\\My Pictures\\Brew\\hops.png'], 'a Placeholder with a picture on another path');
 assert.deepEqual(c.graphics.find(g => g.placeholder.bruName === 'alm_Hops').placeholder.sounds, ['C:\\BruControl\\Media\\hops.wav']);
 // ... checked, never copied, unless asked
 const asked = [];
@@ -118,3 +118,8 @@ console.log('bruimport tests passed');
   assert.equal(by('M_HLT Temp').tap, undefined, 'a probe keeps its SetPoint click');
   console.log('bruimport newest standard tests passed');
 }
+// Globals are only listed for now (OakBarn Brewery, 2026-11-08): no Placeholder, listed with their Tab
+{ const x = xml.replace('</Elements>', '<Element i:type="GlobalVariableElement"><ID>g1</ID><Name>gMashTemp</Name></Element></Elements>');
+  const q = importBruControl(x);
+  assert.ok(q.report.globals.some(g => g.name === 'gMashTemp'), 'the Global is listed');
+  assert.ok(!q.conv.graphics.some(g => g.placeholder?.bruName === 'gMashTemp'), '... and gets no Placeholder'); }
