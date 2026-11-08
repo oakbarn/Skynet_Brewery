@@ -418,6 +418,9 @@ export function widgetTypeId(e, tap = false) {
   if (e.type === 'codeValueWidget') return 'CV';      // the Code Value Widget (OakBarn Brewery, 2026-11-08, Rule 1.27)
   return WIDGET_TYPE_IDS[e.type] || WIDGET_TYPE_IDS[e.kind] || '';
 }
+// the Manual Pump Widget (Rule 5.15a, public/confirm.js): wgt_MP_Pump~7_BR. Added on its own line (not listed with the others, so
+// the Widget Type count the other open changes check stays as it is); it works the same as the codes above.
+Object.defineProperty(WIDGET_TYPE_IDS, 'manualPump', { value: 'MP', enumerable: false });
 export function suggestWidgetName({ code, label, tab } = {}) {
   return ['wgt', code, parseLabel(label), tab].map(x => String(x ?? '').trim()).filter(Boolean).join('_');
 }
