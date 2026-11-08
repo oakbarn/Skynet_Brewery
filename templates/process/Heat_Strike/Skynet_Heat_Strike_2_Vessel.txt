@@ -7,7 +7,7 @@ ask "Fill the boil kettle with " + rcp_Strike_Volume + " " + rcp_Volume_Units + 
 step "Heat the strike water"
 @if HLT_Heater
 {{HLT_Heater}}.target = rcp_Strike_Temp
-{{HLT_Heater}}.enabled = true
+{{HLT_Heater}} = on
 @else
 ask "Turn the kettle heat on and set it to " + rcp_Strike_Temp + rcp_Temp_Units + ". Press Done when it is on."
 @end
@@ -17,6 +17,6 @@ wait {{HLT_Probe}} >= rcp_Strike_Temp
 ask "Press Done when the strike water reaches " + rcp_Strike_Temp + rcp_Temp_Units + "."
 @end
 @if HLT_Heater
-{{HLT_Heater}}.enabled = false
+{{HLT_Heater}} = off
 @end
 print "Strike water at " + rcp_Strike_Temp + rcp_Temp_Units

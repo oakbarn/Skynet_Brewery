@@ -75,4 +75,4 @@ Tick **Do not show this warning again** to stop the warnings. Turn them back on 
 
 ## Sample processes
 
-`Demo_Transfer_HLT_to_MLT`, `Demo_Hop_Stand`, `Demo_Heat_HLT`, `Hops_Order_Boil`, `looper_LogTemps` and `Demo_Variables` show how things are done. Open one and press Start to watch it work on the simulator.
+The **Three vessels, one pump** sample comes with `BrewDay_Flow` (a whole guided brew day), `BrewDay_Stop` (everything off) and `looper_Advance_Switch`. Open one to see how things are done, and press Start to watch it work on the simulator. The Process Templates (☰ Menu > Brew Process) show more.

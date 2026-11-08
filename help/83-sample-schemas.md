@@ -1,10 +1,12 @@
 # Add a Sample Schema
 
-The Schema dropdown (on the Menu Bar, the ☰ Menu > Schema tab and the About tab) has a section at the bottom called **Add a Sample Schema**. It lists the ready-made sample breweries that come with Skynet, for example:
+The Schema dropdown (on the Menu Bar, the ☰ Menu > Schema tab and the About tab) has a section at the bottom called **Add a Sample Schema**. It lists the ready-made sample breweries that come with Skynet. For now there is one:
 
-- **Two vessels, one pump**
-- **Three vessels, one pump**
-- **BrewZilla brew day (no board)**
+- **Three vessels, one pump** (also the Schema a new panel starts with)
+
+It is kept up to every new Rule, so it is the place to try new things. The other samples (Two vessels, one pump and the
+BrewZilla brew day) have been set aside for now and will come back later, most likely as Schema Templates (see
+[New Schema from a Skynet Template](157-schema-templates)).
 
 Only an Admin sees this section.
 
@@ -17,7 +19,7 @@ The same samples are on the **Schema** Menu tab: press **☰ Menu > 🗂 Schema*
 3. The panel asks if it is OK to go on. If Processes are running it lists them, because switching Schemas stops them and switches every output off.
 4. Press **OK**. A copy of the sample is added as a **new Schema** and loaded.
 
-The new Schema is named after the sample. If you already have a Schema with that name, a number is added (for example "Two vessels, one pump 2"), so you can add the same sample more than once.
+The new Schema is named after the sample. If you already have a Schema with that name, a number is added (for example "Three vessels, one pump 2"), so you can add the same sample more than once.
 
 ## Your own Schemas are never written over
 
