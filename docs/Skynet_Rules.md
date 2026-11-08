@@ -209,6 +209,37 @@ globals interview later (Fritz). (thread "Explain the Shared Variable Widget", H
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
 screens clean for Brew Day; rarely-needed items go in the ☰ (hamburger) Menu. (2026-10-21, PR #56)
 
+2.44 **Things act the same everywhere: what you do every day is one click away** (OakBarn Brewery, 2026-11-08: "I am striving to
+make things act the same. Like Click the Graphic for On or Off. And maybe on a Temperature Probe associated with a setpoint, bring
+up a SetPoint Dialog. What you do every day One Click away"). It sits here, next to Rule 2.1, because it grows from it. On a Tab,
+outside Edit layout, one click or tap does the same kind of thing on every Device, Widget and picture, so a brewer learns it once:
+- **A picture of something that turns On and Off** (a Pump, a Heating Element, a Valve, a gas valve, a Sound Player, or a Picture
+  Widget that follows one of them), **wherever it is** (on its own on a Tab, built into a Vessel Device, on a Valve Tee or Supply
+  Manifold): **one click turns it On or Off at once.** Valves open or close. Rule 2.33 (Pumps), Rule 6.19 (a Heating Element in the
+  method it is in) and Rule 5.35 (valves on Valve Tees and Supply Manifolds) are this Rule for those things.
+- **A temperature that a Heating Element holds** (a Temperature Probe, a Thermowell, a probe tee, a probe built into a Vessel
+  Device, its reading or its Skynet Dial): **one click opens its SetPoint pop-up** (Rule 2.43).
+- **Something set to a number, not just On or Off** (a variable speed pump or PWM output, a proportional valve, a stepper, a scale,
+  a Value Widget, a Timer): one click opens the pop-up where that number is set.
+- **Something only shown** (a reading with no Setpoint, a Text or Label, a picture that follows nothing): a click does nothing,
+  or a short note says why.
+- **The same thing does the same in every place:** a Device on its own on a Tab, the same Device built into a Vessel Device, its
+  Clone and a Picture Widget that follows it all answer one click the same way.
+- What stays the same: **double-click opens Properties** (Rule 2.9), the right mouse button drags in Edit layout and gives Help
+  outside it (Rule 2.11), view only accounts can't change anything, and an item's own **When tapped** setting (none, process, tab,
+  or Ask before changing) still wins, because the user chose it for that one item.
+- **Anything new** is built to this Rule: before a new Device or Widget is finished, its one click is checked against this list.
+- **BruControl Import:** checked. The Importer has no Tabs that run, so it has no clicks of its own; everything it makes is a Panel
+  Device or Widget and gets these clicks in the Panel. One thing it carries over: an item BruControl marked as not user controlled
+  gets **When tapped: none**, so a click on it does nothing. That is the user's own choice for that item and is kept.
+- **Not yet the same** (2026-11-08, reported, not changed; each waits for OakBarn Brewery's go):
+  1. A **Heating Element on its own on a Tab** (and a Picture Widget that follows one) still opens its pop-up on one click, because
+     Rule 2.33 says "Heating elements still ask first". Only the picture of an Element built into a Vessel Device turns it On or
+     Off at once (PR #276).
+  2. A **Valve built into a Vessel Device**: a click on its picture does nothing; it should open or close it, like a valve Device.
+  3. The older **Duty Cycle, Hysteresis, PID and Deadband Devices** (from before one Heating Element, Rule 6.19) open their number
+     pop-up on one click instead of turning On or Off.
+
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
 
@@ -2408,6 +2439,7 @@ Not Placed) or the dialog closes.
 
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
+- 2026-11-08: Added Rule 2.44 (OakBarn Brewery: "make things act the same. Like Click the Graphic for On or Off ... What you do every day One Click away"): outside Edit layout one click on a picture of something that turns On and Off turns it On or Off at once, wherever it is; one click on a temperature a Heating Element holds opens its SetPoint (Rule 2.43); one click on something set to a number opens its pop-up; double-click still opens Properties. Lists three things that don't follow it yet (a Heating Element on its own on a Tab, a Valve built into a Vessel Device, the older Duty Cycle, Hysteresis, PID and Deadband Devices). Checked against the BruControl Import program: no change, everything it makes gets these clicks in the Panel. (thread "Add the one-click rule to the Rules")
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
