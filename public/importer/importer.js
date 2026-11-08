@@ -3,7 +3,9 @@
 // Skynet BruControl Importer, in the window (Rule 15.4): 1 Welcome, 2 BruControl and Skynet, 3 pick the config file, 4 Names,
 // 5 Boards and Tabs (the Import Copy is converted), 6 Connect your brewery (public/importer/connectpage.js), 8 Save the Schema.
 import { startConnect, connectState } from './connectpage.js';
-import { PART_PAGES } from './connect.js';
+import { PART_PAGES, METHOD_COLS, NOT_RECOMMENDED } from './connect.js';
+import { parseLabel } from '../naming.js';
+import { glossBold, GLOSSARY } from './glossary.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -35,6 +37,7 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.re
 const state = { start: null, folder: '', files: [], sel: '' };
 
 function show(n) {
+  state.page = n;
   document.body.classList.remove('wideStep');
   for (const s of document.querySelectorAll('.step')) s.classList.toggle('hidden', s.id !== 'step' + n);
   for (const li of document.querySelectorAll('#steps li')) {
@@ -122,9 +125,26 @@ async function next() {
       $('#unitsNote').textContent = u.guess ? `Your BruControl probes use ${u.guess === 'US' ? '°F (Fahrenheit)' : '°C (Celsius)'}, so ${u.guess} is picked. Please confirm it, or change it.`
         : 'Your BruControl file does not say which units it used. Please pick one.';
     } catch { /* the question still stands */ }
+    // answers kept from last time for this file: offered on top of the page (come back later)
+    state.resume = null; $('#resume').classList.add('hidden');
+    try {
+      const pr = await api('GET', '/api/progress?file=' + encodeURIComponent(state.sel));
+      if (pr?.data) {
+        state.resume = pr.data;
+        $('#resumeWhen').textContent = pr.saved ? `(last saved ${new Date(pr.saved).toLocaleString()})` : '';
+        $('#resume').classList.remove('hidden');
+        if (pr.data.units) document.querySelector(`input[name=units][value=${pr.data.units === 'Metric' ? 'Metric' : 'US'}]`).checked = true;
+      }
+    } catch { /* nothing kept */ }
     show(4);
   } catch (e) { toast(e.message); }
 }
+$('#resumeYes').onclick = () => { const d = state.resume; if (d) convert({ restore: d }); };
+$('#resumeNo').onclick = async () => {
+  if (!await ask('Start again?', '<p>Your answers kept for this file are cleared, and the Import starts again from its first guesses.</p>', 'Yes, start again', 'No, keep them')) return;
+  state.resume = null; $('#resume').classList.add('hidden');
+  api('POST', '/api/progress', { file: state.sel, clear: true }).catch(e => toast(e.message));
+};
 
 async function init() {
   try {
@@ -203,21 +223,46 @@ async function namesChoice() {
 const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` class="${cls[i]}"` : ''}>${c}</td>`).join('') + '</tr>';
 // again: the names are made again ({ to: the step to land on }) with state.ids and state.labels; none: a fresh convert
 async function convert(again = null) {
-  const names = again ? state.names : await namesChoice();
+  const d = again?.restore;      // the answers kept from last time (come back later)
+  const names = d ? (d.names === 'bru' ? 'bru' : 'skynet') : again ? state.names : await namesChoice();
   state.names = names;
-  if (!again) { state.keepTabs = null; state.ids = null; state.labels = null; state.itemPicks = null; state.parts = null; state.partPage = 0; }
+  if (!again || d) {
+    Object.assign(state, { keepIfs: null, keepTabs: null, ids: null, itemPicks: null, parts: null, kindOf: null, partPage: 0, wPage: 0, savedConnect: null });
+    if (d) Object.assign(state, { keepIfs: Array.isArray(d.keepIfs) ? new Set(d.keepIfs) : null, keepTabs: Array.isArray(d.keepTabs) ? new Set(d.keepTabs) : null,
+      ids: d.ids ?? null, itemPicks: d.itemPicks ?? null, parts: d.parts ?? null, kindOf: d.kindOf ?? null, partPage: d.partPage ?? 0, wPage: d.wPage ?? 0, savedConnect: d.connect ?? null });
+  }
   show(5);
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
   sub5('busy');
   try {
     state.units = document.querySelector('input[name=units]:checked')?.value === 'Metric' ? 'Metric' : 'US';
-    const r = await api('POST', '/api/convert', { file: state.sel, names, units: state.units, copyMedia: true, ...(state.ids ? { ids: state.ids } : {}), ...(state.labels ? { labels: state.labels } : {}) });
+    const sent = picksSent();
+    const r = await api('POST', '/api/convert', { file: state.sel, names, units: state.units, copyMedia: true, ...(state.ids ? { ids: state.ids } : {}), ...sent });
+    state.sentSig = JSON.stringify(sent);
     state.converted = true;
+    // the Vessels step answers are kept when the names are made again (and when coming back later)
+    const oldVessels = d?.vessels ?? (again ? state.connect?.parts?.vessels : null);
+    if (Array.isArray(oldVessels) && r.connect?.parts) r.connect.parts.vessels = oldVessels;
     state.connect = r.connect;
-    state.r = r;
-    sub5(again?.to ?? 'if');
+    state.r = r; exampleName();
+    const to = d ? (steps().some(([x]) => x === d.sub5) ? d.sub5 : 'if') : again?.to ?? 'if';
+    sub5(to);
   } catch (e) { state.converted = false; box.innerHTML = `<p class="note">${esc(e.message)}</p>`; }
 }
+// The answers so far are kept by the Importer (OakBarn Brewery, 2026-11-08: "Make the user's answers and settings persistent, so they
+// can close and come back later"): a moment after each change, in Brewing\Import\progress.json, by config file
+let saveTimer;
+function saveProgress() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (!state.sel || !state.r || state.sub5 === 'busy') return;
+    const data = { names: state.names, units: state.units, ids: state.ids, keepIfs: state.keepIfs ? [...state.keepIfs] : null, keepTabs: state.keepTabs ? [...state.keepTabs] : null,
+      itemPicks: state.itemPicks, parts: state.parts, kindOf: state.kindOf, sub5: state.sub5, partPage: state.partPage, wPage: state.wPage,
+      vessels: state.connect?.parts?.vessels ?? null, connect: connectState() ?? state.savedConnect ?? null, page: state.page, buildPage: state.buildPage };
+    api('POST', '/api/progress', { file: state.sel, data }).catch(() => { /* kept next time */ });
+  }, 800);
+}
+setInterval(() => { if (state.page === 6) saveProgress(); }, 15000);      // Connect your brewery changes are kept too
 // The Tabs step (OakBarn Brewery, 2026-11-08: "Layout the Tab ... different Place Holder type ... a Check box and accept Button"): one row
 // per Tab with its Items and a column for each kind of Placeholder found (Timers, Globals ...), and an Import box. A Tab with items is
 // always imported (its box is ticked and cannot be cleared); an empty one is imported only when ticked. Accept goes on.
@@ -242,6 +287,8 @@ function tabsHtml(r) {
 const SPARGE = [['none', 'None'], ['left', 'Upper Left'], ['right', 'Upper Right']];
 const OUTLET = [['none', 'None'], ['low', 'Center Low'], ['bottom', 'Bottom Drain']];
 const MANUAL = [['none', 'None'], ['ball', 'Manual Ball Valve'], ['butterfly', 'Manual Butterfly Valve']];
+const HERMS = [['none', 'None'], ['left', 'Left'], ['right', 'Right'], ['outLeftInRight', 'Outlet Left & Inlet Right'], ['outRightInLeft', 'Outlet Right & Inlet Left']];
+const hermsOf = v => HERMS.some(([k]) => k === v.details?.herms) ? v.details.herms : 'none';      // an old yes / no is None
 function vesselsHtml() {
   const vs = state.connect?.parts?.vessels ?? [];
   const add = '<div class="buttons"><button type="button" id="vAdd" title="Add a vessel the Importer missed">➕ Add a vessel</button></div>';
@@ -252,7 +299,7 @@ function vesselsHtml() {
       Type each vessel's <b>Volume</b>, and measure its <b>Height</b> and <b>Diameter</b> (in ${state.units === 'Metric' ? 'Liters and centimeters' : 'Gallons and inches'}).
       Everything is shown by its <b>BruControl name</b> for now. <b>(found)</b> means a name or a Script points to it; it is a guess, so change anything that is wrong. <b>Manual valves</b> are not in
       BruControl at all (nothing controls them), so pick the kind on each vessel, or leave it at None. Then <b>Accept</b>.</p>
-    <div class="vesWrap"><table class="vesTable"><tr><th>Vessel</th><th>Side</th><th></th><th>Volume (${state.units === 'Metric' ? 'L' : 'gal'})</th><th>Height (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Diameter (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Heater</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
+    <div class="vesWrap"><table class="vesTable"><tr><th>Vessel</th><th>Side</th><th></th><th>Volume (${state.units === 'Metric' ? 'L' : 'gal'})</th><th>Height (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Diameter (${state.units === 'Metric' ? 'cm' : 'in'})</th><th>Heater Element</th><th>Thermowell with Probe</th><th>Outlet</th><th>Tangential Inlet</th><th>Sparge Arm / Steam Slayer</th><th>HERMS Coil</th><th>Motorized Ball Valve</th><th>Manual Valves</th></tr>
     ${vs.map(v => row([
       // the start of this page is the old Your vessels table (OakBarn Brewery, 2026-11-08): rename, Side, remove, Add a vessel
       `<input class="vd vName" data-v="${esc(v.key)}" data-k="name" value="${esc(v.name)}" maxlength="40" title="The vessel's name" aria-label="Vessel name">`,
@@ -269,20 +316,78 @@ function vesselsHtml() {
       // Tangential: a tick box; Sparge Arm or Steam Slayer: one answer, where it sits (OakBarn Brewery, 2026-11-08)
       `<input type="checkbox" class="vd" data-v="${esc(v.key)}" data-k="tangential"${v.details?.tangential === 'yes' ? ' checked' : ''} title="${v.details?.found?.tangential ? 'Found in your names or Scripts (a guess): untick it if it is wrong' : 'Tick it if this vessel has a tangential inlet'}" aria-label="${esc(v.name)} has a tangential inlet">${v.details?.found?.tangential ? ' <span class="small muted">found</span>' : ''}`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="sparge" title="A Sparge Arm or a Steam Slayer, and where it sits">${SPARGE.map(([k, n]) => `<option value="${k}"${(v.details?.sparge || 'none') === k ? ' selected' : ''}>${n}${(v.details?.sparge || 'none') === k && v.details?.found?.sparge ? ' (found)' : ''}</option>`).join('')}</select>`,
-      // HERMS Coil: a tick box, unticked to start (OakBarn Brewery, 2026-11-08)
-      `<input type="checkbox" class="vd" data-v="${esc(v.key)}" data-k="herms"${v.details?.herms === 'yes' ? ' checked' : ''} title="Tick it if this vessel has a HERMS coil inside${v.details?.found?.herms ? ' (a Script mentions HERMS)' : ''}" aria-label="${esc(v.name)} has a HERMS coil">${v.details?.found?.herms ? ' <span class="small muted">in a Script</span>' : ''}`,
+      // HERMS Coil: the Panel's own choices, None to start (OakBarn Brewery, 2026-11-08)
+      `<select class="vd" data-v="${esc(v.key)}" data-k="herms" title="Where this vessel's HERMS coil joins it, as in the Panel${v.details?.found?.herms ? ' (a Script mentions HERMS)' : ''}" aria-label="${esc(v.name)} HERMS coil">${HERMS.map(([k, n]) => `<option value="${k}"${hermsOf(v) === k ? ' selected' : ''}>${n}</option>`).join('')}</select>${v.details?.found?.herms ? ' <span class="small muted">in a Script</span>' : ''}`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="motorValve" title="The motorized ball valve on this vessel, from every motorized valve found${v.details?.found?.motorValve ? ' (the guess is the one named for this vessel)' : ''}"><option value="">None</option>${(state.connect?.parts?.valves ?? []).map(x => `<option value="${esc(x.id)}"${v.details?.motorValve === x.id ? ' selected' : ''}>${esc(x.label)}${v.details?.motorValve === x.id && v.details?.found?.motorValve ? ' (found)' : ''}</option>`).join('')}</select>`,
       `<select class="vd" data-v="${esc(v.key)}" data-k="manualValve" title="Manual valves are not in BruControl: pick the kind this vessel has">${MANUAL.map(([k, n]) => `<option value="${k}"${(v.details?.manualValve || 'none') === k ? ' selected' : ''}>${n}</option>`).join('')}</select>`])).join('')}</table></div>${add}</div>`;
 }
 // The items on each Interface (OakBarn Brewery, 2026-11-08: "Insert a New Page after the Tab Page for the Elements associated with an
 // Interface are all Listed"): one table per Interface (board), each item by its port, with its BruControl name, what it becomes in
-// Skynet, its Skynet name and its Tab. Read only; an item on a Tab left out on the Tabs step is marked so.
+// Skynet, its Skynet names and its Tab. An item on a Tab left out on the Tabs step is marked so.
 const TYPE_TEXT = { digitalOut: 'Digital Output', digitalIn: 'Digital Input', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output',
   temperature: 'Temperature Probe', hysteresis: 'Hysteresis', pid: 'PID', dutyCycle: 'Duty Cycle', deadband: 'Deadband', flowMeter: 'Flow Meter',
   scale: 'Scale', stepper: 'Stepper', switch: 'Switch', chart: 'Chart' };
-const typeText = e => e.subtype === 'pump' ? 'Pump' : e.subtype === 'element' ? 'Heating Element' : TYPE_TEXT[e.type] ?? e.type;
+const typeText = e => e.subtype === 'pump' ? (/_CPMP_/.test(e.name) ? 'Cool / Warm Pump' : 'Pump') : e.subtype === 'element' ? 'Heating Element' : TYPE_TEXT[e.type] ?? e.type;
 const itemKey = e => e.bruId || `${e.device}|${e.port}|${e.bru}`;
 const shownName = e => e.noDisplay ? e.bru : (e.display || e.bru);      // what the Display Name column shows, and what the tick copies
+// The two name columns (OakBarn Brewery, 2026-11-08: "Skynet Name should read Skynet Name with DisplayName and a new Column Skynet Name
+// with Label that is updated every time a Label is populated (and updated if change)"): the suggested name with the Label part made
+// from the Display Name, and with the Label typed (a space becomes ~, public/naming.js parseLabel, the Panel's own rule)
+const nameWith = (e, label) => e.pre && e.tabId && state.names !== 'bru' ? `${e.pre}_${parseLabel(label) || '…'}_${e.tabId}` : e.name;
+const pickOf = e => state.itemPicks?.[itemKey(e)];
+const showOf = e => pickOf(e)?.show ?? e.show !== false;
+const nmLabel = (e, label) => label?.trim() ? esc(nameWith(e, label)) : '<span class="muted">(type a Label)</span>';
+// The cells every item line has (OakBarn Brewery, 2026-11-08: "Pumps (and all items) get the Display Name / tick / Label (and Show)
+// treatment"): Display Name, the tick box that copies it, the Label box (blank to start), and Show (ticked as it was in BruControl)
+function pickCells(e, out = false) {
+  const k = esc(itemKey(e)), pick = pickOf(e);
+  return [e.noDisplay ? `<span class="noDisplay" title="No Display Name in BruControl: the BruControl name is shown greyed instead">${esc(e.bru)}</span>` : esc(shownName(e)),
+    `<input type="checkbox" class="itemTick" data-item="${k}" data-copy="${esc(shownName(e))}"${pick?.tick ? ' checked' : ''} title="Copy the Display Name into the Label box" aria-label="Copy the Display Name of ${esc(e.bru)}">`,
+    `<input type="text" class="itemLabel" data-item="${k}"${out ? ' data-out="1"' : ''} maxlength="40" value="${esc(pick?.label ?? '')}" title="${out ? 'This item is on a Tab you left out, so it is not imported' : 'Your Label for this item: the words you use for it'}" aria-label="Label of ${esc(e.bru)}">`,
+    `<input type="checkbox" class="itemShow" data-item="${k}"${showOf(e) ? ' checked' : ''} title="Ticked: the Label is shown with it on the Tab (it starts as BruControl showed the name)" aria-label="Show the Label of ${esc(e.bru)}">`];
+}
+const pickHeads = '<th>Display Name</th><th title="Tick to copy the Display Name into the Label box">✔</th><th>Label</th><th title="Ticked: the Label is shown on the Tab, as BruControl showed the name">Show</th>';
+const nameCells = e => [`<code>${esc(nameWith(e, shownName(e)))}</code>`, `<code class="nmLabel" data-item="${esc(itemKey(e))}">${nmLabel(e, pickOf(e)?.label)}</code>`];
+const nameHeads = '<th>Skynet Name with DisplayName</th><th>Skynet Name with Label</th>';
+// every item and Widget by its key, for the live name column
+const allItems = () => [...(state.r?.portItems ?? []), ...(state.r?.appItems ?? [])];
+// the tick box, the Label box and the Show box, the same on every page
+function pickInput(ev) {
+  const t = ev.target, k = t.dataset?.item;
+  if (!k || !t.matches?.('.itemTick, .itemLabel, .itemShow')) return false;
+  state.itemPicks ??= {};
+  const e = allItems().find(x => itemKey(x) === k);
+  const p = state.itemPicks[k] ??= { tick: false, label: '' };
+  if (t.classList.contains('itemTick')) {
+    p.tick = t.checked;
+    // ticking copies the Display Name into the Label box (OakBarn Brewery, 2026-11-08)
+    if (t.checked) { const l = t.closest('tr').querySelector('.itemLabel'); l.value = p.label = t.dataset.copy; l.classList.remove('blankLabel'); }
+  }
+  if (t.classList.contains('itemLabel')) { p.label = t.value; if (t.value.trim()) t.classList.remove('blankLabel'); }
+  if (t.classList.contains('itemShow')) p.show = t.checked;
+  if (e) for (const n of document.querySelectorAll(`.nmLabel[data-item="${CSS.escape(k)}"]`)) n.innerHTML = nmLabel(e, p.label);
+  saveProgress();
+  return true;
+}
+// the Labels and Show boxes as the convert gets them (by BruControl element ID)
+const picksSent = () => {
+  const labels = {}, shows = {};
+  for (const [k, p] of Object.entries(state.itemPicks ?? {})) { if (p.label?.trim()) labels[k] = p.label.trim(); if (typeof p.show === 'boolean') shows[k] = p.show; }
+  return { labels, shows };
+};
+// No box may be blank (OakBarn Brewery, 2026-11-08: "Fields cannot be blank"): the blank ones are marked red and named in a message
+async function noBlanks(box) {
+  const labels = [...box.querySelectorAll('.itemLabel:not([data-out])')].filter(b => !b.value.trim());
+  const fields = [...box.querySelectorAll('.pf:not(.pName), .pfUser, .pName')].filter(b => !b.disabled && !String(b.value).trim());
+  for (const b of box.querySelectorAll('.itemLabel, .pf, .pfUser')) b.classList.remove('blankLabel', 'blankField');
+  labels.forEach(b => b.classList.add('blankLabel')); fields.forEach(b => b.classList.add('blankField'));
+  if (!labels.length && !fields.length) return true;
+  await tell('Some boxes are blank', `<p>${labels.length ? `${labels.length} Label${labels.length === 1 ? ' is' : 's are'} blank. Every item needs a Label, because it is part of its suggested Skynet name: type one, or tick the box to copy the Display Name.` : ''}
+    ${fields.length ? `${fields.length} other box${fields.length === 1 ? ' is' : 'es are'} blank or still say <b>Pick one…</b>. Every answer is needed: if none fits, pick <b>User defined</b> and type your own words.` : ''}</p>
+    <p>The blank boxes are marked in red.</p>`);
+  (labels[0] ?? fields[0]).focus();
+  return false;
+}
 function itemsHtml(r) {
   const keep = state.keepTabs ?? new Set(r.tabs.map(t => t.name));
   const all = r.portItems ?? [];
@@ -290,13 +395,17 @@ function itemsHtml(r) {
   // the Labels text (OakBarn Brewery, 2026-11-08)
   return `<div class="card"><p>Every item wired to a port of an Interface (board), listed by Interface and port, with its <b>BruControl name</b>,
       its <b>Display Name</b> (a greyed one means there was no Display Name, so the BruControl name is shown), the <b>Skynet type</b>, the
-      suggested <b>Skynet name</b> and its <b>Tab</b>. An item on a Tab you left out on the Tabs step is not imported.</p>
+      suggested <b>Skynet name</b> made with the Display Name and with your Label, and its <b>Tab</b>. An item on a Tab you left out on the Tabs step is not imported.</p>
       <h3>Labels</h3>
       <p>In BruControl each item had a <b>Display Name</b>, the words shown with it on the screen. The Importer brings over the Display Name
-      settings and puts them in the item's <b>Label</b> in Skynet. The Label can be shown on the Tab just like the Display Name was in BruControl,
-      and it is also the <b>Label part of the suggested Skynet name</b>.</p>
+      settings and puts them in the item's <b>Label</b> in Skynet. The Label can be shown on the Tab just like the Display Name was in BruControl
+      (the <b>Show</b> box, ticked as BruControl showed it), and it is also the <b>Label part of the suggested Skynet name</b>.</p>
       <p>Give every item a Label using <b>the words you use when you describe your brewery</b> to someone, like HLT, Mash Tun or Boil Kettle.
-      Tick an item's box to copy its Display Name into its Label box, then change it if you like.</p>
+      Tick an item's box to copy its Display Name into its Label box, then change it if you like. The <b>Skynet Name with Label</b> column
+      changes as you type.</p>
+      <p><b>Why there is no "tick them all" box:</b> each item must be looked at on its own. A BruControl name is often a code only its
+      builder knows, like <code>M_6_B_1</code>, while the Label should say what it is in your brewery, like <i>HLT</i> or <i>HLT Outlet Valve</i>.
+      Copying every Display Name at once would carry those codes into every Skynet name.</p>
       <ul>
         <li>A Label can have <b>spaces</b>. In the suggested Skynet name a space becomes <code>~</code>, so <i>Mash Tun</i> is <code>Mash~Tun</code>.</li>
         <li>A Label <b>does not have to be different</b> from the others. A Heater, a Temperature Probe and a Valve can all have the Label
@@ -307,18 +416,12 @@ function itemsHtml(r) {
         <li><b>No Label may be blank.</b> When every Label is filled in, press <b>Accept</b> at the bottom of the page. The suggested Skynet
         names are then made again with your Labels.</li>
       </ul></div>
-    ${r.interfaces.map(d => {
+    ${r.interfaces.filter(d => ifOn(d.name)).map(d => {
       const list = all.filter(e => e.device === d.name).sort((a, b) => String(a.port).localeCompare(String(b.port), undefined, { numeric: true }));
       return `<div class="card"><h3>${esc(d.name)} <span class="muted small">(ID ${esc(d.id)}, ${list.length} item${list.length === 1 ? '' : 's'})</span></h3>
-        ${list.length ? `<table class="itemTable"><tr><th>Port</th><th>BruControl name</th><th>Display Name</th><th title="Tick to copy the Display Name into the Label box">✔</th><th>Label</th><th>Skynet type</th><th>Skynet name</th><th>Tab</th></tr>
-        ${list.map(e => { const k = esc(itemKey(e)), pick = state.itemPicks?.[itemKey(e)], out = !keep.has(e.tab);
-          return row([esc(e.port), esc(e.bru),
-          // Display Name (OakBarn Brewery, 2026-11-08): the DisplayName when there is one; none: the BruControl name, greyed.
-          e.noDisplay ? `<span class="noDisplay" title="No Display Name in BruControl: the BruControl name is shown greyed instead">${esc(e.bru)}</span>` : esc(shownName(e)),
-          // Then a tick box (copies the Display Name into the Label box) and a Label box, blank to start; kept while you move between the steps
-          `<input type="checkbox" class="itemTick" data-item="${k}" data-copy="${esc(shownName(e))}"${pick?.tick ? ' checked' : ''} title="Copy the Display Name into the Label box" aria-label="Copy the Display Name of ${esc(e.bru)}">`,
-          `<input type="text" class="itemLabel" data-item="${k}"${out ? ' data-out="1"' : ''} maxlength="40" value="${esc(pick?.label ?? '')}" title="${out ? 'This item is on a Tab you left out, so it is not imported' : 'Your Label for this item: the words you use for it'}" aria-label="Label of ${esc(e.bru)}">`,
-          esc(typeText(e)), `<code>${esc(e.name)}</code>`, out ? `${esc(e.tab)} <span class="note small">left out</span>` : esc(e.tab)], ['n']); }).join('')}</table>`
+        ${list.length ? `<div class="vesWrap"><table class="itemTable"><tr><th>Port</th><th>BruControl name</th>${pickHeads}<th>Skynet type</th>${nameHeads}<th>Tab</th></tr>
+        ${list.map(e => { const out = !keep.has(e.tab);
+          return row([esc(e.port), esc(e.bru), ...pickCells(e, out), esc(typeText(e)), ...nameCells(e), out ? `${esc(e.tab)} <span class="note small">left out</span>` : esc(e.tab)], ['n']); }).join('')}</table></div>`
           : '<p class="small muted">No items on this Interface.</p>'}</div>`;
     }).join('')}`;
 }
@@ -331,54 +434,139 @@ function tell(title, html) {
     d.returnValue = ''; d.showModal(); $('#askNo').focus();
   });
 }
-// The item pages (OakBarn Brewery, 2026-11-08: "before the Vessels getting the Details of all The Elements that are an Interface
+// ---- The Widget pages (OakBarn Brewery, 2026-11-08: "After Your Tabs, add pages for all Widgets, with a category for each Skynet Widget
+// type. Import all BruControl Application Elements ... as Skynet equivalent Widgets"): first every Skynet Widget type and what came in
+// as one, then a page for each kind found, with the same Display Name, tick, Label and Show columns as the items.
+const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Switch Widget', 'Toggle Switch'], ['Value Widget', 'Script (a Script\'s value)'],
+  ['Chart Widget', 'Chart'], ['Push Button Widget', ''], ['Pulse Button Widget', ''], ['LED Widget', ''], ['Time Widget', ''], ['DateTime Widget', ''],
+  ['Code Value Widget', ''], ['Text Widget', ''], ['Label Widget', ''], ['Picture Widget', ''], ['Sound Player Widget', ''], ['Manual Valve Widget', ''],
+  ['Manual Pump Widget', ''], ['Override button Widget', '']];
+const widgetKeep = e => (state.keepTabs ?? new Set(state.r.tabs.map(t => t.name))).has(e.tab);
+const widgetPages = () => [...new Set((state.r?.appItems ?? []).map(e => e.page))];
+function widgetsPage(box) {
+  const pages = widgetPages(), i = state.wPage ?? 0, all = state.r.appItems ?? [];
+  if (i === 0) {
+    const count = w => all.filter(e => e.widget === w && widgetKeep(e)).length;
+    box.innerHTML = `<div class="card"><p>BruControl's <b>Application Elements</b> are the things on a Workspace that are not wired to an
+        Interface (board): Timers, Alarms, Toggle Switches, Scripts, Charts and so on. Each one comes into Skynet as the Skynet <b>Widget</b>
+        that does the same job. This list has every kind of Skynet Widget, and how many of yours become one. The next
+        page${pages.length === 1 ? '' : 's'} give${pages.length === 1 ? 's' : ''} each kind found its Labels, the same way as the items on your boards.</p>
+      <table class="itemTable"><tr><th>Skynet Widget</th><th>BruControl Element it comes from</th><th>How many of yours</th></tr>
+      ${SKYNET_WIDGETS.map(([w, b]) => row([`<b>${esc(w)}</b>`, b ? esc(b) : '<span class="muted">none in BruControl</span>', count(w) || '<span class="muted">0</span>'], ['', '', 'n'])).join('')}</table>
+      ${(state.r.appHolders ?? []).length ? `<p class="small">These have <b>no Skynet Widget</b> (for example a BruControl <b>Inspector</b>), so they stay a grey <b>Placeholder</b> on their Tab:
+        ${state.r.appHolders.map(h => `${esc(h.bru)} <span class="muted">(${esc(h.kind)}, ${esc(h.tab)})</span>`).join(', ')}.</p>` : ''}
+      ${state.r.globals?.length ? `<p class="small">Your ${state.r.globals.length} BruControl <b>Globals</b> are only listed (on the summary) and dealt with later.</p>` : ''}
+      ${all.length ? '' : '<p>No Application Elements were found in your config file, so there are no Widget pages. Press <b>Accept</b>.</p>'}</div>`;
+    state.accept = forward;
+    return;
+  }
+  const page = pages[i - 1], list = all.filter(e => e.page === page);
+  box.innerHTML = `<div class="card"><p>Your BruControl <b>${esc(page)}</b>, each now a Skynet <b>${esc(list[0]?.widget ?? 'Widget')}</b>. Give each one a
+      <b>Label</b> (tick the box to copy its Display Name), and keep <b>Show</b> ticked to show the Label on the Tab. A Widget's suggested
+      Skynet name is <code>wgt_</code>, its kind, the Label and the Tab ID (Rule 3.14). No Label may be blank. Then <b>Accept</b>.</p></div>
+    <div class="card"><div class="vesWrap"><table class="itemTable"><tr><th>#</th><th>BruControl name</th>${pickHeads}<th>Skynet Widget</th>${nameHeads}<th>Tab</th></tr>
+    ${list.map((e, n) => { const out = !widgetKeep(e); return row([`${n + 1}`, esc(e.bru), ...pickCells(e, out), esc(e.widget), ...nameCells(e), out ? `${esc(e.tab)} <span class="note small">left out</span>` : esc(e.tab)], ['n']); }).join('')}</table></div></div>`;
+  box.oninput = box.onchange = pickInput;
+  state.accept = async () => { if (await noBlanks(box)) forward(); };
+}
+// ---- The item pages (OakBarn Brewery, 2026-11-08: "before the Vessels getting the Details of all The Elements that are an Interface
 // Element and divide them in to pages: Pumps, Heaters, Probes, Valves, Flow ... Always begin with How Many and if you found 3, and the
 // User Says 5, add two empty slots with the Name Pump 4, Pump 5"). One page per kind; each starts with How many; the details are first
 // guesses the brewer can change. Answers are kept per kind while you move between the pages, and saved in the Schema (itemDetails).
-const pageItems = kind => { const keep = state.keepTabs ?? new Set(state.r.tabs.map(t => t.name)); return (state.r.portItems ?? []).filter(e => e.kind === kind && keep.has(e.tab)); };
+// An item can be moved to the page it belongs on (Belongs on), and an empty line can be filled with an item no page has taken yet
+// (OakBarn Brewery, 2026-11-08: "a dropdown of other (unassigned) Elements to fill a line ... the same dropdown ... on every page").
+const ifOn = d => !state.keepIfs || state.keepIfs.has(d);      // an Interface left unticked on the first step: its items are left out
+const kindOfItem = e => state.kindOf?.[itemKey(e)] ?? e.kind;
+const pageItems = kind => { const keep = state.keepTabs ?? new Set(state.r.tabs.map(t => t.name)); return (state.r.portItems ?? []).filter(e => kindOfItem(e) === kind && keep.has(e.tab) && ifOn(e.device)); };
 function partState(page) {
   state.parts ??= {};
   const found = pageItems(page.kind);
-  const p = state.parts[page.kind] ??= { count: found.length, items: {}, extras: [] };
-  for (const e of found) p.items[itemKey(e)] ??= { ...(e.guess ?? {}) };
+  const p = state.parts[page.kind] ??= { items: {}, extras: [] };
+  for (const e of found) p.items[itemKey(e)] ??= structuredClone(e.kind === page.kind ? e.guess ?? {} : {});
+  if (page.methods) for (const e of found) { const d = p.items[itemKey(e)]; d.methods ??= ['onoff']; d.primary ??= 'onoff'; }
   return { p, found };
 }
-function fieldHtml(f, v, attrs) {
-  if (f.number) return `<input type="number" class="pf num" min="0" step="any" ${attrs} data-f="${f.k}" value="${esc(v ?? '')}" aria-label="${esc(f.name)}">`;
-  return `<select class="pf" ${attrs} data-f="${f.k}" aria-label="${esc(f.name)}">${f.list.map(([k, n]) => `<option value="${esc(k)}"${(v ?? '') === k ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>`;
+function fieldHtml(f, v, attrs, d = {}) {
+  const help = f.help ? ` title="${esc(f.help)}"` : '';
+  if (f.number) return `<input type="number" class="pf num" min="0" step="any" ${attrs} data-f="${f.k}" value="${esc(v ?? '')}" aria-label="${esc(f.name)}"${help}>`;
+  return `<select class="pf" ${attrs} data-f="${f.k}" aria-label="${esc(f.name)}"${help}>${f.list.map(([k, n]) => `<option value="${esc(k)}"${(v ?? '') === k ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>` +
+    (v === 'user' ? ` <input type="text" class="pfUser" ${attrs} data-f="${f.k}User" maxlength="60" value="${esc(d[f.k + 'User'] ?? '')}" placeholder="Your words" aria-label="${esc(f.name)}: your own words">` : '');
 }
+// the Control Type columns (OakBarn Brewery, 2026-11-08: "Speed becomes Control Type"): a tick box per method, then the Primary by number
+function methodCells(d, attrs) {
+  const ms = d.methods ?? ['onoff'];
+  return [...METHOD_COLS.map(([k, w], n) => `<input type="checkbox" class="pm" ${attrs} data-m="${k}"${ms.includes(k) ? ' checked' : ''}${k === 'onoff' ? ' disabled title="On/Off is always allowed (Rule 6.19)"' : ` title="${n + 1}. ${esc(w)}: tick it to allow this method"`} aria-label="${esc(w)}">`),
+    `<select class="pmPrimary" ${attrs} title="The method it starts with: pick its column number" aria-label="Primary method">${METHOD_COLS.map(([k, w], n) => ms.includes(k) ? `<option value="${k}"${d.primary === k ? ' selected' : ''}>${n + 1}. ${esc(w)}</option>` : '').join('')}</select>`];
+}
+const methodHeads = () => METHOD_COLS.map(([, w], n) => `<th class="mCol">${n + 1}<br>${esc(w)}</th>`).join('') + '<th>Primary (column #)</th>';
 function partsPage(box) {
-  const page = PART_PAGES[state.partPage ?? 0], { p, found } = partState(page);
+  const page = PART_PAGES[state.partPage ?? 0];
   const ifName = n => state.r.interfaces.find(d => d.name === n);
+  const belongs = e => `<select class="pBelongs" data-i="${esc(itemKey(e))}" title="The page this item belongs on: pick another to move it there" aria-label="Belongs on">${PART_PAGES.map(pg => `<option value="${pg.kind}"${pg.kind === page.kind ? ' selected' : ''}>${esc(pg.title)}</option>`).join('')}</select>`;
   const draw = () => {
+    const { p, found } = partState(page);
+    const free = pageItems('other').filter(e => page.kind !== 'other');
+    const fill = i => free.length ? `<select class="pFill" data-x="${i}" title="Fill this line with an item no page has taken yet (from Other items)" aria-label="Fill with an item"><option value="">Fill with an item…</option>${free.map(e => `<option value="${esc(itemKey(e))}">${esc(e.bru)}</option>`).join('')}</select>` : '<span class="small muted">no free items</span>';
     const extraRows = p.extras.map((x, i) => row([`${found.length + i + 1}`,
-      `<input class="pf pName" data-x="${i}" data-f="name" maxlength="40" value="${esc(x.name)}" aria-label="Name">`, '<span class="small muted">new</span>',
-      '<span class="small muted">not wired yet</span>', '', ...page.fields.map(f => fieldHtml(f, x[f.k], `data-x="${i}"`))], ['n']));
+      `<input class="pf pName" data-x="${i}" data-f="name" maxlength="40" value="${esc(x.name)}" aria-label="Name">`, '<span class="small muted">new, not wired yet</span>', '', '', '', fill(i), '',
+      ...page.fields.map(f => fieldHtml(f, x[f.k], `data-x="${i}"`, x)), ...(page.methods ? methodCells(x, `data-x="${i}"`) : [])], ['n']));
     box.innerHTML = `<div class="card"><p>Every <b>${esc(page.one)}</b> found on the ports of your Interfaces (boards), on the Tabs you are importing.
-        Check the details: the ones filled in are guesses from the names, so change any that are wrong. Then <b>Accept</b>.</p>
-      <p class="howMany"><label><b>How many ${esc(page.title)} do you have?</b> <input type="number" id="howMany" min="${found.length}" max="${found.length + 100}" step="1" value="${p.count}"></label>
-        <span class="small muted">We found ${found.length}. If you have more, type how many: an empty line is added for each one${found.length ? ', named ' + esc(page.one) + ' ' + (found.length + 1) + ' and so on' : ''}.</span></p></div>
-      <div class="card">${found.length || p.extras.length ? `<table class="itemTable partTable"><tr><th>#</th><th>BruControl name</th><th>Label</th><th>Interface and Port</th><th>Skynet name</th>${page.fields.map(f => `<th>${esc(f.name)}</th>`).join('')}</tr>
-        ${found.map((e, i) => row([`${i + 1}`, esc(e.bru), esc(e.label), `${esc(ifName(e.device)?.id ?? e.device)} port ${esc(e.port)}`, `<code>${esc(e.name)}</code>`,
-          ...page.fields.map(f => fieldHtml(f, p.items[itemKey(e)]?.[f.k], `data-i="${esc(itemKey(e))}"`))], ['n'])).join('')}
-        ${extraRows.join('')}</table>` : `<p class="small muted">No ${esc(page.title)} found. If you have some, type how many above.</p>`}</div>`;
+        Check each line: give it a <b>Label</b> (or tick to copy its Display Name), and pick every detail. The ones filled in are guesses from
+        the names, so change any that are wrong. Nothing can be left at <b>Pick one…</b>: if no choice fits, pick <b>User defined</b> and type
+        your own words. An item on the wrong page can be moved with <b>Belongs on</b>. Then <b>Accept</b>.</p>
+      ${page.methods ? `<p><b>Control Type:</b> each numbered column is a way to control it; tick every one it may use (On/Off is always
+        allowed), then pick the <b>Primary</b> one, the method it starts with, by its column number. A method that is not recommended for
+        a ${esc(page.one)} unticks itself and says why.</p>` : ''}
+      ${page.kind === 'valve' ? `<p><b>Connection</b> is how the valve is built into your manifold, not the thread on the valve itself. For
+        example, a BSP valve with a BSP to NPT adapter and a female TC on each end is a <b>TC</b> valve, because it joins the manifold with
+        Tri-Clamps. <b>Size</b> is the pipe size it joins (any size up to 4 inch, in inches or millimeters, whatever units you picked).</p>` : ''}
+      <p class="howMany"><label><b>How many ${esc(page.title)} do you have?</b> <input type="number" id="howMany" min="${found.length}" max="${found.length + 100}" step="1" value="${found.length + p.extras.length}"></label>
+        <span class="small muted">We found ${found.length}. If you have more, type how many: an empty line is added for each one${found.length ? ', named ' + esc(page.one) + ' ' + (found.length + 1) + ' and so on' : ''}. An empty line can be filled with an item from Other items.</span></p></div>
+      <div class="card">${found.length || p.extras.length ? `<div class="vesWrap"><table class="itemTable partTable"><tr><th>#</th><th>BruControl name</th>${pickHeads}<th>Belongs on</th><th>Interface and Port</th>${page.fields.map(f => `<th${f.help ? ` title="${esc(f.help)}"` : ''}>${esc(f.name)}</th>`).join('')}${page.methods ? methodHeads() : ''}<th>Skynet Name with Label</th></tr>
+        ${found.map((e, i) => { const d = p.items[itemKey(e)], a = `data-i="${esc(itemKey(e))}"`;
+          return row([`${i + 1}`, esc(e.bru), ...pickCells(e), belongs(e), `${esc(ifName(e.device)?.id ?? e.device)} port ${esc(e.port)}`,
+            ...page.fields.map(f => fieldHtml(f, d?.[f.k], a, d)), ...(page.methods ? methodCells(d, a) : []), nameCells(e)[1]], ['n']); }).join('')}
+        ${extraRows.join('')}</table></div>` : `<p class="small muted">No ${esc(page.title)} found. If you have some, type how many above.</p>`}</div>`;
+    return p;
   };
-  draw();
-  box.oninput = box.onchange = ev => {
+  let p = draw();
+  const target = t => t.dataset.x != null ? p.extras[Number(t.dataset.x)] : p.items[t.dataset.i];
+  box.oninput = box.onchange = async ev => {
+    if (pickInput(ev)) return;
     const t = ev.target;
     if (t.id === 'howMany') {
       if (ev.type !== 'change') return;
-      const n = Math.max(found.length, Math.min(found.length + 100, Math.floor(Number(t.value) || 0)));
-      while (found.length + p.extras.length < n) p.extras.push({ name: `${page.one} ${found.length + p.extras.length + 1}`, ...(page.kind === 'pump' ? { speed: 'onoff' } : {}) });
-      p.extras.length = n - found.length; p.count = n; draw(); return;
+      const found = pageItems(page.kind).length, n = Math.max(found, Math.min(found + 100, Math.floor(Number(t.value) || 0)));
+      while (found + p.extras.length < n) p.extras.push({ name: `${page.one} ${found + p.extras.length + 1}` });
+      p.extras.length = n - found; p = draw(); saveProgress(); return;
     }
+    if (ev.type !== 'change' && !t.matches('input[type=text], input[type=number]')) return;
+    // move an item to the page it belongs on, or fill an empty line with a free item
+    if (t.classList.contains('pBelongs')) { (state.kindOf ??= {})[t.dataset.i] = t.value; p = draw(); saveProgress(); return; }
+    if (t.classList.contains('pFill')) { if (!t.value) return; (state.kindOf ??= {})[t.value] = page.kind; p.extras.splice(Number(t.dataset.x), 1); p = draw(); saveProgress(); return; }
+    const d = target(t); if (!d) return;
+    if (t.classList.contains('pm')) {
+      const k = t.dataset.m, why = NOT_RECOMMENDED[page.kind]?.[k], ms = new Set(d.methods ?? ['onoff']);
+      if (t.checked) {
+        if (why && !(d.override ?? []).includes(k)) {
+          t.checked = false;      // a method not recommended unticks itself and says why, with a button to use it anyway (OakBarn Brewery, 2026-11-08)
+          if (!await ask(`${METHOD_COLS.find(m => m[0] === k)[1]} is not recommended for a ${page.one}`, `<p>${esc(why)}</p><p>You can still use it if you know your ${esc(page.one)} needs it.</p>`, 'Use it anyway', 'OK, leave it off')) return;
+          (d.override ??= []).push(k);
+        }
+        ms.add(k);
+      } else { ms.delete(k); if (d.override) d.override = d.override.filter(x => x !== k); }
+      ms.add('onoff');
+      d.methods = METHOD_COLS.map(m => m[0]).filter(x => ms.has(x));
+      if (!d.methods.includes(d.primary)) d.primary = 'onoff';
+      p = draw(); saveProgress(); return;
+    }
+    if (t.classList.contains('pmPrimary')) { d.primary = t.value; saveProgress(); return; }
     const f = t.dataset?.f; if (!f) return;
-    const target = t.dataset.x != null ? p.extras[Number(t.dataset.x)] : p.items[t.dataset.i];
-    if (target) target[f] = t.value;
+    d[f] = t.value;
+    if (t.tagName === 'SELECT' && (t.value === 'user' || t.nextElementSibling?.classList.contains('pfUser'))) p = draw();      // User defined: its words box
+    saveProgress();
   };
-  state.accept = () => {
-    if (state.partPage < PART_PAGES.length - 1) { state.partPage++; sub5('parts'); } else sub5('vessels');
-  };
+  state.accept = async () => { if (await noBlanks(box)) forward(); };
 }
 // what the item pages send to the Schema: per kind, each found item by its Skynet name with its details, and the empty slots
 function partsToSave() {
@@ -386,25 +574,55 @@ function partsToSave() {
   const out = {};
   for (const page of PART_PAGES) {
     const p = state.parts[page.kind]; if (!p) continue;
-    out[page.kind] = { count: p.count, items: pageItems(page.kind).map(e => ({ name: e.name, ...p.items[itemKey(e)] })), extras: p.extras };
+    const items = pageItems(page.kind).map(e => ({ name: e.name, ...p.items[itemKey(e)] }));
+    out[page.kind] = { count: items.length + p.extras.length, items, extras: p.extras };
   }
   return out;
 }
+// ---- The order of the small steps on page 5 (OakBarn Brewery, 2026-11-08): the Interfaces, the IDs, the Tabs, the Widget pages,
+// the items on each Interface, the item pages, the Vessels and the summary. Back and Next (Accept) walk them.
+function steps() {
+  const w = state.r ? widgetPages().length + 1 : 1;
+  return [['if'], ['id'], ['tabs'], ...Array.from({ length: w }, (_, i) => ['widgets', i]), ['items'], ...PART_PAGES.map((_, i) => ['parts', i]), ['vessels'], ['sum']];
+}
+const stepAt = () => steps().findIndex(([s, i]) => s === state.sub5 && (i == null || i === (s === 'parts' ? state.partPage ?? 0 : state.wPage ?? 0)));
+// go to a step; when a Label or a Show box changed since the last convert, the names are made again first
+function goStep(n) {
+  const l = steps(); if (n < 0) return show(4);
+  const [s, i] = l[Math.min(l.length - 1, n)];
+  if (s === 'parts') state.partPage = i;
+  if (s === 'widgets') state.wPage = i;
+  const sig = JSON.stringify(picksSent());
+  if (sig !== state.sentSig && ['items', 'parts', 'vessels', 'sum'].includes(s)) return convert({ to: s });
+  sub5(s);
+}
+const forward = () => goStep(stepAt() + 1);
+const stepTitle = which => which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)'
+  : which === 'widgets' ? ((state.wPage ?? 0) ? `Your Widgets: ${widgetPages()[state.wPage - 1]} (${state.wPage} of ${widgetPages().length})` : 'Your Widgets (BruControl Application Elements)')
+  : which === 'vessels' ? 'Your vessels' : which === 'items' ? 'The items on each Interface'
+  : which === 'parts' ? `Your ${PART_PAGES[state.partPage ?? 0].title} (${(state.partPage ?? 0) + 1} of ${PART_PAGES.length})` : 'Boards and Tabs';
 function sub5(which) {
   $('#convBody').oninput = null; $('#convBody').onchange = null;
   state.sub5 = which;
-  document.body.classList.toggle('wideStep', which === 'vessels' || which === 'parts');      // the wide Vessels table gets the whole window
+  document.body.classList.toggle('wideStep', ['vessels', 'parts', 'items', 'widgets'].includes(which));      // the wide tables get the whole window
   // the page's own Back and Next walk the small steps; on the ID step Next is Accept
-  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'items', 'parts', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
+  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ACCEPTS.includes(which) ? 'Accept ▶' : 'Next ▶'; }
   $('#next5a').classList.toggle('hidden', which === 'busy' || which === 'items');      // the items page: Accept at the bottom, after the Labels
-  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : which === 'items' ? 'The items on each Interface' : which === 'parts' ? `Your ${PART_PAGES[state.partPage ?? 0].title} (${(state.partPage ?? 0) + 1} of ${PART_PAGES.length})` : 'Boards and Tabs';
+  $('#step5 h1').textContent = stepTitle(which);
   if (which === 'busy') return;
+  saveProgress();
   const r = state.r, box = $('#convBody');
   if (which === 'if') {
-    box.innerHTML = `<div class="card"><p>These are the Interfaces (boards) in your BruControl config file. Nothing can be changed on this page;
-      it only shows what was found. The <b>ID</b> column is new in Skynet and is explained on the next page.</p>
-      <table class="ifTable"><tr><th>Interface</th><th>ID</th><th>Items</th><th>Interface Type</th><th>Interface Connection</th><th>Enabled</th></tr>
-      ${r.interfaces.map(d => row([esc(d.name), `<span class="greyId">${esc(d.id)}</span>`, d.items, esc(d.typeName || ''), esc(d.connection || ''), d.enabled ? '✓' : '✗'], ['', '', 'n', '', '', 'c'])).join('')}</table></div>`;
+    // the Import box (OakBarn Brewery, 2026-11-08): an Interface with items starts ticked, an empty one unticked; any can be changed.
+    // The Interfaces are all settled here, at the start (the summary no longer asks about them).
+    state.keepIfs ??= new Set(r.interfaces.filter(d => d.items).map(d => d.name));
+    box.innerHTML = `<div class="card"><p>These are the Interfaces (boards) in your BruControl config file. An Interface with items starts
+      <b>ticked</b> to import; an empty one starts unticked. You can tick or untick any of them: an unticked Interface is not imported,
+      with its items. The <b>ID</b> column is new in Skynet and is explained on the next page.</p>
+      <table class="ifTable"><tr><th>Interface</th><th>ID</th><th>Items</th><th>Interface Type</th><th>Interface Connection</th><th>Enabled</th><th>Import</th></tr>
+      ${r.interfaces.map(d => row([esc(d.name), `<span class="greyId">${esc(d.id)}</span>`, d.items, esc(d.typeName || ''), esc(d.connection || ''), d.enabled ? '✓' : '✗',
+        `<input type="checkbox" class="keepIf" data-name="${esc(d.name)}"${state.keepIfs.has(d.name) ? ' checked' : ''} title="Ticked: this Interface (board) is imported with its items. Unticked: it is left out." aria-label="Import ${esc(d.name)}">`], ['', '', 'n', '', '', 'c', 'c'])).join('')}</table></div>`;
+    box.onchange = e => { if (e.target.classList.contains('keepIf')) { if (e.target.checked) state.keepIfs.add(e.target.dataset.name); else state.keepIfs.delete(e.target.dataset.name); saveProgress(); } };
     return;
   }
   if (which === 'id') {
@@ -421,7 +639,7 @@ function sub5(which) {
           <li><b>Type ID</b>: what kind of Device it is, for example <code>DO</code> (a digital output), <code>HE</code> (a Heating Element), <code>10KNTC</code> (a probe).</li>
           <li><b>Label</b>: your own name for it, the BruControl DisplayName. A space becomes <code>~</code>, so <i>Mash Tun</i> is <code>Mash~Tun</code>.</li>
           <li><b>Tab ID</b>: the two letters of the Tab (old Workspace) it is on.</li></ol>
-        <p>For example <code>${esc(ex)}</code>. If two names would come out the same, the second gets <code>_2</code> before its Tab ID, so no two are ever alike.</p>
+        <p>For example <code>${esc(ex)}</code>. Because of the <b>One Port, One Device</b> Rule, two suggested names can never come out the same.</p>
         <p><b>The Importer chose these IDs for you.</b> You may change them: up to 4 letters, but <b>2 are preferred</b>, because a short ID keeps every
         name short. Each ID must be different. Accept them, or change them and then Accept, before going on. After this, an ID is best left as it is,
         because it is part of every Device name on that board.</p></div></div>
@@ -444,37 +662,19 @@ function sub5(which) {
   }
   if (which === 'tabs') {
     box.innerHTML = tabsHtml(r);
-    state.accept = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); sub5('items'); };
+    box.onchange = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); saveProgress(); };
+    state.accept = () => { state.keepTabs = new Set([...box.querySelectorAll('.keepTab:checked')].map(c => c.dataset.name)); state.wPage = 0; forward(); };
     return;
   }
   if (which === 'items') {
     box.innerHTML = itemsHtml(r);
     state.itemPicks ??= {};
-    box.oninput = box.onchange = ev => {
-      const t = ev.target, k = t.dataset?.item; if (!k) return;
-      const p = state.itemPicks[k] ??= { tick: false, label: '' };
-      if (t.classList.contains('itemTick')) {
-        p.tick = t.checked;
-        // ticking copies the Display Name into the Label box (OakBarn Brewery, 2026-11-08)
-        if (t.checked) { const l = t.closest('tr').querySelector('.itemLabel'); l.value = p.label = t.dataset.copy; l.classList.remove('blankLabel'); }
-      }
-      if (t.classList.contains('itemLabel')) { p.label = t.value; if (t.value.trim()) t.classList.remove('blankLabel'); }
-    };
+    box.oninput = box.onchange = pickInput;
     // Accept: no Label may be blank (on the Tabs being imported); then the names are made again with the Labels
-    state.accept = async () => {
-      const boxes = [...box.querySelectorAll('.itemLabel:not([data-out])')], blank = boxes.filter(b => !b.value.trim());
-      boxes.forEach(b => b.classList.toggle('blankLabel', !b.value.trim()));
-      if (blank.length) {
-        await tell('Some Labels are blank', `<p>${blank.length} item${blank.length === 1 ? ' has' : 's have'} no Label. Blank Labels are not allowed:
-          every item needs one, because it is part of its suggested Skynet name.</p><p>The blank boxes are marked in red. Type a Label, or tick the
-          box to copy the Display Name.</p>`);
-        blank[0].focus(); return;
-      }
-      state.labels = Object.fromEntries(boxes.map(b => [b.dataset.item, b.value.trim()]));
-      state.partPage = 0; convert({ to: 'parts' });
-    };
+    state.accept = async () => { if (await noBlanks(box)) forward(); };
     return;
   }
+  if (which === 'widgets') { widgetsPage(box); return; }
   if (which === 'parts') { partsPage(box); return; }
   if (which === 'vessels') {
     box.innerHTML = vesselsHtml();
@@ -492,14 +692,14 @@ function sub5(which) {
       const vs = state.connect.parts.vessels;
       if (e.target.closest('#vAdd')) {
         let n = vs.length + 1; while (vs.some(v => v.key === 'V' + n)) n++;
-        vs.push({ key: 'V' + n, name: 'Vessel ' + n, side: 'hot', details: { outlet: 'bottom', sparge: 'none', tangential: 'no', herms: 'no', manualValve: 'none', motorValve: '', heater: null, probe: null, found: {} } });
+        vs.push({ key: 'V' + n, name: 'Vessel ' + n, side: 'hot', details: { outlet: 'bottom', sparge: 'none', tangential: 'no', herms: 'none', manualValve: 'none', motorValve: '', heater: null, probe: null, found: {} } });
       } else if (e.target.closest('.vDel')) {
         const i = vs.findIndex(v => v.key === e.target.closest('.vDel').dataset.v); if (i >= 0) vs.splice(i, 1);
       } else return;
       state.connect.vv = (state.connect.vv ?? 0) + 1;
       box.innerHTML = vesselsHtml();
     };
-    state.accept = () => { box.onchange = null; box.onclick = null; sub5('sum'); };
+    state.accept = () => { box.onchange = null; box.onclick = null; forward(); };
     return;
   }
   for (const id of ['#next5', '#next5a']) $(id).disabled = false;
@@ -510,8 +710,8 @@ function sub5(which) {
         BruControl had them, until the next steps bring them in. Tab backgrounds are left out for now.</p>
         ${r.charts ? `<p><b>${r.charts}</b> BruControl Chart(s) are now Skynet <b>Chart Widgets</b>, with the same span, refresh, grid lines, colors and channels.</p>` : ''}</div>
       <div class="cards two"><div><h3>Interfaces (boards)</h3><table><tr><th>Interface</th><th>ID</th><th>Items</th><th>Import</th></tr>
-        ${r.interfaces.map(d => row([esc(d.name), esc(d.id), d.items, d.items ? '✓' : `<input type="checkbox" class="keepEmpty" data-name="${esc(d.name)}" title="This Interface (board) has no items. Tick it to import it anyway; unticked, it is not imported." aria-label="Import ${esc(d.name)} anyway">`], ['', '', 'n', 'c'])).join('')}</table>
-        ${r.interfaces.some(d => !d.items) ? '<p class="small">An Interface with no items (0) is <b>not</b> imported. Tick its box and it <b>will</b> be imported.</p>' : ''}</div>
+        ${r.interfaces.map(d => row([esc(d.name), esc(d.id), d.items, state.keepIfs?.has(d.name) ? '✓' : '✗'], ['', '', 'n', 'c'])).join('')}</table>
+        <p class="small">✓ is imported, ✗ is left out: you chose this on the first step (The Interfaces we found).</p></div>
       <div><h3>Placeholders</h3><table><tr><th>BruControl kind</th><th>How many</th></tr>
         ${Object.entries(r.byKind).map(([k, n]) => row([esc(k), n], ['', 'n'])).join('') || row(['(none)', ''])}</table></div></div>
       ${r.globals?.length ? `<div class="card"><h3>Your BruControl Globals (${r.globals.length}): listed only</h3><p class="small">Globals will be dealt
@@ -533,13 +733,13 @@ function sub5(which) {
   }
 }
 for (const id of ['#next4', '#next4a']) $(id).onclick = () => convert();
-for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'parts' ? (state.partPage > 0 ? (state.partPage--, sub5('parts')) : sub5('items'))
-  : state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? (state.partPage = PART_PAGES.length - 1, sub5('parts')) : state.sub5 === 'items' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
+const ACCEPTS = ['id', 'tabs', 'widgets', 'items', 'parts', 'vessels'];
+for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'if' || state.sub5 === 'busy' ? show(4) : goStep(stepAt() - 1);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
-  if (state.sub5 === 'if') return sub5('id');
-  if (['id', 'tabs', 'items', 'parts', 'vessels'].includes(state.sub5)) return state.accept();
+  if (state.sub5 === 'if') return forward();
+  if (ACCEPTS.includes(state.sub5)) return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
-  startConnect(state.connect, { toast }); state.buildPage = 0; drawBuildPages();
+  startConnect(state.connect, { toast, saved: state.savedConnect }); state.buildPage = state.savedConnect ? state.buildPage ?? 0 : 0; state.savedConnect = null; drawBuildPages();
   show(6);
 };
 for (const id of ['#back6', '#back6a']) $(id).onclick = () => show(5);
@@ -561,7 +761,7 @@ $('#saveBtn').onclick = async () => {
   const b = $('#saveBtn'); b.disabled = true; b.textContent = 'Saving…';
   try {
     const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: withDetails(connectState()),
-      keepEmpty: [...document.querySelectorAll('#convBody .keepEmpty:checked')].map(c => c.dataset.name),
+      keepIfs: [...(state.keepIfs ?? new Set(state.r.interfaces.filter(d => d.items).map(d => d.name)))],
       keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs, parts: partsToSave() });
     const box = $('#saveResult');
     box.innerHTML = `<p>✅ Saved <b>${esc(r.file)}</b> in <code>${esc(r.folder)}</code>.</p>
@@ -631,3 +831,27 @@ function drawBuildPages() {
     } catch (e) { $('#buildNote').textContent = e.message; } finally { b.disabled = false; }
   };
 }
+
+// hover help on every bold word in the list (OakBarn Brewery, 2026-11-08: "Hover Help on Bold"), now and on every page drawn later
+glossBold(document.body);
+new MutationObserver(list => { for (const m of list) for (const n of m.addedNodes) if (n.nodeType === 1) glossBold(n.parentElement ?? n); })
+  .observe(document.body, { childList: true, subtree: true });
+// the example name on the differences page: made up until a config file is converted, then one of your own Heating Elements
+// (an HLT one first) (OakBarn Brewery, 2026-11-08: "pull the Element names of the associated HLT items if they were available")
+function exampleName() {
+  const items = state.r?.portItems ?? [], hlt = e => /(^|[^a-z])hlt([^a-z]|$)/i.test(`${e.bru} ${e.label}`);
+  const heaters = items.filter(e => e.kind === 'heater' || e.subtype === 'element');
+  const e = heaters.find(hlt) ?? heaters[0];
+  const ifc = e ? state.r.interfaces.find(d => d.name === e.device)?.id : '';
+  const tab = e ? state.r.tabs.find(t => t.name === e.tab)?.id : '';
+  const parts = e && e.name.split('_');
+  const x = parts && parts.length >= 5 ? { name: e.name, ifc: ifc || parts[0], port: parts[1], label: parts.slice(3, -1).join(' ').replace(/~/g, ' '), tab: tab || parts.at(-1) }
+    : { name: 'MB_42_HE_HLT~Heat_BH', ifc: 'MB', port: '42', label: 'HLT Heat', tab: 'BH' };
+  for (const n of document.querySelectorAll('.exName')) { n.textContent = n.dataset.ex === 'method' ? x.name + '.PID' : x.name; n.dataset.help = GLOSSARY['suggested skynet names']; n.classList.add('gloss'); }
+  const put = (sel, v, help) => { for (const n of document.querySelectorAll(sel)) { n.textContent = v; n.dataset.help = help; n.classList.add('gloss'); } };
+  put('.exIf', x.ifc, `${x.ifc}: the ID of the Interface (board) this Device is on (the first part of its name).`);
+  put('.exPort', x.port, `${x.port}: the Port (Pin) on that Interface (the second part of its name).`);
+  put('.exLabel', x.label, `${x.label}: its Label (BruControl DisplayName), the fourth part of its name, with ~ for each space.`);
+  put('.exTab', x.tab, `${x.tab}: the ID of the Tab (BruControl Workspace) it is on (the last part of its name).`);
+}
+exampleName();
