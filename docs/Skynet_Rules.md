@@ -204,6 +204,18 @@ it is **never on a Tab**, and its **Database and .API are Off**, so it still onl
 between Processes now, make a gGlobal with Database and .API Off. Imported BruControl Globals are set one by one in the Importer's
 globals interview later (Fritz). (thread "Explain the Shared Variable Widget", Help 149)
 
+1.26 **Chart Widget** (Fritz, 2026-11-08: "build a chart method so we can import BruControl charts"; "Closely match BruControl Chart
+properties as attributes"). A Chart Widget (Type ID `CHT`, Rule 3.14, `wgt_CHT_Label_TabID`) draws a line graph over time of
+readings in the brew database (Rule 6.14) for up to **two** Devices or Widgets: **Channel 1** on the left axis, **Channel 2** on the
+right axis. Its settings are BruControl's Chart properties, and each is a Process attribute: **Span** (`.spanseconds`), **Refresh
+interval** (`.refreshinterval`), **Grid lines across** (`.hgridlines`) and **up and down** (`.vgridlines`), **Time axis color**
+(`.xaxiscolor`), and for each Channel n: the **Device or Widget** (`.chNelement`), **Auto scale** (`.chNautoscale`), **Axis lowest**
+and **highest** (`.chNymin`, `.chNymax`), **Line color** (`.chNlinecolor`) and **Axis color** (`.chNaxiscolor`). Properties follow
+the Widget drill-down look (Rule 18.30). A Device or Widget drawn must be sent to the database, or its line stays empty (the Chart
+says so). The **BruControl Import** turns each BruControl Chart into a Chart Widget with the same settings, names each Channel's
+item by its Skynet name, and sets each item drawn that has no Database setting to send its reading every Refresh interval
+(Rule 15.4). Skynet draws its own lines (SVG); nothing is copied from BruControl's DevExpress charts. Help 159.
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -598,7 +610,7 @@ widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
 **PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
-**OVR** Override (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
+**OVR** Override, **CHT** Chart (Rule 1.26) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
 > To a Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
 fittings and Clones keep their own names. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
@@ -1822,6 +1834,10 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     place and size, until a later step brings it in; a hidden item's Placeholder stays hidden.
     An **Interface (board) with no items** is **not** imported unless the brewer ticks its **Import** box on the convert page
     (Fritz, 2026-11-08); the ones left out are named in the report.
+    A **Tab with no items** is **not** imported, with its Placeholders, unless its box is ticked (Fritz, 2026-11-08); a Tab with
+    items or a Clone always comes in. When every Placeholder on a Tab is a BruControl Global, the page asks whether those Globals
+    import a Beer.xml recipe (Node-RED): Yes suggests leaving it unticked; No ticks it, and the Globals wait for the Globals step.
+    Each BruControl **Chart** becomes a Chart Widget (Rule 1.26).
   - **Pictures and Sounds** (Fritz, 2026-11-06: "The Picture Paths and Sounds are imported. The files stay where they were so
     BruControl continues to work normally. You do have the option of copying those files to a new folder that consolidates
     all the picture files and sound files so if you move to a Pi or other computer, those files will be available. They are
@@ -2653,6 +2669,8 @@ Not Placed) or the dialog closes.
 - 2026-11-08: Rule 15.4: the Importer's page 2, Global Elements, adds OakBarn Brewery's text: importing a recipe needs no Globals (Skynet imports Beer.xml and BeerSmith .bsmx with no code), and Globals and Scripts found (with the brewer's help) to be only for a Node-RED recipe import are not imported. The Globals step itself is still to be built (plan in docs/BruControl_Importer_Plan.md). Checked against the Skynet Panel: wording only. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Rule 15.4: the Importer's "copy my pictures and sounds" tick box is now "Also copy my pictures and sounds into one folder with subfolders (Recommended)" and is ticked to start with (was unticked); page 2 and page 4 wording from Fritz, Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Rule 15.4: on the Importer's convert page an Interface (board) with no items is not imported unless its Import box is ticked; the Look (theme) line uses Fritz's wording (Skynet Office Black, Skynet Themes, User Theme, a Theme per Tab). Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 1.26 (new, Fritz: "build a chart method so we can import BruControl charts", "Closely match BruControl Chart properties as attributes"): the Chart Widget, a line graph of database readings with BruControl's Chart properties as its attributes; Rule 3.14 Type ID CHT; Rule 15.4: the BruControl Import makes each Chart a Chart Widget and sends its items to the database. Rule 11.1 next free Help is 160. Help 159 new. Checked against both programs: the Panel draws it and its Properties; the Importer makes it. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: a Tab with no items is imported (with its Placeholders) only when ticked; a Tab whose Placeholders are all Globals asks whether they import a Beer.xml recipe (Yes: leave it out). Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rules 3.1, 3.14 and 4.2 changed (Fritz: "I like the ~ instead of a _ in the label part of the name. Make that the rule"): a space in the Label part of a suggested Device or Widget name becomes `~` (was `_`), so `_` only separates the parts (`MB_A0_10KNTC_Mash~Tun_SP`). Names made before keep their `_` (Rule 3.5). Checked against both programs: one shared code path (public/naming.js) makes the Panel's and the Importer's names; Help 3, 46, 55, 72, the Device Library and the Importer's page 2 updated. A BruControl name kept on purpose (Rule 15.1) still gets `_` for its spaces, as it is not a Skynet name. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the Importer's page 2, Your Scripts, adds Fritz's words on the Preset Schema Templates ("I wanted to Brew, not write Code!"); its Names card has Fritz's wording of the naming convention (Rule 3.1). Help 143 updated. Checked against the Skynet Panel: wording only, nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Importer has page 6, **Connect your brewery**: what is connected to what as chains, Hose or Pipe for each connection, guesses from the names, Scripts and BruControl picture, a picture as a guide, an optional free AI outside the Importer (copy the question, paste the answer back), Fermenter questions, and Fritz's song. Help 143 updated, no new Help number used. Checked against the Skynet Panel: it keeps the answers in the Schema file only; nothing in the Panel changes until the Vessel step draws the pipes. (thread "Import from BruControl .bak backups")

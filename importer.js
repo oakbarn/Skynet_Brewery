@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme, readClues, dropEmptyInterfaces } from './lib/importer.js';
+import { defaultFolders, findConfigs, summarize, settingsFile, loadSettings, saveSettings, pickFolderScript, pickFileScript, isConfigName, isBackupName, resolveFolder, configBase, importFolder, importFileName, buildSchemaFile, safeName, makeImportCopy, findBruControlTheme, readClues, dropEmptyInterfaces, dropEmptyTabs } from './lib/importer.js';
 import { findParts, guessFermenters, guessChains, connectReport, OPENINGS, COOLING, HEATING, AI_SITES } from './public/importer/connect.js';
 import { bruThemeToLook, themeOf, newTabLook } from './public/themes.js';
 import { openAppWindow, closeAppWindow, importerProfileDir } from './lib/appwindow.js';
@@ -193,10 +193,12 @@ async function api(req, res, p, q) {
   }
   // Save the Schema into Brewing\Import, for the Panel to open (Schema.json > Open a Schema file)
   if (p === '/api/save' && m === 'POST') {
-    const { file, name, connect, keepEmpty } = await body(req);
+    const { file, name, connect, keepEmpty, keepTabs } = await body(req);
     if (!converted || converted.file !== file) return json(res, 400, { error: 'Go back to Names and click Next first, so the config file is converted.' });
     // an Interface (board) with no items comes in only when its tick box was ticked (Fritz, 2026-11-08)
-    const { conv, dropped } = dropEmptyInterfaces(converted.conv, keepEmpty);
+    const { conv: conv1, dropped } = dropEmptyInterfaces(converted.conv, keepEmpty);
+    // a Tab with no items comes in only when ticked; its Placeholders stay out with it (Fritz, 2026-11-08)
+    const { conv, dropped: tabsOut, holdersDropped } = dropEmptyTabs(conv1, keepTabs);
     const out = buildSchemaFile(conv, { name: name || path.basename(file), source: path.basename(file), draft: true, version: readVersion(ROOT).version || '' });
     out.importCopy = path.basename(converted.copy);
     out.importReport = { stage: 'new import, step 1: Interfaces, Tabs, items on a board port and Placeholders', names: converted.report.names, renames: converted.report.renames };
@@ -204,6 +206,7 @@ async function api(req, res, p, q) {
     const cn = connectAnswers(connect, converted.connect);
     out.connect = connectReport(cn);
     const nLinks = out.connect.links.length, nLoose = out.connect.loose.length;
+    if (tabsOut.length) out.warnings = [...out.warnings, `${tabsOut.length} Tab(s) with no items were not imported${holdersDropped ? `, with their ${holdersDropped} Placeholder(s)` : ''}: ${tabsOut.join(', ')}.`];
     if (dropped.length) out.warnings = [...out.warnings, `${dropped.length} Interface(s) (board(s)) with no items were not imported: ${dropped.join(', ')}.`];
     out.warnings = [...out.warnings, `Connect your brewery: ${nLinks} connection(s) between ${cn.parts.vessels.length} vessel(s), pumps and valves are kept in this file${nLoose ? `; ${nLoose} pump(s) or valve(s) are not joined yet` : ''}. The pipes and hoses are drawn when the Vessels are built (a later Import step).`];
     fs.mkdirSync(IMPORT_DIR, { recursive: true });

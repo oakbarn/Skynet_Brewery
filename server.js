@@ -873,6 +873,11 @@ async function route(req, res) {
   }
   if (p === '/ui/ports' && m === 'GET') return ok(res, await hw.listPorts());
   if (p === '/ui/log/names' && m === 'GET') return ok(res, logger.names());
+  // a Chart Widget's lines (Rule 1.26): /ui/chart?names=A,B&from=ms&to=ms&points=400
+  if (p === '/ui/chart' && m === 'GET') {
+    const sp = url.searchParams, names = (sp.get('names') || '').split(',').map(x => x.trim()).filter(Boolean).slice(0, 2);
+    return ok(res, logger.chartSeries({ names, from: sp.get('from'), to: sp.get('to'), points: sp.get('points') }));
+  }
   // Log page > Download CSV: pick values (or a saved CSV set) and a time span; the file is named after them
   if (p === '/ui/log/export.csv' && m === 'GET') {
     const sp = url.searchParams, names = (sp.get('names') || '').split(',').map(s => s.trim()).filter(Boolean), tz = Number(sp.get('tz')) || 0;
