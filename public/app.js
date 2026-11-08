@@ -2405,10 +2405,6 @@ $('#ws').addEventListener('click', ev => {
   const mfv = ev.target.closest('.mfValve');
   if (mfv) return toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35)
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
-  const vp = ev.target.closest('.vpPart.vp-probe[data-dev], .vpPart.vp-thermowell[data-dev]');      // a Probe built into a Vessel Device (Rule 2.43)
-  if (vp) { const p = elByName(vp.dataset.dev); if (p) return probeTap(p); }
-  const vw = ev.target.closest('.gfx.vessel .vwProbe, .gfx.vessel .twell:not(.elmark)');          // a Vessel's own Probe spot: its Probe, its heater first
-  if (vw) { const g = L().graphics.find(x => x.id === vw.closest('.gfx')?.dataset.gid), p = g?.probe && elByName(g.probe); if (p) return probeTap(p, g.heater); }
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const mc = n.dataset.gid && L().graphics.find(g => g.id === n.dataset.gid && isMethodClone(g));
   if (mc) return methodCloneTap(mc);
@@ -2540,6 +2536,15 @@ async function probeTap(p, first) {
   const t = hs.length === 1 ? hs[0] : await choose(`${pl}: whose Setpoint?`, hs.map(e => [S.values[e.name]?.label ?? e.label ?? e.name, e]));
   if (t) setpointDialog(p, t);
 }
+// a Probe built into a Vessel Device, or a Vessel's own Probe spot (its Probe, the Vessel's Heater first): not a tile, so a click
+// listener of its own (Rule 2.43)
+$('#ws').addEventListener('click', ev => {
+  if (editing) return;
+  const vp = ev.target.closest('.vpPart.vp-probe[data-dev], .vpPart.vp-thermowell[data-dev]');
+  if (vp) { const p = elByName(vp.dataset.dev); if (p) probeTap(p); return; }
+  const vw = ev.target.closest('.gfx.vessel .vwProbe, .gfx.vessel .twell:not(.elmark)');
+  if (vw) { const g = L().graphics.find(x => x.id === vw.closest('.gfx')?.dataset.gid), p = g?.probe && elByName(g.probe); if (p) probeTap(p, g.heater); }
+});
 function setpointDialog(p, t) {
   const d = $('#valDlg'); d.innerHTML = '';
   const pv = S.values[p.name] || {}, v = S.values[t.name] || {}, he = isHeatElem(t);
