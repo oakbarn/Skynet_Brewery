@@ -2361,6 +2361,18 @@ async function doTap(e) {
   const act = tapAction(e);
   if (!['none', 'workspace'].includes(act) && !can('operator')) return toast('Your account is view only', true);
   const targetName = e.tapTarget || (e.type === 'picture' ? e.follow : e.name);
+  // a Heating Element: one click turns it ON or OFF at once in the method it is in, like a Pump (Fritz, 2026-11-08: "Change the Rule
+  // Individual elements toggle on off. I really do not like the popup to turn any thing on", Rules 2.33, 2.44). Only an Element set to
+  // Ask before changing by hand still asks (ON / OFF buttons). Its method spots and its Temperature Probe's click (Rule 2.43) set the rest.
+  const ht = ['heat', 'toggle', 'dialog'].includes(act) && elByName(targetName);
+  if (isHeatElem(ht)) {
+    const t = ht;
+    const cur = !!S.values[t.name]?.state, k = heatMethodKey(S.values[t.name]?.method) ?? startMethod(t);
+    let on = !cur;
+    if (e.confirm || t.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; on = r; }
+    if (on && NEEDS_PROBE.includes(k) && !t.input) return toast(`${t.label || t.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
+    return setProp(t.name, 'state', on);
+  }
   if (act === 'none' || act === 'hold') return;          // push and hold buttons work on press / release (below)
   if (act === 'pulse') { const t = elByName(targetName); if (t && isBoolEl(t)) setProp(t.name, boolProp(t), true); return; }
   if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
@@ -2372,16 +2384,7 @@ async function doTap(e) {
     return;
   }
   const t = elByName(targetName); if (!t) return toast(`No Device or Widget "${targetName}"`, true);
-  // a Heating Element: one click turns it ON or OFF at once in the method it is in, like a Pump (Fritz, 2026-11-08: "Change the Rule
-  // Individual elements toggle on off. I really do not like the popup to turn any thing on", Rules 2.33, 2.44). Only an Element set to
-  // Ask before changing by hand still asks (ON / OFF buttons). Its method spots and its Temperature Probe's click (Rule 2.43) set the rest.
-  if (isHeatElem(t) && (act === 'heat' || act === 'toggle' || act === 'dialog')) {
-    const cur = !!S.values[t.name]?.state, k = heatMethodKey(S.values[t.name]?.method) ?? startMethod(t);
-    let on = !cur;
-    if (e.confirm || t.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; on = r; }
-    if (on && NEEDS_PROBE.includes(k) && !t.input) return toast(`${t.label || t.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
-    return setProp(t.name, 'state', on);
-  }
+  if (isHeatElem(t) && (act === 'heat' || act === 'toggle' || act === 'dialog')) return heatDialog(t);
   if (act === 'toggle' && isBoolEl(t)) {
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
