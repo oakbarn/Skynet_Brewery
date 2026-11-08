@@ -2412,9 +2412,16 @@ $('#ws').addEventListener('click', ev => {
   const mfv = ev.target.closest('.mfValve');
   if (mfv) return toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35)
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
-  // a Heating Element built into a Vessel Device: a click on its picture opens its pop-up (ON, OFF and its method), as a click on its tile does
+  // a Heating Element built into a Vessel Device: one click on its picture turns it ON or OFF at once in the method it is in, like a
+  // Pump (Fritz, 2026-11-08: "Have the Graphic toggle on Off like a Pump", Rule 2.33); its box (tile) opens its pop-up
   const hp = ev.target.closest('.vpPart.vp-element[data-dev]');
-  if (hp) { const he = elByName(hp.dataset.dev); if (he) return doTap(he); }
+  if (hp) {
+    const he = elByName(hp.dataset.dev); if (!he) return;
+    if (!can('operator')) return toast('Your account is view only', true);
+    const k = heatMethodKey(S.values[he.name]?.method) ?? startMethod(he);
+    if (!S.values[he.name]?.state && NEEDS_PROBE.includes(k) && !he.input) return toast(`${he.label || he.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
+    return setProp(he.name, 'state', !S.values[he.name]?.state);
+  }
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const mc = n.dataset.gid && L().graphics.find(g => g.id === n.dataset.gid && isMethodClone(g));
   if (mc) return methodCloneTap(mc);

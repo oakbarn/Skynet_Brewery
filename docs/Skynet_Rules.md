@@ -362,7 +362,9 @@ one of these. (thread "Add shortcut keys for text entry", Help 113)
 Device, or on a Picture Widget that follows one, switches it ON or OFF at once, the same as a valve. No ON / OFF pop-up asks
 first. A new Pump starts that way, and every Schema's Pumps are changed once when the panel starts. **Ask before changing**
 (When tapped ⬢ in the Pump's Properties) can still be turned on by hand for a Pump that should ask. Double-click still opens
-Properties (Rule 2.9). Heating elements still ask first. (thread "Toggle pumps with one click", Help 120)
+Properties (Rule 2.9). Heating elements still ask first, **except the picture of an Element built into a Vessel Device: one click
+on it turns it ON or OFF at once, in the method it is in** (Fritz, 2026-11-08: "Have the Graphic toggle on Off like a Pump"); its
+box (tile) still opens its pop-up. (thread "Toggle pumps with one click", Help 120)
 
 2.34 **The selected choice in every dropdown has a Cyan background** (Fritz, 2026-11-04, a standard for the whole app):
 when a dropdown list (DDLB) is open, the choice that is selected now is shown on **Cyan** with black text; the choice under the
@@ -1447,8 +1449,8 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   Element on its Tab, or under its picture on a Vessel Device when it is built in, whenever **two or more** are allowed. **One
   click** on one switches the Element to that method at once; the one in use is **red**, the others **yellow** (Fritz, 2026-11-07).
   While it is ON a dark **Turn Off** button shows at the end of the row: one click turns it Off (Fritz, 2026-11-08: "it switches
-  between All tree methods fine, but no Turn Off!"). A click on the picture of an Element built into a Vessel Device opens its
-  pop-up (ON, OFF, its method), as a click on its tile does. A spot clicked while the Element is OFF switches its method and opens
+  between All tree methods fine, but no Turn Off!"). One click on the picture of an Element built into a Vessel Device turns it
+  ON or OFF at once, like a Pump (Rule 2.33); a click on its box (tile) opens its pop-up (ON, OFF, its method). A spot clicked while the Element is OFF switches its method and opens
   its pop-up, so **Set + ON** turns it on (it still asks first, Rule 2.33). Any number of Elements may be ON at once (Fritz,
   2026-11-08: "I use more than a single element as they are on different AC Circuits").
   With only the main method, none show. The
@@ -2731,3 +2733,4 @@ Not Placed) or the dialog closes.
 - 2026-11-08: Rule 6.19 (Fritz: "The buttons change color but nothing else"; "I use more than a single element as they are on different AC Circuits"): a method spot clicked while the Element is OFF also opens its pop-up to turn it ON; nothing stops two Elements being ON at once. (thread "Pick the heating method on one Element")
 - 2026-11-08: Added Rule 6.20 (Fritz): the electrical warning "Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician." in a Heating Element's Properties, its wiring hover help, Help 137 and 150, and the BruControl Import's first page. Checked against the BruControl Import program: its first page shows it. (thread "Pick the heating method on one Element")
 - 2026-11-08: Rule 6.19 (Fritz: "I found and On/Off Button slider on the Heat Element Proerties ... It should not be a choice. Always displayed"): On/Off is always allowed with its spot always shown; its switch is gone from the Heating Element's Properties. Help 150 updated. Checked against the BruControl Import program: no change. (thread "Pick the heating method on one Element")
+- 2026-11-08: Rules 2.33 and 6.19 (Fritz: "You can turn on more than a single element at a Time. I was Clicking the Graphic and not the Box. Have the Graphic toggle on Off like a Pump"): one click on a built in Element's picture on its Vessel Device turns it ON or OFF at once in its method; its box opens the pop-up. Help 150 updated. (thread "Pick the heating method on one Element")
