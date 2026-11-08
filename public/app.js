@@ -2271,8 +2271,10 @@ const methodSpots = e => { const ok = allowedMethods(e), l = HEAT_METHODS.filter
 function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots')) old.remove();
   for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
+    // and a Turn Off button, shown only while it is ON (Fritz, 2026-11-08: "it switches between All tree methods fine, but no Turn Off!")
     const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
-      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}` }, word)));
+      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}` }, word)),
+      h('button', { type: 'button', class: 'hmBtn hmOff', 'data-k': 'off', title: `One click: turn ${e.label || e.name} Off` }, 'Turn Off'));
     const part = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
     if (part) { box.style.left = part.style.left; box.style.top = `${parseFloat(part.style.top) + parseFloat(part.style.height) + 2}px`; part.parentNode.append(box); }
     else if (!e.integratedIn) { box.style.left = `${e.x ?? 0}px`; box.style.top = `${(e.y ?? 0) + (e.h ?? 60) + 2}px`; $('#ws').append(box); }
@@ -2282,7 +2284,10 @@ function drawMethodSpots(w) {
 }
 function litSpots(name) {
   const m = heatMethodKey(S.values[name]?.method);
-  for (const b of $$(`#ws .hmSpots[data-dev="${CSS.escape(name)}"] .hmBtn`)) b.classList.toggle('cur', b.dataset.k === m);
+  for (const b of $$(`#ws .hmSpots[data-dev="${CSS.escape(name)}"] .hmBtn`)) {
+    if (b.dataset.k === 'off') b.hidden = !S.values[name]?.state;
+    else b.classList.toggle('cur', b.dataset.k === m);
+  }
 }
 $('#ws').addEventListener('click', ev => {
   const b = ev.target.closest('.hmBtn'); if (!b) return;
@@ -2290,8 +2295,12 @@ $('#ws').addEventListener('click', ev => {
   if (editing) return;
   if (!can('operator')) return toast('Your account is view only', true);
   const name = b.closest('.hmSpots').dataset.dev, k = b.dataset.k, e = elByName(name);
+  if (k === 'off') return setProp(name, 'state', false);
   if (NEEDS_PROBE.includes(k) && !e?.input) return toast(`${e?.label || name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
-  setProp(name, 'method', heatMethodWord(k));
+  // an Element that is OFF also opens its pop-up, so Set + ON is one more click (Fritz, 2026-11-08: "The buttons change color but
+  // nothing else"); it still asks before it turns on (Rule 2.33). Several Elements can be ON at once (on different AC circuits).
+  const wasOn = !!S.values[name]?.state;
+  setProp(name, 'method', heatMethodWord(k)).then(() => { if (!wasOn && e) { S.values[name] = { ...(S.values[name] || {}), method: heatMethodWord(k) }; heatDialog(e); } });
 }, true);
 
 function updateEl(name) {
@@ -2403,6 +2412,9 @@ $('#ws').addEventListener('click', ev => {
   const mfv = ev.target.closest('.mfValve');
   if (mfv) return toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35)
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
+  // a Heating Element built into a Vessel Device: a click on its picture opens its pop-up (ON, OFF and its method), as a click on its tile does
+  const hp = ev.target.closest('.vpPart.vp-element[data-dev]');
+  if (hp) { const he = elByName(hp.dataset.dev); if (he) return doTap(he); }
   const n = ev.target.closest('.el'); if (!n || ev.target.closest('.btns')) return;
   const mc = n.dataset.gid && L().graphics.find(g => g.id === n.dataset.gid && isMethodClone(g));
   if (mc) return methodCloneTap(mc);
@@ -5784,6 +5796,8 @@ const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
     ['_or', 'Orientation', 'orient', null, false, false, { tip: T.eOrient, with: tog, ...x }]];
 };
 const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
+// The electrical warning (Fritz, 2026-11-08, Rule 6.20): wherever wiring, elements or AC circuits come up
+const ELEC_WARN = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
 const ELEM_OWN = (it, x = {}) => [['_ask', 'A Heating Element asks before it turns on (Rule 2.33).', 'note', null, false, false, x]];
 // One Heating Element, the heating method picked (Fritz, 2026-11-07, Rule 6.19): the method it starts with, the Temperature Probe a
 // Hysteresis, PID, Deadband or Precise reads, and that method's settings. A Process (.method = "PID") or a click while running changes the
@@ -5799,6 +5813,7 @@ function heatFields(it, x = {}) {
   const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
   if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
   return [['_heatHead', 'Heating method', 'head', null, false, false, x],
+    ['_elecWarn', ELEC_WARN, 'note', null, false, false, x],
     ['heatMethod', 'Heating method (it starts with)', 'sel', methodChoices(), true, false, { tip: T.heatMethod, ...x }],
     ...(NEEDS_PROBE.includes(m) ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }]] : []),
     ...HEAT_SETTINGS[m].map(([, key, label]) => [key, label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]),
@@ -6340,9 +6355,9 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target), Deadband (steps its % toward the Target) or Precise (a calm PID that holds a Target to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
+  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Target, off at it), PID (holds a Target), Deadband (steps its % toward the Target) or Precise (a calm PID that holds a Target to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Target. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
-  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best.',
+  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',

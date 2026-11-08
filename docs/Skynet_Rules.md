@@ -1445,6 +1445,11 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
   Element on its Tab, or under its picture on a Vessel Device when it is built in, whenever **two or more** are allowed. **One
   click** on one switches the Element to that method at once; the one in use is **red**, the others **yellow** (Fritz, 2026-11-07).
+  While it is ON a dark **Turn Off** button shows at the end of the row: one click turns it Off (Fritz, 2026-11-08: "it switches
+  between All tree methods fine, but no Turn Off!"). A click on the picture of an Element built into a Vessel Device opens its
+  pop-up (ON, OFF, its method), as a click on its tile does. A spot clicked while the Element is OFF switches its method and opens
+  its pop-up, so **Set + ON** turns it on (it still asks first, Rule 2.33). Any number of Elements may be ON at once (Fritz,
+  2026-11-08: "I use more than a single element as they are on different AC Circuits").
   With only the main method, none show. The
   BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
   ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
@@ -1468,6 +1473,13 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   In the Process editor, typing `name.method =` lists that Device's methods (for example "PID", "Duty Cycle"), and `.method`
   shows its choices beside it. A Device with only one way of control has no `.method`.
   (thread "Pick the heating method on one Element", Help 150)
+
+6.20 **Electrical warning** (Fritz, 2026-11-08: "WE wi;; give a General warning about electricty and that we are not
+Electricians and can give no electrical advice. Consult a Licensed Electrician."; "OaKbarn Brewery or Skynet"). Wherever
+Skynet talks about wiring, heating elements, SSRs, contactors, DACs or AC circuits (a Heating Element's Properties and the hover
+help on its Heating method, Help 137 and 150, the BruControl Import's Heating Element note), it shows:
+**"⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
+Electrician."** Any later page or dialog about wiring gets the same words.
 
 ## 7. Pictures
 
@@ -2714,3 +2726,6 @@ Not Placed) or the dialog closes.
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
   program: no change (it does not use Schema Templates or the Brew Process; making a Schema from a BruControl file stays in the
   Importer). (thread "Build Process and Schema Templates")
+- 2026-11-08: Rule 6.19 (Fritz: "it switches between All tree methods fine, but no Turn Off!"): the method spots get a Turn Off button while the Element is ON, and a click on a built in Element's picture on its Vessel Device opens its pop-up with ON and OFF. Help 150 updated. Checked against the BruControl Import program: no change (its joined Elements get the same spots in the Panel). (thread "Pick the heating method on one Element")
+- 2026-11-08: Rule 6.19 (Fritz: "The buttons change color but nothing else"; "I use more than a single element as they are on different AC Circuits"): a method spot clicked while the Element is OFF also opens its pop-up to turn it ON; nothing stops two Elements being ON at once. (thread "Pick the heating method on one Element")
+- 2026-11-08: Added Rule 6.20 (Fritz): the electrical warning "Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician." in a Heating Element's Properties, its wiring hover help, Help 137 and 150, and the BruControl Import's first page. Checked against the BruControl Import program: its first page shows it. (thread "Pick the heating method on one Element")

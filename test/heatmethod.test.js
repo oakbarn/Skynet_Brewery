@@ -161,7 +161,9 @@ console.log('one port one Device tests passed');
 {
   const app = (await import('node:fs')).readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /return l\.length > 1 \? l : \[\];/, 'spots only when more than one method is ticked');
-  assert.match(app, /setProp\(name, 'method', heatMethodWord\(k\)\);\n\}, true\);/, 'one click switches the method');
+  assert.match(app, /setProp\(name, 'method', heatMethodWord\(k\)\)\.then\(/, 'one click switches the method');
+  assert.match(app, /if \(k === 'off'\) return setProp\(name, 'state', false\);/, 'the Turn Off spot turns it Off');
+  assert.match(app, /if \(!wasOn && e\)[^\n]*heatDialog\(e\)/, 'a spot clicked while Off opens its pop-up to turn it ON');
   assert.match(app, /const isMethodClone = \(g, p = [^\n]+controlMethods\(p\)/, 'Method Clones only for Devices with more than one Control Method');
   assert.match(app, /state: !!v0\.state && heatMethodKey\(v0\.method\) === e0\.cloneMethod/, 'a Method Clone is ON only in its method');
 }
