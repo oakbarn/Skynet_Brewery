@@ -99,6 +99,8 @@ It is wired straight to its port, going to an SSR or contactor, or to a DAC. Ele
 - `.method` is **On/Off**, **Duty Cycle**, **Hysteresis**, **PID** or **Deadband** (the short codes DO, DutyC, HYS, PID and DeadB
   work too). Reading it gives the word, for example `if hE_HLT_1.method == "PID"`.
 - `hE_HLT_1 = on` turns it **On** in its method; `hE_HLT_1 = off` turns it **Off**. Every method works this way, Hysteresis and PID too. (BruControl used *Enabled* for this; an old `.enabled` line still works, but Skynet says On and Off.)
+- **Picking a method never turns it On**: a method spot, the pop-up's method buttons or a Process only change the method. Turning
+  it On or Off is its picture, its On/Off button or spot, a Clone, or a Duty cycle % (Skynet Rule 6.19).
 - Changing the method **while it is ON** goes on at once in the new method, **except** to **On/Off**: that turns it OFF first, so
   an Element never jumps from 40 % to full power by itself. Turn it ON again for full power.
 - Every method keeps its own settings: `.dutycycle`, `.interval` (Duty Cycle); `.target`, `.onoffset`, `.ondelay` (Hysteresis);
