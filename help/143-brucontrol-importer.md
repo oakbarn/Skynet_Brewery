@@ -127,7 +127,15 @@ Then you confirm what comes in, in small steps:
    - Skynet names are the preferred way to name things in Skynet.
    - **Accept ▶** is at the bottom of the page. No Label may be blank: a message says how many are, and marks them in red. When they
      are all filled in, the suggested Skynet names are made again with your Labels, and each Label is the item's Label in the new Schema.
-5. **Your vessels.** It starts with the vessels found, where you rename one, set its **Side**, remove one (✖) or **➕ Add a
+5. **Your Pumps, Heaters, Temperature Probes, Valves, Flow Meters and Other items.** One page for each kind, in that order. Each
+   page starts with **How many ... do you have?**, filled in with how many were found. If you have more, type how many: an empty
+   line is added for each one, named for example *Pump 7* and *Pump 8* when 6 were found (you can rename it). Then the details of
+   each one: Pumps have their model (AC pumps and the 12 V and 24 V DC pumps), Power and Speed; Heaters their Watts and Volts;
+   Probes their type (OneWire, Thermistor, PT100); Valves their type and size; Flow Meters their pulses per Gallon or Liter.
+   Details filled in are guesses from the names; change any that are wrong. **Accept ▶** goes to the next page. The answers are kept
+   in the Schema. An extra one you add has no Interface Port, so it will become a **Confirmation Widget** (Rule 1.28): Skynet asks
+   you to do it by hand and confirm it is done.
+6. **Your vessels.** It starts with the vessels found, where you rename one, set its **Side**, remove one (✖) or **➕ Add a
    vessel**. For each one, type its **Volume** and measure its **Height** and **Diameter** (Gallons and inches, or
    Liters and centimeters, from the Units question). Then what the import could tell about it from your names and Scripts: its **Heater** (a list of every BruControl heating element found; the guess is the one named for the vessel),
    its **Thermowell with Probe** (a list of every BruControl probe found; the guess is the one named for the vessel), its **Outlet** (None, Center Low or Bottom Drain; Bottom Drain to start), a **Tangential Inlet** tick box (a whirlpool pump means one on the Boil Kettle), **Sparge Arm / Steam
@@ -137,7 +145,7 @@ Then you confirm what comes in, in small steps:
    during these steps, so you know each one; the Skynet names are still what is saved (Rule 15.1). **Manual Valves** are not in
    BruControl, so pick None, Manual Ball Valve or Manual Butterfly Valve (None to start). **Accept ▶** goes on; the answers are saved
    with each vessel, and the next page uses them to build each vessel into a Vessel Device.
-6. **Boards and Tabs:** everything else that comes in:
+7. **Boards and Tabs:** everything else that comes in:
 
 - your **Interfaces** (BruControl boards), each with its Interface ID and how many items it has. An Interface with **no
   items (0)** is **not** imported, unless you tick its **Import** box; then it **will** be imported;

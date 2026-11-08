@@ -3,6 +3,7 @@
 // Skynet BruControl Importer, in the window (Rule 15.4): 1 Welcome, 2 BruControl and Skynet, 3 pick the config file, 4 Names,
 // 5 Boards and Tabs (the Import Copy is converted), 6 Connect your brewery (public/importer/connectpage.js), 8 Save the Schema.
 import { startConnect, connectState } from './connectpage.js';
+import { PART_PAGES } from './connect.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -204,7 +205,7 @@ const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` c
 async function convert(again = null) {
   const names = again ? state.names : await namesChoice();
   state.names = names;
-  if (!again) { state.keepTabs = null; state.ids = null; state.labels = null; state.itemPicks = null; }
+  if (!again) { state.keepTabs = null; state.ids = null; state.labels = null; state.itemPicks = null; state.parts = null; state.partPage = 0; }
   show(5);
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
   sub5('busy');
@@ -335,14 +336,73 @@ function tell(title, html) {
     d.returnValue = ''; d.showModal(); $('#askNo').focus();
   });
 }
+// The item pages (OakBarn Brewery, 2026-11-08: "before the Vessels getting the Details of all The Elements that are an Interface
+// Element and divide them in to pages: Pumps, Heaters, Probes, Valves, Flow ... Always begin with How Many and if you found 3, and the
+// User Says 5, add two empty slots with the Name Pump 4, Pump 5"). One page per kind; each starts with How many; the details are first
+// guesses the brewer can change. Answers are kept per kind while you move between the pages, and saved in the Schema (itemDetails).
+const pageItems = kind => { const keep = state.keepTabs ?? new Set(state.r.tabs.map(t => t.name)); return (state.r.portItems ?? []).filter(e => e.kind === kind && keep.has(e.tab)); };
+function partState(page) {
+  state.parts ??= {};
+  const found = pageItems(page.kind);
+  const p = state.parts[page.kind] ??= { count: found.length, items: {}, extras: [] };
+  for (const e of found) p.items[itemKey(e)] ??= { ...(e.guess ?? {}) };
+  return { p, found };
+}
+function fieldHtml(f, v, attrs) {
+  if (f.number) return `<input type="number" class="pf num" min="0" step="any" ${attrs} data-f="${f.k}" value="${esc(v ?? '')}" aria-label="${esc(f.name)}">`;
+  return `<select class="pf" ${attrs} data-f="${f.k}" aria-label="${esc(f.name)}">${f.list.map(([k, n]) => `<option value="${esc(k)}"${(v ?? '') === k ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>`;
+}
+function partsPage(box) {
+  const page = PART_PAGES[state.partPage ?? 0], { p, found } = partState(page);
+  const ifName = n => state.r.interfaces.find(d => d.name === n);
+  const draw = () => {
+    const extraRows = p.extras.map((x, i) => row([`${found.length + i + 1}`,
+      `<input class="pf pName" data-x="${i}" data-f="name" maxlength="40" value="${esc(x.name)}" aria-label="Name">`, '<span class="small muted">new</span>',
+      '<span class="small muted">not wired yet</span>', '', ...page.fields.map(f => fieldHtml(f, x[f.k], `data-x="${i}"`))], ['n']));
+    box.innerHTML = `<div class="card"><p>Every <b>${esc(page.one)}</b> found on the ports of your Interfaces (boards), on the Tabs you are importing.
+        Check the details: the ones filled in are guesses from the names, so change any that are wrong. Then <b>Accept</b>.</p>
+      <p class="howMany"><label><b>How many ${esc(page.title)} do you have?</b> <input type="number" id="howMany" min="${found.length}" max="${found.length + 100}" step="1" value="${p.count}"></label>
+        <span class="small muted">We found ${found.length}. If you have more, type how many: an empty line is added for each one${found.length ? ', named ' + esc(page.one) + ' ' + (found.length + 1) + ' and so on' : ''}.</span></p></div>
+      <div class="card">${found.length || p.extras.length ? `<table class="itemTable partTable"><tr><th>#</th><th>BruControl name</th><th>Label</th><th>Interface and Port</th><th>Skynet name</th>${page.fields.map(f => `<th>${esc(f.name)}</th>`).join('')}</tr>
+        ${found.map((e, i) => row([`${i + 1}`, esc(e.bru), esc(e.label), `${esc(ifName(e.device)?.id ?? e.device)} port ${esc(e.port)}`, `<code>${esc(e.name)}</code>`,
+          ...page.fields.map(f => fieldHtml(f, p.items[itemKey(e)]?.[f.k], `data-i="${esc(itemKey(e))}"`))], ['n'])).join('')}
+        ${extraRows.join('')}</table>` : `<p class="small muted">No ${esc(page.title)} found. If you have some, type how many above.</p>`}</div>`;
+  };
+  draw();
+  box.oninput = box.onchange = ev => {
+    const t = ev.target;
+    if (t.id === 'howMany') {
+      if (ev.type !== 'change') return;
+      const n = Math.max(found.length, Math.min(found.length + 100, Math.floor(Number(t.value) || 0)));
+      while (found.length + p.extras.length < n) p.extras.push({ name: `${page.one} ${found.length + p.extras.length + 1}`, ...(page.kind === 'pump' ? { speed: 'onoff' } : {}) });
+      p.extras.length = n - found.length; p.count = n; draw(); return;
+    }
+    const f = t.dataset?.f; if (!f) return;
+    const target = t.dataset.x != null ? p.extras[Number(t.dataset.x)] : p.items[t.dataset.i];
+    if (target) target[f] = t.value;
+  };
+  state.accept = () => {
+    if (state.partPage < PART_PAGES.length - 1) { state.partPage++; sub5('parts'); } else sub5('vessels');
+  };
+}
+// what the item pages send to the Schema: per kind, each found item by its Skynet name with its details, and the empty slots
+function partsToSave() {
+  if (!state.parts || !state.r) return {};
+  const out = {};
+  for (const page of PART_PAGES) {
+    const p = state.parts[page.kind]; if (!p) continue;
+    out[page.kind] = { count: p.count, items: pageItems(page.kind).map(e => ({ name: e.name, ...p.items[itemKey(e)] })), extras: p.extras };
+  }
+  return out;
+}
 function sub5(which) {
   $('#convBody').oninput = null; $('#convBody').onchange = null;
   state.sub5 = which;
-  document.body.classList.toggle('wideStep', which === 'vessels');      // the wide Vessels table gets the whole window
+  document.body.classList.toggle('wideStep', which === 'vessels' || which === 'parts');      // the wide Vessels table gets the whole window
   // the page's own Back and Next walk the small steps; on the ID step Next is Accept
-  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'items', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
+  for (const id of ['#next5', '#next5a']) { $(id).classList.toggle('hidden', which === 'busy'); $(id).textContent = ['id', 'tabs', 'items', 'parts', 'vessels'].includes(which) ? 'Accept ▶' : 'Next ▶'; }
   $('#next5a').classList.toggle('hidden', which === 'busy' || which === 'items');      // the items page: Accept at the bottom, after the Labels
-  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : which === 'items' ? 'The items on each Interface' : 'Boards and Tabs';
+  $('#step5 h1').textContent = which === 'if' ? 'The Interfaces (boards) we found' : which === 'id' ? 'The ID column: new in Skynet' : which === 'tabs' ? 'Your Tabs (workspaces)' : which === 'vessels' ? 'Your vessels' : which === 'items' ? 'The items on each Interface' : which === 'parts' ? `Your ${PART_PAGES[state.partPage ?? 0].title} (${(state.partPage ?? 0) + 1} of ${PART_PAGES.length})` : 'Boards and Tabs';
   if (which === 'busy') return;
   const r = state.r, box = $('#convBody');
   if (which === 'if') {
@@ -416,10 +476,11 @@ function sub5(which) {
         blank[0].focus(); return;
       }
       state.labels = Object.fromEntries(boxes.map(b => [b.dataset.item, b.value.trim()]));
-      convert({ to: 'vessels' });
+      state.partPage = 0; convert({ to: 'parts' });
     };
     return;
   }
+  if (which === 'parts') { partsPage(box); return; }
   if (which === 'vessels') {
     box.innerHTML = vesselsHtml();
     box.onchange = e => {
@@ -481,10 +542,11 @@ $('#convBody').addEventListener('click', e => {
   if (box) box.checked = b.classList.contains('askYes');
   for (const x of b.parentElement.querySelectorAll('button')) x.classList.toggle('primary', x === b);
 });
-for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? sub5('items') : state.sub5 === 'items' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
+for (const id of ['#back5', '#back5a']) $(id).onclick = () => state.sub5 === 'parts' ? (state.partPage > 0 ? (state.partPage--, sub5('parts')) : sub5('items'))
+  : state.sub5 === 'sum' ? sub5('vessels') : state.sub5 === 'vessels' ? (state.partPage = PART_PAGES.length - 1, sub5('parts')) : state.sub5 === 'items' ? sub5('tabs') : state.sub5 === 'tabs' ? sub5('id') : state.sub5 === 'id' ? sub5('if') : show(4);
 for (const id of ['#next5', '#next5a']) $(id).onclick = () => {
   if (state.sub5 === 'if') return sub5('id');
-  if (['id', 'tabs', 'items', 'vessels'].includes(state.sub5)) return state.accept();
+  if (['id', 'tabs', 'items', 'parts', 'vessels'].includes(state.sub5)) return state.accept();
   if (!state.converted) return toast('The config file is not converted yet. Go back to Names and click Next.');
   startConnect(state.connect, { toast });
   show(6);
@@ -509,7 +571,7 @@ $('#saveBtn').onclick = async () => {
   try {
     const r = await api('POST', '/api/save', { file: state.sel, name: $('#schemaName').value, connect: withDetails(connectState()),
       keepEmpty: [...document.querySelectorAll('#convBody .keepEmpty:checked')].map(c => c.dataset.name),
-      keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs });
+      keepTabs: [...(state.keepTabs ?? [])], tabsPicked: !!state.keepTabs, parts: partsToSave() });
     const box = $('#saveResult');
     box.innerHTML = `<p>✅ Saved <b>${esc(r.file)}</b> in <code>${esc(r.folder)}</code>.</p>
       <p>${r.interfaces} Interfaces, ${r.tabs} Tabs, ${r.items} items on a board port, ${r.placeholders} Placeholders${r.warnings ? `, ${r.warnings} notes for the report` : ''}.</p>

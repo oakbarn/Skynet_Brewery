@@ -166,3 +166,19 @@ await import('./chart.test.js');
   assert.equal(d.HLT.herms, 'no', 'HERMS starts unticked'); assert.ok(d.HLT.found.herms, 'a Script mentions it'); assert.equal(d.HLT.outlet, 'bottom'); assert.equal(d.HLT.motorValve, 'MP_9_PWM_M~HLT~PV2_MD', 'its own motorized valve'); assert.equal(d.HLT.manualValve, 'none');
   assert.equal(d.BK.tangential, 'yes', 'a whirlpool pump means a tangential inlet on the Boil Kettle'); assert.equal(d.BK.sparge, 'none');
 }
+// the item pages (OakBarn Brewery, 2026-11-08): each item on a port has one kind, with first guesses; only known answers are saved
+{
+  const { itemKind, guessPartDetails, cleanPartDetails, PART_PAGES } = await import('../public/importer/connect.js');
+  assert.deepEqual(PART_PAGES.map(p => p.kind), ['pump', 'heater', 'probe', 'valve', 'flow', 'other']);
+  const pump = { type: 'digitalOut', subtype: 'pump', bru: { name: 'M_120VAC Chugger Pump' } };
+  assert.equal(itemKind(pump), 'pump');
+  assert.deepEqual(guessPartDetails(pump, 'pump'), { model: 'chugger', power: 'ac120', speed: 'onoff' });
+  assert.equal(itemKind({ type: 'digitalOut', subtype: 'element', bru: { name: 'HLT Heat' } }), 'heater');
+  assert.equal(itemKind({ type: 'temperature', bru: { name: 'HLT Temp' } }), 'probe');
+  assert.equal(guessPartDetails({ type: 'temperature' }, 'probe').probe, 'onewire');
+  assert.equal(itemKind({ type: 'digitalOut', bru: { name: 'M_HLT PV2 valve' } }), 'valve');
+  assert.equal(itemKind({ type: 'flowMeter', bru: { name: 'Flow 1' } }), 'flow');
+  assert.equal(itemKind({ type: 'digitalOut', bru: { name: 'Lamp' } }), 'other');
+  assert.deepEqual(cleanPartDetails('heater', { watts: '5500', volts: 'ac240', junk: 1 }), { watts: 5500, volts: 'ac240' });
+  assert.deepEqual(cleanPartDetails('pump', { model: 'nope', speed: 'variable' }), { speed: 'variable' });
+}

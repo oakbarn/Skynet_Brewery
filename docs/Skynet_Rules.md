@@ -216,6 +216,27 @@ says so). The **BruControl Import** turns each BruControl Chart into a Chart Wid
 item by its Skynet name, and sets each item drawn that has no Database setting to send its reading every Refresh interval
 (Rule 15.4). Skynet draws its own lines (SVG); nothing is copied from BruControl's DevExpress charts. Help 159.
 
+1.28 **Confirmation Widgets** (OakBarn Brewery, 2026-11-08: "The Special Widgets Just ask for a Confirmation that the Widget was
+turned On. These are a special Class of Widget and do not really turn anything on, just a confirmation that the User did so
+manually"; "Manual Valves, Manual Pumps, Moving a QD Hose to a Vessel or other QD are in this Confirmation Category. We may add
+other Widgets later"). A **Confirmation Widget** stands for something on the brewery that **no Interface (board) controls**, so a
+person does it **by hand**. It does not turn anything on. When it is commanded **On or Off**, either by **Process code**
+(`Name.state = true` or `false`, OakBarn Brewery 2026-11-08: ".confirmation Widget would get a process Code to turn them On or Off")
+or by a **click on it on the screen** (OakBarn Brewery: "When Manually Clicked, The Popup Confirmation will still Pop Up"), Skynet
+shows a **confirmation pop-up** asking the person to do it by hand and confirm it is done; only then does the Widget show On or Off
+(Open or Closed, Connected or not), so Processes and the screen match the brewery. The class today:
+- **Manual Valves** (a Manual Ball Valve or Manual Butterfly Valve, Rule 6.15 and the manual vessel valves).
+- **Manual Pumps** (a pump with no Interface Port, e.g. one plugged into a wall outlet).
+- **Moving a QD Hose** to a Vessel or to another QD (Quick Disconnect).
+A Widget is in this class when its **`.confirmation`** attribute is ticked (OakBarn Brewery, 2026-11-08: "Add an Attribute
+.confirmation to widgets and if ticked, they are that special class"): a switch in Properties, on for the three above, and any
+Widget that can be On or Off can have it ticked. A Process line that commands one (e.g. `Pump~7.state = true`) works like the
+Manual Valve of Rule 5.15, which is the first of this class: the pop-up shows, the Widget blinks on its Tab, and the Process waits
+until a person confirms. More Widgets may join this class later, only when OakBarn Brewery says so. This is a **named exception to "no pop-up to turn
+anything On"** (Rule 2.44, Rule 2.33): those Rules are about things Skynet really turns on; a Confirmation Widget turns nothing on,
+so its pop-up is the confirmation, not a question before switching. Help 162. The **BruControl Import** makes one for each extra item the
+person adds on its item pages (e.g. Pump 7 when 6 were found), because those have no Interface Port (Rule 15.4).
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
@@ -2448,6 +2469,7 @@ Not Placed) or the dialog closes.
 
 ## Change log
 
+- 2026-11-08: Added Rule 1.28, Confirmation Widgets (OakBarn Brewery), and the `.confirmation` attribute that puts a Widget in the class (Help 162): Manual Valves, Manual Pumps and moving a QD Hose ask the person to confirm they did it by hand; a named exception to Rule 2.44's no pop-up to turn anything On, since they turn nothing on. The Importer's item pages (Pumps, Heaters, Probes, Valves, Flow Meters, Other) start with How many; extra ones added there will become Confirmation Widgets. Checked against both programs: the Panel gets the Widget class (to be built); the Importer makes them. (thread "Import from BruControl .bak backups")
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).

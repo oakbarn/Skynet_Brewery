@@ -52,6 +52,65 @@ export function findParts(conv, scripts = []) {
   const vessels = VESSEL_KINDS.filter(k => k.re.test(all)).map(k => ({ key: k.key, name: k.name, side: k.side }));
   return { vessels, pumps, valves };
 }
+// ---- The item pages (OakBarn Brewery, 2026-11-08: "before the Vessels getting the Details of all The Elements that are an Interface
+// Element and divide them in to pages: Pumps, Heaters, Probes, Valves, Flow ... Always begin with How Many and if you found 3, and the
+// User Says 5, add two empty slots with the Name Pump 4, Pump 5"). Each item on a board port has one kind; each page asks a few details.
+// Pump models: the AC pumps the Panel has pictures for, and the DC (12 V and 24 V) list in docs/DC_Brewing_Pumps.md.
+export const PUMP_MODELS = [['', 'Not sure'], ['march809', 'March 809 (AC)'], ['march815', 'March 815 (AC)'], ['chugger', 'Chugger (AC)'],
+  ['riptide', 'Blichmann RipTide (AC)'], ['mkii', 'KegLand MKII (AC)'], ['td5', 'Topsflo TD5 (24 V DC)'], ['march809dc', 'March 809 DC (12 or 24 V DC)'],
+  ['hbmp20', 'DDMETER HB-MP20 (12 V DC)'], ['jt1000', 'BrewTaurus JT-1000B-24 (24 V DC)'], ['bayite', 'bayite BYT-7A006 (12 V DC)'],
+  ['solar12', 'Solar hot-water pump (12 V DC)'], ['penguin', 'Penguin Chillers glycol pump (12 or 24 V DC)'], ['gf30', 'Grainfather GF30 cooling pump (12 V DC)'],
+  ['submersible', 'Small submersible pump (12 or 24 V DC)'], ['other', 'Other']];
+export const PART_PAGES = [
+  { kind: 'pump', title: 'Pumps', one: 'Pump', fields: [
+    { k: 'model', name: 'Pump model', list: PUMP_MODELS },
+    { k: 'power', name: 'Power', list: [['', 'Not sure'], ['ac120', '120 V AC'], ['ac240', '240 V AC'], ['dc12', '12 V DC'], ['dc24', '24 V DC']] },
+    { k: 'speed', name: 'Speed', list: [['onoff', 'On or Off only'], ['variable', 'Variable speed (PWM)']] }] },
+  { kind: 'heater', title: 'Heaters', one: 'Heater', fields: [
+    { k: 'watts', name: 'Watts', number: true },
+    { k: 'volts', name: 'Volts', list: [['', 'Not sure'], ['ac120', '120 V AC'], ['ac240', '240 V AC']] }] },
+  { kind: 'probe', title: 'Temperature Probes', one: 'Probe', fields: [
+    { k: 'probe', name: 'Probe type', list: [['', 'Not sure'], ['onewire', 'OneWire (DS18B20)'], ['ntc', 'Thermistor (10K NTC)'], ['pt100', 'PT100 (RTD)'], ['other', 'Other']] }] },
+  { kind: 'valve', title: 'Valves', one: 'Valve', fields: [
+    { k: 'valve', name: 'Valve type', list: [['', 'Not sure'], ['mbv', 'Motorized Ball Valve'], ['solenoid', 'Solenoid Valve'], ['other', 'Other']] },
+    { k: 'size', name: 'Size', list: [['', 'Not sure'], ['0.5', '1/2 inch'], ['0.75', '3/4 inch'], ['1', '1 inch'], ['1.5', '1 1/2 inch'], ['other', 'Other']] }] },
+  { kind: 'flow', title: 'Flow Meters', one: 'Flow Meter', fields: [
+    { k: 'pulses', name: 'Pulses per Gallon or Liter', number: true }] },
+  { kind: 'other', title: 'Other items', one: 'Item', fields: [] }];
+// the kind of an item on a board port, for the item pages
+export function itemKind(e) {
+  if (!e) return 'other';
+  const t = textOf(e);
+  if (e.subtype === 'pump' || (e.subtype !== 'element' && PUMP.test(t) && PUMP_TYPES.has(e.type))) return 'pump';
+  if (e.subtype === 'element' || HEAT_TYPES.has(e.type)) return 'heater';
+  if (isProbe(e)) return 'probe';
+  if (VALVE.test(t) && !NOT_VALVE.test(t) && VALVE_TYPES.has(e.type)) return 'valve';
+  if (e.type === 'flowMeter') return 'flow';
+  return 'other';
+}
+// the first guesses for an item's details (each one can be changed)
+export function guessPartDetails(e, kind) {
+  const t = textOf(e);
+  if (kind === 'pump') return {
+    model: /chu+g+er/i.test(t) ? 'chugger' : /riptide/i.test(t) ? 'riptide' : /march ?815/i.test(t) ? 'march815' : /march/i.test(t) ? 'march809' : /mkii|mk ?2/i.test(t) ? 'mkii' : /td5|topsflo/i.test(t) ? 'td5' : '',
+    power: /240 ?v?ac/i.test(t) ? 'ac240' : /120 ?v?ac/i.test(t) ? 'ac120' : /24 ?v?dc/i.test(t) ? 'dc24' : /12 ?v?dc/i.test(t) ? 'dc12' : '',
+    speed: e.type === 'pwmOut' ? 'variable' : 'onoff' };
+  if (kind === 'heater') { const w = /(\d{3,5}) ?w\b/i.exec(t); return { watts: w ? Number(w[1]) : '', volts: /240/.test(t) ? 'ac240' : /120/.test(t) ? 'ac120' : '' }; }
+  if (kind === 'probe') return { probe: e.type === 'temperature' ? 'onewire' : /pt ?100|rtd/i.test(t) ? 'pt100' : /ntc|thermistor/i.test(t) ? 'ntc' : '' };
+  if (kind === 'valve') return { valve: /solenoid/i.test(t) ? 'solenoid' : /mbv|motor|ball/i.test(t) ? 'mbv' : '', size: '' };
+  if (kind === 'flow') return { pulses: '' };
+  return {};
+}
+// keep only known answers (for the saved Schema)
+export function cleanPartDetails(kind, d) {
+  const page = PART_PAGES.find(x => x.kind === kind), out = {};
+  for (const f of page?.fields ?? []) {
+    const v = d?.[f.k];
+    if (f.number) { const n = Number(v); if (v !== '' && v != null && Number.isFinite(n) && n >= 0 && n < 1e6) out[f.k] = n; }
+    else if (f.list.some(([k]) => k === v)) out[f.k] = v;
+  }
+  return out;
+}
 // ---- The Vessels page (OakBarn Brewery, 2026-11-08): each vessel found, with what the import could tell about it, from the names
 // of its items and the Scripts: its heaters, its probe (a thermowell with a probe), a Tangential inlet (or a whirlpool), a Steam
 // Slayer, a Sparge Arm, a HERMS Coil. Manual valves are never in BruControl, so they are asked: None, Manual Ball Valve or Manual
