@@ -250,3 +250,60 @@ export function connectReport(state) {
     places: state.places ?? {},
   };
 }
+
+// ---- The picture screen's tidy start (OakBarn Brewery, 2026-11-08): "When first starting create twice as many columns as there are
+// vessels. Move the left most [vessel] to the leftmost Column, then the Right most to the last column. Place other vessel in Between.
+// Have a Set Button and move Left Most 1 Column right and Right one Column left. Space others trying to leave a column between all
+// vessels." Things joined by a Pipe stack down the same column, with room to grab a pipe between them; a Hose step moves one column
+// over. Pieces joined to nothing go in rows at the bottom. pieces: [{ key, kind, end }] with the vessels in left-to-right order.
+// Returns { [key]: { x, y } } as parts of the picture's width and height (0 to 1).
+export function layoutPieces(pieces, chains = [], { set = false } = {}) {
+  const vessels = pieces.filter(p => p.kind === 'vessel'), n = vessels.length, cols = Math.max(2, 2 * n);
+  const colX = c => (Math.max(0, Math.min(cols - 1, c)) + 0.5) / cols;
+  const out = {}, colOf = {}, rowOf = {}, ROW = 0.12, TOP = 0.1;
+  const first = set ? 1 : 0, last = set ? cols - 2 : cols - 1;
+  vessels.forEach((v, i) => { const c = n === 1 ? first : first + i * (last - first) / (n - 1); colOf[v.key] = c; rowOf[v.key] = 0; });
+  const keyOf = e => e?.kind === 'vessel' ? 'vessel:' + e.key : e?.id;
+  const known = new Set(pieces.map(p => p.key));
+  const used = new Map();                       // "col|row" taken
+  const take = (c, r) => { while (used.has(`${Math.round(c * 2)}|${r}`)) r++; used.set(`${Math.round(c * 2)}|${r}`, true); return r; };
+  for (const v of vessels) take(colOf[v.key], 0);
+  // walk each chain from the first piece that has a place; pieces before it are put above it, after it below it
+  for (let pass = 0; pass < 4; pass++) {
+    for (const c of chains) {
+      const ends = [c.start, ...c.steps.map(s => s.to)], by = [null, ...c.steps.map(s => s.by)];
+      let a = ends.findIndex(e => keyOf(e) in colOf);
+      if (a < 0) continue;
+      for (let i = a + 1; i < ends.length; i++) {
+        const k = keyOf(ends[i]), pk = keyOf(ends[i - 1]); if (!known.has(k) || k in colOf || !(pk in colOf)) continue;
+        const c0 = colOf[pk] + (by[i] === 'hose' ? (colOf[pk] + 1 < cols ? 1 : -1) : 0);
+        colOf[k] = c0; rowOf[k] = take(c0, rowOf[pk] + 1);
+      }
+      for (let i = a - 1; i >= 0; i--) {
+        const k = keyOf(ends[i]), nk = keyOf(ends[i + 1]); if (!known.has(k) || k in colOf || !(nk in colOf)) continue;
+        const c0 = colOf[nk] + (by[i + 1] === 'hose' ? (colOf[nk] + 1 < cols ? 1 : -1) : 0);
+        colOf[k] = c0; rowOf[k] = take(c0, Math.max(1, rowOf[nk] + 1));
+      }
+    }
+  }
+  const maxRow = Math.max(0, ...Object.values(rowOf));
+  const loose = pieces.filter(p => !(p.key in colOf)), perRow = Math.max(4, cols * 2), looseRows = Math.ceil(loose.length / perRow);
+  const room = 0.95 - TOP - looseRows * 0.08, step = Math.min(ROW, maxRow ? room / maxRow : ROW);
+  for (const k of Object.keys(colOf)) out[k] = { x: colX(colOf[k]), y: TOP + rowOf[k] * step };
+  loose.forEach((p, i) => { out[p.key] = { x: ((i % perRow) + 0.5) / perRow, y: 0.95 - (looseRows - 1 - Math.floor(i / perRow)) * 0.08 }; });
+  return out;
+}
+
+// A Pipe runs only across, up and down, or at 45 degrees (OakBarn Brewery, 2026-11-08): straight, then 45 degrees, then straight.
+// Points in pixels; returns an SVG path.
+export function pipePath(p, q) {
+  const dx = q.x - p.x, dy = q.y - p.y, ax = Math.abs(dx), ay = Math.abs(dy), sx = Math.sign(dx), sy = Math.sign(dy);
+  const f = n => n.toFixed(1);
+  if (ay >= ax) { const s = (ay - ax) / 2; return `M${f(p.x)} ${f(p.y)} V${f(p.y + sy * s)} L${f(q.x)} ${f(p.y + sy * (s + ax))} V${f(q.y)}`; }
+  const s = (ax - ay) / 2; return `M${f(p.x)} ${f(p.y)} H${f(p.x + sx * s)} L${f(p.x + sx * (s + ay))} ${f(q.y)} H${f(q.x)}`;
+}
+// A Hose hangs in a soft curve, like a hose
+export function hosePath(p, q) {
+  const d = Math.hypot(q.x - p.x, q.y - p.y), sag = Math.min(120, d * 0.35), f = n => n.toFixed(1);
+  return `M${f(p.x)} ${f(p.y)} C${f(p.x)} ${f(p.y + sag)} ${f(q.x)} ${f(q.y + sag)} ${f(q.x)} ${f(q.y)}`;
+}

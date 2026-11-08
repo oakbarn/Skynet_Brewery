@@ -2,7 +2,7 @@
 // Copyright (c) OakBarn Brewery 2026
 // The Importer's page 6, Connect your brewery (Rule 15.4, Fritz 2026-11-07). The rules of the chains, the guesses and reading an
 // AI's answer are in connect.js (shared with the Importer's server); this file only draws the page and keeps the brewer's answers.
-import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink } from './connect.js';
+import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink, layoutPieces, pipePath, hosePath } from './connect.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -162,43 +162,57 @@ function usePicture(v) {
   renderPicture();
 }
 // where a piece sits: what the brewer dragged, or where BruControl had it on that Tab's picture, or a tidy row
-function placeOf(key, i, n, row, item) {
+// what the brewer dragged, or where BruControl had it on that Tab's picture, or the tidy columns (layoutPieces, OakBarn Brewery
+// 2026-11-08: twice as many columns as vessels, joined pieces stacked down a column)
+function placeOf(key, item) {
   if (S.places[key]) return S.places[key];
   const tab = S.tabs.find(t => t.name === S.picTab), pic = S.pictures[S.picTab];
   if (item && tab && item.tab === S.picTab) { const W = pic?.w || tab.width, H = pic?.h || tab.height; return { x: Math.min(0.97, (item.x + item.w / 2) / W), y: Math.min(0.97, (item.y + item.h / 2) / H) }; }
-  const per = Math.max(1, Math.ceil(n / (row === 0 ? 1 : 2)));
-  const r = row === 0 ? 0 : row + Math.floor(i / per) * 0.5;
-  return { x: 0.06 + 0.88 * ((i % per) + 0.5) / per, y: 0.1 + 0.27 * r };
+  return S.layout?.[key] ?? { x: 0.5, y: 0.5 };
 }
-function pieces() {
+function basePieces() {
   const hot = S.parts.vessels.filter(v => v.side === 'hot');
   const ferm = new Set(S.fermenters.flatMap(f => [f.feed, f.ret, f.coolPump, f.warmPump]));
   const pumps = S.parts.pumps.filter(i => !ferm.has(i.id)), valves = S.parts.valves.filter(i => !ferm.has(i.id));
-  return [...hot.map((v, i) => ({ key: 'vessel:' + v.key, kind: 'vessel', label: v.name, end: { kind: 'vessel', key: v.key }, at: placeOf('vessel:' + v.key, i, hot.length, 0) })),
-    ...pumps.map((p, i) => ({ key: p.id, kind: 'pump', label: p.label, end: { kind: 'pump', id: p.id }, at: placeOf(p.id, i, pumps.length, 1, p) })),
-    ...valves.map((p, i) => ({ key: p.id, kind: 'valve', label: p.label, end: { kind: 'valve', id: p.id }, at: placeOf(p.id, i, valves.length, 2, p) }))];
+  return [...hot.map(v => ({ key: 'vessel:' + v.key, kind: 'vessel', label: v.name, end: { kind: 'vessel', key: v.key } })),
+    ...pumps.map(p => ({ key: p.id, kind: 'pump', label: p.label, end: { kind: 'pump', id: p.id }, item: p })),
+    ...valves.map(p => ({ key: p.id, kind: 'valve', label: p.label, end: { kind: 'valve', id: p.id }, item: p }))];
 }
+function pieces() {
+  const base = basePieces();
+  if (!S.layout || base.some(p => !S.layout[p.key])) S.layout = layoutPieces(base, S.chains, { set: !!S.layoutSet });
+  return base.map(p => ({ ...p, at: placeOf(p.key, p.item) }));
+}
+// Set (OakBarn Brewery): the left most vessel one column right, the right most one column left, a column between all vessels;
+// Start: the first tidy columns again. Either one puts every piece back in its column (what was dragged is forgotten).
+function tidy(set) { S.layoutSet = set; S.layout = null; S.places = {}; renderPicture(); say(set ? 'Set: the vessels are one column in from each side, with a column between them.' : 'Every piece is back in its first column.'); }
 function renderPicture() {
   const img = $('#cnPicImg'), box = $('#cnPic');
   if (picSrc) { if (img.getAttribute('src') !== picSrc) img.src = picSrc; img.classList.remove('hidden'); box.classList.add('hasPic'); }
   else { img.removeAttribute('src'); img.classList.add('hidden'); box.classList.remove('hasPic'); }
   const used = usedIds(S.chains, S.fermenters);
+  // a vessel looks like a vessel, a pump like a pump (the Skynet drawings), a valve like a valve
   $('#cnChips').innerHTML = pieces().map(p => `<div class="cnChip ${p.kind}${picked === p.key ? ' picked' : ''}${p.kind !== 'vessel' && !used.has(p.key) ? ' loose' : ''}" data-chip="${esc(p.key)}"
-    style="left:${(p.at.x * 100).toFixed(2)}%;top:${(p.at.y * 100).toFixed(2)}%" title="${esc(p.label)}: drag it to its place; click it, then click another piece to join them">${p.kind === 'vessel' ? '🛢' : p.kind === 'pump' ? '⚙' : '⧓'} ${esc(p.label)}</div>`).join('');
+    style="left:${(p.at.x * 100).toFixed(2)}%;top:${(p.at.y * 100).toFixed(2)}%" title="${esc(p.label)}: drag it to its place; click it, then click another piece to join them"><img src="${CHIP_PICS[p.kind]}" alt="" draggable="false"><span>${esc(p.label)}</span></div>`).join('');
   drawLines();
 }
+const CHIP_PICS = { vessel: '/media/Images/Skynet/Vessels/Skynet_Generic_Brew_Vessel_Widget.svg', pump: '/media/Images/Skynet/Pumps/Pump_Red_Rip_Off.svg',
+  valve: '/media/Images/Skynet/Valves/Motorized_TC15_Ball_Valve_Vertical.svg' };
 // a line for each connection between two pieces on the picture
 function drawLines() {
   const svg = $('#cnLines'); if (!svg || !S) return;
-  const pos = new Map(pieces().map(p => [p.key, p.at]));
+  const r = $('#cnPic').getBoundingClientRect(), W = r.width || 800, H = r.height || 600;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const pos = new Map(pieces().map(p => [p.key, { x: p.at.x * W, y: p.at.y * H }]));
   const key = e => e?.kind === 'vessel' ? 'vessel:' + e.key : e?.id;
   const lines = [];
   // blue = a Pipe (and its fittings), yellow = a Hose (Fritz, 2026-11-08); each has a wide see-through line on top to click
   S.chains.forEach((c, ci) => { let a = c.start; c.steps.forEach((s, si) => {
     const p = pos.get(key(a)), q = pos.get(key(s.to));
     if (p && q) {
-      const xy = `x1="${p.x * 100}%" y1="${p.y * 100}%" x2="${q.x * 100}%" y2="${q.y * 100}%"`, on = lineSel?.[0] === ci && lineSel?.[1] === si;
-      lines.push(`<line ${xy} class="${s.by === 'hose' ? 'hose' : 'pipe'}${on ? ' sel' : ''}"/><line ${xy} class="hit" data-ci="${ci}" data-si="${si}"><title>${s.by === 'hose' ? 'Hose' : 'Pipe'}: click to pick it (Delete removes it); right-click turns a Pipe into a Hose and back</title></line>`);
+      // a Pipe only across, up and down or at 45 degrees; a Hose hangs in a curve (OakBarn Brewery, 2026-11-08)
+      const d = s.by === 'hose' ? hosePath(p, q) : pipePath(p, q), on = lineSel?.[0] === ci && lineSel?.[1] === si;
+      lines.push(`<path d="${d}" class="${s.by === 'hose' ? 'hose' : 'pipe'}${on ? ' sel' : ''}"/><path d="${d}" class="hit" data-ci="${ci}" data-si="${si}"><title>${s.by === 'hose' ? 'Hose' : 'Pipe'}: click to pick it (Delete removes it); right-click turns a Pipe into a Hose and back</title></path>`);
     }
     a = s.to;
   }); });
@@ -206,7 +220,7 @@ function drawLines() {
 }
 // a line on the picture (Fritz, 2026-11-08): a click picks it, the Delete key removes it, a right-click turns a Pipe into a Hose
 // and back. Removing a link in the middle of a chain splits it in two.
-function lineAt(e) { const l = e.target.closest?.('line.hit'); return l ? [Number(l.dataset.ci), Number(l.dataset.si)] : null; }
+function lineAt(e) { const l = e.target.closest?.('.hit'); return l ? [Number(l.dataset.ci), Number(l.dataset.si)] : null; }
 function lineClick(e) {
   const at = lineAt(e); if (!at) return;
   lineSel = lineSel && lineSel[0] === at[0] && lineSel[1] === at[1] ? null : at; picked = null;
@@ -332,6 +346,27 @@ function wire() {
     r.readAsDataURL(f);
   };
   const chips = $('#cnChips');
+  // the picture on its own screen, so it is larger (OakBarn Brewery, 2026-11-08)
+  // the list on its own screen too; Next and Back move between the picture and the list (OakBarn Brewery, 2026-11-08)
+  const stage = $('#cnStage'), listCard = $('#cnChainCard');
+  const show = which => {   // which: 'pic', 'list' or '' (the page)
+    stage.classList.toggle('full', which === 'pic'); listCard.classList.toggle('full', which === 'list');
+    document.body.classList.toggle('cnFullOpen', !!which);
+    if (which === 'pic') renderPicture(); else renderChains();
+    if (which === 'list') listCard.scrollTop = 0;
+  };
+  $('#cnOpenPic').onclick = () => show('pic');
+  $('#cnClosePic').onclick = () => show('');
+  $('#cnPicNext').onclick = () => show('list');
+  $('#cnOpenList').onclick = () => show('list');
+  $('#cnListBack').onclick = () => show('pic');
+  $('#cnListNext').onclick = () => { show(''); $('#cnFermCard').scrollIntoView({ block: 'start' }); };
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && (stage.classList.contains('full') || listCard.classList.contains('full'))) show('');
+  });
+  $('#cnSet').onclick = () => tidy(true);
+  $('#cnStart').onclick = () => tidy(false);
+  window.addEventListener('resize', () => { if (S) drawLines(); });
   const lines = $('#cnLines');
   lines.addEventListener('click', lineClick); lines.addEventListener('contextmenu', lineRight);
   document.addEventListener('keydown', lineKey);

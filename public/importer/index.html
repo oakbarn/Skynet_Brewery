@@ -404,7 +404,16 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
         <p class="small muted">Drag each vessel, pump and valve onto its place. <b>Click one</b> (it gets a yellow border), <b>then another</b>,
           and a line joins them. A <b>blue</b> line is a <b>Pipe</b> (with its fittings), a <b>yellow</b> line is a <b>Hose</b>: right-click a line to
           change it. Click a line to pick it, then press <b>Delete</b> to remove it. The picture is only a guide: it is not saved and nothing reads it.</p>
-        <div id="cnPic"><img id="cnPicImg" alt=""><svg id="cnLines"></svg><div id="cnChips"></div></div>
+        <button class="primary" id="cnOpenPic" title="The picture on its own screen, as large as the window">🖼 Open the picture screen</button>
+        <div id="cnStage">
+          <div class="cnStageBar"><b>A picture as a guide</b>
+            <button id="cnStart" title="Every piece back in the first tidy columns: twice as many columns as vessels, the left most vessel in the first column, the right most in the last">↺ Start</button>
+            <button id="cnSet" title="The left most vessel moves one column right and the right most one column left, with a column between all the vessels">Set</button>
+            <span class="small">Click one piece, then another, to join them. Blue = Pipe, yellow = Hose (right-click a line). Click a line, then Delete, to remove it.</span>
+            <span class="spacer"></span><button id="cnClosePic" title="Back to the page (Esc)">◀ Back</button>
+            <button class="primary" id="cnPicNext" title="The list of what is connected to what, on its own screen">Next ▶ (the list)</button></div>
+          <div id="cnPic"><img id="cnPicImg" alt=""><svg id="cnLines"></svg><div id="cnChips"></div></div>
+        </div>
         <h3>Ask an AI about my picture (your choice)</h3>
         <p class="small">The Importer itself never uses an AI. This button <b>copies a ready-made question</b> and <b>opens the free AI site you
           pick</b>. There, add your picture of the Hot Side and paste the question. Then copy the AI's answer back here.
@@ -417,7 +426,11 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
       </div>
 
       <div class="card" id="cnChainCard">
+        <div class="cnListBar"><b>What is connected to what</b><span class="spacer"></span>
+          <button id="cnListBack" title="Back to the picture screen">◀ Back (the picture)</button>
+          <button class="primary" id="cnListNext" title="Back to the page, at the Fermenters (Esc)">Next ▶</button></div>
         <h2>What is connected to what</h2>
+        <button class="primary" id="cnOpenList" title="The list on its own screen, as large as the window">📋 Open the list screen</button>
         <div id="cnChains"></div>
         <div class="buttons"><button id="cnNewChain" title="Start a new chain at a vessel opening, a pump or a valve">➕ Start a new chain</button></div>
         <div id="cnLoose"></div>
