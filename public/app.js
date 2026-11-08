@@ -28,6 +28,7 @@ import { FLOW_COLORS, flowKey, flowHex, pipeFlowColor, pipeWins } from './flowco
 import { CV_FORMATS, cvDataType, isCodeValue, codeWithValue } from './codevalue.js';
 import { GENERAL_TYPES, GENERAL_TEMPLATE, HEATS, RECIRCS, CHILLERS, VALVES, MANIFOLDS, MANIFOLD_KINDS, NS_DEFAULTS, nsDefault, startAnswers, planSchema, roleOf, generalPick } from './schemabuild.js';
 import { APPLIANCES, isAppliance, setpointWords, handWords } from './appliance.js';
+import { VB_TEMPLATE, VB_KINDS, VB_STEPS, VB_OUTLETS, VB_VALVES, VB_MANUAL_PICS, VB_TANGENTIAL, VB_SPARGE, VB_HERMS, VB_PROBES, VB_SIDE_SPOTS, VB_MAX_HEATERS, vbStart, vbHeaters, vbParts, vbPlaced, vbProbeSpot, vbProblems, vbSummary } from './vesselbuilder.js';
 import { EQUIP_FIELDS, UNIT_SYSTEMS, VESSEL_TYPES, HEAT_KINDS, heatKindsFor, REPORT_UNITS, VALVE_SERVICE, SPARGE, MASH_STEPS, brewVolumes, volUnit, tempUnit, firstOfType } from './brewcalc.js';
 // Brew Panel browser app (plain JavaScript, works in Chrome, Edge, Safari, Firefox, DuckDuckGo)
 const $ = s => document.querySelector(s);
@@ -4409,7 +4410,7 @@ const WGT_TYPES = () => [
   ['fittings', 'IPs, couplings and caps', FIT_ROWS()],
   ['gGlobal', 'gGlobal variables', amGroup('gGlobal').map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
 ];
-const VESSEL_ROWS = [['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
+const VESSEL_ROWS = [['🔨 Build a Vessel Device (step by step) ...', () => vesselBuilder()], ['Vessel Widget (you add everything to it) ...', () => addVessel('widget')], ['Integrated vessel (ready-made) ...', () => addVessel('integrated')],
   ['Manual vessel (BrewZilla, DigiBoil: you set it by hand)', () => { const r = am('Manual vessel'); return addThing(r[1], r[2], r[3]); }]];
 const EQUIP_ROWS = () => Object.entries(VESSELS).filter(([k]) => k !== 'vessel' && !['eqTee', 'eqElbow90', 'eqElbow45', 'eqCross'].includes(k))     // pipe fittings are TC Pipe Fittings now (Rule 5.25).map(([k, t]) => [t, () => addEquipment(k)]);
 const FIT_ROWS = () => Object.entries(FITTINGS).filter(([k]) => !TC_FIT_TPL[k] && k !== 'manualValve').map(([k, t]) => [t, () => addIpFit(k)]);     // elbows, tees and crosses are TC Pipe Fittings (Rule 5.25)
@@ -5336,6 +5337,134 @@ function vesselToBuild(t) {
   const from = buildWs()?.name === wsName ? buildWs().from || wsName : wsName;
   addTemplateToTab('vessel', t, from, bundleName(t.name, tabIdOf(from) || 'Build', taken));
   if (sel) editItem('gfx', sel.id);
+}
+// ---- 🔨 Build a Vessel Device (OakBarn Brewery, 2026-11-08, Rule 19.5, Help 166; the questions are in public/vesselbuilder.js): one
+// page for each question, in the Pump drill-down look (Rule 18.31), with ◀ Back and Next ▶. The last page shows the vessel and what
+// is on it; 🔨 Build puts a Vessel Device (Rule 5.31) on the 🔨 Build Tab, its parts built into their IPs and every spot it does
+// not use Not Placed (Rule 19.4). 💾 Save Build ... > To a Tab then puts it on its Tab, where it locks (no way back).
+const vbOneWire = ptk => !!ptk && isOneWire(vpProto('probe', ptk));
+const vbPtkName = ptk => tempKinds().find(([k]) => k === ptk)?.[1] || ptk;
+const vbTabs = () => draft.workspaces.filter(x => !x.build).map(x => [x.name, x.id ? `${x.id}: ${x.name}` : x.name]);
+function vbFields(step, w) {
+  const metric = w.units === 'Metric', spot = k => 'vp_' + k;
+  if (step === 'name') return [['_vbn', 'Page 1: what the vessel is and where it goes. Its parts (Heating Elements, the Temperature probe, a Motorized Ball Valve) are built into it, like the RIMS tube, all wired to one Interface.', 'note'],
+    ['label', '1. Label (shown on the Tab, for example HLT; never blank)', 'text'], ['vtype', '2. What it is', 'sel', VB_KINDS],
+    ['workspace', '3. Tab it goes on (when the Build is saved)', 'sel', vbTabs()],
+    ['vpIface', '4. Interface (board) its built in parts are wired to', 'dev', 'addnew']];
+  if (step === 'size') return [['_vbs', 'Page 2: its size. It starts at 10 gallons (Rule 19.1). Proportional keeps the plain vessel shape; Diameter uses its Diameter and Height for the shape (Rule 19.2).', 'note'],
+    ['units', '1. Units', 'sel', [['US', 'US (gallons, inches)'], ['Metric', 'Metric (liters, cm)']], true],
+    ['volume', `2. ${metric ? 'Liters' : 'Gallons'}`, 'num'], ['sizeMethod', '3. Shape', 'sel', V_METHODS, true],
+    ...(w.sizeMethod === 'diameter' ? [['diameter', `4. Diameter (${metric ? 'cm' : 'inches'})`, 'num'], ['vheight', `5. Height (${metric ? 'cm' : 'inches'})`, 'num']] : [])];
+  if (step === 'outlet') return [['_vbo', 'Page 3: the outlet and the valve on it. A Manual Valve is a Widget of its own (Rule 5.15), put just below the outlet; a Motorized Ball Valve is built into the outlet.', 'note'],
+    ['outlet', '1. Outlet', 'sel', VB_OUTLETS, true],
+    ...(w.outlet === 'none' ? [] : [['outValve', '2. Valve on the outlet', 'sel', VB_VALVES, true]]),
+    ...(w.outlet !== 'none' && w.outValve === 'motor' ? [['outPin', '3. Available Ports / Pins: Motorized Ball Valve', 'pin', spot(w.outlet)]] : [])];
+  if (step === 'inlets') return [['_vbi', 'Page 4: the openings that bring liquid in.', 'note'],
+    ['tangential', '1. Tangential Inlet (whirlpool)', 'sel', VB_TANGENTIAL], ['sparge', '2. Sparge Arm / Steam Slayer', 'sel', VB_SPARGE]];
+  if (step === 'heat') {
+    const n = vbHeaters(w), f = [['_vbh', 'Page 5: its Heating Elements. Each is one Heating Element with a Method (Rule 6.19); one click turns it On or Off (Rule 2.33). You can have more than one.', 'note'],
+      ['heaters', '1. How many Heating Elements', 'sel', [...Array(VB_MAX_HEATERS + 1)].map((_, i) => [String(i), i ? String(i) : 'None']), true]];
+    for (let i = 1; i <= n; i++) f.push(['_vbh' + i, `Heating Element ${i}`, 'head'], [`heat${i}Spot`, `Spot (IP) of Heating Element ${i}`, 'sel', VB_SIDE_SPOTS, true],
+      [`heat${i}Pin`, `Available Ports / Pins: Heating Element ${i}`, 'pin', spot(w[`heat${i}Spot`])]);
+    return f;
+  }
+  if (step === 'temp') {
+    const on = w.probe === 'thermowell' || w.probe === 'front', ow = on && vbOneWire(w.ptk);
+    return [['_vbt', 'Page 6: its Temperature probe. A Thermowell comes in from the side on a spot you pick; a Front probe is on the Center Probe spot. A Heating Element on this vessel uses it to hold its temperature.', 'note'],
+      ['probe', '1. Temperature probe', 'sel', VB_PROBES, true],
+      ...(w.probe === 'thermowell' ? [['probeSpot', '2. Spot (IP) of the Thermowell', 'sel', VB_SIDE_SPOTS, true]] : []),
+      ...(on ? [['ptk', '3. Probe type', 'sel', tempKinds().map(([a, b]) => [a, b]), true]] : []),
+      ...(!on ? [] : ow ? [['probeIdx', '4. OneWire probe number', 'probe']] : [['probePin', '4. Available Ports / Pins: Temperature probe', 'pin', spot(vbProbeSpot(w))]])];
+  }
+  if (step === 'herms') return [['_vbc', 'Page 7: a HERMS Coil goes on one side, on its HERMS In and HERMS Out IPs; flow in one comes out the other.', 'note'],
+    ['herms', '1. HERMS Coil', 'sel', VB_HERMS]];
+  return [['_vbk', 'Page 8: check it. 🔨 Build puts it on the 🔨 Build Tab. Change it there if you need to, then 💾 Save Build ... > To a Tab. Once it is saved on a Tab its IPs and parts are locked for good (Rule 5.31).', 'note'],
+    ...vbSummary(w, { ptkName: vbPtkName }).map((t, i) => ['_vbl' + i, t, 'note'])];
+}
+// the small picture on the Check page: the vessel with a dot on every IP it uses
+function vbPreview(t, w) {
+  const on = vbPlaced(w), box = h('div', { class: 'full vbPreview' }, h('img', { src: media(t.image || EQ_VW.image), alt: 'The vessel' }));
+  for (const k of on) {
+    const d = EQ_VW.ports[k], p = d?.pos?.[0]; if (!p) continue;
+    const kind = vbParts(w)[k + '_part'];
+    box.append(h('span', { class: 'vbDot' + (kind ? ' vbPart' : ''), title: `${d.name}${kind ? ': ' + VP_KINDS.find(([x]) => x === kind)?.[1] : ''}`, style: `left:${p[1] * 100}%;top:${p[2] * 100}%` }));
+  }
+  return box;
+}
+async function vesselBuilder() {
+  if (!TPL) await loadTemplates();
+  const t = tplOf('vessel', VB_TEMPLATE); if (!t) return toast(`The Skynet Template ${VB_TEMPLATE} is missing`, true);
+  if (menuTab) leaveMenuTab();
+  if (!editing) setEditing(true);
+  const devs = S.config.devices || [], tabs = vbTabs();
+  const from = buildWs()?.name === wsName ? buildWs().from || wsName : wsName;
+  const w = vbStart({ vpIface: devs.length === 1 ? devs[0].name : '', ptk: tempKinds()[0]?.[0] || '', workspace: tabs.some(([n]) => n === from) ? from : tabs[0]?.[0] || '' });
+  const body = $('#dlgBody'), oks = $$('#dlg button[value="ok"]'), back = $$('#dlg .dlgCopy'), backWas = back.map(b => [b.textContent, b.title]), okTips = oks.map(b => b.title);
+  const refresh = () => { const x = { ...w }; try { readFields(x, body); } catch { } vpPinLists(vbParts(x), { id: '\0vb' }); };
+  const addIface = ev => { if (ev.target.dataset?.k === 'vpIface' && ev.target.value === ADD_IFACE) $('#dlg').close('addIface'); };
+  body.addEventListener('change', refresh); body.addEventListener('change', addIface);
+  let i = 0;
+  try {
+    for (;;) {
+      const [step, title] = VB_STEPS[i], last = i === VB_STEPS.length - 1;
+      vpPinLists(vbParts(w), { id: '\0vb' });
+      for (const b of oks) { b.textContent = last ? '🔨 Build' : 'Next ▶'; b.title = last ? 'Build the Vessel Device on the 🔨 Build Tab' : 'Go on to the next page'; }
+      for (const b of back) { b.textContent = '◀ Back'; b.title = 'Go back one page (what you typed is kept)'; }
+      const r0 = dialog(`🔨 Build a Vessel Device: page ${i + 1} of ${VB_STEPS.length}, ${title}`, o => vbFields(step, o), w, false, ['vessel-device-builder'], i > 0);
+      if (last) body.append(vbPreview(t, w));
+      const r = await r0;
+      if (r === 'addIface') { const was = w.vpIface; try { readFields(w, body); } catch { } w.vpIface = (await addInterfaceDialog()) || was || ''; continue; }
+      if (r === 'copy') { try { readFields(w, body); } catch { } i = Math.max(0, i - 1); continue; }      // ◀ Back keeps what was typed
+      if (r !== 'ok') return;
+      try { readFields(w, body); } catch (err) { toast(err.message, true); continue; }
+      if (w.probe !== 'none' && vbOneWire(w.ptk)) w.probePin = ''; else w.probeIdx = '';
+      const bad = vbProblems(w, step, { oneWire: vbOneWire });
+      if (bad.length) { toast(bad.join(' '), true, 9000); continue; }
+      if (!last) { i++; continue; }
+      if (vbBuild(t, w)) return;
+    }
+  } finally {
+    body.removeEventListener('change', refresh); body.removeEventListener('change', addIface);
+    oks.forEach((b, n) => { b.textContent = 'Save'; b.title = okTips[n]; });
+    back.forEach((b, n) => { [b.textContent, b.title] = backWas[n]; });
+  }
+}
+// 🔨 Build: the Vessel Device on the 🔨 Build Tab. Nothing is left behind when something is wrong (the error shows, the page stays).
+function vbBuild(t, w) {
+  const keep = { graphics: clone(draft.graphics), elements: clone(draft.elements), workspaces: clone(draft.workspaces) }, keepWs = wsName;
+  try {
+    const taken = [...draft.graphics.map(x => x.name), ...draft.elements.map(e => e.name)].filter(Boolean).map(x => String(x).toLowerCase());
+    const base = String(w.label).trim().replace(/\s+/g, '~').replace(/[^\w~-]/g, '') + '_Vessel';      // a space in the Label is ~ (HLT~2_Vessel)
+    let name = base; for (let n = 2; taken.includes(name.toLowerCase()); n++) name = `${base}_${n}`;
+    addTemplateToTab('vessel', t, w.workspace, name);
+    const g = sel?.kind === 'gfx' && draft.graphics.find(x => x.id === sel.id);
+    if (!g || !isVDev(g)) throw new Error('The Vessel Device could not be made');
+    const old = clone(g);
+    Object.assign(g, { label: String(w.label).trim(), vtype: w.vtype, units: w.units, volume: +w.volume, probeStyle: w.probe === 'front' ? 'front' : 'thermowell' });
+    if (w.sizeMethod === 'diameter') Object.assign(g, { sizeMethod: 'diameter', diameter: +w.diameter, vheight: +w.vheight }); else { delete g.sizeMethod; delete g.diameter; delete g.vheight; }
+    [g.w, g.h] = vBox(g, vScaleFor(w.workspace));
+    const on = vbPlaced(w);
+    for (const [k, d] of Object.entries(EQ_VW.ports)) if (g.ports[k]) g.ports[k].installed = !!d.vw && on.includes(k);      // the old Probe and Element spots are not used: the parts are on IPs
+    const vp = vbParts(w);
+    if (vp.vHerms) g.herms = vp.vHerms; else delete g.herms;
+    syncVesselPorts(g, old);
+    applyVParts(g, vp, g.workspace, g.label);
+    const parts = draft.elements.filter(e => e.integratedIn === g.id && isVPart(e)), probe = parts.find(e => e.type === 'temperature');
+    if (probe) for (const e of parts) if (e.vpKind === 'element') e.input = probe.name;      // its Heating Elements hold the temperature of its probe
+    if (w.outlet !== 'none' && VB_MANUAL_PICS[w.outValve]) {      // a Manual Valve Widget of its own, below the outlet and its parts' readouts (Rule 5.15)
+      const ip = draft.graphics.find(x => x.kind === 'ip' && x.attachTo === g.id && x.port === w.outlet), [cx, cy] = ip ? ipCenter(ip) : [g.x + g.w / 2, g.y + g.h];
+      const mv = { id: newId(), kind: 'ip', fitting: 'manualValve', workspace: g.workspace, x: Math.round(cx - 30), y: Math.round(g.y + g.h + 100), w: 60, h: 60, color: '#8a8f96', image: VB_MANUAL_PICS[w.outValve], confirmation: true };
+      draft.graphics.push(mv); giveName(mv, draft.graphics);
+    }
+    sel = { kind: 'gfx', id: g.id };
+    renderTabs(); renderWs();
+    toast(`${g.label} is on the 🔨 Build Tab as a Vessel Device. Join its pipes there, then 💾 Save Build ... > To a Tab puts it on the ${w.workspace} Tab, where its IPs and parts lock.`, false, 10000);
+    return true;
+  } catch (err) {
+    Object.assign(draft, keep); wsName = keepWs; sel = null; renderTabs(); renderWs();
+    toast(err.message, true, 9000);
+    return false;
+  }
 }
 // a pop-up of small icons in groups; one click picks one. Resolves to its key, or undefined for Cancel.
 function pickVessel(title, groups) {

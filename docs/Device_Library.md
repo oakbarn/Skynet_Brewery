@@ -462,6 +462,7 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 
 ### 5.3 Vessel Device (built from a Vessel Widget Template)
 - **Made by:** placing a Vessel Widget Template (Skynet_Vessel_Widget, or a kettle Template built from it). It goes on the Build Tab as a Vessel Device (Skynet Rule 5.31, one exception to Rule 5.7; Help 133).
+- **Or step by step:** Vessel > 🔨 Build a Vessel Device asks Name, Size, Outlet and its valve, Inlets, Heating Elements, Temperature probe and HERMS Coil one page at a time, then builds it on the Build Tab (Skynet Rule 19.5, Help 166).
 - **Picture:** the Template's (Skynet_Vessel_Widget.svg: 15 IPs from Fritz's Vessel IP Template drawing).
 - **Parts built into its IPs** (Properties, under each Placed IP, **On this IP**): Heating Element (digital out, element), Temperature Probe, Thermowell with its Temperature Probe, or Motorized Valve (digital out, valve). One **Interface** for all of them, then each part's **Port** (a DS18B20 takes its OneWire number). Two parts can't share a Port. They are integral parts, like the RIMS tube's: not separate Devices, can't be deleted on their own, and a built-in valve has no IPs of its own (it sits in the vessel's IP).
 - **Named:** each part gets the suggested name from its Label `<Vessel Label> <IP Label>`, e.g. `BM_14_eVlv_HLT_Right_Sparge_BH`.
@@ -517,3 +518,4 @@ Then the Label; Create puts it on the Build Tab with its two Devices beside it.
 - 2026-11-06: 5.4 Valve Tee and Supply Manifolds: the Pump's drill-down Add box and Properties (Rule 18.29), valve ends with TC ferrules matching the tees, valve numbers, three Orientations and no Flip. (thread "Add valve Tees and supply manifolds")
 - 2026-11-07: 5.4 Valve Tee and Supply Manifolds: Flip added on the Orientation line (valves on top or bottom). (thread "Let Supply Manifolds flip valves top or bottom")
 - 2026-11-08: 4.2 Pump: Model with Pump facts, Power, Use, Speed control and Speed % (PWM), hover facts (Rule 18.32, Help 163). (thread "List DC brewing pumps for the Panel")
+- 2026-11-08: 5.3 Vessel Device: can be made step by step with the Vessel Device Builder (Skynet Rule 19.5, Help 166).
