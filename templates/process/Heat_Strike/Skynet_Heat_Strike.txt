@@ -7,7 +7,7 @@ ask "Fill the Hot Liquor Tank with at least " + rcp_Strike_Volume + " " + rcp_Vo
 step "Heat the strike water"
 @if HLT_Heater
 {{HLT_Heater}}.target = rcp_Strike_Temp
-{{HLT_Heater}}.enabled = true
+{{HLT_Heater}} = on
 @else
 ask "Turn the Hot Liquor Tank heat on and set it to " + rcp_Strike_Temp + rcp_Temp_Units + ". Press Done when it is on."
 @end

@@ -7,7 +7,7 @@ ask "Take a pre-boil gravity reading of the wort in the kettle and write it down
 step "Up to the boil"
 @if Boil_Heater
 {{Boil_Heater}}.target = rcp_Boil_Start_Temp + 5
-{{Boil_Heater}}.enabled = true
+{{Boil_Heater}} = on
 @else
 ask "Turn the boil kettle heat on full. Press Done when it is on."
 @end
@@ -31,7 +31,7 @@ sleep rcp_Boil_Time * 1000
 @end
 step "Flame out"
 @if Boil_Heater
-{{Boil_Heater}}.enabled = false
+{{Boil_Heater}} = off
 @else
 ask "Turn the boil kettle heat off. Press Done when it is off."
 @end
