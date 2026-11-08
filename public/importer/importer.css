@@ -128,3 +128,8 @@ body.cnFullOpen { overflow: hidden; }
 .vesTable td, .vesTable th { padding: 4px 6px; }
 .vesTable select { max-width: 11em; }
 body.wideStep main { max-width: 1500px; }
+.vesTable input.vName { width: 9em; }
+/* the vessels are named, sided, added and removed on the Vessels step now (OakBarn Brewery, 2026-11-08); here only their template */
+#cnVessels .cnTable, #cnAddVessel { display: none; }
+.noDisplay { color: #8a8a8a; font-style: italic; }
+.itemTable .itemLabel { width: 12em; }

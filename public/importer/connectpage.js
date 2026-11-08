@@ -17,7 +17,13 @@ export function startConnect(data, { toast } = {}) {
   say = toast || say;
   if (!data) return;
   // a new conversion starts again from its guesses; Back and Next keep the brewer's answers
-  if (!S || S.from !== data) S = { from: data, parts: structuredClone(data.parts), chains: structuredClone(data.chains), fermenters: structuredClone(data.fermenters), places: {}, pictures: data.pictures ?? {}, tabs: data.tabs ?? [] };
+  // the vessels were changed on the Vessels step (renamed, Side, added or removed): take them again, keeping the templates picked here
+  if (S && S.from === data && S.vv !== data.vv) {
+    const tpl = new Map(S.parts.vessels.map(v => [v.key, v.template]));
+    S.parts.vessels = structuredClone(data.parts.vessels).map(v => ({ ...v, ...(tpl.get(v.key) ? { template: tpl.get(v.key) } : {}) }));
+    S.vv = data.vv; syncFerm();
+  }
+  if (!S || S.from !== data) S = { vv: data.vv, from: data, parts: structuredClone(data.parts), chains: structuredClone(data.chains), fermenters: structuredClone(data.fermenters), places: {}, pictures: data.pictures ?? {}, tabs: data.tabs ?? [] };
   wire();
   pictureChoices();
   renderAll();
