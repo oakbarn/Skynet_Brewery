@@ -105,3 +105,19 @@ console.log('connect tests passed');
 }
 // the Chart Widget tests run here too, so package.json stays as it is (no clash with other open PRs)
 await import('./chart.test.js');
+// the picture screen's tidy start and its Set button (OakBarn Brewery, 2026-11-08)
+{
+  const { layoutPieces, pipePath, hosePath } = await import('../public/importer/connect.js');
+  const ps = [{ key: 'vessel:HLT', kind: 'vessel' }, { key: 'vessel:MLT', kind: 'vessel' }, { key: 'vessel:BK', kind: 'vessel' }, { key: 'V1', kind: 'valve' }, { key: 'P1', kind: 'pump' }, { key: 'X', kind: 'valve' }];
+  const ch = [{ start: { kind: 'vessel', key: 'HLT' }, steps: [{ to: { kind: 'valve', id: 'V1' }, by: 'pipe' }, { to: { kind: 'pump', id: 'P1' }, by: 'hose' }] }];
+  const a = layoutPieces(ps, ch), col = x => Math.round(x * 6 - 0.5);
+  assert.equal(col(a['vessel:HLT'].x), 0); assert.equal(col(a['vessel:BK'].x), 5, 'the first and last columns');
+  assert.equal(a.V1.x, a['vessel:HLT'].x, 'joined by a Pipe: the same column'); assert.ok(a.V1.y > a['vessel:HLT'].y, '... below it');
+  assert.equal(col(a.P1.x), 1, 'a Hose step moves one column over');
+  assert.ok(a.X.y > 0.85, 'joined to nothing: the bottom row');
+  const b = layoutPieces(ps, ch, { set: true });
+  assert.equal(col(b['vessel:HLT'].x), 1); assert.equal(col(b['vessel:BK'].x), 4, 'Set: one column in from each side');
+  assert.match(pipePath({ x: 0, y: 0 }, { x: 10, y: 50 }), /^M0\.0 0\.0 V20\.0 L10\.0 30\.0 V50\.0$/, 'down, 45 degrees, down');
+  assert.match(pipePath({ x: 0, y: 0 }, { x: 50, y: 10 }), /H20\.0 L30\.0 10\.0 H50\.0$/);
+  assert.match(hosePath({ x: 0, y: 0 }, { x: 100, y: 0 }), /^M0\.0 0\.0 C/);
+}

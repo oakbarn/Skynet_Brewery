@@ -149,6 +149,15 @@ song, *Skynet - Outlet to Valve*, made by OakBarn Brewery; it never plays by its
   then **click one** (it gets a yellow border) **and then another**, and a line joins them. A **blue** line is a **Pipe** (with its
   fittings), a **yellow** line is a **Hose**: **right-click** a line to change it. **Click** a line to pick it and press **Delete** to
   remove it (a line in the middle of a chain splits the chain in two). The picture is only a guide: it is not saved and nothing reads it.
+  **🖼 Open the picture screen** shows it as large as the window. The vessels look like Skynet vessels, the pumps like pumps and
+  the valves like valves. A Pipe runs only across, up and down, or at 45 degrees; a Hose hangs in a curve. Pieces joined by Pipe
+  are stacked in a column under their vessel, a Hose moves over a column, with room to grab each line. It starts with twice as
+  many columns as vessels: the left most vessel in the first column, the right most in the last, the others spaced between.
+  **Set** moves the left most vessel one column right and the right most one column left, leaving a column between all the
+  vessels; **↺ Start** puts every piece back where it started.
+- **The list on its own screen.** **Next ▶ (the list)** on the picture screen shows **What is connected to what** as large as the
+  window; its **◀ Back (the picture)** goes straight back to the picture, so you can move quickly between the two. **Next ▶**
+  there returns to this page at the Fermenters (**📋 Open the list screen** opens it from the page; **Esc** closes either screen).
 - **Ask an AI about my picture (your choice).** The Importer itself never uses an AI. **🤖 Copy the question and open it**
   copies a ready-made question (it lists your own vessel, pump and valve names) and opens the free AI site you pick (Claude,
   ChatGPT or Gemini). Add your picture there and paste the question. Copy the AI's answer back into the box and click **Read
