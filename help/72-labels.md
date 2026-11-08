@@ -2,7 +2,7 @@
 
 Every Device and Widget has a **Name** and a **Label**.
 
-- The **Name** is the one Processes use, for example `MB_25_P_L_Vlv_Fly_Sparge__SP`.
+- The **Name** is the one Processes use, for example `MB_25_P_L_Vlv_Fly~Sparge_SP`.
 - The **Label** is the text the Tab shows, for example *Fly Sparge*. Empty = the Tab shows the Name.
 
 The Label used to be called the **Display name** (`displayName` in the Schema file). It is now **Label** everywhere. An older Schema moves over by itself when it loads; nothing is lost.

@@ -34,17 +34,17 @@ The **Suggested Name** is filled in as you go:
 
 **Interface ID _ Port _ Device Type ID _ Label _ Tab ID** (one underscore between the parts; names made before 2026-11-05 keep their `__` before the Tab ID)
 
-The port is always in the name, and the Device Type ID comes third. There are **two** underscores before the Tab ID. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
+The port is always in the name, and the Device Type ID comes third. There is **one** underscore between each part, and a space in the Label becomes `~`, so the parts are easy to tell apart. A low temperature proportional valve called *Fly Sparge*, on port 25 of the Mega `MB`, on the Sparge tab `SP`, gets:
 
-`MB_25_P_L_Vlv_Fly_Sparge_SP`
+`MB_25_P_L_Vlv_Fly~Sparge_SP`
 
 Analog pins are written the way BruControl numbers them, A0 = 54 up to A15 = 69, so a 10K thermistor called *Mash/Tun* on pin A0 gets `MB_54_10KNTC_Mash~Tun_SP`. You can still type A0 or 54 when you pick the pin. DS18B20 probes all share one wire, so each probe number is a virtual port from 700 to 799 (probe 1 = 700, probe 2 = 701 ...): `MB_700_1W_HLT_HL`. A probe number can belong to one Device only.
 
 How the Label is turned into the name part (the Label itself stays exactly as you typed it):
 
 - Control characters and emoji are left out, and spaces at the start and end are dropped.
-- Each of `< > : " / \ | ? * . ,` becomes `~`. *Fly/Sparge In* becomes `Fly~Sparge_In`.
-- Spaces become `_`.
+- Each of `< > : " / \ | ? * . ,` becomes `~`. *Fly/Sparge In* becomes `Fly~Sparge~In`.
+- Spaces become `~` too (OakBarn Brewery, 2026-11-07), so the `_` only separates the parts of the name: *Mash Tun* becomes `Mash~Tun`. Names made before keep their `_`.
 
 More rules:
 

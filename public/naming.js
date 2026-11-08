@@ -91,12 +91,13 @@ export function upgradeCode(el) {
 }
 
 // Label -> the part of a name (Fritz, 2026-10-23): control characters and emoji are dropped, spaces at the ends trimmed,
-// < > : " / \ | ? * . , each become ~ and spaces become _
+// < > : " / \ | ? * . , each become ~, and so do spaces (OakBarn Brewery, 2026-11-07: "I like the ~ instead of a _ in the label
+// part of the name"): the _ only ever separates the parts of a name
 // Emoji as the name rules count them (public/names.js): the colour pictures, flags, skin tones and joiners; © ® ™ stay
 const PICTO = /\p{Extended_Pictographic}/u, EMOJI_PART = /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u200D\uFE0E\uFE0F\u20E3]/u;
 const isEmoji = ch => EMOJI_PART.test(ch) || (PICTO.test(ch) && ch.codePointAt(0) >= 0x2190);
 export const parseLabel = s => [...String(s ?? '').replace(/\p{Cc}/gu, '')].filter(ch => !isEmoji(ch)).join('').trim()
-  .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '_');
+  .replace(/[<>:"/\\|?*.,]/g, '~').replace(/\s+/g, '~');
 
 // Virtual ports, as BruControl numbers them (Fritz, 2026-10-23): a hydrometer (Hydro: a Tilt or any other) has no pin,
 // so the 1st one is port 200, the 2nd 201 ... (index from 1). Used in its name when Hydro Devices are built.
@@ -403,7 +404,7 @@ export const cloneNumber = name => +(/_Clone_(\d+)$/.exec(name ?? '')?.[1] ?? 0)
 export const WIDGET_TYPE_IDS = {
   picture: 'PIX', text: 'TXT', label: 'LBL', valueWidget: 'VAL', timeWidget: 'TM', dateTimeWidget: 'DT', timer: 'TMR',
   soundPlayer: 'SND', switch: 'SW', pushButton: 'PB', pulseButton: 'PL', led: 'LED', manualValve: 'MV', tapValve: 'TWV',
-  alarm: 'ALM', override: 'OVR',
+  alarm: 'ALM', override: 'OVR', chart: 'CHT',
 };
 // the Type of a Widget: by its type (an element) or its kind (a Text, an Override); a Manual Valve is an IP fitting (tap: a Tap
 // Water Valve, TWV)

@@ -58,6 +58,10 @@ assert.deepEqual(s.interfaces, [
 assert.deepEqual(s.tabs, [{ name: 'Brew', items: 2 }, { name: 'Fermentation', items: 2 }]);
 assert.equal(s.items, 4); assert.equal(s.processes, 1); assert.equal(s.globals, 4, 'the Globals list and the Global Variable elements');
 assert.throws(() => summarize('<x/>'), /not a BruControl config file/);
+// US or Metric from BruControl's probe ports (OakBarn Brewery, 2026-11-08)
+assert.equal(summarize('<Configuration><Devices><Device><Ports><DevicePort><Unit>Fahrenheit</Unit></DevicePort></Ports></Device></Devices></Configuration>').units.guess, 'US');
+assert.equal(summarize('<Configuration><Devices><Device><Ports><DevicePort><Unit>Celsius</Unit></DevicePort></Ports></Device></Devices></Configuration>').units.guess, 'Metric');
+assert.equal(summarize('<Configuration></Configuration>').units.guess, '');
 
 // the Importer keeps only its own small settings (last folder and file), never Schemas (Rule 1.7)
 assert.equal(settingsFile(env, 'win32'), 'C:\\Users\\Fritz\\AppData\\Local\\SkynetBrewer\\Importer\\settings.json');
@@ -104,16 +108,16 @@ fs.rmSync(dir, { recursive: true, force: true });
   fs.writeFileSync(path.join(d, 'default.config'), '<Configuration/>');
   const f = findConfigs(d);
   assert.deepEqual(f.files.map(x => [x.name, x.isBackup, x.isDefault, x.backupDate, x.base]), [
-    ['Oakbarn.brucfg', false, false, '', 'Oakbarn'], ['Oakbarn.brucfg.20260615.bak', true, false, '2026-06-15', 'Oakbarn_Backup_2026-06-15'],
-    ['default.config', false, true, '', 'default']], 'own config, then backups, then the default one');
+    ['Oakbarn.brucfg.20260615.bak', true, false, '2026-06-15', 'Oakbarn_Backup_2026-06-15'], ['Oakbarn.brucfg', false, false, '', 'Oakbarn'],
+    ['default.config', false, true, '', 'default']], 'backups first, then config files, then the default one');
   // BruControl's own "Config Backup" folder is listed too, backups only (Fritz, 2026-11-07)
   fs.mkdirSync(path.join(d, 'Config Backup'));
   fs.writeFileSync(path.join(d, 'Config Backup', 'Oakbarn.brucfg.20260601.bak'), '<Configuration/>');
   fs.writeFileSync(path.join(d, 'Config Backup', 'Other.brucfg'), '<Configuration/>');
   fs.utimesSync(path.join(d, 'Config Backup', 'Oakbarn.brucfg.20260601.bak'), Date.now() / 1000 - 999, Date.now() / 1000 - 999);
   fs.utimesSync(path.join(d, 'Config Backup', 'Other.brucfg'), Date.now() / 1000 - 999, Date.now() / 1000 - 999);
-  assert.deepEqual(findConfigs(d).files.map(x => [x.sub, x.name]), [['', 'Oakbarn.brucfg'], ['Config Backup', 'Other.brucfg'], ['', 'Oakbarn.brucfg.20260615.bak'],
-    ['Config Backup', 'Oakbarn.brucfg.20260601.bak'], ['', 'default.config']], 'the Config Backup folder: its backups and any config file put there');
+  assert.deepEqual(findConfigs(d).files.map(x => [x.sub, x.name]), [['', 'Oakbarn.brucfg.20260615.bak'], ['Config Backup', 'Oakbarn.brucfg.20260601.bak'],
+    ['', 'Oakbarn.brucfg'], ['Config Backup', 'Other.brucfg'], ['', 'default.config']], 'the Config Backup folder: its backups and any config file put there');
   const copy = makeImportCopy(path.join(d, 'Oakbarn.brucfg.20260615.bak'), path.join(d, 'Import'), { ms: new Date(2026, 10, 7, 3, 4, 5).getTime() });
   assert.equal(path.basename(copy), 'Oakbarn_Backup_2026-06-15_2026-11-07T030405.brucfg', 'the Import Copy of a backup is a plain .brucfg');
   assert.ok(pickFileScript('').includes('*.brucfg;*.bak'), 'Browse shows config files and backups');
@@ -174,3 +178,28 @@ assert.equal(importFileName('Oakbarn', new Date(2026, 10, 6, 18, 5, 9).getTime()
   fs.rmSync(sdir, { recursive: true, force: true });
 }
 console.log('importer Schema file tests passed');
+
+// Interfaces with no items come in only when ticked (Fritz, 2026-11-08)
+{
+  const { dropEmptyInterfaces } = await import('../lib/importer.js');
+  const conv = { devices: [{ name: 'Main' }, { name: 'LV1' }, { name: 'Test' }], elements: [{ device: 'Main' }] };
+  const r = dropEmptyInterfaces(conv, ['Test']);
+  assert.deepEqual(r.conv.devices.map(d => d.name), ['Main', 'Test']);
+  assert.deepEqual(r.dropped, ['LV1']);
+  assert.equal(conv.devices.length, 3, 'the converted file is not changed');
+  assert.deepEqual(dropEmptyInterfaces(conv).dropped, ['LV1', 'Test'], 'none ticked: every empty one left out');
+}
+
+// Tabs with no items come in only when ticked, with their Placeholders (Fritz, 2026-11-08)
+{
+  const { dropEmptyTabs } = await import('../lib/importer.js');
+  const conv = { workspaces: [{ name: 'Main' }, { name: 'HV' }, { name: 'GV' }, { name: 'Far' }], elements: [{ name: 'a', workspace: 'Main' }],
+    graphics: [{ id: 'ph_1', workspace: 'GV', placeholder: {} }, { id: 'ph_2', workspace: 'HV', placeholder: {} }, { id: 'cl_1', kind: 'clone', workspace: 'Far' }] };
+  const r = dropEmptyTabs(conv, ['HV']);
+  assert.deepEqual(r.conv.workspaces.map(w => w.name), ['Main', 'HV', 'Far'], 'a Tab with a Clone always comes in');
+  assert.deepEqual(r.dropped, ['GV']); assert.equal(r.holdersDropped, 1);
+  assert.deepEqual(r.conv.graphics.map(g => g.id), ['ph_2', 'cl_1']);
+  // every Tab has an Import Tab box (OakBarn Brewery, 2026-11-08): an unticked Tab with items stays out too, with its items
+  const a = dropEmptyTabs(conv, ['HV'], { all: true });
+  assert.deepEqual(a.conv.workspaces.map(w => w.name), ['HV']); assert.equal(a.itemsDropped, 1); assert.equal(a.conv.elements.length, 0);
+}

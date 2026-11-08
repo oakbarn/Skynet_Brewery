@@ -9,6 +9,7 @@ import { setRich } from './richtext.js';
 import { installShortcutKeys } from './shortkeys.js';
 import { SKYNET_STYLES, KIND_KEYS, styleOf, isSkynetStyle, tabStyleOf, TIMER_FRAMES, timerDigits } from './styles.js';
 import { dialSvg, dialRange, DIAL_DEFAULTS } from './dial.js';
+import { chartSvg, chartSettings, spanText, CHART_DEFAULTS, CHART_POINTS } from './chart.js';
 import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes.js';
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
@@ -148,6 +149,13 @@ async function load() {
   document.body.classList.remove('role-viewer', 'role-operator', 'role-admin');
   document.body.classList.add('role-' + myRole());
   document.body.classList.toggle('touchRun', S.me.role === 'admin' && touchRun());
+  // the BruControl Importer's Build page (OakBarn Brewery, 2026-11-08: "the Process Icon needs to be greyed Out"): the same Panel,
+  // no board connected, Processes greyed out (they are a later Importer step)
+  if (S.importBuild) {
+    document.body.classList.add('importBuild');
+    for (const b of document.querySelectorAll('#views button[data-view="scripts"], #procTab')) { b.disabled = true; b.title = 'Processes are greyed out on the BruControl Importer\'s Build page: your Scripts become Processes in a later Importer step'; }
+    $('#title').textContent = 'BruControl Importer: Build page';
+  }
   if (S.me.role === 'admin' && touchRun() && !load.told) { load.told = true; toast('📱 Phone or tablet: run mode. Editing and building are done on a computer (Rule 2.35)', false, 5000); }
   if (S.me.role === 'admin' && !touchRun()) load.told = false;
   $('#code').readOnly = !can('admin');
@@ -156,6 +164,12 @@ async function load() {
   document.title = S.config.title || 'Skynet Brew Panel';
   showPanelVer();
   setTextLarge();
+  // the Importer's Build Tab pages (OakBarn Brewery, 2026-11-08): the Importer opens one imported Tab at a time (#tab=Name)
+  if (S.importBuild && !load.hashTab) {
+    load.hashTab = true;
+    const pick = () => { const n = decodeURIComponent((location.hash.match(/^#tab=(.+)$/) ?? [])[1] ?? ''); if (n && S.config.workspaces.some(w => w.name === n)) { wsName = n; return true; } return false; };
+    pick(); addEventListener('hashchange', () => { if (pick()) { setView('workspace'); renderTabs(); renderWs(); } });
+  }
   if (!wsName || !S.config.workspaces.some(w => w.name === wsName)) wsName = S.config.workspaces[0]?.name;
   [S.schemas, S.profiles, S.mashProfiles, S.boilProfiles, S.waterProfiles, S.tabProfiles, S.valveProfiles] = await Promise.all([api('GET', '/ui/schemas'), api('GET', '/ui/equipment'),
     ...['mash', 'boil', 'water', 'tab', 'valve'].map(k => api('GET', '/ui/profiles/' + k))]);
@@ -2164,6 +2178,7 @@ function fillEl(n, e0) {
       almLayers(n, e, v); break;
     case 'soundPlayer': on = !!v.active; text = `${v.playing ? 'Playing' : v.active ? 'Paused for an alarm' : 'Stopped'}: ${String(v.path || '(no sound file)').split('/').pop()}`; break;
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
+    case 'chart': fillChart(n, e0, editing ? {} : v); break;          // the Chart Widget (Rule 1.26): its line graph, not a text
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
@@ -2208,7 +2223,8 @@ function fillEl(n, e0) {
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   n.classList.toggle('look-dial', dial);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
-  if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
+  if (e.type === 'chart') { /* drawn by fillChart */ }
+  else if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
   else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
   // A Timer's look is its Style (Skynet or User, public/styles.js); a Process's .fore / .back go over it
@@ -2254,6 +2270,28 @@ function fillEl(n, e0) {
   n.classList.toggle('vfit', !!vf);
   if (vf) { const gm = elGeom(e); n.style.setProperty('--vfs', vf.size); n.style.setProperty('--vfp', `${Math.round(vf.mx * (gm.w || 120))}px ${Math.round(vf.my * (gm.h || 60))}px`); }
   n.classList.toggle('clickable', !editing && tapAction(e) !== 'none');
+}
+// The Chart Widget (Fritz, 2026-11-08, Rule 1.26): its lines come from the brew database (/ui/chart), fetched again every
+// Refresh interval seconds; in between the picture is drawn from the readings it already has.
+const chartData = new Map();      // name -> { at, key, series, busy }
+function fillChart(n, e, v) {
+  const vl = n.querySelector('.vl'); n.classList.add('chartW');
+  const s = chartSettings(e, v), names = s.channels.map(c => c.element).filter(Boolean);
+  const key = names.join(',') + '|' + s.spanSeconds, now = Date.now(), d = chartData.get(e.name) || {};
+  const draw = () => {
+    const gm = elGeom(e), w = Math.max(80, (gm.w || 400)), hh = Math.max(60, (gm.h || 200) - (n.querySelector('.nm')?.offsetHeight || 0));
+    const missing = names.filter(x => !L().elements.some(el => el.name === x));
+    const empty = d.series && names.length && names.every(x => !(d.series[x] ?? []).length);
+    vl.innerHTML = chartSvg(e, v, d.series || {}, { now: d.at || now, w, h: hh,
+      note: missing.length ? `Not in this Schema: ${missing.join(', ')}` : empty ? `No readings in the last ${spanText(s.spanSeconds)}: send it to the database (its Database box)` : '' });
+  };
+  if (!d.busy && names.length && (d.key !== key || !d.at || now - d.at >= s.refreshInterval * 1000)) {
+    d.busy = true; chartData.set(e.name, d);
+    api('GET', `/ui/chart?names=${encodeURIComponent(names.join(','))}&from=${now - s.spanSeconds * 1000}&to=${now}&points=${CHART_POINTS}`)
+      .then(r => { Object.assign(d, { series: r, at: now, key }); }).catch(() => { d.at = now; })
+      .finally(() => { d.busy = false; draw(); setTimeout(() => { const m = document.querySelector(`.el[data-name="${CSS.escape(e.name)}"]`); const me = L().elements.find(x => x.name === e.name); if (m && me) fillEl(m, me); }, s.refreshInterval * 1000); });
+  }
+  draw();
 }
 // The On overlay covers just the picture underneath (Fritz: sized to the picture), not the empty sides of a wide or tall item.
 // The picture is drawn "contain" in the item, so its box comes from the picture's own width and height (loaded once).
@@ -4001,6 +4039,7 @@ const ADD_MENU = [
   ['Widgets (app only, no board pin)', [
     ['Picture Widget', 'picture'],
     ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
+    ['Chart (a line graph of recorded readings)', 'chart', 'Chart'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
   ]],
 ];
@@ -4040,6 +4079,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
   if (kind === 'list') { e.w = 200; e.h = 70; e.items = [{ value: 1, text: '' }, { value: 2, text: '' }, { value: 3, text: '' }]; e.initial = '1'; }
   if (type === 'temperature') { e.units = '°F'; e.precision = 1; }
   if (type === 'picture') { e.hideName = true; e.w = 140; e.h = 120; }
+  if (type === 'chart') { e.w = 610; e.h = 190; e.label = 'Chart_' + i; Object.assign(e, { spanSeconds: CHART_DEFAULTS.spanSeconds, refreshInterval: CHART_DEFAULTS.refreshInterval, hGridLines: CHART_DEFAULTS.hGridLines, vGridLines: 0 }); }     // Rule 1.26
   if (type === 'alarm' && e.alarmClass) {       // an Alarm Widget (Fritz, 2026-11-02): a Label from the start (never blank), the Name follows it
     e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
     if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
@@ -4295,7 +4335,7 @@ function cloneHere(name, byMethod) {
 for (const ev of ['pointerdown', 'focus', 'keydown']) $('#cloneDev').addEventListener(ev, () => { if (!$('#cloneDev').value) fillClones(); });
 // Fritz, 2026-10-23: a new Device is made as in BruControl: 1 Interface, 2 Port, 3 Device Type (more than one type may share a port),
 // then its Label; Create puts it on the Build Tab (always, Fritz: the same as a new Widget or Template) and opens its Properties.
-// 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly_Sparge__SP (public/naming.js). An Admin may
+// 💾 Save Build puts it on a Tab, and its name gets that Tab's ID then. Its name is suggested from them: InterfaceID_Port_DeviceTypeID_ParsedLabel__TabID, e.g. MB_25_P_L_Vlv_Fly~Sparge_SP (public/naming.js). An Admin may
 // type another name; it must be unique and has no spaces. Only one Device per port of an Interface, except outputs of different Device Types (the last one turned on wins).
 const ADD_TAB = '\0addTab';          // "➕ Add new Tab…" in the Add Device box's Tab list
 const ADD_IFACE = '\0addIface';      // "➕ Add new Interface…" in an Interface dropdown
@@ -4929,7 +4969,7 @@ async function useValveProfile(e) {
 // Fritz, 2026-10-20: a new device or widget takes the look of its tab's Tab Background Profile (only when it is made).
 // Something with an ON / OFF state can be an LED or Text; something with a value also a Gauge; with neither, only the colors.
 const hasStateEl = e => isBoolEl(e) || (['gGlobal'].includes(e.type) && ['switch', 'pushbutton', 'momentary', 'bool'].includes(e.kind));
-const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual'].includes(e.type) && !(e.type === 'gGlobal' && ['graphic', 'list', 'longstring'].includes(e.kind));
+const hasValueEl = e => !hasStateEl(e) && !['picture', 'label', 'manual', 'chart'].includes(e.type) && !(e.type === 'gGlobal' && ['graphic', 'list', 'longstring'].includes(e.kind));
 function useTabProfile(e) {
   const p = tabProfileOf(draft.workspaces.find(w => w.name === e.workspace)); if (!p) return;
   for (const k of ['nameColor', 'nameBg', 'nameAlign', 'valueColor', 'valueBg', 'valueAlign']) if (p[k]) e[k] = p[k];
@@ -5278,7 +5318,7 @@ function moveBuildTo(tab) {
   for (const x of items) x.workspace = to.name;
   if (vMaster(to)) for (const v of items.filter(isVW)) vResize(v, ...vBox(v, vScaleFor(to.name)));       // a Tab with a Master Vessel Sizer: a new Vessel takes its scale (Rule 5.32)
   for (const v of items.filter(x => x.buildFrom)) rebundle(v);
-  // a new Device or Widget still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_P_L_Vlv_Fly_Sparge_SP, wgt_DT_DateTime_1_BR)
+  // a new Device or Widget still named by the suggestion gets the Tab ID of its Tab at the end (MB_25_P_L_Vlv_Fly~Sparge_SP, wgt_DT_DateTime_1_BR)
   for (const e of draft.elements.filter(e => items.includes(e) && autoNamed.has(e))) {
     const n = nameSuggestion(e);
     if (n && n !== e.name && !nameTaken(n, e)) { swapName(items.filter(x => x !== e), e.name, n); e.name = n; }
@@ -6169,6 +6209,26 @@ function textWidgetFields() {
     ['text', 'Text', 'text', null, false, false, { up: 30, attr: TEXT_LOOK_POP, tip: T.text }],
     ['color', 'Fore color', 'color', null, false, false, { tip: T.color }],
     ...wgtPlace(), wgtType('Text')];
+}
+// Chart Widget (Fritz, 2026-11-08, Rule 1.26): a BruControl Chart's properties, in the Widget drill-down look (Rule 18.30)
+const CHART_TIPS = {
+  label: 'The title over the graph, for example Conical 5 Day. The ⬢ beside it sets its font, size and colors.',
+  name: 'Made from the Label and the Tab: wgt_CHT_ + the Label + the Tab ID. A Process uses it, for example wgt_CHT_Conical_CT.spanseconds = 86400. It must be unique.',
+  ch: n => `The Device or Widget whose readings Channel ${n} draws (Channel 1 on the left axis, Channel 2 on the right axis). It must be sent to the database (its Database box), or its line stays empty. The ⬢ beside it sets Auto scale, the axis lowest and highest, the Line color and the Axis color.`,
+  span: 'How far back the graph goes, in seconds, like BruControl\'s Span: 3600 = 1 hour, 86400 = 1 day, 432000 = 5 days. The ⬢ beside it sets the grid lines and the time axis color.',
+  refresh: 'How often the graph is drawn again with the newest readings, in seconds, like BruControl\'s Refresh interval.',
+};
+const CHART_CH_POP = n => ({ title: `Channel ${n}`, fields: [[`ch${n}AutoScale`, 'Auto scale (the axis fits the readings)', 'bool', true], [`ch${n}YMin`, 'Axis lowest (Auto scale off)', 'num'], [`ch${n}YMax`, 'Axis highest (Auto scale off)', 'num'],
+  [`ch${n}LineColor`, 'Line color', 'color'], [`ch${n}AxisColor`, 'Axis color', 'color']] });
+const CHART_GRID_POP = { title: 'Grid and time axis', fields: [['hGridLines', 'Grid lines across (0 = none)', 'num'], ['vGridLines', 'Grid lines up and down (0 = none)', 'num'], ['xAxisColor', 'Time axis color', 'color']] };
+function chartWidgetFields() {
+  const T = CHART_TIPS;
+  return [...wgtHead(T),
+    ['ch1Element', 'Channel 1 (left axis)', 'elem', null, false, false, { tip: T.ch(1), attr: CHART_CH_POP(1) }],
+    ['ch2Element', 'Channel 2 (right axis)', 'elem', null, false, false, { tip: T.ch(2), attr: CHART_CH_POP(2) }],
+    ['spanSeconds', 'Span (seconds)', 'num', null, false, false, { tip: T.span, attr: CHART_GRID_POP }],
+    ['refreshInterval', 'Refresh interval (seconds)', 'num', null, false, false, { tip: T.refresh }],
+    ...wgtPlace(), wgtType('Chart')];
 }
 // Override button (Rule 2.27): one press and every running Process moves on; only one on a Tab
 const OVR_TIPS = {
@@ -7477,7 +7537,8 @@ async function editItem(kind, id) {
   const type = kind === 'el' ? item.type : item.kind;
   const fields = kind === 'el' ? it => {
     if (it.type === 'timer' && !skyDev(it)) return [...timerWidgetFields(), wgtType('Timer')];      // the Pump's drill-down look (Rule 18.30)
-    if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
+    if (isDataW(it)) return [...dataWidgetFields(it), dataWidgetType(it)];
+    if (it.type === 'chart') return chartWidgetFields();       // Chart Widget Properties (Rule 1.26)       // Value, Time and DateTime Widget Properties: the Pump's drill-down (Rules 1.23, 18.21), Widget Type last
     if (it.type === 'alarm' && it.alarmClass) return [...alarmWidgetFields(it), ...dbFields(it)];      // Alarm Widget Properties (Fritz, 2026-11-02)
     const oldF = () => { const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)]; return skyDev(it) ? skyDevFields(it, f) : f; };
     if (isBuiltIn(it) && isGenDrill(it)) return genDeviceFields(it, item, oldF());      // built into a Vessel Device, RIMS tube or kettle: the Pump's drill-down (Rule 18.31)
@@ -7682,7 +7743,7 @@ async function editItem(kind, id) {
       }
       if (work.type === 'alarm' && work.alarmClass && !String(work.label ?? '').trim()) throw new Error('The Label can\'t be blank (Rule 18.3): type a Label');
       work.name = noSpaces(work.name || '');            // no spaces in names: "Test Timer" -> Test_Timer
-      if ((isDrillDev(item) || isDataW(item) || isPicW(item)) && !String(work.label ?? '').trim()) work.label = work.name || item.name;
+      if ((isDrillDev(item) || isDataW(item) || isPicW(item) || item.type === 'chart') && !String(work.label ?? '').trim()) work.label = work.name || item.name;
       if (isGenDrill(item) && !String(work.label ?? '').trim()) work.label = item.label || work.name || item.name;      // every Device (Rule 18.31)     // the Label is never blank (Rule 18.3): a blank one becomes the Name (Rule 1.13)
       // a new Device keeps following the suggested name (Label, Interface, port, type, tab) until a name of its own is typed
       const follow = autoNamed.has(item) && work.name === item.name && (isDevice(work) || !!widgetTypeId(work));      // a new Widget follows its suggestion too (Rule 3.14)
@@ -7764,7 +7825,7 @@ async function editWorkspace() {
   const w = curWs(); const work = clone(w), before = clone(w);
   await loadMediaPictures();
   const r = await dialog('Tab settings', [['name', 'Name', 'text'],
-    ['id', 'Tab ID (exactly 2 letters, unique; it ends the suggested name of each new Device on this tab, e.g. ..._Fly_Sparge_SP)', 'text'],
+    ['id', 'Tab ID (exactly 2 letters, unique; it ends the suggested name of each new Device on this tab, e.g. ..._Fly~Sparge_SP)', 'text'],
     ['_bgHead', 'Background', 'head'],
     ['tabProfile', 'Tab Background Profile (its background color, and the look new devices and widgets here start with)', 'sel', [['', '(none)'], ...(S.tabProfiles || []).map(p => [p.id, p.name])]],
     ['color', 'Background color (Default = the Tab Background Profile\'s)', 'color'],

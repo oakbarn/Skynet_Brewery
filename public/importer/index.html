@@ -61,9 +61,9 @@
             Ethernet and WiFi links, and the same pin numbers. Nothing is rewired.</li>
           <li><b>Your Elements, Workspaces and Scripts</b> all come over. Each one is explained below.</li>
           <li><b>Pictures and Sounds:</b> the picture paths and sounds are imported. The files stay where they were, so BruControl
-            continues to work normally. You do have the option of copying those files to a new folder that consolidates all the
-            picture files and sound files, so if you move to a Pi or another computer, those files will be available. They are
-            never deleted in their original spot, just copies made.</li>
+            continues to work normally. A copy of each one is also put into one folder with subfolders, so if you move to a Pi or
+            another computer, those files will be available. They are never deleted in their original spot, just copies made. New
+            pictures and sounds you add in Skynet always go into its media folders.</li>
         </ul>
       </div>
       <div class="card">
@@ -87,7 +87,7 @@
           <li><b>Skynet pictures and Templates.</b> Pumps, valves, pipes and vessels use Skynet's own drawings, with pipes that show the flow.</li>
           <li><b>Skynet's own gauges.</b> BruControl's round, bar and digit gauges are another company's paid drawings, so Skynet
             draws its own: a round or bar gauge becomes the <b>Skynet Dial</b> (an arc with a needle and the reading under it, blue when
-            too cold, green when close to its Setpoint, red when too hot), a digit gauge shows LCD digits. Timers can have Fritz's
+            too cold, green when close to its Setpoint, red when too hot), a digit gauge shows LCD digits. Timers can have OakBarn Brewery's
             frames, hh:mm:ss or hh:mm, and just the seconds in the last minute.</li>
           <li><b>Everything comes in the Skynet way.</b> Names, settings and script lines are changed to Skynet's words and style
             (for example a 0-255 output becomes 0-100%). Each change is listed for you.</li>
@@ -100,12 +100,12 @@
                 use</b> (On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise). Only the main method and the ticked ones can be used.</li>
               <li>Each allowed method gets a small <b>one-click spot</b> under the Element on its Tab (or under it on its Vessel), so
                 one click switches it, for example from Duty Cycle to PID. A Process can switch it too, for example
-                <code>MP_42_HE_HLT_Heat_BH.PID</code>.</li>
+                <code>MP_42_HE_HLT~Heat_BH.PID</code>.</li>
               <li>It is simply turned <b>On</b> or <b>Off</b>, whatever its method. BruControl turned a PID or Hysteresis on and off
                 with <i>Enabled</i>; Skynet does not use that word.</li>
               <li>Heating Elements are the only Devices with more than one method: the wiring of everything else fixes how it is
                 controlled.</li>
-              <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_HE_HLT_Heat_BH</code>.</li>
+              <li>Its name has <b>HE</b> (Heating Element) as its type, for example <code>MP_42_HE_HLT~Heat_BH</code>.</li>
               <li>The Import does this for you: the first Element on the port sets the main method, the others are ticked, and if
                 BruControl showed both on a Tab, the second becomes a <b>Method Clone</b> tile with its BruControl Label. Your
                 old names (<i>HLT_PID</i>) still work in a Process.</li>
@@ -150,23 +150,29 @@
         some new commands that you can use. There are also other standard coding methods, like <code>for</code> and
         <code>while</code>, that can be used. If you don't know those, don't worry, as you may never use them, and they will not be
         in your new code.</p>
+      <p>In addition, there are <b>Preset Schema Templates</b> (what BruControl called Configurations) that can be easily changed
+        by you, the brewer.</p>
+      <p class="quote">"I was excited when I got BruControl, but scripting without any Template examples was a huge hill to climb. I
+        am hoping that a novice brewer can create a Schema (configuration) in a day and be brewing in the morning. I wanted to Brew,
+        not write Code!" <span class="muted">OakBarn Brewery</span></p>
     </div>
 
     <div class="card topic">
       <h2>Names</h2>
       <p>Both BruControl and Skynet use a <b>Name</b> to control a Device (Element). In BruControl, once created, you could not change
         the Name, but it is easy to do in Skynet, as it updates it everywhere (in Processes too!).</p>
-      <p>Skynet has a preferred <b>naming convention</b>, which the Oakbarn Brewery used. The naming convention lets you (the user)
-        know the Interface and port, plus the Type (Digital Output, Temperature Probe type, Hysteresis, PID and so on), then what it
-        is: the Label (displayname). The last part of a Name tells you the Tab (Workspace). While at first it may seem somewhat
-        convoluted, you may find it familiar and useful, but that is strictly up to you. You can give your own Name rather than the
-        suggested one when you add a new Device (Element).</p>
+      <p>Skynet has a preferred <b>naming convention</b>, which the Oakbarn Brewery used. A Name tells you (the user) the
+        <b>Interface</b> and <b>Port</b>, then the <b>Type</b> (Digital Output, Temperature Probe type, Heating Element, Valve and so
+        on), then what it is: the <b>Label</b> (displayname), which you give it in most cases. The last part of a Name tells you the
+        <b>Tab</b> (Workspace). At first it may seem a bit complicated, but you may find it familiar and useful; that is up to you.
+        You can give your own Name instead of the suggested one when you add a new Device (Element). <b>Names cannot have spaces</b>:
+        the underscore <code>_</code> separates the parts of a Name, and a space in the Label part becomes a tilde <code>~</code>.</p>
       <p><b>When importing</b>, your BruControl Names are changed to the Skynet naming convention, like everything else that comes
         in (Skynet Rule 15.1). Every change is listed in the import report, and Processes are updated to the new Names. You may choose
         to keep your BruControl Names instead, but we will ask you twice, because <b>the Skynet way is better in the end</b>: one look at
         a Name tells you the Interface, port, type, Label and Tab, and every new Device you add will have a Skynet Name anyway.</p>
       <p class="example">Example: <code>MB_A0_10KNTC_Mash~Tun_SP</code> &nbsp;=&nbsp; Interface <i>MB</i>, port <i>A0</i>, type
-        <i>10KNTC</i> (a 10K thermistor probe), Label <i>Mash~Tun</i>, Tab <i>SP</i>.</p>
+        <i>10KNTC</i> (a 10K thermistor probe), Label <i>Mash Tun</i> (its space is now <code>~</code>), Tab <i>SP</i>.</p>
     </div>
 
     <div class="card topic">
@@ -257,12 +263,21 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
       <p>So there is a lot to digest in how Globals go from BruControl to Skynet, but we do them <b>one by one</b>, and you decide how
         each is handled in Skynet. After a few questions, the Importer tells you what it thinks you should do, and you can accept it or
         choose a different option.</p>
+      <h3>Importing a recipe needs no Globals</h3>
+      <p>In BruControl, importing a BeerSmith XML file took many Globals with the API turned on, and it was hard to build your own
+        Node-RED flow around the names of your Globals, because there was no standard. <b>In Skynet, none of those Globals are
+        needed</b>, and no one has to write a Node-RED flow to import a Beer.xml. Skynet imports a <b>Beer.xml</b> file or a
+        <b>BeerSmith .bsmx</b> file without a single line of code.</p>
+      <p>In fact, if the Importer finds (with your help) that some Globals were only used for a Node-RED import of an XML recipe, those
+        Globals and the Scripts that go with them are <b>not imported</b>, because they are not needed any more.</p>
     </div>
 
     <div class="card">
       <h2>How we will guide you</h2>
       <ol class="guide">
-        <li><b>Pick your BruControl config file.</b> We look in <code>Documents\BruControl</code> first, or a folder you choose.</li>
+        <li><b>Pick your BruControl config file.</b> We look in <code>Documents\BruControl\Config Backup</code> first and list
+          its backup files (<code>.bak</code>). Below them we list the config files (<code>.brucfg</code>) in <code>Documents\BruControl</code>.
+          You can also pick another folder that has a BruControl <code>.bak</code> or <code>.brucfg</code> file.</li>
         <li><b>Boards.</b> We show each BruControl board and its COM port or address, so you can check them.</li>
         <li><b>Tabs and items, one question at a time.</b> Each workspace becomes a Tab. For each BruControl item we ask you a few
           plain questions (is this a pump, a valve, a vessel? what kind?) so it becomes the right Skynet Device, Widget or Template.</li>
@@ -270,6 +285,7 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
         <li><b>Save the Schema</b> and send it to your Skynet Brain, with a report of everything that changed.</li>
       </ol>
       <p class="muted">Nothing is saved or changed until the last step, and you can go Back at any time.</p>
+      <p class="muted">Your <code>.bak</code> or <code>.brucfg</code> file is only read. Nothing is done to it, so it is unchanged after you import it.</p>
     </div>
 
     <div class="buttons"><button id="back2">◀ Back</button><span class="spacer"></span><button class="primary" id="startBtn">Start ▶</button></div>
@@ -282,6 +298,8 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <p class="lead">BruControl saves its whole setup in one config file that ends in <code>.brucfg</code>. Pick the one you want to bring into Skynet.
     A BruControl backup (a file that ends in <code>.bak</code>, like <code>default.brucfg.20260615.bak</code>) is the same file inside, so you can pick one of those too.
     <b>One config file makes one Schema.</b> If you have more than one, import each one on its own; they are never combined.</p>
+    <p class="muted">The list shows BruControl's backups (<code>.bak</code>) from <code>Documents\BruControl\Config Backup</code> first, newest first,
+    then the config files (<code>.brucfg</code>) in <code>Documents\BruControl</code>. The file you pick is only read and is never changed.</p>
 
     <div class="card">
       <div class="buttons"><button class="primary" id="browseBtn" title="Windows' Open box, in Documents\BruControl, where BruControl keeps its config files and backups (.brucfg or .bak)">📄 Browse for the config file…</button>
@@ -291,7 +309,7 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
         <input id="folder" spellcheck="false" title="The folder to look in. Type or paste a folder and press Enter, or use Change folder.">
         <button id="lookBtn" title="Look in the folder typed in the box">Look</button>
         <button id="pickBtn" title="Pick a folder with Windows' Browse For Folder box">📁 Change folder…</button>
-        <button id="homeBtn" title="Go back to Documents\BruControl">⌂ Documents\BruControl</button>
+        <button id="homeBtn" title="Look in Documents\BruControl again: its .brucfg config files, and the .bak backups in its Config Backup folder">⌂ Documents\BruControl</button>
       </div>
       <p id="folderNote" class="muted"></p>
 
@@ -318,7 +336,15 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
   <section class="step hidden" id="step4">
     <div class="buttons top"><button id="back4a">◀ Back</button><span class="spacer"></span><button class="primary" id="next4a">Next ▶</button></div>
     <h1>Names</h1>
-    <p class="lead">You picked <b id="chosen"></b>. How should your items be named in Skynet?</p>
+    <p class="lead">You picked <b id="chosen"></b>. First your units, then how your items should be named in Skynet.</p>
+    <h2>Units</h2>
+    <div class="card" id="unitsCard">
+      <p>Which units does your brewery use? Every temperature, size and volume in the next steps uses them.</p>
+      <label class="choice"><input type="radio" name="units" value="US" checked> <b>US</b>: Gallons, °F (Fahrenheit), inches, pounds</label>
+      <label class="choice"><input type="radio" name="units" value="Metric"> <b>Metric</b>: Liters, °C (Celsius), centimeters, kilograms</label>
+      <p class="small" id="unitsNote"></p>
+    </div>
+    <h2>Names</h2>
     <div class="card">
       <label class="choice"><input type="radio" name="names" value="skynet" checked> <b>Skynet names (recommended)</b></label>
       <p class="small">Every name tells you its Interface, Port, Type, Label and Tab at a glance (Rule 3.1), for example
@@ -330,10 +356,11 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <h2>Pictures and Sounds</h2>
     <div class="card">
       <p>The picture paths and sounds are imported. <b>The files stay where they were</b>, so BruControl continues to work normally.</p>
-      <label class="choice"><input type="checkbox" id="copyMedia"> Also copy my pictures and sounds into one folder</label>
-      <p class="small">Copies every picture into <code>media\Images\User</code> and every sound into <code>media\sounds\User</code> of the
+      <p><b>Your pictures and sounds are also copied into one folder with subfolders.</b></p>
+      <p class="small">Every picture is copied into <code>media\Images\User</code> and every sound into <code>media\sounds\User</code> of the
         Skynet Panel, so they are all together if you move to a Pi or another computer. They are never deleted in their original
         spot, just copies made.</p>
+      <p class="small">New pictures and sounds you add in Skynet are always put in these media folders too.</p>
     </div>
     <div class="buttons"><button id="back4">◀ Back</button><span class="spacer"></span><button class="primary" id="next4">Next ▶</button></div>
   </section>
@@ -347,7 +374,7 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
     <div class="buttons"><button id="back5">◀ Back</button><span class="spacer"></span><button class="primary" id="next5">Next ▶</button></div>
   </section>
 
-  <!-- Step 6: Connect your brewery (Fritz, 2026-11-07): what is connected to what, built one piece at a time -->
+  <!-- Step 6: Connect your brewery (OakBarn Brewery, 2026-11-07): what is connected to what, built one piece at a time -->
   <section class="step hidden" id="step6">
     <div class="buttons top"><button id="back6a">◀ Back</button><span class="spacer"></span><button class="primary" id="next6a">Next ▶</button></div>
     <h1>Connect your brewery</h1>
@@ -355,10 +382,18 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
       joined to. Here you tell Skynet <b>what is connected to what</b>, one piece at a time. We made a first guess from your names and
       your Scripts; check each one and change what is wrong.</p>
 
+    <div class="card buildCard">
+      <h2>🔨 Build Tab pages: build each Tab as it is in your brewery</h2>
+      <p>Each Tab you are importing gets its own <b>Build Tab page</b>, one at a time, in the order they were in BruControl. A Tab you
+        left unticked has no page. Each one opens in the <b>Skynet Panel's own Build Tab</b>, the same one you use in the Panel, in its own
+        window. No board is connected there, and <b>Processes</b> are greyed out (your Scripts become Processes in a later step).</p>
+      <div id="buildPages"></div>
+    </div>
+
     <div class="card rhyme">
       <h2>How a manifold is built</h2>
       <div class="cards two">
-        <div><p class="muted small">The old song (<i>Dem Bones</i>, 1928): <button id="voiceBtn" class="small" title="Hear these lines in a comic voice (Fritz's own clip)">▶ Hear it</button></p>
+        <div><p class="muted small">The old song (<i>Dem Bones</i>, 1928): <button id="voiceBtn" class="small" title="Hear these lines in a comic voice (OakBarn Brewery's own clip)">▶ Hear it</button></p>
           <p class="verse"><i>Toe bone connected to the foot bone,<br>Foot bone connected to the heel bone,<br>Heel bone connected to the ankle bone,<br>Ankle bone connected to the leg bone ...</i></p></div>
         <div><p class="muted small">Your brewery is built the same way:</p>
           <p class="verse"><i>Outlet connected to the valve,<br>Valve connected to the pump,<br>Pump connected to the hose,<br>Hose connected to the mash tun ...</i></p></div>
@@ -371,8 +406,8 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
 
     <div class="card">
       <h2>Your vessels</h2>
-      <p class="small muted">Guessed from your names and Scripts. The Hot Side (HLT, Mash Tun, Boil Kettle) is joined below; a
-        Fermenter is on the Cold Side and has its own questions.</p>
+      <p class="small muted">The vessels from the Vessels step (go Back to rename, add or remove one). The Hot Side (HLT, Mash Tun, Boil
+        Kettle) is joined below; a Fermenter is on the Cold Side and has its own questions.</p>
       <div id="cnVessels"></div>
       <div class="buttons"><button id="cnAddVessel" title="Add a vessel the guess missed">➕ Add a vessel</button></div>
     </div>
@@ -382,9 +417,19 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
         <h2>A picture as a guide</h2>
         <div class="folderRow"><label for="cnPicPick">Picture</label><select id="cnPicPick" title="A picture of your brewery to join the pieces on. It is only a guide and is not saved."></select>
           <label class="btnlike" title="A photo or drawing of your brewery from this computer. It stays on this computer.">📷 Use a photo or drawing…<input type="file" id="cnPicFile" accept="image/*" hidden></label></div>
-        <p class="small muted">Drag each vessel, pump and valve onto its place. <b>Click one, then another</b> to join them. The picture is
-          only a guide: it is not saved and nothing reads it.</p>
-        <div id="cnPic"><img id="cnPicImg" alt=""><svg id="cnLines"></svg><div id="cnChips"></div></div>
+        <p class="small muted">Drag each vessel, pump and valve onto its place. <b>Click one</b> (it gets a yellow border), <b>then another</b>,
+          and a line joins them. A <b>blue</b> line is a <b>Pipe</b> (with its fittings), a <b>yellow</b> line is a <b>Hose</b>: right-click a line to
+          change it. Click a line to pick it, then press <b>Delete</b> to remove it. The picture is only a guide: it is not saved and nothing reads it.</p>
+        <button class="primary" id="cnOpenPic" title="The picture on its own screen, as large as the window">🖼 Open the picture screen</button>
+        <div id="cnStage">
+          <div class="cnStageBar"><b>A picture as a guide</b>
+            <button id="cnStart" title="Every piece back in the first tidy columns: twice as many columns as vessels, the left most vessel in the first column, the right most in the last">↺ Start</button>
+            <button id="cnSet" title="The left most vessel moves one column right and the right most one column left, with a column between all the vessels">Set</button>
+            <span class="small">Click one piece, then another, to join them. Blue = Pipe, yellow = Hose (right-click a line). Click a line, then Delete, to remove it.</span>
+            <span class="spacer"></span><button id="cnClosePic" title="Back to the page (Esc)">◀ Back</button>
+            <button class="primary" id="cnPicNext" title="The list of what is connected to what, on its own screen">Next ▶ (the list)</button></div>
+          <div id="cnPic"><img id="cnPicImg" alt=""><svg id="cnLines"></svg><div id="cnChips"></div></div>
+        </div>
         <h3>Ask an AI about my picture (your choice)</h3>
         <p class="small">The Importer itself never uses an AI. This button <b>copies a ready-made question</b> and <b>opens the free AI site you
           pick</b>. There, add your picture of the Hot Side and paste the question. Then copy the AI's answer back here.
@@ -397,7 +442,11 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
       </div>
 
       <div class="card" id="cnChainCard">
+        <div class="cnListBar"><b>What is connected to what</b><span class="spacer"></span>
+          <button id="cnListBack" title="Back to the picture screen">◀ Back (the picture)</button>
+          <button class="primary" id="cnListNext" title="Back to the page, at the Fermenters (Esc)">Next ▶</button></div>
         <h2>What is connected to what</h2>
+        <button class="primary" id="cnOpenList" title="The list on its own screen, as large as the window">📋 Open the list screen</button>
         <div id="cnChains"></div>
         <div class="buttons"><button id="cnNewChain" title="Start a new chain at a vessel opening, a pump or a valve">➕ Start a new chain</button></div>
         <div id="cnLoose"></div>
