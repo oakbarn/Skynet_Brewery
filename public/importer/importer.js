@@ -192,7 +192,7 @@ async function convert() {
   show(5);
   const box = $('#convBody'); box.innerHTML = '<p class="muted">Making the Import Copy and converting it…</p>';
   try {
-    const r = await api('POST', '/api/convert', { file: state.sel, names, copyMedia: $('#copyMedia').checked });
+    const r = await api('POST', '/api/convert', { file: state.sel, names, copyMedia: true });
     state.converted = true;
     state.connect = r.connect;
     const row = (cells, cls = []) => '<tr>' + cells.map((c, i) => `<td${cls[i] ? ` class="${cls[i]}"` : ''}>${c}</td>`).join('') + '</tr>';

@@ -2,7 +2,7 @@
 // Copyright (c) OakBarn Brewery 2026
 // The Importer's page 6, Connect your brewery (Rule 15.4, Fritz 2026-11-07). The rules of the chains, the guesses and reading an
 // AI's answer are in connect.js (shared with the Importer's server); this file only draws the page and keeps the brewer's answers.
-import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink, layoutPieces, pipePath, hosePath, JOINS, joinOf, setJoin, setFit, addTee, chainVessel, pieceKey } from './connect.js';
+import { OPENINGS, COOLING, HEATING, AI_SITES, endKey, endText, isFinal, addLink, guessBy, usedIds, looseItems, aiQuestion, readAiAnswer, removeLink, layoutPieces, pipePath, hosePath, JOINS, joinOf, setJoin, setFit, addTee, chainVessel, pieceKey, guessVesselTemplate } from './connect.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -21,17 +21,36 @@ export function startConnect(data, { toast } = {}) {
   wire();
   pictureChoices();
   renderAll();
+  loadTemplates();
 }
+// the Skynet vessel formats (the Panel's own Vessel Templates and drawings, shared on this computer)
+let VT = null;
+async function loadTemplates() {
+  if (!VT) { try { VT = await (await fetch('/api/vessel-templates', { headers: { 'X-Skynet-Importer': '1' } })).json(); if (!Array.isArray(VT)) VT = []; } catch { VT = []; } }
+  for (const v of S.parts.vessels) if (!v.template) { v.template = guessVesselTemplate(v, VT); v.templateGuess = true; }
+  renderVessels(); renderPicture();
+}
+const tplOf = v => VT?.find(t => t.id === v?.template);
 
 function renderAll() { renderVessels(); renderChains(); renderFerm(); renderPicture(); }
 
 // ---- the vessels
+// Build your vessels, one at a time (OakBarn Brewery, 2026-11-08): "which template matches your vessel the best", with every Skynet
+// vessel format as a picture to click. The answer is saved with the vessel; the Vessel Device is built from it.
 function renderVessels() {
-  $('#cnVessels').innerHTML = `<table class="cnTable"><tr><th>Vessel</th><th>Side</th><th></th></tr>${S.parts.vessels.map((v, i) => `<tr>
+  const vs = S.parts.vessels; if (S.vi >= vs.length || !(S.vi >= 0)) S.vi = 0;
+  const cur = vs[S.vi], ct = tplOf(cur);
+  const build = !cur ? '' : `<div class="cnBuild"><h3>Build your vessels: Vessel ${S.vi + 1} of ${vs.length}, <b>${esc(cur.name)}</b></h3>
+    <p class="small">Which template matches your vessel the best? Click the one that looks most like it.${cur.templateGuess ? ' <span class="cnTag">guess from the name</span>' : ''}</p>
+    ${VT ? `<div class="cnTpls">${VT.map(t => `<button class="cnTpl${t.id === cur.template ? ' on' : ''}" data-tpl="${esc(t.id)}" title="${esc(t.name)}${t.integrated ? ' (heater built in)' : ''}"><img src="${esc(t.image)}" alt="" loading="lazy"><span>${esc(t.name)}</span></button>`).join('')}</div>` : '<p class="muted">Loading the vessel templates…</p>'}
+    <div class="buttons"><button data-vstep="-1"${S.vi ? '' : ' disabled'}>◀ Previous vessel</button><span class="spacer"></span>
+      ${S.vi + 1 < vs.length ? `<button class="primary" data-vstep="1" title="Keep this template and go on to the next vessel">Save, next vessel ▶ (${esc(vs[S.vi + 1].name)})</button>` : `<span class="small">${ct ? '✅ ' + esc(cur.name) + ': ' + esc(ct.name) : ''}</span>`}</div></div>`;
+  $('#cnVessels').innerHTML = `<table class="cnTable"><tr><th>Vessel</th><th>Side</th><th>Template</th><th></th></tr>${vs.map((v, i) => `<tr${i === S.vi ? ' class="on"' : ''}>
     <td><input data-v="${i}" data-f="name" value="${esc(v.name)}" maxlength="40" title="The vessel's name"></td>
     <td><select data-v="${i}" data-f="side" title="Hot Side vessels are joined here; a Fermenter (Cold Side) has its own questions">
       <option value="hot"${v.side === 'hot' ? ' selected' : ''}>Hot Side</option><option value="cold"${v.side === 'cold' ? ' selected' : ''}>Cold Side (Fermenter)</option></select></td>
-    <td><button data-vdel="${i}" title="Remove this vessel (the guess was wrong)">✖</button></td></tr>`).join('')}</table>`;
+    <td><button class="cnTplPick" data-vpick="${i}" title="Pick this vessel's template">${tplOf(v) ? `<img src="${esc(tplOf(v).image)}" alt="">${esc(tplOf(v).name)}` : 'Pick…'}</button></td>
+    <td><button data-vdel="${i}" title="Remove this vessel (the guess was wrong)">✖</button></td></tr>`).join('')}</table>${build}`;
 }
 function vesselEdit(e) {
   const i = e.target.dataset.v; if (i === undefined) return;
@@ -222,7 +241,7 @@ function renderPicture() {
   const used = usedIds(S.chains, S.fermenters);
   // a vessel looks like a vessel, a pump like a pump (the Skynet drawings), a valve like a valve
   $('#cnChips').innerHTML = pieces().map(p => `<div class="cnChip ${p.kind}${picked === p.key ? ' picked' : ''}${p.kind !== 'vessel' && !used.has(p.key) ? ' loose' : ''}" data-chip="${esc(p.key)}"
-    style="left:${(p.at.x * 100).toFixed(2)}%;top:${(p.at.y * 100).toFixed(2)}%" title="${esc(p.label)}: drag it to its place; click it, then click another piece to join them"><img src="${CHIP_PICS[p.kind]}" alt="" draggable="false"><span>${esc(p.label)}</span></div>`).join('');
+    style="left:${(p.at.x * 100).toFixed(2)}%;top:${(p.at.y * 100).toFixed(2)}%" title="${esc(p.label)}: drag it to its place; click it, then click another piece to join them"><img src="${esc(p.kind === 'vessel' && tplOf(S.parts.vessels.find(v => 'vessel:' + v.key === p.key))?.image || CHIP_PICS[p.kind])}" alt="" draggable="false"><span>${esc(p.label)}</span></div>`).join('');
   drawLines();
 }
 const CHIP_PICS = { vessel: '/media/Images/Skynet/Vessels/Skynet_Generic_Brew_Vessel_Widget.svg', pump: '/media/Images/Skynet/Pumps/Pump_Red_Rip_Off.svg',
@@ -347,7 +366,11 @@ function wire() {
   if (wired) return; wired = true;
   $('#cnVessels').addEventListener('change', vesselEdit);
   $('#cnVessels').addEventListener('click', e => {
-    const i = e.target.dataset.vdel; if (i === undefined) return;
+    const b = e.target.closest('button'), d = b?.dataset ?? {};
+    if (d.tpl) { const v = S.parts.vessels[S.vi]; v.template = d.tpl; v.templateGuess = false; renderVessels(); renderPicture(); return; }
+    if (d.vstep) { S.vi += Number(d.vstep); renderVessels(); $('#cnVessels').scrollIntoView({ block: 'start' }); return; }
+    if (d.vpick) { S.vi = Number(d.vpick); renderVessels(); return; }
+    const i = d.vdel; if (i === undefined) return;
     const v = S.parts.vessels[i];
     S.parts.vessels.splice(i, 1);
     S.chains = S.chains.map(c => ({ ...c, steps: c.steps.filter(s => !(s.to.kind === 'vessel' && s.to.key === v.key)) })).filter(c => !(c.start.kind === 'vessel' && c.start.key === v.key) && c.steps.length);

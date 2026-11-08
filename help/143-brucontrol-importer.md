@@ -83,11 +83,10 @@ Pick how your items are named in Skynet:
   characters a name may not have still change.
 
 **Pictures and Sounds:** the picture paths and sounds are imported, and the files stay where they were, so BruControl
-continues to work normally. The tick box **Also copy my pictures and sounds into one folder with subfolders (Recommended)**
-is ticked to start with: every picture is then copied into `media\Images\User` and every sound
+continues to work normally. A copy of each one is always made too (it is not a question): every picture is copied into `media\Images\User` and every sound
 into `media\sounds\User` of the Skynet Panel, so they are all together if you move to a Pi or another computer, and the items
 use the copies. They are never deleted in their original spot, just copies made, and a copy already there is never written over.
-Untick it to keep only the paths. New pictures and sounds you add in Skynet are always put in its media folders.
+New pictures and sounds you add in Skynet are always put in its media folders.
 
 Your BruControl **DisplayName** becomes the **Label**, the name shown on the Tab. A blank DisplayName: the Label is the Name,
 and it is not shown on the Tab.
@@ -135,6 +134,10 @@ song, *Skynet - Outlet to Valve*, made by OakBarn Brewery; it never plays by its
 
 - **Your vessels.** Guessed from your names and Scripts (HLT, Mash Tun, Boil Kettle, Fermenter). Rename, remove or add one.
   The **Hot Side** vessels are joined here; a **Fermenter** (Cold Side) has its own questions.
+- **Build your vessels**, one at a time: **which template matches your vessel the best?** Every Skynet vessel format is shown
+  as its picture (the Panel's own Vessel Templates); click the one that looks most like your vessel. The first pick is a guess
+  from the name. **Save, next vessel ▶** goes on to the next one. Your vessel then looks like that template on the picture
+  screen, and the answer is saved with it, so its Vessel Device can be built from it.
 - **What is connected to what.** Each **chain** starts at a vessel opening (or a pump or valve), then says what that piece is
   **connected to**, then what *that* is connected to, until it reaches an **end**: a vessel opening, **Tap Water**, a
   **Drain**, a **Quick Disconnect (QD)** or **Not connected**. A QD also asks **Male or Female** and **Open or Shut-off**; a

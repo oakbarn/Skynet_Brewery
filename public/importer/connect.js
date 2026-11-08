@@ -295,6 +295,23 @@ export function readAiAnswer(text, parts) {
   return out;
 }
 
+// ---- Build each vessel into a Vessel Device (OakBarn Brewery, 2026-11-08: "Start with a dialog to build the imported vessels into a
+// Vessel Device ... which template matches your vessel the best and have all our sample vessel formats"). The first guess comes
+// from the vessel's name and side; the brewer picks the template that looks most like the real one. templates: [{ id, vtype }]
+export function guessVesselTemplate(v, templates = []) {
+  const has = id => templates.some(t => t.id === id) ? id : '';
+  const n = `${v?.key ?? ''} ${v?.name ?? ''}`;
+  if (v?.side === 'cold' || /ferm|fv\b|conical|unitank/i.test(n)) return has('Fermenter');
+  if (/\bhlt\b|hot liquor/i.test(n)) return has('HLT');
+  if (/mash|\bmlt\b|\bmt\b/i.test(n)) return has('Mash_Tun');
+  if (/boil|kettle|\bbk\b/i.test(n)) return has('Brew_Kettle');
+  if (/brewzilla|robobrew/i.test(n)) return has('Kettle_Brewzilla_Electric');
+  if (/grainfather/i.test(n)) return has('Kettle_Grainfather_Electric');
+  if (/foundry/i.test(n)) return has('Kettle_Foundry_Electric');
+  if (/digiboil/i.test(n)) return has('Kettle_DigiBoil_Electric');
+  return has('Generic_Brew_Vessel_Widget') || templates[0]?.id || '';
+}
+
 // ---- what is saved in the Schema file: the chains as they are, plus each link with the names spelled out
 export function connectReport(state) {
   const { parts, chains = [], fermenters = [] } = state;
