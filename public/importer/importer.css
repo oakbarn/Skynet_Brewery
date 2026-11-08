@@ -29,8 +29,9 @@ table.words th { background: var(--panel2); }
 #files { width: 100%; border-collapse: collapse; }
 #files th, #files td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
 #files td:nth-child(2) { white-space: normal; font-weight: 600; }
-#files tbody tr { cursor: pointer; }
-#files tbody tr:hover { background: var(--panel2); }
+#files tbody tr[data-i] { cursor: pointer; }
+#files tbody tr.group th { background: var(--panel2); font-size: .9em; padding-top: 10px; }
+#files tbody tr[data-i]:hover { background: var(--panel2); }
 #files tbody tr.sel { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 .note { background: var(--panel2); border-left: 4px solid var(--warn); padding: 8px 10px; border-radius: 4px; }
 #peekBody table { border-collapse: collapse; margin: 6px 0 10px; }

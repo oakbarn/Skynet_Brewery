@@ -42,13 +42,18 @@ Click **Start ▶**.
 config files, showing `.brucfg` files and BruControl's backups (`.bak`): pick yours and it is chosen. You can also pick from the list:
 
 The Importer looks **only in Documents\BruControl** first (the real Documents folder, even when Windows keeps it on
-OneDrive). It lists every BruControl config file (`.brucfg`) there, newest first, with the date it was saved and its size.
+OneDrive). The list has two parts. First come BruControl's **backups** (`.bak`) from
+**Documents\BruControl\Config Backup**, newest first. Below them come the **config files** (`.brucfg`) in Documents\BruControl,
+newest first. Each shows the date it was saved and its size. The file you pick is only read; nothing is done to it, so it is
+unchanged after the import.
 BruControl may keep a **default config** there too; it is listed last and marked *(BruControl default)*.
 
 **Backups work too.** BruControl backups end in `.bak` (for example `default.brucfg.20260615.bak`). A backup is the same
-config file inside, so it imports the same way. Backups are listed after your own config files, marked *(backup of
+config file inside, so it imports the same way. Backups are listed first, marked *(backup of
 2026-06-15)*, and the Schema is named after it, for example `default_Backup_2026-06-15`. BruControl keeps its backups in
 **Documents\BruControl\Config Backup**; everything there is listed too (backups and any `.brucfg` you put there), with *Config Backup\* in front of the name.
+To look somewhere else, use **📁 Change folder…** (any folder with a `.bak` or `.brucfg` file) or **📄 Browse for the config
+file…**; **⌂ Documents\BruControl** goes back to BruControl's own folder.
 
 - **Typing a folder:** a full folder like `D:\Brewing` works. A short one like `\downloads` or `Downloads` means that folder
   in your own Windows folder (`C:\Users\<you>\Downloads`).

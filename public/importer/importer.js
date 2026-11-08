@@ -53,7 +53,10 @@ function render(list) {
   $('#folderNote').classList.remove('note');
   $('#folderNote').textContent = !list.exists ? '' : list.folder.toLowerCase() === home.toLowerCase() ? 'This is BruControl\'s usual folder.' : '';
   const tb = $('#files tbody');
-  tb.innerHTML = list.files.map((f, i) => `<tr data-i="${i}" class="${f.path === state.sel ? 'sel' : ''}">
+  // two lists in one table (Fritz, 2026-11-08): BruControl's backups (.bak) first, then the config files (.brucfg)
+  const head = (f, i) => i && f.isBackup === list.files[i - 1].isBackup ? '' : `<tr class="group"><th colspan="4">${f.isBackup
+    ? 'BruControl backups (.bak), from the Config Backup folder' : 'BruControl config files (.brucfg)'}</th></tr>`;
+  tb.innerHTML = list.files.map((f, i) => head(f, i) + `<tr data-i="${i}" class="${f.path === state.sel ? 'sel' : ''}">
     <td><input type="radio" name="cfg" ${f.path === state.sel ? 'checked' : ''} aria-label="Pick ${esc(f.name)}"></td>
     <td>${f.sub ? `<span class="muted">${esc(f.sub)}\\</span>` : ''}${esc(f.name)}${f.isDefault ? ' <span class="muted">(BruControl default)</span>' : ''}${f.isBackup ? ` <span class="muted" title="A backup BruControl made of a config file. It is the same config file inside and imports the same way.">(backup${f.backupDate ? ` of ${esc(f.backupDate)}` : ''})</span>` : ''}</td><td>${esc(f.modified)}</td><td>${sizeText(f.size)}</td></tr>`).join('');
   $('#files').classList.toggle('hidden', !list.files.length);
@@ -82,7 +85,7 @@ async function look(folder, remember = true) {
 async function select(i) {
   const f = state.files[i]; if (!f) return;
   state.sel = f.path;
-  for (const tr of document.querySelectorAll('#files tbody tr')) { const on = Number(tr.dataset.i) === i; tr.classList.toggle('sel', on); tr.querySelector('input').checked = on; }
+  for (const tr of document.querySelectorAll('#files tbody tr[data-i]')) { const on = Number(tr.dataset.i) === i; tr.classList.toggle('sel', on); tr.querySelector('input').checked = on; }
   setNext();
   const box = $('#peek'); box.classList.remove('hidden');
   $('#peekName').textContent = f.name;
@@ -156,8 +159,8 @@ $('#browseBtn').onclick = async () => {
     if (i >= 0) select(i); else toast('That is not a BruControl config file (.brucfg) or backup (.bak).');
   } catch (e) { folderMsg(e.message); toast(e.message); }
 };
-$('#files tbody').onclick = e => { const tr = e.target.closest('tr'); if (tr) select(Number(tr.dataset.i)); };
-$('#files tbody').ondblclick = async e => { const tr = e.target.closest('tr'); if (!tr) return; await select(Number(tr.dataset.i)); next(); };
+$('#files tbody').onclick = e => { const tr = e.target.closest('tr[data-i]'); if (tr) select(Number(tr.dataset.i)); };
+$('#files tbody').ondblclick = async e => { const tr = e.target.closest('tr[data-i]'); if (!tr) return; await select(Number(tr.dataset.i)); next(); };
 for (const id of ['#back4', '#back4a']) $(id).onclick = () => show(3);
 
 // a question box whose No is the default (Enter or Esc = No), like Start Fresh (Rule 9.8)
