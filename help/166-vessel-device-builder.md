@@ -1,51 +1,46 @@
 # Build a Vessel Device step by step
 
-The **Vessel Device Builder** asks a few plain questions, one page at a time, and then builds the vessel for you as a **Vessel
-Device** (Skynet Rules 19.5 and 5.31). Its Heating Elements, its Temperature probe and a Motorized Ball Valve are **built into it**,
-like the RIMS tube's, so they can't be lost or deleted on their own.
+The **Vessel Device Builder** asks what your vessel has, then builds it for you as a **Vessel Device** (Skynet Rules 19.5 and 5.31).
+Its Heating Elements and its Temperature probe are **built into it**, like the RIMS tube's, so they can't be lost or deleted on
+their own. The BruControl Import program will ask the same questions, with the same look.
 
 ## Where to find it
 
 In **Edit layout**, open **Vessel** on the Edit layout bar and pick **🔨 Build a Vessel Device (step by step)**. It is also under
 **Add Widget > Vessels**.
 
-Each page has **◀ Back** and **Next ▶** at the top and **Next ▶** at the bottom. Back keeps what you typed. If something is missing,
-Next tells you what, in plain words, and stays on the page. **Cancel** stops; nothing is built.
+## 1. The questions
 
-## The pages
+| Question | Choices |
+| --- | --- |
+| Label | for example HLT (it can't be blank) |
+| General Type | HLT, Mash Tun, Brew Kettle, All In One, Whirlpool, Fermentor, Bright Tank. **Other** asks you to type one, and it is kept in the list as **USER: Hop Pot Strainer**. |
+| Tab | the Tab it goes on when the Build is saved |
+| Units, Volume | Gallons (Liters when Metric). It starts at 10. |
+| Height, Diameter | type both for its shape, or leave both empty for the plain vessel shape |
+| Bottom Drain | None, Center Low, Center Bottom Drain |
+| Tangential Inlet | None, Left, Right |
+| Sparge Arm / Steam Slayer | None, Right (High), Left (High) |
+| Thermowell / Probe | None, Center, Left, Right, Back Left, Back Right |
+| Heating Element | None, Left, Right, Back Left, Back Right (a second one can be added) |
+| HERMS Coil | None, Left, Right |
 
-1. **Name.** The Label (for example HLT; it can't be blank), what the vessel is (HLT, Mash Tun, Brew Kettle, All In One,
-   Fermenter, Other), the **Tab** it goes on, and the **Interface** (board) its built in parts are wired to. If the board is not
-   there yet, pick **➕ Add new Interface…**.
-2. **Size.** Units (US or Metric), **Gallons** (Liters) and the shape: **Proportional** (the plain vessel shape) or **Diameter**
-   (type its Diameter and Height). It starts at 10 gallons. See *Vessel sizing by gallons*.
-3. **Outlet.** None, **Center Outlet** (low on the side) or **Center Bottom Outlet** (a bottom drain), and the valve on it:
-   - **Motorized Ball Valve:** built into the outlet. Pick its Port.
-   - **Manual Ball Valve** or **Manual Butterfly Valve:** a Manual Valve Widget of its own, put just below the vessel, ready for you
-     to pipe to the outlet. Only a click opens or closes it, and a Process asks a person to do it (Skynet Rule 5.15).
-   - **None:** the outlet is an open IP for a pipe or hose.
-4. **Inlets.** A **Tangential Inlet** for a whirlpool (Left or Right) and a **Sparge Arm / Steam Slayer** (Upper Left or Upper
-   Right).
-5. **Heating.** How many **Heating Elements** (None to 4). For each one pick its spot (Right Element, Left Element, Right Back
-   Element, Left Back Element) and its Port. Each is one Heating Element with a Method (On/Off, Hysteresis, PID, Duty Cycle ...),
-   and one click on it turns it On or Off. Running more than one at a time is fine; ask a Licensed Electrician about your circuits.
-6. **Temperature.** None, a **Thermowell with its probe** (in from the side; pick its spot) or a **Front probe** (on the Center
-   Probe spot). Pick the probe type and its Port (or the OneWire probe number). The vessel's Heating Elements read this probe.
-7. **HERMS Coil.** None, Left or Right. It goes on that side's HERMS In and HERMS Out; flow in one comes out the other.
-8. **Check and Build.** A small picture shows a dot on every opening it uses (blue = a part built in) with a line for each thing on
-   it. Press **🔨 Build**.
+A Thermowell, Probe or Heating Element has **no IP of its own**. On an opening it closes it, like an End Cap. Two of them can't go
+on the same spot. Press **🔨 Build**.
 
-Two parts can't share a spot, and two parts can't share a Port.
+## 2. Finish it on the Build Tab
 
-## After Build
+The vessel is on the left of the **🔨 Build Tab**, showing its Heating Element, Thermowell and HERMS coil, and the openings of its
+Drain, Tangential Inlet, Sparge Arm or Steam Slayer and HERMS coil. Every opening you didn't pick is hidden.
 
-The vessel is on the **🔨 Build Tab**. Every opening you did not use is **Not Placed** (hidden; **👁 Show All** in its Properties
-shows them). Join its pipes there, or double-click it to change anything in its Properties. Then press **💾 Save Build ... > To a
-Tab** to put it on its Tab.
+The **Vessel Builder** panel is on the right. It has a line for each thing you still need to pick:
 
-**Once it is on a Tab and the layout is saved, its openings and built in parts are locked for good.** Its Name, Labels, Gallons,
+- **Heating Element** or **Thermowell / Probe**: click the line (or the small hot spot on its faint picture) and pick an
+  existing one from the list, or **➕ Add new …**, which opens the usual Add dialog. The one you pick is built into the vessel
+  and keeps its name and Port. Its readout goes on the vessel, like the HLT's on the Three Vessel sample.
+- **Drain, Tangential Inlet, Sparge Arm / Steam Slayer**: their valves and pieces come in the next update.
+
+Press **✔ Done** to close the panel. Then press **💾 Save Build ... > To a Tab** to put the vessel on its Tab.
+
+**Once it is on a Tab and the layout is saved, its openings and built in parts are locked for good.** Its Name, Labels, Volume,
 Tab and place can still change.
-
-## BruControl Import
-
-The BruControl Import program's Vessels page will ask these same pages later, with some items greyed out.
