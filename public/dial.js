@@ -67,7 +67,9 @@ export function dialSvg(e = {}, value, sp = null, text = null) {
   // the reading, colored by its zone
   const shown = text ?? (v === null ? '--' : v.toFixed(dec)) + (e.units ? String(e.units) : '');
   out.push(`<text x="${cx}" y="${cy + 52}" text-anchor="middle" font-size="${shown.length > 7 ? Math.round(30 * 7 / shown.length) : 30}" font-weight="700" class="dialVal"${zone ? ` fill="${col[zone]}"` : ' fill="currentColor"'}>${esc(shown)}</text>`);
-  return `<svg class="dial" viewBox="0 0 200 160" preserveAspectRatio="xMidYMid meet" data-zone="${zone}" role="img" aria-label="${esc(shown)}">${out.join('')}</svg>`;
+  // the picture is cut close round the drawing (Fritz, 2026-11-08: the Dial takes up most of its box): the side numbers reach
+  // past 0 and 200 and the reading ends near 152, so nothing is cut off and no empty edge is kept
+  return `<svg class="dial" viewBox="-8 3 216 151" preserveAspectRatio="xMidYMid meet" data-zone="${zone}" role="img" aria-label="${esc(shown)}">${out.join('')}</svg>`;
 }
 
 function num(x) { if (x === null || x === undefined || x === '' || typeof x === 'boolean') return null; const n = Number(x); return Number.isFinite(n) ? n : null; }
