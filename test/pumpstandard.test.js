@@ -18,3 +18,21 @@ const app = fs.readFileSync(path.join(import.meta.dirname, '..', 'public', 'app.
 assert.ok(app.includes('const PUMP_STD = { w: 300, h: 300, ends: [[285 / 300, 150 / 300], [243 / 300, 56 / 300]] };'), 'the panel puts the IPs on the standard spots');
 assert.ok(/pump: \{ type: 'digitalOut', subtype: 'pump',[^}]*w: 150, h: 150/.test(app), 'a new Pump starts 150 x 150');
 console.log('pump standard ok');
+
+// The Three Vessel sample (Fritz, 2026-11-08: a Blichmann Riptide put in place of its pump joined its center inlet to the outlet
+// pipe): its pump's pipes end on the Pump Standard spots, so any Skynet pump can be swapped in and stay joined. Pump_1 is shown
+// Left (Flip Horizontal: inlet facing the incoming pipe on the left, outlet up) at pipe size 10.
+{
+  const cfg = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '..', 'samples', 'configs', 'three-vessel-one-pump', 'config.json'), 'utf8'));
+  const e = cfg.elements.find(x => x.name === 'Pump_1');
+  assert.ok(e.w === 150 && e.h === 150 && e.flipH, 'the sample pump is 150 x 150, shown Left');
+  const spot = ([fx, fy]) => { const x = Math.round(e.x + fx * 150), y = Math.round(e.y + fy * 150); return [e.flipH ? Math.round(2 * (e.x + 75) - x) : x, y]; };
+  const ips = { in: spot([285 / 300, 150 / 300]), out: spot([243 / 300, 56 / 300]) };
+  for (const k of ['in', 'out']) {
+    const id = `dev:Pump_1:${k}`, p = cfg.graphics.find(g => g.kind === 'pipe' && (g.from === id || g.to === id));
+    assert.ok(p, `a pipe is on the pump ${k}`);
+    const end = p.from === id ? p.points[0] : p.points[p.points.length - 1];
+    assert.ok(Math.hypot(end[0] - ips[k][0], end[1] - ips[k][1]) <= 1.5, `the ${k} pipe ends on the pump's ${k} IP (${end} vs ${ips[k]})`);
+  }
+  console.log('three vessel sample pump pipes ok');
+}
