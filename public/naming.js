@@ -404,7 +404,7 @@ export const cloneNumber = name => +(/_Clone_(\d+)$/.exec(name ?? '')?.[1] ?? 0)
 export const WIDGET_TYPE_IDS = {
   picture: 'PIX', text: 'TXT', label: 'LBL', valueWidget: 'VAL', timeWidget: 'TM', dateTimeWidget: 'DT', timer: 'TMR',
   soundPlayer: 'SND', switch: 'SW', pushButton: 'PB', pulseButton: 'PL', led: 'LED', manualValve: 'MV', tapValve: 'TWV',
-  alarm: 'ALM', override: 'OVR',
+  alarm: 'ALM', override: 'OVR', chart: 'CHT',
 };
 // the Type of a Widget: by its type (an element) or its kind (a Text, an Override); a Manual Valve is an IP fitting (tap: a Tap
 // Water Valve, TWV)

@@ -17,7 +17,7 @@ assert.match(own, /with: \['tap', 'Toggle', 'sel', PIC_TAP\(it\.tap\)\]/, 'Turns
 assert.match(own, /attr: PIC_POP/, 'the second picture is in the Overlay pop-up');
 assert.match(own, /\['locked', '', 'lock', null, false, false, \{ inTitle: true \}\]/, 'Properties: the lock in the title line');
 assert.match(app, /if \(isPicW\(it\)\) return pictureWidgetFields\(it, item\)/, 'its Properties are the drill-down');
-assert.match(app, /isDrillDev\(item\) \|\| isDataW\(item\) \|\| isPicW\(item\)\) && !String\(work\.label/, 'the Label is never blank');
+assert.match(app, /isDrillDev\(item\) \|\| isDataW\(item\) \|\| isPicW\(item\)( \|\| item\.type === 'chart')?\) && !String\(work\.label/, 'the Label is never blank');
 // the Add box: Label and Picture first, then the rest; Enter goes Label, Picture, Add Widget
 const add = app.slice(app.indexOf('async function newPictureDialog('), app.indexOf('// ---- Thermowell'));
 assert.match(add, /'Type a Label first \(1\. Label\)' : !w\.imageOff/, 'Add Widget says what is missing');

@@ -53,6 +53,8 @@ table.words th { background: var(--panel2); }
 #convBody th, #convBody td { border: 1px solid var(--line); padding: 3px 8px; text-align: left; }
 #convBody td.n { text-align: right; }
 #convBody td.c { text-align: center; }
+#convBody tr.ask td { background: var(--panel2); white-space: normal; }
+#convBody tr.ask button { margin: 0 6px 6px 0; }
 #ask { background: var(--panel); color: inherit; border: 1px solid var(--warn); border-radius: 10px; max-width: 620px; }
 #ask::backdrop { background: rgba(0, 0, 0, 0.5); }
 #ask h2 { margin-top: 0; }

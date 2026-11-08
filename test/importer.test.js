@@ -185,3 +185,14 @@ console.log('importer Schema file tests passed');
   assert.equal(conv.devices.length, 3, 'the converted file is not changed');
   assert.deepEqual(dropEmptyInterfaces(conv).dropped, ['LV1', 'Test'], 'none ticked: every empty one left out');
 }
+
+// Tabs with no items come in only when ticked, with their Placeholders (Fritz, 2026-11-08)
+{
+  const { dropEmptyTabs } = await import('../lib/importer.js');
+  const conv = { workspaces: [{ name: 'Main' }, { name: 'HV' }, { name: 'GV' }, { name: 'Far' }], elements: [{ name: 'a', workspace: 'Main' }],
+    graphics: [{ id: 'ph_1', workspace: 'GV', placeholder: {} }, { id: 'ph_2', workspace: 'HV', placeholder: {} }, { id: 'cl_1', kind: 'clone', workspace: 'Far' }] };
+  const r = dropEmptyTabs(conv, ['HV']);
+  assert.deepEqual(r.conv.workspaces.map(w => w.name), ['Main', 'HV', 'Far'], 'a Tab with a Clone always comes in');
+  assert.deepEqual(r.dropped, ['GV']); assert.equal(r.holdersDropped, 1);
+  assert.deepEqual(r.conv.graphics.map(g => g.id), ['ph_2', 'cl_1']);
+}
