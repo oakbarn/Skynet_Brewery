@@ -183,6 +183,21 @@ across Processes, so they **stay Widgets and do not become gGlobals**. It keeps 
 .API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
 Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
 
+1.27 **Code Value Widget** (OakBarn Brewery, 2026-11-08: "A Code Value Widget. It has a Value displayed in the chosen format and
+will run a Process code that is in an Attribute", "It would have the normal Label like a Regular Value Widget"; it sits here,
+next to the Value Widget it grows from). A Value Widget (Rule 1.23) with two more things: a **Format** (**Number** with Units and
+Decimals, **Time** hh:mm:ss, or **DateTime**) and a **Code** attribute that holds **Process code**. In the Code, **`{value}`**
+stands for the Value of the Widget, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}` (a Heating Element's Setpoint is its
+`.target`). `{value}` inside "quoted text" stays as typed; the Widget's own `Name.value` works too. The Code **runs once each time a person sets the Value**: a tap and Set on its Tab (even to the same
+value) or the .API (Read & Control). **A Process setting the Value does not run it**, so they can never set each other off in a
+loop, and a Brain restart does not run it. It runs like a short Process with the same words, is **not on the Processes list**,
+prints in the Console as `Name (code)`, and Stop All stops it; a new Value while it is still in a sleep or wait stops the old run.
+The Code is checked like a Process when its Properties are saved (a problem shows, the Widget is still saved); a Code with a
+problem is NOT RUN and the Console says why. It has the normal **Label** (never blank, Rule 18.15) and the Value Widget's
+Properties in the Pump's drill-down look (Rule 18.30), with Format after 3 Name and Code before X. Name `wgt_CV_Label_TabID`
+(Rule 3.14, type letters **CV**). Database and .API as Rule 6.14. The BruControl Import makes none (BruControl has no such
+element). (thread "Build a Code Value Widget", Help 161)
+
 1.24 **Making a gGlobal in a Process** (Fritz, 2026-11-06). Besides the gGlobal screen (Rule 1.19), a Process line makes a
 gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gV_X = 10` (the long word), `new gV gV_X = 10` (the
 short word) and `new value gV_X = 10` (a normal variable word with a name that starts gV_). The words are **gGlobalValue / gV**
@@ -580,6 +595,21 @@ Help 155).
   them. It draws no pipes, so its pumps and valves (with no pipe on them) are drawn for the Default pipe size. Its Tabs keep the
   sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39).
 
+2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
+Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
+reading or its Skynet Dial), a **Thermowell**, a **probe tee**, a **Probe or Thermowell built into a Vessel Device**, a Vessel's own
+Probe spot, or a **Picture Widget** that shows a probe, opens the **SetPoint pop-up** of the Heating Element that holds that
+temperature: the one whose Temperature Probe it is (older Hysteresis, PID and Deadband Devices too; a Vessel's own Probe goes to the
+Vessel's Heater first). Two or more: a short list asks which. None: a short note says so (a simulated probe still opens its
+Simulated reading pop-up). The pop-up shows the reading, whose Setpoint it is (ON or OFF, method), the Setpoint with − and +, then
+**Set + ON**, **OFF**, **Set**, **Heating method…** (the Rule 6.19 pop-up) and **Cancel**. It still asks before it turns on
+(Rule 2.33). Only Hysteresis, PID, Deadband and Precise hold a Setpoint: on On/Off or Duty Cycle, Set switches it to the first
+allowed method that does. A Tap set by hand (When tapped) still wins. Operators and admins only. Double-click still opens Properties
+(Rule 2.9).
+- **BruControl Import:** checked, not changed. Its probes and Heating Elements are the Panel's own, so they get this click in the
+  Panel; the Import keeps the probe it reads as each Heating Element's Temperature Probe. (thread "Open SetPoint dialog from
+  temperature widgets", Help 160)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
@@ -669,7 +699,7 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 3.14 **Widget names** follow `wgt_Type_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-06: "Suggested names for
 widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name is good. wgt_DT_DateTime_1_BR"). Example
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
-**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
+**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override, **CHT** Chart (Rule 1.26) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
@@ -2888,6 +2918,7 @@ Not Placed) or the dialog closes.
   Clean (always last); any step can be skipped; Whirlpool and Chill or Chill. Rule 16.3 Process names follow the steps used.
   Help 100. Checked against the BruControl Import program: no change (it does not build a Brew Process).
   (thread "Build Process and Schema Templates")
+- 2026-11-08: Added Rule 2.43 (Fritz: "Click on a Thermowell or Probe or Display of a Temperature NOT in edit Mode, Bring up SetPoint Dialog"): outside Edit layout one click on a Temperature Probe, Thermowell, probe tee, a probe built into a Vessel, or a picture showing a probe opens the SetPoint pop-up of the Heating Element that reads it. Help 160; next free Help number 161. Checked against the BruControl Import program: not changed, its probes and Heating Elements get this click in the Panel. (thread "Open SetPoint dialog from temperature widgets")
 - 2026-11-07: Rule 16.1 (Fritz): the hop stand in Whirlpool and Chill and in Chill (chill to the hop stand temperature, cooling
   water off for the hop stand time, then chill on), and the Hop Infuser for Hop Rocket Whirlpool hops. New jobs Chiller cooling
   water and Hop Infuser valve; rcp_Hop_Stand, rcp_Hop_Stand_Temp, rcp_Hop_Stand_Minutes, rcp_Hop_Infuser; Default settings Hop
@@ -2896,6 +2927,10 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.15 (Fritz): a tap water valve's Properties show On Close List on and On Open List off, greyed out; the last
   step of Skynet_Clean is open_all_valves. Checked against the BruControl Import program: a Schema file it makes is put right the
   same way when the panel opens it (Tap water valves on Close only). Help 100. (thread "Build Process and Schema Templates")
+- 2026-11-08: Added Rule 1.27 (Code Value Widget: a Value Widget with a Format and a Code attribute of Process code that runs
+  each time a person sets the Value; {value} is the Value) and its type letters CV in Rule 3.14. Help 161; next free Help number
+  162. Checked against the BruControl Import program: no change (BruControl has no such element, so the Importer makes none).
+  (thread "Build a Code Value Widget")
 - 2026-11-07: Rules 16.6 and 16.7 new (Fritz): Schema Templates (1 Vessel, 1 Vessel + 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2
   Pumps, 3 Vessel, OakBarn, Fermentor on its own), Process Templates for the 1 and 2 Vessel models, the Skynet ones filled out from
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
