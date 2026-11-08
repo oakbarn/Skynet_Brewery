@@ -18,6 +18,7 @@ import { elementNameError, fileNameError } from './names.js';
 import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames } from './semi.js';
+import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
@@ -93,7 +94,7 @@ function renderValves(all = []) {
   if (!list.length) { if (d?.open) d.close(); return; }
   if (!d) { d = h('dialog', { id: 'valveDlg', class: 'valveDlg', 'data-nomenu': true }); d.addEventListener('cancel', e => e.preventDefault()); document.body.append(d); }
   d.innerHTML = '';
-  d.append(h('h3', {}, list.every(a => a.ask) ? '📋 Brew Day' : list.every(a => a.hose) ? '🔗 Quick Disconnect hose' : '✋ Manual valve'), ...list.map(a => a.hose ? h('div', { class: 'valveAsk' },
+  d.append(h('h3', {}, list.every(a => a.ask) ? '📋 Brew Day' : list.every(a => a.hose) ? '🔗 Quick Disconnect hose' : list.every(a => !a.say || ['OPEN', 'CLOSE'].includes(a.say)) ? '✋ Manual valve' : '✋ By hand'), ...list.map(a => a.hose ? h('div', { class: 'valveAsk' },
     // Hose_1.connect = QD_1 in a Process (Rule 5.34): the hose is already drawn there; a person moves the real one and presses Done
     h('div', { class: 'valveDo' }, `PUT ${a.label} ${a.where}`),
     h('div', { class: 'muted' }, `It is drawn there on the ${a.tab || ''} Tab. The Process ${a.process} waits until you press Done.`),
@@ -107,10 +108,11 @@ function renderValves(all = []) {
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), can('operator')
       ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, '✔ Done')
       : h('span', { class: 'muted' }, 'An operator or admin must press Done.'))) : h('div', { class: 'valveAsk' },
-    h('div', { class: 'valveDo' }, `${a.open ? 'OPEN' : 'CLOSE'} ${a.label} by hand`),
-    h('div', { class: 'muted' }, `The Process ${a.process} waits until you press Done.`),
+    // a Confirmation Widget (Rule 1.28) says TURN ON / TURN OFF (a valve OPEN / CLOSE), and Done shows it On or Off
+    h('div', { class: 'valveDo' }, `${a.say || (a.open ? 'OPEN' : 'CLOSE')} ${a.label} by hand`),
+    h('div', { class: 'muted' }, `${a.confirm && a.tab ? `It is on the ${a.tab} Tab. ` : ''}The Process ${a.process} waits until you press Done.`),
     h('div', { class: 'bar' }, h('span', { class: 'spacer' }), can('operator')
-      ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, `Done: it is ${a.open ? 'open' : 'closed'}`)
+      ? h('button', { class: 'primary', onclick: guard(() => api('POST', '/ui/valve/confirm', { name: a.name })) }, `Done: it is ${a.is || (a.open ? 'open' : 'closed')}`)
       : h('span', { class: 'muted' }, 'An operator or admin must press Done.')))));
   if (!d.open) d.showModal();
 }
@@ -672,6 +674,7 @@ function updateMfs(ch) {
 const toggleMfValve = guard(async name => {
   const e = name && elByName(name); if (!e) throw new Error('This valve is not made yet: save the layout once (Edit layout > Save layout)');
   if (!can('operator')) throw new Error('Only an operator or an admin can open or close a valve');
+  if (isConfirmation(e)) return confirmByHand(e, !isOn(e.name));      // a Manual valve: done by hand, then Done (Rule 1.28)
   await setProp(e.name, 'state', !isOn(e.name));
 });
 // what a valve's IP passes (ipNode): shut while its valve is closed (null: its IP is open, flow goes through the tees)
@@ -1413,7 +1416,7 @@ function buildIp(g) {
 
 // Pumps and valves are Digital Output devices of kind "pump" or "valve". Each comes with two built-in IPs on the sides of its box:
 // a pump has an inlet and an outlet, a valve has one at each end (flow can go either way through it).
-const hasIps = e => e && !isVPart(e) && !isMfPart(e) && ((e.type === 'digitalOut' && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
+const hasIps = e => e && !isVPart(e) && !isMfPart(e) && (((e.type === 'digitalOut' || isManualPump(e)) && (e.subtype === 'pump' || e.subtype === 'valve')) || isPropValve(e) || isInline(e) || isThermowell(e));
 // (a part built into a Vessel Device's IP has no IPs of its own: it sits in the vessel's IP, Rule 5.31 exception)
 // Inline sensors sit in a pipe and always let flow through: a flow meter (from the PLC device library), or any input marked
 // "Inline in a pipe" (for example a flow switch). They get IN and OUT IPs.
@@ -2110,7 +2113,7 @@ function fillEl(n, e0) {
       break;
     case 'valueWidget': case 'timeWidget': case 'dateTimeWidget':
       text = fmtVal(e, v.value) + (e.units ? ' ' + e.units : ''); break;
-    case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led':
+    case 'digitalOut': case 'switch': case 'digitalIn': case 'pushButton': case 'pulseButton': case 'led': case MANUAL_PUMP_TYPE:
       on = !!v.state; text = on ? (e.onText ?? 'ON') : (e.offText ?? 'OFF');
       // a Heating Element run by a control method (Rule 6.19): what it is doing, like the PID's own "45 %  ▸ 152"
       if (isHeatElem(e) && on && v.method && heatMethodKey(v.method) !== 'onoff') {
@@ -2336,7 +2339,7 @@ function tapAction(e) {
 // a tap on a clone is a tap on its parent
 const elByName = n => S.config.elements.find(x => x.name === n) ?? S.config.elements.find(x => x.name === S.config.graphics.find(g => isClone(g) && g.name === n)?.of);
 const boolProp = t => t.type === 'alarm' || t.type === 'soundPlayer' ? 'active' : t.type === 'digitalIn' ? 'raw' : isVarEl(t) ? 'value' : 'state';
-const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer'].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
+const isBoolEl = t => ['digitalOut', 'switch', 'pushButton', 'pulseButton', 'led', 'digitalIn', 'alarm', 'soundPlayer', MANUAL_PUMP_TYPE].includes(t.type) || (isVarEl(t) && t.dataType === 'bool');
 
 // One click on a Method Clone (Rule 4.4): its parent switches to the Clone's method at once, then the pop-up opens on it
 async function methodCloneTap(g) {
@@ -2367,6 +2370,7 @@ async function doTap(e) {
   if (isHeatElem(t) && (act === 'heat' || act === 'toggle' || act === 'dialog')) return heatDialog(t);
   if (act === 'toggle' && isBoolEl(t)) {
     const cur = t.type === 'digitalIn' ? !!S.values[t.name]?.raw : isOn(t.name);     // simulator: the tap is the switch itself
+    if (isConfirmation(t)) return confirmByHand(t, !cur);      // a Confirmation Widget: do it by hand, then Done (Rule 1.28)
     if (e.confirm) { const r = await choose(`${S.values[t.name]?.label ?? t.name}`, [['ON', true], ['OFF', false]], cur); if (r === undefined) return; return setProp(t.name, boolProp(t), r); }
     return setProp(t.name, boolProp(t), !cur);
   }
@@ -2416,9 +2420,21 @@ const toggleManualValve = guard(async id => {
   if (!can('operator')) throw new Error('Only an operator or an admin can open or close a valve');
   if (!g.name) throw new Error('Save the layout once (Edit layout > Save layout) so this Manual Valve gets its name');
   const open = !mvOpen(g);
+  // .confirmation (on to start, Rule 1.28): "When Manually Clicked, The Popup Confirmation will still Pop Up"
+  if (isConfirmation(g) && !(await byHandAsk(g.label || g.name, byHandWords(g, open)))) return;
   await api('POST', '/ui/set', { name: g.name, prop: 'state', value: open });
   setMvOpen(g.name, open); toast(`${g.label || g.name} is ${open ? 'open' : 'closed'}`);
 });
+// A Confirmation Widget clicked on its Tab (OakBarn Brewery, 2026-11-08, Rule 1.28: "When Manually Clicked, The Popup Confirmation will
+// still Pop Up"): the pop-up asks the person to do it by hand; Done shows it On or Off (and lets a Process waiting on it go on),
+// Cancel leaves it as it was.
+function byHandAsk(label, { say, is }) {
+  return choose(`✋ ${say} ${label} by hand, then press Done`, [[`✔ Done: it is ${is}`, true]]).then(r => r === true);
+}
+async function confirmByHand(t, on) {
+  if (!(await byHandAsk(S.values[t.name]?.label || t.label || t.name, byHandWords(t, on)))) return;
+  await setProp(t.name, 'state', on);
+}
 // a Manual Valve opened or closed (here or on another screen): the layout, the edit copy and the Tab follow
 function setMvOpen(name, open) {
   for (const gs of [S.config.graphics, draft?.graphics]) for (const g of gs || []) if (isMv(g) && g.name === name) g.open = !!open;
@@ -4054,7 +4070,8 @@ function skyDevPreset(name) {
 }
 // The Close all / Open all valve lists (Rule 6.15): close_all_valves and open_all_valves in a Process, and the Brew Process's
 // PreBrew. On both by default; a tap water valve is always on Close all and never on Open all; a Manual valve is on neither.
-const VALVE_LIST_FIELDS = it => it.valveType === 'manual' ? [['_vl', 'A Manual valve is not on the Close all or Open all valves lists: a Process asks for it by name.', 'note']]
+const VALVE_LIST_FIELDS = it => it.valveType === 'manual' ? [['_vl', 'A Manual valve is not on the Close all or Open all valves lists: a Process asks for it by name.', 'note'],
+  ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP }]]
   : it.tapwater ? [['_tapClose', 'On the Close all valves list (always, for a tap water valve)', 'bool', true, false, false, { disabled: true }], ['_tapOpen', 'On the Open all valves list (never, for a tap water valve)', 'bool', true, false, false, { disabled: true }],
     ['_vl', 'A tap water valve is always on the Close all valves list and never on the Open all valves list (Rule 6.15): these can\'t be changed.', 'note']]
     : [['closeAll', 'On the Close all valves list (close_all_valves in a Process, PreBrew house cleaning)', 'bool', true], ['openAll', 'On the Open all valves list (open_all_valves, e.g. after cleaning)', 'bool', true]];
@@ -4127,13 +4144,15 @@ const PUMP = ['Pump, on / off (relay or SSR)', 'pump', 'Pump'];
 const SUMP = ['Sump pump, on / off (relay or SSR)', 'pump', 'Pump', { imageOn: 'Images/Skynet/Pumps/Pump_Sump_On.svg', imageOff: 'Images/Skynet/Pumps/Pump_Sump_Off.svg' }];
 // Fritz, 2026-11-05: one row for the Motorized Ball Valves; step 2 picks the Skynet one or the User Defined one (with pictures)
 const MBV = ['Motorized Ball Valve, open / closed (relay)', 'mbv', 'Valve'];
+// the Manual Pump Widget (Rule 1.28): in the Pumps list too, as the Manual Valve Widget is in the Valves list; it stays a Widget
+const MANUAL_PUMP_ROW = ['Manual Pump (Widget, no Port: you switch it by hand and confirm)', () => addManualPump()];
 const ELEMENT = ['Heating element, on / off (relay, SSR or contactor)', 'element', 'HE'];
 // Fritz, 2026-11-05: "instead of the Electric Kettle, Basic have Vessel Device Template and Choose then Build"
 const VESSEL_ELEMENT = ['Vessel Device Template (choose the Vessel, then Build its Heating Element)', 'vesselElement', 'HE'];
 const DEV_TYPES = () => [
   ['onoff', 'On/Off', [am('Relay module'), PUMP, SUMP, MBV, ...SKY_DEV_ROWS('digitalOut'), ELEMENT]],
   ['pumps', 'Pumps', [PUMP, ['Pump speed 0-100 % (PWM output, e.g. a MOSFET module)', 'pwmOut', 'PWM', { units: '%' }],
-    ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP]],
+    ['Pump speed 0-100 % (0-10 V output, e.g. a VFD)', 'analogOut', 'AO', { signal: '0-10V', rangeLow: 0, rangeHigh: 100, units: '%' }], SUMP, MANUAL_PUMP_ROW]],
   // the Manual Valve Widget is in the Valves list too (Fritz, 2026-11-03): it stays a Widget (Rule 1.2), its bar button stays
   ['valves', 'Valves', [MBV, ...SKY_DEV_ROWS(), am('User Defined Proportional Valve'), ['Manual Valve (Widget, no pin: only a click opens or closes it)', () => addIpFit('manualValve')],
     ['Tap Water Valve (household hose bib: a Manual Valve Widget, only a click opens or closes it)', () => addIpFit('manualValve', 'tap')],
@@ -4152,7 +4171,7 @@ const WGT_TYPES = () => [
   ['dataw', 'Value, Time and DateTime Widgets', Object.entries(DATA_W).map(([t, d]) => [`${d.word} Widget (shows a ${d.word.toLowerCase()}; a tap sets it)`, () => addThing(t, 'w_' + d.word)])],
   // Semi_Widgets_Devices (Rule 1.20): the Manual Valve Widget and the Switch, Push Button, Pulse Button and LED
   ['semi', 'Semi_Widgets_Devices (Switch, buttons, LED, Manual Valve)', [...amGroup('Semi_Widgets_Devices').map(r => [r[0], () => addThing(r[1], r[2], r[3])]),
-    ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')],
+    ['Manual Valve Widget (only a click opens or closes it)', () => addIpFit('manualValve')], MANUAL_PUMP_ROW,
     ['Tap Water Valve (household hose bib Manual Valve Widget)', () => addIpFit('manualValve', 'tap')]]],
   ['controls', 'On-screen controls', amGroup('Widgets').filter(r => !['picture', 'label', 'manual'].includes(r[1])).map(r => [r[0], () => addThing(r[1], r[2], r[3])])],
   ['vessels', 'Vessels', VESSEL_ROWS],
@@ -5113,7 +5132,36 @@ function addIpFit(fit, kind) {
   if (fit !== 'point') g.fitting = fit;
   if (isIpFit(g)) delete g.label;          // a pipe fitting has no label, only its Skynet name (Tee_1)
   if (kind === 'tap') { g.image = TAP_PIC; g.label = tapLabel(draft.graphics); }       // the Tap Water Valve (Rule 5.33)
+  if (fit === 'manualValve') g.confirmation = true;       // a Confirmation Widget to start (Rule 1.28)
   draft.graphics.push(g); giveName(g, draft.graphics); sel = { kind: 'gfx', id: g.id }; renderWs(); editItem('gfx', g.id);
+}
+// ➕ Manual Pump Widget (OakBarn Brewery, 2026-11-08: "create Manual Pump Wizard. The same types as Pump Devices", Rule 1.28): step 2
+// picks the pump from the same list as Add Pump (and the Sump pump); its drawing, IPs, Cover and Overlay are a Pump Device's. No
+// Interface or Port: it is switched by hand, so it is a Confirmation Widget (.confirmation on). Made on the 🔨 Build Tab (Rule 4.1).
+async function addManualPump() {
+  toBuild();
+  const k = await pickModel('2. Pick the pump (a Manual Pump: you switch it by hand)', [...PUMP_MODELS.map(([t, k]) => [t, k, pumpPic(k)]), ['Sump pump', 'sump', SUMP[3].imageOff]]);
+  if (!k) return;
+  const D = TD(), sump = k === 'sump';
+  let i = 1; while (draft.elements.some(e => e.type === MANUAL_PUMP_TYPE && e.label === 'Pump ' + i)) i++;
+  const e = { type: MANUAL_PUMP_TYPE, subtype: 'pump', label: 'Pump ' + i, workspace: wsName, x: D.x, y: D.y, w: 150, h: 150, ipIn: 'left', ipOut: 'right',
+    imageOff: sump ? SUMP[3].imageOff : pumpPic(k), ...(sump ? { imageOn: SUMP[3].imageOn } : { cover: 'None' }), imageOverlay: 'Images/Skynet/On_Off/Overlay_Glow_Ring.svg',
+    hideValue: true, tap: 'toggle', onText: 'ON', offText: 'OFF', confirmation: true };
+  if (!D.visible) e.visibility = 'hidden';
+  centerNew(e); stackNew(e);
+  e.name = widgetSuggestion(e); autoNamed.add(e);       // wgt_MP_Pump~1_BU (Rule 3.14): it follows its Label and Tab
+  draft.elements.push(e); sel = { kind: 'el', id: e.name };
+  renderWs(); editItem('el', e.name);
+}
+// the Manual Pump Widget's Properties: a Pump Device's (Rule 18.21) without Interface and Port, and its .confirmation switch
+function manualPumpFields(it) {
+  const T = DEVICE_TIPS;
+  return [...wgtHead({ name: `How a Process uses it, for example ${it.name || 'wgt_MP_Pump~1_BR'}.state = true: a pop-up asks you to turn it on by hand, and the Process waits for Done. It must be unique.` }),
+    ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP }],
+    ...PUMP_GRAPHIC_FIELDS(it), ...PUMP_COVER_TOGGLE(it), ...PUMP_OVERLAY(it),
+    ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
+    ['w', 'Width (pixels)', 'num', null, false, false, { tip: T.size }], ['h', 'Height (pixels)', 'num', null, false, false, { tip: T.size }],
+    wgtType('Manual Pump', 'A pump plugged into a wall outlet, switched by hand: no Interface or Port turns it (Rule 1.28).')];
 }
 // a new Tab starts with the Look's Tab back color and Tab Style (Rule 2.39); a Tab Style picked on ☰ Menu > Default tab wins
 function tabLook() {
@@ -6138,6 +6186,7 @@ const semiWidgetFields = (type, it) => {
     ['deviceControlled', 'Device controlled', 'devctl', null, false, false, { tip: `${k.title}: one of the ${SEMI_CLASS} (a Widget with an ON / OFF state). With a Device controlled, it and the Device follow each other, like a Clone. ${SEMI_TIP[type]} Only Devices with an ON / OFF state are listed (a heater is ON while Enabled); a Manual valve and an input are not. None: it only shows its own state.`, dbPop: true }],
     ...(led ? [] : [['imageOff', 'Picture', 'path', null, false, false, { tip: 'Its picture when OFF. The ⬢ beside it holds the picture when ON.', attr: SEMI_PIC_POP }]]),
     ['onText', 'Text when on', 'text', null, false, false, { tip: 'The words it shows while ON. The ⬢ beside it holds the words while OFF.', attr: SEMI_TEXT_POP }],
+    ...(['switch', 'led'].includes(type) ? [['confirmation', '.confirmation (done by hand, then Done)', 'bool', false, false, false, { tip: CONFIRM_TIP }]] : []),
     ...wgtPlace(), wgtType(k.title.replace(/ \(.*$/, ''))];
 };
 // the Label Widget: words on a Tab, nothing else
@@ -6149,8 +6198,9 @@ const labelWidgetFields = () => [...wgtHead({ label: 'The words it shows on the 
 const mvWidgetFields = it => [['_mvnow', `It is ${mvOpen(it) ? 'OPEN' : 'CLOSED'} now.`, 'note'],
   ['label', '1. Label', 'text', null, false, false, { tip: 'Shown in the "Open it by hand" message on the Tab, and the start of its name. It can\'t be blank.' }],
   ['labelVisible', 'Label Visible', 'yn', null, false, false, { tip: 'On: the Label shows on the Tab.' }],
-  ['_nmro', '2. Name', 'ro', it.name, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BR'}.state = true does not open it: it shows "Open it by hand" on the Tab and waits until someone clicks it open (= false: closed).` }],
-  ['image', 'Picture', 'sel', MV_PICS, false, false, { tip: "Fritz's Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. One click on it on its Tab opens or closes it, at any time; that is the only way it changes." }],
+  ['_nmro', '2. Name', 'ro', it.name, false, false, { tip: `Made from the Label and the Tab (Rule 3.14). A Process line ${it.name || 'wgt_MV_Valve_BR'}.state = true does not open it: it asks for it to be opened by hand and waits (= false: closed).` }],
+  ['confirmation', '.confirmation (done by hand, then Done)', 'bool', true, false, false, { tip: CONFIRM_TIP + ' Off: a Process asks on a bar at the top and waits until someone clicks the valve on its Tab.' }],
+  ['image', 'Picture', 'sel', MV_PICS, false, false, { tip: "OakBarn Brewery's Manual Ball Valve drawings, or the Tap Water Valve hose bib: its one IP is on the hose outlet and, open, it is a tap water source. A click on it on its Tab opens or closes it, at any time." }],
   ...FIT_PLACE(it), wgtType(isTapMv(it) ? 'Tap Water Valve' : 'Manual Valve')];
 // Timer Widget Properties in the Pump's drill-down look (Rule 18.30): no pictures and no background; its look is a Style (Rule 2.24)
 const TIMER_TIPS = {
@@ -7424,6 +7474,7 @@ async function editItem(kind, id) {
     if (isPicW(it)) return pictureWidgetFields(it, item);
     if (it.type === 'soundPlayer') return soundPlayerFields();      // the other Widgets: the Pump's drill-down look (Rule 18.30)
     if (SEMI_KINDS[it.type] && !it.cloneId) return semiWidgetFields(it.type, it);
+    if (isManualPump(it)) return manualPumpFields(it);       // the Manual Pump Widget (Rule 1.28)
     if (it.type === 'label') return labelWidgetFields();         // Picture Widget: the Pump's drill-down for a Widget (Rule 18.27)
     if (isGenDrill(it)) return genDeviceFields(it, item, oldF());      // every other Device: the Pump's drill-down (Fritz, 2026-11-07, Rule 18.31)
     const f = [...F.common.slice(0, 3), ...fieldsFor(it), ...(isPropValve(it) ? F.propValve : []), ...(isInline(it) && !isProbeTee(it) ? F.inlineSides : []), ...F.common.slice(3)];

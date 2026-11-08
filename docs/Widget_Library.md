@@ -69,13 +69,14 @@ A pipe fitting turned by hand and a pseudo Device (Rule 5.15, Help 87). Name Man
 | Setting | Notes |
 |---|---|
 | .state | true = open, false = closed. Only a click on it on its Tab changes it (Operators and Admins), at any time. Kept in the layout (`open`). A closed one stops flow. |
+| .confirmation | On (2026-11-08, Rules 1.28 and 5.15): a Confirmation Widget. A click asks "OPEN (CLOSE) it by hand, then press Done" and it changes only on Done. Off: a click changes it at once. |
 | Label, Show label | The Label is used in the "by hand" message |
 | Autosize to pipe, X, Y, Width, Height, Lock position | As a pipe fitting |
 | Open overlay | Images/Skynet/On_Off/Overlay_Manual_Valve_Open.svg, drawn on top while open (fixed) |
-| Picture (`image`) | Plain (the drawn valve), or Fritz's Manual Ball Valve drawings (2026-11-02, Help 110): side view, front view, on a front elbow (Images/Skynet/Valves/Manual_Ball_Valve_*_Closed.svg; the Tab shows the _Open twin while open), or the **Tap Water Valve** (below). |
+| Picture (`image`) | Plain (the drawn valve), or OakBarn Brewery's Manual Ball Valve drawings (2026-11-02, Help 110): side view, front view, on a front elbow (Images/Skynet/Valves/Manual_Ball_Valve_*_Closed.svg; the Tab shows the _Open twin while open), or the **Tap Water Valve** (below). |
 | IPs (Rule 5.24, Help 123) | **Two**, one at each pipe end (`eq:<id>:in`, `eq:<id>:out`): plain valve left and right ends; side view the outer face of each ferrule; front view both at the center of the opening; front elbow the center of the opening and the bottom ferrule face; a user's picture the middle of its left and right sides. They turn with Rotate 45; a closed valve blocks both. (Before 2026-11-04 it had one IP in its middle.) |
 
-In a Process: `ManualValve_1.state = true` (or `ManualValve_1 = true`) does not change it. It shows "✋ OPEN ... by hand, then click it on the ... Tab to confirm" at the top of every screen, the valve blinks, and the Process waits until it is clicked to that state. Reading it (`if ManualValve_1 == true`) works as for any Device.
+In a Process: `ManualValve_1.state = true` (or `ManualValve_1 = true`) does not change it at once. With .confirmation on (2026-11-08) it shows the pop-up "OPEN ... by hand" with **Done** on every screen and the Process waits; Done opens it. With .confirmation off it shows "✋ OPEN ... by hand, then click it on the ... Tab to confirm" at the top of every screen, the valve blinks, and the Process waits until it is clicked to that state. Reading it (`if ManualValve_1 == true`) works as for any Device.
 
 #### Tap Water Valve (a Manual Valve Widget, Rule 5.33, Help 141)
 A brass household hose bib with a green cross handle (Images/Skynet/Valves/Tap_Water_Valve_Hose_Bib.svg). Added as **Tap Water Valve** from Select Device Type > Valves or Select Widget Type > Semi_Widgets_Devices, or by picking its Picture on a Manual Valve. Name ManualValve_n, Label starts as **tap_water_n**.
@@ -86,6 +87,16 @@ A brass household hose bib with a green cross handle (Images/Skynet/Valves/Tap_W
 | .state | As every Manual Valve: only a click changes it; a Process asks by hand. |
 | Flow | Open: a tap water source, flow pushes out of the hose outlet with no pump, tap water Blue (Rule 5.21). Closed: blocks the hose on it. |
 
+### Manual Pump Widget (`manualPump`, 2026-11-08, Rules 1.28 and 5.15a, Help 162)
+A pump plugged into a wall outlet and switched **by hand**: no Interface or Port turns it. Added from Select Device Type > Pumps or Select Widget Type > Semi_Widgets_Devices; step 2 picks the pump from the same list as Add Pump (March 809 / 815, Chugger, Blichmann Riptide, Topsflo TD5, KegLand MKII) or the Sump pump. Name `wgt_MP_Label_TabID` (Label starts Pump 1, Pump 2 ...). 150 x 150.
+
+| Setting | Notes |
+|---|---|
+| .state | true = ON, false = OFF (its value: `wgt_MP_Pump~1_BR = true` works too). |
+| .confirmation | On to start: a click or a Process line asks "TURN ON (OFF) ... by hand, then press Done"; it shows ON or OFF only after Done, and the Process waits. Off: a click changes it at once. |
+| Graphic, Path, Orientation, Cover, Toggle, Overlay | As a Pump Device (Rule 18.21). |
+| IPs | Inlet and outlet, on the pump drawing's ports, as a Pump Device. |
+| Label, Tab, Name, X, Y, Width, Height | As every Widget. No Interface, no Port. |
 
 **Snap to align** (2026-10-28, Help 86): in Edit layout, anything with IPs that is dragged so one of its IPs comes within 10 px of another IP on the Tab jumps so the two sit exactly on each other (hold Alt to place it without the jump). On Skynet valve pictures (motorized ball, manual ball, butterfly, gas solenoid) the two IPs sit on the picture's pipe ends, not the middle of the box's sides.
 
@@ -542,3 +553,4 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-05: Sight_Glass and Sight_Glass_Caged TC Pipe Fittings (Rule 5.32, Help 139): a Length setting in inches stretches the glass; Label starts as site_glass_n. (thread "Add caged and plain sight glass fittings")
 - 2026-11-06: Tap Water Valve, a Manual Valve Widget with a household hose bib picture, one IP on its hose outlet, a tap water source while open, Label tap_water_n (Rule 5.33, Help 141). (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Pointer to the Valve Tee and Supply Manifolds (Rule 5.35): on the Elbows, Tees … list, but they are Skynet_Integrated_Devices (Device Library 5.4). (thread "Add valve Tees and supply manifolds")
+- 2026-11-08: Manual Pump Widget (`manualPump`, Rule 5.15a) and the `.confirmation` switch on the Manual Valve Widget (on), Manual valve Devices (on), Switch and LED (off) (Rule 1.28). (thread "Build Confirmation Widgets in the Panel")
