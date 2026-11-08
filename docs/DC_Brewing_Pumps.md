@@ -1,7 +1,7 @@
 # DC Brewing Pumps (12 V and 24 V)
 
 A list of low-voltage (DC) pumps that home and craft brewers use, so the Skynet Panel can get these pump types.
-OakBarn Brewery said Go to every idea in section 5 (2026-11-08): they are built (Rule 18.32, Help 162).
+OakBarn Brewery said Go to every idea in section 5 (2026-11-08): they are built (Rule 18.32, Help 163).
 
 Searched 2026-11-08. Numbers are what each maker or store page says (see Sources at the end). Pages often
 disagree a little, so treat flow and lift as "about".
@@ -61,7 +61,7 @@ These run straight off house power (AC). The Panel already has pictures for most
 | Blichmann RipTide | 120 V AC |
 | BrewZilla Gen 4 built-in pump | 220 to 240 V AC, 6 W |
 
-## 5. What the Skynet Panel does with them (Rule 18.32, Help 162)
+## 5. What the Skynet Panel does with them (Rule 18.32, Help 163)
 
 All a Go (2026-11-08). Built, except where it says it waits:
 
@@ -75,7 +75,7 @@ All a Go (2026-11-08). Built, except where it says it waits:
    facts show even with another picture. New drawings (for example a small solar-style
    12 V pump or a Penguin glycol pump) are only made if OakBarn Brewery asks, and they are not added to the Image
    Library unless asked.
-5. **Wiring note** (Help 162 and the Pump's Properties): a 12 V or 24 V pump is never wired straight to a board pin. The
+5. **Wiring note** (Help 163 and the Pump's Properties): a 12 V or 24 V pump is never wired straight to a board pin. The
    board's output switches a relay or a switch module (MOSFET) that carries the pump's own 12 V or 24 V power. With the
    electrical warning of Rule 6.20: "OakBarn Brewery and Skynet are not electricians... Consult a Licensed Electrician".
 6. **Facts at your fingertips**: hold the mouse on a pump to see its model, power, use, speed, flow, lift, hottest liquid and ports.

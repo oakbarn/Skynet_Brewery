@@ -5763,7 +5763,7 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
 const OVERLAY_CHOICES = v => [['', 'None (No Overlay)'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
 const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f => f[2] !== 'box' && f[2] !== 'boxend') };
-// DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 162): "any of the Pumps can be controlled (On/Off or PWM if
+// DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 163): "any of the Pumps can be controlled (On/Off or PWM if
 // it can) and the voltage, Lift, GPM etc are all good info to have at your fingertips." Model with its facts ⬢, Power with Use, and
 // Speed control with Speed %. An AC pump is On/Off only.
 const PUMP_MODEL_CHOICES = (v, it) => [['', (f => f ? `From the drawing (${f.name})` : '(not set)')(it && !it.pumpModel ? factsOf(it) : null)], ...PUMP_FACTS.map(f => [f.key, f.name]), ['other', 'Other (type its facts in the ⬢)'], ...(v && v !== 'other' && !pumpFacts(v) ? [[v, v]] : [])];
