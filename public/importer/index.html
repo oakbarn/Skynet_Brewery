@@ -263,6 +263,13 @@ new value gV_GobblyGook            (a name starting gV_ makes it a gGlobal)</pre
       <p>So there is a lot to digest in how Globals go from BruControl to Skynet, but we do them <b>one by one</b>, and you decide how
         each is handled in Skynet. After a few questions, the Importer tells you what it thinks you should do, and you can accept it or
         choose a different option.</p>
+      <h3>Importing a recipe needs no Globals</h3>
+      <p>In BruControl, importing a BeerSmith XML file took many Globals with the API turned on, and it was hard to build your own
+        Node-RED flow around the names of your Globals, because there was no standard. <b>In Skynet, none of those Globals are
+        needed</b>, and no one has to write a Node-RED flow to import a Beer.xml. Skynet imports a <b>Beer.xml</b> file or a
+        <b>BeerSmith .bsmx</b> file without a single line of code.</p>
+      <p>In fact, if the Importer finds (with your help) that some Globals were only used for a Node-RED import of an XML recipe, those
+        Globals and the Scripts that go with them are <b>not imported</b>, because they are not needed any more.</p>
     </div>
 
     <div class="card">
