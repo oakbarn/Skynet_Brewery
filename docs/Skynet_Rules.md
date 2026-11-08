@@ -183,6 +183,21 @@ across Processes, so they **stay Widgets and do not become gGlobals**. It keeps 
 .API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
 Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
 
+1.27 **Code Value Widget** (OakBarn Brewery, 2026-11-08: "A Code Value Widget. It has a Value displayed in the chosen format and
+will run a Process code that is in an Attribute", "It would have the normal Label like a Regular Value Widget"; it sits here,
+next to the Value Widget it grows from). A Value Widget (Rule 1.23) with two more things: a **Format** (**Number** with Units and
+Decimals, **Time** hh:mm:ss, or **DateTime**) and a **Code** attribute that holds **Process code**. In the Code, **`{value}`**
+stands for the Value of the Widget, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}` (a Heating Element's Setpoint is its
+`.target`). `{value}` inside "quoted text" stays as typed; the Widget's own `Name.value` works too. The Code **runs once each time a person sets the Value**: a tap and Set on its Tab (even to the same
+value) or the .API (Read & Control). **A Process setting the Value does not run it**, so they can never set each other off in a
+loop, and a Brain restart does not run it. It runs like a short Process with the same words, is **not on the Processes list**,
+prints in the Console as `Name (code)`, and Stop All stops it; a new Value while it is still in a sleep or wait stops the old run.
+The Code is checked like a Process when its Properties are saved (a problem shows, the Widget is still saved); a Code with a
+problem is NOT RUN and the Console says why. It has the normal **Label** (never blank, Rule 18.15) and the Value Widget's
+Properties in the Pump's drill-down look (Rule 18.30), with Format after 3 Name and Code before X. Name `wgt_CV_Label_TabID`
+(Rule 3.14, type letters **CV**). Database and .API as Rule 6.14. The BruControl Import makes none (BruControl has no such
+element). (thread "Build a Code Value Widget", Help 161)
+
 1.24 **Making a gGlobal in a Process** (Fritz, 2026-11-06). Besides the gGlobal screen (Rule 1.19), a Process line makes a
 gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gV_X = 10` (the long word), `new gV gV_X = 10` (the
 short word) and `new value gV_X = 10` (a normal variable word with a name that starts gV_). The words are **gGlobalValue / gV**
@@ -594,7 +609,7 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 3.14 **Widget names** follow `wgt_Type_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-06: "Suggested names for
 widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name is good. wgt_DT_DateTime_1_BR"). Example
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
-**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
+**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
 **OVR** Override (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `_`, as in Rule 3.1; a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
@@ -2709,6 +2724,10 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.15 (Fritz): a tap water valve's Properties show On Close List on and On Open List off, greyed out; the last
   step of Skynet_Clean is open_all_valves. Checked against the BruControl Import program: a Schema file it makes is put right the
   same way when the panel opens it (Tap water valves on Close only). Help 100. (thread "Build Process and Schema Templates")
+- 2026-11-08: Added Rule 1.27 (Code Value Widget: a Value Widget with a Format and a Code attribute of Process code that runs
+  each time a person sets the Value; {value} is the Value) and its type letters CV in Rule 3.14. Help 161; next free Help number
+  162. Checked against the BruControl Import program: no change (BruControl has no such element, so the Importer makes none).
+  (thread "Build a Code Value Widget")
 - 2026-11-07: Rules 16.6 and 16.7 new (Fritz): Schema Templates (1 Vessel, 1 Vessel + 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2
   Pumps, 3 Vessel, OakBarn, Fermentor on its own), Process Templates for the 1 and 2 Vessel models, the Skynet ones filled out from
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import

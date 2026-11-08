@@ -167,6 +167,9 @@ Process attributes: `.text` (`.value` = `.text`), `.label`, `.label_visible`, `.
 ### Value, Time and DateTime Widgets (`valueWidget`, `timeWidget`, `dateTimeWidget`; 2026-11-05, Rule 1.23, Help 134)
 Show one value on a Tab (a number, hh:mm:ss, or a date and time); a tap sets it unless Read only; every Process reads and sets it by its Name. Names start `w_Value_N`, `w_Time_N`, `w_DateTime_N`; the Label is never blank. Value box: Start value (Value Widget: Units, Decimals, Step, Lowest, Highest), Read only, Fore / Back color, Alignment; Label box; Properties box; Database and .API (When Clicked, Database Groups ...). Keeps its value when the Brain restarts.
 
+### Code Value Widget (`codeValueWidget`; 2026-11-08, Rule 1.27, Help 161)
+A Value Widget with a **Format** (Number with Units and Decimals, Time hh:mm:ss, or DateTime) and a **Code** attribute: Process code that runs once each time a person sets the Value (a tap and Set, or the .API), never when a Process sets it. `{value}` in the Code is the Value, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}`. Normal Label (never blank); name `wgt_CV_Label_TabID`. Properties as the Value Widget, plus Format (after 3 Name) and Code (before X). Keeps its value when the Brain restarts; a restart does not run the Code.
+
 ### Timer Widget (Timer Widget Properties, 2026-10-29, Help 92)
 Same pattern as the Text Widget (COPY, orange ?, boxes). **No pictures and no background.**
 
@@ -541,4 +544,5 @@ gKonstant and gAPI became one class, gGlobal, on 2026-10-30 (Skynet Rule 1.16, H
 - 2026-11-05: Picture Widget: Add Widget box and Properties follow the Pump drill-down (Rule 18.27, Help 74); Picture ➕ makes a Picture Widget. (thread "Build Picture Widget dialog like Pump")
 - 2026-11-05: Sight_Glass and Sight_Glass_Caged TC Pipe Fittings (Rule 5.32, Help 139): a Length setting in inches stretches the glass; Label starts as site_glass_n. (thread "Add caged and plain sight glass fittings")
 - 2026-11-06: Tap Water Valve, a Manual Valve Widget with a household hose bib picture, one IP on its hose outlet, a tap water source while open, Label tap_water_n (Rule 5.33, Help 141). (thread "Add hose bib Manual Valve Widget")
+- 2026-11-08: Code Value Widget (Rule 1.27, Help 161): a Value Widget in a chosen Format whose Code attribute runs Process code with {value} each time a person sets it. (thread "Build a Code Value Widget")
 - 2026-11-06: Pointer to the Valve Tee and Supply Manifolds (Rule 5.35): on the Elbows, Tees … list, but they are Skynet_Integrated_Devices (Device Library 5.4). (thread "Add valve Tees and supply manifolds")
