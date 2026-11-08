@@ -1889,6 +1889,11 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     `media\Images\User` and every sound to `media\sounds\User`, and the items use the copies; a copy already there is never
     written over. The brewer never has to make a zip.
   - **Connect your brewery** (page 6, Fritz 2026-11-07: "Build the manifold like the knee bone is connected to the leg bone").
+    **The Build Tab pages** (OakBarn Brewery, 2026-11-08: "Build Page is actually a Build Tab Page ... for every Workspace (Tab), in
+    order as they are in BruControl ... Only ones that are Ticked to Import"): one page per ticked Tab, in BruControl order, each with
+    an explanation of the Build Tab choices, a pop-up of every choice with its Panel hover help, how to add the manual parts of the
+    manifold (Manual Valves, tees, elbows, QD hoses, manual pumps as Confirmation Widgets, Rule 1.28), and a button that opens that Tab.
+    Vessels and the Tab's items are placed for the user after the Vessel Templates are built (a later step).
     **The Build page** (OakBarn Brewery, 2026-11-08: "Connect to your Brewery will use the same Build page as in Skynet Panel";
     "The Only thing I see is the Process Icon needs to be greyed Out"): 🔨 Open the Build page starts the Skynet Panel itself on the
     imported Tabs, Devices and Widgets, in its own window and folder (Brewing\Import\build), with no board connected and Processes
@@ -2474,6 +2479,7 @@ Not Placed) or the dialog closes.
 
 ## Change log
 
+- 2026-11-08: Rule 15.4 (OakBarn Brewery: "Build Page is actually a Build Tab Page"): Connect your brewery has one Build Tab page per ticked Tab in BruControl order, each explaining the Build Tab choices (with a pop-up of every choice's hover help) and adding manual parts to the manifold, and opening the Panel's own Build Tab on that Tab. Help 143 updated. Checked against the Skynet Panel: in its Build-page mode only, it opens on the Tab the Importer names. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Connect to your Brewery will use the same Build page as in Skynet Panel"; "The Only thing I see is the Process Icon needs to be greyed Out"): Connect your brewery has 🔨 Open the Build page, the Skynet Panel's own Build page on the imported Schema, with no board connected and Processes greyed out; what is built comes into the saved Schema. Help 143 updated. Checked against the Skynet Panel: the Panel gets a Build-page mode used only when the Importer starts it (SKYNET_IMPORT_BUILD); a normal Panel is unchanged. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Globals will be dealt with later. For now, only list them"): the Importer only lists BruControl Globals (name and Tab) on the Boards and Tabs summary; they get no Placeholder and the Beer.xml question on a Globals-only Tab is gone. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-08: Added Rule 1.28, Confirmation Widgets (OakBarn Brewery), and the `.confirmation` attribute that puts a Widget in the class (Help 162): Manual Valves, Manual Pumps and moving a QD Hose ask the person to confirm they did it by hand; a named exception to Rule 2.44's no pop-up to turn anything On, since they turn nothing on. The Importer's item pages (Pumps, Heaters, Probes, Valves, Flow Meters, Other) start with How many; extra ones added there will become Confirmation Widgets. Checked against both programs: the Panel gets the Widget class (to be built); the Importer makes them. (thread "Import from BruControl .bak backups")

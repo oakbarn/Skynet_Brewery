@@ -176,17 +176,22 @@ The list of new names and the notes for the report are at the bottom.
 
 ## Connect your brewery
 
-### The Build page
+### The Build Tab pages
 
-**🔨 Open the Build page** opens your imported Tabs, Devices and Widgets in the **Skynet Panel's own Build page**, in its own window.
-It is the same Panel you build with every day: Edit layout, Add Device, Add Widget, Vessels, pipes, hoses and Save layout all work
-the same. Only two things are different:
+Each Tab you are importing gets its own **Build Tab page**, one at a time, in the order the Tabs were in BruControl (for example
+MD, then ME). A Tab you left unticked has no page. **◀ Previous Tab** and **Next Tab ▶** move between them. Each page has:
 
-- **No board is connected**: the Panel there never talks to your Arduino or ESP32 boards.
-- **Processes are greyed out**: your Scripts become Processes in a later Importer step.
+- **Before you build: the choices on a Build Tab**: what the Edit layout bar does, row by row, and
+  **❓ Show every Build Tab choice and its hover help**, a pop-up with each choice and the hover help it shows in the Panel.
+- **Build your manifold as it really is**: add the parts you turn or move by hand: **Manual Valve ➕**, **Elbows, Tees ...** joined with
+  **Draw pipe** or **Draw hose**, **Draw QD hose**, and manual pumps (they become Confirmation Widgets, [Help 162](162-confirmation-widgets)).
+- **🔨 Open the Build Tab for** that Tab: the **Skynet Panel's own Build Tab**, on that Tab, in its own window. It is the same Panel
+  you build with every day. Only two things are different: **no board is connected**, and **Processes are greyed out** (your Scripts
+  become Processes in a later Importer step).
 
 Close the window when you are done: your work is kept in `Brewing\Import\build`, and it comes into your Schema when you save it on
-the last page. If you import a different file, the Build page starts again from that file.
+the last page. If you import a different file, the Build Tabs start again from that file. Your Vessels and each Tab's items will be
+placed for you once the Vessel Templates are built (the Vessel Device Builder, a later step).
 
 BruControl only knew your valves and pumps as buttons; it never knew which vessel they sit on or what they are joined to. This
 page asks **what is connected to what** (OakBarn Brewery, 2026-11-07), one piece at a time, "like the knee bone is connected to the leg
