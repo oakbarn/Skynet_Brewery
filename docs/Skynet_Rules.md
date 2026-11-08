@@ -183,6 +183,21 @@ across Processes, so they **stay Widgets and do not become gGlobals**. It keeps 
 .API as Rule 6.14 (**When Clicked** fits them). Properties follow the dialog pattern (Rule 18). The Switch, Push Button, Pulse
 Button and LED stay Semi_Widgets_Devices (Rule 1.20, Fritz confirmed 2026-11-05). (Help 134)
 
+1.27 **Code Value Widget** (OakBarn Brewery, 2026-11-08: "A Code Value Widget. It has a Value displayed in the chosen format and
+will run a Process code that is in an Attribute", "It would have the normal Label like a Regular Value Widget"; it sits here,
+next to the Value Widget it grows from). A Value Widget (Rule 1.23) with two more things: a **Format** (**Number** with Units and
+Decimals, **Time** hh:mm:ss, or **DateTime**) and a **Code** attribute that holds **Process code**. In the Code, **`{value}`**
+stands for the Value of the Widget, e.g. `MB_25_HE_Brew~Kettle_BR.target = {value}` (a Heating Element's Setpoint is its
+`.target`). `{value}` inside "quoted text" stays as typed; the Widget's own `Name.value` works too. The Code **runs once each time a person sets the Value**: a tap and Set on its Tab (even to the same
+value) or the .API (Read & Control). **A Process setting the Value does not run it**, so they can never set each other off in a
+loop, and a Brain restart does not run it. It runs like a short Process with the same words, is **not on the Processes list**,
+prints in the Console as `Name (code)`, and Stop All stops it; a new Value while it is still in a sleep or wait stops the old run.
+The Code is checked like a Process when its Properties are saved (a problem shows, the Widget is still saved); a Code with a
+problem is NOT RUN and the Console says why. It has the normal **Label** (never blank, Rule 18.15) and the Value Widget's
+Properties in the Pump's drill-down look (Rule 18.30), with Format after 3 Name and Code before X. Name `wgt_CV_Label_TabID`
+(Rule 3.14, type letters **CV**). Database and .API as Rule 6.14. The BruControl Import makes none (BruControl has no such
+element). (thread "Build a Code Value Widget", Help 161)
+
 1.24 **Making a gGlobal in a Process** (Fritz, 2026-11-06). Besides the gGlobal screen (Rule 1.19), a Process line makes a
 gGlobal. These three lines make the **same** gGlobal: `new gGlobalValue gV_X = 10` (the long word), `new gV gV_X = 10` (the
 short word) and `new value gV_X = 10` (a normal variable word with a name that starts gV_). The words are **gGlobalValue / gV**
@@ -204,10 +219,77 @@ it is **never on a Tab**, and its **Database and .API are Off**, so it still onl
 between Processes now, make a gGlobal with Database and .API Off. Imported BruControl Globals are set one by one in the Importer's
 globals interview later (Fritz). (thread "Explain the Shared Variable Widget", Help 149)
 
+1.26 **Chart Widget** (Fritz, 2026-11-08: "build a chart method so we can import BruControl charts"; "Closely match BruControl Chart
+properties as attributes"). A Chart Widget (Type ID `CHT`, Rule 3.14, `wgt_CHT_Label_TabID`) draws a line graph over time of
+readings in the brew database (Rule 6.14) for up to **two** Devices or Widgets: **Channel 1** on the left axis, **Channel 2** on the
+right axis. Its settings are BruControl's Chart properties, and each is a Process attribute: **Span** (`.spanseconds`), **Refresh
+interval** (`.refreshinterval`), **Grid lines across** (`.hgridlines`) and **up and down** (`.vgridlines`), **Time axis color**
+(`.xaxiscolor`), and for each Channel n: the **Device or Widget** (`.chNelement`), **Auto scale** (`.chNautoscale`), **Axis lowest**
+and **highest** (`.chNymin`, `.chNymax`), **Line color** (`.chNlinecolor`) and **Axis color** (`.chNaxiscolor`). Properties follow
+the Widget drill-down look (Rule 18.30). A Device or Widget drawn must be sent to the database, or its line stays empty (the Chart
+says so). The **BruControl Import** turns each BruControl Chart into a Chart Widget with the same settings, names each Channel's
+item by its Skynet name, and sets each item drawn that has no Database setting to send its reading every Refresh interval
+(Rule 15.4). Skynet draws its own lines (SVG); nothing is copied from BruControl's DevExpress charts. Help 159.
+
+1.28 **Confirmation Widgets** (OakBarn Brewery, 2026-11-08: "The Special Widgets Just ask for a Confirmation that the Widget was
+turned On. These are a special Class of Widget and do not really turn anything on, just a confirmation that the User did so
+manually"; "Manual Valves, Manual Pumps, Moving a QD Hose to a Vessel or other QD are in this Confirmation Category. We may add
+other Widgets later"). A **Confirmation Widget** stands for something on the brewery that **no Interface (board) controls**, so a
+person does it **by hand**. It does not turn anything on. When it is commanded **On or Off**, either by **Process code**
+(`Name.state = true` or `false`, OakBarn Brewery 2026-11-08: ".confirmation Widget would get a process Code to turn them On or Off")
+or by a **click on it on the screen** (OakBarn Brewery: "When Manually Clicked, The Popup Confirmation will still Pop Up"), Skynet
+shows a **confirmation pop-up** asking the person to do it by hand and confirm it is done; only then does the Widget show On or Off
+(Open or Closed, Connected or not), so Processes and the screen match the brewery. The class today:
+- **Manual Valves** (a Manual Ball Valve or Manual Butterfly Valve, Rule 6.15 and the manual vessel valves).
+- **Manual Pumps** (a pump with no Interface Port, e.g. one plugged into a wall outlet).
+- **Moving a QD Hose** to a Vessel or to another QD (Quick Disconnect).
+A Widget is in this class when its **`.confirmation`** attribute is ticked (OakBarn Brewery, 2026-11-08: "Add an Attribute
+.confirmation to widgets and if ticked, they are that special class"): a switch in Properties, on for the three above, and any
+Widget that can be On or Off can have it ticked. A Process line that commands one (e.g. `Pump~7.state = true`) works like the
+Manual Valve of Rule 5.15, which is the first of this class: the pop-up shows, the Widget blinks on its Tab, and the Process waits
+until a person confirms. More Widgets may join this class later, only when OakBarn Brewery says so. This is a **named exception to "no pop-up to turn
+anything On"** (Rule 2.44, Rule 2.33): those Rules are about things Skynet really turns on; a Confirmation Widget turns nothing on,
+so its pop-up is the confirmation, not a question before switching. Help 162. The **BruControl Import** makes one for each extra item the
+person adds on its item pages (e.g. Pump 7 when 6 were found), because those have no Interface Port (Rule 15.4).
+
 ## 2. Screen design and clicks
 
 2.1 **One click for things done often, two or more clicks for things done rarely.** Keep Tab
 screens clean for Brew Day; rarely-needed items go in the ☰ (hamburger) Menu. (2026-10-21, PR #56)
+
+2.44 **Things act the same everywhere: what you do every day is one click away** (OakBarn Brewery, 2026-11-08: "I am striving to
+make things act the same. Like Click the Graphic for On or Off. And maybe on a Temperature Probe associated with a setpoint, bring
+up a SetPoint Dialog. What you do every day One Click away"). It sits here, next to Rule 2.1, because it grows from it. On a Tab,
+outside Edit layout, one click or tap does the same kind of thing on every Device, Widget and picture, so a brewer learns it once:
+- **A picture of something that turns On and Off** (a Pump, a Heating Element, a Valve, a gas valve, a Sound Player, or a Picture
+  Widget that follows one of them), **wherever it is** (on its own on a Tab, built into a Vessel Device, on a Valve Tee or Supply
+  Manifold): **one click turns it On or Off at once. No pop-up is used to turn something On** (OakBarn Brewery, 2026-11-08: "I
+  really do not like the popup to turn any thing on"); only an item set to Ask before changing by hand asks first. Valves open or close. Rule 2.33 (Pumps), Rule 6.19 (a Heating Element in the
+  method it is in) and Rule 5.35 (valves on Valve Tees and Supply Manifolds) are this Rule for those things.
+- **A temperature that a Heating Element holds** (a Temperature Probe, a Thermowell, a probe tee, a probe built into a Vessel
+  Device, its reading or its Skynet Dial): **one click opens its SetPoint pop-up** (Rule 2.43).
+- **Something set to a number, not just On or Off** (a variable speed pump or PWM output, a proportional valve, a stepper, a scale,
+  a Value Widget, a Timer): one click opens the pop-up where that number is set.
+- **Something only shown** (a reading with no Setpoint, a Text or Label, a picture that follows nothing): a click does nothing,
+  or a short note says why.
+- **The same thing does the same in every place:** a Device on its own on a Tab, the same Device built into a Vessel Device, its
+  Clone and a Picture Widget that follows it all answer one click the same way.
+- What stays the same: **double-click opens Properties** (Rule 2.9), the right mouse button drags in Edit layout and gives Help
+  outside it (Rule 2.11), view only accounts can't change anything, and an item's own **When tapped** setting (none, process, tab,
+  or Ask before changing) still wins, because the user chose it for that one item.
+- **Anything new** is built to this Rule: before a new Device or Widget is finished, its one click is checked against this list.
+- **BruControl Import:** checked. The Importer has no Tabs that run, so it has no clicks of its own; everything it makes is a Panel
+  Device or Widget and gets these clicks in the Panel. One thing it carries over: an item BruControl marked as not user controlled
+  gets **When tapped: none**, so a click on it does nothing. That is the user's own choice for that item and is kept.
+- **Made the same on 2026-11-08** (OakBarn Brewery's go): a **Heating Element on its own on a Tab** (and a Picture Widget that follows
+  one) turns On or Off with one click (Rule 2.33 changed); a **Valve built into a Vessel Device** opens or closes with one click on
+  its picture; a **Method Clone** acts as its parent, all in unison, with no pop-up (Rule 4.4 changed).
+- **Not yet the same** (reported, not changed; each waits for OakBarn Brewery's go):
+  1. The older **Duty Cycle, Hysteresis, PID and Deadband Devices** (from before one Heating Element, Rule 6.19) open their number
+     pop-up on one click instead of turning On or Off.
+  2. PR #276 (not merged yet) makes a **method spot** clicked while the Element is Off open the pop-up (Set + ON). That breaks
+     Rule 6.19 ("Picking a method never turns it On", no pop-up), so it is taken out here once #276 is in. (A Method Clone is a Clone,
+     not a method pick: one click on it acts as on its parent, Rule 4.4.)
 
 2.2 **The Menu Bar is hidden on Tabs** by default; reach it from ☰ Menu > Show Menu Bar. The switch
 is on the ☰ Menu > Default tab. (2026-10-21, PR #54)
@@ -362,7 +444,13 @@ one of these. (thread "Add shortcut keys for text entry", Help 113)
 Device, or on a Picture Widget that follows one, switches it ON or OFF at once, the same as a valve. No ON / OFF pop-up asks
 first. A new Pump starts that way, and every Schema's Pumps are changed once when the panel starts. **Ask before changing**
 (When tapped ⬢ in the Pump's Properties) can still be turned on by hand for a Pump that should ask. Double-click still opens
-Properties (Rule 2.9). Heating elements still ask first. (thread "Toggle pumps with one click", Help 120)
+Properties (Rule 2.9). **Heating Elements too** (changed 2026-11-08, OakBarn Brewery: "Change the Rule Individual elements toggle
+on off. I really do not like the popup to turn any thing on"): one click on a Heating Element on its Tab, on a Picture Widget that
+follows one, or on the picture of one built into a Vessel Device turns it ON or OFF at once, in the method it is in. A method that
+needs a Temperature Probe and has none gives a short note instead. Every Schema's Heating Elements are changed once when the panel
+starts, and a new one starts that way; Ask before changing can still be turned on by hand. (thread "Toggle pumps with one click",
+Help 120)
+*Replaced:* "Heating elements still ask first" (2026-11-04 to 2026-11-08).
 
 2.34 **The selected choice in every dropdown has a Cyan background** (Fritz, 2026-11-04, a standard for the whole app):
 when a dropdown list (DDLB) is open, the choice that is selected now is shown on **Cyan** with black text; the choice under the
@@ -507,10 +595,27 @@ Help 155).
   them. It draws no pipes, so its pumps and valves (with no pipe on them) are drawn for the Default pipe size. Its Tabs keep the
   sizes BruControl had. The list names the Import's own defaults (Skynet names, Rule 15.1; the Look, Rule 2.39).
 
+2.43 **One click on a temperature opens its SetPoint** (Fritz, 2026-11-08: "Click on a Thermowell or Probe or Display of a
+Temperature NOT in edit Mode, Bring up SetPoint Dialog"). Outside Edit layout, one click or tap on a **Temperature Probe** (its
+reading or its Skynet Dial), a **Thermowell**, a **probe tee**, a **Probe or Thermowell built into a Vessel Device**, a Vessel's own
+Probe spot, or a **Picture Widget** that shows a probe, opens the **SetPoint pop-up** of the Heating Element that holds that
+temperature: the one whose Temperature Probe it is (older Hysteresis, PID and Deadband Devices too; a Vessel's own Probe goes to the
+Vessel's Heater first). Two or more: a short list asks which. None: a short note says so (a simulated probe still opens its
+Simulated reading pop-up). The pop-up shows the reading, whose Setpoint it is (ON or OFF, method), the Setpoint with − and +, then
+**Set + ON**, **OFF**, **Set**, **Heating method…** (the Rule 6.19 pop-up) and **Cancel**. It still asks before it turns on
+(Rule 2.33). Only Hysteresis, PID, Deadband and Precise hold a Setpoint: on On/Off or Duty Cycle, Set switches it to the first
+allowed method that does. A Tap set by hand (When tapped) still wins. Operators and admins only. Double-click still opens Properties
+(Rule 2.9).
+- **BruControl Import:** checked, not changed. Its probes and Heating Elements are the Panel's own, so they get this click in the
+  Panel; the Import keeps the probe it reads as each Heating Element's Temperature Probe. (thread "Open SetPoint dialog from
+  temperature widgets", Help 160)
+
 ## 3. Names and file names
 
 3.1 **Device names** follow `InterfaceID_Port_DeviceTypeID_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-05:
-"Single Underscores between parts of name"; example `MB_A0_10KNTC_Mash~Tun_SP`). Spaces in the Label become `_`. Names made before
+"Single Underscores between parts of name"; example `MB_A0_10KNTC_Mash~Tun_SP`). **Spaces in the Label become `~`** (Fritz, 2026-11-07: "I like the ~ instead of a _ in
+the label part of the name. Make that the rule"), so `_` only ever separates the parts: Label *Mash Tun* gives `Mash~Tun`. Names made
+before keep their `_` (Rule 3.5). Names made before
 keep their double `__` before the Tab ID (Rule 3.5); a taken name gets _2, _3 ... before the Tab ID.
 *Replaced:* `InterfaceID_Port_DeviceTypeID_Label__TabID`, two underscores before the Tab ID (2026-10-23). The panel suggests the name; an Admin may type another.
 Full details (Type IDs, virtual ports, what happens to odd characters) are in the Device Library.
@@ -594,9 +699,9 @@ name is better. OK keeps it, Cancel goes back. (2026-10-27, Help 76)
 3.14 **Widget names** follow `wgt_Type_Label_TabID`, **one underscore between the parts** (Fritz, 2026-11-06: "Suggested names for
 widgets wgt_Label_Tabid", "Widgets like gGlobals have types", "Your suggest name is good. wgt_DT_DateTime_1_BR"). Example
 `wgt_DT_DateTime_1_BR`. The **Type** is a few letters for the kind of Widget, as gGlobals have gV_, gS_ ... (Rule 1.19):
-**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
+**PIX** Picture, **TXT** Text, **LBL** Label, **VAL** Value, **CV** Code Value (Rule 1.27), **TM** Time, **DT** DateTime, **TMR** Timer, **SND** Sound Player, **SW** Switch,
 **PB** Push Button, **PL** Pulse Button, **LED** LED, **MV** Manual Valve, **TWV** Tap Water Valve, **ALM** Alarm (Basic and User),
-**OVR** Override (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `_`, as in Rule 3.1; a taken name
+**OVR** Override, **CHT** Chart (Rule 1.26) (Fritz picked PIX for Picture; the rest as suggested). Spaces in the Label become `~`, as in Rule 3.1 (`wgt_PIX_Kettle~Element`); a taken name
 gets _2, _3 ... before the Tab ID. A new Widget is made on the 🔨 Build Tab (Rule 4.1), so its name has no Tab ID until Save Build ...
 > To a Tab adds it. Its name **follows its Label and Tab** until a name of its own is typed (as a Device's does). Vessels, pipes,
 fittings and Clones keep their own names. **Names already made never change by themselves** (Rule 3.5): w_Text_1, pic_Kettle,
@@ -634,7 +739,7 @@ which has a **default** (the Interface the last new Device went on, or else the 
 **Available Ports**: a Device that works best with **true PWM** is offered only PWM pins; any other Device (on/off, or pseudo PWM done
 in software) is offered only the pins that **can't** do PWM, so the PWM pins are kept for the Devices that need them (only when none
 of those is free are the PWM pins offered; on a Pi every pin does PWM). Once the Label (never blank), Interface and Port are set (and
-the Tab), the Suggested Name is built (Rule 3.1); spaces in a Label become `_` in the name. This is in the one Add Device box every
+the Tab), the Suggested Name is built (Rule 3.1); spaces in a Label become `~` in the name (Rule 3.1). This is in the one Add Device box every
 Device uses (Pump, Motorized Ball Valve, Heating Element, PWM / Analog out, Temperature Probe ...).
 **No free PWM pin** (Fritz, 2026-11-05: "If No PWM Pin is available for a True PWM, 2 choices for User 1. Add Interface, 2 Use Pseudo PWM
 with explanation of degradation"): when a true PWM Device's Interface has no free PWM pin, a pop-up gives **1. ➕ Add an Interface**
@@ -666,8 +771,10 @@ per port) is not touched. Help 71. (2026-10-27, thread "Show one Device on sever
   a Device with more than one Control Method (today the Heating Element, Rule 6.19) may stand for **one** of its methods: its
   **Control Method** and its own **Label** are the Clone's own too (blank Label = the parent's Label and the method, for example
   *HLT Element PID*). It may sit on its parent's **own Tab** (the ⧉ Clone Device list has a *Method Clone* group for these
-  Devices, on any Tab). **One click** on it switches the parent to its method at once and opens the parent's pop-up; it shows
-  **ON only while the parent is ON in its method** (otherwise OFF). A Clone with no Control Method picked is a plain Clone. So a
+  Devices, on any Tab). It shows **ON only while the parent is ON in its method** (otherwise OFF). **One click acts as on the
+  parent, all in unison, with no pop-up** (changed 2026-11-08, OakBarn Brewery: "Clones act just as if it was the Parent That all
+  act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"): shown ON, it turns the parent Off; shown OFF, it switches the
+  parent to its method and turns it On. *Replaced:* one click switched the method and opened the parent's pop-up (2026-11-07). A Clone with no Control Method picked is a plain Clone. So a
   Tab can show one Element as tiles side by side, like BruControl's *M_HLT Heat* (Duty Cycle) and *HLT PID*. The BruControl
   Import makes each joined control's second placing a Method Clone with its BruControl Label.
 
@@ -1254,6 +1361,33 @@ Fitting or Widget, but the Option to Unlock as the user may not want to, and may
   Exit without saving still undoes everything since the last Save layout.
 - **BruControl Import:** checked, not changed; it does not move things on a Tab. Schemas it makes get this in the Panel.
 
+5.39 **Hand-set appliance vessels: the DigiBoil and the 65 L Brewzilla** (Fritz, 2026-11-07: "a DigiBoil Widget Vessel. It has its
+own Heating but no control from Skynet at all"; "The 65 L Brewzilla Widget has 4 switches one Intergrated Bottom Drain Pump, 3
+Heater"; thread "Add DigiBoil manual vessel widget", Help 158).
+- Two Skynet Vessel Templates: **Kettle_DigiBoil** and **Kettle_Brewzilla_65L**. Each heats itself (and the Brewzilla pumps
+  itself); Skynet does not switch any of it. Their parts are built in and never un-bundled (Integrated items):
+  - **DigiBoil:** 2 manual switches, **Power** and **Heater**; one Manual valve in its outlet, the small silver **Spigot with BSP
+    threads**; one manual **Temperature Set Point and Display Screen**.
+  - **65 L Brewzilla:** 4 manual switches, the bottom drain **Pump**, **Heater 1**, **Heater 2**, **Heater 3**; one Manual valve in
+    its outlet (the **BSP Spigot**) and one on the **out side of its pump manifold** (an IP of its own, Pump out); one manual
+    **Temperature Set Point and Display Screen** that has an **On/Off button** and a **Run** hot spot.
+- The switches and screen are its **Controls**, a Manual vessel Widget beside it (Name_Controls, for example DigiBoil_Controls).
+  The valves are Manual valve Devices (Valve type Manual, no Port; DigiBoil_Spigot, Brewzilla_Pump_Out). A closed valve shuts its IP.
+- **A Process sets them, a person does it:** `DigiBoil_Controls.setpoint = 152`, `.power`, `.heat`, `.heat2`, `.heat3`, `.pump`
+  (`.power` is the Brewzilla screen's On/Off button) and `.run` (the Brewzilla Run spot) show what was asked on its Controls,
+  pop up what to do by hand, and the Process waits for ✔ Done (like `ask`, Rule 16.5). Already set that way: no pop-up.
+- **°C pop-up:** both screens go back to °C every time they are turned off. When the panel works in °F (its Controls' units), the
+  set point pop-up gives the °C too: "Set the DigiBoil temperature set point to 152 °F (that is 66.7 °C)". In °C only the °C shows.
+- **`open_valve Name` / `close_valve Name`**: a Process command for **any one valve**. A Manual one (a Manual valve, a Manual
+  Valve Widget, a built-in Spigot or Pump out valve, a Supply Manifold's Manual valve) pops up "OPEN ... by hand" and waits, as
+  in Rule 5.13; a motorized one is switched at once. `Valve.state = true` still works as before.
+- A click on its Controls in run mode records what you set by hand (a switch, a valve, a new set point, what its screen reads).
+- **Schema Templates (Rule 16.6):** a new heat choice, **Its own, set by hand**: Skynet makes no probe or heater for that vessel and it
+  does no Brew Process heating job. The OakBarn Template uses the DigiBoil and the 65 L Brewzilla this way. The older
+  Kettle_DigiBoil_Electric and Kettle_Brewzilla_Electric Templates stay for brewers who switch theirs from Skynet.
+- Older Manual vessel Widgets (no appliance) work as before: no pop-up.
+- **BruControl Import:** checked, not changed. BruControl has no DigiBoil or Brewzilla items; its Manual valves import as before.
+
 ---
 
 
@@ -1454,16 +1588,27 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   primary Control Method, and then have check boxes of other available Methods. Only Checked Methods are allowed. If a Method is
   Checked, it needs a Hot Spot or Icon on the Screen Display of the device to switch between methods"): its pop-up, its spots,
   its Method Clones, the Process editor and the Brain offer only those; a Process asking for another gets a plain error. One with
-  nothing ticked has one way of control. The other methods' settings are kept.
+  nothing ticked has one way of control. **On/Off is always allowed and always has its spot; it is not a tick box** (Fritz,
+  2026-11-08: "It should not be a choice. Always displayed"). The other methods' settings are kept.
 - **One click on it while running** opens its pop-up (Fritz, 2026-11-07: "One Click on the dispayed device"): one button per
   method (the one in use marked; the ones that need a probe greyed out without one), and **one click on a method switches to it at
   once**, the method's main setting with − and + (Duty cycle % or Target), then **Set + ON** (ON for On/Off), **OFF**, **Set**
-  and **Cancel**. It still asks before it turns on (Rule 2.33).
+  and **Cancel**. *Changed 2026-11-08 (Rule 2.33):* one click on the Element itself now turns it ON or OFF at once; the pop-up opens
+  from a method spot or its Temperature Probe's SetPoint pop-up (Rule 2.43, **Heating method…**).
+- **In Duty Cycle the % is its On and Off too** (OakBarn Brewery, 2026-11-08: "Duty Cycle % is good. 0 turns it off. Above zero
+  turns it on if it was off"): set from the pop-up, a Process or the .API, a Duty cycle % of **0 turns the Element Off**, and **above
+  0 turns it On** if it was Off. Loading a Schema never turns it on. In another method the Duty cycle % is only a kept setting.
 - **One-click method spots** (Fritz, 2026-11-07: "with the Tartan Main Panel Port 42, that will be integrated into a vessel, it
   need only one click to select Duty Cycle or a click somewhere else to select PID"; "Those hot spots only need to be there when
   there is more than one control metod"): every allowed method (the main one and each one ticked) gets a small button under the
   Element on its Tab, or under its picture on a Vessel Device when it is built in, whenever **two or more** are allowed. **One
   click** on one switches the Element to that method at once; the one in use is **red**, the others **yellow** (Fritz, 2026-11-07).
+  While it is ON a dark **Turn Off** button shows at the end of the row: one click turns it Off (Fritz, 2026-11-08: "it switches
+  between All tree methods fine, but no Turn Off!"). One click on the picture of an Element built into a Vessel Device turns it
+  ON or OFF at once, like a Pump (Rule 2.33); a click on its box (tile) opens its pop-up (ON, OFF, its method). A spot clicked while the Element is OFF only switches its method: picking a
+  method never turns it On, with no pop-up (changed 2026-11-08, OakBarn Brewery: "Selecting a Different Method when a Heating Element
+  does not turn it on, On off is By the On Off Buttton"). Any number of Elements may be ON at once (Fritz,
+  2026-11-08: "I use more than a single element as they are on different AC Circuits").
   With only the main method, none show. The
   BruControl Import makes the first joined control's method the main one and ticks the others (port 42: Duty Cycle main, PID
   ticked), and explains this on its first page. This needs no Clone (Rule 4.4).
@@ -1473,6 +1618,10 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   by the same names the separate Devices had (`.target`, `.dutycycle`, `.kp` ...). **It is turned On or Off, never "Enabled"** (Fritz, 2026-11-07: "I prefer on and Off rather than
   enabled"; "So even a Hystersis element would be Turned On or Turned Off and not use enabled"): `hE_1 = on` (or `= true`) turns it ON
   in its method. `.value` is a PID, Deadband or Precise output %; `.pv` the smoothed reading Precise holds; `.output` is its pin now (read only).
+- **Picking a method never turns it On** (OakBarn Brewery, 2026-11-08: "Selecting a Different Method when a Heating Element does not
+  turn it on, On off is By the On Off Button. When a Heating element is On, It simply switches to the new control method and stays
+  on"). A method spot, the pop-up's method buttons or a Process `.method` only change the method, with no pop-up; turning it On or
+  Off is its picture, its On/Off spot or button, a Clone, a Duty cycle % (below) or a Process.
 - **Changing the method while it is ON** goes on at once in the new method, **except to On/Off**, which turns it **OFF** first, so it
   never jumps to full power by itself.
 - It is On while ON (Rule 7.9), whatever its pin is doing; it shows what it is doing (60 %, 45 % ▸ 152, ON ▸ 152, idle ▸ 152).
@@ -1487,6 +1636,13 @@ is its **heating method**: **On/Off**, **Duty Cycle**, **Hysteresis**, **PID**, 
   In the Process editor, typing `name.method =` lists that Device's methods (for example "PID", "Duty Cycle"), and `.method`
   shows its choices beside it. A Device with only one way of control has no `.method`.
   (thread "Pick the heating method on one Element", Help 150)
+
+6.20 **Electrical warning** (Fritz, 2026-11-08: "WE wi;; give a General warning about electricty and that we are not
+Electricians and can give no electrical advice. Consult a Licensed Electrician."; "OaKbarn Brewery or Skynet"). Wherever
+Skynet talks about wiring, heating elements, SSRs, contactors, DACs or AC circuits (a Heating Element's Properties and the hover
+help on its Heating method, Help 137 and 150, the BruControl Import's Heating Element note), it shows:
+**"⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed
+Electrician."** Any later page or dialog about wiring gets the same words.
 
 ## 7. Pictures
 
@@ -1723,7 +1879,7 @@ thread "Improve the Simulator bar defaults", Help 85)
 ## 11. Help pages
 
 11.1 **Every new feature gets a Help page** (or an update to one) when it merges. Help pages are
-Markdown files in help/ on the Brain, numbered for order. Next free number: **157** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back, 154 Properties hot spots, 155 Default settings, 156 Precise heating). (2026-10-04,
+Markdown files in help/ on the Brain, numbered for order. Next free number: **159** (143 is the BruControl Importer's, 144 API_Name, 151 Panel Looks, 152 Skynet Dial, 153 Move alone, Swap and Put back, 154 Properties hot spots, 155 Default settings, 156 Precise heating, 157 Schema Templates, 158 DigiBoil and Brewzilla by hand). (2026-10-04,
 PR #16)
 
 11.2 **New Help headings and ☰ Menu tabs** are added to the right-click Help map. (2026-10-21,
@@ -1837,14 +1993,52 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   - **Boards and Tabs** (page 5): the Interfaces, the Tabs (no Tab backgrounds for now), and **only the items that have an
     Interface and a Port**. Everything else on a Tab is a **Placeholder** (a grey box with the BruControl name) at the same
     place and size, until a later step brings it in; a hidden item's Placeholder stays hidden.
+    **Units first** (OakBarn Brewery, 2026-11-08: "add a Question in the beginning of the Import if he is Metric or US"): US (Gallons,
+    °F, inches) or Metric (Liters, °C, cm), on the Names page; when BruControl's probe ports show °F or °C, that one is picked and the
+    question is a confirmation. Every temperature, size and volume after it uses it.
+    **The brewer confirms what comes in, in small steps** (a drill-down, OakBarn Brewery 2026-11-08): first the Interfaces found (read
+    only, the ID greyed), then the **ID column** explained with the Importer's IDs editable (up to 4 letters, 2 preferred, Rule 3.2) and
+    **Accept**, then **the Tabs** (one row per Tab: ID, Items, a column for each kind of Placeholder, an **Import Tab** box, and **Accept**;
+    OakBarn Brewery 2026-11-08: "Layout the Tab ... different Place Holder type, a Check box and accept Button"; "The Empty Tabs Unchecked";
+    "allow user to check Uncheck": a Tab with items starts ticked, an empty one unticked, and any box can be ticked or unticked; an unticked
+    Tab stays out with everything on it), then **the items on each Interface** (read only: one table per board, every item by its
+    port with its BruControl name, Display Name (none: the Name, greyed), a tick box (unticked; ticking copies the Display Name into the Label) and a Label box (blank to start; it is the Label in the new Schema and the Label part of the suggested name, spaces become ~, need not be different; no Label may be blank at Accept, which is at the bottom), Skynet type, Skynet name and Tab; OakBarn Brewery 2026-11-08), then **the vessels** (it starts with
+    the old Your vessels table: rename, Side, ✖, Add a vessel; moved here from Connect your brewery) (each one found, with its **Volume**, **Height** and **Diameter** typed in the units picked, and columns for its Heater (a dropdown of every BruControl heating element found), Thermowell with Probe (a dropdown of every
+    BruControl probe found),
+    an Outlet dropdown (None, Center Low, Bottom Drain), a Tangential Inlet tick box, Sparge Arm / Steam Slayer (one dropdown: None,
+    Upper Left, Upper Right) and a HERMS Coil tick box (unticked to start), as found in the names and Scripts, a **Motorized Ball Valve** dropdown of
+    every motorized valve found (the guess is the vessel's own), and a **Manual Valves** dropdown, None,
+    Manual Ball Valve or Manual Butterfly Valve, None to start, since BruControl never has them; OakBarn Brewery 2026-11-08), then the rest.
+    An **Interface (board) with no items** is **not** imported unless the brewer ticks its **Import** box on the convert page
+    (Fritz, 2026-11-08); the ones left out are named in the report.
+    A **Tab with no items** is **not** imported, with its Placeholders, unless its box is ticked (Fritz, 2026-11-08); a Tab with
+    items starts ticked and comes in unless the brewer unticks it (then it stays out with its items). BruControl **Globals are only listed** for now (OakBarn Brewery, 2026-11-08: "Globals will be dealt with later. For now, only
+    list them"): each with its Tab, on the summary and in the import report; no Placeholder, no import and no question.
+    Each BruControl **Chart** becomes a Chart Widget (Rule 1.26). An imported Schema follows the newest standard (Fritz,
+    2026-11-08): a pump is a Skynet Pump Device (Rule 5.27); a control keeps its settings and its probe (.input, Rules 6.19, 2.43);
+    an item BruControl marked not user controlled gets When tapped: none (Rule 2.44), except a probe.
   - **Pictures and Sounds** (Fritz, 2026-11-06: "The Picture Paths and Sounds are imported. The files stay where they were so
     BruControl continues to work normally. You do have the option of copying those files to a new folder that consolidates
     all the picture files and sound files so if you move to a Pi or other computer, those files will be available. They are
-    never deleted in their original spot, just copies made."). By default each item keeps the path BruControl saved (any
-    folder), even when the file is not on the computer (it is listed in the report). The option copies every picture to
+    never deleted in their original spot, just copies made."). The tick box is **Also copy my pictures and sounds into one
+    folder with subfolders (Recommended)** and is **ticked to start with** (Fritz, 2026-11-08); **later the same day it is no longer
+    a question: the copies are always made** (OakBarn Brewery, 2026-11-08: "maybe the Picture import to make copies is not a question,
+    just make the copies"), and the original files are never deleted or changed; new pictures and sounds added
+    in Skynet always go into its media folders. A file that is not on the computer keeps the path BruControl saved (any
+    folder) and is listed in the report. Every picture is copied to
     `media\Images\User` and every sound to `media\sounds\User`, and the items use the copies; a copy already there is never
     written over. The brewer never has to make a zip.
   - **Connect your brewery** (page 6, Fritz 2026-11-07: "Build the manifold like the knee bone is connected to the leg bone").
+    **The Build Tab pages** (OakBarn Brewery, 2026-11-08: "Build Page is actually a Build Tab Page ... for every Workspace (Tab), in
+    order as they are in BruControl ... Only ones that are Ticked to Import"): one page per ticked Tab, in BruControl order, each with
+    an explanation of the Build Tab choices, a pop-up of every choice with its Panel hover help, how to add the manual parts of the
+    manifold (Manual Valves, tees, elbows, QD hoses, manual pumps as Confirmation Widgets, Rule 1.28), and a button that opens that Tab.
+    Vessels and the Tab's items are placed for the user after the Vessel Templates are built (a later step).
+    **The Build page** (OakBarn Brewery, 2026-11-08: "Connect to your Brewery will use the same Build page as in Skynet Panel";
+    "The Only thing I see is the Process Icon needs to be greyed Out"): 🔨 Open the Build page starts the Skynet Panel itself on the
+    imported Tabs, Devices and Widgets, in its own window and folder (Brewing\Import\build), with no board connected and Processes
+    greyed out; nothing else is changed or hidden. It signs in only with a one-time key the Importer makes. What is built there comes
+    into the Schema when it is saved.
     The Importer asks **what is connected to what**, as chains: a vessel opening (or a pump or valve), then what it is connected
     to, then what that is connected to, until an end (a vessel opening, Tap Water, Drain, a QD with Male/Female and Open/Shut-off,
     or Not connected); a Supply Manifold (Rule 5.35) can be a piece. **Each connection asks Hose or Pipe** (Pipe is the guess, Hose
@@ -1869,7 +2063,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 - **It starts with Welcome pages** (Fritz, 2026-11-06: "Welcome is Page 1, Similarities and differences are Page 2"; more pages
   may come): **Page 1** is just the welcome; **Page 2** explains what stays the same and what is different between BruControl
   and Skynet, and how the Importer guides the brewer through the import.
-- **Page 3 is the Starting dialog, the config file picker** (Fritz, 2026-11-06). **Browse for the config file** opens Windows' Open box in Documents\BruControl, where BruControl keeps it, showing only `.brucfg` files (Fritz, 2026-11-06: "use a browse to get the desired .brucfg"). It also shows BruControl's **backups** (`.bak`, for example `default.brucfg.20260615.bak`), which are the same config file inside (Fritz, 2026-11-07: "allow and import from a .bak file which is the same as the brucfg file"); they are listed after the brewer's own config files, marked *backup* with their date, also the ones in BruControl's own **Config Backup** folder (`Documents\BruControl\Config Backup`, Fritz 2026-11-07, where BruControl keeps them), and import the same way (the Import Copy is a plain `.brucfg`, and the Schema is named `<config>_Backup_YYYY-MM-DD`). It looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
+- **Page 3 is the Starting dialog, the config file picker** (Fritz, 2026-11-06). **Browse for the config file** opens Windows' Open box in Documents\BruControl, where BruControl keeps it, showing only `.brucfg` files (Fritz, 2026-11-06: "use a browse to get the desired .brucfg"). It also shows BruControl's **backups** (`.bak`, for example `default.brucfg.20260615.bak`), which are the same config file inside (Fritz, 2026-11-07: "allow and import from a .bak file which is the same as the brucfg file"); they are listed **first**, newest first, before the config files (`.brucfg`) (Fritz, 2026-11-08: "look in Documents\BruControl\Config Backup for .bak files First but also a second list of .brucfg type"), marked *backup* with their date, also the ones in BruControl's own **Config Backup** folder (`Documents\BruControl\Config Backup`, Fritz 2026-11-07, where BruControl keeps them), and import the same way (the Import Copy is a plain `.brucfg`, and the Schema is named `<config>_Backup_YYYY-MM-DD`). It looks **only in Documents\BruControl** first and **lists the config files** there, newest first.
   BruControl may keep a default config there too; it is listed and marked as BruControl's default. If no config file is there
   (or only the default one), the user is asked to **point to the folder** that holds theirs (Fritz, 2026-11-06). Clicking a file
   shows what is in it.
@@ -2164,6 +2358,7 @@ Pump Properties ⬢, Pin ⬢ (Invert, One-shot), When tapped ⬢, Kind, Picture 
 from its dialog (what a Pump already has set is kept). The On / Off text is shown with an **Overlay** instead (Rule 7.13).
 *Replaced:* for the Pump, Rule 18.12's list of fields (2026-11-03).
 *Replaced (Rule 18.13):* the Interface and Port each had **✏ Change** to change them on purpose (2026-11-04).
+*Changed (Fritz, 2026-11-08, Rule 18.32):* the Model ⬢, Power with Use, and Speed control with Speed % are added below the Overlay.
 
 18.22 **Each Device and Widget has only its own Properties** (Fritz, 2026-11-04): besides the Universal Properties (Rule 1.21),
 a Device or Widget may have a limited set of attributes and Properties, only the ones that fit it (the Pump: Rule 18.21). Other
@@ -2207,8 +2402,8 @@ like Pump", Help 137):
 3. The Add box is titled with the element and works as the Pump's and the Motorized Ball Valve's (Rules 4.2, 18.13, 18.15-18.17,
    18.20, 18.23): 1 Label ⬢ and Label Visible, 2 Interface with Available Ports, 3 Tab; then the Name, the **Graphic**, its **Path**,
    **Orientation** (Right / Left) with **Toggle** on its line, **Overlay** (None to start: the on picture glows) with **Database and
-   .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**HE**, Rule 3.1). **No Cover.** It still asks before it
-   turns on (Rule 2.33). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in as **hE_n** (**hE_1**, hE_2 ...), with no
+   .API ⬢** on its line, X, Y, Width, Height, and the Device Type greyed out last (**HE**, Rule 3.1). **No Cover.** One click on it turns it
+   ON or OFF at once (Rule 2.33, changed 2026-11-08). Label auto-fill (Fritz, 2026-11-05, Rule 18.15): a Heating Element's Label fills in as **hE_n** (**hE_1**, hE_2 ...), with no
    method in it, since its method can change (Rule 6.19, 2026-11-07); a heating PWM is **hE_PWM_1**, and the older control Devices
    keep **hE_PID_1**, **hE_HYS_1**, **hE_DutyC_1**, **hE_DeadB_1** (n the next number not used yet). *The hE_ start and the _n end wait on Fritz's OK.*
 4. Its Properties are the Pump's screen 9 (Rule 18.21) without the Cover; the Interface and Port are greyed out for good (Rule 18.13).
@@ -2359,6 +2554,22 @@ Flow switch, Interlock), the analog inputs and sensors (Pressure, Level, pH), th
 - **BruControl Import:** it has no Device dialogs of its own; the Devices it brings in open in these Properties in the Panel.
 ---
 
+18.32 **DC pumps: Model, Power, Use, Speed and the pump's facts** (Fritz, 2026-11-08: "All of the Suggestions on the Pump MD are a
+Go. I think that any of the Pumps can be controlled (On/Off or PWM if it can) and the voltage, Lift, GPM etc are all good info to
+have at your fingertips", [docs/DC_Brewing_Pumps.md](DC_Brewing_Pumps.md), Help 163). Every Pump's Add box and Properties have,
+below the Overlay:
+- **Model** (the pump list in public/pumps.js; a Skynet pump drawing picks its own; **Other** for a pump not listed) with a **⬢**
+  holding the **Pump facts** (Flow, Lift, Hottest liquid, Ports: the model's, or typed by the brewer).
+- **Power** (AC 120 V, AC 240 V, DC 12 V, DC 24 V; empty = the model's) with **Use** (Hot, or Cold for glycol and ice water) on its line.
+- **Speed control** (On/Off only, or PWM speed) with **Speed %** (0-100, empty = 100) on its line. An AC pump is On/Off only. A PWM
+  pump needs a true PWM Port (Rule 4.2's pin lists): its Add box lists only PWM Ports, and its Properties warn when the Port cannot.
+- The electrical warning (Rule 6.20).
+One click still turns a Pump On or Off (Rule 2.33); a PWM pump runs at its Speed % while On. A Process sets `Pump.speed = 60`.
+Holding the mouse on a Pump shows its facts. New pump drawings are made only when OakBarn Brewery asks (Rule 7.7); the manual
+BrewZilla 3 pump is a Pump Widget, built in its own thread.
+- **BruControl Import:** it shares the Pump; an imported Pump starts On/Off only with no Model. Guessing a Cold pump from its name
+  ("Cool", "Glycol") and joining a BruControl pump's on/off and PWM speed on one Port into one PWM Pump wait for the Importer review.
+
 ## 19. Vessel Rules
 
 Fritz (2026-11-05): "Vessels will have their own Rules." "Vessels on a Tab are Exception to the Rule and Only Apply to Vessel
@@ -2425,8 +2636,17 @@ Not Placed) or the dialog closes.
 
 ## Change log
 
+- 2026-11-08: Rule 15.4 (OakBarn Brewery: "Build Page is actually a Build Tab Page"): Connect your brewery has one Build Tab page per ticked Tab in BruControl order, each explaining the Build Tab choices (with a pop-up of every choice's hover help) and adding manual parts to the manifold, and opening the Panel's own Build Tab on that Tab. Help 143 updated. Checked against the Skynet Panel: in its Build-page mode only, it opens on the Tab the Importer names. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4 (OakBarn Brewery: "Connect to your Brewery will use the same Build page as in Skynet Panel"; "The Only thing I see is the Process Icon needs to be greyed Out"): Connect your brewery has 🔨 Open the Build page, the Skynet Panel's own Build page on the imported Schema, with no board connected and Processes greyed out; what is built comes into the saved Schema. Help 143 updated. Checked against the Skynet Panel: the Panel gets a Build-page mode used only when the Importer starts it (SKYNET_IMPORT_BUILD); a normal Panel is unchanged. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4 (OakBarn Brewery: "Globals will be dealt with later. For now, only list them"): the Importer only lists BruControl Globals (name and Tab) on the Boards and Tabs summary; they get no Placeholder and the Beer.xml question on a Globals-only Tab is gone. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Added Rule 1.28, Confirmation Widgets (OakBarn Brewery), and the `.confirmation` attribute that puts a Widget in the class (Help 162): Manual Valves, Manual Pumps and moving a QD Hose ask the person to confirm they did it by hand; a named exception to Rule 2.44's no pop-up to turn anything On, since they turn nothing on. The Importer's item pages (Pumps, Heaters, Probes, Valves, Flow Meters, Other) start with How many; extra ones added there will become Confirmation Widgets. Checked against both programs: the Panel gets the Widget class (to be built); the Importer makes them. (thread "Import from BruControl .bak backups")
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
+- 2026-11-08: Added Rule 2.44 (OakBarn Brewery: "make things act the same. Like Click the Graphic for On or Off ... What you do every day One Click away"): outside Edit layout one click on a picture of something that turns On and Off turns it On or Off at once, wherever it is; one click on a temperature a Heating Element holds opens its SetPoint (Rule 2.43); one click on something set to a number opens its pop-up; double-click still opens Properties. Lists three things that don't follow it yet (a Heating Element on its own on a Tab, a Valve built into a Vessel Device, the older Duty Cycle, Hysteresis, PID and Deadband Devices). Checked against the BruControl Import program: no change, everything it makes gets these clicks in the Panel. (thread "Add the one-click rule to the Rules")
+- 2026-11-08: Rule 6.19 (OakBarn Brewery: "Selecting a Different Method when a Heating Element does not turn it on, On off is By the On Off Button"): picking a method (a spot, the pop-up's buttons, a Process) only changes the method, with no pop-up, and never turns it On; while On it goes on in the new method. Help 150. Checked against the BruControl Import program: no change. (thread "Add the one-click rule to the Rules")
+- 2026-11-08: Rule 6.19 (OakBarn Brewery: "Duty Cycle % is good. 0 turns it off. Above zero turns it on if it was off"): in Duty Cycle, setting the % to 0 turns the Element Off and above 0 turns it On (pop-up, Process or .API). Help 150. Checked against the BruControl Import program: no change, it only sets the starting %, and loading a Schema never turns an Element on. (thread "Add the one-click rule to the Rules")
+- 2026-11-08: Changed Rule 4.4 (OakBarn Brewery: "Clones act just as if it was the Parent That all act in Unison. Click One on, ALL on, cLICK ONE OFF , aLL oFF"): one click on a Method Clone acts as on its parent with no pop-up: shown ON it turns the parent Off, shown OFF it switches the parent to its method and turns it On. Rule 2.44's list updated; Help 71 and 150 updated. Checked against the BruControl Import program: no change, the Method Clones it makes get this click in the Panel. (thread "Add the one-click rule to the Rules")
+- 2026-11-08: Changed Rule 2.33 (OakBarn Brewery: "Change the Rule Individual elements toggle on off. I really do not like the popup to turn any thing on"; "Valve in a Vessels Device Graphic toggle on off"): one click on any Heating Element (on its own, followed by a Picture Widget, or built into a Vessel Device) turns it ON or OFF at once in its method; every Schema's Heating Elements stop asking once when the panel starts; a new one does not ask. One click on the picture of a Valve built into a Vessel Device opens or closes it. Rule 2.44's list and Rule 6.19 updated; Help 120, 137 and 150 updated. Checked against the BruControl Import program: no change, its Heating Elements and Vessel Valves get these clicks in the Panel. (thread "Add the one-click rule to the Rules")
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
 - 2026-10-27: Added Rule 6.10, pin D10 on an Ethernet Mega.
 - 2026-10-27: Added Rule 6.11, SD cards not supported; warning on D4 and when a card is inserted.
@@ -2560,6 +2780,8 @@ Not Placed) or the dialog closes.
 - 2026-11-02: Rule 1.15 rewritten: `.x`, `.xh`, `.x_hPosition` (and `.y`, `.yv`, `.y_vPosition`) are all Process attributes for the same thing, `.x` / `.y` the main names; an exception to Rule 15.2. (thread "Set universal properties standard")
 - 2026-11-02: Rule 5.14 changed (Fritz): pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label, besides `.x`, `.y`, `.width`, `.height` and Autosize to pipe. Open question 14 answered. (thread "Set universal properties standard")
 - 2026-11-02: Rule 12.2 changed (Fritz): Beer money can go to at most 2 PayPal accounts; locked now with only Fritz's, unlocked only when he gives the second, then locked again. (thread "Expand Buy a Beer and Patron support")
+- 2026-11-08: Rule 18.32 new and Rule 18.21 changed (Fritz): DC pumps. Every Pump has Model (with its facts ⬢), Power with Use, and Speed
+  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 163, docs/DC_Brewing_Pumps.md.
 - 2026-11-02: Added Rule 12.3 (Fritz): Patron payments are split by percent between several PayPal accounts (Option A, Pay Out); Rule 12.2 covers Buy a Beer only. (thread "Expand Buy a Beer and Patron support")
 - 2026-11-02: Rule 12.3: a Patron account or percent change needs every Prime Developer's approval (100%, Fritz). (thread "Expand Buy a Beer and Patron support")
 - 2026-11-03: Rule 4.5 updated from Fritz's Edit layout bar picture ("Fix 1"): row 1 order Picture, Text, Manual Valve, Override, Add equipment, Vessel; 👻 Hidden Tab gets an orange ? pop-up holding the Edit layout hint (taken off row 3); the switch is now Update Schema Version. Help 82 updated; no new Help number used. (thread "Fix the Edit layout bar from screenshot")
@@ -2663,9 +2885,23 @@ Not Placed) or the dialog closes.
 - 2026-11-06: Added Rule 5.33 (the Tap Water Valve: a Manual Valve Widget with Fritz's household hose bib picture, one IP on the hose outlet, a tap water source while open; Label tap_water_n). Help 141; next free Help number 142. (thread "Add hose bib Manual Valve Widget")
 - 2026-11-06: Added Rule 5.34 (a Process line Hose_1.connect = QD_1 / = a Vessel Widget or Vessel Device / = none moves a Quick Disconnect hose at once and waits for Done, like a Manual valve; a Vessel is its top third, as a drag there; dragging the end by hand asks "Is the real hose there now?"). Help 142, Help 127 updated; next free Help number 143. (thread "Add Process command to connect QD hose")
 - 2026-11-06: Added Rule 15.4 (the Skynet BruControl Importer: Windows only, on BruControl's computer, shares one source of code, Templates, pictures and Rules with the Panel, both ways; Welcome screen, then a Starting dialog that lists the config files in Documents\BruControl or a folder the user points to when none is there; only Documents\BruControl is looked in). Help 143; next free Help number 144. (thread "Plan the BruControl config importer")
+- 2026-11-08: Rule 15.4: the Importer's page 2, Global Elements, adds OakBarn Brewery's text: importing a recipe needs no Globals (Skynet imports Beer.xml and BeerSmith .bsmx with no code), and Globals and Scripts found (with the brewer's help) to be only for a Node-RED recipe import are not imported. The Globals step itself is still to be built (plan in docs/BruControl_Importer_Plan.md). Checked against the Skynet Panel: wording only. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: the Importer's "copy my pictures and sounds" tick box is now "Also copy my pictures and sounds into one folder with subfolders (Recommended)" and is ticked to start with (was unticked); page 2 and page 4 wording from Fritz, Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: on the Importer's convert page an Interface (board) with no items is not imported unless its Import box is ticked; the Look (theme) line uses Fritz's wording (Skynet Office Black, Skynet Themes, User Theme, a Theme per Tab). Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 1.26 (new, Fritz: "build a chart method so we can import BruControl charts", "Closely match BruControl Chart properties as attributes"): the Chart Widget, a line graph of database readings with BruControl's Chart properties as its attributes; Rule 3.14 Type ID CHT; Rule 15.4: the BruControl Import makes each Chart a Chart Widget and sends its items to the database. Rule 11.1 next free Help is 160. Help 159 new. Checked against both programs: the Panel draws it and its Properties; the Importer makes it. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: a Tab with no items is imported (with its Placeholders) only when ticked; a Tab whose Placeholders are all Globals asks whether they import a Beer.xml recipe (Yes: leave it out). Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: Connect your brewery, "A picture as a guide" (Fritz): bigger vessels, a picked piece has a yellow border, blue lines are Pipes and yellow lines are Hoses (right-click changes one), a click picks a line and Delete removes it, the picture's back is always black. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4 (OakBarn Brewery: "if we import a BruControl have it conform to the newest standard"): a pump (found by its name) is imported as a Skynet Pump Device that follows the Pump Standard (Rule 5.27; BruControl's own pump pictures are kept in the file); a PID, Hysteresis, Duty Cycle or Deadband keeps its settings (Target, Kp, Ki, Kd, Max output ...) and its probe (.input), so the one Heating Element works and its SetPoint click finds it (Rules 6.19, 2.43); an item BruControl marked not user controlled gets When tapped: none (Rule 2.44), except a probe. Names already use ~ (Rule 3.1); Charts are Chart Widgets (Rule 1.26). Help 143 updated. Checked against the Skynet Panel: these are the Panel's own standards. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: Connect your brewery (OakBarn Brewery): the picture guide has its own full-window screen, with Skynet vessel, pump and valve drawings; a Pipe runs only across, up and down or at 45 degrees, a Hose hangs in a curve; Pipe-joined pieces stack in columns, twice as many columns as vessels, the end vessels in the end columns; Set moves them one column in, with a column between vessels; ↺ Start resets. The "What is connected to what" list has its own screen too, and Next and Back move between the picture and the list. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: the BruControl pictures and sounds are always copied into media\Images\User and media\sounds\User (the tick box is gone, OakBarn Brewery: "just make the copies"); the originals stay where they were and are never deleted. Connect your brewery starts with Build your vessels: one vessel at a time, "which template matches your vessel the best", every Skynet vessel Template shown as its picture (the Panel's own Templates and drawings, shared on the same computer); the answer is saved with the vessel (template). Help 143 updated. Checked against the Skynet Panel: the copies are the files it already uses; nothing else changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4 (OakBarn Brewery: "Steer the Importer to a Drill Down type question where the User Confirms what is imported in small steps"): the Boards and Tabs page is now small steps: the Interfaces found (read only: ID greyed, Items, Interface Type, Connection, Enabled), then the ID column explained (how the suggested Skynet name is built, Rule 3.1) with the Importer's IDs editable (up to 4 letters, 2 preferred, each different, Rule 3.2) and Accept, then the rest. Changed IDs convert the Import Copy again, so every name uses them. Then the Tabs step: Items, a column per Placeholder kind, an Import Tab box per Tab (with items: starts ticked; empty: unticked; any can be changed) and Accept. Then the items on each Interface (read only, one table per board), then the Vessels step, which starts with the old Your vessels table (rename, Side, remove, Add a vessel; Connect your brewery keeps only the template picker). Units (US or Metric) are asked first, on the Names page, confirming what BruControl's probes used. Then the Vessels step: Volume, Height, Diameter, Heater (a dropdown of the BruControl heating elements found), Thermowell with Probe (a dropdown of the BruControl probes found), Outlet (None, Center Low, Bottom Drain), Tangential Inlet (a tick box), Sparge Arm / Steam Slayer (one dropdown: None, Upper Left, Upper Right), HERMS Coil (a tick box, unticked to start); found answers are guesses and Manual Valves (None, Manual Ball Valve, Manual Butterfly Valve; None to start), saved with each vessel as details. A Motorized Ball Valve column lists every motorized valve found. During the interview every item is shown by its BruControl name (OakBarn Brewery: "use the Brucontrol names from the start until we get further in the interview"); the saved names are still the Skynet names (Rule 15.1 unchanged). Help 143 updated. Checked against the Skynet Panel: the same IDs and names as Rule 3.1 and 3.2; nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: Connect your brewery's list (OakBarn Brewery): one vessel at a time (a button per Hot Side vessel, Other chains, All; "Save, next vessel"); each join is a Vertical pipe, a Pipe to the left, a Pipe to the right or a Hose; left or right asks for an Elbow or a Tee ("Right or left add an elbow or Tee, need user input as to type"); a Tee goes in the line and its third opening starts a branch chain; ⊤ Tee adds one after any piece. Saved as by = pipe/hose, dir = left/right, fit = elbow/tee and end kind tee (n) in the Schema's connect key. Help 143 updated. Checked against the Skynet Panel: it does not read the connect key yet; nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-07: Rules 3.1, 3.14 and 4.2 changed (Fritz: "I like the ~ instead of a _ in the label part of the name. Make that the rule"): a space in the Label part of a suggested Device or Widget name becomes `~` (was `_`), so `_` only separates the parts (`MB_A0_10KNTC_Mash~Tun_SP`). Names made before keep their `_` (Rule 3.5). Checked against both programs: one shared code path (public/naming.js) makes the Panel's and the Importer's names; Help 3, 46, 55, 72, the Device Library and the Importer's page 2 updated. A BruControl name kept on purpose (Rule 15.1) still gets `_` for its spaces, as it is not a Skynet name. (thread "Import from BruControl .bak backups")
+- 2026-11-07: Rule 15.4: the Importer's page 2, Your Scripts, adds Fritz's words on the Preset Schema Templates ("I wanted to Brew, not write Code!"); its Names card has Fritz's wording of the naming convention (Rule 3.1). Help 143 updated. Checked against the Skynet Panel: wording only, nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Importer has page 6, **Connect your brewery**: what is connected to what as chains, Hose or Pipe for each connection, guesses from the names, Scripts and BruControl picture, a picture as a guide, an optional free AI outside the Importer (copy the question, paste the answer back), Fermenter questions, and Fritz's song. Help 143 updated, no new Help number used. Checked against the Skynet Panel: it keeps the answers in the Schema file only; nothing in the Panel changes until the Vessel step draws the pipes. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Import's Browse box and file list also take BruControl backups (`.bak`, the same config file inside), marked *backup* with their date; Help 143 updated, no new Help number used. Checked against the Skynet Panel: it only opens the Importer's `.json` Schema files, so nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-07: Rule 15.4: the BruControl Import also lists the backups (and any config file put there) in Documents\BruControl\Config Backup; its Windows boxes open in front of its window; a folder typed without a drive (like `\downloads`) means that folder in the user's own folder; the page says plainly when the Importer has stopped (its black window was closed). Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
+- 2026-11-08: Rule 15.4: the BruControl Import lists BruControl's backups (.bak) from Documents\BruControl\Config Backup first, then the config files (.brucfg), as two parts of one list; the 5 steps on page 2 use Fritz's new wording, with a line that the .bak or .brucfg file is only read and never changed. Help 143 updated. Checked against the Skynet Panel: nothing changes there. (thread "Import from BruControl .bak backups")
 - 2026-11-06: Rule 15.1 changed (Fritz): the BruControl Importer may keep the user's BruControl names, but only after "Do you really want to keep your BruControl names?" (why not, No is the default) and a last chance to back out, like Start Fresh (Rule 9.8); the Skynet names stay the default and the recommended way. (thread "Plan the BruControl config importer")
 - 2026-11-06: Added Rule 6.18 (API_Name: a Unique String on the Database and .API pop-up only, what a Voice Command says, e.g. "Turn on Red Pump"; may be blank with a warning; Home Assistant and /api/items use it; replaces the planned Voice Name). Help 144, Help 98 updated; next free Help number 145. (thread "Add unique API_Name for voice commands")
 - 2026-11-06: Rule 6.14: the .API choices are renamed (Fritz: "Plain English. Get and Put are computer terms that only geeks understand"; "Get and put follow in the ( )"): Off, Read Only (Get: outside programs like Node-Red can read it.), Read & Control (Get & Put: outside programs like Node-Red can also control it.). Added Rule 2.37 (correct spelling, plain English). They work the same. Help 98 updated. (thread "Add unique API_Name for voice commands")
@@ -2721,6 +2957,7 @@ Not Placed) or the dialog closes.
   Clean (always last); any step can be skipped; Whirlpool and Chill or Chill. Rule 16.3 Process names follow the steps used.
   Help 100. Checked against the BruControl Import program: no change (it does not build a Brew Process).
   (thread "Build Process and Schema Templates")
+- 2026-11-08: Added Rule 2.43 (Fritz: "Click on a Thermowell or Probe or Display of a Temperature NOT in edit Mode, Bring up SetPoint Dialog"): outside Edit layout one click on a Temperature Probe, Thermowell, probe tee, a probe built into a Vessel, or a picture showing a probe opens the SetPoint pop-up of the Heating Element that reads it. Help 160; next free Help number 161. Checked against the BruControl Import program: not changed, its probes and Heating Elements get this click in the Panel. (thread "Open SetPoint dialog from temperature widgets")
 - 2026-11-07: Rule 16.1 (Fritz): the hop stand in Whirlpool and Chill and in Chill (chill to the hop stand temperature, cooling
   water off for the hop stand time, then chill on), and the Hop Infuser for Hop Rocket Whirlpool hops. New jobs Chiller cooling
   water and Hop Infuser valve; rcp_Hop_Stand, rcp_Hop_Stand_Temp, rcp_Hop_Stand_Minutes, rcp_Hop_Infuser; Default settings Hop
@@ -2729,8 +2966,24 @@ Not Placed) or the dialog closes.
 - 2026-11-07: Rule 6.15 (Fritz): a tap water valve's Properties show On Close List on and On Open List off, greyed out; the last
   step of Skynet_Clean is open_all_valves. Checked against the BruControl Import program: a Schema file it makes is put right the
   same way when the panel opens it (Tap water valves on Close only). Help 100. (thread "Build Process and Schema Templates")
+- 2026-11-08: Added Rule 1.27 (Code Value Widget: a Value Widget with a Format and a Code attribute of Process code that runs
+  each time a person sets the Value; {value} is the Value) and its type letters CV in Rule 3.14. Help 161; next free Help number
+  162. Checked against the BruControl Import program: no change (BruControl has no such element, so the Importer makes none).
+  (thread "Build a Code Value Widget")
 - 2026-11-07: Rules 16.6 and 16.7 new (Fritz): Schema Templates (1 Vessel, 1 Vessel + 1 Pump, 2 Vessel + 1 Pump, 2 Vessel + 2
   Pumps, 3 Vessel, OakBarn, Fermentor on its own), Process Templates for the 1 and 2 Vessel models, the Skynet ones filled out from
   the OakBarn brew day, and click to pick a Brew Process job on the Tab. Help 157, Help 100. Checked against the BruControl Import
   program: no change (it does not use Schema Templates or the Brew Process; making a Schema from a BruControl file stays in the
   Importer). (thread "Build Process and Schema Templates")
+- 2026-11-08: Rule 6.19 (Fritz: "it switches between All tree methods fine, but no Turn Off!"): the method spots get a Turn Off button while the Element is ON, and a click on a built in Element's picture on its Vessel Device opens its pop-up with ON and OFF. Help 150 updated. Checked against the BruControl Import program: no change (its joined Elements get the same spots in the Panel). (thread "Pick the heating method on one Element")
+- 2026-11-08: Rule 6.19 (Fritz: "The buttons change color but nothing else"; "I use more than a single element as they are on different AC Circuits"): a method spot clicked while the Element is OFF also opens its pop-up to turn it ON; nothing stops two Elements being ON at once. (thread "Pick the heating method on one Element")
+- 2026-11-08: Added Rule 6.20 (Fritz): the electrical warning "Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician." in a Heating Element's Properties, its wiring hover help, Help 137 and 150, and the BruControl Import's first page. Checked against the BruControl Import program: its first page shows it. (thread "Pick the heating method on one Element")
+- 2026-11-08: Rule 6.19 (Fritz: "I found and On/Off Button slider on the Heat Element Proerties ... It should not be a choice. Always displayed"): On/Off is always allowed with its spot always shown; its switch is gone from the Heating Element's Properties. Help 150 updated. Checked against the BruControl Import program: no change. (thread "Pick the heating method on one Element")
+- 2026-11-08: Rules 2.33 and 6.19 (Fritz: "You can turn on more than a single element at a Time. I was Clicking the Graphic and not the Box. Have the Graphic toggle on Off like a Pump"): one click on a built in Element's picture on its Vessel Device turns it ON or OFF at once in its method; its box opens the pop-up. Help 150 updated. (thread "Pick the heating method on one Element")
+- 2026-11-08: Rule 6.19 changed (OakBarn Brewery: "Selecting a Different Method when a Heating Element does not turn it on, On off is By the On Off Buttton"): a method spot clicked while the Element is OFF only switches its method, with no pop-up. Help 150 updated. Checked against the BruControl Import program: no change. (thread "Add the one-click rule to the Rules")
+- 2026-11-07: Rule 5.39 new (Fritz): hand-set appliance vessels, the DigiBoil (Power and Heater switches, Spigot with BSP threads,
+  set point and screen) and the 65 L Brewzilla (Pump, Heater 1, 2, 3 switches, Spigot, Pump out valve, set point and screen with
+  On/Off and Run); a Process asks for each by hand and waits for Done; a set point in °F is given in °C too (their screens go back
+  to °C when turned off); new Process commands open_valve and close_valve for any valve; Schema Template heat choice "Its own, set
+  by hand", used by the OakBarn Template. Rule 11.1 next free Help is 159. Help 158 new; Help 100, 157, 62 updated. Checked against
+  the BruControl Import program: no change (BruControl has no such items). (thread "Add DigiBoil manual vessel widget")

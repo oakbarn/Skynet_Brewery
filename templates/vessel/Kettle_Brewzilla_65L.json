@@ -1,0 +1,30 @@
+{
+  "vesselType": "vessel",
+  "vtype": "All In One",
+  "image": "Images/Skynet/Vessels/Vessel_Brewzilla.svg",
+  "heatKind": "other",
+  "otherHeat": "Its own heaters, pump and controller (set by hand)",
+  "appliance": "brewzilla65",
+  "volume": 17.2,
+  "std": {
+    "type": "BSPMRc",
+    "size": 0.5
+  },
+  "size": [
+    180,
+    350
+  ],
+  "ports": {
+    "outlet": {
+      "installed": true,
+      "position": "Center Bottom",
+      "label": "BSP spigot"
+    },
+    "outlet2": {
+      "installed": true,
+      "position": "Brewzilla Pump Out",
+      "label": "Pump out"
+    }
+  },
+  "notes": "A 65 L Brewzilla (Fritz, 2026-11-07, Rule 5.39): it heats and pumps itself and Skynet does not switch any of it. Built in: its 4 switches (the bottom drain Pump, Heater 1, Heater 2, Heater 3), its temperature set point and screen with its On/Off button and Run spot (a Manual vessel Widget, Brewzilla_Controls), the silver BSP spigot on its outlet (Brewzilla_Spigot) and the Manual valve on the out side of its pump (Brewzilla_Pump_Out). A Process sets them and a pop-up asks you to do it by hand; its screen goes back to °C every time it is turned off, so a set point in °F is given in °C too."
+}

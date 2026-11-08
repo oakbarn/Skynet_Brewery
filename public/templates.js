@@ -6,6 +6,7 @@
 
 // Connection Standard (was "Outlet Standard"): the default for every port and Bundled Fitting of a Template; each one can set
 // its own. It goes on the Equipment list and sets the default size of the SVG. DIN sizes are text, the others numbers.
+import { isAppliance } from './appliance.js';
 export const CONNECTION_STANDARDS = {
   TC: 'TC (Tri-Clamp)', FPT: 'FPT (NPT female)', MPT: 'MPT (NPT male)',
   BSPFRp: 'BSP Female Rp', BSPFRc: 'BSP Female Rc', BSPMRp: 'BSP Male Rp', BSPMRc: 'BSP Male Rc',
@@ -126,6 +127,8 @@ export function cleanVessel(b = {}) {
   // the size it is drawn on a Tab, [width, height] in pixels, so a picture keeps its shape (empty = the kind's own size)
   const size = cleanSize(b.size); if (size) t.size = size;
   if (INTEGRATED[b.integrated]) t.integrated = b.integrated;
+  // a hand-set appliance (Fritz, 2026-11-07, Rule 5.39): a DigiBoil or a 65 L Brewzilla, with its switches, screen and valves built in
+  if (isAppliance(b.appliance)) t.appliance = b.appliance;
   // the Vessel Widget class (Fritz, 2026-11-05, Rule 5.31): every spot of the Template has a Place slider (installed = Placed);
   // its Temperature Probe is seen as a Thermowell (in from the side) or from the Front
   if (b.vwidget === true) { t.vwidget = true; t.probeStyle = b.probeStyle === 'front' ? 'front' : 'thermowell'; }

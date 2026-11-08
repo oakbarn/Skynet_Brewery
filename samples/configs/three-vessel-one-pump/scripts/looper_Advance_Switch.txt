@@ -5,10 +5,10 @@
 new value vVBrew
 [LoopAuto]
 sleep 100
-if sw_Advance_BrewStatus == true
+if wgt_SW_Advance_BR == true
 	vVBrew = gblV_Brew_Status
 	vVBrew += 1
 	gblV_Brew_Status = vVBrew
-	sw_Advance_BrewStatus = false
+	wgt_SW_Advance_BR = false
 endif
 goto "LoopAuto"

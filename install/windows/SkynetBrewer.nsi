@@ -47,7 +47,8 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !define MUI_ICON "skynet.ico"
 !define MUI_UNICON "skynet.ico"
 !define MUI_WELCOMEPAGE_TITLE "Install Skynet Brewer"
-!define MUI_WELCOMEPAGE_TEXT "This puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop.$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
+; The opening screen shows the version, so the brewer can see which one this Setup installs (Fritz, 2026-11-07)
+!define MUI_WELCOMEPAGE_TEXT "Version: ${VERSION}$\r$\n$\r$\nThis puts the Skynet Brew Panel on this computer and adds a Skynet Brewer shortcut to your Desktop.$\r$\n$\r$\nIf the panel is already running, close its black command window before you click Next.$\r$\n$\r$\nUpdating? The next page lets you pick: keep everything, reset all users, or Start Fresh."
 !define MUI_DIRECTORYPAGE_TEXT_TOP "The panel goes in this folder. C:\Brewing\BrewPanel is recommended."
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_TEXT "Start Skynet Brewer now"

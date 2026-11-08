@@ -41,7 +41,7 @@ Press **💾 Save Build ...** on the Edit layout bar. A pop-up asks where it sho
 | **Throw it away** | Everything on the Build Tab is deleted (it asks first). |
 | **Keep building** | Back to the Build Tab, nothing changes. |
 
-A new Device whose name still follows the suggested name gets the **Tab ID** of the Tab it moves to at the end of its name (for example `MB_25_PWM_VlV_Fly_Sparge_SP`). A name you typed yourself is never changed.
+A new Device whose name still follows the suggested name gets the **Tab ID** of the Tab it moves to at the end of its name (for example `MB_25_PWM_VlV_Fly~Sparge_SP`). A name you typed yourself is never changed.
 
 If you press **Save layout** while something is still on the Build Tab, the Save Build pop-up opens first, so nothing is lost. **Exit without Saving** throws away the Build Tab with the rest of your changes.
 
