@@ -495,7 +495,9 @@ Import** (they share these Rules, Rule 15.4):
 2. The explanation is the field's **hover help**: its name has a dotted underline; **rest the mouse on the name** (of a field or
    a dropdown) and a small yellow help box shows the explanation **instantly, with no wait** (Fritz, 2026-11-06: "That is the way
    the Hover Help Works. Help for any Choice is always available instantly"). Every choice has its hover help. It **stays as long as the mouse is on the name**
-   and goes away as soon as the mouse moves off (or on a click, a key or a scroll). It never hides the field it explains.
+   and goes away as soon as the mouse moves off (or on a click, a key or a scroll). It never hides the field it explains. A box you
+   type in or pick from (a dropdown) never shows hover help itself, so the help can never cover a choice (OakBarn Brewery, 2026-11-08:
+   "The Hover Help for Connection covers the DDLB so no Choice can be made"); its help is on its name or column heading.
 3. **Phones and tablets** (run mode, Rule 2.35) have no mouse: a **tap** on the name opens the small pop-up with Close
    (Rule 18.16), as before. Tap-and-hold is not used, so it never clashes with holding a finger for Properties (Rule 2.9).
 4. **Buttons and the dialog title have hover help too** (Fritz, 2026-11-06: "add hover over the Buttons as well and maybe over the
@@ -1992,8 +1994,8 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
 - **It is a choice when installing** (Fritz, 2026-11-06). The Windows Setup asks "Will you import a BruControl configuration
   on this computer?" with this under it (Fritz, 2026-11-07): "If you are a BruControl Brewer and want to import a BruControl
   .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the Importer's shortcuts (Desktop, Start menu and the Import folder); No leaves them out (Setup can be run again to add it). On an update the
-  last answer is the default. When the answer was Yes, the last Setup page has a tick box, **Open the BruControl Importer now**
-  (Fritz, 2026-11-07).
+  last answer is the default. When the answer was Yes, the last Setup page has **Start Skynet Brewer now** (ticked) and **Start the
+  BruControl Importer now**: only one can be ticked, so only one program starts (OakBarn Brewery, 2026-11-08: "only one Skynet or Importer start").
 - **The Import folder is always made** (Fritz, 2026-11-06): the Brewing folder's **Import** subfolder (`C:\Brewing\Import` when
   the Panel is in `C:\Brewing\BrewPanel`), whether or not the Importer is added, because BeerSmith or other programs may save
   their files there too. An uninstall never deletes it.
@@ -2075,7 +2077,7 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
   - **The Interfaces found** each have an **Import** box (the ones with items ticked); the old Interface question on the summary is gone.
   - **Every box the brewer fills in** is grey with black text, and **no box may be left blank**: a blank one is marked red and named in a message.
   - **The items on each Interface** have Display Name, a tick box (copies it to the Label), Label, **Show** (ticked as BruControl showed
-    the name), **Skynet Name with DisplayName** and **Skynet Name with Label** (it changes as the Label is typed). There is no
+    the name) and **Skynet Name** (made with the Label as it is typed; see the minor fixes below). There is no
     "tick them all" box, on purpose: each item must be looked at (a code like `M_6_B_1` should become words like HLT).
   - **The Widget pages** come after the Tabs: every Skynet Widget type with how many of the brewer's BruControl Application Elements
     become one, then a page per kind found. A BruControl **Timer** becomes a Timer Widget, an **Alarm** an Alarm Widget, a **Toggle
@@ -2095,6 +2097,12 @@ boards or sign-in. It keeps no Schemas: what it makes goes to the Brain (Rule 1.
     says why, with **Use it anyway**. A Heating Element and a Cool / Warm Pump (Rule 6.21) start in the Primary method, with a spot for each other one ticked.
   - **Vessels:** the Heater column is **Heater Element**; **HERMS Coil** is a dropdown with the Panel's choices: None, Left, Right,
     Outlet Left & Inlet Right, Outlet Right & Inlet Left.
+  - **The minor fixes of 2026-11-08** (OakBarn Brewery, thread "Fix the Importer pages"): the topics along the top can be clicked
+    to jump to any one reached, and Boards and Tabs has a row of its small steps to jump to; the ID page lists only the Interfaces
+    being imported; a Widget page is made only for a kind on a Tab being imported; **one Skynet Name** column, made with the Label
+    (it changes as the Label changes; greyed and made with the Display Name until a Label is typed); a pump model made for one voltage
+    fills in its Power; a Heating Element's first Control Type column is **On/Off Only** (ticked: the other methods are greyed);
+    **Watts** may be blank; Next on the Names page never clears the kept answers without asking.
   - **The Importer has its own icon**, clinking beer mugs (listed as CC0 on SVG Repo), in its window and on its shortcuts; the Panel keeps its own.
 - **Save the Schema** (Fritz, 2026-11-06): the Importer saves its Schema as one Skynet Schema file (`.json`) in the Import
   folder, named `<Name>_YYYY-MM-DDTHHMMSS.json` (Rule 3), with the import report (and, once that step is built, its
@@ -2701,6 +2709,7 @@ Not Placed) or the dialog closes.
 
 ## Change log
 
+- 2026-11-08: Rules 2.38 and 15.4, the Importer minor fixes (OakBarn Brewery): a box you type in or pick from never shows hover help over itself (both programs: public/hoverhelp.js is shared); the Setup Finish page has Start Skynet Brewer now or Start the BruControl Importer now, only one; the Importer's topics and the Boards and Tabs steps can be jumped to; the ID page lists only Interfaces being imported; Widget pages only for kinds being imported; one Skynet Name column made with the Label; pump Power filled in from a one-voltage model; Heating Elements On/Off Only; Watts optional; Next never clears kept answers without asking. Checked against the Panel: its boxes and dropdowns show their hover help on their names only, like the Importer; nothing else changes there. Help 143 and 165 updated. (thread "Fix the Importer pages")
 - 2026-11-08: Added Rule 6.21, One Cool / Warm Pump (OakBarn Brewery): a pump a temperature switches is one Pump Device with a Method (On/Off or Hysteresis), Device Type ID CPMP (`MB_D5_CPMP_Cool~Pump_FR`). Help 164. Checked against both programs: the Panel shows its Method in the Pump's Properties and the Brain runs it; the Importer makes BruControl's temperature-run pumps one CPMP Pump.
 - 2026-11-08: Rule 15.4, the Importer fix list (OakBarn Brewery): answers kept to come back later, Interfaces Import box, no blank boxes, Show and the two Skynet Name columns, the Widget pages (BruControl Timers, Alarms, Toggle Switches, Scripts become Skynet Widgets), new item pages (pH, Pressure, Hydrometers, Volume, Floats, Digital Inputs), no "Not sure", User defined, valve Connection, Sizes and Voltage, more flow meters, Control Type columns with Primary, Heater Element and the Panel's HERMS Coil choices, the clinking beer mugs icon. Help 143 updated, Help 165. Checked against the Skynet Panel: the CPMP Type ID and the Pump's Method (Rule 6.21) are the only Panel changes. (thread "Fix the Importer pages")
 - 2026-11-08: Rule 15.4 (OakBarn Brewery: "Build Page is actually a Build Tab Page"): Connect your brewery has one Build Tab page per ticked Tab in BruControl order, each explaining the Build Tab choices (with a pop-up of every choice's hover help) and adding manual parts to the manifold, and opening the Panel's own Build Tab on that Tab. Help 143 updated. Checked against the Skynet Panel: in its Build-page mode only, it opens on the Tab the Importer names. (thread "Import from BruControl .bak backups")

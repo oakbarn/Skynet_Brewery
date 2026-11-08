@@ -64,6 +64,9 @@ export const PUMP_MODELS = [PICK, ['march809', 'March 809 (AC)'], ['march815', '
   ['hbmp20', 'DDMETER HB-MP20 (12 V DC)'], ['jt1000', 'BrewTaurus JT-1000B-24 (24 V DC)'], ['bayite', 'bayite BYT-7A006 (12 V DC)'],
   ['solar12', 'Solar hot-water pump (12 V DC)'], ['penguin', 'Penguin Chillers glycol pump (12 or 24 V DC)'], ['gf30', 'Grainfather GF30 cooling pump (12 V DC)'],
   ['submersible', 'Small submersible pump (12 or 24 V DC)'], USER];
+// a pump model made for one voltage only fills in its Power by itself (OakBarn Brewery, 2026-11-08: "If a Pump only has one voltage
+// option, fill in the voltage automatically"); "12 or 24 V DC" and "(AC)" (120 or 240 V) are left for the brewer to pick
+export const onePower = model => { const m = /\((12|24) V DC\)$/.exec(PUMP_MODELS.find(([k]) => k === model)?.[1] ?? ''); return m ? 'dc' + m[1] : ''; };
 const VOLTS = [PICK, ['dc5', '5 V DC'], ['dc12', '12 V DC'], ['dc24', '24 V DC'], ['ac120', '120 V AC'], ['ac240', '240 V AC'], USER];
 // the Skynet probe types (public/naming.js, Device Type IDs for a temperature probe)
 const PROBES = [PICK, ['1W', 'OneWire (DS18B20)'], ['RTD', 'RTD (PT100 or PT1000)'], ['TC', 'Thermocouple (MAX31855 / MAX31856 board)'], ['10KNTC', '10K NTC thermistor (BCS-462 / BruControl type)'],
@@ -94,6 +97,10 @@ const DIN_TYPES = [PICK, ['DI', 'Direct Input (plain)'], ['DIN', 'DIN momentary 
 // kind of item unticks itself and says why, with a button to use it anyway. On/Off is always allowed (Rule 6.19).
 export const METHOD_COLS = [['onoff', 'On/Off'], ['pwm', 'Speed (PWM)'], ['dutyCycle', 'Duty Cycle'], ['hysteresis', 'Hysteresis'], ['pid', 'PID'], ['deadband', 'Deadband'], ['precise', 'Precise']];
 const PUMP_WHY = 'A pump is not run this way. This method switches the pump on and off many times a minute to hold a number: it wears out the motor and its relay, and a pump does not hold a temperature by itself. Use On/Off, Speed (PWM) or Hysteresis (a Cool / Warm Pump, Rule 6.21).';
+// the On/Off column's name: a Heating Element always has its On/Off button (Rule 6.19), so for it the column is "On/Off Only", a heater
+// controlled by nothing else (OakBarn Brewery, 2026-11-08: "On/Off column should be On/Off Only ... Every heater has on off as the means
+// to turn it on")
+export const methodName = (kind, k) => kind === 'heater' && k === 'onoff' ? 'On/Off Only' : METHOD_COLS.find(m => m[0] === k)?.[1] ?? k;
 export const NOT_RECOMMENDED = {
   pump: { dutyCycle: PUMP_WHY, pid: PUMP_WHY, deadband: PUMP_WHY, precise: PUMP_WHY },
   heater: { pwm: 'A heating element has no speed. Speed (PWM) is for a pump, a fan or a motor. A heater on a PWM pin is run by Duty Cycle, PID, Deadband or Precise, which work out its % for you.' },
@@ -103,7 +110,7 @@ export const PART_PAGES = [
     { k: 'model', name: 'Pump model', list: PUMP_MODELS },
     { k: 'power', name: 'Power', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], ['dc12', '12 V DC'], ['dc24', '24 V DC'], USER] }] },
   { kind: 'heater', title: 'Heating Elements', one: 'Heating Element', methods: true, fields: [
-    { k: 'watts', name: 'Watts', number: true },
+    { k: 'watts', name: 'Watts', number: true, optional: true },      // may be left blank (OakBarn Brewery, 2026-11-08: "Wattage Optional No Red Boxes")
     { k: 'volts', name: 'Volts', list: [PICK, ['ac120', '120 V AC'], ['ac240', '240 V AC'], USER] }] },
   { kind: 'probe', title: 'Temperature Probes', one: 'Probe', fields: [
     { k: 'probe', name: 'Probe type', list: PROBES }] },
@@ -156,9 +163,9 @@ export function guessPartDetails(e, kind) {
   const t = textOf(e);
   if (kind === 'pump') {
     const m = e.heatMethod === 'hysteresis' ? 'hysteresis' : e.type === 'pwmOut' ? 'pwm' : 'onoff';
-    return {
-      model: /chu+g+er/i.test(t) ? 'chugger' : /riptide/i.test(t) ? 'riptide' : /march ?815/i.test(t) ? 'march815' : /march/i.test(t) ? 'march809' : /mkii|mk ?2/i.test(t) ? 'mkii' : /td5|topsflo/i.test(t) ? 'td5' : '',
-      power: /240 ?v?ac/i.test(t) ? 'ac240' : /120 ?v?ac/i.test(t) ? 'ac120' : /24 ?v?dc/i.test(t) ? 'dc24' : /12 ?v?dc/i.test(t) ? 'dc12' : '',
+    const model = /chu+g+er/i.test(t) ? 'chugger' : /riptide/i.test(t) ? 'riptide' : /march ?815/i.test(t) ? 'march815' : /march/i.test(t) ? 'march809' : /mkii|mk ?2/i.test(t) ? 'mkii' : /td5|topsflo/i.test(t) ? 'td5' : '';
+    return { model,
+      power: /240 ?v?ac/i.test(t) ? 'ac240' : /120 ?v?ac/i.test(t) ? 'ac120' : /24 ?v?dc/i.test(t) ? 'dc24' : /12 ?v?dc/i.test(t) ? 'dc12' : onePower(model),
       methods: [...new Set(['onoff', m])], primary: m };
   }
   if (kind === 'heater') {

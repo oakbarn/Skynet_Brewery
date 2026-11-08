@@ -79,7 +79,12 @@ size and volume in the next steps uses them. When your BruControl probes show wh
 for you and the question asks you to confirm it.
 
 **Coming back later.** Every answer you give is kept a moment after you give it. If you close the Importer and come back, pick
-the same config file: the Names page then offers **▶ Carry on where I left off**, or **Start again** (it asks first).
+the same config file: the Names page then offers **▶ Carry on where I left off**, or **Start again** (it asks first). Clicking
+**Next ▶** instead never wipes your answers out: it asks whether to carry on, and asks again before starting over.
+
+**Jump to a topic.** The topics along the top (Welcome, BruControl and Skynet ... Save the Schema) can be clicked to go back to
+any you have reached. Under **Boards and Tabs** a second row lists its small steps (Interfaces, IDs, Tabs, the Widget pages, Items,
+each item page, Vessels, Summary): click any one you have reached to jump there.
 
 Every box you fill in is **grey with black text**, and **no box may be left blank**: a blank one is marked red when you press
 **Accept ▶**, and a message says how many there are.
@@ -116,7 +121,7 @@ Then you confirm what comes in, in small steps:
    **suggested Skynet name** of every Device on that board: *Interface ID*_*Port*_*Type ID*_*Label*_*Tab ID*, one `_` between the
    parts, a space in the Label becomes `~` (Rule 3.1), for example `MP_45_DO_M~HLT~Pump_MD`; a name that would be the same as another
    gets `_2` before its Tab ID, so every name is unique. The Importer chose the IDs for you; you may change them (up to 4 letters,
-   **2 are preferred**, each one different). **Accept ▶** uses them in every name and goes on.
+   **2 are preferred**, each one different). Only the Interfaces you are importing are listed. **Accept ▶** uses them in every name and goes on.
 3. **Your Tabs (workspaces).** One row per Tab: its ID, its **Items** and a column for each kind of **Placeholder** found
    (Timers, Counter Devices ...) and an **Import Tab** box. A Tab with items starts ticked, an empty Tab starts unticked; you can tick
    or untick any of them, and an unticked Tab is not imported, with everything on it. **Accept ▶** goes on.
@@ -128,7 +133,8 @@ Then you confirm what comes in, in small steps:
 4. **The items on each Interface.** One table per Interface (board): every item wired to one of its ports, by port, with its
    BruControl name, its **Display Name** (with no Display Name, the BruControl name is shown greyed), a **tick box** and a **Label** box,
    a **Show** box (ticked when BruControl showed the name), what it becomes in Skynet (Pump, Cool / Warm Pump, Heating Element, Analog
-   Input ...), its **Skynet Name with DisplayName**, its **Skynet Name with Label** (it changes as you type the Label) and its Tab.
+   Input ...), its **Skynet Name** (made with your Label, and it changes as you type; until you type a Label it is made with the
+   Display Name and greyed) and its Tab.
    There is no "tick them all" box, on purpose: look at each item, because a BruControl name like `M_6_B_1` should become words like HLT. An item on a Tab you
    left out is marked *left out*.
    - **Labels.** BruControl's Display Name settings come over as the item's **Label** in Skynet. The Label can be shown on the Tab just
@@ -281,7 +287,8 @@ Then, in the **Skynet Panel**, open **Schema.json** and click **Open a Schema fi
 ## Installing the Importer
 
 The Windows Setup asks **"Will you import a BruControl configuration on this computer?"** Under the question it says: "If you are a BruControl Brewer and want to import a BruControl .brucfg Configuration File, answer Yes. If you are not a BruControl Brewer, answer No." Yes adds the **Skynet BruControl
-Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. If you answered Yes, the last Setup page has a tick box, **Open the BruControl Importer now**. Setup
+Importer** shortcut to your Desktop, the Start menu and the Import folder (`C:\Brewing\Import`); No leaves it out, and you can run Setup again to add it later. If you answered Yes, the last Setup page has two tick boxes, **Start Skynet Brewer now** (ticked) and **Start the BruControl
+Importer now**: only one can be ticked, so only one program starts. Setup
 always makes the Import folder, as BeerSmith or other programs may save their files there too.
 
 ## Next steps (being built)
