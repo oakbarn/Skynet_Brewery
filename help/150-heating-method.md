@@ -24,7 +24,9 @@ via process or on the Device when clicked").
 2. The main setting of that method, with **−** and **+**: the **Duty cycle %**, or the **Target**.
 3. **Set + ON** (or **ON** for On/Off), **OFF**, **Set** (change it, leave it on or off as it is) and **Cancel**.
 
-Nothing in the pop-up turns on until you click **Set + ON** or **ON**.
+Nothing in the pop-up turns on until you click **Set + ON** or **ON**, with one exception: in **Duty Cycle** the % is its On and
+Off too. A Duty cycle % of **0 turns the Element Off**, and **above 0 turns it On** if it was Off, whether you set it here or a
+Process sets it (Skynet Rule 6.19).
 
 While it is ON, the Element shows what it is doing: **60 %** in Duty Cycle, **45 % ▸ 152** in PID, Deadband or Precise, **ON ▸ 152** or
 **idle ▸ 152** in Hysteresis.

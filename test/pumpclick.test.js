@@ -41,4 +41,20 @@ for (const s of fs.readdirSync('samples/configs')) {
   const f = path.join('samples/configs', s, 'config.json'); if (!fs.existsSync(f)) continue;
   for (const e of JSON.parse(fs.readFileSync(f, 'utf8')).elements ?? []) if (e.type === 'digitalOut' && e.subtype === 'pump') assert.ok(!e.confirm, `${s}: ${e.name} is one click`);
 }
+// Duty Cycle % is its On / Off too (Fritz, 2026-11-08: "0 turns it off. Above zero turns it on if it was off")
+{
+  const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'dutyzero')), c2 = path.join(d2, 'c.json');
+  fs.writeFileSync(c2, JSON.stringify({ elements: [{ name: 'hE_BK', type: 'digitalOut', subtype: 'element', heatMethod: 'dutyCycle', dutyCycle: 0, methodSpot_pid: true, input: 'T' },
+    { name: 'T', type: 'temperature' }] }));
+  const s2 = new Store(c2, path.join(d2, 'data')); s2.load();
+  const g = p => s2.getProp('hE_BK', p);
+  assert.equal(g('state'), false, 'starts OFF');
+  s2.setProp('hE_BK', 'dutycycle', 60);
+  assert.equal(g('state'), true, 'above 0 turns it ON');
+  assert.equal(g('dutycycle'), 60);
+  s2.setProp('hE_BK', 'dutycycle', 0);
+  assert.equal(g('state'), false, '0 turns it OFF');
+  s2.setProp('hE_BK', 'method', 'PID'); s2.setProp('hE_BK', 'dutycycle', 40);
+  assert.equal(g('state'), false, 'in another method the % is only a setting');
+}
 console.log('pumpclick ok');
