@@ -2423,8 +2423,6 @@ Not Placed) or the dialog closes.
 
 ## Change log
 
-- 2026-11-08: Rule 18.32 new and Rule 18.21 changed (Fritz): DC pumps. Every Pump has Model (with its facts ⬢), Power with Use, and Speed
-  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 162, docs/DC_Brewing_Pumps.md.
 - 2026-10-27: First version, gathered from project memory, the GitHub repo docs and the Device,
   Widget and Image Libraries.
 - 2026-10-27: Added Rule 6.9, RTD CS pins on a Mega (D14-D17, D22-D39, D41-D43, D47-D49, D53).
@@ -2560,6 +2558,8 @@ Not Placed) or the dialog closes.
 - 2026-11-02: Rule 1.15 rewritten: `.x`, `.xh`, `.x_hPosition` (and `.y`, `.yv`, `.y_vPosition`) are all Process attributes for the same thing, `.x` / `.y` the main names; an exception to Rule 15.2. (thread "Set universal properties standard")
 - 2026-11-02: Rule 5.14 changed (Fritz): pipe fittings get `.visible`, `.hiddenlock`, `.lock`, `.tab` and a Label, besides `.x`, `.y`, `.width`, `.height` and Autosize to pipe. Open question 14 answered. (thread "Set universal properties standard")
 - 2026-11-02: Rule 12.2 changed (Fritz): Beer money can go to at most 2 PayPal accounts; locked now with only Fritz's, unlocked only when he gives the second, then locked again. (thread "Expand Buy a Beer and Patron support")
+- 2026-11-08: Rule 18.32 new and Rule 18.21 changed (Fritz): DC pumps. Every Pump has Model (with its facts ⬢), Power with Use, and Speed
+  control with Speed % (PWM on a PWM Port); hover shows the facts; .speed in Processes. Help 162, docs/DC_Brewing_Pumps.md.
 - 2026-11-02: Added Rule 12.3 (Fritz): Patron payments are split by percent between several PayPal accounts (Option A, Pay Out); Rule 12.2 covers Buy a Beer only. (thread "Expand Buy a Beer and Patron support")
 - 2026-11-02: Rule 12.3: a Patron account or percent change needs every Prime Developer's approval (100%, Fritz). (thread "Expand Buy a Beer and Patron support")
 - 2026-11-03: Rule 4.5 updated from Fritz's Edit layout bar picture ("Fix 1"): row 1 order Picture, Text, Manual Valve, Override, Add equipment, Vessel; 👻 Hidden Tab gets an orange ? pop-up holding the Edit layout hint (taken off row 3); the switch is now Update Schema Version. Help 82 updated; no new Help number used. (thread "Fix the Edit layout bar from screenshot")
