@@ -71,7 +71,7 @@ A name that starts with `VGC` made a digital output a **valve** and a PWM output
 | ToggleSwitchElement | a switch |
 | TimerElement | a timer (count up or down, reset value, start value, alarms kept under `.bru`) |
 | AlarmElement | an alarm (loop, up to 3 sounds, on/off pictures, its output, email) |
-| ScriptElement | a Script Widget (Rule 1.31, 2026-11-09) that shows its Process with Start / Stop; one click starts or stops it (When tapped: none when UserControl is off); its variable is kept in `.bru` |
+| ScriptElement | a Process Widget (Rule 1.31, 2026-11-09) that shows its Process with Start / Stop; one click starts or stops it (When tapped: none when UserControl is off); its variable is kept in `.bru` |
 | anything else | skipped, with a note |
 
 ### 4. How each item looked

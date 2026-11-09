@@ -22,7 +22,7 @@ import { VAR_KINDS, isVarKind, samplesToAdd } from './gkinds.js';
 import { cleanApiName, apiNameProblem, apiNameOwner } from './apiname.js';
 import { SEMI_KINDS, SEMI_CLASS, controllableNames, BOOL_CLASS, boolStyleOf, boolStyleName, boolStyleTip, SWITCH_LOOKS } from './semi.js';
 import { MANUAL_PUMP_TYPE, isManualPump, isConfirmation, byHandWords, CONFIRM_TIP } from './confirm.js';
-import { SCRIPT_WIDGET_TYPE, SCRIPT_WIDGET_WORD, SCRIPT_WIDGET_SIZE, SCRIPT_TIPS, isScriptWidget, scriptState, scriptButton } from './scriptwidget.js';
+import { PROCESS_WIDGET_TYPE, PROCESS_WIDGET_WORD, PROCESS_WIDGET_SIZE, PROCESS_TIPS, isProcessWidget, processState, processButton } from './processwidget.js';
 import { BOARDS, LINK_NAMES, boardOf, linkOf, isHeating, rating, heatingLinkWarning, LOST_LINK, lostLinkSec } from './links.js';
 import { CONNECTION_STANDARDS, textSize, stdShort, FITTING_KINDS, FITTING_SLOTS, THERMOWELL_POS, FITTING_PORTS, TEMPLATE_KINDS, VESSEL_KINDS, nameProblem, copyName, bundleName, fittingEnds, fittingPortStd, isCapOnly, isVesselWidget, isIntegratedVessel, vesselBase, isUserBundledVessel, applyDeviceTemplate, tapOutFrom, DEVICE_FIXED } from './templates.js';
 import { DISPLAY_UNITS, RECIPE_DEFAULTS, displayUnits, kgTo, lTo, toL, cTo, toC, ratioTo, toRatio, HOP_USES, FERMENTABLE_TYPES, MISC_USES, miscShow, boilKind, hopKgToUse, hopSchedule, calculateRecipe, fmtW, WATER_IONS, blendWater, recipeField, hopFieldName, toKg, sortHops, hopActualProblems, hopIbu, isGrain, AFTER_BOIL_TYPES, BEERXML_FERM_TYPES, FERM_MEASURES, MISC_UNITS, MISC_TYPES, MISC_TIME_UNITS, gravityPoints, expectedGravity, WATER_FIELDS, fToC } from './recipecalc.js';
@@ -202,7 +202,7 @@ function connect() {
     if (!editing && view === 'workspace' && Object.values(ch).some(p => 'layer' in p)) renderWs();      // a Process changed a Layer Order (Rule 1.29)
     renderPipes(); updateMeters(); updateAlarms(); updateMfs(ch); if (view === 'globals') refreshGlobalValues(ch);
   });
-  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshScriptWidgets(); if (menuTab === 'schema') renderMenuPane(); });
+  es.addEventListener('scripts', e => { S.scripts = JSON.parse(e.data); renderScriptList(); updateScriptState(); refreshProcessWidgets(); if (menuTab === 'schema') renderMenuPane(); });
   es.addEventListener('print', e => { S.console.push(JSON.parse(e.data)); if (S.console.length > 1500) S.console.splice(0, 300); renderConsole(); });
   es.addEventListener('alert', e => alertBar(JSON.parse(e.data).text));
   es.addEventListener('hopAlert', e => hopAlert(JSON.parse(e.data)));
@@ -2335,7 +2335,7 @@ function fillEl(n, e0) {
     case 'label': text = e.hideName ? '' : shownName(e0, v); nm.classList.add('hidden'); break;     // a Label widget's text is its Label: Show label off hides it
     case 'chart': fillChart(n, e0, editing ? {} : v); break;          // the Chart Widget (Rule 1.26): its line graph, not a text
     case 'manual': fillManual(n, e, v); on = !!v.heat || !!v.pump; text = v.message || ''; break;
-    case SCRIPT_WIDGET_TYPE: { on = fillScriptWidget(n, e); text = ''; break; }      // the Script Widget (Rule 1.31): its Process, what it does, Start / Stop
+    case PROCESS_WIDGET_TYPE: { on = fillProcessWidget(n, e); text = ''; break; }      // the Process Widget (Rule 1.31): its Process, what it does, Start / Stop
     case 'picture':
       // A screen picture: static image, or it follows another element (on image / off image)
       if (e.follow) { on = turnsOn(e.follow); img = (on ? v.imageon : v.imageoff) || pic; }
@@ -2379,7 +2379,7 @@ function fillEl(n, e0) {
   for (const k of ['led', 'lcd', 'dark', 'button', 'indicator']) n.classList.toggle('look-' + k, e.look === k);
   n.classList.toggle('look-dial', dial);
   if (e.look === 'indicator') n.style.setProperty('--ind', on || v.active ? (e.onColor || 'green') : (e.offColor && e.offColor !== 'off' ? e.offColor : 'transparent'));
-  if (e.type === 'chart' || isScriptWidget(e)) { /* drawn by fillChart, fillScriptWidget */ }
+  if (e.type === 'chart' || isProcessWidget(e)) { /* drawn by fillChart, fillProcessWidget */ }
   else if (dial) vl.innerHTML = dialSvg(isHeatElem(e) ? { ...e, units: '%' } : e, v.fault ? null : dialReading(e, v), dialSetpoint(e), v.fault ? 'FAULT' : null);     // the Skynet Dial (Rule 2.40)
   else setRich(vl, (fromSkyTpl(e) ? !e.showOnOffText : e.hideValue) ? '' : text);     // a User version of a Skynet Template shows its On / Off text only with Text On/Off on
   // the Timer look (Fritz, 2026-10-29): seven-segment digits on an orange-red panel in a grey bezel, its Label as the title bar
@@ -2558,7 +2558,7 @@ function tapAction(e) {
       return { switch: 'toggle', pushbutton: 'hold', momentary: 'pulse' }[vkKind(e)] || 'dialog';
     case 'picture': return e.follow ? 'toggle' : 'none';
     case 'manual': return 'manual';
-    case SCRIPT_WIDGET_TYPE: return 'startStop';      // the Script Widget (Rule 1.31): one click starts or stops its Process
+    case PROCESS_WIDGET_TYPE: return 'startStop';      // the Process Widget (Rule 1.31): one click starts or stops its Process
     case 'pwmOut': case 'dutyCycle': case 'hysteresis': case 'pid': case 'deadband': return 'dialog';
     default: return 'none';
   }
@@ -2604,7 +2604,7 @@ async function doTap(e) {
   if (act === 'acknowledge') { if (S.values[e.name]?.active) setProp(e.name, 'active', false); return; }
   if (act === 'manual') return manualDialog(elByName(targetName) || e);
   if (act === 'workspace') { if (S.config.workspaces.some(w => w.name === targetName)) { wsName = targetName; renderTabs(); renderWs(); } return; }
-  if (act === 'startStop') return scriptWidgetTap(e);
+  if (act === 'startStop') return processWidgetTap(e);
   if (act === 'script') {
     if (e.confirm && !(await choose(`Start process ${targetName}?`, [['Start', true]]))) return;
     try { const r = await api('POST', `/ui/scripts/${encodeURIComponent(targetName)}/start`); if (!r.ok) toast(r.msg, true); else toast(`Started ${targetName}`); } catch (x) { toast(x.message, true); }
@@ -2851,22 +2851,22 @@ function setpointDialog(p, t) {
   d.showModal(); if (m) setTimeout(() => { inp.focus(); inp.select(); }, 50);
 }
 
-// ---- Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, public/scriptwidget.js, Help 173) ----
+// ---- Process Widget (OakBarn Brewery, 2026-11-09, Rule 1.31, public/processwidget.js, Help 173) ----
 // Its Label is the title; under it what its Process is doing (Running, Waiting, Stopped, Stopped on an error) and a Start / Stop
 // button. The whole Widget is the button: one click starts the Process when it is stopped and stops it when it runs, with no pop-up
 // (Rule 2.44). An item set to Ask before changing asks first. What it shows comes from the Processes list, so it follows every change.
-const scriptStatusOf = name => (S.scripts || []).find(x => x.name === String(name ?? '').trim()) ?? null;
-function fillScriptWidget(n, e) {
-  const st = scriptState(e.process, scriptStatusOf(e.process)), vl = n.querySelector('.vl');
-  n.classList.add('scriptw');
+const processStatusOf = name => (S.scripts || []).find(x => x.name === String(name ?? '').trim()) ?? null;
+function fillProcessWidget(n, e) {
+  const st = processState(e.process, processStatusOf(e.process)), vl = n.querySelector('.vl');
+  n.classList.add('procw');
   n.classList.toggle('scr-error', !!st.error); n.classList.toggle('scr-missing', !!st.missing);
-  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : scriptButton(st)));
+  if (vl) vl.replaceChildren(h('div', { class: 'scrState' }, st.word), h('div', { class: 'scrBtn' + (st.running ? ' stop' : '') }, st.missing ? '' : processButton(st)));
   n.title = st.missing ? `${e.label || e.name}: ${st.word}. Pick its Process in its Properties (double-click it).` : `Process ${e.process}: ${st.word}. One click ${st.running ? 'stops' : 'starts'} it.`;
   return st.running;
 }
-async function scriptWidgetTap(e) {
+async function processWidgetTap(e) {
   const name = String(e.process ?? '').trim();
-  const st = scriptState(name, scriptStatusOf(name));
+  const st = processState(name, processStatusOf(name));
   if (st.missing) return toast(`${e.label || e.name}: ${st.word}. Double-click it to pick its Process.`, true);
   if (e.confirm && !(await choose(`${st.running ? 'Stop' : 'Start'} Process ${name}?`, [[st.running ? 'Stop' : 'Start', true]]))) return;
   try {
@@ -2874,9 +2874,9 @@ async function scriptWidgetTap(e) {
     if (!st.running && !r.ok) toast(r.msg ? `${name}: ${r.msg}` : `${name} did not start`, true);
   } catch (x) { toast(x.message, true); }
 }
-// the Processes list changed (one started, stopped, was renamed ...): every Script Widget on the screen shows it
-function refreshScriptWidgets() {
-  for (const n of document.querySelectorAll('#ws .el.scriptw')) { const e = elNamed(n.dataset.name); if (e) fillEl(n, e); }
+// the Processes list changed (one started, stopped, was renamed ...): every Process Widget on the screen shows it
+function refreshProcessWidgets() {
+  for (const n of document.querySelectorAll('#ws .el.procw')) { const e = elNamed(n.dataset.name); if (e) fillEl(n, e); }
 }
 
 // Manual vessel widget (BrewZilla, DigiBoil and other appliances with their own controller): no board pin.
@@ -4359,7 +4359,7 @@ const ADD_MENU = [
     ['Timer', 'timer'], ['Basic Skynet Alarm (a bell: Back and Fore colors, Set Graphic)', 'alarm', '', { kind: 'general', alarmClass: 'basic' }], ['User Alarm (your own pictures)', 'alarm', '', { kind: 'general', alarmClass: 'user' }], ['Sound Player (plays one sound file; pauses for alarms)', 'soundPlayer', 'SoundPlayer', { w: 220 }], ['Label', 'label'],
     ['Graph (a line graph of recorded readings)', 'chart', 'Graph'],
     ['Manual vessel (BrewZilla, DigiBoil: you set it by hand, the panel tells you what)', 'manual', 'Manual', { w: 230, h: 190, units: '°F', volumeUnits: 'gal' }],
-    [`${SCRIPT_WIDGET_WORD} (shows a Process; one click starts or stops it)`, SCRIPT_WIDGET_TYPE, 'Script'],      // Rule 1.31
+    [`${PROCESS_WIDGET_WORD} (shows a Process; one click starts or stops it)`, PROCESS_WIDGET_TYPE, 'Script'],      // Rule 1.31
   ]],
 ];
 // make one new Device or Widget of a type list on the Edit layout bar on the Build Tab and open its Properties
@@ -4403,7 +4403,7 @@ async function addThing(pick, prefix, extra, what) {      // what: the list line
     e.w = e.h = 150; e.label = 'Alarm'; e.name = almSuggest(e, e.label);
     if (e.alarmClass === 'basic') Object.assign(e, { backColor: ALM_COLORS.back, foreColor: ALM_COLORS.fore, setGraphic: ALM_DIR + 'Alarm_Set_Hop.svg', imageOverlay: ALM_DIR + 'Alarm_Active_Red.svg' });
   }
-  if (type === SCRIPT_WIDGET_TYPE) { Object.assign(e, SCRIPT_WIDGET_SIZE); e.label = 'Script_' + i; e.process = ''; }     // the Script Widget (Rule 1.31): a Label from the start
+  if (type === PROCESS_WIDGET_TYPE) { Object.assign(e, PROCESS_WIDGET_SIZE); e.label = 'Process_' + i; e.process = ''; }     // the Process Widget (Rule 1.31): a Label from the start
   // Fritz: anything new with on / off pictures starts with green for on and red for off (pumps and valves bring their own)
   if (['digitalOut', 'digitalIn', 'switch', 'picture'].includes(type) && !e.imageOn && !e.imageOff) { e.imageOn = 'Images/Skynet/Lights_LEDs/led_green.svg'; e.imageOff = 'Images/Skynet/Lights_LEDs/led_red.svg'; }
   if (isDevice(e)) {      // Fritz, 2026-10-28: a new Device is 150 x 150 unless its size is changed in the Add Device box
@@ -6981,13 +6981,13 @@ const SND_TIPS = {
 const soundPlayerFields = () => [...wgtHead(SND_TIPS),
   ['path', 'Sound file', 'gpick', 'sounds', false, false, { tip: SND_TIPS.path }], ['loop', 'Repeat sound', 'bool', null, false, false, { tip: SND_TIPS.loop }],
   ...wgtPlace(), wgtType('Sound Player')];
-// Script Widget (OakBarn Brewery, 2026-11-09, Rule 1.31): the Pump's drill-down look (Rule 18.30), its Process picked from the list
-const scriptWidgetFields = it => {
+// Process Widget (OakBarn Brewery, 2026-11-09, Rule 1.31): the Pump's drill-down look (Rule 18.30), its Process picked from the list
+const processWidgetFields = it => {
   const names = (S.scripts || []).map(x => x.name), cur = String(it.process ?? '').trim();
-  return [...wgtHead(SCRIPT_TIPS),
-    ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: SCRIPT_TIPS.process }],
+  return [...wgtHead(PROCESS_TIPS),
+    ['process', '4. Process', 'sel', [['', '(pick a Process)'], ...names.map(n => [n, n]), ...(cur && !names.includes(cur) ? [[cur, `${cur} (not in the Processes list)`]] : [])], false, false, { tip: PROCESS_TIPS.process }],
     ['confirm', 'Ask before starting or stopping', 'bool', null, false, false, { tip: 'On: one click asks first (Start or Stop). Off (the usual): one click starts or stops it at once (Rule 2.44).' }],
-    ...wgtPlace(), wgtType(SCRIPT_WIDGET_WORD, SCRIPT_TIPS.type)];
+    ...wgtPlace(), wgtType(PROCESS_WIDGET_WORD, PROCESS_TIPS.type)];
 };
 // Boolean Widgets (Semi_Widgets_Devices, Rule 1.20): the Switch, Slider, Checkbox, Lighted Button, Push Button, Pulse Button and LED
 const SEMI_PIC_POP = { title: 'Pictures', fields: [['imageOn', 'Picture when on', 'path']] };
@@ -8429,7 +8429,7 @@ function openTabProps(name) {
 // The Properties title of a Device or Widget (Fritz, 2026-10-27): a Widget is a Widget, never an "element", e.g. Picture Widget, Digital Out Device
 const TYPE_TITLE = { valueWidget: 'Value', codeValueWidget: 'Code Value', timeWidget: 'Time', dateTimeWidget: 'DateTime', gGlobal: 'gGlobal', pwmOut: 'PWM Output', analogIn: 'Analog Input', analogOut: 'Analog Output', digitalIn: 'Digital Input', digitalOut: 'Digital Output', pid: 'PID', deadband: 'Deadband', soundPlayer: 'Sound Player', flowMeter: 'Flow Meter', dutyCycle: 'Duty Cycle' };
 const elTitle = e => `${TYPE_TITLE[e.type] || e.type[0].toUpperCase() + e.type.slice(1).replace(/([a-z])([A-Z])/g, '$1 $2')} ${isDevice(e) ? 'Device' : 'Widget'}`;
-TYPE_TITLE[SCRIPT_WIDGET_TYPE] = SCRIPT_WIDGET_WORD.replace(/ Widget$/, '');      // "Script Widget Properties" (Rule 1.31)
+TYPE_TITLE[PROCESS_WIDGET_TYPE] = PROCESS_WIDGET_WORD.replace(/ Widget$/, '');      // "Process Widget Properties" (Rule 1.31)
 async function editItem(kind, id) {
   const item = findItem(kind, id); if (!item) return;
   const unitOf = item.kind === 'ip' && item.attachTo ? draft.graphics.find(x => x.id === item.attachTo && (isUnit(x) || isSkyV(x))) : null;
@@ -8454,7 +8454,7 @@ async function editItem(kind, id) {
     if (isProbeDev(it)) return [...probeDeviceFields(it, item), ['typeCode', 'Device Type', 'ro', shownType(it), false, false, { tip: DEVICE_TIPS.type }]];      // Temperature Probe: the same drill-down (Rule 18.26)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPwmDev(it)) return pwmDeviceFields(it, item);      // PWM / Analog out: the same drill-down, Device Type last (Rule 18.25)      // Motorized Ball Valve: the same drill-down (Rule 18.23)
     if (isPicW(it)) return pictureWidgetFields(it, item);
-    if (isScriptWidget(it)) return scriptWidgetFields(it);      // the Script Widget (Rule 1.31)
+    if (isProcessWidget(it)) return processWidgetFields(it);      // the Process Widget (Rule 1.31)
     if (it.type === 'soundPlayer') return soundPlayerFields();      // the other Widgets: the Pump's drill-down look (Rule 18.30)
     if (SEMI_KINDS[it.type] && !it.cloneId) return semiWidgetFields(it.type, it);
     if (isManualPump(it)) return manualPumpFields(it);       // the Manual Pump Widget (Rule 1.28)
