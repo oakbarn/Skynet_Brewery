@@ -2,7 +2,7 @@
 // Device's Placed IPs and the Heating Elements and Thermowell still to be picked; plain words say what is wrong.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp, vbOpenings, vbChainClean, vbChainProblems, vbPieceList } from '../public/vesselbuilder.js';
+import { VB_TEMPLATE, VB_GENERAL, vbUserType, vbStart, vbWant, vbPlaced, vbProblems, vbSummary, vbSizeMethod, vbSpotIp, vbOpenings, vbChainClean, vbChainProblems, vbPieceList, vbFromImport } from '../public/vesselbuilder.js';
 
 assert.ok(fs.existsSync(`templates/vessel/${VB_TEMPLATE}.json`), 'it builds from the Vessel Widget Main Template');
 assert.ok(VB_GENERAL.includes('HLT') && VB_GENERAL.includes('Fermentor'));
@@ -76,4 +76,13 @@ assert.match(vbChainProblems(['primingTee'], 'h', 'tangential').join(' '), /can 
 assert.deepEqual(vbChainProblems(['elbow', 'elbow', 'tee'], 'h', 'sparge'), []);
 assert.ok(app.includes('function vbChainBuild(') && app.includes("[VB_NEW_MBV, '➕ Add New Motorized Ball Valve…']"), 'the chains and the Valve picker');
 assert.ok(app.includes('const spargeArm = ') || app.includes('function spargeArm('), 'the Sparge Arm drawn inside the vessel');
+// the BruControl Import (2026-11-09): the Vessels step opens the same builder, starting from what the import found
+const imp = vbFromImport({ key: 'MLT', name: 'Mash Tun', details: { volume: '15', outlet: 'low', tangential: 'yes', sparge: 'left', herms: 'outRightInLeft', heater: { id: 'MB_25_HE_Mash_BR' }, probe: { id: 'MB_A0_10KNTC_Mash_BR' } } }, 'US');
+assert.equal(imp.vtype, 'Mash Tun'); assert.equal(imp.volume, 15); assert.equal(imp.drain, 'cOutlet'); assert.equal(imp.tangential, 'right');
+assert.equal(imp.sparge, 'left'); assert.equal(imp.herms, 'crossRL'); assert.equal(imp.heaterPart, 'MB_25_HE_Mash_BR'); assert.equal(imp.probePart, 'MB_A0_10KNTC_Mash_BR');
+assert.deepEqual(vbProblems({ ...imp, workspace: 'Brewhouse' }), []);
+assert.equal(vbFromImport({ key: 'V5', name: 'Hop Pot', details: {} }, 'Metric').units, 'Metric');
+assert.ok(app.includes("have.find(e => e.name === g.vbPre?.[k])"), 'the imported Heater or Probe is picked first');
+const impPage = fs.readFileSync('public/importer/importer.js', 'utf8');
+assert.ok(impPage.includes("import { vbFromImport } from '../vesselbuilder.js';") && impPage.includes('class="vBuild primary"'), 'the Importer opens the same builder');
 console.log('vesselbuilder tests passed');
