@@ -556,10 +556,11 @@ function partState(page) {
   return { p, found };
 }
 function fieldHtml(f, v, attrs, d = {}) {
-  // a box mandatory for some rows only (a Hydrometer's Tilt Color or Hardware ID): mandatory where need() is true, greyed where false
+  // a box mandatory for some types only (Rule 18.33: Pulses, Highest pressure, Most it reads, a Tilt's Color, a Hardware ID): mandatory
+  // where need() is true, greyed where false
   const need = f.need?.(d ?? {});
   if (need === true) f = { ...f, optional: false };
-  if (need === false) attrs += ` disabled title="${esc(`Not used by this kind of ${f.k === 'color' ? 'hydrometer: only a Tilt has a Color' : 'hydrometer: a Tilt is told apart by its Color'}`)}"`;
+  if (need === false) attrs += ` disabled title="${esc(f.notUsed ?? 'Not used by this type')}"`;
   if (f.blank && need === true) attrs += ` data-blank="${esc(f.blank)}"`;
   const help = f.help && need !== false ? ` title="${esc(f.help)}"` : '';
   if (f.number) return `<input type="number" class="pf num" min="0" step="any" ${attrs} data-f="${f.k}"${f.optional ? ' data-optional="1" placeholder="(optional)"' : ''} value="${esc(v ?? '')}" aria-label="${esc(f.name)}"${help}>`;
@@ -670,22 +671,24 @@ function partsPage(box) {
     d[f] = t.value;
     // a pump model made for one voltage fills in its Power
     if (page.kind === 'pump' && f === 'model' && onePower(t.value)) { d.power = onePower(t.value); p = draw(); saveProgress(); return; }
-    // a Hydrometer's type greys its Tilt Color or its Hardware ID; a Tilt goes straight to its Color box
-    if (page.kind === 'hydro' && f === 'hydro') {
+    // a type that needs a box (Rule 18.33) makes it mandatory, one that does not greys it; the line goes straight to the first
+    // blank box it now needs (a Tilt to its Color, a Hall effect meter to its Pulses)
+    const needs = page.fields.filter(x => x.need);
+    if (needs.length && !needs.some(x => x.k === f)) {
       const key = t.dataset.x != null ? `[data-x="${t.dataset.x}"]` : `[data-i="${CSS.escape(t.dataset.i)}"]`;
       p = draw(); saveProgress();
-      const c = box.querySelector(`select[data-f="color"]${key}`);
-      if (c && !c.disabled && !c.value) c.focus();
+      const c = needs.map(x => box.querySelector(`[data-f="${x.k}"]${key}`)).find(c => c && !c.disabled && c.dataset.blank && !String(c.value).trim());
+      if (c) c.focus();
       return;
     }
     if (t.tagName === 'SELECT' && (t.value === 'user' || t.nextElementSibling?.classList.contains('pfUser'))) p = draw();      // User defined: its words box
     saveProgress();
   };
-  // leaving a mandatory box blank (a Tilt's Color, OakBarn Brewery 2026-11-09): a pop-up says so, then back to that box
+  // leaving a mandatory box blank (a Tilt's Color, the Pulses of a Hall effect meter ..., Rule 18.33): a pop-up says so, then back to that box
   box.onfocusout = async ev => {
     const t = ev.target;
     if (!t?.dataset?.blank || !t.isConnected || t.disabled || String(t.value).trim() || $('#ask').open || !document.hasFocus()) return;      // not when the window itself loses the focus
-    await ask('Pick a Color', `<p>${esc(t.dataset.blank)}</p>`, 'OK', null);
+    await ask(t.dataset.f === 'color' ? 'Pick a Color' : 'This box is needed', `<p>${esc(t.dataset.blank)}</p><p>Fill it in, or leave the page with Back.</p>`, 'OK', null);
     if (t.isConnected) t.focus();
   };
   state.accept = async () => { if (await noBlanks(box)) forward(); };
