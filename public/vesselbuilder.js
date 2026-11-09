@@ -83,3 +83,33 @@ export function vbSummary(w, { metric = w.units === 'Metric' } = {}) {
   if (w.herms !== 'none') L.push(`HERMS Coil: ${word(VB_HERMS, w.herms)}`);
   return L;
 }
+
+// ---- Step 2: the pieces on each opening (OakBarn Brewery, 2026-11-08, Rule 19.5). Drain and Tangential: up to 3 pieces running out
+// from the vessel, None, Valve, Elbow, Tee or Priming Tee (a Tangential has no Priming Tee); None ends the chain, so the next choice is
+// greyed out. Sparge Arm: drawn inside the vessel, opposite its IP, with its own chain outside (no Priming Tee).
+export const VB_PIECES = [['none', 'None'], ['valve', 'Valve'], ['elbow', 'Elbow'], ['tee', 'Tee'], ['primingTee', 'Priming Tee']];
+export const VB_PIECE_TPL = { elbow: 'Elbow_90', tee: 'Tee', primingTee: 'Priming_Tee' };
+export const VB_OPENING_WORD = { drain: 'Drain', tangential: 'Tangential Inlet', sparge: 'Sparge Arm' };
+export const vbPieceList = opening => opening === 'drain' ? VB_PIECES : VB_PIECES.filter(([k]) => k !== 'primingTee');
+// the openings that get pieces: { IP: 'drain' | 'tangential' | 'sparge' }
+export function vbOpenings(w) {
+  const out = {}, ipOf = (q, word) => { const v = w[q]; return vbPicked(v) || (q === 'drain' ? v : SIDE[v] ? SIDE[v] + word : ''); };
+  for (const [q, word] of [['drain', ''], ['tangential', 'Tangential'], ['sparge', 'Sparge']]) { const k = w[q] && w[q] !== 'none' && w[q] !== 'pick' ? ipOf(q, word) : ''; if (k) out[k] = q; }
+  return out;
+}
+// the pieces kept: up to 3, ending at the first None
+export function vbChainClean(list) {
+  const out = [];
+  for (const p of (list || []).slice(0, 3)) { if (!p || p === 'none') break; out.push(p); }
+  return out;
+}
+// which way each piece runs: 'v' (up and down) or 'h' (level); an Elbow turns it. The Priming Tee always points up, so its run is level.
+export function vbChainProblems(pieces, start, opening) {
+  const out = []; let dir = start;
+  for (const [i, p] of vbChainClean(pieces).entries()) {
+    if (!vbPieceList(opening).some(([k]) => k === p)) out.push(`Piece ${i + 1}: a ${VB_OPENING_WORD[opening]} can not have a ${p === 'primingTee' ? 'Priming Tee' : p}.`);
+    if (p === 'primingTee' && dir !== 'h') out.push(`Piece ${i + 1}: the Priming Tee always points up, so it only goes in a level run. Put an Elbow before it.`);
+    if (p === 'elbow') dir = dir === 'v' ? 'h' : 'v';
+  }
+  return out;
+}

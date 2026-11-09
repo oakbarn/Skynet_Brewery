@@ -97,6 +97,7 @@ assert.ok(app.includes("['vtype', 'Type', 'ro', it.vtype || '']") && app.include
 assert.ok(app.includes("...vpSections(it, true), ...VESSEL_FLOW(it),"), 'integrated: the Heater and Probe sections are editable');
 assert.ok(app.includes("vpApply = () => { const swaps = vpxApply(item, vpx);"), 'their changes are saved onto the parts, and a part can be swapped');
 assert.ok(app.includes("for (const k of ['integratedIn', 'integratedAs', 'vpKind']) delete e[k];"), 'a swapped out part stays as a Device of its own');
+assert.ok(app.includes("if (vpSamePort(old, e)) { vpxRelease(g, old);") && app.includes("draft.elements = draft.elements.filter(q => q !== old);"), 'swapped: deleted on another Port, kept on the same Port (2026-11-09)');
 assert.ok(app.includes("for (const k of Object.keys(work.ports)) work.ports[k].installed = !!item.ports?.[k]?.installed;"), 'locked: Place does not change');
 assert.ok(app.includes("...(vdev && vpLocked(it) ? [] : looseField(it))"), 'locked: no un-bundling');
 assert.ok(app.includes("integratedIn: g.id, integratedAs: 'ip:' + k, vpKind: kind"), 'its parts are built in, like the RIMS tube');
