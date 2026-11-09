@@ -22,6 +22,7 @@ assert.match(fh, /f\.onVessel === g\.id && f\.onPort === ip\.port/, 'a fitting j
 assert.match(fh, /part\?\.vpKind === 'valve'/, 'a Valve built into the opening: at its outer end');
 assert.match(app, /fieldOne\(\['flowColor', 'Out flow color', 'flowc', 'vessel'\], g\)/, 'the vessel\'s own Out flow color, the setting that is already there (Rule 5.21)');
 assert.match(app, /isVDev\(g\)\)\) ws\.append\(\.\.\.flowHots\(g, capped\)\)/, 'drawn in Edit layout');
-assert.match(app, /class: 'vwPart vpOvl'[^\n]*\n[^\n]*e\.imageOverlay \|\| BOLT/, 'the On Overlay on a built in Element or Valve');
+assert.match(app, /class: 'vwPart vpOvl'[^\n]*\n[^\n]*media\(ovp\)/, 'the On Overlay on a built in Element or Valve');
+assert.match(app, /return e\.vpKind === 'valve' \? BOLT : ''/, 'a built in Valve starts with the bolt, a built in Element with its Glow alone (2026-11-09)');
 assert.match(app, /'#ws \.vpPart\[data-dev\], #ws \.vpOvl\[data-dev\]'/, 'the overlay follows on and off');
 console.log('propshot flow + overlay ok');

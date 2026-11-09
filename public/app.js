@@ -14,7 +14,7 @@ import { THEMES, themeOf, applyTheme, rememberTheme, newTabLook } from './themes
 import { FONTS, TB_ALIGNS, textDefaults, firstSet, placeWith, tbFontCss } from './textbox.js';
 import { loadSnippet } from './hoverhelp.js';
 import { PUMP_FACTS, PUMP_POWERS, PUMP_USES, PUMP_SPEEDS, pumpFacts, factsOf, factLines, powerOf, isDcPower, pumpSpeed } from './pumps.js';
-import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
+import { HEAT_METHODS, HEAT_SETTINGS, HEAT_MAIN, NEEDS_PROBE, PERCENT_METHODS, probeStep, isHeatElem, noNoneTap, methodButtonWord, isCoolPump, PUMP_METHOD_KEYS, heatMethodKey, heatMethodWord, heatMethodCode, startMethod, methodChoices, controlMethods, allowedMethods, TYPE_METHOD } from './heatmethod.js';
 import { CAL_KINDS, CAL_TYPES, calSummary, pairsFrom, pairsText, pwmVolts } from './calibrations.js';
 import { DISPLAY_CHOICES, displayChoices } from './datadisplay.js';
 import { hasDualThrow, samePin, canTruePwm, isDevice, typeCodes, defaultCode, suggestName, uniqueName, oneWirePort, cleanInterfaceId, defaultInterfaceId, cleanTabId, defaultTabId, portClash, portKeys, portSharers, busCheck, freePins, canPseudoPwm, pinTag, pinLabel, boardOfDevice, RTD_CS_PINS, cloneName, cloneNumber, widgetTypeId, suggestWidgetName } from './naming.js';
@@ -747,6 +747,9 @@ function spargeArm(w, h, s) {
   return 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
 // the pictures of its parts and its HERMS coil, on the vessel (at), s: its scale, W: its picture's width
+// the On overlay picture of a part built into a Vessel Device: None draws nothing; a Heating Element's start is its Glow alone (no
+// picture on top); a Valve's start is the bolt (Rule 7.15). A tint is a glow, not a picture.
+const vpOverlay = e => { const o = e.imageOverlay; if (o === 'none' || isTint(o)) return ''; if (o) return o; return e.vpKind === 'valve' ? BOLT : ''; };
 function vpParts(g, at, s, W) {
   const out = [];
   const hs = HERMS_SIDES[g.herms];
@@ -785,10 +788,12 @@ function vpParts(g, at, s, W) {
     else if (e.vpKind === 'valve' && side) { pic = VP_PICS.valveH; w = hh = 60 * s; left = right ? px : px - w; }
     else { pic = e.vpKind === 'valve' ? VP_PICS.valveF : e.vpKind === 'element' ? VP_PICS.element : VP_PICS.front; w = e.vpKind === 'element' ? 56 * s : 40 * s; hh = e.vpKind === 'element' ? 26 * s : 40 * s; left = px - w / 2; }
     top ??= py - hh / 2;
-    out.push(h('div', { class: `vwPart vpPart vp-${e.vpKind}`, 'data-dev': e.name, title: `${p.label || vpName(k)}: ${e.label || e.name} (${e.name}, built in)`,
+    // a built in Heating Element glows while on (its Glow, the start); Overlay None: no glow and nothing on it (OakBarn Brewery, 2026-11-09)
+    const ovp = vpOverlay(e);
+    out.push(h('div', { class: `vwPart vpPart vp-${e.vpKind}` + (e.vpKind === 'element' && e.imageOverlay === 'none' ? ' noglow' : ''), 'data-dev': e.name, title: `${p.label || vpName(k)}: ${e.label || e.name} (${e.name}, built in)`,
       style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(pic)}");transform:scaleX(${fl})` }));
-    if (e.vpKind === 'element' || e.vpKind === 'valve') out.push(h('div', { class: 'vwPart vpOvl' + (turnsOn(e.name) ? ' on' : ''), 'data-dev': e.name,      // its On Overlay while it is on (Rule 7.8, Rule 2.41)
-      style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(e.imageOverlay || BOLT)}")` }));
+    if (ovp) out.push(h('div', { class: 'vwPart vpOvl' + (turnsOn(e.name) ? ' on' : ''), 'data-dev': e.name,      // its On Overlay while it is on (Rule 7.8, Rule 2.41)
+      style: `left:${left}px;top:${top}px;width:${w}px;height:${hh}px;background-image:url("${media(ovp)}")` }));
     if (editing) out.push(propsHotspot('vpHot vpHot-' + e.vpKind, `${e.label || e.name}: one click opens this built in ${VP_WHAT[e.vpKind] || 'part'}'s own Properties (Rule 5.38)`, () => editItem('el', e.name),
       `left:${left + w / 2 - 9}px;top:${top - 9}px`));      // every built in part (Heating Element, Temperature Probe, Thermowell, Valve): on the middle of its top edge
   }
@@ -873,6 +878,7 @@ $('#ws').addEventListener('click', ev => {
   if (editing) return;
   const vv = ev.target.closest('.vpPart.vp-valve[data-dev]'); if (!vv) return;
   ev.stopPropagation(); ev.preventDefault();
+  if (isPushHeld(vv.dataset.dev)) return;       // Push Button: works on press and let go (Rule 2.46)
   toggleMfValve(vv.dataset.dev);
 }, true);
 // what a valve's IP passes (ipNode): shut while its valve is closed (null: its IP is open, flow goes through the tees)
@@ -2431,8 +2437,11 @@ function fillEl(n, e0) {
     if (cv) fitOverlay(n, co, v.imageoff || e.imageOff || img, stretchPic(e, v));
   }
   // On overlay: drawn on top while on. With no "Picture when on" the off picture stays underneath.
-  const lit = on || (e.type === 'alarm' && !!v.active), ovl = lit && (v.imageoverlay === 'none' ? '' : v.imageoverlay || e.imageOverlay);      // 'none': an Alarm Chain step took it off (Rule 7.16)
+  const lit = on || (e.type === 'alarm' && !!v.active), ovlRaw = v.imageoverlay || e.imageOverlay, ovl = lit && (ovlRaw === 'none' ? '' : ovlRaw);      // 'none': an Alarm Chain step took it off (Rule 7.16), or Overlay None
   if (ovl && img === pic) img = (e.type === 'alarm' ? v.imageoff : (v.imageoff || e.imageOff)) || pic;
+  // a Heating Element with Overlay None (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None"): nothing changes on its picture
+  // while it is On, not even the glow of its on picture. Its Glow (the start) is its on picture, as before.
+  if (lit && ovlRaw === 'none' && isHeatElem(e)) img = (v.imageoff || e.imageOff) || pic;
   let ov = n.querySelector(':scope > .onov');
   if (ovl && !ov) n.append(ov = h('div', { class: 'onov' }));
   if (ov) {
@@ -2441,6 +2450,7 @@ function fillEl(n, e0) {
     ov.style.backgroundColor = tint ? tint[1] : '';
     ov.style.webkitMaskImage = ov.style.maskImage = tint ? `url("${media(img)}")` : '';
     ov.classList.toggle('tint', !!tint);
+    ov.classList.toggle('small', !!ovl && !isTint(ovl) && !/Overlay_Glow_Ring\.svg$/i.test(ovl));      // overlays drawn smaller (2026-11-09, Rule 7.8)
     ov.classList.toggle('hidden', !ovl || (isTint(ovl) && !tint));
     if (ovl) fitOverlay(n, ov, img, stretchPic(e, v));
   }
@@ -2569,17 +2579,18 @@ const simDev = d => !d || S.devices.find(x => x.name === d)?.connection === 'sim
 // for each heating method it is allowed (its main one and the ones ticked in its Properties), under its picture on the Tab, or under its picture on a Vessel Device when it
 // is built in. Only when MORE THAN ONE is ticked (Fritz, 2026-11-07: "Those hot spots only need to be there when there is more
 // than one control metod"). One click on one switches the Element to that method at once; the one in use is lit.
+// The buttons sit in an invisible box only as wide as the methods ticked (OakBarn Brewery, 2026-11-09: "dynamically resize to how
+// many Ticked"), its middle under the middle of the picture. No Turn Off button: one click on the picture does that (2026-11-09).
+// Short method names (DO, DutyC, HYS, PID ...) when its Properties say so (methodShort).
 const methodSpots = e => { const ok = allowedMethods(e), l = HEAT_METHODS.filter(([k]) => ok.includes(k)); return l.length > 1 ? l : []; };      // every allowed method (Rule 6.19), when 2 or more
 function drawMethodSpots(w) {
   for (const old of $$('#ws .hmSpots')) old.remove();
   for (const e of L().elements.filter(e => e.workspace === w.name && methodSpots(e).length && e.visibility !== 'hidden')) {
-    // and a Turn Off button, shown only while it is ON (Fritz, 2026-11-08: "it switches between All tree methods fine, but no Turn Off!")
     const box = h('div', { class: 'hmSpots', 'data-dev': e.name }, ...methodSpots(e).map(([k, word]) =>
-      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}` }, word)),
-      h('button', { type: 'button', class: 'hmBtn hmOff', 'data-k': 'off', title: `One click: turn ${e.label || e.name} Off` }, 'Turn Off'));
+      h('button', { type: 'button', class: 'hmBtn', 'data-k': k, title: `One click: ${e.label || e.name} heats by ${word}` }, methodButtonWord(k, !!e.methodShort))));
     const part = e.integratedIn && $(`#ws .vpPart[data-dev="${CSS.escape(e.name)}"]`);
-    if (part) { box.style.left = part.style.left; box.style.top = `${parseFloat(part.style.top) + parseFloat(part.style.height) + 2}px`; part.parentNode.append(box); }
-    else if (!e.integratedIn) { box.style.left = `${e.x ?? 0}px`; box.style.top = `${(e.y ?? 0) + (e.h ?? 60) + 2}px`; $('#ws').append(box); }
+    if (part) { box.style.left = `${parseFloat(part.style.left) + parseFloat(part.style.width) / 2}px`; box.style.top = `${parseFloat(part.style.top) + parseFloat(part.style.height) + 2}px`; part.parentNode.append(box); }
+    else if (!e.integratedIn) { box.style.left = `${(e.x ?? 0) + (e.w ?? 60) / 2}px`; box.style.top = `${(e.y ?? 0) + (e.h ?? 60) + 2}px`; $('#ws').append(box); }
     else continue;
     litSpots(e.name);
   }
@@ -2587,8 +2598,7 @@ function drawMethodSpots(w) {
 function litSpots(name) {
   const m = heatMethodKey(S.values[name]?.method);
   for (const b of $$(`#ws .hmSpots[data-dev="${CSS.escape(name)}"] .hmBtn`)) {
-    if (b.dataset.k === 'off') b.hidden = !S.values[name]?.state;
-    else b.classList.toggle('cur', b.dataset.k === m);
+    b.classList.toggle('cur', b.dataset.k === m);
   }
 }
 $('#ws').addEventListener('click', ev => {
@@ -2597,7 +2607,6 @@ $('#ws').addEventListener('click', ev => {
   if (editing) return;
   if (!can('operator')) return toast('Your account is view only', true);
   const name = b.closest('.hmSpots').dataset.dev, k = b.dataset.k, e = elByName(name);
-  if (k === 'off') return setProp(name, 'state', false);
   if (NEEDS_PROBE.includes(k) && !e?.input) return toast(`${e?.label || name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
   // picking a method only changes the method, with no pop-up: it never turns the Element On, and an Element that is On stays On in
   // the new method (Fritz, 2026-11-08: "Selecting a Different Method when a Heating Element does not turn it on, On off is By the On
@@ -2714,10 +2723,14 @@ function release() {
   api('POST', '/ui/hold', { name: held.name, down: false }).catch(x => toast(x.message, true));
   held = null;
 }
+// A Valve or Heating Element set to Push Button (OakBarn Brewery, 2026-11-09, Rule 2.46): On only while its picture is held down, on
+// the Tab, built into a Vessel Device or in a Valve Tee; when it is already On, Off only while held (the Brain reverses it).
+const isPushHeld = name => { const e = name && elByName(name); return !!e && tapAction(e) === 'hold'; };
 $('#ws').addEventListener('pointerdown', ev => {
   if (editing || ev.button !== 0) return;     // the right button is for Help, it never presses a push button
-  const n = ev.target.closest('.el'); const e = n && elByName(n.dataset.name);
+  const n = ev.target.closest('.el, .vpPart[data-dev], .mfValve[data-dev]'); const e = n && elByName(n.dataset.name || n.dataset.dev);
   if (!e || tapAction(e) !== 'hold') return;
+  if (!can('operator')) return toast('Your account is view only', true);
   ev.preventDefault(); release();
   const name = e.tapTarget || e.name;
   const send = () => api('POST', '/ui/hold', { name, down: true }).catch(x => { toast(x.message, true); release(); });
@@ -2733,13 +2746,15 @@ $('#ws').addEventListener('click', ev => {
   const mv = ev.target.closest('.gfx.ip[data-fit="manualValve"]');
   if (mv) return toggleManualValve(mv.dataset.gid);
   const mfv = ev.target.closest('.mfValve');
-  if (mfv) return toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35)
+  if (mfv) return isPushHeld(mfv.dataset.dev) ? undefined : toggleMfValve(mfv.dataset.dev);       // a valve of a Valve Tee or Supply Manifold (Rule 5.35); a Push Button works on press
+
   if (ev.target.closest('.gfx.ovr')) return pressOverride();
   // a Heating Element built into a Vessel Device: one click on its picture turns it ON or OFF at once in the method it is in, like a
   // Pump (Fritz, 2026-11-08: "Have the Graphic toggle on Off like a Pump", Rule 2.33); its box (tile) opens its pop-up
   const hp = ev.target.closest('.vpPart.vp-element[data-dev]');
   if (hp) {
     const he = elByName(hp.dataset.dev); if (!he) return;
+    if (isPushHeld(he.name)) return;       // Push Button: works on press and let go (Rule 2.46)
     if (!can('operator')) return toast('Your account is view only', true);
     const k = heatMethodKey(S.values[he.name]?.method) ?? startMethod(he);
     if (!S.values[he.name]?.state && NEEDS_PROBE.includes(k) && !he.input) return toast(`${he.label || he.name}: ${heatMethodWord(k)} needs a Temperature Probe (pick one in its Properties)`, true);
@@ -2845,7 +2860,7 @@ function heatDialog(t) {
     const btn = ([k, word]) => {
       const off = NEEDS_PROBE.includes(k) && !t.input;
       // one click on a method switches to it at once (Fritz, 2026-11-07: "One Click on the dispayed device"); the pop-up stays open
-      // for its setting. To On/Off while ON turns it OFF first (Rule 6.19).
+      // for its setting. To Direct while ON turns it OFF first (Rule 6.19).
       return h('button', { type: 'button', class: 'big' + (k === m ? ' cur primary' : ''), ...(off ? { disabled: true, title: 'Needs a Temperature Probe: pick one in its Properties' } : {}),
         onclick: async () => { if (k === m) return; m = k; await setProp(t.name, 'method', heatMethodWord(k)); Object.assign(v, S.values[t.name] || {}); v.method = heatMethodWord(k); if (k === 'onoff') v.state = false; draw(); } }, word);
     };
@@ -2853,7 +2868,7 @@ function heatDialog(t) {
       h('div', { class: 'muted' }, 'Heating method'),
       h('div', { class: 'vdBtns heatMethods' }, ...HEAT_METHODS.filter(([k]) => allowedMethods(t).includes(k) || k === now).map(btn)),
       ...(main ? [h('div', { class: 'muted' }, main[1]), h('div', { class: 'vdRow' }, h('button', { type: 'button', class: 'big', onclick: () => bump(-1) }, '−'), inp, h('button', { type: 'button', class: 'big', onclick: () => bump(1) }, '+'))] : []),
-      h('div', { class: 'muted' }, m === 'onoff' ? 'Switching to On/Off turns it OFF first; click ON for full power.' : 'A click on a method switches to it at once.'),
+      h('div', { class: 'muted' }, m === 'onoff' ? 'Switching to Direct turns it OFF first; click ON for full power.' : 'A click on a method switches to it at once.'),
       h('div', { class: 'vdBtns' },
         h('button', { type: 'button', class: 'big onb' + (v.state ? ' cur' : ''), onclick: () => done(true) }, main ? 'Set + ON' : 'ON'),
         h('button', { type: 'button', class: 'big offb' + (!v.state ? ' cur' : ''), onclick: () => done(false) }, 'OFF'),
@@ -6710,6 +6725,10 @@ const DEV_TAP_POP = { title: 'When tapped: more', fields: [['tapTarget', 'Tap ta
 // its Picture (an exception to Rule 7.10's three paths).
 const PUMP_ORIENT = [['', 'Right'], ['h', 'Left']];      // Fritz's screens 7-9: Right = as drawn (the pump head on the right), Left = mirrored
 const PUMP_TAP = v => [['toggle', 'On/Off'], ['hold', 'Push button'], ['none', 'None'], ...(v && !['toggle', 'hold', 'none'].includes(v) ? [[v, v]] : [])];
+// Valves and Heating Elements (OakBarn Brewery, 2026-11-09: "Valves and Heaters Toggle cannot have None, Default to Toggle", Rule 2.46):
+// Toggle (one click On / Off, the start) or Push Button (On only while the picture is held; reversed when it is already On). No None.
+const ONE_CLICK_TAP = v => [['toggle', 'Toggle'], ['hold', 'Push Button'], ...(v && !['toggle', 'hold', 'none', '', 'default'].includes(v) ? [[v, v]] : [])];
+const TAP_CHOICES_FOR = it => noNoneTap(it) ? ONE_CLICK_TAP(it.tap) : PUMP_TAP(it.tap);
 // the Graphic, its Path (set on a Skynet pump drawing, Rule 5.6; one path a User pump may edit, an exception to Rule 7.10) and Orientation
 const PUMP_GRAPHIC_FIELDS = (it, x = {}) => [['_pv', 'Graphic', 'devpic', null, false, false, { tip: DEVICE_TIPS.graphic, ...x }],
   pumpModelOf(it) ? ['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: DEVICE_TIPS.pathSet, ...x }]
@@ -6723,7 +6742,7 @@ const PUMP_COVER_TOGGLE = (it, x = {}) => {
 };
 // the On overlay just below the Cover (Fritz, 2026-11-04): the steady bolt to start, the flashing bolt and the others a choice (Rule 7.16)
 // Fritz's screen 7 (2026-11-04): Overlay, and on the same line Database and .API with its ⬢ pop-up, in the Add box and the Properties
-const OVERLAY_CHOICES = v => [['', 'None (No Overlay)'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
+const OVERLAY_CHOICES = v => [['', 'None (No Overlay)'], ...OVERLAY_GRAPHICS.map(([t, p]) => [p, t]), ...(v && v !== 'none' && !OVERLAY_GRAPHICS.some(g => g[1] === v) ? [[v, String(v).split('/').pop()]] : [])];
 const PUMP_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.overlay, dbPop: true, ...x }]];
 const DB_POP = { title: 'Database and .API', fields: o => dbFields(o).filter(f => f[2] !== 'box' && f[2] !== 'boxend') };
 // DC pumps (Fritz, 2026-11-08, docs/DC_Brewing_Pumps.md, Rule 18.32, Help 163): "any of the Pumps can be controlled (On/Off or PWM if
@@ -6773,13 +6792,16 @@ function pumpDeviceFields(it, item) {
 // User Defined one has Path (off) and Path (on). Orientation Right / Left with Toggle on its line; Overlay with Database and .API ⬢.
 // One click turns it ON or OFF at once, like a Pump (Rule 2.33).
 const ELEM_GRAPHIC_FIELDS = (it, x = {}) => {
-  const T = DEVICE_TIPS, tog = ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.eToggle }];
+  const T = DEVICE_TIPS, tog = ['tap', 'Toggle', 'sel', ONE_CLICK_TAP(it.tap), false, false, { tip: T.eToggle }];
   return [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.eGraphic, ...x }],
     ...(isSkyElem(it) ? [['imageOff', 'Path', 'ro', String(it.imageOff || '').replace(/^Images\//, ''), false, false, { tip: T.ePathSet, ...x }]]
       : [['imageOff', 'Path (off)', 'gpick', null, false, false, { tip: T.ePath, ...x }], ['imageOn', 'Path (on)', 'gpick', null, false, false, { tip: T.ePathOn, ...x }]]),
     ['_or', 'Orientation', 'orient', null, false, false, { tip: T.eOrient, with: tog, ...x }]];
 };
-const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
+// A Heating Element's Overlay (OakBarn Brewery, 2026-11-09: "In Overlay None should mean None. Default to the Glow (what None was
+// regardless). And Have None as none"): Glow (the start, saved as no overlay) glows while on; None ('none') shows nothing at all.
+const ELEM_OVERLAY_CHOICES = v => [['', 'Glow (it glows while on; the start)'], ['none', 'None (nothing while on)'], ...OVERLAY_CHOICES(v).slice(1)];
+const ELEM_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', ELEM_OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.eOverlay, dbPop: true, ...x }]];
 // The electrical warning (Fritz, 2026-11-08, Rule 6.20): wherever wiring, elements or AC circuits come up
 const ELEC_WARN = '⚠ Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.';
 const ELEM_OWN = (it, x = {}) => [['_ask', 'One click on a Heating Element turns it ON or OFF at once, in the method it is in (Rule 2.33).', 'note', null, false, false, x]];
@@ -6807,20 +6829,22 @@ function heatFields(it, x = {}) {
     ...((m === 'precise' || it.methodSpot_precise) && it.input ? [['_precNote', `Precise: ${probeStep((draft || S.config).elements.find(e => e.name === it.input))?.text ?? 'pick its Temperature Probe.'}`, 'note', null, false, false, x]] : []),
     ...(PERCENT_METHODS.includes(m) ? [['reversed', 'Reversed (cooling)', 'bool', null, false, false, x], ['pwm', 'PWM pin (off = on / off pin, on for its % of each Output window)', 'bool', null, false, false, x]] : []),
     ['_spotHead', 'Other methods allowed (each one ticked gets a one-click spot on the Tab)', 'head', null, false, false, x],
-    ...HEAT_METHODS.filter(([k]) => k !== m && k !== 'onoff').map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),      // On/Off is always allowed, not a choice
+    ...HEAT_METHODS.filter(([k]) => k !== m && k !== 'onoff').map(([k, word]) => ['methodSpot_' + k, word, 'bool', null, false, false, { tip: T.methodSpot, ...x }]),      // Direct is always allowed, not a choice
+    ['methodShort', 'Short method names on its buttons', 'bool', null, false, false, { tip: T.methodShort, ...x }],
     ['_heatNote', allowedMethods(it).length > 1 ? `A Process changes it: ${it.name || 'hE_1'}.method = "${heatMethodWord(allowedMethods(it).find(k => k !== m))}" or ${it.name || 'hE_1'}.${heatMethodCode(allowedMethods(it).find(k => k !== m))}. So does a click on one of its spots, or on it while running. Only the methods allowed here can be used.` : 'Only its starting method is allowed. Tick another method above to switch between them by a click or a Process.', 'note', null, false, false, x]];
 }
-// The Cool / Warm Pump's Method (Rule 6.21): a pump's own methods only, On/Off or Hysteresis (- On offset cools, + warms)
+// The Cool / Warm Pump's Method (Rule 6.21): a pump's own methods only, Direct (the old On/Off) or Hysteresis (- On offset cools, + warms)
 function pumpMethodFields(it, x = {}) {
   const m = PUMP_METHOD_KEYS.includes(startMethod(it)) ? startMethod(it) : 'onoff', T = DEVICE_TIPS;
   const temps = [['', '(none)'], ...(draft || S.config).elements.filter(e => e.type === 'temperature').map(e => [e.name, e.name]).sort((a, b) => a[0].localeCompare(b[0]))];
   if (it.input && !temps.some(t => t[0] === it.input)) temps.push([it.input, it.input]);
   return [['_pumpHead', 'Cool / Warm Pump: its Method (Rule 6.21)', 'head', null, false, false, x],
     ['heatMethod', 'Method (it starts with)', 'sel', HEAT_METHODS.filter(([k]) => PUMP_METHOD_KEYS.includes(k)).map(([k, w, , d]) => [k, `${w} (${d})`]), true, false,
-      { tip: 'One pump, one Device (Rule 6.21): On/Off runs it by a click or a Process; Hysteresis runs it by its Probe, to cool (a minus On offset, a glycol pump) or to warm (a plus On offset). A Process changes it with .method.', ...x }],
+      { tip: 'One pump, one Device (Rule 6.21): Direct runs it by a click or a Process; Hysteresis runs it by its Probe, to cool (a minus On offset, a glycol pump) or to warm (a plus On offset). A Process changes it with .method.', ...x }],
     ...(m === 'hysteresis' ? [['input', 'Temperature Probe (what it reads)', 'sel', temps, false, false, { tip: T.heatProbe, ...x }],
       ...HEAT_SETTINGS.hysteresis.map(([, key, label]) => [key, key === 'onOffset' ? 'On offset (- cools, + warms)' : label, 'num', null, false, false, HEAT_TIPS[key] ? { tip: HEAT_TIPS[key], ...x } : x]), PREDICTIVE_FIELD(x)] : []),
-    ['methodSpot_hysteresis', 'Hysteresis allowed too (a one-click spot on the Tab)', 'bool', null, false, false, { tip: T.methodSpot, ...x }]];
+    ['methodSpot_hysteresis', 'Hysteresis allowed too (a one-click spot on the Tab)', 'bool', null, false, false, { tip: T.methodSpot, ...x }],
+    ['methodShort', 'Short method names on its buttons', 'bool', null, false, false, { tip: T.methodShort, ...x }]];
 }
 function elemDeviceFields(it, item) {
   const T = DEVICE_TIPS;
@@ -6878,7 +6902,7 @@ const MBV_GRAPHIC_FIELDS = (it, x = {}) => {
 // Fritz, 2026-11-05 ("Toggles and Overlays should work normally"): the Skynet valve's too (its Template lists them as user settable)
 // Fritz, 2026-11-05 ("It should look and feel almost a copy of the Pump dialogs"): two dropdowns on one line as the Pump's Cover and
 // Toggle are, so the Toggle sits beside the Orientation (a valve has no Cover)
-const MBV_TOGGLE = it => ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: DEVICE_TIPS.vToggle }];
+const MBV_TOGGLE = it => ['tap', 'Toggle', 'sel', ONE_CLICK_TAP(it.tap), false, false, { tip: DEVICE_TIPS.vToggle }];
 const MBV_TOGGLE_OVERLAY = (it, x = {}) => [['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: DEVICE_TIPS.vOverlay, dbPop: true, ...x }]];
 // a valve's own (Rule 18.22): Tap water (Rule 6.15) and the Close all / Open all valves lists
 // Fritz, 2026-11-05: short names (On Close List, On Open List) and the three switches on one line, in the Add box too
@@ -7369,8 +7393,8 @@ function genDeviceFields(it, item, f) {
     ...(pics ? [['_pv', 'Graphic', 'devpic', null, false, false, { tip: T.graphic }],
       [...(f.find(x => x[0] === 'imageOff') || ['imageOff', 'Path', 'gpick']).slice(0, 1), onPic ? 'Path (off)' : 'Path', 'gpick', null, false, false, { tip: 'The picture file it shows on the Tab.' }],
       ...(onPic ? [['imageOn', 'Path (on)', 'gpick', null, false, false, { tip: 'A second picture while it is on (optional: the Overlay is the preferred way, Rule 7.8).' }]] : []),
-      ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: 'Drawn on top of its picture while it is On (Rule 7.8). The ⬢ beside it holds Database and .API.', dbPop: true, ...(out ? { with: ['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.toggle }] } : {}) }]] : []),
-    ...(!pics && out && !part ? [['tap', 'Toggle', 'sel', PUMP_TAP(it.tap), false, false, { tip: T.toggle }]] : []),
+      ['imageOverlay', 'Overlay', 'sel', OVERLAY_CHOICES(it.imageOverlay), false, false, { tip: 'Drawn on top of its picture while it is On (Rule 7.8). The ⬢ beside it holds Database and .API.', dbPop: true, ...(out ? { with: ['tap', 'Toggle', 'sel', TAP_CHOICES_FOR(it), false, false, { tip: T.toggle }] } : {}) }]] : []),
+    ...(!pics && out && !part ? [['tap', 'Toggle', 'sel', TAP_CHOICES_FOR(it), false, false, { tip: T.toggle }]] : []),
     ...own, ...(isHeatElem(it) ? heatFields(it) : isCoolPump(it) ? pumpMethodFields(it) : []), ...dbLine,
     ...(part ? [] : [['_txt', 'Text attributes', 'attrhead', null, false, false, { attr: GEN_TEXT_POP }],
       ['x', 'X (Horizontal)', 'num', null, false, false, { tip: T.xy }], ['y', 'Y (Vertical)', 'num', null, false, false, { tip: T.xy }],
@@ -7556,9 +7580,10 @@ function fieldTip(name, text) {
 }
 // the tips of the Add Device box (Fritz, 2026-11-04): the long words that were in the field names
 const DEVICE_TIPS = {
-  heatMethod: 'How it heats when it starts: On/Off (full on or off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  heatMethod: 'How it heats when it starts: Direct (full on or off; it was called On/Off), Duty Cycle (on for a % of each cycle), Hysteresis (on below the Setpoint, off at it), PID (holds a Setpoint), Deadband (steps its % toward the Setpoint) or Precise (a calm PID that holds a Setpoint to 0.1 degree, for a still\'s column or a water bath, with a fine probe like a PT100). One Element, one Device (Rule 6.19): a Process or a click while running can change it. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   heatProbe: 'The Temperature Probe that Hysteresis, PID, Deadband and Precise read to hold the Setpoint. Precise needs a fine probe: a PT100 on a MAX31865 board sees 0.03 °C steps, a DS18B20 0.0625 °C (0.11 °F).',
-  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use On/Off or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
+  methodShort: 'On: its method buttons on the Tab show short names, so they take less room: Direct is DO, Duty Cycle DutyC, Hysteresis HYS, PID PID, Deadband DeadB, Precise PREC (the same short names a Process uses, hE_1.HYS). Off: the full names.',
+  methodSpot: 'On: this Element may also use this heating method (only the starting method and the ones ticked are allowed). A small button for each allowed method shows under the Element on its Tab (or under it on its Vessel Device); one click on it switches the Element to that method at once. How it is wired matters (Fritz, 2026-11-07): an SSR (solid state relay) switches it fully on or off as fast as needed, so every method works. A contactor (a switch that clicks) wears out when switched on and off quickly, so use Direct or Hysteresis, or a long cycle time. A DAC (a 0-10 V signal to a power controller) sets the power from 0 to 100 %, so PID, Deadband or Precise suit it best. Electricity can kill. OakBarn Brewery and Skynet are not electricians and can give no electrical advice. Consult a Licensed Electrician.',
   label: 'The name shown on the Tab, for example Fly Sparge or Brewery Pump. It is the start of the Suggested Name. The ⬢ beside it sets its font, size and colors.',
   labelVisible: 'On: the Label shows on the Tab. Off: no Label shows.',
   iface: 'The board this Device is wired to. Its ID (for example BM) is part of the Suggested Name. ➕ Add new Interface… adds a board and comes back here.',
@@ -7587,7 +7612,7 @@ const DEVICE_TIPS = {
   vPathOpen: 'The picture of your valve when it is open (it may be the same picture: the Overlay shows it is open).',
   vOrient: 'How the valve stands: Horizontal, Vertical Left, Vertical Right, Front or 45 degrees. The Graphic here and the valve on the Tab follow, and its IPs too.',
   vOrientUser: 'Where the two pipe ends of your picture are: Horizontal, Vertical, or turned 45 degrees Left or Right. Its IPs follow.',
-  vToggle: 'What a tap on the valve does: On/Off opens or closes it with one click; Push button is open only while held.',
+  vToggle: 'What a click on the valve does. Toggle (the start): one click opens or closes it. Push Button: you can hold and the Valve is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A valve always has one of the two (no None). A Process ignores this choice.',
   vOverlay: 'Drawn on top of the valve while it is open: the steady red and yellow lightning bolt to start (Rule 7.16); the flashing bolt and others are choices, None for no overlay.',
   vTap: 'On: this valve lets tap water in when it is open, no pump needed (Rule 6.15). It is always on the Close all valves list.',
   vCloseAll: 'On: close_all_valves in a Process (and PreBrew house cleaning) closes this valve (Rule 6.15).',
@@ -7619,8 +7644,8 @@ const DEVICE_TIPS = {
   ePath: 'The picture of your Heating Element when it is off.',
   ePathOn: 'The picture of your Heating Element when it is on (it may be the same picture: the Overlay shows it is on).',
   eOrient: 'Right (as drawn) or Left (mirrored): the Graphic here and the Heating Element on the Tab turn with it.',
-  eToggle: 'What a tap on the Heating Element does: On/Off turns it on or off at once, in the method it is in; Push button is on only while held.',
-  eOverlay: 'Drawn on top of the Heating Element while it is on: None to start (its on picture glows); the bolts are choices (Rule 7.16).',
+  eToggle: 'What a click on the Heating Element does. Toggle (the start): one click turns it On or Off at once, in the method it is in. Push Button: you can hold and the Heater is Direct On in the On State as long as you hold the Button. You can no longer Toggle it On and Off with the Image. If it is already On, holding turns it Off, only as long as the picture is held down. A Heating Element always has one of the two (no None). A Process ignores this choice.',
+  eOverlay: 'What shows on the Heating Element while it is on. Glow (the start): it glows. None: nothing at all, the picture stays as it is. The bolts and others are drawn small in the middle of it, on top of the glow (Rule 7.8).',
 };
 function fieldOne([key, label, kind, opts, rerender], obj) {
   if (key === 'name' && (kind === 'lockname' || kind === 'text' && obj._ref) && String(obj.name ?? '').trim()) return lockedName(key, label, obj);

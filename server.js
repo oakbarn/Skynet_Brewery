@@ -233,11 +233,15 @@ const codeAfterApi = r => { if (r?.attribute) runWidgetCode(r.name, r.attribute,
 
 // Push Buttons (gGlobal) are on only while a finger or mouse holds them. The browser repeats "down"
 // every 0.5 s while held; if it goes quiet (closed tab, lost WiFi) the button lets go by itself.
-const holds = new Map();
+// A Valve or Heating Element set to Push Button (OakBarn Brewery, 2026-11-09, Rule 2.46) is On only while its picture is held; if it was
+// already On when pressed, the push is reversed: Off while held, back On when let go. A Process ignores the Push Button choice.
+const holds = new Map();     // name -> { t: the let-go timer, rest: what it goes back to when let go }
 function hold(name, down) {
-  clearTimeout(holds.get(name)); holds.delete(name);
-  if (down) holds.set(name, setTimeout(() => { holds.delete(name); store.setProp(name, 'value', false, 'ui'); }, 1500));
-  store.setProp(name, 'value', !!down, 'ui');
+  const el = store.get(name), out = el?.type === 'digitalOut', prop = out ? 'state' : 'value';
+  const was = holds.get(name); clearTimeout(was?.t); holds.delete(name);
+  const rest = was ? was.rest : out ? !!store.getProp(name, 'state') : false;
+  if (down) holds.set(name, { rest, t: setTimeout(() => { holds.delete(name); store.setProp(name, prop, rest, 'ui'); }, 1500) });
+  store.setProp(name, prop, down ? !rest : rest, 'ui');
 }
 engine.on('scripts', () => { clearTimeout(engine._bt); engine._bt = setTimeout(() => broadcast('scripts', engine.list()), 100); });
 engine.on('print', e => broadcast('print', e));
