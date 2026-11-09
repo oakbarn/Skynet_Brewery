@@ -47,6 +47,6 @@ A Clone has the same Properties, but most belong to its parent and can't be chan
 2. Its **Layer Order** shows where it is now. Type **1** to put it on top (or 2 to put it just under the top one), then **Save** and **Save layout**. The other items on the Tab are numbered again, with no gaps.
 3. A Process can change it while brewing: `Pump_1.layer = 1` puts the pump on top and the others move down one; `Pump_1.layer = ""` puts back its Properties' number.
 
-A Tab that was never numbered keeps the order it always had; **Save layout** numbers it. Pipes and hoses always stay under the other items, and the IP markers and Manual Valve Widgets always stay over them, so they have no Layer Order. The **BruControl Import** brings BruControl's Z Order across: the first item in each BruControl Workspace is on top (Layer Order 1).
+Every item has a Layer Order: pipes, hoses, IP markers, pipe fittings and Manual Valve Widgets too. A Tab that was never numbered keeps the order it always had (pipes at the bottom, IP markers at the top); **Save layout** numbers it. The **BruControl Import** brings BruControl's Z Order across: the first item in each BruControl Workspace is on top (Layer Order 1).
 
 The full standard is in the Skynet document **Universal Properties** (docs/Universal_Properties.md).
