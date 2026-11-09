@@ -490,14 +490,10 @@ function tell(title, html) {
 // ---- The Widget pages (OakBarn Brewery, 2026-11-08: "After Your Tabs, add pages for all Widgets, with a category for each Skynet Widget
 // type. Import all BruControl Application Elements ... as Skynet equivalent Widgets"): first every Skynet Widget type and what came in
 // as one, then a page for each kind found, with the same Display Name, tick, Label and Show columns as the items.
-const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Boolean Widget', 'Toggle Switch'], ['Value Widget', 'Script (a Script\'s value)'],
+const SKYNET_WIDGETS = [['Timer Widget', 'Timer'], ['Alarm Widget', 'Alarm'], ['Boolean Widget', 'Toggle Switch'], [SCRIPT_WIDGET_WORD, 'Script'], ['Value Widget', ''],
   ['Graph Widget', 'Chart'], ['Time Widget', ''], ['DateTime Widget', ''],
   ['Code Value Widget', ''], ['Text Widget', ''], ['Label Widget', ''], ['Picture Widget', ''], ['Sound Player Widget', ''], ['Manual Valve Widget', ''],
   ['Manual Pump Widget', ''], ['Override button Widget', '']];
-// the Script Widget (OakBarn Brewery, 2026-11-09: "A Script Widget", Rule 1.31): a BruControl Script element now becomes a Script Widget,
-// not a Value Widget. Set here on their own lines, so the list above stays as the other open changes have it.
-for (const w of SKYNET_WIDGETS) if (w[0] === 'Value Widget') w[1] = '';
-SKYNET_WIDGETS.splice(SKYNET_WIDGETS.findIndex(w => w[0] === 'Boolean Widget') + 1, 0, [SCRIPT_WIDGET_WORD, 'Script']);
 const widgetKeep = e => (state.keepTabs ?? new Set(state.r.tabs.map(t => t.name))).has(e.tab);
 // only the kinds with a Widget on a Tab being imported get a page, so "(1 of 1)" when there is only one kind (OakBarn Brewery, 2026-11-08:
 // "Your Widget Timers (1of 2) should be Your Widget Timers (1of 1) as there is only 1")
