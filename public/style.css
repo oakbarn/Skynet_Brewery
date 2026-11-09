@@ -81,6 +81,8 @@ body.previewing #editBar .editRow > :not(#previewBuild):not(#saveBuild):not(#can
 .el.on { border-color: var(--ok); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ok) 45%, transparent) inset; }
 .el.on .vl { color: var(--ok); }
 .el.has-img { background-color: transparent; border-color: transparent; }
+/* A picture with an On overlay has no border round it while on (OakBarn Brewery, 2026-11-09: "On Overlays no Border", Rule 7.8) */
+.el.has-img.on { border-color: transparent; box-shadow: none; }
 .el.has-img .vl { text-shadow: 0 1px 3px #000; color: #fff; }
 .el.img-missing { background-color: #c8c8c8; border-color: #888; }
 .el.img-missing .vl { color: #000 !important; text-shadow: none; }
@@ -457,9 +459,9 @@ body.importBuild #views button:disabled, body.importBuild #procTab:disabled { op
 #ws .gfx.vessel .vwPart.vwOff { opacity: .3; outline: 1px dashed rgba(255,255,255,.7); }
 #ws .gfx.vessel.heating .vwElem:not(.vwOff) { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
 /* a Vessel Device (Rule 5.31 exception): its HERMS coil sits under its IPs; an Element glows and a Valve shows green while on */
-#ws .gfx.vessel .vwPart.vpOvl { display: none; background-size: contain; background-position: center; pointer-events: none; z-index: 5; }      /* a built in Element's or Valve's On Overlay (Rule 7.8) */
+#ws .gfx.vessel .vwPart.vpOvl { display: none; background-size: 55% 55%; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 5; }      /* a built in Element's or Valve's On Overlay (Rule 7.8) */
 #ws .gfx.vessel .vwPart.vpOvl.on { display: block; }
-#ws .vpPart.vp-element.on { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
+#ws .vpPart.vp-element.on:not(.noglow) { filter: sepia(1) saturate(6) hue-rotate(-35deg) drop-shadow(0 0 6px #ff7a00); }
 #ws .vpPart.vp-valve.on { filter: drop-shadow(0 0 5px #2ecc40); }
 #ws .gfx.vessel .vwGhost { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px dashed rgba(232,163,58,.8); background: rgba(232,163,58,.12); pointer-events: auto; }
 .vpop { position: fixed; top: 90px; right: 24px; z-index: 50; width: 340px; max-width: calc(100vw - 32px); background: #1d2329; color: #e8ecef; border: 1px solid #4a5058; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.5); padding: 0 14px 12px; font-size: 14px; }
@@ -838,6 +840,9 @@ button.hiddenTab { border-style: dotted; opacity: .8; }
 .buildOpt label { display: block; margin: 6px 0; }
 /* On overlay: a see-through picture drawn on top of the item while it is on (Fritz, 2026-10-22) */
 .el > .onov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; }
+/* On overlays are drawn smaller, in the middle of the picture (OakBarn Brewery, 2026-11-09: "On Overlays no Border and smaller", every
+   overlay). A glow (tint) colors the picture itself and the Glow ring goes round it, so those two stay the picture's size. */
+.el > .onov.small { background-size: 55% 55%; }
 .el > .coverov { position: absolute; inset: 0; background: center / 100% 100% no-repeat; pointer-events: none; z-index: 1; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
 .el > .onov.tint { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; mix-blend-mode: color; }
 .mdReadOnly { margin: 6px 0; padding: 6px 10px; border: 1px solid #e8a33a; border-radius: 8px; background: #e8a33a22; }
@@ -1104,13 +1109,11 @@ input.labelBlank, textarea.labelBlank { outline: 2px solid var(--bad); outline-o
   border: 2px solid #111; font: bold 14px/18px sans-serif; text-align: center; pointer-events: none; box-sizing: border-box; z-index: 2; }
 .mfPrev { position: relative; margin: 6px 0; }
 /* One-click method spots under a Heating Element (Rule 6.19): one click switches it to that heating method; the one in use is lit */
-#ws .hmSpots { position: absolute; display: flex; gap: 3px; z-index: 6; pointer-events: auto; white-space: nowrap; }
+/* an invisible box only as wide as the methods ticked, its middle under the middle of the picture (OakBarn Brewery, 2026-11-09) */
+#ws .hmSpots { position: absolute; display: flex; justify-content: center; gap: 3px; z-index: 6; pointer-events: auto; white-space: nowrap; transform: translateX(-50%); background: transparent; border: 0; }
 /* Fritz, 2026-11-07: the method in use is Red, the others Yellow (orange is the Element's own glow while on) */
 #ws .hmBtn { font-size: 11px; line-height: 1.2; padding: 2px 7px; border-radius: 10px; border: 1px solid #c9a800; background: #ffd400; color: #000; cursor: pointer; }
 #ws .hmBtn.cur { background: #d32f2f; border-color: #9a1b1b; color: #fff; font-weight: 600; }
-/* Turn Off: only while the Element is ON (Rule 6.19) */
-#ws .hmBtn.hmOff { background: #37474f; border-color: #1c262b; color: #fff; font-weight: 600; margin-left: 4px; }
-#ws .hmBtn[hidden] { display: none; }
 
 /* ===== the Look (theme) picker, Settings > Panel settings (Rule 2.39) ===== */
 .lookPreview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: -2px 0 6px; }

@@ -571,7 +571,7 @@ function fieldHtml(f, v, attrs, d = {}) {
     (v === 'user' ? ` <input type="text" class="pfUser" ${attrs} data-f="${f.k}User" maxlength="60" value="${esc(d[f.k + 'User'] ?? '')}" placeholder="Your words" aria-label="${esc(f.name)}: your own words">` : '');
 }
 // the Control Type columns (OakBarn Brewery, 2026-11-08: "Speed becomes Control Type"): a tick box per method, then the Primary by number
-// A Heating Element's first column is On/Off Only (OakBarn Brewery, 2026-11-08): ticked, it is run by its On/Off button and nothing else,
+// A Heating Element's first column is Direct Only (OakBarn Brewery, 2026-11-08; Direct was On/Off until 2026-11-09): ticked, it is run by a click on it and nothing else,
 // so the other methods on its line are greyed; untick it to pick them. A pump's On/Off is always ticked and greyed.
 const onoffOnly = (d, kind) => kind === 'heater' && (d.onoffOnly ?? (d.methods ?? ['onoff']).length === 1);
 function methodCells(d, attrs, kind) {
@@ -579,9 +579,9 @@ function methodCells(d, attrs, kind) {
   const box = (k, n) => {
     const w = methodName(kind, k);
     if (k === 'onoff') return kind === 'heater'
-      ? `<input type="checkbox" class="pm" ${attrs} data-m="onoff"${only ? ' checked' : ''} title="1. On/Off Only: it is run by its On/Off button and nothing else. Untick it to pick another method" aria-label="${esc(w)}">`
+      ? `<input type="checkbox" class="pm" ${attrs} data-m="onoff"${only ? ' checked' : ''} title="1. Direct Only: it is turned on and off by a click on it (or a Process) and nothing else. Untick it to pick another method" aria-label="${esc(w)}">`
       : `<input type="checkbox" class="pm" ${attrs} data-m="onoff" checked disabled title="On/Off is always allowed (Rule 6.19)" aria-label="${esc(w)}">`;
-    return `<input type="checkbox" class="pm" ${attrs} data-m="${k}"${ms.includes(k) && !only ? ' checked' : ''}${only ? ' disabled' : ''} title="${n + 1}. ${esc(w)}: ${only ? 'untick On/Off Only first' : 'tick it to allow this method'}" aria-label="${esc(w)}">`;
+    return `<input type="checkbox" class="pm" ${attrs} data-m="${k}"${ms.includes(k) && !only ? ' checked' : ''}${only ? ' disabled' : ''} title="${n + 1}. ${esc(w)}: ${only ? 'untick Direct Only first' : 'tick it to allow this method'}" aria-label="${esc(w)}">`;
   };
   return [...METHOD_COLS.map(([k], n) => box(k, n)),
     `<select class="pmPrimary" ${attrs} title="The method it starts with: pick its column number" aria-label="Primary method"${only ? ' disabled' : ''}>${METHOD_COLS.map(([k], n) => ms.includes(k) && (!only || k === 'onoff') ? `<option value="${k}"${d.primary === k ? ' selected' : ''}>${n + 1}. ${esc(methodName(kind, k))}</option>` : '').join('')}</select>`];
@@ -603,7 +603,7 @@ function partsPage(box) {
         the names, so change any that are wrong. Only a box marked <i>(optional)</i> may stay at <b>Pick one…</b>: for the others, if no choice fits, pick <b>User defined</b> and type
         your own words. An item on the wrong page can be moved with <b>Belongs on</b>. Then <b>Accept</b>.</p>
       ${page.methods ? `<p><b>Control Type:</b> each numbered column is a way to control it; tick every one it may use${page.kind === 'heater'
-        ? ' (every Heating Element has its On/Off button to turn it on; tick <b>On/Off Only</b> when nothing else controls it, and the other columns are greyed)'
+        ? ' (every Heating Element is turned on and off by a click on it; tick <b>Direct Only</b> when nothing else controls it, and the other columns are greyed)'
         : ' (On/Off is always allowed)'}, then pick the <b>Primary</b> one, the method it starts with, by its column number. A method that is not recommended for
         a ${esc(page.one)} unticks itself and says why.</p>` : ''}
       ${page.kind === 'valve' ? `<p>Only <b>Connection Type</b> and <b>Size</b> must be filled in: they change how the valve is drawn. Use
@@ -647,7 +647,7 @@ function partsPage(box) {
     if (t.classList.contains('pFill')) { if (!t.value) return; (state.kindOf ??= {})[t.value] = page.kind; p.extras.splice(Number(t.dataset.x), 1); p = draw(); saveProgress(); return; }
     const d = target(t); if (!d) return;
     if (t.classList.contains('pm') && t.dataset.m === 'onoff' && page.kind === 'heater') {
-      // On/Off Only: ticked, the other methods go; unticked, they can be picked
+      // Direct Only: ticked, the other methods go; unticked, they can be picked
       d.onoffOnly = t.checked;
       if (t.checked) { d.methods = ['onoff']; d.primary = 'onoff'; d.override = []; }
       p = draw(); saveProgress(); return;

@@ -17,8 +17,8 @@ has no Cover**. (Skynet Rule 18.24)
    Then the **Suggested Name** shows, made from them, with the rest:
    - **Graphic**: the element as it will show on the Tab, off, turned to its Orientation.
    - **Path** (a Skynet element: greyed out), or **Path (off)** and **Path (on)** (a User Defined one).
-   - **Orientation** (Right or Left) and, on the same line, **Toggle** (what a tap does).
-   - **Overlay** (None to start: its on picture glows) and, on the same line, **Database and .API ⬢** (Help 98).
+   - **Orientation** (Right or Left) and, on the same line, **Toggle** (Toggle to start, or Push Button: on only while held; [Help 179](179-heating-element-look)).
+   - **Overlay** (**Glow** to start: it glows while on; **None** shows nothing) and, on the same line, **Database and .API ⬢** (Help 98).
    - **X**, **Y**, **Width** and **Height**, and the **Device Type** greyed out (**DO**).
    **Enter** takes you through Label, Interface, Available Ports, Tab, Orientation, then **➕ Add Device**.
 4. Press **➕ Add Device**. The Heating Element goes on the Tab you picked and its Properties open. The **Interface** and **Port**
@@ -46,7 +46,7 @@ name reads like `MB_25_HE_HLT_BR`.
 
 | Kind | Label |
 |---|---|
-| Heating Element (on / off output: On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise) | hE_1 |
+| Heating Element (on / off output: Direct, Duty Cycle, Hysteresis, PID, Deadband or Precise) | hE_1 |
 | PWM (Heating element power 0-100 %) | hE_PWM_1 |
 | The older control Devices: PID, Hysteresis, Duty Cycle, Deadband | hE_PID_1, hE_HYS_1, hE_DutyC_1, hE_DeadB_1 |
 
@@ -59,7 +59,7 @@ name reads like `MB_25_HE_HLT_BR`.
 4. **3. Tab** and **4. Name**.
 5. **Graphic**, **Path**, then **Orientation** and **Toggle** on one line.
 6. **Overlay** with **Database and .API ⬢**.
-7. **Heating method**: the method it starts with (On/Off, Duty Cycle, Hysteresis, PID, Deadband or Precise), its Temperature Probe and that
+7. **Heating method**: the method it starts with (Direct, Duty Cycle, Hysteresis, PID, Deadband or Precise), its Temperature Probe and that
    method's settings. A click while brewing or a Process changes it: see [One Heating Element, pick how it heats](150-heating-method).
 8. **X (Horizontal)**, **Y (Vertical)**, **Width**, **Height**, and the **Device Type** greyed out (**DO**).
 
